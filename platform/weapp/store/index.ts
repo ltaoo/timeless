@@ -4,17 +4,13 @@ import { NavigatorCore } from "@/domains/navigator/index";
 import { RouteViewCore } from "@/domains/route_view/index";
 import { HistoryCore } from "@/domains/history/index";
 import { Result } from "@/domains/result/index";
-import { RequestCore, onCreate } from "@/domains/request/index";
+import { RequestCore, onRequestCreated } from "@/domains/request/index";
 import {
   onCreateGetPayload,
   onCreatePostPayload,
 } from "@/domains/request/utils";
 import { ImageCore } from "@/domains/ui/image/index";
 import { query_stringify, wxResultify } from "@/utils/index";
-import {
-  fetchNotifications,
-  fetchNotificationsProcess,
-} from "@/services/index";
 
 import { client } from "./http_client";
 import { user } from "./user";
@@ -45,7 +41,7 @@ onCreatePostPayload((payload) => {
 onCreateGetPayload((payload) => {
   payload.process = media_response_format;
 });
-onCreate((ins) => {
+onRequestCreated((ins) => {
   ins.onFailed((e) => {
     app.tip({
       text: [e.message],
@@ -181,80 +177,3 @@ user.onTip((msg) => {
 user.onNeedUpdate(() => {
   app.tipUpdate();
 });
-
-export const messageList = new ListCore(
-  new RequestCore(fetchNotifications, {
-    process: fetchNotificationsProcess,
-    client: client,
-  }),
-  {
-    search: {
-      status: 1,
-    },
-  }
-);
-
-ListCore.commonProcessor = <T>(
-  originalResponse: any
-): {
-  dataSource: T[];
-  page: number;
-  pageSize: number;
-  total: number;
-  empty: boolean;
-  noMore: boolean;
-  error: Error | null;
-} => {
-  if (originalResponse === null) {
-    return {
-      dataSource: [],
-      page: 1,
-      pageSize: 20,
-      total: 0,
-      noMore: false,
-      empty: false,
-      error: null,
-    };
-  }
-  try {
-    const data = originalResponse.data || originalResponse;
-    const { list, page, page_size, total, noMore, no_more, next_marker } = data;
-    const result = {
-      dataSource: list,
-      page,
-      pageSize: page_size,
-      total,
-      empty: false,
-      noMore: false,
-      error: null,
-      next_marker,
-    };
-    if (total <= page_size * page) {
-      result.noMore = true;
-    }
-    if (no_more !== undefined) {
-      result.noMore = no_more;
-    }
-    if (noMore !== undefined) {
-      result.noMore = noMore;
-    }
-    if (next_marker === null) {
-      result.noMore = true;
-    }
-    if (list.length === 0 && page === 1) {
-      result.empty = true;
-    }
-    return result;
-  } catch (error) {
-    return {
-      dataSource: [],
-      page: 1,
-      pageSize: 20,
-      total: 0,
-      noMore: false,
-      empty: false,
-      error: new Error(`${(error as Error).message}`),
-      // next_marker: "",
-    };
-  }
-};

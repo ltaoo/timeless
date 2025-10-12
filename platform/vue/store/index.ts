@@ -8,25 +8,16 @@ import { HistoryCore } from "@/domains/history/index";
 import { connect as connectApplication } from "@/domains/app/connect.web";
 import { connect as connectHistory } from "@/domains/history/connect.web";
 import { onCreateScrollView } from "@/domains/ui/scroll-view";
-import {
-  RequestCore,
-  onCreate as onCreateRequest,
-} from "@/domains/request/index";
+import { RequestCore, onRequestCreated } from "@/domains/request/index";
 import { ImageCore } from "@/domains/ui/index";
 import { Result } from "@/domains/result/index";
-
-import {
-  fetchInfo,
-  fetchNotifications,
-  fetchNotificationsProcess,
-} from "@/services/index";
 import { UserCore } from "@/biz/user";
 
 import { client } from "./http_client";
 import { storage } from "./storage";
 import { PageKeys, routes, routesWithPathname } from "./routes";
 
-onCreateRequest((ins) => {
+onRequestCreated((ins) => {
   ins.onFailed((e) => {
     app.tip({
       text: [e.message],
@@ -46,7 +37,7 @@ ImageCore.setPrefix(window.location.origin);
 const router = new NavigatorCore();
 class ExtendsUser extends UserCore {
   say() {
-    console.log(`My name is ${this.username}`);
+    console.log(`My name is ${this.nickname}`);
   }
 }
 const user = new ExtendsUser(storage.get("user"), client);
@@ -119,9 +110,6 @@ export const app = new ExtendsApplication({
     client.appendHeaders({
       Authorization: app.$user.token,
     });
-    media_request.appendHeaders({
-      Authorization: app.$user.token,
-    });
     messageList.init();
     if (!history.isLayout(route.name)) {
       history.push(route.name, query, { ignore: true });
@@ -176,14 +164,10 @@ user.onLogin((profile) => {
   client.appendHeaders({
     Authorization: user.token,
   });
-  media_request.appendHeaders({
-    Authorization: user.token,
-  });
   storage.set("user", profile);
 });
 user.onLogout(() => {
   storage.clear("user");
-  media_request.deleteHeaders("Authorization");
   history.push("root.login");
 });
 user.onExpired(() => {
@@ -199,82 +183,3 @@ user.onTip((msg) => {
 user.onNeedUpdate(() => {
   app.tipUpdate();
 });
-export const messageList = new ListCore(
-  new RequestCore(fetchNotifications, {
-    process: fetchNotificationsProcess,
-    client: client,
-  }),
-  {
-    search: {
-      status: 1,
-    },
-  }
-);
-export const infoRequest = new RequestCore(fetchInfo, {
-  client,
-});
-
-ListCore.commonProcessor = <T>(
-  originalResponse: any
-): {
-  dataSource: T[];
-  page: number;
-  pageSize: number;
-  total: number;
-  empty: boolean;
-  noMore: boolean;
-  error: Error | null;
-} => {
-  if (originalResponse === null) {
-    return {
-      dataSource: [],
-      page: 1,
-      pageSize: 20,
-      total: 0,
-      noMore: false,
-      empty: false,
-      error: null,
-    };
-  }
-  try {
-    const data = originalResponse.data || originalResponse;
-    const { list, page, page_size, total, noMore, no_more, next_marker } = data;
-    const result = {
-      dataSource: list,
-      page,
-      pageSize: page_size,
-      total,
-      empty: false,
-      noMore: false,
-      error: null,
-      next_marker,
-    };
-    if (total <= page_size * page) {
-      result.noMore = true;
-    }
-    if (no_more !== undefined) {
-      result.noMore = no_more;
-    }
-    if (noMore !== undefined) {
-      result.noMore = noMore;
-    }
-    if (next_marker === null) {
-      result.noMore = true;
-    }
-    if (list.length === 0 && page === 1) {
-      result.empty = true;
-    }
-    return result;
-  } catch (error) {
-    return {
-      dataSource: [],
-      page: 1,
-      pageSize: 20,
-      total: 0,
-      noMore: false,
-      empty: false,
-      error: new Error(`${(error as Error).message}`),
-      // next_marker: "",
-    };
-  }
-};

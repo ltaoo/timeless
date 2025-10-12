@@ -6,6 +6,7 @@ const DEFAULT_CACHE_VALUES = {
     username: "anonymous",
     token: "",
     avatar: "",
+    expires_at: 0,
   },
   tab: "tauri",
   newuser: 1,

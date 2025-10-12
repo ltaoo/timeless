@@ -3,8 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "~/*": ["./bindings/devboard/internal/service/*"]
+      "@/*": ["../../*"],
+      "~/*": ["./*"]
     }
-  }
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
 }

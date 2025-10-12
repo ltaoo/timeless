@@ -5,12 +5,12 @@
 import React, { useState } from "react";
 import { Film, HardDrive, Home, Tv2, User } from "lucide-react";
 
-import { PageKeys } from "@/store/routes";
-import { ViewComponent, ViewComponentWithMenu } from "@/store/types";
-import { Show } from "@/packages/ui/show";
-import { useInitialize, useInstance } from "@/hooks/index";
-import { StackRouteView } from "@/components/ui/stack-route-view";
-import { BottomMenuCore } from "@/domains/bottom_menu";
+import { PageKeys } from "~/store/routes";
+import { ViewComponent, ViewComponentWithMenu } from "~/store/types";
+import { Show } from "~/packages/ui/show";
+import { useInitialize, useInstance } from "~/hooks/index";
+import { StackRouteView } from "~/components/ui/stack-route-view";
+import { BottomMenuCore } from "~/domains/bottom_menu";
 import { cn } from "@/utils/index";
 
 const BottomMenu = (props: { store: BottomMenuCore }) => {
@@ -30,7 +30,10 @@ const BottomMenu = (props: { store: BottomMenuCore }) => {
 
   return (
     <div
-      className={cn("flex flex-col justify-center items-center", active ? highlightColor : "")}
+      className={cn(
+        "flex flex-col justify-center items-center",
+        active ? highlightColor : ""
+      )}
       onClick={() => {
         store.handleClick();
       }}
@@ -136,7 +139,12 @@ export const HomeLayout: ViewComponent = React.memo((props) => {
           const routeName = subView.name;
           const PageContent = pages[routeName as Exclude<PageKeys, "root">];
           return (
-            <StackRouteView key={subView.id} className="absolute left-0 top-0 w-full h-full" store={subView} index={i}>
+            <StackRouteView
+              key={subView.id}
+              className="absolute left-0 top-0 w-full h-full"
+              store={subView}
+              index={i}
+            >
               <div
                 className={cn(
                   "w-full h-full scrollbar-hide overflow-y-auto bg-w-bg-3 opacity-100 scroll scroll--hidden",

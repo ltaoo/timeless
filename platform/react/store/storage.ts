@@ -7,6 +7,7 @@ const DEFAULT_CACHE_VALUES = {
     email: "",
     token: "",
     avatar: "",
+    expires_at: 0,
   },
   theme: "system",
 };

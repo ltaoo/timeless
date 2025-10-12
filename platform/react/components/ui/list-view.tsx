@@ -4,8 +4,8 @@
 import React, { useState } from "react";
 import { AlertCircle, ArrowDown, Bird, Loader } from "lucide-react";
 
-import { useInitialize, useInstance } from "@/hooks/index";
-import { Show } from "@/packages/ui/show";
+import { useInitialize, useInstance } from "~/hooks/index";
+import { Show } from "~/packages/ui/show";
 import { ListCore } from "@/domains/list";
 import { ButtonCore } from "@/domains/ui";
 import { cn } from "@/utils/index";
@@ -23,7 +23,13 @@ export const ListView = React.memo(
       onRefresh?: () => void;
     } & React.HTMLAttributes<HTMLDivElement>
   ) => {
-    const { store, skeleton = null, extraEmpty = null, extraNoMore, onRefresh } = props;
+    const {
+      store,
+      skeleton = null,
+      extraEmpty = null,
+      extraNoMore,
+      onRefresh,
+    } = props;
     const [response, setResponse] = useState(store.response);
 
     const loginBtn = useInstance(
@@ -59,7 +65,9 @@ export const ListView = React.memo(
                   <Show when={response.loading}>
                     <Loader className="w-6 h-6 animate-spin" />
                   </Show>
-                  <div className="text-xl">{response.loading ? "加载中" : "列表为空"}</div>
+                  <div className="text-xl">
+                    {response.loading ? "加载中" : "列表为空"}
+                  </div>
                 </div>
                 {extraEmpty}
               </div>
@@ -79,10 +87,15 @@ export const ListView = React.memo(
                     store.loadMore();
                   }}
                 >
-                  <Show when={response.loading} fallback={<ArrowDown className="w-6 h-6" />}>
+                  <Show
+                    when={response.loading}
+                    fallback={<ArrowDown className="w-6 h-6" />}
+                  >
                     <Loader className="w-6 h-6 animate-spin" />
                   </Show>
-                  <div className="text-center">{response.loading ? "加载中" : "加载更多"}</div>
+                  <div className="text-center">
+                    {response.loading ? "加载中" : "加载更多"}
+                  </div>
                 </div>
               </div>
             </Show>
@@ -92,10 +105,21 @@ export const ListView = React.memo(
             <div className="flex flex-col items-center justify-center px-8">
               <AlertCircle className="w-24 h-24" />
               <div className="mt-4 flex items-center space-x-2">
-                <div className="text-center text-xl">{response.error?.message}</div>
+                <div className="text-center text-xl">
+                  {response.error?.message}
+                </div>
               </div>
-              <Show when={!!response.error?.message.includes("timestamp check failed")}>
-                <Button store={loginBtn} variant="subtle" size="sm" className="mt-4 py-8 px-4">
+              <Show
+                when={
+                  !!response.error?.message.includes("timestamp check failed")
+                }
+              >
+                <Button
+                  store={loginBtn}
+                  variant="subtle"
+                  size="sm"
+                  className="mt-4 py-8 px-4"
+                >
                   点击刷新
                 </Button>
               </Show>

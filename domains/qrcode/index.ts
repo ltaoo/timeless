@@ -1,128 +1,131 @@
 /**
- * esbuild src/domains/qrcode/index.ts --outfile=dist/qrcode.js --format=esm --bundle --minify
+ * 生成二维码
  */
-import { QRErrorCorrectLevel, QRCodeModel, _getTypeNumber } from "./libs";
-import { QRcodeDrawing } from "./types";
+import { QRCode } from "./core";
 
-type CanvasDrawingOptions = {
+type CanvasDrawingProps = {
   width: number;
   height: number;
-  colorDark: string;
-  colorLight: string;
-};
-type QrcodeOptions = CanvasDrawingOptions & {
-  text: string;
-  width: number;
-  height: number;
-  colorDark: string;
-  colorLight: string;
-  typeNumber: number;
-  correctLevel: number;
-};
 
+  ctx: CanvasRenderingContext2D;
+};
+interface QRCode {
+  getModuleCount(): number;
+  isDark(x: number, y: number): boolean;
+}
 /**
- * @class QRCode
+ * Drawing QRCode by using canvas
+ *
  * @constructor
- * @example
- * new QRCode(document.getElementById("test"), "http://jindo.dev.naver.com/collie");
- *
- * @example
- * var oQRCode = new QRCode("test", {
- *    text : "http://naver.com",
- *    width : 128,
- *    height : 128
- * });
- *
- * oQRCode.clear(); // Clear the QRCode.
- * oQRCode.makeCode("http://map.naver.com"); // Re-create the QRCode.
- *
- * @param {Object|String} vOption
- * @param {String} vOption.text QRCode link data
- * @param {Number} [vOption.width=256]
- * @param {Number} [vOption.height=256]
- * @param {String} [vOption.colorDark="#000000"]
- * @param {String} [vOption.colorLight="#ffffff"]
- * @param {QRCode.CorrectLevel} [vOption.correctLevel=QRCode.CorrectLevel.H] [L|M|Q|H]
+ * @param {Object} htOption QRCode Options
  */
-export class QRCode {
+export class CanvasDrawing {
+  /** canvas 绘制上下文 */
+  ctx: CanvasRenderingContext2D;
+  /** 是否绘制完成 */
+  isPainted = false;
+
+  options: {
+    width: number;
+    height: number;
+  };
+
+  constructor(options: CanvasDrawingProps) {
+    const { ctx } = options;
+    this.options = options;
+    this.ctx = ctx;
+  }
+
   /**
-   * @name QRCode.CorrectLevel
+   * 绘制 logo
    */
-  static CorrectLevel = QRErrorCorrectLevel;
+  //   async drawLogo(img) {
+  //     const ctx = this.ctx;
+  //     return new Promise((resolve, reject) => {
+  //       const image = document.createElement("img");
+  //       image.src = img;
+  //       image.crossOrigin = "anonymous";
+  //       image.onload = (event) => {
+  //         const { target } = event;
+  //         // (256 / 2) - (48 / 2) === 104
+  //         const size = 54;
+  //         const x = 256 / 2 - size / 2;
+  //         ctx.drawImage(image, x, x, size, size);
+  //         resolve();
+  //       };
+  //       image.onerror = () => {
+  //         resolve(Result.Err("Logo 加载失败"));
+  //       };
+  //     });
+  //   }
+  /**
+   * Draw the QRCode
+   *
+   * @param {QRCode} model
+   */
+  draw(model: QRCode) {
+    const { ctx } = this;
+    const { options } = this;
+    const nCount = model.getModuleCount();
+    const nWidth = options.width / nCount;
+    const nHeight = options.height / nCount;
+    const nRoundedWidth = Math.round(nWidth);
+    const nRoundedHeight = Math.round(nHeight);
+    console.log("count", nCount, nRoundedWidth, nRoundedHeight);
 
-  _htOption: QrcodeOptions;
-  _oQRCode: null | QRCodeModel = null;
-  //   _oDrawing: QRcodeDrawing;
+    this.clear();
 
-  constructor(vOption?: Partial<QrcodeOptions> | string) {
-    this._htOption = {
-      width: 256,
-      height: 256,
-      typeNumber: 4,
-      colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: QRErrorCorrectLevel.H,
-      text: "",
-    };
-    const options: Partial<QrcodeOptions> = (() => {
-      if (typeof vOption === "string") {
-        return {
-          text: vOption,
-        };
+    for (let row = 0; row < nCount; row++) {
+      for (let col = 0; col < nCount; col++) {
+        const isDark = model.isDark(row, col);
+        const nLeft = col * nWidth;
+        const nTop = row * nHeight;
+        ctx.strokeStyle = isDark ? "#000000" : "#ffffff";
+        ctx.lineWidth = 1;
+        ctx.fillStyle = isDark ? "#000000" : "#ffffff";
+        ctx.fillRect(nLeft, nTop, nWidth, nHeight);
+        // console.log(Math.floor(nLeft), Math.floor(nTop), isDark, ctx.fillStyle);
+        ctx.strokeRect(Math.floor(nLeft) + 0.5, Math.floor(nTop) + 0.5, nRoundedWidth, nRoundedHeight);
+        ctx.strokeRect(Math.ceil(nLeft) - 0.5, Math.ceil(nTop) - 0.5, nRoundedWidth, nRoundedHeight);
       }
-      return vOption || {};
-    })();
-    // Overwrites options
-    for (const key in options) {
-      // @ts-ignore
-      this._htOption[key] = options[key];
     }
-    // if (this._htOption.useSVG) {
-    //     CanvasDrawing = svgDrawer;
-    // }
-    this._oQRCode = null;
-    //     this._oDrawing = new CanvasDrawing(this._htOption);
+    this.isPainted = true;
   }
 
   /**
-   * Make the QRCode
-   *
-   * @param {String} sText link data
-   */
-  fetchModel(sText: string, options: { logo?: string } = {}) {
-    if ([undefined, null, ""].includes(sText)) {
-      console.error("二维码内容不能为空");
-      return null;
-    }
-    this._oQRCode = new QRCodeModel(_getTypeNumber(sText, this._htOption.correctLevel), this._htOption.correctLevel);
-    this._oQRCode.addData(sText);
-    this._oQRCode.make();
-    return this._oQRCode;
-    //     this._oDrawing.draw(this._oQRCode);
-    //     const { logo } = options;
-    //     if (logo !== undefined) {
-    //       await this._oDrawing.drawLogo.call(this, logo);
-    //     }
-    //     return this._oDrawing._elCanvas.toDataURL();
-  }
-
-  /**
-   * Make the Image from Canvas element
-   * - It occurs automatically
-   * - Android below 3 doesn't support Data-URI spec.
-   *
-   * @private
+   * Make the image from Canvas if the browser supports Data URI.
    */
   // makeImage() {
-  //   if (typeof this._oDrawing.makeImage === "function") {
-  //     this._oDrawing.makeImage();
+  //   if (this._bIsPainted) {
+  //     _safeSetDataURI.call(this, _onMakeImage);
   //   }
   // }
 
   /**
    * Clear the QRCode
    */
-  //   clear() {
-  //     this._oDrawing.clear();
-  //   }
+  clear() {
+    this.ctx.clearRect(0, 0, this.options.width, this.options.height);
+    this.isPainted = false;
+  }
+
+  /**
+   * @private
+   * @param {Number} nNumber
+   */
+  round(nNumber: number) {
+    if (!nNumber) {
+      return nNumber;
+    }
+
+    return Math.floor(nNumber * 1000) / 1000;
+  }
+}
+
+export async function createQRCode(text: string, options: CanvasDrawingProps) {
+  const { width, height } = options;
+  const drawer = new CanvasDrawing(options);
+  // @ts-ignore
+  const model: QRCode = await new QRCode({ width, height }).fetchModel(text, options);
+  drawer.draw(model);
 }

@@ -1,19 +1,27 @@
 import React, { useState } from "react";
 
+import { useInitialize } from "~/hooks";
 import { CheckboxCore } from "@/domains/ui/checkbox";
 import { CheckboxGroupCore } from "@/domains/ui/checkbox/group";
 import { cn } from "@/utils";
-import { useInitialize } from "@/hooks";
 
 export const CheckboxOption = React.memo(
-  (props: { label: string; store: CheckboxCore } & React.HTMLAttributes<HTMLDivElement>) => {
+  (
+    props: {
+      label: string;
+      store: CheckboxCore;
+    } & React.HTMLAttributes<HTMLDivElement>
+  ) => {
     const { label, store } = props;
 
     const [state, setState] = useState(store.state);
 
     useInitialize(() => {
       store.onStateChange((nextState) => {
-        console.log("[COMPONENT]CheckboxGroup - Option store.onStateChange", nextState);
+        console.log(
+          "[COMPONENT]CheckboxGroup - Option store.onStateChange",
+          nextState
+        );
         setState(nextState);
       });
     });

@@ -3,8 +3,8 @@
  */
 import React, { useState } from "react";
 
-import * as ToastPrimitive from "@/packages/ui/toast";
-import { useInitialize } from "@/hooks/index";
+import { useInitialize } from "~/hooks/index";
+import * as ToastPrimitive from "~/packages/ui/toast";
 import { ToastCore } from "@/domains/ui/toast";
 import { cn } from "@/utils/index";
 
@@ -27,7 +27,10 @@ export const Toast = React.memo((props: { store: ToastCore }) => {
     <ToastPrimitive.Root store={store}>
       <ToastPrimitive.Portal
         store={store}
-        className={cn(state2.enter ? "animate-in fade-in" : "", state2.exit ? "animate-out fade-out" : "")}
+        className={cn(
+          state2.enter ? "animate-in fade-in" : "",
+          state2.exit ? "animate-out fade-out" : ""
+        )}
       >
         <ToastPrimitive.Content
           store={store}

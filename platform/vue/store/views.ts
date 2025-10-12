@@ -1,7 +1,7 @@
-import HomeLayout from "@/pages/home/layout.vue";
-import HomeIndexPage from "@/pages/home/index.vue";
-import UserLoginPage from "@/pages/login/index.vue";
-import NotFoundPage from "@/pages/not-found/index.vue";
+import HomeLayout from "~/pages/home/layout.vue";
+import HomeIndexPage from "~/pages/home/index.vue";
+import UserLoginPage from "~/pages/login/index.vue";
+import NotFoundPage from "~/pages/not-found/index.vue";
 
 import { PageKeys } from "./routes";
 

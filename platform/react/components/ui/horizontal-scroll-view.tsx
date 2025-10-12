@@ -3,8 +3,8 @@
  */
 import React, { useRef, useState } from "react";
 
+import { useInitialize } from "~/hooks";
 import { HorizontalScrollViewCore } from "@/domains/ui/scroll-view/horizontal";
-import { useInitialize } from "@/hooks";
 import { cn } from "@/utils";
 
 export const HorizontalScrollView = React.memo(
@@ -15,7 +15,15 @@ export const HorizontalScrollView = React.memo(
       contentClassName?: string;
     } & React.HTMLAttributes<HTMLDivElement>
   ) => {
-    const { store, className, contentClassName, wrapClassName, style = {}, children, ...restProps } = props;
+    const {
+      store,
+      className,
+      contentClassName,
+      wrapClassName,
+      style = {},
+      children,
+      ...restProps
+    } = props;
 
     // const ref = useRef<HTMLDivElement>(null);
     const [state, setState] = useState(store.state);

@@ -4,21 +4,29 @@
 import React, { useState } from "react";
 import { ArrowRightCircle, ArrowUp, Bell, Search, User } from "lucide-react";
 
-import { messageList } from "@/store/index";
-import { ViewComponentProps, ViewComponentWithMenu } from "@/store/types";
-import { canShowDialog, dialogHasShow } from "@/store/dialog";
-import { PageKeys } from "@/store/routes";
-import { fetchUpdatedMediaHasHistory, fetchUpdatedMediaHasHistoryProcess } from "@/services";
-import { useInitialize, useInstance } from "@/hooks/index";
-import { Show } from "@/packages/ui/show";
-import { Input, LazyImage, Sheet } from "@/components/ui";
-import { StackRouteView } from "@/components/ui/stack-route-view";
-import { TabHeader } from "@/components/ui/tab-header";
+import { ViewComponentProps, ViewComponentWithMenu } from "~/store/types";
+import { canShowDialog, dialogHasShow } from "~/store/dialog";
+import { PageKeys } from "~/store/routes";
+import { useInitialize, useInstance } from "~/hooks/index";
+import { Show } from "~/packages/ui/show";
+import { Input, LazyImage, Sheet } from "~/components/ui";
+import { StackRouteView } from "~/components/ui/stack-route-view";
+import { TabHeader } from "~/components/ui/tab-header";
+
 import { TabHeaderCore } from "@/domains/ui/tab-header";
-import { ScrollViewCore, InputCore, DialogCore, ImageInListCore } from "@/domains/ui";
+import {
+  ScrollViewCore,
+  InputCore,
+  DialogCore,
+  ImageInListCore,
+} from "@/domains/ui";
 import { AffixCore } from "@/domains/ui/affix";
 import { RequestCore } from "@/domains/request";
 import { ListCore } from "@/domains/list";
+import {
+  fetchUpdatedMediaHasHistory,
+  fetchUpdatedMediaHasHistoryProcess,
+} from "~/biz/services";
 import { MediaOriginCountry } from "@/constants/index";
 import { sleep } from "@/utils/index";
 
@@ -111,6 +119,7 @@ function Page(props: ViewComponentProps) {
     },
   });
   const $search = new InputCore({
+    defaultValue: "",
     placeholder: "请输入关键字搜索",
   });
   const $image = new ImageInListCore({});
@@ -143,7 +152,11 @@ function Page(props: ViewComponentProps) {
         if (!$tab.mounted) {
           return;
         }
-        console.log("[PAGE]home/index - history.onRouteChange", pathname, query);
+        console.log(
+          "[PAGE]home/index - history.onRouteChange",
+          pathname,
+          query
+        );
         if (!query.id) {
           return;
         }
@@ -152,7 +165,11 @@ function Page(props: ViewComponentProps) {
       });
       $tab.onMounted(() => {
         const pathname = history.$router.pathname;
-        console.log("[PAGE]home/index - tab-header onMounted", pathname, $tab.key);
+        console.log(
+          "[PAGE]home/index - tab-header onMounted",
+          pathname,
+          $tab.key
+        );
         $tab.selectById("china");
       });
       $updatedMediaList.onStateChange((v) => {
@@ -175,8 +192,9 @@ export const HomeIndexPage: ViewComponentWithMenu = React.memo((props) => {
   const $page = useInstance(() => Page(props));
 
   const [subViews, setSubViews] = useState(view.subViews);
-  const [messageResponse, setMessageResponse] = useState(messageList.response);
-  const [updatedMediaResponse, setUpdatedMediaResponse] = useState($page.$updatedMediaList.response);
+  const [updatedMediaResponse, setUpdatedMediaResponse] = useState(
+    $page.$updatedMediaList.response
+  );
   const [height, setHeight] = useState($page.ui.$affix.height);
 
   useInitialize(() => {
@@ -214,129 +232,8 @@ export const HomeIndexPage: ViewComponentWithMenu = React.memo((props) => {
         $page.ui.$scroll.startPullToRefresh();
       });
     }
-    messageList.onStateChange((nextState) => {
-      setMessageResponse(nextState);
-    });
     $page.ready();
   });
 
-  return (
-    <>
-      <div className="z-10">
-        <div className="z-50 w-full bg-w-bg-0">
-          <div className="flex items-center justify-between w-full py-2 px-4 text-w-fg-0 space-x-4">
-            <div className="relative flex-1 w-0">
-              <Input store={$page.ui.$search} prefix={<Search className="w-5 h-5" />} />
-              <div
-                className="absolute z-10 inset-0"
-                onClick={() => {
-                  history.push("root.search");
-                }}
-              ></div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div
-                className="relative"
-                onClick={() => {
-                  history.push("root.messages");
-                }}
-              >
-                <Bell className="w-6 h-6" />
-                <Show when={!!messageResponse.total}>
-                  <div
-                    className="absolute top-[-6px] right-0 px-[8px] h-[16px] rounded-xl break-all whitespace-nowrap text-[12px] border-w-bg-0 dark:border-w-fg-0 bg-w-red text-w-bg-0 dark:text-w-fg-0 translate-x-1/2"
-                    style={{
-                      lineHeight: "16px",
-                    }}
-                  >
-                    {messageResponse.total}
-                  </div>
-                </Show>
-              </div>
-              <div
-                className="relative"
-                onClick={() => {
-                  history.push("root.mine");
-                }}
-              >
-                <User className="w-6 h-6" />
-              </div>
-            </div>
-          </div>
-          <TabHeader store={$page.ui.$tab as any} />
-        </div>
-        <div className="absolute inset-0 flex flex-col" style={{ top: height }}>
-          {subViews.map((subView, i) => {
-            const routeName = subView.name;
-            const PageContent = pages[routeName as Exclude<PageKeys, "root">];
-            return (
-              <StackRouteView
-                key={subView.id}
-                className="absolute inset-0"
-                style={{ zIndex: i }}
-                store={subView}
-                index={i}
-              >
-                <PageContent
-                  app={app}
-                  history={history}
-                  storage={storage}
-                  client={client}
-                  pages={pages}
-                  view={subView}
-                />
-              </StackRouteView>
-            );
-          })}
-        </div>
-      </div>
-      <Sheet title="有更新" store={$page.ui.$updatedMediaDialog} size="content">
-        <div className="px-4 pt-4 mb-4 flex w-full h-[280px] overflow-x-auto scroll--hidden safe-bottom">
-          {updatedMediaResponse.dataSource.map((media) => {
-            const { id, name, poster_path, latest_episode } = media;
-            return (
-              <div
-                key={id}
-                className="mr-2"
-                onClick={() => {
-                  history.push("root.season_playing", { id });
-                  $page.ui.$updatedMediaDialog.hide();
-                }}
-              >
-                <div className="w-[120px] h-[180px] rounded-md">
-                  <LazyImage
-                    className="w-full h-full rounded-md object-cover"
-                    store={$page.ui.$image.bind(poster_path)}
-                    alt={name}
-                  />
-                </div>
-                <div className="w-[120px] mt-2">
-                  <div className="text-lg text-w-fg-1 truncate text-ellipsis">{name}</div>
-                  <div className="">
-                    <div className="max-w-full text-w-fg-2 text-sm truncate text-ellipsis">
-                      <div className="">{latest_episode.name}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-          <div
-            className=""
-            onClick={() => {
-              history.push("root.history_updated");
-              $page.ui.$updatedMediaDialog.hide();
-            }}
-          >
-            <div className="flex items-center justify-center w-[120px] h-[180px] rounded-md bg-w-bg-1">
-              <div className="flex flex-col items-center justify-center text-w-fg-2">
-                <ArrowRightCircle className="w-12 h-12" />
-                <div className="mt-1">查看更多</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Sheet>
-    </>
-  );
+  return <div className="z-10"></div>;
 });

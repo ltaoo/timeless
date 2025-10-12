@@ -5,8 +5,8 @@ import React, { useState } from "react";
 import { VariantProps, cva } from "class-variance-authority";
 import { Loader } from "lucide-react";
 
-import { Show } from "@/packages/ui/show";
-import { useInitialize } from "@/hooks/index";
+import { Show } from "~/packages/ui/show";
+import { useInitialize } from "~/hooks/index";
 import { ButtonCore } from "@/domains/ui/button";
 import { cn } from "@/utils/index";
 
@@ -16,8 +16,10 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-w-brand text-white",
-        destructive: "bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600",
-        outline: "bg-transparent border border-slate-200 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100",
+        destructive:
+          "bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600",
+        outline:
+          "bg-transparent border border-slate-200 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100",
         subtle: "bg-w-fg-5 text-w-fg-0",
         ghost:
           "bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-100 dark:hover:text-slate-100 data-[state=open]:bg-transparent dark:data-[state=open]:bg-transparent",
@@ -54,7 +56,11 @@ const Button = React.memo(
     });
 
     const { disabled, loading } = state;
-    const c = buttonVariants({ variant, size, class: cn(props.className, "w-full space-x-2") });
+    const c = buttonVariants({
+      variant,
+      size,
+      class: cn(props.className, "w-full space-x-2"),
+    });
 
     return (
       <button

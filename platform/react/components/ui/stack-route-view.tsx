@@ -3,9 +3,9 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 
-import { Show } from "@/packages/ui/show";
+import { useInitialize } from "~/hooks/index";
+import { Show } from "~/packages/ui/show";
 import { RouteViewCore } from "@/domains/route_view/index";
-import { useInitialize } from "@/hooks/index";
 import { cn } from "@/utils/index";
 
 export const StackRouteView = React.memo(
@@ -53,8 +53,12 @@ export const StackRouteView = React.memo(
           <div
             className={cn(
               props.className,
-              state.enter && store.animation.in ? `animate-in ${store.animation.in}` : "",
-              state.exit && store.animation.out ? `animate-out ${store.animation.out}` : ""
+              state.enter && store.animation.in
+                ? `animate-in ${store.animation.in}`
+                : "",
+              state.exit && store.animation.out
+                ? `animate-out ${store.animation.out}`
+                : ""
               // "animate",
               // "animate-in duration-500",
               // index !== 0 ? (store.animation.show ? ` ${store.animation.show}` : "") : "",

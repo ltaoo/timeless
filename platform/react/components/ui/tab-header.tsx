@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 
+import { useInitialize } from "~/hooks/index";
 import { TabHeaderCore } from "@/domains/ui/tab-header";
-import { useInitialize } from "@/hooks/index";
 import { cn } from "@/utils/index";
 
 export const TabHeader = React.memo(
-  <T extends { key: "id"; options: { id: string; text: string; [x: string]: any }[] }>(props: {
+  <
+    T extends {
+      key: "id";
+      options: { id: string; text: string; [x: string]: any }[];
+    }
+  >(props: {
     store: TabHeaderCore<T>;
   }) => {
     const { store } = props;
@@ -32,7 +37,8 @@ export const TabHeader = React.memo(
         className={cn("__a tab-header w-full overflow-x-auto scroll--hidden")}
         //       style="{{style}}"
         onAnimationStart={(event) => {
-          const { width, height, left } = event.currentTarget.getBoundingClientRect();
+          const { width, height, left } =
+            event.currentTarget.getBoundingClientRect();
           // store.onStateChange((v) => {
           //   setState(v);
           // });
@@ -73,7 +79,8 @@ export const TabHeader = React.memo(
                     const target = event.currentTarget;
                     store.updateTabClient(index, {
                       rect() {
-                        const { offsetLeft, clientWidth, clientHeight } = target;
+                        const { offsetLeft, clientWidth, clientHeight } =
+                          target;
                         return {
                           width: clientWidth,
                           height: clientHeight,

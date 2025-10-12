@@ -3,9 +3,9 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 
+import { useInitialize } from "~/hooks";
 import { NodeCore } from "@/domains/ui/node";
 import { connect } from "@/domains/ui/node/connect.web";
-import { useInitialize } from "@/hooks";
 
 export const Node = React.memo(
   (

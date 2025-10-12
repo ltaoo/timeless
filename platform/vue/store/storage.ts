@@ -7,6 +7,7 @@ const DEFAULT_CACHE_VALUES = {
     email: "",
     avatar: "",
     token: "",
+    expires_at: 0,
   },
 };
 const key = "m_global";

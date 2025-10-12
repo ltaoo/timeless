@@ -4,12 +4,17 @@
 import React, { ReactElement, useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, Loader2, X } from "lucide-react";
 
-import { useInitialize } from "@/hooks/index";
+import { useInitialize } from "~/hooks/index";
 import { InputCore } from "@/domains/ui/input";
 import { connect } from "@/domains/ui/input/connect.web";
 import { cn } from "@/utils/index";
 
-const Input = (props: { store: InputCore; focus?: boolean; prefix?: ReactElement; className?: string }) => {
+const Input = (props: {
+  store: InputCore;
+  focus?: boolean;
+  prefix?: ReactElement;
+  className?: string;
+}) => {
   const { store, prefix, focus } = props;
 
   const ref = useRef<HTMLInputElement>(null);
@@ -32,7 +37,17 @@ const Input = (props: { store: InputCore; focus?: boolean; prefix?: ReactElement
     });
   });
 
-  const { loading, value, placeholder, disabled, allowClear, autoComplete, autoFocus, type, tmpType } = state;
+  const {
+    loading,
+    value,
+    placeholder,
+    disabled,
+    allowClear,
+    autoComplete,
+    autoFocus,
+    type,
+    tmpType,
+  } = state;
 
   return (
     <div className="relative">

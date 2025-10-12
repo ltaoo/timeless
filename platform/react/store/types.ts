@@ -8,7 +8,6 @@ import { RouteConfig } from "@/domains/route_view/utils";
 import { ScrollViewCore } from "@/domains/ui/index";
 import { HttpClientCore } from "@/domains/http_client/index";
 import { StorageCore } from "@/domains/storage/index";
-import { BottomMenuCore } from "@/domains/bottom_menu/index";
 
 import { PageKeys } from "./routes";
 import { storage } from "./storage";
@@ -26,9 +25,7 @@ export type ViewComponentProps = {
     scrollView?: ScrollViewCore;
   };
 };
-export type ViewComponentPropsWithMenu = ViewComponentProps & {
-  menu?: BottomMenuCore;
-};
+export type ViewComponentPropsWithMenu = ViewComponentProps & {};
 export type ViewComponent = NamedExoticComponent<ViewComponentProps>;
 export type ViewComponentWithMenu =
   NamedExoticComponent<ViewComponentPropsWithMenu>;

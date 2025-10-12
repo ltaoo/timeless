@@ -3,8 +3,8 @@
  */
 import React, { useState } from "react";
 
-import { Show } from "@/packages/ui/show";
-import { useInitialize } from "@/hooks/index";
+import { Show } from "~/packages/ui/show";
+import { useInitialize } from "~/hooks/index";
 import { PresenceCore } from "@/domains/ui/presence";
 import { cn } from "@/utils/index";
 

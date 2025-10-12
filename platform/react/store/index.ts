@@ -10,10 +10,6 @@ import { connect as connectHistory } from "@/domains/history/connect.web";
 import { RequestCore, onRequestCreated } from "@/domains/request/index";
 import { ImageCore } from "@/domains/ui/image/index";
 import { Result } from "@/domains/result/index";
-import {
-  fetchNotifications,
-  fetchNotificationsProcess,
-} from "@/services/index";
 
 import { client } from "./http_client";
 import { storage } from "./storage";
@@ -35,14 +31,11 @@ onRequestCreated((ins) => {
 
 NavigatorCore.prefix = import.meta.env.BASE_URL;
 ImageCore.setPrefix(window.location.origin);
-if (window.location.hostname === "media-t.funzm.com") {
-  media_request.setEnv("dev");
-}
 
 const router = new NavigatorCore();
 class ExtendsUser extends UserCore {
   say() {
-    console.log(`My name is ${this.username}`);
+    console.log(`My name is ${this.nickname}`);
   }
 }
 const user = new ExtendsUser(storage.get("user"), client);
@@ -104,18 +97,11 @@ export const app = new Application({
     client.appendHeaders({
       Authorization: user.token,
     });
-    messageList.init();
     if (!history.isLayout(route.name)) {
       history.push(route.name, query, { ignore: true });
       return Result.Ok(null);
     }
-    history.push(
-      "root.home_layout.home_index.home_index_season",
-      {
-        language: MediaOriginCountry.CN,
-      },
-      { ignore: true }
-    );
+    history.push("root.home_layout.home_index", {}, { ignore: true });
     return Result.Ok(null);
   },
 });
@@ -184,80 +170,3 @@ user.onTip((msg) => {
 user.onNeedUpdate(() => {
   app.tipUpdate();
 });
-
-export const messageList = new ListCore(
-  new RequestCore(fetchNotifications, {
-    process: fetchNotificationsProcess,
-    client: client,
-  }),
-  {
-    search: {
-      status: 1,
-    },
-  }
-);
-
-ListCore.commonProcessor = <T>(
-  originalResponse: any
-): {
-  dataSource: T[];
-  page: number;
-  pageSize: number;
-  total: number;
-  empty: boolean;
-  noMore: boolean;
-  error: Error | null;
-} => {
-  if (originalResponse === null) {
-    return {
-      dataSource: [],
-      page: 1,
-      pageSize: 20,
-      total: 0,
-      noMore: false,
-      empty: false,
-      error: null,
-    };
-  }
-  try {
-    const data = originalResponse.data || originalResponse;
-    const { list, page, page_size, total, noMore, no_more, next_marker } = data;
-    const result = {
-      dataSource: list,
-      page,
-      pageSize: page_size,
-      total,
-      empty: false,
-      noMore: false,
-      error: null,
-      next_marker,
-    };
-    if (total <= page_size * page) {
-      result.noMore = true;
-    }
-    if (no_more !== undefined) {
-      result.noMore = no_more;
-    }
-    if (noMore !== undefined) {
-      result.noMore = noMore;
-    }
-    if (next_marker === null) {
-      result.noMore = true;
-    }
-    if (list.length === 0 && page === 1) {
-      result.empty = true;
-    }
-    return result;
-  } catch (error) {
-    return {
-      dataSource: [],
-      page: 1,
-      pageSize: 20,
-      total: 0,
-      noMore: false,
-      empty: false,
-      error: new Error(`${(error as Error).message}`),
-      // next_marker: "",
-    };
-  }
-};

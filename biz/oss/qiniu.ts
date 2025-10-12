@@ -1,8 +1,10 @@
-// @ts-ignore
-import { createDirectUploadTask, createMultipartUploadV2Task, FileData } from "qiniu-js";
+import {
+  createDirectUploadTask,
+  createMultipartUploadV2Task,
+  FileData,
+  // @ts-ignore
+} from "qiniu-js";
 // import { HttpProtocol, LogLevel } from "qiniu-js/output/@internal";
-
-import { ViewComponentProps } from "@/store/types";
 
 import { Result } from "@/domains/result";
 import { base, Handler } from "@/domains/base";
@@ -32,14 +34,18 @@ function fetchQiniuToken() {
   return request.post<{ token: string }>("/api/auth/qiniu_token");
 }
 
-export function QiniuOSS(props: { storage: StorageCore<{ token: string }>; client: HttpClientCore; scope?: string }) {
+export function QiniuOSS(props: {
+  storage: StorageCore<{ token: string }>;
+  client: HttpClientCore;
+  scope?: string;
+}) {
   const $storage = props.storage;
   const $request = new RequestCore(fetchQiniuToken, { client: props.client });
   const methods = {
     refresh() {
       bus.emit(Events.StateChange, { ..._state });
     },
-    compress() { },
+    compress() {},
     check_file(file: File, opt: { accept: string; size: number }) {
       const tip = checkFile(file, opt);
       if (tip !== null) {
@@ -83,13 +89,15 @@ export function QiniuOSS(props: { storage: StorageCore<{ token: string }>; clien
         }
       );
       // 设置进度回调函数
-      task.onProgress((progress: { size: number; percent: number; details: any; }) => {
-        // console.log("更新");
-        // console.log(progress);
-        // console.log(context);
-        // 处理进度回调
-        bus.emit(Events.Progress, progress);
-      });
+      task.onProgress(
+        (progress: { size: number; percent: number; details: any }) => {
+          // console.log("更新");
+          // console.log(progress);
+          // console.log(context);
+          // 处理进度回调
+          bus.emit(Events.Progress, progress);
+        }
+      );
 
       // 设置完成回调函数
       task.onComplete((result?: string) => {
@@ -112,7 +120,7 @@ export function QiniuOSS(props: { storage: StorageCore<{ token: string }>; clien
       return Result.Ok(null);
     },
 
-    async auth() { },
+    async auth() {},
   };
   const ui = {};
 
@@ -165,7 +173,7 @@ export function QiniuOSS(props: { storage: StorageCore<{ token: string }>; clien
     state: _state,
     upload: methods.upload_file,
     filename: methods.build_key,
-    ready() { },
+    ready() {},
     onStart(handler: Handler<TheTypesOfEvents[Events.Start]>) {
       return bus.on(Events.Start, handler);
     },

@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
 
-import { ViewComponent, ViewComponentProps } from "@/store/types";
-import { useInstance } from "@/hooks/index";
-import { Button, Input } from "@/components/ui";
+import { ViewComponent, ViewComponentProps } from "~/store/types";
+import { useInstance } from "~/hooks/index";
+import { Button, Input } from "~/components/ui";
 import { ButtonCore, InputCore } from "@/domains/ui";
-import { MediaOriginCountry } from "@/constants/index";
+import { MediaOriginCountry } from "~/biz/constants/index";
 
 function Page(props: ViewComponentProps) {
   const { app, view, history, client } = props;
 
   const $view = view;
   const $username = new InputCore({
+    defaultValue: "",
     placeholder: "请输入邮箱",
   });
   const $password = new InputCore({
+    defaultValue: "",
     placeholder: "请输入密码",
     type: "password",
     autoComplete: false,
@@ -22,6 +24,7 @@ function Page(props: ViewComponentProps) {
     },
   });
   const $code = new InputCore({
+    defaultValue: "",
     placeholder: "没有则不用输入",
     autoComplete: true,
     onEnter() {
@@ -47,7 +50,7 @@ function Page(props: ViewComponentProps) {
       app.tip({
         text: ["注册成功"],
       });
-      history.replace("root.home_layout.home_index.home_index_season", {
+      history.replace("root.home_layout.home_index", {
         language: MediaOriginCountry.CN,
       });
     },
@@ -59,7 +62,7 @@ function Page(props: ViewComponentProps) {
   });
   const $home = new ButtonCore({
     onClick() {
-      history.push("root.home_layout.home_index.home_index_season", {
+      history.push("root.home_layout.home_index", {
         language: MediaOriginCountry.CN,
       });
     },
@@ -87,7 +90,9 @@ export const RegisterPage: ViewComponent = React.memo((props) => {
       <div className="h-[160px] mx-auto">
         <div className="relative cursor-pointer">
           <div className="z-10 absolute left-14 top-[32px] w-[82%] h-[32px] rounded-xl bg-green-500"></div>
-          <div className="z-20 relative text-6xl text-center italic">FamilyFlix</div>
+          <div className="z-20 relative text-6xl text-center italic">
+            FamilyFlix
+          </div>
         </div>
       </div>
       <div className="space-y-4 rounded-md">
@@ -121,7 +126,9 @@ export const RegisterPage: ViewComponent = React.memo((props) => {
             <Button size="lg" variant="subtle" store={$page.ui.$home}>
               前往首页
             </Button>
-            <div className="mt-1 text-sm text-w-fg-2 text-center">检测到当前已登录</div>
+            <div className="mt-1 text-sm text-w-fg-2 text-center">
+              检测到当前已登录
+            </div>
           </div>
         ) : null}
       </div>

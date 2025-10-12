@@ -19,7 +19,7 @@ import { onRequestCreated } from "@/domains/request/index";
 import { Result } from "@/domains/result/index";
 
 import { PageKeys, routes, routesWithPathname } from "./routes";
-import { client } from "./request";
+import { client } from "./http_client";
 import { storage } from "./storage";
 
 export { client, storage };
@@ -48,7 +48,7 @@ ImageCore.prefix = window.location.origin;
 
 class ExtendsUser extends UserCore {
   say() {
-    console.log(`My name is ${this.username}`);
+    console.log(`My name is ${this.nickname}`);
   }
 }
 const user = new ExtendsUser(storage.get("user"), client);
@@ -172,71 +172,3 @@ user.onExpired(() => {
   });
   history.push("root.login");
 });
-
-ListCore.commonProcessor = <T>(
-  originalResponse: any
-): {
-  dataSource: T[];
-  page: number;
-  pageSize: number;
-  total: number;
-  empty: boolean;
-  noMore: boolean;
-  error: BizError | null;
-} => {
-  if (originalResponse === null) {
-    return {
-      dataSource: [],
-      page: 1,
-      pageSize: 20,
-      total: 0,
-      noMore: false,
-      empty: false,
-      error: null,
-    };
-  }
-  try {
-    const data = originalResponse.data || originalResponse;
-    const { list, page, page_size, total, noMore, no_more, next_marker } = data;
-    const result = {
-      dataSource: list,
-      page,
-      pageSize: page_size,
-      total,
-      empty: false,
-      noMore: false,
-      error: null,
-      next_marker,
-    };
-    if (total <= page_size * page) {
-      result.noMore = true;
-    }
-    if (no_more !== undefined) {
-      result.noMore = no_more;
-    }
-    if (noMore !== undefined) {
-      result.noMore = noMore;
-    }
-    if (next_marker === null) {
-      result.noMore = true;
-    }
-    if (list.length === 0 && page === 1) {
-      result.empty = true;
-    }
-    if (list.length === 0) {
-      result.noMore = true;
-    }
-    return result;
-  } catch (error) {
-    return {
-      dataSource: [],
-      page: 1,
-      pageSize: 20,
-      total: 0,
-      noMore: false,
-      empty: false,
-      error: new BizError(`${(error as Error).message}`),
-      // next_marker: "",
-    };
-  }
-};

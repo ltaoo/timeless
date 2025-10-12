@@ -1,10 +1,10 @@
 import mitt from "mitt";
 
-import { app, history } from "@/store/index";
-import { PageKeys } from "@/store/routes";
-import { client } from "@/store/request";
-import { storage } from "@/store/storage";
-import { ViewComponentProps } from "@/store/types";
+import { app, history } from "~/store/index";
+import { PageKeys } from "~/store/routes";
+import { client } from "~/store/http_client";
+import { storage } from "~/store/storage";
+import { ViewComponentProps } from "~/store/types";
 
 import { ListCore } from "@/domains/list/index";
 import { TabHeaderCore } from "@/domains/ui/tab-header/index";
@@ -16,9 +16,9 @@ import {
   InputCore,
   ScrollViewCore,
 } from "@/domains/ui/index";
-import { ItemTypeFromListCore } from "@/domains/list/typing";
-import { fetchMediaList, fetchMediaListProcess } from "@/services/media";
-import { MediaOriginCountry, MediaTypes } from "@/constants/index";
+import { TheItemTypeFromListCore } from "@/domains/list/typing";
+import { fetchMediaList, fetchMediaListProcess } from "~/biz/services/media";
+import { MediaOriginCountry, MediaTypes } from "~/biz/constants/index";
 
 function HomePageLogic(props: ViewComponentProps) {
   const { app, history, client, view } = props;
@@ -36,66 +36,7 @@ function HomePageLogic(props: ViewComponentProps) {
     }[];
   }>({
     key: "id",
-    options: [
-      {
-        id: "recommended",
-        name: "root.home_layout.home_index.home_index_recommended",
-        text: "推荐",
-        query: {},
-      },
-      {
-        id: "history",
-        name: "root.home_layout.home_index.home_index_history",
-        text: "观看记录",
-        query: {},
-      },
-      {
-        id: "china",
-        name: "root.home_layout.home_index.home_index_season",
-        text: "电视剧",
-        query: {
-          language: MediaOriginCountry.CN,
-        },
-      },
-      {
-        id: "movie",
-        name: "root.home_layout.home_index.home_index_movie",
-        text: "电影",
-        query: {},
-      },
-      // {
-      //   id: "animate",
-      //   text: "动漫",
-      // },
-      // {
-      //   id: "zongyi",
-      //   text: "综艺",
-      // },
-      {
-        id: "korean",
-        name: "root.home_layout.home_index.home_index_season",
-        text: "韩剧",
-        query: {
-          language: MediaOriginCountry.KR,
-        },
-      },
-      {
-        id: "jp",
-        name: "root.home_layout.home_index.home_index_season",
-        text: "日剧",
-        query: {
-          language: MediaOriginCountry.JP,
-        },
-      },
-      {
-        id: "us",
-        name: "root.home_layout.home_index.home_index_season",
-        text: "美剧",
-        query: {
-          language: MediaOriginCountry.US,
-        },
-      },
-    ],
+    options: [],
     onChange(value) {
       const { name, query } = value;
       history.push(name, query);
@@ -209,23 +150,23 @@ function SeasonTabContentCom(props: ViewComponentProps) {
         language: MediaOriginCountry.CN,
       });
     },
-    handleClickSeason(season: ItemTypeFromListCore<typeof $list>) {
-      const { id, type } = season;
-      if (app.env.prod === "develop" || app.$user.permissions.includes("002")) {
-        if (type === MediaTypes.Season) {
-          history.push("root.season_playing", { id, type });
-          return;
-        }
-        if (type === MediaTypes.Movie) {
-          history.push("root.movie_playing", { id, type });
-          return;
-        }
-        app.tip({
-          text: ["未知的媒体类型"],
-        });
-        return;
-      }
-      history.push("root.profile", { id, type });
+    handleClickSeason(season: TheItemTypeFromListCore<typeof $list>) {
+      // const { id, type } = season;
+      // if (app.env.prod === "develop" || app.$user.permissions.includes("002")) {
+      //   if (type === MediaTypes.Season) {
+      //     history.push("root.season_playing", { id, type });
+      //     return;
+      //   }
+      //   if (type === MediaTypes.Movie) {
+      //     history.push("root.movie_playing", { id, type });
+      //     return;
+      //   }
+      //   app.tip({
+      //     text: ["未知的媒体类型"],
+      //   });
+      //   return;
+      // }
+      // history.push("root.profile", { id, type });
     },
   };
 }
@@ -270,7 +211,7 @@ Page({
       });
     });
     this.onClick("search", () => {
-      history.push("root.search");
+      // history.push("root.search");
     });
     this.onClick("pull-down-refresh", () => {
       $page.$list.refresh();

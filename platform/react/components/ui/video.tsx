@@ -3,7 +3,7 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 
-import { useInitialize } from "@/hooks/index";
+import { useInitialize } from "~/hooks/index";
 import { PlayerCore } from "@/domains/player";
 import { connect } from "@/domains/player/connect.web";
 
@@ -63,14 +63,21 @@ export const Video = React.memo((props: { store: PlayerCore }) => {
         height={`${height}px`}
       >
         {subtitle ? (
-          <track src={subtitle.src} kind="captions" label={subtitle.label} srcLang={subtitle.lang}></track>
+          <track
+            src={subtitle.src}
+            kind="captions"
+            label={subtitle.label}
+            srcLang={subtitle.lang}
+          ></track>
         ) : null}
       </video>
     </div>
   );
 });
 
-function VideoTrack(props: { store: PlayerCore } & React.TrackHTMLAttributes<HTMLTrackElement>) {
+function VideoTrack(
+  props: { store: PlayerCore } & React.TrackHTMLAttributes<HTMLTrackElement>
+) {
   const { store, src, kind, label, srcLang } = props;
 
   const ref = useRef<HTMLTrackElement | null>(null);
@@ -82,5 +89,13 @@ function VideoTrack(props: { store: PlayerCore } & React.TrackHTMLAttributes<HTM
   //   }
   // });
 
-  return <track ref={ref} src={src} kind={kind} label={label} srcLang={srcLang}></track>;
+  return (
+    <track
+      ref={ref}
+      src={src}
+      kind={kind}
+      label={label}
+      srcLang={srcLang}
+    ></track>
+  );
 }

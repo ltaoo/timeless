@@ -4,17 +4,19 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 
-import { history, app } from "./store/index";
-import { PageKeys } from "./store/routes";
-import { pages } from "./store/views";
-import { client } from "./store/request";
-import { useInitialize, useInstance } from "./hooks/index";
-import { ThemeProvider } from "./components/theme-switch";
-import { StackRouteView } from "./components/ui/stack-route-view";
-import { Toast, Dialog } from "./components/ui";
-import { ToastCore } from "./domains/ui/toast";
-import { DialogCore } from "./domains/ui/index";
-import { cn } from "./utils/index";
+import { history, app } from "~/store/index";
+import { PageKeys } from "~/store/routes";
+import { pages } from "~/store/views";
+import { client } from "~/store/http_client";
+import { ThemeProvider } from "~/components/theme-switch";
+import { StackRouteView } from "~/components/ui/stack-route-view";
+import { Toast, Dialog } from "~/components/ui";
+
+import { ToastCore } from "@/domains/ui/toast";
+import { DialogCore } from "@/domains/ui/index";
+import { cn } from "@/utils/index";
+
+import { useViewModel, useInitialize, useInstance } from "./hooks";
 
 import "./index.css";
 
@@ -75,7 +77,9 @@ function ApplicationView() {
         <div className="w-screen h-screen flex items-center justify-center">
           <div>
             <div className="text-3xl text-center">{error.message}</div>
-            <div className="mt-4 text-center">请根据上述提示进行操作，或者点击刷新</div>
+            <div className="mt-4 text-center">
+              请根据上述提示进行操作，或者点击刷新
+            </div>
           </div>
         </div>
       </div>

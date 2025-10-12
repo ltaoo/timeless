@@ -17,12 +17,6 @@ const configure = {
           home_index: {
             title: "首页",
             pathname: "/home/index",
-            children: {
-              home_index_season: {
-                title: "电视剧",
-                pathname: "/home/index/season",
-              },
-            },
             options: {
               keep_alive: true,
               require: ["login"],

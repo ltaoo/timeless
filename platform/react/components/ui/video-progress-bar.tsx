@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { useInstance } from "@/hooks/index";
-import { Portal } from "@/packages/ui/portal";
-import { Presence } from "@/components/ui/presence";
+import { useInstance } from "~/hooks/index";
+import { Portal } from "~/packages/ui/portal";
+import { Presence } from "~/components/ui/presence";
 import { Handler, base } from "@/domains/base";
 import { PlayerCore } from "@/domains/player/index";
 import { PresenceCore } from "@/domains/ui/index";
@@ -115,7 +115,11 @@ function VideoProgressBarComponent(props: { store: PlayerCore }) {
           $target.innerText = `${text}/${seconds_to_hour(store._duration)}`;
         }
       }, 200);
-      console.log("[COMPONENT]video-progress-bar - touch start", startX, rect.left);
+      console.log(
+        "[COMPONENT]video-progress-bar - touch start",
+        startX,
+        rect.left
+      );
       leftRef.current = posX - cursorWidth;
       const $bar = barRef.current;
       const $cursor = cursorRef.current;
@@ -206,12 +210,18 @@ function VideoProgressBarComponent(props: { store: PlayerCore }) {
         width: client.width,
         left: client.left,
       };
-      console.log("[COMPONENT]ui/video-progress-bar fetch rect", rectRef.current);
+      console.log(
+        "[COMPONENT]ui/video-progress-bar fetch rect",
+        rectRef.current
+      );
       if (store._duration === 0) {
         return;
       }
       const percent = (store.currentTime / store._duration) * client.width;
-      console.log("[COMPONENT]ui/video-progress-bar initial bar and cur position", percent);
+      console.log(
+        "[COMPONENT]ui/video-progress-bar initial bar and cur position",
+        percent
+      );
       const $bar = barRef.current;
       const $cursor = cursorRef.current;
       if ($bar) {
@@ -226,7 +236,9 @@ function VideoProgressBarComponent(props: { store: PlayerCore }) {
       const unlisten1 = store.onProgress((v) => {
         const rect = rectRef.current;
         if (rect && rect.width) {
-          const percent = Math.floor((store.currentTime / store._duration) * rect.width);
+          const percent = Math.floor(
+            (store.currentTime / store._duration) * rect.width
+          );
           const $bar = barRef.current;
           const $cursor = cursorRef.current;
           if ($bar) {
@@ -247,14 +259,17 @@ function VideoProgressBarComponent(props: { store: PlayerCore }) {
         if (!rect) {
           return;
         }
-        const percent = store._duration !== 0 ? (store.currentTime / store._duration) * rect.width : 0;
+        const percent =
+          store._duration !== 0
+            ? (store.currentTime / store._duration) * rect.width
+            : 0;
         const $bar = barRef.current;
         const $cursor = cursorRef.current;
         if ($bar) {
           $bar.style.width = percent + "px";
         }
         if ($cursor) {
-          $cursor.style.left = (percent - cursorWidth) + "px";
+          $cursor.style.left = percent - cursorWidth + "px";
         }
         emitter.emit(Events.Change, {
           currentTime: seconds_to_hour(store.currentTime),
