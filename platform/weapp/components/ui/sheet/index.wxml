@@ -1,0 +1,17 @@
+<dialog-primitive-root _store="{{_store}}">
+    <dialog-primitive-portal name="_in_dialog" _store="{{_store}}" class-name="fixed inset-0 z-50 flex items-end" enter-class="fade-in" exit-class="fade-out">
+        <dialog-primitive-overlay _store="{{_store}}" class-name="dialog__overlay fixed inset-0 z-50 bg-black--50 opacity-0 backdrop-blur transition-all duration-200" enter-class="animate-in fade-in" exit-class="animate-out fade-out"></dialog-primitive-overlay>
+        <dialog-primitive-content _store="{{_store}}" class-name="dialog__content fixed z-50 scale-100 opacity-100 w-full max-w-lg shadow-lg duration-200 rounded-tl-xl rounded-tr-xl bg-w-bg-2 text-w-fg-0 border-w-bg-2" enter-class="aniamte-in slide-in-from-bottom" exit-class="aniamte-in slide-out-to-bottom" style="height: 50%;">
+            <block wx:if="{{!hideTitle}}">
+                <dialog-primitive-header class-name="dialog__header flex flex-col space-y-2 text-left">
+                    <dialog-primitive-close _store="{{_store}}" class-name="dialog__close flex-col space-y-2 text-center sm:text-left flex">
+                        <view class="p-2 self-end">
+                            <icon name="x" size="24" class-name="text-xl text-w-fg-1" />
+                        </view>
+                    </dialog-primitive-close>
+                </dialog-primitive-header>
+            </block>
+            <slot />
+        </dialog-primitive-content>
+    </dialog-primitive-portal>
+</dialog-primitive-root>

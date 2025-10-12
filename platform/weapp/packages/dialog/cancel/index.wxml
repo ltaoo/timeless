@@ -1,0 +1,3 @@
+<button _store="{{_store.cancelBtn}}" class-name="dialog__cancel-btn {{className}}" style="{{style}}" variant="subtle">
+    取消
+</button>

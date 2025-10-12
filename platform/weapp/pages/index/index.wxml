@@ -1,0 +1,69 @@
+<page-meta class="" page-style="" background-color="{{backgroundBottomColor}}">
+    <bar class-name="bg-w-bg-2" fixed="{{true}}">
+        <view class="flex items-center justify-between w-full py-2 px-4 text-w-fg-2 bg-w-bg-2 space-x-3" style="z-index: 10;">
+            <view class="w-0 flex-1 rounded-xl border border-w-fg-2">
+                <view class="flex items-center border rounded-xl px-2 h-8" data-elm="search" bind:tap="handleClickElm">
+                    <view class="ml-2 text-sm">请输入关键字搜索</view>
+                </view>
+            </view>
+        </view>
+    </bar>
+    <view class="relative pb-4" style="z-index: 0;">
+        <view class="mt-4">
+            <scroll-view class="h-full">
+                <list-view _store="{{$season.$list}}" class="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                    <block wx:for="{{response.dataSource}}" wx:for-item="season" wx:key="id">
+                        <view class="flex px-3 py-2 mb-2 rounded-md cursor-pointer bg-w-bg-3" data-elm="season" data-id="{{season.id}}" bind:tap="handleClickElm">
+                            <view class="relative mr-4 rounded-lg overflow-hidden" style="width: 256rpx; height: 396rpx">
+                                <lazy-image class="w-full h-full object-cover" src="{{season.poster_path}}" alt="{{season.name}}" />
+                            </view>
+                            <view class="flex-1 max-w-full overflow-hidden text-w-fg-0">
+                                <view class="flex items-center">
+                                    <h2 class="text-xl text-w-fg-0">{{season.name}}</h2>
+                                </view>
+                                <view class="flex items-center mt-1">
+                                    <view>{{season.air_date}}</view>
+                                    <block wx:if="{{season.episode_count_text}}">
+                                        <view class="mx-2 ">·</view>
+                                        <view class="relative flex items-center rounded-md {{ season.full ? 'text-green-500' : ''}}" style="padding: 2px 4px;">
+                                            {{season.episode_count_text}}
+                                        </view>
+                                    </block>
+                                </view>
+                                <block wx:if="{{season.actors}}">
+                                    <view class="mt-1 text-sm rounded-md bg-blue-100 text-blue-600 overflow-hidden text-ellipsis break-keep whitespace-nowrap" style="padding: 2px 4px; font-size: 12px;">
+                                        {{season.actors}}
+                                    </view>
+                                </block>
+                                <block wx:if="{{season.vote}}">
+                                    <view class="mt-2">
+                                        <view class="relative {{ season.vote <= 6 ? 'text-gray-500' : season.vote >= 8 ? 'text-orange-500' : 'text-green-500'}}">
+                                            <span class="italic tracking-tight font-mono text-lg">
+                                                {{season.vote}}
+                                            </span>
+                                            <span class="relative ml-1 italic" style="top: -1; left: -2; font-size: 10px;">
+                                                分
+                                            </span>
+                                        </view>
+                                    </view>
+                                </block>
+                                <view class="mt-2 flex items-center flex-wrap gap-2 max-w-full">
+                                    <block wx:for="{{season.genres}}" wx:for-item="tag" wx:key="self">
+                                        <view class="py-1 px-2 leading-none rounded-lg break-keep whitespace-nowrap border border-w-fg-1" style="font-size: 24rpx; line-height: 24rpx;">
+                                            {{tag}}
+                                        </view>
+                                    </block>
+                                </view>
+                            </view>
+                        </view>
+                    </block>
+                </list-view>
+            </scroll-view>
+        </view>
+        <view class="safe-block3"></view>
+        <!-- <swiper class="w-full" style="height: 1280rpx;" current="{{current}}" bind:change="handleSwiperChange">
+            <swiper-item></swiper-item>
+        </swiper> -->
+    </view>
+    <!-- <view class="z-50 fixed inset-0 bg-w-brand" /> -->
+</page-meta>

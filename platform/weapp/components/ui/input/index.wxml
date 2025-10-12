@@ -1,0 +1,15 @@
+<view class="relative class-name">
+    <view class="absolute left-3 top-[50%] translate-y-[-50%] text-w-fg-1"></view>
+    <view class="py-2 px-3 h-10 w-full rounded-md border-w-bg-2 bg-w-bg-3 text-fg-0">
+        <input class="leading-none border-0 text-sm focus--outline-none focus--ring-2 focus--ring-fg-4 focus--ring-offset-2 disabled--cursor-not-allowed disabled--opacity-50 placeholder--text-w-fg-1 class {{prefix ? 'pl-8' : ''}}" style="vertical-align: bottom" value="{{value}}" focus="{{focus}}" placeholder="{{placeholder}}" disabled="{{disabled}}" bind:input="handleChange" bind:confirm="handleConfirm" />
+    </view>
+    <view class="absolute right-3 text-w-fg-1" style="top: 50%; transform: translateY(-50%);">
+        <block wx:if="{{!allowClear}}"></block>
+        <block wx:elif="{{!value}}"></block>
+        <block wx:else>
+            <view class="flex items-center">
+                <icon name="x" size="{{16}}" />
+            </view>
+        </block>
+    </view>
+</view>

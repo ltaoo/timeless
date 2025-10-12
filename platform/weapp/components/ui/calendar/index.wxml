@@ -1,0 +1,32 @@
+<calendar-primitive-root _store="{{_store}}">
+    <view class="calendar class-name {{className}}" style="{{style}}">
+        <calendar-primitive-month _store="{{_store}}" class-name="calendar__month w-full">
+            <calendar-primitive-caption _store="{{_store}}" class-name="calendar__caption pl-2">
+                <view class="text-xl">{{title}}</view>
+            </calendar-primitive-caption>
+            <calendar-primitive-weekdays class-name="calendar__weekdays mt-4 grid grid-cols-7">
+                <view class="text-sm text-w-fg-1 text-center">周一</view>
+                <view class="text-sm text-w-fg-1 text-center">周二</view>
+                <view class="text-sm text-w-fg-1 text-center">周三</view>
+                <view class="text-sm text-w-fg-1 text-center">周四</view>
+                <view class="text-sm text-w-fg-1 text-center">周五</view>
+                <view class="text-sm text-w-fg-1 text-center">周六</view>
+                <view class="text-sm text-w-fg-1 text-center">周天</view>
+            </calendar-primitive-weekdays>
+            <calendar-primitive-body class-name="calendar__body">
+                <block wx:for="{{weeks}}" wx:for-item="week" wx:key="id">
+                    <calendar-primitive-week class-name="calendar__week grid grid-cols-7">
+                        <block wx:for="{{week.dates}}" wx:for-item="d" wx:key="id">
+                            <calendar-primitive-day class-name="calendar__day relative">
+                                <view class="text-center p-2 {{d.is_prev_month || d.is_next_month ? 'text-w-fg-2' : ''}}">
+                                    {{d.text}}
+                                </view>
+                                <view wx:if="{{day.time === d.time}}" class="absolute bottom-0 w-full bg-w-brand" style="height: 2px;" />
+                            </calendar-primitive-day>
+                        </block>
+                    </calendar-primitive-week>
+                </block>
+            </calendar-primitive-body>
+        </calendar-primitive-month>
+    </view>
+</calendar-primitive-root>

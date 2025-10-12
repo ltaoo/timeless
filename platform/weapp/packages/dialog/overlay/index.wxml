@@ -1,0 +1,1 @@
+<view class="{{className}}" style="{{style}}" bind:tap="handleClick" bind:touchmove="handleTouchMove"></view>

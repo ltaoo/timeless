@@ -1,0 +1,5 @@
+<presence _store="{{_store.$present}}" enter-class="{{enterClass}}" exit-class="{{exitClass}}">
+    <view class="dialog__portal {{className}}" style="{{style}}">
+        <slot />
+    </view>
+</presence>

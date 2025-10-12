@@ -1,0 +1,11 @@
+{
+  "usingComponents": {
+    "bar": "/components/ui/navigation-bar",
+    "tabs": "/components/ui/tabs",
+    "input": "/components/ui/input",
+    "icon": "/components/ui/icon",
+    "calendar": "/components/ui/calendar",
+    "list-view": "/components/list-view/index",
+    "lazy-image": "/components/ui/image"
+  }
+}

@@ -1,0 +1,12 @@
+<view id="tabs-outer" class="__a tabs tab-class" style="{{style}}" catch:animationstart="updateContainer">
+    <scroll-view class="tabs-wrapper relative" scroll-with-animation="{{scrollWithAnimation}}" scroll-left="{{scrollLeftInset}}" scroll-x>
+        <view id="tabs-wrapper" class="flex">
+            <block wx:for="{{options}}" wx:for-item="tab" wx:key="index">
+                <view id="tab-{{index}}" class="__a p-4 item-class {{current === index ? 'active-item-class' : ''}}" style="{{current === index ? activeItemStyle : itemStyle}}" data-index="{{index}}" data-text="{{item.text}}" data-id="tab-{{index}}" catch:animationstart="updateTab" bind:tap="handleChange">
+                    {{tab.text}}
+                </view>
+            </block>
+            <view wx:if="{{showLine}}" class="absolute bottom-0 w-4 bg-w-brand transition-all" style="left: {{left}}px; height: 4rpx; transform: translateX(-50%)" />
+        </view>
+    </scroll-view>
+</view>

@@ -1,0 +1,11 @@
+<view class="navigation-bar" style="{{style}}">
+    <view class="__a navigation-bar__inner class-name relative w-full {{fixed ? 'fixed z-20 top-0' : ''}}" style="padding-top: {{paddingTop}}px;" bind:animationend="handleViewMounted">
+        <view style="padding-right: {{paddingRight}}px;">
+            <slot />
+        </view>
+        <view class="navigation-bar__footer" style="padding-right: {{paddingRight}}px;">
+            <slot name="footer"></slot>
+        </view>
+    </view>
+    <view wx:if="{{fixed}}" style="min-height: 68rpx; height: {{height}}px;" />
+</view>

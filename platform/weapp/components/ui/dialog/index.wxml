@@ -1,0 +1,30 @@
+<dialog-primitive-root _store="{{_store}}">
+    <dialog-primitive-portal name="_in_dialog" _store="{{_store}}" class-name="fixed inset-0 z-50 flex items-start justify-center items-center" enter-class="fade-in" exit-class="fade-out">
+        <dialog-primitive-overlay _store="{{_store}}" class-name="dialog__overlay fixed inset-0 z-50 bg-black--50 backdrop-blur transition-all duration-200 {{overlayClassName}}" enter-class="fade-in" exit-class="fade-out" style="z-index: 0;"></dialog-primitive-overlay>
+        <dialog-primitive-content _store="{{_store}}" class-name="dialog__content relative z-50 grid w-full max-w-lg gap-4 border p-6 shadow-lg duration-200 rounded-lg--sm w-full--md bg-w-bg-0 border-w-bg-2 {{contentClassName}}" enter-class="aniamte-in slide-in-from-bottom" exit-class="aniamte-in slide-out-to-bottom" style="z-index: 10;">
+            <dialog-primitive-header class-name="dialog__header flex flex-col space-y-1.5 text-center sm:text-left">
+                <dialog-primitive-title class-name="dialog__title text-lg text-w-fg-0 font-semibold leading-none tracking-tight">
+                    {{title}}
+                </dialog-primitive-title>
+                <dialog-primitive-description class-name="dialog__description mt-4 text-sm text-muted-foreground">
+                    <slot />
+                </dialog-primitive-description>
+            </dialog-primitive-header>
+            <block wx:if="{{!!footer}}">
+                <dialog-primitive-footer class-name="dialog__footer mt-4">
+                    <dialog-primitive-submit _store="{{_store}}" class=""></dialog-primitive-submit>
+                    <block wx:if="{{!!cancel}}">
+                        <view class="mt-4">
+                            <dialog-primitive-cancel class-name="mt-4" _store="{{_store}}">
+                                取消
+                            </dialog-primitive-cancel>
+                        </view>
+                    </block>
+                </dialog-primitive-footer>
+            </block>
+            <dialog-primitive-close _store="{{_store}}" class-name="dialog__close absolute top-4 right-4 cursor-pointer rounded-full opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:pointer-events-none dark:focus:ring-slate-400 dark:focus:ring-offset-black-900 data-[state=open]:bg-w-bg-0">
+                <icon name="x" class-name="text-xl" size="{{24}}" />
+            </dialog-primitive-close>
+        </dialog-primitive-content>
+    </dialog-primitive-portal>
+</dialog-primitive-root>

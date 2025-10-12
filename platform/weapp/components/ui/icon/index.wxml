@@ -1,0 +1,2 @@
+<cover-view wx:if="{{cover}}" class="icon icon-{{name}} {{className}}" style="display: block; font-size: {{size}}px; width: {{size}}px; height: {{size}}px; color: {{color}}; {{style}}"></cover-view>
+<text wx:else class="icon icon-{{name}} {{className}}" style="display: block; font-size: {{size}}px; width: {{size}}px; height: {{size}}px; color: {{color}}; {{style}}"></text>

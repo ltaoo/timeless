@@ -1,0 +1,257 @@
+<view class="flex items-center user-select-none" bind:touchstart="{{m1.handleTouchStart}}" bind:touchmove="{{m1.handleTouchMove}}" bind:touchend="{{m1.handleTouchEnd}}">
+    <view class="text-sm" style="min-width: 80px;">{{times.currentTime}}</view>
+    <view class="__a progress__wrap relative mx-4 w-full py-4 bg-gray-300 cursor-pointer rounded-md" style="overflow: unset;" change:duration="{{m1.durationObserver}}" change:cur="{{m1.progressObserver}}" duration="{{duration}}" cur="{{curTime}}" bind:animationend="{{m1.handleAnimationEnd}}">
+        <view class="progress__mask absolute left-0" style="z-index: 10; top: 50%; width: 100%; height: 4px; background-color: #000; opacity: 0.3; transform: translateY(-50%);"></view>
+        <view class="progress__bar absolute left-0 bg-green-500" style="z-index: 20; top: 50%; width: {{width}}px; height: 4px; transform: translateY(-50%);"></view>
+        <view class="progress__cursor absolute" style="z-index: 30; left: {{left}}px; top: 50%; width: 12px; height: 12px; border-radius: 50%; background-color: #fff; transform: translate(0px, -50%);"></view>
+    </view>
+    <view class="text-sm text-w-fg-1" style="min-width: 80px; text-align: right;">
+        {{times.duration}}
+    </view>
+</view>
+<root-portal>
+    <view class="fixed toast p-4 rouned-md" style="display: none; top: 32%; left: 50%; width: 240px; transform: translate(-50%, -50%);">
+        <view class="z-0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; background-color: #000; opacity: 0.8;"></view>
+        <view class="z-10 relative" style="">
+            <view class="text-md text-w-fg-1 text-center" style="width: 100%; font-size: 24px; color: #898989;">
+                {{virtualCurTime}}/{{times.duration}}
+            </view>
+            <view class="__a progress__wrap2 relative mx-4 w-full py-4 bg-gray-300 cursor-pointer rounded-md overflow-hidden" style="" bind:animationend="{{m1.handleAnimationEnd2}}">
+                <view class="progress__mask2 absolute left-0" style="top: 50%; width: 100%; height: 4px; background-color: #333; transform: translateY(-50%);"></view>
+                <view class="progress__bar2 absolute left-0 bg-green-500" style="top: 50%; width: {{width}}px; height: 4px; transform: translateY(-50%);"></view>
+            </view>
+        </view>
+    </view>
+</root-portal>
+<wxs module="m1">
+var _instance1 = null;
+var _instance2 = null;
+var _instance3 = null;
+var _instance4 = null;
+
+var cursorWidth = 6;
+var touchStartTime = 0;
+var moving = 0;
+var startX = 0;
+var length = 0;
+var rect =  {
+    left: 0,
+    width: 0,
+};
+var rect2 =  {
+    left: 0,
+    width: 0,
+};
+var _distance = 0;
+var pos = {
+    clientX: 0,
+};
+var _tmpCur = 0;
+var _percent = 0;
+var cur = 0;
+var _curTime = 0;
+var _duration = 0;
+var hasShow = 0;
+var _timer = null;
+module.exports = {
+    handleAnimationEnd: function (event, ownerInstance) {
+        var instance1 = ownerInstance.selectComponent('.progress__wrap')
+        var _rect = instance1.getBoundingClientRect();
+        rect = _rect;
+        ownerInstance.callMethod('handleMounted', _rect)
+    },
+    handleAnimationEnd2: function (event, ownerInstance) {
+        var instance1 = ownerInstance.selectComponent('.progress__wrap2')
+        var _rect = instance1.getBoundingClientRect();
+        rect2 = _rect;
+    },
+    handleTouchStart: function (event, ownerInstance) {
+        console.log("[WXML]video-progress - handleTouchStart");
+        var instance1 = (function () {
+            if (_instance1) {
+                return _instance1;
+            }
+            _instance1 = ownerInstance.selectComponent('.progress__bar');
+            return _instance1;
+        })();
+        var instance2 = (function () {
+            if (_instance2) {
+                return _instance2;
+            }
+            _instance2 = ownerInstance.selectComponent('.progress__cursor');
+            return _instance2;
+        })();
+        var instance3 = (function () {
+            if (_instance3) {
+                return _instance3;
+            }
+            _instance3 = ownerInstance.selectComponent('.progress__bar2');
+            return _instance3;
+        })();
+        var instance4 = (function () {
+            if (_instance4) {
+                return _instance4;
+            }
+            _instance4 = ownerInstance.selectComponent('.toast');
+            return _instance4;
+        })();
+        var touches = event.touches;
+        touchStartTime = event.timeStamp;
+        var finger = touches[0];
+        var posX = finger.clientX - rect.left;
+        var percent = posX / rect.width;
+        timer = ownerInstance.setTimeout(function () {
+            if (timer !== null) {
+                console.log('long press');
+                moving = 1;
+                if (!hasShow) {
+                    hasShow = 1;
+                    instance4.setStyle({
+                        display: 'block',
+                    });
+                }
+                _tmpCur = posX;
+                cur = posX;
+                ownerInstance.callMethod('handleMove', { percent })
+            }
+        }, 200);
+        ownerInstance.callMethod('tagIsMoving')
+        startX = finger.clientX;
+        cur = startX - rect.left;
+        instance1.setStyle({
+            width: posX + 'px'
+        });
+        instance2.setStyle({
+            left: (posX - cursorWidth) + 'px'
+        });
+    },
+    handleTouchMove: function(event, ownerInstance) {
+        console.log("[WXML]video-progress - handleTouchMove");
+        var instance1 = (function () {
+            if (_instance1) {
+                return _instance1;
+            }
+            _instance1 = ownerInstance.selectComponent('.progress__bar');
+            return _instance1;
+        })();
+        var instance2 = (function () {
+            if (_instance2) {
+                return _instance2;
+            }
+            _instance2 = ownerInstance.selectComponent('.progress__cursor');
+            return _instance2;
+        })();
+        var instance3 = (function () {
+            if (_instance3) {
+                return _instance3;
+            }
+            _instance3 = ownerInstance.selectComponent('.progress__bar2');
+            return _instance3;
+        })();
+        var instance4 = (function () {
+            if (_instance4) {
+                return _instance4;
+            }
+            _instance4 = ownerInstance.selectComponent('.toast');
+            return _instance4;
+        })();
+        var touches = event.touches;
+        var finger = touches[0];
+        var now = event.timeStamp;
+        if (now - touchStartTime > 200) {
+            if (!hasShow) {
+                hasShow = 1;
+                instance4.setStyle({
+                    display: 'block',
+                });
+            }
+        }
+        var distance = finger.clientX - startX + cur;
+        moving = 1;
+        if (distance < 0) {
+            return;
+        }
+        if (distance > rect.width) {
+            return;
+        }
+        var posX = finger.clientX - rect.left;
+        var percent = (posX) / rect.width;
+        // console.log('set width and left', posX);
+        instance1.setStyle({
+            width: distance + 'px'
+        });
+        instance2.setStyle({
+            left: (distance - cursorWidth) + 'px'
+        });
+        instance3.setStyle({
+            width: (rect2.width * percent) + 'px'
+        });
+        _distance = distance;
+        _tmpCur = distance;
+        _percent = percent;
+        pos = finger;
+        ownerInstance.callMethod('handleMove', { percent })
+    },
+    handleTouchEnd: function (event, ownerInstance) {
+        console.log("[WXML]video-progress - handleTouchEnd");
+        var instance4 = (function () {
+            if (_instance4) {
+                return _instance4;
+            }
+            _instance4 = ownerInstance.selectComponent('.toast');
+            return _instance4;
+        })();
+        var now = event.timeStamp;
+        moving = 0;
+        timer = null;
+        if (now - touchStartTime <= 200) {
+            var percent = cur / rect.width;
+            console.log('the reason is click', cur);
+            ownerInstance.callMethod('handleMoveEnd', { percent })
+            return;
+        }
+        if (hasShow) {
+            instance4.setStyle({
+                display: 'none',
+            });
+            hasShow = 0;
+        }
+        cur = _tmpCur;
+        var percent = cur / rect.width;
+        console.log('the reason is touch end', cur);
+        ownerInstance.callMethod('handleMoveEnd', { percent })
+    },
+    durationObserver: function(newValue, oldValue, ownerInstance, instance) {
+        // console.log('prop observer', newValue, oldValue)
+        _duration = newValue;
+    },
+    progressObserver: function (v, _, ownerInstance) {
+        if (moving) {
+            return;
+        }
+        var instance1 = (function () {
+            if (_instance1) {
+                return _instance1;
+            }
+            _instance1 = ownerInstance.selectComponent('.progress__bar');
+            return _instance1;
+        })();
+        var instance2 = (function () {
+            if (_instance2) {
+                return _instance2;
+            }
+            _instance2 = ownerInstance.selectComponent('.progress__cursor');
+            return _instance2;
+        })();
+        var percent = v / _duration;
+        var width = percent * rect.width;
+        cur = width;
+        instance1.setStyle({
+            width: width + 'px'
+        });
+        instance2.setStyle({
+            left: (width - cursorWidth) + 'px'
+        });
+    }
+}
+</wxs>

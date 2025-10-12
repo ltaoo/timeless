@@ -1,0 +1,13 @@
+{
+  "component": true,
+  "usingComponents": {
+    "calendar-primitive-root": "/packages/calendar/root",
+    "calendar-primitive-month": "/packages/calendar/month",
+    "calendar-primitive-caption": "/packages/calendar/caption",
+    "calendar-primitive-weekdays": "/packages/calendar/weekdays",
+    "calendar-primitive-body": "/packages/calendar/body",
+    "calendar-primitive-week": "/packages/calendar/week",
+    "calendar-primitive-day": "/packages/calendar/day",
+    "icon": "/components/ui/icon"
+  }
+}

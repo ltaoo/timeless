@@ -1,0 +1,56 @@
+<view>
+    <block wx:if="{{!!response.initial}}">
+        <slot name="skeleton"></slot>
+    </block>
+    <block wx:if="{{response.empty}}">
+        <view class="w-full h-[480px] center flex items-center justify-center">
+            <view class="flex flex-col items-center justify-center text-slate-500">
+                <view>
+                    <Bird class="w-24 h-24" />
+                </view>
+                <view class="mt-4 flex items-center space-x-2">
+                    <block wx:if="{{response.loading}}">
+                        <icon class="animate animate-spin" name="loader" size="{{24}}" />
+                    </block>
+                    <view class="text-center">{{ response.loading ? "加载中" : "列表为空" }}</view>
+                </view>
+            </view>
+        </view>
+    </block>
+    <block wx:else>
+        <view class="{{className}}">
+            <slot></slot>
+        </view>
+    </block>
+    <block wx:if="{{!!response.error}}">
+        <view class="w-full h-[480px] center flex items-center justify-center">
+            <view class="flex flex-col items-center justify-center text-slate-500">
+                <view class="mt-4 flex items-center space-x-2">
+                    <view class="">{{ response.error.message }}</view>
+                </view>
+            </view>
+        </view>
+    </block>
+    <block wx:else>
+        <block wx:if="{{!response.noMore && !response.initial}}" name="bottom">
+            <view class="mt-4 flex justify-center py-4 text-slate-500">
+                <view class="mt-4 flex flex-col items-center space-x-2 cursor-pointer">
+                    <block wx:if="{{response.loading}}">
+                        <Loader2 class="animate animate-spin" :size="32" />
+                    </block>
+                    <view class="text-center">{{ response.loading ? "加载中" : "加载更多" }}</view>
+                </view>
+            </view>
+        </block>
+    </block>
+    <block wx:if="{{response.noMore && !response.empty}}">
+        <view class="mt-4 flex justify-center py-4 text-slate-500">
+            <view class="flex items-center space-x-2">
+                <block wx:if="{{response.loading}}">
+                    <icon class="animate animate-spin" name="loader" size="{{24}}" />
+                </block>
+                <view class="text-center">没有数据了</view>
+            </view>
+        </view>
+    </block>
+</view>

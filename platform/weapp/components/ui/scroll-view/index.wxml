@@ -1,0 +1,6 @@
+<button class="{{className}}" style="{{style}}" role="button" disabled="{{disabled}}" bind:tap="handleClick">
+    <block wx:if="{{loading}}">
+        <icon name="loader" class-name="w-4 h-4 mr-2 animation animate-spin" />
+    </block>
+    {{text}}
+</button>

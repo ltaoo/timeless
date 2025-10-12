@@ -1,0 +1,40 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/history/index",
+    "pages/mine/index",
+    "pages/search/index",
+    "pages/tv_play/index",
+    "pages/movie_play/index",
+    "pages/video/index",
+    "pages/profile/index"
+  ],
+  "window": {
+    "navigationStyle": "custom"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "resolveAlias": {
+    "nzh/*": "/modules/nzh/*",
+    "mitt/*": "/modules/mitt/*",
+    "@/*": "/*"
+  },
+  "tabBar": {
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/history/index",
+        "text": "观看记录"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "plugins": {},
+  "darkmode": true
+}

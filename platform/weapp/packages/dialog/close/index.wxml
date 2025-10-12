@@ -1,0 +1,3 @@
+<view class="{{className}}" style="{{style}}" data-state="{{state.open ? 'open' : 'closed'}}" bind:tap="handleClick">
+    <slot />
+</view>

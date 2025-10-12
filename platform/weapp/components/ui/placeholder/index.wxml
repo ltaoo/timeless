@@ -1,0 +1,8 @@
+<block wx:if="{{!mounted}}">
+    <cover-view wx:if="{{cover}}" class="presence class-name {{className}}" style="{{style}}">
+        <slot />
+    </cover-view>
+    <view wx:else class="presence class-name {{className}}" style="{{style}}">
+        <slot />
+    </view>
+</block>

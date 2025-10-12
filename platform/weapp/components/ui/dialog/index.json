@@ -1,0 +1,17 @@
+{
+  "component": true,
+  "usingComponents": {
+    "dialog-primitive-root": "/packages/dialog/root",
+    "dialog-primitive-portal": "/packages/dialog/portal",
+    "dialog-primitive-overlay": "/packages/dialog/overlay",
+    "dialog-primitive-header": "/packages/dialog/header",
+    "dialog-primitive-content": "/packages/dialog/content",
+    "dialog-primitive-title": "/packages/dialog/title",
+    "dialog-primitive-description": "/packages/dialog/description",
+    "dialog-primitive-footer": "/packages/dialog/footer",
+    "dialog-primitive-cancel": "/packages/dialog/cancel",
+    "dialog-primitive-submit": "/packages/dialog/submit",
+    "dialog-primitive-close": "/packages/dialog/close",
+    "icon": "/components/ui/icon"
+  }
+}
