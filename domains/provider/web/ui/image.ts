@@ -1,4 +1,4 @@
-import { ImageCore } from "./index";
+import { ImageCore } from "@/domains/ui/image/index";
 
 export function connect($img: HTMLDivElement, store: ImageCore) {
   const io = new IntersectionObserver(
@@ -16,7 +16,7 @@ export function connect($img: HTMLDivElement, store: ImageCore) {
         }
       });
     },
-    { threshold: 0.01 }
+    { threshold: 0.01 },
   );
   io.observe($img);
   // store.onStartLoad(() => {});

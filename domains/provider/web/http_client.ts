@@ -1,8 +1,7 @@
 import axios, { CancelTokenSource } from "axios";
 
 import { Result } from "@/domains/result/index";
-
-import { HttpClientCore } from "./index";
+import { HttpClientCore } from "@/domains/http_client/index";
 
 export function connect(store: HttpClientCore) {
   let requests: { id: string; source: CancelTokenSource }[] = [];

@@ -1,5 +1,5 @@
-import { ScrollViewCore, PointEvent } from "./index";
-import { preventDefault } from "./utils";
+import { ScrollViewCore, PointEvent } from "@/domains/ui/scroll-view/index";
+import { preventDefault } from "@/domains/ui/scroll-view/utils";
 
 const SpeedClassName = "enable-hardware";
 
@@ -67,7 +67,10 @@ export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
           // 如果是指定条件的元素，则无需拦截 touchmove 事件
           isPrevent = false;
           break;
-        } else if (cls.contains("mescroll-touch-x") || cls.contains("mescroll-touch-y")) {
+        } else if (
+          cls.contains("mescroll-touch-x") ||
+          cls.contains("mescroll-touch-y")
+        ) {
           // 如果配置了水平或者垂直滑动
           var curX = e.touches ? e.touches[0].pageX : 0;
           var curY = e.touches ? e.touches[0].pageY : 0;
@@ -84,7 +87,10 @@ export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
           preWinY = curY;
           if (z !== 0) {
             var angle = (Math.asin(y / z) / Math.PI) * 180;
-            if ((angle <= 45 && cls.contains("mescroll-touch-x")) || (angle > 45 && cls.contains("mescroll-touch-y"))) {
+            if (
+              (angle <= 45 && cls.contains("mescroll-touch-x")) ||
+              (angle > 45 && cls.contains("mescroll-touch-y"))
+            ) {
               isPrevent = false;
               break;
             }
@@ -154,7 +160,7 @@ export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
     end: number,
     callback: (step: number, timer?: unknown) => void,
     t: number = 300,
-    rate: number = 30
+    rate: number = 30,
   ) {
     const diff = end - star;
     if (t === 0 || diff === 0) {
@@ -203,7 +209,7 @@ export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
           store.isScrollTo = false;
         }
       },
-      duration
+      duration,
     );
   };
 
@@ -221,7 +227,10 @@ export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
   };
 }
 
-export function connectIndicator(store: ScrollViewCore, $indicator: HTMLDivElement) {
+export function connectIndicator(
+  store: ScrollViewCore,
+  $indicator: HTMLDivElement,
+) {
   store.hideIndicator = () => {
     $indicator.innerHTML = "";
   };

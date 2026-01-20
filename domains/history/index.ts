@@ -55,7 +55,10 @@ type HistoryCoreState = {
   cursor: number;
 };
 
-export class HistoryCore<K extends string, R extends Record<string, any>> extends BaseDomain<TheTypesOfEvents> {
+export class HistoryCore<
+  K extends string,
+  R extends Record<string, any>,
+> extends BaseDomain<TheTypesOfEvents> {
   virtual = false;
 
   /** 路由配置 */
@@ -108,7 +111,7 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
     options: Partial<{
       /** 不变更 history stack */
       ignore: boolean;
-    }> = {}
+    }> = {},
   ) {
     // console.log("-----------");
     // console.log("[DOMAIN]history/index - push target url is", name, "and cur href is", this.$router.href);
@@ -122,7 +125,9 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
       console.log("[DOMAIN]history/index - push 2. no matched route", name);
       return;
     }
-    const uniqueKey = [route1.pathname, query_stringify(query)].filter(Boolean).join("?");
+    const uniqueKey = [route1.pathname, query_stringify(query)]
+      .filter(Boolean)
+      .join("?");
     if (uniqueKey === this.$router.href) {
       // console.log("[DOMAIN]history/index - push target url is", uniqueKey, "and cur href is", this.$router.href);
       return;
@@ -172,7 +177,10 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
       return m;
     })();
     if (!route) {
-      console.log("[DOMAIN]history/index - push 2. no matched route", uniqueKey);
+      console.log(
+        "[DOMAIN]history/index - push 2. no matched route",
+        uniqueKey,
+      );
       return null;
     }
     const created = new RouteViewCore({
@@ -202,7 +210,10 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
     // }
     this.stacks = this.stacks.slice(0, this.cursor + 1).concat(created);
     this.cursor += 1;
-    created.parent.showView(created, { reason: "show_sibling", destroy: false });
+    created.parent.showView(created, {
+      reason: "show_sibling",
+      destroy: false,
+    });
     this.emit(Events.RouteChange, {
       reason: "push",
       view: created,
@@ -218,7 +229,12 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
   replace(name: K, query: Record<string, string> = {}) {
     const uniqueKey = [name, query_stringify(query)].filter(Boolean).join("?");
     if (uniqueKey === this.$router.href) {
-      console.log("[DOMAIN]history/index - replace target url is", uniqueKey, "and cur href is", this.$router.href);
+      console.log(
+        "[DOMAIN]history/index - replace target url is",
+        uniqueKey,
+        "and cur href is",
+        this.$router.href,
+      );
       return;
     }
     const view = this.views[uniqueKey];
@@ -334,7 +350,10 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
     //   view_prepare_to_show.parent.title,
     //   view_prepare_to_show.parent.curView?.title
     // );
-    view_prepare_to_show.parent.showView(view_prepare_to_show, { reason: "back", destroy: true });
+    view_prepare_to_show.parent.showView(view_prepare_to_show, {
+      reason: "back",
+      destroy: true,
+    });
     this.emit(Events.RouteChange, {
       reason: "back",
       view: view_prepare_to_show,
@@ -393,7 +412,7 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
     options: Partial<{
       /** 不变更 history stack */
       ignore: boolean;
-    }> = {}
+    }> = {},
   ) {
     // console.log("-----------");
     // console.log("[DOMAIN]history/index - push target url is", name, "and cur href is", this.$router.href);
@@ -407,7 +426,9 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
       console.log("[DOMAIN]history/index - push 2. no matched route", name);
       return;
     }
-    const unique_key = [route1.pathname, query_stringify(query)].filter(Boolean).join("?");
+    const unique_key = [route1.pathname, query_stringify(query)]
+      .filter(Boolean)
+      .join("?");
     if (unique_key === this.$router.href) {
       // console.log("[DOMAIN]history/index - push target url is", uniqueKey, "and cur href is", this.$router.href);
       return;
@@ -438,7 +459,10 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
       return m;
     })();
     if (!route) {
-      console.log("[DOMAIN]history/index - push 2. no matched route", unique_key);
+      console.log(
+        "[DOMAIN]history/index - push 2. no matched route",
+        unique_key,
+      );
       return null;
     }
     const created = new RouteViewCore({
@@ -468,7 +492,10 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
     // }
     this.stacks = this.stacks.slice(0, this.cursor + 1).concat(created);
     this.cursor += 1;
-    created.parent.showView(created, { reason: "show_sibling", destroy: false });
+    created.parent.showView(created, {
+      reason: "show_sibling",
+      destroy: false,
+    });
     this.emit(Events.RouteChange, {
       reason: "push",
       view: created,
@@ -594,5 +621,3 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
     return this.on(Events.StateChange, handler);
   }
 }
-
-export { connect as connectWeb } from "./connect.web";

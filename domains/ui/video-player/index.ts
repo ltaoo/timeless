@@ -2,7 +2,7 @@
  * @file 播放器
  */
 import { BaseDomain, Handler } from "@/domains/base";
-import { Application } from "@/domains/app";
+import { ApplicationModel } from "@/domains/app";
 import { Result } from "@/domains/result/index";
 
 /** 影片分辨率 */
@@ -110,7 +110,7 @@ type TheTypesOfEvents = {
 };
 
 type PlayerProps = {
-  app: Application<any>;
+  app: ApplicationModel<any>;
 };
 type PlayerState = {
   playing: boolean;
@@ -135,7 +135,7 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
   metadata: { url: string; thumbnail?: string } | null = null;
   static Events = Events;
 
-  $app: Application<any>;
+  $app: ApplicationModel<any>;
 
   private _timer: null | number = null;
   _canPlay = false;
@@ -198,7 +198,12 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  constructor(props: { unique_id?: string; app: Application<any>; volume?: number; rate?: number }) {
+  constructor(props: {
+    unique_id?: string;
+    app: ApplicationModel<any>;
+    volume?: number;
+    rate?: number;
+  }) {
     super(props);
 
     const { app, volume, rate } = props;
@@ -213,7 +218,12 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
 
   bindAbstractNode(node: VideoPlayerCore["_abstractNode"]) {
     this._abstractNode = node;
-    console.log("[DOMAIN]player/index - bindAbstractNode", this.unique_id, node, this.pendingRate);
+    console.log(
+      "[DOMAIN]player/index - bindAbstractNode",
+      this.unique_id,
+      node,
+      this.pendingRate,
+    );
     if (this._abstractNode) {
       if (this.pendingRate) {
         this.changeRate(this.pendingRate);
@@ -226,7 +236,11 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
   hasPlayed = false;
   /** 开始播放 */
   async play() {
-    console.log("[DOMAIN]player/index - play", this._abstractNode, this.playing);
+    console.log(
+      "[DOMAIN]player/index - play",
+      this._abstractNode,
+      this.playing,
+    );
     if (this._abstractNode === null) {
       return;
     }
@@ -294,7 +308,11 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 改变当前进度 */
   setCurrentTime(currentTime: number | null = 0) {
-    console.log("[DOMAIN]player/index - setCurrentTime", this._abstractNode, currentTime);
+    console.log(
+      "[DOMAIN]player/index - setCurrentTime",
+      this._abstractNode,
+      currentTime,
+    );
     if (this._abstractNode === null) {
       return;
     }
@@ -359,7 +377,11 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
     }, 800);
   }
   toggleSubtitleVisible() {
-    console.log("[DOMAIN]player/index - toggleSubtitleVisible", this._abstractNode, this._subtitleVisible);
+    console.log(
+      "[DOMAIN]player/index - toggleSubtitleVisible",
+      this._abstractNode,
+      this._subtitleVisible,
+    );
     if (!this._abstractNode) {
       return;
     }
@@ -411,7 +433,12 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
   }
   _pending_url = "";
   load(url: string) {
-    console.log("[DOMAIN]player - load", this.unique_id, url, this._abstractNode);
+    console.log(
+      "[DOMAIN]player - load",
+      this.unique_id,
+      url,
+      this._abstractNode,
+    );
     this._canPlay = false;
     if (!this._abstractNode) {
       this._pending_url = url;
@@ -456,7 +483,13 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
     return this._abstractNode.$node;
   }
   updated = false;
-  handleTimeUpdate({ currentTime, duration }: { currentTime: number; duration: number }) {
+  handleTimeUpdate({
+    currentTime,
+    duration,
+  }: {
+    currentTime: number;
+    duration: number;
+  }) {
     // if (!this.startLoad) {
     //   this.emit(Events.BeforeLoadStart);
     // }
@@ -508,7 +541,11 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, { ...this.state });
   }
   setMounted() {
-    console.log("[DOMAIN]player/index - setMounted - before", this._mounted, this._pending_url);
+    console.log(
+      "[DOMAIN]player/index - setMounted - before",
+      this._mounted,
+      this._pending_url,
+    );
     this._mounted = true;
     if (this._pending_url && this._abstractNode) {
       const u = this._pending_url;
@@ -519,7 +556,11 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.Ready);
   }
   setConnected() {
-    console.log("[DOMAIN]player/index - setConnected - before", this._mounted, this._pending_url);
+    console.log(
+      "[DOMAIN]player/index - setConnected - before",
+      this._mounted,
+      this._pending_url,
+    );
     this._mounted = true;
     if (this._pending_url && this._abstractNode) {
       const u = this._pending_url;
@@ -540,7 +581,13 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
       this.emit(Events.ExitFullscreen);
     }
   }
-  handlePause({ currentTime, duration }: { currentTime: number; duration: number }) {
+  handlePause({
+    currentTime,
+    duration,
+  }: {
+    currentTime: number;
+    duration: number;
+  }) {
     this.emit(Events.Pause, { currentTime, duration });
   }
   handleVolumeChange(cur_volume: number) {
@@ -570,7 +617,11 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
       duration: this._duration,
     });
   }
-  handleLoadedmetadata(values: { width: number; height: number; duration: number }) {
+  handleLoadedmetadata(values: {
+    width: number;
+    height: number;
+    duration: number;
+  }) {
     const { width, height } = values;
     this.setSize({ width, height });
     this._duration = values.duration;
@@ -602,7 +653,9 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
   onReady(handler: Handler<TheTypesOfEvents[Events.Ready]>) {
     return this.on(Events.Ready, handler);
   }
-  onBeforeStartLoad(handler: Handler<TheTypesOfEvents[Events.BeforeLoadStart]>) {
+  onBeforeStartLoad(
+    handler: Handler<TheTypesOfEvents[Events.BeforeLoadStart]>,
+  ) {
     return this.on(Events.BeforeLoadStart, handler);
   }
   onLoaded(handler: Handler<TheTypesOfEvents[Events.Loaded]>) {
@@ -638,16 +691,24 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
   onPause(handler: Handler<TheTypesOfEvents[Events.Pause]>) {
     return this.on(Events.Pause, handler);
   }
-  onResolutionChange(handler: Handler<TheTypesOfEvents[Events.ResolutionChange]>) {
+  onResolutionChange(
+    handler: Handler<TheTypesOfEvents[Events.ResolutionChange]>,
+  ) {
     return this.on(Events.ResolutionChange, handler);
   }
-  onCanSetCurrentTime(handler: Handler<TheTypesOfEvents[Events.CanSetCurrentTime]>) {
+  onCanSetCurrentTime(
+    handler: Handler<TheTypesOfEvents[Events.CanSetCurrentTime]>,
+  ) {
     return this.on(Events.CanSetCurrentTime, handler);
   }
-  beforeAdjustCurrentTime(handler: Handler<TheTypesOfEvents[Events.BeforeAdjustCurrentTime]>) {
+  beforeAdjustCurrentTime(
+    handler: Handler<TheTypesOfEvents[Events.BeforeAdjustCurrentTime]>,
+  ) {
     return this.on(Events.BeforeAdjustCurrentTime, handler);
   }
-  afterAdjustCurrentTime(handler: Handler<TheTypesOfEvents[Events.AfterAdjustCurrentTime]>) {
+  afterAdjustCurrentTime(
+    handler: Handler<TheTypesOfEvents[Events.AfterAdjustCurrentTime]>,
+  ) {
     return this.on(Events.AfterAdjustCurrentTime, handler);
   }
   onPlay(handler: Handler<TheTypesOfEvents[Events.Play]>) {
@@ -656,10 +717,14 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
   onSourceLoaded(handler: Handler<TheTypesOfEvents[Events.SourceLoaded]>) {
     return this.on(Events.SourceLoaded, handler);
   }
-  onTargetTimeChange(handler: Handler<TheTypesOfEvents[Events.TargetTimeChange]>) {
+  onTargetTimeChange(
+    handler: Handler<TheTypesOfEvents[Events.TargetTimeChange]>,
+  ) {
     return this.on(Events.TargetTimeChange, handler);
   }
-  onCurrentTimeChange(handler: Handler<TheTypesOfEvents[Events.CurrentTimeChange]>) {
+  onCurrentTimeChange(
+    handler: Handler<TheTypesOfEvents[Events.CurrentTimeChange]>,
+  ) {
     return this.on(Events.CurrentTimeChange, handler);
   }
   onEnd(handler: Handler<TheTypesOfEvents[Events.End]>) {
@@ -678,5 +743,3 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
     return this.on(Events.Connected, handler);
   }
 }
-
-export { connect as connectWeb } from "./connect.web";

@@ -1,20 +1,46 @@
 {
   "name": "timeless",
   "version": "1.0.0",
+  "exports": {
+    ".": {
+      "types": "./dist/dts/core/domains/index.d.ts",
+      "import": "./dist/timeless.core.mjs",
+      "require": "./dist/timeless.core.umd.min.js"
+    },
+    "./web": {
+      "types": "./dist/dts/web/provider/web/index.d.ts",
+      "import": "./dist/timeless.web.mjs",
+      "require": "./dist/timeless.web.umd.min.js"
+    },
+    "./weapp": {
+      "types": "./dist/dts/weapp/provider/weapp/index.d.ts",
+      "import": "./dist/timeless.weapp.mjs",
+      "require": "./dist/timeless.weapp.umd.min.js"
+    }
+  },
   "main": "dist/timeless.core.umd.min.js",
-  "types": "dist/timeless.core.d.ts",
+  "types": "./dist/dts/core/domains/index.d.ts",
   "files": [
     "dist/"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run build:core && npm run build:web && npm run build:weapp && npm run build:types",
-    "build:core": "esbuild domains/core/index.ts --bundle --format=iife --global-name=Timeless --target=es2015 --platform=browser --outfile=dist/timeless.core.umd.min.js --minify && echo 'window.Timeless=Timeless;' >> dist/timeless.core.umd.min.js",
-    "build:web": "esbuild domains/web/index.ts --bundle --format=iife --global-name=TimelessWeb --target=es2015 --platform=browser --outfile=dist/timeless.web.umd.min.js --minify && echo 'window.TimelessWeb=TimelessWeb;' >> dist/timeless.web.umd.min.js",
-    "build:weapp": "esbuild domains/weapp/index.ts --bundle --format=iife --global-name=TimelessWeapp --target=es2015 --platform=browser --outfile=dist/timeless.weapp.umd.min.js --minify",
-    "build:types": "npm run build:types:core && npm run build:types:web",
-    "build:types:core": "tsc -p tsconfig.json --outDir dist/types/core",
-    "build:types:web": "tsc -p tsconfig.json --outDir dist/types/web",
+    "build:core": "esbuild domains/index.ts --bundle --format=iife --global-name=Timeless --target=es2015 --platform=browser --outfile=dist/timeless.core.umd.min.js --minify && echo 'window.Timeless=Timeless;' >> dist/timeless.core.umd.min.js",
+    "build:web": "esbuild domains/provider/web/index.ts --bundle --format=iife --global-name=TimelessWeb --target=es2015 --platform=browser --outfile=dist/timeless.web.umd.min.js --minify && echo 'window.TimelessWeb=TimelessWeb;' >> dist/timeless.web.umd.min.js",
+    "build:weapp": "esbuild domains/provider/weapp/index.ts --bundle --format=iife --global-name=TimelessWeapp --target=es2015 --platform=browser --outfile=dist/timeless.weapp.umd.min.js --minify && echo 'window.TimelessWeapp=TimelessWeapp;' >> dist/timeless.weapp.umd.min.js",
+    "build:types": "npm run build:types:core && npm run build:types:web && npm run build:types:weapp && npm run merge:types && npm run merge:types:web && npm run merge:types:weapp",
+    "build:types:core": "tsc -p tsconfig.core.json --outDir dist/dts/core",
+    "build:types:web": "tsc -p tsconfig.web.json --outDir dist/dts/web",
+    "build:types:weapp": "tsc -p tsconfig.weapp.json --outDir dist/dts/weapp",
+    "merge:types": "echo 'declare var Timeless: any;' >> dist/dts/core/domains/index.d.ts",
+    "merge:types:web": "echo 'declare var TimelessWeb: any;' >> dist/dts/web/domains/provider/web/index.d.ts",
+    "merge:types:weapp": "echo 'declare var TimelessWeapp: any;' >> dist/dts/weapp/domains/provider/weapp/index.d.ts",
+    "build:types:publish": "npm run build:types && npm run copy:types:core && npm run copy:types:web && npm run copy:types:weapp && npm run gen:types:index",
+    "copy:types:core": "mkdir -p types/core && cp -r dist/dts/core/domains types/core/",
+    "copy:types:web": "mkdir -p types/web && cp -r dist/dts/web/domains types/web/",
+    "copy:types:weapp": "mkdir -p types/weapp && cp -r dist/dts/weapp/domains types/weapp/",
+    "gen:types:index": "echo '/// <reference path=\"./core/index.d.ts\" />\n/// <reference path=\"./web/index.d.ts\" />\n/// <reference path=\"./weapp/index.d.ts\" />\nexport * from \"./core\";\nexport * from \"./web\";\nexport * from \"./weapp\";' > types/index.d.ts",
     "build:watch": "tsup --watch"
   },
   "keywords": [],
@@ -34,6 +60,7 @@
     "@types/node": "^25.0.9",
     "@types/qs": "^6.14.0",
     "@types/url-parse": "^1.4.11",
+    "dts-bundle-generator": "^9.5.1",
     "esbuild": "^0.27.2",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

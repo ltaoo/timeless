@@ -106,7 +106,9 @@ type ApplicationProps<T extends { storage: StorageCore<any> }> = {
   onReady?: () => void;
 };
 
-export class Application<T extends { storage: StorageCore<any> }> extends BaseDomain<TheTypesOfEvents> {
+export class ApplicationModel<
+  T extends { storage: StorageCore<any> },
+> extends BaseDomain<TheTypesOfEvents> {
   /** 用户 */
   $user: UserCore;
   $storage: T["storage"];
@@ -322,14 +324,18 @@ export class Application<T extends { storage: StorageCore<any> }> extends BaseDo
   onReady(handler: Handler<TheTypesOfEvents[Events.Ready]>) {
     return this.on(Events.Ready, handler);
   }
-  onDeviceSizeChange(handler: Handler<TheTypesOfEvents[Events.DeviceSizeChange]>) {
+  onDeviceSizeChange(
+    handler: Handler<TheTypesOfEvents[Events.DeviceSizeChange]>,
+  ) {
     return this.on(Events.DeviceSizeChange, handler);
   }
   onUpdate(handler: Handler<TheTypesOfEvents[Events.ForceUpdate]>) {
     return this.on(Events.ForceUpdate, handler);
   }
   /** 平台相关全局事件 */
-  onOrientationChange(handler: Handler<TheTypesOfEvents[Events.OrientationChange]>) {
+  onOrientationChange(
+    handler: Handler<TheTypesOfEvents[Events.OrientationChange]>,
+  ) {
     return this.on(Events.OrientationChange, handler);
   }
   onResize(handler: Handler<TheTypesOfEvents[Events.Resize]>) {
@@ -371,6 +377,3 @@ export class Application<T extends { storage: StorageCore<any> }> extends BaseDo
     return this.on(Events.Error, handler);
   }
 }
-
-export { connect as connectWeb } from "./connect.web";
-export * from "./platform/weapp";

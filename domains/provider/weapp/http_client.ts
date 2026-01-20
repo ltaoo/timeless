@@ -1,6 +1,5 @@
 import { Result } from "@/domains/result/index";
-
-import { HttpClientCore } from "../../http_client";
+import { HttpClientCore } from "@/domains/http_client";
 
 export function connect(store: HttpClientCore) {
   let requests: { id: string; source: { abort: () => void } }[] = [];

@@ -1,4 +1,4 @@
-import { VideoPlayerCore } from "./index";
+import { VideoPlayerCore } from "@/domains/ui/video-player/index";
 
 /** 连接 $video 标签和 player 领域 */
 export function connect($video: HTMLVideoElement, player: VideoPlayerCore) {
@@ -140,7 +140,12 @@ export function connect($video: HTMLVideoElement, player: VideoPlayerCore) {
     },
     async load(url: string) {
       // console.log("[DOMAIN]player/connect - load", url, $video);
-      console.log("[]player.onUrlChange", url, $video.canPlayType("application/vnd.apple.mpegurl"), $video);
+      console.log(
+        "[]player.onUrlChange",
+        url,
+        $video.canPlayType("application/vnd.apple.mpegurl"),
+        $video,
+      );
       if ($video.canPlayType("application/vnd.apple.mpegurl")) {
         $video.src = url;
         $video.load();

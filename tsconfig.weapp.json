@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist/dts/weapp"
+  },
+  "include": ["domains/provider/weapp/index.ts", "domains/**/*.ts"],
+  "exclude": ["node_modules", "platform", "biz", "dist"]
+}

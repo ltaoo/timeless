@@ -1,13 +1,16 @@
-import { Application } from "@/domains/app/index";
+import { ApplicationModel } from "@/domains/app/index";
 import { StorageCore } from "@/domains/storage/index";
 
-export function connect<T extends { storage: StorageCore<any> }>(app: Application<T>) {
+export function connect<T extends { storage: StorageCore<any> }>(
+  app: ApplicationModel<T>,
+) {
   // const { router } = app;
   // const ownerDocument = globalThis.document;
   // app.getComputedStyle = (el: HTMLElement) => {
   //   return window.getComputedStyle(el);
   // };
   app.setTitle = (title: string) => {
+    // @ts-ignore
     wx.setNavigationBarTitle({
       title,
     });
@@ -25,6 +28,7 @@ export function connect<T extends { storage: StorageCore<any> }>(app: Applicatio
   // });
   // window.addEventListener("beforeunload", (event) => {
   // });
+  // @ts-ignore
   wx.onWindowResize((screen) => {
     const {
       size: { windowWidth, windowHeight },

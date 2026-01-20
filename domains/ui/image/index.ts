@@ -78,7 +78,14 @@ export class ImageCore extends BaseDomain<TheTypesOfEvents> {
   constructor(props: Partial<{}> & ImageProps) {
     super();
 
-    const { unique_id, width = 200, height = 200, src, scale, fit = "cover" } = props;
+    const {
+      unique_id,
+      width = 200,
+      height = 200,
+      src,
+      scale,
+      fit = "cover",
+    } = props;
     this.width = width;
     this.height = height;
     this.src = "";
@@ -152,8 +159,6 @@ export class ImageCore extends BaseDomain<TheTypesOfEvents> {
     return this.on(Events.Error, handler);
   }
 }
-
-export { connect as connectImage } from "./connect.web";
 
 export class ImageInListCore extends BaseDomain<TheTypesOfEvents> {
   /** 列表中一类多个按钮 */

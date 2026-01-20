@@ -54,7 +54,10 @@ type InputState<T> = {
   autoComplete: boolean;
 };
 
-export class InputCore<T> extends BaseDomain<TheTypesOfEvents<T>> implements ValueInputInterface<T> {
+export class InputCore<T>
+  extends BaseDomain<TheTypesOfEvents<T>>
+  implements ValueInputInterface<T>
+{
   shape = "input" as const;
   defaultValue: T;
   value: T;
@@ -272,7 +275,9 @@ type TheTypesInListOfEvents<K extends string, T> = {
   [Events.StateChange]: InputProps<T>;
 };
 
-export class InputInListCore<K extends string, T> extends BaseDomain<TheTypesInListOfEvents<K, T>> {
+export class InputInListCore<K extends string, T> extends BaseDomain<
+  TheTypesInListOfEvents<K, T>
+> {
   defaultValue: T;
 
   list: InputCore<T>[] = [];
@@ -290,7 +295,7 @@ export class InputInListCore<K extends string, T> extends BaseDomain<TheTypesInL
     unique_id: K,
     options: {
       defaultValue?: T;
-    } = {}
+    } = {},
   ) {
     const { defaultValue = this.defaultValue } = options;
     // console.log("[DOMAIN]input/index - bind", unique_id, this.cached);
@@ -347,9 +352,9 @@ export class InputInListCore<K extends string, T> extends BaseDomain<TheTypesInL
   onChange(handler: Handler<TheTypesInListOfEvents<K, T>[Events.Change]>) {
     this.on(Events.Change, handler);
   }
-  onStateChange(handler: Handler<TheTypesInListOfEvents<K, T>[Events.StateChange]>) {
+  onStateChange(
+    handler: Handler<TheTypesInListOfEvents<K, T>[Events.StateChange]>,
+  ) {
     this.on(Events.StateChange, handler);
   }
 }
-
-export { connect as connectInput } from "./connect.web";

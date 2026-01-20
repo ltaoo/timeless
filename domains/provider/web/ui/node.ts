@@ -1,4 +1,4 @@
-import { NodeCore } from ".";
+import { NodeCore } from "@/domains/ui/node";
 
 export function connect($img: HTMLImageElement, store: NodeCore) {
   const io = new IntersectionObserver(
@@ -10,7 +10,7 @@ export function connect($img: HTMLImageElement, store: NodeCore) {
         }
       });
     },
-    { threshold: 0.4 }
+    { threshold: 0.4 },
   );
   io.observe($img);
 }
