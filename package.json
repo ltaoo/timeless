@@ -1,18 +1,27 @@
 {
   "name": "timeless",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.global.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsup",
+    "build:watch": "tsup --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "mitt": "^3.0.1"
+    "dayjs": "^1.11.19",
+    "mitt": "^3.0.1",
+    "qs": "^6.14.1",
+    "tailwind-merge": "^3.4.0",
+    "url-parse": "^1.5.10"
   },
   "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   }
 }
