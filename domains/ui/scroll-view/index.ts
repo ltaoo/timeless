@@ -502,3 +502,5 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     return this.on(Events.Mounted, handler);
   }
 }
+
+export * from "./utils";

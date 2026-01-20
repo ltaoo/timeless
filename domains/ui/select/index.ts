@@ -554,3 +554,5 @@ export class SelectInListCore<K extends string, T> extends BaseDomain<TheTypesIn
     this.on(Events.StateChange, handler);
   }
 }
+
+export { clamp } from "./utils";

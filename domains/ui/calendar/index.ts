@@ -199,3 +199,4 @@ export function CalendarCore(props: CalendarCoreProps) {
 }
 
 export type CalendarCore = ReturnType<typeof CalendarCore>;
+export * from "./utils";

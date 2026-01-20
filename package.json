@@ -5,7 +5,7 @@
   "types": "dist/timeless.umd.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild domains/index.ts --bundle --format=iife --target=es2015 --platform=browser --outfile=dist/timeless.umd.min.js --minify && tsc --project tsconfig.declaration.json && node scripts/generate-dts.js",
+    "build": "esbuild domains/index.ts --bundle --format=iife --global-name=Timeless --target=es2015 --platform=browser --outfile=dist/timeless.umd.min.js --minify && echo 'window.Timeless=Timeless;' >> dist/timeless.umd.min.js",
     "build:watch": "tsup --watch"
   },
   "keywords": [],

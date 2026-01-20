@@ -9,6 +9,7 @@ import { HistoryCore } from "@/domains/history";
 import { query_stringify } from "@/utils/index";
 
 import { buildUrl } from "./utils";
+import { build, OriginalRouteConfigure, PageKeysType, PathnameKey, RouteConfig } from "./utils";
 
 enum Events {
   /** 子视图改变（数量 */
@@ -520,3 +521,6 @@ export function RouteMenusModel<T extends { title: string; url?: unknown; onClic
     },
   };
 }
+
+export { build, buildUrl };
+export type { OriginalRouteConfigure, PageKeysType, PathnameKey, RouteConfig };

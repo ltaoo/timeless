@@ -851,6 +851,7 @@ export * from "./storage";
 export * from "./system";
 export * from "./timer";
 export * from "./video_player";
+export declare const Timeless: {};
 
 
 // From domains/list/constants.d.ts

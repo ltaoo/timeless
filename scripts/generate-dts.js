@@ -25,5 +25,17 @@ const declarations = dtsFiles.map(file => {
 }).join('\n\n');
 
 fs.writeFileSync(outputFile, `declare namespace Timeless {\n${declarations}\n}\nexport as namespace Timeless;`);
+
 fs.rmSync(tempDir, { recursive: true, force: true });
+
+const jsFile = 'dist/timeless.umd.min.js';
+let jsContent = fs.readFileSync(jsFile, 'utf8');
+
+jsContent = jsContent.replace(
+  /;\}\)\(\);$/,
+  ';\nif (typeof window !== "undefined") { window.Timeless = Timeless; } else if (typeof global !== "undefined") { global.Timeless = Timeless; } else if (typeof self !== "undefined") { self.Timeless = Timeless; }\n})();'
+);
+
+fs.writeFileSync(jsFile, jsContent);
+
 

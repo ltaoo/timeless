@@ -329,3 +329,5 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
     return this.on(Events.ResponseChange, handler);
   }
 }
+
+export * from "./utils";
