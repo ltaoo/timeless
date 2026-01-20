@@ -1,8 +1,10 @@
-import { findInnerTextNode, findNodeByPath, getNodePath } from "./op.dom";
-import { SlatePoint } from "./point";
-import { SlateEditorModel } from "./slate";
-import { SlateDescendant, SlateDescendantType } from "./types";
-import { isElement, isText } from "./utils/node";
+import {
+  findInnerTextNode,
+  findNodeByPath,
+  getNodePath,
+} from "@/domains/slate/op.dom";
+import { SlatePoint } from "@/domains/slate/point";
+import { SlateEditorModel } from "@/domains/slate/slate";
 
 export function connect(vm: SlateEditorModel, $input: Element) {
   document.addEventListener("selectionchange", (event) => {
@@ -27,8 +29,12 @@ export function connect(vm: SlateEditorModel, $input: Element) {
       return;
     }
     const range = selection.getRangeAt(0);
-    const $start = findInnerTextNode(range.startContainer.parentNode) as HTMLDivElement | null;
-    const $end = findInnerTextNode(range.endContainer.parentNode) as HTMLDivElement | null;
+    const $start = findInnerTextNode(
+      range.startContainer.parentNode,
+    ) as HTMLDivElement | null;
+    const $end = findInnerTextNode(
+      range.endContainer.parentNode,
+    ) as HTMLDivElement | null;
     // console.log("[]getCaretPosition - ", range.startContainer, $start, $end);
     if (!$start || !$end) {
       return;
@@ -59,7 +65,10 @@ export function connect(vm: SlateEditorModel, $input: Element) {
       collapsed: range.collapsed,
     });
   };
-  vm.methods.setCaretPosition = function (arg: { start: SlatePoint; end: SlatePoint }) {
+  vm.methods.setCaretPosition = function (arg: {
+    start: SlatePoint;
+    end: SlatePoint;
+  }) {
     const $node_start = findNodeByPath($input as Element, arg.start.path);
     const $node_end = findNodeByPath($input as Element, arg.start.path);
     if (!$node_start || !$node_end) {
