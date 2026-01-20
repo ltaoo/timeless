@@ -1,11 +1,11 @@
 {
   "name": "timeless",
   "version": "1.0.0",
-  "main": "dist/index.global.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/timeless.umd.min.js",
+  "types": "dist/timeless.umd.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsup",
+    "build": "esbuild domains/index.ts --bundle --format=iife --target=es2015 --platform=browser --outfile=dist/timeless.umd.min.js --minify && tsc --project tsconfig.declaration.json && node scripts/generate-dts.js",
     "build:watch": "tsup --watch"
   },
   "keywords": [],
@@ -20,6 +20,9 @@
     "url-parse": "^1.5.10"
   },
   "devDependencies": {
+    "@types/qs": "^6.14.0",
+    "@types/url-parse": "^1.4.11",
+    "esbuild": "^0.27.2",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"

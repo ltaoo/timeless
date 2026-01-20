@@ -16,7 +16,7 @@ function uid_factory() {
 const uid = uid_factory();
 
 // 这里必须给 Tip 显示声明值，否则默认为 0，会和其他地方声明的 Events 第一个 Key 冲突
-enum BaseEvents {
+export enum BaseEvents {
   Loading = "__loading",
   Destroy = "__destroy",
 }

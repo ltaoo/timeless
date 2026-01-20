@@ -1,5 +1,8 @@
 import { BaseDomain, Handler } from "@/domains/base";
 
+import * as Utils from "./utils";
+export { Utils };
+
 enum Events {
   StateChange,
 }
