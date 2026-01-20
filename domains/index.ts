@@ -13,5 +13,7 @@ export * as rutil from "./request";
 export * from "./result";
 export * from "./storage";
 export * from "./system";
+export * from "./slate/slate";
+export * from "./shortcut/shortcut";
 
 export * from "./base";

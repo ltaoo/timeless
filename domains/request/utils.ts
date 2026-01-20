@@ -2,7 +2,7 @@
  * @file 构建 http 请求载荷
  */
 import { Result, UnpackedResult } from "@/domains/result/index";
-import { Unpacked } from "@/types/index";
+import { Unpacked } from "@/domains/types/index";
 import { query_stringify } from "@/utils/index";
 
 export type RequestPayload<T> = {
@@ -20,9 +20,14 @@ export type RequestPayload<T> = {
  * GetRespTypeFromRequestPayload
  * T extends RequestPayload
  */
-export type UnpackedRequestPayload<T> = NonNullable<T extends RequestPayload<infer U> ? (U extends null ? U : U) : T>;
-export type RequestedResource<T extends (...args: any[]) => any> = UnpackedResult<Unpacked<ReturnType<T>>>;
-export type TmpRequestResp<T extends (...args: any[]) => any> = Result<UnpackedRequestPayload<RequestedResource<T>>>;
+export type UnpackedRequestPayload<T> = NonNullable<
+  T extends RequestPayload<infer U> ? (U extends null ? U : U) : T
+>;
+export type RequestedResource<T extends (...args: any[]) => any> =
+  UnpackedResult<Unpacked<ReturnType<T>>>;
+export type TmpRequestResp<T extends (...args: any[]) => any> = Result<
+  UnpackedRequestPayload<RequestedResource<T>>
+>;
 
 let posterHandler: null | ((v: RequestPayload<any>) => void) = null;
 export function onCreatePostPayload(h: (v: RequestPayload<any>) => void) {
@@ -47,7 +52,7 @@ export const request = {
     extra: Partial<{
       headers: Record<string, string | number>;
       // defaultResponse: T;
-    }> = {}
+    }> = {},
   ) {
     // console.log("GET", endpoint);
     const { headers } = extra;
@@ -70,7 +75,7 @@ export const request = {
     extra: Partial<{
       headers: Record<string, string | number>;
       // defaultResponse: T;
-    }> = {}
+    }> = {},
   ) {
     // console.log("POST", url);
     const { headers } = extra;
@@ -99,7 +104,7 @@ export function request_factory(
     debug: boolean;
     headers: Record<string, string | number>;
     process: (v: any) => any;
-  }> = {}
+  }> = {},
 ) {
   const { hostnames = {} } = opt;
   let _hostname = hostnames.prod || "";

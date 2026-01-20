@@ -1,7 +1,11 @@
+import { JSONObject } from "@/domains/types";
 import { query_stringify } from "@/utils";
-import { JSONObject } from "@/types";
 
-export function buildUrl(key: string, params?: JSONObject, query?: Parameters<typeof query_stringify>[0]) {
+export function buildUrl(
+  key: string,
+  params?: JSONObject,
+  query?: Parameters<typeof query_stringify>[0],
+) {
   const search = (() => {
     if (!query || Object.keys(query).length === 0) {
       return "";
@@ -44,7 +48,10 @@ export type OriginalRouteConfigure = Record<
     children?: OriginalRouteConfigure;
   }
 >;
-export type PageKeysType<T extends OriginalRouteConfigure, K = keyof T> = K extends keyof T & (string | number)
+export type PageKeysType<
+  T extends OriginalRouteConfigure,
+  K = keyof T,
+> = K extends keyof T & (string | number)
   ?
       | `${K}`
       | (T[K] extends object
@@ -83,13 +90,15 @@ function apply<T>(
   parent: null | {
     pathname: PathnameKey;
     name: T;
-  } = null
+  } = null,
 ): RouteConfig<T>[] {
   const routes = Object.keys(configure).map((key) => {
     const config = configure[key];
     const { title, pathname, options, children } = config;
     // 一个 hack 操作，过滤掉 root
-    const name = parent ? ([parent.name, key].filter(Boolean).join(".") as T) : key;
+    const name = parent
+      ? ([parent.name, key].filter(Boolean).join(".") as T)
+      : key;
     if (children) {
       const subRoutes = apply(children, {
         name,

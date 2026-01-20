@@ -6,7 +6,7 @@ import qs from "qs";
 import parse from "url-parse";
 
 import { BaseDomain, Handler } from "@/domains/base";
-import { JSONObject } from "@/types/index";
+import { JSONObject } from "@/domains/types/index";
 
 enum Events {
   PushState,
@@ -87,9 +87,16 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
   static prefix: string | null = null;
   static parse(url: string) {
     const { pathname, query: query_str, ...rest } = parse(url);
-    const query = qs.parse(query_str, { ignoreQueryPrefix: true }) as Record<string, string>;
+    const query = qs.parse(query_str, { ignoreQueryPrefix: true }) as Record<
+      string,
+      string
+    >;
     if (NavigatorCore.prefix && pathname.startsWith(NavigatorCore.prefix)) {
-      return { ...rest, query, pathname: pathname.replace(NavigatorCore.prefix, "") };
+      return {
+        ...rest,
+        query,
+        pathname: pathname.replace(NavigatorCore.prefix, ""),
+      };
     }
     return {
       ...rest,
@@ -147,7 +154,10 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
     const { host, pathname, href, search, origin } = location;
     // console.log("[DOMAIN]router - prepare", location);
     let clean_pathname = pathname;
-    if (NavigatorCore.prefix && NavigatorCore.prefix.match(/^\/[a-z0-9A-Z]{1,}/)) {
+    if (
+      NavigatorCore.prefix &&
+      NavigatorCore.prefix.match(/^\/[a-z0-9A-Z]{1,}/)
+    ) {
       clean_pathname = pathname.replace(NavigatorCore.prefix!, "");
     }
     this.setPathname(clean_pathname);
@@ -205,7 +215,9 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
     const { pathname: realTargetPathname, search } = r;
     this.setPrevPathname(this.pathname);
     this.setPathname(realTargetPathname);
-    this.histories[this.histories.length - 1] = { pathname: realTargetPathname };
+    this.histories[this.histories.length - 1] = {
+      pathname: realTargetPathname,
+    };
     this.emit(Events.ReplaceState, {
       from: this.prevPathname,
       path: realTargetPathname + search,
@@ -269,8 +281,21 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
   //   this.emit(Events.PopState, { type, href, pathname });
   // }
   /** 外部路由改变（点击浏览器前进、后退），作出响应 */
-  handlePopState({ type, pathname, href }: { type: string; href: string; pathname: string }) {
-    console.log("[DOMAIN]navigator/index - handlePopState", type, this.pathname, this.prevHistories);
+  handlePopState({
+    type,
+    pathname,
+    href,
+  }: {
+    type: string;
+    href: string;
+    pathname: string;
+  }) {
+    console.log(
+      "[DOMAIN]navigator/index - handlePopState",
+      type,
+      this.pathname,
+      this.prevHistories,
+    );
     if (type !== "popstate") {
       return;
     }
@@ -282,7 +307,8 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
       if (this.prevHistories.length === 0) {
         return false;
       }
-      const lastStackWhenBack = this.prevHistories[this.prevHistories.length - 1];
+      const lastStackWhenBack =
+        this.prevHistories[this.prevHistories.length - 1];
       // console.log("[DOMAIN]navigator -lastStackWhenBack", lastStackWhenBack.pathname, targetPathname);
       if (lastStackWhenBack?.pathname === targetPathname) {
         return true;
@@ -324,14 +350,16 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
     //   history.pushState(null, null, window.location.href);
     // }
     const theHistoryDestroy = this.histories[this.histories.length - 1];
-    this.prevHistories = this.prevHistories.concat([theHistoryDestroy]).filter(Boolean);
+    this.prevHistories = this.prevHistories
+      .concat([theHistoryDestroy])
+      .filter(Boolean);
     // this.prevHistories = [...this.histories];
     this.setPrevPathname(this.pathname);
     this.setPathname(targetPathname);
     // const cloneStacks = this.histories.slice(0, this.histories.length - 1);
     console.log(
       "[DOMAIN]navigator - before pop",
-      this.histories.map((h) => h.pathname)
+      this.histories.map((h) => h.pathname),
     );
     const cloneStacks = this.histories.slice(0, this.histories.length - 1);
     this.histories = cloneStacks.filter(Boolean);
@@ -370,12 +398,19 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
   onRelaunch(handler: Handler<TheTypesOfEvents[Events.Relaunch]>) {
     return this.on(Events.Relaunch, handler);
   }
-  onHistoriesChange(handler: Handler<TheTypesOfEvents[Events.HistoriesChange]>) {
+  onHistoriesChange(
+    handler: Handler<TheTypesOfEvents[Events.HistoriesChange]>,
+  ) {
     return this.on(Events.HistoriesChange, handler);
   }
 }
 
-export type RouteAction = "initialize" | "push" | "replace" | "back" | "forward";
+export type RouteAction =
+  | "initialize"
+  | "push"
+  | "replace"
+  | "back"
+  | "forward";
 
 function buildQuery(path: string) {
   const [, search] = path.split("?");
@@ -388,7 +423,10 @@ function buildQuery(path: string) {
 type ExtractDefinedKeys<T, K extends keyof T> = {
   [key in K]: T[key] extends undefined ? never : T[key];
 };
-function extractDefinedKeys<T extends any, K extends keyof T>(obj: T, keys: K[]): ExtractDefinedKeys<T, K> {
+function extractDefinedKeys<T extends any, K extends keyof T>(
+  obj: T,
+  keys: K[],
+): ExtractDefinedKeys<T, K> {
   const result = {} as ExtractDefinedKeys<T, K>;
   for (const key of keys) {
     // @ts-ignore

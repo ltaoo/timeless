@@ -6,7 +6,7 @@ import { BaseDomain, Handler } from "@/domains/base";
 import { UserCore } from "@/biz/user/index";
 import { StorageCore } from "@/domains/storage/index";
 import { Result } from "@/domains/result/index";
-import { JSONObject } from "@/types/index";
+import { JSONObject } from "@/domains/types/index";
 
 import { ThemeTypes } from "./types";
 

@@ -4,7 +4,7 @@ import relative_time from "dayjs/plugin/relativeTime";
 import { twMerge } from "tailwind-merge";
 
 import { Result } from "@/domains/result/index";
-import { JSONObject } from "@/types/index";
+import { JSONObject } from "@/domains/types/index";
 
 import { cn as nzhcn } from "./nzh";
 
@@ -41,7 +41,8 @@ export function uidFactory() {
   };
 }
 
-const defaultRandomAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const defaultRandomAlphabet =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 /**
  * 返回一个指定长度的随机字符串
  * @param length
@@ -66,7 +67,11 @@ export function padding_zero(str: number | string) {
   }
   return String(str);
 }
-export function remove_str(filename: string, index: number = 0, length: number) {
+export function remove_str(
+  filename: string,
+  index: number = 0,
+  length: number,
+) {
   return filename.slice(0, index) + filename.slice(index + length);
 }
 /**
@@ -198,7 +203,7 @@ export function seconds_to_hour_with_template(
     hours: (v: { value: number; text: string }) => string;
     minutes: (v: { value: number; text: string; hours: string }) => string;
     seconds: (v: { value: number; text: string }) => string;
-  }
+  },
 ) {
   const { hours, minutes, seconds } = seconds_to_hour_minute_seconds(value);
   let str = "";

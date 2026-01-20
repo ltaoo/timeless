@@ -1,6 +1,6 @@
 import { BaseDomain, Handler } from "@/domains/base";
 import { Result } from "@/domains/result/index";
-import { JSONObject } from "@/types/index";
+import { JSONObject } from "@/domains/types/index";
 import { query_stringify } from "@/utils/index";
 
 enum Events {
@@ -35,12 +35,17 @@ export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
   async get<T>(
     endpoint: unknown,
     query?: Record<string, string | number | undefined>,
-    extra: Partial<{ headers: Record<string, string | number>; id: string }> = {}
+    extra: Partial<{
+      headers: Record<string, string | number>;
+      id: string;
+    }> = {},
   ): Promise<Result<T>> {
     try {
       const h = this.hostname;
       const url =
-        typeof endpoint === "string" ? [h, endpoint, query ? "?" + query_stringify(query) : ""].join("") : endpoint;
+        typeof endpoint === "string"
+          ? [h, endpoint, query ? "?" + query_stringify(query) : ""].join("")
+          : endpoint;
       const payload = {
         url,
         method: "GET" as const,
@@ -64,10 +69,14 @@ export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
   async post<T>(
     endpoint: unknown,
     body?: JSONObject | FormData,
-    extra: Partial<{ headers: Record<string, string | number>; id: string }> = {}
+    extra: Partial<{
+      headers: Record<string, string | number>;
+      id: string;
+    }> = {},
   ): Promise<Result<T>> {
     const h = this.hostname;
-    const url = typeof endpoint === "string" ? [h, endpoint].join("") : endpoint;
+    const url =
+      typeof endpoint === "string" ? [h, endpoint].join("") : endpoint;
     try {
       const payload = {
         url,

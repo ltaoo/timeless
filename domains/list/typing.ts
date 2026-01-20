@@ -1,8 +1,6 @@
 /**
  * 请求原始响应
  */
-import { JSONObject } from "@/types";
-
 export type OriginalResponse = {
   list: unknown[];
 };
@@ -73,19 +71,25 @@ export interface Response<T> {
 }
 
 export type OriginalResponseProcessor = <T>(
-  originalResponse: OriginalResponse
+  originalResponse: OriginalResponse,
 ) => Omit<Response<T>, "dataSource" | "page" | "pageSize" | "noMore" | "error">;
 /**
  * 响应处理器
  */
 export type ResponseProcessor = <T>(
-  response: Omit<Response<T>, "dataSource" | "page" | "pageSize" | "noMore" | "error">,
-  originalResponse: OriginalResponse
+  response: Omit<
+    Response<T>,
+    "dataSource" | "page" | "pageSize" | "noMore" | "error"
+  >,
+  originalResponse: OriginalResponse,
 ) => Omit<Response<T>, "dataSource" | "page" | "pageSize" | "noMore" | "error">;
 /**
  * 参数处理器
  */
-export type ParamsProcessor = (params: FetchParams, currentParams: any) => FetchParams;
+export type ParamsProcessor = (
+  params: FetchParams,
+  currentParams: any,
+) => FetchParams;
 export interface ListProps<T> {
   /**
    * 是否打开 debug
@@ -105,7 +109,10 @@ export interface ListProps<T> {
    * 响应处理器
    * 建议在 service 函数中直接处理
    */
-  processor?: <T>(response: Response<T>, originalResponse: OriginalResponse | null) => Response<T>;
+  processor?: <T>(
+    response: Response<T>,
+    originalResponse: OriginalResponse | null,
+  ) => Response<T>;
   /**
    * 默认已存在的数据
    */
@@ -135,4 +142,6 @@ export interface ListProps<T> {
   afterSearch?: () => void;
 }
 
-export type TheItemTypeFromListCore<T extends { response: { dataSource: {}[] } }> = T["response"]["dataSource"][number];
+export type TheItemTypeFromListCore<
+  T extends { response: { dataSource: {}[] } },
+> = T["response"]["dataSource"][number];
