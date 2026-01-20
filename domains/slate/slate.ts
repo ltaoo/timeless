@@ -6,7 +6,7 @@ import { SlateText, SlateDescendant, SlateOperation, SlateDescendantType, SlateO
 import { SlatePoint, SlatePointModel } from "./point";
 import { SlateSelectionModel } from "./selection";
 import { SlateHistoryModel } from "./history";
-import { SlateNodeOperations, findNodeByPath } from "./op.node";
+import { SlateNodeOperations, findNodeByPathWithNode } from "./op.node";
 import { SlatePathModel } from "./path";
 import { depthFirstSearch } from "./utils/node";
 import { uidFactory } from "./utils/uid";
@@ -135,7 +135,7 @@ export function SlateEditorModel(props: { defaultValue?: SlateDescendant[] }) {
       }
       if (!SlatePathModel.isSameParent(start.path, end.path)) {
         // 跨行输入，先删除 start end 两行的选中部分，然后删除 start end 中间可能存在的行，然后合并 start end 行，最后插入输入的文本
-        const node2 = findNodeByPath(_children, end.path);
+        const node2 = findNodeByPathWithNode(_children, end.path);
         if (node2 && node2.type === SlateDescendantType.Text) {
           const ops: SlateOperation[] = [];
           const { op_start_delete_text, op_end_delete_text } = methods.removeContentCrossLines(
@@ -255,7 +255,7 @@ export function SlateEditorModel(props: { defaultValue?: SlateDescendant[] }) {
       if (!is_same_point) {
         // 选中部分选取，然后回车
         // @todo 还要考虑跨行的场景
-        const node = findNodeByPath(_children, start.path);
+        const node = findNodeByPathWithNode(_children, start.path);
         if (node && node.type === SlateDescendantType.Text) {
           const original_text = node.text;
           const deleted_text = original_text.substring(start.offset, end.offset);
@@ -414,7 +414,7 @@ export function SlateEditorModel(props: { defaultValue?: SlateDescendant[] }) {
       });
     },
     removeLines(start: SlatePoint) {
-      const node = findNodeByPath(_children, [start.path[0]]);
+      const node = findNodeByPathWithNode(_children, [start.path[0]]);
       if (node) {
         const op_remove_lines: SlateOperation = {
           type: SlateOperationType.RemoveLines,
@@ -634,7 +634,7 @@ export function SlateEditorModel(props: { defaultValue?: SlateDescendant[] }) {
             return;
           }
           if (node.text === "") {
-            const prev_node = findNodeByPath(_children, [start.path[0] - 1, 0]);
+            const prev_node = findNodeByPathWithNode(_children, [start.path[0] - 1, 0]);
             console.log("[]slate/slate - handleBackward - is removeLines?", prev_node);
             if (prev_node && prev_node.type === SlateDescendantType.Text && prev_node.text === "") {
               methods.removeLines(start);
@@ -746,7 +746,7 @@ export function SlateEditorModel(props: { defaultValue?: SlateDescendant[] }) {
     handleCompositionStart(event: CompositionStartEvent) {
       event.preventDefault();
       _is_composing = true;
-      const node = findNodeByPath(_children, ui.$selection.start.path);
+      const node = findNodeByPathWithNode(_children, ui.$selection.start.path);
       if (node) {
         _start_node_clone = { ...node };
       }
@@ -756,8 +756,8 @@ export function SlateEditorModel(props: { defaultValue?: SlateDescendant[] }) {
       const is_same_point = SlatePointModel.isSamePoint(ui.$selection.start, ui.$selection.end);
       if (!is_same_point) {
         // 在合成开始时，发现跨行选择文字，就提前处理好浏览器默认合并的行为，在 end 阶段就不会出问题了
-        const node1 = findNodeByPath(_children, ui.$selection.start.path);
-        const node2 = findNodeByPath(_children, ui.$selection.end.path);
+        const node1 = findNodeByPathWithNode(_children, ui.$selection.start.path);
+        const node2 = findNodeByPathWithNode(_children, ui.$selection.end.path);
         if (
           node1 &&
           node2 &&
@@ -805,7 +805,7 @@ export function SlateEditorModel(props: { defaultValue?: SlateDescendant[] }) {
           };
           ops.push(op_merge_node);
           _children = SlateNodeOperations.exec(_children, op_merge_node);
-          const node = findNodeByPath(_children, ui.$selection.start.path);
+          const node = findNodeByPathWithNode(_children, ui.$selection.start.path);
           if (node) {
             _start_node_clone = { ...node };
           }

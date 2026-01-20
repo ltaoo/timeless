@@ -1,6 +1,10 @@
 import { SlatePoint } from "./point";
-import { SlateEditorModel } from "./slate";
-import { SlateDescendant, SlateDescendantType, SlateOperation, SlateOperationType } from "./types";
+import {
+  SlateDescendant,
+  SlateDescendantType,
+  SlateOperation,
+  SlateOperationType,
+} from "./types";
 import { isElement, isText } from "./utils/node";
 import { deleteTextAtOffset, insertTextAtOffset } from "./utils/text";
 
@@ -9,8 +13,18 @@ export const SlateDOMOperations = {
     if (op.type !== SlateOperationType.InsertText) {
       return;
     }
-    const $target = findNodeByPath($input as Element, op.path) as Element | null;
-    console.log("[op.dom]insertText 1.", $target?.nodeName, op.path, op.offset, op.text, op.original_text);
+    const $target = findNodeByPathWithElement(
+      $input as Element,
+      op.path,
+    ) as Element | null;
+    console.log(
+      "[op.dom]insertText 1.",
+      $target?.nodeName,
+      op.path,
+      op.offset,
+      op.text,
+      op.original_text,
+    );
     if (!$target) {
       return;
     }
@@ -34,31 +48,54 @@ export const SlateDOMOperations = {
     if (op.type !== SlateOperationType.ReplaceText) {
       return;
     }
-    const $target = findNodeByPath($input as Element, op.path) as Element | null;
-    console.log("[op.dom]replaceText 1.", $target?.nodeName, op.path, op.offset, op.text, op.original_text);
+    const $target = findNodeByPathWithElement(
+      $input as Element,
+      op.path,
+    ) as Element | null;
+    console.log(
+      "[op.dom]replaceText 1.",
+      $target?.nodeName,
+      op.path,
+      op.offset,
+      op.text,
+      op.original_text,
+    );
     if (!$target) {
       return;
     }
-    $target.textContent = insertTextAtOffset(op.original_text, op.text, op.offset);
+    $target.textContent = insertTextAtOffset(
+      op.original_text,
+      op.text,
+      op.offset,
+    );
   },
   removeText($input: Element, op: SlateOperation) {
     if (op.type !== SlateOperationType.RemoveText) {
       return;
     }
-    const $target = findNodeByPath($input as Element, op.path) as Element | null;
-    console.log("[op.dom]deleteText 1. find $target", op.original_text, op.text);
+    const $target = findNodeByPathWithElement(
+      $input as Element,
+      op.path,
+    ) as Element | null;
+    console.log(
+      "[op.dom]deleteText 1. find $target",
+      op.original_text,
+      op.text,
+    );
     if (!$target || op.ignore) {
       return;
     }
     const content = getNodeText($target);
     console.log("[op.dom]deleteText 2. content in current node", content);
-    $target.innerHTML = renderHTML(deleteTextAtOffset(content, op.text, op.offset));
+    $target.innerHTML = renderHTML(
+      deleteTextAtOffset(content, op.text, op.offset),
+    );
   },
   splitNode($input: Element, op: SlateOperation) {
     if (op.type !== SlateOperationType.SplitNode) {
       return;
     }
-    const $node = findNodeByPath($input, op.path);
+    const $node = findNodeByPathWithElement($input, op.path);
     if (!$node) {
       return;
     }
@@ -80,8 +117,14 @@ export const SlateDOMOperations = {
     if (op.type !== SlateOperationType.MergeNode) {
       return;
     }
-    const $prev = findNodeByPath($input as Element, op.path) as Element | null;
-    const $cur = findNodeByPath($input as Element, op.end.path) as Element | null;
+    const $prev = findNodeByPathWithElement(
+      $input as Element,
+      op.path,
+    ) as Element | null;
+    const $cur = findNodeByPathWithElement(
+      $input as Element,
+      op.end.path,
+    ) as Element | null;
     console.log("[op.dom]mergeNode 0. find nodes", $prev, $cur);
     // 输入中文，在合成过程，当前行的内容和下一行就已经被浏览器合并了，而且还是 <span>text1</span>text2 这样
     if (!$prev || !$cur) {
@@ -110,7 +153,7 @@ export const SlateDOMOperations = {
       return;
     }
     //     console.log("[op.dom]removeLines - ", op.path, op.node);
-    const $target = findNodeByPath($input as Element, [op.path[0]]);
+    const $target = findNodeByPathWithElement($input as Element, [op.path[0]]);
     if (!$target) {
       return;
     }
@@ -164,7 +207,10 @@ export const SlateDOMOperations = {
   },
 };
 
-export function renderText(node: SlateDescendant & { key?: number }, extra: { text?: boolean } = {}): Element | null {
+export function renderText(
+  node: SlateDescendant & { key?: number },
+  extra: { text?: boolean } = {},
+): Element | null {
   if (node.type === SlateDescendantType.Text) {
     const $text = document.createElement("span");
     $text.setAttribute("data-slate-node", "text");
@@ -182,7 +228,7 @@ export function renderText(node: SlateDescendant & { key?: number }, extra: { te
 }
 export function renderElement(
   node: SlateDescendant & { key?: number },
-  extra: { text?: boolean } = {}
+  extra: { text?: boolean } = {},
 ): Element | null {
   if (node.type !== SlateDescendantType.Paragraph) {
     return null;
@@ -216,7 +262,11 @@ export function renderElement(
   $node.appendChild($tmp);
   return $node;
 }
-export function buildInnerHTML(nodes: SlateDescendant[], parents: number[] = [], level = 0) {
+export function buildInnerHTML(
+  nodes: SlateDescendant[],
+  parents: number[] = [],
+  level = 0,
+) {
   // let lines: Element[] = [];
   const $tmp = document.createDocumentFragment();
   for (let i = 0; i < nodes.length; i += 1) {
@@ -265,7 +315,10 @@ export function renderHTML(v: string) {
   return v;
 }
 
-export function renderNodeThenInsertLine($input: Element, op: { node: SlateDescendant; path: number[] }) {
+export function renderNodeThenInsertLine(
+  $input: Element,
+  op: { node: SlateDescendant; path: number[] },
+) {
   console.log("[SlateView]renderNodeThenInsertLine - ", op.node, op.path);
   const $node = renderElement(op.node);
   if (!$node) {
@@ -275,11 +328,18 @@ export function renderNodeThenInsertLine($input: Element, op: { node: SlateDesce
   if (idx > $input.children.length - 1) {
     $input.appendChild($node);
   } else {
-    console.log("[SlateView]renderNodeThenInsertLine - insertBefore", $node, $input.childNodes[idx]);
+    console.log(
+      "[SlateView]renderNodeThenInsertLine - insertBefore",
+      $node,
+      $input.childNodes[idx],
+    );
     $input.insertBefore($node, $input.children[idx]);
   }
 }
-export function renderLineNodesThenInsert($input: Element, op: { node: SlateDescendant[]; path: number[] }) {
+export function renderLineNodesThenInsert(
+  $input: Element,
+  op: { node: SlateDescendant[]; path: number[] },
+) {
   console.log("[SlateView]renderNodeThenInsertLine - ", op.node, op.path);
   const $tmp = document.createDocumentFragment();
   for (let i = 0; i < op.node.length; i += 1) {
@@ -292,7 +352,10 @@ export function renderLineNodesThenInsert($input: Element, op: { node: SlateDesc
   if (idx > $input.children.length - 1) {
     $input.appendChild($tmp);
   } else {
-    console.log("[SlateView]renderNodeThenInsertLine - insertBefore", $input.childNodes[idx]);
+    console.log(
+      "[SlateView]renderNodeThenInsertLine - insertBefore",
+      $input.childNodes[idx],
+    );
     $input.insertBefore($tmp, $input.children[idx]);
   }
 }
@@ -337,7 +400,10 @@ export function getNodePath(targetNode: Element, rootNode: Element) {
   return path;
 }
 
-export function findNodeByPath($elm: Element, path: number[]): Element | null {
+export function findNodeByPathWithElement(
+  $elm: Element,
+  path: number[],
+): Element | null {
   if (path.length === 0) {
     return $elm;
   }
@@ -345,13 +411,17 @@ export function findNodeByPath($elm: Element, path: number[]): Element | null {
   if (!$v) {
     return null;
   }
-  return findNodeByPath($v as Element, path.slice(1));
+  return findNodeByPathWithElement($v as Element, path.slice(1));
 }
 
-export function refreshSelection($editor: Element, start: SlatePoint, end: SlatePoint) {
+export function refreshSelection(
+  $editor: Element,
+  start: SlatePoint,
+  end: SlatePoint,
+) {
   //     const { start, end } = vm.ui.$selection.state;
-  const $node_start = findNodeByPath($editor as Element, start.path);
-  const $node_end = findNodeByPath($editor as Element, end.path);
+  const $node_start = findNodeByPathWithElement($editor as Element, start.path);
+  const $node_end = findNodeByPathWithElement($editor as Element, end.path);
   if (!$node_start || !$node_end) {
     return;
   }
@@ -360,11 +430,20 @@ export function refreshSelection($editor: Element, start: SlatePoint, end: Slate
     return;
   }
   const range = document.createRange();
-  console.log("[]refresh selection - start", $node_start, $node_start.childNodes[0], start.offset);
+  console.log(
+    "[]refresh selection - start",
+    $node_start,
+    $node_start.childNodes[0],
+    start.offset,
+  );
   console.log("[]refresh selection - end", $node_end.childNodes[0], end.offset);
   if ($node_start.textContent === "") {
     const $br = $node_start.childNodes[0];
-    console.log("[]refresh selection - find $br", $node_start.parentElement, $br);
+    console.log(
+      "[]refresh selection - find $br",
+      $node_start.parentElement,
+      $br,
+    );
     range.setStartBefore($br);
     range.setEndBefore($br);
   } else {

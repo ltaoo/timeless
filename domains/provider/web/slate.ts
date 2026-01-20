@@ -1,6 +1,6 @@
 import {
   findInnerTextNode,
-  findNodeByPath,
+  findNodeByPathWithElement,
   getNodePath,
 } from "@/domains/slate/op.dom";
 import { SlatePoint } from "@/domains/slate/point";
@@ -69,8 +69,8 @@ export function connect(vm: SlateEditorModel, $input: Element) {
     start: SlatePoint;
     end: SlatePoint;
   }) {
-    const $node_start = findNodeByPath($input as Element, arg.start.path);
-    const $node_end = findNodeByPath($input as Element, arg.start.path);
+    const $node_start = findNodeByPathWithElement($input as Element, arg.start.path);
+    const $node_end = findNodeByPathWithElement($input as Element, arg.start.path);
     if (!$node_start || !$node_end) {
       return;
     }

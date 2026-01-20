@@ -7,7 +7,7 @@ import { base, Handler } from "@/domains/base";
 import { BizError } from "@/domains/error";
 import { SlatePoint, SlatePointModel } from "./point";
 import { SlateDescendant, SlateDescendantType } from "./types";
-import { findNodeByPath } from "./op.node";
+import { findNodeByPathWithNode } from "./op.node";
 
 export function SlateSelectionModel() {
   const methods = {
@@ -231,7 +231,7 @@ SlateSelectionModel.getLineFirstNode = function (nodes: SlateDescendant[], line_
   };
 };
 SlateSelectionModel.isCaretAtLineEnd = function (nodes: SlateDescendant[], start: SlatePoint) {
-  const n = findNodeByPath(nodes, start.path);
+  const n = findNodeByPathWithNode(nodes, start.path);
   if (!n) {
     return false;
   }
@@ -243,7 +243,7 @@ SlateSelectionModel.isCaretAtLineEnd = function (nodes: SlateDescendant[], start
   return false;
 };
 SlateSelectionModel.isCaretAtLineHead = function (nodes: SlateDescendant[], start: SlatePoint) {
-  const n = findNodeByPath(nodes, start.path);
+  const n = findNodeByPathWithNode(nodes, start.path);
   if (!n) {
     return false;
   }
