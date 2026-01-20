@@ -23,3 +23,5 @@ export class NodeCore extends BaseDomain<TheTypesOfEvents> {
     return this.on(Events.Click, handler);
   }
 }
+
+export { connect as connectNode } from "./connect.web";

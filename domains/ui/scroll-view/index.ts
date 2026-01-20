@@ -503,4 +503,6 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
   }
 }
 
+export { connectScroll as connectScrollView, connectIndicator as connectScrollIndicator } from "./connect.web";
+
 export * from "./utils";

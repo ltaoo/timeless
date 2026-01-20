@@ -1,11 +1,20 @@
 {
   "name": "timeless",
   "version": "1.0.0",
-  "main": "dist/timeless.umd.min.js",
-  "types": "dist/timeless.umd.d.ts",
+  "main": "dist/timeless.core.umd.min.js",
+  "types": "dist/timeless.core.d.ts",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild domains/index.ts --bundle --format=iife --global-name=Timeless --target=es2015 --platform=browser --outfile=dist/timeless.umd.min.js --minify && echo 'window.Timeless=Timeless;' >> dist/timeless.umd.min.js",
+    "build": "npm run build:core && npm run build:web && npm run build:weapp && npm run build:types",
+    "build:core": "esbuild domains/core/index.ts --bundle --format=iife --global-name=Timeless --target=es2015 --platform=browser --outfile=dist/timeless.core.umd.min.js --minify && echo 'window.Timeless=Timeless;' >> dist/timeless.core.umd.min.js",
+    "build:web": "esbuild domains/web/index.ts --bundle --format=iife --global-name=TimelessWeb --target=es2015 --platform=browser --outfile=dist/timeless.web.umd.min.js --minify && echo 'window.TimelessWeb=TimelessWeb;' >> dist/timeless.web.umd.min.js",
+    "build:weapp": "esbuild domains/weapp/index.ts --bundle --format=iife --global-name=TimelessWeapp --target=es2015 --platform=browser --outfile=dist/timeless.weapp.umd.min.js --minify",
+    "build:types": "npm run build:types:core && npm run build:types:web",
+    "build:types:core": "tsc -p tsconfig.json --outDir dist/types/core",
+    "build:types:web": "tsc -p tsconfig.json --outDir dist/types/web",
     "build:watch": "tsup --watch"
   },
   "keywords": [],
@@ -13,6 +22,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.13.2",
     "dayjs": "^1.11.19",
     "mitt": "^3.0.1",
     "qs": "^6.14.1",
@@ -20,6 +30,8 @@
     "url-parse": "^1.5.10"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.23",
+    "@types/node": "^25.0.9",
     "@types/qs": "^6.14.0",
     "@types/url-parse": "^1.4.11",
     "esbuild": "^0.27.2",

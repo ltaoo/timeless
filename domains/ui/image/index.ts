@@ -153,6 +153,8 @@ export class ImageCore extends BaseDomain<TheTypesOfEvents> {
   }
 }
 
+export { connect as connectImage } from "./connect.web";
+
 export class ImageInListCore extends BaseDomain<TheTypesOfEvents> {
   /** 列表中一类多个按钮 */
   btns: ImageCore[] = [];

@@ -1,9 +1,9 @@
 export * from "./base";
 export * from "./ui";
-export * from "./app";
+export { Application } from "./app";
 export * from "./error";
-export * from "./history";
-export * from "./http_client";
+export { HistoryCore } from "./history";
+export { HttpClientCore } from "./http_client";
 export * from "./list";
 export * from "./multiple";
 export * from "./navigator";
@@ -14,4 +14,4 @@ export * from "./route_view";
 export * from "./storage";
 export * from "./system";
 export * from "./timer";
-export * from "./video_player";
+export { VideoPlayerCore } from "./video_player";

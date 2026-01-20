@@ -1,5 +1,5 @@
 import { BaseDomain, Handler } from "@/domains/base";
-import { Rect } from "@/types";
+import { Rect } from "@/domains/ui/popper/types";
 
 import type {
   Alignment,

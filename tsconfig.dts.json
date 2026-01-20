@@ -7,18 +7,17 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": false,
-    "jsx": "preserve",
-    "jsxImportSource": "solid-js",
-    "types": ["node"],
+    "noEmitOnError": false,
     "noEmit": false,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "isolatedModules": true,
+    "outDir": "dist",
+    "types": ["node"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
     }
   },
-  "include": ["domains/**/*", "global.d.ts"],
-  "exclude": ["node_modules", "platform", "biz"]
+  "include": ["domains/core/index.ts", "global.d.ts"],
+  "exclude": ["node_modules", "biz", "dist", "domains/index.ts"]
 }

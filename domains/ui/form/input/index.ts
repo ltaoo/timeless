@@ -351,3 +351,5 @@ export class InputInListCore<K extends string, T> extends BaseDomain<TheTypesInL
     this.on(Events.StateChange, handler);
   }
 }
+
+export { connect as connectInput } from "./connect.web";

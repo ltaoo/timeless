@@ -594,3 +594,5 @@ export class HistoryCore<K extends string, R extends Record<string, any>> extend
     return this.on(Events.StateChange, handler);
   }
 }
+
+export { connect as connectWeb } from "./connect.web";

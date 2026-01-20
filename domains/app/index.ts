@@ -371,3 +371,6 @@ export class Application<T extends { storage: StorageCore<any> }> extends BaseDo
     return this.on(Events.Error, handler);
   }
 }
+
+export { connect as connectWeb } from "./connect.web";
+export * from "./platform/weapp";

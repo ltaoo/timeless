@@ -1,7 +1,7 @@
 import { BaseDomain, Handler } from "@/domains/base";
 import { MenuCore } from "@/domains/ui/menu";
 import { MenuItemCore } from "@/domains/ui/menu/item";
-import { Rect } from "@/types";
+import { Rect } from "@/domains/ui/popper/types";
 
 enum Events {
   StateChange,

@@ -5,7 +5,7 @@ import { DismissableLayerCore } from "@/domains/ui/dismissable-layer";
 import { PopoverCore } from "@/domains/ui/popover";
 import { Direction } from "@/domains/ui/direction";
 import { PresenceCore } from "@/domains/ui/presence";
-import { Rect } from "@/types";
+import { Rect } from "@/domains/ui/popper/types";
 
 import { SelectContentCore } from "./content";
 import { SelectViewportCore } from "./viewport";

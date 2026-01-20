@@ -1,6 +1,6 @@
 import { Result } from "@/domains/result/index";
 
-import { HttpClientCore } from "./index";
+import { HttpClientCore } from "../../http_client";
 
 export function connect(store: HttpClientCore) {
   store.fetch = async (options) => {

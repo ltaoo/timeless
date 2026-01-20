@@ -678,3 +678,5 @@ export class VideoPlayerCore extends BaseDomain<TheTypesOfEvents> {
     return this.on(Events.Connected, handler);
   }
 }
+
+export { connect as connectWeb } from "./connect.web";

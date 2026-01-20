@@ -80,7 +80,7 @@ export type Middleware = {
 
 export type Dimensions = { [key in Length]: number };
 
-export type Rect = Coords & Dimensions;
+export type Rect = Coords & Dimensions & SideObject;
 
 export interface ElementRects {
   reference: Rect;
