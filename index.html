@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<script src="./dist/timeless.core.umd.min.js"></script>
+	<script src="./dist/timeless.web.umd.min.js"></script>
+	<style>
+		#editor {
+			border: 2px solid #ccc;
+			padding: 4px;
+			width: 240px;
+			height: 480px;
+			border-radius: 12px;
+		}
+
+		#editor:focus {
+		}
+	</style>
+</head>
+
+<body>
+	<div id="editor" contenteditable="true" autocapitalize="off" autocorrect="off"></div>
+	<script>
+		const $elm = document.querySelector('#editor');
+		const slate$ = Timeless.SlateEditorModel({ defaultValue: [] })
+		slate$.onAction((operations) => {
+			for (let i = 0; i < operations.length; i += 1) {
+				const op = operations[i];
+				Timeless.SlateDOM.exec($elm, op);
+			}
+		});
+		slate$.onSelectionChange(({ type, start, end }) => {
+			Timeless.SlateDOM.refreshSelection($elm, start, end);
+		});
+		// @ts-ignore
+		TimelessWeb.provide_slate(slate$, $elm);
+		const $slate_content = Timeless.SlateDOM.buildInnerHTML(
+			slate$.state.children
+		);
+		console.log("[]SlateEditor - before ", slate$.state.children);
+		$elm.appendChild($slate_content);
+	</script>
+</body>
+
+</html>

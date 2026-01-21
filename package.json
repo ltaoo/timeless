@@ -26,6 +26,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run build:core && npm run build:web && npm run build:weapp && npm run build:types",
+    "build2": "esbuild domains/index.ts --bundle --format=iife --target=es2015 --platform=browser --outfile=dist/timeless.umd.min.js --minify && tsc --project tsconfig.declaration.json && node scripts/generate-dts.js",
     "build:core": "esbuild domains/index.ts --bundle --format=iife --global-name=Timeless --target=es2015 --platform=browser --outfile=dist/timeless.core.umd.min.js --minify && echo 'window.Timeless=Timeless;' >> dist/timeless.core.umd.min.js",
     "build:web": "esbuild domains/provider/web/index.ts --bundle --format=iife --global-name=TimelessWeb --target=es2015 --platform=browser --outfile=dist/timeless.web.umd.min.js --minify && echo 'window.TimelessWeb=TimelessWeb;' >> dist/timeless.web.umd.min.js",
     "build:weapp": "esbuild domains/provider/weapp/index.ts --bundle --format=iife --global-name=TimelessWeapp --target=es2015 --platform=browser --outfile=dist/timeless.weapp.umd.min.js --minify && echo 'window.TimelessWeapp=TimelessWeapp;' >> dist/timeless.weapp.umd.min.js",
