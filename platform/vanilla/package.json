@@ -1,0 +1,25 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "Frontend application",
+  "type": "module",
+  "scripts": {
+    "build:prosemirror": "rollup --config rollup.config.js",
+    "build:prosemirror:dts": "rollup --config rollup.dts.config.js",
+    "build:editor": "rollup --config rollup.editor.config.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^8.56.0",
+    "postcss": "^8.5.6",
+    "rollup": "^4.56.0",
+    "rollup-plugin-dts": "^6.3.0",
+    "tailwindcss": "^4.1.18"
+  },
+  "dependencies": {}
+}
