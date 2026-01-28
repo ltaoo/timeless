@@ -9,13 +9,22 @@ import { HistoryCore } from "@/domains/history";
 import { query_stringify } from "@/utils/index";
 
 import { buildUrl } from "./utils";
-import { build, OriginalRouteConfigure, PageKeysType, PathnameKey, RouteConfig } from "./utils";
+import {
+  build,
+  OriginalRouteConfigure,
+  PageKeysType,
+  PathnameKey,
+  RouteConfig,
+} from "./utils";
 
 enum Events {
+  SubViewChanged,
+  SubViewRemoved,
+  SubViewAppended,
   /** 子视图改变（数量 */
-  ViewsChange,
+  SubViewsChange,
   /** 当前展示的子视图改变 */
-  CurViewChange,
+  CurSubViewChange,
   /** 有视图变为可见状态 */
   ViewShow,
   /** 视图加载好 */
@@ -41,8 +50,11 @@ enum Events {
   NotFound,
 }
 type TheTypesOfEvents = {
-  [Events.ViewsChange]: RouteViewCore[];
-  [Events.CurViewChange]: RouteViewCore;
+  [Events.SubViewChanged]: RouteViewCore;
+  [Events.SubViewRemoved]: RouteViewCore;
+  [Events.SubViewAppended]: RouteViewCore;
+  [Events.SubViewsChange]: RouteViewCore[];
+  [Events.CurSubViewChange]: RouteViewCore;
   [Events.Ready]: void;
   [Events.Mounted]: void;
   [Events.ViewShow]: RouteViewCore[];
@@ -135,7 +147,9 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
   get href() {
-    return [this.pathname, query_stringify(this.query)].filter(Boolean).join("?");
+    return [this.pathname, query_stringify(this.query)]
+      .filter(Boolean)
+      .join("?");
   }
   get visible() {
     return this.$presence.visible;
@@ -146,7 +160,16 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
 
   constructor(options: Partial<{ _name: string }> & RouteViewCoreProps) {
     super(options);
-    const { name, pathname, title, query = {}, visible = false, animation = {}, parent = null, views = [] } = options;
+    const {
+      name,
+      pathname,
+      title,
+      query = {},
+      visible = false,
+      animation = {},
+      parent = null,
+      views = [],
+    } = options;
     this.name = name;
     this.pathname = pathname;
     this.parent = parent;
@@ -188,7 +211,6 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     });
     emitViewCreated(this);
   }
-
   appendView(view: RouteViewCore) {
     view.parent = this;
     if (this.subViews.length === 0 && view.visible) {
@@ -196,19 +218,24 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
       this.curView = view;
     }
     if (!this.subViews.includes(view)) {
+      this.emit(Events.SubViewAppended, view);
       this.subViews.push(view);
     }
     // console.log("[DOMAIN]route_view - appendView", this.title, this.subViews, view);
-    this.emit(Events.ViewsChange, [...this.subViews]);
+    this.emit(Events.SubViewsChange, [...this.subViews]);
   }
   replaceViews(views: RouteViewCore[]) {
     this.subViews = views;
-    this.emit(Events.ViewsChange, [...this.subViews]);
+    this.emit(Events.SubViewsChange, [...this.subViews]);
   }
   /** 移除（卸载）一个子视图 */
   removeView(
     view: RouteViewCore,
-    options: Partial<{ reason: "show_sibling" | "back" | "forward"; destroy: boolean; callback: () => void }> = {}
+    options: Partial<{
+      reason: "show_sibling" | "back" | "forward";
+      destroy: boolean;
+      callback: () => void;
+    }> = {},
   ) {
     // const { reason, destroy, callback } = options;
     // console.log("[DOMAIN]route_view - removeView", this.title, view.title);
@@ -227,7 +254,8 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
         options.callback();
       }
       // console.log("[DOMAIN]route_view - removeView before Events.ViewsChange", this.title, view.title);
-      this.emit(Events.ViewsChange, [...this.subViews]);
+      this.emit(Events.SubViewRemoved, view);
+      this.emit(Events.SubViewsChange, [...this.subViews]);
     });
     // console.log();
     // console.log("[DOMAIN]route_view - removeView before view.hide", this.title, view.title, performance.now());
@@ -235,7 +263,8 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
       reason: options.reason,
       destroy: options.destroy,
     });
-    this.emit(Events.ViewsChange, [...this.subViews]);
+    this.emit(Events.SubViewChanged, view);
+    this.emit(Events.SubViewsChange, [...this.subViews]);
   }
   findCurView(): RouteViewCore | null {
     if (!this.curView) {
@@ -247,7 +276,13 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.Ready);
   }
   /** 让自身的一个子视图变为可见 */
-  showView(sub_view: RouteViewCore, options: Partial<{ reason: "show_sibling" | "back"; destroy: boolean }> = {}) {
+  showView(
+    sub_view: RouteViewCore,
+    options: Partial<{
+      reason: "show_sibling" | "back";
+      destroy: boolean;
+    }> = {},
+  ) {
     // console.log("[DOMAIN]route_view - showView", this.title, sub_view.title, this.curView?.title);
     if (sub_view === this) {
       console.warn("cannot show self");
@@ -278,7 +313,7 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     // console.log("[DOMAIN]route_view - before this.curView = view 2", sub_view.title);
     this.curView = sub_view;
     sub_view.show();
-    this.emit(Events.CurViewChange, this.curView);
+    this.emit(Events.CurSubViewChange, this.curView);
   }
   /** 主动展示视图 */
   show() {
@@ -291,7 +326,12 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     this.$presence.show();
   }
   /** 主动隐藏自身视图 */
-  hide(options: Partial<{ reason: "show_sibling" | "back" | "forward"; destroy: boolean }> = {}) {
+  hide(
+    options: Partial<{
+      reason: "show_sibling" | "back" | "forward";
+      destroy: boolean;
+    }> = {},
+  ) {
     // console.log("[DOMAIN]route_view - hide", this.title, options);
     if (this.visible === false) {
       console.warn("has been hide");
@@ -402,11 +442,22 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
   onUnmounted(handler: Handler<TheTypesOfEvents[Events.Unmounted]>) {
     return this.on(Events.Unmounted, handler);
   }
-  onSubViewsChange(handler: Handler<TheTypesOfEvents[Events.ViewsChange]>) {
-    return this.on(Events.ViewsChange, handler);
+  onSubViewChanged(handler: Handler<TheTypesOfEvents[Events.SubViewChanged]>) {
+    return this.on(Events.SubViewChanged, handler);
   }
-  onCurViewChange(handler: Handler<TheTypesOfEvents[Events.CurViewChange]>) {
-    return this.on(Events.CurViewChange, handler);
+  onSubViewAppended(
+    handler: Handler<TheTypesOfEvents[Events.SubViewAppended]>,
+  ) {
+    return this.on(Events.SubViewAppended, handler);
+  }
+  onSubViewRemoved(handler: Handler<TheTypesOfEvents[Events.SubViewRemoved]>) {
+    return this.on(Events.SubViewRemoved, handler);
+  }
+  onSubViewsChange(handler: Handler<TheTypesOfEvents[Events.SubViewsChange]>) {
+    return this.on(Events.SubViewsChange, handler);
+  }
+  onCurViewChange(handler: Handler<TheTypesOfEvents[Events.CurSubViewChange]>) {
+    return this.on(Events.CurSubViewChange, handler);
   }
   onMatched(handler: Handler<TheTypesOfEvents[Events.Match]>) {
     return this.on(Events.Match, handler);
@@ -456,11 +507,9 @@ function emitViewCreated(view: RouteViewCore) {
   handler(view);
 }
 
-export function RouteMenusModel<T extends { title: string; url?: unknown; onClick?: (m: T) => void }>(props: {
-  route: T["url"];
-  menus: T[];
-  $history: HistoryCore<any, any>;
-}) {
+export function RouteMenusModel<
+  T extends { title: string; url?: unknown; onClick?: (m: T) => void },
+>(props: { route: T["url"]; menus: T[]; $history: HistoryCore<any, any> }) {
   const methods = {
     refresh() {
       bus.emit(Events.StateChange, { ..._state });

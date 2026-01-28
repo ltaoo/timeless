@@ -60,15 +60,18 @@ let handler: null | ((v: RequestCore<any>) => void) = null;
 export function onRequestCreated(h: (v: RequestCore<any>) => void) {
   handler = h;
 }
-export type TheResponseOfRequestCore<T extends RequestCore<any, any>> = NonNullable<T["response"]>;
-export type TheResponseOfFetchFunction<T extends FetchFunction> = UnpackedRequestPayload<ReturnType<T>>;
+export type TheResponseOfRequestCore<T extends RequestCore<any, any>> =
+  NonNullable<T["response"]>;
+export type TheResponseOfFetchFunction<T extends FetchFunction> =
+  UnpackedRequestPayload<ReturnType<T>>;
 
 /**
  * 用于接口请求的核心类
  */
-export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<ReturnType<F>>> extends BaseDomain<
-  TheTypesOfEvents<any>
-> {
+export class RequestCore<
+  F extends FetchFunction,
+  P = UnpackedRequestPayload<ReturnType<F>>,
+> extends BaseDomain<TheTypesOfEvents<any>> {
   _name = "RequestCore";
   debug = false;
 
@@ -202,7 +205,15 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
     this.emit(Events.BeforeRequest);
     let payloadProcess: null | ((v: any) => any) = null;
     const r2 = (() => {
-      const { hostname = "", url, method, query, body, headers, process } = this.service(...(args as unknown as any[]));
+      const {
+        hostname = "",
+        url,
+        method,
+        query,
+        body,
+        headers,
+        process,
+      } = this.service(...(args as unknown as any[]));
       // console.log('[DOMAIN]request/index - after = this.service()', headers);
       if (process) {
         payloadProcess = process;
@@ -231,7 +242,10 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
       return Result.Err(r2.error);
     }
     this.pending = r2.data;
-    const [r] = await Promise.all([this.pending, this.delay === null ? null : sleep(this.delay)]);
+    const [r] = await Promise.all([
+      this.pending,
+      this.delay === null ? null : sleep(this.delay),
+    ]);
     this.loading = false;
     const rr = (() => {
       if (payloadProcess) {
@@ -291,13 +305,19 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
     this.emit(Events.ResponseChange, this.response);
   }
 
-  onLoadingChange(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.LoadingChange]>) {
+  onLoadingChange(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.LoadingChange]>,
+  ) {
     return this.on(Events.LoadingChange, handler);
   }
-  beforeRequest(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.BeforeRequest]>) {
+  beforeRequest(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.BeforeRequest]>,
+  ) {
     return this.on(Events.BeforeRequest, handler);
   }
-  onSuccess(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Success]>) {
+  onSuccess(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Success]>,
+  ) {
     return this.on(Events.Success, handler);
   }
   onFailed(
@@ -305,29 +325,39 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
     opt: Partial<{
       /** 清除其他 failed 监听 */
       override: boolean;
-    }> = {}
+    }> = {},
   ) {
     if (opt.override) {
       this.offEvent(Events.Failed);
     }
     return this.on(Events.Failed, handler);
   }
-  onCanceled(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Canceled]>) {
+  onCanceled(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Canceled]>,
+  ) {
     return this.on(Events.Canceled, handler);
   }
   /** 建议使用 onFailed */
-  onError(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Failed]>) {
+  onError(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Failed]>,
+  ) {
     return this.on(Events.Failed, handler);
   }
-  onCompleted(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Completed]>) {
+  onCompleted(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Completed]>,
+  ) {
     return this.on(Events.Completed, handler);
   }
-  onStateChange(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.StateChange]>) {
+  onStateChange(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.StateChange]>,
+  ) {
     return this.on(Events.StateChange, handler);
   }
-  onResponseChange(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.ResponseChange]>) {
+  onResponseChange(
+    handler: Handler<
+      TheTypesOfEvents<UnpackedResult<P>>[Events.ResponseChange]
+    >,
+  ) {
     return this.on(Events.ResponseChange, handler);
   }
 }
-
-export * from "./utils";

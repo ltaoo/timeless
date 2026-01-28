@@ -7,6 +7,7 @@ export * from "./dismissable-layer";
 export * from "./dropdown-menu";
 export * from "./focus-scope";
 export * from "./form";
+export * from "./formv2";
 export * from "./image";
 export * from "./form/input";
 export * from "./menu";

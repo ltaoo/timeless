@@ -16,8 +16,7 @@
 			border-radius: 12px;
 		}
 
-		#editor:focus {
-		}
+		#editor:focus {}
 	</style>
 </head>
 
@@ -25,7 +24,14 @@
 	<div id="editor" contenteditable="true" autocapitalize="off" autocorrect="off"></div>
 	<script>
 		const $elm = document.querySelector('#editor');
-		const slate$ = Timeless.SlateEditorModel({ defaultValue: [] })
+		const slate$ = Timeless.SlateEditorModel({
+			defaultValue: [
+				{
+					type: 'paragraph',
+					children: [{ type: 'text', text: '' }],
+				}
+			]
+		})
 		slate$.onAction((operations) => {
 			for (let i = 0; i < operations.length; i += 1) {
 				const op = operations[i];
@@ -37,11 +43,23 @@
 		});
 		// @ts-ignore
 		TimelessWeb.provide_slate(slate$, $elm);
+		console.log("[]SlateEditor - state.children", slate$.state.children);
 		const $slate_content = Timeless.SlateDOM.buildInnerHTML(
 			slate$.state.children
 		);
-		console.log("[]SlateEditor - before ", slate$.state.children);
+		console.log("[]SlateEditor - buildInnerHTML result", $slate_content);
+		console.log("[]SlateEditor - $slate_content.childNodes", $slate_content.childNodes.length);
+		while ($elm.firstChild) {
+			$elm.removeChild($elm.firstChild);
+		}
 		$elm.appendChild($slate_content);
+		console.log("[]SlateEditor - $elm.innerHTML after append", $elm.innerHTML);
+		// 初始化选区
+		const selection = window.getSelection();
+		if (selection) {
+			selection.removeAllRanges();
+		}
+		Timeless.SlateDOM.refreshSelection($elm, { path: [0, 0], offset: 0 }, { path: [0, 0], offset: 0 });
 	</script>
 </body>
 
