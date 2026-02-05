@@ -7,6 +7,7 @@ import { RequestCore } from "@/domains/request";
 import { RequestPayload } from "@/domains/request/utils";
 import { ScrollViewCore } from "@/domains/ui";
 import { BizError } from "@/domains/error";
+import { HttpClientCore } from "@/domains/http_client";
 
 export type BizFile = {
   id: string;
@@ -29,6 +30,7 @@ export function FileBrowserModel(props: {
   service: BizFileFetchService;
   /** 调用接口时的额外参数 */
   extra?: Record<string, unknown>;
+  client: HttpClientCore;
   onError?: (err: BizError) => void;
 }) {
   const methods = {
@@ -38,6 +40,7 @@ export function FileBrowserModel(props: {
     createColumn(folder: BizFile) {
       const list$ = new ListCore(
         new RequestCore(props.service, {
+          client: props.client,
           onFailed: (error) => {
             bus.emit(Events.Error, new BizError([error.message]));
           },
@@ -46,7 +49,7 @@ export function FileBrowserModel(props: {
           pageSize: 50,
           search: {
             ...(props.extra || {}),
-            id: folder.id,
+            ...folder,
           },
         },
       );
@@ -216,6 +219,7 @@ export function FileBrowserModel(props: {
 
   return {
     methods,
+    state,
     onFolderColumnChange(
       handler: Handler<TheTypesOfEvents[Events.FoldersChange]>,
     ) {
@@ -238,3 +242,5 @@ export function FileBrowserModel(props: {
     },
   };
 }
+
+export type FileBrowserModel = ReturnType<typeof FileBrowserModel>;
