@@ -18,5 +18,6 @@ export * from "./slate/slate";
 export * as SlateNode from "./slate/op.node";
 export * as SlateDOM from "./slate/op.dom";
 export * from "./shortcut/shortcut";
+export * from "./file_browser";
 
 export * from "./base";

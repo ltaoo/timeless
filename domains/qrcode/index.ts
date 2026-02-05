@@ -1,7 +1,7 @@
 /**
  * 生成二维码
  */
-import { QRCode } from "./core";
+import { QRCode as QRCodeLib } from "./core";
 
 type CanvasDrawingProps = {
   width: number;
@@ -126,6 +126,6 @@ export async function createQRCode(text: string, options: CanvasDrawingProps) {
   const { width, height } = options;
   const drawer = new CanvasDrawing(options);
   // @ts-ignore
-  const model: QRCode = await new QRCode({ width, height }).fetchModel(text, options);
+  const model: QRCode = await new QRCodeLib({ width, height }).fetchModel(text, options);
   drawer.draw(model);
 }

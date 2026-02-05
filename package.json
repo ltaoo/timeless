@@ -25,6 +25,8 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build:t": "rollup --config rollup.config.js",
+    "build:t:dts": "rollup --config rollup.dts.config.js",
     "build": "npm run build:core && npm run build:web && npm run build:weapp && npm run build:types",
     "build2": "esbuild domains/index.ts --bundle --format=iife --target=es2015 --platform=browser --outfile=dist/timeless.umd.min.js --minify && tsc --project tsconfig.declaration.json && node scripts/generate-dts.js",
     "build:core": "esbuild domains/index.ts --bundle --format=iife --global-name=Timeless --target=es2015 --platform=browser --outfile=dist/timeless.core.umd.min.js --minify && echo 'window.Timeless=Timeless;' >> dist/timeless.core.umd.min.js",
@@ -57,12 +59,18 @@
     "url-parse": "^1.5.10"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.3.0",
     "@types/lodash": "^4.17.23",
     "@types/node": "^25.0.9",
     "@types/qs": "^6.14.0",
     "@types/url-parse": "^1.4.11",
     "dts-bundle-generator": "^9.5.1",
     "esbuild": "^0.27.2",
+    "rollup-plugin-dts": "^6.3.0",
+    "tslib": "^2.8.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
