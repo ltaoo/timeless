@@ -61,9 +61,7 @@ export function FileBrowserModel(props: {
         }
         if (response.initial === false) {
           _initialized = true;
-          methods.refresh();
         }
-        bus.emit(Events.FoldersChange, [..._folderColumns]);
       });
       list$.onLoadingChange((loading) => {
         _loading = loading;
@@ -83,61 +81,64 @@ export function FileBrowserModel(props: {
       return column;
     },
     appendColumn(folder: BizFile) {
-      _folderColumns.push(methods.createColumn(folder));
-      bus.emit(Events.FoldersChange, [..._folderColumns]);
+      _columns.push(methods.createColumn(folder));
+      bus.emit(Events.FoldersChange, [..._columns]);
     },
     replaceColumn(folder: BizFile, index: number) {
-      _folderColumns = [
-        ..._folderColumns.slice(0, index + 1),
+      _columns = [
+        ..._columns.slice(0, index + 1),
         methods.createColumn(folder),
       ];
-      bus.emit(Events.FoldersChange, [..._folderColumns]);
+      bus.emit(Events.FoldersChange, [..._columns]);
     },
     clearFolderColumns() {
-      _folderColumns = [];
-      bus.emit(Events.FoldersChange, [..._folderColumns]);
+      _columns = [];
+      bus.emit(Events.FoldersChange, [..._columns]);
     },
     /** 选中文件/文件夹 */
     select(folder: BizFile, index: [number, number]) {
       _selectedFolder = folder;
       bus.emit(Events.SelectFolder, [folder, index]);
       const [x, y] = index;
-      const column = _folderColumns[x];
-      column.list.modifyItem((f) => {
-        return {
-          ...f,
-          selected: f.id === folder.id,
-          hover: false,
-        };
-      });
+      const column = _columns[x];
+      // column.list.modifyItem((f) => {
+      //   if (f.id !== folder.id) {
+      //     return f;
+      //   }
+      //   return {
+      //     ...f,
+      //     selected: true,
+      //     hover: false,
+      //   };
+      // });
       const selectedFolder = column.list.response.dataSource[y];
       if (folder.type === BizFileType.File) {
         // @todo 获取文件详情
         return;
       }
       (() => {
-        if (x < this.folderColumns.length - 1) {
+        if (x < _columns.length - 1) {
           methods.replaceColumn(folder, x);
           return;
         }
         methods.appendColumn(selectedFolder);
       })();
-      this.paths = (() => {
-        if (this.paths[x + 1]) {
-          const clone = this.paths.slice(0, x + 2);
+      _paths = (() => {
+        if (_paths[x + 1]) {
+          const clone = _paths.slice(0, x + 2);
           clone[x + 1] = folder;
           return clone;
         }
-        return this.paths.concat(selectedFolder);
+        return _paths.concat(selectedFolder);
       })();
-      this.emit(Events.PathsChange, [...this.paths]);
+      bus.emit(Events.PathsChange, [..._paths]);
     },
     virtualSelect(folder: BizFile, position: [number, number]) {
-      this.virtualSelectedFolder = [folder, position];
+      _virtualSelectedFolder = [folder, position];
       bus.emit(Events.SelectFolder, [folder, position]);
       const [x, y] = position;
-      const column = _folderColumns[x];
-      this.tmpSelectedColumn = column;
+      const column = _columns[x];
+      _tmpSelectedColumn = column;
       column.list.modifyItem((f) => {
         return {
           ...f,
@@ -178,7 +179,7 @@ export function FileBrowserModel(props: {
     },
   ];
   /** 文件夹列表 */
-  let _folderColumns: FileColumn[] = [];
+  let _columns: FileColumn[] = [];
 
   const state = {
     get loading() {
@@ -192,6 +193,9 @@ export function FileBrowserModel(props: {
     },
     get paths() {
       return _paths;
+    },
+    get columns() {
+      return _columns;
     },
     //   tmpHoverFile: [F, [number, number]] | null;
   };
@@ -208,7 +212,7 @@ export function FileBrowserModel(props: {
   type TheTypesOfEvents = {
     [Events.Initialized]: void;
     [Events.FoldersChange]: FileColumn[];
-    [Events.PathsChange]: { file_id: string; name: string }[];
+    [Events.PathsChange]: BizFile[];
     [Events.SelectFolder]: [BizFile, [number, number]];
     [Events.LoadingChange]: boolean;
     [Events.StateChange]: typeof state;
