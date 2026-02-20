@@ -64,10 +64,10 @@ export const app = new Timeless.ApplicationModel({
       history.push(route.name, query, { ignore: true });
       return Timeless.Result.Ok(null);
     }
-    console.log(
-      "[Store] beforeReady push to default page",
-      "root.home_layout.index"
-    );
+    // console.log(
+    //   "[Store] beforeReady push to default page",
+    //   "root.home_layout.index"
+    // );
     history.push("root.home_layout.index", {}, { ignore: true });
     return Timeless.Result.Ok(null);
   },

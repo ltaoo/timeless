@@ -1,0 +1,186 @@
+/* WeUI Theme for BaseUI */
+:root, [data-weui-theme="light"] {
+  --weui-BG-0: #ededed;
+  --weui-BG-1: #f7f7f7;
+  --weui-BG-2: #fff;
+  --weui-BG-3: #f7f7f7;
+  --weui-BG-4: #4c4c4c;
+  --weui-BG-5: #fff;
+  --weui-FG-0: rgba(0, 0, 0, 0.9);
+  --weui-FG-1: rgba(0, 0, 0, 0.55);
+  --weui-FG-2: rgba(0, 0, 0, 0.3);
+  --weui-FG-3: rgba(0, 0, 0, 0.1);
+  --weui-FG-4: rgba(0, 0, 0, 0.15);
+  --weui-FG-5: rgba(0, 0, 0, 0.05);
+  --weui-BRAND: #07c160;
+  --weui-BRAND-120: #38cd7f;
+  --weui-BRAND-170: #b4ecce;
+  --weui-BRAND-80: #059a4c;
+  --weui-BRAND-90: #06ae56;
+  --weui-RED: #fa5151;
+  --weui-RED-80: #c84040;
+  --weui-RED-170: #fdcaca;
+  --weui-ORANGE: #fa9d3b;
+  --weui-YELLOW: #ffc300;
+  --weui-GREEN: #91d300;
+  --weui-BLUE: #10aeff;
+  --weui-BLUE-80: #0c8bcc;
+  --weui-BLUE-170: #b7e6ff;
+  --weui-INDIGO: #1485ee;
+  --weui-PURPLE: #6467f0;
+  --weui-LINK: #576b95;
+  --weui-SEPARATOR-0: rgba(0, 0, 0, 0.1);
+  --weui-SEPARATOR-1: rgba(0, 0, 0, 0.15);
+  --weui-OVERLAY: rgba(0, 0, 0, 0.5);
+  --weui-STATELAYER-PRESSED: rgba(0, 0, 0, 0.1);
+  --weui-STATELAYER-HOVERED: rgba(0, 0, 0, 0.02);
+  --weui-WHITE: #fff;
+  --weui-BG: #fff;
+  --weui-FG: #000;
+  --weui-TAG-TEXT-RED: rgba(250, 81, 81, 0.6);
+  --weui-TAG-TEXT-ORANGE: #fa9d3b;
+  --weui-TAG-TEXT-GREEN: #06ae56;
+  --weui-TAG-TEXT-BLUE: #10aeff;
+  --weui-TAG-BG-RED: rgba(250, 81, 81, 0.1);
+  --weui-TAG-BG-ORANGE: rgba(250, 157, 59, 0.1);
+  --weui-TAG-BG-GREEN: rgba(6, 174, 86, 0.1);
+  --weui-TAG-BG-BLUE: rgba(16, 174, 255, 0.1);
+  --weui-BTN-HEIGHT: 48px;
+  --weui-BTN-HEIGHT-MEDIUM: 40px;
+  --weui-BTN-HEIGHT-SMALL: 32px;
+  --weui-BTN-RADIUS: 8px;
+  --weui-CELL-HEIGHT: 56px;
+  --weui-CELL-GAP: 16px;
+  --weui-FONT-SIZE: 17px;
+  --weui-FONT-SIZE-SM: 14px;
+  --weui-FONT-SIZE-XS: 12px;
+}
+
+[data-weui-theme="dark"] {
+  --weui-BG-0: #111;
+  --weui-BG-1: #1e1e1e;
+  --weui-BG-2: #191919;
+  --weui-BG-3: #202020;
+  --weui-BG-4: #404040;
+  --weui-BG-5: #2c2c2c;
+  --weui-FG-0: rgba(255, 255, 255, 0.8);
+  --weui-FG-1: rgba(255, 255, 255, 0.5);
+  --weui-FG-2: rgba(255, 255, 255, 0.3);
+  --weui-FG-3: rgba(255, 255, 255, 0.1);
+  --weui-FG-4: rgba(255, 255, 255, 0.15);
+  --weui-FG-5: rgba(255, 255, 255, 0.1);
+  --weui-BRAND: #07c160;
+  --weui-BRAND-120: #059a4c;
+  --weui-BRAND-170: #023a1c;
+  --weui-BRAND-80: #38cd7f;
+  --weui-BRAND-90: #20c770;
+  --weui-RED: #fa5151;
+  --weui-RED-80: #fb7373;
+  --weui-RED-170: #4b1818;
+  --weui-ORANGE: #c87d2f;
+  --weui-YELLOW: #cc9c00;
+  --weui-GREEN: #74a800;
+  --weui-BLUE: #10aeff;
+  --weui-BLUE-80: #3fbeff;
+  --weui-BLUE-170: #04344d;
+  --weui-INDIGO: #1196ff;
+  --weui-PURPLE: #8183ff;
+  --weui-LINK: #7d90a9;
+  --weui-SEPARATOR-0: rgba(255, 255, 255, 0.05);
+  --weui-SEPARATOR-1: rgba(255, 255, 255, 0.15);
+  --weui-OVERLAY: rgba(0, 0, 0, 0.8);
+  --weui-STATELAYER-PRESSED: rgba(255, 255, 255, 0.1);
+  --weui-STATELAYER-HOVERED: rgba(0, 0, 0, 0.02);
+  --weui-WHITE: rgba(255, 255, 255, 0.8);
+  --weui-BG: #000;
+  --weui-FG: #fff;
+  --weui-TAG-TEXT-RED: rgba(250, 81, 81, 0.6);
+  --weui-TAG-TEXT-ORANGE: rgba(250, 157, 59, 0.6);
+  --weui-TAG-TEXT-GREEN: rgba(6, 174, 86, 0.6);
+  --weui-TAG-TEXT-BLUE: rgba(16, 174, 255, 0.6);
+  --weui-TAG-BG-RED: rgba(250, 81, 81, 0.1);
+  --weui-TAG-BG-ORANGE: rgba(250, 157, 59, 0.1);
+  --weui-TAG-BG-GREEN: rgba(6, 174, 86, 0.1);
+  --weui-TAG-BG-BLUE: rgba(16, 174, 255, 0.1);
+}
+
+/* Base reset */
+.weui-root {
+  font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: var(--weui-FONT-SIZE);
+  color: var(--weui-FG-0);
+  background: var(--weui-BG-1);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Animations */
+@keyframes weui-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes weui-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes weui-slide-up { from { transform: translate(-50%, -50%) scale(0.95); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+@keyframes weui-slide-down { from { transform: translate(-50%, -50%) scale(1); opacity: 1; } to { transform: translate(-50%, -50%) scale(0.95); opacity: 0; } }
+@keyframes weui-spin { to { transform: rotate(360deg); } }
+@keyframes weui-pulse { 50% { opacity: 0.5; } }
+@keyframes weui-progress-indeterminate { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
+
+.weui-animate-spin { animation: weui-spin 1s linear infinite; }
+.weui-animate-pulse { animation: weui-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+/* Cell-based form layout */
+.weui-cells {
+  position: relative;
+  margin-top: 0;
+  background-color: var(--weui-BG-2);
+  overflow: hidden;
+  border-radius: 8px;
+}
+.weui-cells::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  border-top: 1px solid var(--weui-SEPARATOR-0);
+  transform: scaleY(0.5);
+}
+.weui-cells::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  border-bottom: 1px solid var(--weui-SEPARATOR-0);
+  transform: scaleY(0.5);
+}
+.weui-cells__title {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  padding: 0 var(--weui-CELL-GAP);
+  color: var(--weui-FG-1);
+  font-size: var(--weui-FONT-SIZE-SM);
+}
+.weui-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  min-height: var(--weui-CELL-HEIGHT);
+  box-sizing: border-box;
+}
+.weui-cell + .weui-cell::before {
+  content: "";
+  position: absolute;
+  left: var(--weui-CELL-GAP);
+  right: 0;
+  top: 0;
+  border-top: 1px solid var(--weui-SEPARATOR-0);
+  transform: scaleY(0.5);
+}
+.weui-cell__hd {
+  flex-shrink: 0;
+  margin-right: 16px;
+}
+.weui-cell__bd {
+  flex: 1;
+  min-width: 0;
+}
+.weui-cell__ft {
+  flex-shrink: 0;
+  margin-left: 8px;
+  color: var(--weui-FG-2);
+}

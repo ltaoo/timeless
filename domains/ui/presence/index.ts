@@ -57,6 +57,8 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
   visible = false;
   exit = false;
 
+  hide_timer: NodeJS.Timeout | null = null;
+
   get state(): PresenceState {
     return {
       mounted: this.mounted,
@@ -96,6 +98,10 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     this.show();
   }
   show() {
+    if (this.hide_timer) {
+      clearTimeout(this.hide_timer);
+      this.hide_timer = null;
+    }
     if (this.mounted === false) {
       this.mounted = true;
     }
@@ -117,7 +123,12 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
       this.exit = true;
       this.enter = false;
       this.emit(Events.StateChange, { ...this.state });
-      setTimeout(() => {
+      if (this.hide_timer) {
+        clearTimeout(this.hide_timer);
+        this.hide_timer = null;
+      }
+      this.hide_timer = setTimeout(() => {
+        this.hide_timer = null;
         this.visible = false;
         this.emit(Events.Hidden);
         this.emit(Events.StateChange, { ...this.state });
@@ -127,7 +138,12 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     this.exit = true;
     this.enter = false;
     this.emit(Events.StateChange, { ...this.state });
-    setTimeout(() => {
+    if (this.hide_timer) {
+      clearTimeout(this.hide_timer);
+      this.hide_timer = null;
+    }
+    this.hide_timer = setTimeout(() => {
+      this.hide_timer = null;
       this.visible = false;
       this.emit(Events.Hidden);
       this.emit(Events.StateChange, { ...this.state });
@@ -144,6 +160,10 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     this.enter = false;
     this.visible = false;
     this.exit = false;
+    if (this.hide_timer) {
+      clearTimeout(this.hide_timer);
+      this.hide_timer = null;
+    }
     this.emit(Events.Unmounted);
     this.emit(Events.StateChange, { ...this.state });
   }

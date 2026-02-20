@@ -15,6 +15,10 @@ type DropdownMenuProps = {
   align?: Align;
   items?: MenuItemCore[];
   onHidden?: () => void;
+  offsetX?: number;
+  offsetY?: number;
+  submenuOffsetX?: number;
+  submenuOffsetY?: number;
 };
 type DropdownMenuState = {
   items: MenuItemCore[];
@@ -27,6 +31,11 @@ type DropdownMenuState = {
 export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
   open = false;
   disabled = false;
+
+  offsetX = 0;
+  offsetY = 0;
+  submenuOffsetX = 0;
+  submenuOffsetY = 0;
 
   get state(): DropdownMenuState {
     return {
@@ -43,16 +52,41 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
   subs: MenuCore[] = [];
   items: MenuItemCore[] = [];
 
-  constructor(
-    props: {
-      _name?: string;
-    } & DropdownMenuProps = {}
-  ) {
+  constructor(props: { _name?: string } & DropdownMenuProps = {}) {
     super(props);
 
-    const { _name, side, align, items = [], onHidden } = props;
+    console.log("[DropdownMenuCore] constructor", props);
+
+    const {
+      _name,
+      side,
+      align,
+      items = [],
+      offsetX = 0,
+      offsetY = 0,
+      submenuOffsetX = 0,
+      submenuOffsetY = 0,
+      onHidden,
+    } = props;
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
+    this.submenuOffsetX = submenuOffsetX;
+    this.submenuOffsetY = submenuOffsetY;
     this.items = items;
-    this.menu = new MenuCore({ side, align, items, _name: _name ? `${_name}__menu` : "menu-in-dropdown" });
+    this.menu = new MenuCore({
+      side,
+      align,
+      items,
+      _name: _name ? `${_name}__menu` : "menu-in-dropdown",
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+    });
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      if (item.menu) {
+        item.menu.setOffset({ x: submenuOffsetX, y: submenuOffsetY });
+      }
+    }
     this.menu.onHide(() => {
       this.menu.reset();
       if (onHidden) {
@@ -67,63 +101,6 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
     // });
   }
 
-  listenItems(items: MenuItemCore[]) {
-    for (let i = 0; i < items.length; i += 1) {
-      const item = items[i];
-      // console.log(item);
-      // item.onEnter(() => {
-      //   this.maybeLeave = false;
-      //   this.inside = true;
-      //   if (item.menu) {
-      //     this.maybeLeave = false;
-      //     item.menu.show();
-      //   }
-      //   if (!item.menu && this.curSub) {
-      //     this.curSub.hide();
-      //   }
-      //   this.emit(Events.EnterItem, item);
-      // });
-      // item.onLeave(() => {
-      //   this.maybeLeave = true;
-      //   this.emit(Events.LeaveItem, item);
-      //   this.log("item.onLeave", this.items.length);
-      //   if (this.leaveTimer !== null) {
-      //     clearInterval(this.leaveTimer);
-      //     this.leaveTimer = setTimeout(() => {
-      //       this.leaveMenu(item);
-      //     }, 100);
-      //     return;
-      //   }
-      //   this.leaveTimer = setTimeout(() => {
-      //     this.leaveMenu(item);
-      //   }, 100);
-      // });
-      // if (!item.menu) {
-      //   continue;
-      // }
-      // const sub = item.menu;
-      // if (this.subs.includes(sub)) {
-      //   return;
-      // }
-      // sub.onShow(() => {
-      //   this.log("sub.onShow");
-      //   this.curSub = sub;
-      // });
-      // sub.onEnter(() => {
-      //   this.log("sub.onEnter");
-      //   this.inSubMenu = true;
-      // });
-      // sub.onLeave(() => {
-      //   this.log("sub.onLeave");
-      //   this.inSubMenu = false;
-      // });
-      // sub.onHide(() => {
-      //   this.log("sub.onHide");
-      //   this.curSub = null;
-      // });
-      // this.subs.push(sub);
-    }
-  }
   setItems(items: MenuItemCore[]) {
     this.items = items;
     this.emit(Events.StateChange, {
@@ -137,9 +114,13 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
     }
     matched.show();
   }
-  toggle(position?: Partial<{ x: number; y: number; width: number; height: number }>) {
+  toggle(
+    position?: Partial<{ x: number; y: number; width: number; height: number }>,
+  ) {
     if (position) {
-      const { x, y, width = 8, height = 8 } = position;
+      let { x = 0, y = 0, width = 8, height = 8 } = position;
+      x += this.offsetX;
+      y += this.offsetY;
       this.menu.popper.updateReference({
         // @ts-ignore
         getRect() {

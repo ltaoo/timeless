@@ -1,0 +1,7 @@
+import { tp, merge } from "./theme.js";
+import { View } from "../ui/view.js";
+
+export function Separator(props) {
+  const { orientation = "horizontal", theme: t, class: cn, style: st } = props || {};
+  return View({ ...merge(tp(t?.root, { orientation }), cn, st) });
+}

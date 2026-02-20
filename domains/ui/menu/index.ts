@@ -39,6 +39,8 @@ type MenuCoreProps = {
   align: Align;
   strategy: "fixed" | "absolute";
   items: MenuItemCore[];
+  offsetX?: number;
+  offsetY?: number;
 };
 
 export class MenuCore extends BaseDomain<TheTypesOfEvents> {
@@ -59,17 +61,35 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
 
   constructor(options: Partial<{ _name: string } & MenuCoreProps> = {}) {
     super(options);
-    const { _name, items = [], side, align, strategy } = options;
+    const {
+      _name,
+      items = [],
+      side,
+      align,
+      strategy,
+      offsetX = 0,
+      offsetY = 0,
+    } = options;
     if (_name) {
       this._name = _name;
     }
     this.state.items = items;
     this.items = items;
 
+    console.log("[DOMAIN]ui/menu/index - constructor", {
+      name: this._name,
+      items: items.map((v) => v.label),
+      side,
+      align,
+      strategy,
+    });
+
     this.popper = new PopperCore({
       side,
       align,
       strategy,
+      offsetX,
+      offsetY,
       _name: _name ? `${_name}__popper` : "menu__popper",
     });
     this.presence = new PresenceCore();
@@ -78,21 +98,34 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     this.listen_items(items);
 
     this.popper.onEnter(() => {
-      // console.log("[DOMAIN]ui/menu/index - handle Enter popper");
+      console.log("[DOMAIN]ui/menu/index - popper.onEnter", this._name);
       this.state.hover = true;
       this.emit(Events.EnterMenu);
     });
     this.popper.onLeave(() => {
+      console.log("[DOMAIN]ui/menu/index - popper.onLeave", this._name);
       this.state.hover = false;
       this.emit(Events.LeaveMenu);
     });
     this.layer.onDismiss(() => {
-      // console.log("[DOMAIN/ui]menu/index - hide");
-      // console.log("[DOMAIN]ui/menu/index - this.layer.onDismiss");
+      console.log("[DOMAIN]ui/menu/index - layer.onDismiss", this._name);
       this.hide();
     });
     this.presence.onHidden(() => {
-      // console.log("[DOMAIN]ui/menu/index - presence.onHidden", this.cur_item?.label);
+      console.log(
+        "[DOMAIN]ui/menu/index - presence.onHidden",
+        this._name,
+        this.cur_item?.label,
+        this.cur_sub?._name,
+        this.state.open,
+      );
+      if (this.state.open) {
+        console.log(
+          "[DOMAIN]ui/menu/index - presence.onHidden ignored because open",
+          this._name,
+        );
+        return;
+      }
       this.reset();
       if (this.cur_item) {
         this.cur_item.blur();
@@ -116,7 +149,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
 
   toggle() {
     const { open } = this.state;
-    console.log("[DOMAIN]ui/dropdown-menu - toggle", open);
+    console.log("[DOMAIN]ui/menu/index - toggle", this._name, open);
     // this.log("toggle", open);
     if (open) {
       this.hide();
@@ -128,7 +161,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     if (this.state.open) {
       return;
     }
-    // console.log("[DOMAIN]ui/menu/index - hide");
+    console.log("[DOMAIN]ui/menu/index - show", this._name);
     this.state.open = true;
     this.presence.show();
     this.popper.place();
@@ -139,7 +172,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     if (this.state.open === false) {
       return;
     }
-    // console.log("[DOMAIN]ui/menu/index - hide");
+    console.log("[DOMAIN]ui/menu/index - hide", this._name);
     this.state.open = false;
     // this.log("hide");
     this.presence.hide();
@@ -150,16 +183,24 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   listen_item(item: MenuItemCore) {
     //  const item = items[i];
     item.onEnter(() => {
+      console.log(
+        "[DOMAIN]ui/menu/index - item.onEnter",
+        this._name,
+        item.label,
+        {
+          hasMenu: !!item.menu,
+          curItem: this.cur_item?.label,
+        },
+      );
       // this.maybeHideSub = false;
       // if (item.menu) {
       //   this.maybeHideSub = false;
       //   const subMenu = item.menu;
       //   subMenu.show();
       // }
-      // if (!item.menu && this.curSub) {
-      //   this.curSub.hide();
+      // if (!item.menu && this.cur_sub) {
+      //   this.cur_sub.hide();
       // }
-      console.log("[DOMAIN]ui/menu/index - item.onEnter", item.label, item.menu, this.cur_item?.label);
       this.emit(Events.EnterItem, item);
       if (item.menu) {
         item.menu.show();
@@ -175,28 +216,16 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     // 考虑清楚 menu item 选中状态,到底表达了什么,在什么情况下,会出现 选中状态
     // 表达了两个含义 1是鼠标悬浮于 item 上   2是item 有子菜单且子菜单属于打开状态
     item.onLeave(() => {
-      console.log(
-        "[DOMAIN]ui/menu/index - item.onLeave",
-        item.label,
-        { open: item._open, focused: item._focused },
-        item.menu?.state
-      );
+      console.log("[DOMAIN]ui/menu/index - item.onLeave", this._name, {
+        label: item.label,
+        open: item._open,
+        focused: item._focused,
+        hasMenu: !!item.menu,
+        itemState: item.menu?.state,
+      });
       // this.maybeHideSub = true;
       this.emit(Events.LeaveItem, item);
       item.blur();
-      if (item.menu) {
-        let timer = setTimeout(() => {
-          item.menu!.hide();
-          // this.cur_item = null;
-        }, 0);
-        item.menu.onEnter(() => {
-          console.log("[DOMAIN]ui/menu/index - item.menu.onEnter");
-          if (timer) {
-            clearTimeout(timer);
-          }
-        });
-        return;
-      }
       // this.checkNeedHideSubMenu(item);
       // this.log("item.onLeave", this.items.length);
       // if (this.hideSubTimer !== null) {
@@ -236,7 +265,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     // this.subs.push(subMenu);
   }
   listen_items(items: MenuItemCore[]) {
-    // this.log("listen items", items);
+    console.log(
+      "[DOMAIN]ui/menu/index - listen_items",
+      this._name,
+      items.map((v) => v.label),
+    );
     for (let i = 0; i < items.length; i += 1) {
       this.listen_item(items[i]);
     }
@@ -249,6 +282,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, {
       ...this.state,
     });
+  }
+  setOffset(offset: { x: number; y: number }) {
+    // this.offsetX = offset.x;
+    // this.offsetY = offset.y;
+    this.popper.setOffset(offset);
   }
   checkNeedHideSubMenu(item: MenuItemCore) {
     // console.log("[DOMAIN]ui/menu/index - checkNeedHideSubMenu", item.label, this.maybeHideSub, this.curSub);

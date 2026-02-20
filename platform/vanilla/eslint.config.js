@@ -1,6 +1,6 @@
 export default [
   {
-    ignores: ["node_modules/", "dist/", "build/", "public/"]
+    ignores: ["node_modules/", "dist/", "build/", "public/"],
   },
   {
     languageOptions: {
@@ -22,16 +22,78 @@ export default [
         alert: "readonly",
         Timeless: "readonly",
         TimelessWeb: "readonly",
+        ref: "readonly",
+        computed: "readonly",
+        isRef: "readonly",
+        isComponent: "readonly",
+        classnames: "readonly",
+        Show: "readonly",
+        For: "readonly",
+        Match: "readonly",
         View: "readonly",
-        Flex: "readonly"
-      }
+        Txt: "readonly",
+        DangerouslyInnerHTML: "readonly",
+        // content
+        Flex: "readonly",
+        ScrollView: "readonly",
+        Tabs: "readonly",
+        Button: "readonly",
+        DropdownMenu: "readonly",
+        Progress: "readonly",
+        // form
+        Input: "readonly",
+        Checkbox: "readonly",
+        Select: "readonly",
+        Switch: "readonly",
+        Slider: "readonly",
+        Textarea: "readonly",
+        Label: "readonly",
+        // data display
+        Steps: "readonly",
+        Badge: "readonly",
+        Separator: "readonly",
+        Avatar: "readonly",
+        Card: "readonly",
+        CardHeader: "readonly",
+        CardTitle: "readonly",
+        CardDescription: "readonly",
+        CardContent: "readonly",
+        CardFooter: "readonly",
+        Skeleton: "readonly",
+        ScrollArea: "readonly",
+        AspectRatio: "readonly",
+        Table: "readonly",
+        TableHeader: "readonly",
+        TableRow: "readonly",
+        TableHead: "readonly",
+        TableBody: "readonly",
+        TableCell: "readonly",
+        // feedback
+        Dialog: "readonly",
+        Toast: "readonly",
+        Alert: "readonly",
+        AlertTitle: "readonly",
+        AlertDescription: "readonly",
+        // navigation
+        Accordion: "readonly",
+        // overlay
+        Popover: "readonly",
+        Modal: "readonly",
+        Presence: "readonly",
+        Portal: "readonly",
+        Tooltip: "readonly",
+        Sheet: "readonly",
+      },
     },
     rules: {
       "no-unused-vars": "warn",
       "no-undef": "warn",
-      "no-define": "error",
-      "semi": ["error", "always"],
-      "indent": ["error", 2, { "ignoreComments": true, "ignoredNodes": ["TemplateLiteral > *"] }]
-    }
-  }
+      semi: ["warn", "always"],
+      indent: [
+        "warn",
+        2,
+        { ignoreComments: true, ignoredNodes: ["TemplateLiteral > *"] },
+      ],
+    },
+  },
 ];

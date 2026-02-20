@@ -1,16 +1,16 @@
 import { app, history, client, views } from "./store/index.js";
 import { storage } from "./store/storage.js";
 
-let currentPage$ = null;
-let currentContainer = null;
-let isRendering = false;
+// let currentPage$ = null;
+// let currentContainer = null;
+// let isRendering = false;
 
 const render = ($elm) => {
   // currentContainer = $elm;
   const root_view$ = history.$view;
 
   root_view$.onSubViewsChange(async (view$s) => {
-    console.log("[Render] onSubViewsChange", view$s);
+    // console.log("[Render] onSubViewsChange", view$s);
     // if (isRendering) {
     //   console.log("[Render] Already rendering, skipping...");
     //   return;
@@ -51,7 +51,7 @@ const render = ($elm) => {
         console.warn("[Render] No page component found for:", view$.name);
         return;
       }
-      console.log("[Render] Rendering page:", view$.name);
+      // console.log("[Render] Rendering page:", view$.name);
       const $elm = renderPage(_Page, view$);
       if ($elm) {
         $segments.appendChild($elm);

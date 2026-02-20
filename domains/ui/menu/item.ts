@@ -82,7 +82,17 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
   constructor(options: Partial<{ _name: string }> & MenuItemCoreProps) {
     super(options);
 
-    const { _name, tooltip, label, icon, shortcut, disabled = false, hidden = false, menu, onClick } = options;
+    const {
+      _name,
+      tooltip,
+      label,
+      icon,
+      shortcut,
+      disabled = false,
+      hidden = false,
+      menu,
+      onClick,
+    } = options;
 
     this.label = label;
     this.tooltip = tooltip;
@@ -96,11 +106,26 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
 
     if (menu) {
       this.menu = menu;
+      console.log(
+        "[DOMAIN]ui/menu/item - bind menu",
+        this.label,
+        menu._name
+      );
       menu.onShow(() => {
+        console.log(
+          "[DOMAIN]ui/menu/item - menu.onShow",
+          this.label,
+          menu._name
+        );
         this._open = true;
         this.emit(Events.Change, { ...this.state });
       });
       menu.onHide(() => {
+        console.log(
+          "[DOMAIN]ui/menu/item - menu.onHide",
+          this.label,
+          menu._name
+        );
         this._open = false;
         this.emit(Events.Change, { ...this.state });
       });
@@ -131,7 +156,12 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 鼠标进入菜单项 */
   handlePointerEnter() {
-    // console.log("[DOMAIN]ui/menu/item - handle pointer enter", this.label, this._enter);
+    console.log(
+      "[DOMAIN]ui/menu/item - handlePointerEnter",
+      this.label,
+      this._enter,
+      this._open
+    );
     if (this._enter) {
       return;
     }
@@ -151,7 +181,12 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 鼠标离开菜单项 */
   handlePointerLeave() {
-    // console.log("[DOMAIN]ui/menu/item - handle pointer leave", this.label, this._enter, this._open);
+    console.log(
+      "[DOMAIN]ui/menu/item - handlePointerLeave",
+      this.label,
+      this._enter,
+      this._open
+    );
     if (this._enter === false) {
       return;
     }
@@ -161,7 +196,11 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.Change, { ...this.state });
   }
   handleFocus() {
-    // console.log("[DOMAIN]ui/menu/item - handle focus", this.label, this._focused);
+    console.log(
+      "[DOMAIN]ui/menu/item - handleFocus",
+      this.label,
+      this._focused
+    );
     if (this._focused) {
       return;
     }
@@ -171,7 +210,11 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.Change, { ...this.state });
   }
   handleBlur() {
-    // console.log("[DOMAIN]ui/menu/item - handle blur", this.label, this._focused);
+    console.log(
+      "[DOMAIN]ui/menu/item - handleBlur",
+      this.label,
+      this._focused
+    );
     if (this._focused === false) {
       return;
     }

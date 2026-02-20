@@ -3,18 +3,22 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/wails.png" />
-  <!-- 通过 CDN 加载 ProseMirror 核心样式 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prosemirror-view@1.0.0/style/prosemirror.css">
-  <!-- 可选：菜单栏样式 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prosemirror-menu@1.0.0/style/menu.css">
-  <!-- 可选：示例主题样式（包含工具栏等） -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prosemirror-example-setup@1.0.0/style/style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="/public/tailwindcss.3.4.17.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+    }
+  </script>
   <title>TheBox</title>
   <style>
+    @font-face {
+      font-family: 'HarmonyOS Sans SC';
+      src: url('/public/dc027189e0ba4cd-500.woff2') format('woff2');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
     :root {
       --background: #ededed;
       --foreground: #171717;
@@ -59,58 +63,8 @@
       --GREEN: #07c160;
       --border: oklch(100% 0 0/.1);
     }
-
-    html,
-    body {
-      overscroll-behavior: none;
-      -ms-text-size-adjust: 100%;
-      -webkit-text-size-adjust: 100%;
-      margin: 0;
-    }
-
-    body {
-      width: 100vw;
-      height: 100vh;
-      font-family: system-ui, -apple-system, "Helvetica Neue";
-    }
-
-    [data-theme="light"] body {
-      background-color: #ededed;
-    }
-
-    [data-theme="dark"] body {
-      background-color: #111111;
-    }
-
-    img {
-      -webkit-user-drag: none;
-    }
-
-    video {
-      max-height: 100%;
-      height: unset;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    #root {
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-    }
-
-    .page-container {
-      width: 100%;
-      height: 100%;
-    }
-
-    .home-page {
-      display: flex;
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
+    .text-fanqie {
+      font-family: 'HarmonyOS Sans SC', sans-serif;
     }
   </style>
 </head>
@@ -120,9 +74,8 @@
   <div id="root"></div>
   <script src="/public/timeless.core.umd.min.js"></script>
   <script src="/public/timeless.web.umd.min.js"></script>
-  <script src="/public/prosemirror.umd.min.js"></script>
-  <script src="/src/components/error.js"></script>
-  <script src="/src/components/baseui.js"></script>
+  <!-- <script src="/src/components/error.js"></script> -->
+  <script type="module" src="/src/components/baseui.js"></script>
   <script type="module" src="/src/index.js"></script>
 </body>
 
