@@ -153,7 +153,7 @@ export function For(props) {
     },
     onChange() {},
   };
-  // let _nodes = [];
+  let _nodes = [];
 
   return {
     t: "for",
@@ -178,6 +178,19 @@ export function For(props) {
       if (props.onUnmounted) {
         props.onUnmounted();
       }
+      for (let i = 0; i < _children.length; i += 1) {
+        const node = _children[i];
+        if (isComponent(node) && typeof node.onUnmounted === "function") {
+          node.onUnmounted();
+        }
+      }
+      for (let i = 0; i < _nodes.length; i += 1) {
+        const node = _nodes[i];
+        if (isComponent(node) && typeof node.onUnmounted === "function") {
+          node.onUnmounted();
+        }
+      }
+      _nodes = [];
       $elm.innerHTML = "";
     },
     append(node) {
@@ -185,6 +198,15 @@ export function For(props) {
     },
     setContent(v) {},
     render() {
+      for (let i = 0; i < _nodes.length; i += 1) {
+        const node = _nodes[i];
+        if (isComponent(node) && typeof node.onUnmounted === "function") {
+          node.onUnmounted();
+        }
+      }
+      _nodes = [];
+      $elm.innerHTML = "";
+
       const items = (() => {
         if (isRef(each)) {
           each._subscribe(ctx);
@@ -198,7 +220,6 @@ export function For(props) {
       // _items = items.slice();
       // _children = [];
       // _doms = [];
-      const _nodes = [];
       // console.log("in For before items.length for", items);
       for (let i = 0; i < items.length; i += 1) {
         (() => {
@@ -224,7 +245,9 @@ export function For(props) {
           // added_items.push([item, res]);
           _existing_map.set(item, res);
           $elm.appendChild(res.elm);
-          _nodes.push(res.node);
+          if (res.node && isComponent(res.node)) {
+            _nodes.push(res.node);
+          }
         })();
         // 这里到底要不要调用？
         // for (const node of nodes) {

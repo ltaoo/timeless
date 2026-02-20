@@ -9,7 +9,7 @@ export function Popover(props, children) {
   const state = ref(store.state);
   const events = [];
   events.push(store.onStateChange(() => { state.value = store.state; }));
-  const visible = computed({ state }, (d) => d.state.visible || d.state.enter);
+  const visible = computed({ state }, (d) => d.state.visible || d.state.enter || d.state.exit);
   const layer = store.layer;
   let handlePointerDown;
 
@@ -54,8 +54,23 @@ export function Popover(props, children) {
         },
       }, [
         View({
-          class: computed({ state }, (d) => merge(tp(t?.content, { enter: d.state.enter, exit: d.state.exit }), cn, st).class || ""),
-          style: computed({ state }, (d) => merge(tp(t?.content, { enter: d.state.enter, exit: d.state.exit }), cn, st).style || ""),
+          class: computed({ state }, (d) => {
+            const s = d.state;
+            return merge(tp(t?.content, { enter: s.enter, exit: s.exit }), cn, st).class || "";
+          }),
+          style: computed({ state }, (d) => {
+            const s = d.state;
+            const tr = merge(tp(t?.content, { enter: s.enter, exit: s.exit }), cn, st);
+            const base = tr.style || "";
+            const visibleFlag = s.visible || s.enter;
+            return [
+              base,
+              "transition:opacity 160ms ease-out,transform 160ms ease-out;",
+              visibleFlag
+                ? "opacity:1;transform:translate3d(0,0,0);"
+                : "opacity:0;transform:translate3d(0,-4px,0);",
+            ].join("");
+          }),
         }, children || []),
       ]),
     ]),
