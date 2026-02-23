@@ -201,15 +201,14 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
           curItem: this.cur_item?.label,
         },
       );
-      // this.maybeHideSub = false;
-      // if (item.menu) {
-      //   this.maybeHideSub = false;
-      //   const subMenu = item.menu;
-      //   subMenu.show();
-      // }
-      // if (!item.menu && this.cur_sub) {
-      //   this.cur_sub.hide();
-      // }
+      if (this.hide_sub_timer !== null) {
+        clearTimeout(this.hide_sub_timer);
+        this.hide_sub_timer = null;
+      }
+      if (item.menu && item.menu.hide_sub_timer !== null) {
+        clearTimeout(item.menu.hide_sub_timer);
+        item.menu.hide_sub_timer = null;
+      }
       this.emit(Events.EnterItem, item);
       if (item.menu) {
         item.menu.show();
@@ -222,8 +221,6 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       }
       this.cur_item = item;
     });
-    // 考虑清楚 menu item 选中状态,到底表达了什么,在什么情况下,会出现 选中状态
-    // 表达了两个含义 1是鼠标悬浮于 item 上   2是item 有子菜单且子菜单属于打开状态
     item.onLeave(() => {
       console.log("[DOMAIN]ui/menu/index - item.onLeave", this._name, {
         label: item.label,
@@ -232,21 +229,8 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         hasMenu: !!item.menu,
         itemState: item.menu?.state,
       });
-      // this.maybeHideSub = true;
       this.emit(Events.LeaveItem, item);
       item.blur();
-      // this.checkNeedHideSubMenu(item);
-      // this.log("item.onLeave", this.items.length);
-      // if (this.hideSubTimer !== null) {
-      //   clearInterval(this.hideSubTimer);
-      //   this.hideSubTimer = setTimeout(() => {
-      //     this.checkNeedHideSubMenu(item);
-      //   }, 100);
-      //   return;
-      // }
-      // this.hideSubTimer = setTimeout(() => {
-      //   this.checkNeedHideSubMenu(item);
-      // }, 100);
     });
     if (!item.menu) {
       return;

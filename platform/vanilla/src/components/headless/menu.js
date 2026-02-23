@@ -114,7 +114,10 @@ function SubMenuContent(menu, child) {
   });
   $el.addEventListener("mouseleave", () => {
     menu.popper.handleLeave();
-    menu.hide();
+    menu.hide_sub_timer = setTimeout(() => {
+      menu.hide_sub_timer = null;
+      menu.hide();
+    }, 100);
   });
   return child;
 }
