@@ -20,7 +20,7 @@ const Portal = React.memo((props: { store: DialogCore } & React.AllHTMLAttribute
   const { store } = props;
 
   return (
-    <Presence store={store.$present}>
+    <Presence store={store.$presence}>
       <PortalPrimitive>
         <div className={props.className}>{props.children}</div>
       </PortalPrimitive>

@@ -14,26 +14,43 @@ export function Textarea(props) {
   });
 
   const m = merge(tp(t?.root), cn, st);
-  const class$ = classnames(m.class || "");
-  class$.listen({ onChange(v) { $elm.className = v.join(" "); } });
+  const class$ = classnames([m.class || ""]);
+  class$.listen({
+    onChange(v) {
+      $elm.className = v.join(" ");
+    },
+  });
   $elm.className = class$.toString();
   if (m.style) $elm.style.cssText = m.style;
 
   const events = [];
   if (store) {
     if (store.value !== undefined) $elm.value = store.value;
-    $elm.addEventListener("input", (e) => { store.setValue(e.target.value); });
-    const unsub = store.onStateChange ? store.onStateChange(() => {
-      if (store.value !== undefined && $elm.value !== String(store.value)) $elm.value = store.value;
-    }) : null;
+    $elm.addEventListener("input", (e) => {
+      // @ts-ignore
+      store.setValue(e.target.value);
+    });
+    const unsub = store.onStateChange
+      ? store.onStateChange(() => {
+          if (store.value !== undefined && $elm.value !== String(store.value))
+            $elm.value = store.value;
+        })
+      : null;
     if (unsub) events.push(unsub);
   }
 
   return {
-    t: "view", $elm,
-    render() { return $elm; },
-    onMounted() { if (props.onMounted) props.onMounted($elm); },
-    beforeUnmounted() { if (props.beforeUnmounted) props.beforeUnmounted(); },
+    t: "view",
+    $elm,
+    render() {
+      return $elm;
+    },
+    onMounted() {
+      if (props.onMounted) props.onMounted($elm);
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) props.beforeUnmounted();
+    },
     onUnmounted() {
       for (const fn of events) if (typeof fn === "function") fn();
       if (props.onUnmounted) props.onUnmounted();

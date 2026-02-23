@@ -28,6 +28,7 @@ const Anchor = (props: { store: PopperCore } & JSX.HTMLAttributes<HTMLElement>) 
           }
           props.ref = el;
           props.store.setReference({
+            $el: $anchor,
             getRect() {
               const rect = $anchor.getBoundingClientRect();
               return rect;
@@ -57,9 +58,9 @@ const Content = (props: { store: PopperCore } & JSX.HTMLAttributes<HTMLElement>)
   onMount(() => {
     // console.log("[COMPONENT]PopperContent - getRect of floating", $content);
     store.setFloating({
+      $el: $content,
       getRect() {
         const rect = $content.getBoundingClientRect();
-        // console.log("[COMPONENT]PopperContent - getRect of floating", $content, rect);
         return rect;
       },
     });

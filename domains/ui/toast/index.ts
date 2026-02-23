@@ -40,7 +40,7 @@ type ToastState = {
 export class ToastCore extends BaseDomain<TheTypesOfEvents> {
   name = "ToastCore";
 
-  present = new PresenceCore();
+  presence = new PresenceCore();
   delay = 1200;
   timer: NodeJS.Timeout | null = null;
   open = false;
@@ -53,9 +53,9 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
       mask: this._mask,
       icon: this._icon,
       texts: this._texts,
-      enter: this.present.state.enter,
-      visible: this.present.state.visible,
-      exit: this.present.state.exit,
+      enter: this.presence.state.enter,
+      visible: this.presence.state.visible,
+      exit: this.presence.state.exit,
     };
   }
 
@@ -66,17 +66,17 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
     if (delay) {
       this.delay = delay;
     }
-    this.present.onShow(() => {
+    this.presence.onShow(() => {
       // console.log("[]ToastCore - this.present.onShow");
       this.open = true;
       this.emit(Events.OpenChange, true);
     });
-    this.present.onHidden(() => {
+    this.presence.onHidden(() => {
       // console.log("[]ToastCore - this.present.onHide");
       this.open = false;
       this.emit(Events.OpenChange, false);
     });
-    this.present.onStateChange(() => this.emit(Events.StateChange, { ...this.state }));
+    this.presence.onStateChange(() => this.emit(Events.StateChange, { ...this.state }));
   }
 
   /** 显示弹窗 */
@@ -99,7 +99,7 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
       }, this.delay);
       return;
     }
-    this.present.show();
+    this.presence.show();
     if (this._icon === "loading") {
       return;
     }
@@ -116,7 +116,7 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 隐藏弹窗 */
   hide() {
-    this.present.hide();
+    this.presence.hide();
     this.clearTimer();
   }
 

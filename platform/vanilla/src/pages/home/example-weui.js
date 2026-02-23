@@ -38,6 +38,7 @@ import { Tabs } from "../../components/weui/tabs.js";
 import { Accordion } from "../../components/weui/accordion.js";
 import { DropdownMenu } from "../../components/weui/menu.js";
 import { Tooltip } from "../../components/weui/tooltip.js";
+import { Popover } from "../../components/weui/popover.js";
 import { Sheet } from "../../components/weui/sheet.js";
 
 function injectWeUITheme() {
@@ -685,6 +686,105 @@ export function UIExampleWeUIPageView() {
                         ]),
                       ],
                     ),
+                  ]),
+                ]),
+                Section("Popover", [
+                  Item("Align (start / center / end)", [
+                    (() => {
+                      const popover$ = new Timeless.ui.PopoverCore({
+                        align: "start",
+                      });
+                      return View({ style: "display:inline-block;margin-right:8px;" }, [
+                        Popover(
+                          {
+                            store: popover$,
+                            title: "气泡 (start)",
+                            content: "align: start",
+                          },
+                          [
+                            Button(
+                              {
+                                variant: "default",
+                                size: "sm",
+                              },
+                              [Txt("align: start")],
+                            ),
+                          ],
+                        ),
+                      ]);
+                    })(),
+                    (() => {
+                      const popover$ = new Timeless.ui.PopoverCore({
+                        align: "center",
+                      });
+                      return View({ style: "display:inline-block;margin-right:8px;" }, [
+                        Popover(
+                          {
+                            store: popover$,
+                            title: "气泡 (center)",
+                            content: "align: center",
+                          },
+                          [
+                            Button(
+                              {
+                                variant: "default",
+                                size: "sm",
+                              },
+                              [Txt("align: center")],
+                            ),
+                          ],
+                        ),
+                      ]);
+                    })(),
+                    (() => {
+                      const popover$ = new Timeless.ui.PopoverCore({
+                        align: "end",
+                      });
+                      return View({ style: "display:inline-block;margin-right:8px;" }, [
+                        Popover(
+                          {
+                            store: popover$,
+                            title: "气泡 (end)",
+                            content: "align: end",
+                          },
+                          [
+                            Button(
+                              {
+                                variant: "default",
+                                size: "sm",
+                              },
+                              [Txt("align: end")],
+                            ),
+                          ],
+                        ),
+                      ]);
+                    })(),
+                  ]),
+                  Item("With offsetY", [
+                    (() => {
+                      const popover$ = new Timeless.ui.PopoverCore({
+                        align: "center",
+                      });
+                      popover$.popper.setOffset({ x: 0, y: 12 });
+                      return View({ style: "display:inline-block;" }, [
+                        Popover(
+                          {
+                            store: popover$,
+                            title: "气泡 (offsetY)",
+                            content: "offsetY: 12px 让气泡更靠下",
+                          },
+                          [
+                            Button(
+                              {
+                                variant: "default",
+                                size: "sm",
+                              },
+                              [Txt("offsetY: 12px")],
+                            ),
+                          ],
+                        ),
+                      ]);
+                    })(),
                   ]),
                 ]),
                 Section("Tooltip", [

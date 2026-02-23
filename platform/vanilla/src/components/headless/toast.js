@@ -17,7 +17,7 @@ export function Toast(props) {
   return Portal({
     onUnmounted() { for (const fn of events) if (typeof fn === "function") fn(); },
   }, [
-    Presence({ store: store.present }, [
+    Presence({ store: store.presence }, [
       Show({ when: computed({ state }, (d) => !!d.state.mask) }, [
         View({ ...merge(tp(t?.mask)) }),
       ]),

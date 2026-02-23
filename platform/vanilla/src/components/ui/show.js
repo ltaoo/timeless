@@ -10,7 +10,7 @@ export function Show(props, children) {
   let _prev_condition = null;
   let $parent = null;
 
-  const view$ = View(rest, []);
+  const view$ = View({ dataset: { show: 1 }, ...rest }, []);
   const cache = {};
 
   _when_ref._subscribe({

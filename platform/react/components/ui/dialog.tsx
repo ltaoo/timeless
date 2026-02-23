@@ -19,11 +19,11 @@ export const Dialog = React.memo(
     const { store } = props;
 
     const [state, setState] = useState(store.state);
-    const [state2, setState2] = useState(store.$present.state);
+    const [state2, setState2] = useState(store.$presence.state);
 
     useInitialize(() => {
       store.onStateChange((v) => setState(v));
-      store.$present.onStateChange((v) => setState2(v));
+      store.$presence.onStateChange((v) => setState2(v));
     });
 
     const { title, footer, cancel } = state;

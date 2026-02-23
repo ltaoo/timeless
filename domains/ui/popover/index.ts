@@ -39,7 +39,7 @@ type PopoverProps = {
 
 export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
   popper: PopperCore;
-  present: PresenceCore;
+  presence: PresenceCore;
   layer: DismissableLayerCore;
 
   _side: Side;
@@ -59,16 +59,21 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
       x: this.popper.state.x,
       y: this.popper.state.y,
 
-      enter: this.present.state.enter,
-      visible: this.present.state.visible,
-      exit: this.present.state.exit,
+      enter: this.presence.state.enter,
+      visible: this.presence.state.visible,
+      exit: this.presence.state.exit,
     };
   }
 
   constructor(props: { _name?: string } & PopoverProps = {}) {
     super();
 
-    const { side = "bottom", align = "end", strategy, closeable = true } = props;
+    const {
+      side = "bottom",
+      align = "end",
+      strategy = "fixed",
+      closeable = true,
+    } = props;
     this._side = side;
     this._align = align;
     this._closeable = closeable;
@@ -78,13 +83,13 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
       align,
       strategy,
     });
-    this.present = new PresenceCore();
+    this.presence = new PresenceCore();
     this.layer = new DismissableLayerCore();
     this.layer.onDismiss(() => {
       console.log("[DOMAIN/ui]popover/index - onDismiss");
       this.hide();
     });
-    this.present.onStateChange(() => {
+    this.presence.onStateChange(() => {
       this.emit(Events.StateChange, { ...this.state });
     });
     this.popper.onStateChange(() => {
@@ -94,7 +99,9 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
 
   ready() {}
   destroy() {}
-  toggle(position?: Partial<{ x: number; y: number; width: number; height: number }>) {
+  toggle(
+    position?: Partial<{ x: number; y: number; width: number; height: number }>,
+  ) {
     console.log("[DOMAIN/ui]popover/index - toggle");
     const { visible } = this;
     if (visible) {
@@ -131,7 +138,16 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
     if (position) {
       this.popper.updateReference({
         getRect() {
-          const { x = 0, y = 0, width = 0, height = 0, left = 0, top = 0, right = 0, bottom = 0 } = position;
+          const {
+            x = 0,
+            y = 0,
+            width = 0,
+            height = 0,
+            left = 0,
+            top = 0,
+            right = 0,
+            bottom = 0,
+          } = position;
           return {
             width,
             height,
@@ -146,7 +162,7 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
       });
     }
     this.visible = true;
-    this.present.show();
+    this.presence.show();
     this.popper.place();
     this.emit(Events.Show);
   }
@@ -155,14 +171,14 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     this.visible = false;
-    this.present.hide();
+    this.presence.hide();
     this.emit(Events.Hidden);
   }
   unmount() {
     super.destroy();
     this.layer.destroy();
     this.popper.destroy();
-    this.present.unmount();
+    this.presence.unmount();
   }
 
   onShow(handler: Handler<TheTypesOfEvents[Events.Show]>) {

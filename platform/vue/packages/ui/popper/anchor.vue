@@ -19,6 +19,7 @@ async function handleAnimationEnd(event: AnimationEvent) {
     return false;
   };
   store.setReference({
+    $el: $anchor,
     getRect() {
       const rect = $anchor.getBoundingClientRect();
       return rect;

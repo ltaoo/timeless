@@ -20,6 +20,7 @@ onMounted(() => {
   }
   // console.log($el);
   store.setFloating({
+    $el: $content,
     getRect() {
       const rect = $content.getBoundingClientRect();
       // console.log("[COMPONENT]PopperContent - getRect of floating", $content, rect);

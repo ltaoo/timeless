@@ -6,12 +6,8 @@ export function Presence(props, children) {
   const { store, animation, ...rest } = props;
   const state = ref(store.state);
   const visible = computed({ state }, (draft) => {
-    // console.log(
-    //   "[baseui]Presence - before ",
-    //   draft.state.mounted,
-    //   draft.state.visible,
-    // );
-    return draft.state.mounted && draft.state.visible;
+    const s = draft.state;
+    return s.mounted && (s.visible || s.enter || s.exit);
   });
 
   const unsubscribe = store.onStateChange(() => {

@@ -29,15 +29,15 @@ export function View(props = {}, children) {
 
   const class$ = (() => {
     if (!tmpcn) {
-      return classnames("");
+      return classnames([]);
     }
     if (tmpcn.__CN) {
       return tmpcn;
     }
     if (isRef(tmpcn)) {
-      return classnames(tmpcn);
+      return classnames([tmpcn]);
     }
-    return classnames(tmpcn);
+    return classnames([tmpcn]);
   })();
   // console.log("class$", class$);
   class$.listen({

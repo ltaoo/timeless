@@ -11,12 +11,12 @@ const configure = {
         pathname: "/home",
         children: {
           index: {
-            title: "工作台",
+            title: "组件库",
             pathname: "/home/index",
           },
-          task: {
-            title: "待办事项",
-            pathname: "/home/task",
+          weui: {
+            title: "Weui 组件库",
+            pathname: "/home/weui",
           },
         },
         options: {

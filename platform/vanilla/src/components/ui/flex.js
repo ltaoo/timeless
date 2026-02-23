@@ -3,8 +3,7 @@ import { View } from "./view.js";
 
 export function Flex(props, children) {
   const { justify, items, class: cn, ...rest } = props;
-  // const class$ = ViewClassname("flex");
-  const class$ = classnames(["flex", cn].join(" "));
+  const class$ = classnames(["flex", cn]);
   if (justify) {
     class$.add(` justify-${props.justify}`);
   }

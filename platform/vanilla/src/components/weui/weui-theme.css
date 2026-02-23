@@ -121,9 +121,23 @@
 @keyframes weui-spin { to { transform: rotate(360deg); } }
 @keyframes weui-pulse { 50% { opacity: 0.5; } }
 @keyframes weui-progress-indeterminate { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
+@keyframes weui-menu-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes weui-menu-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.96); } }
+@keyframes weui-sheet-in-right { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes weui-sheet-out-right { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+@keyframes weui-sheet-in-left { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes weui-sheet-out-left { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-100%); opacity: 0; } }
+@keyframes weui-sheet-in-top { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes weui-sheet-out-top { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100%); opacity: 0; } }
+@keyframes weui-sheet-in-bottom { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes weui-sheet-out-bottom { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100%); opacity: 0; } }
 
 .weui-animate-spin { animation: weui-spin 1s linear infinite; }
 .weui-animate-pulse { animation: weui-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.weui-animate-menu-in { animation: weui-menu-in 0.16s ease-out; }
+.weui-animate-menu-out { animation: weui-menu-out 0.12s ease-in forwards; }
+.weui-animate-menu-sub-in { animation: weui-fade-in 0.16s ease-out; }
+.weui-animate-menu-sub-out { animation: weui-fade-out 0.12s ease-in forwards; }
 
 /* Cell-based form layout */
 .weui-cells {

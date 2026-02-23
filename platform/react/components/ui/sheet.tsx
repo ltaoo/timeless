@@ -155,10 +155,10 @@ const Overlay = (
 ) => {
   const { store } = props;
 
-  const [state, setState] = useState(store.$present.state);
+  const [state, setState] = useState(store.$presence.state);
 
   useInitialize(() => {
-    store.$present.onStateChange((v) => setState(v));
+    store.$presence.onStateChange((v) => setState(v));
   });
 
   return (
@@ -190,10 +190,10 @@ const Content = (
 ) => {
   const { className, store, position, size, hideTitle, children } = props;
 
-  const [state, setState] = useState(store.$present.state);
+  const [state, setState] = useState(store.$presence.state);
 
   useInitialize(() => {
-    store.$present.onStateChange((v) => setState(v));
+    store.$presence.onStateChange((v) => setState(v));
   });
 
   return (

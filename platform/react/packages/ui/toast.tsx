@@ -17,7 +17,7 @@ const Portal = (props: { store: ToastCore } & React.AllHTMLAttributes<HTMLDivEle
 
   return (
     <PortalPrimitive>
-      <Presence store={store.$present}>{props.children}</Presence>
+      <Presence store={store.$presence}>{props.children}</Presence>
     </PortalPrimitive>
   );
 };

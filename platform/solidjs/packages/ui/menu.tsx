@@ -196,6 +196,7 @@ const SubTrigger = (
       props.onMounted($$item);
     }
     item.menu.popper.setReference({
+      $el: $$item,
       getRect() {
         const rect = $$item.getBoundingClientRect();
         return rect;

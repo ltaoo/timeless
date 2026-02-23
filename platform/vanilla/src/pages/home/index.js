@@ -1,17 +1,24 @@
 function Section(title, children) {
-  return View({ class: "space-y-3" }, [
+  return View({ class: classnames(["space-y-3"]) }, [
     View(
-      { class: "text-sm font-semibold text-zinc-500 uppercase tracking-wider" },
+      {
+        class: classnames([
+          "text-sm font-semibold text-zinc-500 uppercase tracking-wider",
+        ]),
+      },
       [Txt(title)],
     ),
-    View({ class: "space-y-4 pl-1" }, children),
+    View({ class: classnames(["space-y-4 pl-1"]) }, children),
   ]);
 }
 
 function Item(label, children) {
-  return View({ class: "space-y-2" }, [
-    View({ class: "text-sm text-zinc-400" }, [Txt(label)]),
-    View({ class: "flex flex-wrap items-center gap-3" }, children),
+  return View({ class: classnames(["space-y-2"]) }, [
+    View({ class: classnames(["text-sm text-zinc-400"]) }, [Txt(label)]),
+    View(
+      { class: classnames(["flex flex-wrap items-center gap-3"]) },
+      children,
+    ),
   ]);
 }
 
@@ -34,15 +41,20 @@ export function HomePageView() {
   ];
   const activeCategory = ref("general");
 
-  return View({ class: "flex h-full" }, [
+  return View({ class: classnames(["flex h-full"]) }, [
     // Sidebar
     View(
-      { class: "w-[180px] border-r border-zinc-200 dark:border-zinc-800 py-4" },
+      {
+        class: classnames([
+          "w-[180px] border-r border-zinc-200 dark:border-zinc-800 py-4",
+        ]),
+      },
       [
         View(
           {
-            class:
+            class: classnames([
               "px-3 mb-3 text-xs font-bold text-zinc-400 uppercase tracking-widest",
+            ]),
           },
           [Txt("Components")],
         ),
@@ -51,14 +63,14 @@ export function HomePageView() {
           render(cat) {
             return View(
               {
-                class: computed({ activeCategory }, (d) =>
-                  [
-                    "px-3 py-2 text-sm cursor-pointer transition-colors",
+                class: classnames([
+                  "px-3 py-2 text-sm cursor-pointer transition-colors",
+                  computed({ activeCategory }, (d) =>
                     d.activeCategory === cat.value
                       ? "text-zinc-900 bg-zinc-100 font-medium dark:text-zinc-50 dark:bg-zinc-800"
                       : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50",
-                  ].join(" "),
-                ),
+                  ),
+                ]),
                 onClick() {
                   activeCategory.value = cat.value;
                 },
@@ -70,7 +82,7 @@ export function HomePageView() {
       ],
     ),
     // Content
-    View({ class: "flex-1 w-0 overflow-y-auto p-6" }, [
+    View({ class: classnames(["flex-1 w-0 overflow-y-auto p-6"]) }, [
       // === General ===
       Show(
         {
@@ -80,7 +92,7 @@ export function HomePageView() {
           ),
         },
         [
-          View({ class: "space-y-8" }, [
+          View({ class: classnames(["space-y-8"]) }, [
             Section("Button", [
               Item("Variants", [
                 Button({}, [Txt("Default")]),
@@ -105,9 +117,11 @@ export function HomePageView() {
               ]),
             ]),
             Section("Separator", [
-              Item("Horizontal", [View({ class: "w-full" }, [Separator({})])]),
+              Item("Horizontal", [
+                View({ class: classnames(["w-full"]) }, [Separator({})]),
+              ]),
               Item("Vertical", [
-                View({ class: "flex items-center h-6 gap-3" }, [
+                View({ class: classnames(["flex items-center h-6 gap-3"]) }, [
                   Txt("Left"),
                   Separator({ orientation: "vertical" }),
                   Txt("Right"),
@@ -123,13 +137,13 @@ export function HomePageView() {
             ]),
             Section("Card", [
               Item("Default", [
-                Card({ class: "w-[350px]" }, [
+                Card({ class: classnames(["w-[350px]"]) }, [
                   CardHeader({}, [
                     CardTitle({}, [Txt("Card Title")]),
                     CardDescription({}, [Txt("Card description goes here.")]),
                   ]),
                   CardContent({}, [
-                    View({ class: "text-sm" }, [
+                    View({ class: classnames(["text-sm"]) }, [
                       Txt("This is the card content area."),
                     ]),
                   ]),
@@ -149,7 +163,7 @@ export function HomePageView() {
           ),
         },
         [
-          View({ class: "space-y-8" }, [
+          View({ class: classnames(["space-y-8"]) }, [
             Section("Input", [
               Item("Default", [
                 Input({
@@ -169,7 +183,7 @@ export function HomePageView() {
             ]),
             Section("Label", [
               Item("With Input", [
-                View({ class: "space-y-2 w-full" }, [
+                View({ class: classnames(["space-y-2 w-full"]) }, [
                   Label({}, [Txt("Email")]),
                   Input({
                     store: new Timeless.ui.InputCore({ defaultValue: "" }),
@@ -217,7 +231,7 @@ export function HomePageView() {
           ),
         },
         [
-          View({ class: "space-y-8" }, [
+          View({ class: classnames(["space-y-8"]) }, [
             Section("Progress", [
               Item("60%", [Progress({ value: progressVal, max: 100 })]),
               Item("Controls", [
@@ -275,11 +289,13 @@ export function HomePageView() {
             ]),
             Section("Skeleton", [
               Item("Default", [
-                View({ class: "space-y-3 w-[250px]" }, [
-                  Skeleton({ class: "h-[125px] w-full rounded-xl" }),
-                  View({ class: "space-y-2" }, [
-                    Skeleton({ class: "h-4 w-full" }),
-                    Skeleton({ class: "h-4 w-[200px]" }),
+                View({ class: classnames(["space-y-3 w-[250px]"]) }, [
+                  Skeleton({
+                    class: classnames(["h-[125px] w-full rounded-xl"]),
+                  }),
+                  View({ class: classnames(["space-y-2"]) }, [
+                    Skeleton({ class: classnames(["h-4 w-full"]) }),
+                    Skeleton({ class: classnames(["h-4 w-[200px]"]) }),
                   ]),
                 ]),
               ]),
@@ -288,13 +304,14 @@ export function HomePageView() {
               Item("Default", [
                 ScrollArea(
                   {
-                    class:
+                    class: classnames([
                       "h-[200px] w-[250px] rounded-md border border-zinc-200 p-4 dark:border-zinc-800",
+                    ]).toString(),
                   },
                   [
-                    View({ class: "space-y-4" }, [
+                    View({ class: classnames(["space-y-4"]) }, [
                       ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) =>
-                        View({ class: "text-sm" }, [
+                        View({ class: classnames(["text-sm"]) }, [
                           Txt(`Item ${i} — Scrollable content area`),
                         ]),
                       ),
@@ -305,12 +322,13 @@ export function HomePageView() {
             ]),
             Section("AspectRatio", [
               Item("16:9", [
-                View({ class: "w-[300px]" }, [
+                View({ class: classnames(["w-[300px]"]) }, [
                   AspectRatio({ ratio: 16 / 9 }, [
                     View(
                       {
-                        class:
+                        class: classnames([
                           "flex items-center justify-center w-full h-full rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500",
+                        ]),
                       },
                       [Txt("16 : 9")],
                     ),
@@ -360,7 +378,7 @@ export function HomePageView() {
           ),
         },
         [
-          View({ class: "space-y-8" }, [
+          View({ class: classnames(["space-y-8"]) }, [
             Section("Dialog", [
               Item("Default", [
                 Button(
@@ -372,7 +390,7 @@ export function HomePageView() {
                   [Txt("Open Dialog")],
                 ),
                 Dialog({ store: dialog$ }, [
-                  View({ class: "text-sm text-zinc-500" }, [
+                  View({ class: classnames(["text-sm text-zinc-500"]) }, [
                     Txt(
                       "This is a dialog content area. You can put anything here.",
                     ),
@@ -384,7 +402,7 @@ export function HomePageView() {
               Item("Toggle visibility", [
                 (() => {
                   const p$ = new Timeless.ui.PresenceCore({});
-                  return View({ class: "space-y-2" }, [
+                  return View({ class: classnames(["space-y-2"]) }, [
                     Button(
                       {
                         size: "sm",
@@ -407,8 +425,9 @@ export function HomePageView() {
                     Presence(
                       {
                         store: p$,
-                        class:
+                        class: classnames([
                           "p-3 rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm",
+                        ]).toString(),
                       },
                       [Txt("I am visible!")],
                     ),
@@ -420,7 +439,7 @@ export function HomePageView() {
               Item("Default", [
                 (() => {
                   const toast$ = new Timeless.ui.ToastCore({});
-                  return View({ class: "flex gap-2" }, [
+                  return View({ class: classnames(["flex gap-2"]) }, [
                     Button(
                       {
                         size: "sm",
@@ -477,7 +496,7 @@ export function HomePageView() {
           when: computed({ activeCategory }, (d) => d.activeCategory === "nav"),
         },
         [
-          View({ class: "space-y-8" }, [
+          View({ class: classnames(["space-y-8"]) }, [
             Section("Tabs", [
               Item("Default", [
                 Tabs({
@@ -537,7 +556,7 @@ export function HomePageView() {
           ),
         },
         [
-          View({ class: "space-y-8" }, [
+          View({ class: classnames(["space-y-8"]) }, [
             Section("Dropdown Menu", [
               Item("Default", [
                 DropdownMenu(
@@ -622,38 +641,149 @@ export function HomePageView() {
                   [Button({}, [Txt("With Submenu")])],
                 ),
               ]),
+              Item("Near Page Bottom", [
+                View(
+                  {
+                    class: classnames([
+                      "w-full h-[800px] flex items-end justify-center",
+                    ]),
+                  },
+                  [
+                    DropdownMenu(
+                      {
+                        store: new Timeless.ui.DropdownMenuCore({
+                          items: [
+                            new Timeless.ui.MenuItemCore({
+                              label: "Edit",
+                              onClick() {
+                                console.log("edit");
+                              },
+                            }),
+                            new Timeless.ui.MenuItemCore({
+                              label: "Duplicate",
+                              onClick() {
+                                console.log("duplicate");
+                              },
+                            }),
+                            new Timeless.ui.MenuItemCore({
+                              label: "Delete",
+                              onClick() {
+                                console.log("delete");
+                              },
+                            }),
+                          ],
+                        }),
+                      },
+                      [Button({ variant: "outline" }, [Txt("Open Menu")])],
+                    ),
+                  ],
+                ),
+              ]),
+              Item("Near Right Side", [
+                View(
+                  {
+                    class: classnames(["w-full flex justify-end"]),
+                  },
+                  [
+                    DropdownMenu(
+                      {
+                        store: new Timeless.ui.DropdownMenuCore({
+                          side: "right",
+                          align: "start",
+                          items: [
+                            new Timeless.ui.MenuItemCore({
+                              label: "Edit",
+                              onClick() {
+                                console.log("edit");
+                              },
+                            }),
+                            new Timeless.ui.MenuItemCore({
+                              label: "Duplicate",
+                              onClick() {
+                                console.log("duplicate");
+                              },
+                            }),
+                            new Timeless.ui.MenuItemCore({
+                              label: "Delete",
+                              onClick() {
+                                console.log("delete");
+                              },
+                            }),
+                          ],
+                        }),
+                      },
+                      [Button({ variant: "outline" }, [Txt("Open Menu")])],
+                    ),
+                  ],
+                ),
+              ]),
+              Item("Align Positions", [
+                View({ class: classnames(["flex gap-4 flex-wrap"]) }, [
+                  ...[
+                    "bottom-start",
+                    "bottom-center",
+                    "bottom-end",
+                    "top-start",
+                    "top-center",
+                    "top-end",
+                    "right-start",
+                    "right-center",
+                    "left-start",
+                  ].map((pos) => {
+                    const [side, align] = pos.split("-");
+                    return DropdownMenu(
+                      {
+                        store: new Timeless.ui.DropdownMenuCore({
+                          side,
+                          align,
+                          items: [
+                            new Timeless.ui.MenuItemCore({
+                              label: "Edit",
+                              onClick() {
+                                console.log("edit");
+                              },
+                            }),
+                            new Timeless.ui.MenuItemCore({
+                              label: "Duplicate",
+                              onClick() {
+                                console.log("duplicate");
+                              },
+                            }),
+                            new Timeless.ui.MenuItemCore({
+                              label: "Delete",
+                              onClick() {
+                                console.log("delete");
+                              },
+                            }),
+                          ],
+                        }),
+                      },
+                      [Button({ variant: "outline", size: "sm" }, [Txt(pos)])],
+                    );
+                  }),
+                ]),
+              ]),
             ]),
             Section("Popover", [
               Item("Default", [
                 (() => {
                   const popover$ = new Timeless.ui.PopoverCore({});
-                  return View({ class: "inline-block" }, [
-                    Button(
+                  return View({ class: classnames(["inline-block"]) }, [
+                    Popover(
                       {
-                        variant: "outline",
-                        onClick(event) {
-                          const rect =
-                            event.currentTarget.getBoundingClientRect();
-                          popover$.toggle({
-                            x: rect.left,
-                            y: rect.bottom + 4,
-                            width: rect.width,
-                            height: rect.height,
-                          });
-                        },
+                        store: popover$,
+                        title: "Popover Title",
+                        content: "This is the popover content.",
                       },
-                      [Txt("Open Popover")],
+                      [
+                        Button(
+                          {
+                            variant: "outline",
+                          },
+                          [Txt("Open Popover")],
+                        ),
+                      ],
                     ),
-                    Popover({ store: popover$ }, [
-                      View({ class: "space-y-2" }, [
-                        View({ class: "text-sm font-medium" }, [
-                          Txt("Popover Title"),
-                        ]),
-                        View({ class: "text-sm text-zinc-500" }, [
-                          Txt("This is the popover content."),
-                        ]),
-                      ]),
-                    ]),
                   ]);
                 })(),
               ]),
@@ -686,7 +816,7 @@ export function HomePageView() {
                   const sheetB$ = new Timeless.ui.DialogCore({
                     title: "Sheet Bottom",
                   });
-                  return View({ class: "flex gap-2" }, [
+                  return View({ class: classnames(["flex gap-2"]) }, [
                     Button(
                       {
                         size: "sm",
@@ -717,31 +847,31 @@ export function HomePageView() {
                       [Txt("Bottom")],
                     ),
                     Sheet({ store: sheetR$, side: "right" }, [
-                      View({ class: "mt-8 space-y-2" }, [
-                        View({ class: "text-lg font-semibold" }, [
+                      View({ class: classnames(["mt-8 space-y-2"]) }, [
+                        View({ class: classnames(["text-lg font-semibold"]) }, [
                           Txt("Sheet Right"),
                         ]),
-                        View({ class: "text-sm text-zinc-500" }, [
+                        View({ class: classnames(["text-sm text-zinc-500"]) }, [
                           Txt("This is sheet content sliding from the right."),
                         ]),
                       ]),
                     ]),
                     Sheet({ store: sheetL$, side: "left" }, [
-                      View({ class: "mt-8 space-y-2" }, [
-                        View({ class: "text-lg font-semibold" }, [
+                      View({ class: classnames(["mt-8 space-y-2"]) }, [
+                        View({ class: classnames(["text-lg font-semibold"]) }, [
                           Txt("Sheet Left"),
                         ]),
-                        View({ class: "text-sm text-zinc-500" }, [
+                        View({ class: classnames(["text-sm text-zinc-500"]) }, [
                           Txt("This is sheet content sliding from the left."),
                         ]),
                       ]),
                     ]),
                     Sheet({ store: sheetB$, side: "bottom" }, [
-                      View({ class: "space-y-2" }, [
-                        View({ class: "text-lg font-semibold" }, [
+                      View({ class: classnames(["space-y-2"]) }, [
+                        View({ class: classnames(["text-lg font-semibold"]) }, [
                           Txt("Sheet Bottom"),
                         ]),
-                        View({ class: "text-sm text-zinc-500" }, [
+                        View({ class: classnames(["text-sm text-zinc-500"]) }, [
                           Txt("This is sheet content sliding from the bottom."),
                         ]),
                       ]),

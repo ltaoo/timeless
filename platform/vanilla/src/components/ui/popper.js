@@ -4,22 +4,24 @@ import { Portal } from "./portal.js";
 import { Presence } from "./presence.js";
 
 export function Popper(props, children) {
-  const state = ref(props.store.state);
+  const { store, zIndex = 999, ...rest } = props;
+  const state = ref(store.state);
   let unsubscribe;
 
   const content$ = View(
     {
+      ...rest,
       class: "portal z-[999]",
       style: computed({ state }, (draft) => {
         const ss = {
-          "z-index": 999,
+          "z-index": zIndex,
           position: "fixed",
           left: 0,
           top: 0,
           opacity: draft.state.isPlaced ? 100 : 0,
           transform: draft.state.isPlaced
             ? `translate3d(${Math.round(draft.state.x)}px, ${Math.round(draft.state.y)}px, 0)`
-            : "translate3d(0, -200%, 0)",
+            : "translate3d(0, 0, 0)",
         };
         return Object.keys(ss)
           .map((k) => {
@@ -28,7 +30,7 @@ export function Popper(props, children) {
           .join("; ");
       }),
       onMounted($e) {
-        props.store.setFloating({
+        store.setFloating({
           $el: $e,
           getRect() {
             const rect = $e.getBoundingClientRect();
@@ -40,23 +42,32 @@ export function Popper(props, children) {
             return rect;
           },
         });
+        // if (typeof store.place2 === "function") {
+        //   const rect = $e.getBoundingClientRect();
+        //   store.place2({
+        //     x: rect.x,
+        //     y: rect.y,
+        //     width: rect.width,
+        //     height: rect.height,
+        //   });
+        // }
       },
       onUnmounted() {
         if (typeof unsubscribe === "function") {
           unsubscribe();
         }
-        props.store.setFloating(null);
+        store.setFloating(null);
       },
     },
     children,
   );
-  unsubscribe = props.store.onStateChange(() => {
+  unsubscribe = store.onStateChange(() => {
     // console.log(
     //   "[baseui]Popover props.store.onStateChange",
-    //   props.store.state.isPlaced,
-    //   props.store.state.visible,
+    //   store.state.isPlaced,
+    //   store.state.visible,
     // );
-    state.value = props.store.state;
+    state.value = store.state;
   });
 
   // return Presence(

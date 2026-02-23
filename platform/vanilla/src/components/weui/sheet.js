@@ -15,15 +15,26 @@ const SIDE_POS = {
 
 const t = {
   overlay: ({ enter, exit }) => ({
-    style: ["position:fixed;inset:0;z-index:50;background:var(--weui-OVERLAY);", enter ? "animation:weui-fade-in .3s;" : "", exit ? "animation:weui-fade-out .3s;" : ""].join(""),
+    style: [
+      "position:fixed;inset:0;z-index:50;background:var(--weui-OVERLAY);",
+      enter ? "animation:weui-fade-in 0.2s ease-out;" : "",
+      exit ? "animation:weui-fade-out 0.18s ease-in forwards;" : "",
+    ].join(""),
   }),
-  content: ({ side, visible, enter }) => {
+  content: ({ side, enter, exit }) => {
     const tr = SIDE_TRANSFORM[side] || SIDE_TRANSFORM.right;
+    const sideKey = SIDE_POS[side] ? side : "right";
+    const animation = enter
+      ? `animation:weui-sheet-in-${sideKey} 0.2s ease-out forwards;`
+      : exit
+        ? `animation:weui-sheet-out-${sideKey} 0.16s ease-in forwards;`
+        : "";
     return {
       style: [
-        "position:fixed;z-index:50;background:var(--weui-BG-2);padding:var(--weui-CELL-GAP);box-shadow:-2px 0 8px rgba(0,0,0,.1);transition:transform .3s ease-in-out;",
+        "position:fixed;z-index:50;background:var(--weui-BG-2);padding:var(--weui-CELL-GAP);box-shadow:-2px 0 8px rgba(0,0,0,.1);",
         SIDE_POS[side] || SIDE_POS.right,
-        (visible && enter) ? `transform:${tr.enter};` : `transform:${tr.base};`,
+        `transform:${tr.enter};`,
+        animation,
       ].join(""),
     };
   },

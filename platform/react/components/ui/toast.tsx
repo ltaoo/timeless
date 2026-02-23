@@ -12,13 +12,13 @@ export const Toast = React.memo((props: { store: ToastCore }) => {
   const { store } = props;
 
   const [state, setState] = useState(store.state);
-  const [state2, setState2] = useState(store.$present.state);
+  const [state2, setState2] = useState(store.$presence.state);
 
   useInitialize(() => {
     store.onStateChange((nextState) => {
       setState(nextState);
     });
-    store.$present.onStateChange((v) => setState2(v));
+    store.$presence.onStateChange((v) => setState2(v));
   });
 
   const { texts } = state;

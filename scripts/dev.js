@@ -1,4 +1,5 @@
 const fs = require("fs");
+const http = require("http");
 const path = require("path");
 const { spawn } = require("child_process");
 
@@ -110,4 +111,54 @@ function startWatch() {
   });
 }
 
+const port = parseInt(process.argv[2], 10) || 3000;
+const vanillaDir = path.join(rootDir, "platform", "vanilla");
+
+const MIME = {
+  ".html": "text/html",
+  ".js": "application/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+  ".woff2": "font/woff2",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+};
+
+function startServer() {
+  http
+    .createServer(async (req, res) => {
+      let urlPath = decodeURIComponent(req.url.split("?")[0]);
+      let filePath = path.join(vanillaDir, urlPath);
+      const indexFile = path.join(vanillaDir, "index.html");
+
+      try {
+        const stat = await fs.promises.stat(filePath);
+        if (stat.isDirectory()) filePath = path.join(filePath, "index.html");
+      } catch {}
+
+      try {
+        const data = await fs.promises.readFile(filePath);
+        const ext = path.extname(filePath);
+        res.writeHead(200, { "Content-Type": MIME[ext] || "application/octet-stream" });
+        res.end(data);
+      } catch {
+        const ext = path.extname(urlPath);
+        if (!ext || ext === ".html") {
+          try {
+            const data = await fs.promises.readFile(indexFile);
+            res.writeHead(200, { "Content-Type": "text/html" });
+            res.end(data);
+            return;
+          } catch {}
+        }
+        res.writeHead(404);
+        res.end("Not Found");
+      }
+    })
+    .listen(port, () => {
+      console.log(`开发服务已启动: http://localhost:${port}`);
+    });
+}
+
+startServer();
 startWatch();

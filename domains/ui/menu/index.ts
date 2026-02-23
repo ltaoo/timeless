@@ -66,7 +66,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       items = [],
       side,
       align,
-      strategy,
+      strategy = "fixed",
       offsetX = 0,
       offsetY = 0,
     } = options;
@@ -127,6 +127,15 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         return;
       }
       this.reset();
+      this.in_sub_menu = false;
+      this.cur_sub = null;
+      this.maybe_hide_sub = false;
+      this.hide_sub_timer = null;
+      this.state.open = false;
+      this.popper.reset();
+      for (let i = 0; i < this.items.length; i += 1) {
+        this.items[i].reset();
+      }
       if (this.cur_item) {
         this.cur_item.blur();
       }

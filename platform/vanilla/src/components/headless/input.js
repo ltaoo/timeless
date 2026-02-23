@@ -14,7 +14,7 @@ export function Input(props) {
   });
 
   const m = merge(tp(t?.root), cn, st);
-  const class$ = classnames(m.class || "");
+  const class$ = classnames([m.class || ""]);
   class$.listen({ onChange(v) { $elm.className = v.join(" "); } });
   $elm.className = class$.toString();
   if (m.style) $elm.style.cssText = m.style;

@@ -245,39 +245,107 @@ export function computed(deps, consumer) {
 export function isComponent(v) {
   return v && typeof v.render === "function";
 }
-export function classnames(classname) {
+export function classnames(items) {
   let ctx = {
     onChange(names) {},
   };
-  let _names = (() => {
-    if (classname) {
-      if (typeof classname === "object" && classname.__isRef) {
-        classname._subscribe({
-          onChange(v) {
-            _names = String(v).split(" ");
-            // console.log("[]the className is changed, ", _names);
-            ctx.onChange(_names);
-          },
-        });
-        return String(classname.value).split(" ");
+  let _names = [];
+  const sources = [];
+  const manualAdds = new Set();
+  function evalString(v) {
+    if (!v) return [];
+    return String(v)
+      .split(" ")
+      .filter(Boolean);
+  }
+  function recompute() {
+    const next = [];
+    for (let i = 0; i < sources.length; i += 1) {
+      const src = sources[i];
+      if (src.type === "string") {
+        const seg = evalString(src.value);
+        for (let j = 0; j < seg.length; j += 1) {
+          const v = seg[j];
+          if (!next.includes(v)) {
+            next.push(v);
+          }
+        }
+      } else if (src.type === "ref") {
+        const seg = evalString(src.value.value);
+        for (let j = 0; j < seg.length; j += 1) {
+          const v = seg[j];
+          if (!next.includes(v)) {
+            next.push(v);
+          }
+        }
+      } else if (src.type === "cn") {
+        const seg = evalString(src.value.toString());
+        for (let j = 0; j < seg.length; j += 1) {
+          const v = seg[j];
+          if (!next.includes(v)) {
+            next.push(v);
+          }
+        }
       }
-      // console.log("[]classnames", classname);
-      return classname.split(" ");
     }
-    return [];
-  })();
+    manualAdds.forEach((v) => {
+      if (!next.includes(v)) {
+        next.push(v);
+      }
+    });
+    _names = next;
+    ctx.onChange(_names);
+  }
+  function addSourceFromItem(item) {
+    if (!item && item !== "") {
+      return;
+    }
+    if (typeof item === "string") {
+      sources.push({ type: "string", value: item });
+      return;
+    }
+    if (item && item.__CN) {
+      sources.push({ type: "cn", value: item });
+      item.listen({
+        onChange() {
+          recompute();
+        },
+      });
+      return;
+    }
+    if (item && typeof item === "object" && item.__isRef) {
+      sources.push({ type: "ref", value: item });
+      item._subscribe({
+        onChange() {
+          recompute();
+        },
+        onPatch() {
+          recompute();
+        },
+      });
+    }
+  }
+  if (Array.isArray(items)) {
+    for (let i = 0; i < items.length; i += 1) {
+      addSourceFromItem(items[i]);
+    }
+  } else if (items !== undefined) {
+    addSourceFromItem(items);
+  }
+  recompute();
   return {
     __CN: true,
     del(v) {
+      manualAdds.delete(v);
       _names = _names.filter((vv) => vv !== v);
       ctx.onChange(_names);
     },
     add(v) {
-      if (_names.includes(v)) {
-        return;
+      if (!_names.includes(v)) {
+        manualAdds.add(v);
+        _names.push(v);
+        ctx.onChange(_names);
       }
-      _names.push(v);
-      ctx.onChange(_names);
     },
     append(c) {
       const segments = c.split(" ");
@@ -290,7 +358,6 @@ export function classnames(classname) {
       ctx = c;
     },
     toString() {
-      // console.log("[]classnames.toString", _names);
       return _names.filter(Boolean).join(" ");
     },
   };

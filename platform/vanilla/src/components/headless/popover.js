@@ -5,7 +5,7 @@ import { Portal } from "../ui/portal.js";
 import { ref, computed } from "../ui/core.js";
 
 export function Popover(props, children) {
-  const { store, theme: t, class: cn, style: st, ...rest } = props;
+  const { store, content, title, theme: t, class: cn, style: st, ...rest } = props;
   const state = ref(store.state);
   const events = [];
   events.push(store.onStateChange(() => { state.value = store.state; }));
@@ -13,7 +13,42 @@ export function Popover(props, children) {
   const layer = store.layer;
   let handlePointerDown;
 
-  return Portal({
+  function normalizeNodes(input) {
+    if (Array.isArray(input)) {
+      return input.map((item) => {
+        if (item && typeof item === "object" && item.render) return item;
+        return {
+          t: "text",
+          $elm: document.createTextNode(String(item == null ? "" : item)),
+          render() { return this.$elm; },
+          onMounted() {},
+          beforeUnmounted() {},
+          onUnmounted() {},
+        };
+      });
+    }
+    if (input && typeof input === "object" && input.render) return [input];
+    if (input === undefined) return [];
+    return [{
+      t: "text",
+      $elm: document.createTextNode(String(input == null ? "" : input)),
+      render() { return this.$elm; },
+      onMounted() {},
+      beforeUnmounted() {},
+      onUnmounted() {},
+    }];
+  }
+
+  let contentNodes = content !== undefined ? normalizeNodes(content) : (children || []);
+  if (title !== undefined) {
+    const titleNodes = normalizeNodes(title);
+    contentNodes = [
+      View({ ...merge(tp(t?.title)) }, titleNodes),
+      ...contentNodes,
+    ];
+  }
+
+  const portal$ = Portal({
     onUnmounted() {
       for (const fn of events) if (typeof fn === "function") fn();
       if (rest.onUnmounted) rest.onUnmounted();
@@ -71,8 +106,57 @@ export function Popover(props, children) {
                 : "opacity:0;transform:translate3d(0,-4px,0);",
             ].join("");
           }),
-        }, children || []),
+        }, contentNodes),
       ]),
     ]),
+  ]);
+
+  if (content === undefined) {
+    return portal$;
+  }
+
+  return View({
+    ...rest,
+    onMounted($e) {
+      if (rest.onMounted) rest.onMounted($e);
+      const $ref = $e.firstElementChild || $e;
+      store.popper.setReference(
+        {
+          $el: $ref,
+          getRect() {
+            return $ref.getBoundingClientRect();
+          },
+        },
+        { force: true },
+      );
+      if (layer) {
+        $e.addEventListener("pointerdown", () => {
+          layer.pointerDown();
+          const rect = $e.getBoundingClientRect();
+          store.toggle({
+            x: rect.x,
+            y: rect.y + 4,
+            width: rect.width,
+            height: rect.height,
+          });
+        });
+      } else {
+        $e.addEventListener("pointerdown", () => {
+          const rect = $e.getBoundingClientRect();
+          store.toggle({
+            x: rect.left,
+            y: rect.bottom + 4,
+            width: rect.width,
+            height: rect.height,
+          });
+        });
+      }
+    },
+    onUnmounted() {
+      if (rest.onUnmounted) rest.onUnmounted();
+    },
+  }, [
+    ...(children || []),
+    portal$,
   ]);
 }

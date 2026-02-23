@@ -29,7 +29,7 @@ Component({
           cancel,
           // contentClassName,
         });
-        store.$present.onStateChange((v) => {
+        store.$presence.onStateChange((v) => {
           const { enter, exit } = v;
           // const overlayAnimationClassName = (() => {
           //   if (enter) {

@@ -2,7 +2,7 @@ import { View } from "./view.js";
 import { isRef, classnames } from "./core.js";
 
 export function Paragraph(props, children) {
-  const class$ = classnames();
+  const class$ = classnames([]);
   const node$ = View(
     {
       type: "p",

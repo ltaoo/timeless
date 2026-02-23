@@ -61,7 +61,7 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
   closeable = true;
   mask = true;
 
-  present = new PresenceCore();
+  presence = new PresenceCore();
   okBtn = new ButtonCore();
   cancelBtn = new ButtonCore();
 
@@ -72,16 +72,25 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
       footer: this.footer,
       closeable: this.closeable,
       mask: this.mask,
-      enter: this.present.state.enter,
-      visible: this.present.state.visible,
-      exit: this.present.state.exit,
+      enter: this.presence.state.enter,
+      visible: this.presence.state.visible,
+      exit: this.presence.state.exit,
     };
   }
 
   constructor(props: Partial<{ _name: string }> & DialogProps = {}) {
     super(props);
 
-    const { title, footer = true, open = false, mask = true, closeable = true, onOk, onCancel, onUnmounted } = props;
+    const {
+      title,
+      footer = true,
+      open = false,
+      mask = true,
+      closeable = true,
+      onOk,
+      onCancel,
+      onUnmounted,
+    } = props;
     if (title) {
       this.title = title;
     }
@@ -90,7 +99,7 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
     this.mask = mask;
     this.open = open;
     if (open) {
-      this.present.show();
+      this.presence.show();
     }
     if (onOk) {
       this.onOk(onOk);
@@ -101,23 +110,23 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
     if (onUnmounted) {
       this.onUnmounted(onUnmounted);
     }
-    this.present.onShow(async () => {
+    this.presence.onShow(async () => {
       this.open = true;
       this.emit(Events.VisibleChange, true);
       this.emit(Events.Show);
       this.emit(Events.StateChange, { ...this.state });
     });
-    this.present.onHidden(async () => {
+    this.presence.onHidden(async () => {
       this.open = false;
       this.emit(Events.Cancel);
       this.emit(Events.Hidden);
       this.emit(Events.VisibleChange, false);
       this.emit(Events.StateChange, { ...this.state });
     });
-    this.present.onUnmounted(() => {
+    this.presence.onUnmounted(() => {
       this.emit(Events.Unmounted);
     });
-    this.present.onStateChange(() => {
+    this.presence.onStateChange(() => {
       this.emit(Events.StateChange, { ...this.state });
     });
     this.okBtn.onClick(() => {
@@ -129,10 +138,10 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
   }
   toggle() {
     if (this.open) {
-      this.present.hide();
+      this.presence.hide();
       return;
     }
-    this.present.show();
+    this.presence.show();
   }
   /** 显示弹窗 */
   show() {
@@ -141,7 +150,7 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     // this.emit(Events.BeforeShow);
-    this.present.show();
+    this.presence.show();
   }
   /** 隐藏弹窗 */
   hide(opt: Partial<{ destroy: boolean }> = {}) {
@@ -149,7 +158,7 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
     //   return;
     // }
     // this.emit(Events.Cancel);
-    this.present.hide(opt);
+    this.presence.hide(opt);
   }
   ok() {
     this.emit(Events.OK);

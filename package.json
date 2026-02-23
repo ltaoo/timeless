@@ -44,7 +44,8 @@
     "copy:types:web": "mkdir -p types/web && cp -r dist/dts/web/domains types/web/",
     "copy:types:weapp": "mkdir -p types/weapp && cp -r dist/dts/weapp/domains types/weapp/",
     "gen:types:index": "echo '/// <reference path=\"./core/index.d.ts\" />\n/// <reference path=\"./web/index.d.ts\" />\n/// <reference path=\"./weapp/index.d.ts\" />\nexport * from \"./core\";\nexport * from \"./web\";\nexport * from \"./weapp\";' > types/index.d.ts",
-    "build:watch": "tsup --watch"
+    "build:watch": "tsup --watch",
+    "build:wui": "esbuild platform/vanilla/src/components/weui/weui.js --bundle --format=iife --target=es2015 --platform=browser --outfile=platform/vanilla/public/wui.umd.min.js --minify"
   },
   "keywords": [],
   "author": "",
@@ -56,7 +57,8 @@
     "mitt": "^3.0.1",
     "qs": "^6.14.1",
     "tailwind-merge": "^3.4.0",
-    "url-parse": "^1.5.10"
+    "url-parse": "^1.5.10",
+    "@floating-ui/dom": "^1.7.5"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^29.0.0",

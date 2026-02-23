@@ -21,6 +21,14 @@ const MENU_CONTENT_CLASS = "min-w-[8rem] overflow-hidden rounded-md border borde
 import { Menu as HMenu, MenuItem as HItem, MenuLabel as HLabel, MenuSeparator as HSep, DropdownMenu as HDrop } from "../headless/menu.js";
 
 const t = {
+  animation: {
+    in: "animate-in fade-in-0 zoom-in-95",
+    out: "animate-out fade-out-0 zoom-out-95",
+  },
+  subAnimation: {
+    in: "animate-in fade-in-0",
+    out: "animate-out fade-out-0",
+  },
   menu: { class: MENU_CONTENT_CLASS },
   item: { class: "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50" },
   itemHover: { class: "bg-gray-100" },

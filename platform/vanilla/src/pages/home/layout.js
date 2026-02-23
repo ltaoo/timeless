@@ -29,9 +29,41 @@ export function HomeLayoutView(props) {
       },
     },
     [
-      // View({ class: "sidebar-wrapper w-[72px]" }, []),
+      View({ class: "sidebar-wrapper w-[72px]" }, [
+        For({
+          each: [
+            {
+              id: "root.home_layout.index",
+              name: "首页",
+            },
+            {
+              id: "root.home_layout.weui",
+              name: "Weui",
+            },
+          ],
+          render(menu) {
+            return View(
+              {
+                class: classnames([
+                  "sidebar-item flex items-center justify-center w-full h-[72px] cursor-pointer",
+                  (() => {
+                    if (curSubView.value === menu.id) {
+                      return "bg-[#f5f5f5]";
+                    }
+                    return "";
+                  })(),
+                ]),
+                onClick() {
+                  props.history.push(menu.id);
+                },
+              },
+              [View({}, [Txt(menu.name)])],
+            );
+          },
+        }),
+      ]),
       For({
-        class: "w-full h-full",
+        class: "relative flex-1 w-0 h-full",
         each: subViews,
         render(sub_view) {
           const PageView = props.views[sub_view.name];
@@ -61,7 +93,7 @@ export function HomeLayoutView(props) {
           });
           return View(
             {
-              class: classnames(displayed),
+              class: classnames([displayed]),
               style: {},
               dataset: {
                 name: sub_view.name,
