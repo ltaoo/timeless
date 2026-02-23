@@ -11,6 +11,11 @@ export function Portal(props, children) {
       document.body.appendChild($elm);
       return null;
     },
+    onMounted() {
+      if (view$.onMounted) {
+        view$.onMounted();
+      }
+    },
     onUnmounted() {
       if (view$.$elm && view$.$elm.parentNode) {
         view$.$elm.parentNode.removeChild(view$.$elm);

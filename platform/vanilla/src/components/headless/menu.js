@@ -127,17 +127,15 @@ function MenuItemView(item, t) {
       View({ ...merge(tp(t?.submenuArrow)) }, [ChevronRightOutlined()]),
     ]),
     Portal({}, [
-      Presence(
-        {
-          store: item.menu.presence,
-          animation: t?.subAnimation || t?.animation,
-        },
-        [
-          Popper({ store: item.menu.popper }, [
-            SubMenuContent(item.menu, MenuContent(item.menu.items, t)),
-          ]),
-        ],
-      ),
+      Popper({ store: item.menu.popper }, [
+        Presence(
+          {
+            store: item.menu.presence,
+            animation: t?.subAnimation || t?.animation,
+          },
+          [SubMenuContent(item.menu, MenuContent(item.menu.items, t))],
+        ),
+      ]),
     ]),
   ]);
 }
@@ -180,20 +178,20 @@ export function DropdownMenu(props, children) {
             // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
             item.menu
               ? Portal({}, [
-                  Presence(
-                    {
-                      store: item.menu.presence,
-                      animation: t?.subAnimation || t?.animation,
-                    },
-                    [
-                      Popper({ store: item.menu.popper }, [
+                  Popper({ store: item.menu.popper }, [
+                    Presence(
+                      {
+                        store: item.menu.presence,
+                        animation: t?.subAnimation || t?.animation,
+                      },
+                      [
                         SubMenuContent(
                           item.menu,
                           MenuContent(item.menu.items, t),
                         ),
-                      ]),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ]),
                 ])
               : null,
           ]),
@@ -272,8 +270,8 @@ export function DropdownMenu(props, children) {
     [
       ...children,
       Portal({}, [
-        Presence({ store: store.menu.presence }, [
-          Popper({ store: store.menu.popper }, [$menucontent]),
+        Popper({ store: store.menu.popper }, [
+          Presence({ store: store.menu.presence }, [$menucontent]),
         ]),
         // Show({ when: showWhen }, [
         //   View(

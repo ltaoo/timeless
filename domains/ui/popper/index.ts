@@ -306,7 +306,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   reset() {
     this._enter = false;
     this._focus = false;
-    this.floating = null;
     this.state.isPlaced = false;
     this.state.x = 0;
     this.state.y = 0;
