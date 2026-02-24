@@ -170,7 +170,8 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     if (this.state.open) {
       return;
     }
-    console.log("[DOMAIN]ui/menu/index - show", this._name);
+    console.log("[DEBUG-MENU] show()", this._name);
+    console.trace("[DEBUG-MENU] show() call stack");
     this.state.open = true;
     this.presence.show();
     this.popper.place();

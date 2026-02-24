@@ -140,8 +140,7 @@ export function For(props) {
           })();
         }
         _existing_map.forEach((res, item) => {
-          if (res.elm) {
-            // console.log("[baseui]For - before remove deleted item", item);
+          if (res.elm && res.elm.parentNode === $elm) {
             $elm.removeChild(res.elm);
           }
         });

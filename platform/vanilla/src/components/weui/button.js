@@ -20,4 +20,10 @@ const t = {
   spinner: { style: "width:16px;height:16px;margin-right:8px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:weui-spin 1s linear infinite;" },
 };
 
-export function Button(p, c) { return H({ ...p, theme: t }, c); }
+export function Button(p, c) {
+  const el = H({ ...p, theme: t }, c);
+  const $ = el.$elm;
+  $.addEventListener("mouseenter", () => { if (!p.disabled && !p.loading) $.style.opacity = "0.8"; });
+  $.addEventListener("mouseleave", () => { if (!p.disabled && !p.loading) $.style.opacity = ""; });
+  return el;
+}

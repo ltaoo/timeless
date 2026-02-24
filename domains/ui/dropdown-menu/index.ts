@@ -19,6 +19,7 @@ type DropdownMenuProps = {
   offsetY?: number;
   submenuOffsetX?: number;
   submenuOffsetY?: number;
+  trigger?: "click" | "hover" | "manual";
 };
 type DropdownMenuState = {
   items: MenuItemCore[];
@@ -51,6 +52,7 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
   menu: MenuCore;
   subs: MenuCore[] = [];
   items: MenuItemCore[] = [];
+  trigger: "click" | "hover" | "manual" = "click";
 
   constructor(props: { _name?: string } & DropdownMenuProps = {}) {
     super(props);
@@ -64,10 +66,12 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
       items = [],
       offsetX = 0,
       offsetY = 0,
-      submenuOffsetX = 0,
+      submenuOffsetX = 8,
       submenuOffsetY = 0,
+      trigger = "click",
       onHidden,
     } = props;
+    this.trigger = trigger;
     this.offsetX = offsetX;
     this.offsetY = offsetY;
     this.submenuOffsetX = submenuOffsetX;
@@ -117,10 +121,9 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
   toggle(
     position?: Partial<{ x: number; y: number; width: number; height: number }>,
   ) {
+    console.log("[DEBUG-DROPDOWN] toggle", { position, offsetX: this.offsetX, offsetY: this.offsetY, popperRef: !!this.menu.popper.reference, popperHas$el: !!(this.menu.popper.reference as any)?.$el, popperFloating: !!this.menu.popper.floating });
     if (position) {
-      let { x = 0, y = 0, width = 8, height = 8 } = position;
-      x += this.offsetX;
-      y += this.offsetY;
+      const { x = 0, y = 0, width = 8, height = 8 } = position;
       this.menu.popper.updateReference({
         // @ts-ignore
         getRect() {
@@ -134,6 +137,20 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
       });
     }
     this.menu.toggle();
+  }
+  show(
+    position?: Partial<{ x: number; y: number; width: number; height: number }>,
+  ) {
+    if (position) {
+      const { x = 0, y = 0, width = 8, height = 8 } = position;
+      this.menu.popper.updateReference({
+        // @ts-ignore
+        getRect() {
+          return { width, height, x, y };
+        },
+      });
+    }
+    this.menu.show();
   }
   hide() {
     // console.log("[DOMAIN/ui]dropdown-menu/index - hide");

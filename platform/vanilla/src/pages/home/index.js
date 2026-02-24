@@ -641,6 +641,94 @@ export function HomePageView() {
                   [Button({}, [Txt("With Submenu")])],
                 ),
               ]),
+              Item("Dynamic Submenu", [
+                (() => {
+                  const shareMenu = new Timeless.ui.MenuCore({
+                    items: [
+                      new Timeless.ui.MenuItemCore({ label: "February", onClick() { console.log("February"); } }),
+                      new Timeless.ui.MenuItemCore({ label: "March", onClick() { console.log("March"); } }),
+                    ],
+                  });
+                  const menuItem = new Timeless.ui.MenuItemCore({
+                    label: "Month",
+                    menu: shareMenu,
+                    onClick() { console.log("Month"); },
+                  });
+                  let count = 0;
+                  shareMenu.onShow(() => {
+                    setTimeout(() => {
+                      count++;
+                      const extra = Array.from({ length: 3 }, (_, i) => {
+                        const label = `Extra ${(count - 1) * 3 + i + 1}`;
+                        return new Timeless.ui.MenuItemCore({ label, onClick() { console.log(label); } });
+                      });
+                      shareMenu.setItems([...shareMenu.items, ...extra]);
+                    }, 1000);
+                  });
+                  const dm$ = new Timeless.ui.DropdownMenuCore({
+                    items: [
+                      new Timeless.ui.MenuItemCore({ label: "Year 2025", onClick() { console.log("Year 2025"); } }),
+                      menuItem,
+                    ],
+                  });
+                  return DropdownMenu({ store: dm$ }, [
+                    Button({ variant: "outline" }, [Txt("Dynamic Submenu")]),
+                  ]);
+                })(),
+              ]),
+              Item("Hover Trigger", [
+                DropdownMenu(
+                  {
+                    store: new Timeless.ui.DropdownMenuCore({
+                      trigger: "hover",
+                      items: [
+                        new Timeless.ui.MenuItemCore({ label: "Profile", onClick() { console.log("profile"); } }),
+                        new Timeless.ui.MenuItemCore({ label: "Settings", onClick() { console.log("settings"); } }),
+                        new Timeless.ui.MenuItemCore({ label: "Logout", onClick() { console.log("logout"); } }),
+                      ],
+                    }),
+                  },
+                  [Button({ variant: "outline" }, [Txt("Hover Me")])],
+                ),
+              ]),
+              Item("Context Menu", [
+                (() => {
+                  const ctxStore = new Timeless.ui.DropdownMenuCore({
+                    trigger: "manual",
+                    side: "bottom",
+                    align: "start",
+                    offsetX: 4,
+                    offsetY: 4,
+                    items: [
+                      new Timeless.ui.MenuItemCore({ label: "Cut", onClick() { console.log("cut"); } }),
+                      new Timeless.ui.MenuItemCore({ label: "Copy", onClick() { console.log("copy"); } }),
+                      new Timeless.ui.MenuItemCore({ label: "Paste", onClick() { console.log("paste"); } }),
+                      new Timeless.ui.MenuItemCore({ label: "Delete", onClick() { console.log("delete"); } }),
+                    ],
+                  });
+                  return DropdownMenu(
+                    {
+                      store: ctxStore,
+                      onMounted($e) {
+                        $e.addEventListener("contextmenu", (e) => {
+                          e.preventDefault();
+                          ctxStore.toggle({ x: e.clientX, y: e.clientY });
+                        });
+                      },
+                    },
+                    [
+                      View(
+                        {
+                          class: classnames([
+                            "flex items-center justify-center w-[300px] h-[150px] rounded-md border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-sm text-zinc-500 select-none",
+                          ]),
+                        },
+                        [Txt("Right click here")],
+                      ),
+                    ],
+                  );
+                })(),
+              ]),
               Item("Near Page Bottom", [
                 View(
                   {

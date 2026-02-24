@@ -7,6 +7,7 @@
     "build:prosemirror": "rollup --config rollup.config.js",
     "build:prosemirror:dts": "rollup --config rollup.dts.config.js",
     "build:editor": "rollup --config rollup.editor.config.js",
+    "build:baseui": "rollup --config rollup.baseui.config.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix"
   },

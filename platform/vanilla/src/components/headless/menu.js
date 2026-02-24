@@ -163,6 +163,19 @@ export function DropdownMenu(props, children) {
   const menuitem$s = computed({ state }, (d) => d.state.items);
 
   let unDismiss, handlePointerDown;
+  let _hoverHideTimer = null;
+  function _hoverClearHide() {
+    if (_hoverHideTimer) {
+      clearTimeout(_hoverHideTimer);
+      _hoverHideTimer = null;
+    }
+  }
+  function _hoverScheduleHide() {
+    _hoverClearHide();
+    _hoverHideTimer = setTimeout(() => {
+      store.hide();
+    }, 100);
+  }
 
   const $menucontent = For({
     ...merge(tp(t?.menu)),
@@ -190,7 +203,16 @@ export function DropdownMenu(props, children) {
                       [
                         SubMenuContent(
                           item.menu,
-                          MenuContent(item.menu.items, t),
+                          (() => {
+                            const subState = ref(item.menu.state);
+                            item.menu.onStateChange((v) => { subState.value = v; });
+                            const subItems = computed({ subState }, (d) => d.subState.items);
+                            return For({
+                              ...merge(tp(t?.menu)),
+                              each: subItems,
+                              render(sub) { return MenuItemView(sub, t); },
+                            });
+                          })(),
                         ),
                       ],
                     ),
@@ -205,6 +227,14 @@ export function DropdownMenu(props, children) {
   $menucontent.$elm.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
   });
+  if (store.trigger === "hover") {
+    $menucontent.$elm.addEventListener("mouseenter", () => {
+      _hoverClearHide();
+    });
+    $menucontent.$elm.addEventListener("mouseleave", () => {
+      _hoverScheduleHide();
+    });
+  }
 
   // const popperState = ref(store.menu.popper.state);
   // events.push(
@@ -245,21 +275,44 @@ export function DropdownMenu(props, children) {
           store.hide();
         });
         handlePointerDown = () => {
-          layer.handlePointerDownOnTop();
+          if (store.menu.state.open) {
+            layer.handlePointerDownOnTop();
+          }
         };
         document.addEventListener("pointerdown", handlePointerDown);
-        $e.addEventListener("pointerdown", () => {
-          layer.pointerDown();
-          const rect = $e.getBoundingClientRect();
-          // console.log("[DropdownMenu] pointerdown", $e, rect);
-          // debugger;
-          store.toggle({
-            x: rect.x,
-            y: rect.y,
-            width: $e.clientWidth,
-            height: $e.clientHeight + 8,
+        if (store.trigger === "hover") {
+          let hoverTimer = null;
+          $e.addEventListener("mouseenter", () => {
+            _hoverClearHide();
+            hoverTimer = setTimeout(() => {
+              const rect = $e.getBoundingClientRect();
+              store.show({
+                x: rect.x,
+                y: rect.y,
+                width: $e.clientWidth,
+                height: $e.clientHeight + 8,
+              });
+            }, 100);
           });
-        });
+          $e.addEventListener("mouseleave", () => {
+            if (hoverTimer) {
+              clearTimeout(hoverTimer);
+              hoverTimer = null;
+            }
+            _hoverScheduleHide();
+          });
+        } else if (store.trigger !== "manual") {
+          $e.addEventListener("pointerdown", () => {
+            layer.pointerDown();
+            const rect = $e.getBoundingClientRect();
+            store.toggle({
+              x: rect.x,
+              y: rect.y,
+              width: $e.clientWidth,
+              height: $e.clientHeight + 8,
+            });
+          });
+        }
       },
       onUnmounted() {
         for (const fn of events) if (typeof fn === "function") fn();

@@ -687,6 +687,167 @@ export function UIExampleWeUIPageView() {
                       ],
                     ),
                   ]),
+                  Item("Dynamic Submenu", [
+                    (() => {
+                      const shareMenu = new Timeless.ui.MenuCore({
+                        items: [
+                          new Timeless.ui.MenuItemCore({ label: "February", onClick() { console.log("February"); } }),
+                          new Timeless.ui.MenuItemCore({ label: "March", onClick() { console.log("March"); } }),
+                        ],
+                      });
+                      const menuItem = new Timeless.ui.MenuItemCore({
+                        label: "Month",
+                        menu: shareMenu,
+                        onClick() { console.log("Month"); },
+                      });
+                      let count = 0;
+                      shareMenu.onShow(() => {
+                        setTimeout(() => {
+                          count++;
+                          const extra = Array.from({ length: 3 }, (_, i) => {
+                            const label = `Extra ${(count - 1) * 3 + i + 1}`;
+                            return new Timeless.ui.MenuItemCore({ label, onClick() { console.log(label); } });
+                          });
+                          shareMenu.setItems([...shareMenu.items, ...extra]);
+                        }, 1000);
+                      });
+                      const dm$ = new Timeless.ui.DropdownMenuCore({
+                        items: [
+                          new Timeless.ui.MenuItemCore({ label: "Year 2025", onClick() { console.log("Year 2025"); } }),
+                          menuItem,
+                        ],
+                      });
+                      return DropdownMenu({ store: dm$ }, [
+                        Button({ variant: "default", size: "sm" }, [Txt("动态子菜单")]),
+                      ]);
+                    })(),
+                  ]),
+                  Item("Hover Trigger", [
+                    DropdownMenu(
+                      {
+                        store: new Timeless.ui.DropdownMenuCore({
+                          trigger: "hover",
+                          items: [
+                            new Timeless.ui.MenuItemCore({ label: "个人资料", onClick() { console.log("profile"); } }),
+                            new Timeless.ui.MenuItemCore({ label: "设置", onClick() { console.log("settings"); } }),
+                            new Timeless.ui.MenuItemCore({ label: "退出", onClick() { console.log("logout"); } }),
+                          ],
+                        }),
+                      },
+                      [Button({ variant: "default", size: "sm" }, [Txt("悬停触发")])],
+                    ),
+                  ]),
+                  Item("Context Menu", [
+                    (() => {
+                      const ctxStore = new Timeless.ui.DropdownMenuCore({
+                        trigger: "manual",
+                        side: "bottom",
+                        align: "start",
+                        offsetX: 4,
+                        offsetY: 4,
+                        items: [
+                          new Timeless.ui.MenuItemCore({ label: "剪切", onClick() { console.log("cut"); } }),
+                          new Timeless.ui.MenuItemCore({ label: "复制", onClick() { console.log("copy"); } }),
+                          new Timeless.ui.MenuItemCore({ label: "粘贴", onClick() { console.log("paste"); } }),
+                          new Timeless.ui.MenuItemCore({ label: "删除", onClick() { console.log("delete"); } }),
+                        ],
+                      });
+                      return DropdownMenu(
+                        {
+                          store: ctxStore,
+                          onMounted($e) {
+                            $e.addEventListener("contextmenu", (e) => {
+                              e.preventDefault();
+                              ctxStore.toggle({ x: e.clientX, y: e.clientY });
+                            });
+                          },
+                        },
+                        [
+                          View(
+                            {
+                              style:
+                                "display:flex;align-items:center;justify-content:center;width:300px;height:150px;border-radius:8px;border:2px dashed var(--weui-SEPARATOR-0);font-size:14px;color:var(--weui-FG-2);user-select:none;",
+                            },
+                            [Txt("右键点击此处")],
+                          ),
+                        ],
+                      );
+                    })(),
+                  ]),
+                  Item("Near Page Bottom", [
+                    View(
+                      {
+                        style:
+                          "width:100%;height:800px;display:flex;align-items:flex-end;justify-content:center;",
+                      },
+                      [
+                        DropdownMenu(
+                          {
+                            store: new Timeless.ui.DropdownMenuCore({
+                              items: [
+                                new Timeless.ui.MenuItemCore({ label: "编辑", onClick() { console.log("edit"); } }),
+                                new Timeless.ui.MenuItemCore({ label: "复制", onClick() { console.log("duplicate"); } }),
+                                new Timeless.ui.MenuItemCore({ label: "删除", onClick() { console.log("delete"); } }),
+                              ],
+                            }),
+                          },
+                          [Button({ variant: "default", size: "sm" }, [Txt("打开菜单")])],
+                        ),
+                      ],
+                    ),
+                  ]),
+                  Item("Near Right Side", [
+                    View(
+                      { style: "width:100%;display:flex;justify-content:flex-end;" },
+                      [
+                        DropdownMenu(
+                          {
+                            store: new Timeless.ui.DropdownMenuCore({
+                              side: "right",
+                              align: "start",
+                              items: [
+                                new Timeless.ui.MenuItemCore({ label: "编辑", onClick() { console.log("edit"); } }),
+                                new Timeless.ui.MenuItemCore({ label: "复制", onClick() { console.log("duplicate"); } }),
+                                new Timeless.ui.MenuItemCore({ label: "删除", onClick() { console.log("delete"); } }),
+                              ],
+                            }),
+                          },
+                          [Button({ variant: "default", size: "sm" }, [Txt("打开菜单")])],
+                        ),
+                      ],
+                    ),
+                  ]),
+                  Item("Align Positions", [
+                    View({ style: "display:flex;gap:16px;flex-wrap:wrap;" }, [
+                      ...[
+                        "bottom-start",
+                        "bottom-center",
+                        "bottom-end",
+                        "top-start",
+                        "top-center",
+                        "top-end",
+                        "right-start",
+                        "right-center",
+                        "left-start",
+                      ].map((pos) => {
+                        const [side, align] = pos.split("-");
+                        return DropdownMenu(
+                          {
+                            store: new Timeless.ui.DropdownMenuCore({
+                              side,
+                              align,
+                              items: [
+                                new Timeless.ui.MenuItemCore({ label: "编辑", onClick() { console.log("edit"); } }),
+                                new Timeless.ui.MenuItemCore({ label: "复制", onClick() { console.log("duplicate"); } }),
+                                new Timeless.ui.MenuItemCore({ label: "删除", onClick() { console.log("delete"); } }),
+                              ],
+                            }),
+                          },
+                          [Button({ variant: "default", size: "sm" }, [Txt(pos)])],
+                        );
+                      }),
+                    ]),
+                  ]),
                 ]),
                 Section("Popover", [
                   Item("Align (start / center / end)", [
