@@ -141,16 +141,10 @@
 <body>
   <script src="/public/timeless.core.umd.min.js"></script>
   <script src="/public/timeless.web.umd.min.js"></script>
+  <script src="/public/reactive.umd.min.js"></script>
   <script src="/public/headless.umd.min.js"></script>
   <script src="/public/shadcnui.umd.min.js"></script>
   <script>!function () { try { var d = document.documentElement, n = 'data-theme', s = 'setAttribute'; var e = localStorage.getItem('theme'); if ('system' === e || (!e && true)) { var t = '(prefers-color-scheme: dark)', m = window.matchMedia(t); if (m.media !== t || m.matches) { d.style.colorScheme = 'dark'; d[s](n, 'dark') } else { d.style.colorScheme = 'light'; d[s](n, 'light') } } else if (e) { d[s](n, e || '') } if (e === 'light' || e === 'dark') d.style.colorScheme = e } catch (e) { } }()</script>
-  <script>
-    window.ref = Headless.ref;
-    window.computed = Headless.computed;
-    window.classnames = Headless.classnames;
-    window.isRef = Headless.isRef;
-    window.isComponent = Headless.isComponent;
-  </script>
   <div id="root"></div>
   <script type="module" src="/src/index.js"></script>
 </body>

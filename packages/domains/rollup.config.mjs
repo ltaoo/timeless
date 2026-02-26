@@ -10,6 +10,13 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const pkg = require('./package.json');
 
+const removeConsole = terser({
+  compress: {
+    pure_funcs: ['console.log'],
+    drop_debugger: true,
+  },
+});
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -46,6 +53,7 @@ export default [
           outDir: null,
         }
       }),
+      removeConsole,
     ],
     external: [
       ...Object.keys(pkg.dependencies || {}),
@@ -78,7 +86,7 @@ export default [
           outDir: null,
         }
       }),
-      terser(),
+      removeConsole,
     ],
   },
   {

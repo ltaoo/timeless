@@ -38,8 +38,14 @@ export function HomePageView() {
     { label: "Feedback", value: "feedback" },
     { label: "Navigation", value: "nav" },
     { label: "Overlay", value: "overlay" },
+    { label: "Logic", value: "logic" },
   ];
   const activeCategory = ref("general");
+  const commitList = ref([
+    { id: 1, message: "Initial commit" },
+    { id: 2, message: "Add feature A" },
+    { id: 3, message: "Fix bug B" },
+  ]);
 
   return View({ class: classnames(["flex h-full"]) }, [
     // Sidebar
@@ -1023,6 +1029,57 @@ export function HomePageView() {
                     ]),
                   ]);
                 })(),
+              ]),
+            ]),
+          ]),
+        ],
+      ),
+      // === Logic ===
+      Show(
+        {
+          when: computed(
+            { activeCategory },
+            (d) => d.activeCategory === "logic",
+          ),
+        },
+        [
+          View({ class: classnames(["space-y-8"]) }, [
+            Section("For", [
+              Item("Commit List", [
+                View({ class: classnames(["space-y-4 w-full"]) }, [
+                  Button(
+                    {
+                      size: "sm",
+                      onClick() {
+                        commitList.value.splice(1, 0, {
+                          id: Date.now(),
+                          message: `New Commit ${Date.now()}`,
+                        });
+                      },
+                    },
+                    [Txt("Insert at index 1")],
+                  ),
+                  View({ class: classnames(["space-y-2"]) }, [
+                    For({
+                      each: commitList.value,
+                      render(commit) {
+                        return View(
+                          {
+                            class: classnames([
+                              "p-3 rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm flex justify-between items-center",
+                            ]),
+                          },
+                          [
+                            Txt(commit.message),
+                            View({ class: classnames(["text-xs text-zinc-400"]) }, [
+                              Txt(`ID: ${commit.id}`),
+                            ]),
+                          ],
+                        );
+                      },
+                    }),
+                  ]),
+                ]),
               ]),
             ]),
           ]),
