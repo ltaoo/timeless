@@ -1,37 +1,4 @@
-import { PageKeysType, build } from "@/domains/route_view/utils";
-
-/**
- * @file 路由配置
- */
-const configure = {
-  root: {
-    title: "ROOT",
-    pathname: "/",
-    children: {
-      home_layout: {
-        title: "HomeLayout",
-        pathname: "/home",
-        children: {
-          index: {
-            title: "AppIconsHelper - Home",
-            pathname: "/home/index",
-            options: {
-              require: ["login"],
-            },
-          },
-        },
-      },
-      login: {
-        title: "登录",
-        pathname: "/login",
-      },
-      register: {
-        title: "注册",
-        pathname: "/register",
-      },
-      notfound: {
-        title: "404",
-        pathname: "/notfound",
+import {  PageKeysType, build  } from "@timeless/domains";,
       },
     },
   },

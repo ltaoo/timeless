@@ -1,19 +1,4 @@
-import { VideoPlayerCore } from "@/domains/ui/video-player";
-import { JSX } from "solid-js/jsx-runtime";
-
-const Root = () => {};
-
-const Video = (props: { store: VideoPlayerCore }) => {
-  let $video: undefined | HTMLVideoElement;
-
-  return (
-    <video
-      ref={$video}
-      class="w-full relative z-10"
-      controls={true}
-      webkit-playsinline="true"
-      plays-in-line
-      preload="none"
+import {  VideoPlayerCore  } from "@timeless/domains";
       //       height={height}
     />
   );

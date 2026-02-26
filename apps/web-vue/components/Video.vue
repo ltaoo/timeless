@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, defineComponent } from "vue";
 
-import { PlayerCore } from "@/domains/player";
+import { VideoPlayerCore as PlayerCore } from "@/domains/ui/video-player/index";
 import { provide_ui_video_player } from "@timeless/provider-web";
 
 const { store } = defineProps<{ store: PlayerCore }>();

@@ -3,9 +3,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["../../*"],
+      "@timeless/domains": ["../../packages/domains/src/index.ts"],
+      "@timeless/biz": ["../../packages/biz/src/index.ts"],
+      "@timeless/utils": ["../../packages/utils/src/index.ts"],
       "~/*": ["./*"]
-    }
+    },
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "types": ["vite/client", "node"]
   },
   "include": ["**/*.ts", "**/*.tsx"]
 }

@@ -7,9 +7,9 @@ import { PopoverCore } from "@/domains/ui/popover/index";
 
 const { store, className } = defineProps<{ store: PopoverCore; className: string }>();
 
-const state = ref(store.present.state);
+const state = ref(store.presence.state);
 
-store.present.onStateChange((v) => {
+store.presence.onStateChange((v) => {
   state.value = v;
 });
 </script>

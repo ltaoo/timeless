@@ -1,6 +1,7 @@
 import axios, { CancelTokenSource } from "axios";
 
-import { Result, HttpClientCore } from "@timeless/core";
+import { HttpClientCore } from "@timeless/domains";
+import { Result } from "@timeless/utils";
 
 export function connect(store: HttpClientCore) {
   let requests: { id: string; source: CancelTokenSource }[] = [];

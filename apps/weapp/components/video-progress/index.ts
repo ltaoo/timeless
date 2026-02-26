@@ -1,6 +1,7 @@
 import mitt from "mitt";
 
-import { ui, Utils } from "@timeless/core";
+import { ui } from "@timeless/domains";
+import * as Utils from "@timeless/utils";
 
 const { seconds_to_hour_text: seconds_to_hour } = Utils;
 

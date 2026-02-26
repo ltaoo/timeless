@@ -1,4 +1,4 @@
-import { RequestPayload } from "@timeless/core";
+import { RequestPayload } from "@timeless/domains";
 
 export function fetchUserSettings(params?: any): RequestPayload<any> {
   return {

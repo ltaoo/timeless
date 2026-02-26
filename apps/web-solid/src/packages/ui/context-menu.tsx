@@ -3,59 +3,7 @@
  */
 import { onMount, JSX } from "solid-js";
 
-import { ContextMenuCore } from "@/domains/ui/context-menu";
-import * as Menu from "~/packages/ui/menu";
-import { MenuCore } from "@/domains/ui/menu";
-import { MenuItemCore } from "@/domains/ui/menu/item";
-
-const Root = (
-  props: {
-    store: ContextMenuCore;
-  } & JSX.HTMLAttributes<HTMLElement>
-) => {
-  const { store } = props;
-  return (
-    <Menu.Root store={store.menu} class={props.class}>
-      {props.children}
-    </Menu.Root>
-  );
-};
-
-/**
- * 点击展示菜单
- */
-const Trigger = (props: { store: ContextMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
-  const { store: contextMenu } = props;
-  let $span: HTMLSpanElement | undefined = undefined;
-
-  onMount(() => {
-    const _$span = $span;
-    if (!_$span) {
-      return;
-    }
-    contextMenu.setReference({
-      getRect() {
-        // console.log("[ContextMenuTrigger]get reference rect", $span);
-        const rect = _$span.getBoundingClientRect();
-        return rect;
-        // const { width, height, left, top, x, y } = rect;
-        // return {
-        //   width,
-        //   height,
-        //   left,
-        //   top,
-        //   x,
-        //   y,
-        // } as Rect;
-      },
-    });
-  });
-
-  return (
-    <span
-      ref={$span}
-      class={props.class}
-      style={{ "-webkit-touch-callout": "none" }}
+import {  ContextMenuCore  } from "@timeless/domains"; }}
       onContextMenu={(event) => {
         event.preventDefault();
         const _$span = $span;

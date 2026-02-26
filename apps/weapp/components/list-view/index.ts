@@ -1,11 +1,4 @@
-import { ListCore } from "@/domains/list/index";
-
-Component({
-  externalClasses: ["class-name"],
-  options: {
-    // pureDataPattern: /^_/,
-    virtualHost: true,
-    styleIsolation: "apply-shared",
+import {  ListCore  } from "@timeless/domains";,
   },
   properties: {
     _store: {

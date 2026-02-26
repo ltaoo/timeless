@@ -1,4 +1,4 @@
-import { ui } from "@timeless/core";
+import { ui } from "@timeless/domains";
 
 const { ScrollViewCore, preventDefault } = ui;
 type PointEvent = ui.PointEvent;

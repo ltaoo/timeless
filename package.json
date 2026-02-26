@@ -2,7 +2,7 @@
   "name": "timeless-monorepo",
   "private": true,
   "scripts": {
-    "build": "pnpm -r run build",
+    "build": "pnpm --filter \"./packages/*\" -r run build",
     "dev": "pnpm -r run dev",
     "test": "pnpm -r run test",
     "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules"

@@ -7,8 +7,8 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "../../packages/core/src"),
-      "@timeless/core": path.resolve(__dirname, "../../packages/core/src/index.ts"),
+      "@/components": path.resolve(__dirname, "./components"),
+      "@": path.resolve(__dirname, "./"),
       "@timeless/provider-web": path.resolve(__dirname, "../../packages/provider-web/src/index.ts"),
       "~": path.resolve(__dirname, "./"),
     },

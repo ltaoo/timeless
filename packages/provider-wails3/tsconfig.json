@@ -12,9 +12,10 @@
     "declaration": true,
     "emitDeclarationOnly": false,
     "isolatedModules": true,
+    "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*", "../core/src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"]

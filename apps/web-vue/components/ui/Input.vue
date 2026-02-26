@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 
-import { InputCore } from "@/domains/ui/input";
+import { InputCore } from "@/domains/ui/form/input";
 import { provide_ui_input } from "@timeless/provider-web";
 import { cn } from "@/utils/index";
 

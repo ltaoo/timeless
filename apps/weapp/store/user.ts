@@ -1,9 +1,4 @@
-import { UserCore } from "@/biz/user/index";
-
-import { storage } from "./storage";
-import { client } from "./http_client";
-
-const { id, username, email, avatar, token } = storage.get("user");
+import {  UserCore  } from "@timeless/biz";);
 
 class ExtendsUser extends UserCore {
   say() {

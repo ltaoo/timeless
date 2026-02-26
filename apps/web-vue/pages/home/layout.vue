@@ -2,10 +2,10 @@
 import { ref, defineComponent } from "vue";
 import { Home, Film, History, Bell, ChevronDown, User } from "lucide-vue-next";
 
-import { messageList } from "@/store/index";
-import { PageKeys } from "@/store/routes";
-import { ViewComponentProps } from "@/store/types";
-import { MediaItem, fetchMediaList, fetchMediaListProcess } from "@/services/media";
+import { messageList } from "../../store/index";
+import { PageKeys } from "../../store/routes";
+import { ViewComponentProps } from "../../store/types";
+import { MediaItem, fetchMediaList, fetchMediaListProcess } from "@/biz/media/services";
 import ScrollView from "@/components/ui/ScrollView.vue";
 import ListView from "@/components/ui/ListView.vue";
 import Input from "@/components/ui/Input.vue";
@@ -54,7 +54,7 @@ const nameInput = new InputCore({
     if (!v) {
       return;
     }
-    if (v === helper.params.name) {
+    if (v === (helper.params as any).name) {
       return;
     }
     helper.search({

@@ -13,8 +13,8 @@ import { KeepAliveRouteView } from "./components/ui";
 import { Toast } from "./components/ui/toast";
 import { RouteChildren } from "./components/route-children";
 
-import { ToastCore } from "@timeless/core";
-import { RequestCore } from "@timeless/core";
+import { ToastCore } from "@timeless/domains";
+import { RequestCore } from "@timeless/domains";
 
 import "./style.css";
 

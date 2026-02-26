@@ -1,1 +1,1 @@
-import { cn } from "@/utils";
+import {  cn  } from "@timeless/utils";

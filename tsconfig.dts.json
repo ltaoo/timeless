@@ -18,6 +18,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["domains/core/index.ts", "global.d.ts"],
+  "include": ["global.d.ts"],
   "exclude": ["node_modules", "biz", "dist", "domains/index.ts"]
 }

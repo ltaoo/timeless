@@ -1,4 +1,4 @@
-import { RequestPayload } from "@timeless/core";
+import { RequestPayload } from "@timeless/domains";
 
 export function fetchCategoryTree(params?: any): RequestPayload<any> {
   return {

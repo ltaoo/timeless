@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defineComponent, ref } from "vue";
 
-import { ViewComponentProps } from "@/store/types";
+import { ViewComponentProps } from "../../store/types";
 import ListView from "@/components/ui/ListView.vue";
 import ScrollView from "@/components/ui/ScrollView.vue";
 import LazyImage from "@/components/ui/Image.vue";

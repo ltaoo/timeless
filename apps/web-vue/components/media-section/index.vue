@@ -2,8 +2,8 @@
 import { defineComponent, ref } from "vue";
 import { ArrowRightCircle, ChevronRight } from "lucide-vue-next";
 
-import { ViewComponentProps } from "@/store/types";
-import { MediaItem, fetchMediaList, fetchMediaListProcess } from "@/services/media";
+import { ViewComponentProps } from "../../store/types";
+import { MediaItem, fetchMediaList, fetchMediaListProcess } from "@/biz/media/services";
 import AspectRatio from "@/components/ui/AspectRatio.vue";
 import LazyImage from "@/components/ui/Image.vue";
 import { ListCore } from "@/domains/list/index";

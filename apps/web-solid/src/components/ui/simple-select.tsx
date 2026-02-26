@@ -1,5 +1,4 @@
-import { SimpleSelectCore } from "@/domains/ui/simple-select";
-import { For, createSignal } from "solid-js";
+import {  SimpleSelectCore  } from "@timeless/domains";
 
 export const SimpleSelect = (props: { store: SimpleSelectCore }) => {
   const { store } = props;

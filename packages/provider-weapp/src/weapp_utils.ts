@@ -1,5 +1,5 @@
 
-import { Result } from "@timeless/core";
+import { Result } from "@timeless/utils";
 
 export function wxResultify<T = any>(fn: (opt: any) => any) {
   return (args: any = {}) => {

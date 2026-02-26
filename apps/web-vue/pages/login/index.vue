@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 
-import { ViewComponentProps } from "@/store/types";
+import { ViewComponentProps } from "../../store/types";
 import Input from "@/components/ui/Input.vue";
 import Button from "@/components/ui/Button.vue";
 import { QRCodeWithState } from "@/biz/qrcode_confirm/index";
@@ -34,9 +34,9 @@ function Page(props: ViewComponentProps) {
       $login.setLoading(true);
       const r = await app.$user.loginWithEmailAndPwd(values);
       $login.setLoading(false);
-      if (r.error) {
+      if ((r as any).error) {
         app.tip({
-          text: ["登录失败", r.error.message],
+          text: ["登录失败", (r as any).error.message],
         });
         return;
       }
@@ -47,11 +47,12 @@ function Page(props: ViewComponentProps) {
     },
   });
   const $code = QRCodeWithState({ unique_id: view.query.code, step: AuthCodeStep.Loading, client });
-  $code.onConfirm((v) => {
-    const r2 = app.$user.authWithToken(v);
-    if (r2.error) {
+  $code.onConfirm(async (v) => {
+    const r2 = await app.$user.authWithToken(v);
+    const r2_any = r2 as any;
+    if (r2_any.error) {
       app.tip({
-        text: ["登录失败", r2.error.message],
+        text: ["登录失败", r2_any.error.message],
       });
       return;
     }
@@ -93,9 +94,9 @@ onMounted(async () => {
     return;
   }
   const r = await $page.$code.refresh();
-  if (r.error) {
+  if ((r as any).error) {
     props.app.tip({
-      text: [r.error.message],
+      text: [(r as any).error.message],
     });
     return;
   }

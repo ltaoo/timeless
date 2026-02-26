@@ -2,7 +2,6 @@
 import { ref } from "vue";
 
 import { cn } from "@/utils";
-import { InputCore } from "@/domains/ui/input";
 
 const props = defineProps<{
   ratio: number;

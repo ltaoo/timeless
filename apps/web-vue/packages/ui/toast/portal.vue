@@ -8,7 +8,7 @@ const { store, className } = defineProps<{ store: ToastCore; className?: string 
 </script>
 
 <template>
-  <Presence :store="store.present" :class-name="className">
+  <Presence :store="store.presence" :class-name="className">
     <Teleport to="body">
       <slot></slot>
     </Teleport>

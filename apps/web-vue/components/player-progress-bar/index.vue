@@ -2,9 +2,9 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import hotkeys from "hotkeys-js";
 
-import { ViewComponentProps } from "@/store/types";
+import { ViewComponentProps } from "../../store/types";
 import { Handler, base } from "@/domains/base";
-import { PlayerCore } from "@/domains/player/index";
+import { VideoPlayerCore as PlayerCore } from "@/domains/ui/video-player/index";
 import { PresenceCore } from "@/domains/ui/presence";
 import { cn, seconds_to_hour } from "@/utils/index";
 
@@ -79,7 +79,7 @@ function VideoProgressBarComponent(props: { store: PlayerCore }) {
     cursorRef,
     handleTouchStart(event: {
       clientX: number;
-      touches: Record<number, { clientX: number }>;
+      touches?: Record<number, { clientX: number }>;
       stopPropagation: () => void;
     }) {
       event.stopPropagation();
@@ -129,7 +129,7 @@ function VideoProgressBarComponent(props: { store: PlayerCore }) {
     },
     handleTouchMove(event: {
       clientX: number;
-      touches: Record<number, { clientX: number }>;
+      touches?: Record<number, { clientX: number }>;
       stopPropagation: () => void;
     }) {
       event.stopPropagation();
@@ -200,8 +200,8 @@ function VideoProgressBarComponent(props: { store: PlayerCore }) {
       // console.log("before store.adjustCurrentTime", targetTime, percent, store._duration);
       store.adjustCurrentTime(targetTime);
     },
-    handleAnimationEnd(event: { currentTarget: HTMLDivElement }) {
-      const { currentTarget: target } = event;
+    handleAnimationEnd(event: Event) {
+      const target = event.currentTarget as HTMLDivElement;
       const client = target.getBoundingClientRect();
       rectRef.current = {
         width: client.width,

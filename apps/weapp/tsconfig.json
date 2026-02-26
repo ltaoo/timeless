@@ -4,7 +4,9 @@
     "baseUrl": ".",
     "types": ["node", "wechat-miniprogram"],
     "paths": {
-      "@/*": ["../../packages/core/src/*"],
+      "@timeless/domains": ["../../packages/domains/src/index.ts"],
+      "@timeless/biz": ["../../packages/biz/src/index.ts"],
+      "@timeless/utils": ["../../packages/utils/src/index.ts"],
       "~/*": ["./*"]
     }
   },

@@ -1,14 +1,4 @@
-import { ApplicationModel as Application } from "@/domains/app/index";
-import { HistoryCore } from "@/domains/history/index";
-import { RouteViewCore } from "@/domains/route_view/index";
-import { ScrollViewCore } from "@/domains/ui/index";
-import { HttpClientCore } from "@/domains/http_client/index";
-import { StorageCore } from "@/domains/storage/index";
-
-import { PageKeys, RouteConfig } from "./routes";
-import { storage } from "./storage";
-
-export type GlobalStorageValues = (typeof storage)["values"];
+import {  ApplicationModel as Application  } from "@timeless/domains";];
 export type ViewComponentProps = {
   app: Application<{ storage: typeof storage }>;
   history: HistoryCore<PageKeys, RouteConfig>;

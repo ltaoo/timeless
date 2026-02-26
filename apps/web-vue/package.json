@@ -12,7 +12,9 @@
     "lucide-vue-next": "^0.344.0",
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.3.0",
-    "@timeless/core": "workspace:*",
+    "class-variance-authority": "^0.7.0",
+    "hotkeys-js": "^3.13.7",
+    "@timeless/biz": "workspace:*", "@timeless/domains": "workspace:*", "@timeless/utils": "workspace:*",
     "@timeless/provider-web": "workspace:*"
   },
   "devDependencies": {

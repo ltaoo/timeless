@@ -2,16 +2,22 @@
   "name": "@timeless/provider-web",
   "version": "1.0.0",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "rollup -c"
   },
   "dependencies": {
-    "@timeless/core": "workspace:*",
+    "@timeless/biz": "workspace:*", "@timeless/domains": "workspace:*", "@timeless/utils": "workspace:*",
     "axios": "^1.13.2"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "@types/node": "^22.0.0"
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/node": "^22.0.0",
+    "rollup": "^4.59.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3"
   }
 }

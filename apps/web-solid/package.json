@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@timeless/core": "workspace:*",
+    "@timeless/biz": "workspace:*", "@timeless/domains": "workspace:*", "@timeless/utils": "workspace:*",
     "@timeless/provider-wails3": "workspace:*",
     "@timeless/provider-web": "workspace:*",
     "@wailsio/runtime": "3.0.0-alpha.79",

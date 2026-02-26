@@ -1,18 +1,4 @@
-import { StorageCore } from "@/domains/storage";
-
-const DEFAULT_CACHE_VALUES = {
-  user: {
-    id: "",
-    username: "anonymous",
-    token: "",
-    avatar: "",
-    expires_at: 0,
-  },
-  tab: "tauri",
-  newuser: 1,
-  file: null as null | { name: string; content: string },
-};
-const key = "global";
+import {  StorageCore  } from "@timeless/domains";
 const e = globalThis.localStorage.getItem(key);
 export const storage = new StorageCore<typeof DEFAULT_CACHE_VALUES>({
   key,

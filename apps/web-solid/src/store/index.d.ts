@@ -1,4 +1,0 @@
-import { RouteConfig } from "@/domains/route_view/utils";
-import { HistoryCore } from "@/domains/history/index";
-export declare const history: HistoryCore<"root" | "root.home_layout" | "root.notfound" | "root.error" | "root.video_preview" | "root.image_preview" | "root.pdf_preview" | "root.paste_event_preview" | "root.settings_layout" | "root.login" | "root.register" | "root.home_layout.index" | "root.settings_layout.system" | "root.settings_layout.user_settings" | "root.settings_layout.category" | "root.settings_layout.synchronization", RouteConfig<"root" | "root.home_layout" | "root.notfound" | "root.error" | "root.video_preview" | "root.image_preview" | "root.pdf_preview" | "root.paste_event_preview" | "root.settings_layout" | "root.login" | "root.register" | "root.home_layout.index" | "root.settings_layout.system" | "root.settings_layout.user_settings" | "root.settings_layout.category" | "root.settings_layout.synchronization">>;
-export declare const app: any;

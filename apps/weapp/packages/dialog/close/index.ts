@@ -1,11 +1,4 @@
-import { DialogCore } from "@/domains/ui/index";
-
-Component({
-  externalClasses: ["class"],
-  options: {
-    // pureDataPattern: /^_/,
-    virtualHost: true,
-    styleIsolation: "apply-shared",
+import {  DialogCore  } from "@timeless/domains";,
   },
   properties: {
     _store: {

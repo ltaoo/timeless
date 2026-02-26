@@ -1,4 +1,4 @@
-import { ui } from "@timeless/core";
+import { ui } from "@timeless/domains";
 
 export function connect(store: ui.InputCore<any>, actions: { focus: () => void; blur: () => void }) {
   store.onFocus(() => {

@@ -6,7 +6,7 @@ const { store, className } = defineProps<{ store: PopoverCore; className: string
 </script>
 
 <template>
-  <Presence :store="store.present" :class-name="className">
+  <Presence :store="store.presence" :class-name="className">
     <template v-if="store.toBody">
       <Teleport to="body">
         <slot></slot>

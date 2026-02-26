@@ -1,4 +1,4 @@
-import { ui } from "@timeless/core";
+import { ui } from "@timeless/domains";
 
 const { NodeCore } = ui;
 

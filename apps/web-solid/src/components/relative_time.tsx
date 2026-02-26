@@ -1,9 +1,7 @@
 import dayjs, { Dayjs } from "dayjs";
 import { createSignal, JSX } from "solid-js";
 
-import { base, Handler } from "@/domains/base";
-import { BizError } from "@/domains/error";
-import { useViewModel } from "~/hooks";
+import {  base, Handler  } from "@timeless/domains";
 
 // const bus
 // setInterval(() => {

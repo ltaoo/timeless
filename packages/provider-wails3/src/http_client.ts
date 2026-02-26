@@ -1,4 +1,5 @@
-import { Result, HttpClientCore } from "@timeless/core";
+import { HttpClientCore } from "@timeless/domains";
+import { Result } from "@timeless/utils";
 
 export function connect(store: HttpClientCore) {
   store.fetch = async (options) => {

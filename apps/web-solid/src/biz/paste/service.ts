@@ -1,4 +1,5 @@
-import { RequestPayload, Result } from "@timeless/core";
+import { RequestPayload } from "@timeless/domains";
+import { Result } from "@timeless/utils";
 
 export function fetchPasteEventList(params?: any): RequestPayload<any> {
   return {

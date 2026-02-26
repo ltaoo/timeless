@@ -1,4 +1,4 @@
-import { TabHeaderCore } from "@timeless/core";
+import { TabHeaderCore } from "@timeless/domains";
 
 Component({
   externalClasses: ["tab-class", "item-class", "active-item-class"],

@@ -1,4 +1,4 @@
-import { ui } from "@timeless/core";
+import { ui } from "@timeless/domains";
 
 const defaultOverlayClassName =
   "fixed inset-0 z-50 bg-black--50 opacity-0 backdrop-blur-sm transition-all duration-100";

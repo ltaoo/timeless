@@ -1,4 +1,4 @@
-import { RequestPayload } from "@timeless/core";
+import { RequestPayload } from "@timeless/domains";
 
 export function downloadDouyinVideo(params?: any): RequestPayload<any> {
   return {

@@ -1,16 +1,27 @@
 {
   "name": "@timeless/weui",
   "version": "1.0.0",
-  "main": "src/index.js",
-  "module": "src/index.js",
+  "main": "dist/weui.umd.min.js",
+  "module": "src/index.ts",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "echo 'No build step yet'"
+    "build": "rollup -c"
   },
   "dependencies": {
-    "@timeless/base-ui": "workspace:*"
+    "@timeless/shadcnui": "workspace:*"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^3.0.0 || ^4.0.0"
   },
   "devDependencies": {
-    "tailwindcss": "^4.1.18"
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "rollup": "^4.59.0",
+    "tailwindcss": "^4.1.18",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3"
   }
 }

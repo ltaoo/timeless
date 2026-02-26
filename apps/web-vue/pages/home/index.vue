@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { defineComponent, ref } from "vue";
 
-import { ViewComponentProps } from "@/store/types";
-import { fetchMediaList } from "@/services/media";
+import { ViewComponentProps } from "../../store/types";
+import { fetchMediaList } from "@/biz/media/services";
 import AspectRatio from "@/components/ui/AspectRatio.vue";
 import ListView from "@/components/ui/ListView.vue";
 import ScrollView from "@/components/ui/ScrollView.vue";

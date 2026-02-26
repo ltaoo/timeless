@@ -1,6 +1,4 @@
-import { CollectionCore } from "@/domains/ui/collection";
-import { createContext, onCleanup, useContext } from "solid-js";
-import { JSX } from "solid-js/jsx-runtime";
+import {  CollectionCore  } from "@timeless/domains";
 
 const CollectionContext = createContext<CollectionCore>();
 const CollectionProvider = (props: { store: CollectionCore; children: JSX.Element }) => {

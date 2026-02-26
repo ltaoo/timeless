@@ -1,4 +1,4 @@
-import { ui } from "@timeless/core";
+import { ui } from "@timeless/domains";
 
 export function connect(store: ui.VideoPlayerCore, context: WechatMiniprogram.VideoContext) {
   store.bindAbstractNode({

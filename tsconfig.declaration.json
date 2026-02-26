@@ -15,8 +15,8 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["packages/core/src/*"],
-      "@timeless/core": ["packages/core/src/index.ts"],
+      "@/*": ["packages/domains/src/*"],
+      "@timeless/core": ["packages/domains/src/index.ts"],
       "@timeless/provider-web": ["packages/provider-web/src/index.ts"],
       "@timeless/provider-weapp": ["packages/provider-weapp/src/index.ts"],
       "@timeless/provider-tauri": ["packages/provider-tauri/src/index.ts"],
@@ -24,8 +24,7 @@
     }
   },
   "include": [
-    "packages/core/src/domains/**/*",
-    "packages/core/src/types/**/*",
+    "packages/domains/**/*",
     "packages/provider-web/src/**/*",
     "packages/provider-weapp/src/**/*",
     "packages/provider-tauri/src/**/*",

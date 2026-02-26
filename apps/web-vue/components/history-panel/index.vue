@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-import { ViewComponentProps } from "@/store/types";
+import { ViewComponentProps } from "../../store/types";
 import LazyImage from "@/components/ui/Image.vue";
 import AspectRatio from "@/components/ui/AspectRatio.vue";
 import {
@@ -12,8 +12,12 @@ import {
 } from "@/biz/media/services";
 import { ListCore } from "@/domains/list/index";
 import { RequestCore } from "@/domains/request/index";
-import { DialogCore, ImageInListCore, NodeInListCore, PopoverCore, ScrollViewCore } from "@/domains/ui";
-import { RefCore } from "@/domains/cur";
+import { DialogCore } from "@/domains/ui/dialog";
+import { ImageInListCore } from "@/domains/ui/image";
+import { NodeInListCore } from "@/domains/ui/node";
+import { PopoverCore } from "@/domains/ui/popover";
+import { ScrollViewCore } from "@/domains/ui/scroll-view";
+import { RefCore } from "@/domains/ui/cur";
 import { MediaTypes } from "@/constants/index";
 
 const { app, client, history, store } = defineProps<

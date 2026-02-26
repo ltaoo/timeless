@@ -1,4 +1,4 @@
-import { ApplicationModel, StorageCore } from "@timeless/core";
+import { ApplicationModel, StorageCore } from "@timeless/domains";
 
 export function connect<T extends { storage: StorageCore<any> }>(
   app: ApplicationModel<T>,

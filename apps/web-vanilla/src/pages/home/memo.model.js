@@ -1,5 +1,5 @@
 
-import { ref } from "@timeless/base-ui";
+import { ref } from "@timeless/shadcnui";
 
 export function MemoModel(props) {
   const memos = ref([]);
