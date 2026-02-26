@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["node", "wechat-miniprogram"],
+    "paths": {
+      "@/*": ["../../packages/core/src/*"],
+      "~/*": ["./*"]
+    }
+  },
+  "include": ["wx.typings.ts", "**/*.ts", "**/*.tsx"]
+}

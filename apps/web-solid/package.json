@@ -1,0 +1,33 @@
+{
+  "name": "web-solid",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@timeless/core": "workspace:*",
+    "@timeless/provider-wails3": "workspace:*",
+    "@timeless/provider-web": "workspace:*",
+    "@wailsio/runtime": "3.0.0-alpha.79",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.19",
+    "highlight.js": "^11.11.1",
+    "lucide-solid": "^0.575.0",
+    "solid-app-router": "^0.4.2",
+    "solid-js": "^1.8.15",
+    "tailwind-merge": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.1",
+    "vite-plugin-solid": "^2.10.1"
+  }
+}

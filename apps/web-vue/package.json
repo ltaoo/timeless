@@ -1,0 +1,28 @@
+{
+  "name": "web-vue",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "lucide-vue-next": "^0.344.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.3.0",
+    "@timeless/core": "workspace:*",
+    "@timeless/provider-web": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vue-tsc": "^2.0.6",
+    "tailwindcss": "^3.4.3",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "@types/node": "^20.0.0"
+  }
+}

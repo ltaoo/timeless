@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "jsx": "preserve",
+    "types": ["node"],
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*", "../core/src/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}

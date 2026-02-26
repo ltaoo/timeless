@@ -1,0 +1,27 @@
+{
+  "name": "@timeless/core",
+  "version": "1.0.0",
+  "description": "Core logic for Timeless",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc && tsc-alias"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.7.5",
+    "axios": "^1.13.2",
+    "dayjs": "^1.11.19",
+    "mitt": "^3.0.1",
+    "qs": "^6.14.1",
+    "tailwind-merge": "^3.4.0",
+    "url-parse": "^1.5.10"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.23",
+    "@types/node": "^25.0.9",
+    "@types/qs": "^6.14.0",
+    "@types/url-parse": "^1.4.11",
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.9.3"
+  }
+}

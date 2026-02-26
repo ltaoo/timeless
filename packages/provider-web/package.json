@@ -1,0 +1,17 @@
+{
+  "name": "@timeless/provider-web",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@timeless/core": "workspace:*",
+    "axios": "^1.13.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^22.0.0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@timeless/weui",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'No build step yet'"
+  },
+  "dependencies": {
+    "@timeless/base-ui": "workspace:*"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.1.18"
+  }
+}

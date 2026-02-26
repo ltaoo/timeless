@@ -1,0 +1,19 @@
+{
+  "name": "weapp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@timeless/core": "workspace:*",
+    "@timeless/provider-weapp": "workspace:*",
+    "class-variance-authority": "^0.7.1",
+    "mitt": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/wechat-miniprogram": "^3.4.7",
+    "typescript": "^5.9.3"
+  }
+}

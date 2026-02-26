@@ -12,11 +12,24 @@
     "emitDeclarationOnly": true,
     "declarationDir": "dist/temp_dts",
     "noEmitOnError": false,
+    "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["packages/core/src/*"],
+      "@timeless/core": ["packages/core/src/index.ts"],
+      "@timeless/provider-web": ["packages/provider-web/src/index.ts"],
+      "@timeless/provider-weapp": ["packages/provider-weapp/src/index.ts"],
+      "@timeless/provider-tauri": ["packages/provider-tauri/src/index.ts"],
+      "@timeless/provider-wails3": ["packages/provider-wails3/src/index.ts"]
     }
   },
-  "include": ["domains/**/*", "types/**/*"],
+  "include": [
+    "packages/core/src/domains/**/*",
+    "packages/core/src/types/**/*",
+    "packages/provider-web/src/**/*",
+    "packages/provider-weapp/src/**/*",
+    "packages/provider-tauri/src/**/*",
+    "packages/provider-wails3/src/**/*"
+  ],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test-d.ts"]
 }

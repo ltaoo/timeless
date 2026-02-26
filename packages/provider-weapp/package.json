@@ -1,0 +1,17 @@
+{
+  "name": "@timeless/provider-weapp",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@timeless/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/wechat-miniprogram": "^3.4.10",
+    "typescript": "^5.9.3"
+  }
+}

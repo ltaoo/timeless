@@ -1,80 +1,19 @@
 {
-  "name": "timeless",
-  "version": "1.0.0",
-  "exports": {
-    ".": {
-      "types": "./dist/dts/core/domains/index.d.ts",
-      "import": "./dist/timeless.core.mjs",
-      "require": "./dist/timeless.core.umd.min.js"
-    },
-    "./web": {
-      "types": "./dist/dts/web/provider/web/index.d.ts",
-      "import": "./dist/timeless.web.mjs",
-      "require": "./dist/timeless.web.umd.min.js"
-    },
-    "./weapp": {
-      "types": "./dist/dts/weapp/provider/weapp/index.d.ts",
-      "import": "./dist/timeless.weapp.mjs",
-      "require": "./dist/timeless.weapp.umd.min.js"
-    }
-  },
-  "main": "dist/timeless.core.umd.min.js",
-  "types": "./dist/dts/core/domains/index.d.ts",
-  "files": [
-    "dist/"
-  ],
+  "name": "timeless-monorepo",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:t": "rollup --config rollup.config.js",
-    "build:t:dts": "rollup --config rollup.dts.config.js",
-    "build": "npm run build:core && npm run build:web && npm run build:weapp && npm run build:types",
-    "build2": "esbuild domains/index.ts --bundle --format=iife --target=es2015 --platform=browser --outfile=dist/timeless.umd.min.js --minify && tsc --project tsconfig.declaration.json && node scripts/generate-dts.js",
-    "build:core": "esbuild domains/index.ts --bundle --format=iife --global-name=Timeless --target=es2015 --platform=browser --outfile=dist/timeless.core.umd.min.js --minify && echo 'window.Timeless=Timeless;' >> dist/timeless.core.umd.min.js",
-    "build:web": "esbuild domains/provider/web/index.ts --bundle --format=iife --global-name=TimelessWeb --target=es2015 --platform=browser --outfile=dist/timeless.web.umd.min.js --minify && echo 'window.TimelessWeb=TimelessWeb;' >> dist/timeless.web.umd.min.js",
-    "build:weapp": "esbuild domains/provider/weapp/index.ts --bundle --format=iife --global-name=TimelessWeapp --target=es2015 --platform=browser --outfile=dist/timeless.weapp.umd.min.js --minify && echo 'window.TimelessWeapp=TimelessWeapp;' >> dist/timeless.weapp.umd.min.js",
-    "build:types": "npm run build:types:core && npm run build:types:web && npm run build:types:weapp && npm run merge:types && npm run merge:types:web && npm run merge:types:weapp",
-    "build:types:core": "tsc -p tsconfig.core.json --outDir dist/dts/core",
-    "build:types:web": "tsc -p tsconfig.web.json --outDir dist/dts/web",
-    "build:types:weapp": "tsc -p tsconfig.weapp.json --outDir dist/dts/weapp",
-    "merge:types": "echo 'declare var Timeless: any;' >> dist/dts/core/domains/index.d.ts",
-    "merge:types:web": "echo 'declare var TimelessWeb: any;' >> dist/dts/web/domains/provider/web/index.d.ts",
-    "merge:types:weapp": "echo 'declare var TimelessWeapp: any;' >> dist/dts/weapp/domains/provider/weapp/index.d.ts",
-    "build:types:publish": "npm run build:types && npm run copy:types:core && npm run copy:types:web && npm run copy:types:weapp && npm run gen:types:index",
-    "copy:types:core": "mkdir -p types/core && cp -r dist/dts/core/domains types/core/",
-    "copy:types:web": "mkdir -p types/web && cp -r dist/dts/web/domains types/web/",
-    "copy:types:weapp": "mkdir -p types/weapp && cp -r dist/dts/weapp/domains types/weapp/",
-    "gen:types:index": "echo '/// <reference path=\"./core/index.d.ts\" />\n/// <reference path=\"./web/index.d.ts\" />\n/// <reference path=\"./weapp/index.d.ts\" />\nexport * from \"./core\";\nexport * from \"./web\";\nexport * from \"./weapp\";' > types/index.d.ts",
-    "build:watch": "tsup --watch",
-    "build:wui": "esbuild platform/vanilla/src/components/weui/weui.js --bundle --format=iife --target=es2015 --platform=browser --outfile=platform/vanilla/public/wui.umd.min.js --minify"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "axios": "^1.13.2",
-    "dayjs": "^1.11.19",
-    "mitt": "^3.0.1",
-    "qs": "^6.14.1",
-    "tailwind-merge": "^3.4.0",
-    "url-parse": "^1.5.10",
-    "@floating-ui/dom": "^1.7.5"
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r run dev",
+    "test": "pnpm -r run test",
+    "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^29.0.0",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^12.3.0",
-    "@types/lodash": "^4.17.23",
-    "@types/node": "^25.0.9",
-    "@types/qs": "^6.14.0",
-    "@types/url-parse": "^1.4.11",
-    "dts-bundle-generator": "^9.5.1",
-    "esbuild": "^0.27.2",
-    "rollup-plugin-dts": "^6.3.0",
-    "tslib": "^2.8.1",
-    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
-  }
+    "prettier": "^3.2.5",
+    "eslint": "^9.1.1"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
 }

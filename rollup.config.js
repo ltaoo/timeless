@@ -39,14 +39,14 @@ const createConfig = (input, output, name) => ({
 });
 
 export default [
-  createConfig("domains/index.ts", "dist/timeless.core.umd.min.js", "Timeless"),
+  createConfig("packages/core/src/domains/index.ts", "dist/timeless.core.umd.min.js", "Timeless"),
   createConfig(
-    "domains/provider/web/index.ts",
+    "packages/provider-web/src/index.ts",
     "dist/timeless.web.umd.min.js",
     "TimelessWeb"
   ),
   createConfig(
-    "domains/provider/weapp/index.ts",
+    "packages/provider-weapp/src/index.ts",
     "dist/timeless.weapp.umd.min.js",
     "TimelessWeapp"
   ),

@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default [
   {
-    input: path.join(__dirname, "domains/index.ts"),
+    input: path.join(__dirname, "packages/core/src/domains/index.ts"),
     output: {
       file: path.join(__dirname, "dist/timeless.core.d.ts"),
       format: "es",

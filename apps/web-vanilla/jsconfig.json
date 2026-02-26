@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "checkJs": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@timeless/base-ui": ["../../packages/base-ui/src/index.js"],
+      "@timeless/weui": ["../../packages/weui/src/index.js"],
+      "@timeless/headless": ["../../packages/headless/src/index.js"]
+    }
+  },
+  "include": [
+    "src/**/*.js",
+    "types/index.d.ts",
+    "types/global.d.ts",
+    "types/timeless.umd.d.ts",
+    "types/prosemirror.d.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

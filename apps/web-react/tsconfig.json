@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../../packages/core/src/*"],
+      "@timeless/core": ["../../packages/core/src/index.ts"],
+      "@timeless/provider-web": ["../../packages/provider-web/src/index.ts"],
+      "~/*": ["./src/*"]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

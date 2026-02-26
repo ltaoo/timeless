@@ -26,9 +26,13 @@ const declarations = dtsFiles.map(file => {
 
 fs.writeFileSync(outputFile, `declare namespace Timeless {\n${declarations}\n}\nexport as namespace Timeless;`);
 
-fs.rmSync(tempDir, { recursive: true, force: true });
+try {
+  fs.rmSync(tempDir, { recursive: true, force: true });
+} catch (err) {
+  console.warn('Failed to clean up temp directory:', err.message);
+}
 
-const jsFile = 'dist/timeless.umd.min.js';
+const jsFile = 'dist/timeless.core.umd.min.js';
 let jsContent = fs.readFileSync(jsFile, 'utf8');
 
 jsContent = jsContent.replace(

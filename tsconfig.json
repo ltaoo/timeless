@@ -19,6 +19,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["domains/**/*", "global.d.ts"],
+  "include": ["packages/core/src/domains/**/*", "global.d.ts"],
   "exclude": ["node_modules", "platform", "biz"]
 }
