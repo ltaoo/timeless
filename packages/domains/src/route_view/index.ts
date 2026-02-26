@@ -2,7 +2,7 @@
  * @file 根据路由判断是否可见的视图块
  */
 import { base, BaseDomain, Handler } from "@/base";
-import { BizError } from "@timeless/utils";
+import { BizError } from "@/error";
 import { PresenceCore } from "@/ui/presence/index";
 import { NavigatorCore } from "@/navigator/index";
 import { HistoryCore } from "@/history";

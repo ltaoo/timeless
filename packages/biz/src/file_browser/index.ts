@@ -1,13 +1,14 @@
 /**
  * @todo 如果删除当前选中的文件夹，子文件夹在视图上也要同步移除
  */
-import { base, BaseDomain, Handler } from "@/base";
-import { ListCore } from "@/list";
-import { RequestCore } from "@/request";
-import { RequestPayload } from "@/request/utils";
-import { ScrollViewCore } from "@/ui";
-import { BizError } from "@timeless/utils";
-import { HttpClientCore } from "@/http_client";
+// import { base, BaseDomain, Handler } from "@/base";
+// import { ListCore } from "@/list";
+// import { RequestCore } from "@/request";
+// import { RequestPayload } from "@/request/utils";
+// import { ScrollViewCore } from "@/ui";
+import { ui, ListCore, base, BaseDomain, Handler, HttpClientCore, RequestPayload, RequestCore } from "@timeless/domains";
+import { BizError } from "@timeless/domains";
+// import { HttpClientCore } from "@/http_client";
 
 export type BizFile = {
   id: string;
@@ -22,7 +23,7 @@ export enum BizFileType {
 export type BizFileFetchService = (...args: any[]) => RequestPayload<BizFile[]>;
 type FileColumn = {
   list: ListCore<RequestCore<BizFileFetchService, any>>;
-  view: ScrollViewCore;
+  view: ui.ScrollViewCore;
 };
 
 export function FileBrowserModel(props: {
@@ -67,7 +68,7 @@ export function FileBrowserModel(props: {
         _loading = loading;
         bus.emit(Events.LoadingChange, loading);
       });
-      const scrollView = new ScrollViewCore({
+      const scrollView = new ui.ScrollViewCore({
         async onReachBottom() {
           await list$.loadMore();
           scrollView.finishLoadingMore();

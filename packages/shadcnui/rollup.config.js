@@ -14,6 +14,7 @@ export default {
     format: "umd",
     name: "ShadcnUI",
     globals: {},
+    footer: `if (typeof window !== "undefined") { Object.assign(window, window.ShadcnUI); }`,
   },
   external: [],
   plugins: [

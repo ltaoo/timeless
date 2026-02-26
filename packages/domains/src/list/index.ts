@@ -5,7 +5,7 @@ import { BaseDomain, Handler } from "@/base";
 import { RequestCore } from "@/request/index";
 import { RequestPayload } from "@/request/utils";
 import { debounce } from "@timeless/utils";
-import { Result } from "@timeless/utils";
+import { Result } from "@/result";
 
 import { DEFAULT_RESPONSE, DEFAULT_PARAMS, DEFAULT_CURRENT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_TOTAL } from "./constants";
 import { OriginalResponse, FetchParams, Response, Search, ParamsProcessor, ListProps } from "./typing";

@@ -1,7 +1,9 @@
-import { BaseDomain } from "@timeless/domains";
+import { BaseDomain, Handler } from "@timeless/domains";
 import { AuthCodeStep } from "@/constants/index";
-import { Result } from "@timeless/utils";
-import { BizError } from "@timeless/utils";
+import { BizError } from "@timeless/domains";
+import { Result } from "@timeless/domains";
+
+import { request } from "@/requests";
 
 export class QRCodeWithStateCore extends BaseDomain<{
   StateChange: { unique_id: string; step: AuthCodeStep; error?: BizError | null };

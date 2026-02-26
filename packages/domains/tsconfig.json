@@ -18,6 +18,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "../biz/src/qrcode", "../biz/src/file_browser"],
+  "include": ["src/**/*", "../biz/src/qrcode", "../biz/src/file_browser", "../utils/src/result"],
   "exclude": ["src/**/__tests__", "src/**/*.test.ts"]
 }

@@ -1,13 +1,26 @@
 import { base, Handler } from "@/base";
-import { BizError } from "@timeless/utils";
+import { BizError } from "@/error";
 import { PopoverCore } from "@/ui/popover";
 import { InputCore } from "@/ui/form/input";
 import { ButtonCore } from "@/ui/button";
 
-export function TreeNodeEditModel<T extends { id: number | string; label: string; children?: T[] }>(props: {
-  onEdit?: (v: { node: T; level: number; idx: number; uid: string; value: string }) => void;
+export function TreeNodeEditModel<
+  T extends { id: number | string; label: string; children?: T[] },
+>(props: {
+  onEdit?: (v: {
+    node: T;
+    level: number;
+    idx: number;
+    uid: string;
+    value: string;
+  }) => void;
   onDelete?: (v: { level: number; idx: number; uid: string; node: T }) => void;
-  onCreate?: (v: { level: number; idx: number; uid: string; value: string }) => void;
+  onCreate?: (v: {
+    level: number;
+    idx: number;
+    uid: string;
+    value: string;
+  }) => void;
   //   onChecked?: () => void;
 }) {
   const methods = {
@@ -31,7 +44,12 @@ export function TreeNodeEditModel<T extends { id: number | string; label: string
     handleDelete(e: {}) {
       console.log("[COMPONENT]CategoryTreeNode - onChange", e);
       if (_payload) {
-        bus.emit(Events.Delete, { node: _payload.node, level: _payload.level, idx: _payload.idx, uid: _payload.uid });
+        bus.emit(Events.Delete, {
+          node: _payload.node,
+          level: _payload.level,
+          idx: _payload.idx,
+          uid: _payload.uid,
+        });
       }
       //       const { node } = props;
       //       props.onDelete?.({
@@ -59,7 +77,12 @@ export function TreeNodeEditModel<T extends { id: number | string; label: string
       onClick() {
         const v = ui.$input.value;
         if (_action === "create" && _payload) {
-          bus.emit(Events.Create, { level: _payload.level, idx: _payload.idx, uid: _payload.uid, value: v });
+          bus.emit(Events.Create, {
+            level: _payload.level,
+            idx: _payload.idx,
+            uid: _payload.uid,
+            value: v,
+          });
           return;
         }
         if (_action === "edit" && _payload) {
@@ -77,7 +100,8 @@ export function TreeNodeEditModel<T extends { id: number | string; label: string
     }),
   };
 
-  let _payload: null | { level: number; idx: number; uid: string; node: T } = null;
+  let _payload: null | { level: number; idx: number; uid: string; node: T } =
+    null;
   let _action: "edit" | "create" | null = null;
   let _state = {};
   enum Events {
@@ -89,7 +113,13 @@ export function TreeNodeEditModel<T extends { id: number | string; label: string
   }
   type TheTypesOfEvents = {
     [Events.Create]: { level: number; idx: number; uid: string; value: string };
-    [Events.Edit]: { node: T; level: number; idx: number; uid: string; value: string };
+    [Events.Edit]: {
+      node: T;
+      level: number;
+      idx: number;
+      uid: string;
+      value: string;
+    };
     [Events.Delete]: { node: T; level: number; idx: number; uid: string };
     [Events.StateChange]: typeof _state;
     [Events.Error]: BizError;

@@ -1,6 +1,6 @@
 import { ApplicationModel, StorageCore } from "@timeless/domains";
 
-export function connect<T extends { storage: StorageCore<any> }>(
+export function connect<T extends { storage: StorageCore<any>; user: any }>(
   app: ApplicationModel<T>,
 ) {
   // const { router } = app;

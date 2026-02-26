@@ -19,6 +19,7 @@
       font-style: normal;
       font-display: swap;
     }
+
     :root {
       --background: #ededed;
       --foreground: #171717;
@@ -63,45 +64,94 @@
       --GREEN: #07c160;
       --border: oklch(100% 0 0/.1);
     }
+
     .text-fanqie {
       font-family: 'HarmonyOS Sans SC', sans-serif;
     }
+
     #root {
       width: 100vw;
       height: 100vh;
     }
-    @keyframes enter { from { opacity: var(--tw-enter-opacity, 1); transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), var(--tw-enter-scale, 1)); } }
-    @keyframes exit { to { opacity: var(--tw-exit-opacity, 1); transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1)); } }
-    .animate-in { animation: enter 150ms ease-out; }
-    .animate-out { animation: exit 150ms ease-in forwards; }
-    .fade-in { --tw-enter-opacity: 0; }
-    .fade-in-0 { --tw-enter-opacity: 0; }
-    .fade-out { --tw-exit-opacity: 0; }
-    .fade-out-0 { --tw-exit-opacity: 0; }
-    .zoom-in-95 { --tw-enter-scale: 0.95; }
-    .zoom-out-95 { --tw-exit-scale: 0.95; }
-    .slide-in-from-top-full { --tw-enter-translate-y: -100%; }
-    .slide-in-from-bottom-2 { --tw-enter-translate-y: 0.5rem; }
-    .slide-out-to-bottom { --tw-exit-translate-y: 100%; }
-    .slide-out-to-bottom-2 { --tw-exit-translate-y: 0.5rem; }
+
+    @keyframes enter {
+      from {
+        opacity: var(--tw-enter-opacity, 1);
+        transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), var(--tw-enter-scale, 1));
+      }
+    }
+
+    @keyframes exit {
+      to {
+        opacity: var(--tw-exit-opacity, 1);
+        transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1));
+      }
+    }
+
+    .animate-in {
+      animation: enter 150ms ease-out;
+    }
+
+    .animate-out {
+      animation: exit 150ms ease-in forwards;
+    }
+
+    .fade-in {
+      --tw-enter-opacity: 0;
+    }
+
+    .fade-in-0 {
+      --tw-enter-opacity: 0;
+    }
+
+    .fade-out {
+      --tw-exit-opacity: 0;
+    }
+
+    .fade-out-0 {
+      --tw-exit-opacity: 0;
+    }
+
+    .zoom-in-95 {
+      --tw-enter-scale: 0.95;
+    }
+
+    .zoom-out-95 {
+      --tw-exit-scale: 0.95;
+    }
+
+    .slide-in-from-top-full {
+      --tw-enter-translate-y: -100%;
+    }
+
+    .slide-in-from-bottom-2 {
+      --tw-enter-translate-y: 0.5rem;
+    }
+
+    .slide-out-to-bottom {
+      --tw-exit-translate-y: 100%;
+    }
+
+    .slide-out-to-bottom-2 {
+      --tw-exit-translate-y: 0.5rem;
+    }
   </style>
 </head>
 
 <body>
-  <script>!function () { try { var d = document.documentElement, n = 'data-theme', s = 'setAttribute'; var e = localStorage.getItem('theme'); if ('system' === e || (!e && true)) { var t = '(prefers-color-scheme: dark)', m = window.matchMedia(t); if (m.media !== t || m.matches) { d.style.colorScheme = 'dark'; d[s](n, 'dark') } else { d.style.colorScheme = 'light'; d[s](n, 'light') } } else if (e) { d[s](n, e || '') } if (e === 'light' || e === 'dark') d.style.colorScheme = e } catch (e) { } }()</script>
-  <div id="root"></div>
   <script src="/public/timeless.core.umd.min.js"></script>
   <script src="/public/timeless.web.umd.min.js"></script>
-  <!-- <script src="/src/components/error.js"></script> -->
-  <script type="importmap">
-    {
-      "imports": {
-        "@timeless/shadcnui": "/node_modules/@timeless/shadcnui/src/index.js",
-        "@timeless/weui": "/node_modules/@timeless/weui/src/index.js"
-      }
-    }
+  <script src="/public/headless.umd.min.js"></script>
+  <script src="/public/shadcnui.umd.min.js"></script>
+  <script>!function () { try { var d = document.documentElement, n = 'data-theme', s = 'setAttribute'; var e = localStorage.getItem('theme'); if ('system' === e || (!e && true)) { var t = '(prefers-color-scheme: dark)', m = window.matchMedia(t); if (m.media !== t || m.matches) { d.style.colorScheme = 'dark'; d[s](n, 'dark') } else { d.style.colorScheme = 'light'; d[s](n, 'light') } } else if (e) { d[s](n, e || '') } if (e === 'light' || e === 'dark') d.style.colorScheme = e } catch (e) { } }()</script>
+  <script>
+    window.ref = Headless.ref;
+    window.computed = Headless.computed;
+    window.classnames = Headless.classnames;
+    window.isRef = Headless.isRef;
+    window.isComponent = Headless.isComponent;
   </script>
-  <script type="module" src="/node_modules/@timeless/base-ui/src/index.js"></script>
+  <div id="root"></div>
   <script type="module" src="/src/index.js"></script>
 </body>
 

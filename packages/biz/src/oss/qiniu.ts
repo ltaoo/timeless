@@ -6,9 +6,9 @@ import {
 } from "qiniu-js";
 // import { HttpProtocol, LogLevel } from "qiniu-js/output/@internal";
 
-import { Result } from "@timeless/utils";
+import { Result } from "@timeless/domains";
 import { base, Handler } from "@timeless/domains";
-import { BizError } from "@timeless/utils";
+import { BizError } from "@timeless/domains";
 import { StorageCore } from "@timeless/domains";
 import { HttpClientCore } from "@timeless/domains";
 import { request_factory } from "@timeless/domains";

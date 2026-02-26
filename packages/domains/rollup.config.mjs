@@ -3,6 +3,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 import dts from 'rollup-plugin-dts';
 import alias from '@rollup/plugin-alias';
+import terser from '@rollup/plugin-terser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
@@ -49,6 +50,35 @@ export default [
     external: [
       ...Object.keys(pkg.dependencies || {}),
       ...Object.keys(pkg.peerDependencies || {}),
+    ],
+  },
+  {
+    input: 'src/index.ts',
+    output: {
+      file: 'dist/timeless.core.umd.min.js',
+      format: 'umd',
+      name: 'Timeless',
+      sourcemap: true,
+    },
+    plugins: [
+      alias({
+        entries: [
+          { find: '@', replacement: path.resolve(__dirname, 'src') },
+        ]
+      }),
+      resolve({ browser: true }),
+      commonjs(),
+      typescript({ 
+        tsconfig: './tsconfig.json',
+        declaration: false,
+        outDir: null,
+        compilerOptions: {
+          declaration: false,
+          declarationMap: false,
+          outDir: null,
+        }
+      }),
+      terser(),
     ],
   },
   {

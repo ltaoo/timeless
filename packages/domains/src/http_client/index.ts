@@ -1,5 +1,5 @@
 import { BaseDomain, Handler } from "@/base";
-import { Result } from "@timeless/utils";
+import { Result } from "@/result";
 import { JSONObject } from "@timeless/utils";
 import { query_stringify } from "@timeless/utils";
 

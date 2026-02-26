@@ -1,7 +1,6 @@
-import { StorageCore, ApplicationModel, ThemeTypes } from "@timeless/domains";
-import { Result } from "@timeless/utils";
+import { StorageCore, ApplicationModel, ThemeTypes, Result } from "@timeless/domains";
 
-export function connect<T extends { storage: StorageCore<any> }>(
+export function connect<T extends { storage: StorageCore<any>; user: any }>(
   app: ApplicationModel<T>,
 ) {
   const ownerDocument = globalThis.document;
@@ -126,15 +125,15 @@ export function connect<T extends { storage: StorageCore<any> }>(
   const color_schemes = ["light", "dark"];
   app.theme = get_theme();
 
-  app.setTheme = (theme: ThemeTypes) => {
-    set_theme(theme);
-    app.theme = theme;
-    app.emit(app.Events.StateChange, { ...app.state });
-    localStorage.setItem("theme", theme);
-    // app.$storage.set("theme", theme);
-    return Result.Ok(null);
-  };
-  app.getTheme = get_theme;
+  // app.setTheme = (theme: ThemeTypes) => {
+  //   set_theme(theme);
+  //   app.theme = theme;
+  //   app.emit(app.Events.StateChange, { ...app.state });
+  //   localStorage.setItem("theme", theme);
+  //   // app.$storage.set("theme", theme);
+  //   return Result.Ok(null);
+  // };
+  // app.getTheme = get_theme;
   const { availHeight, availWidth } = window.screen;
   if (window.navigator.userAgent.match(/iphone/i)) {
     const matched = [

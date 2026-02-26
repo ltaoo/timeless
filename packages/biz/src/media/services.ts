@@ -1,5 +1,5 @@
 import { request } from "@timeless/domains";
-import { Result } from "@timeless/utils";
+import { Result } from "@timeless/domains";
 import { MediaTypes } from "@/constants/index";
 
 export type MediaItem = {

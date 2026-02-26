@@ -1,7 +1,8 @@
-import { base, Handler } from "@/base";
-import { Result } from "@timeless/utils";
-import { BizError } from "@timeless/utils";
 import { remove_arr_item } from "@timeless/utils";
+
+import { base, Handler } from "@/base";
+import { Result } from "@/result";
+import { BizError } from "@/error";
 
 import { FormInputInterface } from "./types";
 
@@ -106,8 +107,9 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
         value: this._input.value,
         // @ts-ignore
         type: this._input.type,
-        // @ts-ignore
-        options: this._input.shape === "select" ? this._input.options : undefined,
+        options:
+          // @ts-ignore
+          this._input.shape === "select" ? this._input.options : undefined,
       },
     };
   }
@@ -198,7 +200,7 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
       if (rule.mode && value) {
         if (rule.mode === "email") {
           const is_valid_email = (value as string).match(
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
           );
           if (!is_valid_email) {
             errors.push(`${this._label}格式错误`);
@@ -223,7 +225,10 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
     }
     return Result.Ok(value);
   }
-  setValue(value: T["value"], extra: Partial<{ key: string; idx: number; silence: boolean }> = {}) {
+  setValue(
+    value: T["value"],
+    extra: Partial<{ key: string; idx: number; silence: boolean }> = {},
+  ) {
     const v = (() => {
       if (value !== undefined) {
         return value;
@@ -253,22 +258,33 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
     }
     this._bus.destroy();
   }
-  onChange(handler: Handler<TheSingleFieldCoreEvents<T>[SingleFieldEvents.Change]>) {
+  onChange(
+    handler: Handler<TheSingleFieldCoreEvents<T>[SingleFieldEvents.Change]>,
+  ) {
     return this._bus.on(SingleFieldEvents.Change, handler);
   }
-  onStateChange(handler: Handler<TheSingleFieldCoreEvents<T>[SingleFieldEvents.StateChange]>) {
+  onStateChange(
+    handler: Handler<
+      TheSingleFieldCoreEvents<T>[SingleFieldEvents.StateChange]
+    >,
+  ) {
     return this._bus.on(SingleFieldEvents.StateChange, handler);
   }
 }
 
 type ArrayFieldCoreProps<
-  T extends (count: number) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>
+  T extends (
+    count: number,
+  ) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>,
 > = FormFieldCoreProps & {
   field: T;
   hidden?: boolean;
 };
-type ArrayFieldValue<T extends (count: number) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>> =
-  ReturnType<T>["value"];
+type ArrayFieldValue<
+  T extends (
+    count: number,
+  ) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>,
+> = ReturnType<T>["value"];
 // type ArrayFieldValue<T extends (count: number) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>> = {
 //   [K in keyof ReturnType<T>]: ReturnType<T>[K] extends SingleFieldCore<any>
 //     ? ReturnType<T>[K]["value"]
@@ -286,13 +302,17 @@ enum ArrayFieldEvents {
   StateChange,
 }
 type TheArrayFieldCoreEvents<
-  T extends (count: number) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>
+  T extends (
+    count: number,
+  ) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>,
 > = {
   [ArrayFieldEvents.Change]: { idx: number; id: number };
   [ArrayFieldEvents.StateChange]: ArrayFieldValue<T>;
 };
 export class ArrayFieldCore<
-  T extends (count: number) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>
+  T extends (
+    count: number,
+  ) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>,
 > {
   symbol = "ArrayFieldCore" as const;
   _label: string;
@@ -407,8 +427,16 @@ export class ArrayFieldCore<
     this._hidden = false;
     this._bus.emit(ArrayFieldEvents.StateChange, { ...this.state });
   }
-  setValue(values: any[], extra: Partial<{ key: string; idx: number; silence: boolean }> = {}) {
-    console.log("[DOMAIN]ArrayFieldCore - setValue", extra.key, values, this.fields);
+  setValue(
+    values: any[],
+    extra: Partial<{ key: string; idx: number; silence: boolean }> = {},
+  ) {
+    console.log(
+      "[DOMAIN]ArrayFieldCore - setValue",
+      extra.key,
+      values,
+      this.fields,
+    );
     let i = 0;
     for (; i < values.length; i += 1) {
       (() => {
@@ -431,7 +459,11 @@ export class ArrayFieldCore<
           };
           this.fields[i] = field;
         }
-        field.field.setValue(v, { idx: i, silence: extra.silence, key: extra.key });
+        field.field.setValue(v, {
+          idx: i,
+          silence: extra.silence,
+          key: extra.key,
+        });
       })();
     }
     this.fields = this.fields.slice(0, i);
@@ -487,7 +519,9 @@ export class ArrayFieldCore<
     return field;
   }
   insertAfter(id: number): ReturnType<T> {
-    const field_idx = this.fields.findIndex((field) => field.id === id) ?? this.fields.length - 1;
+    const field_idx =
+      this.fields.findIndex((field) => field.id === id) ??
+      this.fields.length - 1;
     const field = this._field(this.fields.length);
     const v_id = this.fields.length;
     let v_idx = field_idx + 1;
@@ -599,21 +633,30 @@ export class ArrayFieldCore<
     }
     this._bus.destroy();
   }
-  onChange(handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.Change]>) {
+  onChange(
+    handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.Change]>,
+  ) {
     return this._bus.on(ArrayFieldEvents.Change, handler);
   }
-  onStateChange(handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.StateChange]>) {
+  onStateChange(
+    handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.StateChange]>,
+  ) {
     return this._bus.on(ArrayFieldEvents.StateChange, handler);
   }
 }
-type ObjectValue<O extends Record<string, SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>>> = {
+type ObjectValue<
+  O extends Record<
+    string,
+    SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>
+  >,
+> = {
   [K in keyof O]: O[K] extends SingleFieldCore<any>
     ? O[K]["value"]
     : O[K] extends ArrayFieldCore<any>
-    ? O[K]["value"]
-    : O[K] extends ObjectFieldCore<any>
-    ? O[K]["value"]
-    : never;
+      ? O[K]["value"]
+      : O[K] extends ObjectFieldCore<any>
+        ? O[K]["value"]
+        : never;
 };
 type ObjectFieldCoreProps<T> = FormFieldCoreProps & {
   fields: T;
@@ -634,15 +677,21 @@ enum ObjectFieldEvents {
   StateChange,
 }
 type TheObjectFieldCoreEvents<
-  T extends Record<string, SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>>
+  T extends Record<
+    string,
+    SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>
+  >,
 > = {
   [ObjectFieldEvents.Change]: ObjectValue<T>;
   [ObjectFieldEvents.StateChange]: ObjectFieldCoreState;
 };
 
-function buildFieldsState<T extends Record<string, SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>>>(
-  fields: T
-) {
+function buildFieldsState<
+  T extends Record<
+    string,
+    SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>
+  >,
+>(fields: T) {
   const state: {
     symbol: string;
     label: string;
@@ -661,7 +710,10 @@ function buildFieldsState<T extends Record<string, SingleFieldCore<any> | ArrayF
 }
 
 export class ObjectFieldCore<
-  T extends Record<string, SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>>
+  T extends Record<
+    string,
+    SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>
+  >,
 > {
   symbol = "ObjectFieldCore" as const;
   _label: string;
@@ -727,7 +779,10 @@ export class ObjectFieldCore<
     }
     return field;
   }
-  setField(name: string, field: SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>) {
+  setField(
+    name: string,
+    field: SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>,
+  ) {
     // @ts-ignore
     this.fields[name] = field;
     this._bus.emit(ObjectFieldEvents.StateChange, { ...this.state });
@@ -765,7 +820,7 @@ export class ObjectFieldCore<
   }
   setValue(
     values: Partial<Record<keyof T, any>>,
-    extra: Partial<{ key: keyof T; idx: number; silence: boolean }> = {}
+    extra: Partial<{ key: keyof T; idx: number; silence: boolean }> = {},
   ) {
     // console.log("[DOMAIN]formv2 - setValue", values, extra, this.fields);
     if (extra.key) {
@@ -860,10 +915,16 @@ export class ObjectFieldCore<
     }
     this._bus.destroy();
   }
-  onChange(handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.Change]>) {
+  onChange(
+    handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.Change]>,
+  ) {
     return this._bus.on(ObjectFieldEvents.Change, handler);
   }
-  onStateChange(handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.StateChange]>) {
+  onStateChange(
+    handler: Handler<
+      TheObjectFieldCoreEvents<T>[ObjectFieldEvents.StateChange]
+    >,
+  ) {
     return this._bus.on(ObjectFieldEvents.StateChange, handler);
   }
 }

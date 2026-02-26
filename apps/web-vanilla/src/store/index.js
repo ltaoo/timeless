@@ -35,7 +35,7 @@ export const history = new Timeless.HistoryCore({
   },
 });
 
-export const app = new Timeless.ApplicationModel({
+export const app = new Timeless.Application({
   user,
   storage,
   async beforeReady() {
@@ -101,7 +101,5 @@ history.onClickLink(({ href, target }) => {
   history.push(route.name, query);
 });
 
-// @ts-ignore
-TimelessWeb.provide_app(app);
-// @ts-ignore
-TimelessWeb.provide_history(history);
+Timeless.Web.provide_app(app);
+Timeless.Web.provide_history(history);

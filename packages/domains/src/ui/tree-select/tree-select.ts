@@ -1,9 +1,11 @@
 import { base, Handler } from "@/base";
-import { BizError } from "@timeless/utils";
+import { BizError } from "@/error";
 import { PopoverCore } from "@/ui/popover";
 import { InputCore } from "@/ui/form/input";
 
-export function TreeSelectModel<T extends { id: number | string; label: string; children?: T[] }>(props: {
+export function TreeSelectModel<
+  T extends { id: number | string; label: string; children?: T[] },
+>(props: {
   nodes: T[];
   /** 是否支持多选 */
   multiple?: boolean;
@@ -66,7 +68,9 @@ export function TreeSelectModel<T extends { id: number | string; label: string; 
       // console.log("[]TreeSelect - findNodeWithLevelAndIdx");
       for (let i = 0; i < _$nodes.length; i += 1) {
         const $node = _$nodes[i];
-        const matched = $node.methods.findNodeWithUID(uid) as any as TreeSelectNodeModel<T>;
+        const matched = $node.methods.findNodeWithUID(
+          uid,
+        ) as any as TreeSelectNodeModel<T>;
         if (matched) {
           return matched;
         }
@@ -77,7 +81,9 @@ export function TreeSelectModel<T extends { id: number | string; label: string; 
       // console.log("[]TreeSelect - findNodeWithLevelAndIdx");
       for (let i = 0; i < _$nodes.length; i += 1) {
         const $node = _$nodes[i];
-        const matched = $node.methods.findNodeWithUID(uid) as any as TreeSelectNodeModel<T>;
+        const matched = $node.methods.findNodeWithUID(
+          uid,
+        ) as any as TreeSelectNodeModel<T>;
         if (matched) {
           return $node;
         }
@@ -122,9 +128,16 @@ export function TreeSelectModel<T extends { id: number | string; label: string; 
       // return false;
       for (let i = 0; i < _$nodes.length; i += 1) {
         const $node = _$nodes[i];
-        const matched = $node.methods.findNodeWithUID(uid) as any as TreeSelectNodeModel<T>;
+        const matched = $node.methods.findNodeWithUID(
+          uid,
+        ) as any as TreeSelectNodeModel<T>;
         if (matched) {
-          console.log("[]removeNodeWithUID - i-----", props.uid, $node.state.uid, uid);
+          console.log(
+            "[]removeNodeWithUID - i-----",
+            props.uid,
+            $node.state.uid,
+            uid,
+          );
           if ($node.state.uid === uid) {
             methods.removeChildNodeWithUID(uid);
             return true;
@@ -210,11 +223,13 @@ export function TreeSelectModel<T extends { id: number | string; label: string; 
   };
   return $ins;
 }
-export type TreeSelectModel<T extends { id: number | string; label: string; children?: T[] }> = ReturnType<
-  typeof TreeSelectModel<T>
->;
+export type TreeSelectModel<
+  T extends { id: number | string; label: string; children?: T[] },
+> = ReturnType<typeof TreeSelectModel<T>>;
 
-export function TreeSelectNodeModel<T extends { id: number | string; label: string; children?: T[] }>(props: {
+export function TreeSelectNodeModel<
+  T extends { id: number | string; label: string; children?: T[] },
+>(props: {
   node: T;
   uid: string;
   idx: number;
@@ -246,7 +261,9 @@ export function TreeSelectNodeModel<T extends { id: number | string; label: stri
     removeChildNodeWithUID(uid: string) {
       // const ok = ui.$children.methods.removeChildNodeWithUID(uid) as any as boolean;
       // return ok;
-      const ok = ui.$children.methods.searchNodeWithUIDThenRemove(uid) as any as boolean;
+      const ok = ui.$children.methods.searchNodeWithUIDThenRemove(
+        uid,
+      ) as any as boolean;
       return ok;
     },
     setNode(v: T) {
@@ -357,6 +374,6 @@ export function TreeSelectNodeModel<T extends { id: number | string; label: stri
   return $ins;
 }
 
-export type TreeSelectNodeModel<T extends { id: number | string; label: string; children?: T[] }> = ReturnType<
-  typeof TreeSelectNodeModel<T>
->;
+export type TreeSelectNodeModel<
+  T extends { id: number | string; label: string; children?: T[] },
+> = ReturnType<typeof TreeSelectNodeModel<T>>;

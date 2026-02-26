@@ -26,7 +26,7 @@ export function HomePageView() {
   // Shared state for interactive demos
   const progressVal = ref(60);
   const stepIdx = ref(1);
-  const dialog$ = new Timeless.DialogCore({
+  const dialog$ = new Timeless.ui.DialogCore({
     title: "Dialog Title",
     footer: true,
   });
@@ -208,14 +208,14 @@ export function HomePageView() {
             ]),
             Section("Checkbox", [
               Item("Default", [
-                Checkbox({ store: new Timeless.CheckboxCore({}) }),
+                Checkbox({ store: new Timeless.ui.CheckboxCore({}) }),
               ]),
             ]),
-            Section("Switch", [
-              Item("Default", [
-                Switch({ store: new Timeless.CheckboxCore({}) }),
-              ]),
-            ]),
+            // Section("Switch", [
+            //   Item("Default", [
+            //     Switch({ store: new Timeless.ui.CheckboxCore({}) }),
+            //   ]),
+            // ]),
             Section("Slider", [
               Item("Default", [Slider({ value: ref(50), min: 0, max: 100 })]),
             ]),
@@ -258,7 +258,7 @@ export function HomePageView() {
             Section("Steps", [
               Item("3 Steps", [
                 Steps({
-                  current: stepIdx,
+                  current: stepIdx.value,
                   items: [
                     { title: "Account" },
                     { title: "Profile" },
@@ -645,14 +645,26 @@ export function HomePageView() {
                 (() => {
                   const shareMenu = new Timeless.ui.MenuCore({
                     items: [
-                      new Timeless.ui.MenuItemCore({ label: "February", onClick() { console.log("February"); } }),
-                      new Timeless.ui.MenuItemCore({ label: "March", onClick() { console.log("March"); } }),
+                      new Timeless.ui.MenuItemCore({
+                        label: "February",
+                        onClick() {
+                          console.log("February");
+                        },
+                      }),
+                      new Timeless.ui.MenuItemCore({
+                        label: "March",
+                        onClick() {
+                          console.log("March");
+                        },
+                      }),
                     ],
                   });
                   const menuItem = new Timeless.ui.MenuItemCore({
                     label: "Month",
                     menu: shareMenu,
-                    onClick() { console.log("Month"); },
+                    onClick() {
+                      console.log("Month");
+                    },
                   });
                   let count = 0;
                   shareMenu.onShow(() => {
@@ -660,14 +672,24 @@ export function HomePageView() {
                       count++;
                       const extra = Array.from({ length: 3 }, (_, i) => {
                         const label = `Extra ${(count - 1) * 3 + i + 1}`;
-                        return new Timeless.ui.MenuItemCore({ label, onClick() { console.log(label); } });
+                        return new Timeless.ui.MenuItemCore({
+                          label,
+                          onClick() {
+                            console.log(label);
+                          },
+                        });
                       });
                       shareMenu.setItems([...shareMenu.items, ...extra]);
                     }, 1000);
                   });
                   const dm$ = new Timeless.ui.DropdownMenuCore({
                     items: [
-                      new Timeless.ui.MenuItemCore({ label: "Year 2025", onClick() { console.log("Year 2025"); } }),
+                      new Timeless.ui.MenuItemCore({
+                        label: "Year 2025",
+                        onClick() {
+                          console.log("Year 2025");
+                        },
+                      }),
                       menuItem,
                     ],
                   });
@@ -682,9 +704,24 @@ export function HomePageView() {
                     store: new Timeless.ui.DropdownMenuCore({
                       trigger: "hover",
                       items: [
-                        new Timeless.ui.MenuItemCore({ label: "Profile", onClick() { console.log("profile"); } }),
-                        new Timeless.ui.MenuItemCore({ label: "Settings", onClick() { console.log("settings"); } }),
-                        new Timeless.ui.MenuItemCore({ label: "Logout", onClick() { console.log("logout"); } }),
+                        new Timeless.ui.MenuItemCore({
+                          label: "Profile",
+                          onClick() {
+                            console.log("profile");
+                          },
+                        }),
+                        new Timeless.ui.MenuItemCore({
+                          label: "Settings",
+                          onClick() {
+                            console.log("settings");
+                          },
+                        }),
+                        new Timeless.ui.MenuItemCore({
+                          label: "Logout",
+                          onClick() {
+                            console.log("logout");
+                          },
+                        }),
                       ],
                     }),
                   },
@@ -700,10 +737,30 @@ export function HomePageView() {
                     offsetX: 4,
                     offsetY: 4,
                     items: [
-                      new Timeless.ui.MenuItemCore({ label: "Cut", onClick() { console.log("cut"); } }),
-                      new Timeless.ui.MenuItemCore({ label: "Copy", onClick() { console.log("copy"); } }),
-                      new Timeless.ui.MenuItemCore({ label: "Paste", onClick() { console.log("paste"); } }),
-                      new Timeless.ui.MenuItemCore({ label: "Delete", onClick() { console.log("delete"); } }),
+                      new Timeless.ui.MenuItemCore({
+                        label: "Cut",
+                        onClick() {
+                          console.log("cut");
+                        },
+                      }),
+                      new Timeless.ui.MenuItemCore({
+                        label: "Copy",
+                        onClick() {
+                          console.log("copy");
+                        },
+                      }),
+                      new Timeless.ui.MenuItemCore({
+                        label: "Paste",
+                        onClick() {
+                          console.log("paste");
+                        },
+                      }),
+                      new Timeless.ui.MenuItemCore({
+                        label: "Delete",
+                        onClick() {
+                          console.log("delete");
+                        },
+                      }),
                     ],
                   });
                   return DropdownMenu(
@@ -819,15 +876,30 @@ export function HomePageView() {
                     "left-start",
                   ].map((pos) => {
                     const [side, align] = pos.split("-");
-                        return DropdownMenu(
-                          {
-                            store: new Timeless.DropdownMenuCore({
-                              side: /** @type {any} */ (side),
-                              align: /** @type {any} */ (align),
-                              items: [
-                            new Timeless.MenuItemCore({ label: "编辑", onClick() { console.log("edit"); } }),
-                            new Timeless.MenuItemCore({ label: "复制", onClick() { console.log("duplicate"); } }),
-                            new Timeless.MenuItemCore({ label: "删除", onClick() { console.log("delete"); } }),
+                    return DropdownMenu(
+                      {
+                        store: new Timeless.ui.DropdownMenuCore({
+                          side: /** @type {any} */ (side),
+                          align: /** @type {any} */ (align),
+                          items: [
+                            new Timeless.ui.MenuItemCore({
+                              label: "编辑",
+                              onClick() {
+                                console.log("edit");
+                              },
+                            }),
+                            new Timeless.ui.MenuItemCore({
+                              label: "复制",
+                              onClick() {
+                                console.log("duplicate");
+                              },
+                            }),
+                            new Timeless.ui.MenuItemCore({
+                              label: "删除",
+                              onClick() {
+                                console.log("delete");
+                              },
+                            }),
                           ],
                         }),
                       },

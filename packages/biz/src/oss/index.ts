@@ -1,5 +1,6 @@
+import { Result } from "@timeless/domains";
 import { base, Handler } from "@timeless/domains";
-import { BizError } from "@timeless/utils";
+import { BizError } from "@timeless/domains";
 
 export function OSSManager() {
   const methods = {

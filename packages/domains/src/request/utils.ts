@@ -1,7 +1,7 @@
 /**
  * @file 构建 http 请求载荷
  */
-import { Result, UnpackedResult } from "@timeless/utils";
+import { Result, UnpackedResult } from "@/result";
 import { Unpacked } from "@timeless/utils";
 import { query_stringify } from "@timeless/utils";
 

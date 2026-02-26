@@ -2,9 +2,9 @@
  * @file API 请求
  */
 import { BaseDomain, Handler } from "@/base";
-import { BizError } from "@timeless/utils";
+import { BizError } from "@/error";
 import { HttpClientCore } from "@/http_client/index";
-import { Result, UnpackedResult } from "@timeless/utils";
+import { Result, UnpackedResult } from "@/result";
 import { sleep } from "@timeless/utils";
 
 import { RequestPayload, UnpackedRequestPayload } from "./utils";

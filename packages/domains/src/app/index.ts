@@ -4,7 +4,7 @@
 
 import { BaseDomain, Handler } from "@/base";
 import { StorageCore } from "@/storage/index";
-import { Result } from "@timeless/utils";
+import { Result } from "@/result";
 import { JSONObject } from "@timeless/utils";
 
 import { ThemeTypes } from "./types";
@@ -202,6 +202,12 @@ export class Application<
   getComputedStyle(el: unknown) {
     return {} as CSSStyleDeclaration;
   }
+  // setTheme(v: ThemeTypes) {
+  //   this.theme = v;
+  // }
+  // getTheme() {
+  //   return Result.Ok(this.theme);
+  // }
   setTitle(title: string) {}
   setSize(size: { width: number; height: number }) {
     const { width, height } = size;
@@ -257,5 +263,6 @@ export class Application<
   }
 }
 
-export type ApplicationModel<T extends { storage: StorageCore<any>; user: any }> =
-  Application<T>;
+export type ApplicationModel<
+  T extends { storage: StorageCore<any>; user: any },
+> = Application<T>;

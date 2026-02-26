@@ -5,7 +5,7 @@ import { base, Handler } from "@/base";
 
 import { FormFieldCore } from "./field";
 import { ValueInputInterface } from "./types";
-import { Result } from "@timeless/utils";
+import { Result } from "@/result";
 
 type FormProps<F extends Record<string, FormFieldCore<any>>> = {
   fields: F;

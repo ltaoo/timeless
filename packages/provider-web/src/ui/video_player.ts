@@ -1,9 +1,7 @@
 import { ui } from "@timeless/domains";
 
-const { VideoPlayerCore } = ui;
-
 /** 连接 $video 标签和 player 领域 */
-export function connect($video: HTMLVideoElement, player: InstanceType<typeof VideoPlayerCore>) {
+export function connect($video: HTMLVideoElement, player: InstanceType<typeof ui.VideoPlayerCore>) {
   // const canvas = document.createElement("canvas");
   // const context = canvas.getContext("2d", {
   //   willReadFrequently: true,

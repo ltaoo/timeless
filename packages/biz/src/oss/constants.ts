@@ -1,28 +1,28 @@
 // import { getCookie } from '@cf2e/utils';
 
-const uploadCookieName = 'cft-userCenter';
+const uploadCookieName = "";
 export const Config = {
-    uploadUrl: 'https://skt.weipaitang.com',
-    uploadCookieName,
-    CDN_URL: `https://cdnt.weipaitang.com`,
-    MEDIA_URL: 'https://mediat.weipaitang.com',
-    token: "",
+  uploadUrl: "",
+  uploadCookieName,
+  CDN_URL: "",
+  MEDIA_URL: "",
+  token: "",
 };
 export let isProd = false;
 
 export let getToken = () => {
-    return Config.token;
+  return Config.token;
 };
 /**
  * 设置当前为正式环境
  */
 export function setProd() {
-    isProd = true;
-    Config.uploadUrl = 'https://sk.weipaitang.com';
-    Config.uploadCookieName = 'cf-userCenter';
-    Config.CDN_URL = 'https://cdn.weipaitang.com';
-    Config.MEDIA_URL = 'https://media.weipaitang.com';
-    Config.token = "";
+  isProd = true;
+  Config.uploadUrl = "https://sk.weipaitang.com";
+  Config.uploadCookieName = "cf-userCenter";
+  Config.CDN_URL = "https://cdn.weipaitang.com";
+  Config.MEDIA_URL = "https://media.weipaitang.com";
+  Config.token = "";
 }
 
 /**
@@ -30,20 +30,20 @@ export function setProd() {
  * @param config
  */
 export const setToken = (
-    options: string | { token?: string; cookieName?: string },
+  options: string | { token?: string; cookieName?: string },
 ) => {
-    if (typeof options === 'string') {
-        Config.token = options;
-        return;
-    }
-    const { token, cookieName } = options;
-    if (token !== undefined) {
-        Config.token = token;
-    }
-    if (cookieName !== undefined) {
-        Config.uploadCookieName = cookieName;
-        Config.token = "";
-    }
+  if (typeof options === "string") {
+    Config.token = options;
+    return;
+  }
+  const { token, cookieName } = options;
+  if (token !== undefined) {
+    Config.token = token;
+  }
+  if (cookieName !== undefined) {
+    Config.uploadCookieName = cookieName;
+    Config.token = "";
+  }
 };
 
 /**
@@ -51,9 +51,9 @@ export const setToken = (
  * @param options
  */
 export const config = (options = {}) => {
-    if (options === undefined) {
-        return Config;
-    }
-    Object.assign(Config, options);
+  if (options === undefined) {
     return Config;
+  }
+  Object.assign(Config, options);
+  return Config;
 };

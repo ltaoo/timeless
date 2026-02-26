@@ -1,5 +1,3 @@
-import { Result } from "@/result/index";
-
 export type Unpacked<T> = T extends (infer U)[]
   ? U
   : T extends (...args: any[]) => infer U

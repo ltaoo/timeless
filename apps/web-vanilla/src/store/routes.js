@@ -14,10 +14,10 @@ const configure = {
             title: "组件库",
             pathname: "/home/index",
           },
-          weui: {
-            title: "Weui 组件库",
-            pathname: "/home/weui",
-          },
+          // weui: {
+          //   title: "Weui 组件库",
+          //   pathname: "/home/weui",
+          // },
         },
         options: {
           require: [],

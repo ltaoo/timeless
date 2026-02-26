@@ -9,8 +9,8 @@
     "build": "rollup -c rollup.config.mjs"
   },
   "dependencies": {
-    "@timeless/utils": "workspace:*",
     "@floating-ui/dom": "^1.7.5",
+    "@timeless/utils": "workspace:*",
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",
     "mitt": "^3.0.1",
@@ -21,6 +21,7 @@
     "@rollup/plugin-alias": "^6.0.0",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/lodash": "^4.17.23",
     "@types/node": "^25.0.9",

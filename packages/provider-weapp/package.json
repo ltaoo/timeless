@@ -8,11 +8,14 @@
     "build": "rollup -c"
   },
   "dependencies": {
-    "@timeless/biz": "workspace:*", "@timeless/domains": "workspace:*", "@timeless/utils": "workspace:*"
+    "@timeless/biz": "workspace:*",
+    "@timeless/domains": "workspace:*",
+    "@timeless/utils": "workspace:*"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/node": "^22.0.0",
     "@types/wechat-miniprogram": "^3.4.10",

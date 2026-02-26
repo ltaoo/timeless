@@ -2,8 +2,7 @@ import dayjs from "dayjs";
 
 import { request } from "@/requests";
 import { SubscriptionStatus, SubscriptionStatusTextMap } from "@/subscription/constants";
-import { TmpRequestResp } from "@timeless/domains";
-import { Result } from "@timeless/utils";
+import { TmpRequestResp, Result } from "@timeless/domains";
 
 /**
  * 用户登录

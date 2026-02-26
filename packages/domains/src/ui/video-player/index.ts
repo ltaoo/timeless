@@ -3,7 +3,7 @@
  */
 import { BaseDomain, Handler } from "@/base";
 import { ApplicationModel } from "@/app";
-import { Result } from "@timeless/utils";
+import { Result } from "@/result";
 
 /** 影片分辨率 */
 enum MediaResolutionTypes {

@@ -1,5 +1,5 @@
 import { base, Handler } from "@/base";
-import { BizError } from "@timeless/utils";
+import { BizError } from "@/error";
 
 export function BackToTopModel(props: { clientHeight?: number }) {
   const methods = {

@@ -1,7 +1,7 @@
-import { BizError } from "@timeless/utils";
+import { BizError } from "@timeless/domains";
 import { ListCore } from "@timeless/domains";
 import { request_factory } from "@timeless/domains";
-import { Result } from "@timeless/utils";
+import { Result } from "@timeless/domains";
 
 export const request = request_factory({
   hostnames: {},
