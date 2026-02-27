@@ -66,10 +66,10 @@ export function Dialog(props: any, children?: any) {
             ),
           },
           [
-            Show({ when: computed({ state }, (d: any) => !!d.state.title) }, [
+            Show({ when: computed(state, (d) => !!d.title) }, [
               View({ ...merge(tp(t?.titleWrap)) }, [
                 View({ ...merge(tp(t?.title)) }, [
-                  Txt(computed({ state }, (d: any) => d.state.title || "")),
+                  Txt(computed(state, (d) => d.title || "")),
                 ]),
               ]),
             ]),

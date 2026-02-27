@@ -240,7 +240,7 @@ export function UIExampleWeUIPageView() {
                     View({ class: "weui-cell__bd" }, [
                       Input({
                         store: new Timeless.ui.InputCore({ defaultValue: "" }),
-                        placeholder: "请输入手机号",
+                        // placeholder: "请输入手机号",
                         type: "tel",
                       }),
                     ]),

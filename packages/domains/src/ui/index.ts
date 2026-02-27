@@ -13,6 +13,7 @@ export * from "./form/input";
 export * from "./menu";
 export * from "./node";
 export * from "./popover";
+export * from "./popper";
 export * from "./presence";
 export * from "./progress";
 export * from "./roving-focus";

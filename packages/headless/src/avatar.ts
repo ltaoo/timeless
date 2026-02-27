@@ -62,13 +62,13 @@ export function Avatar(props: any) {
     View(
       {
         ...merge(tp(t?.fallback)),
-        // style: computed({ imgError }, (d: any) => {
-        //   const base = merge(tp(t?.fallback)).style || "";
-        //   return (d.imgError || !srcRef.value) ? base : base + "display:none;";
-        // }),
-        class: computed({ imgError }, (d: any) => {
+        style: computed(imgError, (d) => {
+          const base = merge(tp(t?.fallback)).style || "";
+          return d || !srcRef.value ? base : base + "display:none;";
+        }),
+        class: computed(imgError, (d) => {
           const base = merge(tp(t?.fallback)).class || "";
-          return d.imgError || !srcRef.value ? base : base + " hidden";
+          return d || !srcRef.value ? base : base + " hidden";
         }),
       },
       [Txt(fallback || (alt ? alt.charAt(0).toUpperCase() : "?"))],

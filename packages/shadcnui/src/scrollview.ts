@@ -1,11 +1,16 @@
-import { View } from "@timeless/headless";
-import { ref, computed } from "@timeless/headless";
+import { ui } from "@timeless/domains";
+import { View, ViewChildren, type ViewProps } from "@timeless/headless";
+import { ref, cn } from "@timeless/reactive";
 
-export function ScrollView(props: any, children: any) {
-  const { store, ...rest } = props;
-  const cn = ref(rest.class);
+export function ScrollView(
+  props: ViewProps & { store: ui.ScrollViewCore },
+  children: ViewChildren,
+) {
+  const { store, class: cls, ...rest } = props;
+  // const cn = ref(rest.class);
   const progress$ = View(
     {
+      ...rest,
       class: "w-[50px] h-[50px] mx-auto rounded-full bg-w-bg-0",
     },
     [
@@ -31,20 +36,18 @@ export function ScrollView(props: any, children: any) {
   );
   const view$ = View(
     {
-      class: computed({ cn }, (draft) =>
-        ["scroll-view w-full h-full overflow-y-auto", draft.cn].join(" "),
-      ),
+      class: cn(["scroll-view w-full h-full overflow-y-auto", cls]),
     },
     [indicator$, ...children],
   );
   const rotate = ref(false);
 
   props.store.inDownOffset(() => {
-    rotate.value = false;
+    rotate.as(false);
     progress$.$elm.style.display = "block";
   });
   props.store.outDownOffset(() => {
-    rotate.value = true;
+    rotate.as(true);
     progress$.$elm.style.display = "none";
   });
 

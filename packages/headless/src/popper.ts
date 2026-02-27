@@ -1,26 +1,34 @@
-import { ref, computed } from "@timeless/reactive";
-import { View } from "./view.js";
+import { ref, refobj, computed } from "@timeless/reactive";
+import { ui } from "@timeless/domains";
+
+import { View, ViewProps } from "./view.js";
 import { Portal } from "./portal.js";
 import { Presence } from "./presence.js";
 
-export function Popper(props: any, children?: any) {
+export function Popper(
+  props: ViewProps & {
+    store: ui.PopperCore;
+    zIndex?: number;
+  },
+  children?: any,
+) {
   const { store, zIndex = 999, ...rest } = props;
-  const state = ref(store.state);
+  const state = refobj(store.state);
   let unsubscribe: any;
 
   const content$ = View(
     {
       ...rest,
-      class: "portal z-[999]",
-      style: computed({ state }, (draft: any) => {
-        const ss: any = {
+      class: "popper z-[999]",
+      style: computed(state, (draft) => {
+        const ss: Record<string, any> = {
           "z-index": zIndex,
           position: "fixed",
           left: 0,
           top: 0,
-          opacity: draft.state.isPlaced ? 100 : 0,
-          transform: draft.state.isPlaced
-            ? `translate3d(${Math.round(draft.state.x)}px, ${Math.round(draft.state.y)}px, 0)`
+          opacity: draft.isPlaced ? 100 : 0,
+          transform: draft.isPlaced
+            ? `translate3d(${Math.round(draft.x)}px, ${Math.round(draft.y)}px, 0)`
             : "translate3d(0, 0, 0)",
         };
         return Object.keys(ss)

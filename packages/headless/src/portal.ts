@@ -13,17 +13,16 @@ export function Portal(
     $elm: view$.$elm,
     render() {
       const $elm = view$.render();
-      document.body.appendChild($elm);
+      const $fragment = document.createDocumentFragment();
+      for (let i = 0; i < $elm.childNodes.length; i++) {
+        $fragment.appendChild($elm.childNodes[i]);
+      }
+      document.body.appendChild($fragment);
       // if (props.onMounted) {
       //   props.onMounted($elm);
       // }
       return null;
     },
-    // onMounted() {
-    //   if (view$.onMounted) {
-    //     view$.onMounted();
-    //   }
-    // },
     onUnmounted() {
       if (view$.$elm && view$.$elm.parentNode) {
         view$.$elm.parentNode.removeChild(view$.$elm);

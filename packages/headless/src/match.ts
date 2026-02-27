@@ -33,12 +33,9 @@ export function Match(props: any, renders: any) {
   return {
     t: "show",
     $elm: view$.$elm,
-    onMounted() {
-      view$.onMounted();
-      if (props.onMounted) {
-        props.onMounted();
-      }
-    },
+    // onMounted() {
+    //   view$.onMounted();
+    // },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -54,6 +51,9 @@ export function Match(props: any, renders: any) {
     setContent(v: any) {},
     render() {
       render();
+      if (props.onMounted) {
+        props.onMounted();
+      }
       return view$.$elm;
     },
   };

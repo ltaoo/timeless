@@ -207,5 +207,4 @@ export interface Component {
   onUnmounted?(): void;
 }
 
-export type ViewChild = Component;
-export type ViewChildren = ViewChild[];
+export type ViewChildren = Component[];

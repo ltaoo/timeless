@@ -32,13 +32,13 @@ export function Button(
         state.as(store.state);
       }),
     );
-    const m = (d: any) =>
+    const m = (d: Record<string, any>) =>
       merge(
         tp(t?.root, {
           variant,
           size,
-          loading: d.state.loading,
-          disabled: d.state.disabled,
+          loading: d.loading,
+          disabled: d.disabled,
         }),
         cn,
         st,
@@ -48,7 +48,7 @@ export function Button(
       {
         type: "button",
         ...rest,
-        class: computed({ state }, (d: any) => m(d).class),
+        class: computed(state, (d) => m(d).class),
         // style: computed({ state }, (d: any) => m(d).style),
         onClick() {
           store.click();
@@ -59,7 +59,7 @@ export function Button(
         },
       },
       [
-        Show({ when: computed({ state }, (d: any) => d.state.loading) }, [
+        Show({ when: computed(state, (d) => d.loading) }, [
           View({ ...merge(tp(t?.spinner)) }),
         ]),
         ...(Array.isArray(children) ? children : [children]),

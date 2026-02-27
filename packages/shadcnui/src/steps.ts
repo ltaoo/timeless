@@ -20,16 +20,16 @@ export function Steps(props: {
             View({ class: "flex flex-col items-center relative z-10" }, [
               View(
                 {
-                  class: computed({ current }, (d) =>
+                  class: computed(current, (d) =>
                     [
                       "flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors",
-                      index < d.current
+                      index < d
                         ? "bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900"
                         : "",
-                      index === d.current
+                      index === d
                         ? "border-2 border-zinc-900 text-zinc-900 dark:border-zinc-50 dark:text-zinc-50"
                         : "",
-                      index > d.current
+                      index > d
                         ? "border-2 border-zinc-200 text-zinc-500 dark:border-zinc-700"
                         : "",
                     ]
@@ -39,8 +39,8 @@ export function Steps(props: {
                 },
                 [
                   Txt(
-                    computed({ current }, (d) =>
-                      index < d.current ? "✓" : String(index + 1),
+                    computed(current, (d) =>
+                      index < d ? "✓" : String(index + 1),
                     ),
                   ),
                 ],
@@ -53,18 +53,21 @@ export function Steps(props: {
                 [Txt(item.title)],
               ),
             ]),
-            Show({ when: computed({}, () => index < items.length - 1) }, [
-              View({
-                class: computed({ current }, (d) =>
-                  [
-                    "h-[2px] w-full flex-1 mx-2 transition-colors",
-                    index < d.current
-                      ? "bg-zinc-900 dark:bg-zinc-50"
-                      : "bg-zinc-200 dark:bg-zinc-700",
-                  ].join(" "),
-                ),
-              }),
-            ]),
+            Show(
+              { when: computed(items, (items) => index < items.length - 1) },
+              [
+                View({
+                  class: computed(current, (d) =>
+                    [
+                      "h-[2px] w-full flex-1 mx-2 transition-colors",
+                      index < d
+                        ? "bg-zinc-900 dark:bg-zinc-50"
+                        : "bg-zinc-200 dark:bg-zinc-700",
+                    ].join(" "),
+                  ),
+                }),
+              ],
+            ),
           ]);
         },
       }),

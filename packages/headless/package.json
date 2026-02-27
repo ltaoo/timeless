@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "dist/headless.umd.min.js",
   "module": "dist/headless.esm.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c"
   },

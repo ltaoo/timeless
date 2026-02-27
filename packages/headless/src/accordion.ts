@@ -10,9 +10,7 @@ export function Accordion(props: any) {
 
   return View({ ...merge(tp(t?.root), cn, st) }, [
     ...items.map((item: any, index: number) => {
-      const isOpen = computed({ openItems }, (d: any) =>
-        d.openItems.includes(index),
-      );
+      const isOpen = computed(openItems, (d) => d.includes(index));
       const toggle = () => {
         if (type === "single") {
           openItems.as(openItems.includes(index) ? [] : [index]);

@@ -2,7 +2,7 @@
   "name": "@timeless/shadcnui",
   "version": "1.0.0",
   "main": "dist/shadcnui.umd.min.js",
-  "module": "src/index.ts",
+  "module": "dist/shadcnui.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c"
@@ -13,6 +13,8 @@
     "dist"
   ],
   "dependencies": {
+    "@timeless/domains": "workspace:*",
+    "@timeless/reactive": "workspace:*",
     "@timeless/headless": "workspace:*",
     "@timeless/icons": "workspace:*"
   },
