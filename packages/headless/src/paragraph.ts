@@ -1,8 +1,8 @@
 import { View } from "./view.js";
-import { isRef, classnames } from "@timeless/reactive";
+import { isRef, cn } from "@timeless/reactive";
 
 export function Paragraph(props: any, children?: any) {
-  const class$ = classnames([]);
+  // const class$ = cn([]);
   const node$ = View(
     {
       type: "p",

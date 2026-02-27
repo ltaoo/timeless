@@ -182,7 +182,7 @@ export function MenuItemView(item: any, t: any) {
                           (() => {
                             const subState = ref(item.menu.state);
                             item.menu.onStateChange((v: any) => {
-                              subState.value = v;
+                              subState.as(v);
                             });
                             const subItems = computed(
                               { subState },

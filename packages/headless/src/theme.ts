@@ -1,4 +1,4 @@
-import { classnames, Ref, isRef } from "@timeless/reactive";
+import { cn, Ref, isRef, isClassName, ClassNameRef } from "@timeless/reactive";
 
 let _theme: any = null;
 export function setTheme(t: any) {
@@ -15,15 +15,17 @@ export function tp(part: ThemePart, ctx?: any) {
   return typeof part === "function" ? part(ctx) : part;
 }
 
-export function merge(tr: any = {}, userClass?: any, userStyle?: any) {
+export function merge(
+  tr: any = {},
+  userClass?: string | Ref<string> | ClassNameRef,
+  userStyle?: string | Ref<string> | ClassNameRef,
+) {
   const baseClass = tr.class;
   let classValue: any;
-  if (userClass && userClass.__CN) {
-    classValue = baseClass ? classnames([baseClass, userClass]) : userClass;
-  } else if (userClass && isRef(userClass)) {
-    classValue = baseClass
-      ? classnames([baseClass, userClass])
-      : classnames([userClass]);
+  if (isClassName(userClass)) {
+    classValue = baseClass ? cn([baseClass, userClass]) : userClass;
+  } else if (isRef(userClass)) {
+    classValue = baseClass ? cn([baseClass, userClass]) : cn([userClass]);
   } else {
     const c = [baseClass, userClass].filter(Boolean).join(" ") || undefined;
     if (c !== undefined) {

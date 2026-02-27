@@ -4,22 +4,24 @@ import { View, ViewProps } from "./view.js";
 
 export function For<T>(
   props: ViewProps & {
-    each: Ref<T[]>;
+    each: T[] | Ref<T[]>;
     render: (item: T, idx: number) => Component;
+    key?: string;
   },
 ) {
-  const { each, render, ...restProps } = props;
+  const { each, key, render, onMounted, onUnmounted, ...restProps } = props;
 
-  const view$ = View(restProps);
-  const $elm = view$.$elm;
+  const _key = key;
   let _mounted = false;
-  $elm.setAttribute("for-wrapper", "true");
   let _each_items: T[] = [];
   let _children: (Component | null)[] = [];
   let _$elms: (HTMLElement | Text | null)[] = [];
 
+  const view$ = View(restProps);
+  const $elm = view$.$elm;
+  $elm.setAttribute("for-wrapper", "true");
+
   const _existing_map = new Map();
-  // const _existing_map_by_id = new Map();
 
   const methods = {
     _render_item(item: T, index: number) {
@@ -45,38 +47,37 @@ export function For<T>(
       })();
       return rr;
     },
-    _insert(index: number, items: any[]) {
-      // console.log("[For]_insert - handle", index, items.length);
-      for (let i = 0; i < items.length; i += 1) {
+    _insert(index: number, items: T[]) {
+      const new_children: (Component | null)[] = new Array(items.length);
+      const new_elms: (HTMLElement | Text | null)[] = new Array(items.length);
+
+      // console.log("insert items", index, items);
+
+      const $base = _$elms[index];
+      const $fragment = document.createDocumentFragment();
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        _each_items[index + i] = item;
+        const res = render(item, index + i);
         (() => {
-          const res = methods._render_item(items[i], index + i);
           if (!res) {
+            _children[index + i] = null;
             return;
           }
-          if (res.delete) {
-            return;
-          }
-          // const refElm = $container.childNodes[index + i] || null;
-          // $container.insertBefore(res.elm, refElm);
-          // console.log(
-          //   "[For]_insert - before appendChild",
-          //   i,
-          //   $container.innerHTML,
-          // );
-          if (res.elm) {
-            $elm.appendChild(res.elm);
-            if (
-              isComponent(res.node) &&
-              typeof res.node.onMounted === "function"
-            ) {
-              res.node.onMounted(res.elm);
-            }
+          if (isComponent(res)) {
+            _children[index + i] = res;
+            const $sub = res.render();
+            _$elms[index + i] = $sub;
+            $fragment.appendChild($sub);
+          } else {
+            _children[index + i] = null;
           }
         })();
-        // _items.splice(index + i, 0, items[i]);
-        // _children.splice(index + i, 0, res.node || res.elm);
-        // _doms.splice(index + i, 0, res.elm);
       }
+      $elm.insertBefore($fragment, $base);
+      // _each_items.splice(index, 0, ...items);
+      // _children.splice(index, 0, ...new_children);
+      // _$elms.splice(index, 0, ...new_elms);
     },
     _remove(index: number, count: number) {
       for (let i = 0; i < count; i += 1) {
@@ -122,73 +123,116 @@ export function For<T>(
       const prev_children = _children;
       const prev_elms = _$elms;
 
-      const new_children: (Component | null)[] = [];
-      const new_elms: (HTMLElement | Text | null)[] = [];
-      const added_items: { node: Component; elm: HTMLElement | Text }[] = [];
+      // 1. Prepare target state
+      const new_children: (Component | null)[] = new Array(new_items.length);
+      const new_elms: (HTMLElement | Text | null)[] = new Array(
+        new_items.length,
+      );
 
-      const old_map = new Map<T, number[]>();
+      // 2. Index old items for O(1) lookup
+      const old_map = new Map<any, number[]>();
       prev_items.forEach((item, index) => {
-        let indices = old_map.get(item);
+        const k = _key && item ? (item as any)[_key] : item;
+        let indices = old_map.get(k);
         if (!indices) {
           indices = [];
-          old_map.set(item, indices);
+          old_map.set(k, indices);
         }
         indices.push(index);
       });
 
+      // 3. Diff Phase: Identify operations
+      const added_nodes: { node: Component; elm: HTMLElement | Text }[] = [];
+      const updated_nodes: {
+        node: Component;
+        elm: HTMLElement | Text;
+      }[] = [];
+      const removed_nodes: {
+        elm: HTMLElement | Text | null;
+        component: Component | null;
+      }[] = [];
+
+      // Iterate new items -> Determine Reused vs Added
       for (let i = 0; i < new_items.length; i++) {
         const item = new_items[i];
-        // console.log("loop", i, item);
-        const prev_indices = old_map.get(item);
+        const k = _key && item ? (item as any)[_key] : item;
+        const prev_indices = old_map.get(k);
 
         if (prev_indices && prev_indices.length > 0) {
+          // Reused
           const oldIndex = prev_indices.shift()!;
-          new_children[i] = prev_children[oldIndex];
-          new_elms[i] = prev_elms[oldIndex];
+          const oldItem = prev_items[oldIndex];
+
+          if (item !== oldItem) {
+            const res = methods._render_item(item, i);
+            new_children[i] = res.node;
+            new_elms[i] = res.elm;
+
+            removed_nodes.push({
+              elm: prev_elms[oldIndex],
+              component: prev_children[oldIndex],
+            });
+
+            if (res.node && res.elm && isComponent(res.node)) {
+              added_nodes.push({ node: res.node, elm: res.elm });
+              updated_nodes.push({ node: res.node, elm: res.elm });
+            }
+          } else {
+            new_children[i] = prev_children[oldIndex];
+            new_elms[i] = prev_elms[oldIndex];
+          }
         } else {
+          // Added (New)
           const res = methods._render_item(item, i);
           new_children[i] = res.node;
           new_elms[i] = res.elm;
           if (res.node && res.elm && isComponent(res.node)) {
-            added_items.push({ node: res.node, elm: res.elm });
+            added_nodes.push({ node: res.node, elm: res.elm });
           }
         }
       }
 
-      // Cleanup removed
+      // Remaining items in old_map are Removed
       for (const indices of old_map.values()) {
-        console.log("cleanup removed", indices);
         for (const index of indices) {
-          const elm = prev_elms[index];
-          if (elm && elm.parentNode === $elm) {
-            $elm.removeChild(elm);
-          }
-          const comp = prev_children[index];
-          if (comp && isComponent(comp)) {
+          removed_nodes.push({
+            elm: prev_elms[index],
+            component: prev_children[index],
+          });
+        }
+      }
+
+      console.log("1. removed_nodes", removed_nodes);
+      console.log("2. added_nodes", added_nodes);
+      console.log("3. updated_nodes", updated_nodes);
+      // 4. Patch Phase: Apply to DOM
+
+      // 4.1 Remove nodes
+      for (const { elm, component } of removed_nodes) {
+        if (elm && elm.parentNode === $elm) {
+          $elm.removeChild(elm);
+        }
+        if (component && isComponent(component)) {
+          // @ts-ignore
+          if (typeof component.onUnmounted === "function") {
             // @ts-ignore
-            if (typeof comp.onUnmounted === "function") {
-              comp.onUnmounted();
-            }
+            component.onUnmounted();
           }
         }
       }
 
-      // Reorder/Insert
+      // 4.2 Reorder / Insert nodes
       for (let i = 0; i < new_elms.length; i++) {
         const node = new_elms[i];
-        (() => {
-          if (!node) {
-            return;
-          }
-          const cur_node = $elm.childNodes[i];
-          if (node !== cur_node) {
-            $elm.insertBefore(node, cur_node || null);
-          }
-        })();
+        if (!node) continue;
+        const cur_node = $elm.childNodes[i];
+        if (node !== cur_node) {
+          $elm.insertBefore(node, cur_node || null);
+        }
       }
 
-      // Trigger onMounted for new components
-      for (const { node, elm } of added_items) {
+      // 4.3 Trigger Lifecycle (Mounted)
+      for (const { node, elm } of added_nodes) {
         // @ts-ignore
         if (typeof node.onMounted === "function") {
           // @ts-ignore
@@ -196,6 +240,7 @@ export function For<T>(
         }
       }
 
+      // 5. Update State
       _each_items = new_items;
       _children = new_children;
       _$elms = new_elms;
@@ -204,7 +249,7 @@ export function For<T>(
 
   const ctx = {
     onPatch(change: any) {
-      console.log("[headless]For - ctx.onPatch - handle patch", change);
+      // console.log("[headless]For - ctx.onPatch - handle patch", change);
       if (change.type === "insert") {
         methods._insert(change.index, change.items);
       }
@@ -216,11 +261,6 @@ export function For<T>(
       }
     },
     onChange(v: T[]) {
-      console.log("[headless]For - ctx.onChange - handle change", v);
-      // $elm.innerHTML = "";
-      // _each_items = [];
-      // _children = [];
-      // _$elms = [];
       if (!_mounted) {
         return;
       }
@@ -238,10 +278,11 @@ export function For<T>(
     $elm,
     render() {
       // console.log('[For] render', each.value);
+      const nodes = isRef(each) ? each.value : each;
       const $fragment = document.createDocumentFragment();
-      for (let i = 0; i < each.value.length; i += 1) {
-        const item = each.value[i];
-        console.log("", i, item);
+      for (let i = 0; i < nodes.length; i += 1) {
+        const item = nodes[i];
+        // console.log("before mounted", i, item);
         _each_items[i] = item;
         const res = render(item, i);
         (() => {
@@ -261,7 +302,25 @@ export function For<T>(
       }
       $elm.appendChild($fragment);
       _mounted = true;
+      if (onMounted) {
+        onMounted($elm);
+      }
       return $elm;
+    },
+    onUnmounted() {
+      if (onUnmounted) {
+        onUnmounted();
+      }
+      for (let i = 0; i < _children.length; i += 1) {
+        const component = _children[i];
+        if (isComponent(component)) {
+          // @ts-ignore
+          if (typeof component.onUnmounted === "function") {
+            // @ts-ignore
+            component.onUnmounted();
+          }
+        }
+      }
     },
   };
 }

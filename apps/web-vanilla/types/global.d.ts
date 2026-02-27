@@ -28,10 +28,12 @@ declare interface Window {
   dayjs: typeof dayjs;
 }
 // Global Core Functions
-declare const ref: typeof import("@timeless/shadcnui").ref;
+declare const ref: typeof import("@timeless/headless").ref;
+declare const refarr: typeof import("@timeless/headless").refarr;
+declare const refobj: typeof import("@timeless/headless").refobj;
 declare const computed: typeof import("@timeless/shadcnui").computed;
 declare const isRef: typeof import("@timeless/shadcnui").isRef;
-declare const classnames: typeof import("@timeless/shadcnui").classnames;
+declare const cn: typeof import("@timeless/shadcnui").cn;
 
 declare const Show: typeof import("@timeless/shadcnui").Show;
 declare const For: typeof import("@timeless/shadcnui").For;

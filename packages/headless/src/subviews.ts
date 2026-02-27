@@ -7,7 +7,7 @@ export function RouterSubViews(props: any) {
   const curSubView = ref(props.view.curView);
 
   props.view.onCurViewChange((view: any) => {
-    curSubView.value = view;
+    curSubView.as(view);
   });
   props.view.onSubViewAppended((v: any) => {
     subViews.value.push(v);

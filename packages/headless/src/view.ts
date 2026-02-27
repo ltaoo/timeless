@@ -2,15 +2,15 @@ import {
   Ref,
   isRef,
   isComponent,
-  classnames,
-  ViewClassname,
+  isClassName,
+  ClassNameRef,
 } from "@timeless/reactive";
 
 export interface ViewProps {
   type?: string;
   id?: string | Ref<string>;
   style?: string | Ref<string>;
-  class?: string | Ref<string>;
+  class?: string | Ref<string> | ClassNameRef;
   dataset?: Record<string, string>;
   onMounted?(el: any): void;
   beforeUnmounted?(): void;
@@ -58,8 +58,6 @@ export function View(props: ViewProps = {}, children?: any) {
     }
   });
 
-  // const class$ = classnames([tmpcn]);
-  // console.log("class$", class$);
   if (cls) {
     if (typeof cls === "string") {
       $elm.className = cls;
@@ -70,6 +68,14 @@ export function View(props: ViewProps = {}, children?: any) {
         },
       });
       $elm.className = cls.value;
+    } else if (isClassName(cls)) {
+      cls._subscribe({
+        onChange(v: string[]) {
+          console.log("[]view the className is changed", v);
+          $elm.className = v.join(" ");
+        },
+      });
+      $elm.className = cls.toString();
     }
   }
   // if (tmpid) {
@@ -80,20 +86,19 @@ export function View(props: ViewProps = {}, children?: any) {
   //   }
   // }
 
-  // if (style) {
-  //   if (typeof style === "string") {
-  //     $elm.style.cssText = style;
-  //   }
-  //   if (style.value) {
-  //     $elm.style.cssText = style.value;
-  //     // console.log(style);
-  //     style._subscribe({
-  //       onChange(v: any) {
-  //         $elm.style.cssText = v;
-  //       },
-  //     });
-  //   }
-  // }
+  if (style) {
+    if (typeof style === "string") {
+      $elm.style.cssText = style;
+    }
+    if (isRef(style)) {
+      $elm.style.cssText = style.value;
+      style._subscribe({
+        onChange(v: any) {
+          $elm.style.cssText = v;
+        },
+      });
+    }
+  }
   if (onClick) {
     // console.log("[baseui]View - register click", props.class, props.dataset);
     $elm.addEventListener("click", function (event: Event) {

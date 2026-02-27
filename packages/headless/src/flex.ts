@@ -1,9 +1,17 @@
-import { classnames } from "@timeless/reactive";
-import { View } from "./view.js";
+import { cn, ClassNameRef, Ref } from "@timeless/reactive";
 
-export function Flex(props: any, children?: any) {
-  const { justify, items, class: cn, ...rest } = props;
-  const class$: any = classnames(["flex", cn]);
+import { View, ViewProps } from "./view.js";
+
+export function Flex(
+  props: {
+    justify?: string;
+    items?: string;
+    class?: string | Ref<string> | ClassNameRef;
+  } & ViewProps,
+  children?: any,
+) {
+  const { justify, items, class: cls, ...rest } = props;
+  const class$: any = cn(["flex", cls]);
   if (justify) {
     class$.add(` justify-${props.justify}`);
   }

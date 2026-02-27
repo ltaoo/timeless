@@ -29,7 +29,7 @@ export function Button(
     const events: any[] = [];
     events.push(
       store.onStateChange(() => {
-        state.value = store.state;
+        state.as(store.state);
       }),
     );
     const m = (d: any) =>

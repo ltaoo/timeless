@@ -1,8 +1,8 @@
 import { tp, merge } from "./theme.js";
-import { classnames } from "@timeless/reactive";
+import { cn } from "@timeless/reactive";
 
 export function Textarea(props: any) {
-  const { store, style: st, class: cn, dataset, theme: t, ...rest } = props;
+  const { store, style: st, class: cls, dataset, theme: t, ...rest } = props;
   const $elm = document.createElement("textarea");
 
   Object.keys(rest).forEach((k) => {
@@ -13,9 +13,9 @@ export function Textarea(props: any) {
     $elm.setAttribute(`data-${k}`, dataset[k]);
   });
 
-  const m = merge(tp(t?.root), cn, st);
-  const class$: any = classnames([m.class || ""]);
-  class$.listen({
+  const m = merge(tp(t?.root), cls, st);
+  const class$: any = cn([m.class || ""]);
+  class$._subscribe({
     onChange(v: any) {
       $elm.className = v.join(" ");
     },

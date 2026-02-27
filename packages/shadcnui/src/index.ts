@@ -2,7 +2,7 @@ import * as Headless from "@timeless/headless";
 import {
   ref,
   computed,
-  classnames,
+  cn,
   isRef,
   isComponent,
   View,

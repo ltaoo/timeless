@@ -1,13 +1,12 @@
 import { NotFoundPageView } from "../notfound/index.js";
 
 export function HomeLayoutView(props) {
-  /** @type {import("@timeless/core").RouteViewCore} */
   const view = props.view;
-  const subViews = ref([]);
+  const subViews = refarr([]);
   const curSubView = ref(view.curView?.name);
   view.onCurViewChange((view) => {
     // console.log("[LAYOUT]handle cur view change", view.name);
-    curSubView.value = view.name;
+    curSubView.as(view.name);
   });
   view.onSubViewAppended((v) => {
     // console.log(
@@ -15,7 +14,7 @@ export function HomeLayoutView(props) {
     //   v,
     //   subViews.value.length,
     // );
-    subViews.value.push(v);
+    subViews.push(v);
     // console.log("[]HomeLayoutView - after .push(v)", subViews.value.length);
   });
 
@@ -44,7 +43,7 @@ export function HomeLayoutView(props) {
           render(menu) {
             return View(
               {
-                class: classnames([
+                class: cn([
                   "sidebar-item flex items-center justify-center w-full h-[72px] cursor-pointer",
                   (() => {
                     if (curSubView.value === menu.id) {
@@ -73,28 +72,17 @@ export function HomeLayoutView(props) {
               history: props.history,
             });
           }
-          const displayed = computed({ curSubView }, (draft) => {
-            // console.log(
-            //   "reactive the cur subview change",
-            //   draft.curSubView,
-            //   sub_view.name,
-            // );
+          const displayed = computed(curSubView, (s) => {
+            console.log("recompute", s, sub_view.name);
             return [
               "page absolute inset-0 right-0 h-full",
-              (() => {
-                if (!draft.curSubView) {
-                  return "hidden";
-                }
-                return draft.curSubView === sub_view.name
-                  ? "display"
-                  : "hidden";
-              })(),
+              s === sub_view.name ? "display" : "hidden",
             ].join(" ");
           });
           return View(
             {
-              class: classnames([displayed]),
-              style: {},
+              class: cn([displayed]),
+              style: "",
               dataset: {
                 name: sub_view.name,
                 pathname: sub_view.pathname,

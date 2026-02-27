@@ -7,9 +7,9 @@ export function LogicTestPageView() {
     { id: 3, message: "Fix bug B" },
   ]);
 
-  return View({ class: classnames(["space-y-8"]) }, [
+  return View({ class: cn(["space-y-8"]) }, [
     Item("Commit List", [
-      View({ class: classnames(["space-y-4 w-full"]) }, [
+      View({ class: cn(["space-y-4 w-full"]) }, [
         Button(
           {
             store: new Timeless.ui.ButtonCore({
@@ -27,19 +27,19 @@ export function LogicTestPageView() {
           },
           [Txt("Insert at index 1")],
         ),
-        View({ class: classnames(["space-y-2"]) }, [
+        View({ class: cn(["space-y-2"]) }, [
           For({
             each: commitList.value,
             render(commit) {
               return View(
                 {
-                  class: classnames([
+                  class: cn([
                     "p-3 rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm flex justify-between items-center",
                   ]),
                 },
                 [
                   Txt(commit.message),
-                  View({ class: classnames(["text-xs text-zinc-400"]) }, [
+                  View({ class: cn(["text-xs text-zinc-400"]) }, [
                     Txt(`ID: ${commit.id}`),
                   ]),
                 ],

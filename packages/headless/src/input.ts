@@ -1,9 +1,9 @@
 import { tp, merge } from "./theme.js";
-import { classnames } from "@timeless/reactive";
+import { cn } from "@timeless/reactive";
 import { ViewProps } from "./view.js";
 
 export function Input(props: ViewProps & { store?: any, theme?: any, dataset?: any }) {
-  const { store, style: st, class: cn, dataset, theme: t, ...rest } = props;
+  const { store, style: st, class: cls, dataset, theme: t, ...rest } = props;
   const $elm = document.createElement("input");
 
   // Object.keys(rest).forEach((k) => {
@@ -14,9 +14,9 @@ export function Input(props: ViewProps & { store?: any, theme?: any, dataset?: a
     $elm.setAttribute(`data-${k}`, dataset[k]);
   });
 
-  const m = merge(tp(t?.root), cn, st);
-  const class$: any = classnames([m.class || ""]);
-  class$.listen({ onChange(v: any) { $elm.className = v.join(" "); } });
+  const m = merge(tp(t?.root), cls, st);
+  const class$: any = cn([m.class || ""]);
+  class$._subscribe({ onChange(v: any) { $elm.className = v.join(" "); } });
   $elm.className = class$.toString();
   if (m.style) $elm.style.cssText = m.style;
 

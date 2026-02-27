@@ -1,21 +1,23 @@
-import { isRef } from '@timeless/reactive';
+import { isRef, Ref } from "@timeless/reactive";
 
-/**
- * @param {import("./core.js").Ref<any> | string} state
- */
-export function Txt(state: any) {
-  let _text = (() => {
-    if (state && isRef(state)) {
-      state._subscribe({
-        onChange(v: any) {
-          $elm.textContent = v;
-        },
-      });
-      return state.value;
-    }
-    return state;
-  })();
-  const $elm = document.createTextNode(_text);
+export function Txt(value: Ref<any> | string) {
+  let _local_value = isRef(value) ? value.value : value;
+  if (isRef(value)) {
+    value._subscribe({
+      onPatch(action) {
+
+      },
+      onChange(v: any) {
+        console.log("compare", v, _local_value);
+        if (v === _local_value) {
+          return;
+        }
+        _local_value = v;
+        $elm.textContent = _local_value;
+      },
+    });
+  }
+  const $elm = document.createTextNode(_local_value);
   return {
     t: "text",
     $elm,
@@ -24,7 +26,8 @@ export function Txt(state: any) {
     },
     onMounted() {},
     beforeUnmounted() {},
-    onUnmounted() {},
-    class$: null,
+    onUnmounted() {
+      // console.log("the text unmounted", _local_value);
+    },
   };
 }

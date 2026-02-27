@@ -18,7 +18,7 @@ export function Sheet(props: any, children?: any) {
   const events: any[] = [];
   events.push(
     store.onStateChange(() => {
-      state.value = store.state;
+      state.as(store.state);
     }),
   );
 

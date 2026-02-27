@@ -67,7 +67,7 @@ export function Popper(props: any, children?: any) {
     //   store.state.isPlaced,
     //   store.state.visible,
     // );
-    state.value = store.state;
+    state.as(store.state);
   });
 
   // return Presence(

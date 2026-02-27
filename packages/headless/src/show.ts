@@ -1,11 +1,6 @@
+import { isRef, isComponent } from "@timeless/reactive";
+
 import { View } from "./view.js";
-import {
-  ref,
-  computed,
-  isRef,
-  classnames,
-  isComponent,
-} from "@timeless/reactive";
 
 export function Show(props: any, children?: any) {
   const { when, fallback, ...rest } = props;
@@ -20,7 +15,7 @@ export function Show(props: any, children?: any) {
   const cache = {};
 
   _when_ref._subscribe({
-    onPatch() {
+    onChange() {
       render();
     },
   });
@@ -111,11 +106,19 @@ export function Show(props: any, children?: any) {
   return {
     t: "show",
     $elm: view$.$elm,
-    onMounted() {
-      view$.onMounted();
+    append(node: any) {
+      view$.append(node);
+    },
+    setContent(v: any) {
+      view$.setContent(v);
+    },
+    render() {
+      render();
+      // view$.onMounted();
       if (props.onMounted) {
         props.onMounted();
       }
+      return view$.$elm;
     },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
@@ -126,17 +129,14 @@ export function Show(props: any, children?: any) {
       if (props.onUnmounted) {
         props.onUnmounted();
       }
+      // console.log('show onUnmounted', _nodes);
+      for (let i = 0; i < _nodes.length; i += 1) {
+        const node = _nodes[i];
+        if (isComponent(node) && typeof node.onUnmounted === "function") {
+          node.onUnmounted();
+        }
+      }
       view$.$elm.innerHTML = "";
-    },
-    append(node: any) {
-      view$.append(node);
-    },
-    setContent(v: any) {
-      view$.setContent(v);
-    },
-    render() {
-      render();
-      return view$.$elm;
     },
   };
 }

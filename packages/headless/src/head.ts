@@ -1,8 +1,8 @@
 import { View } from "./view.js";
-import { classnames } from "@timeless/reactive";
+import { cn } from "@timeless/reactive";
 
 export function Head2(props: any, children?: any) {
-  const class$ = classnames(["flex"]);
+  const class$ = cn(["flex"]);
   return View(
     {
       type: "h2",
