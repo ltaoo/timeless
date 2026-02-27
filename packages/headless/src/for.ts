@@ -217,9 +217,7 @@ export function For<T>(
           $elm.removeChild(elm);
         }
         if (component && isComponent(component)) {
-          // @ts-ignore
           if (typeof component.onUnmounted === "function") {
-            // @ts-ignore
             component.onUnmounted();
           }
         }
@@ -237,9 +235,7 @@ export function For<T>(
 
       // 4.3 Trigger Lifecycle (Mounted)
       for (const { node, elm } of added_nodes) {
-        // @ts-ignore
         if (typeof node.onMounted === "function") {
-          // @ts-ignore
           node.onMounted(elm);
         }
       }
@@ -311,10 +307,8 @@ export function For<T>(
       for (let i = 0; i < _children.length; i += 1) {
         const component = _children[i];
         if (isComponent(component)) {
-          // @ts-ignore
           if (typeof component.onMounted === "function") {
-            // @ts-ignore
-            component.onMounted(_$elms[i]);
+            component.onMounted(_$elms[i] as any as HTMLElement);
           }
         }
       }
@@ -327,9 +321,7 @@ export function For<T>(
       for (let i = 0; i < _children.length; i += 1) {
         const component = _children[i];
         if (isComponent(component)) {
-          // @ts-ignore
           if (typeof component.onUnmounted === "function") {
-            // @ts-ignore
             component.onUnmounted();
           }
         }

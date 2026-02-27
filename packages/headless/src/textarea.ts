@@ -27,8 +27,9 @@ export function Textarea(props: any) {
   if (store) {
     if (store.value !== undefined) $elm.value = store.value;
     $elm.addEventListener("input", (e) => {
-      // @ts-ignore
-      store.setValue(e.target.value);
+      if (e.target) {
+        store.setValue((e.target as any).value);
+      }
     });
     const unsub = store.onStateChange
       ? store.onStateChange(() => {

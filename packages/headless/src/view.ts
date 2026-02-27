@@ -175,10 +175,8 @@ export function View(props: ViewProps = {}, children?: any) {
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
         if (isComponent(node)) {
-          // @ts-ignore
           if (node.onMounted) {
-            // @ts-ignore
-            node.onMounted();
+            node.onMounted(node.$elm);
           }
         }
       }
