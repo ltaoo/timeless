@@ -1,3 +1,6 @@
+// Primitives
+export * from "@timeless/reactive";
+
 export * from "./accordion.js";
 export * from "./alert.js";
 export * from "./avatar.js";
@@ -24,8 +27,6 @@ export * from "./toast.js";
 export * from "./toggle.js";
 export * from "./tooltip.js";
 
-// Primitives
-export * from "@timeless/reactive";
 export * from "./view.js";
 export * from "./text.js";
 export * from "./match.js";

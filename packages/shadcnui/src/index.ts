@@ -64,11 +64,6 @@ import {
 import { ChevronRightOutlined } from "@timeless/icons";
 
 export {
-  ref,
-  computed,
-  classnames,
-  isRef,
-  isComponent,
   View,
   Match,
   DangerouslyInnerHTML,

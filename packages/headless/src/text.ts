@@ -1,9 +1,11 @@
+import { isRef } from '@timeless/reactive';
+
 /**
  * @param {import("./core.js").Ref<any> | string} state
  */
 export function Txt(state: any) {
   let _text = (() => {
-    if (state && typeof state === "object" && state.__isRef) {
+    if (state && isRef(state)) {
       state._subscribe({
         onChange(v: any) {
           $elm.textContent = v;

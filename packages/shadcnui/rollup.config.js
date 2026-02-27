@@ -13,10 +13,13 @@ export default {
     file: path.join(__dirname, "dist/shadcnui.umd.min.js"),
     format: "umd",
     name: "ShadcnUI",
-    globals: {},
+    globals: {
+      "@timeless/reactive": "Reactive",
+      "@timeless/headless": "Headless",
+    },
     footer: `if (typeof window !== "undefined") { Object.assign(window, window.ShadcnUI); }`,
   },
-  external: [],
+  external: ["@timeless/reactive", "@timeless/headless"],
   plugins: [
     typescript(),
     resolve({

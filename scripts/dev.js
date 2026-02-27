@@ -1,164 +1,254 @@
 const fs = require("fs");
-const http = require("http");
 const path = require("path");
+const http = require("http");
+const url = require("url");
 const { spawn } = require("child_process");
 
 const rootDir = path.resolve(__dirname, "..");
-const domainsDir = path.join(rootDir, "domains");
-const srcFile = path.join(rootDir, "dist", "timeless.core.umd.min.js");
-const destFile = path.join(
-  rootDir,
-  "platform",
-  "vanilla",
-  "public",
-  "timeless.core.umd.min.js"
-);
+const packagesDir = path.join(rootDir, "packages");
+const playgroundDir = path.join(rootDir, "apps/reactive-playground");
+const serverRoot = playgroundDir;
+const targetDir = path.join(playgroundDir, "public");
 
-if (!fs.existsSync(domainsDir)) {
-  console.error("domains 目录不存在:", domainsDir);
-  process.exit(1);
-}
+// Map of package names to their artifact paths and destination filenames
+const artifacts = [
+  {
+    pkg: "headless",
+    src: "packages/headless/dist/headless.umd.min.js",
+    dest: "headless.umd.min.js",
+  },
+  {
+    pkg: "reactive",
+    src: "packages/reactive/dist/reactive.umd.min.js",
+    dest: "reactive.umd.min.js",
+  },
+  {
+    pkg: "shadcnui",
+    src: "packages/shadcnui/dist/shadcnui.umd.min.js",
+    dest: "shadcnui.umd.min.js",
+  },
+  {
+    pkg: "domains",
+    src: "packages/domains/dist/timeless.core.umd.min.js",
+    dest: "timeless.core.umd.min.js",
+  },
+  {
+    pkg: "provider-web",
+    src: "packages/provider-web/dist/timeless.web.umd.min.js",
+    dest: "timeless.web.umd.min.js",
+  },
+];
 
-let isBuilding = false;
-let pendingBuild = false;
-let debounceTimer = null;
-
-function queueBuild(reason) {
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
-  }
-
-  debounceTimer = setTimeout(() => {
-    debounceTimer = null;
-    startBuild(reason);
-  }, 300);
-}
-
-function startBuild(reason) {
-  if (isBuilding) {
-    pendingBuild = true;
-    return;
-  }
-
-  isBuilding = true;
-  console.log("检测到 domains 变更，开始执行 pnpm build", reason || "");
-
-  const buildProc = spawn("pnpm", ["build"], {
-    cwd: rootDir,
-    stdio: "inherit",
-    shell: process.platform === "win32",
-  });
-
-  buildProc.on("exit", async (code) => {
-    if (code === 0) {
-      try {
-        await copyBundle();
-        console.log("已更新:", destFile);
-      } catch (err) {
-        console.error("移动构建产物失败:", err);
-      }
-    } else {
-      console.error("pnpm build 执行失败，退出码:", code);
-    }
-
-    isBuilding = false;
-
-    if (pendingBuild) {
-      pendingBuild = false;
-      startBuild("pending");
-    }
-  });
-}
-
-async function copyBundle() {
-  await fs.promises.mkdir(path.dirname(destFile), { recursive: true });
-
-  try {
-    await fs.promises.copyFile(srcFile, destFile);
-  } catch (err) {
-    if (err.code === "ENOENT") {
-      console.error("找不到构建产物:", srcFile);
-    }
-    throw err;
-  }
-}
-
-function startWatch() {
-  console.log("开始监听目录:", domainsDir);
-
-  const watcher = fs.watch(
-    domainsDir,
-    {
-      recursive: true,
-    },
-    (eventType, filename) => {
-      const name = filename || "";
-      console.log("文件变更:", eventType, name);
-      queueBuild(`${eventType} ${name}`);
-    }
-  );
-
-  process.on("SIGINT", () => {
-    console.log("收到中断信号，停止监听");
-    watcher.close();
-    process.exit(0);
-  });
-
-  process.on("SIGTERM", () => {
-    console.log("收到终止信号，停止监听");
-    watcher.close();
-    process.exit(0);
-  });
-}
-
-const port = parseInt(process.argv[2], 10) || 3000;
-const vanillaDir = path.join(rootDir, "platform", "vanilla");
-
-const MIME = {
-  ".html": "text/html",
-  ".js": "application/javascript",
-  ".css": "text/css",
-  ".json": "application/json",
-  ".woff2": "font/woff2",
-  ".png": "image/png",
-  ".svg": "image/svg+xml",
+// Explicit build dependencies
+const buildRelations = {
+  reactive: ["headless"],
+  headless: ["shadcnui"],
 };
 
-function startServer() {
-  http
-    .createServer(async (req, res) => {
-      let urlPath = decodeURIComponent(req.url.split("?")[0]);
-      let filePath = path.join(vanillaDir, urlPath);
-      const indexFile = path.join(vanillaDir, "index.html");
+let buildQueue = null;
+let isBuilding = false;
 
-      try {
-        const stat = await fs.promises.stat(filePath);
-        if (stat.isDirectory()) filePath = path.join(filePath, "index.html");
-      } catch {}
+function copyArtifacts() {
+  console.log("Copying artifacts...");
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
 
+  artifacts.forEach((item) => {
+    const srcPath = path.join(rootDir, item.src);
+    const destPath = path.join(targetDir, item.dest);
+    if (fs.existsSync(srcPath)) {
       try {
-        const data = await fs.promises.readFile(filePath);
-        const ext = path.extname(filePath);
-        res.writeHead(200, { "Content-Type": MIME[ext] || "application/octet-stream" });
-        res.end(data);
-      } catch {
-        const ext = path.extname(urlPath);
-        if (!ext || ext === ".html") {
-          try {
-            const data = await fs.promises.readFile(indexFile);
-            res.writeHead(200, { "Content-Type": "text/html" });
-            res.end(data);
-            return;
-          } catch {}
-        }
-        res.writeHead(404);
-        res.end("Not Found");
+        fs.copyFileSync(srcPath, destPath);
+        console.log(`Copied ${item.src} to ${item.dest}`);
+      } catch (e) {
+        console.error(`Failed to copy ${item.src}:`, e.message);
       }
-    })
-    .listen(port, () => {
-      console.log(`开发服务已启动: http://localhost:${port}`);
-    });
+    }
+  });
 }
 
-startServer();
-startWatch();
+function runBuild(pkgName) {
+  if (isBuilding) {
+    // If already building, queue this package (replace any existing queued package)
+    // We only keep the latest request to avoid build storms
+    if (buildQueue !== pkgName) {
+      console.log(`Queuing build for ${pkgName}...`);
+      buildQueue = pkgName;
+    }
+    return;
+  }
+  isBuilding = true;
+  console.log(`\nTriggered by change in @timeless/${pkgName}`);
+  console.log(`Building @timeless/${pkgName} and its dependents...`);
+
+  // Use pnpm filter to build package and dependents
+  // Filter syntax: ./packages/<pkg>...
+  // This builds the package and everything that depends on it
+  const targets = new Set([pkgName]);
+  const queue = [pkgName];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (buildRelations[current]) {
+      buildRelations[current].forEach((dep) => {
+        if (!targets.has(dep)) {
+          targets.add(dep);
+          queue.push(dep);
+          console.log(
+            `Also triggering build for ${dep} due to explicit relation`,
+          );
+        }
+      });
+    }
+  }
+
+  const filters = Array.from(targets).map((t) => `./packages/${t}...`);
+
+  const args = [...filters.flatMap((f) => ["--filter", f]), "build"];
+
+  const child = spawn("pnpm", args, {
+    cwd: rootDir,
+    stdio: "inherit",
+    shell: true,
+  });
+
+  child.on("close", (code) => {
+    isBuilding = false;
+    if (code === 0) {
+      console.log("Build success.");
+      copyArtifacts();
+    } else {
+      console.error("Build failed with code", code);
+    }
+
+    if (buildQueue) {
+      const nextPkg = buildQueue;
+      buildQueue = null;
+      // Small delay to let system settle
+      setTimeout(() => runBuild(nextPkg), 100);
+    }
+  });
+}
+
+let debounceTimer = null;
+function triggerBuild(pkgName) {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    runBuild(pkgName);
+  }, 1000); // 1s debounce to capture multiple file saves
+}
+
+// Watch packages
+console.log(`Watching packages in ${packagesDir}...`);
+
+try {
+  const packages = fs.readdirSync(packagesDir).filter((f) => {
+    return fs.statSync(path.join(packagesDir, f)).isDirectory();
+  });
+
+  packages.forEach((pkg) => {
+    const pkgPath = path.join(packagesDir, pkg);
+    const srcPath = path.join(pkgPath, "src");
+
+    // Only watch if src exists
+    if (fs.existsSync(srcPath)) {
+      console.log(`Watching @timeless/${pkg}`);
+      // Watch src directory recursively
+      fs.watch(srcPath, { recursive: true }, (eventType, filename) => {
+        if (
+          filename &&
+          !filename.includes(".git") &&
+          !filename.includes("node_modules")
+        ) {
+          triggerBuild(pkg);
+        }
+      });
+    }
+  });
+
+  // Initial copy to ensure artifacts are present
+  copyArtifacts();
+  startServer();
+} catch (err) {
+  console.error("Error setting up watchers:", err);
+}
+
+function startServer() {
+  // Parse port from command line args
+  const portArg = process.argv.find((arg) => arg.startsWith("--port="));
+  const port = portArg ? parseInt(portArg.split("=")[1], 10) : 3000;
+
+  const mimeTypes = {
+    ".html": "text/html",
+    ".js": "text/javascript",
+    ".css": "text/css",
+    ".json": "application/json",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".gif": "image/gif",
+    ".svg": "image/svg+xml",
+    ".ico": "image/x-icon",
+    ".wav": "audio/wav",
+    ".mp4": "video/mp4",
+    ".woff": "application/font-woff",
+    ".ttf": "application/font-ttf",
+    ".eot": "application/vnd.ms-fontobject",
+    ".otf": "application/font-otf",
+    ".wasm": "application/wasm",
+  };
+
+  const server = http.createServer((req, res) => {
+    const parsedUrl = url.parse(req.url);
+    let pathname = path.join(serverRoot, parsedUrl.pathname);
+
+    fs.stat(pathname, (err, stats) => {
+      if (err) {
+        // File not found
+        // If it has no extension or is .html, fallback to index.html for SPA routing
+        const ext = path.parse(pathname).ext;
+        if (!ext || ext === ".html") {
+          const indexPath = path.join(serverRoot, "index.html");
+          fs.readFile(indexPath, (readErr, data) => {
+            if (readErr) {
+              res.statusCode = 404;
+              res.end(`File ${parsedUrl.pathname} not found!`);
+            } else {
+              res.setHeader("Content-type", "text/html");
+              res.setHeader("Access-Control-Allow-Origin", "*");
+              res.end(data);
+            }
+          });
+          return;
+        }
+
+        res.statusCode = 404;
+        res.end(`File ${parsedUrl.pathname} not found!`);
+        return;
+      }
+
+      if (stats.isDirectory()) {
+        pathname = path.join(pathname, "index.html");
+      }
+
+      fs.readFile(pathname, (err, data) => {
+        if (err) {
+          res.statusCode = 404;
+          res.end(`File ${parsedUrl.pathname} not found!`);
+        } else {
+          const ext = path.parse(pathname).ext;
+          res.setHeader("Content-type", mimeTypes[ext] || "text/plain");
+          // Add CORS headers for dev convenience
+          res.setHeader("Access-Control-Allow-Origin", "*");
+          res.end(data);
+        }
+      });
+    });
+  });
+
+  server.listen(port, () => {
+    console.log(`\nStatic server listening on port ${port}`);
+    console.log(`Root: ${serverRoot}`);
+    console.log(`Url: http://localhost:${port}`);
+  });
+}

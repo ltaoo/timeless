@@ -18,7 +18,7 @@ const MENU_CONTENT_CLASS = "min-w-[8rem] overflow-hidden rounded-md border borde
   };
 }
 
-import { Menu as HMenu, MenuItem as HItem, MenuLabel as HLabel, MenuSeparator as HSep, DropdownMenu as HDrop } from "@timeless/headless";
+import { Menu as HMenu, MenuItem as HItem, MenuLabel as HLabel, MenuSeparator as HSep } from "@timeless/headless";
 
 const t = {
   animation: {
@@ -41,4 +41,4 @@ export function Menu(p: any, c?: any) { return HMenu({ ...p, theme: t }, c); }
 export function MenuItem(p: any, c?: any) { return HItem({ ...p, theme: t }, c); }
 export function MenuLabel(p: any, c?: any) { return HLabel({ ...p, theme: t }, c); }
 export function MenuSeparator(p: any) { return HSep({ ...p, theme: t }); }
-export function DropdownMenu(p: any, c?: any) { return HDrop({ ...p, theme: t }, c); }
+export function DropdownMenu(p: any, c?: any) { return HMenu({ ...p, theme: t }, c); }

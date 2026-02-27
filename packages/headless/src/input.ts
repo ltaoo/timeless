@@ -6,10 +6,10 @@ export function Input(props: ViewProps & { store?: any, theme?: any, dataset?: a
   const { store, style: st, class: cn, dataset, theme: t, ...rest } = props;
   const $elm = document.createElement("input");
 
-  Object.keys(rest).forEach((k) => {
-    if (typeof rest[k] === "function") return;
-    $elm.setAttribute(k, rest[k]);
-  });
+  // Object.keys(rest).forEach((k) => {
+  //   if (typeof rest[k] === "function") return;
+  //   $elm.setAttribute(k, rest[k]);
+  // });
   Object.keys(dataset || {}).forEach((k) => {
     $elm.setAttribute(`data-${k}`, dataset[k]);
   });

@@ -1,5 +1,11 @@
 import { View } from "./view.js";
-import { ref, computed, isRef, classnames, isComponent } from "@timeless/reactive";
+import {
+  ref,
+  computed,
+  isRef,
+  classnames,
+  isComponent,
+} from "@timeless/reactive";
 
 export function Show(props: any, children?: any) {
   const { when, fallback, ...rest } = props;
@@ -97,7 +103,7 @@ export function Show(props: any, children?: any) {
     for (let i = 0; i < _nodes.length; i += 1) {
       const node = _nodes[i];
       if (isComponent(node) && typeof node.onMounted === "function") {
-        node.onMounted();
+        node.onMounted(node.$elm);
       }
     }
   }

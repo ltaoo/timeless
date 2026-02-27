@@ -1,8 +1,12 @@
-import { classnames, Ref } from "@timeless/reactive";
+import { classnames, Ref, isRef } from "@timeless/reactive";
 
 let _theme: any = null;
-export function setTheme(t: any) { _theme = t; }
-export function theme() { return _theme; }
+export function setTheme(t: any) {
+  _theme = t;
+}
+export function theme() {
+  return _theme;
+}
 
 type ThemePart = ((ctx: any) => any) | any;
 
@@ -16,8 +20,10 @@ export function merge(tr: any = {}, userClass?: any, userStyle?: any) {
   let classValue: any;
   if (userClass && userClass.__CN) {
     classValue = baseClass ? classnames([baseClass, userClass]) : userClass;
-  } else if (userClass && typeof userClass === "object" && (userClass as any).__isRef) {
-    classValue = baseClass ? classnames([baseClass, userClass]) : classnames([userClass]);
+  } else if (userClass && isRef(userClass)) {
+    classValue = baseClass
+      ? classnames([baseClass, userClass])
+      : classnames([userClass]);
   } else {
     const c = [baseClass, userClass].filter(Boolean).join(" ") || undefined;
     if (c !== undefined) {

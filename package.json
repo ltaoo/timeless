@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "pnpm --filter \"./packages/*\" -r run build",
-    "dev": "pnpm -r run dev",
+    "dev": "node scripts/dev.js",
     "test": "pnpm -r run test",
     "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules"
   },

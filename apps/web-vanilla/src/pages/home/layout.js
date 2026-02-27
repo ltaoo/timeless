@@ -37,8 +37,8 @@ export function HomeLayoutView(props) {
               name: "首页",
             },
             {
-              id: "root.home_layout.weui",
-              name: "Weui",
+              id: "root.home_layout.logic",
+              name: "Logic",
             },
           ],
           render(menu) {

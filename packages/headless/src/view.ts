@@ -1,37 +1,39 @@
-import { isRef, isComponent, classnames } from "@timeless/reactive";
+import {
+  Ref,
+  isRef,
+  isComponent,
+  classnames,
+  ViewClassname,
+} from "@timeless/reactive";
 
 export interface ViewProps {
   type?: string;
-  style?: any;
-  id?: any;
-  class?: any;
+  id?: string | Ref<string> | any;
+  style?: string | Ref<string> | any;
+  class?: string | Ref<string> | ViewClassname | any;
   dataset?: Record<string, string>;
-  onMounted?: (elm: HTMLElement) => void;
-  beforeUnmounted?: () => void;
-  onUnmounted?: () => void;
-  onClick?: (event: Event) => void;
-  onFocus?: (event: Event) => void;
-  onBlur?: (event: Event) => void;
-  [key: string]: any;
+  onMounted?(el: any): void;
+  beforeUnmounted?(): void;
+  onUnmounted?(): void;
+  onClick?(e: any): void;
+  onFocus?(e: any): void;
+  onBlur?(e: any): void;
+  key?: any;
 }
 
-export interface ViewResult {
-  t: string;
-  $elm: HTMLElement;
-  class$: any;
-  onMounted: () => void;
-  beforeUnmounted: () => void;
-  onUnmounted: () => void;
-  append: (node: any) => void;
-  setContent: (html: string) => void;
-  render: () => HTMLElement;
-}
+// export interface ViewResult {
+//   t: string;
+//   $elm: HTMLElement;
+//   class$: any;
+//   onMounted: () => void;
+//   beforeUnmounted: () => void;
+//   onUnmounted: () => void;
+//   append: (node: any) => void;
+//   setContent: (html: string) => void;
+//   render: () => HTMLElement;
+// }
 
-/**
- * @param {import("./core.js").ViewProps} [props]
- * @param {import("./core.js").ViewChildren} [children]
- */
-export function View(props: ViewProps = {}, children?: any): ViewResult {
+export function View(props: ViewProps = {}, children?: any) {
   const {
     type = "div",
     style,
@@ -47,12 +49,12 @@ export function View(props: ViewProps = {}, children?: any): ViewResult {
   } = props;
   const $elm = document.createElement(type);
 
-  Object.keys(restProps).forEach((k) => {
-    $elm.setAttribute(k, props[k]);
-  });
+  // Object.keys(restProps).forEach((k) => {
+  //   $elm.setAttribute(k, props[k]);
+  // });
   Object.keys(dataset || {}).forEach((k) => {
     if (dataset && dataset[k]) {
-        $elm.setAttribute(`data-${k}`, dataset[k]);
+      $elm.setAttribute(`data-${k}`, dataset[k]);
     }
   });
 
@@ -108,12 +110,12 @@ export function View(props: ViewProps = {}, children?: any): ViewResult {
   }
   if (onFocus) {
     $elm.addEventListener("focus", function (event: Event) {
-        if (onFocus) onFocus(event);
+      if (onFocus) onFocus(event);
     });
   }
   if (onBlur) {
     $elm.addEventListener("blur", function (event: Event) {
-        if (onBlur) onBlur(event);
+      if (onBlur) onBlur(event);
     });
   }
 

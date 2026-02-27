@@ -1,26 +1,4 @@
-function Section(title, children) {
-  return View({ class: classnames(["space-y-3"]) }, [
-    View(
-      {
-        class: classnames([
-          "text-sm font-semibold text-zinc-500 uppercase tracking-wider",
-        ]),
-      },
-      [Txt(title)],
-    ),
-    View({ class: classnames(["space-y-4 pl-1"]) }, children),
-  ]);
-}
-
-function Item(label, children) {
-  return View({ class: classnames(["space-y-2"]) }, [
-    View({ class: classnames(["text-sm text-zinc-400"]) }, [Txt(label)]),
-    View(
-      { class: classnames(["flex flex-wrap items-center gap-3"]) },
-      children,
-    ),
-  ]);
-}
+import { Section, Item } from '@/components/index.js'
 
 export function HomePageView() {
   // Shared state for interactive demos
@@ -41,11 +19,6 @@ export function HomePageView() {
     { label: "Logic", value: "logic" },
   ];
   const activeCategory = ref("general");
-  const commitList = ref([
-    { id: 1, message: "Initial commit" },
-    { id: 2, message: "Add feature A" },
-    { id: 3, message: "Fix bug B" },
-  ]);
 
   return View({ class: classnames(["flex h-full"]) }, [
     // Sidebar
@@ -65,7 +38,7 @@ export function HomePageView() {
           [Txt("Components")],
         ),
         For({
-          each: categories,
+          each: ref(categories),
           render(cat) {
             return View(
               {
@@ -1029,57 +1002,6 @@ export function HomePageView() {
                     ]),
                   ]);
                 })(),
-              ]),
-            ]),
-          ]),
-        ],
-      ),
-      // === Logic ===
-      Show(
-        {
-          when: computed(
-            { activeCategory },
-            (d) => d.activeCategory === "logic",
-          ),
-        },
-        [
-          View({ class: classnames(["space-y-8"]) }, [
-            Section("For", [
-              Item("Commit List", [
-                View({ class: classnames(["space-y-4 w-full"]) }, [
-                  Button(
-                    {
-                      size: "sm",
-                      onClick() {
-                        commitList.value.splice(1, 0, {
-                          id: Date.now(),
-                          message: `New Commit ${Date.now()}`,
-                        });
-                      },
-                    },
-                    [Txt("Insert at index 1")],
-                  ),
-                  View({ class: classnames(["space-y-2"]) }, [
-                    For({
-                      each: commitList.value,
-                      render(commit) {
-                        return View(
-                          {
-                            class: classnames([
-                              "p-3 rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm flex justify-between items-center",
-                            ]),
-                          },
-                          [
-                            Txt(commit.message),
-                            View({ class: classnames(["text-xs text-zinc-400"]) }, [
-                              Txt(`ID: ${commit.id}`),
-                            ]),
-                          ],
-                        );
-                      },
-                    }),
-                  ]),
-                ]),
               ]),
             ]),
           ]),

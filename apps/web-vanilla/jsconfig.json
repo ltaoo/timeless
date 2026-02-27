@@ -8,6 +8,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "@timeless/shadcnui": ["../../packages/shadcnui/src/index.js"],
       "@timeless/weui": ["../../packages/weui/src/index.js"],
       "@timeless/headless": ["../../packages/headless/src/index.js"]

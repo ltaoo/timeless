@@ -9,13 +9,22 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default {
   input: path.join(__dirname, "src/index.ts"),
-  output: {
-    file: path.join(__dirname, "dist/headless.umd.min.js"),
-    format: "umd",
-    name: "Headless",
-    globals: {},
-  },
-  external: [],
+  output: [
+    {
+      file: path.join(__dirname, "dist/headless.umd.min.js"),
+      format: "umd",
+      name: "Headless",
+      globals: {
+        "@timeless/reactive": "Reactive",
+      },
+      footer: `if (typeof window !== "undefined") { Object.assign(window, window.Headless); }`,
+    },
+    {
+      file: path.join(__dirname, "dist/headless.esm.js"),
+      format: "es",
+    },
+  ],
+  external: ["@timeless/reactive"],
   plugins: [
     typescript(),
     resolve({

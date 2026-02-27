@@ -2,7 +2,7 @@
   "name": "@timeless/headless",
   "version": "1.0.0",
   "main": "dist/headless.umd.min.js",
-  "module": "src/index.js",
+  "module": "dist/headless.esm.js",
   "scripts": {
     "build": "rollup -c"
   },
@@ -25,6 +25,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@timeless/reactive": "workspace:^"
+    "@timeless/reactive": "workspace:^",
+    "@timeless/domains": "workspace:^"
   }
 }

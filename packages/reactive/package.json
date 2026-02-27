@@ -2,7 +2,8 @@
   "name": "@timeless/reactive",
   "version": "1.0.0",
   "main": "dist/reactive.umd.min.js",
-  "module": "src/index.js",
+  "module": "dist/reactive.esm.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c"
   },
@@ -15,6 +16,8 @@
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
-    "rollup": "^4.59.0"
+    "@rollup/plugin-typescript": "^12.1.2",
+    "rollup": "^4.59.0",
+    "typescript": "^5.7.0"
   }
 }
