@@ -411,6 +411,9 @@ importers:
       '@timeless/domains':
         specifier: workspace:^
         version: link:../domains
+      '@timeless/icons':
+        specifier: workspace:^
+        version: link:../icons
       '@timeless/reactive':
         specifier: workspace:^
         version: link:../reactive

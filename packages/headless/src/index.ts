@@ -27,6 +27,7 @@ export * from "./dialog";
 export * from "./input";
 export * from "./label";
 export * from "./menu";
+export * from "./dropdownmenu";
 export * from "./popover";
 export * from "./progress";
 export * from "./select";
