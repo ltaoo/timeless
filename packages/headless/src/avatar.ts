@@ -27,10 +27,10 @@ export function Avatar(props: any) {
     })(),
     View({
       ...merge(tp(t?.fallback)),
-      style: computed({ imgError }, (d: any) => {
-        const base = merge(tp(t?.fallback)).style || "";
-        return (d.imgError || !srcRef.value) ? base : base + "display:none;";
-      }),
+      // style: computed({ imgError }, (d: any) => {
+      //   const base = merge(tp(t?.fallback)).style || "";
+      //   return (d.imgError || !srcRef.value) ? base : base + "display:none;";
+      // }),
       class: computed({ imgError }, (d: any) => {
         const base = merge(tp(t?.fallback)).class || "";
         return (d.imgError || !srcRef.value) ? base : base + " hidden";

@@ -17,7 +17,7 @@ export function RouterSubViews(props: any) {
     if (props.NotFound) {
       return props.NotFound;
     }
-    return View({ class: "not-found" }, ["Not Found"]);
+    return View({ class: ref("not-found") }, ["Not Found"]);
   })();
 
   const nodes: any[] = [];

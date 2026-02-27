@@ -6,7 +6,7 @@ export function Paragraph(props: any, children?: any) {
   const node$ = View(
     {
       type: "p",
-      class: class$.toString(),
+      // class: class$.toString(),
     },
     children,
   );

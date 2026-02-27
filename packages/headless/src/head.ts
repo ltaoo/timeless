@@ -6,7 +6,7 @@ export function Head2(props: any, children?: any) {
   return View(
     {
       type: "h2",
-      class: class$.toString(),
+      // class: class$.toString(),
     },
     children,
   );

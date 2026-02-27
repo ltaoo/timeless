@@ -33,6 +33,6 @@ export function Portal(props: any, children?: any) {
     setContent(html: string) {
       view$.setContent(html);
     },
-    class$: view$.class$,
+    // class$: view$.class$,
   };
 }

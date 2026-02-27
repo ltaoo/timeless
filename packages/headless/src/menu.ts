@@ -113,15 +113,12 @@ export function MenuSeparator(props: any) {
 export function SubMenuContent(store: any, children: any) {
   return Portal({}, [
     Popper({ store: store.popper }, [
-      Presence(
-        { store: store.presence },
-        [
-          Show(
-            { when: computed({ state: store.state }, (d: any) => d.state.open) },
-            children
-          ),
-        ]
-      ),
+      Presence({ store: store.presence }, [
+        Show(
+          { when: computed({ state: store.state }, (d: any) => d.state.open) },
+          children,
+        ),
+      ]),
     ]),
   ]);
 }
@@ -143,7 +140,7 @@ export function MenuItemView(item: any, t: any) {
                 {
                   class: "mr-2 h-4 w-4",
                 },
-                [item.icon]
+                [item.icon],
               )
             : null,
           Txt(item.label),
@@ -152,7 +149,7 @@ export function MenuItemView(item: any, t: any) {
                 {
                   class: "ml-auto text-xs tracking-widest opacity-60",
                 },
-                [Txt(item.shortcut)]
+                [Txt(item.shortcut)],
               )
             : null,
           item.children
@@ -160,7 +157,7 @@ export function MenuItemView(item: any, t: any) {
                 {
                   class: "ml-auto h-4 w-4",
                 },
-                [ChevronRightOutlined()]
+                [ChevronRightOutlined()],
               )
             : null,
           item.children
@@ -191,22 +188,25 @@ export function MenuItemView(item: any, t: any) {
                               { subState },
                               (d: any) => d.subState.items,
                             );
-                            return For({
-                              ...merge(tp(t?.menu)),
-                              each: subItems,
-                              render(sub: any) {
-                                return MenuItemView(sub, t);
-                              },
-                            });
+                            // return [
+                            //   For({
+                            //     // ...merge(tp(t?.menu)),
+                            //     each: subItems,
+                            //     render(sub) {
+                            //       return MenuItemView(sub, t);
+                            //     },
+                            //   }),
+                            // ];
                           })(),
                         ),
                       ],
                     ),
                   ]),
-                ])
-              : null,
-        ]
+                ],
+              )
+            : null,
+        ],
       ),
-    ]
+    ],
   );
 }

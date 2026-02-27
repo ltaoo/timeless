@@ -1,155 +1,115 @@
-// export interface Ref<T = any> {
-//   value: T;
-//   __is_ref: true;
-//   _subscribe(opts: {
-//     onChange?: (v: T) => void;
-//     onPatch?: (c: any) => void;
-//     ignore?: boolean;
-//   }): void;
-// }
-
-export interface ViewClassname {
-  __CN: true;
-  del(v: string): void;
-  add(v: string): void;
-  append(c: string): void;
-  toString(): string;
-  listen(c: any): void;
-}
-
-export interface ViewReturn {
-  t: string;
-  $elm: HTMLElement | Text;
-  render(): HTMLElement | Text;
-  onMounted?(el: HTMLElement | Text): void;
-  beforeUnmounted?(): void;
-  onUnmounted?(): void;
-}
-
-export type ViewChild = ViewReturn;
-export type ViewChildren = ViewChild[];
-
-// export interface ViewProps {
-//   type?: string;
-//   id?: string | Ref<string> | any;
-//   style?: string | Ref<string> | any;
-//   class?: string | Ref<string> | ViewClassname | any;
-//   dataset?: Record<string, string>;
-//   onMounted?(el: any): void;
-//   beforeUnmounted?(el: any): void;
-//   onUnmounted?(el: any): void;
-//   onClick?(e: any): void;
-//   onFocus?(e: any): void;
-//   onBlur?(e: any): void;
-//   key?: any;
-// }
-
-interface Subscriber {
-  onChange?: (v: any) => void;
-  onPatch?: (c: any) => void;
-  ignore?: boolean;
-}
-
-console.log("reactive.version 1.3.0");
+console.log("reactive.version 1.3.1");
 
 export function ref<T = any>(v: T) {
-  let _v: any = v;
+  let _v = v;
   const deps: Subscriber[] = [];
-  function notify(patch?: any) {
+  function notify(action: {
+    type: string;
+    index?: number;
+    deleteCount?: number;
+    item?: any;
+    items?: any;
+  }) {
     for (let i = 0; i < deps.length; i += 1) {
-      const dep = deps[i];
-      if (dep.onPatch) {
-        dep.onPatch(patch);
-      } else if (dep.onChange) {
-        dep.onChange(_v);
-      }
+      const ctx = deps[i];
+      (() => {
+        if (action.type === "insert") {
+          if (ctx.onPatch) {
+            ctx.onPatch(action);
+          }
+          return;
+        }
+        if (ctx.onChange) {
+          ctx.onChange(_v);
+        }
+      })();
     }
   }
-  function wrap_arr(arr: any[]) {
-    const proxy = new Proxy(arr, {
-      get(target: any, prop: string | symbol, receiver: any) {
-        // console.log("[]proxy arr", prop);
-        if (prop === "push") {
-          return function (...items: any[]) {
-            const start = target.length;
-            const r = Array.prototype.push.apply(target, items);
-            notify({ type: "insert", index: start, items });
-            return r;
-          };
-        }
-        if (prop === "unshift") {
-          return function (...items: any[]) {
-            const r = Array.prototype.unshift.apply(target, items);
-            notify({ type: "insert", index: 0, items });
-            return r;
-          };
-        }
-        if (prop === "pop") {
-          return function () {
-            const idx = target.length - 1;
-            const r = Array.prototype.pop.apply(target);
-            notify({ type: "remove", index: idx, count: 1 });
-            return r;
-          };
-        }
-        if (prop === "shift") {
-          return function () {
-            const r = Array.prototype.shift.apply(target);
-            notify({ type: "remove", index: 0, count: 1 });
-            return r;
-          };
-        }
-        if (prop === "splice") {
-          console.log("[]invoke splice in arr");
-          return function (
-            start: number,
-            deleteCount: number,
-            ...items: any[]
-          ) {
-            const r = Array.prototype.splice.call(
-              target,
-              start,
-              deleteCount,
-              ...items,
-            );
-            if (deleteCount && deleteCount > 0) {
-              notify({ type: "remove", index: start, count: deleteCount });
-            }
-            if (items && items.length > 0) {
-              notify({ type: "insert", index: start, items });
-            }
-            return r;
-          };
-        }
-        return Reflect.get(target, prop, receiver);
-      },
-      set(target: any, prop: string | symbol, value: any, receiver: any) {
-        if (prop === "length") {
-          const oldLen = target.length;
-          const r = Reflect.set(target, prop, value, receiver);
-          if (value < oldLen) {
-            notify({ type: "remove", index: value, count: oldLen - value });
-          }
-          return r;
-        }
-        const idx = Number(prop);
-        const exists = idx >= 0 && idx < target.length;
-        const r = Reflect.set(target, prop, value, receiver);
-        if (!Number.isNaN(idx)) {
-          if (exists) {
-            notify({ type: "update", index: idx, item: value });
-          } else {
-            notify({ type: "insert", index: idx, items: [value] });
-          }
-        }
-        return r;
-      },
-    });
-    return proxy;
-  }
-  if (Array.isArray(_v)) {
-    _v = wrap_arr(_v);
-  }
+  // function wrap_arr(arr: any[]) {
+  //   const proxy = new Proxy(arr, {
+  //     get(target: any, prop: string | symbol, receiver: any) {
+  //       // console.log("[]proxy arr", prop);
+  //       if (prop === "push") {
+  //         return function (...items: any[]) {
+  //           const start = target.length;
+  //           const r = Array.prototype.push.apply(target, items);
+  //           notify({ type: "insert", index: start, items });
+  //           return r;
+  //         };
+  //       }
+  //       if (prop === "unshift") {
+  //         return function (...items: any[]) {
+  //           const r = Array.prototype.unshift.apply(target, items);
+  //           notify({ type: "insert", index: 0, items });
+  //           return r;
+  //         };
+  //       }
+  //       if (prop === "pop") {
+  //         return function () {
+  //           const idx = target.length - 1;
+  //           const r = Array.prototype.pop.apply(target);
+  //           notify({ type: "remove", index: idx, count: 1 });
+  //           return r;
+  //         };
+  //       }
+  //       if (prop === "shift") {
+  //         return function () {
+  //           const r = Array.prototype.shift.apply(target);
+  //           notify({ type: "remove", index: 0, count: 1 });
+  //           return r;
+  //         };
+  //       }
+  //       if (prop === "splice") {
+  //         console.log("[]invoke splice in arr");
+  //         return function (
+  //           start: number,
+  //           deleteCount: number,
+  //           ...items: any[]
+  //         ) {
+  //           const r = Array.prototype.splice.call(
+  //             target,
+  //             start,
+  //             deleteCount,
+  //             ...items,
+  //           );
+  //           if (deleteCount && deleteCount > 0) {
+  //             notify({ type: "remove", index: start, count: deleteCount });
+  //           }
+  //           if (items && items.length > 0) {
+  //             notify({ type: "insert", index: start, items });
+  //           }
+  //           return r;
+  //         };
+  //       }
+  //       return Reflect.get(target, prop, receiver);
+  //     },
+  //     set(target: any, prop: string | symbol, value: any, receiver: any) {
+  //       if (prop === "length") {
+  //         const oldLen = target.length;
+  //         const r = Reflect.set(target, prop, value, receiver);
+  //         if (value < oldLen) {
+  //           notify({ type: "remove", index: value, count: oldLen - value });
+  //         }
+  //         return r;
+  //       }
+  //       const idx = Number(prop);
+  //       const exists = idx >= 0 && idx < target.length;
+  //       const r = Reflect.set(target, prop, value, receiver);
+  //       if (!Number.isNaN(idx)) {
+  //         if (exists) {
+  //           notify({ type: "update", index: idx, item: value });
+  //         } else {
+  //           notify({ type: "insert", index: idx, items: [value] });
+  //         }
+  //       }
+  //       return r;
+  //     },
+  //   });
+  //   return proxy;
+  // }
+  // if (Array.isArray(_v)) {
+  //   _v = wrap_arr(_v);
+  // }
   const r = {
     __is_ref: true as const,
     get value() {
@@ -161,27 +121,52 @@ export function ref<T = any>(v: T) {
       } else {
         _v = newValue;
       }
-      if (Array.isArray(_v)) {
-        _v = wrap_arr(_v);
-      }
-      notify();
+      // if (Array.isArray(_v)) {
+      //   _v = wrap_arr(_v);
+      // }
+      notify({ type: "refresh" });
     },
-    _subscribe(opts: Subscriber) {
-      deps.push(opts);
-      if (!opts.ignore && opts.onChange) {
-        opts.onChange(_v);
-      }
+    _subscribe(ctx: Subscriber) {
+      deps.push(ctx);
+      // if (!opts.ignore && opts.onChange) {
+      //   opts.onChange(_v);
+      // }
     },
     splice(idx: number, dcount: number, ...items: any[]) {
-      const r = Array.prototype.splice.call(_v, idx, dcount, ...items);
-      notify({ type: "insert", index: idx, deleteCount: dcount, items });
-      return r;
+      Array.prototype.splice.call(_v, idx, dcount, ...items);
+      notify({ type: "refresh" });
+    },
+    set(idx: number, item: any) {
+      Array.prototype.splice.call(_v, idx, 1, item);
+      // _v[idx] = item;
+      notify({ type: "refresh" });
+    },
+    push(...items: any[]) {
+      if (!Array.isArray(_v)) {
+        return;
+      }
+      Array.prototype.push.call(_v, ...items);
+      notify({
+        type: "insert",
+        index: _v.length - items.length,
+        deleteCount: 0,
+        items,
+      });
+    },
+    to(items: T) {
+      _v = items;
+      notify({ type: "refresh" });
+    },
+    refresh() {
+      notify({ type: "refresh" });
     },
   };
   return r;
 }
 
 export type Ref<T> = ReturnType<typeof ref<T>>;
+
+export type Component = ViewReturn;
 
 export function computed<T = any>(
   deps: Ref<T>[] | Record<string, Ref<T> | undefined>,
@@ -369,3 +354,45 @@ export function cn(...items: any[]): ViewClassname {
 }
 
 export const classnames = cn;
+
+export interface ViewClassname {
+  __CN: true;
+  del(v: string): void;
+  add(v: string): void;
+  append(c: string): void;
+  toString(): string;
+  listen(c: any): void;
+}
+
+export interface ViewReturn {
+  t: string;
+  $elm: HTMLElement | Text;
+  render(): HTMLElement | Text;
+  onMounted?(el: HTMLElement | Text): void;
+  beforeUnmounted?(): void;
+  onUnmounted?(): void;
+}
+
+export type ViewChild = ViewReturn;
+export type ViewChildren = ViewChild[];
+
+// export interface ViewProps {
+//   type?: string;
+//   id?: string | Ref<string> | any;
+//   style?: string | Ref<string> | any;
+//   class?: string | Ref<string> | ViewClassname | any;
+//   dataset?: Record<string, string>;
+//   onMounted?(el: any): void;
+//   beforeUnmounted?(el: any): void;
+//   onUnmounted?(el: any): void;
+//   onClick?(e: any): void;
+//   onFocus?(e: any): void;
+//   onBlur?(e: any): void;
+//   key?: any;
+// }
+
+interface Subscriber {
+  onChange?: (v: any) => void;
+  onPatch?: (c: any) => void;
+  ignore?: boolean;
+}

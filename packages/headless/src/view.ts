@@ -8,9 +8,9 @@ import {
 
 export interface ViewProps {
   type?: string;
-  id?: string | Ref<string> | any;
-  style?: string | Ref<string> | any;
-  class?: string | Ref<string> | ViewClassname | any;
+  id?: string | Ref<string>;
+  style?: string | Ref<string>;
+  class?: string | Ref<string>;
   dataset?: Record<string, string>;
   onMounted?(el: any): void;
   beforeUnmounted?(): void;
@@ -38,7 +38,7 @@ export function View(props: ViewProps = {}, children?: any) {
     type = "div",
     style,
     id: tmpid,
-    class: tmpcn,
+    class: cls,
     dataset,
     onMounted,
     onUnmounted,
@@ -58,47 +58,42 @@ export function View(props: ViewProps = {}, children?: any) {
     }
   });
 
-  const class$ = (() => {
-    if (!tmpcn) {
-      return classnames([]);
-    }
-    if (tmpcn.__CN) {
-      return tmpcn;
-    }
-    if (isRef(tmpcn)) {
-      return classnames([tmpcn]);
-    }
-    return classnames([tmpcn]);
-  })();
+  // const class$ = classnames([tmpcn]);
   // console.log("class$", class$);
-  class$.listen({
-    onChange(v: any) {
-      $elm.className = v.join(" ");
-    },
-  });
-  $elm.className = class$.toString();
-  if (tmpid) {
-    if (isRef(tmpid)) {
-      $elm.id = tmpid.value;
-    } else {
-      $elm.id = tmpid;
-    }
-  }
-
-  if (style) {
-    if (typeof style === "string") {
-      $elm.style.cssText = style;
-    }
-    if (style.value) {
-      $elm.style.cssText = style.value;
-      // console.log(style);
-      style._subscribe({
-        onChange(v: any) {
-          $elm.style.cssText = v;
+  if (cls) {
+    if (typeof cls === "string") {
+      $elm.className = cls;
+    } else if (isRef(cls)) {
+      cls._subscribe({
+        onChange(v) {
+          $elm.className = v;
         },
       });
+      $elm.className = cls.value;
     }
   }
+  // if (tmpid) {
+  //   if (isRef(tmpid)) {
+  //     $elm.id = tmpid.value;
+  //   } else {
+  //     $elm.id = tmpid;
+  //   }
+  // }
+
+  // if (style) {
+  //   if (typeof style === "string") {
+  //     $elm.style.cssText = style;
+  //   }
+  //   if (style.value) {
+  //     $elm.style.cssText = style.value;
+  //     // console.log(style);
+  //     style._subscribe({
+  //       onChange(v: any) {
+  //         $elm.style.cssText = v;
+  //       },
+  //     });
+  //   }
+  // }
   if (onClick) {
     // console.log("[baseui]View - register click", props.class, props.dataset);
     $elm.addEventListener("click", function (event: Event) {
@@ -127,7 +122,7 @@ export function View(props: ViewProps = {}, children?: any) {
   return {
     t: "view",
     $elm,
-    class$,
+    // class$,
     onMounted() {
       // console.log("[baseui]View - invoke onMounted", $elm);
       if (onMounted) {
@@ -187,7 +182,7 @@ export function View(props: ViewProps = {}, children?: any) {
           }
         }
       }
-      $elm.className = class$.toString();
+      // $elm.className = class$.toString();
       return $elm;
     },
   };

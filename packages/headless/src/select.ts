@@ -59,9 +59,9 @@ export function Select(props: any) {
       Show({ when: open }, [
         View({
           ...merge(tp(t?.dropdown)),
-          style: computed({ pos }, (d: any) =>
-            `${merge(tp(t?.dropdown)).style || ""}position:fixed;z-index:999;left:${d.pos.x}px;top:${d.pos.y}px;min-width:${d.pos.width}px;`
-          ),
+          // style: computed({ pos }, (d: any) =>
+          //   `${merge(tp(t?.dropdown)).style || ""}position:fixed;z-index:999;left:${d.pos.x}px;top:${d.pos.y}px;min-width:${d.pos.width}px;`
+          // ),
         }, [
           For({
             ...merge(tp(t?.list)),

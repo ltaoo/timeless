@@ -67,12 +67,12 @@ export function Slider(props: any) {
     View({ ...merge(tp(t?.track)) }, [
       View({
         ...merge(tp(t?.fill)),
-        style: computed({ pct }, (d: any) => `${merge(tp(t?.fill)).style || ""}width:${d.pct}%`),
+        // style: computed({ pct }, (d: any) => `${merge(tp(t?.fill)).style || ""}width:${d.pct}%`),
       }),
     ]),
     View({
       ...merge(tp(t?.thumb)),
-      style: computed({ pct }, (d: any) => `${merge(tp(t?.thumb)).style || ""}left:${d.pct}%;top:50%;transform:translate(-50%,-50%);`),
+      // style: computed({ pct }, (d: any) => `${merge(tp(t?.thumb)).style || ""}left:${d.pct}%;top:50%;transform:translate(-50%,-50%);`),
     }),
   ]);
 }
