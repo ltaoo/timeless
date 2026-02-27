@@ -1,8 +1,16 @@
 import { ref, refobj, computed } from "@timeless/reactive";
+import { ui } from "@timeless/domains";
 
 import { Show } from "./show.js";
+import { ViewChildren, ViewProps } from "./view.js";
 
-export function Presence(props: any, children?: any) {
+export function Presence(
+  props: ViewProps & {
+    store: ui.PresenceCore;
+    animation?: { in: boolean; out: boolean };
+  },
+  children?: ViewChildren,
+) {
   const { store, animation, ...rest } = props;
   const state = refobj(store.state);
   const visible = computed(state, (s) => {

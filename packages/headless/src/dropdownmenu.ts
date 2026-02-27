@@ -1,12 +1,12 @@
 import { ui } from "@timeless/domains";
-import { ref, refobj, computed } from "@timeless/reactive";
+import { ref, refobj, refarr, computed, uncomputed } from "@timeless/reactive";
 import { ChevronRightOutlined } from "@timeless/icons";
 
 import { For } from "./for";
 import { merge, tp } from "./theme";
 import { Show } from "./show";
-import { MenuItem, MenuItemView, SubMenuContent } from "./menu";
-import { View } from "./view";
+import { MenuItem, MenuItemView } from "./menu";
+import { Component, View } from "./view";
 import { Txt } from "./text";
 import { Portal } from "./portal";
 import { Popper } from "./popper";
@@ -53,6 +53,13 @@ export function DropdownMenu(
     each: menuitem$s,
     render(item: { label: string; menu?: ui.MenuCore }) {
       //       console.log("[]DropdownMenu render item", !!item.menu, item.label);
+      const items = ref(item.menu ? item.menu.state.items : []);
+      if (item.menu) {
+        item.menu.onStateChange((v) => {
+          // console.log("[]items change", v.items);
+          items.as(v.items);
+        });
+      }
       return Show(
         {
           when: ref(!!item.menu),
@@ -75,16 +82,15 @@ export function DropdownMenu(
                         SubMenuContent(
                           item.menu,
                           (() => {
-                            const subState = refobj(item.menu.state);
-                            item.menu.onStateChange((v) => {
-                              subState.as(v);
-                            });
-                            const subItems = computed(subState, (d) => d.items);
                             return For({
                               ...merge(tp(t?.menu)),
-                              each: subItems,
+                              each: items,
                               render(sub) {
                                 return MenuItemView(sub, t);
+                              },
+                              onUnmounted() {
+                                console.log("12312312312312321");
+                                uncomputed(items);
                               },
                             });
                           })(),
@@ -256,4 +262,22 @@ export function DropdownMenu(
       ]),
     ],
   );
+}
+
+function SubMenuContent(menu: ui.MenuCore, child: Component) {
+  const $el = child.$elm;
+  $el.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+  });
+  $el.addEventListener("mouseenter", () => {
+    menu.popper.handleEnter();
+  });
+  $el.addEventListener("mouseleave", () => {
+    menu.popper.handleLeave();
+    menu.hide_sub_timer = setTimeout(() => {
+      menu.hide_sub_timer = null;
+      menu.hide();
+    }, 100);
+  });
+  return child;
 }

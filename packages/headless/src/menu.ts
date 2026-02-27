@@ -1,7 +1,8 @@
-import { ref, computed } from "@timeless/reactive";
+import { ref, refobj, computed } from "@timeless/reactive";
+import { ui } from "@timeless/domains";
 
 import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
+import { Component, View, ViewChildren } from "./view.js";
 import { Txt } from "./text.js";
 import { For } from "./for.js";
 import { Show } from "./show.js";
@@ -110,100 +111,89 @@ export function MenuSeparator(props: any) {
   return View({ ...rest, ...merge(tp(t?.separator), cn, st) });
 }
 
-export function SubMenuContent(store: any, children: any) {
+export function SubMenuContent(
+  props: { store: ui.MenuCore },
+  children: ViewChildren,
+) {
   return Portal({}, [
-    Popper({ store: store.popper }, [
-      Presence({ store: store.presence }, [
-        Show({ when: computed(store.state, (d) => d.open) }, children),
+    Popper({ store: props.store.popper }, [
+      Presence({ store: props.store.presence }, [
+        Show({ when: computed(props.store.state, (d) => d.open) }, children),
       ]),
     ]),
   ]);
 }
 
-export function MenuItemView(item: any, t: any) {
-  return MenuItem(
-    {
-      store: item,
-      theme: t,
-    },
-    [
-      View(
-        {
-          class: "flex items-center w-full",
-        },
-        [
-          item.icon
-            ? View(
-                {
-                  class: "mr-2 h-4 w-4",
+export function MenuItemView(item: any, t: any): Component {
+  return MenuItem({ store: item, theme: t }, [
+    View(
+      {
+        class: "flex items-center w-full",
+      },
+      [
+        item.icon
+          ? View(
+              {
+                class: "mr-2 h-4 w-4",
+              },
+              [item.icon],
+            )
+          : null,
+        Txt(item.label),
+        item.shortcut
+          ? View(
+              {
+                class: "ml-auto text-xs tracking-widest opacity-60",
+              },
+              [Txt(item.shortcut)],
+            )
+          : null,
+        item.children
+          ? View(
+              {
+                class: "ml-auto h-4 w-4",
+              },
+              [ChevronRightOutlined()],
+            )
+          : null,
+        item.children
+          ? Portal(
+              {
+                onUnmounted() {
+                  if (item.menu) {
+                    item.menu.dispose();
+                  }
                 },
-                [item.icon],
-              )
-            : null,
-          Txt(item.label),
-          item.shortcut
-            ? View(
-                {
-                  class: "ml-auto text-xs tracking-widest opacity-60",
-                },
-                [Txt(item.shortcut)],
-              )
-            : null,
-          item.children
-            ? View(
-                {
-                  class: "ml-auto h-4 w-4",
-                },
-                [ChevronRightOutlined()],
-              )
-            : null,
-          item.children
-            ? Portal(
-                {
-                  onUnmounted() {
-                    if (item.menu) {
-                      item.menu.dispose();
-                    }
-                  },
-                },
-                [
-                  Popper({ store: item.menu.popper }, [
-                    Presence(
-                      {
-                        store: item.menu.presence,
-                        animation: t?.subAnimation || t?.animation,
-                      },
-                      [
-                        SubMenuContent(
-                          item.menu,
-                          (() => {
-                            const subState = ref(item.menu.state);
-                            item.menu.onStateChange((v: any) => {
-                              subState.as(v);
-                            });
-                            const subItems = computed(
-                              { subState },
-                              (d: any) => d.subState.items,
-                            );
-                            // return [
-                            //   For({
-                            //     // ...merge(tp(t?.menu)),
-                            //     each: subItems,
-                            //     render(sub) {
-                            //       return MenuItemView(sub, t);
-                            //     },
-                            //   }),
-                            // ];
-                          })(),
-                        ),
-                      ],
-                    ),
-                  ]),
-                ],
-              )
-            : null,
-        ],
-      ),
-    ],
-  );
+              },
+              [
+                Popper({ store: item.menu.popper }, [
+                  Presence(
+                    {
+                      store: item.menu.presence,
+                      animation: t?.subAnimation || t?.animation,
+                    },
+                    [
+                      (() => {
+                        const subState = refobj(item.menu.state);
+                        item.menu.onStateChange((v: any) => {
+                          subState.as(v);
+                        });
+                        const subItems = computed(subState, (d) => d.items);
+                        return For({
+                          ...merge(tp(t?.menu)),
+                          each: subItems,
+                          render(sub) {
+                            return MenuItemView(sub, t);
+                          },
+                        });
+                      })(),
+                    ],
+                  ),
+                ]),
+              ],
+            )
+          : null,
+      ],
+    ),
+  ]);
 }

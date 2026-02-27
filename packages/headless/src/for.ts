@@ -280,7 +280,7 @@ export function For<T>(
     $elm,
     render() {
       const nodes = isRef(each) ? each.value : each;
-      // console.log("[For] render", nodes);
+      console.log("[For] render", nodes);
       const $fragment = document.createDocumentFragment();
       for (let i = 0; i < nodes.length; i += 1) {
         const item = nodes[i];
@@ -334,6 +334,11 @@ export function For<T>(
           }
         }
       }
+      _mounted = false;
+      _each_items = [];
+      _children = [];
+      _$elms = [];
+      $elm.innerHTML = "";
     },
   };
 }

@@ -268,15 +268,15 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.listen_item(items[i]);
     }
   }
-  setItems(items: MenuItemCore[]) {
-    console.log("[DOMAIN]ui/menu - set items", items);
-    this.state.items = items;
-    this.items = items;
-    this.listen_items(items);
-    this.emit(Events.StateChange, {
-      ...this.state,
-    });
-  }
+  // setItems(items: MenuItemCore[]) {
+  //   console.log("[DOMAIN]ui/menu - set items", items);
+  //   this.state.items = items;
+  //   this.items = items;
+  //   this.listen_items(items);
+  //   this.emit(Events.StateChange, {
+  //     ...this.state,
+  //   });
+  // }
   setOffset(offset: { x: number; y: number }) {
     // this.offsetX = offset.x;
     // this.offsetY = offset.y;
