@@ -260,7 +260,7 @@ export function For<T>(
         methods._update(change.index, change.item);
       }
     },
-    onChange(v: T[]) {
+    onChange(v: T[] = []) {
       if (!_mounted) {
         return;
       }
@@ -275,8 +275,8 @@ export function For<T>(
     t: "view",
     $elm,
     render() {
-      const nodes = isRef(each) ? each.value : each;
-      console.log("[For] render", nodes);
+      const nodes = (isRef(each) ? each.value : each) || [];
+      // console.log("[For] render", nodes);
       const $fragment = document.createDocumentFragment();
       for (let i = 0; i < nodes.length; i += 1) {
         const item = nodes[i];

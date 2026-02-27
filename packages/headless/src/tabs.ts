@@ -1,52 +1,108 @@
+import { ref, refarr, computed } from "@timeless/reactive";
+import { ui } from "@timeless/domains";
+
 import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
+import { View, ViewProps } from "./view.js";
 import { For } from "./for.js";
 import { Show } from "./show.js";
-import { ref, computed } from "@timeless/reactive";
 import { Txt } from "./text.js";
 
-export function Tabs(props: any) {
-  const { store, value, items, theme: t, class: cn, style: st } = props;
+export function Tabs(
+  props: ViewProps & {
+    store: ui.TabHeaderCore<any>;
+    theme?: { root: any; tab: any; list: any; indicator: any; content: any };
+  },
+) {
+  const { store, theme: t, class: cls, style: st } = props;
 
-  const activeRef = store ? ref(store.state) : value;
+  const state = ref(store.state);
+  const items = refarr(store.state.tabs);
   const events: any[] = [];
-  if (store) events.push(store.onStateChange(() => { activeRef.value = store.state; }));
+  events.push(
+    store.onStateChange(() => {
+      state.as(store.state);
+      items.as(store.state.tabs);
+    }),
+  );
 
-  const getActive = (d: any) => store ? d.state.curValue : d.active;
-  const deps = store ? { state: activeRef } : { active: activeRef };
-
-  return View({
-    ...merge(tp(t?.root), cn, st),
-    onUnmounted() { for (const fn of events) if (typeof fn === "function") fn(); },
-  }, [
-    View({ ...merge(tp(t?.list)) }, [
-      For({
-        each: items,
-        render(item: any) {
-          return View({
-            type: "button",
-            class: computed(deps, (d: any) => merge(tp(t?.tab, { active: getActive(d) === item.value })).class || ""),
-            style: computed(deps, (d: any) => merge(tp(t?.tab, { active: getActive(d) === item.value })).style || ""),
-            onClick() { store ? store.selectTab(item.value) : (activeRef.value = item.value); },
-          }, [
-            Txt(item.label),
-            View({
-              class: computed(deps, (d: any) => merge(tp(t?.indicator, { active: getActive(d) === item.value })).class || ""),
-              style: computed(deps, (d: any) => merge(tp(t?.indicator, { active: getActive(d) === item.value })).style || ""),
-            }),
-          ]);
-        },
-      }),
-    ]),
-    View({ ...merge(tp(t?.content)) }, [
-      For({
-        each: items,
-        render(item: any) {
-          return Show({
-            when: computed(deps, (d: any) => getActive(d) === item.value),
-          }, [item.content]);
-        },
-      }),
-    ]),
-  ]);
+  return View(
+    {
+      ...merge(tp(t?.root), cls, st),
+      onUnmounted() {
+        for (const fn of events) if (typeof fn === "function") fn();
+      },
+    },
+    [
+      View({ ...merge(tp(t?.list)) }, [
+        For({
+          each: computed(items, (s) => s),
+          render(item: { value: string; label: string }, idx) {
+            return View(
+              {
+                type: "button",
+                class: computed(
+                  state,
+                  (d) =>
+                    merge(tp(t?.tab, { active: d.curId === item.value }))
+                      .class || "",
+                ),
+                style: computed(
+                  state,
+                  (d) =>
+                    merge(tp(t?.tab, { active: d.curId === item.value }))
+                      .style || "",
+                ),
+                onMounted($el) {
+                  store.updateTabClient(idx, {
+                    rect() {
+                      return $el.getBoundingClientRect();
+                    },
+                  });
+                },
+                onClick() {
+                  store.selectById(item.value);
+                },
+              },
+              [
+                Txt(item.label),
+                View({
+                  class: computed(
+                    state,
+                    (d) =>
+                      merge(
+                        tp(t?.indicator, {
+                          active: d.curId === item.value,
+                        }),
+                      ).class || "",
+                  ),
+                  style: computed(
+                    state,
+                    (d) =>
+                      merge(
+                        tp(t?.indicator, {
+                          active: d.curId === item.value,
+                        }),
+                      ).style || "",
+                  ),
+                }),
+              ],
+            );
+          },
+        }),
+      ]),
+      View({ ...merge(tp(t?.content)) }, [
+        For({
+          each: computed(state, (s) => s.items),
+          render(item: any) {
+            return Show(
+              {
+                when: computed(state, (d) => d.curId === item.value),
+              },
+              [item.content],
+            );
+          },
+        }),
+      ]),
+    ],
+  );
 }

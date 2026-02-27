@@ -59,7 +59,7 @@ export function ref<T = any>(v: T) {
 }
 
 export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
-  let _v = items;
+  let _local_value = items;
   const deps: Subscriber[] = [];
   function notify(action: {
     type: string;
@@ -84,7 +84,7 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
           return;
         }
         if (ctx.onChange) {
-          ctx.onChange(_v);
+          ctx.onChange(_local_value);
         }
       })();
     }
@@ -97,10 +97,10 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
     },
     key: opt.key,
     get value() {
-      return _v;
+      return _local_value;
     },
     get(idx: number) {
-      const vv = _v[idx];
+      const vv = _local_value[idx];
       if (isRef(vv)) {
         return vv;
       }
@@ -112,15 +112,15 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
       }
     },
     set(idx: number, item: any) {
-      Array.prototype.splice.call(_v, idx, 1, item);
+      Array.prototype.splice.call(_local_value, idx, 1, item);
       notify({ type: "update", index: idx, item });
     },
     splice(idx: number, dcount: number, ...items: any[]) {
-      Array.prototype.splice.call(_v, idx, dcount, ...items);
+      Array.prototype.splice.call(_local_value, idx, dcount, ...items);
       notify({ type: "refresh" });
     },
     insert(idx: number, ...items: any[]) {
-      Array.prototype.splice.call(_v, idx, 0, ...items);
+      Array.prototype.splice.call(_local_value, idx, 0, ...items);
       notify({
         type: "insert",
         index: idx,
@@ -129,16 +129,16 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
       });
     },
     push(...items: any[]) {
-      Array.prototype.push.call(_v, ...items);
+      Array.prototype.push.call(_local_value, ...items);
       notify({
         type: "insert",
-        index: _v.length - items.length,
+        index: _local_value.length - items.length,
         deleteCount: 0,
         items,
       });
     },
     unshift(...items: any[]) {
-      Array.prototype.unshift.call(_v, ...items);
+      Array.prototype.unshift.call(_local_value, ...items);
       notify({
         type: "insert",
         index: 0,
@@ -147,16 +147,16 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
       });
     },
     filter(predicate: (item: T, index: number, array: T[]) => boolean) {
-      return _v.filter(predicate);
+      return _local_value.filter(predicate);
     },
     includes(item: T) {
-      return _v.includes(item);
+      return _local_value.includes(item);
     },
     as(items: T[] | ((cur: T[]) => T[])) {
       if (typeof items === "function") {
-        _v = items(_v);
+        _local_value = items(_local_value);
       } else {
-        _v = items;
+        _local_value = items;
       }
       notify({ type: "refresh" });
     },

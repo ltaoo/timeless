@@ -73,9 +73,6 @@ export function HomeLayoutView(props) {
                 name: sub_view.name,
                 pathname: sub_view.pathname,
               },
-              onMounted() {
-                console.log("layout mounted");
-              },
             },
             [
               PageView({

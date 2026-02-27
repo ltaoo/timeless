@@ -5,24 +5,27 @@ export function NavigationView() {
     Section("Tabs", [
       Item("Default", [
         Tabs({
-          value: ref("tab1"),
-          items: [
-            {
-              label: "Account",
-              value: "tab1",
-              content: Txt("Account settings content."),
-            },
-            {
-              label: "Password",
-              value: "tab2",
-              content: Txt("Password settings content."),
-            },
-            {
-              label: "Notifications",
-              value: "tab3",
-              content: Txt("Notification preferences."),
-            },
-          ],
+          store: new Timeless.ui.TabHeaderCore({
+            key: "value",
+            selected: "tab2",
+            options: [
+              {
+                label: "Account",
+                value: "tab1",
+                // content: Txt("Account settings content."),
+              },
+              {
+                label: "Password",
+                value: "tab2",
+                // content: Txt("Password settings content."),
+              },
+              {
+                label: "Notifications",
+                value: "tab3",
+                // content: Txt("Notification preferences."),
+              },
+            ],
+          }),
         }),
       ]),
     ]),
@@ -32,8 +35,7 @@ export function NavigationView() {
           items: [
             {
               title: "Is it accessible?",
-              content:
-                "Yes. It adheres to the WAI-ARIA design pattern.",
+              content: "Yes. It adheres to the WAI-ARIA design pattern.",
             },
             {
               title: "Is it styled?",
@@ -42,8 +44,7 @@ export function NavigationView() {
             },
             {
               title: "Is it animated?",
-              content:
-                "Yes. It uses CSS transitions for smooth open/close.",
+              content: "Yes. It uses CSS transitions for smooth open/close.",
             },
           ],
         }),

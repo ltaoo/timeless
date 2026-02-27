@@ -7,20 +7,29 @@ enum Events {
   Mounted,
   Change,
 }
-type TheTypesOfEvents<T extends { key: any; options: { id: any; text: string }[] }> = {
+type TheTypesOfEvents<
+  T extends { key: any; options: { id: any; text: string }[] },
+> = {
   [Events.StateChange]: TabHeaderState<T>;
   [Events.Scroll]: { left: number };
   [Events.LinePositionChange]: { left: number };
   [Events.Mounted]: void;
   [Events.Change]: T["options"][number] & { index: number };
 };
-type TabHeaderState<T extends { key: any; options: { id: any; text: string }[] }> = {
+type TabHeaderState<
+  T extends { key: any; options: { id: any; text: string }[] },
+> = {
   tabs: T["options"];
   current: number | null;
   left: number | null;
   curId: string | null;
 };
-type TabHeaderProps<T extends { key: any; options: { id: any; text: string; hidden?: boolean }[] }> = {
+type TabHeaderProps<
+  T extends {
+    key: any;
+    options: { id: any; text: string; hidden?: boolean }[];
+  },
+> = {
   key?: T["key"];
   selected?: any;
   options: T["options"];
@@ -30,7 +39,10 @@ type TabHeaderProps<T extends { key: any; options: { id: any; text: string; hidd
 };
 
 export class TabHeaderCore<
-  T extends { key: any; options: { id: any; text: string; hidden?: boolean; [x: string]: any }[] }
+  T extends {
+    key: any;
+    options: { id: any; text: string; hidden?: boolean; [x: string]: any }[];
+  },
 > extends BaseDomain<TheTypesOfEvents<T>> {
   key: T["key"];
   tabs: T["options"] = [];
@@ -60,11 +72,11 @@ export class TabHeaderCore<
     const matched = this.tabs[this.current];
     if (!matched) {
       if (this.tabs.length) {
-        return this.tabs[0].id;
+        return this.tabs[0][this.key];
       }
       return null;
     }
-    return matched.id ?? null;
+    return matched[this.key] ?? null;
   }
   get selectedTab() {
     if (this.current === null) {
@@ -84,17 +96,25 @@ export class TabHeaderCore<
   constructor(props: Partial<{ _name: string }> & TabHeaderProps<T>) {
     super(props);
 
-    const { key = "id", options, selected, targetLeftWhenSelected = 0, onChange, onMounted } = props;
+    const {
+      key = "id",
+      options = [],
+      selected,
+      targetLeftWhenSelected = 0,
+      onChange,
+      onMounted,
+    } = props;
     this.key = key;
     this.targetLeftWhenSelected = targetLeftWhenSelected;
     this.tabs = options;
     this.current = 0;
     if (selected !== undefined) {
-      const i = options.findIndex((v) => v.id === selected);
+      const i = options.findIndex((v) => v[key] === selected);
       if (i !== -1) {
         this.current = i;
       }
     }
+    // console.log("[]this.current", selected, this.current);
     if (onChange) {
       this.onChange(onChange);
     }
@@ -108,8 +128,9 @@ export class TabHeaderCore<
     }
     this.tabs = options;
     for (let i = 0; i < options.length; i += 1) {
-      const { id, hidden } = options[i];
-      if (!hidden) {
+      const opt = options[i];
+      const id = opt[this.key];
+      if (!opt.hidden) {
         this.extra[id] = {
           rect() {
             return {
@@ -143,7 +164,10 @@ export class TabHeaderCore<
     id: T["options"][number]["id"];
     options: Partial<{ ignore: boolean }>;
   } = null;
-  selectById(id: T["options"][number]["id"], options: Partial<{ ignore: boolean }> = {}) {
+  selectById(
+    id: T["options"][number]["id"],
+    options: Partial<{ ignore: boolean }> = {},
+  ) {
     if (!this.mounted) {
       this.pendingAction = {
         id,
@@ -152,7 +176,7 @@ export class TabHeaderCore<
       return;
     }
     const { ignore } = options;
-    const matchedIndex = this.tabs.findIndex((t) => t.id === id);
+    const matchedIndex = this.tabs.findIndex((t) => t[this.key] === id);
     if (matchedIndex === -1) {
       return;
     }
@@ -177,7 +201,7 @@ export class TabHeaderCore<
   }
   handleChangeById(id: string) {
     // console.log("[DOMAIN]tab-header/index selectById", id, this.tabs);
-    const matchedIndex = this.tabs.findIndex((t) => t.id === id);
+    const matchedIndex = this.tabs.findIndex((t) => t[this.key] === id);
     if (matchedIndex === -1) {
       return;
     }
@@ -196,11 +220,14 @@ export class TabHeaderCore<
     if (!matchedTab) {
       return null;
     }
-    const client = this.extra[matchedTab.id].rect();
+    const client = this.extra[matchedTab[this.key]].rect();
     // console.log("[DOMAIN]ui/tab-header/index - calcLineLeft", this.extra, client);
     return client.left + client.width / 2;
   }
-  updateTabClient(index: number, info: { rect: () => { width: number; height: number; left: number } }) {
+  updateTabClient(
+    index: number,
+    info: { rect: () => { width: number; height: number; left: number } },
+  ) {
     console.log("[]updateTabClient", index);
     const matchedTab = this.tabs[index];
     if (!matchedTab) {
@@ -209,9 +236,12 @@ export class TabHeaderCore<
     if (this.mounted) {
       return;
     }
-    this.extra[matchedTab.id] = info;
+    this.extra[matchedTab[this.key]] = info;
     // console.log("[DOMAIN]ui/tab-headers", index, Object.keys(this.extra).length, this.tabs.length);
-    if (Object.keys(this.extra).length !== this.tabs.filter((t) => !t.hidden).length) {
+    if (
+      Object.keys(this.extra).length !==
+      this.tabs.filter((t) => !t.hidden).length
+    ) {
       return;
     }
     // if (this.current === null) {
@@ -239,13 +269,16 @@ export class TabHeaderCore<
   changeLinePosition(left: number) {
     this.emit(Events.LinePositionChange, { left });
   }
-  updateTabClientById(id: string, info: { rect: () => { width: number; height: number; left: number } }) {
-    const matchedTabIndex = this.tabs.findIndex((t) => t.id === id);
+  updateTabClientById(
+    id: string,
+    info: { rect: () => { width: number; height: number; left: number } },
+  ) {
+    const matchedTabIndex = this.tabs.findIndex((t) => t[this.key] === id);
     if (matchedTabIndex === -1) {
       return;
     }
     const matchedTab = this.tabs[matchedTabIndex];
-    this.extra[matchedTab.id] = info;
+    this.extra[matchedTab[this.key]] = info;
   }
   updateContainerClient(info: { width: number; height: number; left: number }) {
     // console.log('[]setContainer', info);
@@ -261,7 +294,7 @@ export class TabHeaderCore<
     if (curTab === null) {
       return;
     }
-    const client = this.extra[curTab.id].rect();
+    const client = this.extra[curTab[this.key]].rect();
     const theTabMiddle = client.left + client.width / 2;
     const realTargetPosition = (() => {
       if (this.targetLeftWhenSelected === null) {
@@ -292,7 +325,9 @@ export class TabHeaderCore<
   onScroll(handler: Handler<TheTypesOfEvents<T>[Events.Scroll]>) {
     return this.on(Events.Scroll, handler);
   }
-  onLinePositionChange(handler: Handler<TheTypesOfEvents<T>[Events.LinePositionChange]>) {
+  onLinePositionChange(
+    handler: Handler<TheTypesOfEvents<T>[Events.LinePositionChange]>,
+  ) {
     return this.on(Events.LinePositionChange, handler);
   }
   onChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>) {

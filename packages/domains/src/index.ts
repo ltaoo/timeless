@@ -1,3 +1,5 @@
+// console.log("domain.version 1.1.0");
+
 export * from "./base";
 export * from "./result";
 export * from "./error";
