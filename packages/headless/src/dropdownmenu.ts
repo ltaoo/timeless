@@ -17,13 +17,14 @@ export function DropdownMenu(
     store: ui.DropdownMenuCore;
     theme: any;
     onMounted?: ($elm: any) => void;
+    onUnmounted?: () => void;
   },
   children: any[],
 ) {
   const { store, theme: t, ...rest } = props;
   const layer = store.menu.layer;
   const state = refobj(store.state);
-  const events = [];
+  const events: (void | (() => void))[] = [];
   events.push(
     store.onStateChange(() => {
       state.as(store.state);
@@ -31,8 +32,9 @@ export function DropdownMenu(
   );
   const menuitem$s = computed(state, (d) => d.items);
 
-  let unDismiss, handlePointerDown;
-  let _hoverHideTimer = null;
+  let unDismiss: undefined | Function;
+  let handlePointerDown: undefined | (() => void);
+  let _hoverHideTimer: null | number = null;
   function _hoverClearHide() {
     if (_hoverHideTimer) {
       clearTimeout(_hoverHideTimer);
@@ -49,7 +51,7 @@ export function DropdownMenu(
   const $menucontent = For({
     ...merge(tp(t?.menu)),
     each: menuitem$s,
-    render(item) {
+    render(item: { label: string; menu?: ui.MenuCore }) {
       //       console.log("[]DropdownMenu render item", !!item.menu, item.label);
       return Show(
         {
@@ -75,7 +77,7 @@ export function DropdownMenu(
                           (() => {
                             const subState = ref(item.menu.state);
                             item.menu.onStateChange((v) => {
-                              subState.value = v;
+                              subState.as(v);
                             });
                             const subItems = computed(
                               { subState },
@@ -133,7 +135,7 @@ export function DropdownMenu(
     {
       ...rest,
       onMounted($e) {
-        console.log("[]menu onMounted", $e);
+        // console.log("[]menu onMounted", $e);
         if (rest.onMounted) {
           rest.onMounted($e);
         }
@@ -151,13 +153,14 @@ export function DropdownMenu(
           store.hide();
         });
         handlePointerDown = () => {
+          console.log("[DropdownMenu]click", store.menu.state.open);
           if (store.menu.state.open) {
             layer.handlePointerDownOnTop();
           }
         };
         document.addEventListener("pointerdown", handlePointerDown);
         if (store.trigger === "hover") {
-          let hoverTimer = null;
+          let hoverTimer: null | number = null;
           $e.addEventListener("mouseenter", () => {
             _hoverClearHide();
             hoverTimer = setTimeout(() => {
@@ -192,11 +195,16 @@ export function DropdownMenu(
       },
       onUnmounted() {
         for (const fn of events) if (typeof fn === "function") fn();
-        if (unDismiss) unDismiss();
-        if (handlePointerDown)
+        if (unDismiss) {
+          unDismiss();
+        }
+        if (handlePointerDown) {
           document.removeEventListener("pointerdown", handlePointerDown);
+        }
         store.unmount();
-        if (rest.onUnmounted) rest.onUnmounted();
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
+        }
       },
     },
     [

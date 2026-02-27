@@ -3,22 +3,14 @@ import { NotFoundPageView } from "../notfound/index.js";
 export function HomeLayoutView(props) {
   const view = props.view;
   const subViews = refarr([]);
-  const curSubView = ref(view.curView?.name);
+  const curSubView = refobj(view.curView);
   view.onCurViewChange((view) => {
-    // console.log("[LAYOUT]handle cur view change", view.name);
-    curSubView.as(view.name);
+    curSubView.as(view);
   });
   view.onSubViewAppended((v) => {
-    // console.log(
-    //   "[]HomeLayoutView - view.onSubViewAppended",
-    //   v,
-    //   subViews.value.length,
-    // );
     subViews.push(v);
-    // console.log("[]HomeLayoutView - after .push(v)", subViews.value.length);
   });
 
-  // console.log("[]HomeLayoutView - render", props.view, subViews.value);
   return Flex(
     {
       class: "layout_home w-full h-full",
@@ -45,12 +37,9 @@ export function HomeLayoutView(props) {
               {
                 class: cn([
                   "sidebar-item flex items-center justify-center w-full h-[72px] cursor-pointer",
-                  (() => {
-                    if (curSubView.value === menu.id) {
-                      return "bg-[#f5f5f5]";
-                    }
-                    return "";
-                  })(),
+                  computed(curSubView, (s) => {
+                    return s && s.name === menu.id ? "bg-[#f5f5f5]" : "";
+                  }),
                 ]),
                 onClick() {
                   props.history.push(menu.id);
@@ -66,26 +55,26 @@ export function HomeLayoutView(props) {
         each: subViews,
         render(sub_view) {
           const PageView = props.views[sub_view.name];
-          // console.log("[LAYOUT]HomeLayoutView render sub view", sub_view.name);
           if (!PageView) {
             return NotFoundPageView({
               history: props.history,
             });
           }
           const displayed = computed(curSubView, (s) => {
-            console.log("recompute", s, sub_view.name);
             return [
               "page absolute inset-0 right-0 h-full",
-              s === sub_view.name ? "display" : "hidden",
+              s && s.name === sub_view.name ? "display" : "hidden",
             ].join(" ");
           });
           return View(
             {
-              class: cn([displayed]),
-              style: "",
+              class: displayed,
               dataset: {
                 name: sub_view.name,
                 pathname: sub_view.pathname,
+              },
+              onMounted() {
+                console.log("layout mounted");
               },
             },
             [

@@ -166,7 +166,7 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
   };
   return r;
 }
-export function refobj<T extends Record<string, any>>(obj: T) {
+export function refobj<T extends Record<string, any>>(obj: T | null) {
   let _v = obj;
   const deps: Subscriber[] = [];
   function notify(action: { type: string }) {
@@ -188,13 +188,19 @@ export function refobj<T extends Record<string, any>>(obj: T) {
     },
     set(key: keyof T, item: any) {
       let vv = item;
-      if (typeof item === "function") {
+      if (_v && typeof item === "function") {
         vv = item(_v[key]);
+      }
+      if (!_v) {
+        _v = {} as T;
       }
       _v[key] = vv;
       notify({ type: "update" });
     },
     get(key: keyof T) {
+      if (!_v) {
+        return null;
+      }
       const vv = _v[key];
       if (isRef(vv)) {
         return vv;
@@ -204,15 +210,18 @@ export function refobj<T extends Record<string, any>>(obj: T) {
           return global_refs.get(vv);
         }
         _inner[key] = refobj(vv);
-        return _inner[key];
+        return _inner[key] ?? null;
       }
       console.warn("refobj get", key);
     },
     delete(key: keyof T) {
+      if (!_v) {
+        return;
+      }
       delete _v[key];
       notify({ type: "refresh" });
     },
-    as(nextObj: T | ((cur: T) => T)) {
+    as(nextObj: T | ((cur: T | null) => T)) {
       if (typeof nextObj === "function") {
         _v = nextObj(_v);
       } else {
@@ -232,7 +241,6 @@ export type Ref<T> = {
   _subscribe: (ctx: Subscriber) => void;
   value: T;
 };
-export type Component = ViewReturn;
 
 export function computed<T = any>(
   deps: Ref<any> | Record<string, any>,
@@ -317,30 +325,6 @@ export function computed<T = any>(
   };
 
   return res;
-  // const isArr = Array.isArray(deps);
-  // const depsArr: Ref<T>[] = isArr
-  //   ? deps
-  //   : Object.values(deps).filter((v): v is Ref<T> => v != null);
-  // const getArgs = () => {
-  //   if (isArr) {
-  //     return depsArr.map((d) => d.value);
-  //   }
-  //   const obj: Record<string, any> = {};
-  //   for (const [k, v] of Object.entries(deps)) {
-  //     if (v) obj[k] = v.value;
-  //   }
-  //   return [obj];
-  // };
-  // const r = ref<T>(fn(...getArgs()));
-  // for (let i = 0; i < depsArr.length; i += 1) {
-  //   depsArr[i]._subscribe({
-  //     onChange() {
-  //       r.as(fn(...getArgs()));
-  //     },
-  //     ignore: true,
-  //   });
-  // }
-  // return r;
 }
 
 export function isRef(v: any): v is Ref<any> {
@@ -365,26 +349,6 @@ export function isClassName(v: any): v is ClassNameRef {
   }
   return false;
 }
-
-export function isComponent(v: any): v is ViewReturn {
-  if (v === null || v === undefined) {
-    return false;
-  }
-  if (v.t && v.$elm) {
-    return true;
-  }
-  return false;
-}
-
-interface CnSource {
-  type: "string" | "ref" | "cn";
-  value: any;
-}
-
-interface CnContext {
-  onChange(names: string[]): void;
-}
-
 export function cn(
   items: (string | Ref<string> | ClassNameRef | undefined)[],
 ): ClassNameRef {
@@ -526,19 +490,6 @@ export interface ClassNameRef {
   append(c: string): void;
   toString(): string;
 }
-
-export interface ViewReturn {
-  t: string;
-  $elm: HTMLElement | Text;
-  render(): HTMLElement | Text;
-  onMounted?(el: HTMLElement | Text): void;
-  beforeUnmounted?(): void;
-  onUnmounted?(): void;
-}
-
-export type ViewChild = ViewReturn;
-export type ViewChildren = ViewChild[];
-
 // export interface ViewProps {
 //   type?: string;
 //   id?: string | Ref<string> | any;

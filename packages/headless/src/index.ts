@@ -1,17 +1,21 @@
 export * from "@timeless/reactive";
 
-console.log("headless.version 1.3.0");
+console.log("headless.version 1.4.0");
 
 // Primitives
 export * from "./for";
 export * from "./show";
+export * from "./match";
+
 export * from "./view";
 export * from "./text";
-export * from "./match";
 export * from "./html";
 export * from "./portal";
 export * from "./presence";
 export * from "./popper";
+
+export * from "./routesubviews";
+
 export * from "./flex";
 export * from "./head";
 export * from "./paragraph";

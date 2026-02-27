@@ -68,7 +68,7 @@ export const app = new Timeless.Application({
     //   "[Store] beforeReady push to default page",
     //   "root.home_layout.index"
     // );
-    history.push("root.home_layout.index", {}, { ignore: true });
+    history.push("root.home_layout.index.general", {}, { ignore: true });
     return Timeless.Result.Ok(null);
   },
 });

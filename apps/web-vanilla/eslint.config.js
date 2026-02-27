@@ -30,6 +30,7 @@ export default [
         isComponent: "readonly",
         cn: "readonly",
         Show: "readonly",
+        RouteSubViews: "readonly",
         For: "readonly",
         Match: "readonly",
         View: "readonly",

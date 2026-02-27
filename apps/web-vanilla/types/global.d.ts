@@ -27,25 +27,26 @@ declare function invoke(
 declare interface Window {
   dayjs: typeof dayjs;
 }
-// Global Core Functions
-declare const ref: typeof import("@timeless/headless").ref;
-declare const refarr: typeof import("@timeless/headless").refarr;
-declare const refobj: typeof import("@timeless/headless").refobj;
-declare const computed: typeof import("@timeless/shadcnui").computed;
-declare const isRef: typeof import("@timeless/shadcnui").isRef;
-declare const cn: typeof import("@timeless/shadcnui").cn;
 
-declare const Show: typeof import("@timeless/shadcnui").Show;
-declare const For: typeof import("@timeless/shadcnui").For;
-declare const Match: typeof import("@timeless/shadcnui").Match;
-declare const Switch: typeof import("@timeless/shadcnui").Toggle;
+declare const ref: typeof import("@timeless/reactive").ref;
+declare const refarr: typeof import("@timeless/reactive").refarr;
+declare const refobj: typeof import("@timeless/reactive").refobj;
+declare const computed: typeof import("@timeless/reactive").computed;
+declare const isRef: typeof import("@timeless/reactive").isRef;
+declare const cn: typeof import("@timeless/reactive").cn;
+
+declare const Show: typeof import("@timeless/headless").Show;
+declare const For: typeof import("@timeless/headless").For;
+declare const Match: typeof import("@timeless/headless").Match;
+declare const Switch: typeof import("@timeless/headless").Toggle;
+declare const View: typeof import("@timeless/headless").View;
+declare const Txt: typeof import("@timeless/headless").Txt;
+declare const DangerouslyInnerHTML: typeof import("@timeless/headless").DangerouslyInnerHTML;
+declare const RouteSubViews: typeof import("@timeless/headless").RouteSubViews;
+
 declare const Slider: typeof import("@timeless/shadcnui").Slider;
 declare const Slide: typeof import("@timeless/shadcnui").Slider;
 declare const Progress: typeof import("@timeless/shadcnui").Progress;
-// Global Components
-declare const View: typeof import("@timeless/shadcnui").View;
-declare const DangerouslyInnerHTML: typeof import("@timeless/shadcnui").DangerouslyInnerHTML;
-declare const Txt: typeof import("@timeless/shadcnui").Txt;
 declare const ScrollView: typeof import("@timeless/shadcnui").ScrollView;
 declare const Flex: typeof import("@timeless/shadcnui").Flex;
 declare const Head2: typeof import("@timeless/shadcnui").Head2;

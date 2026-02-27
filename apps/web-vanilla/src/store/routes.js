@@ -13,10 +13,32 @@ const configure = {
           index: {
             title: "组件库",
             pathname: "/home/index",
-          },
-          logic: {
-            title: "核心响应式组件",
-            pathname: "/home/logic",
+            children: {
+              general: {
+                title: "通用组件",
+                pathname: "/home/index/general",
+              },
+              form: {
+                title: "表单组件",
+                pathname: "/home/index/form",
+              },
+              data: {
+                title: "数据展示组件",
+                pathname: "/home/index/data",
+              },
+              feedback: {
+                title: "反馈组件",
+                pathname: "/home/index/feedback",
+              },
+              nav: {
+                title: "导航组件",
+                pathname: "/home/index/nav",
+              },
+              overlay: {
+                title: "浮层组件",
+                pathname: "/home/index/overlay",
+              },
+            },
           },
         },
         options: {

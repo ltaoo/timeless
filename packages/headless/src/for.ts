@@ -1,11 +1,11 @@
-import { ref, isComponent, isRef, Ref, Component } from "@timeless/reactive";
+import { ref, isRef, Ref } from "@timeless/reactive";
 
-import { View, ViewProps } from "./view.js";
+import { View, ViewProps, Component, isComponent } from "./view.js";
 
 export function For<T>(
   props: ViewProps & {
     each: T[] | Ref<T[]>;
-    render: (item: T, idx: number) => Component;
+    render: (item: T, idx: number) => Component | null;
     key?: string;
   },
 ) {
@@ -96,8 +96,12 @@ export function For<T>(
     },
     _update(index: number, item: any) {
       const res = methods._render_item(item, index);
-      if (!res) return;
-      if (res.delete) return;
+      if (!res) {
+        return;
+      }
+      if (res.delete) {
+        return;
+      }
       const old = _$elms[index];
       if (old && old.parentNode === $elm && res.elm) {
         $elm.replaceChild(res.elm, old);
@@ -270,15 +274,13 @@ export function For<T>(
 
   if (isRef(each)) {
     each._subscribe(ctx);
-    // ctx.onChange(each.value);
   }
-
   return {
     t: "view",
     $elm,
     render() {
-      // console.log('[For] render', each.value);
       const nodes = isRef(each) ? each.value : each;
+      // console.log("[For] render", nodes);
       const $fragment = document.createDocumentFragment();
       for (let i = 0; i < nodes.length; i += 1) {
         const item = nodes[i];
@@ -304,6 +306,17 @@ export function For<T>(
       _mounted = true;
       if (onMounted) {
         onMounted($elm);
+      }
+      // console.log("2. mounted", _children);
+      for (let i = 0; i < _children.length; i += 1) {
+        const component = _children[i];
+        if (isComponent(component)) {
+          // @ts-ignore
+          if (typeof component.onMounted === "function") {
+            // @ts-ignore
+            component.onMounted(_$elms[i]);
+          }
+        }
       }
       return $elm;
     },

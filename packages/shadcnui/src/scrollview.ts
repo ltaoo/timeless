@@ -58,14 +58,6 @@ export function ScrollView(props: any, children: any) {
     $elm: view$.$elm,
     onMounted() {
       // 所有 component 都要返回 onMounted，调用 view$.onMounted 和 props.onMounted
-      props.store.setRect({
-        width: view$.$elm.clientWidth,
-        height: view$.$elm.clientHeight,
-      });
-      view$.onMounted();
-      if (props.onMounted) {
-        props.onMounted();
-      }
     },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
@@ -79,7 +71,16 @@ export function ScrollView(props: any, children: any) {
       }
     },
     render() {
-      return view$.render();
+      const $elm = view$.render();
+      props.store.setRect({
+        width: view$.$elm.clientWidth,
+        height: view$.$elm.clientHeight,
+      });
+      // view$.onMounted();
+      if (props.onMounted) {
+        props.onMounted($elm);
+      }
+      return $elm;
     },
   };
 }

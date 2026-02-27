@@ -1,10 +1,4 @@
-import {
-  Ref,
-  isRef,
-  isComponent,
-  isClassName,
-  ClassNameRef,
-} from "@timeless/reactive";
+import { Ref, isRef, isClassName, ClassNameRef } from "@timeless/reactive";
 
 export interface ViewProps {
   type?: string;
@@ -71,7 +65,7 @@ export function View(props: ViewProps = {}, children?: any) {
     } else if (isClassName(cls)) {
       cls._subscribe({
         onChange(v: string[]) {
-          console.log("[]view the className is changed", v);
+          // console.log("[]view the className is changed", v);
           $elm.className = v.join(" ");
         },
       });
@@ -128,22 +122,9 @@ export function View(props: ViewProps = {}, children?: any) {
     t: "view",
     $elm,
     // class$,
-    onMounted() {
-      // console.log("[baseui]View - invoke onMounted", $elm);
-      if (onMounted) {
-        onMounted($elm);
-      }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
-        if (isComponent(node)) {
-          // @ts-ignore
-          if (node.onMounted) {
-            // @ts-ignore
-            node.onMounted();
-          }
-        }
-      }
-    },
+    // onMounted() {
+
+    // },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -187,8 +168,44 @@ export function View(props: ViewProps = {}, children?: any) {
           }
         }
       }
+      // console.log("[baseui]View - invoke onMounted", $elm);
+      if (onMounted) {
+        onMounted($elm);
+      }
+      for (let i = 0; i < _children.length; i += 1) {
+        const node = _children[i];
+        if (isComponent(node)) {
+          // @ts-ignore
+          if (node.onMounted) {
+            // @ts-ignore
+            node.onMounted();
+          }
+        }
+      }
       // $elm.className = class$.toString();
       return $elm;
     },
   };
 }
+
+export function isComponent(v: any): v is Component {
+  if (v === null || v === undefined) {
+    return false;
+  }
+  if (v.t && v.$elm) {
+    return true;
+  }
+  return false;
+}
+
+export interface Component {
+  t: string;
+  $elm: HTMLElement | Text;
+  render(): HTMLElement | Text;
+  onMounted?(el: HTMLElement | Text): void;
+  beforeUnmounted?(): void;
+  onUnmounted?(): void;
+}
+
+export type ViewChild = Component;
+export type ViewChildren = ViewChild[];

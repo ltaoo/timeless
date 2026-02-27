@@ -4,11 +4,7 @@ import { storage } from "./store/storage.js";
 const render = ($elm) => {
   const root_view$ = history.$view;
 
-  root_view$.onSubViewsChange(async (view$s) => {
-    renderViews(view$s);
-  });
-
-  const renderViews = async (view$s) => {
+  root_view$.onSubViewsChange((view$s) => {
     if (!view$s || view$s.length === 0) {
       console.log("[Render] No views to render");
       return;
@@ -16,18 +12,20 @@ const render = ($elm) => {
     const $segments = document.createDocumentFragment();
     for (let i = 0; i < view$s.length; i += 1) {
       const view$ = view$s[i];
-      const _Page = views[view$.name];
-      if (!_Page) {
-        console.warn("[Render] No page component found for:", view$.name);
-        return;
-      }
-      const $elm = renderPage(_Page, view$);
-      if ($elm) {
-        $segments.appendChild($elm);
-      }
+      const PageView = views[view$.name];
+      (() => {
+        if (!PageView) {
+          console.warn("[Render] No page component found for:", view$.name);
+          return;
+        }
+        const $elm = renderPage(PageView, view$);
+        if ($elm) {
+          $segments.appendChild($elm);
+        }
+      })();
     }
     $elm.appendChild($segments);
-  };
+  });
 
   const renderPage = (PageView, view) => {
     try {
