@@ -1,10 +1,5 @@
 import * as Headless from "@timeless/headless";
 import {
-  ref,
-  computed,
-  cn,
-  isRef,
-  isComponent,
   View,
   Match,
   DangerouslyInnerHTML,

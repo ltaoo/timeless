@@ -83,7 +83,7 @@ export function Dialog(props: any, children?: any) {
               },
               [Txt("\u2715")],
             ),
-            Show({ when: computed({ state }, (d: any) => !!d.state.footer) }, [
+            Show({ when: computed(state, (d) => !!d.footer) }, [
               View({ ...merge(tp(t?.footer)) }, [
                 View(
                   {

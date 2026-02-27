@@ -16,7 +16,7 @@ export function Select(props: any) {
     state.as(store.state);
   });
   if (unsub) events.push(unsub);
-  const options = computed({ state }, (d: any) => d.state.options);
+  const options = computed(state, (d) => d.options);
 
   let handleClickOutside: any = null;
 
@@ -74,11 +74,11 @@ export function Select(props: any) {
             },
             [
               Txt(
-                computed({ state }, (d: any) => {
-                  const opt = (d.state.options || []).find(
-                    (o: any) => o.value === d.state.value,
+                computed(state, (d) => {
+                  const opt = (d.options || []).find(
+                    (o: any) => o.value === d.value,
                   );
-                  return opt ? opt.label : d.state.placeholder || "Select...";
+                  return opt ? opt.label : d.placeholder || "Select...";
                 }),
               ),
             ],
@@ -91,9 +91,11 @@ export function Select(props: any) {
           View(
             {
               ...merge(tp(t?.dropdown)),
-              // style: computed({ pos }, (d: any) =>
-              //   `${merge(tp(t?.dropdown)).style || ""}position:fixed;z-index:999;left:${d.pos.x}px;top:${d.pos.y}px;min-width:${d.pos.width}px;`
-              // ),
+              style: computed(
+                pos,
+                (d) =>
+                  `${merge(tp(t?.dropdown)).style || ""}position:fixed;z-index:999;left:${d.x}px;top:${d.y}px;min-width:${d.width}px;`,
+              ),
             },
             [
               For({

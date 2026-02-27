@@ -1,15 +1,14 @@
-import { View } from "@timeless/headless";
-import { For } from "@timeless/headless";
-import { Show } from "@timeless/headless";
-import { computed } from "@timeless/headless";
-import { Txt } from "@timeless/headless";
+import { ref } from "@timeless/reactive";
+import { computed, View, For, Show, Txt } from "@timeless/headless";
 
 export function Steps(props: {
   current: number;
   items: any[];
   class?: string;
 }) {
-  const { current, items, class: cn } = props;
+  const { current: cc, items, class: cn } = props;
+
+  const current = ref(cc);
 
   return View({ class: ["w-full", cn].filter(Boolean).join(" ") }, [
     View({ class: "flex items-center justify-between" }, [

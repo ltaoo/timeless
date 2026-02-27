@@ -75,14 +75,11 @@ export function DropdownMenu(
                         SubMenuContent(
                           item.menu,
                           (() => {
-                            const subState = ref(item.menu.state);
+                            const subState = refobj(item.menu.state);
                             item.menu.onStateChange((v) => {
                               subState.as(v);
                             });
-                            const subItems = computed(
-                              { subState },
-                              (d) => d.subState.items,
-                            );
+                            const subItems = computed(subState, (d) => d.items);
                             return For({
                               ...merge(tp(t?.menu)),
                               each: subItems,

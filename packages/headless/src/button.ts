@@ -49,7 +49,7 @@ export function Button(
         type: "button",
         ...rest,
         class: computed(state, (d) => m(d).class),
-        // style: computed({ state }, (d: any) => m(d).style),
+        // style: computed(state, (d) => m(d).style),
         onClick() {
           store.click();
         },

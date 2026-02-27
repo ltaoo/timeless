@@ -16,7 +16,7 @@ export function Toast(props: any) {
       state.as(store.state);
     }),
   );
-  const texts = computed({ state }, (d: any) => d.state.texts || []);
+  const texts = computed(state, (d) => d.texts || []);
 
   return Portal(
     {
@@ -26,28 +26,22 @@ export function Toast(props: any) {
     },
     [
       Presence({ store: store.presence }, [
-        Show({ when: computed({ state }, (d: any) => !!d.state.mask) }, [
+        Show({ when: computed(state, (d) => !!d.mask) }, [
           View({ ...merge(tp(t?.mask)) }),
         ]),
         View(
           {
             class: computed(
-              { state },
-              (d: any) =>
-                merge(
-                  tp(t?.body, { enter: d.state.enter, exit: d.state.exit }),
-                  cn,
-                  st,
-                ).class || "",
+              state,
+              (d) =>
+                merge(tp(t?.body, { enter: d.enter, exit: d.exit }), cn, st)
+                  .class || "",
             ),
             style: computed(
-              { state },
-              (d: any) =>
-                merge(
-                  tp(t?.body, { enter: d.state.enter, exit: d.state.exit }),
-                  cn,
-                  st,
-                ).style || "",
+              state,
+              (d) =>
+                merge(tp(t?.body, { enter: d.enter, exit: d.exit }), cn, st)
+                  .style || "",
             ),
           },
           [

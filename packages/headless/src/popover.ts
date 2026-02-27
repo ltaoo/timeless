@@ -82,8 +82,8 @@ export function Popover(props: any, children?: any) {
         View(
           {
             ...merge(tp(t?.wrapper)),
-            style: computed({ state }, (d: any) => {
-              const s = d.state;
+            style: computed(state, (d) => {
+              const s = d;
               const base = merge(tp(t?.wrapper)).style || "";
               return [
                 base,
@@ -121,8 +121,8 @@ export function Popover(props: any, children?: any) {
           [
             View(
               {
-                class: computed({ state }, (d: any) => {
-                  const s = d.state;
+                class: computed(state, (d) => {
+                  const s = d;
                   return (
                     merge(
                       tp(t?.content, { enter: s.enter, exit: s.exit }),
@@ -131,8 +131,8 @@ export function Popover(props: any, children?: any) {
                     ).class || ""
                   );
                 }),
-                style: computed({ state }, (d: any) => {
-                  const s = d.state;
+                style: computed(state, (d) => {
+                  const s = d;
                   const tr = merge(
                     tp(t?.content, { enter: s.enter, exit: s.exit }),
                     cn,
@@ -147,7 +147,7 @@ export function Popover(props: any, children?: any) {
             ),
             View({
               ...merge(tp(t?.arrow)),
-              style: computed({ state }, (d: any) => {
+              style: computed(state, (d) => {
                 const s = d.state;
                 const base = merge(tp(t?.arrow)).style || "";
                 if (!s.arrowX && !s.arrowY) return base + "display:none;";

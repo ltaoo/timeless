@@ -114,10 +114,7 @@ export function SubMenuContent(store: any, children: any) {
   return Portal({}, [
     Popper({ store: store.popper }, [
       Presence({ store: store.presence }, [
-        Show(
-          { when: computed({ state: store.state }, (d: any) => d.state.open) },
-          children,
-        ),
+        Show({ when: computed(store.state, (d) => d.open) }, children),
       ]),
     ]),
   ]);

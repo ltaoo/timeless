@@ -244,7 +244,7 @@ export type Ref<T> = {
 
 export function computed<T = any>(
   deps: Ref<any> | Record<string, any>,
-  fn: (draft: Record<string, any>) => T,
+  fn: (draft: any) => T,
 ): Ref<T> {
   // const dep = global_refs.get(deps);
   // if (dep) {

@@ -26,9 +26,9 @@ export function Progress(props: any) {
       [
         View({
           ...merge(tp(t?.fill)),
-          style: computed({ state }, (d: any) => {
-            const v = d.state.value ?? 0;
-            const m = d.state.max ?? 100;
+          style: computed(state, (d) => {
+            const v = d.value ?? 0;
+            const m = d.max ?? 100;
             return `${merge(tp(t?.fill)).style || ""}width:${Math.min(Math.max((v / m) * 100, 0), 100)}%`;
           }),
         }),
@@ -39,8 +39,8 @@ export function Progress(props: any) {
   return View({ ...merge(tp(t?.root), cn, st) }, [
     View({
       ...merge(tp(t?.fill)),
-      style: computed({ value }, (d: any) => {
-        const v = isRef(value) ? d.value : value;
+      style: computed(value, (d) => {
+        const v = isRef(value) ? d : value;
         return `${merge(tp(t?.fill)).style || ""}width:${Math.min(Math.max((v / max) * 100, 0), 100)}%`;
       }),
     }),

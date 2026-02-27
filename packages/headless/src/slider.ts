@@ -3,20 +3,36 @@ import { View } from "./view.js";
 import { computed, isRef, ref } from "@timeless/reactive";
 
 export function Slider(props: any) {
-  const { store, min: _min = 0, max: _max = 100, step: _step = 1, disabled, onChange, theme: t, class: cn, style: st } = props;
+  const {
+    store,
+    min: _min = 0,
+    max: _max = 100,
+    step: _step = 1,
+    disabled,
+    onChange,
+    theme: t,
+    class: cn,
+    style: st,
+  } = props;
 
   const valueRef = store
     ? ref(store.state?.value ?? 0)
-    : (isRef(props.value) ? props.value : ref(props.value ?? _min));
+    : isRef(props.value)
+      ? props.value
+      : ref(props.value ?? _min);
 
   const events: any[] = [];
   if (store && store.onStateChange) {
-    events.push(store.onStateChange(() => { valueRef.value = store.state.value; }));
+    events.push(
+      store.onStateChange(() => {
+        valueRef.value = store.state.value;
+      }),
+    );
   }
 
-  const pct = computed({ value: valueRef }, (d: any) => {
-    const v = Math.min(Math.max(d.value, _min), _max);
-    return (_max - _min) === 0 ? 0 : ((v - _min) / (_max - _min)) * 100;
+  const pct = computed(valueRef, (d) => {
+    const v = Math.min(Math.max(d, _min), _max);
+    return _max - _min === 0 ? 0 : ((v - _min) / (_max - _min)) * 100;
   });
 
   const containerRef: { current: HTMLElement | null } = { current: null };
@@ -49,30 +65,43 @@ export function Slider(props: any) {
     };
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerup", onUp);
-    cleanupDrag = () => { document.removeEventListener("pointermove", onMove); document.removeEventListener("pointerup", onUp); };
+    cleanupDrag = () => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+    };
   };
 
-  return View({
-    ...merge(tp(t?.root, { disabled }), cn, st),
-    onMounted(elm: HTMLElement) {
-      containerRef.current = elm;
-      elm.addEventListener("pointerdown", onPointerDown);
+  return View(
+    {
+      ...merge(tp(t?.root, { disabled }), cn, st),
+      onMounted(elm: HTMLElement) {
+        containerRef.current = elm;
+        elm.addEventListener("pointerdown", onPointerDown);
+      },
+      onUnmounted() {
+        if (cleanupDrag) cleanupDrag();
+        for (const fn of events) if (typeof fn === "function") fn();
+        if (props.onUnmounted) props.onUnmounted();
+      },
     },
-    onUnmounted() {
-      if (cleanupDrag) cleanupDrag();
-      for (const fn of events) if (typeof fn === "function") fn();
-      if (props.onUnmounted) props.onUnmounted();
-    },
-  }, [
-    View({ ...merge(tp(t?.track)) }, [
+    [
+      View({ ...merge(tp(t?.track)) }, [
+        View({
+          ...merge(tp(t?.fill)),
+          style: computed(
+            pct,
+            (d) => `${merge(tp(t?.fill)).style || ""}width:${d}%`,
+          ),
+        }),
+      ]),
       View({
-        ...merge(tp(t?.fill)),
-        // style: computed({ pct }, (d: any) => `${merge(tp(t?.fill)).style || ""}width:${d.pct}%`),
+        ...merge(tp(t?.thumb)),
+        style: computed(
+          pct,
+          (d) =>
+            `${merge(tp(t?.thumb)).style || ""}left:${d}%;top:50%;transform:translate(-50%,-50%);`,
+        ),
       }),
-    ]),
-    View({
-      ...merge(tp(t?.thumb)),
-      // style: computed({ pct }, (d: any) => `${merge(tp(t?.thumb)).style || ""}left:${d.pct}%;top:50%;transform:translate(-50%,-50%);`),
-    }),
-  ]);
+    ],
+  );
 }

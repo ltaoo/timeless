@@ -29,7 +29,13 @@ export function Toggle(props: any) {
               st,
             ).class,
         ),
-        // style: computed({ state }, (d: any) => merge(tp(t?.root, { on: isOn(d), disabled: d.state.disabled }), cn, st).style),
+        // style: computed(state, (d) => {
+        //   return merge(
+        //     tp(t?.root, { on: isOn(d), disabled: d.disabled }),
+        //     cn,
+        //     st,
+        //   ).style;
+        // }),
         onClick() {
           store.toggle();
         },
