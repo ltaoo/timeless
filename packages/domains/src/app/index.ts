@@ -1,15 +1,13 @@
 /**
  * @file 应用，包含一些全局相关的事件、状态
  */
+import { JSONObject } from "@timeless/types";
 
 import { BaseDomain, Handler } from "@/base";
 import { StorageCore } from "@/storage/index";
 import { Result } from "@/result";
-import { JSONObject } from "@timeless/utils";
 
 import { ThemeTypes } from "./types";
-
-export * from "./types";
 
 export enum OrientationTypes {
   Horizontal = "horizontal",

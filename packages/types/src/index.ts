@@ -14,6 +14,7 @@ export type MutableRecord<U> = {
 export type MutableRecord2<U> = {
   [SubType in keyof U]: {
     type: SubType;
+    data: U[SubType];
   } & U[SubType];
 }[keyof U];
 export type Shift<T extends any[]> = ((...args: T) => void) extends (
@@ -42,3 +43,9 @@ export type JSONValue =
   | JSONArray
   | null;
 export type JSONObject = { [Key in string]?: JSONValue };
+
+/**
+ * type UserID = Brand<string, "UserID">;
+ */
+declare const __brand: unique symbol;
+export type Brand<T, B> = T & { readonly [__brand]: B };

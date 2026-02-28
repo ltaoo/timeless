@@ -253,8 +253,8 @@ export function For<T>(
       if (change.type === "insert") {
         methods._insert(change.index, change.items);
       }
-      if (change.type === "remove") {
-        methods._remove(change.index, change.count);
+      if (change.type === "delete") {
+        methods._remove(change.index, change.deleteCount);
       }
       if (change.type === "update") {
         methods._update(change.index, change.item);

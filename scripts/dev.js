@@ -6,8 +6,8 @@ const { spawn } = require("child_process");
 
 const rootDir = path.resolve(__dirname, "..");
 const packagesDir = path.join(rootDir, "packages");
-const playgroundDir = path.join(rootDir, "apps/web-vanilla");
-// const playgroundDir = path.join(rootDir, "apps/reactive-playground");
+// const playgroundDir = path.join(rootDir, "apps/web-vanilla");
+const playgroundDir = path.join(rootDir, "apps/reactive-playground");
 const serverRoot = playgroundDir;
 const targetDir = path.join(playgroundDir, "public");
 

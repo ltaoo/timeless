@@ -25,9 +25,6 @@ export function Presence(
     {
       ...rest,
       when: visible,
-      dataset: {
-        // "state": ,
-      },
       class: computed(state, (s) => {
         return [
           "presence",

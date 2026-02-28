@@ -1,4 +1,4 @@
-import { TabHeaderCore } from "@timeless/domains";
+import { ui } from "@timeless/domains";
 
 Component({
   externalClasses: ["tab-class", "item-class", "active-item-class"],
@@ -9,7 +9,12 @@ Component({
   properties: {
     _store: {
       type: null,
-      observer(store: TabHeaderCore<{ key: string; options: { id: string; text: string }[] }>) {
+      observer(
+        store: ui.TabHeaderCore<{
+          key: string;
+          options: { id: string; text: string }[];
+        }>,
+      ) {
         if (this.mounted) {
           return;
         }
@@ -79,7 +84,9 @@ Component({
     },
   },
   methods: {
-    query(selector: string): Promise<{ width: number; height: number; left: number }> {
+    query(
+      selector: string,
+    ): Promise<{ width: number; height: number; left: number }> {
       return new Promise((resolve) => {
         this.createSelectorQuery()
           .select(selector)
@@ -91,7 +98,10 @@ Component({
     },
     handleChange(e: { currentTarget: { dataset: { index: number } } }) {
       const { index } = e.currentTarget.dataset;
-      const store = this.data._store as TabHeaderCore<{ key: string; options: { id: string; text: string }[] }>;
+      const store = this.data._store as ui.TabHeaderCore<{
+        key: string;
+        options: { id: string; text: string }[];
+      }>;
       store.select(index);
     },
     /** 横向滚动到指定位置 */
@@ -107,7 +117,10 @@ Component({
       const client = await this.query(`#${id}`);
       const { width, height, left } = client;
       // console.log('[] - setContainer', client);
-      const store = this.data._store as TabHeaderCore<{ key: string; options: { id: string; text: string }[] }>;
+      const store = this.data._store as ui.TabHeaderCore<{
+        key: string;
+        options: { id: string; text: string }[];
+      }>;
       store.updateContainerClient({
         width,
         height,
@@ -121,7 +134,10 @@ Component({
       const client = await this.query(`#${id}`);
       console.log("[COMPONENT]ui/tabs - setTab", client);
       const { width, height, left } = client;
-      const store = this.data._store as TabHeaderCore<{ key: string; options: { id: string; text: string }[] }>;
+      const store = this.data._store as ui.TabHeaderCore<{
+        key: string;
+        options: { id: string; text: string }[];
+      }>;
       store.updateTabClient(index, {
         rect: () => ({
           width,

@@ -16,15 +16,31 @@ const S = {
 
 const t = {
   root: ({ variant = "primary", size = "md", loading, disabled }: any) => ({
-    style: S.base + (S[variant as keyof typeof S] || S.primary) + (S[size as keyof typeof S] || S.md) + (loading ? S.loading : "") + (disabled ? S.disabled : ""),
+    style:
+      S.base +
+      (S[variant as keyof typeof S] || S.primary) +
+      (S[size as keyof typeof S] || S.md) +
+      (loading ? S.loading : "") +
+      (disabled ? S.disabled : ""),
   }),
-  spinner: { style: "width:16px;height:16px;margin-right:8px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:weui-spin 1s linear infinite;" },
+  spinner: {
+    style:
+      "width:16px;height:16px;margin-right:8px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:weui-spin 1s linear infinite;",
+  },
 };
 
 export function Button(p: Parameters<typeof H>[0], c?: any) {
   const el = H({ ...p, theme: t }, c);
   const $ = el.$elm as HTMLElement;
-  $.addEventListener("mouseenter", () => { if (!p.disabled && !p.loading) $.style.opacity = "0.8"; });
-  $.addEventListener("mouseleave", () => { if (!p.disabled && !p.loading) $.style.opacity = ""; });
+  $.addEventListener("mouseenter", () => {
+    if (!p.disabled && !p.loading) {
+      $.style.opacity = "0.8";
+    }
+  });
+  $.addEventListener("mouseleave", () => {
+    if (!p.disabled && !p.loading) {
+      $.style.opacity = "";
+    }
+  });
   return el;
 }

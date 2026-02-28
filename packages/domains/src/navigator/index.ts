@@ -2,11 +2,11 @@
  * @file 仅负责「地址」的核心类
  * 包括 URL 解析、应用等
  */
+import { JSONObject } from "@timeless/types";
 import qs from "qs";
 import parse from "url-parse";
 
 import { BaseDomain, Handler } from "@/base";
-import { JSONObject } from "@timeless/utils";
 
 enum Events {
   PushState,

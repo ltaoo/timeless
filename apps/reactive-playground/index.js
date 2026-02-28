@@ -99,6 +99,14 @@ function render($container) {
       View(
         {
           onClick() {
+            commitList.delete(1);
+          },
+        },
+        [Txt("Delete Special commit")],
+      ),
+      View(
+        {
+          onClick() {
             commitList.get(2).set("id", Date.now());
           },
         },

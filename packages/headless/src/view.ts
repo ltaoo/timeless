@@ -15,18 +15,6 @@ export interface ViewProps {
   key?: any;
 }
 
-// export interface ViewResult {
-//   t: string;
-//   $elm: HTMLElement;
-//   class$: any;
-//   onMounted: () => void;
-//   beforeUnmounted: () => void;
-//   onUnmounted: () => void;
-//   append: (node: any) => void;
-//   setContent: (html: string) => void;
-//   render: () => HTMLElement;
-// }
-
 export function View(props: ViewProps = {}, children?: any) {
   const {
     type = "div",

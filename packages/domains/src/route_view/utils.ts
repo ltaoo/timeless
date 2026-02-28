@@ -1,4 +1,4 @@
-import { JSONObject } from "@timeless/utils";
+import { JSONObject } from "@timeless/types";
 import { query_stringify } from "@timeless/utils";
 
 export function buildUrl(

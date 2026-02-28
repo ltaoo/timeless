@@ -1,5 +1,5 @@
 import { UnpackedResult } from "@timeless/domains";
-import { Unpacked } from "@timeless/utils";
+import { Unpacked } from "@timeless/types";
 
 export type BizResponse<T> = {
   code: number;

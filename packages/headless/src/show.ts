@@ -1,18 +1,22 @@
-import { isRef } from "@timeless/reactive";
+import { isRef, Ref } from "@timeless/reactive";
 
-import { View, isComponent } from "./view.js";
+import { View, ViewChildren, ViewProps, isComponent } from "./view.js";
 
-export function Show(props: any, children?: any) {
+export function Show(
+  props: ViewProps & {
+    when: Ref<boolean>;
+    fallback?: ViewChildren;
+  },
+  children?: ViewChildren,
+) {
   const { when, fallback, ...rest } = props;
 
-  let _children = children;
   let _fallback = fallback;
   let _when_ref = when;
+  let _children = children;
   let _prev_condition: any = null;
-  let $parent = null;
 
   const view$ = View({ dataset: { show: "1" }, ...rest }, []);
-  const cache = {};
 
   _when_ref._subscribe({
     onChange() {
@@ -21,7 +25,7 @@ export function Show(props: any, children?: any) {
   });
   let _nodes: any[] = [];
   function render() {
-    const condition = isRef(when) ? when.value : when();
+    const condition = isRef(when) ? when.value : when;
     // console.log("[baseui]Show - refresh", condition, _prev_condition);
     if (condition === _prev_condition) {
       // 就是没有变化
@@ -116,15 +120,15 @@ export function Show(props: any, children?: any) {
       render();
       // view$.onMounted();
       if (props.onMounted) {
-        props.onMounted();
+        props.onMounted(view$.$elm);
       }
       return view$.$elm;
     },
-    beforeUnmounted() {
-      if (props.beforeUnmounted) {
-        props.beforeUnmounted();
-      }
-    },
+    // beforeUnmounted() {
+    //   if (props.beforeUnmounted) {
+    //     props.beforeUnmounted();
+    //   }
+    // },
     onUnmounted() {
       if (props.onUnmounted) {
         props.onUnmounted();
@@ -137,6 +141,8 @@ export function Show(props: any, children?: any) {
         }
       }
       view$.$elm.innerHTML = "";
+      _when_ref = when;
+      _prev_condition = null;
     },
   };
 }

@@ -1,7 +1,8 @@
+import { JSONObject } from "@timeless/types";
+import { query_stringify } from "@timeless/utils";
+
 import { BaseDomain, Handler } from "@/base";
 import { Result } from "@/result";
-import { JSONObject } from "@timeless/utils";
-import { query_stringify } from "@timeless/utils";
 
 enum Events {
   StateChange,

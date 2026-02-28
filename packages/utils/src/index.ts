@@ -1,16 +1,10 @@
 import dayjs from "dayjs";
 import "dayjs/locale/zh-cn";
 import relative_time from "dayjs/plugin/relativeTime";
-import { twMerge } from "tailwind-merge";
 import qs from "qs";
-
-// import { Result } from "@timeless/domains";
-// import { JSONObject } from "./types/index";
 
 import { cn as nzhcn } from "./nzh";
 
-export * from "./types";
-// export * from "./browser";
 export * from "./primitive";
 export * from "./download";
 export * from "./lodash/debounce";
@@ -19,27 +13,9 @@ export * from "./lodash/throttle";
 dayjs.extend(relative_time);
 dayjs.locale("zh-cn");
 
-export function cn(...inputs: any[]) {
-  return twMerge(inputs);
-}
-
 export function toFixed(v: any, n: number = 2) {
   return Number(Number(v).toFixed(n));
 }
-
-/** 解析一段 json 字符串 */
-// export function parseJSONStr<T extends any>(json: string) {
-//   try {
-//     if (json[0] !== "{" && json[0] !== "[") {
-//       return Result.Err("不是合法的 json");
-//     }
-//     const d = JSON.parse(json);
-//     return Result.Ok(d as T);
-//   } catch (err) {
-//     const e = err as Error;
-//     return Result.Err(e);
-//   }
-// }
 
 export function uidFactory() {
   let _uid = 0;

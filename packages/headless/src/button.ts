@@ -11,6 +11,8 @@ export function Button(
     theme?: any;
     variant?: "default";
     size?: "default" | "large" | "small";
+    disabled?: boolean;
+    loading?: boolean;
   },
   children?: any,
 ) {

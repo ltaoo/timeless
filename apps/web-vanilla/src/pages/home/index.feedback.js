@@ -6,7 +6,7 @@ export function FeedbackView() {
     footer: true,
   });
 
-  return View({ class: cn(["space-y-8"]) }, [
+  return View({ class: "space-y-8" }, [
     Section("Dialog", [
       Item("Default", [
         Button(
@@ -18,10 +18,8 @@ export function FeedbackView() {
           [Txt("Open Dialog")],
         ),
         Dialog({ store: dialog$ }, [
-          View({ class: cn(["text-sm text-zinc-500"]) }, [
-            Txt(
-              "This is a dialog content area. You can put anything here.",
-            ),
+          View({ class: "text-sm text-zinc-500" }, [
+            Txt("This is a dialog content area. You can put anything here."),
           ]),
         ]),
       ]),
@@ -30,13 +28,16 @@ export function FeedbackView() {
       Item("Toggle visibility", [
         (() => {
           const p$ = new Timeless.ui.PresenceCore({});
-          return View({ class: cn(["space-y-2"]) }, [
+          return View({ class: "space-y-2" }, [
             Button(
               {
                 size: "sm",
-                onClick() {
-                  p$.show();
-                },
+                variant: "outline",
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    p$.show();
+                  },
+                }),
               },
               [Txt("Show")],
             ),
@@ -44,18 +45,18 @@ export function FeedbackView() {
               {
                 size: "sm",
                 variant: "outline",
-                onClick() {
-                  p$.hide();
-                },
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    p$.hide();
+                  },
+                }),
               },
               [Txt("Hide")],
             ),
             Presence(
               {
                 store: p$,
-                class: cn([
-                  "p-3 rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm",
-                ]).toString(),
+                class: "p-3 rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm",
               },
               [Txt("I am visible!")],
             ),
@@ -67,13 +68,15 @@ export function FeedbackView() {
       Item("Default", [
         (() => {
           const toast$ = new Timeless.ui.ToastCore({});
-          return View({ class: cn(["flex gap-2"]) }, [
+          return View({ class: "flex gap-2" }, [
             Button(
               {
                 size: "sm",
-                onClick() {
-                  toast$.show({ texts: ["Operation successful!"] });
-                },
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    toast$.show({ texts: ["Operation successful!"] });
+                  },
+                }),
               },
               [Txt("Success")],
             ),
@@ -81,14 +84,16 @@ export function FeedbackView() {
               {
                 size: "sm",
                 variant: "outline",
-                onClick() {
-                  toast$.show({
-                    texts: ["Loading..."],
-                    icon: "loading",
-                    mask: true,
-                  });
-                  setTimeout(() => toast$.hide(), 2000);
-                },
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    toast$.show({
+                      texts: ["Loading..."],
+                      icon: "loading",
+                      mask: true,
+                    });
+                    setTimeout(() => toast$.hide(), 2000);
+                  },
+                }),
               },
               [Txt("Loading")],
             ),

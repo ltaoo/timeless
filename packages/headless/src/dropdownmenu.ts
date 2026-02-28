@@ -79,7 +79,7 @@ export function DropdownMenu(
                         animation: t?.subAnimation || t?.animation,
                       },
                       [
-                        SubMenuContent(
+                        listenMenuContent(
                           item.menu,
                           (() => {
                             return For({
@@ -89,7 +89,6 @@ export function DropdownMenu(
                                 return MenuItemView(sub, t);
                               },
                               onUnmounted() {
-                                console.log("12312312312312321");
                                 uncomputed(items);
                               },
                             });
@@ -117,28 +116,10 @@ export function DropdownMenu(
     });
   }
 
-  // const popperState = ref(store.menu.popper.state);
-  // events.push(
-  //   store.menu.popper.onStateChange(() => {
-  //     popperState.value = store.menu.popper.state;
-  //   }),
-  // );
-  // const presenceState = ref(store.menu.presence.state);
-  // events.push(
-  //   store.menu.presence.onStateChange(() => {
-  //     presenceState.value = store.menu.presence.state;
-  //   }),
-  // );
-  // const showWhen = computed({ presenceState }, (d) => {
-  //   const s = d.presenceState;
-  //   return s.mounted && (s.visible || s.enter || s.exit);
-  // });
-
   return View(
     {
       ...rest,
       onMounted($e) {
-        // console.log("[]menu onMounted", $e);
         if (rest.onMounted) {
           rest.onMounted($e);
         }
@@ -216,55 +197,12 @@ export function DropdownMenu(
         Popper({ store: store.menu.popper }, [
           Presence({ store: store.menu.presence }, [$menucontent]),
         ]),
-        // Show({ when: showWhen }, [
-        //   View(
-        //     {
-        //       style: computed({ popperState }, (d) => {
-        //         const s = d.popperState;
-        //         return [
-        //           "position:fixed;left:0;top:0;z-index:1000;",
-        //           `opacity:${s.isPlaced ? 1 : 0};`,
-        //           s.isPlaced
-        //             ? `transform:translate3d(${Math.round(s.x)}px,${Math.round(s.y)}px,0);`
-        //             : "transform:translate3d(0,0,0);",
-        //         ].join("");
-        //       }),
-        //       onMounted($e) {
-        //         store.menu.popper.setFloating({
-        //           $el: $e,
-        //           getRect() {
-        //             return $e.getBoundingClientRect();
-        //           },
-        //         });
-        //       },
-        //       onUnmounted() {
-        //         store.menu.popper.setFloating(null);
-        //       },
-        //     },
-        //     [
-        //       View(
-        //         {
-        //           class: computed({ presenceState }, (d) => {
-        //             const s = d.presenceState;
-        //             return [
-        //               s.enter ? t?.animation?.in || "" : "",
-        //               s.exit ? t?.animation?.out || "" : "",
-        //             ]
-        //               .filter(Boolean)
-        //               .join(" ");
-        //           }),
-        //         },
-        //         [$menucontent],
-        //       ),
-        //     ],
-        //   ),
-        // ]),
       ]),
     ],
   );
 }
 
-function SubMenuContent(menu: ui.MenuCore, child: Component) {
+function listenMenuContent(menu: ui.MenuCore, child: Component) {
   const $el = child.$elm;
   $el.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
