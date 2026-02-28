@@ -18,6 +18,7 @@ jobs:
         run: |
           mkdir -p dist
           cp apps/web-vanilla/index.html dist/
+          cp apps/web-vanilla/index.html dist/404.html
           cp -r apps/web-vanilla/public dist/
           cp -r apps/web-vanilla/src dist/
 
