@@ -1,6 +1,6 @@
 import { Section, Item } from "@/components/index.js";
 
-export function OverlayView() {
+export default function OverlayView() {
   return View({ class: "space-y-8" }, [
     Section("Dropdown Menu", [
       Item("Default", [
@@ -29,7 +29,17 @@ export function OverlayView() {
               ],
             }),
           },
-          [Button({ variant: "outline", onClick() {} }, [Txt("Open Menu")])],
+          [
+            Button(
+              {
+                variant: "outline",
+                onClick() {
+                  console.log("click Open Menu");
+                },
+              },
+              [Txt("Open Menu")],
+            ),
+          ],
         ),
       ]),
       Item("With Submenu", [

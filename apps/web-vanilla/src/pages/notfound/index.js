@@ -1,4 +1,4 @@
-export function NotFoundPageView(props) {
+export default function NotFoundPageView(props) {
   return View(
     {
       class: cn([

@@ -1,6 +1,6 @@
 import { Section, Item } from "@/components/index.js";
 
-export function FormView() {
+export default function FormView() {
   return View({ class: "space-y-8" }, [
     Section("Input", [
       Item("Default", [

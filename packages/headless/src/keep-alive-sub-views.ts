@@ -14,6 +14,7 @@ import {
 
 import { Component, View, ViewProps } from "./view.js";
 import { For } from "./for.js";
+import { AsyncView } from "./async-view.js";
 
 export function KeepAliveSubViews(
   props: ViewProps & {
@@ -22,7 +23,11 @@ export function KeepAliveSubViews(
     history: HistoryCore<any, any>;
     storage: StorageCore<any>;
     client: HttpClientCore;
-    views: Record<string, (props: {}) => Component>;
+    views: Record<
+      string,
+      | ((...args: any[]) => Component)
+      | (() => Promise<{ default: (...args: any[]) => Component }>)
+    >;
     NotFound?: (...args: any[]) => Component;
   },
 ) {
@@ -52,7 +57,7 @@ export function KeepAliveSubViews(
     // class: props.class,
     // style: "position: relative;",
     each: subviews,
-    render(subview: any) {
+    render(subview: any, idx) {
       const PageView = props.views[subview.name];
       if (!PageView) {
         return NotFoundPageView;
@@ -62,7 +67,7 @@ export function KeepAliveSubViews(
           class: props.subclass,
           style: computed(cur_subview, (d) => {
             return [
-              "width: 100%; height: 100%;",
+              `z-index: ${idx + 1}; width: 100%; height: 100%;`,
               d && d.name === subview.name
                 ? "display: block;"
                 : "display: none;",
@@ -74,7 +79,7 @@ export function KeepAliveSubViews(
           },
         },
         [
-          PageView({
+          AsyncView(PageView, {
             ...props,
             view: subview,
             onMounted() {

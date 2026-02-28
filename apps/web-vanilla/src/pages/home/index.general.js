@@ -1,6 +1,6 @@
 import { Section, Item } from "@/components/index.js";
 
-export function GeneralView() {
+export default function GeneralView() {
   return View({ class: cn(["space-y-8"]) }, [
     Section("Button", [
       Item("Variants", [

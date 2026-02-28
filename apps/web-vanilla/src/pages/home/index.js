@@ -1,15 +1,10 @@
 import { defaultRouteName } from "@/store/routes.js";
 
-export function HomePageView(props) {
-  // Shared state for interactive demos
-  // const activeCategory = ref("general");
-  // const curView = ref(props.view.curSubView);
+export default function HomePageView(props) {
   const curSubView = ref(props.view.curView);
   props.view.onCurViewChange((view) => {
-    // console.log("[LAYOUT]handle cur view change", view.name);
     curSubView.as(view);
   });
-  console.log(props.history);
   const sidemenu$ = Timeless.RouteMenusModel({
     route: props.view.curView ? props.view.curView.name : defaultRouteName,
     history: props.history,
@@ -64,7 +59,6 @@ export function HomePageView(props) {
     View({ class: "relative overflow-y-auto flex-1 w-0 h-full p-6" }, [
       KeepAliveSubViews({
         ...props,
-        // class: "relative",
       }),
     ]),
   ]);

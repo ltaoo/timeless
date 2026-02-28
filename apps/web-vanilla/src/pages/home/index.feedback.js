@@ -1,6 +1,6 @@
 import { Section, Item } from "@/components/index.js";
 
-export function FeedbackView() {
+export default function FeedbackView() {
   const dialog$ = new Timeless.ui.DialogCore({
     title: "Dialog Title",
     footer: true,

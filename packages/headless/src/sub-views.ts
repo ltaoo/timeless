@@ -15,6 +15,7 @@ import {
 import { Component, View, ViewProps } from "./view.js";
 import { For } from "./for.js";
 import { Show } from "./show.js";
+import { AsyncView } from "./async-view.js";
 
 export function RouteSubViews(
   props: ViewProps & {
@@ -23,7 +24,11 @@ export function RouteSubViews(
     history: HistoryCore<any, any>;
     storage: StorageCore<any>;
     client: HttpClientCore;
-    views: Record<string, (props: {}) => Component>;
+    views: Record<
+      string,
+      | ((...args: any[]) => Component)
+      | (() => Promise<{ default: (...args: any[]) => Component }>)
+    >;
     NotFound?: (...args: any[]) => Component;
   },
 ) {
@@ -60,7 +65,6 @@ export function RouteSubViews(
       }
       return Show(
         {
-          class: props.subclass,
           style: `z-index: ${idx + 1}; position: absolute; width: 100%; height: 100%;"`,
           dataset: {
             name: subview.name,
@@ -69,7 +73,7 @@ export function RouteSubViews(
           when: computed(cur_subview, (d) => d && d.name === subview.name),
         },
         [
-          PageView({
+          AsyncView(PageView, {
             ...props,
             view: subview,
             onMounted() {

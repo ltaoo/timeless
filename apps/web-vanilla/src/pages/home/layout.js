@@ -1,8 +1,8 @@
 /** 首页布局 */
-import { NotFoundPageView } from "@/pages/notfound/index.js";
 import { defaultRouteName } from "@/store/routes.js";
+import NotFoundPageView from "@/pages/notfound/index.js";
 
-export function HomeLayoutView(props) {
+export default function HomeLayoutView(props) {
   const view = props.view;
   const subViews = refarr([]);
   const curSubView = refobj(view.curView);
@@ -191,7 +191,6 @@ export function HomeLayoutView(props) {
     View({ class: "relative overflow-y-auto flex-1 w-0 h-full" }, [
       KeepAliveSubViews({
         ...props,
-        view: props.view,
         NotFound: NotFoundPageView,
       }),
     ]),
