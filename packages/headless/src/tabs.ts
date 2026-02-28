@@ -40,18 +40,18 @@ export function Tabs(
             return View(
               {
                 type: "button",
-                class: computed(
-                  state,
-                  (d) =>
+                class: computed(state, (d) => {
+                  return (
                     merge(tp(t?.tab, { active: d.curId === item.value }))
-                      .class || "",
-                ),
-                style: computed(
-                  state,
-                  (d) =>
+                      .class || ""
+                  );
+                }),
+                style: computed(state, (d) => {
+                  return (
                     merge(tp(t?.tab, { active: d.curId === item.value }))
-                      .style || "",
-                ),
+                      .style || ""
+                  );
+                }),
                 onMounted($el) {
                   store.updateTabClient(idx, {
                     rect() {
@@ -66,24 +66,24 @@ export function Tabs(
               [
                 Txt(item.label),
                 View({
-                  class: computed(
-                    state,
-                    (d) =>
+                  class: computed(state, (d) => {
+                    return (
                       merge(
                         tp(t?.indicator, {
                           active: d.curId === item.value,
                         }),
-                      ).class || "",
-                  ),
-                  style: computed(
-                    state,
-                    (d) =>
+                      ).class || ""
+                    );
+                  }),
+                  style: computed(state, (d) => {
+                    return (
                       merge(
                         tp(t?.indicator, {
                           active: d.curId === item.value,
                         }),
-                      ).style || "",
-                  ),
+                      ).style || ""
+                    );
+                  }),
                 }),
               ],
             );

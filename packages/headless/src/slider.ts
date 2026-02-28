@@ -1,34 +1,48 @@
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
 import { computed, isRef, ref } from "@timeless/reactive";
+import { ui } from "@timeless/domains";
 
-export function Slider(props: any) {
+import { tp, merge } from "./theme.js";
+import { View, ViewProps } from "./view.js";
+
+export function Slider(
+  props: ViewProps & {
+    value?: number;
+    min?: number;
+    max?: number;
+    step?: number;
+    disabled?: boolean;
+    theme?: any;
+    store?: any;
+    onChange?: (v: number) => void;
+  },
+) {
   const {
-    store,
+    // store,
     min: _min = 0,
     max: _max = 100,
     step: _step = 1,
     disabled,
-    onChange,
     theme: t,
     class: cn,
     style: st,
+    onChange,
   } = props;
 
-  const valueRef = store
-    ? ref(store.state?.value ?? 0)
-    : isRef(props.value)
-      ? props.value
-      : ref(props.value ?? _min);
+  const valueRef = ref(props.value ?? _min);
+  // const valueRef = store
+  //   ? ref(store.state?.value ?? 0)
+  //   : isRef(props.value)
+  //     ? props.value
+  //     : ref(props.value ?? _min);
 
   const events: any[] = [];
-  if (store && store.onStateChange) {
-    events.push(
-      store.onStateChange(() => {
-        valueRef.value = store.state.value;
-      }),
-    );
-  }
+  // if (store && store.onStateChange) {
+  //   events.push(
+  //     store.onStateChange(() => {
+  //       valueRef.value = store.state.value;
+  //     }),
+  //   );
+  // }
 
   const pct = computed(valueRef, (d) => {
     const v = Math.min(Math.max(d, _min), _max);
@@ -45,9 +59,14 @@ export function Slider(props: any) {
     if (_step > 0) newVal = _min + Math.round((newVal - _min) / _step) * _step;
     newVal = Math.max(_min, Math.min(newVal, _max));
     if (newVal !== valueRef.value) {
-      if (store && store.setValue) store.setValue(newVal);
-      else valueRef.value = newVal;
-      if (onChange) onChange(newVal);
+      // if (store && store.setValue) {
+      //   store.setValue(newVal);
+      // } else {
+      // }
+      valueRef.as(newVal);
+      if (onChange) {
+        onChange(newVal);
+      }
     }
   };
 
@@ -88,19 +107,16 @@ export function Slider(props: any) {
       View({ ...merge(tp(t?.track)) }, [
         View({
           ...merge(tp(t?.fill)),
-          style: computed(
-            pct,
-            (d) => `${merge(tp(t?.fill)).style || ""}width:${d}%`,
-          ),
+          style: computed(pct, (d) => {
+            return `${merge(tp(t?.fill)).style || ""}width:${d}%`;
+          }),
         }),
       ]),
       View({
         ...merge(tp(t?.thumb)),
-        style: computed(
-          pct,
-          (d) =>
-            `${merge(tp(t?.thumb)).style || ""}left:${d}%;top:50%;transform:translate(-50%,-50%);`,
-        ),
+        style: computed(pct, (d) => {
+          return `${merge(tp(t?.thumb)).style || ""}left:${d}%;top:50%;transform:translate(-50%,-50%);`;
+        }),
       }),
     ],
   );

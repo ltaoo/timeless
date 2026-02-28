@@ -31,9 +31,9 @@ const render = ($elm) => {
     try {
       const page$ = PageView({
         app,
-        view: view,
-        history: history,
-        views: views,
+        view,
+        history,
+        views,
         storage,
         client,
       });

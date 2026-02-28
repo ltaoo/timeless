@@ -259,6 +259,8 @@ export function OverlayView() {
             DropdownMenu(
               {
                 store: new Timeless.ui.DropdownMenuCore({
+                  side: "right",
+                  align: "start",
                   items: [
                     new Timeless.ui.MenuItemCore({
                       label: "Edit",

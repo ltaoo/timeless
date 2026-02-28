@@ -36,41 +36,37 @@ export function Checkbox(props: ViewProps & { store?: any; theme?: any }) {
     [
       View(
         {
-          class: computed(
-            { state },
-            (d: any) =>
+          class: computed(state, (d) => {
+            return (
               merge(
                 tp(t?.box, {
-                  checked: d.state.checked,
-                  disabled: d.state.disabled,
+                  checked: d.checked,
+                  disabled: d.disabled,
                 }),
-              ).class || "",
-          ),
-          style: computed(
-            { state },
-            (d: any) =>
+              ).class || ""
+            );
+          }),
+          style: computed(state, (d) => {
+            return (
               merge(
                 tp(t?.box, {
-                  checked: d.state.checked,
-                  disabled: d.state.disabled,
+                  checked: d.checked,
+                  disabled: d.disabled,
                 }),
-              ).style || "",
-          ),
+              ).style || ""
+            );
+          }),
         },
         [
           View(
             {
               type: "span",
-              class: computed(
-                { state },
-                (d: any) =>
-                  merge(tp(t?.check, { checked: d.state.checked })).class || "",
-              ),
-              style: computed(
-                { state },
-                (d: any) =>
-                  merge(tp(t?.check, { checked: d.state.checked })).style || "",
-              ),
+              class: computed(state, (d) => {
+                return merge(tp(t?.check, { checked: d.checked })).class || "";
+              }),
+              style: computed(state, (d) => {
+                return merge(tp(t?.check, { checked: d.checked })).style || "";
+              }),
             },
             [
               {

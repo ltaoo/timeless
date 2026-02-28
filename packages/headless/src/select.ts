@@ -1,10 +1,12 @@
+import { ref, computed } from "@timeless/reactive";
+import { ChevronRightOutlined } from "@timeless/icons";
+
 import { tp, merge } from "./theme.js";
 import { View } from "./view.js";
 import { Txt } from "./text.js";
 import { For } from "./for.js";
 import { Show } from "./show.js";
 import { Portal } from "./portal.js";
-import { ref, computed } from "@timeless/reactive";
 
 export function Select(props: any) {
   const { store, theme: t, class: cn, style: st, ...rest } = props;
@@ -59,18 +61,18 @@ export function Select(props: any) {
           View(
             {
               type: "span",
-              class: computed(
-                { state },
-                (d: any) =>
-                  merge(tp(t?.valueText, { hasValue: d.state.value != null }))
-                    .class || "",
-              ),
-              style: computed(
-                { state },
-                (d: any) =>
-                  merge(tp(t?.valueText, { hasValue: d.state.value != null }))
-                    .style || "",
-              ),
+              class: computed(state, (d) => {
+                return (
+                  merge(tp(t?.valueText, { hasValue: d.value != null }))
+                    .class || ""
+                );
+              }),
+              style: computed(state, (d) => {
+                return (
+                  merge(tp(t?.valueText, { hasValue: d.value != null }))
+                    .style || ""
+                );
+              }),
             },
             [
               Txt(
@@ -83,7 +85,7 @@ export function Select(props: any) {
               ),
             ],
           ),
-          View({ ...merge(tp(t?.arrow)) }, [Txt("\u25BE")]),
+          View({ ...merge(tp(t?.arrow)) }, [ChevronRightOutlined]),
         ],
       ),
       Portal({}, [
@@ -91,11 +93,9 @@ export function Select(props: any) {
           View(
             {
               ...merge(tp(t?.dropdown)),
-              style: computed(
-                pos,
-                (d) =>
-                  `${merge(tp(t?.dropdown)).style || ""}position:fixed;z-index:999;left:${d.x}px;top:${d.y}px;min-width:${d.width}px;`,
-              ),
+              style: computed(pos, (d) => {
+                return `${merge(tp(t?.dropdown)).style || ""}position:fixed;z-index:999;left:${d.x}px;top:${d.y}px;min-width:${d.width}px;`;
+              }),
             },
             [
               For({
@@ -104,18 +104,18 @@ export function Select(props: any) {
                 render(opt: any) {
                   return View(
                     {
-                      class: computed(
-                        { state },
-                        () =>
+                      class: computed(state, () => {
+                        return (
                           merge(tp(t?.option, { selected: opt.selected }))
-                            .class || "",
-                      ),
-                      style: computed(
-                        { state },
-                        () =>
+                            .class || ""
+                        );
+                      }),
+                      style: computed(state, () => {
+                        return (
                           merge(tp(t?.option, { selected: opt.selected }))
-                            .style || "",
-                      ),
+                            .style || ""
+                        );
+                      }),
                       onClick() {
                         store.select(opt.value);
                         open.as(false);

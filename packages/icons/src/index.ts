@@ -23,3 +23,4 @@ export * from './square-arrow-down';
 export * from './trash-2';
 export * from './trash';
 export * from './undo-2';
+export * from './x';

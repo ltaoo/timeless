@@ -26,44 +26,36 @@ export function Dialog(props: any, children?: any) {
     [
       Presence({ store: store.presence || store }, [
         View({
-          class: computed(
-            { state },
-            (d: any) =>
-              merge(
-                tp(t?.overlay, { enter: d.state.enter, exit: d.state.exit }),
-              ).class || "",
-          ),
-          style: computed(
-            { state },
-            (d: any) =>
-              merge(
-                tp(t?.overlay, { enter: d.state.enter, exit: d.state.exit }),
-              ).style || "",
-          ),
+          class: computed(state, (d) => {
+            return (
+              merge(tp(t?.overlay, { enter: d.enter, exit: d.exit })).class ||
+              ""
+            );
+          }),
+          style: computed(state, (d) => {
+            return (
+              merge(tp(t?.overlay, { enter: d.enter, exit: d.exit })).style ||
+              ""
+            );
+          }),
           onClick() {
             store.hide();
           },
         }),
         View(
           {
-            class: computed(
-              { state },
-              (d: any) =>
-                merge(
-                  tp(t?.content, { enter: d.state.enter, exit: d.state.exit }),
-                  cn,
-                  st,
-                ).class || "",
-            ),
-            style: computed(
-              { state },
-              (d: any) =>
-                merge(
-                  tp(t?.content, { enter: d.state.enter, exit: d.state.exit }),
-                  cn,
-                  st,
-                ).style || "",
-            ),
+            class: computed(state, (d) => {
+              return (
+                merge(tp(t?.content, { enter: d.enter, exit: d.exit }), cn, st)
+                  .class || ""
+              );
+            }),
+            style: computed(state, (d) => {
+              return (
+                merge(tp(t?.content, { enter: d.enter, exit: d.exit }), cn, st)
+                  .style || ""
+              );
+            }),
           },
           [
             Show({ when: computed(state, (d) => !!d.title) }, [

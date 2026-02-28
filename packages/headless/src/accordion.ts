@@ -32,16 +32,12 @@ export function Accordion(props: any) {
             Txt(item.title),
             View(
               {
-                class: computed(
-                  { isOpen },
-                  (d: any) =>
-                    merge(tp(t?.chevron, { isOpen: d.isOpen })).class || "",
-                ),
-                style: computed(
-                  { isOpen },
-                  (d: any) =>
-                    merge(tp(t?.chevron, { isOpen: d.isOpen })).style || "",
-                ),
+                class: computed(isOpen, (d) => {
+                  return merge(tp(t?.chevron, { isOpen: d })).class || "";
+                }),
+                style: computed(isOpen, (d) => {
+                  return merge(tp(t?.chevron, { isOpen: d })).style || "";
+                }),
               },
               [Txt("\u25BE")],
             ),
@@ -49,16 +45,12 @@ export function Accordion(props: any) {
         ),
         View(
           {
-            class: computed(
-              { isOpen },
-              (d: any) =>
-                merge(tp(t?.content, { isOpen: d.isOpen })).class || "",
-            ),
-            style: computed(
-              { isOpen },
-              (d: any) =>
-                merge(tp(t?.content, { isOpen: d.isOpen })).style || "",
-            ),
+            class: computed(isOpen, (d) => {
+              return merge(tp(t?.content, { isOpen: d })).class || "";
+            }),
+            style: computed(isOpen, (d) => {
+              return merge(tp(t?.content, { isOpen: d })).style || "";
+            }),
           },
           [typeof item.content === "string" ? Txt(item.content) : item.content],
         ),

@@ -1,92 +1,61 @@
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
 import { ref, computed } from "@timeless/reactive";
+import { ui } from "@timeless/domains";
 
-export function Toggle(props: any) {
-  const { store, value, disabled, theme: t, class: cn, style: st } = props;
+import { tp, merge } from "./theme.js";
+import { View, ViewProps } from "./view.js";
 
-  const isOn = (d: any) => (store ? d.state.checked || d.state.value : d.state);
+export function Toggle(
+  props: ViewProps & {
+    store: ui.ToggleCore;
+    disabled?: boolean;
+    theme?: any;
+  },
+) {
+  const { store, disabled, theme: t, class: cn, style: st } = props;
 
-  if (store) {
-    const state = ref(store.state);
-    const events: any[] = [];
-    if (store.onStateChange)
-      events.push(
-        store.onStateChange(() => {
-          state.as(store.state);
-        }),
-      );
-
-    return View(
-      {
-        type: "button",
-        class: computed(
-          { state },
-          (d: any) =>
-            merge(
-              tp(t?.root, { on: isOn(d), disabled: d.state.disabled }),
-              cn,
-              st,
-            ).class,
-        ),
-        // style: computed(state, (d) => {
-        //   return merge(
-        //     tp(t?.root, { on: isOn(d), disabled: d.disabled }),
-        //     cn,
-        //     st,
-        //   ).style;
-        // }),
-        onClick() {
-          store.toggle();
-        },
-        onUnmounted() {
-          for (const fn of events) if (typeof fn === "function") fn();
-          if (props.onUnmounted) props.onUnmounted();
-        },
-      },
-      [
-        View({
-          type: "span",
-          class: computed(
-            { state },
-            (d: any) => merge(tp(t?.thumb, { on: isOn(d) })).class || "",
-          ),
-          style: computed(
-            { state },
-            (d: any) => merge(tp(t?.thumb, { on: isOn(d) })).style || "",
-          ),
-        }),
-      ],
+  const state = ref(store.state);
+  const events: any[] = [];
+  if (store.onStateChange)
+    events.push(
+      store.onStateChange(() => {
+        state.as(store.state);
+      }),
     );
-  }
 
-  const stateRef = value;
   return View(
     {
       type: "button",
-      class: computed(
-        { state: stateRef },
-        (d: any) => merge(tp(t?.root, { on: d.state, disabled }), cn, st).class,
-      ),
-      // style: computed(
-      //   { state: stateRef },
-      //   (d: any) => merge(tp(t?.root, { on: d.state, disabled }), cn, st).style,
-      // ),
+      class: computed(state, (d) => {
+        return merge(
+          tp(t?.root, { on: d.checked || d.value, disabled: d.disabled }),
+          cn,
+          st,
+        ).class;
+      }),
+      // style: computed(state, (d) => {
+      //   return merge(
+      //     tp(t?.root, { on: isOn(d), disabled: d.disabled }),
+      //     cn,
+      //     st,
+      //   ).style;
+      // }),
       onClick() {
-        if (!disabled) stateRef.value = !stateRef.value;
+        store.toggle();
+      },
+      onUnmounted() {
+        for (const fn of events) if (typeof fn === "function") fn();
+        if (props.onUnmounted) props.onUnmounted();
       },
     },
     [
       View({
         type: "span",
-        class: computed(
-          { state: stateRef },
-          (d: any) => merge(tp(t?.thumb, { on: d.state })).class || "",
-        ),
-        style: computed(
-          { state: stateRef },
-          (d: any) => merge(tp(t?.thumb, { on: d.state })).style || "",
-        ),
+        class: computed(state, (d) => {
+          return merge(tp(t?.thumb, { on: d.checked || d.value })).class || "";
+        }),
+        style: computed(state, (d) => {
+          return merge(tp(t?.thumb, { on: d.checked || d.value })).style || "";
+        }),
       }),
     ],
   );

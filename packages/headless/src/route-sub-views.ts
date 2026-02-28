@@ -9,7 +9,7 @@ export function RouteSubViews(
     view: RouteViewCore;
     history: HistoryCore<any, any>;
     views: Record<string, (props: {}) => Component>;
-    NotFound?: Component;
+    NotFound?: (...args: any[]) => Component;
   },
 ) {
   const subViews = refarr(props.view.subViews);
@@ -24,7 +24,7 @@ export function RouteSubViews(
 
   const NotFoundPageView = (() => {
     if (props.NotFound) {
-      return props.NotFound;
+      return props.NotFound();
     }
     return View({ class: ref("not-found") }, ["Not Found"]);
   })();
@@ -34,43 +34,25 @@ export function RouteSubViews(
   return For({
     class: props.class,
     each: subViews,
-    onMounted() {
-      // console.log("router sub views mounted", nodes);
-      // if (props.onMounted) {
-      //   props.onMounted();
-      // }
-      // for (const node of nodes) {
-      //   if (typeof node.onMounted === "function") {
-      //     node.onMounted();
-      //   }
-      // }
-    },
     render(subView: any) {
       const PageView = props.views[subView.name];
       if (!PageView) {
-        return null;
+        return NotFoundPageView;
       }
-      const displayed = computed(curSubView, (d) => {
-        return [
-          "page__wrap absolute inset-0",
-          d && d.name === subView.name ? "display" : "hidden",
-        ].join(" ");
-      });
-
       return View(
         {
-          class: displayed,
-          // style: computed(curSubView, (draft) => {
-          //   return draft && draft.name === subView.name
-          //     ? "display: block;"
-          //     : "display: none;";
-          // }),
+          style: computed(curSubView, (draft) => {
+            return [
+              draft && draft.name === subView.name
+                ? "display: block;"
+                : "display: none;",
+            ].join("");
+          }),
         },
         [
           PageView({
+            ...props,
             view: subView,
-            views: props.views,
-            history: props.history,
             onMounted() {
               nodes.push(this);
             },

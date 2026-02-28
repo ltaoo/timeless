@@ -58,18 +58,9 @@ export function HomePageView(props) {
         }),
       ],
     ),
-    // Content
-    View(
-      {
-        class: "relative flex-1 w-0 overflow-y-auto p-6",
-      },
-      [
-        RouteSubViews({
-          view: props.view,
-          history: props.history,
-          views: props.views,
-        }),
-      ],
-    ),
+    RouteSubViews({
+      ...props,
+      class: "relative overflow-y-auto flex-1 w-0 h-full p-6",
+    }),
   ]);
 }
