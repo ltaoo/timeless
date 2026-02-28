@@ -175,12 +175,7 @@ export function OverlayView() {
       ]),
       Item("Context Menu", [
         (() => {
-          const ctxStore = new Timeless.ui.DropdownMenuCore({
-            trigger: "manual",
-            side: "bottom",
-            align: "start",
-            offsetX: 4,
-            offsetY: 4,
+          const menu$ = new Timeless.ui.ContextMenuCore({
             items: [
               new Timeless.ui.MenuItemCore({
                 label: "Cut",
@@ -208,26 +203,15 @@ export function OverlayView() {
               }),
             ],
           });
-          return DropdownMenu(
-            {
-              store: ctxStore,
-              onMounted($e) {
-                $e.addEventListener("contextmenu", (e) => {
-                  e.preventDefault();
-                  ctxStore.toggle({ x: e.clientX, y: e.clientY });
-                });
+          return ContextMenu({ store: menu$ }, [
+            View(
+              {
+                class:
+                  "flex items-center justify-center w-[300px] h-[150px] rounded-md border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-sm text-zinc-500 select-none",
               },
-            },
-            [
-              View(
-                {
-                  class:
-                    "flex items-center justify-center w-[300px] h-[150px] rounded-md border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-sm text-zinc-500 select-none",
-                },
-                [Txt("Right click here")],
-              ),
-            ],
-          );
+              [Txt("Right click here")],
+            ),
+          ]);
         })(),
       ]),
       Item("Near Page Bottom", [

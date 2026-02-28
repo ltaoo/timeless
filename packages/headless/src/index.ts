@@ -14,7 +14,7 @@ export * from "./portal";
 export * from "./presence";
 export * from "./popper";
 
-export * from "./routesubviews";
+export * from "./route-sub-views";
 
 export * from "./flex";
 export * from "./head";
@@ -31,7 +31,8 @@ export * from "./dialog";
 export * from "./input";
 export * from "./label";
 export * from "./menu";
-export * from "./dropdownmenu";
+export * from "./dropdown-menu";
+export * from "./context-menu";
 export * from "./popover";
 export * from "./progress";
 export * from "./select";

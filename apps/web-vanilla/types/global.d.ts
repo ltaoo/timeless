@@ -65,6 +65,7 @@ declare const MenuItem: typeof import("@timeless/shadcnui").MenuItem;
 declare const MenuLabel: typeof import("@timeless/shadcnui").MenuLabel;
 declare const MenuSeparator: typeof import("@timeless/shadcnui").MenuSeparator;
 declare const DropdownMenu: typeof import("@timeless/shadcnui").DropdownMenu;
+declare const ContextMenu: typeof import("@timeless/shadcnui").ContextMenu;
 
 declare const Tabs: typeof import("@timeless/shadcnui").Tabs;
 declare const Steps: typeof import("@timeless/shadcnui").Steps;

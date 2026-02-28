@@ -42,6 +42,7 @@ export default [
         Tabs: "readonly",
         Button: "readonly",
         DropdownMenu: "readonly",
+        ContextMenu: "readonly",
         Progress: "readonly",
         // form
         Input: "readonly",

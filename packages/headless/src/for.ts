@@ -68,7 +68,9 @@ export function For<T>(
             _children[index + i] = res;
             const $sub = res.render();
             _$elms[index + i] = $sub;
-            $fragment.appendChild($sub);
+            if ($sub) {
+              $fragment.appendChild($sub);
+            }
           } else {
             _children[index + i] = null;
           }
@@ -206,9 +208,9 @@ export function For<T>(
         }
       }
 
-      console.log("1. removed_nodes", removed_nodes);
-      console.log("2. added_nodes", added_nodes);
-      console.log("3. updated_nodes", updated_nodes);
+      // console.log("1. removed_nodes", removed_nodes);
+      // console.log("2. added_nodes", added_nodes);
+      // console.log("3. updated_nodes", updated_nodes);
       // 4. Patch Phase: Apply to DOM
 
       // 4.1 Remove nodes
@@ -292,7 +294,9 @@ export function For<T>(
             _children[i] = res;
             const $sub = res.render();
             _$elms[i] = $sub;
-            $fragment.appendChild($sub);
+            if ($sub) {
+              $fragment.appendChild($sub);
+            }
           } else {
             _children[i] = null;
           }

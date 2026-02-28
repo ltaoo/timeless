@@ -25,6 +25,7 @@ import {
   MenuItem as HItem,
   MenuLabel as HLabel,
   MenuSeparator as HSep,
+  ContextMenu as HContextMenu,
 } from "@timeless/headless";
 
 const t = {
@@ -61,4 +62,7 @@ export function MenuSeparator(p: any) {
 }
 export function DropdownMenu(p: any, c?: any) {
   return HDropdownMenu({ ...p, theme: t }, c);
+}
+export function ContextMenu(p: any, c?: any) {
+  return HContextMenu({ ...p, theme: t }, c);
 }

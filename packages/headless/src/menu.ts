@@ -1,5 +1,6 @@
 import { ref, refobj, computed } from "@timeless/reactive";
 import { ui } from "@timeless/domains";
+import { ChevronRightOutlined } from "@timeless/icons";
 
 import { tp, merge } from "./theme.js";
 import { Component, View, ViewChildren } from "./view.js";
@@ -9,19 +10,13 @@ import { Show } from "./show.js";
 import { Portal } from "./portal.js";
 import { Presence } from "./presence.js";
 import { Popper } from "./popper.js";
-import { DangerouslyInnerHTML } from "./html.js";
 
-const chevronRightSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>`;
-function ChevronRightOutlined() {
-  return DangerouslyInnerHTML(chevronRightSvg);
-}
-
-export function Menu(props: any, children?: any) {
+export function Menu(props: any, children?: ViewChildren) {
   const { theme: t, class: cn, style: st, ...rest } = props;
   return View({ ...rest, ...merge(tp(t?.menu), cn, st) }, children);
 }
 
-export function MenuItem(props: any, children?: any) {
+export function MenuItem(props: any, children?: ViewChildren) {
   const { store, theme: t, class: cn, style: st, ...rest } = props;
   const view$ = View(
     {

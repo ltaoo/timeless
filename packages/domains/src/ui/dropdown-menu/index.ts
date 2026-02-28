@@ -121,9 +121,16 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
   toggle(
     position?: Partial<{ x: number; y: number; width: number; height: number }>,
   ) {
-    console.log("[DEBUG-DROPDOWN] toggle", { position, offsetX: this.offsetX, offsetY: this.offsetY, popperRef: !!this.menu.popper.reference, popperHas$el: !!(this.menu.popper.reference as any)?.$el, popperFloating: !!this.menu.popper.floating });
+    console.log("[DEBUG-DROPDOWN] toggle", {
+      position,
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      popperRef: !!this.menu.popper.reference,
+      popperHas$el: !!(this.menu.popper.reference as any)?.$el,
+      popperFloating: !!this.menu.popper.floating,
+    });
     if (position) {
-      const { x = 0, y = 0, width = 8, height = 8 } = position;
+      const { x = 0, y = 0, width = 0, height = 0 } = position;
       this.menu.popper.updateReference({
         // @ts-ignore
         getRect() {

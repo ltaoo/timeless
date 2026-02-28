@@ -25,7 +25,14 @@ import { Toggle } from "./toggle";
 import { Slider } from "./slider";
 import { Progress } from "./progress";
 import { Dialog } from "./dialog";
-import { Menu, MenuItem, MenuLabel, MenuSeparator, DropdownMenu } from "./menu";
+import {
+  Menu,
+  MenuItem,
+  MenuLabel,
+  MenuSeparator,
+  DropdownMenu,
+  ContextMenu,
+} from "./menu";
 import { Tabs } from "./tabs";
 import { Steps } from "./steps";
 import { Button } from "./button";
@@ -56,7 +63,6 @@ import {
   TableHead,
   TableCell,
 } from "./table";
-import { ChevronRightOutlined } from "@timeless/icons";
 
 export {
   View,
@@ -81,6 +87,7 @@ export {
   MenuLabel,
   MenuSeparator,
   DropdownMenu,
+  ContextMenu,
   Tabs,
   Steps,
   Show,
@@ -115,6 +122,5 @@ export {
   TableRow,
   TableHead,
   TableCell,
-  ChevronRightOutlined,
   Headless,
 };

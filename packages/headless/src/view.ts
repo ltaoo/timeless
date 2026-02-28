@@ -187,10 +187,10 @@ export function isComponent(v: any): v is Component {
 export interface Component {
   t: string;
   $elm: HTMLElement | Text;
-  render(): HTMLElement | Text;
+  render(): HTMLElement | Text | null;
   onMounted?(el: HTMLElement | Text): void;
   beforeUnmounted?(): void;
   onUnmounted?(): void;
 }
 
-export type ViewChildren = Component[];
+export type ViewChildren = (Component | null)[];

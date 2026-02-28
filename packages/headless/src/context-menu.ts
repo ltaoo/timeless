@@ -1,27 +1,27 @@
 import { ui } from "@timeless/domains";
-import { ref, refobj, refarr, computed, uncomputed } from "@timeless/reactive";
+import { computed, ref, refobj, uncomputed } from "@timeless/reactive";
 import { ChevronRightOutlined } from "@timeless/icons";
 
-import { For } from "./for";
-import { merge, tp } from "./theme";
-import { Show } from "./show";
-import { MenuItem, MenuItemView } from "./menu";
-import { Component, View } from "./view";
-import { Txt } from "./text";
+import { Component, View, ViewChildren, ViewProps } from "./view";
+import { DropdownMenu } from "./dropdown-menu";
 import { Portal } from "./portal";
 import { Popper } from "./popper";
 import { Presence } from "./presence";
+import { For } from "./for";
+import { merge, tp } from "./theme";
+import { MenuItem, MenuItemView } from "./menu";
+import { Show } from "./show";
+import { Txt } from "./text";
 
-export function DropdownMenu(
-  props: {
-    store: ui.DropdownMenuCore;
-    theme: any;
-    onMounted?: ($elm: any) => void;
-    onUnmounted?: () => void;
+export function ContextMenu(
+  props: ViewProps & {
+    store: ui.ContextMenuCore;
+    theme?: any;
   },
-  children: any[],
+  children: ViewChildren,
 ) {
   const { store, theme: t, ...rest } = props;
+
   const layer = store.menu.layer;
   const state = refobj(store.state);
   const events: (void | (() => void))[] = [];
@@ -34,19 +34,6 @@ export function DropdownMenu(
 
   let unDismiss: undefined | Function;
   let handlePointerDown: undefined | (() => void);
-  let _hoverHideTimer: null | number = null;
-  function _hoverClearHide() {
-    if (_hoverHideTimer) {
-      clearTimeout(_hoverHideTimer);
-      _hoverHideTimer = null;
-    }
-  }
-  function _hoverScheduleHide() {
-    _hoverClearHide();
-    _hoverHideTimer = setTimeout(() => {
-      store.hide();
-    }, 100);
-  }
 
   const $menucontent = For({
     ...merge(tp(t?.menu)),
@@ -107,75 +94,53 @@ export function DropdownMenu(
   $menucontent.$elm.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
   });
-  if (store.trigger === "hover") {
-    $menucontent.$elm.addEventListener("mouseenter", () => {
-      _hoverClearHide();
-    });
-    $menucontent.$elm.addEventListener("mouseleave", () => {
-      _hoverScheduleHide();
-    });
-  }
 
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted($el: HTMLDivElement) {
         if (rest.onMounted) {
-          rest.onMounted($e);
+          rest.onMounted($el);
         }
-        const $ref = $e.firstElementChild || $e;
-        store.menu.popper.setReference(
-          {
-            $el: $ref,
-            getRect() {
-              return $ref.getBoundingClientRect();
-            },
+        store.setReference({
+          getRect() {
+            return $el.getBoundingClientRect();
           },
-          { force: true },
-        );
+        });
+
         unDismiss = layer.onDismiss(() => {
           store.hide();
         });
+
         handlePointerDown = () => {
-          console.log("[DropdownMenu]click", store.menu.state.open);
           if (store.menu.state.open) {
             layer.handlePointerDownOnTop();
           }
         };
         document.addEventListener("pointerdown", handlePointerDown);
-        if (store.trigger === "hover") {
-          let hoverTimer: null | number = null;
-          $e.addEventListener("mouseenter", () => {
-            _hoverClearHide();
-            hoverTimer = setTimeout(() => {
-              const rect = $e.getBoundingClientRect();
-              store.show({
-                x: rect.x,
-                y: rect.y,
-                width: $e.clientWidth,
-                height: $e.clientHeight + 8,
-              });
-            }, 100);
+
+        $el.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const { pageX: x, pageY: y } = e;
+          store.updateReference({
+            getRect() {
+              const rect = $el.getBoundingClientRect();
+              const { top, left, right, bottom } = rect;
+              return {
+                width: 0,
+                height: 0,
+                top,
+                left,
+                right,
+                bottom,
+                x,
+                y,
+              };
+            },
           });
-          $e.addEventListener("mouseleave", () => {
-            if (hoverTimer) {
-              clearTimeout(hoverTimer);
-              hoverTimer = null;
-            }
-            _hoverScheduleHide();
-          });
-        } else if (store.trigger !== "manual") {
-          $e.addEventListener("pointerdown", () => {
-            layer.pointerDown();
-            const rect = $e.getBoundingClientRect();
-            store.toggle({
-              x: rect.x,
-              y: rect.y,
-              width: $e.clientWidth,
-              height: $e.clientHeight + 8,
-            });
-          });
-        }
+          store.show({ x: x - 8, y: y - 4 });
+        });
       },
       onUnmounted() {
         for (const fn of events) if (typeof fn === "function") fn();
@@ -185,7 +150,7 @@ export function DropdownMenu(
         if (handlePointerDown) {
           document.removeEventListener("pointerdown", handlePointerDown);
         }
-        store.unmount();
+        store.destroy();
         if (rest.onUnmounted) {
           rest.onUnmounted();
         }
@@ -195,7 +160,9 @@ export function DropdownMenu(
       ...children,
       Portal({}, [
         Popper({ store: store.menu.popper }, [
-          Presence({ store: store.menu.presence }, [$menucontent]),
+          Presence({ store: store.menu.presence, animation: t?.animation }, [
+            $menucontent,
+          ]),
         ]),
       ]),
     ],

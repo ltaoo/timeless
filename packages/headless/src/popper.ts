@@ -42,11 +42,11 @@ export function Popper(
           $el: $e,
           getRect() {
             const rect = $e.getBoundingClientRect();
-            console.log(
-              "[COMPONENT]PopperContent - getRect of floating",
-              $e,
-              rect,
-            );
+            // console.log(
+            //   "[COMPONENT]PopperContent - getRect of floating",
+            //   $e,
+            //   rect,
+            // );
             return rect;
           },
         });
