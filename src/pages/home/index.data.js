@@ -1,6 +1,6 @@
 import { Section, Item } from "@/components/index.js";
 
-export function DataDisplayView() {
+export default function DataDisplayView() {
   const progressVal = ref(60);
   const stepIdx = ref(1);
 

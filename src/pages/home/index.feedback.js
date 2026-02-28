@@ -1,6 +1,6 @@
 import { Section, Item } from "@/components/index.js";
 
-export function FeedbackView() {
+export default function FeedbackView() {
   const dialog$ = new Timeless.ui.DialogCore({
     title: "Dialog Title",
     footer: true,
@@ -22,6 +22,67 @@ export function FeedbackView() {
             Txt("This is a dialog content area. You can put anything here."),
           ]),
         ]),
+      ]),
+    ]),
+    Section("Sheet", [
+      Item("Sides", [
+        (() => {
+          const sheetR$ = new Timeless.ui.DialogCore({
+            title: "Sheet Right",
+          });
+          const sheetL$ = new Timeless.ui.DialogCore({
+            title: "Sheet Left",
+          });
+          const sheetB$ = new Timeless.ui.DialogCore({
+            title: "Sheet Bottom",
+          });
+          return View({ class: cn(["flex gap-2"]) }, [
+            Button(
+              {
+                size: "sm",
+                onClick() {
+                  sheetR$.show();
+                },
+              },
+              [Txt("Right")],
+            ),
+            Button(
+              {
+                size: "sm",
+                variant: "outline",
+                onClick() {
+                  sheetL$.show();
+                },
+              },
+              [Txt("Left")],
+            ),
+            Button(
+              {
+                size: "sm",
+                variant: "outline",
+                onClick() {
+                  sheetB$.show();
+                },
+              },
+              [Txt("Bottom")],
+            ),
+            Sheet({ store: sheetR$, side: "right" }, [
+              View({ class: cn(["text-sm text-zinc-500"]) }, [
+                Txt("This is a right sheet."),
+              ]),
+            ]),
+            Sheet({ store: sheetL$, side: "left" }, [
+              View({ class: cn(["text-sm text-zinc-500"]) }, [
+                Txt("This is a left sheet."),
+              ]),
+            ]),
+            Sheet({ store: sheetB$, side: "bottom" }, [
+              View({ class: cn(["text-sm text-zinc-500"]) }, [
+                Txt("This is a bottom sheet."),
+              ]),
+            ]),
+          ]);
+        })(),
       ]),
     ]),
     Section("Presence", [

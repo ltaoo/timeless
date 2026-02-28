@@ -1,6 +1,6 @@
 import { Section, Item } from "@/components/index.js";
 
-export function OverlayView() {
+export default function OverlayView() {
   return View({ class: "space-y-8" }, [
     Section("Dropdown Menu", [
       Item("Default", [
@@ -29,7 +29,19 @@ export function OverlayView() {
               ],
             }),
           },
-          [Button({ variant: "outline", onClick() {} }, [Txt("Open Menu")])],
+          [
+            Button(
+              {
+                variant: "outline",
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    console.log("click Open Menu");
+                  },
+                }),
+              },
+              [Txt("Open Menu")],
+            ),
+          ],
         ),
       ]),
       Item("With Submenu", [
@@ -330,67 +342,6 @@ export function OverlayView() {
           Tooltip({ content: "Right tooltip", side: "right" }, [
             Button({ variant: "outline", size: "sm" }, [Txt("Right")]),
           ]),
-        ]),
-      ]),
-      Section("Sheet", [
-        Item("Sides", [
-          (() => {
-            const sheetR$ = new Timeless.ui.DialogCore({
-              title: "Sheet Right",
-            });
-            const sheetL$ = new Timeless.ui.DialogCore({
-              title: "Sheet Left",
-            });
-            const sheetB$ = new Timeless.ui.DialogCore({
-              title: "Sheet Bottom",
-            });
-            return View({ class: cn(["flex gap-2"]) }, [
-              Button(
-                {
-                  size: "sm",
-                  onClick() {
-                    sheetR$.show();
-                  },
-                },
-                [Txt("Right")],
-              ),
-              Button(
-                {
-                  size: "sm",
-                  variant: "outline",
-                  onClick() {
-                    sheetL$.show();
-                  },
-                },
-                [Txt("Left")],
-              ),
-              Button(
-                {
-                  size: "sm",
-                  variant: "outline",
-                  onClick() {
-                    sheetB$.show();
-                  },
-                },
-                [Txt("Bottom")],
-              ),
-              Sheet({ store: sheetR$, side: "right" }, [
-                View({ class: cn(["text-sm text-zinc-500"]) }, [
-                  Txt("This is a right sheet."),
-                ]),
-              ]),
-              Sheet({ store: sheetL$, side: "left" }, [
-                View({ class: cn(["text-sm text-zinc-500"]) }, [
-                  Txt("This is a left sheet."),
-                ]),
-              ]),
-              Sheet({ store: sheetB$, side: "bottom" }, [
-                View({ class: cn(["text-sm text-zinc-500"]) }, [
-                  Txt("This is a bottom sheet."),
-                ]),
-              ]),
-            ]);
-          })(),
         ]),
       ]),
     ]),

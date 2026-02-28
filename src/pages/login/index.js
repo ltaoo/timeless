@@ -1,4 +1,4 @@
-export function LoginPage(props) {
+export default function LoginPage(props) {
   const ui = {
     input_username: new Timeless.ui.InputCore({
       defaultValue: "",

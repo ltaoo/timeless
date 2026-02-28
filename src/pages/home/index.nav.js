@@ -1,6 +1,6 @@
 import { Section, Item } from "@/components/index.js";
 
-export function NavigationView() {
+export default function NavigationView() {
   return View({ class: cn(["space-y-8"]) }, [
     Section("Tabs", [
       Item("Default", [

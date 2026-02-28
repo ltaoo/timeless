@@ -1,4 +1,4 @@
-export function SettingsPageView(props) {
+export default function SettingsPageView(props) {
   return View({ class: "p-6 max-w-2xl space-y-8" }, [
     // Header Section
     View(
