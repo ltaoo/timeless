@@ -16,7 +16,7 @@ export const router = new Timeless.NavigatorCore();
 export const user = /** @type {any} */ ({});
 // export const storage = storage;
 
-export const view = new Timeless.RouteViewCore({
+export const rootview = new Timeless.RouteViewCore({
   name: "root",
   pathname: "/",
   title: "ROOT",
@@ -24,14 +24,14 @@ export const view = new Timeless.RouteViewCore({
   parent: null,
   views: [],
 });
-view.isRoot = true;
+rootview.isRoot = true;
 
 export const history = new Timeless.HistoryCore({
-  view,
+  view: rootview,
   router,
   routes,
   views: {
-    root: view,
+    root: rootview,
   },
 });
 

@@ -450,6 +450,10 @@ importers:
         version: 5.9.3
 
   packages/icons:
+    dependencies:
+      '@timeless/headless':
+        specifier: workspace:*
+        version: link:../headless
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^29.0.0

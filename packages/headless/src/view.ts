@@ -21,7 +21,7 @@ export function View(props: ViewProps = {}, children?: any) {
     style,
     id: tmpid,
     class: cls,
-    dataset,
+    dataset = {},
     onMounted,
     onUnmounted,
     onClick,
@@ -34,7 +34,7 @@ export function View(props: ViewProps = {}, children?: any) {
   // Object.keys(restProps).forEach((k) => {
   //   $elm.setAttribute(k, props[k]);
   // });
-  Object.keys(dataset || {}).forEach((k) => {
+  Object.keys(dataset).forEach((k) => {
     if (dataset && dataset[k]) {
       $elm.setAttribute(`data-${k}`, dataset[k]);
     }

@@ -12,6 +12,7 @@ import { DataDisplayView } from "@/pages/home/index.data.js";
 import { FeedbackView } from "@/pages/home/index.feedback.js";
 import { NavigationView } from "@/pages/home/index.nav.js";
 import { OverlayView } from "@/pages/home/index.overlay.js";
+import { SettingsPageView } from "@/pages/settings/index.js";
 
 export const views = {
   "root.home_layout": HomeLayoutView,
@@ -22,7 +23,7 @@ export const views = {
   "root.home_layout.index.feedback": FeedbackView,
   "root.home_layout.index.nav": NavigationView,
   "root.home_layout.index.overlay": OverlayView,
-  // "root.home_layout.weui": UIExampleWeUIPageView,
+  "root.home_layout.settings": SettingsPageView,
   "root.login": LoginPage,
   "root.notfound": NotFoundPageView,
 };

@@ -53,8 +53,31 @@ export function ContextMenu(
           fallback: [MenuItem({ store: item, theme: t }, [Txt(item.label)])],
         },
         [
-          MenuItem({ store: item, theme: t }, [
-            View({ style: "flex:1;" }, [Txt(item.label)]),
+          MenuItem(
+            {
+              store: item,
+              theme: t,
+              onMouseEnter: () => {
+                const menu = item.menu;
+                if (menu) {
+                  if (menu.hide_sub_timer) {
+                    clearTimeout(menu.hide_sub_timer);
+                    menu.hide_sub_timer = null;
+                  }
+                }
+              },
+              onMouseLeave: () => {
+                const menu = item.menu;
+                if (menu) {
+                  menu.hide_sub_timer = setTimeout(() => {
+                    menu.hide_sub_timer = null;
+                    menu.hide();
+                  }, 100);
+                }
+              },
+            },
+            [
+              View({ style: "flex:1;" }, [Txt(item.label)]),
             View({ ...merge(tp(t?.submenuArrow)) }, [ChevronRightOutlined()]),
             // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
             item.menu
@@ -175,6 +198,10 @@ function listenMenuContent(menu: ui.MenuCore, child: Component) {
     e.stopPropagation();
   });
   $el.addEventListener("mouseenter", () => {
+    if (menu.hide_sub_timer) {
+      clearTimeout(menu.hide_sub_timer);
+      menu.hide_sub_timer = null;
+    }
     menu.popper.handleEnter();
   });
   $el.addEventListener("mouseleave", () => {

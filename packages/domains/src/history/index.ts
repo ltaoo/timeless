@@ -418,19 +418,23 @@ export class HistoryCore<
     // console.log("[DOMAIN]history/index - push target url is", name, "and cur href is", this.$router.href);
     const { ignore } = options;
     if (this.isLayout(name)) {
-      console.log("[DOMAIN]history/index - the target url is layout", name);
+      console.warn("[timeless]history/index - the target url is layout", name);
       return;
     }
     const route1 = this.routes[name];
     if (!route1) {
-      console.log("[DOMAIN]history/index - push 2. no matched route", name);
+      console.warn("[timeless]history/index - push 2. no matched route", name);
       return;
     }
     const unique_key = [route1.pathname, query_stringify(query)]
       .filter(Boolean)
       .join("?");
     if (unique_key === this.$router.href) {
-      // console.log("[DOMAIN]history/index - push target url is", uniqueKey, "and cur href is", this.$router.href);
+      console.warn(
+        "[timeless]history/index - push target url",
+        unique_key,
+        this.$router.href,
+      );
       return;
     }
     // @todo 这里不能写死 root
@@ -440,9 +444,9 @@ export class HistoryCore<
     for (let i = 0; i < kk.length; i += 1) {
       (() => {
         const v = kk[i];
-        // if (["root", "root.home_layout"].includes(v)) {
-        //   return;
-        // }
+        if (["root", "root.home_layout"].includes(v)) {
+          return;
+        }
         const view = this.views[v];
         view.unmount();
       })();

@@ -373,11 +373,11 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     this.subViews = [];
     this.emit(Events.StateChange, { ...this.state });
     // console.log("[DOMAIN]route_view - unmount", this.title);
-    // this.onHidden(() => {
-    //   this.destroy();
-    //   this.setUnmounted();
-    // });
-    // this.hide();
+    this.onHidden(() => {
+      this.destroy();
+      this.setUnmounted();
+    });
+    this.hide();
   }
   /** 视图被装载到页面 */
   setMounted() {
@@ -509,7 +509,7 @@ function emitViewCreated(view: RouteViewCore) {
 
 export function RouteMenusModel<
   T extends { title: string; url?: unknown; onClick?: (m: T) => void },
->(props: { route: T["url"]; menus: T[]; $history: HistoryCore<any, any> }) {
+>(props: { route: T["url"]; menus: T[]; history: HistoryCore<any, any> }) {
   const methods = {
     refresh() {
       bus.emit(Events.StateChange, { ..._state });
@@ -531,11 +531,12 @@ export function RouteMenusModel<
   const ui = {};
 
   let _route_name = props.route;
+  let _menus = props.menus || [];
   let _state = {
     get menus() {
-      return props.menus;
+      return _menus;
     },
-    get route_name() {
+    get curMenu() {
       return _route_name;
     },
   };
@@ -549,7 +550,7 @@ export function RouteMenusModel<
   };
   const bus = base<TheTypesOfEvents>();
 
-  const unlisten = props.$history.onRouteChange(({ name }) => {
+  const unlisten = props.history.onRouteChange(({ name }) => {
     methods.setCurMenu(name);
   });
 
@@ -557,6 +558,12 @@ export function RouteMenusModel<
     methods,
     ui,
     state: _state,
+    get menus() {
+      return _menus;
+    },
+    get curMenu() {
+      return _route_name;
+    },
     ready() {},
     destroy() {
       unlisten();

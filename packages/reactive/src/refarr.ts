@@ -103,6 +103,14 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
       Array.prototype.splice.call(_local_value, idx, 1);
       notify({ type: "delete", index: idx, deleteCount: 1 });
     },
+    remove(item: T) {
+      const index = _local_value.indexOf(item);
+      if (index === -1) {
+        return;
+      }
+      Array.prototype.splice.call(_local_value, index, 1);
+      notify({ type: "delete", index, deleteCount: 1 });
+    },
     as(items: T[] | ((cur: T[]) => T[])) {
       if (typeof items === "function") {
         _local_value = items(_local_value);

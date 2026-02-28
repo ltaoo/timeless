@@ -1,25 +1,42 @@
-import { ref, refobj, refarr, computed } from "@timeless/reactive";
-import { RouteViewCore, HistoryCore } from "@timeless/domains";
+import {
+  ref,
+  refobj,
+  refarr,
+  computed,
+  ClassNameRef,
+} from "@timeless/reactive";
+import {
+  RouteViewCore,
+  HistoryCore,
+  StorageCore,
+  HttpClientCore,
+} from "@timeless/domains";
 
 import { Component, View, ViewProps } from "./view.js";
 import { For } from "./for.js";
 
-export function RouteSubViews(
+export function KeepAliveSubViews(
   props: ViewProps & {
+    subclass?: ClassNameRef;
     view: RouteViewCore;
     history: HistoryCore<any, any>;
+    storage: StorageCore<any>;
+    client: HttpClientCore;
     views: Record<string, (props: {}) => Component>;
     NotFound?: (...args: any[]) => Component;
   },
 ) {
-  const subViews = refarr(props.view.subViews);
-  const curSubView = refobj(props.view.curView);
+  const subviews = refarr(props.view.subViews);
+  const cur_subview = refobj(props.view.curView);
 
   props.view.onCurViewChange((view) => {
-    curSubView.as(view);
+    cur_subview.as(view);
   });
   props.view.onSubViewAppended((v) => {
-    subViews.push(v);
+    subviews.push(v);
+  });
+  props.view.onSubViewRemoved((v) => {
+    subviews.remove(v);
   });
 
   const NotFoundPageView = (() => {
@@ -32,27 +49,34 @@ export function RouteSubViews(
   const nodes: any[] = [];
 
   return For({
-    class: props.class,
-    each: subViews,
-    render(subView: any) {
-      const PageView = props.views[subView.name];
+    // class: props.class,
+    // style: "position: relative;",
+    each: subviews,
+    render(subview: any) {
+      const PageView = props.views[subview.name];
       if (!PageView) {
         return NotFoundPageView;
       }
       return View(
         {
-          style: computed(curSubView, (draft) => {
+          class: props.subclass,
+          style: computed(cur_subview, (d) => {
             return [
-              draft && draft.name === subView.name
+              "width: 100%; height: 100%;",
+              d && d.name === subview.name
                 ? "display: block;"
                 : "display: none;",
             ].join("");
           }),
+          dataset: {
+            name: subview.name,
+            pathname: subview.pathname,
+          },
         },
         [
           PageView({
             ...props,
-            view: subView,
+            view: subview,
             onMounted() {
               nodes.push(this);
             },

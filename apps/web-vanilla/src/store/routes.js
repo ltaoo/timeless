@@ -40,6 +40,10 @@ const configure = {
               },
             },
           },
+          settings: {
+            title: "设置",
+            pathname: "/settings",
+          },
         },
         options: {
           require: [],
@@ -48,9 +52,6 @@ const configure = {
       login: {
         title: "登录",
         pathname: "/login",
-        options: {
-          require: [],
-        },
       },
       notfound: {
         title: "404",
@@ -62,3 +63,4 @@ const configure = {
 const result = Timeless.build(configure);
 export const routes = result.routes;
 export const routesWithPathname = result.routesWithPathname;
+export const defaultRouteName = "root.home_layout.index.general";

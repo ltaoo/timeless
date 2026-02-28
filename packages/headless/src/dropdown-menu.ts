@@ -33,7 +33,7 @@ export function DropdownMenu(
   const menuitem$s = computed(state, (d) => d.items);
 
   let unDismiss: undefined | Function;
-  let handlePointerDown: undefined | (() => void);
+  let handlePointerDown: undefined | ((event: any) => void);
   let _hoverHideTimer: null | number = null;
   function _hoverClearHide() {
     if (_hoverHideTimer) {
@@ -66,8 +66,31 @@ export function DropdownMenu(
           fallback: [MenuItem({ store: item, theme: t }, [Txt(item.label)])],
         },
         [
-          MenuItem({ store: item, theme: t }, [
-            View({ style: "flex:1;" }, [Txt(item.label)]),
+          MenuItem(
+            {
+              store: item,
+              theme: t,
+              onMouseEnter: () => {
+                const menu = item.menu;
+                if (menu) {
+                  if (menu.hide_sub_timer) {
+                    clearTimeout(menu.hide_sub_timer);
+                    menu.hide_sub_timer = null;
+                  }
+                }
+              },
+              onMouseLeave: () => {
+                const menu = item.menu;
+                if (menu) {
+                  menu.hide_sub_timer = setTimeout(() => {
+                    menu.hide_sub_timer = null;
+                    menu.hide();
+                  }, 200);
+                }
+              },
+            },
+            [
+              View({ style: "flex:1;" }, [Txt(item.label)]),
             View({ ...merge(tp(t?.submenuArrow)) }, [ChevronRightOutlined()]),
             // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
             item.menu
@@ -93,6 +116,16 @@ export function DropdownMenu(
                               },
                             });
                           })(),
+                          () => {
+                            if (store.trigger === "hover") {
+                              _hoverClearHide();
+                            }
+                          },
+                          () => {
+                            if (store.trigger === "hover") {
+                              _hoverScheduleHide();
+                            }
+                          },
                         ),
                       ],
                     ),
@@ -136,9 +169,13 @@ export function DropdownMenu(
         unDismiss = layer.onDismiss(() => {
           store.hide();
         });
-        handlePointerDown = () => {
+        handlePointerDown = (event: any) => {
           // console.log("[DropdownMenu]click", store.menu.state.open);
           if (store.menu.state.open) {
+            const $target = event.target as Node;
+            if ($e.contains($target)) {
+              return;
+            }
             layer.handlePointerDownOnTop();
           }
         };
@@ -166,7 +203,7 @@ export function DropdownMenu(
           });
         } else if (store.trigger !== "manual") {
           $e.addEventListener("pointerdown", () => {
-            layer.pointerDown();
+            // layer.pointerDown();
             const rect = $e.getBoundingClientRect();
             store.toggle({
               x: rect.x,
@@ -202,20 +239,35 @@ export function DropdownMenu(
   );
 }
 
-function listenMenuContent(menu: ui.MenuCore, child: Component) {
+function listenMenuContent(
+  menu: ui.MenuCore,
+  child: Component,
+  onEnter?: () => void,
+  onLeave?: () => void,
+) {
   const $el = child.$elm;
   $el.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
   });
   $el.addEventListener("mouseenter", () => {
+    if (menu.hide_sub_timer) {
+      clearTimeout(menu.hide_sub_timer);
+      menu.hide_sub_timer = null;
+    }
     menu.popper.handleEnter();
+    if (onEnter) {
+      onEnter();
+    }
   });
   $el.addEventListener("mouseleave", () => {
     menu.popper.handleLeave();
     menu.hide_sub_timer = setTimeout(() => {
       menu.hide_sub_timer = null;
       menu.hide();
-    }, 100);
+    }, 200);
+    if (onLeave) {
+      onLeave();
+    }
   });
   return child;
 }

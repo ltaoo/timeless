@@ -43,6 +43,7 @@ declare const View: typeof import("@timeless/headless").View;
 declare const Txt: typeof import("@timeless/headless").Txt;
 declare const DangerouslyInnerHTML: typeof import("@timeless/headless").DangerouslyInnerHTML;
 declare const RouteSubViews: typeof import("@timeless/headless").RouteSubViews;
+declare const KeepAliveSubViews: typeof import("@timeless/headless").KeepAliveSubViews;
 
 declare const Slider: typeof import("@timeless/shadcnui").Slider;
 declare const Slide: typeof import("@timeless/shadcnui").Slider;
@@ -101,6 +102,10 @@ declare const TableCell: typeof import("@timeless/shadcnui").TableCell;
 
 declare const Textarea: typeof import("@timeless/shadcnui").Textarea;
 declare const Label: typeof import("@timeless/shadcnui").Label;
+
+declare const BoltOutlined: typeof import("@timeless/icons").BoltOutlined;
+
+
 
 declare var TimelessWeb: {
   provide_app: (vm: any) => void;

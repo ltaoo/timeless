@@ -30,7 +30,6 @@ export default [
         isComponent: "readonly",
         cn: "readonly",
         Show: "readonly",
-        RouteSubViews: "readonly",
         For: "readonly",
         Match: "readonly",
         View: "readonly",
@@ -87,6 +86,9 @@ export default [
         Portal: "readonly",
         Tooltip: "readonly",
         Sheet: "readonly",
+        RouteSubViews: "readonly",
+        KeepAliveSubViews: "readonly",
+        BoltOutlined: "readonly",
       },
     },
     rules: {

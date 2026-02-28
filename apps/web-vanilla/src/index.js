@@ -1,48 +1,25 @@
 import { app, history, client, views } from "./store/index.js";
 import { storage } from "./store/storage.js";
+import { NotFoundPageView } from "./pages/notfound/index.js";
 
-const render = ($elm) => {
+Timeless.NavigatorCore.prefix = "/timeless";
+
+const render = ($root) => {
   const root_view$ = history.$view;
-
-  root_view$.onSubViewsChange((view$s) => {
-    if (!view$s || view$s.length === 0) {
-      console.log("[Render] No views to render");
-      return;
-    }
-    const $segments = document.createDocumentFragment();
-    for (let i = 0; i < view$s.length; i += 1) {
-      const view$ = view$s[i];
-      const PageView = views[view$.name];
-      (() => {
-        if (!PageView) {
-          console.warn("[Render] No page component found for:", view$.name);
-          return;
-        }
-        const $elm = renderPage(PageView, view$);
-        if ($elm) {
-          $segments.appendChild($elm);
-        }
-      })();
-    }
-    $elm.appendChild($segments);
+  // const view$ = refobj(root_view$.curSubView);
+  const view$ = RouteSubViews({
+    class: "w-screen h-screen",
+    NotFound: NotFoundPageView,
+    view: root_view$,
+    client,
+    storage,
+    history,
+    views,
   });
-
-  const renderPage = (PageView, view) => {
-    try {
-      const page$ = PageView({
-        app,
-        view,
-        history,
-        views,
-        storage,
-        client,
-      });
-      return page$.render();
-    } catch (err) {
-      console.error("[Render] Error rendering page:", err);
-      return null;
-    }
-  };
+  $root.appendChild(view$.$elm);
+  // Portal({}, [
+  //   Toast()
+  // ]);
 
   const { innerWidth, innerHeight, location } = window;
   history.$router.prepare(location);

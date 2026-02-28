@@ -201,7 +201,24 @@ function startServer() {
 
   const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url);
-    let pathname = path.join(serverRoot, parsedUrl.pathname);
+    const prefix = "/timeless";
+
+    if (parsedUrl.pathname === "/") {
+      res.writeHead(302, { Location: prefix + "/" });
+      res.end();
+      return;
+    }
+
+    let targetPath = parsedUrl.pathname;
+    if (targetPath.startsWith(prefix)) {
+      targetPath = targetPath.slice(prefix.length) || "/";
+    } else {
+      res.statusCode = 404;
+      res.end(`Not found (Path must start with ${prefix})`);
+      return;
+    }
+
+    let pathname = path.join(serverRoot, targetPath);
 
     fs.stat(pathname, (err, stats) => {
       if (err) {
@@ -250,6 +267,6 @@ function startServer() {
   server.listen(port, () => {
     console.log(`\nStatic server listening on port ${port}`);
     console.log(`Root: ${serverRoot}`);
-    console.log(`Url: http://localhost:${port}`);
+    console.log(`Url: http://localhost:${port}/timeless/`);
   });
 }

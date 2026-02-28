@@ -18,6 +18,8 @@ type ContextMenuState = {
 };
 type ContextMenuProps = {
   items: MenuItemCore[];
+  submenuOffsetX?: number;
+  submenuOffsetY?: number;
 };
 export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
   menu: MenuCore;
@@ -34,7 +36,12 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
     >
   ) {
     super(options);
-    const { _name, items = [] } = options;
+    const {
+      _name,
+      items = [],
+      submenuOffsetX = 8,
+      submenuOffsetY = 0,
+    } = options;
     this.state.items = items;
     this.menu = new MenuCore({
       ...options,
@@ -42,6 +49,13 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
       side: "right",
       align: "start",
     });
+
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      if (item.menu) {
+        item.menu.setOffset({ x: submenuOffsetX, y: submenuOffsetY });
+      }
+    }
   }
 
   show(position: Partial<{ x: number; y: number }> = {}) {

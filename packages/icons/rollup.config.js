@@ -13,8 +13,8 @@ export default {
     {
       file: path.join(__dirname, "dist/icons.umd.min.js"),
       format: "umd",
-      name: "Icons",
-      footer: `if (typeof window !== "undefined") { Object.assign(window, window.Icons); }`,
+      name: "Timeless.icons",
+      extend: true,
     },
     {
       file: path.join(__dirname, "dist/icons.esm.js"),

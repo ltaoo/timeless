@@ -1,13 +1,11 @@
-import { View } from "./view.js";
-import { cn } from "@timeless/reactive";
+import { View, ViewChildren, ViewProps } from "./view.js";
 
-export function Head2(props: any, children?: any) {
-  const class$ = cn(["flex"]);
-  return View(
-    {
-      type: "h2",
-      // class: class$.toString(),
-    },
-    children,
-  );
+export function Head1(props: ViewProps, children?: ViewChildren) {
+  return View({ ...props, type: "h1" }, children);
+}
+export function Head2(props: ViewProps, children?: ViewChildren) {
+  return View({ ...props, type: "h2" }, children);
+}
+export function Head3(props: ViewProps, children?: ViewChildren) {
+  return View({ ...props, type: "h3" }, children);
 }

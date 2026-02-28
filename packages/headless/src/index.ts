@@ -1,6 +1,8 @@
 export * from "@timeless/reactive";
+export * from "@timeless/icons";
 
-console.log("headless.version 1.4.0");
+// console.log("headless.version 1.4.0");
+export const TimelessHeadlessVersion = "1.5.0";
 
 // Primitives
 export * from "./for";
@@ -14,7 +16,8 @@ export * from "./portal";
 export * from "./presence";
 export * from "./popper";
 
-export * from "./route-sub-views";
+export * from "./keep-alive-sub-views";
+export * from "./sub-views";
 
 export * from "./flex";
 export * from "./head";

@@ -42,6 +42,7 @@ export function MenuItem(props: any, children?: ViewChildren) {
   }
   const hoverM = merge(tp(t?.itemHover));
   $el.addEventListener("mouseenter", () => {
+    if (props.onMouseEnter) props.onMouseEnter();
     if (hoverM.style) $el.style.cssText += hoverM.style;
     if (hoverM.class)
       $el.classList.add(...hoverM.class.split(" ").filter(Boolean));
@@ -57,6 +58,7 @@ export function MenuItem(props: any, children?: ViewChildren) {
     store.handlePointerEnter();
   });
   $el.addEventListener("mouseleave", () => {
+    if (props.onMouseLeave) props.onMouseLeave();
     if (hoverM.style) {
       const base = merge(tp(t?.item), cn, st);
       $el.style.cssText = base.style || "";
