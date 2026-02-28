@@ -4,11 +4,9 @@ export function Txt(value: Ref<any> | string) {
   let _local_value = isRef(value) ? value.value : value;
   if (isRef(value)) {
     value._subscribe({
-      onPatch(action) {
-
-      },
+      onPatch(action) {},
       onChange(v: any) {
-        console.log("compare", v, _local_value);
+        // console.log("compare", v, _local_value);
         if (v === _local_value) {
           return;
         }

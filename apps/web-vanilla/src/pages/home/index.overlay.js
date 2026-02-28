@@ -33,9 +33,11 @@ export default function OverlayView() {
             Button(
               {
                 variant: "outline",
-                onClick() {
-                  console.log("click Open Menu");
-                },
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    console.log("click Open Menu");
+                  },
+                }),
               },
               [Txt("Open Menu")],
             ),

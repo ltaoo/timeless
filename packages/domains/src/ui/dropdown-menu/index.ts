@@ -66,8 +66,8 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
       items = [],
       offsetX = 0,
       offsetY = 0,
-      submenuOffsetX = 8,
-      submenuOffsetY = 0,
+      submenuOffsetX = -2,
+      submenuOffsetY = -4,
       trigger = "click",
       onHidden,
     } = props;

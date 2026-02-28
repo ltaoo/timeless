@@ -39,8 +39,8 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
     const {
       _name,
       items = [],
-      submenuOffsetX = 8,
-      submenuOffsetY = 0,
+      submenuOffsetX = -2,
+      submenuOffsetY = -4,
     } = options;
     this.state.items = items;
     this.menu = new MenuCore({

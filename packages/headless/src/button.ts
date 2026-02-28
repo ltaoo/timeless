@@ -2,7 +2,7 @@ import { ref, computed } from "@timeless/reactive";
 import { ui } from "@timeless/domains";
 
 import { tp, merge } from "./theme.js";
-import { View, ViewProps } from "./view.js";
+import { View, ViewChildren, ViewProps } from "./view.js";
 import { Show } from "./show.js";
 
 export function Button(
@@ -14,7 +14,7 @@ export function Button(
     disabled?: boolean;
     loading?: boolean;
   },
-  children?: any,
+  children?: ViewChildren,
 ) {
   const {
     store,

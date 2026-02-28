@@ -27,13 +27,11 @@ export function AsyncView(
               return;
             }
             const r = elm_.render();
-            // console.log("1231", Factory, elm_, r, view$.$elm.parentNode);
             view$.$elm.parentNode?.replaceChild(elm_.$elm, view$.$elm);
             view$.$elm = elm_.$elm;
             if (!r) {
               return;
             }
-            view$.$elm.innerHTML = r.innerHTML;
             if (props.onMounted) {
               props.onMounted(elm_.$elm);
             }

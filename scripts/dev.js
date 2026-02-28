@@ -44,6 +44,7 @@ const artifacts = [
 const buildRelations = {
   reactive: ["headless"],
   headless: ["shadcnui"],
+  domains: ["headless"],
 };
 
 let buildQueue = null;
