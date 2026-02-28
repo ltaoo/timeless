@@ -1,0 +1,29 @@
+name: Deploy Web Vanilla to GitHub Pages
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Pages
+        run: |
+          mkdir -p dist
+          cp apps/web-vanilla/index.html dist/
+          cp -r apps/web-vanilla/public dist/
+          cp -r apps/web-vanilla/src dist/
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: docs
