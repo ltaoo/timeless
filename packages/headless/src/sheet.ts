@@ -1,4 +1,4 @@
-import { ref, computed } from "@timeless/reactive";
+import { ref, refobj, computed } from "@timeless/reactive";
 import { XOutlined } from "@timeless/icons";
 
 import { tp, merge } from "./theme.js";
@@ -16,7 +16,7 @@ export function Sheet(props: any, children?: any) {
     style: st,
     ...rest
   } = props;
-  const state = ref(store.state);
+  const state = refobj(store.state);
   const events: any[] = [];
   events.push(
     store.onStateChange(() => {
@@ -48,9 +48,8 @@ export function Sheet(props: any, children?: any) {
           }),
           style: computed(state, (d) => {
             return (
-              merge(
-                tp(t?.overlay, { enter: d.enter, exit: d.exit }),
-              ).style || ""
+              merge(tp(t?.overlay, { enter: d.enter, exit: d.exit })).style ||
+              ""
             );
           }),
           onClick() {
@@ -62,7 +61,7 @@ export function Sheet(props: any, children?: any) {
             class: computed(state, (d) => {
               return (
                 merge(
-                  tp(t?.content, {
+                  tp(t?.wrapper, {
                     side,
                     visible: d.visible,
                     enter: d.enter,
@@ -76,7 +75,7 @@ export function Sheet(props: any, children?: any) {
             style: computed(state, (d) => {
               return (
                 merge(
-                  tp(t?.content, {
+                  tp(t?.wrapper, {
                     side,
                     visible: d.visible,
                     enter: d.enter,
@@ -91,14 +90,44 @@ export function Sheet(props: any, children?: any) {
           [
             View(
               {
-                ...merge(tp(t?.closeBtn)),
-                onClick() {
-                  store.hide();
-                },
+                class: computed(state, (d) => {
+                  return (
+                    merge(
+                      tp(t?.content, {
+                        side,
+                        visible: d.visible,
+                        enter: d.enter,
+                        exit: d.exit,
+                      }),
+                    ).class || ""
+                  );
+                }),
+                style: computed(state, (d) => {
+                  return (
+                    merge(
+                      tp(t?.content, {
+                        side,
+                        visible: d.visible,
+                        enter: d.enter,
+                        exit: d.exit,
+                      }),
+                    ).style || ""
+                  );
+                }),
               },
-              [XOutlined],
+              [
+                View(
+                  {
+                    ...merge(tp(t?.closeBtn)),
+                    onClick() {
+                      store.hide();
+                    },
+                  },
+                  [XOutlined],
+                ),
+                ...(children || []),
+              ],
             ),
-            ...(children || []),
           ],
         ),
       ]),
