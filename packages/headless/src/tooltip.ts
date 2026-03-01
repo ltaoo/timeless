@@ -1,5 +1,5 @@
 import { tp, merge } from "./theme";
-import { Component, View, ViewChildren, ViewProps } from "./view";
+import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
 
 export function Tooltip(
   props: ViewProps & {

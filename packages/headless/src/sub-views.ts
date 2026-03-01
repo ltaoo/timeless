@@ -12,7 +12,7 @@ import {
   HttpClientCore,
 } from "@timeless/kit";
 
-import { Component, View, ViewProps } from "./view";
+import { TimelessComponent, TimelessElement, View, ViewProps } from "./view";
 import { For } from "./for";
 import { Show } from "./show";
 import { AsyncView } from "./async-view";
@@ -24,12 +24,8 @@ export function RouteSubViews(
     history: HistoryCore<any, any>;
     storage: StorageCore<any>;
     client: HttpClientCore;
-    views: Record<
-      string,
-      | ((...args: any[]) => Component)
-      | (() => Promise<{ default: (...args: any[]) => Component }>)
-    >;
-    NotFound?: (...args: any[]) => Component;
+    views: Record<string, TimelessComponent>;
+    NotFound?: (...args: any[]) => TimelessElement;
   },
 ) {
   const subviews = refarr(props.view.subViews);

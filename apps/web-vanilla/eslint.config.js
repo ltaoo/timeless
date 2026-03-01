@@ -89,6 +89,8 @@ export default [
         RouteSubViews: "readonly",
         KeepAliveSubViews: "readonly",
         BoltOutlined: "readonly",
+        lazy: "readonly",
+        buildRoutes: "readonly",
       },
     },
     rules: {

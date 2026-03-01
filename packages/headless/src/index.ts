@@ -56,3 +56,5 @@ export * from "./sub-views";
 
 // other
 export * from "./theme";
+export * from "./lazy";
+

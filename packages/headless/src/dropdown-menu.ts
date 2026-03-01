@@ -6,7 +6,7 @@ import { For } from "./for";
 import { merge, tp } from "./theme";
 import { Show } from "./show";
 import { MenuItem, MenuItemView } from "./menu";
-import { Component, View, ViewChildren } from "./view";
+import { TimelessElement, View, ViewChildren } from "./view";
 import { Txt } from "./text";
 import { Portal } from "./portal";
 import { Popper } from "./popper";
@@ -244,7 +244,7 @@ export function DropdownMenu(
 
 function listenMenuContent(
   menu: MenuCore,
-  child: Component,
+  child: TimelessElement,
   onEnter?: () => void,
   onLeave?: () => void,
 ) {

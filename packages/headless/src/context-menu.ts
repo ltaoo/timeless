@@ -2,7 +2,7 @@ import { computed, ref, refobj, uncomputed } from "@timeless/reactive";
 import { ContextMenuCore, MenuCore } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons/chevron-right";
 
-import { Component, View, ViewChildren, ViewProps } from "./view";
+import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
 import { DropdownMenu } from "./dropdown-menu";
 import { Portal } from "./portal";
 import { Popper } from "./popper";
@@ -195,7 +195,7 @@ export function ContextMenu(
   );
 }
 
-function listenMenuContent(menu: MenuCore, child: Component) {
+function listenMenuContent(menu: MenuCore, child: TimelessElement) {
   const $el = child.$elm;
   $el.addEventListener("pointerdown", (e) => {
     e.stopPropagation();

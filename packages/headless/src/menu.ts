@@ -3,7 +3,7 @@ import { MenuCore } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons/chevron-right";
 
 import { tp, merge } from "./theme";
-import { Component, View, ViewChildren, ViewProps } from "./view";
+import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
 import { Txt } from "./text";
 import { For } from "./for";
 import { Show } from "./show";
@@ -124,7 +124,7 @@ export function SubMenuContent(
   ]);
 }
 
-export function MenuItemView(item: any, t: any): Component {
+export function MenuItemView(item: any, t: any): TimelessElement {
   return MenuItem({ store: item, theme: t }, [
     View(
       {

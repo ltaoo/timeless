@@ -1,11 +1,11 @@
 import { ref, isRef, Ref } from "@timeless/reactive";
 
-import { View, ViewProps, Component, isComponent } from "./view";
+import { View, ViewProps, TimelessElement, isComponent } from "./view";
 
 export function For<T>(
   props: ViewProps & {
     each: T[] | Ref<T[]>;
-    render: (item: T, idx: number) => Component | null;
+    render: (item: T, idx: number) => TimelessElement | null;
     key?: string;
   },
 ) {
@@ -14,7 +14,7 @@ export function For<T>(
   const _key = key;
   let _mounted = false;
   let _each_items: T[] = [];
-  let _children: (Component | null)[] = [];
+  let _children: (TimelessElement | null)[] = [];
   let _$elms: (HTMLElement | Text | null)[] = [];
 
   const view$ = View(restProps);
@@ -26,7 +26,7 @@ export function For<T>(
   const methods = {
     _render_item(item: T, index: number) {
       const rr: {
-        node: null | Component;
+        node: null | TimelessElement;
         elm: null | HTMLElement | Text;
         empty?: boolean;
         delete?: boolean;
@@ -48,7 +48,7 @@ export function For<T>(
       return rr;
     },
     _insert(index: number, items: T[]) {
-      const new_children: (Component | null)[] = new Array(items.length);
+      const new_children: (TimelessElement | null)[] = new Array(items.length);
       const new_elms: (HTMLElement | Text | null)[] = new Array(items.length);
 
       // console.log("insert items", index, items);
@@ -130,7 +130,7 @@ export function For<T>(
       const prev_elms = _$elms;
 
       // 1. Prepare target state
-      const new_children: (Component | null)[] = new Array(new_items.length);
+      const new_children: (TimelessElement | null)[] = new Array(new_items.length);
       const new_elms: (HTMLElement | Text | null)[] = new Array(
         new_items.length,
       );
@@ -148,14 +148,14 @@ export function For<T>(
       });
 
       // 3. Diff Phase: Identify operations
-      const added_nodes: { node: Component; elm: HTMLElement | Text }[] = [];
+      const added_nodes: { node: TimelessElement; elm: HTMLElement | Text }[] = [];
       const updated_nodes: {
-        node: Component;
+        node: TimelessElement;
         elm: HTMLElement | Text;
       }[] = [];
       const removed_nodes: {
         elm: HTMLElement | Text | null;
-        component: Component | null;
+        component: TimelessElement | null;
       }[] = [];
 
       // Iterate new items -> Determine Reused vs Added

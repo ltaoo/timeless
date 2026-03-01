@@ -1,12 +1,16 @@
-import { View, Component, isComponent, ViewProps } from "./view";
+import {
+  View,
+  TimelessElement,
+  isComponent,
+  ViewProps,
+  TimelessComponent,
+} from "./view";
 
 export function AsyncView(
-  tt:
-    | ((...args: any[]) => Component)
-    | (() => Promise<{ default: (...args: any[]) => Component }>),
+  component: TimelessComponent,
   props: ViewProps & Record<string, any>,
-): Component {
-  const result = tt(props);
+): TimelessElement {
+  const result = component(props);
   if (isComponent(result)) {
     return result;
   }

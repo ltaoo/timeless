@@ -1,4 +1,4 @@
-import { defaultRouteName } from "@/store/routes.js";
+import { defaultRouteName } from "@/store/index.js";
 
 export default function HomePageView(props) {
   const curSubView = ref(props.view.curView);

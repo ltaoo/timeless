@@ -1,12 +1,10 @@
-import { app, history, client, views } from "./store/index.js";
-import { storage } from "./store/storage.js";
+import { app, history, client, views, storage } from "./store/index.js";
 import NotFoundPageView from "./pages/notfound/index.js";
 
 Timeless.NavigatorCore.prefix = "/timeless";
 
 const render = ($root) => {
   const root_view$ = history.$view;
-  // const view$ = refobj(root_view$.curSubView);
   const view$ = RouteSubViews({
     view: root_view$,
     client,

@@ -174,7 +174,7 @@ export function View(props: ViewProps = {}, children?: any) {
   };
 }
 
-export function isComponent(v: any): v is Component {
+export function isComponent(v: any): v is TimelessElement {
   if (v === null || v === undefined) {
     return false;
   }
@@ -184,7 +184,15 @@ export function isComponent(v: any): v is Component {
   return false;
 }
 
-export interface Component {
+export type TimelessLazyComponent = () => Promise<{
+  default: (...args: any[]) => TimelessElement;
+}>;
+
+export type TimelessComponent =
+  | ((...args: any[]) => TimelessElement)
+  | TimelessLazyComponent;
+
+export interface TimelessElement {
   t: string;
   $elm: HTMLElement | Text;
   render(): HTMLElement | Text | null;
@@ -193,4 +201,4 @@ export interface Component {
   onUnmounted?(): void;
 }
 
-export type ViewChildren = (Component | null)[];
+export type ViewChildren = (TimelessElement | null)[];

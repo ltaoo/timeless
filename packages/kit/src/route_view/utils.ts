@@ -1,4 +1,4 @@
-import { JSONObject } from "@timeless/types";
+import { Brand, JSONObject } from "@timeless/types";
 import { qs_stringify } from "@timeless/utils";
 
 export function buildUrl(
@@ -60,6 +60,7 @@ export type PageKeysType<
             : never
           : never)
   : never;
+// export type PathnameKey = Brand<string, "PathnameKey">;
 export type PathnameKey = string;
 
 export type RouteConfig<T> = {

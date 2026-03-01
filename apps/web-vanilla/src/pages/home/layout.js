@@ -1,5 +1,5 @@
 /** 首页布局 */
-import { defaultRouteName } from "@/store/routes.js";
+import { defaultRouteName } from "@/store/index.js";
 import NotFoundPageView from "@/pages/notfound/index.js";
 
 export default function HomeLayoutView(props) {
