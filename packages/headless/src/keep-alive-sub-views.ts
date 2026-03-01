@@ -18,7 +18,6 @@ import { LazyView } from "./lazy-view";
 
 export function KeepAliveSubViews(
   props: ViewProps & {
-    subclass?: ClassNameRef;
     view: RouteViewCore;
     history: HistoryCore<any, any>;
     storage: StorageCore<any>;
@@ -50,8 +49,6 @@ export function KeepAliveSubViews(
   const nodes: any[] = [];
 
   return For({
-    // class: props.class,
-    // style: "position: relative;",
     each: subviews,
     render(subview: any, idx) {
       const PageView = props.views[subview.name];
@@ -60,7 +57,6 @@ export function KeepAliveSubViews(
       }
       return View(
         {
-          class: props.subclass,
           style: computed(cur_subview, (d) => {
             return [
               `z-index: ${idx + 1}; width: 100%; height: 100%;`,

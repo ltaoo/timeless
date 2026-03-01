@@ -1,148 +1,139 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { View, ViewChildren, ViewProps, isElement } from "./view";
+import { ViewChildren, isElement } from "./view";
 
 export function Show(
-  props: ViewProps & {
-    when: Ref<boolean>;
+  props: {
+    when: Ref<boolean> | boolean;
     fallback?: ViewChildren;
+    onMounted?: ($fg: any) => void;
+    beforeUnmounted?: () => void;
+    onUnmounted?: () => void;
+    [key: string]: any;
   },
   children?: ViewChildren,
 ) {
-  const { when, fallback, ...rest } = props;
+  const { when, fallback, onMounted, beforeUnmounted, onUnmounted } = props;
+  const anchor = document.createTextNode("");
+  
+  let _currentNodes: Node[] = [];
+  let _currentChildren: any[] = [];
+  let _prev_condition: boolean | null = null;
 
-  let _fallback = fallback;
-  let _when_ref = when;
-  let _children = children;
-  let _prev_condition: any = null;
+  // Normalize children helper
+  const normalize = (c: any) => {
+    if (Array.isArray(c)) return c;
+    return [c];
+  };
 
-  const view$ = View({ dataset: { show: "1" }, ...rest }, []);
+  const _children = normalize(children);
+  const _fallback = normalize(fallback);
 
-  _when_ref._subscribe({
-    onChange() {
-      render();
-    },
-  });
-  let _nodes: any[] = [];
-  function render() {
-    const condition = isRef(when) ? when.value : when;
-    // console.log("[baseui]Show - refresh", condition, _prev_condition);
-    if (condition === _prev_condition) {
-      // 就是没有变化
-      return;
+  const getTargetChildren = (condition: boolean) => {
+    return condition ? _children : _fallback;
+  };
+
+  const unmount = () => {
+    // Lifecycle
+    for (const child of _currentChildren) {
+      if (isElement(child) && child.onUnmounted) {
+        child.onUnmounted();
+      }
     }
-    if (condition === false && _prev_condition === true) {
-      _prev_condition = condition;
-      for (let i = 0; i < _nodes.length; i += 1) {
-        const node = _nodes[i];
-        if (isElement(node) && typeof node.onUnmounted === "function") {
-          node.onUnmounted();
+    // DOM removal
+    const parent = anchor.parentNode;
+    if (parent) {
+      for (const node of _currentNodes) {
+        parent.removeChild(node);
+      }
+    }
+    _currentNodes = [];
+    _currentChildren = [];
+  };
+
+  const mount = (targetChildren: any[], parent?: Node, before?: Node) => {
+    const fragment = document.createDocumentFragment();
+    const newNodes: Node[] = [];
+    const newInstances: any[] = [];
+
+    for (const node of targetChildren) {
+      if (!node) continue;
+      if (isElement(node)) {
+        const result = node.render();
+        if (result) {
+          fragment.appendChild(result);
+          newNodes.push(result);
+          newInstances.push(node);
         }
-      }
-      _nodes = [];
-      view$.$elm.innerHTML = "";
-      return;
-    }
-    // if (condition === false) {
-    // 如果 false 表示要渲染 condition
-    //   return;
-    // }
-    _prev_condition = condition;
-    const nodes = condition ? _children : _fallback;
-    if (!nodes || nodes.length === 0) {
-      return;
-    }
-    for (let i = 0; i < _nodes.length; i += 1) {
-      const node = _nodes[i];
-      if (isElement(node) && typeof node.onUnmounted === "function") {
-        node.onUnmounted();
+      } else if (typeof node === "string" || typeof node === "number") {
+        const textNode = document.createTextNode(String(node));
+        fragment.appendChild(textNode);
+        newNodes.push(textNode);
       }
     }
-    _nodes = nodes;
-    // console.log("[baseui]Show - insert content");
-    const $fragment = document.createDocumentFragment();
-    for (let i = 0; i < nodes.length; i += 1) {
-      const node = nodes[i];
-      const $el = (() => {
-        if (isElement(node)) {
-          const result = node.render();
-          if (result) {
-            return result;
-          }
-        } else if (typeof node === "string" || typeof node === "number") {
-          // $fragment.appendChild(document.createTextNode(String(node)));
-          return document.createTextNode(String(node));
-        } else if (node) {
-          // $fragment.appendChild(node);
-          return node;
+
+    _currentNodes = newNodes;
+    _currentChildren = newInstances;
+
+    if (parent) {
+      parent.insertBefore(fragment, before || null);
+    }
+
+    // Lifecycle
+    for (const child of newInstances) {
+      if (isElement(child) && child.onMounted) {
+        child.onMounted(child.$elm);
+      }
+    }
+    
+    return fragment;
+  };
+
+  if (isRef(when)) {
+    when._subscribe({
+      onChange(value: boolean) {
+        const condition = !!value;
+        if (condition === _prev_condition) return;
+        _prev_condition = condition;
+
+        unmount();
+        const target = getTargetChildren(condition);
+        if (target.length > 0 && anchor.parentNode) {
+            mount(target, anchor.parentNode, anchor);
         }
-        return null;
-      })();
-      if ($el) {
-        $fragment.appendChild($el);
-      }
-    }
-    // cache[condition] = $fragment;
-    view$.$elm.innerHTML = "";
-    view$.$elm.appendChild($fragment);
-
-    // console.log("[baseui]Show - before insert to $parent", $parent);
-    // if ($parent) {
-    //   // 本来是 hidden，可见后，$parent 有了值。再 hide、open，就到这个分支
-    //   console.log("[baseui]Show - insert to $parent");
-    //   $parent.appendChild(view$.$elm);
-    // } else {
-    //   console.log("[baseui]Show - no $parent", view$.$elm.parentNode);
-    //   console.log(view$.$elm.parentNode);
-    //   $parent = view$.$elm.parentNode;
-    // }
-    // console.log("[baseui]Show - before invoke view$.onMounted");
-
-    // view$.onMounted();
-    for (let i = 0; i < _nodes.length; i += 1) {
-      const node = _nodes[i];
-      if (isElement(node) && typeof node.onMounted === "function") {
-        node.onMounted(node.$elm);
-      }
-    }
+      },
+    });
   }
 
   return {
     t: "show",
-    $elm: view$.$elm,
-    append(node: any) {
-      view$.append(node);
-    },
-    setContent(v: any) {
-      view$.setContent(v);
-    },
+    $elm: anchor as any,
     render() {
-      render();
-      // view$.onMounted();
-      if (props.onMounted) {
-        props.onMounted(view$.$elm);
+      const condition = isRef(when) ? !!when.value : !!when;
+      _prev_condition = condition;
+      
+      const target = getTargetChildren(condition);
+      const fragment = mount(target); 
+      
+      // Append anchor to the result fragment so it gets inserted into DOM
+      fragment.appendChild(anchor);
+      
+      if (onMounted) {
+        onMounted(anchor); 
       }
-      return view$.$elm;
+      return fragment;
     },
-    // beforeUnmounted() {
-    //   if (props.beforeUnmounted) {
-    //     props.beforeUnmounted();
-    //   }
-    // },
-    onUnmounted() {
-      if (props.onUnmounted) {
-        props.onUnmounted();
-      }
-      // console.log('show onUnmounted', _nodes);
-      for (let i = 0; i < _nodes.length; i += 1) {
-        const node = _nodes[i];
-        if (isElement(node) && typeof node.onUnmounted === "function") {
-          node.onUnmounted();
+    beforeUnmounted() {
+        if (beforeUnmounted) beforeUnmounted();
+        for (const child of _currentChildren) {
+            if (isElement(child) && child.beforeUnmounted) {
+                child.beforeUnmounted();
+            }
         }
-      }
-      view$.$elm.innerHTML = "";
-      _when_ref = when;
-      _prev_condition = null;
+    },
+    onUnmounted() {
+      if (onUnmounted) onUnmounted();
+      unmount();
     },
   };
 }

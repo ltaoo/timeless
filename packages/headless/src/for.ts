@@ -17,9 +17,8 @@ export function For<T>(
   let _elements: (TimelessElement | null)[] = [];
   let _$children: (HTMLElement | Text | DocumentFragment | null)[] = [];
 
-  const view$ = View(restProps);
-  const $elm = view$.$elm;
-  $elm.setAttribute("for-wrapper", "true");
+  const anchor = document.createTextNode("");
+  const $elm = anchor as any;
 
   const _existing_map = new Map();
 
@@ -28,17 +27,18 @@ export function For<T>(
       const rr: {
         node: null | TimelessElement;
         elm: null | HTMLElement | Text | DocumentFragment;
+        trackElm?: HTMLElement | Text | DocumentFragment | null;
         empty?: boolean;
         delete?: boolean;
       } = (() => {
         const view$ = render(item, index);
         if (!view$) {
-          return { node: null, elm: null, empty: true };
+          return { node: null, elm: null, trackElm: null, empty: true };
         }
         // is component
         // if (isComponent(view$)) {
         const elm = view$.render();
-        return { node: view$, elm };
+        return { node: view$, elm, trackElm: view$.$elm };
         // }
         // if (typeof view$ === "string" || typeof view$ === "number") {
         //   return { node: null, elm: document.createTextNode(String(view$)) };
@@ -50,7 +50,11 @@ export function For<T>(
     _insert(index: number, items: T[]) {
       // const new_children: (TimelessElement | null)[] = new Array(items.length);
       // const new_elms: (HTMLElement | Text | null)[] = new Array(items.length);
-      const $base = _$children[index];
+      const $base = _$children[index] || anchor;
+      const $parent = anchor.parentNode;
+      
+      if (!$parent) return;
+
       const $fragment = document.createDocumentFragment();
       for (let i = 0; i < items.length; i++) {
         const item_prepare_insert = items[i];
@@ -64,22 +68,25 @@ export function For<T>(
           }
           if (isElement(res)) {
             const $elm_prepare_insert = res.render();
-            _$children.splice(index + i, 0, $elm_prepare_insert);
+            _$children.splice(index + i, 0, res.$elm);
             if ($elm_prepare_insert) {
               $fragment.appendChild($elm_prepare_insert);
             }
           }
         })();
       }
-      $elm.insertBefore($fragment, $base || null);
+      $parent.insertBefore($fragment, $base);
       // console.log("[headless]For - insert items", index, items, _$children);
     },
     _remove(index: number, count: number) {
+      const $parent = anchor.parentNode;
+      if (!$parent) return;
+
       for (let i = 0; i < count; i += 1) {
         const elm = _$children[index + i];
         // console.log(i, index + i, elm, _$children);
-        if (elm && elm.parentNode === $elm) {
-          $elm.removeChild(elm);
+        if (elm && elm.parentNode === $parent) {
+          $parent.removeChild(elm);
         }
         const item = _values[index + i];
         if (_existing_map.has(item)) {
@@ -91,6 +98,9 @@ export function For<T>(
       }
     },
     _update(index: number, item: any) {
+      const $parent = anchor.parentNode;
+      if (!$parent) return;
+
       const res = methods._render_item(item, index);
       if (!res) {
         return;
@@ -99,10 +109,10 @@ export function For<T>(
         return;
       }
       const old = _$children[index];
-      if (old && old.parentNode === $elm && res.elm) {
-        $elm.replaceChild(res.elm, old);
+      if (old && old.parentNode === $parent && res.elm) {
+        $parent.replaceChild(res.elm, old);
       } else if (res.elm) {
-        $elm.appendChild(res.elm);
+        $parent.insertBefore(res.elm, anchor);
         // if (res.onMounted) {
         //   res.onMounted();
         // }
@@ -122,6 +132,9 @@ export function For<T>(
       const prev_items = _values;
       const prev_elements = _elements;
       const prev_children = _$children;
+      
+      const $parent = anchor.parentNode;
+      if (!$parent) return;
 
       // 1. Prepare target state
       const new_elements: (TimelessElement | null)[] = new Array(new_items.length);
@@ -166,7 +179,7 @@ export function For<T>(
           if (item !== oldItem) {
             const res = methods._render_item(item, i);
             new_elements[i] = res.node;
-            new_children[i] = res.elm;
+            new_children[i] = res.trackElm || res.elm; // Use trackElm
 
             removed_nodes.push({
               elm: prev_children[oldIndex],
@@ -185,7 +198,7 @@ export function For<T>(
           // Added (New)
           const res = methods._render_item(item, i);
           new_elements[i] = res.node;
-          new_children[i] = res.elm;
+          new_children[i] = res.trackElm || res.elm; // Use trackElm
           if (res.node && res.elm && isElement(res.node)) {
             added_nodes.push({ node: res.node, elm: res.elm });
           }
@@ -209,8 +222,8 @@ export function For<T>(
 
       // 4.1 Remove nodes
       for (const { elm, component } of removed_nodes) {
-        if (elm && elm.parentNode === $elm) {
-          $elm.removeChild(elm);
+        if (elm && elm.parentNode === $parent) {
+          $parent.removeChild(elm);
         }
         if (component && isElement(component)) {
           if (typeof component.onUnmounted === "function") {
@@ -220,13 +233,24 @@ export function For<T>(
       }
 
       // 4.2 Reorder / Insert nodes
-      for (let i = 0; i < new_children.length; i++) {
+      // Backward loop for correct insertion relative to anchor
+      let nextSibling: Node | null = anchor;
+      for (let i = new_children.length - 1; i >= 0; i--) {
         const node = new_children[i];
         if (!node) continue;
-        const cur_node = $elm.childNodes[i];
-        if (node !== cur_node) {
-          $elm.insertBefore(node, cur_node || null);
+        
+        // If node is already in correct position (immediately before nextSibling), skip.
+        if (node.nextSibling === nextSibling) {
+            nextSibling = node;
+            continue;
         }
+
+        if ($parent) {
+             // If node is already in DOM elsewhere, insertBefore moves it.
+             $parent.insertBefore(node, nextSibling);
+        }
+        
+        nextSibling = node;
       }
 
       // 4.3 Trigger Lifecycle (Mounted)
@@ -288,7 +312,7 @@ export function For<T>(
           if (isElement(res)) {
             _elements[i] = res;
             const $sub = res.render();
-            _$children[i] = $sub;
+            _$children[i] = res.$elm;
             if ($sub) {
               $fragment.appendChild($sub);
             }
@@ -297,21 +321,31 @@ export function For<T>(
           }
         })();
       }
-      $elm.appendChild($fragment);
+      $fragment.appendChild(anchor); // Add anchor to fragment
       _mounted = true;
+      
+      // onMounted will be called by parent with the result of render(), which is the fragment.
+      // But props.onMounted expects an element?
       if (onMounted) {
-        onMounted($elm);
+        // onMounted($elm); // $elm is anchor.
+        // We can pass anchor, but user might expect the container.
+        // Since there is no container, we pass anchor.
+        onMounted(anchor);
       }
       // console.log("2. mounted", _children);
       for (let i = 0; i < _elements.length; i += 1) {
         const component = _elements[i];
         if (isElement(component)) {
           if (typeof component.onMounted === "function") {
-            component.onMounted(_$children[i] as any as HTMLElement);
+            // component.onMounted(_$children[i] as any as HTMLElement); 
+            // _$children[i] is trackElm (possibly Anchor).
+            // Pass rendered element (from render() result) or trackElm?
+            // Usually onMounted expects the root element.
+            component.onMounted(component.$elm);
           }
         }
       }
-      return $elm;
+      return $fragment; // Return fragment with items + anchor
     },
     onUnmounted() {
       if (onUnmounted) {
@@ -325,11 +359,27 @@ export function For<T>(
           }
         }
       }
+
+      // Remove DOM nodes
+      const $parent = anchor.parentNode;
+      if ($parent) {
+        for (const elm of _$children) {
+          if (elm && elm.parentNode === $parent) {
+             $parent.removeChild(elm);
+          }
+        }
+        // Remove anchor? Usually onUnmounted means the whole component is gone.
+        // But if it's just unmounted from parent but kept alive?
+        // Typically we don't need to remove anchor if parent removes the whole block.
+        // But if we want to be clean:
+        // if (anchor.parentNode === $parent) $parent.removeChild(anchor);
+      }
+
       _mounted = false;
       _values = [];
       _elements = [];
       _$children = [];
-      $elm.innerHTML = "";
+      // $elm.innerHTML = ""; // This was valid when $elm was a wrapper. Now $elm is anchor.
     },
   };
 }

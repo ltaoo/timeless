@@ -179,13 +179,19 @@ export function MenuItemView(item: any, t: any): TimelessElement {
                           subState.as(v);
                         });
                         const subItems = computed(subState, (d) => d.items);
-                        return For({
-                          ...merge(tp(t?.menu)),
-                          each: subItems,
-                          render(sub) {
-                            return MenuItemView(sub, t);
+                        return View(
+                          {
+                            ...merge(tp(t?.menu)),
                           },
-                        });
+                          [
+                            For({
+                              each: subItems,
+                              render(sub) {
+                                return MenuItemView(sub, t);
+                              },
+                            }),
+                          ],
+                        );
                       })(),
                     ]),
                   ],

@@ -101,33 +101,39 @@ export function Select(
               }),
             },
             [
-              For({
-                ...merge(tp(t?.list)),
-                each: options,
-                render(opt: any) {
-                  return View(
-                    {
-                      class: computed(state, () => {
-                        return (
-                          merge(tp(t?.option, { selected: opt.selected }))
-                            .class || ""
-                        );
-                      }),
-                      style: computed(state, () => {
-                        return (
-                          merge(tp(t?.option, { selected: opt.selected }))
-                            .style || ""
-                        );
-                      }),
-                      onClick() {
-                        store.select(opt.value);
-                        open.as(false);
-                      },
-                    },
-                    [Txt(opt.label)],
-                  );
+              View(
+                {
+                  ...merge(tp(t?.list)),
                 },
-              }),
+                [
+                  For({
+                    each: options,
+                    render(opt: any) {
+                      return View(
+                        {
+                          class: computed(state, () => {
+                            return (
+                              merge(tp(t?.option, { selected: opt.selected }))
+                                .class || ""
+                            );
+                          }),
+                          style: computed(state, () => {
+                            return (
+                              merge(tp(t?.option, { selected: opt.selected }))
+                                .style || ""
+                            );
+                          }),
+                          onClick() {
+                            store.select(opt.value);
+                            open.as(false);
+                          },
+                        },
+                        [Txt(opt.label)],
+                      );
+                    },
+                  }),
+                ],
+              ),
             ],
           ),
         ]),

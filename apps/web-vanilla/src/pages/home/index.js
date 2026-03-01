@@ -57,10 +57,12 @@ export default function HomePageView(props) {
         }),
       ],
     ),
-    View({ class: "relative overflow-y-auto flex-1 w-0 h-full p-6" }, [
-      KeepAliveSubViews({
-        ...props,
-      }),
+    View({ class: "overflow-y-auto flex-1 w-0 h-full" }, [
+      View({ class: "relative p-6" }, [
+        KeepAliveSubViews({
+          ...props,
+        }),
+      ]),
     ]),
   ]);
 }

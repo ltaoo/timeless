@@ -48,99 +48,113 @@ export function DropdownMenu(
     }, 100);
   }
 
-  const $menucontent = For({
-    ...merge(tp(t?.menu)),
-    each: menuitem$s,
-    render(item: { label: string; menu?: MenuCore }) {
-      //       console.log("[]DropdownMenu render item", !!item.menu, item.label);
-      const items = ref(item.menu ? item.menu.state.items : []);
-      if (item.menu) {
-        item.menu.onStateChange((v) => {
-          // console.log("[]items change", v.items);
-          items.as(v.items);
-        });
-      }
-      return Show(
-        {
-          when: ref(!!item.menu),
-          fallback: [MenuItem({ store: item, theme: t }, [Txt(item.label)])],
-        },
-        [
-          MenuItem(
+  const $menucontent = View(
+    {
+      ...merge(tp(t?.menu)),
+    },
+    [
+      For({
+        each: menuitem$s,
+        render(item: { label: string; menu?: MenuCore }) {
+          //       console.log("[]DropdownMenu render item", !!item.menu, item.label);
+          const items = ref(item.menu ? item.menu.state.items : []);
+          if (item.menu) {
+            item.menu.onStateChange((v) => {
+              // console.log("[]items change", v.items);
+              items.as(v.items);
+            });
+          }
+          return Show(
             {
-              store: item,
-              theme: t,
-              onMouseEnter: () => {
-                const menu = item.menu;
-                if (menu) {
-                  if (menu.hide_sub_timer) {
-                    clearTimeout(menu.hide_sub_timer);
-                    menu.hide_sub_timer = null;
-                  }
-                }
-              },
-              onMouseLeave: () => {
-                const menu = item.menu;
-                if (menu) {
-                  menu.hide_sub_timer = setTimeout(() => {
-                    menu.hide_sub_timer = null;
-                    menu.hide();
-                  }, 200);
-                }
-              },
+              when: ref(!!item.menu),
+              fallback: [
+                MenuItem({ store: item, theme: t }, [Txt(item.label)]),
+              ],
             },
             [
-              View({ style: "flex:1;" }, [Txt(item.label)]),
-              View({ ...merge(tp(t?.submenuArrow)) }, [
-                ChevronRightOutlined({}),
-              ]),
-              // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
-              item.menu
-                ? Portal({}, [
-                    Presence(
-                      {
-                        store: item.menu.presence,
-                        animation: t?.subAnimation || t?.animation,
-                      },
-                      [
-                        Popper({ store: item.menu.popper }, [
-                          listenMenuContent(
-                            item.menu,
-                            (() => {
-                              return For({
-                                ...merge(tp(t?.menu)),
-                                each: items,
-                                render(sub) {
-                                  return MenuItemView(sub, t);
+              MenuItem(
+                {
+                  store: item,
+                  theme: t,
+                  onMouseEnter: () => {
+                    const menu = item.menu;
+                    if (menu) {
+                      if (menu.hide_sub_timer) {
+                        clearTimeout(menu.hide_sub_timer);
+                        menu.hide_sub_timer = null;
+                      }
+                    }
+                  },
+                  onMouseLeave: () => {
+                    const menu = item.menu;
+                    if (menu) {
+                      menu.hide_sub_timer = setTimeout(() => {
+                        menu.hide_sub_timer = null;
+                        menu.hide();
+                      }, 200);
+                    }
+                  },
+                },
+                [
+                  View({ style: "flex:1;" }, [Txt(item.label)]),
+                  View({ ...merge(tp(t?.submenuArrow)) }, [
+                    ChevronRightOutlined({}),
+                  ]),
+                  // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
+                  item.menu
+                    ? Portal({}, [
+                        Presence(
+                          {
+                            store: item.menu.presence,
+                            animation: t?.subAnimation || t?.animation,
+                          },
+                          [
+                            Popper({ store: item.menu.popper }, [
+                              listenMenuContent(
+                                item.menu,
+                                (() => {
+                                  return View(
+                                    {
+                                      ...merge(tp(t?.menu)),
+                                    },
+                                    [
+                                      For({
+                                        each: items,
+                                        render(sub) {
+                                          return MenuItemView(sub, t);
+                                        },
+                                        onUnmounted() {
+                                          uncomputed(items);
+                                        },
+                                      }),
+                                    ],
+                                  );
+                                })(),
+                                () => {
+                                  if (store.trigger === "hover") {
+                                    _hoverClearHide();
+                                  }
                                 },
-                                onUnmounted() {
-                                  uncomputed(items);
+                                () => {
+                                  if (store.trigger === "hover") {
+                                    _hoverScheduleHide();
+                                  }
                                 },
-                              });
-                            })(),
-                            () => {
-                              if (store.trigger === "hover") {
-                                _hoverClearHide();
-                              }
-                            },
-                            () => {
-                              if (store.trigger === "hover") {
-                                _hoverScheduleHide();
-                              }
-                            },
-                          ),
-                        ]),
-                      ],
-                    ),
-                  ])
-                : null,
+                              ),
+                            ]),
+                          ],
+                        ),
+                      ])
+                    : null,
+                ],
+              ),
             ],
-          ),
-        ],
-      );
-    },
-  });
-  $menucontent.$elm.addEventListener("pointerdown", (e) => {
+          );
+        },
+      }),
+    ],
+  );
+  $menucontent.$elm.addEventListener("pointerdown", (e: Event) => {
     e.stopPropagation();
   });
   if (store.trigger === "hover") {

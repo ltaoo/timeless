@@ -20,7 +20,6 @@ import { LazyView } from "./lazy-view";
 
 export function RouteSubViews(
   props: ViewProps & {
-    subclass?: ClassNameRef;
     view: RouteViewCore;
     app: ApplicationModel<any>;
     history: HistoryCore<any, any>;
@@ -53,8 +52,6 @@ export function RouteSubViews(
   const nodes: any[] = [];
 
   return For({
-    class: props.class,
-    // style: "position: relative; width: 100%; height: 100%;",
     each: subviews,
     render(subview: any, idx) {
       const PageView = props.views[subview.name];
@@ -63,21 +60,27 @@ export function RouteSubViews(
       }
       return Show(
         {
-          style: `z-index: ${idx + 1}; position: absolute; width: 100%; height: 100%;"`,
-          dataset: {
-            name: subview.name,
-            pathname: subview.pathname,
-          },
           when: computed(cur_subview, (d) => d && d.name === subview.name),
         },
         [
-          LazyView(PageView, {
-            ...props,
-            view: subview,
-            onMounted() {
-              nodes.push(this);
+          View(
+            {
+              style: `z-index: ${idx + 1}; position: absolute; width: 100%; height: 100%;"`,
+              dataset: {
+                name: subview.name,
+                pathname: subview.pathname,
+              },
             },
-          }),
+            [
+              LazyView(PageView, {
+                ...props,
+                view: subview,
+                onMounted() {
+                  nodes.push(this);
+                },
+              }),
+            ],
+          ),
         ],
       );
     },
