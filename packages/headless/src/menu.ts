@@ -20,11 +20,11 @@ export function Menu(
 }
 
 export function MenuItem(props: any, children?: ViewChildren) {
-  const { store, theme: t, class: cn, style: st, ...rest } = props;
+  const { store, theme: t, class: cls, style: st, ...rest } = props;
   const view$ = View(
     {
       ...rest,
-      ...merge(tp(t?.item), cn, st),
+      ...merge(tp(t?.item), cls, st),
       onClick() {
         store.handleClick();
       },
@@ -63,7 +63,7 @@ export function MenuItem(props: any, children?: ViewChildren) {
   $el.addEventListener("mouseleave", () => {
     if (props.onMouseLeave) props.onMouseLeave();
     if (hoverM.style) {
-      const base = merge(tp(t?.item), cn, st);
+      const base = merge(tp(t?.item), cls, st);
       $el.style.cssText = base.style || "";
     }
     if (hoverM.class)
@@ -81,7 +81,7 @@ export function MenuItem(props: any, children?: ViewChildren) {
         }
       } else {
         if (hoverM.style) {
-          const base = merge(tp(t?.item), cn, st);
+          const base = merge(tp(t?.item), cls, st);
           $el.style.cssText = base.style || "";
         }
         if (hoverM.class)
@@ -166,13 +166,13 @@ export function MenuItemView(item: any, t: any): TimelessElement {
                 },
               },
               [
-                Popper({ store: item.menu.popper }, [
-                  Presence(
-                    {
-                      store: item.menu.presence,
-                      animation: t?.subAnimation || t?.animation,
-                    },
-                    [
+                Presence(
+                  {
+                    store: item.menu.presence,
+                    animation: t?.subAnimation || t?.animation,
+                  },
+                  [
+                    Popper({ store: item.menu.popper }, [
                       (() => {
                         const subState = refobj(item.menu.state);
                         item.menu.onStateChange((v: any) => {
@@ -187,9 +187,9 @@ export function MenuItemView(item: any, t: any): TimelessElement {
                           },
                         });
                       })(),
-                    ],
-                  ),
-                ]),
+                    ]),
+                  ],
+                ),
               ],
             )
           : null,

@@ -84,13 +84,13 @@ export function ContextMenu(
               // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
               item.menu
                 ? Portal({}, [
-                    Popper({ store: item.menu.popper }, [
-                      Presence(
-                        {
-                          store: item.menu.presence,
-                          animation: t?.subAnimation || t?.animation,
-                        },
-                        [
+                    Presence(
+                      {
+                        store: item.menu.presence,
+                        animation: t?.subAnimation || t?.animation,
+                      },
+                      [
+                        Popper({ store: item.menu.popper }, [
                           listenMenuContent(
                             item.menu,
                             (() => {
@@ -106,9 +106,9 @@ export function ContextMenu(
                               });
                             })(),
                           ),
-                        ],
-                      ),
-                    ]),
+                        ]),
+                      ],
+                    ),
                   ])
                 : null,
             ],
@@ -185,10 +185,8 @@ export function ContextMenu(
     [
       ...children,
       Portal({}, [
-        Popper({ store: store.menu.popper }, [
-          Presence({ store: store.menu.presence, animation: t?.animation }, [
-            $menucontent,
-          ]),
+        Presence({ store: store.menu.presence, animation: t?.animation }, [
+          Popper({ store: store.menu.popper }, [$menucontent]),
         ]),
       ]),
     ],

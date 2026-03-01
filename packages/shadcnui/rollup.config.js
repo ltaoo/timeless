@@ -2,6 +2,9 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import terser from "@rollup/plugin-terser";
 import typescript from "@rollup/plugin-typescript";
+import postcss from "rollup-plugin-postcss";
+import tailwindcss from "tailwindcss";
+import autoprefixer from "autoprefixer";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -11,9 +14,9 @@ export default {
   input: path.join(__dirname, "src/index.ts"),
   output: [
     {
-      file: path.join(__dirname, "dist/timeless.shadcnui.umd.min.js"),
+      file: path.join(__dirname, "dist/timeless.shadcn.umd.min.js"),
       format: "umd",
-      name: "Timeless.shadcnui",
+      name: "Timeless.shadcn",
       extend: true,
       globals: {
         "@timeless/reactive": "Timeless.reactive",
@@ -23,13 +26,13 @@ export default {
       },
       footer: `if (typeof window !== "undefined") {
         window.Timeless = window.Timeless || {};
-        if (window.Timeless.shadcnui) {
-          Object.assign(window, window.Timeless.shadcnui);
+        if (window.Timeless.shadcn) {
+          Object.assign(window, window.Timeless.shadcn);
         }
       }`,
     },
     {
-      file: path.join(__dirname, "dist/timeless.shadcnui.esm.js"),
+      file: path.join(__dirname, "dist/timeless.shadcn.esm.js"),
       format: "es",
     },
   ],
@@ -39,6 +42,11 @@ export default {
       tsconfig: "./tsconfig.json",
       declaration: true,
       declarationDir: "./dist",
+    }),
+    postcss({
+      extract: path.join(__dirname, "dist/timeless.shadcnui.css"),
+      minimize: true,
+      plugins: [tailwindcss(path.resolve(__dirname, "./tailwind.config.js")), autoprefixer()],
     }),
     resolve({
       browser: true,

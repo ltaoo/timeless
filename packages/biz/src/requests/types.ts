@@ -1,4 +1,4 @@
-import { UnpackedResult } from "@timeless/kit";
+import { UnpackedResult } from "@timeless/base";
 import { Unpacked } from "@timeless/types";
 
 export type BizResponse<T> = {

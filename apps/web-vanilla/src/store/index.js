@@ -49,6 +49,11 @@ const routesConfigure = {
             pathname: "/home/index/overlay",
             component: lazy("@/pages/home/index.overlay.js"),
           },
+          debug: {
+            title: "调试",
+            pathname: "/home/index/debug",
+            component: lazy("@/pages/home/index.debug.js"),
+          },
         },
       },
       settings: {

@@ -170,6 +170,14 @@ function render($container) {
                 return s.message;
               }),
             ),
+            Button(
+              {
+                onClick() {
+                  commitList.remove(commit);
+                },
+              },
+              [Txt("Delete")],
+            ),
             Show(
               {
                 when: computed(

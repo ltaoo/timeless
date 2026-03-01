@@ -201,9 +201,9 @@ export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 
 export interface TimelessElement {
   t: string;
-  $elm: HTMLElement | Text;
-  render(): HTMLElement | Text | null;
-  onMounted?(el: HTMLElement | Text): void;
+  $elm: HTMLElement | Text | DocumentFragment;
+  render(): HTMLElement | Text | DocumentFragment | null;
+  onMounted?(el: HTMLElement | Text | DocumentFragment): void;
   beforeUnmounted?(): void;
   onUnmounted?(): void;
 }

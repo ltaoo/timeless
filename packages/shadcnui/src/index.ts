@@ -1,4 +1,3 @@
-import * as Headless from "@timeless/headless";
 import {
   View,
   Match,
@@ -64,6 +63,8 @@ import {
   TableCell,
 } from "./table";
 
+import "./index.css";
+
 export {
   View,
   Match,
@@ -122,5 +123,6 @@ export {
   TableRow,
   TableHead,
   TableCell,
-  Headless,
 };
+
+console.log('shadcn.version 1.0.1');

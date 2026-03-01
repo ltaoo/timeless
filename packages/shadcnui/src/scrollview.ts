@@ -51,17 +51,15 @@ export function ScrollView(
     progress$.$elm.style.display = "none";
   });
 
-  /** @ts-ignore */
-  TimelessWeb.provide_ui_scroll_view_indicator(props.store, indicator$.$elm);
-  /** @ts-ignore */
-  TimelessWeb.provide_ui_scroll_view_scroll(props.store, view$.$elm);
+  Timeless.web.provide_ui_scroll_view_indicator(props.store, indicator$.$elm);
+  Timeless.web.provide_ui_scroll_view_scroll(props.store, view$.$elm);
 
   return {
     t: "view",
     $elm: view$.$elm,
-    onMounted() {
-      // 所有 component 都要返回 onMounted，调用 view$.onMounted 和 props.onMounted
-    },
+    // onMounted() {
+    //   // 所有 component 都要返回 onMounted，调用 view$.onMounted 和 props.onMounted
+    // },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();

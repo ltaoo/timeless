@@ -54,7 +54,7 @@ export * from "./slider";
 export * from "./toggle";
 
 // overlay
-export * from "./popover";
+export * as PopoverPrimitive from "./popover";
 export * from "./sheet";
 export * from "./dialog";
 export * from "./tooltip";

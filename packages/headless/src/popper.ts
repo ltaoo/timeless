@@ -1,4 +1,4 @@
-import { ref, refobj, computed } from "@timeless/reactive";
+import { ref, refobj, computed, cn } from "@timeless/reactive";
 import { PopperCore } from "@timeless/ui/popper";
 
 import { View, ViewChildren, ViewProps } from "./view";
@@ -12,13 +12,22 @@ export function Popper(
 ) {
   const { store, zIndex = 999, ...rest } = props;
   const state = refobj(store.state);
-  let unsubscribe: any;
 
-  const content$ = View(
+  // console.log('before store.onState change')
+  const unsubscribe = store.onStateChange(() => {
+    // console.log(
+    //   "[baseui]Popover props.store.onStateChange",
+    //   store.state.isPlaced,
+    // );
+    state.as(store.state);
+  });
+
+  return View(
     {
       ...rest,
-      class: "popper z-[999]",
+      class: cn(["popper z-[999]", rest.class]),
       style: computed(state, (draft) => {
+        // console.log("[DEBUG-POPPER] popper on state changed", draft);
         const ss: Record<string, any> = {
           "z-index": zIndex,
           position: "fixed",
@@ -59,32 +68,12 @@ export function Popper(
         // }
       },
       onUnmounted() {
-        if (typeof unsubscribe === "function") {
-          unsubscribe();
-        }
+        // if (typeof unsubscribe === "function") {
+        //   unsubscribe();
+        // }
         store.setFloating(null);
       },
     },
     children,
   );
-  unsubscribe = store.onStateChange(() => {
-    // console.log(
-    //   "[baseui]Popover props.store.onStateChange",
-    //   store.state.isPlaced,
-    //   store.state.visible,
-    // );
-    state.as(store.state);
-  });
-
-  // return Presence(
-  //   {
-  //     store: props.store.present,
-  //     animation: {
-  //       in: "fade-in",
-  //       out: "fade-out",
-  //     },
-  //   },
-  //   [content$],
-  // );
-  return content$;
 }

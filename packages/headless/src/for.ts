@@ -13,9 +13,9 @@ export function For<T>(
 
   const _key = key;
   let _mounted = false;
-  let _each_items: T[] = [];
-  let _children: (TimelessElement | null)[] = [];
-  let _$elms: (HTMLElement | Text | null)[] = [];
+  let _values: T[] = [];
+  let _elements: (TimelessElement | null)[] = [];
+  let _$children: (HTMLElement | Text | DocumentFragment | null)[] = [];
 
   const view$ = View(restProps);
   const $elm = view$.$elm;
@@ -27,7 +27,7 @@ export function For<T>(
     _render_item(item: T, index: number) {
       const rr: {
         node: null | TimelessElement;
-        elm: null | HTMLElement | Text;
+        elm: null | HTMLElement | Text | DocumentFragment;
         empty?: boolean;
         delete?: boolean;
       } = (() => {
@@ -48,52 +48,46 @@ export function For<T>(
       return rr;
     },
     _insert(index: number, items: T[]) {
-      const new_children: (TimelessElement | null)[] = new Array(items.length);
-      const new_elms: (HTMLElement | Text | null)[] = new Array(items.length);
-
-      // console.log("insert items", index, items);
-
-      const $base = _$elms[index];
+      // const new_children: (TimelessElement | null)[] = new Array(items.length);
+      // const new_elms: (HTMLElement | Text | null)[] = new Array(items.length);
+      const $base = _$children[index];
       const $fragment = document.createDocumentFragment();
       for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        _each_items[index + i] = item;
-        const res = render(item, index + i);
+        const item_prepare_insert = items[i];
+        _values.splice(index + i, 0, item_prepare_insert);
+        // @todo index + i 改为是 Ref 类型
+        const res = render(item_prepare_insert, index + i);
         (() => {
+          _elements.splice(index + i, 0, res);
           if (!res) {
-            _children[index + i] = null;
             return;
           }
           if (isElement(res)) {
-            _children[index + i] = res;
-            const $sub = res.render();
-            _$elms[index + i] = $sub;
-            if ($sub) {
-              $fragment.appendChild($sub);
+            const $elm_prepare_insert = res.render();
+            _$children.splice(index + i, 0, $elm_prepare_insert);
+            if ($elm_prepare_insert) {
+              $fragment.appendChild($elm_prepare_insert);
             }
-          } else {
-            _children[index + i] = null;
           }
         })();
       }
-      $elm.insertBefore($fragment, $base);
-      // _each_items.splice(index, 0, ...items);
-      // _children.splice(index, 0, ...new_children);
-      // _$elms.splice(index, 0, ...new_elms);
+      $elm.insertBefore($fragment, $base || null);
+      // console.log("[headless]For - insert items", index, items, _$children);
     },
     _remove(index: number, count: number) {
       for (let i = 0; i < count; i += 1) {
-        const elm = _$elms[index];
+        const elm = _$children[index + i];
+        // console.log(i, index + i, elm, _$children);
         if (elm && elm.parentNode === $elm) {
           $elm.removeChild(elm);
         }
-        const item = _each_items[index];
+        const item = _values[index + i];
         if (_existing_map.has(item)) {
           _existing_map.delete(item);
         }
-        _each_items.splice(index, 1);
-        _children.splice(index, 1);
-        _$elms.splice(index, 1);
+        _values.splice(index + i, 1);
+        _elements.splice(index + i, 1);
+        _$children.splice(index + i, 1);
       }
     },
     _update(index: number, item: any) {
@@ -104,7 +98,7 @@ export function For<T>(
       if (res.delete) {
         return;
       }
-      const old = _$elms[index];
+      const old = _$children[index];
       if (old && old.parentNode === $elm && res.elm) {
         $elm.replaceChild(res.elm, old);
       } else if (res.elm) {
@@ -114,24 +108,24 @@ export function For<T>(
         // }
       }
 
-      const oldItem = _each_items[index];
+      const oldItem = _values[index];
       if (oldItem !== item && _existing_map.has(oldItem)) {
         _existing_map.delete(oldItem);
       }
 
-      _each_items[index] = item;
-      _children[index] = res.node;
-      _$elms[index] = res.elm;
+      _values[index] = item;
+      _elements[index] = res.node;
+      _$children[index] = res.elm;
     },
     _refresh(v: T[]) {
       const new_items = v;
-      const prev_items = _each_items;
-      const prev_children = _children;
-      const prev_elms = _$elms;
+      const prev_items = _values;
+      const prev_elements = _elements;
+      const prev_children = _$children;
 
       // 1. Prepare target state
-      const new_children: (TimelessElement | null)[] = new Array(new_items.length);
-      const new_elms: (HTMLElement | Text | null)[] = new Array(
+      const new_elements: (TimelessElement | null)[] = new Array(new_items.length);
+      const new_children: (HTMLElement | Text | DocumentFragment | null)[] = new Array(
         new_items.length,
       );
 
@@ -148,13 +142,13 @@ export function For<T>(
       });
 
       // 3. Diff Phase: Identify operations
-      const added_nodes: { node: TimelessElement; elm: HTMLElement | Text }[] = [];
+      const added_nodes: { node: TimelessElement; elm: HTMLElement | Text | DocumentFragment }[] = [];
       const updated_nodes: {
         node: TimelessElement;
-        elm: HTMLElement | Text;
+        elm: HTMLElement | Text | DocumentFragment;
       }[] = [];
       const removed_nodes: {
-        elm: HTMLElement | Text | null;
+        elm: HTMLElement | Text | DocumentFragment | null;
         component: TimelessElement | null;
       }[] = [];
 
@@ -171,12 +165,12 @@ export function For<T>(
 
           if (item !== oldItem) {
             const res = methods._render_item(item, i);
-            new_children[i] = res.node;
-            new_elms[i] = res.elm;
+            new_elements[i] = res.node;
+            new_children[i] = res.elm;
 
             removed_nodes.push({
-              elm: prev_elms[oldIndex],
-              component: prev_children[oldIndex],
+              elm: prev_children[oldIndex],
+              component: prev_elements[oldIndex],
             });
 
             if (res.node && res.elm && isElement(res.node)) {
@@ -184,14 +178,14 @@ export function For<T>(
               updated_nodes.push({ node: res.node, elm: res.elm });
             }
           } else {
+            new_elements[i] = prev_elements[oldIndex];
             new_children[i] = prev_children[oldIndex];
-            new_elms[i] = prev_elms[oldIndex];
           }
         } else {
           // Added (New)
           const res = methods._render_item(item, i);
-          new_children[i] = res.node;
-          new_elms[i] = res.elm;
+          new_elements[i] = res.node;
+          new_children[i] = res.elm;
           if (res.node && res.elm && isElement(res.node)) {
             added_nodes.push({ node: res.node, elm: res.elm });
           }
@@ -202,8 +196,8 @@ export function For<T>(
       for (const indices of old_map.values()) {
         for (const index of indices) {
           removed_nodes.push({
-            elm: prev_elms[index],
-            component: prev_children[index],
+            elm: prev_children[index],
+            component: prev_elements[index],
           });
         }
       }
@@ -226,8 +220,8 @@ export function For<T>(
       }
 
       // 4.2 Reorder / Insert nodes
-      for (let i = 0; i < new_elms.length; i++) {
-        const node = new_elms[i];
+      for (let i = 0; i < new_children.length; i++) {
+        const node = new_children[i];
         if (!node) continue;
         const cur_node = $elm.childNodes[i];
         if (node !== cur_node) {
@@ -243,9 +237,9 @@ export function For<T>(
       }
 
       // 5. Update State
-      _each_items = new_items;
-      _children = new_children;
-      _$elms = new_elms;
+      _values = new_items;
+      _elements = new_elements;
+      _$children = new_children;
     },
   };
 
@@ -263,6 +257,7 @@ export function For<T>(
       }
     },
     onChange(v: T[] = []) {
+      // console.log('[headless]For - ctx.onChange', v);
       if (!_mounted) {
         return;
       }
@@ -283,22 +278,22 @@ export function For<T>(
       for (let i = 0; i < nodes.length; i += 1) {
         const item = nodes[i];
         // console.log("before mounted", i, item);
-        _each_items[i] = item;
+        _values[i] = item;
         const res = render(item, i);
         (() => {
           if (!res) {
-            _children[i] = null;
+            _elements[i] = null;
             return;
           }
           if (isElement(res)) {
-            _children[i] = res;
+            _elements[i] = res;
             const $sub = res.render();
-            _$elms[i] = $sub;
+            _$children[i] = $sub;
             if ($sub) {
               $fragment.appendChild($sub);
             }
           } else {
-            _children[i] = null;
+            _elements[i] = null;
           }
         })();
       }
@@ -308,11 +303,11 @@ export function For<T>(
         onMounted($elm);
       }
       // console.log("2. mounted", _children);
-      for (let i = 0; i < _children.length; i += 1) {
-        const component = _children[i];
+      for (let i = 0; i < _elements.length; i += 1) {
+        const component = _elements[i];
         if (isElement(component)) {
           if (typeof component.onMounted === "function") {
-            component.onMounted(_$elms[i] as any as HTMLElement);
+            component.onMounted(_$children[i] as any as HTMLElement);
           }
         }
       }
@@ -322,8 +317,8 @@ export function For<T>(
       if (onUnmounted) {
         onUnmounted();
       }
-      for (let i = 0; i < _children.length; i += 1) {
-        const component = _children[i];
+      for (let i = 0; i < _elements.length; i += 1) {
+        const component = _elements[i];
         if (isElement(component)) {
           if (typeof component.onUnmounted === "function") {
             component.onUnmounted();
@@ -331,9 +326,9 @@ export function For<T>(
         }
       }
       _mounted = false;
-      _each_items = [];
-      _children = [];
-      _$elms = [];
+      _values = [];
+      _elements = [];
+      _$children = [];
       $elm.innerHTML = "";
     },
   };

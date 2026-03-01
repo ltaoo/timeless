@@ -14,10 +14,10 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
       for (let i = 0; i < $elm.childNodes.length; i++) {
         $fragment.appendChild($elm.childNodes[i]);
       }
+      if (props.onMounted) {
+        props.onMounted($elm);
+      }
       document.body.appendChild($fragment);
-      // if (props.onMounted) {
-      //   props.onMounted($elm);
-      // }
       return null;
     },
     onUnmounted() {
@@ -31,12 +31,5 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
         props.onUnmounted();
       }
     },
-    append(node: any) {
-      view$.append(node);
-    },
-    setContent(html: string) {
-      view$.setContent(html);
-    },
-    // class$: view$.class$,
   };
 }

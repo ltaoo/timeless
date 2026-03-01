@@ -65,7 +65,7 @@ const configs = [
           outDir: null,
         },
       }),
-      removeConsole,
+      // removeConsole,
     ],
     external: [],
   },
