@@ -15,7 +15,7 @@ export function For<T>(
   let _mounted = false;
   let _values: T[] = [];
   let _elements: (TimelessElement | null)[] = [];
-  let _$children: (HTMLElement | Text | DocumentFragment | null)[] = [];
+  let _$children: (TimelessElement["$elm"] | null)[] = [];
 
   const anchor = document.createTextNode("");
   const $elm = anchor as any;
@@ -26,8 +26,8 @@ export function For<T>(
     _render_item(item: T, index: number) {
       const rr: {
         node: null | TimelessElement;
-        elm: null | HTMLElement | Text | DocumentFragment;
-        trackElm?: HTMLElement | Text | DocumentFragment | null;
+        elm: null | TimelessElement["$elm"];
+        trackElm?: null | TimelessElement["$elm"];
         empty?: boolean;
         delete?: boolean;
       } = (() => {
@@ -52,7 +52,7 @@ export function For<T>(
       // const new_elms: (HTMLElement | Text | null)[] = new Array(items.length);
       const $base = _$children[index] || anchor;
       const $parent = anchor.parentNode;
-      
+
       if (!$parent) return;
 
       const $fragment = document.createDocumentFragment();
@@ -132,13 +132,15 @@ export function For<T>(
       const prev_items = _values;
       const prev_elements = _elements;
       const prev_children = _$children;
-      
+
       const $parent = anchor.parentNode;
       if (!$parent) return;
 
       // 1. Prepare target state
-      const new_elements: (TimelessElement | null)[] = new Array(new_items.length);
-      const new_children: (HTMLElement | Text | DocumentFragment | null)[] = new Array(
+      const new_elements: (TimelessElement | null)[] = new Array(
+        new_items.length,
+      );
+      const new_children: (TimelessElement["$elm"] | null)[] = new Array(
         new_items.length,
       );
 
@@ -155,13 +157,16 @@ export function For<T>(
       });
 
       // 3. Diff Phase: Identify operations
-      const added_nodes: { node: TimelessElement; elm: HTMLElement | Text | DocumentFragment }[] = [];
+      const added_nodes: {
+        node: TimelessElement;
+        elm: TimelessElement["$elm"];
+      }[] = [];
       const updated_nodes: {
         node: TimelessElement;
-        elm: HTMLElement | Text | DocumentFragment;
+        elm: TimelessElement["$elm"];
       }[] = [];
       const removed_nodes: {
-        elm: HTMLElement | Text | DocumentFragment | null;
+        elm: TimelessElement["$elm"] | null;
         component: TimelessElement | null;
       }[] = [];
 
@@ -238,18 +243,18 @@ export function For<T>(
       for (let i = new_children.length - 1; i >= 0; i--) {
         const node = new_children[i];
         if (!node) continue;
-        
+
         // If node is already in correct position (immediately before nextSibling), skip.
         if (node.nextSibling === nextSibling) {
-            nextSibling = node;
-            continue;
+          nextSibling = node;
+          continue;
         }
 
         if ($parent) {
-             // If node is already in DOM elsewhere, insertBefore moves it.
-             $parent.insertBefore(node, nextSibling);
+          // If node is already in DOM elsewhere, insertBefore moves it.
+          $parent.insertBefore(node, nextSibling);
         }
-        
+
         nextSibling = node;
       }
 
@@ -323,7 +328,7 @@ export function For<T>(
       }
       $fragment.appendChild(anchor); // Add anchor to fragment
       _mounted = true;
-      
+
       // onMounted will be called by parent with the result of render(), which is the fragment.
       // But props.onMounted expects an element?
       if (onMounted) {
@@ -337,7 +342,7 @@ export function For<T>(
         const component = _elements[i];
         if (isElement(component)) {
           if (typeof component.onMounted === "function") {
-            // component.onMounted(_$children[i] as any as HTMLElement); 
+            // component.onMounted(_$children[i] as any as HTMLElement);
             // _$children[i] is trackElm (possibly Anchor).
             // Pass rendered element (from render() result) or trackElm?
             // Usually onMounted expects the root element.
@@ -365,7 +370,7 @@ export function For<T>(
       if ($parent) {
         for (const elm of _$children) {
           if (elm && elm.parentNode === $parent) {
-             $parent.removeChild(elm);
+            $parent.removeChild(elm);
           }
         }
         // Remove anchor? Usually onUnmounted means the whole component is gone.

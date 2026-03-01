@@ -213,6 +213,11 @@
       "import": "./dist/sub-views/index.esm.js",
       "require": "./dist/sub-views/index.js"
     },
+    "./svg": {
+      "types": "./dist/svg/index.d.ts",
+      "import": "./dist/svg/index.esm.js",
+      "require": "./dist/svg/index.js"
+    },
     "./table": {
       "types": "./dist/table/index.d.ts",
       "import": "./dist/table/index.esm.js",

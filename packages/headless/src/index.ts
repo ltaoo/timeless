@@ -16,6 +16,7 @@ export * from "./match";
 
 // Primitives
 export * from "./view";
+export * from "./svg";
 export * from "./lazy-view";
 export * from "./text";
 export * from "./html";

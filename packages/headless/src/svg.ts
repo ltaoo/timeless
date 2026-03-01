@@ -1,23 +1,9 @@
-import { Ref, isRef, isClassName, ClassNameRef } from "@timeless/reactive";
+import { Ref, isRef, isClassName } from "@timeless/reactive";
+import { ViewProps, isElement } from "./view";
 
-export interface ViewProps {
-  type?: string;
-  id?: string | Ref<string>;
-  style?: string | Ref<string>;
-  class?: string | Ref<string> | ClassNameRef;
-  dataset?: Record<string, string>;
-  onMounted?(el: any): void;
-  beforeUnmounted?(): void;
-  onUnmounted?(): void;
-  onClick?(e: any): void;
-  onFocus?(e: any): void;
-  onBlur?(e: any): void;
-  key?: any;
-}
-
-export function View(props: ViewProps = {}, children?: any) {
+export function SVG(props: ViewProps = {}, children?: any) {
   const {
-    type = "div",
+    type = "svg",
     style,
     class: cls,
     dataset = {},
@@ -29,7 +15,7 @@ export function View(props: ViewProps = {}, children?: any) {
     beforeUnmounted,
     ...rest
   } = props;
-  const $elm = document.createElement(type);
+  const $elm = document.createElementNS("http://www.w3.org/2000/svg", type);
 
   Object.keys(rest).forEach((k) => {
     // @ts-ignore
@@ -38,10 +24,10 @@ export function View(props: ViewProps = {}, children?: any) {
       if (isRef(vv)) {
         vv._subscribe({
           onChange(v) {
-            $elm.setAttribute(k, v);
+            $elm.setAttribute(k, String(v));
           },
         });
-        $elm.setAttribute(k, vv.value);
+        $elm.setAttribute(k, String(vv.value));
       } else if (typeof vv === "string" || typeof vv === "number") {
         $elm.setAttribute(k, String(vv));
       }
@@ -55,31 +41,23 @@ export function View(props: ViewProps = {}, children?: any) {
 
   if (cls) {
     if (typeof cls === "string") {
-      $elm.className = cls;
+      $elm.setAttribute("class", cls);
     } else if (isRef(cls)) {
       cls._subscribe({
         onChange(v) {
-          $elm.className = v;
+          $elm.setAttribute("class", v);
         },
       });
-      $elm.className = cls.value;
+      $elm.setAttribute("class", cls.value);
     } else if (isClassName(cls)) {
       cls._subscribe({
         onChange(v: string[]) {
-          // console.log("[]view the className is changed", v);
-          $elm.className = v.join(" ");
+          $elm.setAttribute("class", v.join(" "));
         },
       });
-      $elm.className = cls.toString();
+      $elm.setAttribute("class", cls.toString());
     }
   }
-  // if (tmpid) {
-  //   if (isRef(tmpid)) {
-  //     $elm.id = tmpid.value;
-  //   } else {
-  //     $elm.id = tmpid;
-  //   }
-  // }
 
   if (style) {
     if (typeof style === "string") {
@@ -95,9 +73,7 @@ export function View(props: ViewProps = {}, children?: any) {
     }
   }
   if (onClick) {
-    // console.log("[baseui]View - register click", props.class, props.dataset);
     $elm.addEventListener("click", function (event: Event) {
-      // console.log("[baseui]View - click", event.target, props.dataset);
       if (onClick) {
         onClick(event);
       }
@@ -120,12 +96,8 @@ export function View(props: ViewProps = {}, children?: any) {
   }
 
   return {
-    t: "view",
+    t: "svg",
     $elm,
-    // class$,
-    // onMounted() {
-
-    // },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -169,7 +141,6 @@ export function View(props: ViewProps = {}, children?: any) {
           }
         }
       }
-      // console.log("[baseui]View - invoke onMounted", $elm);
       if (onMounted) {
         onMounted($elm);
       }
@@ -181,44 +152,75 @@ export function View(props: ViewProps = {}, children?: any) {
           }
         }
       }
-      // $elm.className = class$.toString();
       return $elm;
     },
   };
 }
 
-export function isElement(v: any): v is TimelessElement {
-  if (v === null || v === undefined) {
-    return false;
-  }
-  if (v.t && v.$elm) {
-    return true;
-  }
-  return false;
-}
-export function isLazyElement(v: any): v is TimelessLazyComponent {
-  if (v === null || v === undefined) {
-    return false;
-  }
-  if (v instanceof Promise || (v && typeof (v as any).then === "function")) {
-    return true;
-  }
-  return false;
+export function G(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "g" }, children);
 }
 
-export type TimelessNormalComponent = (...args: any[]) => TimelessElement;
-export type TimelessLazyComponent = () => Promise<{
-  default: TimelessNormalComponent;
-}>;
-export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
-
-export interface TimelessElement {
-  t: string;
-  $elm: HTMLElement | SVGElement | Text | DocumentFragment;
-  render(): HTMLElement | SVGElement | Text | DocumentFragment | null;
-  onMounted?(el: HTMLElement | SVGElement | Text | DocumentFragment): void;
-  beforeUnmounted?(): void;
-  onUnmounted?(): void;
+export function Circle(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "circle" }, children);
 }
 
-export type ViewChildren = (TimelessElement | null)[];
+export function Rect(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "rect" }, children);
+}
+
+export function Path(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "path" }, children);
+}
+
+export function Line(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "line" }, children);
+}
+
+export function Polyline(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "polyline" }, children);
+}
+
+export function Polygon(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "polygon" }, children);
+}
+
+export function Text(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "text" }, children);
+}
+
+export function Defs(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "defs" }, children);
+}
+
+export function Symbol(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "symbol" }, children);
+}
+
+export function Use(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "use" }, children);
+}
+
+export function LinearGradient(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "linearGradient" }, children);
+}
+
+export function RadialGradient(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "radialGradient" }, children);
+}
+
+export function Stop(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "stop" }, children);
+}
+
+export function Mask(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "mask" }, children);
+}
+
+export function ClipPath(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "clipPath" }, children);
+}
+
+export function Ellipse(props: ViewProps = {}, children?: any) {
+  return SVG({ ...props, type: "ellipse" }, children);
+}
