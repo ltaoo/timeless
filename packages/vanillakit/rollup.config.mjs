@@ -7,32 +7,38 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const minify = terser({
+  compress: {
+    drop_console: true,
+    drop_debugger: true,
+    pure_funcs: ["console.log"], // Ensures console.log is removed even if drop_console is false in some configs
+  },
+  mangle: {
+    toplevel: true,
+  },
+  format: {
+    comments: false,
+  },
+});
+
 export default {
   input: path.join(__dirname, "src/index.ts"),
   output: [
     {
-      file: path.join(__dirname, "dist/timeless.headless.umd.min.js"),
+      file: path.join(__dirname, "dist/timeless.vanillakit.umd.min.js"),
       format: "umd",
-      name: "Timeless.headless",
+      name: "Timeless",
       extend: true,
-      globals: {
-        "@timeless/reactive": "Timeless.reactive",
-        "@timeless/kit": "Timeless",
-        "@timeless/ui": "Timeless.ui",
-      },
-      footer: `if (typeof window !== "undefined") {
-        window.Timeless = window.Timeless || {};
-        if (window.Timeless.headless) {
-          Object.assign(window, window.Timeless.headless);
-        }
-      }`,
+      sourcemap: true,
+      // No globals because we bundle everything
     },
     {
-      file: path.join(__dirname, "dist/timeless.headless.esm.js"),
+      file: path.join(__dirname, "dist/timeless.vanillakit.esm.js"),
       format: "es",
+      sourcemap: true,
     },
   ],
-  external: ["@timeless/reactive", "@timeless/kit", "@timeless/ui"],
+  // No external because we want a full bundle
   plugins: [
     typescript(),
     resolve({
@@ -42,6 +48,6 @@ export default {
     commonjs({
       sourceMap: false,
     }),
-    terser(),
+    minify,
   ],
 };

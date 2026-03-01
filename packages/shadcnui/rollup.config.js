@@ -18,6 +18,8 @@ export default {
       globals: {
         "@timeless/reactive": "Timeless.reactive",
         "@timeless/headless": "Timeless.headless",
+        "@timeless/kit": "Timeless",
+        "@timeless/ui": "Timeless.ui",
       },
       footer: `if (typeof window !== "undefined") {
         window.Timeless = window.Timeless || {};
@@ -31,7 +33,7 @@ export default {
       format: "es",
     },
   ],
-  external: ["@timeless/reactive", "@timeless/headless"],
+  external: ["@timeless/reactive", "@timeless/headless", "@timeless/kit", "@timeless/ui"],
   plugins: [
     typescript({
       tsconfig: "./tsconfig.json",

@@ -3,7 +3,7 @@
  */
 import { BaseDomain, Handler } from "@timeless/base";
 
-import { MenuCore } from "./index";
+import type { MenuCore } from "./index";
 
 enum Events {
   Enter,

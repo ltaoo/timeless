@@ -1,3 +1,5 @@
+export * from "./menu"; // Export first
+export * from "./menu/item";
 export * from "./button";
 export * from "./checkbox";
 export * from "./context-menu";
@@ -10,7 +12,6 @@ export * from "./form";
 export * from "./formv2";
 export * from "./image";
 export * from "./form/input";
-export * from "./menu";
 export * from "./node";
 export * from "./popover";
 export * from "./popper";
@@ -23,8 +24,6 @@ export * from "./tabs";
 export * from "./toast";
 export * from "./tree";
 export * from "./video-player";
-export * from "./menu";
-export * from "./menu/item";
 export * from "./checkbox/group";
 export * from "./calendar";
 export * from "./tab-header";
