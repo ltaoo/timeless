@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Tabs: H } = Headless;
+import { Tabs as H } from "@timeless/headless";
 
 const t = {
   root: { style: "width:100%;" },

@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Dialog: H } = Headless;
+import { Dialog as H } from "@timeless/headless";
 
 const t = {
   overlay: ({ enter, exit }) => ({

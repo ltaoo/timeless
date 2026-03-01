@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Toggle: H } = Headless;
+import { Toggle as H } from "@timeless/headless";
 
 const t = {
   root: ({ on, disabled }) => ({

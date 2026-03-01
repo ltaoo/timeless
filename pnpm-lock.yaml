@@ -1049,9 +1049,9 @@ importers:
 
   packages/weui:
     dependencies:
-      '@timeless/shadcnui':
+      '@timeless/headless':
         specifier: workspace:*
-        version: link:../shadcnui
+        version: link:../headless
       '@timeless/ui':
         specifier: workspace:*
         version: link:../ui

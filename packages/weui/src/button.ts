@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Button: H } = Headless;
+import { Button as H } from "@timeless/headless";
 
 const S = {
   base: "position:relative;display:flex;align-items:center;justify-content:center;white-space:nowrap;border:none;outline:none;cursor:pointer;border-radius:var(--weui-BTN-RADIUS);font-size:var(--weui-FONT-SIZE);transition:opacity .3s;-webkit-tap-highlight-color:transparent;",

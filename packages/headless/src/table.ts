@@ -11,21 +11,21 @@ function themed(
   return View({ type, ...rest, ...merge(tp(t?.[part]), cls, st) }, children);
 }
 
-export function Table(p: ViewProps, c?: ViewChildren) {
+export function Table(p: ViewProps & { theme?: any }, c?: ViewChildren) {
   return themed("table", "table", p, c);
 }
-export function TableHeader(p: ViewProps, c?: ViewChildren) {
+export function TableHeader(p: ViewProps & { theme?: any }, c?: ViewChildren) {
   return themed("thead", "header", p, c);
 }
-export function TableBody(p: ViewProps, c?: ViewChildren) {
+export function TableBody(p: ViewProps & { theme?: any }, c?: ViewChildren) {
   return themed("tbody", "body", p, c);
 }
-export function TableRow(p: ViewProps, c?: ViewChildren) {
+export function TableRow(p: ViewProps & { theme?: any }, c?: ViewChildren) {
   return themed("tr", "row", p, c);
 }
-export function TableHead(p: ViewProps, c?: ViewChildren) {
+export function TableHead(p: ViewProps & { theme?: any }, c?: ViewChildren) {
   return themed("th", "head", p, c);
 }
-export function TableCell(p: ViewProps, c?: ViewChildren) {
+export function TableCell(p: ViewProps & { theme?: any }, c?: ViewChildren) {
   return themed("td", "cell", p, c);
 }

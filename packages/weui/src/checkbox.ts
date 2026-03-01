@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Checkbox: H } = Headless;
+import { Checkbox as H } from "@timeless/headless";
 
 const t = {
   root: { style: "display:flex;align-items:center;gap:8px;cursor:pointer;" },

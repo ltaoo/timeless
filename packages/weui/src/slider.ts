@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Slider: H } = Headless;
+import { Slider as H } from "@timeless/headless";
 
 const t = {
   root: ({ disabled }) => ({

@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Table: H, TableHeader: HH, TableBody: HB, TableRow: HR, TableHead: HTh, TableCell: HTd } = Headless;
+import { Table as H, TableHeader as HH, TableBody as HB, TableRow as HR, TableHead as HTh, TableCell as HTd } from "@timeless/headless";
 
 const t = {
   table: { style: "width:100%;font-size:var(--weui-FONT-SIZE-SM);border-collapse:collapse;" },

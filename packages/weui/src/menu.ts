@@ -1,5 +1,11 @@
 import { MenuCore } from "@timeless/ui";
-import { Headless } from "@timeless/shadcnui";
+import {
+  Menu as HMenu,
+  MenuItem as HItem,
+  MenuLabel as HLabel,
+  MenuSeparator as HSep,
+  DropdownMenu as HDrop,
+} from "@timeless/headless";
 
 {
   const proto = MenuCore.prototype;
@@ -18,13 +24,7 @@ import { Headless } from "@timeless/shadcnui";
   };
 }
 
-const {
-  Menu: HMenu,
-  MenuItem: HItem,
-  MenuLabel: HLabel,
-  MenuSeparator: HSep,
-  DropdownMenu: HDrop,
-} = Headless;
+
 
 const t = {
   animation: {

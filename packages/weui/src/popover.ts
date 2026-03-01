@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Popover: H } = Headless;
+import { Popover as H } from "@timeless/headless";
 
 const t = {
   wrapper: { style: "position:fixed;z-index:999;left:0;top:0;" },

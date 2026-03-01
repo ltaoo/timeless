@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Sheet: H } = Headless;
+import { Sheet as H } from "@timeless/headless";
 
 const SIDE_TRANSFORM = {
   right: { base: "translateX(100%)", enter: "translateX(0)" },
@@ -39,7 +38,12 @@ const t = {
       ].join(""),
     };
   },
-  closeBtn: { style: "position:absolute;right:16px;top:16px;cursor:pointer;color:var(--weui-FG-2);font-size:18px;" },
+  closeBtn: {
+    style:
+      "position:absolute;right:16px;top:16px;cursor:pointer;color:var(--weui-FG-2);font-size:18px;",
+  },
 };
 
-export function Sheet(p: Parameters<typeof H>[0], c) { return H({ ...p, theme: t }, c); }
+export function Sheet(p: Parameters<typeof H>[0], c) {
+  return H({ ...p, theme: t }, c);
+}

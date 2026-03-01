@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Separator: H } = Headless;
+import { Separator as H } from "@timeless/headless";
 
 const t = {
   root: ({ orientation }) => ({

@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Select: H } = Headless;
+import { Select as H } from "@timeless/headless";
 
 const t = {
   root: { style: "position:relative;flex:1;" },

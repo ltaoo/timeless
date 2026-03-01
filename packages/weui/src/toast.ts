@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Toast: H } = Headless;
+import { Toast as H } from "@timeless/headless";
 
 const t = {
   mask: { style: "position:fixed;inset:0;z-index:998;background:transparent;" },

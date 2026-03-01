@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Card: H, CardHeader: HH, CardTitle: HT, CardDescription: HD, CardContent: HC, CardFooter: HF } = Headless;
+import { Card as H, CardHeader as HH, CardTitle as HT, CardDescription as HD, CardContent as HC, CardFooter as HF } from "@timeless/headless";
 
 const t = {
   root: { style: "background:var(--weui-BG-2);border-radius:8px;overflow:hidden;" },

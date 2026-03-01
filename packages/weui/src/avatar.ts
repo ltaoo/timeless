@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Avatar: H } = Headless;
+import { Avatar as H } from "@timeless/headless";
 
 const SIZES = {
   sm: "width:32px;height:32px;font-size:var(--weui-FONT-SIZE-XS);",

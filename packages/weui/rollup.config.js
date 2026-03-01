@@ -7,17 +7,31 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const minify = terser({
+  compress: {
+    drop_console: true,
+    drop_debugger: true,
+    pure_funcs: ["console.log"], // Ensures console.log is removed even if drop_console is false in some configs
+  },
+  mangle: {
+    toplevel: true,
+  },
+  format: {
+    comments: false,
+  },
+});
+
 export default {
   input: path.join(__dirname, "src/index.ts"),
   output: {
-    file: path.join(__dirname, "dist/weui.umd.min.js"),
+    file: path.join(__dirname, "dist/timeless.weui.umd.min.js"),
     format: "umd",
     name: "WeUI",
     globals: {
-      "@timeless/shadcnui": "ShadcnUI",
+      "@timeless/headless": "Headless",
     },
   },
-  external: ["@timeless/shadcnui"],
+  external: ["@timeless/headless"],
   plugins: [
     typescript(),
     resolve({
@@ -27,6 +41,6 @@ export default {
     commonjs({
       sourceMap: false,
     }),
-    terser(),
+    minify,
   ],
 };

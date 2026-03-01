@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Alert: H, AlertTitle: HT, AlertDescription: HD } = Headless;
+import { Alert as H, AlertTitle as HT, AlertDescription as HD } from "@timeless/headless";
 
 const VARIANTS = {
   default: "border-left:4px solid var(--weui-BRAND);",

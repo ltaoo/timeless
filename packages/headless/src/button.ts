@@ -14,7 +14,7 @@ export function Button(
     disabled?: boolean;
     loading?: boolean;
   },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const {
     store,
@@ -48,10 +48,8 @@ export function Button(
 
     return View(
       {
-        type: "button",
         ...rest,
-        class: computed(state, (d) => m(d).class),
-        // style: computed(state, (d) => m(d).style),
+        type: "button",
         onClick() {
           store.click();
         },
@@ -64,7 +62,7 @@ export function Button(
         Show({ when: computed(state, (d) => d.loading) }, [
           View({ ...merge(tp(t?.spinner)) }),
         ]),
-        ...(Array.isArray(children) ? children : [children]),
+        ...children,
       ],
     );
   }

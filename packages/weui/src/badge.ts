@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Badge: H } = Headless;
+import { Badge as H } from "@timeless/headless";
 
 const VARIANTS = {
   default: "background:var(--weui-BRAND);color:#fff;",

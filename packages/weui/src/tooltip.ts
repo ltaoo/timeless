@@ -1,5 +1,4 @@
-import { Headless } from "@timeless/shadcnui";
-const { Tooltip: H } = Headless;
+import { Tooltip as H } from "@timeless/headless";
 
 const t = {
   wrapper: { style: "display:inline-block;" },
