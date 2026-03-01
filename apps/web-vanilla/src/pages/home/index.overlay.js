@@ -254,6 +254,32 @@ export default function OverlayView() {
           ]);
         })(),
       ]),
+      Section("Popover", [
+        Item("Default", [
+          (() => {
+            const popover$ = new Timeless.ui.PopoverCore({
+              align: "middle",
+            });
+            return View({ class: cn(["inline-block"]) }, [
+              Popover(
+                {
+                  store: popover$,
+                  title: "Popover Title",
+                  content: "This is the popover content.",
+                },
+                [
+                  Button(
+                    {
+                      variant: "outline",
+                    },
+                    [Txt("Open Popover")],
+                  ),
+                ],
+              ),
+            ]);
+          })(),
+        ]),
+      ]),
       Item("Near Page Bottom", [
         View(
           {

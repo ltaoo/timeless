@@ -9,6 +9,7 @@
     "build": "rollup -c"
   },
   "dependencies": {
+    "@timeless/ui": "workspace:*",
     "@timeless/shadcnui": "workspace:*"
   },
   "peerDependencies": {

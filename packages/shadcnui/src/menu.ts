@@ -3,7 +3,7 @@ const MENU_CONTENT_CLASS =
 
 // Patch: fix item.menu.onEnter listener leak in MenuCore.listen_item
 {
-  const proto = Timeless.ui.MenuCore.prototype;
+  const proto = MenuCore.prototype;
   const orig = proto.listen_item;
   proto.listen_item = function (this: any, e: any) {
     if (e.menu) {
@@ -27,6 +27,7 @@ import {
   MenuSeparator as HSep,
   ContextMenu as HContextMenu,
 } from "@timeless/headless";
+import { MenuCore } from "@timeless/ui";
 
 const t = {
   animation: {
@@ -43,9 +44,13 @@ const t = {
       "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:hover:bg-gray-800 dark:hover:text-gray-50",
   },
   itemHover: { class: "bg-gray-100 dark:bg-gray-800" },
-  label: { class: "px-2 py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-50" },
+  label: {
+    class: "px-2 py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-50",
+  },
   separator: { class: "-mx-1 my-1 h-px bg-gray-100 dark:bg-gray-800" },
-  submenuArrow: { class: "ml-auto pl-2 text-xs text-gray-400 dark:text-gray-500" },
+  submenuArrow: {
+    class: "ml-auto pl-2 text-xs text-gray-400 dark:text-gray-500",
+  },
 };
 
 export function Menu(p: any, c?: any) {

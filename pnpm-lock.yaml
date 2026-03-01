@@ -943,50 +943,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  packages/vue:
-    dependencies:
-      '@timeless/kit':
-        specifier: workspace:*
-        version: link:../kit
-      '@timeless/provider-web':
-        specifier: workspace:*
-        version: link:../provider-web
-      '@timeless/utils':
-        specifier: workspace:*
-        version: link:../utils
-      class-variance-authority:
-        specifier: ^0.7.0
-        version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      lucide-vue-next:
-        specifier: ^0.344.0
-        version: 0.344.0(vue@3.5.29(typescript@5.9.3))
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.6.1
-      vue:
-        specifier: ^3.4.0
-        version: 3.5.29(typescript@5.9.3)
-    devDependencies:
-      '@types/node':
-        specifier: ^20.0.0
-        version: 20.19.34
-      '@vitejs/plugin-vue':
-        specifier: ^5.0.0
-        version: 5.2.4(vite@5.4.21(@types/node@20.19.34)(terser@5.46.0))(vue@3.5.29(typescript@5.9.3))
-      typescript:
-        specifier: ^5.2.2
-        version: 5.9.3
-      vite:
-        specifier: ^5.2.0
-        version: 5.4.21(@types/node@20.19.34)(terser@5.46.0)
-      vue-tsc:
-        specifier: ^2.0.6
-        version: 2.2.12(typescript@5.9.3)
-
-  packages/webkit:
+  packages/vanillakit:
     dependencies:
       '@timeless/headless':
         specifier: workspace:^
@@ -1032,11 +989,57 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/vue:
+    dependencies:
+      '@timeless/kit':
+        specifier: workspace:*
+        version: link:../kit
+      '@timeless/provider-web':
+        specifier: workspace:*
+        version: link:../provider-web
+      '@timeless/utils':
+        specifier: workspace:*
+        version: link:../utils
+      class-variance-authority:
+        specifier: ^0.7.0
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      lucide-vue-next:
+        specifier: ^0.344.0
+        version: 0.344.0(vue@3.5.29(typescript@5.9.3))
+      tailwind-merge:
+        specifier: ^2.3.0
+        version: 2.6.1
+      vue:
+        specifier: ^3.4.0
+        version: 3.5.29(typescript@5.9.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.34
+      '@vitejs/plugin-vue':
+        specifier: ^5.0.0
+        version: 5.2.4(vite@5.4.21(@types/node@20.19.34)(terser@5.46.0))(vue@3.5.29(typescript@5.9.3))
+      typescript:
+        specifier: ^5.2.2
+        version: 5.9.3
+      vite:
+        specifier: ^5.2.0
+        version: 5.4.21(@types/node@20.19.34)(terser@5.46.0)
+      vue-tsc:
+        specifier: ^2.0.6
+        version: 2.2.12(typescript@5.9.3)
+
   packages/weui:
     dependencies:
       '@timeless/shadcnui':
         specifier: workspace:*
         version: link:../shadcnui
+      '@timeless/ui':
+        specifier: workspace:*
+        version: link:../ui
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^29.0.0

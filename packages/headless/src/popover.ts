@@ -1,11 +1,20 @@
-import { ref, computed } from "@timeless/reactive";
+import { ref, refobj, computed } from "@timeless/reactive";
 
 import { tp, merge } from "./theme";
-import { View, ViewChildren } from "./view";
+import { View, ViewChildren, ViewProps } from "./view";
 import { Show } from "./show";
 import { Portal } from "./portal";
+import { PopoverCore } from "@timeless/ui";
 
-export function Popover(props: any, children?: ViewChildren) {
+export function Popover(
+  props: ViewProps & {
+    store: PopoverCore;
+    title?: any;
+    content: any;
+    theme?: any;
+  },
+  children?: ViewChildren,
+) {
   const {
     store,
     content,
@@ -15,17 +24,14 @@ export function Popover(props: any, children?: ViewChildren) {
     style: st,
     ...rest
   } = props;
-  const state = ref(store.state);
+  const state = refobj(store.state);
   const events: any[] = [];
   events.push(
     store.onStateChange(() => {
       state.as(store.state);
     }),
   );
-  const visible = computed(
-    { state },
-    (d: any) => d.state.visible || d.state.enter || d.state.exit,
-  );
+  const visible = computed(state, (d) => d.visible || d.enter || d.exit);
   const layer = store.layer;
   let handlePointerDown: any;
 
@@ -94,7 +100,7 @@ export function Popover(props: any, children?: ViewChildren) {
                   : "transform:translate3d(0,-200%,0);",
               ].join("");
             }),
-            onMounted($e: HTMLElement) {
+            onMounted($e) {
               store.popper.setFloating({
                 $el: $e,
                 getRect() {
@@ -141,40 +147,69 @@ export function Popover(props: any, children?: ViewChildren) {
                   );
                   const base = tr.style || "";
                   const visibleFlag = s.visible || s.enter;
-                  return visibleFlag ? base : base + "display:none;";
+                  return [
+                    base,
+                    "transition:opacity 160ms ease-out,transform 160ms ease-out;",
+                    visibleFlag
+                      ? "opacity:1;transform:translate3d(0,0,0);"
+                      : "opacity:0;transform:translate3d(0,-4px,0);",
+                  ].join("");
                 }),
               },
               contentNodes,
             ),
-            View({
-              ...merge(tp(t?.arrow)),
-              style: computed(state, (d) => {
-                const s = d.state;
-                const base = merge(tp(t?.arrow)).style || "";
-                if (!s.arrowX && !s.arrowY) return base + "display:none;";
-                return [
-                  base,
-                  s.arrowX ? `left:${s.arrowX}px;` : "",
-                  s.arrowY ? `top:${s.arrowY}px;` : "",
-                  s.placement
-                    ? `transform:rotate(${
-                        s.placement.startsWith("top")
-                          ? 180
-                          : s.placement.startsWith("right")
-                            ? -90
-                            : s.placement.startsWith("bottom")
-                              ? 0
-                              : 90
-                      }deg);`
-                    : "",
-                ].join("");
-              }),
-            }),
           ],
         ),
       ]),
     ],
   );
 
-  return portal$;
+  if (content === undefined) {
+    return portal$;
+  }
+
+  return View(
+    {
+      ...rest,
+      onMounted($e) {
+        if (rest.onMounted) rest.onMounted($e);
+        const $ref = $e.firstElementChild || $e;
+        store.popper.setReference(
+          {
+            $el: $ref,
+            getRect() {
+              return $ref.getBoundingClientRect();
+            },
+          },
+          { force: true },
+        );
+        if (layer) {
+          $e.addEventListener("pointerdown", () => {
+            layer.pointerDown();
+            const rect = $e.getBoundingClientRect();
+            store.toggle({
+              x: rect.x,
+              y: rect.y + 4,
+              width: rect.width,
+              height: rect.height,
+            });
+          });
+        } else {
+          $e.addEventListener("pointerdown", () => {
+            const rect = $e.getBoundingClientRect();
+            store.toggle({
+              x: rect.left,
+              y: rect.bottom + 4,
+              width: rect.width,
+              height: rect.height,
+            });
+          });
+        }
+      },
+      onUnmounted() {
+        if (rest.onUnmounted) rest.onUnmounted();
+      },
+    },
+    [...(children || []), portal$],
+  );
 }
