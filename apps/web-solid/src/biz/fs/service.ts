@@ -1,4 +1,4 @@
-import { RequestPayload } from "@timeless/domains";
+import { RequestPayload } from "@timeless/kit";
 
 export const URL = (path: string) => path;
 

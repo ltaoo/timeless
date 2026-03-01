@@ -1,5 +1,5 @@
 import { JSX } from "solid-js/jsx-runtime";
-import {  CollectionCore  } from "@timeless/domains";
+import {  CollectionCore  } from "@timeless/kit";
 declare const Provider: (props: {
     store: CollectionCore;
 } & JSX.HTMLAttributes<HTMLElement>) => JSX.Element;

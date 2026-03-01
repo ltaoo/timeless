@@ -1,4 +1,4 @@
-import {  CheckboxCore  } from "@timeless/domains";
+import {  CheckboxCore  } from "@timeless/kit";
 declare const Root: (props: {
     store: CheckboxCore;
 } & JSX.HTMLAttributes<HTMLButtonElement>) => JSX.Element;

@@ -6,7 +6,7 @@ import { useViewModelStore } from "~/hooks";
 import { TopSheet } from "~/components/top-sheet";
 import * as PortalPrimitive from "~/packages/ui/portal";
 
-import {  base, Handler  } from "@timeless/domains";: !opt.selected,
+import {  base, Handler  } from "@timeless/kit";: !opt.selected,
                     }}
                     onClick={() => {
                       vm.methods.select(opt.value);

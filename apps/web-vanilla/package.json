@@ -14,7 +14,7 @@
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
-    "@timeless/biz": "workspace:*", "@timeless/domains": "workspace:*", "@timeless/utils": "workspace:*",
+    "@timeless/biz": "workspace:*", "@timeless/kit": "workspace:*", "@timeless/utils": "workspace:*",
     "@timeless/provider-web": "workspace:*",
     "autoprefixer": "^10.4.23",
     "eslint": "^8.56.0",

@@ -4,7 +4,7 @@
  */
 import { JSX, Show, createSignal, onMount } from "solid-js";
 
-import {  PopperCore  } from "@timeless/domains"; : undefined,
+import {  PopperCore  } from "@timeless/kit"; : undefined,
       }}
     >
       <ArrowPrimitive />

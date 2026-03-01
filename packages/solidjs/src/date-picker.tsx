@@ -5,7 +5,7 @@ import * as PopoverPrimitive from "@/packages/ui/popover";
 import { Calendar } from "./calendar";
 import { Button } from "./button";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { DatePickerCore } = ui;
 

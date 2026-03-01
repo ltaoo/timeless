@@ -1,5 +1,5 @@
 import { JSX } from "solid-js";
-import {  DismissableLayerCore  } from "@timeless/domains";
+import {  DismissableLayerCore  } from "@timeless/kit";
 export declare const DismissableLayer: (props: {
     store: DismissableLayerCore;
     asChild?: boolean;

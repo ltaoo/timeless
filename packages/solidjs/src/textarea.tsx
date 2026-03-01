@@ -1,8 +1,8 @@
 import { createSignal } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
-import { ui } from "@timeless/domains";
-import { ShortcutModel } from "@timeless/domains/src/shortcut/shortcut";
+import { ui } from "@timeless/kit";
+import { ShortcutModel } from "@timeless/kit/src/shortcut/shortcut";
 
 const { InputCore } = ui;
 

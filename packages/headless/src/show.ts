@@ -1,6 +1,6 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { View, ViewChildren, ViewProps, isComponent } from "./view.js";
+import { View, ViewChildren, ViewProps, isComponent } from "./view";
 
 export function Show(
   props: ViewProps & {

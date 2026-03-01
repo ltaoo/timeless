@@ -4,6 +4,6 @@ import { LoaderCircle } from "lucide-solid";
 import { useViewModelStore } from "~/hooks";
 import { Input as InputPrimitive } from "~/packages/ui/input";
 
-import {  InputCore  } from "@timeless/domains";
+import {  InputCore  } from "@timeless/kit";
 
 export { Input };

@@ -2,7 +2,7 @@
  * @file 弹窗 组件
  */
 import { JSX } from "solid-js";
-import {  DialogCore  } from "@timeless/domains";
+import {  DialogCore  } from "@timeless/kit";
 declare const Root: (props: {
     store: DialogCore;
 } & JSX.HTMLAttributes<HTMLElement>) => JSX.Element;

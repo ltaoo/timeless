@@ -1,4 +1,4 @@
-import {  DialogCore  } from "@timeless/domains";, this.data._store);
+import {  DialogCore  } from "@timeless/kit";, this.data._store);
     //   this.data._store.present.unmount();
     // },
     handleTouchMove() {

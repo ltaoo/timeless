@@ -1,4 +1,4 @@
 import { JSX } from "solid-js/jsx-runtime";
 import { ViewComponentProps } from "~/store/types";
-import {  DialogCore  } from "@timeless/domains";];
+import {  DialogCore  } from "@timeless/kit";];
 } & JSX.HTMLAttributes<HTMLDivElement>): JSX.Element;

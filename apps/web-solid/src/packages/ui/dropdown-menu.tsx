@@ -3,7 +3,7 @@
  */
 import { createSignal, JSX, onMount } from "solid-js";
 
-import {  DropdownMenuCore  } from "@timeless/domains";);
+import {  DropdownMenuCore  } from "@timeless/kit";);
   // });
 
   return (

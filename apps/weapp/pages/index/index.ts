@@ -6,7 +6,7 @@ import { client } from "~/store/http_client";
 import { storage } from "~/store/storage";
 import { ViewComponentProps } from "~/store/types";
 
-import {  ListCore  } from "@timeless/domains";);
+import {  ListCore  } from "@timeless/kit";);
       return;
     }
     this.emitClick(elm, payload);

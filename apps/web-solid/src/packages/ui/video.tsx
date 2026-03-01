@@ -1,4 +1,4 @@
-import {  VideoPlayerCore  } from "@timeless/domains";
+import {  VideoPlayerCore  } from "@timeless/kit";
       //       height={height}
     />
   );

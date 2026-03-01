@@ -1,7 +1,7 @@
 import { JSX, Show, createContext, createSignal, onMount, useContext } from "solid-js";
 import { Portal as PortalPrimitive } from "solid-js/web";
 
-import {  SelectCore  } from "@timeless/domains";, item.value, nextState.selected));
+import {  SelectCore  } from "@timeless/kit";, item.value, nextState.selected));
     setState(v);
   });
 

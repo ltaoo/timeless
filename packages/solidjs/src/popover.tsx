@@ -8,8 +8,8 @@ import { X } from "lucide-solid";
 import { useViewModelStore } from "@/hooks";
 import * as PopoverPrimitive from "@/packages/ui/popover";
 
-import { ui } from "@timeless/domains";
-import type { Align, Side } from "@timeless/domains/src/ui/popper";
+import { ui } from "@timeless/kit";
+import type { Align, Side } from "@timeless/kit/src/ui/popper";
 
 const { PopoverCore } = ui;
 

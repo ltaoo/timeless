@@ -1,7 +1,7 @@
 import { createContext, createSignal, onCleanup, useContext } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 import * as Collection from "./collection";
 

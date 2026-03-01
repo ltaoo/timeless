@@ -3,7 +3,7 @@
  */
 import { onMount, JSX } from "solid-js";
 
-import {  ContextMenuCore  } from "@timeless/domains"; }}
+import {  ContextMenuCore  } from "@timeless/kit"; }}
       onContextMenu={(event) => {
         event.preventDefault();
         const _$span = $span;

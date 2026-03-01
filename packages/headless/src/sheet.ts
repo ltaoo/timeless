@@ -1,13 +1,20 @@
 import { ref, refobj, computed } from "@timeless/reactive";
-import { XOutlined } from "@timeless/icons";
+import { XOutlined } from "@timeless/icons/x";
 
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
-import { Txt } from "./text.js";
-import { Portal } from "./portal.js";
-import { Presence } from "./presence.js";
+import { tp, merge } from "./theme";
+import { View, ViewChildren, ViewProps } from "./view";
+import { Portal } from "./portal";
+import { Presence } from "./presence";
+import { DialogCore } from "@timeless/ui";
 
-export function Sheet(props: any, children?: any) {
+export function Sheet(
+  props: ViewProps & {
+    store: DialogCore;
+    side?: "right" | "top" | "bottom" | "left";
+    theme?: any;
+  },
+  children?: ViewChildren,
+) {
   const {
     store,
     side = "right",

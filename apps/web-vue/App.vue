@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 
-import { ToastCore } from "@/domains/ui/index";
-import { cn } from "@/utils/index";
+import { ToastCore } from "@timeless/kit";
+import { cn } from "@timeless/vue";
 
 import { PageKeys } from "./store/routes";
 import { history, app } from "./store/index";
 import { pages } from "./store/views";
 import { client } from "./store/http_client";
 import { storage } from "./store/storage";
-import StackRouteView from "./components/ui/StackRouteView.vue";
-import Toast from "./components/ui/Toast.vue";
+import { StackRouteView, Toast } from "@timeless/vue";
 
 const view = history.$view;
 const toast = new ToastCore();

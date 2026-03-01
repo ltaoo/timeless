@@ -3,7 +3,7 @@
  */
 import { For, JSX, createSignal } from "solid-js";
 
-import {  CheckboxCore  } from "@timeless/domains";>
+import {  CheckboxCore  } from "@timeless/kit";>
       <For each={state().options}>
         {(opt) => {
           const { label, core } = opt;

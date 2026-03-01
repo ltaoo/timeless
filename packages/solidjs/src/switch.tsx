@@ -1,6 +1,6 @@
 import { JSX } from "solid-js/jsx-runtime";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 import { useViewModelStore } from "@/hooks";
 
 const { CheckboxCore } = ui;

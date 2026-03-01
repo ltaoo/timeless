@@ -1,6 +1,6 @@
 import { createSignal, JSX, Show } from "solid-js";
 
-import {  DragZoneCore  } from "@timeless/domains";
+import {  DragZoneCore  } from "@timeless/kit";
             onChange={(event) => {
               store.handleDrop(Array.from(event.currentTarget.files || []));
             }}

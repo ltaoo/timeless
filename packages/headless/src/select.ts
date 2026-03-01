@@ -1,15 +1,18 @@
 import { ref, computed } from "@timeless/reactive";
-import { ChevronRightOutlined } from "@timeless/icons";
+import { ChevronRightOutlined } from "@timeless/icons/chevron-right";
 
 import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
+import { View, ViewProps } from "./view.js";
 import { Txt } from "./text.js";
 import { For } from "./for.js";
 import { Show } from "./show.js";
 import { Portal } from "./portal.js";
+import { SelectCore } from "@timeless/ui";
 
-export function Select(props: any) {
-  const { store, theme: t, class: cn, style: st, ...rest } = props;
+export function Select(
+  props: ViewProps & { store: SelectCore<any>; theme?: any },
+) {
+  const { store, theme: t, class: cls, style: st, ...rest } = props;
   const state = ref(store.state);
   const open = ref(false);
   const pos = ref({ x: 0, y: 0, width: 0 });
@@ -25,7 +28,7 @@ export function Select(props: any) {
   return View(
     {
       ...rest,
-      ...merge(tp(t?.root), cn, st),
+      ...merge(tp(t?.root), cls, st),
       onMounted($e: HTMLElement) {
         handleClickOutside = (event: Event) => {
           if ($e.contains(event.target as Node)) return;

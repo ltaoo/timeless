@@ -1,4 +1,4 @@
-import {  ApplicationModel as Application  } from "@timeless/domains";];
+import {  ApplicationModel as Application  } from "@timeless/kit";];
 export type ViewComponentProps = {
   app: Application<{ storage: typeof storage }>;
   history: HistoryCore<PageKeys, RouteConfig>;

@@ -5,7 +5,7 @@ import { For, JSX, Match, Show, Switch } from "solid-js";
 
 import { useViewModelStore } from "@/hooks";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 import { ListCore } from "@/domains/list";
 import { ArrowDown, Bird, Loader } from "lucide-solid";
 

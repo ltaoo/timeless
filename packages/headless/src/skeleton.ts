@@ -1,7 +1,7 @@
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
+import { tp, merge } from "./theme";
+import { View, ViewProps } from "./view";
 
-export function Skeleton(props: any) {
-  const { theme: t, class: cn, style: st, ...rest } = props || {};
-  return View({ ...rest, ...merge(tp(t?.root), cn, st) });
+export function Skeleton(props: ViewProps & { theme?: any }) {
+  const { theme: t, class: cls, style: st, ...rest } = props || {};
+  return View({ ...rest, ...merge(tp(t?.root), cls, st) });
 }

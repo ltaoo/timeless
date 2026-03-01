@@ -1,5 +1,5 @@
 import { JSX } from "solid-js/jsx-runtime";
-import {  TreeCore  } from "@timeless/domains";
+import {  TreeCore  } from "@timeless/kit";
 declare const Root: (props: {
     store: TreeCore;
 } & JSX.HTMLAttributes<HTMLDivElement>) => JSX.Element;

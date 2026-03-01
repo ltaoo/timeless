@@ -1,6 +1,6 @@
 import { For, Show, createSignal, onMount } from "solid-js";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { TabHeaderCore } = ui;
 

@@ -3,7 +3,7 @@
  */
 import { For, JSX, createSignal } from "solid-js";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { CheckboxCore, CheckboxGroupCore } = ui;
 

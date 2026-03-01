@@ -4,7 +4,7 @@
 import { For, createSignal, onMount, JSX } from "solid-js";
 import { ChevronRight } from "lucide-solid";
 
-import {  ContextMenuCore  } from "@timeless/domains"; }}
+import {  ContextMenuCore  } from "@timeless/kit"; }}
       onContextMenu={(event) => {
         event.preventDefault();
         const $$span = $span;

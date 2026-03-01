@@ -9,7 +9,7 @@ import { useViewModelStore } from "~/hooks";
 import * as DialogPrimitive from "~/packages/ui/dialog";
 import { Show } from "~/packages/ui/show";
 
-import {  DialogCore  } from "@timeless/domains";>
+import {  DialogCore  } from "@timeless/kit";>
                 <DialogPrimitive.Cancel store={vm}>取消</DialogPrimitive.Cancel>
                 <DialogPrimitive.Submit store={vm}>确认</DialogPrimitive.Submit>
               </div>

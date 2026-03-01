@@ -3,7 +3,7 @@ import { MoreHorizontal } from "lucide-solid";
 
 import { useViewModelStore } from "~/hooks";
 
-import {  TabHeaderCore  } from "@timeless/domains";,
+import {  TabHeaderCore  } from "@timeless/kit";,
                 }}
               />
             ) : null} */}

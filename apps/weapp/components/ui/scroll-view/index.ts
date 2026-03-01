@@ -1,6 +1,6 @@
 import { VariantProps, cva } from "class-variance-authority";
 
-import {  ButtonCore  } from "@timeless/domains"; });
+import {  ButtonCore  } from "@timeless/kit"; });
       this.setData({ className: c });
       const store = this.data._store as ButtonCore;
       if (!store) {

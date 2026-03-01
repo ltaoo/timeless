@@ -1,9 +1,6 @@
-import { View, ViewChildren } from "./view.js";
+import { View, ViewChildren, ViewProps } from "./view";
 
-export function Portal(
-  props: { onMounted?: ($el: HTMLElement) => void; onUnmounted?: () => void },
-  children: ViewChildren,
-) {
+export function Portal(props: ViewProps & {}, children: ViewChildren) {
   const { onMounted, ...rest } = props;
 
   const view$ = View(rest, children);

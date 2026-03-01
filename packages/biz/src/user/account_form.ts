@@ -1,10 +1,10 @@
-import timeless from "@timeless/domains";
+import { ObjectFieldCore, SingleFieldCore, InputCore } from "@timeless/ui";
 
 export function UserAccountForm() {
   const ui = {
-    $form: new timeless.ui.ObjectFieldCore({
+    $form: new ObjectFieldCore({
       fields: {
-        email: new timeless.ui.SingleFieldCore({
+        email: new SingleFieldCore({
           label: "邮箱",
           rules: [
             {
@@ -14,9 +14,12 @@ export function UserAccountForm() {
               mode: "email",
             },
           ],
-          input: new timeless.ui.InputCore({ defaultValue: "", placeholder: "请输入邮箱" }),
+          input: new InputCore({
+            defaultValue: "",
+            placeholder: "请输入邮箱",
+          }),
         }),
-        password: new timeless.ui.SingleFieldCore({
+        password: new SingleFieldCore({
           label: "密码",
           rules: [
             {
@@ -25,7 +28,11 @@ export function UserAccountForm() {
               minLength: 3,
             },
           ],
-          input: new timeless.ui.InputCore({ defaultValue: "", placeholder: "请输入密码", type: "password" }),
+          input: new InputCore({
+            defaultValue: "",
+            placeholder: "请输入密码",
+            type: "password",
+          }),
         }),
       },
     }),

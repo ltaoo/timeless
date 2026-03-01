@@ -25,11 +25,11 @@ const config = [
         sourcemap: true,
       },
     ],
-    external: ["solid-js", "solid-js/web", "solid-js/store", /@timeless\/domains/],
+    external: ["solid-js", "solid-js/web", "solid-js/store", /@timeless\/kit/],
     plugins: [
       alias({
         entries: [
-          { find: "@/domains", replacement: path.resolve(__dirname, "../../packages/domains/src") },
+          { find: "@/kit", replacement: path.resolve(__dirname, "../../packages/kit/src") },
           { find: "@/biz", replacement: path.resolve(__dirname, "../../packages/biz/src") },
           { find: "@", replacement: path.resolve(__dirname, "src") },
         ],

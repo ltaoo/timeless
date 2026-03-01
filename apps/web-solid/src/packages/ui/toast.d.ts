@@ -2,7 +2,7 @@
  * @file 小黑块 提示
  */
 import { JSX } from "solid-js";
-import {  ToastCore  } from "@timeless/domains";
+import {  ToastCore  } from "@timeless/kit";
 declare const Root: (props: {
     store: ToastCore;
 } & JSX.HTMLAttributes<HTMLElement>) => JSX.Element;

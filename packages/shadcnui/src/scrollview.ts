@@ -1,9 +1,9 @@
-import { ui } from "@timeless/domains";
 import { View, ViewChildren, type ViewProps } from "@timeless/headless";
 import { ref, cn } from "@timeless/reactive";
+import { ScrollViewCore } from "@timeless/ui";
 
 export function ScrollView(
-  props: ViewProps & { store: ui.ScrollViewCore },
+  props: ViewProps & { store: ScrollViewCore },
   children: ViewChildren,
 ) {
   const { store, class: cls, ...rest } = props;

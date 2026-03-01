@@ -1,16 +1,17 @@
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
-import { Show } from "./show.js";
-import { Portal } from "./portal.js";
 import { ref, computed } from "@timeless/reactive";
 
-export function Popover(props: any, children?: any) {
+import { tp, merge } from "./theme";
+import { View, ViewChildren } from "./view";
+import { Show } from "./show";
+import { Portal } from "./portal";
+
+export function Popover(props: any, children?: ViewChildren) {
   const {
     store,
     content,
     title,
     theme: t,
-    class: cn,
+    class: cls,
     style: st,
     ...rest
   } = props;
@@ -126,7 +127,7 @@ export function Popover(props: any, children?: any) {
                   return (
                     merge(
                       tp(t?.content, { enter: s.enter, exit: s.exit }),
-                      cn,
+                      cls,
                       st,
                     ).class || ""
                   );
@@ -135,7 +136,7 @@ export function Popover(props: any, children?: any) {
                   const s = d;
                   const tr = merge(
                     tp(t?.content, { enter: s.enter, exit: s.exit }),
-                    cn,
+                    cls,
                     st,
                   );
                   const base = tr.style || "";

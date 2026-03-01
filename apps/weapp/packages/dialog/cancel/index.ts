@@ -1,4 +1,4 @@
-import {  ButtonCore, DialogCore  } from "@timeless/domains";, store);
+import {  ButtonCore, DialogCore  } from "@timeless/kit";, store);
       },
     },
     className: {

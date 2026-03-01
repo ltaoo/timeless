@@ -1,11 +1,8 @@
-import { ui } from "@timeless/domains";
-
-// const { ScrollViewCore, preventDefault } = ui;
-type PointEvent = ui.PointEvent;
+import { ScrollViewCore, PointEvent, preventDefault } from "@timeless/ui";
 
 const SpeedClassName = "enable-hardware";
 
-export function connectScroll(store: InstanceType<typeof ui.ScrollViewCore>, $scroll: HTMLDivElement) {
+export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
   function handlePointerDown(e: PointEvent) {
     store.handlePointDown(e);
     const scrollTop = store.getScrollTop();
@@ -102,7 +99,7 @@ export function connectScroll(store: InstanceType<typeof ui.ScrollViewCore>, $sc
       el = (el as HTMLElement).parentNode;
     }
     if (isPrevent) {
-      ui.preventDefault(e);
+      preventDefault(e);
     }
   }
   store.refreshRect = () => {
@@ -230,7 +227,7 @@ export function connectScroll(store: InstanceType<typeof ui.ScrollViewCore>, $sc
 }
 
 export function connectIndicator(
-  store: InstanceType<typeof ui.ScrollViewCore>,
+  store: ScrollViewCore,
   $indicator: HTMLDivElement,
 ) {
   store.hideIndicator = () => {

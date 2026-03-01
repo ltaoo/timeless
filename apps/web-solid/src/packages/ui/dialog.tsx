@@ -3,7 +3,7 @@
  */
 import { createSignal, JSX } from "solid-js";
 
-import {  DialogCore  } from "@timeless/domains";
+import {  DialogCore  } from "@timeless/kit";
 }
 
 export { Root, Portal, Header, Title, Content, Close, Overlay, Footer, Submit, Cancel };

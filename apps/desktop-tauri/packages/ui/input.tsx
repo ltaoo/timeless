@@ -1,7 +1,7 @@
 import { createSignal, JSX, onMount } from "solid-js";
 import { effect } from "solid-js/web";
 
-import {  InputCore  } from "@timeless/domains";
+import {  InputCore  } from "@timeless/kit";
       onInput={(event: Event & { currentTarget: HTMLInputElement }) => {
         store.handleChange(event);
       }}

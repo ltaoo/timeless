@@ -4,9 +4,9 @@ import { JSX } from "solid-js/jsx-runtime";
 import { effect } from "solid-js/web";
 import { Image, ImageOff } from "lucide-solid";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 // @ts-ignore
-// import { connect } from "@timeless/domains/ui/image/connect.web";
+// import { connect } from "@timeless/kit/ui/image/connect.web";
 
 const { ImageCore, ImageStep } = ui;
 

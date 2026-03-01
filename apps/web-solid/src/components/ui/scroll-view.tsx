@@ -5,7 +5,7 @@ import { JSX, createSignal } from "solid-js";
 import { ArrowDown, LoaderCircle } from "lucide-solid";
 
 import * as ScrollViewPrimitive from "~/packages/ui/scroll-view";
-import {  ScrollViewCore  } from "@timeless/domains"; width={18} height={18} />
+import {  ScrollViewCore  } from "@timeless/kit"; width={18} height={18} />
             </div>
           </ScrollViewPrimitive.Loading>
         </div>

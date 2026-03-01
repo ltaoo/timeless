@@ -2,11 +2,10 @@
 import { onMounted, ref } from "vue";
 
 import { ViewComponentProps } from "../../store/types";
-import Input from "@/components/ui/Input.vue";
-import Button from "@/components/ui/Button.vue";
+import { Input, Button } from "@timeless/vue";
 import { QRCodeWithState } from "@/biz/qrcode_confirm/index";
 import { createQRCode } from "@/domains/qrcode/index";
-import { ButtonCore, InputCore } from "@/domains/ui/index";
+import { ButtonCore, InputCore } from "@timeless/kit";
 import { AuthCodeStep } from "@/constants/index";
 
 const props = defineProps<ViewComponentProps>();

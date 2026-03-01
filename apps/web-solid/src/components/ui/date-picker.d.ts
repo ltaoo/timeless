@@ -1,1 +1,1 @@
-import {  DatePickerCore  } from "@timeless/domains";).JSX.Element;
+import {  DatePickerCore  } from "@timeless/kit";).JSX.Element;

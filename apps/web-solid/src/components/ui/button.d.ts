@@ -3,7 +3,7 @@
  */
 import { JSX } from "solid-js";
 import { VariantProps } from "class-variance-authority";
-import {  ButtonCore  } from "@timeless/domains";).ClassProp) => string;
+import {  ButtonCore  } from "@timeless/kit";).ClassProp) => string;
 declare function Button<T = unknown>(props: {
     store: ButtonCore<T>;
     icon?: JSX.Element;

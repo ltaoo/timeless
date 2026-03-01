@@ -8,7 +8,7 @@ import { Button, Input, Popover } from "~/components/ui";
 import { TreeSelect } from "~/components/tree-select/tree-select";
 import { TreeEdit } from "~/components/tree-select/tree-edit";
 
-import {  base, Handler  } from "@timeless/domains"; store={vm.ui.$edit.ui.$btn_ok}>
+import {  base, Handler  } from "@timeless/kit"; store={vm.ui.$edit.ui.$btn_ok}>
               确定
             </Button>
           </div>

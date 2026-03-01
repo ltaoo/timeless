@@ -78,7 +78,7 @@ export default function HomeLayoutView(props) {
               },
             },
             [
-              BoltOutlined({
+              Timeless.icons.BoltOutlined({
                 style: "font-size: 24px",
               }),
             ],

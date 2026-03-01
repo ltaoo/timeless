@@ -4,13 +4,12 @@ import { ArrowRightCircle, ChevronRight } from "lucide-vue-next";
 
 import { ViewComponentProps } from "../../store/types";
 import { MediaItem, fetchMediaList, fetchMediaListProcess } from "@/biz/media/services";
-import AspectRatio from "@/components/ui/AspectRatio.vue";
-import LazyImage from "@/components/ui/Image.vue";
+import { AspectRatio, Image as LazyImage } from "@timeless/vue";
 import { ListCore } from "@/domains/list/index";
 import { DeviceSizeTypes } from "@/domains/app/index";
 import { getPageSizeByDeviceSize } from "@/domains/list/utils";
 import { RequestCore } from "@/domains/request/index";
-import { ImageInListCore } from "@/domains/ui/image";
+import { ImageInListCore } from "@timeless/kit";
 import {
   MediaTypes,
   MediaOriginCountry,

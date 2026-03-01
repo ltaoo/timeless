@@ -3,7 +3,7 @@
  */
 import { JSX } from "solid-js";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { ButtonCore } = ui;
 

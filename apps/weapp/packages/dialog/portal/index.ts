@@ -1,4 +1,4 @@
-import {  DialogCore  } from "@timeless/domains";, store, this.data.name);
+import {  DialogCore  } from "@timeless/kit";, store, this.data.name);
       if (!store) {
         return;
       }

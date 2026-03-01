@@ -1,4 +1,4 @@
-import {  StorageCore  } from "@timeless/domains";);
+import {  StorageCore  } from "@timeless/kit";);
     return {
       ...prev,
     };

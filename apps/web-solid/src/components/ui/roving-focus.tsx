@@ -1,7 +1,7 @@
 import { createContext, createSignal, onCleanup, useContext } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
-import {  RovingFocusCore  } from "@timeless/domains"; && event.shiftKey) {
+import {  RovingFocusCore  } from "@timeless/kit"; && event.shiftKey) {
             store.shiftTab();
             return;
           }

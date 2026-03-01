@@ -1,4 +1,4 @@
-import {  PresenceCore  } from "@timeless/domains";, nextState);
+import { PresenceCore } from "@timeless/kit";, nextState);
           const { visible, mounted } = nextState;
           this.setData({
             visible,

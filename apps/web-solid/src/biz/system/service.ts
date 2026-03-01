@@ -1,4 +1,4 @@
-import { RequestPayload } from "@timeless/domains";
+import { RequestPayload } from "@timeless/kit";
 
 export function fetchSystemInfo(params?: any): RequestPayload<{ fields: any[] }> {
   return {

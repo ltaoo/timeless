@@ -3,17 +3,13 @@ import { defineComponent, ref } from "vue";
 
 import { ViewComponentProps } from "../../store/types";
 import { fetchMediaList } from "@/biz/media/services";
-import AspectRatio from "@/components/ui/AspectRatio.vue";
-import ListView from "@/components/ui/ListView.vue";
-import ScrollView from "@/components/ui/ScrollView.vue";
-import LazyImage from "@/components/ui/Image.vue";
+import { AspectRatio, ListView, ScrollView, Image as LazyImage } from "@timeless/vue";
 import MediaSection from "@/components/media-section/index.vue";
 import PageFooter from "@/components/footer/index.vue";
 import { ListCore } from "@/domains/list";
 import { getPageSizeByDeviceSize } from "@/domains/list/utils";
 import { RequestCore } from "@/domains/request";
-import { ScrollViewCore } from "@/domains/ui/scroll-view";
-import { ImageInListCore } from "@/domains/ui/image";
+import { ScrollViewCore, ImageInListCore } from "@timeless/kit";
 import { MediaTypes, MediaOriginCountry } from "@/constants/index";
 
 const { app, storage } = defineProps<ViewComponentProps>();

@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "@timeless/reactive": "workspace:^",
-    "@timeless/domains": "workspace:^",
+    "@timeless/kit": "workspace:^",
+    "@timeless/ui": "workspace:^",
     "@timeless/icons": "workspace:^"
   }
 }

@@ -7,7 +7,7 @@ import { ViewComponentProps } from "~/store/types";
 import { useViewModel } from "~/hooks";
 import { JSONContentPreview } from "~/components/preview-panels/json";
 
-import {  base, Handler  } from "@timeless/domains";)}>
+import {  base, Handler  } from "@timeless/kit";)}>
                 <JSONContentPreview text={state().profile?.text!} />
               </Match>
               <Match when={isCodeContent(state().profile?.types)}>

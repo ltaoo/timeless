@@ -1,16 +1,16 @@
 import { ref, computed } from "@timeless/reactive";
-import { ui } from "@timeless/domains";
+import { DialogCore } from "@timeless/ui";
 
-import { tp, merge } from "./theme.js";
-import { View, ViewChildren, ViewProps } from "./view.js";
-import { Txt } from "./text.js";
-import { Show } from "./show.js";
-import { Portal } from "./portal.js";
-import { Presence } from "./presence.js";
+import { tp, merge } from "./theme";
+import { View, ViewChildren, ViewProps } from "./view";
+import { Txt } from "./text";
+import { Show } from "./show";
+import { Portal } from "./portal";
+import { Presence } from "./presence";
 
 export function Dialog(
   props: ViewProps & {
-    store: ui.DialogCore;
+    store: DialogCore;
     theme?: any;
   },
   children?: ViewChildren,

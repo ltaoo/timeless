@@ -10,12 +10,12 @@ import {
   HistoryCore,
   StorageCore,
   HttpClientCore,
-} from "@timeless/domains";
+} from "@timeless/kit";
 
-import { Component, View, ViewProps } from "./view.js";
-import { For } from "./for.js";
-import { Show } from "./show.js";
-import { AsyncView } from "./async-view.js";
+import { Component, View, ViewProps } from "./view";
+import { For } from "./for";
+import { Show } from "./show";
+import { AsyncView } from "./async-view";
 
 export function RouteSubViews(
   props: ViewProps & {

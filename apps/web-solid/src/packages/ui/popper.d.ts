@@ -3,7 +3,7 @@
  * 仅负责计算气泡位置，不负责显隐
  */
 import { JSX } from "solid-js";
-import {  PopperCore  } from "@timeless/domains";
+import {  PopperCore  } from "@timeless/kit";
 declare const Root: (props: {
     store?: PopperCore;
 } & JSX.HTMLAttributes<HTMLElement>) => JSX.Element;

@@ -1,4 +1,5 @@
-import { StorageCore, ApplicationModel, ThemeTypes, Result } from "@timeless/domains";
+import { Result } from "@timeless/base";
+import { StorageCore, ApplicationModel, ThemeTypes } from "@timeless/kit";
 
 export function connect<T extends { storage: StorageCore<any>; user: any }>(
   app: ApplicationModel<T>,

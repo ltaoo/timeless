@@ -1,7 +1,7 @@
 import dayjs, { Dayjs } from "dayjs";
 import { createSignal, JSX } from "solid-js";
 
-import {  base, Handler  } from "@timeless/domains";
+import {  base, Handler  } from "@timeless/kit";
 
 // const bus
 // setInterval(() => {

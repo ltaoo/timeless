@@ -1,9 +1,21 @@
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
+import { tp, merge } from "./theme";
+import { View, ViewChildren, ViewProps } from "./view";
 
-export function Alert(props: any, children?: any) {
-  const { variant = "default", theme: t, class: cn, style: st, ...rest } = props || {};
-  return View({ ...rest, ...merge(tp(t?.root, { variant }), cn, st) }, children);
+export function Alert(
+  props: ViewProps & { variant?: "default"; theme?: any },
+  children?: ViewChildren,
+) {
+  const {
+    variant = "default",
+    theme: t,
+    class: cls,
+    style: st,
+    ...rest
+  } = props || {};
+  return View(
+    { ...rest, ...merge(tp(t?.root, { variant }), cls, st) },
+    children,
+  );
 }
 
 export function AlertTitle(props: any, children?: any) {

@@ -7,4 +7,4 @@ export const client = new Timeless.HttpClientCore({
   },
 });
 
-Timeless.Web.provide_http_client(client);
+Timeless.web.provide_http_client(client);

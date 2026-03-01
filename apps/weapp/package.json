@@ -6,7 +6,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@timeless/biz": "workspace:*", "@timeless/domains": "workspace:*", "@timeless/utils": "workspace:*",
+    "@timeless/biz": "workspace:*", "@timeless/kit": "workspace:*", "@timeless/utils": "workspace:*",
     "@timeless/provider-weapp": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "mitt": "^3.0.1"

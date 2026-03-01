@@ -1,5 +1,5 @@
 import { JSX } from "solid-js/jsx-runtime";
-import {  ListCore  } from "@timeless/domains";
+import {  ListCore  } from "@timeless/kit";
 export declare function ListView(props: {
     store: ListCore<any, any>;
     skeleton?: JSX.Element;

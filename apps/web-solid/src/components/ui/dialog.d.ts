@@ -3,5 +3,5 @@
  */
 import { JSX } from "solid-js";
 import { ViewComponentProps } from "~/store/types";
-import {  DialogCore  } from "@timeless/domains";];
+import {  DialogCore  } from "@timeless/kit";];
 } & JSX.HTMLAttributes<HTMLElement>): JSX.Element;

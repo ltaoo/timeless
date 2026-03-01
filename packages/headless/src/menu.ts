@@ -1,19 +1,22 @@
 import { ref, refobj, computed } from "@timeless/reactive";
-import { ui } from "@timeless/domains";
-import { ChevronRightOutlined } from "@timeless/icons";
+import { MenuCore } from "@timeless/ui";
+import { ChevronRightOutlined } from "@timeless/icons/chevron-right";
 
-import { tp, merge } from "./theme.js";
-import { Component, View, ViewChildren } from "./view.js";
-import { Txt } from "./text.js";
-import { For } from "./for.js";
-import { Show } from "./show.js";
-import { Portal } from "./portal.js";
-import { Presence } from "./presence.js";
-import { Popper } from "./popper.js";
+import { tp, merge } from "./theme";
+import { Component, View, ViewChildren, ViewProps } from "./view";
+import { Txt } from "./text";
+import { For } from "./for";
+import { Show } from "./show";
+import { Portal } from "./portal";
+import { Presence } from "./presence";
+import { Popper } from "./popper";
 
-export function Menu(props: any, children?: ViewChildren) {
-  const { theme: t, class: cn, style: st, ...rest } = props;
-  return View({ ...rest, ...merge(tp(t?.menu), cn, st) }, children);
+export function Menu(
+  props: ViewProps & { theme?: any },
+  children?: ViewChildren,
+) {
+  const { theme: t, class: cls, style: st, ...rest } = props;
+  return View({ ...rest, ...merge(tp(t?.menu), cls, st) }, children);
 }
 
 export function MenuItem(props: any, children?: ViewChildren) {
@@ -109,7 +112,7 @@ export function MenuSeparator(props: any) {
 }
 
 export function SubMenuContent(
-  props: { store: ui.MenuCore },
+  props: { store: MenuCore },
   children: ViewChildren,
 ) {
   return Portal({}, [
@@ -150,7 +153,7 @@ export function MenuItemView(item: any, t: any): Component {
               {
                 class: "ml-auto h-4 w-4",
               },
-              [ChevronRightOutlined()],
+              [ChevronRightOutlined({})],
             )
           : null,
         item.children

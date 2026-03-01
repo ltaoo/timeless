@@ -9,7 +9,7 @@ import { useViewModelStore } from "@/hooks";
 import * as DialogPrimitive from "@/packages/ui/dialog";
 import { Show } from "@/packages/ui/show";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { DialogCore } = ui;
 

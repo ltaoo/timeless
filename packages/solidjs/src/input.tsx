@@ -4,9 +4,9 @@ import { Loader } from "lucide-solid";
 import { useViewModelStore } from "@/hooks";
 import { Input as InputPrimitive } from "@/packages/ui/input";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 // @ts-ignore
-import { connect } from "@timeless/domains/ui/form/input/connect.web";
+import { connect } from "@timeless/kit/ui/form/input/connect.web";
 
 const { InputCore } = ui;
 

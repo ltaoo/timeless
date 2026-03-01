@@ -1,1 +1,1 @@
-import {  VideoPlayerCore  } from "@timeless/domains";).JSX.Element;
+import {  VideoPlayerCore  } from "@timeless/kit";).JSX.Element;

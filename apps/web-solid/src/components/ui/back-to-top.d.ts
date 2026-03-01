@@ -1,1 +1,1 @@
-import {  ScrollViewCore  } from "@timeless/domains";).JSX.Element;
+import {  ScrollViewCore  } from "@timeless/kit";).JSX.Element;

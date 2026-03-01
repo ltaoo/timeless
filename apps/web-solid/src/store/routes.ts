@@ -1,6 +1,6 @@
 import { JSX } from "solid-js/jsx-runtime";
 
-import {  PageKeysType, build  } from "@timeless/domains";,
+import {  PageKeysType, build  } from "@timeless/kit";,
       },
     },
   },

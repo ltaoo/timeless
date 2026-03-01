@@ -2,7 +2,7 @@
  * @file 多选按钮组件
  */
 import { JSX } from "solid-js";
-import {  CheckboxCore  } from "@timeless/domains";
+import {  CheckboxCore  } from "@timeless/kit";
 export declare const CheckboxOption: (props: {
     label: string;
     store: CheckboxCore;

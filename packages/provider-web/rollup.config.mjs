@@ -36,7 +36,7 @@ export default [
     output: {
       file: 'dist/timeless.web.umd.min.js',
       format: 'umd',
-      name: 'Timeless.Web',
+      name: 'Timeless.web',
       sourcemap: true,
     },
     plugins: [

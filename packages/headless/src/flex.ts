@@ -1,6 +1,6 @@
 import { cn, ClassNameRef, Ref } from "@timeless/reactive";
 
-import { View, ViewProps } from "./view.js";
+import { View, ViewChildren, ViewProps } from "./view";
 
 export function Flex(
   props: {
@@ -8,7 +8,7 @@ export function Flex(
     items?: string;
     class?: string | Ref<string> | ClassNameRef;
   } & ViewProps,
-  children?: any,
+  children?: ViewChildren,
 ) {
   const { justify, items, class: cls, ...rest } = props;
   const class$: any = cn(["flex", cls]);

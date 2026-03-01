@@ -1,6 +1,6 @@
 import { app } from "~/store/index";
 
-// import {  NavigatorCore  } from "@timeless/domains";, {
+// import {  NavigatorCore  } from "@timeless/kit";, {
         height: $bar.height,
       });
     },

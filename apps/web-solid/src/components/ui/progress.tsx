@@ -3,7 +3,7 @@
  */
 import { JSX, createSignal } from "solid-js";
 
-import {  ProgressCore  } from "@timeless/domains";
+import {  ProgressCore  } from "@timeless/kit";
         style={{ transform: `translateX(-${100 - (state().value || 0)}%)` }}
       />
     </div>

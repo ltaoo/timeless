@@ -2,7 +2,7 @@
   "name": "timeless-monorepo",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter \"./packages/*\" --filter \"!./packages/solidjs\" -r run build",
+    "build": "pnpm --filter \"./packages/*\" --filter \"!./packages/solidjs\" --filter \"!./packages/vue\" -r run build",
     "dev": "node scripts/dev.js",
     "test": "pnpm -r run test",
     "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules"

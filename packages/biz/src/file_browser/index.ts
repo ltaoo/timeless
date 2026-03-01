@@ -6,9 +6,14 @@
 // import { RequestCore } from "@/request";
 // import { RequestPayload } from "@/request/utils";
 // import { ScrollViewCore } from "@/ui";
-import { ui, ListCore, base, BaseDomain, Handler, HttpClientCore, RequestPayload, RequestCore } from "@timeless/domains";
-import { BizError } from "@timeless/domains";
-// import { HttpClientCore } from "@/http_client";
+import { base, BaseDomain, Handler, BizError } from "@timeless/base";
+import {
+  ListCore,
+  HttpClientCore,
+  RequestPayload,
+  RequestCore,
+} from "@timeless/kit";
+import { ScrollViewCore } from "@timeless/ui";
 
 export type BizFile = {
   id: string;
@@ -23,7 +28,7 @@ export enum BizFileType {
 export type BizFileFetchService = (...args: any[]) => RequestPayload<BizFile[]>;
 type FileColumn = {
   list: ListCore<RequestCore<BizFileFetchService, any>>;
-  view: ui.ScrollViewCore;
+  view: ScrollViewCore;
 };
 
 export function FileBrowserModel(props: {
@@ -68,7 +73,7 @@ export function FileBrowserModel(props: {
         _loading = loading;
         bus.emit(Events.LoadingChange, loading);
       });
-      const scrollView = new ui.ScrollViewCore({
+      const scrollView = new ScrollViewCore({
         async onReachBottom() {
           await list$.loadMore();
           scrollView.finishLoadingMore();

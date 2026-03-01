@@ -5,7 +5,7 @@ import { ViewComponentProps } from "~/store/types";
 import { ScrollView } from "~/components/ui";
 import { BottomNavigationBar1 } from "~/components/bottom-navigation-bar1";
 
-import {  ScrollViewCore  } from "@timeless/domains";>
+import {  ScrollViewCore  } from "@timeless/kit";>
             <BottomNavigationBar1
               back={props.store.methods.back}
               home={props.home || stacks().length === 1}

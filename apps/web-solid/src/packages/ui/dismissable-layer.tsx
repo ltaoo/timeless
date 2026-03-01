@@ -1,6 +1,6 @@
 import { JSX, onCleanup, onMount } from "solid-js";
 
-import {  DismissableLayerCore  } from "@timeless/domains";
+import {  DismissableLayerCore  } from "@timeless/kit";
 
 type PointerDownOutsideEvent = CustomEvent<{ originalEvent: PointerEvent }>;
 type FocusOutsideEvent = CustomEvent<{ originalEvent: FocusEvent }>;

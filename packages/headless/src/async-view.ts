@@ -1,4 +1,4 @@
-import { View, Component, isComponent, ViewProps } from "./view.js";
+import { View, Component, isComponent, ViewProps } from "./view";
 
 export function AsyncView(
   tt:

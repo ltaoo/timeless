@@ -1,5 +1,5 @@
 import { JSX } from "solid-js";
-import {  TabsCore  } from "@timeless/domains";
+import {  TabsCore  } from "@timeless/kit";
 declare const Root: (props: {
     store: TabsCore;
 } & JSX.HTMLAttributes<HTMLElement>) => JSX.Element;

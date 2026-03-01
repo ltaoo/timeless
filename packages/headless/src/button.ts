@@ -1,13 +1,13 @@
 import { ref, computed } from "@timeless/reactive";
-import { ui } from "@timeless/domains";
+import { ButtonCore } from "@timeless/ui/button";
 
-import { tp, merge } from "./theme.js";
-import { View, ViewChildren, ViewProps } from "./view.js";
-import { Show } from "./show.js";
+import { tp, merge } from "./theme";
+import { View, ViewChildren, ViewProps } from "./view";
+import { Show } from "./show";
 
 export function Button(
   props: ViewProps & {
-    store: ui.ButtonCore;
+    store: ButtonCore;
     theme?: any;
     variant?: "default";
     size?: "default" | "large" | "small";

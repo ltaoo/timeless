@@ -1,5 +1,4 @@
-import { BaseDomain, Handler } from "@timeless/domains";
-import { Result } from "@timeless/domains";
+import { BaseDomain, Handler, Result } from "@timeless/base";
 
 export class UserCore extends BaseDomain<any> {
   token: string = "";

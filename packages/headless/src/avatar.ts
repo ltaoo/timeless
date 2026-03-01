@@ -1,22 +1,31 @@
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
-import { Txt } from "./text.js";
 import { computed, ref, isRef } from "@timeless/reactive";
 
-export function Avatar(props: any) {
+import { tp, merge } from "./theme";
+import { View, ViewChildren, ViewProps } from "./view";
+import { Txt } from "./text";
+
+export function Avatar(
+  props: ViewProps & {
+    src: string;
+    alt?: string;
+    size: "default" | "large";
+    theme?: any;
+    fallback?: string;
+  },
+) {
   const {
     src,
     alt,
     fallback,
     size = "default",
     theme: t,
-    class: cn,
+    class: cls,
     style: st,
   } = props || {};
   const imgError = ref(false);
   const srcRef = isRef(src) ? src : ref(src || "");
 
-  return View({ ...merge(tp(t?.root, { size }), cn, st) }, [
+  return View({ ...merge(tp(t?.root, { size }), cls, st) }, [
     (() => {
       const $img = document.createElement("img");
       const ir = merge(tp(t?.image));

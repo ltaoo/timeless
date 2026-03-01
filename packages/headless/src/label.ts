@@ -1,7 +1,13 @@
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
+import { tp, merge } from "./theme";
+import { View, ViewChildren, ViewProps } from "./view";
 
-export function Label(props: any, children?: any) {
-  const { theme: t, class: cn, style: st, ...rest } = props || {};
-  return View({ type: "label", ...rest, ...merge(tp(t?.root), cn, st) }, children);
+export function Label(
+  props: ViewProps & { theme?: any },
+  children?: ViewChildren,
+) {
+  const { theme: t, class: cls, style: st, ...rest } = props || {};
+  return View(
+    { type: "label", ...rest, ...merge(tp(t?.root), cls, st) },
+    children,
+  );
 }

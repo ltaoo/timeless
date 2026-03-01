@@ -2,7 +2,7 @@ import { JSX, Show } from "solid-js";
 import { ChevronLeft, ChevronRight } from "lucide-solid";
 
 import { useViewModelStore } from "~/hooks";
-import {  PresenceCore  } from "@timeless/domains"; />
+import {  PresenceCore  } from "@timeless/kit"; />
         </Show>
       </div>
       <div>

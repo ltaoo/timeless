@@ -1,6 +1,6 @@
 import mitt from "mitt";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 import { provide_video_player } from "@timeless/provider-weapp";
 
 Component({

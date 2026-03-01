@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "jsx": "preserve",
+    "types": ["node"],
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "isolatedModules": true,
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@timeless/ui/presence": ["../ui/dist/presence/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*", "../biz/src/qrcode", "../biz/src/file_browser", "../utils/src/result", "../biz/src/shortcut"],
+  "exclude": ["src/**/__tests__", "src/**/*.test.ts"]
+}

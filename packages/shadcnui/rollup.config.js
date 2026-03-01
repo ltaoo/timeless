@@ -11,17 +11,23 @@ export default {
   input: path.join(__dirname, "src/index.ts"),
   output: [
     {
-      file: path.join(__dirname, "dist/shadcnui.umd.min.js"),
+      file: path.join(__dirname, "dist/timeless.shadcnui.umd.min.js"),
       format: "umd",
-      name: "ShadcnUI",
+      name: "Timeless.shadcnui",
+      extend: true,
       globals: {
-        "@timeless/reactive": "Reactive",
-        "@timeless/headless": "Headless",
+        "@timeless/reactive": "Timeless.reactive",
+        "@timeless/headless": "Timeless.headless",
       },
-      footer: `if (typeof window !== "undefined") { Object.assign(window, window.ShadcnUI); }`,
+      footer: `if (typeof window !== "undefined") {
+        window.Timeless = window.Timeless || {};
+        if (window.Timeless.shadcnui) {
+          Object.assign(window, window.Timeless.shadcnui);
+        }
+      }`,
     },
     {
-      file: path.join(__dirname, "dist/shadcnui.esm.js"),
+      file: path.join(__dirname, "dist/timeless.shadcnui.esm.js"),
       format: "es",
     },
   ],

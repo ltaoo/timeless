@@ -1,6 +1,6 @@
 import { JSX, Show, createSignal } from "solid-js";
 
-import {  TabsCore  } from "@timeless/domains";
+import {  TabsCore  } from "@timeless/kit";
         // aria-labelledby={triggerId}
         hidden={!open()}
         // id={contentId}

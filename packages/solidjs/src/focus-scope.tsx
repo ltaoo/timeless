@@ -1,6 +1,6 @@
 import { JSX, onCleanup } from "solid-js";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { FocusScopeCore } = ui;
 

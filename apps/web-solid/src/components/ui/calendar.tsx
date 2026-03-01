@@ -1,7 +1,7 @@
 import { createSignal, For, JSX } from "solid-js";
 import { ChevronLeft, ChevronRight } from "lucide-solid";
 
-import {  CalendarCore  } from "@timeless/domains";
+import {  CalendarCore  } from "@timeless/kit";
                               >
                                 {date.text}
                               </button>

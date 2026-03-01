@@ -1,6 +1,6 @@
 import { createSignal, onMount } from "solid-js";
 
-import {  VideoPlayerCore  } from "@timeless/domains";
+import {  VideoPlayerCore  } from "@timeless/kit";
         height={height}
       />
     </div>

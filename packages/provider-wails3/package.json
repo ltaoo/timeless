@@ -8,8 +8,9 @@
     "build": "rollup -c"
   },
   "dependencies": {
+    "@timeless/base": "workspace:*",
     "@timeless/biz": "workspace:*",
-    "@timeless/domains": "workspace:*",
+    "@timeless/kit": "workspace:*",
     "@timeless/provider-web": "workspace:*",
     "@timeless/utils": "workspace:*"
   },

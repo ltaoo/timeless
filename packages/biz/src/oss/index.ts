@@ -1,6 +1,4 @@
-import { Result } from "@timeless/domains";
-import { base, Handler } from "@timeless/domains";
-import { BizError } from "@timeless/domains";
+import { Result, base, Handler, BizError } from "@timeless/base";
 
 export function OSSManager() {
   const methods = {
@@ -35,7 +33,9 @@ export function OSSManager() {
 export type OSS = {
   upload: (file: File) => void;
   onStart(handler: Handler<void>): () => void;
-  onProgress(handler: Handler<{ percent: number }>): (opt: { percent: number }) => void;
+  onProgress(
+    handler: Handler<{ percent: number }>,
+  ): (opt: { percent: number }) => void;
   onError(handler: Handler<BizError>): () => void;
   onSuccess(handler: Handler<{ hash: string; key: string }>): () => void;
   onCompleted(handler: Handler<void>): () => void;

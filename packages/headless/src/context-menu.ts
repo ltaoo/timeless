@@ -1,6 +1,6 @@
-import { ui } from "@timeless/domains";
 import { computed, ref, refobj, uncomputed } from "@timeless/reactive";
-import { ChevronRightOutlined } from "@timeless/icons";
+import { ContextMenuCore, MenuCore } from "@timeless/ui";
+import { ChevronRightOutlined } from "@timeless/icons/chevron-right";
 
 import { Component, View, ViewChildren, ViewProps } from "./view";
 import { DropdownMenu } from "./dropdown-menu";
@@ -15,7 +15,7 @@ import { Txt } from "./text";
 
 export function ContextMenu(
   props: ViewProps & {
-    store: ui.ContextMenuCore;
+    store: ContextMenuCore;
     theme?: any;
   },
   children: ViewChildren,
@@ -38,7 +38,7 @@ export function ContextMenu(
   const $menucontent = For({
     ...merge(tp(t?.menu)),
     each: menuitem$s,
-    render(item: { label: string; menu?: ui.MenuCore }) {
+    render(item: { label: string; menu?: MenuCore }) {
       //       console.log("[]DropdownMenu render item", !!item.menu, item.label);
       const items = ref(item.menu ? item.menu.state.items : []);
       if (item.menu) {
@@ -78,38 +78,41 @@ export function ContextMenu(
             },
             [
               View({ style: "flex:1;" }, [Txt(item.label)]),
-            View({ ...merge(tp(t?.submenuArrow)) }, [ChevronRightOutlined()]),
-            // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
-            item.menu
-              ? Portal({}, [
-                  Popper({ store: item.menu.popper }, [
-                    Presence(
-                      {
-                        store: item.menu.presence,
-                        animation: t?.subAnimation || t?.animation,
-                      },
-                      [
-                        listenMenuContent(
-                          item.menu,
-                          (() => {
-                            return For({
-                              ...merge(tp(t?.menu)),
-                              each: items,
-                              render(sub) {
-                                return MenuItemView(sub, t);
-                              },
-                              onUnmounted() {
-                                uncomputed(items);
-                              },
-                            });
-                          })(),
-                        ),
-                      ],
-                    ),
-                  ]),
-                ])
-              : null,
-          ]),
+              View({ ...merge(tp(t?.submenuArrow)) }, [
+                ChevronRightOutlined({}),
+              ]),
+              // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
+              item.menu
+                ? Portal({}, [
+                    Popper({ store: item.menu.popper }, [
+                      Presence(
+                        {
+                          store: item.menu.presence,
+                          animation: t?.subAnimation || t?.animation,
+                        },
+                        [
+                          listenMenuContent(
+                            item.menu,
+                            (() => {
+                              return For({
+                                ...merge(tp(t?.menu)),
+                                each: items,
+                                render(sub) {
+                                  return MenuItemView(sub, t);
+                                },
+                                onUnmounted() {
+                                  uncomputed(items);
+                                },
+                              });
+                            })(),
+                          ),
+                        ],
+                      ),
+                    ]),
+                  ])
+                : null,
+            ],
+          ),
         ],
       );
     },
@@ -192,7 +195,7 @@ export function ContextMenu(
   );
 }
 
-function listenMenuContent(menu: ui.MenuCore, child: Component) {
+function listenMenuContent(menu: MenuCore, child: Component) {
   const $el = child.$elm;
   $el.addEventListener("pointerdown", (e) => {
     e.stopPropagation();

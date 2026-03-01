@@ -1,9 +1,18 @@
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
-import { ref, computed, isRef } from "@timeless/reactive";
+import { ref, computed, isRef, Ref } from "@timeless/reactive";
+import { ProgressCore } from "@timeless/ui/progress";
 
-export function Progress(props: any) {
-  const { store, value, max = 100, theme: t, class: cn, style: st } = props;
+import { tp, merge } from "./theme";
+import { View, ViewProps } from "./view";
+
+export function Progress(
+  props: ViewProps & {
+    store: ProgressCore;
+    theme?: any;
+    value: Ref<number>;
+    max?: number;
+  },
+) {
+  const { store, value, max = 100, theme: t, class: cls, style: st } = props;
 
   if (store) {
     const state = ref(store.state);
@@ -17,7 +26,7 @@ export function Progress(props: any) {
 
     return View(
       {
-        ...merge(tp(t?.root), cn, st),
+        ...merge(tp(t?.root), cls, st),
         onUnmounted() {
           for (const fn of events) if (typeof fn === "function") fn();
           if (props.onUnmounted) props.onUnmounted();
@@ -36,7 +45,7 @@ export function Progress(props: any) {
     );
   }
 
-  return View({ ...merge(tp(t?.root), cn, st) }, [
+  return View({ ...merge(tp(t?.root), cls, st) }, [
     View({
       ...merge(tp(t?.fill)),
       style: computed(value, (d) => {

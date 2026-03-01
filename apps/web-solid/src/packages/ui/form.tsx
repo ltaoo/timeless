@@ -1,6 +1,6 @@
 import { JSX } from "solid-js";
 
-import {  FormCore  } from "@timeless/domains";, event.currentTarget.value);
+import {  FormCore  } from "@timeless/kit";, event.currentTarget.value);
       }}
     >
       {props.children}

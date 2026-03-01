@@ -1,7 +1,7 @@
 import { JSX } from "solid-js/jsx-runtime";
 import { Portal as PortalPrimitive } from "solid-js/web";
 
-import {  PopoverCore  } from "@timeless/domains";}>
+import {  PopoverCore  } from "@timeless/kit";}>
       {props.children}
     </PopperPrimitive.Content>
   );

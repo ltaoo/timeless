@@ -3,7 +3,7 @@
  */
 import { Show, createSignal, JSX, onCleanup } from "solid-js";
 
-import {  RouteViewCore  } from "@timeless/domains";}
+import {  RouteViewCore  } from "@timeless/kit";}
         // onAnimationEnd={() => {
         //   store.presence.animationEnd();
         // }}

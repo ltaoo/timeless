@@ -1,6 +1,6 @@
-import { ui } from "@timeless/domains";
+import { InputCore } from "@timeless/ui";
 
-export function connect(store: ui.InputCore<string>, $input: HTMLInputElement) {
+export function connect(store: InputCore<string>, $input: HTMLInputElement) {
   store.focus = () => {
     $input.focus();
   };

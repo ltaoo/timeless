@@ -5,7 +5,7 @@ import { JSX, createSignal } from "solid-js";
 import { ArrowDown, Loader } from "lucide-solid";
 
 import * as ScrollViewPrimitive from "@/packages/ui/scroll-view";
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { ScrollViewCore } = ui;
 

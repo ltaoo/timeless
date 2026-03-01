@@ -1,6 +1,6 @@
 
-import { Result } from "@timeless/domains";
-// import { request } from "@timeless/domains";
+import { Result } from "@timeless/kit";
+// import { request } from "@timeless/kit";
 
 export function fetchMedia(params: any) {
   // TODO: Implement fetchMedia

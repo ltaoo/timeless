@@ -2,7 +2,7 @@ import { JSX } from "solid-js/jsx-runtime";
 
 import { useViewModelStore } from "@/hooks";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { InputCore } = ui;
 

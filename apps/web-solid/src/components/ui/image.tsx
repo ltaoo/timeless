@@ -4,7 +4,7 @@ import { JSX } from "solid-js/jsx-runtime";
 import { effect } from "solid-js/web";
 import { Image, ImageOff } from "lucide-solid";
 
-import {  ImageCore, ImageStep  } from "@timeless/domains";: state().fit }}
+import {  ImageCore, ImageStep  } from "@timeless/kit";: state().fit }}
             src={state().src}
             alt={state().alt}
             onError={() => {

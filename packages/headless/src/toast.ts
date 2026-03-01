@@ -1,20 +1,20 @@
 import { ref, computed, uncomputed } from "@timeless/reactive";
-import { ui } from "@timeless/domains";
+import { ToastCore } from "@timeless/ui/toast";
 
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
-import { Txt } from "./text.js";
-import { For } from "./for.js";
-import { Show } from "./show.js";
-import { Portal } from "./portal.js";
-import { Presence } from "./presence.js";
+import { tp, merge } from "./theme";
+import { View, ViewProps } from "./view";
+import { Txt } from "./text";
+import { For } from "./for";
+import { Show } from "./show";
+import { Portal } from "./portal";
+import { Presence } from "./presence";
 
-export function Toast(props: {
-  store: ui.ToastCore;
-  theme?: any;
-  class?: string;
-  style?: string;
-}) {
+export function Toast(
+  props: ViewProps & {
+    store: ToastCore;
+    theme?: any;
+  },
+) {
   const { store, theme: t, class: cls, style: st } = props;
   const state = ref(store.state);
   const events: any[] = [() => uncomputed(state)];

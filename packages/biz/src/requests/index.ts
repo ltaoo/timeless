@@ -1,7 +1,5 @@
-import { BizError } from "@timeless/domains";
-import { ListCore } from "@timeless/domains";
-import { request_factory } from "@timeless/domains";
-import { Result } from "@timeless/domains";
+import { BizError, Result } from "@timeless/base";
+import { ListCore, request_factory } from "@timeless/kit";
 
 export const request = request_factory({
   hostnames: {},
@@ -19,7 +17,7 @@ export const request = request_factory({
 });
 
 ListCore.commonProcessor = <T>(
-  originalResponse: any
+  originalResponse: any,
 ): {
   dataSource: T[];
   page: number;
@@ -42,7 +40,16 @@ ListCore.commonProcessor = <T>(
   }
   try {
     const data = originalResponse.data || originalResponse;
-    const { list, page, page_size, total, noMore, no_more, has_more, next_marker } = data;
+    const {
+      list,
+      page,
+      page_size,
+      total,
+      noMore,
+      no_more,
+      has_more,
+      next_marker,
+    } = data;
     const result = {
       dataSource: list,
       page,

@@ -1,4 +1,4 @@
-import { RequestPayload } from "@timeless/domains";
+import { RequestPayload } from "@timeless/kit";
 
 export function fetchSubscription(params?: any): RequestPayload<any> {
   return {

@@ -1,4 +1,5 @@
-import { HttpClientCore, Handler, Result } from "@timeless/domains";
+import { Result } from "@timeless/base";
+import { HttpClientCore } from "@timeless/kit";
 
 export function connect(store: HttpClientCore) {
   store.fetch = async (options) => {

@@ -14,24 +14,34 @@ const targetDir = path.join(playgroundDir, "public");
 // Map of package names to their artifact paths and destination filenames
 const artifacts = [
   {
-    pkg: "headless",
-    src: "packages/headless/dist/headless.umd.min.js",
-    dest: "headless.umd.min.js",
+    pkg: "reactive",
+    src: "packages/reactive/dist/timeless.reactive.umd.min.js",
+    dest: "timeless.reactive.umd.min.js",
   },
   {
-    pkg: "reactive",
-    src: "packages/reactive/dist/reactive.umd.min.js",
-    dest: "reactive.umd.min.js",
+    pkg: "ui",
+    src: "packages/ui/dist/timeless.ui.umd.min.js",
+    dest: "timeless.ui.umd.min.js",
+  },
+  {
+    pkg: "kit",
+    src: "packages/kit/dist/timeless.kit.umd.min.js",
+    dest: "timeless.kit.umd.min.js",
+  },
+  {
+    pkg: "headless",
+    src: "packages/headless/dist/timeless.headless.umd.min.js",
+    dest: "timeless.headless.umd.min.js",
+  },
+  {
+    pkg: "icons",
+    src: "packages/icons/dist/timeless.icons.umd.min.js",
+    dest: "timeless.icons.umd.min.js",
   },
   {
     pkg: "shadcnui",
-    src: "packages/shadcnui/dist/shadcnui.umd.min.js",
-    dest: "shadcnui.umd.min.js",
-  },
-  {
-    pkg: "domains",
-    src: "packages/domains/dist/timeless.core.umd.min.js",
-    dest: "timeless.core.umd.min.js",
+    src: "packages/shadcnui/dist/timeless.shadcn.umd.min.js",
+    dest: "timeless.shadcn.umd.min.js",
   },
   {
     pkg: "provider-web",
@@ -42,9 +52,11 @@ const artifacts = [
 
 // Explicit build dependencies
 const buildRelations = {
-  reactive: ["headless"],
-  headless: ["shadcnui"],
-  domains: ["headless"],
+  reactive: ["headless", "shadcnui"],
+  kit: ["headless", "shadcnui"],
+  ui: ["headless", "shadcnui"],
+  headless: ["icons", "shadcnui"],
+  icons: ["shadcnui"],
 };
 
 let buildQueue = null;
@@ -67,6 +79,32 @@ function copyArtifacts() {
         console.error(`Failed to copy ${item.src}:`, e.message);
       }
     }
+  });
+}
+
+function buildAll() {
+  return new Promise((resolve, reject) => {
+    console.log("Building all artifacts...");
+
+    const filters = artifacts.map((a) => `./packages/${a.pkg}...`);
+    const uniqueFilters = [...new Set(filters)];
+    const args = [...uniqueFilters.flatMap((f) => ["--filter", f]), "build"];
+
+    const child = spawn("pnpm", args, {
+      cwd: rootDir,
+      stdio: "inherit",
+      shell: true,
+    });
+
+    child.on("close", (code) => {
+      if (code === 0) {
+        console.log("Initial build success.");
+        copyArtifacts();
+        resolve();
+      } else {
+        reject(new Error(`Initial build failed with code ${code}`));
+      }
+    });
   });
 }
 
@@ -141,40 +179,62 @@ function triggerBuild(pkgName) {
   }, 1000); // 1s debounce to capture multiple file saves
 }
 
-// Watch packages
-console.log(`Watching packages in ${packagesDir}...`);
+function startDev() {
+  console.log(`Watching packages in ${packagesDir}...`);
 
-try {
-  const packages = fs.readdirSync(packagesDir).filter((f) => {
-    return fs.statSync(path.join(packagesDir, f)).isDirectory();
-  });
+  try {
+    const packages = fs.readdirSync(packagesDir).filter((f) => {
+      return fs.statSync(path.join(packagesDir, f)).isDirectory();
+    });
 
-  packages.forEach((pkg) => {
-    const pkgPath = path.join(packagesDir, pkg);
-    const srcPath = path.join(pkgPath, "src");
+    packages.forEach((pkg) => {
+      const pkgPath = path.join(packagesDir, pkg);
+      const srcPath = path.join(pkgPath, "src");
 
-    // Only watch if src exists
-    if (fs.existsSync(srcPath)) {
-      console.log(`Watching @timeless/${pkg}`);
-      // Watch src directory recursively
-      fs.watch(srcPath, { recursive: true }, (eventType, filename) => {
-        if (
-          filename &&
-          !filename.includes(".git") &&
-          !filename.includes("node_modules")
-        ) {
-          triggerBuild(pkg);
-        }
-      });
+      // Only watch if src exists
+      if (fs.existsSync(srcPath)) {
+        console.log(`Watching @timeless/${pkg}`);
+        // Watch src directory recursively
+        fs.watch(srcPath, { recursive: true }, (eventType, filename) => {
+          if (
+            filename &&
+            !filename.includes(".git") &&
+            !filename.includes("node_modules")
+          ) {
+            triggerBuild(pkg);
+          }
+        });
+      }
+    });
+
+    startServer();
+  } catch (err) {
+    console.error("Error setting up watchers:", err);
+  }
+}
+
+// Main execution
+const args = process.argv.slice(2);
+const isBuildOnly = args.includes("--build");
+
+buildAll()
+  .then(() => {
+    if (isBuildOnly) {
+      console.log("Build only mode completed.");
+      process.exit(0);
+    } else {
+      startDev();
+    }
+  })
+  .catch((err) => {
+    console.error(err);
+    if (isBuildOnly) {
+      process.exit(1);
+    } else {
+      console.log("Initial build failed, starting watchers anyway...");
+      startDev();
     }
   });
-
-  // Initial copy to ensure artifacts are present
-  copyArtifacts();
-  startServer();
-} catch (err) {
-  console.error("Error setting up watchers:", err);
-}
 
 function startServer() {
   // Parse port from command line args

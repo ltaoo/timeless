@@ -101,5 +101,5 @@ history.onClickLink(({ href, target }) => {
   history.push(route.name, query);
 });
 
-Timeless.Web.provide_app(app);
-Timeless.Web.provide_history(history);
+Timeless.web.provide_app(app);
+Timeless.web.provide_history(history);

@@ -4,7 +4,7 @@ import { Check } from "lucide-solid";
 
 import * as CheckboxPrimitive from "@/packages/ui/checkbox";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { CheckboxCore } = ui;
 

@@ -1,9 +1,20 @@
-import { tp, merge } from "./theme.js";
 import { cn } from "@timeless/reactive";
-import { ViewProps } from "./view.js";
 
-export function Input(props: ViewProps & { store?: any, theme?: any, dataset?: any }) {
-  const { store, style: st, class: cls, dataset, theme: t, ...rest } = props;
+import { tp, merge } from "./theme";
+import { ViewProps } from "./view";
+import { InputCore } from "@timeless/ui";
+
+export function Input(
+  props: ViewProps & { store?: InputCore<any>; theme?: any },
+) {
+  const {
+    store,
+    style: st,
+    class: cls,
+    dataset = {},
+    theme: t,
+    ...rest
+  } = props;
   const $elm = document.createElement("input");
 
   // Object.keys(rest).forEach((k) => {
@@ -16,25 +27,43 @@ export function Input(props: ViewProps & { store?: any, theme?: any, dataset?: a
 
   const m = merge(tp(t?.root), cls, st);
   const class$: any = cn([m.class || ""]);
-  class$._subscribe({ onChange(v: any) { $elm.className = v.join(" "); } });
+  class$._subscribe({
+    onChange(v: any) {
+      $elm.className = v.join(" ");
+    },
+  });
   $elm.className = class$.toString();
   if (m.style) $elm.style.cssText = m.style;
 
   const events: any[] = [];
   if (store) {
     if (store.value !== undefined) $elm.value = store.value;
-    $elm.addEventListener("input", (e: Event) => { store.setValue(/** @type {HTMLInputElement} */ (e.target as HTMLInputElement).value); });
-    const unsub = store.onStateChange ? store.onStateChange(() => {
-      if (store.value !== undefined && $elm.value !== String(store.value)) $elm.value = store.value;
-    }) : null;
+    $elm.addEventListener("input", (e: Event) => {
+      store.setValue(
+        /** @type {HTMLInputElement} */ (e.target as HTMLInputElement).value,
+      );
+    });
+    const unsub = store.onStateChange
+      ? store.onStateChange(() => {
+          if (store.value !== undefined && $elm.value !== String(store.value))
+            $elm.value = store.value;
+        })
+      : null;
     if (unsub) events.push(unsub);
   }
 
   return {
-    t: "view", $elm,
-    render() { return $elm; },
-    onMounted() { if (props.onMounted) props.onMounted($elm); },
-    beforeUnmounted() { if (props.beforeUnmounted) props.beforeUnmounted(); },
+    t: "view",
+    $elm,
+    render() {
+      return $elm;
+    },
+    onMounted() {
+      if (props.onMounted) props.onMounted($elm);
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) props.beforeUnmounted();
+    },
     onUnmounted() {
       for (const fn of events) if (typeof fn === "function") fn();
       if (props.onUnmounted) props.onUnmounted();

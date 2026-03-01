@@ -1,0 +1,239 @@
+{
+  "name": "@timeless/ui",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    },
+    "./affix": {
+      "types": "./dist/affix/index.d.ts",
+      "import": "./dist/affix/index.esm.js",
+      "require": "./dist/affix/index.js"
+    },
+    "./back-to-top": {
+      "types": "./dist/back-to-top/index.d.ts",
+      "import": "./dist/back-to-top/index.esm.js",
+      "require": "./dist/back-to-top/index.js"
+    },
+    "./button": {
+      "types": "./dist/button/index.d.ts",
+      "import": "./dist/button/index.esm.js",
+      "require": "./dist/button/index.js"
+    },
+    "./calendar": {
+      "types": "./dist/calendar/index.d.ts",
+      "import": "./dist/calendar/index.esm.js",
+      "require": "./dist/calendar/index.js"
+    },
+    "./checkbox": {
+      "types": "./dist/checkbox/index.d.ts",
+      "import": "./dist/checkbox/index.esm.js",
+      "require": "./dist/checkbox/index.js"
+    },
+    "./collection": {
+      "types": "./dist/collection/index.d.ts",
+      "import": "./dist/collection/index.esm.js",
+      "require": "./dist/collection/index.js"
+    },
+    "./context-menu": {
+      "types": "./dist/context-menu/index.d.ts",
+      "import": "./dist/context-menu/index.esm.js",
+      "require": "./dist/context-menu/index.js"
+    },
+    "./cur": {
+      "types": "./dist/cur/index.d.ts",
+      "import": "./dist/cur/index.esm.js",
+      "require": "./dist/cur/index.js"
+    },
+    "./date-picker": {
+      "types": "./dist/date-picker/index.d.ts",
+      "import": "./dist/date-picker/index.esm.js",
+      "require": "./dist/date-picker/index.js"
+    },
+    "./dialog": {
+      "types": "./dist/dialog/index.d.ts",
+      "import": "./dist/dialog/index.esm.js",
+      "require": "./dist/dialog/index.js"
+    },
+    "./direction": {
+      "types": "./dist/direction/index.d.ts",
+      "import": "./dist/direction/index.esm.js",
+      "require": "./dist/direction/index.js"
+    },
+    "./dismissable-layer": {
+      "types": "./dist/dismissable-layer/index.d.ts",
+      "import": "./dist/dismissable-layer/index.esm.js",
+      "require": "./dist/dismissable-layer/index.js"
+    },
+    "./drag-zone": {
+      "types": "./dist/drag-zone/index.d.ts",
+      "import": "./dist/drag-zone/index.esm.js",
+      "require": "./dist/drag-zone/index.js"
+    },
+    "./dropdown-menu": {
+      "types": "./dist/dropdown-menu/index.d.ts",
+      "import": "./dist/dropdown-menu/index.esm.js",
+      "require": "./dist/dropdown-menu/index.js"
+    },
+    "./dynamic-content": {
+      "types": "./dist/dynamic-content/index.d.ts",
+      "import": "./dist/dynamic-content/index.esm.js",
+      "require": "./dist/dynamic-content/index.js"
+    },
+    "./element": {
+      "types": "./dist/element/index.d.ts",
+      "import": "./dist/element/index.esm.js",
+      "require": "./dist/element/index.js"
+    },
+    "./focus-scope": {
+      "types": "./dist/focus-scope/index.d.ts",
+      "import": "./dist/focus-scope/index.esm.js",
+      "require": "./dist/focus-scope/index.js"
+    },
+    "./form": {
+      "types": "./dist/form/index.d.ts",
+      "import": "./dist/form/index.esm.js",
+      "require": "./dist/form/index.js"
+    },
+    "./formv2": {
+      "types": "./dist/formv2/index.d.ts",
+      "import": "./dist/formv2/index.esm.js",
+      "require": "./dist/formv2/index.js"
+    },
+    "./image": {
+      "types": "./dist/image/index.d.ts",
+      "import": "./dist/image/index.esm.js",
+      "require": "./dist/image/index.js"
+    },
+    "./menu": {
+      "types": "./dist/menu/index.d.ts",
+      "import": "./dist/menu/index.esm.js",
+      "require": "./dist/menu/index.js"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.ts",
+      "import": "./dist/node/index.esm.js",
+      "require": "./dist/node/index.js"
+    },
+    "./popover": {
+      "types": "./dist/popover/index.d.ts",
+      "import": "./dist/popover/index.esm.js",
+      "require": "./dist/popover/index.js"
+    },
+    "./popper": {
+      "types": "./dist/popper/index.d.ts",
+      "import": "./dist/popper/index.esm.js",
+      "require": "./dist/popper/index.js"
+    },
+    "./presence": {
+      "types": "./dist/presence/index.d.ts",
+      "import": "./dist/presence/index.esm.js",
+      "require": "./dist/presence/index.js"
+    },
+    "./progress": {
+      "types": "./dist/progress/index.d.ts",
+      "import": "./dist/progress/index.esm.js",
+      "require": "./dist/progress/index.js"
+    },
+    "./roving-focus": {
+      "types": "./dist/roving-focus/index.d.ts",
+      "import": "./dist/roving-focus/index.esm.js",
+      "require": "./dist/roving-focus/index.js"
+    },
+    "./scroll-view": {
+      "types": "./dist/scroll-view/index.d.ts",
+      "import": "./dist/scroll-view/index.esm.js",
+      "require": "./dist/scroll-view/index.js"
+    },
+    "./select": {
+      "types": "./dist/select/index.d.ts",
+      "import": "./dist/select/index.esm.js",
+      "require": "./dist/select/index.js"
+    },
+    "./simple-select": {
+      "types": "./dist/simple-select/index.d.ts",
+      "import": "./dist/simple-select/index.esm.js",
+      "require": "./dist/simple-select/index.js"
+    },
+    "./step": {
+      "types": "./dist/step/index.d.ts",
+      "import": "./dist/step/index.esm.js",
+      "require": "./dist/step/index.js"
+    },
+    "./switch": {
+      "types": "./dist/switch/index.d.ts",
+      "import": "./dist/switch/index.esm.js",
+      "require": "./dist/switch/index.js"
+    },
+    "./tab-header": {
+      "types": "./dist/tab-header/index.d.ts",
+      "import": "./dist/tab-header/index.esm.js",
+      "require": "./dist/tab-header/index.js"
+    },
+    "./tabs": {
+      "types": "./dist/tabs/index.d.ts",
+      "import": "./dist/tabs/index.esm.js",
+      "require": "./dist/tabs/index.js"
+    },
+    "./toast": {
+      "types": "./dist/toast/index.d.ts",
+      "import": "./dist/toast/index.esm.js",
+      "require": "./dist/toast/index.js"
+    },
+    "./toggle": {
+      "types": "./dist/toggle/index.d.ts",
+      "import": "./dist/toggle/index.esm.js",
+      "require": "./dist/toggle/index.js"
+    },
+    "./tree": {
+      "types": "./dist/tree/index.d.ts",
+      "import": "./dist/tree/index.esm.js",
+      "require": "./dist/tree/index.js"
+    },
+    "./tree-select": {
+      "types": "./dist/tree-select/index.d.ts",
+      "import": "./dist/tree-select/index.esm.js",
+      "require": "./dist/tree-select/index.js"
+    },
+    "./video-player": {
+      "types": "./dist/video-player/index.d.ts",
+      "import": "./dist/video-player/index.esm.js",
+      "require": "./dist/video-player/index.js"
+    },
+    "./waterfall": {
+      "types": "./dist/waterfall/index.d.ts",
+      "import": "./dist/waterfall/index.esm.js",
+      "require": "./dist/waterfall/index.js"
+    }
+  },
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prebuild": "node scripts/update-exports.js",
+    "build": "rollup -c rollup.config.mjs"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.7.5",
+    "@timeless/base": "workspace:*",
+    "@timeless/utils": "workspace:*",
+    "dayjs": "^1.11.19",
+    "mitt": "^3.0.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "^6.0.0",
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/node": "^25.0.9",
+    "rollup": "^4.59.0",
+    "rollup-plugin-analyzer": "^4.0.0",
+    "rollup-plugin-dts": "^6.3.0",
+    "rollup-plugin-visualizer": "^7.0.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3"
+  }
+}

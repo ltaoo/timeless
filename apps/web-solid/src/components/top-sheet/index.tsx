@@ -6,7 +6,7 @@ import { useViewModelStore } from "~/hooks";
 import * as DialogPrimitive from "~/packages/ui/dialog";
 import { Show } from "~/packages/ui/show";
 
-import {  DialogCore  } from "@timeless/domains";: state().exit,
+import {  DialogCore  } from "@timeless/kit";: state().exit,
             }}
           >
             {props.children}

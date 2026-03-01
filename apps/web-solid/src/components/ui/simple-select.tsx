@@ -1,4 +1,4 @@
-import {  SimpleSelectCore  } from "@timeless/domains";
+import {  SimpleSelectCore  } from "@timeless/kit";
 
 export const SimpleSelect = (props: { store: SimpleSelectCore }) => {
   const { store } = props;

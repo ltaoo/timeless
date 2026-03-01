@@ -1,7 +1,7 @@
 import { JSX } from "solid-js/jsx-runtime";
 import { createSignal, Show } from "solid-js";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { FormFieldCore } = ui;
 

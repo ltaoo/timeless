@@ -3,7 +3,7 @@ import { JSX } from "solid-js/jsx-runtime";
 
 import { useViewModelStore } from "@/hooks";
 import { ViewComponentProps } from "@/store/types";
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 import * as DialogPrimitive from "@/packages/ui/dialog";
 import { Show } from "@/packages/ui/show";
 

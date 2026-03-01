@@ -1,16 +1,10 @@
 import { createSignal, Show } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
+import { ImageUploadCore } from "@timeless/ui";
 
-import { readFileAsArrayBuffer, readFileAsURL } from "@/utils/browser";
-import { ui } from "@timeless/domains";
-
-const { DragZoneCore, ImageCore, ImageUploadCore } = ui;
-
-import { DragZone } from "./drag-zone";
-import { LazyImage } from "./image";
-import { AspectRatio } from "./aspect-ratio";
-
-export function ImageUpload(props: { store: ImageUploadCore } & JSX.HTMLAttributes<HTMLDivElement>) {
+export function ImageUpload(
+  props: { store: ImageUploadCore } & JSX.HTMLAttributes<HTMLDivElement>,
+) {
   const { store } = props;
 
   const [state, setState] = createSignal(store.state);

@@ -1,8 +1,8 @@
 import { ref, refarr, computed } from "@timeless/reactive";
 
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
-import { Txt } from "./text.js";
+import { tp, merge } from "./theme";
+import { View } from "./view";
+import { Txt } from "./text";
 
 export function Accordion(props: any) {
   const { items, type = "single", theme: t, class: cn, style: st } = props;

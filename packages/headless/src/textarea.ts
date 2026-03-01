@@ -1,15 +1,32 @@
-import { tp, merge } from "./theme.js";
 import { cn } from "@timeless/reactive";
 
-export function Textarea(props: any) {
-  const { store, style: st, class: cls, dataset, theme: t, ...rest } = props;
+import { tp, merge } from "./theme";
+import { ViewProps } from "./view";
+import { InputCore } from "@timeless/ui";
+
+export function Textarea(
+  props: ViewProps & {
+    store: InputCore<any>;
+    theme?: any;
+  },
+) {
+  const {
+    store,
+    style: st,
+    class: cls,
+    dataset = {},
+    theme: t,
+    ...rest
+  } = props;
   const $elm = document.createElement("textarea");
 
-  Object.keys(rest).forEach((k) => {
-    if (typeof rest[k] === "function") return;
-    $elm.setAttribute(k, rest[k]);
-  });
-  Object.keys(dataset || {}).forEach((k) => {
+  // Object.keys(rest).forEach((k) => {
+  //   if (typeof rest[k] === "function") {
+  //     return;
+  //   }
+  //   $elm.setAttribute(k, rest[k]);
+  // });
+  Object.keys(dataset).forEach((k) => {
     $elm.setAttribute(`data-${k}`, dataset[k]);
   });
 

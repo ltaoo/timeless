@@ -4,7 +4,7 @@
 import { createSignal, JSX, onMount } from "solid-js";
 import { effect } from "solid-js/web";
 
-import {  InputCore  } from "@timeless/domains";);
+import {  InputCore  } from "@timeless/kit";);
       //   store.handleChange(event);
       // }}
       onKeyDown={(event) => {

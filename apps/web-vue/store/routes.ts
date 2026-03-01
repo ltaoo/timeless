@@ -1,4 +1,4 @@
-import {  PageKeysType, build  } from "@timeless/domains";,
+import {  PageKeysType, build  } from "@timeless/kit";,
         options: {
           require: [],
         },

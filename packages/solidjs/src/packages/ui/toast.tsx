@@ -5,7 +5,7 @@ import { createSignal, JSX } from "solid-js";
 
 import { Portal as PortalPrimitive } from "@/packages/ui/portal";
 import { Presence } from "./presence";
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { ToastCore } = ui;
 

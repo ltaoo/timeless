@@ -1,5 +1,5 @@
 import { JSX } from "solid-js/jsx-runtime";
-import {  RovingFocusCore  } from "@timeless/domains";
+import {  RovingFocusCore  } from "@timeless/kit";
 declare const Root: (props: {
     store: RovingFocusCore;
 } & JSX.HTMLAttributes<HTMLElement>) => JSX.Element;

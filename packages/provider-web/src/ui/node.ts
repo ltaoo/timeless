@@ -1,8 +1,6 @@
-import { ui } from "@timeless/domains";
+import { NodeCore } from "@timeless/ui";
 
-// const { NodeCore } = ui;
-
-export function connect(store: InstanceType<typeof ui.NodeCore>, $node: HTMLElement) {
+export function connect(store: NodeCore, $node: HTMLElement) {
   const io = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {

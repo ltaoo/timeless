@@ -1,4 +1,4 @@
-import { HistoryCore } from "@timeless/domains";
+import { HistoryCore } from "@timeless/kit";
 
 const ownerDocument = globalThis.document;
 

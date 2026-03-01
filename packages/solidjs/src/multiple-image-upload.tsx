@@ -4,7 +4,7 @@ import { Plus, XCircle } from "lucide-solid";
 import { useViewModelStore } from "@/hooks";
 
 import { MultipleImageUploadModel } from "@/biz/multiple_image_upload";
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { ImageUploadCore } = ui;
 

@@ -1,6 +1,6 @@
 import { JSX } from "solid-js/jsx-runtime";
 import { ViewComponentProps } from "~/store/types";
-import {  ScrollViewCore  } from "@timeless/domains";];
+import {  ScrollViewCore  } from "@timeless/kit";];
     };
 }>(props: {
     store: T;

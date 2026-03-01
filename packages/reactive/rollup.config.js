@@ -11,14 +11,14 @@ export default {
   input: path.join(__dirname, "src/index.ts"),
   output: [
     {
-      file: path.join(__dirname, "dist/reactive.umd.min.js"),
+      file: path.join(__dirname, "dist/timeless.reactive.umd.min.js"),
       format: "umd",
-      name: "Reactive",
+      name: "Timeless.reactive",
       globals: {},
-      footer: `if (typeof window !== "undefined") { Object.assign(window, window.Reactive); }`,
+      footer: `if (typeof window !== "undefined") { Object.assign(window, window.Timeless.reactive); }`,
     },
     {
-      file: path.join(__dirname, "dist/reactive.esm.js"),
+      file: path.join(__dirname, "dist/timeless.reactive.esm.js"),
       format: "es",
     },
   ],

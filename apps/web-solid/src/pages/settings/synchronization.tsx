@@ -7,7 +7,7 @@ import { Button, Input } from "~/components/ui";
 import { FieldObjV2 } from "~/components/fieldv2/obj";
 import { FieldV2 } from "~/components/fieldv2/field";
 
-import {  base, Handler  } from "@timeless/domains"; />
+import {  base, Handler  } from "@timeless/kit"; />
               </Show>
               <div>测试</div>
             </div>

@@ -2,14 +2,10 @@
 import { defineComponent, ref } from "vue";
 
 import { ViewComponentProps } from "../../store/types";
-import ListView from "@/components/ui/ListView.vue";
-import ScrollView from "@/components/ui/ScrollView.vue";
-import LazyImage from "@/components/ui/Image.vue";
-import AspectRatio from "@/components/ui/AspectRatio.vue";
+import { ListView, ScrollView, Image as LazyImage, AspectRatio, Image } from "@timeless/vue";
 import { fetchPlayingHistories, fetchPlayingHistoriesProcess, PlayHistoryItem } from "@/biz/media/services";
-import { ScrollViewCore } from "@/domains/ui/scroll-view";
+import { ScrollViewCore, ImageInListCore } from "@timeless/kit";
 import { MediaTypes } from "@/constants";
-import { ImageInListCore } from "@/domains/ui/image";
 import { ListCore } from "@/domains/list/index";
 import { RequestCore } from "@/domains/request/index";
 

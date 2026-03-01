@@ -1,16 +1,14 @@
 import { ref, refobj, computed } from "@timeless/reactive";
-import { ui } from "@timeless/domains";
+import { PopperCore } from "@timeless/ui/popper";
 
-import { View, ViewProps } from "./view.js";
-import { Portal } from "./portal.js";
-import { Presence } from "./presence.js";
+import { View, ViewChildren, ViewProps } from "./view";
 
 export function Popper(
   props: ViewProps & {
-    store: ui.PopperCore;
+    store: PopperCore;
     zIndex?: number;
   },
-  children?: any,
+  children?: ViewChildren,
 ) {
   const { store, zIndex = 999, ...rest } = props;
   const state = refobj(store.state);

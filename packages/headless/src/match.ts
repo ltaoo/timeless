@@ -1,6 +1,11 @@
-import { View } from "./view.js";
+import { Ref } from "@timeless/reactive";
 
-export function Match(props: any, renders: any) {
+import { View, ViewChildren, ViewProps } from "./view";
+
+export function Match(
+  props: ViewProps & { when: Ref<any> },
+  renders: ViewChildren,
+) {
   const { when } = props;
 
   let _when_ref = when;
@@ -11,6 +16,9 @@ export function Match(props: any, renders: any) {
 
   _when_ref._subscribe({
     onPatch() {
+      render();
+    },
+    onChange() {
       render();
     },
   });
@@ -27,15 +35,25 @@ export function Match(props: any, renders: any) {
     if (!r) {
       return;
     }
-    view$.$elm.appendChild(r.render());
+    const res = r.render();
+    if (!res) {
+      return;
+    }
+    view$.$elm.appendChild(res);
   }
 
   return {
     t: "show",
     $elm: view$.$elm,
-    // onMounted() {
-    //   view$.onMounted();
-    // },
+    append(node: any) {},
+    setContent(v: any) {},
+    render() {
+      render();
+      if (props.onMounted) {
+        props.onMounted(view$.$elm);
+      }
+      return view$.$elm;
+    },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -46,15 +64,6 @@ export function Match(props: any, renders: any) {
         props.onUnmounted();
       }
       view$.$elm.innerHTML = "";
-    },
-    append(node: any) {},
-    setContent(v: any) {},
-    render() {
-      render();
-      if (props.onMounted) {
-        props.onMounted();
-      }
-      return view$.$elm;
     },
   };
 }

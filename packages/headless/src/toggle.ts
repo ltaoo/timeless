@@ -1,17 +1,17 @@
 import { ref, computed } from "@timeless/reactive";
-import { ui } from "@timeless/domains";
+import { ToggleCore } from "@timeless/ui/toggle";
 
 import { tp, merge } from "./theme.js";
 import { View, ViewProps } from "./view.js";
 
 export function Toggle(
   props: ViewProps & {
-    store: ui.ToggleCore;
+    store: ToggleCore;
     disabled?: boolean;
     theme?: any;
   },
 ) {
-  const { store, disabled, theme: t, class: cn, style: st } = props;
+  const { store, disabled, theme: t, class: cls, style: st } = props;
 
   const state = ref(store.state);
   const events: any[] = [];
@@ -28,7 +28,7 @@ export function Toggle(
       class: computed(state, (d) => {
         return merge(
           tp(t?.root, { on: d.checked || d.value, disabled: d.disabled }),
-          cn,
+          cls,
           st,
         ).class;
       }),

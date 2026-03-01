@@ -1,4 +1,4 @@
-// import {  ListCore  } from "@timeless/domains";,
+// import {  ListCore  } from "@timeless/kit";,
     };
   }
 };

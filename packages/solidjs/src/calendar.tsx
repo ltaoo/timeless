@@ -1,7 +1,7 @@
 import { createSignal, For, JSX } from "solid-js";
 import { ChevronLeft, ChevronRight } from "lucide-solid";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { CalendarCore } = ui;
 

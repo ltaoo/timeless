@@ -1,4 +1,4 @@
-import {  DialogCore  } from "@timeless/domains";,
+import { DialogCore } from "@timeless/kit";,
   },
   properties: {
     _store: {

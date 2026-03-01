@@ -1,4 +1,4 @@
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 import { createContext, onCleanup, useContext } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 

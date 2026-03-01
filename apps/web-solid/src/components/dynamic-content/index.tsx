@@ -1,6 +1,6 @@
 import { JSX, createSignal } from "solid-js";
 
-import {  DynamicContentCore  } from "@timeless/domains";
+import {  DynamicContentCore  } from "@timeless/kit";
 
 export const DynamicContent = (
   props: {

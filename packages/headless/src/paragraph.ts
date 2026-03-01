@@ -1,15 +1,7 @@
-import { View } from "./view.js";
-import { isRef, cn } from "@timeless/reactive";
+import { View, ViewChildren, ViewProps } from "./view";
 
-export function Paragraph(props: any, children?: any) {
-  // const class$ = cn([]);
-  const node$ = View(
-    {
-      type: "p",
-      // class: class$.toString(),
-    },
-    children,
-  );
+export function Paragraph(props: ViewProps & {}, children?: ViewChildren) {
+  const node$ = View({ type: "p" }, children);
   return {
     t: "view",
     append(node: any) {

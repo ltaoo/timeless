@@ -5,7 +5,7 @@ import { JSX } from "solid-js";
 import { VariantProps, cva } from "class-variance-authority";
 import { Loader } from "lucide-solid";
 
-import {  ButtonCore  } from "@timeless/domains";></div> */}
+import {  ButtonCore  } from "@timeless/kit";></div> */}
           {props.children}
         </ButtonPrimitive.Text>
       </Show>

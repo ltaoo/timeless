@@ -4,7 +4,7 @@
 import { createSignal, onCleanup, onMount, JSX } from "solid-js";
 // import { Portal as PortalPrimitive } from "solid-js/web";
 
-import {  MenuCore  } from "@timeless/domains";
+import {  MenuCore  } from "@timeless/kit";
 type GraceIntent = { area: Polygon; side: Side };
 
 // Determine if a point is inside of a polygon.

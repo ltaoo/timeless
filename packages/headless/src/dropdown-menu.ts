@@ -1,6 +1,6 @@
-import { ui } from "@timeless/domains";
 import { ref, refobj, refarr, computed, uncomputed } from "@timeless/reactive";
-import { ChevronRightOutlined } from "@timeless/icons";
+import { DropdownMenuCore, MenuCore } from "@timeless/ui";
+import { ChevronRightOutlined } from "@timeless/icons/chevron-right";
 
 import { For } from "./for";
 import { merge, tp } from "./theme";
@@ -14,7 +14,7 @@ import { Presence } from "./presence";
 
 export function DropdownMenu(
   props: {
-    store: ui.DropdownMenuCore;
+    store: DropdownMenuCore;
     theme: any;
     onMounted?: ($elm: any) => void;
     onUnmounted?: () => void;
@@ -51,7 +51,7 @@ export function DropdownMenu(
   const $menucontent = For({
     ...merge(tp(t?.menu)),
     each: menuitem$s,
-    render(item: { label: string; menu?: ui.MenuCore }) {
+    render(item: { label: string; menu?: MenuCore }) {
       //       console.log("[]DropdownMenu render item", !!item.menu, item.label);
       const items = ref(item.menu ? item.menu.state.items : []);
       if (item.menu) {
@@ -91,48 +91,51 @@ export function DropdownMenu(
             },
             [
               View({ style: "flex:1;" }, [Txt(item.label)]),
-            View({ ...merge(tp(t?.submenuArrow)) }, [ChevronRightOutlined()]),
-            // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
-            item.menu
-              ? Portal({}, [
-                  Popper({ store: item.menu.popper }, [
-                    Presence(
-                      {
-                        store: item.menu.presence,
-                        animation: t?.subAnimation || t?.animation,
-                      },
-                      [
-                        listenMenuContent(
-                          item.menu,
-                          (() => {
-                            return For({
-                              ...merge(tp(t?.menu)),
-                              each: items,
-                              render(sub) {
-                                return MenuItemView(sub, t);
-                              },
-                              onUnmounted() {
-                                uncomputed(items);
-                              },
-                            });
-                          })(),
-                          () => {
-                            if (store.trigger === "hover") {
-                              _hoverClearHide();
-                            }
-                          },
-                          () => {
-                            if (store.trigger === "hover") {
-                              _hoverScheduleHide();
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ]),
-                ])
-              : null,
-          ]),
+              View({ ...merge(tp(t?.submenuArrow)) }, [
+                ChevronRightOutlined({}),
+              ]),
+              // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
+              item.menu
+                ? Portal({}, [
+                    Popper({ store: item.menu.popper }, [
+                      Presence(
+                        {
+                          store: item.menu.presence,
+                          animation: t?.subAnimation || t?.animation,
+                        },
+                        [
+                          listenMenuContent(
+                            item.menu,
+                            (() => {
+                              return For({
+                                ...merge(tp(t?.menu)),
+                                each: items,
+                                render(sub) {
+                                  return MenuItemView(sub, t);
+                                },
+                                onUnmounted() {
+                                  uncomputed(items);
+                                },
+                              });
+                            })(),
+                            () => {
+                              if (store.trigger === "hover") {
+                                _hoverClearHide();
+                              }
+                            },
+                            () => {
+                              if (store.trigger === "hover") {
+                                _hoverScheduleHide();
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ]),
+                  ])
+                : null,
+            ],
+          ),
         ],
       );
     },
@@ -240,7 +243,7 @@ export function DropdownMenu(
 }
 
 function listenMenuContent(
-  menu: ui.MenuCore,
+  menu: MenuCore,
   child: Component,
   onEnter?: () => void,
   onLeave?: () => void,

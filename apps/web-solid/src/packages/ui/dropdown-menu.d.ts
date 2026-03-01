@@ -2,7 +2,7 @@
  * @file 下拉菜单
  */
 import { JSX } from "solid-js";
-import {  DropdownMenuCore  } from "@timeless/domains";
+import {  DropdownMenuCore  } from "@timeless/kit";
 declare const Root: (props: {
     store: DropdownMenuCore;
 } & JSX.HTMLAttributes<HTMLElement>) => JSX.Element;

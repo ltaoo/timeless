@@ -5,7 +5,7 @@ import { For, createSignal, JSX, Show } from "solid-js";
 import { Loader } from "lucide-solid";
 
 import * as ToastPrimitive from "~/packages/ui/toast";
-import {  ToastCore  } from "@timeless/domains";>{text}</div>;
+import {  ToastCore  } from "@timeless/kit";>{text}</div>;
                     }}
                   </For>
                 </div>

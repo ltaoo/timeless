@@ -1,7 +1,7 @@
 /**
  * @file tauri 请求
  */
-import {  HttpClientCore  } from "@timeless/domains";
+import {  HttpClientCore  } from "@timeless/kit";
 
 export const client = new HttpClientCore({
   headers: {},

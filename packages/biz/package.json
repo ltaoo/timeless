@@ -9,7 +9,9 @@
     "build": "rollup -c rollup.config.mjs"
   },
   "dependencies": {
-    "@timeless/domains": "workspace:*",
+    "@timeless/base": "workspace:*",
+    "@timeless/kit": "workspace:*",
+    "@timeless/ui": "workspace:*",
     "@timeless/types": "workspace:*",
     "@timeless/utils": "workspace:*",
     "axios": "^1.13.2",

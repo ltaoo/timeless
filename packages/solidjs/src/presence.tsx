@@ -5,7 +5,7 @@ import { JSX, Show, createSignal } from "solid-js";
 
 import { useViewModelStore } from "@/hooks";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { PresenceCore } = ui;
 

@@ -1,9 +1,10 @@
-import { tp, merge } from "./theme.js";
-import { View, ViewProps } from "./view.js";
 import { ref, computed } from "@timeless/reactive";
 
+import { tp, merge } from "./theme";
+import { View, ViewProps } from "./view";
+
 export function Checkbox(props: ViewProps & { store?: any; theme?: any }) {
-  const { store, theme: t, class: cn, style: st, ...rest } = props;
+  const { store, theme: t, class: cls, style: st, ...rest } = props;
   const state = ref(store.state);
   const events: any[] = [];
   const unsub = store.onStateChange
@@ -19,7 +20,7 @@ export function Checkbox(props: ViewProps & { store?: any; theme?: any }) {
       }),
     );
 
-  const m = (d?: any) => merge(tp(t?.root), cn, st);
+  const m = (d?: any) => merge(tp(t?.root), cls, st);
 
   return View(
     {

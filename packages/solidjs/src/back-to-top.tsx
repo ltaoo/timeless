@@ -4,7 +4,7 @@
 import { Show, createSignal } from "solid-js";
 import { ArrowUp } from "lucide-solid";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 // import { app } from "@/store";
 
 const { ScrollViewCore } = ui;

@@ -1,8 +1,7 @@
 import { computed, isRef, ref } from "@timeless/reactive";
-import { ui } from "@timeless/domains";
 
-import { tp, merge } from "./theme.js";
-import { View, ViewProps } from "./view.js";
+import { tp, merge } from "./theme";
+import { View, ViewProps } from "./view";
 
 export function Slider(
   props: ViewProps & {

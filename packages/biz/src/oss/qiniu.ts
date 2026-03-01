@@ -5,14 +5,13 @@ import {
   // @ts-ignore
 } from "qiniu-js";
 // import { HttpProtocol, LogLevel } from "qiniu-js/output/@internal";
-
-import { Result } from "@timeless/domains";
-import { base, Handler } from "@timeless/domains";
-import { BizError } from "@timeless/domains";
-import { StorageCore } from "@timeless/domains";
-import { HttpClientCore } from "@timeless/domains";
-import { request_factory } from "@timeless/domains";
-import { RequestCore } from "@timeless/domains";
+import { Result, base, Handler, BizError } from "@timeless/base";
+import {
+  HttpClientCore,
+  StorageCore,
+  RequestCore,
+  request_factory,
+} from "@timeless/kit";
 import { random_key } from "@timeless/utils";
 
 import { noop, checkFile } from "./utils";
@@ -86,7 +85,7 @@ export function QiniuOSS(props: {
             $storage.set("token", _token);
             return Promise.resolve(_token);
           },
-        }
+        },
       );
       // 设置进度回调函数
       task.onProgress(
@@ -96,7 +95,7 @@ export function QiniuOSS(props: {
           // console.log(context);
           // 处理进度回调
           bus.emit(Events.Progress, progress);
-        }
+        },
       );
 
       // 设置完成回调函数

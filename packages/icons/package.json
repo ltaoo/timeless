@@ -1,27 +1,174 @@
 {
   "name": "@timeless/icons",
   "version": "1.0.0",
-  "main": "dist/icons.umd.min.js",
-  "module": "dist/icons.esm.js",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rollup -c"
+    "build": "node scripts/update-exports.js && rollup -c"
   },
   "type": "module",
   "files": [
     "src",
     "dist"
   ],
-  "dependencies": {
-    "@timeless/headless": "workspace:*"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
     "rollup": "^4.59.0",
+    "rollup-plugin-analyzer": "^4.0.0",
+    "rollup-plugin-dts": "^6.3.0",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    },
+    "./arrow-down-to-line": {
+      "types": "./dist/arrow-down-to-line/index.d.ts",
+      "import": "./dist/arrow-down-to-line/index.esm.js",
+      "require": "./dist/arrow-down-to-line/index.js"
+    },
+    "./bolt": {
+      "types": "./dist/bolt/index.d.ts",
+      "import": "./dist/bolt/index.esm.js",
+      "require": "./dist/bolt/index.js"
+    },
+    "./chevron-right": {
+      "types": "./dist/chevron-right/index.d.ts",
+      "import": "./dist/chevron-right/index.esm.js",
+      "require": "./dist/chevron-right/index.js"
+    },
+    "./circle-arrow-down": {
+      "types": "./dist/circle-arrow-down/index.d.ts",
+      "import": "./dist/circle-arrow-down/index.esm.js",
+      "require": "./dist/circle-arrow-down/index.js"
+    },
+    "./clock-arrow-down": {
+      "types": "./dist/clock-arrow-down/index.d.ts",
+      "import": "./dist/clock-arrow-down/index.esm.js",
+      "require": "./dist/clock-arrow-down/index.js"
+    },
+    "./cloud-download": {
+      "types": "./dist/cloud-download/index.d.ts",
+      "import": "./dist/cloud-download/index.esm.js",
+      "require": "./dist/cloud-download/index.js"
+    },
+    "./download": {
+      "types": "./dist/download/index.d.ts",
+      "import": "./dist/download/index.esm.js",
+      "require": "./dist/download/index.js"
+    },
+    "./ellipsis": {
+      "types": "./dist/ellipsis/index.d.ts",
+      "import": "./dist/ellipsis/index.esm.js",
+      "require": "./dist/ellipsis/index.js"
+    },
+    "./ellipsis-vertical": {
+      "types": "./dist/ellipsis-vertical/index.d.ts",
+      "import": "./dist/ellipsis-vertical/index.esm.js",
+      "require": "./dist/ellipsis-vertical/index.js"
+    },
+    "./file": {
+      "types": "./dist/file/index.d.ts",
+      "import": "./dist/file/index.esm.js",
+      "require": "./dist/file/index.js"
+    },
+    "./file-box": {
+      "types": "./dist/file-box/index.d.ts",
+      "import": "./dist/file-box/index.esm.js",
+      "require": "./dist/file-box/index.js"
+    },
+    "./file-image": {
+      "types": "./dist/file-image/index.d.ts",
+      "import": "./dist/file-image/index.esm.js",
+      "require": "./dist/file-image/index.js"
+    },
+    "./file-lock": {
+      "types": "./dist/file-lock/index.d.ts",
+      "import": "./dist/file-lock/index.esm.js",
+      "require": "./dist/file-lock/index.js"
+    },
+    "./file-play": {
+      "types": "./dist/file-play/index.d.ts",
+      "import": "./dist/file-play/index.esm.js",
+      "require": "./dist/file-play/index.js"
+    },
+    "./file-symlink": {
+      "types": "./dist/file-symlink/index.d.ts",
+      "import": "./dist/file-symlink/index.esm.js",
+      "require": "./dist/file-symlink/index.js"
+    },
+    "./file-video-camera": {
+      "types": "./dist/file-video-camera/index.d.ts",
+      "import": "./dist/file-video-camera/index.esm.js",
+      "require": "./dist/file-video-camera/index.js"
+    },
+    "./file-volume": {
+      "types": "./dist/file-volume/index.d.ts",
+      "import": "./dist/file-volume/index.esm.js",
+      "require": "./dist/file-volume/index.js"
+    },
+    "./folder-closed": {
+      "types": "./dist/folder-closed/index.d.ts",
+      "import": "./dist/folder-closed/index.esm.js",
+      "require": "./dist/folder-closed/index.js"
+    },
+    "./pause": {
+      "types": "./dist/pause/index.d.ts",
+      "import": "./dist/pause/index.esm.js",
+      "require": "./dist/pause/index.js"
+    },
+    "./play": {
+      "types": "./dist/play/index.d.ts",
+      "import": "./dist/play/index.esm.js",
+      "require": "./dist/play/index.js"
+    },
+    "./refresh-ccw": {
+      "types": "./dist/refresh-ccw/index.d.ts",
+      "import": "./dist/refresh-ccw/index.esm.js",
+      "require": "./dist/refresh-ccw/index.js"
+    },
+    "./rss": {
+      "types": "./dist/rss/index.d.ts",
+      "import": "./dist/rss/index.esm.js",
+      "require": "./dist/rss/index.js"
+    },
+    "./square-arrow-down": {
+      "types": "./dist/square-arrow-down/index.d.ts",
+      "import": "./dist/square-arrow-down/index.esm.js",
+      "require": "./dist/square-arrow-down/index.js"
+    },
+    "./trash": {
+      "types": "./dist/trash/index.d.ts",
+      "import": "./dist/trash/index.esm.js",
+      "require": "./dist/trash/index.js"
+    },
+    "./trash-2": {
+      "types": "./dist/trash-2/index.d.ts",
+      "import": "./dist/trash-2/index.esm.js",
+      "require": "./dist/trash-2/index.js"
+    },
+    "./undo-2": {
+      "types": "./dist/undo-2/index.d.ts",
+      "import": "./dist/undo-2/index.esm.js",
+      "require": "./dist/undo-2/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.esm.js",
+      "require": "./dist/utils/index.js"
+    },
+    "./x": {
+      "types": "./dist/x/index.d.ts",
+      "import": "./dist/x/index.esm.js",
+      "require": "./dist/x/index.js"
+    }
   }
 }

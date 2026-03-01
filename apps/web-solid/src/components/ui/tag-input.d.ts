@@ -1,6 +1,6 @@
 import { JSX } from "solid-js";
 import { ViewComponentProps } from "~/store/types";
-import {  Handler  } from "@timeless/domains";).storage;
+import {  Handler  } from "@timeless/kit";).storage;
     }>;
     ready(): void;
     destroy(): void;

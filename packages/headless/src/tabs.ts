@@ -1,15 +1,15 @@
 import { ref, refarr, computed } from "@timeless/reactive";
-import { ui } from "@timeless/domains";
+import { TabHeaderCore } from "@timeless/ui/tab-header";
 
-import { tp, merge } from "./theme.js";
-import { View, ViewProps } from "./view.js";
-import { For } from "./for.js";
-import { Show } from "./show.js";
-import { Txt } from "./text.js";
+import { tp, merge } from "./theme";
+import { View, ViewProps } from "./view";
+import { For } from "./for";
+import { Show } from "./show";
+import { Txt } from "./text";
 
 export function Tabs(
   props: ViewProps & {
-    store: ui.TabHeaderCore<any>;
+    store: TabHeaderCore<any>;
     theme?: { root: any; tab: any; list: any; indicator: any; content: any };
   },
 ) {

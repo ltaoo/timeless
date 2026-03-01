@@ -1,22 +1,58 @@
-import { tp, merge } from "./theme.js";
-import { View } from "./view.js";
+import { tp, merge } from "./theme";
+import { Component, View, ViewChildren, ViewProps } from "./view";
 
-export function Tooltip(props: any, children?: any) {
-  const { content, side = "top", destroyOnHide = false, theme: t, class: cn, style: st } = props || {};
-  let $tip: any = null, $wrapper: any = null;
+export function Tooltip(
+  props: ViewProps & {
+    content?: Record<string, any>;
+    side?: "top" | "right" | "bottom" | "left";
+    destroyOnHide?: boolean;
+    theme?: any;
+  },
+  children?: ViewChildren,
+) {
+  const {
+    content,
+    side = "top",
+    destroyOnHide = false,
+    theme: t,
+    class: cn,
+    style: st,
+  } = props || {};
+  let $tip: any = null,
+    $wrapper: any = null;
   const OFFSET = 8;
   const SIDE_STYLE: any = {
-    top: (r: any, tr: any) => `left:${r.left + r.width / 2 - tr.width / 2}px;top:${r.top - tr.height - OFFSET}px;`,
-    bottom: (r: any, tr: any) => `left:${r.left + r.width / 2 - tr.width / 2}px;top:${r.bottom + OFFSET}px;`,
-    left: (r: any, tr: any) => `left:${r.left - tr.width - OFFSET}px;top:${r.top + r.height / 2 - tr.height / 2}px;`,
-    right: (r: any, tr: any) => `left:${r.right + OFFSET}px;top:${r.top + r.height / 2 - tr.height / 2}px;`,
+    top: (r: any, tr: any) =>
+      `left:${r.left + r.width / 2 - tr.width / 2}px;top:${r.top - tr.height - OFFSET}px;`,
+    bottom: (r: any, tr: any) =>
+      `left:${r.left + r.width / 2 - tr.width / 2}px;top:${r.bottom + OFFSET}px;`,
+    left: (r: any, tr: any) =>
+      `left:${r.left - tr.width - OFFSET}px;top:${r.top + r.height / 2 - tr.height / 2}px;`,
+    right: (r: any, tr: any) =>
+      `left:${r.right + OFFSET}px;top:${r.top + r.height / 2 - tr.height / 2}px;`,
   };
 
   const tipM = merge(tp(t?.tip), cn, st);
-  const tip$ = View({
-    ...tipM,
-    style: `position:fixed;display:none;${tipM.style || ""}`,
-  }, [typeof content === "object" && content.render ? content : { t: "text", $elm: document.createTextNode(String(content || "")), render() { return this.$elm; }, onMounted() {}, beforeUnmounted() {}, onUnmounted() {} }]);
+  const tip$ = View(
+    {
+      ...tipM,
+      style: `position:fixed;display:none;${tipM.style || ""}`,
+    },
+    [
+      typeof content === "object" && content.render
+        ? content
+        : {
+            t: "text",
+            $elm: document.createTextNode(String(content || "")),
+            render() {
+              return this.$elm;
+            },
+            onMounted() {},
+            beforeUnmounted() {},
+            onUnmounted() {},
+          },
+    ],
+  );
 
   const TRANSITION = "opacity 150ms ease,transform 150ms ease";
   const ENTER = { opacity: "1", transform: "scale(1)" };
@@ -34,7 +70,9 @@ export function Tooltip(props: any, children?: any) {
     $tip.style.cssText = `position:fixed;z-index:999;display:block;pointer-events:none;transition:${TRANSITION};${(SIDE_STYLE[side] || SIDE_STYLE.top)(rect, tipRect)}${tipM.style || ""}`;
     Object.assign($tip.style, EXIT);
     if (tipM.class) $tip.className = tipM.class;
-    requestAnimationFrame(() => { Object.assign($tip.style, ENTER); });
+    requestAnimationFrame(() => {
+      Object.assign($tip.style, ENTER);
+    });
   }
   function hide() {
     if (!$tip) return;
@@ -52,13 +90,18 @@ export function Tooltip(props: any, children?: any) {
   }
 
   const wM = merge(tp(t?.wrapper));
-  return View({
-    ...wM,
-    onMounted(el: any) {
-      $wrapper = el;
-      el.addEventListener("mouseenter", show);
-      el.addEventListener("mouseleave", hide);
+  return View(
+    {
+      ...wM,
+      onMounted(el: any) {
+        $wrapper = el;
+        el.addEventListener("mouseenter", show);
+        el.addEventListener("mouseleave", hide);
+      },
+      onUnmounted() {
+        if ($tip && $tip.parentNode) $tip.parentNode.removeChild($tip);
+      },
     },
-    onUnmounted() { if ($tip && $tip.parentNode) $tip.parentNode.removeChild($tip); },
-  }, children);
+    children,
+  );
 }

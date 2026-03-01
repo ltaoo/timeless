@@ -9,7 +9,7 @@ import { useViewModelStore } from "@/hooks";
 import * as DropdownMenuPrimitive from "@/packages/ui/dropdown-menu";
 import { Show } from "@/packages/ui/show";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { DropdownMenuCore, MenuItemCore } = ui;
 

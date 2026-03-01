@@ -2,7 +2,7 @@
  * @file 右键菜单
  */
 import { JSX } from "solid-js";
-import {  ContextMenuCore  } from "@timeless/domains";
+import {  ContextMenuCore  } from "@timeless/kit";
 declare const Root: (props: {
     store: ContextMenuCore;
 } & JSX.HTMLAttributes<HTMLElement>) => JSX.Element;

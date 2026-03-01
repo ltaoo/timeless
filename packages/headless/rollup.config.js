@@ -11,20 +11,27 @@ export default {
   input: path.join(__dirname, "src/index.ts"),
   output: [
     {
-      file: path.join(__dirname, "dist/headless.umd.min.js"),
+      file: path.join(__dirname, "dist/timeless.headless.umd.min.js"),
       format: "umd",
-      name: "Headless",
+      name: "Timeless.headless",
+      extend: true,
       globals: {
-        "@timeless/reactive": "Reactive",
+        "@timeless/reactive": "Timeless.reactive",
+        "@timeless/kit": "Timeless",
       },
-      footer: `if (typeof window !== "undefined") { Object.assign(window, window.Headless); }`,
+      footer: `if (typeof window !== "undefined") {
+        window.Timeless = window.Timeless || {};
+        if (window.Timeless.headless) {
+          Object.assign(window, window.Timeless.headless);
+        }
+      }`,
     },
     {
-      file: path.join(__dirname, "dist/headless.esm.js"),
+      file: path.join(__dirname, "dist/timeless.headless.esm.js"),
       format: "es",
     },
   ],
-  external: ["@timeless/reactive"],
+  external: ["@timeless/reactive", "@timeless/kit"],
   plugins: [
     typescript(),
     resolve({

@@ -8,7 +8,7 @@ import { Loader } from "lucide-solid";
 import * as ButtonPrimitive from "@/packages/ui/button";
 import { Show } from "@/packages/ui/show";
 
-import { ui } from "@timeless/domains";
+import { ui } from "@timeless/kit";
 
 const { ButtonCore } = ui;
 

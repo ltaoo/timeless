@@ -2,7 +2,7 @@ import { For, JSX, Show } from "solid-js";
 
 import { useViewModelStore } from "~/hooks";
 
-import {  TreeSelectModel, TreeSelectNodeModel  } from "@timeless/domains";>
+import {  TreeSelectModel, TreeSelectNodeModel  } from "@timeless/kit";>
           <TreeEdit store={vm.ui.$children} renderNode={props.renderNode} />
         </div>
         {/* <For each={props.children}>

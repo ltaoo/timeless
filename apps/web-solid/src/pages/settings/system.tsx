@@ -4,7 +4,7 @@ import { Check } from "lucide-solid";
 import { ViewComponentProps } from "~/store/types";
 import { useViewModel } from "~/hooks";
 
-import {  base, Handler  } from "@timeless/domains";>
+import {  base, Handler  } from "@timeless/kit";>
                   <div>{field.label}</div>
                   <div>{field.text}</div>
                 </div>

@@ -1,4 +1,4 @@
-import {  ObjectFieldCore, SingleFieldCore  } from "@timeless/domains";,
+import {  ObjectFieldCore, SingleFieldCore  } from "@timeless/kit";,
             },
           ],
         }),

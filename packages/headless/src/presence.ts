@@ -1,12 +1,12 @@
 import { ref, refobj, computed } from "@timeless/reactive";
-import { ui } from "@timeless/domains";
+import { PresenceCore } from "@timeless/ui/presence";
 
-import { Show } from "./show.js";
-import { ViewChildren, ViewProps } from "./view.js";
+import { Show } from "./show";
+import { ViewChildren, ViewProps } from "./view";
 
 export function Presence(
   props: ViewProps & {
-    store: ui.PresenceCore;
+    store: PresenceCore;
     animation?: { in: boolean; out: boolean };
   },
   children?: ViewChildren,
