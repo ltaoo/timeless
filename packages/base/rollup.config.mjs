@@ -1,60 +1,50 @@
-import analyze from 'rollup-plugin-analyzer';
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import typescript from '@rollup/plugin-typescript';
-import dts from 'rollup-plugin-dts';
-import alias from '@rollup/plugin-alias';
-import terser from '@rollup/plugin-terser';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
+import analyze from "rollup-plugin-analyzer";
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
+import typescript from "@rollup/plugin-typescript";
+import dts from "rollup-plugin-dts";
+import alias from "@rollup/plugin-alias";
+import terser from "@rollup/plugin-terser";
+import path from "path";
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const pkg = require('./package.json');
-
-const removeConsole = terser({
-  compress: {
-    pure_funcs: ['console.log'],
-    drop_debugger: true,
-  },
-});
+const pkg = require("./package.json");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default [
   {
-    input: 'src/index.ts',
+    input: "src/index.ts",
     output: [
       {
-        file: 'dist/index.js',
-        format: 'cjs',
+        file: "dist/index.js",
+        format: "cjs",
         sourcemap: true,
       },
       {
-        file: 'dist/index.esm.js',
-        format: 'esm',
+        file: "dist/index.esm.js",
+        format: "esm",
         sourcemap: true,
       },
     ],
     plugins: [
       alias({
-        entries: [
-          { find: '@', replacement: path.resolve(__dirname, 'src') },
-        ]
+        entries: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
       }),
       resolve(),
       commonjs(),
-      typescript({ 
-        tsconfig: './tsconfig.json',
+      typescript({
+        tsconfig: "./tsconfig.json",
         declaration: false,
         outDir: null,
         compilerOptions: {
           declaration: false,
           declarationMap: false,
           outDir: null,
-        }
+        },
       }),
-      // removeConsole,
     ],
     external: [
       ...Object.keys(pkg.dependencies || {}),
@@ -62,13 +52,11 @@ export default [
     ],
   },
   {
-    input: 'src/index.ts',
-    output: [{ file: 'dist/index.d.ts', format: 'es' }],
+    input: "src/index.ts",
+    output: [{ file: "dist/index.d.ts", format: "es" }],
     plugins: [
       alias({
-        entries: [
-          { find: '@', replacement: path.resolve(__dirname, 'src') },
-        ]
+        entries: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
       }),
       dts(),
     ],

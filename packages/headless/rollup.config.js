@@ -13,6 +13,20 @@ const pkg = require("./package.json");
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const minify = terser({
+  compress: {
+    drop_console: true,
+    drop_debugger: true,
+    pure_funcs: ["console.log"], // Ensures console.log is removed even if drop_console is false in some configs
+  },
+  mangle: {
+    toplevel: true,
+  },
+  format: {
+    comments: false,
+  },
+});
+
 // Get all .ts files in src except index.ts and d.ts files
 const components = fs
   .readdirSync(path.resolve(__dirname, "src"))
@@ -56,7 +70,7 @@ const configs = [
       commonjs({
         sourceMap: false,
       }),
-      terser(),
+      minify,
     ],
   },
   // Main CJS and ESM Build
@@ -145,7 +159,9 @@ components.forEach((name) => {
 
   configs.push({
     input: path.join(__dirname, `src/${name}.ts`),
-    output: [{ file: path.join(__dirname, `dist/${name}/index.d.ts`), format: "es" }],
+    output: [
+      { file: path.join(__dirname, `dist/${name}/index.d.ts`), format: "es" },
+    ],
     plugins: [dts()],
   });
 });

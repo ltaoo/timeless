@@ -1,20 +1,27 @@
-import analyze from 'rollup-plugin-analyzer';
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import typescript from '@rollup/plugin-typescript';
-import dts from 'rollup-plugin-dts';
-import alias from '@rollup/plugin-alias';
-import terser from '@rollup/plugin-terser';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
+import analyze from "rollup-plugin-analyzer";
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
+import typescript from "@rollup/plugin-typescript";
+import dts from "rollup-plugin-dts";
+import alias from "@rollup/plugin-alias";
+import terser from "@rollup/plugin-terser";
+import path from "path";
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const pkg = require('./package.json');
+const pkg = require("./package.json");
 
-const removeConsole = terser({
+const minify = terser({
   compress: {
-    pure_funcs: ['console.log'],
+    drop_console: true,
     drop_debugger: true,
+    pure_funcs: ["console.log"], // Ensures console.log is removed even if drop_console is false in some configs
+  },
+  mangle: {
+    toplevel: true,
+  },
+  format: {
+    comments: false,
   },
 });
 
@@ -23,38 +30,36 @@ const __dirname = path.dirname(__filename);
 
 export default [
   {
-    input: 'src/index.ts',
+    input: "src/index.ts",
     output: [
       {
-        file: 'dist/index.js',
-        format: 'cjs',
+        file: "dist/index.js",
+        format: "cjs",
         sourcemap: true,
       },
       {
-        file: 'dist/index.esm.js',
-        format: 'esm',
+        file: "dist/index.esm.js",
+        format: "esm",
         sourcemap: true,
       },
     ],
     plugins: [
       alias({
-        entries: [
-          { find: '@', replacement: path.resolve(__dirname, 'src') },
-        ]
+        entries: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
       }),
       resolve(),
       commonjs(),
-      typescript({ 
-        tsconfig: './tsconfig.json',
+      typescript({
+        tsconfig: "./tsconfig.json",
         declaration: false,
         outDir: null,
         compilerOptions: {
           declaration: false,
           declarationMap: false,
           outDir: null,
-        }
+        },
       }),
-      removeConsole,
+      minify,
     ],
     external: [
       ...Object.keys(pkg.dependencies || {}),
@@ -62,44 +67,40 @@ export default [
     ],
   },
   {
-    input: 'src/index.ts',
+    input: "src/index.ts",
     output: {
-      file: 'dist/timeless.kit.umd.min.js',
-      format: 'umd',
-      name: 'Timeless',
+      file: "dist/timeless.kit.umd.min.js",
+      format: "umd",
+      name: "Timeless",
       extend: true,
       sourcemap: true,
     },
     plugins: [
       alias({
-        entries: [
-          { find: '@', replacement: path.resolve(__dirname, 'src') },
-        ]
+        entries: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
       }),
       resolve({ browser: true }),
       commonjs(),
-      typescript({ 
-        tsconfig: './tsconfig.json',
+      typescript({
+        tsconfig: "./tsconfig.json",
         declaration: false,
         outDir: null,
         compilerOptions: {
           declaration: false,
           declarationMap: false,
           outDir: null,
-        }
+        },
       }),
-      removeConsole,
+      minify,
       // analyze({ summaryOnly: true, limit: 50 }),
     ],
   },
   {
-    input: 'src/index.ts',
-    output: [{ file: 'dist/index.d.ts', format: 'es' }],
+    input: "src/index.ts",
+    output: [{ file: "dist/index.d.ts", format: "es" }],
     plugins: [
       alias({
-        entries: [
-          { find: '@', replacement: path.resolve(__dirname, 'src') },
-        ]
+        entries: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
       }),
       dts(),
     ],

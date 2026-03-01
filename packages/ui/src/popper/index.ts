@@ -5,6 +5,7 @@ import {
   flip,
   shift,
   offset,
+  arrow,
 } from "@floating-ui/dom";
 
 import type { Placement, Strategy, MiddlewareData } from "./types";
@@ -67,6 +68,10 @@ type PopperState = {
   placedAlign: Align;
   /** 是否设置了参考DOM */
   reference: boolean;
+  arrow: {
+    x?: number;
+    y?: number;
+  } | null;
 };
 export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   unique_id = "PopperCore";
@@ -99,6 +104,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     width: number;
     height: number;
   } | null = null;
+  arrowElement: HTMLElement | null = null;
 
   state: PopperState = {
     strategy: "absolute",
@@ -108,6 +114,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     placedSide: "bottom",
     placedAlign: "center",
     reference: false,
+    arrow: null,
   };
 
   _enter = false;
@@ -199,6 +206,13 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   setArrow(arrow: PopperCore["arrow"]) {
     this.arrow = arrow;
   }
+  setArrowElement(arrowElement: HTMLElement | null) {
+    this.arrowElement = arrowElement;
+    // if we have arrow element, we might want to re-place
+    if (this.reference && this.floating) {
+      this.place();
+    }
+  }
   setContainer(container: Node) {
     // this.container = container;
     // this.emit(Events.ContainerChange, container);
@@ -236,11 +250,11 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     }
     const coords = await this.computePosition();
     // const { x, y, width, height } = this.reference.getRect();
-    const { x, y } = coords;
+    const { x, y, middlewareData } = coords;
     const xWithOffset = x + this.offsetX;
     const yWithOffset = y + this.offsetY;
     const [placedSide, placedAlign] = getSideAndAlignFromPlacement(
-      this.placement,
+      coords.placement,
     );
     this.state = {
       x: xWithOffset,
@@ -250,12 +264,14 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       placedSide,
       placedAlign,
       reference: true,
+      arrow: middlewareData.arrow || null,
     };
     console.log(
       ...this.log("place - before emit placed", {
         x,
         y,
         offsetX: this.offsetX,
+        arrow: middlewareData.arrow,
       }),
     );
     this.emit(Events.StateChange, {
@@ -310,7 +326,15 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
             },
           };
 
-    const middleware = [offset(4), flip(), shift({ padding: 8 })];
+    const middleware: any[] = [
+      offset(this.arrowElement ? 12 : 4),
+      flip(),
+      shift({ padding: 8 }),
+    ];
+    if (this.arrowElement) {
+      middleware.push(arrow({ element: this.arrowElement }));
+    }
+
     // Reset floating element position and force reflow before computing
     (floatingEl as HTMLElement).style.transform = "translate3d(0, 0, 0)";
     void (floatingEl as HTMLElement).offsetHeight;

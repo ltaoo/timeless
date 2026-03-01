@@ -10,6 +10,20 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const minify = terser({
+  compress: {
+    drop_console: true,
+    drop_debugger: true,
+    pure_funcs: ["console.log"], // Ensures console.log is removed even if drop_console is false in some configs
+  },
+  mangle: {
+    toplevel: true,
+  },
+  format: {
+    comments: false,
+  },
+});
+
 export default {
   input: path.join(__dirname, "src/index.ts"),
   output: [
@@ -36,7 +50,12 @@ export default {
       format: "es",
     },
   ],
-  external: ["@timeless/reactive", "@timeless/headless", "@timeless/kit", "@timeless/ui"],
+  external: [
+    "@timeless/reactive",
+    "@timeless/headless",
+    "@timeless/kit",
+    "@timeless/ui",
+  ],
   plugins: [
     typescript({
       tsconfig: "./tsconfig.json",
@@ -46,7 +65,10 @@ export default {
     postcss({
       extract: path.join(__dirname, "dist/timeless.shadcnui.css"),
       minimize: true,
-      plugins: [tailwindcss(path.resolve(__dirname, "./tailwind.config.js")), autoprefixer()],
+      plugins: [
+        tailwindcss(path.resolve(__dirname, "./tailwind.config.js")),
+        autoprefixer(),
+      ],
     }),
     resolve({
       browser: true,
@@ -55,6 +77,6 @@ export default {
     commonjs({
       sourceMap: false,
     }),
-    terser(),
+    minify,
   ],
 };

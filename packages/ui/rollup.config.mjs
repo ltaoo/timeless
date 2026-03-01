@@ -12,10 +12,17 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const pkg = require("./package.json");
 
-const removeConsole = terser({
+const minify = terser({
   compress: {
-    pure_funcs: ["console.log"],
+    drop_console: true,
     drop_debugger: true,
+    pure_funcs: ["console.log"], // Ensures console.log is removed even if drop_console is false in some configs
+  },
+  mangle: {
+    toplevel: true,
+  },
+  format: {
+    comments: false,
   },
 });
 
@@ -65,7 +72,7 @@ const configs = [
           outDir: null,
         },
       }),
-      // removeConsole,
+      minify,
     ],
     external: [],
   },
@@ -99,7 +106,7 @@ const configs = [
           outDir: null,
         },
       }),
-      // removeConsole,
+      minify,
     ],
     external: [
       ...Object.keys(pkg.dependencies || {}),
@@ -149,7 +156,7 @@ components.forEach((name) => {
           outDir: null,
         },
       }),
-      // removeConsole,
+      minify,
     ],
     external: [
       ...Object.keys(pkg.dependencies || {}),
