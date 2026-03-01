@@ -14,7 +14,7 @@ import {
 
 import { TimelessComponent, TimelessElement, View, ViewProps } from "./view";
 import { For } from "./for";
-import { AsyncView } from "./async-view";
+import { LazyView } from "./lazy-view";
 
 export function KeepAliveSubViews(
   props: ViewProps & {
@@ -75,7 +75,7 @@ export function KeepAliveSubViews(
           },
         },
         [
-          AsyncView(PageView, {
+          LazyView(PageView, {
             ...props,
             view: subview,
             onMounted() {

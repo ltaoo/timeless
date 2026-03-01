@@ -1,17 +1,17 @@
 import {
   View,
   TimelessElement,
-  isComponent,
+  isElement,
   ViewProps,
   TimelessComponent,
 } from "./view";
 
-export function AsyncView(
+export function LazyView(
   component: TimelessComponent,
   props: ViewProps & Record<string, any>,
 ): TimelessElement {
   const result = component(props);
-  if (isComponent(result)) {
+  if (isElement(result)) {
     return result;
   }
   const view$ = View(props);

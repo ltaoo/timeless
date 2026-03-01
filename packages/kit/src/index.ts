@@ -37,8 +37,8 @@ export type RouteConfigure = Record<PathnameKey, RouteInner>;
 
 export function buildRoutes(routes: RouteConfigure) {
   const views = {};
-  let defaultRouteName = "";
-  let notfoundRouteName = "";
+  let defaultRouteName = "root.home_layout.index";
+  let notfoundRouteName = "root.notfound";
 
   function traverse(config: Record<string, any>, parentName: string) {
     const children = {};

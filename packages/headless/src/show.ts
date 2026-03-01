@@ -1,6 +1,6 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { View, ViewChildren, ViewProps, isComponent } from "./view";
+import { View, ViewChildren, ViewProps, isElement } from "./view";
 
 export function Show(
   props: ViewProps & {
@@ -35,7 +35,7 @@ export function Show(
       _prev_condition = condition;
       for (let i = 0; i < _nodes.length; i += 1) {
         const node = _nodes[i];
-        if (isComponent(node) && typeof node.onUnmounted === "function") {
+        if (isElement(node) && typeof node.onUnmounted === "function") {
           node.onUnmounted();
         }
       }
@@ -54,7 +54,7 @@ export function Show(
     }
     for (let i = 0; i < _nodes.length; i += 1) {
       const node = _nodes[i];
-      if (isComponent(node) && typeof node.onUnmounted === "function") {
+      if (isElement(node) && typeof node.onUnmounted === "function") {
         node.onUnmounted();
       }
     }
@@ -64,7 +64,7 @@ export function Show(
     for (let i = 0; i < nodes.length; i += 1) {
       const node = nodes[i];
       const $el = (() => {
-        if (isComponent(node)) {
+        if (isElement(node)) {
           const result = node.render();
           if (result) {
             return result;
@@ -101,7 +101,7 @@ export function Show(
     // view$.onMounted();
     for (let i = 0; i < _nodes.length; i += 1) {
       const node = _nodes[i];
-      if (isComponent(node) && typeof node.onMounted === "function") {
+      if (isElement(node) && typeof node.onMounted === "function") {
         node.onMounted(node.$elm);
       }
     }
@@ -136,7 +136,7 @@ export function Show(
       // console.log('show onUnmounted', _nodes);
       for (let i = 0; i < _nodes.length; i += 1) {
         const node = _nodes[i];
-        if (isComponent(node) && typeof node.onUnmounted === "function") {
+        if (isElement(node) && typeof node.onUnmounted === "function") {
           node.onUnmounted();
         }
       }

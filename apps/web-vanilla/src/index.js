@@ -3,9 +3,9 @@ import NotFoundPageView from "./pages/notfound/index.js";
 
 Timeless.NavigatorCore.prefix = "/timeless";
 
-const render = ($root) => {
+function ApplicationRootView() {
   const root_view$ = history.$view;
-  const view$ = RouteSubViews({
+  return RouteSubViews({
     view: root_view$,
     client,
     storage,
@@ -13,24 +13,14 @@ const render = ($root) => {
     views,
     NotFound: NotFoundPageView,
   });
-  $root.appendChild(view$.$elm);
-  // Portal({}, [
-  //   Toast()
-  // ]);
+}
 
+document.addEventListener("DOMContentLoaded", function () {
   const { innerWidth, innerHeight, location } = window;
   history.$router.prepare(location);
   app.start({
     width: innerWidth,
     height: innerHeight,
   });
-};
-
-document.addEventListener("DOMContentLoaded", function () {
-  const $root = document.querySelector("#root");
-  if (!$root) {
-    console.error("[Render] Root element not found");
-    return;
-  }
-  render($root);
+  render(ApplicationRootView(), document.querySelector("#root"));
 });

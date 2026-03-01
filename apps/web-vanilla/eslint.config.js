@@ -91,6 +91,7 @@ export default [
         BoltOutlined: "readonly",
         lazy: "readonly",
         buildRoutes: "readonly",
+        render: "readonly",
       },
     },
     rules: {

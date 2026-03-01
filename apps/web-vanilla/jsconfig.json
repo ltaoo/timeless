@@ -19,7 +19,8 @@
     "types/index.d.ts",
     "types/global.d.ts",
     "types/timeless.umd.d.ts",
-    "types/prosemirror.d.ts"
+    "types/prosemirror.d.ts",
+    "../web-vue/example-weui.js"
   ],
   "exclude": ["node_modules", "dist"]
 }

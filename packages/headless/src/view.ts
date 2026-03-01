@@ -119,7 +119,7 @@ export function View(props: ViewProps = {}, children?: any) {
       }
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
-        if (isComponent(node) && node.beforeUnmounted) {
+        if (isElement(node) && node.beforeUnmounted) {
           node.beforeUnmounted();
         }
       }
@@ -130,7 +130,7 @@ export function View(props: ViewProps = {}, children?: any) {
       }
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
-        if (isComponent(node) && node.onUnmounted) {
+        if (isElement(node) && node.onUnmounted) {
           node.onUnmounted();
         }
       }
@@ -149,7 +149,7 @@ export function View(props: ViewProps = {}, children?: any) {
           $elm.appendChild(document.createTextNode(String(node)));
           continue;
         }
-        if (isComponent(node)) {
+        if (isElement(node)) {
           const result = node.render();
           if (result) {
             $elm.appendChild(result);
@@ -162,7 +162,7 @@ export function View(props: ViewProps = {}, children?: any) {
       }
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
-        if (isComponent(node)) {
+        if (isElement(node)) {
           if (node.onMounted) {
             node.onMounted(node.$elm);
           }
@@ -174,7 +174,7 @@ export function View(props: ViewProps = {}, children?: any) {
   };
 }
 
-export function isComponent(v: any): v is TimelessElement {
+export function isElement(v: any): v is TimelessElement {
   if (v === null || v === undefined) {
     return false;
   }
@@ -183,14 +183,21 @@ export function isComponent(v: any): v is TimelessElement {
   }
   return false;
 }
+export function isLazyElement(v: any): v is TimelessLazyComponent {
+  if (v === null || v === undefined) {
+    return false;
+  }
+  if (v instanceof Promise || (v && typeof (v as any).then === "function")) {
+    return true;
+  }
+  return false;
+}
 
+export type TimelessNormalComponent = (...args: any[]) => TimelessElement;
 export type TimelessLazyComponent = () => Promise<{
-  default: (...args: any[]) => TimelessElement;
+  default: TimelessNormalComponent;
 }>;
-
-export type TimelessComponent =
-  | ((...args: any[]) => TimelessElement)
-  | TimelessLazyComponent;
+export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 
 export interface TimelessElement {
   t: string;

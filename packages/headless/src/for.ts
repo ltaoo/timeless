@@ -1,6 +1,6 @@
 import { ref, isRef, Ref } from "@timeless/reactive";
 
-import { View, ViewProps, TimelessElement, isComponent } from "./view";
+import { View, ViewProps, TimelessElement, isElement } from "./view";
 
 export function For<T>(
   props: ViewProps & {
@@ -64,7 +64,7 @@ export function For<T>(
             _children[index + i] = null;
             return;
           }
-          if (isComponent(res)) {
+          if (isElement(res)) {
             _children[index + i] = res;
             const $sub = res.render();
             _$elms[index + i] = $sub;
@@ -179,7 +179,7 @@ export function For<T>(
               component: prev_children[oldIndex],
             });
 
-            if (res.node && res.elm && isComponent(res.node)) {
+            if (res.node && res.elm && isElement(res.node)) {
               added_nodes.push({ node: res.node, elm: res.elm });
               updated_nodes.push({ node: res.node, elm: res.elm });
             }
@@ -192,7 +192,7 @@ export function For<T>(
           const res = methods._render_item(item, i);
           new_children[i] = res.node;
           new_elms[i] = res.elm;
-          if (res.node && res.elm && isComponent(res.node)) {
+          if (res.node && res.elm && isElement(res.node)) {
             added_nodes.push({ node: res.node, elm: res.elm });
           }
         }
@@ -218,7 +218,7 @@ export function For<T>(
         if (elm && elm.parentNode === $elm) {
           $elm.removeChild(elm);
         }
-        if (component && isComponent(component)) {
+        if (component && isElement(component)) {
           if (typeof component.onUnmounted === "function") {
             component.onUnmounted();
           }
@@ -290,7 +290,7 @@ export function For<T>(
             _children[i] = null;
             return;
           }
-          if (isComponent(res)) {
+          if (isElement(res)) {
             _children[i] = res;
             const $sub = res.render();
             _$elms[i] = $sub;
@@ -310,7 +310,7 @@ export function For<T>(
       // console.log("2. mounted", _children);
       for (let i = 0; i < _children.length; i += 1) {
         const component = _children[i];
-        if (isComponent(component)) {
+        if (isElement(component)) {
           if (typeof component.onMounted === "function") {
             component.onMounted(_$elms[i] as any as HTMLElement);
           }
@@ -324,7 +324,7 @@ export function For<T>(
       }
       for (let i = 0; i < _children.length; i += 1) {
         const component = _children[i];
-        if (isComponent(component)) {
+        if (isElement(component)) {
           if (typeof component.onUnmounted === "function") {
             component.onUnmounted();
           }

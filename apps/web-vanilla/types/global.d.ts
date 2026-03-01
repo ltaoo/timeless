@@ -46,6 +46,7 @@ declare const RouteSubViews: typeof import("@timeless/headless").RouteSubViews;
 declare const KeepAliveSubViews: typeof import("@timeless/headless").KeepAliveSubViews;
 declare const lazy: typeof import("@timeless/headless").lazy;
 declare const buildRoutes: typeof import("@timeless/kit").buildRoutes;
+declare const render: typeof import("@timeless/kit").render;
 
 declare const Slider: typeof import("@timeless/shadcnui").Slider;
 declare const Slide: typeof import("@timeless/shadcnui").Slider;

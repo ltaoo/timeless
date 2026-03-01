@@ -97,7 +97,7 @@ const DEFAULT_CACHE_VALUES = {
   },
   theme: "system",
 };
-const key = "m_global";
+const key = "timeless";
 const e = globalThis.localStorage.getItem(key);
 export const storage = new Timeless.StorageCore({
   key,
@@ -150,8 +150,7 @@ export const app = new Timeless.Application({
     const route = routesWithPathname[pathname];
     console.log("[Store] beforeReady", pathname, route, routesWithPathname);
     if (!route) {
-      // @ts-ignore
-      history.push(notfoundRouteName || "root.notfound", { replace: true });
+      history.push(notfoundRouteName, { replace: true });
       return Timeless.Result.Err("not found");
     }
     // if (!route.options?.require?.includes("login")) {
@@ -171,10 +170,6 @@ export const app = new Timeless.Application({
       history.push(route.name, query, { ignore: true });
       return Timeless.Result.Ok(null);
     }
-    // console.log(
-    //   "[Store] beforeReady push to default page",
-    //   defaultRouteName
-    // );
     history.push(defaultRouteName, {}, { ignore: true });
     return Timeless.Result.Ok(null);
   },
@@ -186,7 +181,9 @@ history.onRouteChange(({ reason, view, href, ignore }) => {
   if (title) {
     app.setTitle(title);
   }
-  if (ignore) return;
+  if (ignore) {
+    return;
+  }
   if (reason === "push") {
     router.pushState(href);
   }

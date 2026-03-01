@@ -15,7 +15,7 @@ import {
 import { TimelessComponent, TimelessElement, View, ViewProps } from "./view";
 import { For } from "./for";
 import { Show } from "./show";
-import { AsyncView } from "./async-view";
+import { LazyView } from "./lazy-view";
 
 export function RouteSubViews(
   props: ViewProps & {
@@ -69,7 +69,7 @@ export function RouteSubViews(
           when: computed(cur_subview, (d) => d && d.name === subview.name),
         },
         [
-          AsyncView(PageView, {
+          LazyView(PageView, {
             ...props,
             view: subview,
             onMounted() {
