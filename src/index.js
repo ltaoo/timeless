@@ -1,38 +1,37 @@
-import { app, history, client, views } from "./store/index.js";
-import { storage } from "./store/storage.js";
+import { app, history, client, views, storage } from "./store/index.js";
 import NotFoundPageView from "./pages/notfound/index.js";
 
-Timeless.NavigatorCore.prefix = "/timeless";
-
-const render = ($root) => {
+function ApplicationRootView() {
   const root_view$ = history.$view;
-  // const view$ = refobj(root_view$.curSubView);
-  const view$ = RouteSubViews({
+  // const toast$ = new Timeless.ToastCore();
+  app.onTip((msg) => {
+    const { text } = msg;
+    console.log("[]tip", text);
+    // toast$.show({
+    //   texts: text,
+    // });
+  });
+  app.onError((err) => {
+    console.error(err);
+  });
+
+  return RouteSubViews({
     view: root_view$,
+    app,
     client,
     storage,
     history,
     views,
     NotFound: NotFoundPageView,
   });
-  $root.appendChild(view$.$elm);
-  // Portal({}, [
-  //   Toast()
-  // ]);
+}
 
+document.addEventListener("DOMContentLoaded", function () {
   const { innerWidth, innerHeight, location } = window;
   history.$router.prepare(location);
   app.start({
     width: innerWidth,
     height: innerHeight,
   });
-};
-
-document.addEventListener("DOMContentLoaded", function () {
-  const $root = document.querySelector("#root");
-  if (!$root) {
-    console.error("[Render] Root element not found");
-    return;
-  }
-  render($root);
+  render(ApplicationRootView(), document.querySelector("#root"));
 });

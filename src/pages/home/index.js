@@ -1,4 +1,4 @@
-import { defaultRouteName } from "@/store/routes.js";
+import { defaultRouteName } from "@/store/index.js";
 
 export default function HomePageView(props) {
   const curSubView = ref(props.view.curView);
@@ -15,6 +15,7 @@ export default function HomePageView(props) {
       { title: "Feedback", url: "root.home_layout.index.feedback" },
       { title: "Navigation", url: "root.home_layout.index.nav" },
       { title: "Overlay", url: "root.home_layout.index.overlay" },
+      { title: "Debug", url: "root.home_layout.index.debug" },
     ],
   });
 
@@ -56,10 +57,12 @@ export default function HomePageView(props) {
         }),
       ],
     ),
-    View({ class: "relative overflow-y-auto flex-1 w-0 h-full p-6" }, [
-      KeepAliveSubViews({
-        ...props,
-      }),
+    View({ class: "overflow-y-auto flex-1 w-0 h-full" }, [
+      View({ class: "relative p-6" }, [
+        KeepAliveSubViews({
+          ...props,
+        }),
+      ]),
     ]),
   ]);
 }

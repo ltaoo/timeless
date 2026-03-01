@@ -1,5 +1,5 @@
 /** 首页布局 */
-import { defaultRouteName } from "@/store/routes.js";
+import { defaultRouteName } from "@/store/index.js";
 import NotFoundPageView from "@/pages/notfound/index.js";
 
 export default function HomeLayoutView(props) {
@@ -78,7 +78,7 @@ export default function HomeLayoutView(props) {
               },
             },
             [
-              BoltOutlined({
+              Timeless.icons.BoltOutlined({
                 style: "font-size: 24px",
               }),
             ],
@@ -95,6 +95,9 @@ export default function HomeLayoutView(props) {
                 new Timeless.ui.MenuItemCore({
                   label: "Profile",
                   onClick() {
+                    props.app.tip({
+                      text: ["Hello"],
+                    });
                     console.log("Profile clicked");
                   },
                 }),
