@@ -69,9 +69,8 @@ export function Button(
 
   return View(
     {
-      type: "button",
       ...rest,
-      ...merge(tp(t?.root, { variant, size }), cn, st),
+      type: "button",
     },
     children,
   );

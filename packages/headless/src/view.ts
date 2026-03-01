@@ -19,7 +19,6 @@ export function View(props: ViewProps = {}, children?: any) {
   const {
     type = "div",
     style,
-    id: tmpid,
     class: cls,
     dataset = {},
     onMounted,
@@ -27,13 +26,27 @@ export function View(props: ViewProps = {}, children?: any) {
     onClick,
     onFocus,
     onBlur,
-    ...restProps
+    beforeUnmounted,
+    ...rest
   } = props;
   const $elm = document.createElement(type);
 
-  // Object.keys(restProps).forEach((k) => {
-  //   $elm.setAttribute(k, props[k]);
-  // });
+  Object.keys(rest).forEach((k) => {
+    // @ts-ignore
+    const vv = rest[k];
+    if (vv) {
+      if (isRef(vv)) {
+        vv._subscribe({
+          onChange(v) {
+            $elm.setAttribute(k, v);
+          },
+        });
+        $elm.setAttribute(k, vv.value);
+      } else if (typeof vv === "string" || typeof vv === "number") {
+        $elm.setAttribute(k, String(vv));
+      }
+    }
+  });
   Object.keys(dataset).forEach((k) => {
     if (dataset && dataset[k]) {
       $elm.setAttribute(`data-${k}`, dataset[k]);
