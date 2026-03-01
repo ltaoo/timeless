@@ -95,6 +95,9 @@ export default function HomeLayoutView(props) {
                 new Timeless.ui.MenuItemCore({
                   label: "Profile",
                   onClick() {
+                    props.app.tip({
+                      text: ["Hello"],
+                    });
                     console.log("Profile clicked");
                   },
                 }),

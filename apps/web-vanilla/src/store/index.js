@@ -117,9 +117,9 @@ export const client = new Timeless.HttpClientCore({
   },
 });
 Timeless.web.provide_http_client(client);
-
 export const user = /** @type {any} */ ({});
-Timeless.NavigatorCore.prefix = "";
+// History
+Timeless.NavigatorCore.prefix = "/timeless";
 export const router = new Timeless.NavigatorCore();
 export const rootview = new Timeless.RouteViewCore({
   name: "root",
@@ -130,8 +130,6 @@ export const rootview = new Timeless.RouteViewCore({
   views: [],
 });
 rootview.isRoot = true;
-
-// History
 export const history = new Timeless.HistoryCore({
   view: rootview,
   router,
@@ -142,7 +140,7 @@ export const history = new Timeless.HistoryCore({
 });
 Timeless.web.provide_history(history);
 
-export const app = new Timeless.Application({
+export const app = new Timeless.ApplicationModel({
   user,
   storage,
   async beforeReady() {

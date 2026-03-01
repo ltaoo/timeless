@@ -10,6 +10,7 @@ import {
   HistoryCore,
   StorageCore,
   HttpClientCore,
+  ApplicationModel,
 } from "@timeless/kit";
 
 import { TimelessComponent, TimelessElement, View, ViewProps } from "./view";
@@ -21,6 +22,7 @@ export function RouteSubViews(
   props: ViewProps & {
     subclass?: ClassNameRef;
     view: RouteViewCore;
+    app: ApplicationModel<any>;
     history: HistoryCore<any, any>;
     storage: StorageCore<any>;
     client: HttpClientCore;

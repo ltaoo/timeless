@@ -1,46 +1,15 @@
 /**
  * @file 应用，包含一些全局相关的事件、状态
  */
-import { Result, BaseDomain, Handler } from "@timeless/base";
+
+import { BaseDomain, Handler, Result } from "@timeless/base";
 import { JSONObject } from "@timeless/types";
 
-import { StorageCore } from "@/storage/index";
+import { StorageCore } from "@/storage";
+import { ClipboardModel } from "@/clipboard";
 
-import { ThemeTypes } from "./types";
-
-export type { ThemeTypes };
-
-export enum OrientationTypes {
-  Horizontal = "horizontal",
-  Vertical = "vertical",
-}
-const mediaSizes = {
-  sm: 0,
-  /** 中等设备宽度阈值 */
-  md: 768,
-  /** 大设备宽度阈值 */
-  lg: 992,
-  /** 特大设备宽度阈值 */
-  xl: 1200,
-  /** 特大设备宽度阈值 */
-  "2xl": 1536,
-};
-function getCurrentDeviceSize(width: number) {
-  if (width >= mediaSizes["2xl"]) {
-    return "2xl";
-  }
-  if (width >= mediaSizes.xl) {
-    return "xl";
-  }
-  if (width >= mediaSizes.lg) {
-    return "lg";
-  }
-  if (width >= mediaSizes.md) {
-    return "md";
-  }
-  return "sm";
-}
-export type DeviceSizeTypes = keyof typeof mediaSizes;
+import { ThemeTypes, OrientationTypes } from "./types";
+import { getCurrentDeviceSize, DeviceSizeTypes } from "./utils";
 
 enum Events {
   Tip,
@@ -59,6 +28,7 @@ enum Events {
   Resize,
   Blur,
   Keydown,
+  Keyup,
   OrientationChange,
   EscapeKeyDown,
   StateChange,
@@ -77,10 +47,8 @@ type TheTypesOfEvents = {
     height: number;
   };
   [Events.DeviceSizeChange]: DeviceSizeTypes;
-  [Events.Keydown]: {
-    code: string;
-    preventDefault: () => void;
-  };
+  [Events.Keydown]: KeyboardEvent;
+  [Events.Keyup]: KeyboardEvent;
   [Events.EscapeKeyDown]: void;
   [Events.Blur]: void;
   [Events.Show]: void;
@@ -95,9 +63,9 @@ type ApplicationState = {
   deviceSize: DeviceSizeTypes;
   height: number;
 };
-type ApplicationProps<T extends { storage: StorageCore<any>; user: any }> = {
-  user: T["user"];
+type ApplicationProps<T extends { storage: StorageCore<any> }> = {
   storage: T["storage"];
+  clipboard: ClipboardModel;
   // history: HistoryCore;
   /**
    * 应用加载前的声明周期，只有返回 Result.Ok() 页面才会展示内容
@@ -106,12 +74,11 @@ type ApplicationProps<T extends { storage: StorageCore<any>; user: any }> = {
   onReady?: () => void;
 };
 
-export class Application<
-  T extends { storage: StorageCore<any>; user: any },
+export class ApplicationModel<
+  T extends { storage: StorageCore<any> },
 > extends BaseDomain<TheTypesOfEvents> {
-  /** 用户 */
-  $user: T["user"];
   $storage: T["storage"];
+  $clipboard: ClipboardModel;
 
   lifetimes: Pick<ApplicationProps<T>, "beforeReady" | "onReady">;
 
@@ -167,10 +134,10 @@ export class Application<
   constructor(props: ApplicationProps<T>) {
     super();
 
-    const { user, storage, beforeReady, onReady } = props;
+    const { storage, clipboard, beforeReady, onReady } = props;
 
-    this.$user = user;
     this.$storage = storage;
+    this.$clipboard = clipboard;
 
     this.lifetimes = {
       beforeReady,
@@ -197,71 +164,190 @@ export class Application<
     // console.log("[]Application - before start");
     return Result.Ok(null);
   }
+  /** 应用指定主题 */
+  setTheme(theme: ThemeTypes) {
+    const tip = "请在 connect.web 中实现 setTheme 方法";
+    console.warn(tip);
+    return Result.Err(tip);
+  }
+  getTheme() {
+    const tip = "请在 connect.web 中实现 getTheme 方法";
+    console.warn(tip);
+    return "light";
+  }
+  // getSystemTheme(e?: any): Result<string> {
+  //   const tip = "请在 connect.web 中实现 getSystemTheme 方法";
+  //   console.warn(tip);
+  //   return Result.Err(tip);
+  // }
+  // push(...args: Parameters<HistoryCore["push"]>) {
+  //   return this.$history.push(...args);
+  // }
+  // replace(...args: Parameters<HistoryCore["replace"]>) {
+  //   return this.$history.replace(...args);
+  // }
+  // back(...args: Parameters<HistoryCore["back"]>) {
+  //   return this.$history.back(...args);
+  // }
 
-  getComputedStyle(el: unknown) {
-    return {} as CSSStyleDeclaration;
+  tipUpdate() {
+    this.emit(Events.ForceUpdate);
   }
-  // setTheme(v: ThemeTypes) {
-  //   this.theme = v;
-  // }
-  // getTheme() {
-  //   return Result.Ok(this.theme);
-  // }
-  setTitle(title: string) {}
+  tip(arg: { icon?: unknown; text: string[] }) {
+    this.emit(Events.Tip, arg);
+    return arg.text.join("\n");
+  }
+  loading(arg: { text: string[] }) {
+    this.emit(Events.Loading, arg);
+    return {
+      hideLoading: () => {
+        this.emit(Events.HideLoading);
+      },
+    };
+  }
+  hideLoading() {
+    this.emit(Events.HideLoading);
+  }
+  /** 手机震动 */
+  vibrate() {}
   setSize(size: { width: number; height: number }) {
-    const { width, height } = size;
-    this.screen = { ...this.screen, width, height };
-    this.curDeviceSize = getCurrentDeviceSize(width);
-    this.emit(Events.Resize, { width, height });
-    this.emit(Events.DeviceSizeChange, this.curDeviceSize);
+    this.screen = size;
   }
-  setEnv(env: Partial<Application<T>["env"]>) {
+  /** 设置页面 title */
+  setTitle(title: string): void {
+    throw new Error("请实现 setTitle 方法");
+  }
+  openWindow(url: string) {
+    throw new Error("请实现 openWindow 方法");
+  }
+  setEnv(env: JSONObject) {
     this.env = {
       ...this.env,
       ...env,
     };
   }
-  handleResize(size: { width: number; height: number }) {
-    this.setSize(size);
+  setHeight(v: number) {
+    this.height = v;
+    this.emit(Events.StateChange, { ...this.state });
   }
-  /** 处理屏幕方向变化 */
-  handleScreenOrientationChange(
-    orientation: number | "vertical" | "horizontal",
-  ) {
-    if (typeof orientation === "number") {
-      this.orientation =
-        orientation === 0
-          ? OrientationTypes.Vertical
-          : OrientationTypes.Horizontal;
+  /** 复制文本到粘贴板 */
+  copy(text: string) {
+    // throw new Error("请实现 copy 方法");
+    this.$clipboard.methods.writeText(text);
+  }
+  getComputedStyle(el: unknown): {} {
+    throw new Error("请实现 getComputedStyle 方法");
+  }
+  /** 发送推送 */
+  notify(msg: { title: string; body: string }) {
+    console.log("请实现 notify 方法");
+  }
+  disablePointer() {
+    throw new Error("请实现 disablePointer 方法");
+  }
+  enablePointer() {
+    throw new Error("请实现 enablePointer 方法");
+  }
+  /** 平台相关的全局事件 */
+  keydown(event: KeyboardEvent) {
+    if (event.code === "Escape") {
+      this.escape();
     }
-    if (typeof orientation === "string") {
-      this.orientation =
-        orientation === "vertical"
-          ? OrientationTypes.Vertical
-          : OrientationTypes.Horizontal;
+    this.emit(Events.Keydown, event);
+  }
+  keyup(event: KeyboardEvent) {
+    this.emit(Events.Keyup, event);
+  }
+  escape() {
+    this.emit(Events.EscapeKeyDown);
+  }
+  resize(size: { width: number; height: number }) {
+    this.screen = size;
+    this.emit(Events.Resize, size);
+  }
+  blur() {
+    this.emit(Events.Blur);
+  }
+
+  handleScreenOrientationChange(orientation: number) {
+    if (orientation === 0) {
+      this.orientation = OrientationTypes.Vertical;
+      this.emit(Events.OrientationChange, this.orientation);
+      return;
     }
+    this.orientation = OrientationTypes.Horizontal;
     this.emit(Events.OrientationChange, this.orientation);
   }
-  keydown(event: { key: string }) {
-    if (event.key === "Escape") {
-      this.emit(Events.EscapeKeyDown);
+  handleResize(size: { width: number; height: number }) {
+    this.screen = size;
+    const mediaStr = getCurrentDeviceSize(size.width);
+    if (mediaStr !== this.curDeviceSize) {
+      this.curDeviceSize = mediaStr;
+      this.emit(Events.DeviceSizeChange, this.curDeviceSize);
     }
-    this.emit(Events.Keydown, {
-      code: event.key,
-      preventDefault: () => {},
-    });
+    this.emit(Events.Resize, size);
   }
-  copy(text: string) {}
-  disablePointer() {}
-  enablePointer() {}
-  login() {
-    this.emit(Events.Login, {});
+
+  /* ----------------
+   * Lifetime
+   * ----------------
+   */
+  onReady(handler: Handler<TheTypesOfEvents[Events.Ready]>) {
+    return this.on(Events.Ready, handler);
   }
-  logout() {
-    this.emit(Events.Logout);
+  onDeviceSizeChange(
+    handler: Handler<TheTypesOfEvents[Events.DeviceSizeChange]>,
+  ) {
+    return this.on(Events.DeviceSizeChange, handler);
+  }
+  onUpdate(handler: Handler<TheTypesOfEvents[Events.ForceUpdate]>) {
+    return this.on(Events.ForceUpdate, handler);
+  }
+  /** 平台相关全局事件 */
+  onOrientationChange(
+    handler: Handler<TheTypesOfEvents[Events.OrientationChange]>,
+  ) {
+    return this.on(Events.OrientationChange, handler);
+  }
+  onResize(handler: Handler<TheTypesOfEvents[Events.Resize]>) {
+    return this.on(Events.Resize, handler);
+  }
+  onBlur(handler: Handler<TheTypesOfEvents[Events.Blur]>) {
+    return this.on(Events.Blur, handler);
+  }
+  onShow(handler: Handler<TheTypesOfEvents[Events.Show]>) {
+    return this.on(Events.Show, handler);
+  }
+  onHidden(handler: Handler<TheTypesOfEvents[Events.Hidden]>) {
+    return this.on(Events.Hidden, handler);
+  }
+  onKeydown(handler: Handler<TheTypesOfEvents[Events.Keydown]>) {
+    return this.on(Events.Keydown, handler);
+  }
+  onKeyup(handler: Handler<TheTypesOfEvents[Events.Keyup]>) {
+    return this.on(Events.Keyup, handler);
+  }
+  onEscapeKeyDown(handler: Handler<TheTypesOfEvents[Events.EscapeKeyDown]>) {
+    return this.on(Events.EscapeKeyDown, handler);
+  }
+  onTip(handler: Handler<TheTypesOfEvents[Events.Tip]>) {
+    return this.on(Events.Tip, handler);
+  }
+  onLoading(handler: Handler<TheTypesOfEvents[Events.Loading]>) {
+    return this.on(Events.Loading, handler);
+  }
+  onHideLoading(handler: Handler<TheTypesOfEvents[Events.HideLoading]>) {
+    return this.on(Events.HideLoading, handler);
+  }
+  onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {
+    return this.on(Events.StateChange, handler);
+  }
+  /**
+   * ----------------
+   * Event
+   * ----------------
+   */
+  onError(handler: Handler<TheTypesOfEvents[Events.Error]>) {
+    return this.on(Events.Error, handler);
   }
 }
-
-export type ApplicationModel<
-  T extends { storage: StorageCore<any>; user: any },
-> = Application<T>;

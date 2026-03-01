@@ -1,4 +1,5 @@
 export { connect as provide_app } from "./app";
+export { connect as provide_clipboard } from "./clipboard";
 export { connect as provide_http_client } from "./http_client";
 export { connect as provide_history } from "./history";
 export { connect as provide_ui_image } from "./ui/image";

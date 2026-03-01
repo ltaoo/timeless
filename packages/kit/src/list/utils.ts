@@ -1,4 +1,4 @@
-import { DeviceSizeTypes } from "@/app";
+import { DeviceSizeTypes } from "@/app/utils";
 
 /**
  * 移除指定字段
@@ -23,7 +23,7 @@ function get<T>(obj: T, key: string | number) {
 export function merge<T extends Record<string, any> = { [key: string]: any }>(
   current: T,
   defaultObj: T,
-  override?: boolean
+  override?: boolean,
 ) {
   if (typeof defaultObj !== "object") {
     return current;
