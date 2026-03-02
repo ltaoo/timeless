@@ -196,12 +196,21 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.FloatingMounted, floating);
     const tryPlace = () => {
       if (this.floating !== floating) {
+        console.log("[DEBUG-POPPER] tryPlace - floating mismatch", this.unique_id, "this.floating:", !!this.floating, "floating:", !!floating);
         return;
       }
       const el = (floating as any)?.$el as HTMLElement | undefined;
+      console.log("[DEBUG-POPPER] tryPlace - checking element", this.unique_id, {
+        hasEl: !!el,
+        offsetWidth: el?.offsetWidth,
+        offsetHeight: el?.offsetHeight,
+        isConnected: el?.isConnected,
+      });
       if (el && (el.offsetWidth > 0 || el.offsetHeight > 0)) {
+        console.log("[DEBUG-POPPER] tryPlace - calling place()", this.unique_id);
         this.place();
       } else {
+        console.log("[DEBUG-POPPER] tryPlace - retrying", this.unique_id);
         requestAnimationFrame(tryPlace);
       }
     };

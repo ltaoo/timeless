@@ -165,8 +165,12 @@ export default function FeedbackView() {
             Presence(
               {
                 store: p$,
-                animation: { in: "animate-in fade-in", out: "animate-out fade-out" },
-                class: "p-4 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 text-sm",
+                animation: {
+                  in: "animate-in fade-in",
+                  out: "animate-out fade-out",
+                },
+                class:
+                  "p-4 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 text-sm",
               },
               [Txt("✨ Fade in/out animation")],
             ),
@@ -208,9 +212,10 @@ export default function FeedbackView() {
                 store: p$,
                 animation: {
                   in: "animate-in fade-in slide-in-from-bottom",
-                  out: "animate-out fade-out slide-out-to-bottom"
+                  out: "animate-out fade-out slide-out-to-bottom",
                 },
-                class: "p-4 rounded-lg bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 text-sm",
+                class:
+                  "p-4 rounded-lg bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 text-sm",
               },
               [Txt("📤 Slide from bottom animation")],
             ),
@@ -252,9 +257,10 @@ export default function FeedbackView() {
                 store: p$,
                 animation: {
                   in: "animate-in fade-in zoom-in-95",
-                  out: "animate-out fade-out zoom-out-95"
+                  out: "animate-out fade-out zoom-out-95",
                 },
-                class: "p-4 rounded-lg bg-purple-100 dark:bg-purple-900 text-purple-900 dark:text-purple-100 text-sm",
+                class:
+                  "p-4 rounded-lg bg-purple-100 dark:bg-purple-900 text-purple-900 dark:text-purple-100 text-sm",
               },
               [Txt("🎯 Zoom with fade animation")],
             ),
@@ -296,11 +302,89 @@ export default function FeedbackView() {
                 store: p$,
                 animation: {
                   in: "animate-in fade-in slide-in-from-right",
-                  out: "animate-out fade-out slide-out-to-right"
+                  out: "animate-out fade-out slide-out-to-right",
                 },
-                class: "p-4 rounded-lg bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 text-sm",
+                class:
+                  "p-4 rounded-lg bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 text-sm",
               },
               [Txt("➡️ Slide from right animation")],
+            ),
+          ]);
+        })(),
+      ]),
+      Item("Presence in Portal", [
+        (() => {
+          const p$ = new Timeless.ui.PresenceCore({});
+          return View({ class: "space-y-2" }, [
+            View({ class: "flex gap-2" }, [
+              Button(
+                {
+                  size: "sm",
+                  variant: "outline",
+                  store: new Timeless.ui.ButtonCore({
+                    onClick() {
+                      p$.show();
+                    },
+                  }),
+                },
+                [Txt("Show in Portal")],
+              ),
+              Button(
+                {
+                  size: "sm",
+                  variant: "outline",
+                  store: new Timeless.ui.ButtonCore({
+                    onClick() {
+                      p$.hide();
+                    },
+                  }),
+                },
+                [Txt("Hide")],
+              ),
+            ]),
+            Presence(
+              {
+                store: p$,
+              },
+              [
+                Portal(
+                  {
+                    class: "fixed inset-0 z-50 flex items-center justify-center bg-black/50",
+                    onClick(e) {
+                      if (e.target === e.currentTarget) {
+                        p$.hide();
+                      }
+                    },
+                  },
+                  [
+                    View(
+                      {
+                        class: "p-6 rounded-lg bg-white dark:bg-zinc-800 shadow-lg max-w-md",
+                      },
+                      [
+                        View({ class: "flex items-center justify-between mb-4" }, [
+                          Txt("🎭 Presence inside Portal"),
+                          Button(
+                            {
+                              size: "sm",
+                              variant: "ghost",
+                              store: new Timeless.ui.ButtonCore({
+                                onClick() {
+                                  p$.hide();
+                                },
+                              }),
+                            },
+                            [Txt("✕")],
+                          ),
+                        ]),
+                        View({ class: "text-sm text-zinc-600 dark:text-zinc-400" }, [
+                          Txt("Click the X button or click outside to close. It should be properly destroyed."),
+                        ]),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
           ]);
         })(),

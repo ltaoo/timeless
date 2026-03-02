@@ -7,20 +7,13 @@ import { View, ViewChildren, ViewProps } from "./view";
 export function Presence(
   props: ViewProps & {
     store: PresenceCore;
-    animation?: { in: boolean; out: boolean };
+    animation?: { in: string; out: string };
   },
   children?: ViewChildren,
 ) {
   const { store, animation, ...rest } = props;
   const state = refobj(store.state);
   const visible = computed(state, (s) => {
-    console.log(
-      "[]presence state changed",
-      s.mounted,
-      s.visible,
-      s.enter,
-      s.exit,
-    );
     return s.mounted && (s.visible || s.enter || s.exit);
   });
 

@@ -3,7 +3,10 @@
     "allow": [
       "Bash(pnpm install:*)",
       "Bash(pnpm build:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npm run dev)",
+      "Bash(npm run build:*)",
+      "Bash(find:*)"
     ]
   }
 }

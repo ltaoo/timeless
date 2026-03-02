@@ -42,7 +42,7 @@ export function Content(
         }
       },
       onUnmounted() {
-        // props.store.popper.setFloating(null);
+        props.store.popper.setFloating(null);
         if (layer && handlePointerDown) {
           document.removeEventListener("pointerdown", handlePointerDown);
           handlePointerDown = null;
