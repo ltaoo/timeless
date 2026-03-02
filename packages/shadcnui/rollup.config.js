@@ -77,7 +77,7 @@ const config = {
     commonjs({
       sourceMap: false,
     }),
-    minify,
+    // minify,
   ],
 };
 

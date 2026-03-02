@@ -5,12 +5,10 @@ import { JSX, createSignal } from "solid-js";
 import { ArrowDown, Loader } from "lucide-solid";
 
 import * as ScrollViewPrimitive from "@/packages/ui/scroll-view";
-import { ui } from "@timeless/kit";
-
-const { ScrollViewCore } = ui;
+import * as ui from '@timeless/ui';
 
 export const ScrollView = (
-  props: { store: ScrollViewCore; extra?: JSX.Element } & JSX.HTMLAttributes<HTMLDivElement>
+  props: { store: ui.ScrollViewCore; extra?: JSX.Element } & JSX.HTMLAttributes<HTMLDivElement>
 ) => {
   // const { store, children, ...rest } = props;
 

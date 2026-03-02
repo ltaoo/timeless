@@ -3,15 +3,13 @@
  */
 import { createSignal, JSX, onMount } from "solid-js";
 
-import { DropdownMenuCore } from "@/domains/ui/dropdown-menu";
-import { MenuItemCore } from "@/domains/ui/menu/item";
-import { MenuCore } from "@/domains/ui/menu";
+import { DropdownMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
 import * as MenuPrimitive from "@/packages/ui/menu";
 
 const Root = (
   props: {
     store: DropdownMenuCore;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
   const { store } = props;
 
@@ -22,7 +20,9 @@ const Root = (
   );
 };
 
-const Trigger = (props: { store: DropdownMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Trigger = (
+  props: { store: DropdownMenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const [state, setState] = createSignal(props.store.state);
   props.store.onStateChange((v) => {
     setState(v);
@@ -63,7 +63,9 @@ const Trigger = (props: { store: DropdownMenuCore } & JSX.HTMLAttributes<HTMLEle
 /* -------------------------------------------------------------------------------------------------
  * DropdownMenuPortal
  * -----------------------------------------------------------------------------------------------*/
-const Portal = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Portal = (
+  props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   return (
     <MenuPrimitive.Portal class={props.class} store={props.store}>
       {props.children}
@@ -71,7 +73,9 @@ const Portal = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) =>
   );
 };
 
-const Content = (props: { store: DropdownMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Content = (
+  props: { store: DropdownMenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
 
   return (
@@ -81,39 +85,55 @@ const Content = (props: { store: DropdownMenuCore } & JSX.HTMLAttributes<HTMLEle
   );
 };
 
-const Group = (props: { store: DropdownMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Group = (
+  props: { store: DropdownMenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
-  return <MenuPrimitive.Group class={props.class}>{props.children}</MenuPrimitive.Group>;
+  return (
+    <MenuPrimitive.Group class={props.class}>
+      {props.children}
+    </MenuPrimitive.Group>
+  );
 };
 
 const Label = (
   props: {
     // store: DropdownMenuCore;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
-  return <MenuPrimitive.Label class={props.class}>{props.children}</MenuPrimitive.Label>;
+  return (
+    <MenuPrimitive.Label class={props.class}>
+      {props.children}
+    </MenuPrimitive.Label>
+  );
 };
 
 const Item = (
   props: {
     store: MenuItemCore;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
   return (
-    <MenuPrimitive.Item class={props.class} classList={props.classList} store={props.store}>
+    <MenuPrimitive.Item
+      class={props.class}
+      classList={props.classList}
+      store={props.store}
+    >
       {props.children}
     </MenuPrimitive.Item>
   );
 };
 
 const Separator = (props: {} & JSX.HTMLAttributes<HTMLElement>) => {
-  return <MenuPrimitive.Separator class={props.class}></MenuPrimitive.Separator>;
+  return (
+    <MenuPrimitive.Separator class={props.class}></MenuPrimitive.Separator>
+  );
 };
 
 const Arrow = (
   props: {
     store: DropdownMenuCore;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
   const { store } = props;
   return (
@@ -126,7 +146,7 @@ const Arrow = (
 const Sub = (
   props: {
     store: MenuCore;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
   const { store } = props;
 
@@ -140,7 +160,7 @@ const Sub = (
 const SubTrigger = (
   props: {
     store: MenuItemCore;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
   const { store } = props;
 
@@ -155,7 +175,9 @@ const SubTrigger = (
   );
 };
 
-const SubContent = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const SubContent = (
+  props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
 
   return (
@@ -165,4 +187,17 @@ const SubContent = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>
   );
 };
 
-export { Root, Trigger, Portal, Content, Group, Label, Item, Separator, Arrow, Sub, SubTrigger, SubContent };
+export {
+  Root,
+  Trigger,
+  Portal,
+  Content,
+  Group,
+  Label,
+  Item,
+  Separator,
+  Arrow,
+  Sub,
+  SubTrigger,
+  SubContent,
+};

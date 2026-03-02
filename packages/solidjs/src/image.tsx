@@ -4,13 +4,11 @@ import { JSX } from "solid-js/jsx-runtime";
 import { effect } from "solid-js/web";
 import { Image, ImageOff } from "lucide-solid";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 // @ts-ignore
 // import { connect } from "@timeless/kit/ui/image/connect.web";
 
-const { ImageCore, ImageStep } = ui;
-
-export function LazyImage(props: { store: ImageCore; alt?: string } & JSX.HTMLAttributes<HTMLImageElement>) {
+export function LazyImage(props: { store: ui.ImageCore; alt?: string } & JSX.HTMLAttributes<HTMLImageElement>) {
   const { store } = props;
 
   let $img: HTMLImageElement | undefined = undefined;
@@ -40,17 +38,17 @@ export function LazyImage(props: { store: ImageCore; alt?: string } & JSX.HTMLAt
       classList={{
         [props.class as string]: true,
         "flex items-center justify-center": true,
-        "bg-slate-200": ![ImageStep.Loading, ImageStep.Loaded].includes(state().step),
+        "bg-slate-200": ![ui.ImageStep.Loading, ui.ImageStep.Loaded].includes(state().step),
       }}
     >
       <Switch>
-        <Match when={state().step === ImageStep.Failed}>
+        <Match when={state().step === ui.ImageStep.Failed}>
           <ImageOff class="w-8 h-8 text-slate-500" />
         </Match>
-        <Match when={state().step === ImageStep.Pending}>
+        <Match when={state().step === ui.ImageStep.Pending}>
           <Image class="w-8 h-8 text-slate-500" />
         </Match>
-        <Match when={[ImageStep.Loading, ImageStep.Loaded].includes(state().step)}>
+        <Match when={[ui.ImageStep.Loading, ui.ImageStep.Loaded].includes(state().step)}>
           <img
             class={props.class}
             style={{ "object-fit": state().fit }}

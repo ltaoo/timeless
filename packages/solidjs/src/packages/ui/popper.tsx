@@ -4,15 +4,19 @@
  */
 import { JSX, Show, createSignal, onMount } from "solid-js";
 
-import { PopperCore } from "@/domains/ui/popper";
+import { PopperCore } from "@timeless/ui";
 
 import { Arrow as ArrowPrimitive } from "./arrow";
 
-const Root = (props: { store?: PopperCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Root = (
+  props: { store?: PopperCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   return props.children;
 };
 
-const Anchor = (props: { store: PopperCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Anchor = (
+  props: { store: PopperCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   let $anchor: HTMLDivElement;
 
   // console.log("[COMPONENT]PopperAnchor - before setReference", store.reference);
@@ -45,7 +49,9 @@ const Anchor = (props: { store: PopperCore } & JSX.HTMLAttributes<HTMLElement>) 
   return props.children;
 };
 
-const Content = (props: { store: PopperCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Content = (
+  props: { store: PopperCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
   // const store = useContext(PopperContext);
   const [state, setState] = createSignal(store.state);
@@ -136,7 +142,7 @@ const OPPOSITE_SIDE = {
 const Arrow = (
   props: {
     store: PopperCore;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
   const { store } = props;
   // const { arrowX, arrowY, baseSide, placedSide, shouldHideArrow } = state;

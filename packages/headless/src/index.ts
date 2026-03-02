@@ -7,6 +7,8 @@ import {
   TimelessNormalComponent,
 } from "./view";
 
+console.log('headless v0.1.1')
+
 export * from "@timeless/reactive";
 
 // Reactive
@@ -41,10 +43,9 @@ export * from "./alert";
 
 // interactive
 export * as ButtonPrimitive from "./button";
-export * from "./menu";
-// export * as DropdownMenuPrimitive from "./dropdown-menu";
+export * as MenuPrimitive from "./menu";
+export * as DropdownMenuPrimitive from "./dropdown-menu";
 // export { DropdownMenu } from "./dropdown-menu";
-export * from "./dropdown-menu";
 export * from "./context-menu";
 export * from "./tabs";
 export * from "./accordion";
@@ -59,7 +60,6 @@ export * from "./toggle";
 
 // overlay
 export * as PopoverPrimitive from "./popover";
-export { Popover } from "./popover";
 export * from "./sheet";
 export * from "./dialog";
 export * from "./tooltip";

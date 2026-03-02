@@ -4,11 +4,9 @@ import { Check } from "lucide-solid";
 
 import * as CheckboxPrimitive from "@/packages/ui/checkbox";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { CheckboxCore } = ui;
-
-export function Checkbox(props: { store: CheckboxCore } & JSX.HTMLAttributes<HTMLDivElement>) {
+export function Checkbox(props: { store: ui.CheckboxCore } & JSX.HTMLAttributes<HTMLDivElement>) {
   return (
     <CheckboxPrimitive.Root id={props.id} store={props.store} class="flex items-center gap-1">
       <div

@@ -2,14 +2,16 @@
  * @file 支持多列的瀑布流组件
  */
 import { For, JSX, Match, Show, Switch } from "solid-js";
+import {
+  WaterfallModel,
+  WaterfallCellModel,
+  WaterfallColumnModel,
+} from "@timeless/ui";
+import { ListCore } from "@timeless/kit";
 
 import { useViewModelStore } from "@/hooks";
 
-import { ui } from "@timeless/kit";
-import { ListCore } from "@/domains/list";
 import { ArrowDown, Bird, Loader } from "lucide-solid";
-
-const { WaterfallModel, WaterfallColumnModel, WaterfallCellModel } = ui;
 
 export function WaterfallView<T extends Record<string, unknown>>(
   props: {
@@ -20,7 +22,7 @@ export function WaterfallView<T extends Record<string, unknown>>(
     skeleton?: JSX.Element;
     extra?: JSX.Element;
     render: (payload: T, idx: number) => JSX.Element;
-  } & JSX.HTMLAttributes<HTMLDivElement>
+  } & JSX.HTMLAttributes<HTMLDivElement>,
 ) {
   const [state, vm] = useViewModelStore(props.store);
   const [list, $list] = useViewModelStore(props.list);
@@ -43,7 +45,9 @@ export function WaterfallView<T extends Record<string, unknown>>(
                 <Show when={list().loading}>
                   <Loader class="w-6 h-6 animate-spin" />
                 </Show>
-                <div class="text-center text-xl">{list().loading ? "" : "列表为空"}</div>
+                <div class="text-center text-xl">
+                  {list().loading ? "" : "列表为空"}
+                </div>
               </div>
             </div>
           </div>
@@ -56,7 +60,9 @@ export function WaterfallView<T extends Record<string, unknown>>(
                 if (!$column) {
                   return null;
                 }
-                return <WaterfallColumnView store={$column} render={props.render} />;
+                return (
+                  <WaterfallColumnView store={$column} render={props.render} />
+                );
               }}
             </For>
           </div>
@@ -70,10 +76,15 @@ export function WaterfallView<T extends Record<string, unknown>>(
                     $list.loadMore();
                   }}
                 >
-                  <Show when={list().loading} fallback={<ArrowDown class="w-6 h-6" />}>
+                  <Show
+                    when={list().loading}
+                    fallback={<ArrowDown class="w-6 h-6" />}
+                  >
                     <Loader class="w-6 h-6 animate-spin" />
                   </Show>
-                  <div class="text-center text-sm">{list().loading ? "" : "加载更多"}</div>
+                  <div class="text-center text-sm">
+                    {list().loading ? "" : "加载更多"}
+                  </div>
                 </div>
               </div>
             }
@@ -128,7 +139,11 @@ export function WaterfallColumnView<T extends Record<string, unknown>>(props: {
           const $cell = vm.$cells[idx()];
           return (
             <Show when={$cell} keyed={true}>
-              <WaterfallCellView store={$cell!} idx={cell.idx} render={props.render} />
+              <WaterfallCellView
+                store={$cell!}
+                idx={cell.idx}
+                render={props.render}
+              />
             </Show>
           );
         }}
@@ -142,11 +157,15 @@ function WaterfallCellViewWrap<T extends Record<string, unknown>>(
     store?: WaterfallCellModel<T>;
     idx: number;
     render: (payload: T, idx: number) => JSX.Element;
-  } & JSX.HTMLAttributes<HTMLDivElement>
+  } & JSX.HTMLAttributes<HTMLDivElement>,
 ) {
   return (
     <Show when={props.store} keyed={true}>
-      <WaterfallCellView store={props.store!} idx={props.idx} render={props.render} />
+      <WaterfallCellView
+        store={props.store!}
+        idx={props.idx}
+        render={props.render}
+      />
     </Show>
   );
 }
@@ -156,7 +175,7 @@ export function WaterfallCellView<T extends Record<string, unknown>>(
     store: WaterfallCellModel<T>;
     idx: number;
     render: (payload: T, idx: number) => JSX.Element;
-  } & JSX.HTMLAttributes<HTMLDivElement>
+  } & JSX.HTMLAttributes<HTMLDivElement>,
 ) {
   const [state, vm] = useViewModelStore(props.store);
 

@@ -1,15 +1,14 @@
 import { computed, ref, refobj, uncomputed } from "@timeless/reactive";
-import { ContextMenuCore, MenuCore } from "@timeless/ui";
+import { ContextMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
 
 import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
-import { DropdownMenu } from "./dropdown-menu";
 import { Portal } from "./portal";
 import { Popper } from "./popper";
 import { Presence } from "./presence";
 import { For } from "./for";
 import { merge, tp } from "./theme";
-import { MenuItem, MenuItemView } from "./menu";
+import * as MenuPrimitive from "./menu";
 import { Show } from "./show";
 import { Txt } from "./text";
 
@@ -42,7 +41,7 @@ export function ContextMenu(
     [
       For({
         each: menuitem$s,
-        render(item: { label: string; menu?: MenuCore }) {
+        render(item: MenuItemCore) {
           //       console.log("[]DropdownMenu render item", !!item.menu, item.label);
           const items = ref(item.menu ? item.menu.state.items : []);
           if (item.menu) {
@@ -55,15 +54,14 @@ export function ContextMenu(
             {
               when: ref(!!item.menu),
               fallback: [
-                MenuItem({ store: item, theme: t }, [Txt(item.label)]),
+                MenuPrimitive.Item({ store: item }, [Txt(item.label)]),
               ],
             },
             [
-              MenuItem(
+              MenuPrimitive.Item(
                 {
                   store: item,
-                  theme: t,
-                  onMouseEnter: () => {
+                  onMouseEnter() {
                     const menu = item.menu;
                     if (menu) {
                       if (menu.hide_sub_timer) {
@@ -72,7 +70,7 @@ export function ContextMenu(
                       }
                     }
                   },
-                  onMouseLeave: () => {
+                  onMouseLeave() {
                     const menu = item.menu;
                     if (menu) {
                       menu.hide_sub_timer = setTimeout(() => {
@@ -108,7 +106,8 @@ export function ContextMenu(
                                       For({
                                         each: items,
                                         render(sub) {
-                                          return MenuItemView(sub, t);
+                                          // return MenuItemView(sub, t)
+                                          return null;
                                         },
                                         onUnmounted() {
                                           uncomputed(items);

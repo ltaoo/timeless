@@ -48,6 +48,11 @@
       "import": "./dist/alert/index.esm.js",
       "require": "./dist/alert/index.js"
     },
+    "./arrow": {
+      "types": "./dist/arrow/index.d.ts",
+      "import": "./dist/arrow/index.esm.js",
+      "require": "./dist/arrow/index.js"
+    },
     "./avatar": {
       "types": "./dist/avatar/index.d.ts",
       "import": "./dist/avatar/index.esm.js",

@@ -14,6 +14,13 @@ export function Presence(
   const { store, animation, ...rest } = props;
   const state = refobj(store.state);
   const visible = computed(state, (s) => {
+    console.log(
+      "[]presence state changed",
+      s.mounted,
+      s.visible,
+      s.enter,
+      s.exit,
+    );
     return s.mounted && (s.visible || s.enter || s.exit);
   });
 
@@ -24,13 +31,9 @@ export function Presence(
   return Show(
     {
       when: visible,
-
       onUnmounted() {
         if (unsubscribe) {
           unsubscribe();
-        }
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
         }
       },
     },
@@ -48,6 +51,11 @@ export function Presence(
               .filter(Boolean)
               .join(" ");
           }),
+          onUnmounted() {
+            if (rest.onUnmounted) {
+              rest.onUnmounted();
+            }
+          },
         },
         children,
       ),

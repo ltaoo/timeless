@@ -19,14 +19,7 @@ const MENU_CONTENT_CLASS =
   };
 }
 
-import {
-  Menu as HMenu,
-  DropdownMenu as HDropdownMenu,
-  MenuItem as HItem,
-  MenuLabel as HLabel,
-  MenuSeparator as HSep,
-  ContextMenu as HContextMenu,
-} from "@timeless/headless";
+import { MenuPrimitive, ContextMenu as HContextMenu } from "@timeless/headless";
 import { MenuCore } from "@timeless/ui";
 
 const t = {
@@ -54,19 +47,16 @@ const t = {
 };
 
 export function Menu(p: any, c?: any) {
-  return HMenu({ ...p, theme: t }, c);
+  return MenuPrimitive.Root({ ...p, theme: t }, c);
 }
 export function MenuItem(p: any, c?: any) {
-  return HItem({ ...p, theme: t }, c);
+  return MenuPrimitive.Item({ ...p, theme: t }, c);
 }
 export function MenuLabel(p: any, c?: any) {
-  return HLabel({ ...p, theme: t }, c);
+  return MenuPrimitive.Label({ ...p, theme: t }, c);
 }
 export function MenuSeparator(p: any) {
-  return HSep({ ...p, theme: t });
-}
-export function DropdownMenu(p: any, c?: any) {
-  return HDropdownMenu({ ...p, theme: t }, c);
+  return MenuPrimitive.Root({ ...p, theme: t });
 }
 export function ContextMenu(p: any, c?: any) {
   return HContextMenu({ ...p, theme: t }, c);

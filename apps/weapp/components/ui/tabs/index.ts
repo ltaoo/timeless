@@ -1,4 +1,4 @@
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
 Component({
   externalClasses: ["tab-class", "item-class", "active-item-class"],

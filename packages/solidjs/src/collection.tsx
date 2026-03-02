@@ -1,11 +1,9 @@
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 import { createContext, onCleanup, useContext } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
-const { CollectionCore } = ui;
-
-const CollectionContext = createContext<CollectionCore>();
-const CollectionProvider = (props: { store: CollectionCore; children: JSX.Element }) => {
+const CollectionContext = createContext<ui.CollectionCore>();
+const CollectionProvider = (props: { store: ui.CollectionCore; children: JSX.Element }) => {
   const { store } = props;
   return <CollectionContext.Provider value={store}>{props.children}</CollectionContext.Provider>;
 };

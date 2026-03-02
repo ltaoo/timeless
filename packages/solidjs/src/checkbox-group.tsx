@@ -3,11 +3,9 @@
  */
 import { For, JSX, createSignal } from "solid-js";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { CheckboxCore, CheckboxGroupCore } = ui;
-
-export const CheckboxOption = (props: { label: string; store: CheckboxCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
+export const CheckboxOption = (props: { label: string; store: ui.CheckboxCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
   const { label, store } = props;
 
   const [state, setState] = createSignal(store.state);
@@ -34,7 +32,7 @@ export const CheckboxOption = (props: { label: string; store: CheckboxCore } & J
 };
 
 export const CheckboxGroup = <T extends any>(
-  props: { store: CheckboxGroupCore<T> } & JSX.HTMLAttributes<HTMLDivElement>
+  props: { store: ui.CheckboxGroupCore<T> } & JSX.HTMLAttributes<HTMLDivElement>
 ) => {
   const { store } = props;
 

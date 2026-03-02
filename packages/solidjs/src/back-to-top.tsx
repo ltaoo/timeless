@@ -4,12 +4,10 @@
 import { Show, createSignal } from "solid-js";
 import { ArrowUp } from "lucide-solid";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 // import { app } from "@/store";
 
-const { ScrollViewCore } = ui;
-
-export function BackToTop(props: { store: ScrollViewCore }) {
+export function BackToTop(props: { store: ui.ScrollViewCore }) {
   const { store } = props;
 
   let ref = false;

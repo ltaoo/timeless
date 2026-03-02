@@ -1,16 +1,14 @@
 import { createContext, createSignal, onCleanup, useContext } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
 import * as Collection from "./collection";
 
-const { RovingFocusCore } = ui;
-
-const RovingFocusContext = createContext<RovingFocusCore>();
+const RovingFocusContext = createContext<ui.RovingFocusCore>();
 const RovingFocusGroup = (
   props: {
-    store: RovingFocusCore;
+    store: ui.RovingFocusCore;
   } & JSX.HTMLAttributes<HTMLElement>
 ) => {
   const { store } = props;
@@ -26,7 +24,7 @@ const RovingFocusGroup = (
 
 const RovingFocusGroupImpl = (
   props: {
-    store: RovingFocusCore;
+    store: ui.RovingFocusCore;
   } & JSX.HTMLAttributes<HTMLElement>
 ) => {
   const { store } = props;

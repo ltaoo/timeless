@@ -91,7 +91,7 @@ const config = [
           outDir: null,
         },
       }),
-      minify,
+      // minify,
       // analyze({ summaryOnly: true, limit: 50 }),
     ],
   },

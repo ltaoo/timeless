@@ -3,13 +3,11 @@
  */
 import { JSX } from "solid-js";
 
-import { ui } from "@timeless/kit";
-
-const { ButtonCore } = ui;
+import * as ui from '@timeless/ui';
 
 function Element<T = unknown>(
   props: {
-    store: ButtonCore<T>;
+    store: ui.ButtonCore<T>;
   } & JSX.HTMLAttributes<HTMLButtonElement>
 ) {
   const { store } = props;

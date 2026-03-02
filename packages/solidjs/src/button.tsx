@@ -8,9 +8,7 @@ import { Loader } from "lucide-solid";
 import * as ButtonPrimitive from "@/packages/ui/button";
 import { Show } from "@/packages/ui/show";
 
-import { ui } from "@timeless/kit";
-
-const { ButtonCore } = ui;
+import * as ui from '@timeless/ui';
 
 const buttonVariants = cva(
   "overflow-hidden inline-flex items-center justify-center text-md rounded-xl transition-colors disabled:opacity-50 disabled:pointer-events-none",
@@ -40,7 +38,7 @@ const buttonVariants = cva(
 
 function Button<T = unknown>(
   props: {
-    store: ButtonCore<T>;
+    store: ui.ButtonCore<T>;
     icon?: JSX.Element;
     // disabled?: boolean;
   } & VariantProps<typeof buttonVariants> &

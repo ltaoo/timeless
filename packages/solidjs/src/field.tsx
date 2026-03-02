@@ -1,12 +1,10 @@
 import { JSX } from "solid-js/jsx-runtime";
 import { createSignal, Show } from "solid-js";
 
-import { ui } from "@timeless/kit";
-
-const { FormFieldCore } = ui;
+import * as ui from '@timeless/ui';
 
 export function Field(
-  props: { store: FormFieldCore<any> } & { extra?: JSX.Element } & JSX.HTMLAttributes<HTMLDivElement>
+  props: { store: ui.FormFieldCore<any> } & { extra?: JSX.Element } & JSX.HTMLAttributes<HTMLDivElement>
 ) {
   const { store, extra } = props;
 

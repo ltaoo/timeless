@@ -4,12 +4,10 @@
 import { For, createSignal, onMount, JSX } from "solid-js";
 import { ChevronRight } from "lucide-solid";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 import * as Menu from "@/packages/ui/menu";
 
-const { ContextMenuCore, MenuCore, MenuItemCore } = ui;
-
-export const ContextMenu = (props: { store: ContextMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+export const ContextMenu = (props: { store: ui.ContextMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;
 
   const [state, setState] = createSignal(store.state);
@@ -60,8 +58,8 @@ export const ContextMenu = (props: { store: ContextMenuCore } & JSX.HTMLAttribut
 
 const ItemWithSub = (
   props: {
-    menu: MenuCore;
-    store: MenuItemCore;
+    menu: ui.MenuCore;
+    store: ui.MenuItemCore;
   } & JSX.HTMLAttributes<HTMLElement>
 ) => {
   const { menu, store: item } = props;
@@ -106,10 +104,10 @@ const ItemWithSub = (
   );
 };
 
-// const ContextMenuContext = createContext<ContextMenuCore>();
+// const ContextMenuContext = createContext<ui.ContextMenuCore>();
 const Root = (
   props: {
-    store: ContextMenuCore;
+    store: ui.ContextMenuCore;
   } & JSX.HTMLAttributes<HTMLElement>
 ) => {
   const { store } = props;
@@ -119,7 +117,7 @@ const Root = (
 /**
  * 点击展示菜单
  */
-const Trigger = (props: { store: ContextMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Trigger = (props: { store: ui.ContextMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store: contextMenu } = props;
   // const store = useContext(ContextMenuContext);
   let $span: HTMLSpanElement | undefined;
@@ -194,10 +192,10 @@ const Trigger = (props: { store: ContextMenuCore } & JSX.HTMLAttributes<HTMLElem
     </span>
   );
 };
-const Portal = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Portal = (props: { store: ui.MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
   return <Menu.Portal store={props.store}>{props.children}</Menu.Portal>;
 };
-const Content = (props: { store: ContextMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Content = (props: { store: ui.ContextMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;
   return (
     <Menu.Content class={props.class} store={store.menu}>
@@ -211,7 +209,7 @@ const Group = (props: {} & JSX.HTMLAttributes<HTMLElement>) => {
 const Label = (props: {} & JSX.HTMLAttributes<HTMLElement>) => {
   return <Menu.Label class={props.class}>{props.children}</Menu.Label>;
 };
-const Item = (props: { store: MenuItemCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Item = (props: { store: ui.MenuItemCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;
   return (
     <Menu.Item class={props.class} store={store}>
@@ -222,7 +220,7 @@ const Item = (props: { store: MenuItemCore } & JSX.HTMLAttributes<HTMLElement>) 
 const Separator = (props: {} & JSX.HTMLAttributes<HTMLElement>) => {
   return <Menu.Separator class={props.class}></Menu.Separator>;
 };
-const Arrow = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Arrow = (props: { store: ui.MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;
 
   return (
@@ -231,14 +229,14 @@ const Arrow = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => 
     </Menu.Arrow>
   );
 };
-const Sub = (props: { subMenu: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Sub = (props: { subMenu: ui.MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { subMenu } = props;
   return <Menu.Sub store={subMenu}>{props.children}</Menu.Sub>;
 };
 const SubTrigger = (
   props: {
-    parent: MenuCore;
-    item: MenuItemCore;
+    parent: ui.MenuCore;
+    item: ui.MenuItemCore;
   } & JSX.HTMLAttributes<HTMLElement>
 ) => {
   const { item } = props;
@@ -248,7 +246,7 @@ const SubTrigger = (
     </Menu.SubTrigger>
   );
 };
-const SubContent = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const SubContent = (props: { store: ui.MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;
   return (
     <Menu.SubContent class={props.class} store={store}>

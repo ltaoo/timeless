@@ -4,13 +4,11 @@ import { Loader } from "lucide-solid";
 import { useViewModelStore } from "@/hooks";
 import { Input as InputPrimitive } from "@/packages/ui/input";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 // @ts-ignore
 import { connect } from "@timeless/kit/ui/form/input/connect.web";
 
-const { InputCore } = ui;
-
-const Input = (props: { store: InputCore<any>; prefix?: JSX.Element; class?: string }) => {
+const Input = (props: { store: ui.InputCore<any>; prefix?: JSX.Element; class?: string }) => {
   // const { store, prefix } = props;
 
   const [state, vm] = useViewModelStore(props.store);

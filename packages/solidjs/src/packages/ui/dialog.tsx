@@ -3,19 +3,17 @@
  */
 import { createSignal, JSX } from "solid-js";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 import { Presence } from "./presence";
 
 import { Portal as PortalPrimitive } from "./portal";
 
-const { DialogCore } = ui;
-
-const Root = (props: { store: DialogCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Root = (props: { store: ui.DialogCore } & JSX.HTMLAttributes<HTMLElement>) => {
   return props.children;
 };
 
 const Portal = (
-  props: { store: DialogCore; enterClassName?: string; exitClassName?: string } & JSX.HTMLAttributes<HTMLElement>
+  props: { store: ui.DialogCore; enterClassName?: string; exitClassName?: string } & JSX.HTMLAttributes<HTMLElement>
 ) => {
   return (
     <Presence store={props.store.present} classList={props.classList}>
@@ -25,7 +23,7 @@ const Portal = (
 };
 
 const Overlay = (
-  props: { store: DialogCore; enterClassName?: string; exitClassName?: string } & JSX.HTMLAttributes<HTMLDivElement>
+  props: { store: ui.DialogCore; enterClassName?: string; exitClassName?: string } & JSX.HTMLAttributes<HTMLDivElement>
 ) => {
   return (
     <Presence
@@ -43,7 +41,7 @@ const Overlay = (
 };
 
 const Content = (
-  props: { store: DialogCore; enterClassName?: string; exitClassName?: string } & JSX.HTMLAttributes<HTMLElement>
+  props: { store: ui.DialogCore; enterClassName?: string; exitClassName?: string } & JSX.HTMLAttributes<HTMLElement>
 ) => {
   return (
     <Presence store={props.store.present} class={props.class} classList={props.classList}>
@@ -52,7 +50,7 @@ const Content = (
   );
 };
 
-const Close = (props: { store: DialogCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Close = (props: { store: ui.DialogCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;
   const [state, setState] = createSignal(store.state);
 
@@ -87,13 +85,13 @@ const Title = (props: {} & JSX.HTMLAttributes<HTMLElement>) => {
   return <div class={props.class}>{props.children}</div>;
 };
 
-const Submit = (props: { store: DialogCore } & JSX.HTMLAttributes<HTMLButtonElement>) => {
+const Submit = (props: { store: ui.DialogCore } & JSX.HTMLAttributes<HTMLButtonElement>) => {
   const { store } = props;
 
   return <Button store={store.okBtn}>{props.children}</Button>;
 };
 
-const Cancel = (props: { store: DialogCore } & JSX.HTMLAttributes<HTMLButtonElement>) => {
+const Cancel = (props: { store: ui.DialogCore } & JSX.HTMLAttributes<HTMLButtonElement>) => {
   const { store } = props;
 
   return (

@@ -188,11 +188,16 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     console.log("[DEBUG-POPPER] setFloating", this.unique_id, "floating:", !!floating, "hasRef:", !!this.reference, "has$el:", !!(this.reference as any)?.$el);
     if (!floating) {
       this.floating = null;
+      this.state.isPlaced = false;
+      this.emit(Events.StateChange, { ...this.state });
       return;
     }
     this.floating = floating;
     this.emit(Events.FloatingMounted, floating);
     const tryPlace = () => {
+      if (this.floating !== floating) {
+        return;
+      }
       const el = (floating as any)?.$el as HTMLElement | undefined;
       if (el && (el.offsetWidth > 0 || el.offsetHeight > 0)) {
         this.place();

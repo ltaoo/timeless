@@ -1,14 +1,13 @@
 import { JSX, Show, createSignal } from "solid-js";
 
-import { TabsCore } from "@/domains/ui/tabs";
-import { PresenceCore } from "@/domains/ui/presence";
+import { TabsCore, PresenceCore } from "@timeless/ui";
 
 import { Presence } from "./presence";
 
 const Root = (
   props: {
     store: TabsCore;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
   const { store } = props;
 
@@ -47,7 +46,7 @@ const Trigger = (
   props: {
     store: TabsCore;
     value: string;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
   const { store, value } = props;
 
@@ -77,7 +76,7 @@ const Content = (
   props: {
     store: TabsCore;
     value: string;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
   const { store, value } = props;
 

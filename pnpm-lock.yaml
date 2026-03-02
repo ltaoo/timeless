@@ -90,6 +90,9 @@ importers:
       '@timeless/provider-weapp':
         specifier: workspace:*
         version: link:../../packages/provider-weapp
+      '@timeless/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@timeless/utils':
         specifier: workspace:*
         version: link:../../packages/utils

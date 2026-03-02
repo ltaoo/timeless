@@ -5,15 +5,13 @@ import { createSignal, JSX } from "solid-js";
 
 import { Portal as PortalPrimitive } from "@/packages/ui/portal";
 import { Presence } from "./presence";
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { ToastCore } = ui;
-
-const Root = (props: { store: ToastCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Root = (props: { store: ui.ToastCore } & JSX.HTMLAttributes<HTMLElement>) => {
   return props.children;
 };
 
-const Portal = (props: { store: ToastCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
+const Portal = (props: { store: ui.ToastCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
   const { store } = props;
 
   return (
@@ -23,13 +21,13 @@ const Portal = (props: { store: ToastCore } & JSX.HTMLAttributes<HTMLDivElement>
   );
 };
 
-const Overlay = (props: { store: ToastCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
+const Overlay = (props: { store: ui.ToastCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
   const { store } = props;
 
   return <Presence store={store.present} class={props.class} classList={props.classList}></Presence>;
 };
 
-const Content = (props: { store: ToastCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
+const Content = (props: { store: ui.ToastCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div class="" classList={props.classList}>
       <Presence store={props.store.present} class={props.class}>

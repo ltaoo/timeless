@@ -8,15 +8,13 @@ import * as PortalPrimitive from "@/packages/ui/portal";
 
 import { base, Handler } from "@/domains/base";
 import { BizError } from "@/domains/error";
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 import type { TagInputCore } from "@timeless/ui/form/tag-input";
 import type { DialogCore } from "@timeless/ui/dialog";
 
-const { TagInputCore: TagInputCoreClass, DialogCore: DialogCoreClass } = ui;
-
 // 使用别名后的类作为值
-const TagInputCore = TagInputCoreClass;
-const DialogCore = DialogCoreClass;
+const TagInputCore = ui.TagInputCore;
+const DialogCore = ui.DialogCore;
 
 export function TagSelectInput(props: {
   options: { value: string; text: string }[];

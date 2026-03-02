@@ -99,10 +99,20 @@ export function Show(
     when._subscribe({
       onChange(value: boolean) {
         const condition = !!value;
-        if (condition === _prev_condition) return;
+        console.log("[]Show onChange", condition, "_prev_condition:", _prev_condition, "_currentNodes.length:", _currentNodes.length, "anchor.parentNode:", !!anchor.parentNode);
+
+        // 如果条件没有变化，直接返回
+        if (condition === _prev_condition) {
+          console.log("[]Show condition not changed, skip");
+          return;
+        }
+
         _prev_condition = condition;
 
+        // 先卸载当前内容
         unmount(true);
+
+        // 如果新条件为 true，挂载新内容
         const target = getTargetChildren(condition);
         if (target.length > 0 && anchor.parentNode) {
           mount(target, anchor.parentNode, anchor);

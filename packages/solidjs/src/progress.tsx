@@ -3,11 +3,9 @@
  */
 import { JSX, createSignal } from "solid-js";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { ProgressCore } = ui;
-
-const Progress = (props: { store: ProgressCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Progress = (props: { store: ui.ProgressCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;
 
   const [state, setState] = createSignal(store.state);

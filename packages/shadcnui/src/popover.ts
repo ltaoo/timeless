@@ -1,7 +1,6 @@
 import { PopoverCore } from "@timeless/ui";
 import { computed, ref, refobj } from "@timeless/reactive";
-import { View, ViewChildren, ViewProps } from "@timeless/headless";
-import { Show } from "@timeless/headless";
+import { View, Show, ViewChildren, ViewProps } from "@timeless/headless";
 import { PopoverPrimitive } from "@timeless/headless";
 
 const t = {

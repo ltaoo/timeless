@@ -1,10 +1,8 @@
 import { createSignal, JSX, Show } from "solid-js";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { DragZoneCore } = ui;
-
-export function DragZone(props: { store: DragZoneCore } & JSX.HTMLAttributes<HTMLDivElement>) {
+export function DragZone(props: { store: ui.DragZoneCore } & JSX.HTMLAttributes<HTMLDivElement>) {
   const { store } = props;
 
   const [state, setState] = createSignal(store.state);

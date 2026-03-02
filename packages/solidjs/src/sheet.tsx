@@ -3,18 +3,16 @@ import { JSX } from "solid-js/jsx-runtime";
 
 import { useViewModelStore } from "@/hooks";
 import { ViewComponentProps } from "@/store/types";
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 import * as DialogPrimitive from "@/packages/ui/dialog";
 import { Show } from "@/packages/ui/show";
-
-const { DialogCore } = ui;
 
 type SheetProps = {
   position?: "bottom" | "top" | "left" | "right";
   size?: "content" | "default" | "sm" | "lg" | "xl" | "full";
   ignore_safe_height?: boolean;
   plus_idx?: number;
-  store: DialogCore;
+  store: ui.DialogCore;
   app: ViewComponentProps["app"];
 } & JSX.HTMLAttributes<HTMLDivElement>;
 

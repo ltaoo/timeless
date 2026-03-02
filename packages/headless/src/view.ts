@@ -7,12 +7,17 @@ export interface ViewProps {
   style?: string | Ref<string>;
   class?: string | Ref<string> | ClassNameRef;
   dataset?: Record<string, string>;
+  "tab-index"?: number | Ref<number | undefined>;
   onMounted?(el: any): void;
   beforeUnmounted?(): void;
   onUnmounted?(): void;
   onClick?(e: any): void;
+  onPointerDown?: (e: any) => void;
   onFocus?(e: any): void;
   onBlur?(e: any): void;
+  onKeyDown?: (e: KeyboardEvent) => void;
+  onMouseEnter?: (e: MouseEvent) => void;
+  onMouseLeave?: (e: MouseEvent) => void;
   key?: any;
 }
 
@@ -24,10 +29,14 @@ export function View(props: ViewProps = {}, children?: any) {
     dataset = {},
     onMounted,
     onUnmounted,
+    beforeUnmounted,
     onClick,
     onFocus,
     onBlur,
-    beforeUnmounted,
+    onPointerDown,
+    onKeyDown,
+    onMouseEnter,
+    onMouseLeave,
     ...rest
   } = props;
   const $elm = document.createElement(type);
@@ -104,6 +113,11 @@ export function View(props: ViewProps = {}, children?: any) {
       }
     });
   }
+  if (onPointerDown) {
+    $elm.addEventListener("pointerdown", function (event: Event) {
+      if (onPointerDown) onPointerDown(event);
+    });
+  }
   if (onFocus) {
     $elm.addEventListener("focus", function (event: Event) {
       if (onFocus) onFocus(event);
@@ -112,6 +126,21 @@ export function View(props: ViewProps = {}, children?: any) {
   if (onBlur) {
     $elm.addEventListener("blur", function (event: Event) {
       if (onBlur) onBlur(event);
+    });
+  }
+  if (onKeyDown) {
+    $elm.addEventListener("keydown", function (event: KeyboardEvent) {
+      if (onKeyDown) onKeyDown(event);
+    });
+  }
+  if (onMouseEnter) {
+    $elm.addEventListener("mouseenter", function (event: MouseEvent) {
+      if (onMouseEnter) onMouseEnter(event);
+    });
+  }
+  if (onMouseLeave) {
+    $elm.addEventListener("mouseleave", function (event: MouseEvent) {
+      if (onMouseLeave) onMouseLeave(event);
     });
   }
 

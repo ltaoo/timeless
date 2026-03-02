@@ -4,16 +4,15 @@
 import { For, createSignal, JSX } from "solid-js";
 import { Portal as PortalPrimitive } from "solid-js/web";
 import { ChevronRight } from "lucide-solid";
+import { DropdownMenuCore, MenuItemCore } from "@timeless/ui";
 
 import { useViewModelStore } from "@/hooks";
 import * as DropdownMenuPrimitive from "@/packages/ui/dropdown-menu";
 import { Show } from "@/packages/ui/show";
 
-import { ui } from "@timeless/kit";
-
-const { DropdownMenuCore, MenuItemCore } = ui;
-
-export const DropdownMenu = (props: { store: DropdownMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+export const DropdownMenu = (
+  props: { store: DropdownMenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   // const [state, setState] = createSignal(store.state);
   const [state, vm] = useViewModelStore(props.store);
   // const [popper, ] = createSignal(store.state);
@@ -57,8 +56,7 @@ export const DropdownMenu = (props: { store: DropdownMenuCore } & JSX.HTMLAttrib
         >
           <div
             classList={{
-              "z-50 min-w-[4rem] w-36 overflow-hidden rounded-xl border-2 border-w-fg-3 border-slate-100 bg-w-bg-0 p-1 text-w-fg-0 shadow-md duration-200":
-                true,
+              "z-50 min-w-[4rem] w-36 overflow-hidden rounded-xl border-2 border-w-fg-3 border-slate-100 bg-w-bg-0 p-1 text-w-fg-0 shadow-md duration-200": true,
               "animate-in fade-in": state().enter,
               "animate-out fade-out": state().exit,
             }}
@@ -66,8 +64,8 @@ export const DropdownMenu = (props: { store: DropdownMenuCore } & JSX.HTMLAttrib
             <div
               class="__a"
               onAnimationStart={(event) => {
-                const floating = event.currentTarget.getBoundingClientRect();
-                vm.menu.popper.place2(floating);
+                // const floating = event.currentTarget.getBoundingClientRect();
+                vm.menu.popper.place();
               }}
             >
               <For each={state().items}>
@@ -81,8 +79,7 @@ export const DropdownMenu = (props: { store: DropdownMenuCore } & JSX.HTMLAttrib
                       fallback={
                         <DropdownMenuPrimitive.Item
                           classList={{
-                            "relative flex cursor-default select-none items-center rounded-xl py-1.5 px-2 outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700":
-                              true,
+                            "relative flex cursor-default select-none items-center rounded-xl py-1.5 px-2 outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700": true,
                             // "bg-w-bg-5": item.state.focused,
                           }}
                           store={item}
@@ -110,9 +107,13 @@ export const DropdownMenu = (props: { store: DropdownMenuCore } & JSX.HTMLAttrib
   );
 };
 
-const ItemWithSubMenu = (props: { store: MenuItemCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const ItemWithSubMenu = (
+  props: { store: MenuItemCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const [state, setState] = createSignal(props.store.state);
-  const [state2, setState2] = createSignal(props.store.menu ? props.store.menu.state : { items: [] });
+  const [state2, setState2] = createSignal(
+    props.store.menu ? props.store.menu.state : { items: [] },
+  );
 
   props.store.onStateChange((v) => {
     setState(v);
@@ -133,8 +134,7 @@ const ItemWithSubMenu = (props: { store: MenuItemCore } & JSX.HTMLAttributes<HTM
     <DropdownMenuPrimitive.Sub store={props.store.menu}>
       <DropdownMenuPrimitive.SubTrigger
         classList={{
-          "flex cursor-default select-none items-center rounded-sm py-1.5 px-2 font-medium outline-none focus:bg-slate-100 data-[state=open]:bg-slate-100 dark:focus:bg-slate-700 dark:data-[state=open]:bg-slate-700":
-            true,
+          "flex cursor-default select-none items-center rounded-sm py-1.5 px-2 font-medium outline-none focus:bg-slate-100 data-[state=open]:bg-slate-100 dark:focus:bg-slate-700 dark:data-[state=open]:bg-slate-700": true,
           "pl-8": !!icon(),
           "bg-slate-100": state().focused,
           [props.class ?? ""]: true,
@@ -152,10 +152,8 @@ const ItemWithSubMenu = (props: { store: MenuItemCore } & JSX.HTMLAttributes<HTM
       <DropdownMenuPrimitive.Portal store={props.store.menu}>
         <DropdownMenuPrimitive.SubContent
           classList={{
-            "z-50 min-w-[8rem] overflow-hidden rounded-md border-2 border-slate-100 bg-white p-1 text-slate-700 shadow-md dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400":
-              true,
-            "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 ":
-              true,
+            "z-50 min-w-[8rem] overflow-hidden rounded-md border-2 border-slate-100 bg-white p-1 text-slate-700 shadow-md dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400": true,
+            "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 ": true,
             [props.class ?? ""]: true,
           }}
           store={props.store.menu}
@@ -168,8 +166,7 @@ const ItemWithSubMenu = (props: { store: MenuItemCore } & JSX.HTMLAttributes<HTM
               return (
                 <DropdownMenuPrimitive.Item
                   classList={{
-                    "relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 font-medium outline-none focus:bg-slate-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700":
-                      true,
+                    "relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 font-medium outline-none focus:bg-slate-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700": true,
                   }}
                   store={item}
                 >

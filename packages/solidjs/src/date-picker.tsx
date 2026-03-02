@@ -5,11 +5,9 @@ import * as PopoverPrimitive from "@/packages/ui/popover";
 import { Calendar } from "./calendar";
 import { Button } from "./button";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { DatePickerCore } = ui;
-
-export function DatePicker(props: { store: DatePickerCore }) {
+export function DatePicker(props: { store: ui.DatePickerCore }) {
   const { store } = props;
 
   const [state, setState] = createSignal(store.state);

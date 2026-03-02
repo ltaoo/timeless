@@ -2,14 +2,12 @@
  * @file 菜单 组件
  */
 import { createSignal, onCleanup, onMount, JSX } from "solid-js";
-// import { Portal as PortalPrimitive } from "solid-js/web";
 
-import { MenuCore } from "@/domains/ui/menu";
-import { MenuItemCore } from "@/domains/ui/menu/item";
+import { MenuCore, MenuItemCore } from "@timeless/ui";
 
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
-import { Portal as PortalPrimitive } from "./portal";
+import { Portal as NativePortal } from "./portal";
 
 const Root = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;
@@ -22,7 +20,9 @@ const Root = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
 };
 
 /** 锚点 */
-const Anchor = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Anchor = (
+  props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
 
   return (
@@ -32,15 +32,19 @@ const Anchor = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) =>
   );
 };
 
-const Portal = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Portal = (
+  props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   return (
     <Presence store={props.store.presence}>
-      <PortalPrimitive>{props.children}</PortalPrimitive>
+      <NativePortal>{props.children}</NativePortal>
     </Presence>
   );
 };
 
-const Content = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const Content = (
+  props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
 
   return (
@@ -52,19 +56,31 @@ const Content = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) =
   );
 };
 // 这里多一个，是因为还存在 MenuContentModal 场景，这两个和 MenuSubContent 都复用 MenuContentImpl
-const ContentNonModal = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const ContentNonModal = (
+  props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   // const { store } = props;
 
   return (
-    <ContentImpl store={props.store} class={props.class} classList={props.classList}>
+    <ContentImpl
+      store={props.store}
+      class={props.class}
+      classList={props.classList}
+    >
       {props.children}
     </ContentImpl>
   );
 };
 
-const ContentImpl = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const ContentImpl = (
+  props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   return (
-    <PopperPrimitive.Content store={props.store.popper} class={props.class} classList={props.classList}>
+    <PopperPrimitive.Content
+      store={props.store.popper}
+      class={props.class}
+      classList={props.classList}
+    >
       {props.children}
     </PopperPrimitive.Content>
   );
@@ -78,14 +94,25 @@ const Label = (props: {} & JSX.HTMLAttributes<HTMLElement>) => {
   return <div class={props.class}>{props.children}</div>;
 };
 
-const Item = (props: { store: MenuItemCore; disabled?: boolean } & JSX.HTMLAttributes<HTMLElement>) => {
+const Item = (
+  props: {
+    store: MenuItemCore;
+    disabled?: boolean;
+  } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   return (
-    <ItemImpl class={props.class} classList={props.classList} store={props.store}>
+    <ItemImpl
+      class={props.class}
+      classList={props.classList}
+      store={props.store}
+    >
       {props.children}
     </ItemImpl>
   );
 };
-const ItemImpl = (props: { store: MenuItemCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
+const ItemImpl = (
+  props: { store: MenuItemCore } & JSX.HTMLAttributes<HTMLDivElement>,
+) => {
   // const { store: item } = props;
   let $item: HTMLDivElement;
 
@@ -165,21 +192,33 @@ const Separator = (props: {} & JSX.HTMLAttributes<HTMLElement>) => {
 const Arrow = (
   props: {
     store: MenuCore;
-  } & JSX.HTMLAttributes<HTMLElement>
+  } & JSX.HTMLAttributes<HTMLElement>,
 ) => {
   const { store } = props;
   // const store = useContext(MenuContext);
 
-  return <PopperPrimitive.Arrow class={props.class} store={store.popper}></PopperPrimitive.Arrow>;
+  return (
+    <PopperPrimitive.Arrow
+      class={props.class}
+      store={store.popper}
+    ></PopperPrimitive.Arrow>
+  );
 };
 
 const Sub = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;
 
-  return <PopperPrimitive.Root store={store.popper}>{props.children}</PopperPrimitive.Root>;
+  return (
+    <PopperPrimitive.Root store={store.popper}>
+      {props.children}
+    </PopperPrimitive.Root>
+  );
 };
 const SubTrigger = (
-  props: { store: MenuItemCore; onMounted?: (el: HTMLDivElement) => void } & JSX.HTMLAttributes<HTMLDivElement>
+  props: {
+    store: MenuItemCore;
+    onMounted?: (el: HTMLDivElement) => void;
+  } & JSX.HTMLAttributes<HTMLDivElement>,
 ) => {
   const { store: item } = props;
 
@@ -222,7 +261,9 @@ const SubTrigger = (
 };
 
 // const MenuSubContentContext = createContext<MenuCore>();
-const SubContent = (props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>) => {
+const SubContent = (
+  props: { store: MenuCore } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
   // const store = useContext(MenuSubContext);
   // onCleanup(() => {
@@ -247,7 +288,11 @@ function isIndeterminate(checked?: CheckedState): checked is "indeterminate" {
 }
 
 function getCheckedState(checked: CheckedState) {
-  return isIndeterminate(checked) ? "indeterminate" : checked ? "checked" : "unchecked";
+  return isIndeterminate(checked)
+    ? "indeterminate"
+    : checked
+      ? "checked"
+      : "unchecked";
 }
 
 function focusFirst(candidates: HTMLElement[]) {
@@ -286,13 +331,17 @@ function wrapArray<T>(array: T[], startIndex: number) {
  * don't want focus to move if the current match still matches.
  */
 function getNextMatch(values: string[], search: string, currentMatch?: string) {
-  const isRepeated = search.length > 1 && Array.from(search).every((char) => char === search[0]);
+  const isRepeated =
+    search.length > 1 && Array.from(search).every((char) => char === search[0]);
   const normalizedSearch = isRepeated ? search[0] : search;
   const currentMatchIndex = currentMatch ? values.indexOf(currentMatch) : -1;
   let wrappedValues = wrapArray(values, Math.max(currentMatchIndex, 0));
   const excludeCurrentMatch = normalizedSearch.length === 1;
-  if (excludeCurrentMatch) wrappedValues = wrappedValues.filter((v) => v !== currentMatch);
-  const nextMatch = wrappedValues.find((value) => value.toLowerCase().startsWith(normalizedSearch.toLowerCase()));
+  if (excludeCurrentMatch)
+    wrappedValues = wrappedValues.filter((v) => v !== currentMatch);
+  const nextMatch = wrappedValues.find((value) =>
+    value.toLowerCase().startsWith(normalizedSearch.toLowerCase()),
+  );
   return nextMatch !== currentMatch ? nextMatch : undefined;
 }
 
@@ -320,4 +369,17 @@ function isPointInPolygon(point: Point, polygon: Polygon) {
   return inside;
 }
 
-export { Root, Anchor, Portal, Content, Group, Label, Item, Separator, Arrow, Sub, SubTrigger, SubContent };
+export {
+  Root,
+  Anchor,
+  Portal,
+  Content,
+  Group,
+  Label,
+  Item,
+  Separator,
+  Arrow,
+  Sub,
+  SubTrigger,
+  SubContent,
+};

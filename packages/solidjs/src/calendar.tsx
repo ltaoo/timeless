@@ -1,11 +1,9 @@
 import { createSignal, For, JSX } from "solid-js";
 import { ChevronLeft, ChevronRight } from "lucide-solid";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { CalendarCore } = ui;
-
-export function Calendar(props: { store: CalendarCore } & JSX.HTMLAttributes<HTMLDivElement>) {
+export function Calendar(props: { store: ui.CalendarCore } & JSX.HTMLAttributes<HTMLDivElement>) {
   const { store } = props;
   const [state, setState] = createSignal(store.state);
 

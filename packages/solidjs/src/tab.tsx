@@ -1,10 +1,8 @@
 import { For, Show, createSignal, onMount } from "solid-js";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { TabHeaderCore } = ui;
-
-export const Tab = (props: { store: TabHeaderCore<any> }) => {
+export const Tab = (props: { store: ui.TabHeaderCore<any> }) => {
   const { store } = props;
 
   const [state, setState] = createSignal(store.state);

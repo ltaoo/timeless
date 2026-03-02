@@ -1,14 +1,12 @@
 import { createSignal } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 import { ShortcutModel } from "@timeless/kit/src/shortcut/shortcut";
-
-const { InputCore } = ui;
 
 export interface TextareaProps extends HTMLTextAreaElement {}
 
-const Textarea = (props: { store: InputCore<string> } & JSX.HTMLAttributes<HTMLTextAreaElement>) => {
+const Textarea = (props: { store: ui.InputCore<string> } & JSX.HTMLAttributes<HTMLTextAreaElement>) => {
   const { store, class: className, ...restProps } = props;
 
   const [state, setState] = createSignal(store.state);

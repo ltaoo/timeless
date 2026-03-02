@@ -8,12 +8,10 @@ import { X } from "lucide-solid";
 import { useViewModelStore } from "@/hooks";
 import * as PopoverPrimitive from "@/packages/ui/popover";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 import type { Align, Side } from "@timeless/kit/src/ui/popper";
 
-const { PopoverCore } = ui;
-
-export function Popover(props: { store: PopoverCore } & JSX.HTMLAttributes<HTMLElement>) {
+export function Popover(props: { store: ui.PopoverCore } & JSX.HTMLAttributes<HTMLElement>) {
   const [state, vm] = useViewModelStore(props.store);
 
   return (
@@ -97,7 +95,7 @@ export const PurePopover = (
 ) => {
   const { children, side = "bottom", align = "end" } = props;
 
-  const store = new PopoverCore({
+  const store = new ui.PopoverCore({
     side,
     align,
     strategy: "absolute",

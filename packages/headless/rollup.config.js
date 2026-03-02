@@ -70,7 +70,7 @@ const configs = [
       commonjs({
         sourceMap: false,
       }),
-      minify,
+      // minify,
     ],
   },
   // Main CJS and ESM Build

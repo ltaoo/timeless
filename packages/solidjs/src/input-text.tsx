@@ -2,11 +2,9 @@ import { JSX } from "solid-js/jsx-runtime";
 
 import { useViewModelStore } from "@/hooks";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { InputCore } = ui;
-
-export function InputTextView(props: { store: InputCore<any> } & JSX.HTMLAttributes<HTMLDivElement>) {
+export function InputTextView(props: { store: ui.InputCore<any> } & JSX.HTMLAttributes<HTMLDivElement>) {
   const [state, vm] = useViewModelStore(props.store);
 
   return <div>{state().value}</div>;

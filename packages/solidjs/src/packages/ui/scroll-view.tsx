@@ -1,11 +1,9 @@
 import { onMount, JSX } from "solid-js";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 // import { connect } from "@/domains/ui/scroll-view/connect.web";
 
-const { ScrollViewCore } = ui;
-
-export const Root = (props: { store: ScrollViewCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
+export const Root = (props: { store: ui.ScrollViewCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
   // const { store, children, ...rest } = props;
 
   let $elm = undefined as HTMLDivElement | undefined;
@@ -34,7 +32,7 @@ export const Root = (props: { store: ScrollViewCore } & JSX.HTMLAttributes<HTMLD
 /**
  * 下拉刷新指示器
  */
-export const Indicator = (props: { store: ScrollViewCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
+export const Indicator = (props: { store: ui.ScrollViewCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
   // const { store } = props;
 
   let $elm = undefined as HTMLDivElement | undefined;
@@ -60,7 +58,7 @@ export const Indicator = (props: { store: ScrollViewCore } & JSX.HTMLAttributes<
     </div>
   );
 };
-export const Progress = (props: { store: ScrollViewCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
+export const Progress = (props: { store: ui.ScrollViewCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
   // const { store } = props;
 
   let $node = undefined as HTMLDivElement | undefined;
@@ -87,7 +85,7 @@ export const Progress = (props: { store: ScrollViewCore } & JSX.HTMLAttributes<H
   );
 };
 
-export const Loading = (props: { store: ScrollViewCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
+export const Loading = (props: { store: ui.ScrollViewCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
   // const { store } = props;
 
   let $node = undefined as HTMLDivElement | undefined;

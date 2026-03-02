@@ -3,7 +3,6 @@ import { PopoverCore } from "@timeless/ui";
 
 import { tp, merge } from "./theme";
 import { View, ViewChildren, ViewProps } from "./view";
-import { Show } from "./show";
 import { Portal as NativePortal } from "./portal";
 import { Popper } from "./popper";
 import { Presence } from "./presence";
@@ -17,7 +16,7 @@ export function Content(
   children?: ViewChildren,
 ) {
   const layer = props.store.layer;
-  const state = refobj(props.store.state);
+  // const state = refobj(props.store.state);
 
   let handlePointerDown: any;
 
@@ -76,7 +75,7 @@ export function Trigger(
           },
           { force: true },
         );
-        console.log("[]has layer?", !!layer);
+        // console.log("[]has layer?", !!layer);
         if (layer) {
           $e.addEventListener("pointerdown", () => {
             layer.pointerDown();
@@ -151,34 +150,4 @@ export function Close(
     },
     children,
   );
-}
-
-export function Popover(
-  props: ViewProps & {
-    store: PopoverCore;
-    content?: ViewChildren;
-    theme?: any;
-  },
-  children?: ViewChildren,
-) {
-  const { store, content, theme: t, class: cls, style: st, ...rest } = props;
-  const state = refobj(store.state);
-
-  return Root(rest, [
-    Trigger({ store }, children),
-    Portal({ store }, [
-      Content(
-        {
-          store,
-          class: computed(state, (s) =>
-            merge(tp(t?.content, { enter: s.enter, exit: s.exit }), cls).class || ""
-          ),
-          style: computed(state, (s) =>
-            merge(tp(t?.content, { enter: s.enter, exit: s.exit }), st).style || ""
-          ),
-        },
-        content,
-      ),
-    ]),
-  ]);
 }

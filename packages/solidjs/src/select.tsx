@@ -9,13 +9,11 @@ import { Check, ChevronDown } from "lucide-solid";
 import { useViewModelStore } from "@/hooks";
 import * as SelectPrimitive from "@/packages/ui/select";
 import * as PopperPrimitive from "@/packages/ui/popper";
-import { ui } from "@timeless/kit";
-
-const { SelectCore } = ui;
+import * as ui from '@timeless/ui';
 
 import { Presence } from "./presence";
 
-export const Select = (props: { store: SelectCore<any>; position?: "popper" } & JSX.HTMLAttributes<HTMLElement>) => {
+export const Select = (props: { store: ui.SelectCore<any>; position?: "popper" } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store, position = "popper" } = props;
 
   const [state, setState] = createSignal(store.state);

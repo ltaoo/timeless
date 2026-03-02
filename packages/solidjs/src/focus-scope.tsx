@@ -1,10 +1,8 @@
 import { JSX, onCleanup } from "solid-js";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { FocusScopeCore } = ui;
-
-const FocusScopeRoot = (props: { store: FocusScopeCore; children: JSX.Element }) => {
+const FocusScopeRoot = (props: { store: ui.FocusScopeCore; children: JSX.Element }) => {
   const { store } = props;
 
   let $node: HTMLDivElement | undefined;

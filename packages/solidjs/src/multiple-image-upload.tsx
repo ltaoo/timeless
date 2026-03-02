@@ -4,14 +4,12 @@ import { Plus, XCircle } from "lucide-solid";
 import { useViewModelStore } from "@/hooks";
 
 import { MultipleImageUploadModel } from "@/biz/multiple_image_upload";
-import { ui } from "@timeless/kit";
-
-const { ImageUploadCore } = ui;
+import * as ui from '@timeless/ui';
 
 import { LazyImage } from "./image";
 import { AspectRatio } from "./aspect-ratio";
 
-function ImageUploadView(props: { store: ImageUploadCore } & JSX.HTMLAttributes<HTMLDivElement>) {
+function ImageUploadView(props: { store: ui.ImageUploadCore } & JSX.HTMLAttributes<HTMLDivElement>) {
   const [state, vm] = useViewModelStore(props.store);
 
   return (

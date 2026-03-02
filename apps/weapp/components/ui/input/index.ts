@@ -1,4 +1,4 @@
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 import { provide_input } from "@timeless/provider-weapp";
 
 Component({

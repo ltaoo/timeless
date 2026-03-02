@@ -1,10 +1,8 @@
 import { createSignal, onMount } from "solid-js";
 
-import { ui } from "@timeless/kit";
+import * as ui from '@timeless/ui';
 
-const { VideoPlayerCore } = ui;
-
-export function Video(props: { store: VideoPlayerCore }) {
+export function Video(props: { store: ui.VideoPlayerCore }) {
   const { store } = props;
 
   let $video: undefined | HTMLVideoElement;
