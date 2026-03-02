@@ -21,7 +21,7 @@ const minify = terser({
   },
 });
 
-export default {
+const config = {
   input: path.join(__dirname, "src/index.ts"),
   output: {
     file: path.join(__dirname, "dist/timeless.weui.umd.min.js"),
@@ -43,4 +43,9 @@ export default {
     }),
     minify,
   ],
+};
+
+export default (args) => {
+  if (args.whole) delete args.whole;
+  return config;
 };

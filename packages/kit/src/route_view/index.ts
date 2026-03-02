@@ -2,7 +2,7 @@
  * @file 根据路由判断是否可见的视图块
  */
 import { base, BaseDomain, Handler, BizError } from "@timeless/base";
-import { PresenceCore } from "@timeless/ui/presence";
+import { PresenceCore } from "@timeless/ui";
 import { qs_parse, qs_stringify } from "@timeless/utils";
 
 import { NavigatorCore } from "@/navigator/index";

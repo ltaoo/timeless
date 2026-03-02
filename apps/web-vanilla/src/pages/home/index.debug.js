@@ -32,8 +32,9 @@ export default function OverlayView() {
             Button(
               {
                 variant: "outline",
+                store: new Timeless.ui.ButtonCore({}),
               },
-              [Txt("Open Popover")],
+              ["Open Popover"],
             ),
           ],
         ),
@@ -68,8 +69,9 @@ export default function OverlayView() {
             Button(
               {
                 variant: "outline",
+                store: new Timeless.ui.ButtonCore({}),
               },
-              [Txt("Open Popover")],
+              ["Open Popover"],
             ),
           ],
         ),

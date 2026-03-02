@@ -1,6 +1,6 @@
 import { computed, ref, refobj, uncomputed } from "@timeless/reactive";
 import { ContextMenuCore, MenuCore } from "@timeless/ui";
-import { ChevronRightOutlined } from "@timeless/icons/chevron-right";
+import { ChevronRightOutlined } from "@timeless/icons";
 
 import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
 import { DropdownMenu } from "./dropdown-menu";

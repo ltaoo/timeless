@@ -11,20 +11,24 @@ export default function DataDisplayView() {
         Button(
           {
             size: "sm",
-            onClick() {
-              progressVal.as(Math.max(0, progressVal.value - 10));
-            },
+            store: new Timeless.ui.ButtonCore({
+              onClick() {
+                progressVal.as(Math.max(0, progressVal.value - 10));
+              },
+            }),
           },
-          [Txt("-10")],
+          ["-10"],
         ),
         Button(
           {
             size: "sm",
-            onClick() {
-              progressVal.as(Math.min(100, progressVal.value + 10));
-            },
+            store: new Timeless.ui.ButtonCore({
+              onClick() {
+                progressVal.as(Math.min(100, progressVal.value + 10));
+              },
+            }),
           },
-          [Txt("+10")],
+          ["+10"],
         ),
       ]),
     ]),
@@ -43,20 +47,24 @@ export default function DataDisplayView() {
         Button(
           {
             size: "sm",
-            onClick() {
-              stepIdx.as(Math.max(0, stepIdx.value - 1));
-            },
+            store: new Timeless.ui.ButtonCore({
+              onClick() {
+                stepIdx.as(Math.max(0, stepIdx.value - 1));
+              },
+            }),
           },
-          [Txt("Prev")],
+          ["Prev"],
         ),
         Button(
           {
             size: "sm",
-            onClick() {
-              stepIdx.as(Math.min(3, stepIdx.value + 1));
-            },
+            store: new Timeless.ui.ButtonCore({
+              onClick() {
+                stepIdx.as(Math.min(3, stepIdx.value + 1));
+              },
+            }),
           },
-          [Txt("Next")],
+          ["Next"],
         ),
       ]),
     ]),

@@ -5,7 +5,7 @@
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "node scripts/update-exports.js && rollup -c"
+    "build": "node scripts/update-exports.js && rollup -c rollup.config.mjs"
   },
   "type": "module",
   "files": [

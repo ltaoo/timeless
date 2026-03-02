@@ -14,7 +14,7 @@ const pkg = require("./package.json");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default [
+const config = [
   {
     input: "src/index.ts",
     output: [
@@ -62,3 +62,8 @@ export default [
     ],
   },
 ];
+
+export default (args) => {
+  if (args.whole) delete args.whole;
+  return config;
+};

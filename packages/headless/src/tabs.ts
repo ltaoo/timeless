@@ -1,5 +1,5 @@
 import { ref, refarr, computed } from "@timeless/reactive";
-import { TabHeaderCore } from "@timeless/ui/tab-header";
+import { TabHeaderCore } from "@timeless/ui";
 
 import { tp, merge } from "./theme";
 import { View, ViewProps } from "./view";

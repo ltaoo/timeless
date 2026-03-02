@@ -1,7 +1,7 @@
 import { Subscriber, Ref, isRef } from "./types";
-import { get, has } from "./store";
+import { get, has } from "./registry";
 
-export function refobj<T extends Record<string, any>>(obj: T | null) {
+export function refObject<T extends Record<string, any>>(obj: T | null) {
   let _v = obj;
   const deps: Subscriber[] = [];
   function notify(action: { type: string }) {
@@ -47,10 +47,10 @@ export function refobj<T extends Record<string, any>>(obj: T | null) {
         if (has(vv)) {
           return get(vv);
         }
-        _inner[key] = refobj(vv);
+        _inner[key] = refObject(vv);
         return _inner[key] ?? null;
       }
-      console.warn("refobj get", key);
+      console.warn("reactiveObject get", key);
     },
     delete(key: keyof T) {
       if (!_v) {
@@ -61,7 +61,11 @@ export function refobj<T extends Record<string, any>>(obj: T | null) {
     },
     as(nextObj: T | ((cur: T | null) => T)) {
       if (typeof nextObj === "function") {
-        _v = nextObj(_v);
+        if (_v) {
+          Object.assign(_v, nextObj(_v));
+        } else {
+          _v = nextObj(_v);
+        }
       } else {
         _v = nextObj;
       }

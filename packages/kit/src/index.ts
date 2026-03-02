@@ -3,6 +3,7 @@ import { build, PathnameKey, RouteViewCore } from "./route_view";
 export { Result, BizError, base, BaseDomain } from "@timeless/base";
 
 export * from "./app";
+export * from "./app/types";
 export * from "./clipboard";
 export * from "./storage";
 export * from "./system";

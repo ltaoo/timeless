@@ -14,7 +14,7 @@
     }
   },
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c rollup.config.mjs"
   },
   "peerDependencies": {
     "solid-js": "^1.8.0"

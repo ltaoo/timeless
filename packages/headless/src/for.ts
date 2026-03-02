@@ -86,7 +86,11 @@ export function For<T>(
         const elm = _$children[index + i];
         // console.log(i, index + i, elm, _$children);
         if (elm && elm.parentNode === $parent) {
-          $parent.removeChild(elm);
+          try {
+            $parent.removeChild(elm);
+          } catch (e) {
+            // ignore
+          }
         }
         const item = _values[index + i];
         if (_existing_map.has(item)) {
@@ -366,19 +370,18 @@ export function For<T>(
       }
 
       // Remove DOM nodes
-      const $parent = anchor.parentNode;
-      if ($parent) {
-        for (const elm of _$children) {
-          if (elm && elm.parentNode === $parent) {
-            $parent.removeChild(elm);
-          }
-        }
-        // Remove anchor? Usually onUnmounted means the whole component is gone.
-        // But if it's just unmounted from parent but kept alive?
-        // Typically we don't need to remove anchor if parent removes the whole block.
-        // But if we want to be clean:
-        // if (anchor.parentNode === $parent) $parent.removeChild(anchor);
-      }
+      // const $parent = anchor.parentNode;
+      // if ($parent) {
+      //   for (const elm of _$children) {
+      //     if (elm && elm.parentNode === $parent) {
+      //       try {
+      //         $parent.removeChild(elm);
+      //       } catch (e) {
+      //         // ignore
+      //       }
+      //     }
+      //   }
+      // }
 
       _mounted = false;
       _values = [];

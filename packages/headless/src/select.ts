@@ -1,5 +1,5 @@
 import { ref, computed } from "@timeless/reactive";
-import { ChevronRightOutlined } from "@timeless/icons/chevron-right";
+import { ChevronRightOutlined } from "@timeless/icons";
 
 import { tp, merge } from "./theme.js";
 import { View, ViewProps } from "./view.js";

@@ -1,23 +1,22 @@
-import { isRef, Ref } from "@timeless/reactive";
+import { isRef } from "@timeless/reactive";
 
 import { ViewChildren, isElement } from "./view";
 
-export function Show(
+export function Switch(
   props: {
-    when: Ref<boolean> | boolean;
     fallback?: ViewChildren;
     onMounted?: ($fg: any) => void;
     beforeUnmounted?: () => void;
     onUnmounted?: () => void;
   },
-  children?: ViewChildren,
+  children?: any[],
 ) {
-  const { when, fallback, onMounted, beforeUnmounted, onUnmounted } = props;
+  const { fallback, onMounted, beforeUnmounted, onUnmounted } = props;
   const anchor = document.createTextNode("");
 
   let _currentNodes: Node[] = [];
   let _currentChildren: any[] = [];
-  let _prev_condition: boolean | null = null;
+  let _prev_match: any = undefined;
 
   // Normalize children helper
   const normalize = (c: any) => {
@@ -25,11 +24,21 @@ export function Show(
     return [c];
   };
 
-  const _children = normalize(children);
   const _fallback = normalize(fallback);
 
-  const getTargetChildren = (condition: boolean) => {
-    return condition ? _children : _fallback;
+  const getActiveMatch = () => {
+    if (!children) return null;
+    for (const child of children) {
+      if (child && child.t === "match") {
+        const condition = isRef(child.when) ? !!child.when.value : !!child.when;
+        if (condition) return child;
+      }
+    }
+    return null;
+  };
+
+  const getTargetChildren = (match: any) => {
+    return match ? normalize(match.children) : _fallback;
   };
 
   const unmount = (removeDom = false) => {
@@ -95,30 +104,36 @@ export function Show(
     return fragment;
   };
 
-  if (isRef(when)) {
-    when._subscribe({
-      onChange(value: boolean) {
-        const condition = !!value;
-        if (condition === _prev_condition) return;
-        _prev_condition = condition;
+  const update = () => {
+    const activeMatch = getActiveMatch();
+    if (activeMatch === _prev_match) return;
+    _prev_match = activeMatch;
 
-        unmount(true);
-        const target = getTargetChildren(condition);
-        if (target.length > 0 && anchor.parentNode) {
-          mount(target, anchor.parentNode, anchor);
-        }
-      },
-    });
+    unmount(true);
+    const target = getTargetChildren(activeMatch);
+    if (target.length > 0 && anchor.parentNode) {
+      mount(target, anchor.parentNode, anchor);
+    }
+  };
+
+  if (children) {
+    for (const child of children) {
+      if (child && child.t === "match" && isRef(child.when)) {
+        child.when._subscribe({
+          onChange: update,
+        });
+      }
+    }
   }
 
   return {
-    t: "show",
+    t: "switch",
     $elm: anchor as any,
     render() {
-      const condition = isRef(when) ? !!when.value : !!when;
-      _prev_condition = condition;
+      const activeMatch = getActiveMatch();
+      _prev_match = activeMatch;
 
-      const target = getTargetChildren(condition);
+      const target = getTargetChildren(activeMatch);
       const fragment = mount(target);
 
       // Append anchor to the result fragment so it gets inserted into DOM

@@ -100,47 +100,56 @@ const configs = [
   },
 ];
 
-// Individual Icon Builds
-icons.forEach((name) => {
-  configs.push({
-    input: `src/${name}.ts`,
-    output: [
-      {
-        file: `dist/${name}/index.js`,
-        format: "cjs",
-        sourcemap: true,
-      },
-      {
-        file: `dist/${name}/index.esm.js`,
-        format: "esm",
-        sourcemap: true,
-      },
-    ],
-    plugins: [
-      resolve(),
-      commonjs(),
-      typescript({
-        tsconfig: "./tsconfig.json",
-        declaration: false,
-        outDir: null,
-        compilerOptions: {
-          declaration: false,
-          declarationMap: false,
-          outDir: null,
-        },
-      }),
-    ],
-    external: [
-      ...Object.keys(pkg.dependencies || {}),
-      ...Object.keys(pkg.peerDependencies || {}),
-    ],
-  });
+export default (args) => {
+  // Clear the whole argument to prevent Rollup from complaining about unknown options
+  if (args.whole) {
+    delete args.whole;
+    const whole = true;
+    
+    // Individual Icon Builds
+    if (whole) {
+      icons.forEach((name) => {
+        configs.push({
+          input: `src/${name}.ts`,
+          output: [
+            {
+              file: `dist/${name}/index.js`,
+              format: "cjs",
+              sourcemap: true,
+            },
+            {
+              file: `dist/${name}/index.esm.js`,
+              format: "esm",
+              sourcemap: true,
+            },
+          ],
+          plugins: [
+            resolve(),
+            commonjs(),
+            typescript({
+              tsconfig: "./tsconfig.json",
+              declaration: false,
+              outDir: null,
+              compilerOptions: {
+                declaration: false,
+                declarationMap: false,
+                outDir: null,
+              },
+            }),
+          ],
+          external: [
+            ...Object.keys(pkg.dependencies || {}),
+            ...Object.keys(pkg.peerDependencies || {}),
+          ],
+        });
 
-  configs.push({
-    input: `src/${name}.ts`,
-    output: [{ file: `dist/${name}/index.d.ts`, format: "es" }],
-    plugins: [dts()],
-  });
-});
-
-export default configs;
+        configs.push({
+          input: `src/${name}.ts`,
+          output: [{ file: `dist/${name}/index.d.ts`, format: "es" }],
+          plugins: [dts()],
+        });
+      });
+    }
+  }
+  return configs;
+};

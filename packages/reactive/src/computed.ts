@@ -1,7 +1,7 @@
-import { get, set } from "./store";
+import { get, set } from "./registry";
 import { ref } from "./ref";
-import { refarr } from "./refarr";
-import { refobj } from "./refobj";
+import { refArray } from "./reactive-array";
+import { refObject } from "./reactive-object";
 import { Subscriber, Ref, isRef } from "./types";
 
 export function computed<T = any>(
@@ -41,7 +41,7 @@ export function computed<T = any>(
   //     return _v;
   //   },
   // };
-  const computedRef: Ref<any> = (() => {
+  const _computed_ref: Ref<any> = (() => {
     const existing = get(deps);
     if (existing) {
       return existing;
@@ -51,10 +51,10 @@ export function computed<T = any>(
         return deps;
       }
       if (typeof deps === "object" && deps !== null) {
-        return refobj(deps);
+        return refObject(deps);
       }
       if (Array.isArray(deps)) {
-        return refarr(deps);
+        return refArray(deps);
       }
       return ref(deps);
     })();
@@ -62,17 +62,10 @@ export function computed<T = any>(
     return r;
   })();
 
-  computedRef._subscribe({
+  _computed_ref._subscribe({
     onChange() {
       // console.log("computed ref is changed");
-      _local_value = fn(
-        (() => {
-          if (isRef(deps)) {
-            return deps.value;
-          }
-          return deps;
-        })(),
-      );
+      _local_value = fn(_computed_ref.value);
       notify({ type: "refresh" });
     },
   });
@@ -82,7 +75,7 @@ export function computed<T = any>(
       _deps.push(ctx);
     },
     _destroy() {
-      computedRef._destroy();
+      _computed_ref._destroy();
       _deps.length = 0;
     },
     get value() {

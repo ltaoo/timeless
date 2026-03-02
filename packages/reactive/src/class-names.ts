@@ -1,6 +1,6 @@
 import { Ref, ClassNameRef, Subscriber, isRef, isClassName } from "./types";
 
-export function cn(
+export function classNames(
   items: (string | Ref<string> | ClassNameRef | undefined)[],
 ): ClassNameRef {
   const sources: (string | Ref<string> | ClassNameRef | undefined)[] = [];

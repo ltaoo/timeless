@@ -1,5 +1,5 @@
 import { ref, computed } from "@timeless/reactive";
-import { ToggleCore } from "@timeless/ui/toggle";
+import { ToggleCore } from "@timeless/ui";
 
 import { tp, merge } from "./theme.js";
 import { View, ViewProps } from "./view.js";

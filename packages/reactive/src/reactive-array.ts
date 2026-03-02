@@ -1,8 +1,8 @@
-import { set, has, get } from "./store";
-import { refobj } from "./refobj";
+import { set, has, get } from "./registry";
+import { refObject } from "./reactive-object";
 import { Subscriber, isClassName, isRef } from "./types";
 
-export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
+export function refArray<T>(items: T[], opt: Partial<{ key: any }> = {}) {
   let _local_value = items;
   const deps: Subscriber[] = [];
   function notify(action: {
@@ -39,7 +39,23 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
       })();
     }
   }
-  const _inner = [];
+  const _inner: any[] = [];
+  const getProxy = (vv: any, idx?: number) => {
+    if (isRef(vv)) {
+      return vv;
+    }
+    if (typeof vv === "object" && vv !== null) {
+      if (has(vv)) {
+        return get(vv);
+      }
+      const proxy = refObject(vv);
+      if (typeof idx === "number") {
+        _inner[idx] = proxy;
+      }
+      return proxy;
+    }
+    return vv;
+  };
   const r = {
     __is_ref: true as const,
     _subscribe(ctx: Subscriber) {
@@ -57,15 +73,7 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
     },
     get(idx: number) {
       const vv = _local_value[idx];
-      if (isRef(vv)) {
-        return vv;
-      }
-      if (typeof vv === "object" && vv !== null) {
-        if (has(vv)) {
-          return get(vv);
-        }
-        _inner[idx] = refobj(vv);
-      }
+      return getProxy(vv, idx);
     },
     set(idx: number, item: any) {
       Array.prototype.splice.call(_local_value, idx, 1, item);
@@ -79,7 +87,7 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
         ...items,
       );
       notify({ type: "refresh" });
-      return res;
+      return res.map((item: any) => getProxy(item));
     },
     insert(idx: number, ...items: any[]) {
       Array.prototype.splice.call(_local_value, idx, 0, ...items);
@@ -116,13 +124,13 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
       const index = _local_value.length - 1;
       const item = Array.prototype.pop.call(_local_value);
       notify({ type: "delete", index, deleteCount: 1 });
-      return item;
+      return getProxy(item);
     },
     shift() {
       if (_local_value.length === 0) return undefined;
       const item = Array.prototype.shift.call(_local_value);
       notify({ type: "delete", index: 0, deleteCount: 1 });
-      return item;
+      return getProxy(item);
     },
     delete(idx: number) {
       Array.prototype.splice.call(_local_value, idx, 1);
@@ -145,7 +153,7 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
       notify({ type: "refresh" });
     },
     filter(predicate: (item: T, index: number, array: T[]) => boolean) {
-      return _local_value.filter(predicate);
+      return _local_value.filter(predicate).map((item: any) => getProxy(item));
     },
     includes(item: T) {
       return _local_value.includes(item);
@@ -180,7 +188,7 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
       return _local_value.join(separator);
     },
     slice(start?: number, end?: number) {
-      return _local_value.slice(start, end);
+      return _local_value.slice(start, end).map((item: any) => getProxy(item));
     },
     indexOf(searchElement: T, fromIndex?: number) {
       return _local_value.indexOf(searchElement, fromIndex);
@@ -222,7 +230,12 @@ export function refarr<T>(items: T[], opt: Partial<{ key: any }> = {}) {
       predicate: (value: T, index: number, obj: T[]) => unknown,
       thisArg?: any,
     ) {
-      return _local_value.find(predicate, thisArg);
+      const idx = _local_value.findIndex(predicate, thisArg);
+      if (idx === -1) {
+        return null;
+      }
+      const vv = _local_value[idx];
+      return getProxy(vv, idx);
     },
     findIndex(
       predicate: (value: T, index: number, obj: T[]) => unknown,

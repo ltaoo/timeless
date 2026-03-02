@@ -11,9 +11,11 @@ export default function FeedbackView() {
       Item("Default", [
         Button(
           {
-            onClick() {
-              dialog$.show();
-            },
+            store: new Timeless.ui.ButtonCore({
+              onClick() {
+                dialog$.show();
+              },
+            }),
           },
           [Txt("Open Dialog")],
         ),
@@ -40,9 +42,11 @@ export default function FeedbackView() {
             Button(
               {
                 size: "sm",
-                onClick() {
-                  sheetR$.show();
-                },
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    sheetR$.show();
+                  },
+                }),
               },
               [Txt("Right")],
             ),
@@ -50,9 +54,11 @@ export default function FeedbackView() {
               {
                 size: "sm",
                 variant: "outline",
-                onClick() {
-                  sheetL$.show();
-                },
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    sheetL$.show();
+                  },
+                }),
               },
               [Txt("Left")],
             ),
@@ -60,9 +66,11 @@ export default function FeedbackView() {
               {
                 size: "sm",
                 variant: "outline",
-                onClick() {
-                  sheetB$.show();
-                },
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    sheetB$.show();
+                  },
+                }),
               },
               [Txt("Bottom")],
             ),
@@ -143,9 +151,9 @@ export default function FeedbackView() {
             ),
             Button(
               {
-                size: "sm",
-                variant: "outline",
                 store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
                   onClick() {
                     toast$.show({
                       texts: ["Loading..."],

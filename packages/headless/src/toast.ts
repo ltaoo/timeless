@@ -1,5 +1,5 @@
 import { ref, computed, uncomputed } from "@timeless/reactive";
-import { ToastCore } from "@timeless/ui/toast";
+import { ToastCore } from "@timeless/ui";
 
 import { tp, merge } from "./theme";
 import { View, ViewProps } from "./view";

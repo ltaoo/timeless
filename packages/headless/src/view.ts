@@ -1,4 +1,5 @@
 import { Ref, isRef, isClassName, ClassNameRef } from "@timeless/reactive";
+import { Txt } from "./text";
 
 export interface ViewProps {
   type?: string;
@@ -119,6 +120,13 @@ export function View(props: ViewProps = {}, children?: any) {
     _children = [_children];
   }
 
+  for (let i = 0; i < _children.length; i++) {
+    const child = _children[i];
+    if (isRef(child)) {
+      _children[i] = Txt(child);
+    }
+  }
+
   return {
     t: "view",
     $elm,
@@ -221,4 +229,10 @@ export interface TimelessElement {
   onUnmounted?(): void;
 }
 
-export type ViewChildren = (TimelessElement | null)[];
+export type ViewChildren = (
+  | TimelessElement
+  | string
+  | number
+  | Ref<string | number>
+  | null
+)[];

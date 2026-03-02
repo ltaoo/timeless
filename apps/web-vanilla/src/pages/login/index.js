@@ -116,11 +116,13 @@ export default function LoginPage(props) {
             View({}, [
               Button(
                 {
-                  class: cn([
-                    "flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
-                    "dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-400", // Dark mode button styles
-                  ]),
-                  onClick: handleLogin,
+                  store: new Timeless.ui.ButtonCore({
+                    class: cn([
+                      "flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
+                      "dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-400", // Dark mode button styles
+                    ]),
+                    onClick: handleLogin,
+                  }),
                 },
                 [Txt("Sign in")],
               ),

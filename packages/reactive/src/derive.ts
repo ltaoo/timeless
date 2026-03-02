@@ -1,0 +1,67 @@
+import { Subscriber, Ref, isRef } from "./types";
+
+type UnwrapRef<T> = T extends Ref<infer V> ? V : T;
+
+export function derive<T extends any[], R>(
+  deps: readonly [...T],
+  fn: (...args: { [K in keyof T]: UnwrapRef<T[K]> }) => R,
+): Ref<R>;
+export function derive<T extends Record<string, any>, R>(
+  deps: T,
+  fn: (args: { [K in keyof T]: UnwrapRef<T[K]> }) => R,
+): Ref<R>;
+export function derive(deps: any, fn: any): Ref<any> {
+  const _deps: Subscriber[] = [];
+  let _local_value: any;
+
+  const isArray = Array.isArray(deps);
+  const depRefs: any[] = isArray ? deps : Object.values(deps);
+
+  const getValues = () => {
+    if (isArray) {
+      return (deps as any[]).map((r) => (isRef(r) ? r.value : r));
+    }
+    const res: any = {};
+    for (const key in deps) {
+      const val = deps[key];
+      res[key] = isRef(val) ? val.value : val;
+    }
+    return res;
+  };
+
+  _local_value = isArray ? fn(...getValues()) : fn(getValues());
+
+  function notify() {
+    for (let i = 0; i < _deps.length; i += 1) {
+      const ctx = _deps[i];
+      if (ctx.onChange) {
+        ctx.onChange(_local_value);
+      }
+    }
+  }
+
+  const onChange = () => {
+    const args = getValues();
+    _local_value = isArray ? fn(...args) : fn(args);
+    notify();
+  };
+
+  depRefs.forEach((ref) => {
+    if (isRef(ref)) {
+      ref._subscribe({ onChange });
+    }
+  });
+
+  return {
+    __is_ref: true,
+    _subscribe(ctx: Subscriber) {
+      _deps.push(ctx);
+    },
+    _destroy() {
+      _deps.length = 0;
+    },
+    get value() {
+      return _local_value;
+    },
+  };
+}

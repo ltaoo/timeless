@@ -21,7 +21,7 @@ const minify = terser({
   },
 });
 
-export default {
+const config = {
   input: path.join(__dirname, "src/index.ts"),
   output: [
     {
@@ -50,4 +50,9 @@ export default {
     }),
     minify,
   ],
+};
+
+export default (args) => {
+  if (args.whole) delete args.whole;
+  return config;
 };

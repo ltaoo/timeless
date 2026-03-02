@@ -1,7 +1,7 @@
 import { PopoverCore } from "@timeless/ui";
 import { computed, ref, refobj } from "@timeless/reactive";
-import { View, ViewChildren, ViewProps } from "@timeless/headless/view";
-import { Show } from "@timeless/headless/show";
+import { View, ViewChildren, ViewProps } from "@timeless/headless";
+import { Show } from "@timeless/headless";
 import { PopoverPrimitive } from "@timeless/headless";
 
 const t = {
@@ -100,7 +100,8 @@ export function Popover(
                   if (side === "bottom" || side === "top") styles.left = "16px";
                   else styles.top = "16px";
                 } else if (align === "end") {
-                  if (side === "bottom" || side === "top") styles.right = "16px";
+                  if (side === "bottom" || side === "top")
+                    styles.right = "16px";
                   else styles.bottom = "16px";
                 }
                 styles.transform = transform;
@@ -112,10 +113,16 @@ export function Popover(
             }),
             Show(
               {
-                class: t.title.class,
                 when: ref(!!props.title),
               },
-              [...props.title],
+              [
+                View(
+                  {
+                    class: t.title.class,
+                  },
+                  props.title,
+                ),
+              ],
             ),
             ...props.content,
           ],

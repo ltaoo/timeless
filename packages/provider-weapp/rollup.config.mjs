@@ -6,7 +6,7 @@ import { readFileSync } from 'fs';
 
 const pkg = JSON.parse(readFileSync('./package.json'));
 
-export default [
+const config = [
   {
     input: 'src/index.ts',
     output: [
@@ -47,3 +47,8 @@ export default [
     ]
   }
 ];
+
+export default (args) => {
+  if (args.whole) delete args.whole;
+  return config;
+};

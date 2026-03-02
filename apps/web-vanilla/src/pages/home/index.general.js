@@ -4,17 +4,36 @@ export default function GeneralView() {
   return View({ class: cn(["space-y-8"]) }, [
     Section("Button", [
       Item("Variants", [
-        Button({}, [Txt("Default")]),
-        Button({ variant: "secondary" }, [Txt("Secondary")]),
-        Button({ variant: "outline" }, [Txt("Outline")]),
-        Button({ variant: "ghost" }, [Txt("Ghost")]),
-        Button({ variant: "destructive" }, [Txt("Destructive")]),
-        Button({ variant: "link" }, [Txt("Link")]),
+        Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
+        Button(
+          {
+            variant: "secondary",
+            store: new Timeless.ui.ButtonCore({}),
+          },
+          ["Secondary"],
+        ),
+        Button({ variant: "outline", store: new Timeless.ui.ButtonCore({}) }, [
+          "Outline",
+        ]),
+        Button({ variant: "ghost", store: new Timeless.ui.ButtonCore({}) }, [
+          "Ghost",
+        ]),
+        Button(
+          { variant: "destructive", store: new Timeless.ui.ButtonCore({}) },
+          ["Destructive"],
+        ),
+        Button({ variant: "link", store: new Timeless.ui.ButtonCore({}) }, [
+          "Link",
+        ]),
       ]),
       Item("Sizes", [
-        Button({ size: "sm" }, [Txt("Small")]),
-        Button({}, [Txt("Default")]),
-        Button({ size: "lg" }, [Txt("Large")]),
+        Button({ size: "sm", store: new Timeless.ui.ButtonCore({}) }, [
+          "Small",
+        ]),
+        Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
+        Button({ size: "lg", store: new Timeless.ui.ButtonCore({}) }, [
+          "Large",
+        ]),
       ]),
     ]),
     Section("Badge", [
@@ -26,9 +45,7 @@ export default function GeneralView() {
       ]),
     ]),
     Section("Separator", [
-      Item("Horizontal", [
-        View({ class: cn(["w-full"]) }, [Separator({})]),
-      ]),
+      Item("Horizontal", [View({ class: cn(["w-full"]) }, [Separator({})])]),
       Item("Vertical", [
         View({ class: cn(["flex items-center h-6 gap-3"]) }, [
           Txt("Left"),
@@ -56,7 +73,11 @@ export default function GeneralView() {
               Txt("This is the card content area."),
             ]),
           ]),
-          CardFooter({}, [Button({ size: "sm" }, [Txt("Action")])]),
+          CardFooter({}, [
+            Button({ size: "sm", store: new Timeless.ui.ButtonCore({}) }, [
+              "Action",
+            ]),
+          ]),
         ]),
       ]),
     ]),

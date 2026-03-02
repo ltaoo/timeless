@@ -39,7 +39,7 @@ export default function OverlayView() {
                   },
                 }),
               },
-              [Txt("Open Menu")],
+              ["Open Menu"],
             ),
           ],
         ),
@@ -95,7 +95,7 @@ export default function OverlayView() {
               ],
             }),
           },
-          [Button({}, [Txt("With Submenu")])],
+          [Button({ store: new Timeless.ui.ButtonCore({}) }, ["With Submenu"])],
         ),
       ]),
       Item("Dynamic Submenu", [
@@ -151,7 +151,10 @@ export default function OverlayView() {
             ],
           });
           return DropdownMenu({ store: dm$ }, [
-            Button({ variant: "outline" }, [Txt("Dynamic Submenu")]),
+            Button(
+              { variant: "outline", store: new Timeless.ui.ButtonCore({}) },
+              ["Dynamic Submenu"],
+            ),
           ]);
         })(),
       ]),
@@ -182,7 +185,12 @@ export default function OverlayView() {
               ],
             }),
           },
-          [Button({ variant: "outline" }, [Txt("Hover Me")])],
+          [
+            Button(
+              { variant: "outline", store: new Timeless.ui.ButtonCore({}) },
+              ["Hover Me"],
+            ),
+          ],
         ),
       ]),
       Item("Context Menu", [
@@ -285,7 +293,12 @@ export default function OverlayView() {
                   ],
                 }),
               },
-              [Button({ variant: "outline" }, [Txt("Open Menu")])],
+              [
+                Button(
+                  { variant: "outline", store: new Timeless.ui.ButtonCore({}) },
+                  ["Open Menu"],
+                ),
+              ],
             ),
           ],
         ),
@@ -323,7 +336,12 @@ export default function OverlayView() {
                   ],
                 }),
               },
-              [Button({ variant: "outline" }, [Txt("Open Menu")])],
+              [
+                Button(
+                  { variant: "outline", store: new Timeless.ui.ButtonCore({}) },
+                  ["Open Menu"],
+                ),
+              ],
             ),
           ],
         ),
@@ -331,16 +349,44 @@ export default function OverlayView() {
       Item("Tooltip", [
         View({ class: cn(["flex gap-2"]) }, [
           Tooltip({ content: "Top tooltip" }, [
-            Button({ variant: "outline", size: "sm" }, [Txt("Top")]),
+            Button(
+              {
+                variant: "outline",
+                size: "sm",
+                store: new Timeless.ui.ButtonCore({}),
+              },
+              ["Top"],
+            ),
           ]),
           Tooltip({ content: "Bottom tooltip", side: "bottom" }, [
-            Button({ variant: "outline", size: "sm" }, [Txt("Bottom")]),
+            Button(
+              {
+                variant: "outline",
+                size: "sm",
+                store: new Timeless.ui.ButtonCore({}),
+              },
+              ["Bottom"],
+            ),
           ]),
           Tooltip({ content: "Left tooltip", side: "left" }, [
-            Button({ variant: "outline", size: "sm" }, [Txt("Left")]),
+            Button(
+              {
+                variant: "outline",
+                size: "sm",
+                store: new Timeless.ui.ButtonCore({}),
+              },
+              ["Left"],
+            ),
           ]),
           Tooltip({ content: "Right tooltip", side: "right" }, [
-            Button({ variant: "outline", size: "sm" }, [Txt("Right")]),
+            Button(
+              {
+                variant: "outline",
+                size: "sm",
+                store: new Timeless.ui.ButtonCore({}),
+              },
+              ["Right"],
+            ),
           ]),
         ]),
       ]),
@@ -378,8 +424,9 @@ export default function OverlayView() {
                 Button(
                   {
                     variant: "outline",
+                    store: new Timeless.ui.ButtonCore({}),
                   },
-                  [Txt("Open Popover")],
+                  ["Open Popover"],
                 ),
               ],
             ),

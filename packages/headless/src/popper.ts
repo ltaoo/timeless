@@ -1,5 +1,5 @@
 import { ref, refobj, computed, cn } from "@timeless/reactive";
-import { PopperCore } from "@timeless/ui/popper";
+import { PopperCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "./view";
 

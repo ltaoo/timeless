@@ -2,12 +2,13 @@
 
 import { Subscriber, Ref, ClassNameRef, isRef, isClassName } from "./types";
 import { ref } from "./ref";
-import { refarr } from "./refarr";
-import { refobj } from "./refobj";
+import { refArray } from "./reactive-array";
+import { refObject } from "./reactive-object";
 import { computed } from "./computed";
-import { uncomputed } from "./store";
+import { derive } from "./derive";
+import { release } from "./registry";
+import { classNames } from "./class-names";
 
-export * from "./cn";
 export {
   Subscriber,
   Ref,
@@ -15,8 +16,16 @@ export {
   ClassNameRef,
   isClassName,
   ref,
-  refarr,
-  refobj,
+  refArray as reactiveArray,
+  refObject as reactiveObject,
   computed,
-  uncomputed,
+  derive,
+  release,
+  classNames,
+  // Legacy aliases
+  classNames as cn,
+  derive as combine,
+  refArray as refarr,
+  refObject as refobj,
+  release as uncomputed,
 };

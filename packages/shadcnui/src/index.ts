@@ -32,6 +32,8 @@ import {
   DropdownMenu,
   ContextMenu,
 } from "./menu";
+// import { DropdownMenu } from "./dropdown-menu";
+// import { ContextMenu } from "./context-menu";
 import { Tabs } from "./tabs";
 import { Steps } from "./steps";
 import { Button } from "./button";
@@ -125,4 +127,4 @@ export {
   TableCell,
 };
 
-console.log('shadcn.version 1.0.1');
+console.log("shadcn.version 1.0.1");

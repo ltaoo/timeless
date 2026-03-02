@@ -118,52 +118,65 @@ const configs = [
   },
 ];
 
-// Individual Component Builds
-components.forEach((name) => {
-  configs.push({
-    input: path.join(__dirname, `src/${name}.ts`),
-    output: [
-      {
-        file: path.join(__dirname, `dist/${name}/index.js`),
-        format: "cjs",
-        sourcemap: true,
-      },
-      {
-        file: path.join(__dirname, `dist/${name}/index.esm.js`),
-        format: "esm",
-        sourcemap: true,
-      },
-    ],
-    external: [
-      ...Object.keys(pkg.dependencies || {}),
-      ...Object.keys(pkg.peerDependencies || {}),
-    ],
-    plugins: [
-      resolve(),
-      commonjs(),
-      typescript({
-        tsconfig: "./tsconfig.json",
-        declaration: false,
-        declarationMap: false,
-        outDir: null,
-        declarationDir: null,
-        compilerOptions: {
-          declaration: false,
-          declarationMap: false,
-          outDir: null,
-          declarationDir: null,
-        },
-      }),
-    ],
-  });
+export default (args) => {
+  // Clear the whole argument to prevent Rollup from complaining about unknown options
+  if (args.whole) {
+    delete args.whole;
+    const whole = true;
 
-  configs.push({
-    input: path.join(__dirname, `src/${name}.ts`),
-    output: [
-      { file: path.join(__dirname, `dist/${name}/index.d.ts`), format: "es" },
-    ],
-    plugins: [dts()],
-  });
-});
+    // Individual Component Builds
+    if (whole) {
+      components.forEach((name) => {
+        configs.push({
+          input: path.join(__dirname, `src/${name}.ts`),
+          output: [
+            {
+              file: path.join(__dirname, `dist/${name}/index.js`),
+              format: "cjs",
+              sourcemap: true,
+            },
+            {
+              file: path.join(__dirname, `dist/${name}/index.esm.js`),
+              format: "esm",
+              sourcemap: true,
+            },
+          ],
+          external: [
+            ...Object.keys(pkg.dependencies || {}),
+            ...Object.keys(pkg.peerDependencies || {}),
+          ],
+          plugins: [
+            resolve(),
+            commonjs(),
+            typescript({
+              tsconfig: "./tsconfig.json",
+              declaration: false,
+              declarationMap: false,
+              outDir: null,
+              declarationDir: null,
+              compilerOptions: {
+                declaration: false,
+                declarationMap: false,
+                outDir: null,
+                declarationDir: null,
+              },
+            }),
+          ],
+        });
 
-export default configs;
+        configs.push({
+          input: path.join(__dirname, `src/${name}.ts`),
+          output: [
+            {
+              file: path.join(__dirname, `dist/${name}/index.d.ts`),
+              format: "es",
+            },
+          ],
+          plugins: [dts()],
+        });
+      });
+    }
+  }
+
+  return configs;
+};

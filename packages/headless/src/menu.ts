@@ -1,6 +1,6 @@
 import { ref, refobj, computed } from "@timeless/reactive";
 import { MenuCore } from "@timeless/ui";
-import { ChevronRightOutlined } from "@timeless/icons/chevron-right";
+import { ChevronRightOutlined } from "@timeless/icons";
 
 import { tp, merge } from "./theme";
 import { TimelessElement, View, ViewChildren, ViewProps } from "./view";

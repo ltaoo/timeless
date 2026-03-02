@@ -125,55 +125,64 @@ const configs = [
   },
 ];
 
-components.forEach((name) => {
-  configs.push({
-    input: `src/${name}/index.ts`,
-    output: [
-      {
-        file: `dist/${name}/index.js`,
-        format: "cjs",
-        sourcemap: true,
-      },
-      {
-        file: `dist/${name}/index.esm.js`,
-        format: "esm",
-        sourcemap: true,
-      },
-    ],
-    plugins: [
-      alias({
-        entries: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
-      }),
-      resolve(),
-      commonjs(),
-      typescript({
-        tsconfig: "./tsconfig.json",
-        declaration: false,
-        outDir: null,
-        compilerOptions: {
-          declaration: false,
-          declarationMap: false,
-          outDir: null,
-        },
-      }),
-      minify,
-    ],
-    external: [
-      ...Object.keys(pkg.dependencies || {}),
-      ...Object.keys(pkg.peerDependencies || {}),
-    ],
-  });
+export default (args) => {
+  // Clear the whole argument to prevent Rollup from complaining about unknown options
+  if (args.whole) {
+    delete args.whole;
+    const whole = true;
+    
+    if (whole) {
+      components.forEach((name) => {
+        configs.push({
+          input: `src/${name}/index.ts`,
+          output: [
+            {
+              file: `dist/${name}/index.js`,
+              format: "cjs",
+              sourcemap: true,
+            },
+            {
+              file: `dist/${name}/index.esm.js`,
+              format: "esm",
+              sourcemap: true,
+            },
+          ],
+          plugins: [
+            alias({
+              entries: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
+            }),
+            resolve(),
+            commonjs(),
+            typescript({
+              tsconfig: "./tsconfig.json",
+              declaration: false,
+              outDir: null,
+              compilerOptions: {
+                declaration: false,
+                declarationMap: false,
+                outDir: null,
+              },
+            }),
+            minify,
+          ],
+          external: [
+            ...Object.keys(pkg.dependencies || {}),
+            ...Object.keys(pkg.peerDependencies || {}),
+          ],
+        });
 
-  configs.push({
-    input: `src/${name}/index.ts`,
-    output: [{ file: `dist/${name}/index.d.ts`, format: "es" }],
-    plugins: [
-      alias({
-        entries: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
-      }),
-      dts(),
-    ],
-  });
-});
-
-export default configs;
+        configs.push({
+          input: `src/${name}/index.ts`,
+          output: [{ file: `dist/${name}/index.d.ts`, format: "es" }],
+          plugins: [
+            alias({
+              entries: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
+            }),
+            dts(),
+          ],
+        });
+      });
+    }
+  }
+  return configs;
+};

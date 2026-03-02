@@ -1,5 +1,5 @@
 import { ref, refobj, computed } from "@timeless/reactive";
-import { XOutlined } from "@timeless/icons/x";
+import { XOutlined } from "@timeless/icons";
 
 import { tp, merge } from "./theme";
 import { View, ViewChildren, ViewProps } from "./view";

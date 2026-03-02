@@ -5,7 +5,7 @@
   "module": "dist/reactive.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c rollup.config.js"
   },
   "type": "module",
   "files": [

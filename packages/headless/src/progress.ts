@@ -1,5 +1,5 @@
 import { ref, computed, isRef, Ref } from "@timeless/reactive";
-import { ProgressCore } from "@timeless/ui/progress";
+import { ProgressCore } from "@timeless/ui";
 
 import { tp, merge } from "./theme";
 import { View, ViewProps } from "./view";

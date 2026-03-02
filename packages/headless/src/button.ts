@@ -1,77 +1,62 @@
 import { ref, computed } from "@timeless/reactive";
-import { ButtonCore } from "@timeless/ui/button";
+import { ButtonCore } from "@timeless/ui";
 
 import { tp, merge } from "./theme";
 import { View, ViewChildren, ViewProps } from "./view";
 import { Show } from "./show";
 
-export function Button(
-  props: ViewProps & {
-    store: ButtonCore;
-    theme?: any;
-    variant?: "default";
-    size?: "default" | "large" | "small";
-    disabled?: boolean;
-    loading?: boolean;
-  },
-  children: ViewChildren = [],
+export function Root(
+  props: ViewProps & { store: ButtonCore },
+  children?: ViewChildren,
 ) {
-  const {
-    store,
-    variant = "default",
-    size = "default",
-    theme: t,
-    class: cn,
-    style: st,
-    ...rest
-  } = props;
-
-  if (store) {
-    const state = ref(store.state);
-    const events: any[] = [];
-    events.push(
-      store.onStateChange(() => {
-        state.as(store.state);
-      }),
-    );
-    const m = (d: Record<string, any>) =>
-      merge(
-        tp(t?.root, {
-          variant,
-          size,
-          loading: d.loading,
-          disabled: d.disabled,
-        }),
-        cn,
-        st,
-      );
-
-    return View(
-      {
-        ...rest,
-        type: "button",
-        onClick() {
-          store.click();
-        },
-        onUnmounted() {
-          for (const fn of events) if (typeof fn === "function") fn();
-          if (rest.onUnmounted) rest.onUnmounted();
-        },
-      },
-      [
-        Show({ when: computed(state, (d) => d.loading) }, [
-          View({ ...merge(tp(t?.spinner)) }),
-        ]),
-        ...children,
-      ],
-    );
-  }
+  const { store, ...rest } = props;
 
   return View(
     {
       ...rest,
       type: "button",
+      onClick(e) {
+        if (rest.onClick) rest.onClick(e);
+        store.click();
+      },
+      onUnmounted() {
+        if (rest.onUnmounted) rest.onUnmounted();
+      },
     },
     children,
   );
+}
+
+export function Loading(
+  props: ViewProps & { store: ButtonCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  const state = ref(store.state);
+  const events: any[] = [];
+
+  return View(
+    {
+      style: "display: contents", // Wrapper to handle subscription
+      onMounted() {
+        events.push(
+          store.onStateChange(() => {
+            state.as(store.state);
+          }),
+        );
+      },
+      onUnmounted() {
+        for (const fn of events) if (typeof fn === "function") fn();
+      },
+    },
+    [Show({ when: computed(state, (d) => d.loading) }, [View(rest, children)])],
+  );
+}
+
+export function Prefix(props: ViewProps, children?: ViewChildren) {
+  return View(props, children);
+}
+
+export function Content(props: ViewProps, children?: ViewChildren) {
+  return View(props, children);
 }
