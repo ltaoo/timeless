@@ -113,6 +113,43 @@
         ]
       );
     }
+    function MenuItem(props) {
+      // if (props.type === 'simple') {
+      //   return SimpleItem({ label: item.label });
+      // } else {
+      //   return ComplexItem({ label: item.label });
+      // }
+      const visible = ref(false);
+
+      return View({}, [
+        SimpleItem(props),
+        Show({
+          when: computed(props, (t) => t.type !== "simple")
+        }, [
+          View({}, [
+            View({
+              onClick() {
+                visible.as((prev) => !prev);
+              },
+            }, ["Click it"])
+          ]),
+          // 如果我点击外面的 Toggle List，这里并不会消失（没有被卸载掉），应该就是这里的问题了？
+          // 所以，要排查为什么这里没有在父容器已经被卸载时，Show没有触发卸载逻辑
+          Portal({}, [
+            Show({
+              when: visible,
+            }, [
+              View({
+                class: "",
+                style: "position: fixed; left: 120px; top: 120px;",
+              }, [
+                View({}, ["Hello"])
+              ]),
+            ]),
+          ])
+        ])
+      ]);
+    }
 
     function AppView() {
       const items = ref([
@@ -120,7 +157,7 @@
         { id: 2, label: 'Item 2', type: 'complex' },
         { id: 3, label: 'Item 3', type: 'simple' },
       ]);
-      const visible = ref(true);
+      const visible = ref(false);
 
       document.getElementById('toggle').addEventListener('click', () => {
         if (visible.value) {
@@ -132,10 +169,6 @@
         }
       });
 
-      // return View({}, [
-      //   View({}, ["Hello"]),
-
-      // ]);
       return Portal({}, [
         Show({
           when: visible,
@@ -161,23 +194,23 @@
           //     }
           //   })
           // ]),
-          For({
-            each: items,
-            render(item, idx) {
-              console.log('[For render]', item.label, 'type:', item.type);
-              if (item.type === 'simple') {
-                return SimpleItem({ label: item.label });
-              } else {
-                return ComplexItem({ label: item.label });
+          View({
+            class: 'menu',
+          }, [
+            For({
+              each: items,
+              render(item, idx) {
+                console.log('[For render]', item.label, 'type:', item.type);
+                return MenuItem(item);
+              },
+              onMounted() {
+                console.log('[For] mounted');
+              },
+              onUnmounted() {
+                console.log('[For] unmounted');
               }
-            },
-            onMounted() {
-              console.log('[For] mounted');
-            },
-            onUnmounted() {
-              console.log('[For] unmounted');
-            }
-          })
+            })
+          ]),
         ]
         )
       ])

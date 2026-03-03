@@ -54,9 +54,6 @@ export function Trigger(
     state_.as(v);
   });
 
-  let handlePointerDownOnTop: any;
-  let triggerElement: HTMLElement | null = null;
-
   return View(
     {
       onMounted($e) {
@@ -119,122 +116,13 @@ export function Trigger(
     },
     children,
   );
-
-  // return MenuPrimitive.Anchor({ store: props.store.menu }, [
-  //   View(
-  //     {
-  //       as: "button",
-  //       onMounted($e) {
-  //         if (rest.onMounted) {
-  //           rest.onMounted($e);
-  //         }
-  //         triggerElement = $e;
-
-  //         // Add global pointerdown listener
-  //         handlePointerDownOnTop = (e: any) => {
-  //           // Only handle when menu is open
-  //           if (!store.menu.state.open) {
-  //             return;
-  //           }
-
-  //           const target = e.target as Node;
-  //           const path = e.composedPath ? e.composedPath() : [];
-
-  //           // Check if click is inside trigger
-  //           const isInsideTrigger =
-  //             (triggerElement && triggerElement.contains(target)) ||
-  //             (triggerElement && path.includes(triggerElement));
-
-  //           if (isInsideTrigger) {
-  //             // Click on trigger - don't dismiss
-  //             return;
-  //           }
-
-  //           // Check if click is inside content
-  //           const popperFloating = store.menu.popper.floating?.$el as
-  //             | HTMLElement
-  //             | undefined;
-  //           const isInsideContent =
-  //             (popperFloating && popperFloating.contains(target)) ||
-  //             (popperFloating && path.includes(popperFloating));
-
-  //           if (isInsideContent) {
-  //             // Click inside content - don't dismiss
-  //             return;
-  //           }
-
-  //           // Click outside - dismiss
-  //           props.store.hide();
-  //         };
-  //         document.addEventListener(
-  //           "pointerdown",
-  //           handlePointerDownOnTop,
-  //           true,
-  //         );
-  //       },
-  //       onUnmounted() {
-  //         triggerElement = null;
-
-  //         if (handlePointerDownOnTop) {
-  //           document.removeEventListener(
-  //             "pointerdown",
-  //             handlePointerDownOnTop,
-  //             true,
-  //           );
-  //           handlePointerDownOnTop = null;
-  //         }
-
-  //         if (rest.onUnmounted) {
-  //           rest.onUnmounted();
-  //         }
-  //       },
-  //       onClick() {
-  //         // Force unmount presence before opening to ensure clean state
-  //         if (!props.store.menu.state.open) {
-  //           props.store.menu.presence.unmount();
-  //         }
-  //         props.store.toggle();
-  //       },
-  //       onKeyDown(event: KeyboardEvent) {
-  //         if (store.state.disabled) {
-  //           return;
-  //         }
-  //         if (["Enter", " "].includes(event.key)) {
-  //           props.store.toggle();
-  //           return;
-  //         }
-  //         if (event.key === "ArrowDown") {
-  //           // context.onOpenChange(true)
-  //         }
-  //         // prevent keydown from scrolling window / first focused item to execute
-  //         // that keydown (inadvertently closing the menu)
-  //         if (["Enter", " ", "ArrowDown"].includes(event.key)) {
-  //           event.preventDefault();
-  //         }
-  //       },
-  //     },
-  //     children,
-  //   ),
-  // ]);
 }
 
 export function Portal(
   props: ViewProps & { store: MenuCore },
   children: ViewChildren = [],
 ) {
-  return MenuPrimitive.Portal({ store: props.store }, [
-    ...children,
-    // Popper({ store: props.store.popper }, children),
-    // PopperPrimitive.Content(
-    //   {
-    //     store: props.store.popper,
-    //     onMouseLeave() {
-    //       props.store.handleLeave();
-    //     },
-    //   },
-    //   children,
-    // ),
-  ]);
+  return MenuPrimitive.Portal({ store: props.store }, children);
 }
 
 export function Content(
@@ -248,11 +136,9 @@ export function Content(
     store.trigger === "hover"
       ? {
           onMouseEnter() {
-            console.log("[DropdownMenu Content] mouseenter");
             _hoverClearHide(store);
           },
           onMouseLeave() {
-            console.log("[DropdownMenu Content] mouseleave");
             _hoverScheduleHide(store);
           },
         }

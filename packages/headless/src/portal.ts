@@ -4,6 +4,7 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
   const anchor = document.createTextNode("");
   let _mountedNodes: Node[] = [];
   let _mountedChildren: any[] = [];
+  let _mounted = false;
 
   const normalize = (c: any) => {
     if (Array.isArray(c)) return c;
@@ -16,6 +17,9 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
     t: "portal",
     $elm: anchor as any,
     render() {
+      if (_mounted) {
+        return;
+      }
       const fragment = document.createDocumentFragment();
       const nodes: Node[] = [];
       const instances: any[] = [];
@@ -45,6 +49,7 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
 
       _mountedNodes = nodes;
       _mountedChildren = instances;
+      _mounted = true;
 
       console.log("[Portal] appending to body, nodes count:", nodes.length);
       document.body.appendChild(fragment);
@@ -63,7 +68,11 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
       return null;
     },
     onUnmounted() {
-      console.log("[Portal] onUnmounted, cleaning up", _mountedNodes.length, "nodes");
+      console.log(
+        "[Portal] onUnmounted, cleaning up",
+        _mountedNodes.length,
+        "nodes",
+      );
       // Lifecycle
       for (const child of _mountedChildren) {
         if (isElement(child) && child.onUnmounted) {
@@ -73,7 +82,12 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
 
       // Remove DOM nodes
       for (const node of _mountedNodes) {
-        console.log("[Portal] removing node:", node.nodeName, "parentNode:", !!node.parentNode);
+        console.log(
+          "[Portal] removing node:",
+          node.nodeName,
+          "parentNode:",
+          !!node.parentNode,
+        );
         if (node.parentNode) {
           node.parentNode.removeChild(node);
         }
