@@ -85,108 +85,108 @@ export default function HomeLayoutView(props) {
           ),
           // User Avatar
           (() => {
-            const dropdown$ = new Timeless.ui.DropdownMenuCore({
-              trigger: "hover",
-              side: "right",
-              align: "end",
-              offsetX: 4,
-              offsetY: -8,
-              items: [
-                new Timeless.ui.MenuItemCore({
-                  label: "Profile",
-                  onClick() {
-                    props.app.tip({
-                      text: ["Hello"],
-                    });
-                    console.log("Profile clicked");
-                  },
-                }),
-                new Timeless.ui.MenuItemCore({
-                  label: "Bill",
-                  onClick() {
-                    console.log("Bill clicked");
-                  },
-                }),
-                new Timeless.ui.MenuItemCore({
-                  label: "Other",
-                  menu: new Timeless.ui.MenuCore({
-                    items: [
-                      new Timeless.ui.MenuItemCore({
-                        label: "Item 1",
-                        onClick() {
-                          console.log("Item 1 clicked");
-                        },
-                      }),
-                      new Timeless.ui.MenuItemCore({
-                        label: "Item 2",
-                        onClick() {
-                          console.log("Item 2 clicked");
-                        },
-                      }),
-                      new Timeless.ui.MenuItemCore({
-                        label: "Item 3",
-                        onClick() {
-                          console.log("Item 3 clicked");
-                        },
-                      }),
-                      new Timeless.ui.MenuItemCore({
-                        label: "Close DropdownMenu",
-                        onClick() {
-                          console.log("Item 4 clicked");
-                          dropdown$.hide();
-                        },
-                      }),
-                      new Timeless.ui.MenuItemCore({
-                        label: "Item 5",
-                        onClick() {
-                          console.log("Item 5 clicked");
-                        },
-                      }),
-                    ],
-                  }),
-                  onClick() {
-                    console.log("Other clicked");
-                  },
-                }),
-                new Timeless.ui.MenuItemCore({
-                  label: "Logout",
-                  onClick() {
-                    console.log("Logout clicked");
-                    dropdown$.hide();
-                    props.history.destroyAllAndPush("root.login");
-                  },
-                }),
-              ],
-            });
-            return DropdownMenu(
-              {
-                store: dropdown$,
-              },
-              [
-                View(
-                  {
-                    class:
-                      "w-10 h-10 rounded-full bg-zinc-100 overflow-hidden cursor-pointer border border-zinc-200 hover:ring-2 ring-zinc-200 transition-all dark:bg-zinc-800 dark:border-zinc-700 dark:ring-zinc-700",
-                    onClick() {
-                      console.log("Avatar clicked");
-                    },
-                  },
-                  [
-                    View(
-                      {
-                        type: "img",
-                        class: "w-full h-full object-cover",
-                        onMounted($elm) {
-                          $elm.src = "public/avatar.jpeg";
-                          $elm.alt = "User Avatar";
-                        },
-                      },
-                      [],
-                    ),
-                  ],
-                ),
-              ],
-            );
+            // const dropdown$ = new Timeless.ui.DropdownMenuCore({
+            //   trigger: "hover",
+            //   side: "right",
+            //   align: "end",
+            //   offsetX: 4,
+            //   offsetY: -8,
+            //   items: [
+            //     new Timeless.ui.MenuItemCore({
+            //       label: "Profile",
+            //       onClick() {
+            //         props.app.tip({
+            //           text: ["Hello"],
+            //         });
+            //         console.log("Profile clicked");
+            //       },
+            //     }),
+            //     new Timeless.ui.MenuItemCore({
+            //       label: "Bill",
+            //       onClick() {
+            //         console.log("Bill clicked");
+            //       },
+            //     }),
+            //     new Timeless.ui.MenuItemCore({
+            //       label: "Other",
+            //       menu: new Timeless.ui.MenuCore({
+            //         items: [
+            //           new Timeless.ui.MenuItemCore({
+            //             label: "Item 1",
+            //             onClick() {
+            //               console.log("Item 1 clicked");
+            //             },
+            //           }),
+            //           new Timeless.ui.MenuItemCore({
+            //             label: "Item 2",
+            //             onClick() {
+            //               console.log("Item 2 clicked");
+            //             },
+            //           }),
+            //           new Timeless.ui.MenuItemCore({
+            //             label: "Item 3",
+            //             onClick() {
+            //               console.log("Item 3 clicked");
+            //             },
+            //           }),
+            //           new Timeless.ui.MenuItemCore({
+            //             label: "Close DropdownMenu",
+            //             onClick() {
+            //               console.log("Item 4 clicked");
+            //               dropdown$.hide();
+            //             },
+            //           }),
+            //           new Timeless.ui.MenuItemCore({
+            //             label: "Item 5",
+            //             onClick() {
+            //               console.log("Item 5 clicked");
+            //             },
+            //           }),
+            //         ],
+            //       }),
+            //       onClick() {
+            //         console.log("Other clicked");
+            //       },
+            //     }),
+            //     new Timeless.ui.MenuItemCore({
+            //       label: "Logout",
+            //       onClick() {
+            //         console.log("Logout clicked");
+            //         dropdown$.hide();
+            //         props.history.destroyAllAndPush("root.login");
+            //       },
+            //     }),
+            //   ],
+            // });
+            // return DropdownMenu(
+            //   {
+            //     store: dropdown$,
+            //   },
+            //   [
+            //     View(
+            //       {
+            //         class:
+            //           "w-10 h-10 rounded-full bg-zinc-100 overflow-hidden cursor-pointer border border-zinc-200 hover:ring-2 ring-zinc-200 transition-all dark:bg-zinc-800 dark:border-zinc-700 dark:ring-zinc-700",
+            //         onClick() {
+            //           console.log("Avatar clicked");
+            //         },
+            //       },
+            //       [
+            //         View(
+            //           {
+            //             type: "img",
+            //             class: "w-full h-full object-cover",
+            //             onMounted($elm) {
+            //               $elm.src = "public/avatar.jpeg";
+            //               $elm.alt = "User Avatar";
+            //             },
+            //           },
+            //           [],
+            //         ),
+            //       ],
+            //     ),
+            //   ],
+            // );
           })(),
         ]),
       ],

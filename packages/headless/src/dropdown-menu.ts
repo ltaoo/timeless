@@ -54,6 +54,7 @@ export function Trigger(
 ) {
   const { store, ...rest } = props;
 
+  const layer = props.store.menu.layer;
   const state_ = refobj(store.state);
 
   store.onStateChange((v) => {
@@ -63,166 +64,204 @@ export function Trigger(
   let handlePointerDownOnTop: any;
   let triggerElement: HTMLElement | null = null;
 
-  return MenuPrimitive.Anchor(
+  return View(
     {
-      store: props.store.menu,
-    },
-    [
-      View(
-        {
-          type: "button",
-          onMounted($e) {
-            if (rest.onMounted) {
-              rest.onMounted($e);
-            }
-            triggerElement = $e;
-
-            // Add global pointerdown listener
-            handlePointerDownOnTop = (e: any) => {
-              // Only handle when menu is open
-              if (!store.menu.state.open) {
-                return;
-              }
-
-              const target = e.target as Node;
-              const path = e.composedPath ? e.composedPath() : [];
-
-              // Check if click is inside trigger
-              const isInsideTrigger =
-                (triggerElement && triggerElement.contains(target)) ||
-                (triggerElement && path.includes(triggerElement));
-
-              if (isInsideTrigger) {
-                // Click on trigger - don't dismiss
-                return;
-              }
-
-              // Check if click is inside content
-              const popperFloating = store.menu.popper.floating?.$el as
-                | HTMLElement
-                | undefined;
-              const isInsideContent =
-                (popperFloating && popperFloating.contains(target)) ||
-                (popperFloating && path.includes(popperFloating));
-
-              if (isInsideContent) {
-                // Click inside content - don't dismiss
-                return;
-              }
-
-              // Click outside - dismiss
-              props.store.hide();
-            };
-            document.addEventListener(
-              "pointerdown",
-              handlePointerDownOnTop,
-              true,
-            );
+      onMounted($e) {
+        // if (rest.onMounted) {
+        //   rest.onMounted($e);
+        // }
+        const $ref = $e.firstElementChild || $e;
+        props.store.menu.popper.setReference(
+          {
+            $el: $ref,
+            getRect() {
+              return $ref.getBoundingClientRect();
+            },
           },
-          onUnmounted() {
-            triggerElement = null;
-
-            if (handlePointerDownOnTop) {
-              document.removeEventListener(
-                "pointerdown",
-                handlePointerDownOnTop,
-                true,
-              );
-              handlePointerDownOnTop = null;
-            }
-
-            if (rest.onUnmounted) {
-              rest.onUnmounted();
-            }
-          },
-          onClick() {
-            // Force unmount presence before opening to ensure clean state
-            if (!props.store.menu.state.open) {
-              props.store.menu.presence.unmount();
-            }
+          { force: true },
+        );
+        // console.log("[]has layer?", !!layer, $ref);
+        if (layer) {
+          $e.addEventListener("pointerdown", () => {
+            layer.pointerDown();
+            const rect = $e.getBoundingClientRect();
+            console.log("[]click button in pointerdown callback", rect);
             props.store.toggle();
-          },
-          onKeyDown(event: KeyboardEvent) {
-            if (store.state.disabled) {
-              return;
-            }
-            if (["Enter", " "].includes(event.key)) {
-              props.store.toggle();
-              return;
-            }
-            if (event.key === "ArrowDown") {
-              // context.onOpenChange(true)
-            }
-            // prevent keydown from scrolling window / first focused item to execute
-            // that keydown (inadvertently closing the menu)
-            if (["Enter", " ", "ArrowDown"].includes(event.key)) {
-              event.preventDefault();
-            }
-          },
-        },
-        children,
-      ),
-    ],
+          });
+        } else {
+          $e.addEventListener("pointerdown", () => {
+            const rect = $e.getBoundingClientRect();
+            props.store.toggle({
+              x: rect.left,
+              y: rect.bottom + 4,
+              width: rect.width,
+              height: rect.height,
+            });
+          });
+        }
+      },
+    },
+    children,
   );
+
+  // return MenuPrimitive.Anchor({ store: props.store.menu }, [
+  //   View(
+  //     {
+  //       as: "button",
+  //       onMounted($e) {
+  //         if (rest.onMounted) {
+  //           rest.onMounted($e);
+  //         }
+  //         triggerElement = $e;
+
+  //         // Add global pointerdown listener
+  //         handlePointerDownOnTop = (e: any) => {
+  //           // Only handle when menu is open
+  //           if (!store.menu.state.open) {
+  //             return;
+  //           }
+
+  //           const target = e.target as Node;
+  //           const path = e.composedPath ? e.composedPath() : [];
+
+  //           // Check if click is inside trigger
+  //           const isInsideTrigger =
+  //             (triggerElement && triggerElement.contains(target)) ||
+  //             (triggerElement && path.includes(triggerElement));
+
+  //           if (isInsideTrigger) {
+  //             // Click on trigger - don't dismiss
+  //             return;
+  //           }
+
+  //           // Check if click is inside content
+  //           const popperFloating = store.menu.popper.floating?.$el as
+  //             | HTMLElement
+  //             | undefined;
+  //           const isInsideContent =
+  //             (popperFloating && popperFloating.contains(target)) ||
+  //             (popperFloating && path.includes(popperFloating));
+
+  //           if (isInsideContent) {
+  //             // Click inside content - don't dismiss
+  //             return;
+  //           }
+
+  //           // Click outside - dismiss
+  //           props.store.hide();
+  //         };
+  //         document.addEventListener(
+  //           "pointerdown",
+  //           handlePointerDownOnTop,
+  //           true,
+  //         );
+  //       },
+  //       onUnmounted() {
+  //         triggerElement = null;
+
+  //         if (handlePointerDownOnTop) {
+  //           document.removeEventListener(
+  //             "pointerdown",
+  //             handlePointerDownOnTop,
+  //             true,
+  //           );
+  //           handlePointerDownOnTop = null;
+  //         }
+
+  //         if (rest.onUnmounted) {
+  //           rest.onUnmounted();
+  //         }
+  //       },
+  //       onClick() {
+  //         // Force unmount presence before opening to ensure clean state
+  //         if (!props.store.menu.state.open) {
+  //           props.store.menu.presence.unmount();
+  //         }
+  //         props.store.toggle();
+  //       },
+  //       onKeyDown(event: KeyboardEvent) {
+  //         if (store.state.disabled) {
+  //           return;
+  //         }
+  //         if (["Enter", " "].includes(event.key)) {
+  //           props.store.toggle();
+  //           return;
+  //         }
+  //         if (event.key === "ArrowDown") {
+  //           // context.onOpenChange(true)
+  //         }
+  //         // prevent keydown from scrolling window / first focused item to execute
+  //         // that keydown (inadvertently closing the menu)
+  //         if (["Enter", " ", "ArrowDown"].includes(event.key)) {
+  //           event.preventDefault();
+  //         }
+  //       },
+  //     },
+  //     children,
+  //   ),
+  // ]);
 }
 
 export function Portal(
   props: ViewProps & { store: MenuCore },
   children?: ViewChildren,
 ) {
-  // const { store, ...rest } = props;
-  // const state = refobj(store.state);
-  // const events: (void | (() => void))[] = [];
-  // events.push(
-  //   store.onStateChange(() => {
-  //     state.as(store.state);
-  //   }),
-  // );
-
-  // return NativePortal(
-  //   {
-  //     ...rest,
-  //     onUnmounted() {
-  //       for (const fn of events) if (typeof fn === "function") fn();
-  //       if (rest.onUnmounted) rest.onUnmounted();
-  //     },
-  //   },
-  //   [
-  //     Presence({ store: store.menu.presence }, [
-  //       Popper({ store: store.menu.popper }, children),
-  //     ]),
-  //   ],
-  // );
-  return MenuPrimitive.Portal(
-    {
-      store: props.store,
-    },
-    children,
-  );
+  return MenuPrimitive.Portal({ store: props.store }, [
+    Presence({ store: props.store.presence }, [
+      Popper({ store: props.store.popper }, children),
+    ]),
+  ]);
 }
 
 export function Content(
   props: ViewProps & { store: DropdownMenuCore },
   children: ViewChildren,
 ) {
-  return Presence({ store: props.store.menu.presence }, [
-    Popper(
-      {
-        store: props.store.menu.popper,
+  const { store, ...rest } = props;
+
+  const layer = props.store.menu.layer;
+  // const state = refobj(props.store.state);
+
+  let handlePointerDown: any;
+
+  return View(
+    {
+      ...rest,
+      onMounted($e) {
+        props.store.menu.popper.setFloating({
+          $el: $e,
+          getRect() {
+            return $e.getBoundingClientRect();
+          },
+        });
+        if (layer) {
+          // Reset the isPointerInside flag when Content mounts
+          // because the Trigger's pointerdown set it to true
+          layer.isPointerInside = false;
+
+          handlePointerDown = () => {
+            layer.handlePointerDownOnTop();
+          };
+          // Use requestAnimationFrame to delay registration until after
+          // the current event loop, avoiding the click that opened the menu
+          requestAnimationFrame(() => {
+            document.addEventListener("pointerdown", handlePointerDown);
+          });
+          $e.addEventListener("pointerdown", () => {
+            layer.pointerDown();
+          });
+        }
       },
-      children,
-    ),
-  ]);
-  // return View({}, [
-  //   Presence({ store: props.store.menu.presence }, [
-  //     Popper(
-  //       {
-  //         store: props.store.menu.popper,
-  //       },
-  //       children,
-  //     ),
-  //   ]),
-  // ]);
+      onUnmounted() {
+        props.store.menu.popper.setFloating(null);
+        if (layer && handlePointerDown) {
+          document.removeEventListener("pointerdown", handlePointerDown);
+          handlePointerDown = null;
+        }
+      },
+    },
+    children,
+  );
 }
 
 export function Group(props: ViewProps, children: ViewChildren) {

@@ -6,15 +6,17 @@ import { View, ViewChildren, ViewProps } from "./view";
 import { Portal as NativePortal } from "./portal";
 import { Popper } from "./popper";
 import { Presence } from "./presence";
+import { Fragment } from "./fragment";
 
 export function Root(props: ViewProps, children?: ViewChildren) {
-  return View(props, children);
+  return Fragment(props, children);
 }
 
 export function Content(
   props: ViewProps & { store: PopoverCore },
   children?: ViewChildren,
 ) {
+  const { store, ...rest } = props;
   const layer = props.store.layer;
   // const state = refobj(props.store.state);
 
@@ -22,8 +24,7 @@ export function Content(
 
   return View(
     {
-      class: props.class,
-      style: props.style,
+      ...rest,
       onMounted($e) {
         props.store.popper.setFloating({
           $el: $e,
@@ -75,7 +76,7 @@ export function Trigger(
           },
           { force: true },
         );
-        // console.log("[]has layer?", !!layer);
+        // console.log("[]has layer?", !!layer, $ref);
         if (layer) {
           $e.addEventListener("pointerdown", () => {
             layer.pointerDown();
@@ -114,8 +115,6 @@ export function Portal(
       state.as(props.store.state);
     }),
   );
-  // const visible = computed(state, (d) => d.visible || d.enter || d.exit);
-  // const layer = props.store.layer;
 
   return NativePortal(
     {
@@ -143,7 +142,7 @@ export function Close(
   return View(
     {
       ...props,
-      type: "button",
+      as: "button",
       onClick() {
         props.store.hide();
       },

@@ -3,20 +3,6 @@ import { computed, ref, refobj } from "@timeless/reactive";
 import { View, Show, ViewChildren, ViewProps } from "@timeless/headless";
 import { PopoverPrimitive } from "@timeless/headless";
 
-const t = {
-  wrapper: { style: "position:fixed;z-index:999;left:0;top:0;" },
-  content: ({ enter, exit }) => ({
-    class: [
-      "relative z-50 w-72 rounded-md border border-zinc-200 bg-white p-4 text-sm text-zinc-500 shadow-md outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400",
-      enter ? "animate-in fade-in-0 zoom-in-95" : "",
-      exit ? "animate-out fade-out-0 zoom-out-95" : "",
-    ]
-      .filter(Boolean)
-      .join(" "),
-  }),
-  title: { class: "mb-2 text-sm font-medium text-zinc-950 dark:text-zinc-50" },
-};
-
 export function Popover(
   props: ViewProps & {
     store: PopoverCore;
@@ -25,22 +11,22 @@ export function Popover(
   },
   children?: ViewChildren,
 ) {
-  const state = refobj(props.store.state);
-  const unlisten = props.store.onStateChange((v) => {
-    state.as(v);
-  });
+  const state_ = refobj(props.store.state);
+  const popper_state_ = refobj(props.store.popper.state);
 
-  const popperState = refobj(props.store.popper.state);
-  const unlistenPopper = props.store.popper.onStateChange((v) => {
-    popperState.as(v);
-  });
+  const unlistens = [
+    props.store.onStateChange((v) => {
+      state_.as(v);
+    }),
+    props.store.popper.onStateChange((v) => {
+      popper_state_.as(v);
+    }),
+  ];
 
   return PopoverPrimitive.Root(
     {
-      class: "popover-root",
       onUnmounted() {
-        unlisten();
-        unlistenPopper();
+        unlistens.forEach((fn) => fn());
       },
     },
     [
@@ -49,8 +35,14 @@ export function Popover(
         PopoverPrimitive.Content(
           {
             ...props,
-            class: computed(state, (s) => {
-              return ["popover-content", t.content(s).class].join(" ");
+            class: computed(state_, (t) => {
+              return [
+                "popover-content",
+                "relative z-50 w-72 rounded-md border border-zinc-200 bg-white p-4 text-sm text-zinc-500 shadow-md outline-none",
+                "dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400",
+                t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
+                t.exit ? "animate-out fade-out-0 zoom-out-95" : "",
+              ].join(" ");
             }),
           },
           [
@@ -58,8 +50,8 @@ export function Popover(
               onMounted($el) {
                 props.store.popper.setArrowElement($el);
               },
-              class: computed(popperState, (s) => {
-                const side = s.placedSide;
+              class: computed(popper_state_, (t) => {
+                const side = t.placedSide;
                 const base =
                   "absolute w-3 h-3 rotate-45 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800";
                 // side is where the popover is placed.
@@ -71,7 +63,7 @@ export function Popover(
                 if (side === "left") borderClass = "border-t border-r";
                 return [base, borderClass].join(" ");
               }),
-              style: computed(popperState, (s) => {
+              style: computed(popper_state_, (s) => {
                 const side = s.placedSide;
                 const align = s.placedAlign;
                 const styles: any = {};
@@ -110,19 +102,15 @@ export function Popover(
                   .join(";");
               }),
             }),
-            Show(
-              {
-                when: ref(!!props.title),
-              },
-              [
-                View(
-                  {
-                    class: t.title.class,
-                  },
-                  props.title,
-                ),
-              ],
-            ),
+            Show({ when: ref(!!props.title) }, [
+              View(
+                {
+                  class:
+                    "mb-2 text-sm font-medium text-zinc-950 dark:text-zinc-50",
+                },
+                props.title,
+              ),
+            ]),
             ...props.content,
           ],
         ),

@@ -35,9 +35,9 @@ export function Loading(
   const state = ref(store.state);
   const events: any[] = [];
 
-  return View(
+  return Show(
     {
-      style: "display: contents", // Wrapper to handle subscription
+      when: computed(state, (d) => d.loading),
       onMounted() {
         events.push(
           store.onStateChange(() => {
@@ -49,7 +49,7 @@ export function Loading(
         for (const fn of events) if (typeof fn === "function") fn();
       },
     },
-    [Show({ when: computed(state, (d) => d.loading) }, [View(rest, children)])],
+    children,
   );
 }
 

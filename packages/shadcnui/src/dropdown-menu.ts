@@ -21,6 +21,7 @@ export function DropdownMenu(
   children?: ViewChildren,
 ) {
   const state_ = refobj(props.store.state);
+  const presence_state_ = refobj(props.store.menu.presence.state);
 
   return Show(
     {
@@ -29,38 +30,37 @@ export function DropdownMenu(
     [
       DropdownMenuPrimitive.Trigger({ store: props.store }, children),
       DropdownMenuPrimitive.Portal({ store: props.store.menu }, [
-        DropdownMenuPrimitive.Content({ store: props.store }, [
-          View(
-            {
-              class: computed(state_, (t) => {
-                return [
-                  MENU_CONTENT_CLASS,
-                  t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
-                  t.exit ? "animate-out fade-out-0 zoom-out-95" : "",
-                ].join(" ");
+        DropdownMenuPrimitive.Content(
+          {
+            ...props,
+            class: computed(presence_state_, (t) => {
+              return [
+                MENU_CONTENT_CLASS,
+                t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
+                t.exit ? "animate-out fade-out-0 zoom-out-95" : "",
+              ].join(" ");
+            }),
+          },
+          [
+            For({
+              each: computed(state_, (t) => {
+                return t.items;
               }),
-            },
-            [
-              For({
-                each: computed(state_, (t) => {
-                  return t.items;
-                }),
-                render(item: MenuItemCore, idx) {
-                  if (!item.menu) {
-                    return DropdownMenuPrimitive.Item(
-                      {
-                        store: item,
-                        class: MENU_ITEM_CLASS,
-                      },
-                      [item.label],
-                    );
-                  }
-                  return ItemWithSubMenu({ store: item });
-                },
-              }),
-            ],
-          ),
-        ]),
+              render(item: MenuItemCore, idx) {
+                if (!item.menu) {
+                  return DropdownMenuPrimitive.Item(
+                    {
+                      store: item,
+                      class: MENU_ITEM_CLASS,
+                    },
+                    [item.label],
+                  );
+                }
+                return ItemWithSubMenu({ store: item });
+              },
+            }),
+          ],
+        ),
       ]),
     ],
   );
@@ -68,7 +68,23 @@ export function DropdownMenu(
 
 function ItemWithSubMenu(props: ViewProps & { store: MenuItemCore }) {
   const item_state_ = refobj(props.store.state);
-  const menu_state_ = refobj(props.store.menu ? props.store.menu.state : {});
+  const menu_state_ = refobj(
+    props.store.menu
+      ? props.store.menu.state
+      : ({ items: [] } as {
+          enter?: string;
+          exit?: string;
+          items: MenuItemCore[];
+        }),
+  );
+  const presence_state_ = refobj(
+    props.store.menu
+      ? props.store.menu.presence
+      : ({} as {
+          enter?: string;
+          exit?: string;
+        }),
+  );
 
   props.store.onStateChange(() => {
     item_state_.as(props.store.state);
@@ -89,16 +105,17 @@ function ItemWithSubMenu(props: ViewProps & { store: MenuItemCore }) {
         computed(item_state_, (t) => {
           return t.label;
         }),
-        View({ class: "ml-auto pl-2 text-xs text-gray-400 dark:text-gray-500" }, [
-          ChevronRightOutlined({ class: "w-4 h-4" }),
-        ]),
+        View(
+          { class: "ml-auto pl-2 text-xs text-gray-400 dark:text-gray-500" },
+          [ChevronRightOutlined({ class: "w-4 h-4" })],
+        ),
       ],
     ),
     DropdownMenuPrimitive.Portal({ store: props.store.menu }, [
       DropdownMenuPrimitive.SubMenuContent({ store: props.store.menu }, [
         View(
           {
-            class: computed(menu_state_, (t) => {
+            class: computed(presence_state_, (t) => {
               return [
                 MENU_CONTENT_CLASS,
                 t.enter ? "animate-in fade-in-0" : "",

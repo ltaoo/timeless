@@ -7,7 +7,7 @@ import {
   TimelessNormalComponent,
 } from "./view";
 
-console.log('headless v0.1.1')
+console.log("headless v0.1.1");
 
 export * from "@timeless/reactive";
 
@@ -19,6 +19,7 @@ export * from "./switch";
 
 // Primitives
 export * from "./view";
+export * from "./fragment";
 export * from "./svg";
 export * from "./lazy-view";
 export * from "./text";

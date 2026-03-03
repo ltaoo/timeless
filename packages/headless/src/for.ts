@@ -370,18 +370,18 @@ export function For<T>(
       }
 
       // Remove DOM nodes
-      // const $parent = anchor.parentNode;
-      // if ($parent) {
-      //   for (const elm of _$children) {
-      //     if (elm && elm.parentNode === $parent) {
-      //       try {
-      //         $parent.removeChild(elm);
-      //       } catch (e) {
-      //         // ignore
-      //       }
-      //     }
-      //   }
-      // }
+      const $parent = anchor.parentNode;
+      if ($parent) {
+        for (const elm of _$children) {
+          if (elm && elm.parentNode === $parent) {
+            try {
+              $parent.removeChild(elm);
+            } catch (e) {
+              // ignore
+            }
+          }
+        }
+      }
 
       _mounted = false;
       _values = [];

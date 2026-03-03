@@ -26,26 +26,21 @@ export function Button(props: any, children: any) {
     size = "default",
     class: cls,
     style,
-    loading,
-    disabled,
     prefix,
     ...rest
   } = props;
 
-  const state = ref(store.state);
+  const state_ = ref(store.state);
   const events: any[] = [];
-  events.push(store.onStateChange(() => state.as(store.state)));
+  events.push(store.onStateChange(() => state_.as(store.state)));
 
-  const computedClass = computed(state, (s) => {
-    const isLoading = s.loading || loading;
-    const isDisabled = s.disabled || disabled;
-
+  const classname_ = computed(state_, (s) => {
     return [
       "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
       VARIANTS[variant] || VARIANTS.default,
       SIZES[size] || SIZES.default,
-      isLoading ? "opacity-70 pointer-events-none" : "",
-      isDisabled ? "opacity-50 pointer-events-none" : "",
+      s.loading ? "opacity-70 pointer-events-none" : "",
+      s.disabled ? "opacity-50 pointer-events-none" : "",
       cls,
     ]
       .filter(Boolean)
@@ -54,9 +49,9 @@ export function Button(props: any, children: any) {
 
   return ButtonPrimitive.Root(
     {
-      store,
       ...rest,
-      class: computedClass,
+      store,
+      class: classname_,
       style,
       onUnmounted() {
         for (const fn of events) if (typeof fn === "function") fn();
@@ -69,12 +64,7 @@ export function Button(props: any, children: any) {
         class:
           "mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent",
       }),
-      Show(
-        {
-          when: !!prefix,
-        },
-        [ButtonPrimitive.Prefix({}, prefix)],
-      ),
+      Show({ when: !!prefix }, [ButtonPrimitive.Prefix({}, prefix)]),
       ButtonPrimitive.Content({}, children),
     ].filter(Boolean),
   );

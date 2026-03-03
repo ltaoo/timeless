@@ -1,6 +1,26 @@
 import { Subscriber, Ref, isRef } from "./types";
 import { get, has } from "./registry";
 
+export interface RefObject<T> extends Ref<T> {
+  set(key: keyof T, item: any): void;
+  get(key: keyof T): any;
+  delete(key: keyof T): void;
+  as(nextObj: T | ((cur: T) => T)): void;
+  refresh(): void;
+}
+
+export interface RefObjectNullable<T> extends Ref<T | null> {
+  set(key: keyof T, item: any): void;
+  get(key: keyof T): any;
+  delete(key: keyof T): void;
+  as(nextObj: T | ((cur: T | null) => T)): void;
+  refresh(): void;
+}
+
+export function refObject<T extends Record<string, any>>(obj: T): RefObject<T>;
+export function refObject<T extends Record<string, any>>(
+  obj: T | null,
+): RefObjectNullable<T>;
 export function refObject<T extends Record<string, any>>(obj: T | null) {
   let _v = obj;
   const deps: Subscriber[] = [];

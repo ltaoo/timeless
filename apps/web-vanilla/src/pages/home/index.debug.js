@@ -2,76 +2,120 @@ import { Section, Item } from "@/components/index.js";
 
 export default function OverlayView() {
   return View({ class: "space-y-8" }, [
-    Section("Popover", [
+    // Section("Popover", [
+    //   Item("Default", [
+    //     Popover(
+    //       {
+    //         store: new Timeless.ui.PopoverCore({
+    //           align: "middle",
+    //         }),
+    //         title: [
+    //           View(
+    //             {
+    //               class:
+    //                 "w-[200px] h-[30px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
+    //             },
+    //             [Txt("Popover Title")],
+    //           ),
+    //         ],
+    //         content: [
+    //           View(
+    //             {
+    //               class:
+    //                 "w-[200px] h-[100px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
+    //             },
+    //             [Txt("Popover Content")],
+    //           ),
+    //         ],
+    //       },
+    //       [
+    //         Button(
+    //           {
+    //             variant: "outline",
+    //             store: new Timeless.ui.ButtonCore({}),
+    //           },
+    //           ["Open Popover"],
+    //         ),
+    //       ],
+    //     ),
+    //   ]),
+    //   Item("Left Side", [
+    //     Popover(
+    //       {
+    //         store: new Timeless.ui.PopoverCore({
+    //           side: "right",
+    //           align: "start",
+    //         }),
+    //         title: [
+    //           View(
+    //             {
+    //               class:
+    //                 "w-[200px] h-[30px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
+    //             },
+    //             [Txt("Popover Title")],
+    //           ),
+    //         ],
+    //         content: [
+    //           View(
+    //             {
+    //               class:
+    //                 "w-[200px] h-[100px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
+    //             },
+    //             [Txt("Popover Content")],
+    //           ),
+    //         ],
+    //       },
+    //       [
+    //         Button(
+    //           {
+    //             variant: "outline",
+    //             store: new Timeless.ui.ButtonCore({}),
+    //           },
+    //           ["Open Popover"],
+    //         ),
+    //       ],
+    //     ),
+    //   ]),
+    // ]),
+
+    Section("Dropdown Menu", [
       Item("Default", [
-        Popover(
+        DropdownMenu(
           {
-            store: new Timeless.ui.PopoverCore({
-              align: "middle",
+            store: new Timeless.ui.DropdownMenuCore({
+              items: [
+                new Timeless.ui.MenuItemCore({
+                  label: "Edit",
+                  onClick() {
+                    console.log("edit");
+                  },
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Duplicate",
+                  onClick() {
+                    console.log("duplicate");
+                  },
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Delete",
+                  onClick() {
+                    console.log("delete");
+                  },
+                }),
+              ],
             }),
-            title: [
-              View(
-                {
-                  class:
-                    "w-[200px] h-[30px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
-                },
-                [Txt("Popover Title")],
-              ),
-            ],
-            content: [
-              View(
-                {
-                  class:
-                    "w-[200px] h-[100px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
-                },
-                [Txt("Popover Content")],
-              ),
-            ],
           },
           [
             Button(
               {
                 variant: "outline",
-                store: new Timeless.ui.ButtonCore({}),
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    console.log("click Open Menu");
+                  },
+                }),
               },
-              ["Open Popover"],
-            ),
-          ],
-        ),
-      ]),
-      Item("Left Side", [
-        Popover(
-          {
-            store: new Timeless.ui.PopoverCore({
-              side: "right",
-              align: "start",
-            }),
-            title: [
-              View(
-                {
-                  class:
-                    "w-[200px] h-[30px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
-                },
-                [Txt("Popover Title")],
-              ),
-            ],
-            content: [
-              View(
-                {
-                  class:
-                    "w-[200px] h-[100px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
-                },
-                [Txt("Popover Content")],
-              ),
-            ],
-          },
-          [
-            Button(
-              {
-                variant: "outline",
-                store: new Timeless.ui.ButtonCore({}),
-              },
-              ["Open Popover"],
+              ["Open Menu"],
             ),
           ],
         ),

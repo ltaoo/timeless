@@ -2,6 +2,7 @@ import { Ref, isRef, isClassName, ClassNameRef } from "@timeless/reactive";
 import { Txt } from "./text";
 
 export interface ViewProps {
+  as?: string;
   type?: string;
   id?: string | Ref<string>;
   style?: string | Ref<string>;
@@ -24,6 +25,7 @@ export interface ViewProps {
 export function View(props: ViewProps = {}, children?: any) {
   const {
     type = "div",
+    as,
     style,
     class: cls,
     dataset = {},
@@ -39,7 +41,7 @@ export function View(props: ViewProps = {}, children?: any) {
     onMouseLeave,
     ...rest
   } = props;
-  const $elm = document.createElement(type);
+  const $elm = document.createElement(as || type);
 
   Object.keys(rest).forEach((k) => {
     // @ts-ignore

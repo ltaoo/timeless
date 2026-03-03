@@ -4,9 +4,11 @@ import { refArray } from "./reactive-array";
 import { refObject } from "./reactive-object";
 import { Subscriber, Ref, isRef } from "./types";
 
+export function computed<T, R>(deps: Ref<T>, fn: (val: T) => R): Ref<R>;
+export function computed<T extends object, R>(deps: T, fn: (val: T) => R): Ref<R>;
 export function computed<T = any>(
-  deps: Ref<any> | Record<string, any>,
-  fn: (draft: any) => T,
+  deps: Ref<any> | object,
+  fn: (t: any) => T,
 ): Ref<T> {
   // const dep = global_refs.get(deps);
   // if (dep) {

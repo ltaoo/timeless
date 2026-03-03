@@ -1,3 +1,5 @@
+console.log("ui.version 0.1.0");
+
 export * from "./menu"; // Export first
 export * from "./menu/item";
 export * from "./button";

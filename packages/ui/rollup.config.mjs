@@ -72,7 +72,7 @@ const configs = [
           outDir: null,
         },
       }),
-      minify,
+      // minify,
     ],
     external: [],
   },
@@ -106,7 +106,7 @@ const configs = [
           outDir: null,
         },
       }),
-      minify,
+      // minify,
     ],
     external: [
       ...Object.keys(pkg.dependencies || {}),
@@ -163,7 +163,7 @@ export default (args) => {
                 outDir: null,
               },
             }),
-            minify,
+            // minify,
           ],
           external: [
             ...Object.keys(pkg.dependencies || {}),

@@ -1,10 +1,10 @@
 import { ViewChildren, ViewProps, isElement } from "./view";
 
-export function Fragment(props: ViewProps, children: ViewChildren) {
+export function Fragment(props: ViewProps, children: ViewChildren = []) {
   const $fragment = document.createDocumentFragment();
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
 
-  let _children = children ?? [];
+  let _children = children;
   if (!Array.isArray(_children)) {
     _children = [_children];
   }

@@ -74,8 +74,8 @@ export function Content(
         });
       },
       onUnmounted() {
-        store.setFloating(null);
-        unlisten();
+        // store.setFloating(null);
+        // unlisten();
       },
     },
     children,
@@ -92,23 +92,24 @@ export function Popper(
   const { store, zIndex = 999, ...rest } = props;
   const state = refobj(store.state);
 
-  const unlisten = store.onStateChange(() => {
-    state.as(store.state);
+  const unlisten = store.onStateChange((v) => {
+    state.as(v);
   });
 
   return View(
     {
       ...rest,
       class: cn(["popper z-[999]", rest.class]),
-      style: computed(state, (draft) => {
+      style: computed(state, (t) => {
+    // console.log("[]popper - on stateChange callback", t.isPlaced);
         const ss: Record<string, any> = {
           "z-index": zIndex,
           position: "fixed",
           left: 0,
           top: 0,
-          opacity: draft.isPlaced ? 1 : 0,
-          transform: draft.isPlaced
-            ? `translate3d(${Math.round(draft.x)}px, ${Math.round(draft.y)}px, 0)`
+          opacity: t.isPlaced ? 1 : 0,
+          transform: t.isPlaced
+            ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
             : "translate3d(0, 0, 0)",
         };
         return Object.keys(ss)
@@ -117,17 +118,17 @@ export function Popper(
           })
           .join("; ");
       }),
-      onMounted($e: HTMLElement) {
+      onMounted($el: HTMLElement) {
         store.setFloating({
-          $el: $e,
+          $el,
           getRect() {
-            return $e.getBoundingClientRect();
+            return $el.getBoundingClientRect();
           },
         });
       },
       onUnmounted() {
-        store.setFloating(null);
-        unlisten();
+        // store.setFloating(null);
+        // unlisten();
       },
     },
     children,
