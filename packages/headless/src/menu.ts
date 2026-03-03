@@ -78,10 +78,29 @@ export function ContentImpl(
   props: ViewProps & { store: MenuCore },
   children: ViewChildren,
 ) {
+  // Create a function that returns all parent layers as an array
+  const getAllParentLayers = () => {
+    const layers: any[] = [];
+    let currentMenu = props.store.parent_menu;
+    while (currentMenu) {
+      if (currentMenu.layer) {
+        layers.push(currentMenu.layer);
+      }
+      currentMenu = currentMenu.parent_menu;
+    }
+    return layers;
+  };
+
+  // Determine if this is a root layer (no parent menu)
+  const isRootLayer = !props.store.parent_menu;
+
   return PopperPrimitive.Content(
     {
       ...props,
       store: props.store.popper,
+      layer: props.store.layer,
+      getAllParentLayers,
+      isRootLayer,
       onMouseLeave(event) {
         props.store.handleLeave();
         if (props.onMouseLeave) {
@@ -174,7 +193,7 @@ export function Arrow(
   props: ViewProps & { store: MenuCore },
   children: ViewChildren,
 ) {
-  return PopperPrimitive.Arrow(
+  return NativeArrow(
     {
       ...props,
       store: props.store.popper,
@@ -240,41 +259,6 @@ export function SubMenuContent(
       store: props.store,
       onMounted($el) {
         console.log("[SubMenuContent] mounted");
-        // Add pointerdown event to mark pointer as inside
-        $el.addEventListener("pointerdown", (e: any) => {
-          console.log("[SubMenuContent] pointerdown - START", {
-            menuName: props.store._name,
-            hasLayer: !!props.store.layer,
-            hasParent: !!props.store.parent_menu,
-          });
-          if (props.store.layer) {
-            props.store.layer.pointerDown();
-            console.log("[SubMenuContent] marked current menu layer as inside");
-          }
-          // Mark all parent menus' layers as pointer inside
-          // This is crucial because the document listener is registered on the root menu
-          let currentMenu = props.store.parent_menu;
-          let depth = 0;
-          while (currentMenu) {
-            depth++;
-            console.log("[SubMenuContent] marking parent menu layer", {
-              depth,
-              parentName: currentMenu._name,
-              hasLayer: !!currentMenu.layer,
-            });
-            if (currentMenu.layer) {
-              currentMenu.layer.pointerDown();
-              console.log("[SubMenuContent] marked parent layer as inside");
-            }
-            currentMenu = currentMenu.parent_menu;
-          }
-          console.log(
-            "[SubMenuContent] pointerdown - END, marked",
-            depth + 1,
-            "layers",
-          );
-          e.stopPropagation();
-        });
         // Add hover event listeners to keep submenu open
         $el.addEventListener("mouseenter", () => {
           console.log("[SubMenuContent] mouseenter");

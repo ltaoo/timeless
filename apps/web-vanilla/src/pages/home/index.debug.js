@@ -100,6 +100,22 @@ export default function OverlayView() {
                           console.log("duplicated");
                         },
                       }),
+                      new Timeless.ui.MenuItemCore({
+                        label: "Duplicated2",
+                        menu: new Timeless.ui.MenuCore({
+                          items: [
+                            new Timeless.ui.MenuItemCore({
+                              label: "click it",
+                              onClick() {
+                                console.log("123");
+                              },
+                            }),
+                          ],
+                        }),
+                        onClick() {
+                          console.log("duplicated");
+                        },
+                      }),
                     ],
                   }),
                   onClick() {

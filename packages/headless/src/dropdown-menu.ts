@@ -31,7 +31,7 @@ function _hoverScheduleHide(store: DropdownMenuCore) {
   state.timer = setTimeout(() => {
     store.hide();
     state.timer = null;
-  }, 100);
+  }, 300);
 }
 
 export function Root(
@@ -74,22 +74,41 @@ export function Trigger(
           { force: true },
         );
         // console.log("[]has layer?", !!layer, $ref);
-        if (layer) {
-          $e.addEventListener("pointerdown", () => {
-            layer.pointerDown();
-            const rect = $e.getBoundingClientRect();
-            console.log("[]click button in pointerdown callback", rect);
-            props.store.toggle();
-          });
-        } else {
-          $e.addEventListener("pointerdown", () => {
-            const rect = $e.getBoundingClientRect();
-            props.store.toggle({
-              x: rect.left,
-              y: rect.bottom + 4,
-              width: rect.width,
-              height: rect.height,
+
+        // Handle click trigger
+        if (store.trigger === "click") {
+          if (layer) {
+            $e.addEventListener("pointerdown", () => {
+              layer.pointerDown();
+              const rect = $e.getBoundingClientRect();
+              console.log("[]click button in pointerdown callback", rect);
+              props.store.toggle();
             });
+          } else {
+            $e.addEventListener("pointerdown", () => {
+              const rect = $e.getBoundingClientRect();
+              props.store.toggle({
+                x: rect.left,
+                y: rect.bottom + 4,
+                width: rect.width,
+                height: rect.height,
+              });
+            });
+          }
+        }
+
+        // Handle hover trigger
+        if (store.trigger === "hover") {
+          $e.addEventListener("mouseenter", () => {
+            if (store.disabled) return;
+            _hoverClearHide(store);
+            store.show();
+          });
+          // Don't add mouseleave on trigger - let Content handle closing
+
+          // Prevent click from closing the menu in hover mode
+          $e.addEventListener("pointerdown", (e: any) => {
+            e.stopPropagation();
           });
         }
       },
@@ -220,7 +239,25 @@ export function Content(
 ) {
   const { store, ...rest } = props;
 
-  return MenuPrimitive.Content({ ...rest, store: props.store.menu }, children);
+  // Add hover event handlers for hover trigger mode
+  const hoverHandlers =
+    store.trigger === "hover"
+      ? {
+          onMouseEnter() {
+            console.log("[DropdownMenu Content] mouseenter");
+            _hoverClearHide(store);
+          },
+          onMouseLeave() {
+            console.log("[DropdownMenu Content] mouseleave");
+            _hoverScheduleHide(store);
+          },
+        }
+      : {};
+
+  return MenuPrimitive.Content(
+    { ...rest, ...hoverHandlers, store: props.store.menu },
+    children,
+  );
 }
 
 export function Group(props: ViewProps, children: ViewChildren) {
@@ -272,5 +309,32 @@ export function SubMenuContent(
   props: ViewProps & { store: MenuCore },
   children: ViewChildren,
 ) {
-  return MenuPrimitive.SubMenuContent(props, children);
+  // Get the parent DropdownMenuCore from the menu's parent
+  const parentDropdown = (props.store as any).parentDropdown as
+    | DropdownMenuCore
+    | undefined;
+
+  const hoverHandlers =
+    parentDropdown && parentDropdown.trigger === "hover"
+      ? {
+          onMouseEnter() {
+            console.log("[DropdownMenu SubMenuContent] mouseenter");
+            // Cancel parent dropdown hide timer when entering submenu
+            _hoverClearHide(parentDropdown);
+          },
+          onMouseLeave() {
+            console.log("[DropdownMenu SubMenuContent] mouseleave");
+            // Schedule parent dropdown hide when leaving submenu
+            _hoverScheduleHide(parentDropdown);
+          },
+        }
+      : {};
+
+  return MenuPrimitive.SubMenuContent(
+    {
+      ...props,
+      ...hoverHandlers,
+    },
+    children,
+  );
 }

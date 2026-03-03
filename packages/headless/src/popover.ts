@@ -1,12 +1,11 @@
-import { ref, refobj, computed, Ref } from "@timeless/reactive";
+import { refobj } from "@timeless/reactive";
 import { PopoverCore } from "@timeless/ui";
 
-import { tp, merge } from "./theme";
 import { View, ViewChildren, ViewProps } from "./view";
-import { Portal as NativePortal } from "./portal";
-import { Popper } from "./popper";
-import { Presence } from "./presence";
 import { Fragment } from "./fragment";
+import { Portal as NativePortal } from "./portal";
+import * as PopperPrimitive from "./popper";
+import { Presence } from "./presence";
 
 export function Root(props: ViewProps, children?: ViewChildren) {
   return Fragment(props, children);
@@ -17,38 +16,10 @@ export function Content(
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
-  const layer = props.store.layer;
-  // const state = refobj(props.store.state);
-
-  let handlePointerDown: any;
 
   return View(
     {
       ...rest,
-      onMounted($e) {
-        props.store.popper.setFloating({
-          $el: $e,
-          getRect() {
-            return $e.getBoundingClientRect();
-          },
-        });
-        if (layer) {
-          handlePointerDown = () => {
-            layer.handlePointerDownOnTop();
-          };
-          document.addEventListener("pointerdown", handlePointerDown);
-          $e.addEventListener("pointerdown", () => {
-            layer.pointerDown();
-          });
-        }
-      },
-      onUnmounted() {
-        props.store.popper.setFloating(null);
-        if (layer && handlePointerDown) {
-          document.removeEventListener("pointerdown", handlePointerDown);
-          handlePointerDown = null;
-        }
-      },
     },
     children,
   );
@@ -129,7 +100,10 @@ export function Portal(
     },
     [
       Presence({ store: props.store.presence }, [
-        Popper({ store: props.store.popper }, children),
+        PopperPrimitive.Content(
+          { store: props.store.popper, layer: props.store.layer },
+          children,
+        ),
       ]),
     ],
   );

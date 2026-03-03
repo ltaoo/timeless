@@ -86,10 +86,14 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
       offsetX: this.offsetX,
       offsetY: this.offsetY,
     });
+    // Store reference to parent dropdown in menu for hover handling
+    (this.menu as any).parentDropdown = this;
     for (let i = 0; i < items.length; i += 1) {
       const item = items[i];
       if (item.menu) {
         item.menu.setOffset({ x: submenuOffsetX, y: submenuOffsetY });
+        // Also set parent dropdown reference for submenus
+        (item.menu as any).parentDropdown = this;
       }
     }
     this.menu.onHide(() => {

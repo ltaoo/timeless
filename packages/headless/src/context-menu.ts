@@ -4,7 +4,7 @@ import { ChevronRightOutlined } from "@timeless/icons";
 
 import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
 import { Portal } from "./portal";
-import { Popper } from "./popper";
+import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
 import { For } from "./for";
 import { merge, tp } from "./theme";
@@ -93,32 +93,7 @@ export function ContextMenu(
                             store: item.menu.presence,
                             animation: t?.subAnimation || t?.animation,
                           },
-                          [
-                            Popper({ store: item.menu.popper }, [
-                              listenMenuContent(
-                                item.menu,
-                                (() => {
-                                  return View(
-                                    {
-                                      ...merge(tp(t?.menu)),
-                                    },
-                                    [
-                                      For({
-                                        each: items,
-                                        render(sub) {
-                                          // return MenuItemView(sub, t)
-                                          return null;
-                                        },
-                                        onUnmounted() {
-                                          uncomputed(items);
-                                        },
-                                      }),
-                                    ],
-                                  );
-                                })(),
-                              ),
-                            ]),
-                          ],
+                          [],
                         ),
                       ])
                     : null,
@@ -198,9 +173,7 @@ export function ContextMenu(
     [
       ...children,
       Portal({}, [
-        Presence({ store: store.menu.presence, animation: t?.animation }, [
-          Popper({ store: store.menu.popper }, [$menucontent]),
-        ]),
+        Presence({ store: store.menu.presence, animation: t?.animation }, []),
       ]),
     ],
   );

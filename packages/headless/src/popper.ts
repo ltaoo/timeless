@@ -2,7 +2,7 @@ import { refobj, computed, cn } from "@timeless/reactive";
 import { PopperCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "./view";
-import { Arrow } from "./arrow";
+// import { Arrow } from "./arrow";
 import { Fragment } from "./fragment";
 
 export function Root(
@@ -45,10 +45,25 @@ export function Anchor(
 }
 
 export function Content(
-  props: ViewProps & { zIndex?: number; store: PopperCore },
+  props: ViewProps & {
+    zIndex?: number;
+    store: PopperCore;
+    layer?: any;
+    getParentLayer?: () => any;
+    getAllParentLayers?: () => any[];
+    isRootLayer?: boolean;
+  },
   children: ViewChildren = [],
 ) {
-  const { store, zIndex = 99, ...rest } = props;
+  const {
+    store,
+    zIndex = 99,
+    layer,
+    getParentLayer,
+    getAllParentLayers,
+    isRootLayer = true,
+    ...rest
+  } = props;
 
   const state_ = refobj(store.state);
 
@@ -57,6 +72,8 @@ export function Content(
       state_.as(v);
     }),
   ];
+
+  let handlePointerDown: any;
 
   return View(
     {
@@ -80,73 +97,75 @@ export function Content(
           .join("; ");
       }),
       onMounted($e: HTMLElement) {
+        console.log(
+          "[PopperPrimitive.Content] mounted, has layer:",
+          !!layer,
+          "isRootLayer:",
+          isRootLayer,
+        );
         store.setFloating({
           $el: $e,
           getRect() {
             return $e.getBoundingClientRect();
           },
         });
+        if (layer) {
+          // Only register document listener for root layer
+          if (isRootLayer) {
+            handlePointerDown = () => {
+              console.log(
+                "[PopperPrimitive.Content] handlePointerDownOnTop called on ROOT",
+              );
+              layer.handlePointerDownOnTop();
+            };
+            document.addEventListener("pointerdown", handlePointerDown);
+            console.log(
+              "[PopperPrimitive.Content] registered document listener for ROOT",
+            );
+          }
+          $e.addEventListener("pointerdown", () => {
+            console.log(
+              "[PopperPrimitive.Content] element pointerdown, marking layer, isRoot:",
+              isRootLayer,
+            );
+            layer.pointerDown();
+            // Mark all parent layers as pointer inside
+            if (getAllParentLayers) {
+              const parentLayers = getAllParentLayers();
+              console.log(
+                "[PopperPrimitive.Content] marking parent layers, count:",
+                parentLayers.length,
+              );
+              for (const parentLayer of parentLayers) {
+                if (parentLayer) {
+                  parentLayer.pointerDown();
+                }
+              }
+            } else if (getParentLayer) {
+              // Fallback to old recursive method for backward compatibility
+              let currentLayer = getParentLayer();
+              while (currentLayer) {
+                currentLayer.pointerDown();
+                currentLayer = currentLayer.getParentLayer
+                  ? currentLayer.getParentLayer()
+                  : null;
+              }
+            }
+          });
+        }
       },
       onUnmounted() {
-        // store.setFloating(null);
-        // unlisten();
+        console.log(
+          "[PopperPrimitive.Content] unmounted, removing listeners, isRoot:",
+          isRootLayer,
+        );
+        store.setFloating(null);
+        if (layer && handlePointerDown) {
+          document.removeEventListener("pointerdown", handlePointerDown);
+          handlePointerDown = null;
+        }
       },
     },
     children,
   );
 }
-
-export function Popper(
-  props: ViewProps & {
-    store: PopperCore;
-    zIndex?: number;
-  },
-  children?: ViewChildren,
-) {
-  const { store, zIndex = 999, ...rest } = props;
-  const state = refobj(store.state);
-
-  const unlisten = store.onStateChange((v) => {
-    state.as(v);
-  });
-
-  return View(
-    {
-      ...rest,
-      class: cn(["t-popper", rest.class]),
-      style: computed(state, (t) => {
-        // console.log("[]popper - on stateChange callback", t.isPlaced);
-        const ss: Record<string, any> = {
-          "z-index": zIndex,
-          position: "fixed",
-          left: 0,
-          top: 0,
-          opacity: t.isPlaced ? 1 : 0,
-          transform: t.isPlaced
-            ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
-            : "translate3d(0, 0, 0)",
-        };
-        return Object.keys(ss)
-          .map((k) => {
-            return `${k}: ${ss[k]}`;
-          })
-          .join("; ");
-      }),
-      onMounted($el: HTMLElement) {
-        store.setFloating({
-          $el,
-          getRect() {
-            return $el.getBoundingClientRect();
-          },
-        });
-      },
-      onUnmounted() {
-        // store.setFloating(null);
-        // unlisten();
-      },
-    },
-    children,
-  );
-}
-
-export { Arrow };
