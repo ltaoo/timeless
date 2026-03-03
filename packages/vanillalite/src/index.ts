@@ -9,6 +9,7 @@ import {
   SVG,
   Circle,
   DangerouslyInnerHTML,
+  Portal,
   lazy,
   render,
 } from "@timeless/headless";
@@ -26,6 +27,7 @@ export {
   SVG,
   Circle,
   DangerouslyInnerHTML,
+  Portal,
   lazy,
   render,
 };

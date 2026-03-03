@@ -6,7 +6,8 @@
       "Bash(grep:*)",
       "Bash(npm run dev)",
       "Bash(npm run build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(pnpm vanilla:*)"
     ]
   }
 }

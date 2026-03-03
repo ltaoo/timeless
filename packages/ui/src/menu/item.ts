@@ -108,7 +108,6 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.Change, { ...this.state });
   }
 
-
   constructor(options: Partial<{ _name: string }> & MenuItemCoreProps) {
     super(options);
 
@@ -135,17 +134,16 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
     }
 
     if (menu) {
+      menu.popper.setConfig({
+        placement: "right-start",
+      });
       this.menu = menu;
-      console.log(
-        "[DOMAIN]ui/menu/item - bind menu",
-        this.label,
-        menu._name
-      );
+      console.log("[DOMAIN]ui/menu/item - bind menu", this.label, menu._name);
       menu.onShow(() => {
         console.log(
           "[DOMAIN]ui/menu/item - menu.onShow",
           this.label,
-          menu._name
+          menu._name,
         );
         this._open = true;
         this.emit(Events.Change, { ...this.state });
@@ -154,7 +152,7 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
         console.log(
           "[DOMAIN]ui/menu/item - menu.onHide",
           this.label,
-          menu._name
+          menu._name,
         );
         this._open = false;
         this.emit(Events.Change, { ...this.state });
@@ -190,7 +188,7 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
       "[DOMAIN]ui/menu/item - handlePointerEnter",
       this.label,
       this._enter,
-      this._open
+      this._open,
     );
     if (this._enter) {
       return;
@@ -215,7 +213,7 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
       "[DOMAIN]ui/menu/item - handlePointerLeave",
       this.label,
       this._enter,
-      this._open
+      this._open,
     );
     if (this._enter === false) {
       return;
@@ -229,7 +227,7 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
     console.log(
       "[DOMAIN]ui/menu/item - handleFocus",
       this.label,
-      this._focused
+      this._focused,
     );
     if (this._focused) {
       return;
@@ -240,14 +238,11 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.Change, { ...this.state });
   }
   handleBlur() {
-    console.log(
-      "[DOMAIN]ui/menu/item - handleBlur",
-      this.label,
-      this._focused
-    );
+    console.log("[DOMAIN]ui/menu/item - handleBlur", this.label, this._focused);
     if (this._focused === false) {
       return;
     }
+    this._focused = false;
     this._enter = false;
     this.blur();
   }

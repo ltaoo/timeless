@@ -1,8 +1,8 @@
 {
   "name": "@timeless/vanillakit",
   "version": "1.0.0",
-  "main": "dist/timeless.vanillakit.umd.min.js",
-  "module": "dist/timeless.vanillakit.esm.js",
+  "main": "dist/timeless.vanillalite.umd.min.js",
+  "module": "dist/timeless.vanillalite.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c rollup.config.mjs"

@@ -1,0 +1,195 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test For Component Duplicate</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    .menu-item {
+      padding: 8px;
+      margin: 4px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .item-simple {
+      background: #e3f2fd;
+    }
+
+    .item-complex {
+      background: #fff3e0;
+    }
+
+    button {
+      padding: 8px 16px;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Test For Component - Duplicate Issue</h1>
+  <button id="toggle">Toggle List</button>
+  <div id="container"></div>
+
+  <script src="../../packages/vanillalite/dist/timeless.vanillalite.umd.min.js"></script>
+
+  <script>
+    const { ref, refobj, computed, For, Show, View, Fragment, Portal, render } = Timeless;
+
+    // Simple component - just a View
+    function SimpleItem(props) {
+      console.log('[SimpleItem] created', props.label);
+      return View(
+        {
+          class: 'menu-item item-simple',
+          onMounted() {
+            console.log('[SimpleItem] mounted', props.label);
+          },
+          onUnmounted() {
+            console.log('[SimpleItem] unmounted', props.label);
+          }
+        },
+        ['Simple: ' + props.label]
+      );
+    }
+
+    // Complex component - Fragment with multiple children (similar to ItemWithSubMenu)
+    // Uses computed to create reactive children and Portal (like SubMenu)
+    function ComplexItem(props) {
+      console.log('[ComplexItem] created', props.label);
+
+      const state = refobj({ label: props.label, count: 0, showSubMenu: false, });
+
+      return Fragment(
+        {
+          onMounted() {
+            console.log('[ComplexItem] mounted', props.label);
+          },
+          onUnmounted() {
+            console.log('[ComplexItem] unmounted', props.label);
+          }
+        },
+        [
+          // Main item (like SubMenuTrigger)
+          View(
+            { class: 'menu-item item-complex' },
+            [
+              'Complex: ',
+              Timeless.computed(state, (s) => s.label),
+              View({
+                onClick() {
+                  state.as({
+                    ...state.value,
+                    showSubMenu: !state.value.showSubMenu,
+                  });
+                }
+              }, [
+                'Click it'
+              ]),
+            ]
+          ),
+          Portal({}, [
+            Show({
+              when: computed(state, (t) => {
+                return t.showSubMenu;
+              }),
+            }, [
+              View(
+                { class: 'item item-complex' },
+                [
+                  '  - Portal Child of ',
+                  Timeless.computed(state, (s) => s.label)
+                ]
+              )
+            ]),
+          ]),
+        ]
+      );
+    }
+
+    function AppView() {
+      const items = ref([
+        { id: 1, label: 'Item 1', type: 'simple' },
+        { id: 2, label: 'Item 2', type: 'complex' },
+        { id: 3, label: 'Item 3', type: 'simple' },
+      ]);
+      const visible = ref(true);
+
+      document.getElementById('toggle').addEventListener('click', () => {
+        if (visible.value) {
+          console.log('=== UNMOUNTING ===');
+          visible.as(false);
+        } else {
+          console.log('=== MOUNTING ===');
+          visible.as(true);
+        }
+      });
+
+      // return View({}, [
+      //   View({}, ["Hello"]),
+
+      // ]);
+      return Portal({}, [
+        Show({
+          when: visible,
+        }, [
+          // View({
+          //   class: 'dropdown-menu',
+          // }, [
+          //   For({
+          //     each: items,
+          //     render(item, idx) {
+          //       console.log('[For render]', item.label, 'type:', item.type);
+          //       if (item.type === 'simple') {
+          //         return SimpleItem({ label: item.label });
+          //       } else {
+          //         return ComplexItem({ label: item.label });
+          //       }
+          //     },
+          //     onMounted() {
+          //       console.log('[For] mounted');
+          //     },
+          //     onUnmounted() {
+          //       console.log('[For] unmounted');
+          //     }
+          //   })
+          // ]),
+          For({
+            each: items,
+            render(item, idx) {
+              console.log('[For render]', item.label, 'type:', item.type);
+              if (item.type === 'simple') {
+                return SimpleItem({ label: item.label });
+              } else {
+                return ComplexItem({ label: item.label });
+              }
+            },
+            onMounted() {
+              console.log('[For] mounted');
+            },
+            onUnmounted() {
+              console.log('[For] unmounted');
+            }
+          })
+        ]
+        )
+      ])
+    }
+
+    const container = document.getElementById('container');
+    render(AppView(), container)
+
+
+    console.log('Initial render complete. Check DOM for duplicates.');
+    console.log('Items in DOM:', document.querySelectorAll('.item').length, '(should be 4: 1 simple + 2 complex + 1 simple)');
+  </script>
+</body>
+
+</html>

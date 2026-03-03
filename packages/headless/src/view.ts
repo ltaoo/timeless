@@ -137,12 +137,12 @@ export function View(props: ViewProps = {}, children?: any) {
   }
   if (onMouseEnter) {
     $elm.addEventListener("mouseenter", function (event: MouseEvent) {
-      if (onMouseEnter) onMouseEnter(event);
+      onMouseEnter(event);
     });
   }
   if (onMouseLeave) {
     $elm.addEventListener("mouseleave", function (event: MouseEvent) {
-      if (onMouseLeave) onMouseLeave(event);
+      onMouseLeave(event);
     });
   }
 
@@ -165,28 +165,6 @@ export function View(props: ViewProps = {}, children?: any) {
     // onMounted() {
 
     // },
-    beforeUnmounted() {
-      if (props.beforeUnmounted) {
-        props.beforeUnmounted();
-      }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
-        if (isElement(node) && node.beforeUnmounted) {
-          node.beforeUnmounted();
-        }
-      }
-    },
-    onUnmounted() {
-      if (props.onUnmounted) {
-        props.onUnmounted();
-      }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
-        if (isElement(node) && node.onUnmounted) {
-          node.onUnmounted();
-        }
-      }
-    },
     append(node: any) {
       _children.push(node);
     },
@@ -194,6 +172,7 @@ export function View(props: ViewProps = {}, children?: any) {
       $elm.innerHTML = html;
     },
     render() {
+      // Clear existing content before re-rendering to avoid duplicates
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
         if (!node) continue;
@@ -222,6 +201,31 @@ export function View(props: ViewProps = {}, children?: any) {
       }
       // $elm.className = class$.toString();
       return $elm;
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < _children.length; i += 1) {
+        const node = _children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      for (let i = 0; i < _children.length; i += 1) {
+        const node = _children[i];
+        if (isElement(node) && node.onUnmounted) {
+          node.onUnmounted();
+        }
+      }
+      while ($elm.firstChild) {
+        $elm.removeChild($elm.firstChild);
+      }
     },
   };
 }

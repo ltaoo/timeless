@@ -1,8 +1,8 @@
 {
   "name": "@timeless/reactive",
   "version": "1.0.0",
-  "main": "dist/reactive.umd.min.js",
-  "module": "dist/reactive.esm.js",
+  "main": "dist/timeless.reactive.umd.min.js",
+  "module": "dist/timeless.reactive.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c rollup.config.js"

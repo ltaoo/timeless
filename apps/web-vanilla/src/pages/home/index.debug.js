@@ -91,9 +91,19 @@ export default function OverlayView() {
                   },
                 }),
                 new Timeless.ui.MenuItemCore({
-                  label: "Duplicate",
+                  label: "More",
+                  menu: new Timeless.ui.MenuCore({
+                    items: [
+                      new Timeless.ui.MenuItemCore({
+                        label: "Duplicated",
+                        onClick() {
+                          console.log("duplicated");
+                        },
+                      }),
+                    ],
+                  }),
                   onClick() {
-                    console.log("duplicate");
+                    console.log("more");
                   },
                 }),
                 new Timeless.ui.MenuItemCore({

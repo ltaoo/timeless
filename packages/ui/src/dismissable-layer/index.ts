@@ -39,10 +39,12 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
   handlePointerOutside(branch: HTMLElement) {}
   /** 响应点击事件 */
   pointerDown() {
+    console.log("[DismissableLayerCore] pointerDown - setting isPointerInside to true");
     this.isPointerInside = true;
   }
   /** 响应冒泡到最顶层时的点击事件 */
   handlePointerDownOnTop(absNode?: {}) {
+    console.log("[DismissableLayerCore] handlePointerDownOnTop - isPointerInside:", this.isPointerInside);
     // console.log(...this.log("handlePointerDownOnTop"));
     //     const { branches, layersWithOutsidePointerEventsDisabled } = this;
     //     const isBodyPointerEventsDisabled =
@@ -59,9 +61,11 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
     //     const isPointerEventsEnabled = index !== -1;
     //     const isPointerDownOnBranch = [...branches].some((b) => b.contains(absNode));
     if (this.isPointerInside === true) {
+      console.log("[DismissableLayerCore] pointer is inside, resetting flag and returning");
       this.isPointerInside = false;
       return;
     }
+    console.log("[DismissableLayerCore] pointer is OUTSIDE, emitting Dismiss event");
     this.emit(Events.PointerDownOutside);
     this.emit(Events.InteractOutside);
     this.emit(Events.Dismiss);

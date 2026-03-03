@@ -268,7 +268,14 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     // this.container = container;
     // this.emit(Events.ContainerChange, container);
   }
-  setConfig(config: { placement?: Placement; strategy?: Strategy }) {}
+  setConfig(config: { placement?: Placement; strategy?: Strategy }) {
+    if (config.placement) {
+      this.placement = config.placement;
+    }
+    if (config.strategy) {
+      this.strategy = config.strategy;
+    }
+  }
   setState(v: { x: number; y: number }) {
     this.state.x = v.x;
     this.state.y = v.y;

@@ -1,4 +1,10 @@
-import { Button as H } from "@timeless/headless";
+import {
+  ButtonPrimitive,
+  View,
+  ViewChildren,
+  ViewProps,
+} from "@timeless/headless";
+import { ButtonCore } from "@timeless/ui";
 
 const S = {
   base: "position:relative;display:flex;align-items:center;justify-content:center;white-space:nowrap;border:none;outline:none;cursor:pointer;border-radius:var(--weui-BTN-RADIUS);font-size:var(--weui-FONT-SIZE);transition:opacity .3s;-webkit-tap-highlight-color:transparent;",
@@ -28,18 +34,24 @@ const t = {
   },
 };
 
-export function Button(p: Parameters<typeof H>[0], c?: any) {
-  const el = H({ ...p, theme: t }, c);
-  const $ = el.$elm as HTMLElement;
-  $.addEventListener("mouseenter", () => {
-    if (!p.disabled && !p.loading) {
-      $.style.opacity = "0.8";
-    }
-  });
-  $.addEventListener("mouseleave", () => {
-    if (!p.disabled && !p.loading) {
-      $.style.opacity = "";
-    }
-  });
-  return el;
+// export function Button(p: Parameters<typeof H>[0], c?: any) {
+//   const el = H({ ...p, theme: t }, c);
+//   const $ = el.$elm as HTMLElement;
+//   $.addEventListener("mouseenter", () => {
+//     if (!p.disabled && !p.loading) {
+//       $.style.opacity = "0.8";
+//     }
+//   });
+//   $.addEventListener("mouseleave", () => {
+//     if (!p.disabled && !p.loading) {
+//       $.style.opacity = "";
+//     }
+//   });
+//   return el;
+// }
+export function Button(
+  props: ViewProps & { store: ButtonCore },
+  children: ViewChildren,
+) {
+  return View({}, children);
 }

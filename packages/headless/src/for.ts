@@ -132,6 +132,7 @@ export function For<T>(
       _$children[index] = res.elm;
     },
     _refresh(v: T[]) {
+      console.log("[For _refresh] called with", v.length, "items, current:", _values.length);
       const new_items = v;
       const prev_items = _values;
       const prev_elements = _elements;
@@ -224,6 +225,7 @@ export function For<T>(
         }
       }
 
+      console.log("[For _refresh] removed:", removed_nodes.length, "added:", added_nodes.length, "updated:", updated_nodes.length);
       // console.log("1. removed_nodes", removed_nodes);
       // console.log("2. added_nodes", added_nodes);
       // console.log("3. updated_nodes", updated_nodes);

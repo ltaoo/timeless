@@ -17,16 +17,27 @@ export function Anchor(
   children: ViewChildren,
 ) {
   const { store, ...rest } = props;
+  console.log("[Popper Anchor] created");
   return View(
     {
       ...rest,
       onMounted($el) {
+        console.log("[Popper Anchor] mounted");
         store.setReference({
           getRect() {
             const rect = $el.getBoundingClientRect();
             return rect;
           },
         });
+        if (rest.onMounted) {
+          rest.onMounted($el);
+        }
+      },
+      onUnmounted() {
+        console.log("[Popper Anchor] unmounted");
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
+        }
       },
     },
     children,
@@ -35,28 +46,31 @@ export function Anchor(
 
 export function Content(
   props: ViewProps & { zIndex?: number; store: PopperCore },
-  children: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, zIndex = 99, ...rest } = props;
-  const state = refobj(store.state);
 
-  const unlisten = store.onStateChange(() => {
-    state.as(store.state);
-  });
+  const state_ = refobj(store.state);
+
+  const unsliten = [
+    store.onStateChange((v) => {
+      state_.as(v);
+    }),
+  ];
 
   return View(
     {
       ...rest,
-      class: cn(["popper z-[999]", rest.class]),
-      style: computed(state, (draft) => {
+      class: cn(["t1-popper", rest.class]),
+      style: computed(state_, (t) => {
         const ss: Record<string, any> = {
           "z-index": zIndex,
           position: "fixed",
           left: 0,
           top: 0,
-          opacity: draft.isPlaced ? 100 : 0,
-          transform: draft.isPlaced
-            ? `translate3d(${Math.round(draft.x)}px, ${Math.round(draft.y)}px, 0)`
+          opacity: t.isPlaced ? 100 : 0,
+          transform: t.isPlaced
+            ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
             : "translate3d(0, 0, 0)",
         };
         return Object.keys(ss)
@@ -99,9 +113,9 @@ export function Popper(
   return View(
     {
       ...rest,
-      class: cn(["popper z-[999]", rest.class]),
+      class: cn(["t-popper", rest.class]),
       style: computed(state, (t) => {
-    // console.log("[]popper - on stateChange callback", t.isPlaced);
+        // console.log("[]popper - on stateChange callback", t.isPlaced);
         const ss: Record<string, any> = {
           "z-index": zIndex,
           position: "fixed",

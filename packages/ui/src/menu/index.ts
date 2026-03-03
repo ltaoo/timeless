@@ -149,6 +149,8 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   items: MenuItemCore[] = [];
   cur_sub: MenuCore | null = null;
   cur_item: MenuItemCore | null = null;
+  /** 父菜单引用，用于子菜单清除父菜单的定时器 */
+  parent_menu: MenuCore | null = null;
   inside = false;
   /** 鼠标是否处于子菜单中 */
   in_sub_menu = false;
@@ -210,12 +212,18 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         clearTimeout(item.menu.hide_sub_timer);
         item.menu.hide_sub_timer = null;
       }
+      // 如果当前菜单有父菜单，清除父菜单的定时器
+      if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
+        clearTimeout(this.parent_menu.hide_sub_timer);
+        this.parent_menu.hide_sub_timer = null;
+      }
       this.emit(Events.EnterItem, item);
       if (item.menu) {
         item.menu.show();
       }
       if (this.cur_item && this.cur_item !== item) {
         this.cur_item.blur();
+        // 立即关闭之前菜单项的子菜单，保持快速响应
         if (this.cur_item.menu) {
           this.cur_item.menu.hide();
         }
@@ -237,6 +245,8 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     const sub_menu = item.menu;
+    // 设置子菜单的父菜单引用
+    sub_menu.parent_menu = this;
     // sub_menu.onShow(() => {
     //   this.log("sub.onShow");
     //   this.cur_sub = sub_menu;
@@ -312,6 +322,26 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.items[i].reset();
     }
   }
+
+  handleLeave() {
+    console.log("[]handleLeave", this.cur_item?.label, this.cur_item?._open);
+    // 使用 cur_item 而不是查找 focused 状态的 item
+    // 因为 item 的 handlePointerLeave 会先触发，将 _focused 设置为 false
+    if (!this.cur_item) {
+      return;
+    }
+    // 如果当前菜单项有子菜单且子菜单是打开的，延迟关闭它
+    // 使用较短的延迟时间(100ms)，让用户有时间移动到子菜单，同时保持快速响应
+    if (this.cur_item.menu && this.cur_item._open) {
+      this.hide_sub_timer = setTimeout(() => {
+        this.hide_sub_timer = null;
+        if (this.cur_item && this.cur_item.menu) {
+          this.cur_item.menu.hide();
+        }
+      }, 100);
+    }
+  }
+
   unmount() {
     // this.log("destroy", this.name);
     super.destroy();

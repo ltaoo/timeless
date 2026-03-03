@@ -73,8 +73,18 @@ const config = [
       format: "umd",
       name: "Timeless",
       extend: true,
+      globals: {
+        "@timeless/reactive": "Timeless.reactive",
+        "@timeless/headless": "Timeless.headless",
+        "@timeless/ui": "Timeless.ui",
+      },
       sourcemap: true,
     },
+    external: [
+      "@timeless/reactive",
+      "@timeless/headless",
+      "@timeless/ui",
+    ],
     plugins: [
       alias({
         entries: [{ find: "@", replacement: path.resolve(__dirname, "src") }],

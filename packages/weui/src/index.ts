@@ -8,7 +8,7 @@ export * from "./checkbox";
 export * from "./dialog";
 export * from "./input";
 export * from "./label";
-export * from "./menu";
+// export * from "./menu";
 export * from "./popover";
 export * from "./progress";
 export * from "./select";

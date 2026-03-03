@@ -1,25 +1,25 @@
-import typescript from '@rollup/plugin-typescript';
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import terser from '@rollup/plugin-terser';
-import { readFileSync } from 'fs';
+import typescript from "@rollup/plugin-typescript";
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
+import terser from "@rollup/plugin-terser";
+import { readFileSync } from "fs";
 
-const pkg = JSON.parse(readFileSync('./package.json'));
+const pkg = JSON.parse(readFileSync("./package.json"));
 
 const config = [
   {
-    input: 'src/index.ts',
+    input: "src/index.ts",
     output: [
       {
-        file: 'dist/index.js',
-        format: 'cjs',
+        file: "dist/index.js",
+        format: "cjs",
         sourcemap: true,
       },
       {
-        file: 'dist/index.mjs',
-        format: 'es',
+        file: "dist/index.mjs",
+        format: "es",
         sourcemap: true,
-      }
+      },
     ],
     external: [
       ...Object.keys(pkg.dependencies || {}),
@@ -28,24 +28,36 @@ const config = [
     plugins: [
       resolve(),
       commonjs(),
-      typescript({ tsconfig: './tsconfig.json' })
-    ]
+      typescript({ tsconfig: "./tsconfig.json" }),
+    ],
   },
   {
-    input: 'src/index.ts',
+    input: "src/index.ts",
     output: {
-      file: 'dist/timeless.web.umd.min.js',
-      format: 'umd',
-      name: 'Timeless.web',
+      file: "dist/timeless.web.umd.min.js",
+      format: "umd",
+      name: "Timeless.web",
+      globals: {
+        "@timeless/reactive": "Timeless.reactive",
+        "@timeless/headless": "Timeless.headless",
+        "@timeless/kit": "Timeless",
+        "@timeless/ui": "Timeless.ui",
+      },
       sourcemap: true,
     },
+    external: [
+      "@timeless/reactive",
+      "@timeless/headless",
+      "@timeless/kit",
+      "@timeless/ui",
+    ],
     plugins: [
       resolve({ browser: true }),
       commonjs(),
-      typescript({ tsconfig: './tsconfig.json' }),
-      terser()
-    ]
-  }
+      typescript({ tsconfig: "./tsconfig.json" }),
+      terser(),
+    ],
+  },
 ];
 
 export default (args) => {

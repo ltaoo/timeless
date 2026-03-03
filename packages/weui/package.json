@@ -9,6 +9,7 @@
     "build": "rollup -c rollup.config.js"
   },
   "dependencies": {
+    "@timeless/reactive": "workspace:*",
     "@timeless/ui": "workspace:*",
     "@timeless/headless": "workspace:*"
   },

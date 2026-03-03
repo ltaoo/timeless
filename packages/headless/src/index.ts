@@ -7,7 +7,7 @@ import {
   TimelessNormalComponent,
 } from "./view";
 
-console.log("headless v0.1.1");
+console.log("headless v0.1.2");
 
 export * from "@timeless/reactive";
 

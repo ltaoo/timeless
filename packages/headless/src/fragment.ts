@@ -9,10 +9,13 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
     _children = [_children];
   }
 
+  console.log("[Fragment] created with", _children.length, "children");
+
   return {
     t: "fragment",
     $elm: $fragment,
     beforeUnmounted() {
+      console.log("[Fragment] beforeUnmounted");
       if (beforeUnmounted) {
         beforeUnmounted();
       }
@@ -24,6 +27,7 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       }
     },
     onUnmounted() {
+      console.log("[Fragment] onUnmounted");
       if (onUnmounted) {
         onUnmounted();
       }
@@ -38,6 +42,7 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       _children.push(node);
     },
     render() {
+      console.log("[Fragment] render, children count:", _children.length);
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
         if (!node) continue;
