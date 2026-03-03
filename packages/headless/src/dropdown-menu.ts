@@ -104,7 +104,11 @@ export function Trigger(
             _hoverClearHide(store);
             store.show();
           });
-          // Don't add mouseleave on trigger - let Content handle closing
+
+          $e.addEventListener("mouseleave", () => {
+            if (store.disabled) return;
+            _hoverScheduleHide(store);
+          });
 
           // Prevent click from closing the menu in hover mode
           $e.addEventListener("pointerdown", (e: any) => {

@@ -33,6 +33,8 @@ type MenuCoreState = {
   hover: boolean;
   /** 所有选项 */
   items: MenuItemCore[];
+  enter?: boolean;
+  exit?: boolean;
 };
 type MenuCoreProps = {
   side: Side;
@@ -111,6 +113,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       console.log("[DOMAIN]ui/menu/index - layer.onDismiss", this._name);
       this.hide();
     });
+    this.presence.onStateChange(() => {
+      this.state.enter = this.presence.state.enter;
+      this.state.exit = this.presence.state.exit;
+      this.emit(Events.StateChange, { ...this.state });
+    });
     this.presence.onHidden(() => {
       console.log(
         "[DOMAIN]ui/menu/index - presence.onHidden",
@@ -175,6 +182,8 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     console.log("[DEBUG-MENU] show()", this._name);
     // console.trace("[DEBUG-MENU] show() call stack");
     this.state.open = true;
+    this.state.enter = this.presence.enter;
+    this.state.exit = this.presence.exit;
     this.presence.show();
     this.popper.place();
     this.emit(Events.Show);
@@ -186,6 +195,8 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     }
     console.log("[DOMAIN]ui/menu/index - hide", this._name);
     this.state.open = false;
+    this.state.enter = this.presence.enter;
+    this.state.exit = this.presence.exit;
     // this.log("hide");
     this.presence.hide();
     this.emit(Events.Hidden);

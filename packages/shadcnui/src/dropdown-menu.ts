@@ -4,17 +4,10 @@ import {
   For,
   Fragment,
   Show,
-  Txt,
-  View,
   ViewChildren,
   ViewProps,
 } from "@timeless/headless";
-import {
-  DropdownMenuCore,
-  MenuCore,
-  MenuItemCore,
-  PresenceCore,
-} from "@timeless/ui";
+import { DropdownMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
 
 const MENU_CONTENT_CLASS =
@@ -28,7 +21,6 @@ export function DropdownMenu(
   children?: ViewChildren,
 ) {
   const state_ = refobj(props.store.state);
-  const presence_state_ = refobj(props.store.menu.presence.state);
 
   return Show({ when: !!children }, [
     DropdownMenuPrimitive.Trigger({ store: props.store }, children),
@@ -36,7 +28,7 @@ export function DropdownMenu(
       DropdownMenuPrimitive.Content(
         {
           ...props,
-          class: computed(presence_state_, (t) => {
+          class: computed(state_, (t) => {
             return [
               MENU_CONTENT_CLASS,
               t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
@@ -69,11 +61,6 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
   const has_submenu_ = ref(!!props.store.menu);
   const menu_state_ = refobj(
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
-  );
-  const presence_state_ = refobj(
-    props.store.menu
-      ? props.store.menu.presence.state
-      : ({} as PresenceCore["state"]),
   );
 
   const unlisten = [
@@ -119,11 +106,11 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
           DropdownMenuPrimitive.SubMenuContent(
             {
               store: props.store.menu,
-              class: computed(presence_state_, (t) => {
+              class: computed(menu_state_, (t) => {
                 return [
                   MENU_CONTENT_CLASS,
-                  t.enter ? "animate-in fade-in-0" : "",
-                  t.exit ? "animate-out fade-out-0" : "",
+                  t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
+                  t.exit ? "animate-out fade-out-0 zoom-out-95" : "",
                 ].join(" ");
               }),
             },
