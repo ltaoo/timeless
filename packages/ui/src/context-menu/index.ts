@@ -1,7 +1,7 @@
 import { BaseDomain, Handler } from "@timeless/base";
 import { MenuCore } from "@/menu";
 import { MenuItemCore } from "@/menu/item";
-import { Rect } from "@/popper/types";
+import { Rect, Side, Align } from "@/popper/types";
 
 enum Events {
   StateChange,
@@ -20,12 +20,31 @@ type ContextMenuProps = {
   items: MenuItemCore[];
   submenuOffsetX?: number;
   submenuOffsetY?: number;
+  trigger?: "contextmenu" | "hover" | "manual";
+  side?: Side;
+  align?: Align;
 };
 export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
   menu: MenuCore;
+  disabled = false;
+  trigger: "contextmenu" | "hover" | "manual" = "contextmenu";
 
   state: ContextMenuState = {
     items: [],
+  };
+
+  // Virtual element for positioning
+  private virtualElement = {
+    getBoundingClientRect: () => ({
+      width: 0,
+      height: 0,
+      x: 0,
+      y: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    }),
   };
 
   constructor(
@@ -41,50 +60,92 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
       items = [],
       submenuOffsetX = -2,
       submenuOffsetY = -4,
+      trigger = "contextmenu",
+      side = "bottom",
+      align = "start",
     } = options;
     this.state.items = items;
+    this.trigger = trigger;
     this.menu = new MenuCore({
       ...options,
       _name: _name ? `${_name}__menu` : "menu-in-context-menu",
-      side: "right",
-      align: "start",
+      side,
+      align,
+    });
+    // Store reference to parent context menu in menu for hover handling
+    (this.menu as any).parentContextMenu = this;
+
+    // Set initial virtual reference
+    console.log("[ContextMenuCore] constructor - setting initial reference");
+    this.menu.popper.setReference({
+      $el: this.virtualElement as any,
+      getRect: () => {
+        return this.virtualElement.getBoundingClientRect() as Rect;
+      },
+    });
+    console.log("[ContextMenuCore] constructor - reference set, checking:", {
+      hasReference: !!this.menu.popper.reference,
+      reference: this.menu.popper.reference,
     });
 
     for (let i = 0; i < items.length; i += 1) {
       const item = items[i];
       if (item.menu) {
         item.menu.setOffset({ x: submenuOffsetX, y: submenuOffsetY });
+        // Also set parent context menu reference for submenus
+        (item.menu as any).parentContextMenu = this;
       }
     }
   }
 
   show(position: Partial<{ x: number; y: number }> = {}) {
-    const { x, y } = position;
-    this.updateReference({
-      ...this.menu.popper.reference,
+    const { x = 0, y = 0 } = position;
+    console.log("[ContextMenuCore] show at position:", { x, y });
+    console.log("[ContextMenuCore] show - before update, reference:", {
+      hasReference: !!this.menu.popper.reference,
+    });
+
+    // Update virtual element position
+    this.virtualElement.getBoundingClientRect = () => ({
+      width: 0,
+      height: 0,
+      x,
+      y,
+      top: y,
+      right: x,
+      bottom: y,
+      left: x,
+    });
+
+    // Update reference with new position
+    this.menu.popper.updateReference({
+      $el: this.virtualElement as any,
       getRect: () => {
-        return {
-          width: 5,
-          height: 5,
-          left: x,
-          top: y,
-          x,
-          y,
-        } as Rect;
+        return this.virtualElement.getBoundingClientRect() as Rect;
       },
     });
+
+    console.log("[ContextMenuCore] show - after update, reference:", {
+      hasReference: !!this.menu.popper.reference,
+    });
+
+    console.log("[ContextMenuCore] calling menu.show()");
     this.menu.show();
+
+    // Manually trigger place after show to ensure position is calculated
+    console.log("[ContextMenuCore] calling menu.popper.place()");
+    this.menu.popper.place();
   }
   hide() {
     console.log("[]ContextMenuCore - hide");
     // this._original = null;
     this.menu.hide();
   }
-  setReference(reference: { getRect: () => Rect }) {
+  setReference(reference: { $el?: unknown; getRect: () => Rect }) {
     // console.log("[ContextMenuCore]setReference", reference.getRect());
     this.menu.popper.setReference(reference);
   }
-  updateReference(reference: { getRect: () => Rect }) {
+  updateReference(reference: { $el?: unknown; getRect: () => Rect }) {
     this.menu.popper.updateReference(reference);
   }
   setItems(items: MenuItemCore[]) {

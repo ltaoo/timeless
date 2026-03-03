@@ -19,7 +19,7 @@ const MENU_CONTENT_CLASS =
   };
 }
 
-import { MenuPrimitive, ContextMenu as HContextMenu } from "@timeless/headless";
+import { MenuPrimitive } from "@timeless/headless";
 import { MenuCore } from "@timeless/ui";
 
 const t = {
@@ -57,7 +57,4 @@ export function MenuLabel(p: any, c?: any) {
 }
 export function MenuSeparator(p: any) {
   return MenuPrimitive.Root({ ...p, theme: t });
-}
-export function ContextMenu(p: any, c?: any) {
-  return HContextMenu({ ...p, theme: t }, c);
 }

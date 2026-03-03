@@ -3,7 +3,7 @@ import { ContextMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
 
 import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
-import { Portal } from "./portal";
+import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
 import { For } from "./for";
@@ -12,191 +12,194 @@ import * as MenuPrimitive from "./menu";
 import { Show } from "./show";
 import { Txt } from "./text";
 
-export function ContextMenu(
-  props: ViewProps & {
-    store: ContextMenuCore;
-    theme?: any;
-  },
-  children: ViewChildren,
+// Shared hover timer state to coordinate between Trigger and Content
+const hoverTimers = new WeakMap<ContextMenuCore, { timer: any }>();
+
+function getHoverTimer(store: ContextMenuCore) {
+  let state = hoverTimers.get(store);
+  if (!state) {
+    state = { timer: null };
+    hoverTimers.set(store, state);
+  }
+  return state;
+}
+
+function _hoverClearHide(store: ContextMenuCore) {
+  const state = getHoverTimer(store);
+  if (state.timer) {
+    clearTimeout(state.timer);
+    state.timer = null;
+  }
+}
+
+function _hoverScheduleHide(store: ContextMenuCore) {
+  _hoverClearHide(store);
+  const state = getHoverTimer(store);
+  state.timer = setTimeout(() => {
+    store.hide();
+    state.timer = null;
+  }, 300);
+}
+
+export function Root(
+  props: ViewProps & { store: MenuCore },
+  children?: ViewChildren,
 ) {
-  const { store, theme: t, ...rest } = props;
+  return MenuPrimitive.Root(props, children);
+}
 
-  const layer = store.menu.layer;
-  const state = refobj(store.state);
-  const events: (void | (() => void))[] = [];
-  events.push(
-    store.onStateChange(() => {
-      state.as(store.state);
-    }),
-  );
-  const menuitem$s = computed(state, (d) => d.items);
-
-  let unDismiss: undefined | Function;
-  let handlePointerDown: undefined | (() => void);
-
-  const $menucontent = View(
-    {
-      ...merge(tp(t?.menu)),
-    },
-    [
-      For({
-        each: menuitem$s,
-        render(item: MenuItemCore) {
-          //       console.log("[]DropdownMenu render item", !!item.menu, item.label);
-          const items = ref(item.menu ? item.menu.state.items : []);
-          if (item.menu) {
-            item.menu.onStateChange((v) => {
-              // console.log("[]items change", v.items);
-              items.as(v.items);
-            });
-          }
-          return Show(
-            {
-              when: ref(!!item.menu),
-              fallback: [
-                MenuPrimitive.Item({ store: item }, [Txt(item.label)]),
-              ],
-            },
-            [
-              MenuPrimitive.Item(
-                {
-                  store: item,
-                  onMouseEnter() {
-                    const menu = item.menu;
-                    if (menu) {
-                      if (menu.hide_sub_timer) {
-                        clearTimeout(menu.hide_sub_timer);
-                        menu.hide_sub_timer = null;
-                      }
-                    }
-                  },
-                  onMouseLeave() {
-                    const menu = item.menu;
-                    if (menu) {
-                      menu.hide_sub_timer = setTimeout(() => {
-                        menu.hide_sub_timer = null;
-                        menu.hide();
-                      }, 100);
-                    }
-                  },
-                },
-                [
-                  View({ style: "flex:1;" }, [Txt(item.label)]),
-                  View({ ...merge(tp(t?.submenuArrow)) }, [
-                    ChevronRightOutlined({}),
-                  ]),
-                  // 这里封装成组件，就不用判断 item.menu 了。因为现在是表达式，表达式肯定会执行 item.menu.presence，导致空指针
-                  item.menu
-                    ? Portal({}, [
-                        Presence(
-                          {
-                            store: item.menu.presence,
-                            animation: t?.subAnimation || t?.animation,
-                          },
-                          [],
-                        ),
-                      ])
-                    : null,
-                ],
-              ),
-            ],
-          );
-        },
-      }),
-    ],
-  );
-  $menucontent.$elm.addEventListener("pointerdown", (e: Event) => {
-    e.stopPropagation();
-  });
+export function Trigger(
+  props: ViewProps & { store: ContextMenuCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
 
   return View(
     {
-      ...rest,
-      onMounted($el: HTMLDivElement) {
-        if (rest.onMounted) {
-          rest.onMounted($el);
-        }
-        store.setReference({
-          getRect() {
-            return $el.getBoundingClientRect();
-          },
-        });
+      onMounted($e) {
+        // Don't set reference here - it will be set dynamically on contextmenu event
 
-        unDismiss = layer.onDismiss(() => {
-          store.hide();
-        });
-
-        handlePointerDown = () => {
-          if (store.menu.state.open) {
-            layer.handlePointerDownOnTop();
-          }
-        };
-        document.addEventListener("pointerdown", handlePointerDown);
-
-        $el.addEventListener("contextmenu", (e) => {
+        // Handle context menu (right-click)
+        $e.addEventListener("contextmenu", (e: MouseEvent) => {
           e.preventDefault();
-          e.stopPropagation();
-          const { pageX: x, pageY: y } = e;
-          store.updateReference({
-            getRect() {
-              const rect = $el.getBoundingClientRect();
-              const { top, left, right, bottom } = rect;
-              return {
-                width: 0,
-                height: 0,
-                top,
-                left,
-                right,
-                bottom,
-                x,
-                y,
-              };
-            },
+          if (store.disabled) return;
+
+          store.show({
+            x: e.clientX,
+            y: e.clientY,
           });
-          store.show({ x: x - 8, y: y - 4 });
         });
-      },
-      onUnmounted() {
-        for (const fn of events) if (typeof fn === "function") fn();
-        if (unDismiss) {
-          unDismiss();
-        }
-        if (handlePointerDown) {
-          document.removeEventListener("pointerdown", handlePointerDown);
-        }
-        store.destroy();
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
+
+        // Handle hover trigger if enabled
+        if (store.trigger === "hover") {
+          $e.addEventListener("mouseenter", () => {
+            if (store.disabled) return;
+            _hoverClearHide(store);
+            store.show();
+          });
+
+          // Prevent click from closing the menu in hover mode
+          $e.addEventListener("pointerdown", (e: any) => {
+            e.stopPropagation();
+          });
         }
       },
     },
-    [
-      ...children,
-      Portal({}, [
-        Presence({ store: store.menu.presence, animation: t?.animation }, []),
-      ]),
-    ],
+    children,
   );
 }
 
-function listenMenuContent(menu: MenuCore, child: TimelessElement) {
-  const $el = child.$elm;
-  $el.addEventListener("pointerdown", (e) => {
-    e.stopPropagation();
-  });
-  $el.addEventListener("mouseenter", () => {
-    if (menu.hide_sub_timer) {
-      clearTimeout(menu.hide_sub_timer);
-      menu.hide_sub_timer = null;
-    }
-    menu.popper.handleEnter();
-  });
-  $el.addEventListener("mouseleave", () => {
-    menu.popper.handleLeave();
-    menu.hide_sub_timer = setTimeout(() => {
-      menu.hide_sub_timer = null;
-      menu.hide();
-    }, 100);
-  });
-  return child;
+export function Portal(
+  props: ViewProps & { store: MenuCore },
+  children: ViewChildren = [],
+) {
+  return MenuPrimitive.Portal({ store: props.store }, [...children]);
+}
+
+export function Content(
+  props: ViewProps & { store: ContextMenuCore },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
+  // Add hover event handlers for hover trigger mode
+  const hoverHandlers =
+    store.trigger === "hover"
+      ? {
+          onMouseEnter() {
+            console.log("[ContextMenu Content] mouseenter");
+            _hoverClearHide(store);
+          },
+          onMouseLeave() {
+            console.log("[ContextMenu Content] mouseleave");
+            _hoverScheduleHide(store);
+          },
+        }
+      : {};
+
+  return MenuPrimitive.Content(
+    { ...rest, ...hoverHandlers, store: props.store.menu },
+    children,
+  );
+}
+
+export function Group(props: ViewProps, children: ViewChildren) {
+  return MenuPrimitive.Group(props, children);
+}
+
+export function Label(props: ViewProps, children: ViewChildren) {
+  return MenuPrimitive.Label(props, children);
+}
+
+export function Item(
+  props: ViewProps & { store: MenuItemCore },
+  children: ViewChildren,
+) {
+  return MenuPrimitive.Item(props, children);
+}
+
+export function Separator(props: ViewProps, children: ViewChildren) {
+  return MenuPrimitive.Separator(props, children);
+}
+
+export function Arrow(
+  props: ViewProps & {
+    store: ContextMenuCore;
+  },
+  children: ViewChildren,
+) {
+  return MenuPrimitive.Arrow(
+    {
+      store: props.store.menu,
+    },
+    children,
+  );
+}
+
+export function SubMenu(
+  props: ViewProps & { store: MenuCore },
+  children: ViewChildren,
+) {
+  return MenuPrimitive.SubMenu(props, children);
+}
+
+export function SubMenuTrigger(
+  props: ViewProps & { store: MenuItemCore },
+  children: ViewChildren,
+) {
+  return MenuPrimitive.SubMenuTrigger(props, children);
+}
+
+export function SubMenuContent(
+  props: ViewProps & { store: MenuCore },
+  children: ViewChildren,
+) {
+  // Get the parent ContextMenuCore from the menu's parent
+  const parentContextMenu = (props.store as any).parentContextMenu as
+    | ContextMenuCore
+    | undefined;
+
+  const hoverHandlers =
+    parentContextMenu && parentContextMenu.trigger === "hover"
+      ? {
+          onMouseEnter() {
+            console.log("[ContextMenu SubMenuContent] mouseenter");
+            // Cancel parent context menu hide timer when entering submenu
+            _hoverClearHide(parentContextMenu);
+          },
+          onMouseLeave() {
+            console.log("[ContextMenu SubMenuContent] mouseleave");
+            // Schedule parent context menu hide when leaving submenu
+            _hoverScheduleHide(parentContextMenu);
+          },
+        }
+      : {};
+
+  return MenuPrimitive.SubMenuContent(
+    {
+      ...props,
+      ...hoverHandlers,
+    },
+    children,
+  );
 }

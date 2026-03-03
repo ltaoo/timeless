@@ -4,7 +4,6 @@ import {
   DangerouslyInnerHTML,
   Presence,
   Portal,
-  Popper,
   Show,
   For,
   Flex,
@@ -24,9 +23,9 @@ import { Toggle } from "./toggle";
 import { Slider } from "./slider";
 import { Progress } from "./progress";
 import { Dialog } from "./dialog";
-import { Menu, MenuItem, MenuLabel, MenuSeparator, ContextMenu } from "./menu";
+import { Menu, MenuItem, MenuLabel, MenuSeparator } from "./menu";
 import { DropdownMenu } from "./dropdown-menu";
-// import { ContextMenu } from "./context-menu";
+import { ContextMenu } from "./context-menu";
 import { Tabs } from "./tabs";
 import { Steps } from "./steps";
 import { Button } from "./button";
@@ -71,7 +70,6 @@ export {
   Select,
   Presence,
   Portal,
-  Popper,
   Popover,
   Toast,
   Toggle,

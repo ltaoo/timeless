@@ -1,5 +1,6 @@
 export interface ViewProps {
   type?: string;
+  as?: string;
   style?: string;
   class?: string;
   onClick?(e: any): void;
@@ -10,8 +11,18 @@ export interface ViewProps {
 }
 
 export function View(props: ViewProps = {}, children?: any[]) {
-  const { type = "div", style, class: cls, onClick, onMounted, onUnmounted, beforeUnmounted, ...rest } = props;
-  const $elm = document.createElement(type);
+  const {
+    type = "div",
+    as,
+    style,
+    class: cls,
+    onClick,
+    onMounted,
+    onUnmounted,
+    beforeUnmounted,
+    // ...rest
+  } = props;
+  const $elm = document.createElement(as || type);
   if (cls) {
     $elm.className = cls;
   }

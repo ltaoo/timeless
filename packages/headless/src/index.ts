@@ -46,8 +46,7 @@ export * from "./alert";
 export * as ButtonPrimitive from "./button";
 export * as MenuPrimitive from "./menu";
 export * as DropdownMenuPrimitive from "./dropdown-menu";
-// export { DropdownMenu } from "./dropdown-menu";
-export * from "./context-menu";
+export * as ContextMenuPrimitive from "./context-menu";
 export * from "./tabs";
 export * from "./accordion";
 

@@ -177,14 +177,14 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, { ...this.state });
   }
   /** 更新基准元素（右键菜单时会用到这个方法） */
-  updateReference(reference: { getRect: () => Rect }) {
+  updateReference(reference: { $el?: unknown; getRect: () => Rect }) {
     console.log(
       "[DEBUG-POPPER] updateReference",
       this.unique_id,
       "hasPrevRef:",
       !!this.reference,
       "has$el:",
-      !!(this.reference as any)?.$el,
+      !!(reference as any)?.$el,
     );
     if (!this.reference) {
       return;
