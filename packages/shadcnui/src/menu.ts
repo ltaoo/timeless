@@ -19,8 +19,6 @@ const MENU_ITEM_CLASS =
 export function Menu(props: ViewProps & { store: MenuCore }) {
   const state_ = refobj(props.store.state);
 
-  console.log("[Menu] created, store:", props.store._name, "has layer:", !!props.store.layer);
-
   // Create a function that returns all parent layers as an array
   const getAllParentLayers = () => {
     const layers: any[] = [];
@@ -31,13 +29,11 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
       }
       currentMenu = currentMenu.parent_menu;
     }
-    console.log("[Menu getAllParentLayers] found", layers.length, "parent layers");
     return layers;
   };
 
   // Determine if this is a root layer (no parent menu)
   const isRootLayer = !props.store.parent_menu;
-  console.log("[Menu] isRootLayer:", isRootLayer, "parent_menu:", props.store.parent_menu?._name);
 
   let handlePointerDown: any;
 
@@ -45,17 +41,20 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
     {
       class: MENU_CONTENT_CLASS,
       onMounted($el) {
-        console.log("[Menu onMounted] store:", props.store._name, "has layer:", !!props.store.layer, "isRootLayer:", isRootLayer);
-
         // For root menu that's always visible, override layer.onDismiss to only close submenus
         if (isRootLayer && props.store.layer) {
           // Remove the default onDismiss handler that calls hide()
           // and add a custom one that only closes submenus
           props.store.layer.onDismiss(() => {
-            console.log("[Menu layer.onDismiss] closing submenus for always-visible root menu");
+            console.log(
+              "[Menu layer.onDismiss] closing submenus for always-visible root menu",
+            );
             // Close current submenu if open
-            if (props.store.cur_item && props.store.cur_item.menu && props.store.cur_item.menu.state.open) {
-              console.log("[Menu layer.onDismiss] closing submenu", props.store.cur_item.menu._name);
+            if (
+              props.store.cur_item &&
+              props.store.cur_item.menu &&
+              props.store.cur_item.menu.state.open
+            ) {
               props.store.cur_item.menu.hide();
             }
           });
@@ -66,18 +65,27 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
           // Only register document listener for root layer
           if (isRootLayer) {
             handlePointerDown = () => {
-              console.log("[Menu] handlePointerDownOnTop called on ROOT, store:", props.store._name);
+              console.log(
+                "[Menu] handlePointerDownOnTop called on ROOT, store:",
+                props.store._name,
+              );
               props.store.layer.handlePointerDownOnTop();
             };
             document.addEventListener("pointerdown", handlePointerDown);
-            console.log("[Menu] registered document listener for ROOT, store:", props.store._name);
+            console.log(
+              "[Menu] registered document listener for ROOT, store:",
+              props.store._name,
+            );
           }
 
           $el.addEventListener("pointerdown", (e) => {
             console.log(
-              "[Menu] element pointerdown, store:", props.store._name,
-              "isRoot:", isRootLayer,
-              "target:", e.target
+              "[Menu] element pointerdown, store:",
+              props.store._name,
+              "isRoot:",
+              isRootLayer,
+              "target:",
+              e.target,
             );
             props.store.layer.pointerDown();
             // Mark all parent layers as pointer inside
@@ -94,18 +102,16 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
             }
           });
         } else {
-          console.warn("[Menu onMounted] NO LAYER for store:", props.store._name);
+          console.warn(
+            "[Menu onMounted] NO LAYER for store:",
+            props.store._name,
+          );
         }
         if (props.onMounted) {
           props.onMounted($el);
         }
       },
       onUnmounted() {
-        console.log(
-          "[Menu] unmounted, removing listeners, isRoot:",
-          isRootLayer,
-          "store:", props.store._name
-        );
         if (props.store.layer && handlePointerDown) {
           document.removeEventListener("pointerdown", handlePointerDown);
           handlePointerDown = null;
@@ -136,13 +142,24 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
 function MenuItem(props: ViewProps & { store: MenuItemCore }) {
   const state_ = refobj(props.store.state);
   const has_submenu_ = ref(!!props.store.menu);
+  const has_icon_ = computed(state_, (t) => !!t.icon);
   const menu_state_ = refobj(
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
   );
 
-  console.log("[MenuItem] created, label:", props.store.label, "has submenu:", !!props.store.menu);
+  console.log(
+    "[MenuItem] created, label:",
+    props.store.label,
+    "has submenu:",
+    !!props.store.menu,
+  );
   if (props.store.menu) {
-    console.log("[MenuItem] submenu parent_menu:", props.store.menu.parent_menu?._name, "has layer:", !!props.store.menu.layer);
+    console.log(
+      "[MenuItem] submenu parent_menu:",
+      props.store.menu.parent_menu?._name,
+      "has layer:",
+      !!props.store.menu.layer,
+    );
   }
 
   const unlisten = [
@@ -170,6 +187,14 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
         ]),
       },
       [
+        Show({ when: has_icon_ }, [
+          View(
+            {
+              class: "mr-2 h-4 w-4 flex-shrink-0",
+            },
+            [props.store.icon],
+          ),
+        ]),
         props.store.label,
         Show({ when: has_submenu_ }, [
           ChevronRightOutlined({ class: "w-4 h-4" }),

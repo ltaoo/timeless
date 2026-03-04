@@ -35,6 +35,9 @@ const configs = [
         name: "Timeless.icons",
         extend: true,
         sourcemap: false,
+        globals: {
+          "@timeless/reactive": "Timeless.reactive",
+        },
       },
     ],
     plugins: [
@@ -59,6 +62,7 @@ const configs = [
       }),
       terser(),
     ],
+    external: ["@timeless/reactive"],
   },
   // Main CJS and ESM Build
   {
@@ -109,7 +113,7 @@ export default (args) => {
   if (args.whole) {
     delete args.whole;
     const whole = true;
-    
+
     // Individual Icon Builds
     if (whole) {
       icons.forEach((name) => {

@@ -12,6 +12,13 @@
     "src",
     "dist"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/timeless.reactive.esm.js",
+      "require": "./dist/timeless.reactive.umd.min.js"
+    }
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",

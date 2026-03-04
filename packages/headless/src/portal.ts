@@ -73,7 +73,7 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
     cleanup,
     render() {
       if (_mounted) {
-        return;
+        return null;
       }
       const fragment = document.createDocumentFragment();
       const nodes: Node[] = [];

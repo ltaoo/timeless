@@ -27,6 +27,7 @@ export * from "./html";
 export * from "./portal";
 export * from "./presence";
 export * from "./popper";
+export * from "./transition";
 
 // content
 export * from "./flex";

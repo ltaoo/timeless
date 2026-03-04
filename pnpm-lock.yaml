@@ -444,6 +444,10 @@ importers:
         version: 5.9.3
 
   packages/icons:
+    dependencies:
+      '@timeless/reactive':
+        specifier: workspace:*
+        version: link:../reactive
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^29.0.0

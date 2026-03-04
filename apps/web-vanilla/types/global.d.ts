@@ -89,6 +89,7 @@ declare const CardFooter: typeof import("@timeless/shadcnui").CardFooter;
 declare const Avatar: typeof import("@timeless/shadcnui").Avatar;
 declare const Skeleton: typeof import("@timeless/shadcnui").Skeleton;
 declare const Tooltip: typeof import("@timeless/shadcnui").Tooltip;
+declare const Transition: typeof import("@timeless/shadcnui").Transition;
 declare const Alert: typeof import("@timeless/shadcnui").Alert;
 declare const AlertTitle: typeof import("@timeless/shadcnui").AlertTitle;
 declare const AlertDescription: typeof import("@timeless/shadcnui").AlertDescription;

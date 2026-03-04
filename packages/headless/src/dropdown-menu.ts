@@ -1,4 +1,4 @@
-import { refobj } from "@timeless/reactive";
+import { refobj, computed } from "@timeless/reactive";
 import { DropdownMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
 
 import * as MenuPrimitive from "./menu";
@@ -48,6 +48,7 @@ export function Portal(
   },
   children: ViewChildren = [],
 ) {
+  // Delegate to MenuPrimitive.Portal which uses Presence
   return MenuPrimitive.Portal(props, children);
 }
 

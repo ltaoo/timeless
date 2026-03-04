@@ -5,11 +5,9 @@ import { ChevronRightOutlined } from "@timeless/icons";
 import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
-import { Presence } from "./presence";
 import { For } from "./for";
 import { merge, tp } from "./theme";
 import * as MenuPrimitive from "./menu";
-import { Show } from "./show";
 import { Txt } from "./text";
 
 // Shared hover timer state to coordinate between Trigger and Content
@@ -93,7 +91,8 @@ export function Portal(
   props: ViewProps & { store: MenuCore },
   children: ViewChildren = [],
 ) {
-  return MenuPrimitive.Portal({ store: props.store }, [...children]);
+  // Delegate to MenuPrimitive.Portal which uses Presence
+  return MenuPrimitive.Portal(props, children);
 }
 
 export function Content(

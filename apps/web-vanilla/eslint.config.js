@@ -35,6 +35,7 @@ export default [
         View: "readonly",
         Txt: "readonly",
         DangerouslyInnerHTML: "readonly",
+        Transition: "readonly",
         // content
         Flex: "readonly",
         ScrollView: "readonly",

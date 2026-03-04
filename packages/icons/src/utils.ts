@@ -1,84 +1,47 @@
-export interface ViewProps {
-  type?: string;
-  as?: string;
-  style?: string;
-  class?: string;
-  onClick?(e: any): void;
-  onMounted?(el: any): void;
-  onUnmounted?(): void;
-  beforeUnmounted?(): void;
-  [key: string]: any;
-}
+export * from "./view";
 
-export function View(props: ViewProps = {}, children?: any[]) {
-  const {
-    type = "div",
-    as,
-    style,
-    class: cls,
-    onClick,
-    onMounted,
-    onUnmounted,
-    beforeUnmounted,
-    // ...rest
-  } = props;
-  const $elm = document.createElement(as || type);
-  if (cls) {
-    $elm.className = cls;
-  }
-  if (style) {
-    $elm.style.cssText = style;
-  }
-  if (onClick) {
-    $elm.addEventListener("click", onClick);
-  }
-  const _children = children ?? [];
-  return {
-    t: "view",
-    $elm,
-    beforeUnmounted() {
-      if (beforeUnmounted) beforeUnmounted();
-      for (const node of _children) {
-        if (node && node.beforeUnmounted) node.beforeUnmounted();
-      }
-    },
-    onUnmounted() {
-      if (onUnmounted) onUnmounted();
-      for (const node of _children) {
-        if (node && node.onUnmounted) node.onUnmounted();
-      }
-    },
-    render() {
-      for (const node of _children) {
-        if (!node) continue;
-        if (typeof node === "string" || typeof node === "number") {
-          $elm.appendChild(document.createTextNode(String(node)));
-          continue;
-        }
-        if (node.t && node.$elm) {
-          const result = node.render();
-          if (result) $elm.appendChild(result);
-        }
-      }
-      if (onMounted) onMounted($elm);
-      return $elm;
-    },
-  };
-}
+export function createIcon(svg: string) {
+  return function (props: any = {}) {
+    const span = document.createElement("span");
+    span.innerHTML = svg;
+    span.style.display = "inline-flex";
+    span.style.alignItems = "center";
+    span.style.justifyContent = "center";
 
-export function DangerouslyInnerHTML(html: string) {
-  const $elm = document.createElement("div");
-  return {
-    t: "html",
-    $elm,
-    render() {
-      $elm.innerHTML = html;
-      return $elm;
-    },
-    onMounted() {},
-    beforeUnmounted() {},
-    onUnmounted() {
-      $elm.innerHTML = "";
-    },
+    if (props.class) {
+      if (typeof props.class === "string") {
+        span.className = props.class;
+      }
+    }
+    if (props.style) {
+      if (typeof props.style === "string") {
+        span.setAttribute("style", span.style.cssText + ";" + props.style);
+      }
+    }
+    if (props.onClick) {
+      span.addEventListener("click", props.onClick);
+    }
+    if (props.id) {
+      if (typeof props.id === "string") {
+        span.id = props.id;
+      }
+    }
+
+    return {
+      t: "view",
+      $elm: span,
+      render() {
+        return span;
+      },
+      onMounted() {
+        props.onMounted?.(span);
+      },
+      beforeUnmounted() {
+        props.beforeUnmounted?.();
+      },
+      onUnmounted() {
+        props.onUnmounted?.();
+      },
+    };
   };
 }

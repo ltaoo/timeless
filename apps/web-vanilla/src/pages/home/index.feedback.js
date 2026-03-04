@@ -14,6 +14,7 @@ export default function FeedbackView() {
             items: [
               new Timeless.ui.MenuItemCore({
                 label: "Edit",
+                icon: Timeless.icons.PlayOutlined({ class: "icon icon--play" }),
                 onClick() {
                   console.log("edit");
                 },
@@ -160,7 +161,7 @@ export default function FeedbackView() {
         })(),
       ]),
     ]),
-    Section("Presence", [
+    Section("transition", [
       Item("Toggle visibility", [
         (() => {
           const p$ = new Timeless.ui.PresenceCore({});
@@ -189,7 +190,7 @@ export default function FeedbackView() {
               },
               [Txt("Hide")],
             ),
-            Presence(
+            Transition(
               {
                 store: p$,
                 class: "p-3 rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm",
@@ -229,7 +230,7 @@ export default function FeedbackView() {
                 [Txt("Hide")],
               ),
             ]),
-            Presence(
+            Transition(
               {
                 store: p$,
                 animation: {
@@ -274,7 +275,7 @@ export default function FeedbackView() {
                 [Txt("Hide")],
               ),
             ]),
-            Presence(
+            Transition(
               {
                 store: p$,
                 animation: {
@@ -319,7 +320,7 @@ export default function FeedbackView() {
                 [Txt("Hide")],
               ),
             ]),
-            Presence(
+            Transition(
               {
                 store: p$,
                 animation: {
@@ -364,7 +365,7 @@ export default function FeedbackView() {
                 [Txt("Hide")],
               ),
             ]),
-            Presence(
+            Transition(
               {
                 store: p$,
                 animation: {
@@ -409,7 +410,7 @@ export default function FeedbackView() {
                 [Txt("Hide")],
               ),
             ]),
-            Presence(
+            Transition(
               {
                 store: p$,
               },
