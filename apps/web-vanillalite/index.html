@@ -89,49 +89,18 @@
   <script>
     const { ref, refobj, computed, For, Show, View, Fragment, Portal, render } = Timeless;
 
-    // Simple component - just a View
-    function SimpleItem(props) {
-      // console.log('[SimpleItem] created', props.label);
-      return View(
-        {
-          class: 'menu-item item-simple',
-          onMounted() {
-            // console.log('[SimpleItem] mounted', props.label);
-          },
-          onUnmounted() {
-            // console.log('[SimpleItem] unmounted', props.label);
-          }
-        },
-        ['Simple: ' + props.label]
-      );
-    }
-
-    // Complex component - Fragment with multiple children (similar to ItemWithSubMenu)
-    // Uses computed to create reactive children and Portal (like SubMenu)
     function MenuItem(props) {
-      // if (props.type === 'simple') {
-      //   return SimpleItem({ label: item.label });
-      // } else {
-      //   return ComplexItem({ label: item.label });
-      // }
       const visible_ = ref(false);
 
       return View({}, [
-        SimpleItem(props),
-        Show({
-          when: computed(props, (t) => t.type !== "simple"),
-          onUnmounted() {
-            console.log('[]submenu show is Unmounted');
-          },
-        }, [
-          View({}, [
-            View({
-              class: 'menu-btn',
-              onClick() {
-                visible_.as((prev) => !prev);
-              },
-            }, ["Click it"])
-          ]),
+        props.label,
+        Show({ when: computed(props, (t) => t.type !== "simple"), }, [
+          View({
+            class: 'menu-btn',
+            onClick() {
+              visible_.as((prev) => !prev);
+            },
+          }, ["Click it"]),
           Portal({
             onUnmounted() {
               console.log('[]the sub menu portal is unmounted');
@@ -140,14 +109,21 @@
             Show({
               when: visible_,
               onUnmounted() {
-                console.log('the sub menu is unmounted');
+                console.log('the sub menu show is unmounted');
               }
             }, [
               View({
                 class: "",
                 style: "position: fixed; left: 120px; top: 120px;",
+                onUnmounted() {
+                  console.log('hello wrap is unmounted');
+                }
               }, [
-                View({}, ["Hello"])
+                View({
+                  onUnmounted() {
+                    console.log('hello is unmounted');
+                  }
+                }, ["Hello"])
               ]),
             ]),
           ])
@@ -161,13 +137,13 @@
         { id: 2, label: 'Item 2', type: 'complex' },
         { id: 3, label: 'Item 3', type: 'simple' },
       ]);
-      const visible = ref(false);
+      const open_ = ref(false);
 
       document.getElementById('toggle').addEventListener('click', () => {
-        if (visible.value) {
-          visible.as(false);
+        if (open_.value) {
+          open_.as(false);
         } else {
-          visible.as(true);
+          open_.as(true);
         }
       });
 
@@ -176,7 +152,7 @@
           console.log('root portal is Unmounted');
         },
       }, [
-        Show({ when: visible, }, [View({
+        Show({ when: open_, }, [View({
           class: 'menu',
           onUnmounted() {
             console.log('[page]menu view unmounted');

@@ -15,26 +15,43 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
 
   const cleanup = () => {
     console.log(
-      "[Portal] cleanup, cleaning up",
+      "[Portal] cleanup called, _mountedNodes:",
       _mountedNodes.length,
-      "nodes",
+      "_mountedChildren:",
+      _mountedChildren.length,
     );
-    // Lifecycle
+    // Lifecycle - 先调用 beforeUnmounted
     for (const child of _mountedChildren) {
-      if (isElement(child) && child.onUnmounted) {
-        child.onUnmounted();
+      if (isElement(child) && child.beforeUnmounted) {
+        console.log("[Portal] calling beforeUnmounted on child:", child.t);
+        child.beforeUnmounted();
+      }
+    }
+    // Lifecycle - 再调用 cleanup 或 onUnmounted
+    for (const child of _mountedChildren) {
+      if (isElement(child)) {
+        // 如果子组件有 cleanup 方法，优先调用
+        if (typeof child.cleanup === "function") {
+          console.log("[Portal] calling cleanup on child:", child.t);
+          child.cleanup();
+        } else if (child.onUnmounted) {
+          console.log("[Portal] calling onUnmounted on child:", child.t);
+          child.onUnmounted();
+        }
       }
     }
 
     // Remove DOM nodes
+    console.log("[Portal] removing DOM nodes, count:", _mountedNodes.length);
     for (const node of _mountedNodes) {
       console.log(
-        "[Portal] removing node:",
+        "[Portal] checking node:",
         node.nodeName,
         "parentNode:",
         !!node.parentNode,
       );
       if (node.parentNode) {
+        console.log("[Portal] removing node from parent");
         node.parentNode.removeChild(node);
       }
     }
@@ -44,8 +61,10 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
     _mounted = false;
 
     if (props.onUnmounted) {
+      console.log("[Portal] calling props.onUnmounted");
       props.onUnmounted();
     }
+    console.log("[Portal] cleanup completed");
   };
 
   return {

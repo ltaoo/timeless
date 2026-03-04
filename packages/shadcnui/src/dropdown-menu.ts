@@ -104,30 +104,29 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
       console.log("DropdownMenuItem render", props.store.label);
       const inner$ = props.store.menu
         ? DropdownMenuPrimitive.Portal({ store: props.store.menu }, [
-            View({}, ["Hello", props.store.label]),
-            // DropdownMenuPrimitive.SubMenuContent({ store: props.store.menu }, [
-            //   View(
-            //     {
-            //       class: computed(menu_state_, (t) => {
-            //         return [
-            //           MENU_CONTENT_CLASS,
-            //           t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
-            //           t.exit ? "animate-out fade-out-0 zoom-out-95" : "",
-            //         ].join(" ");
-            //       }),
-            //     },
-            //     [
-            //       For({
-            //         each: computed(menu_state_, (t) => {
-            //           return t.items;
-            //         }),
-            //         render(item: MenuItemCore) {
-            //           return DropdownMenuItem({ store: item });
-            //         },
-            //       }),
-            //     ],
-            //   ),
-            // ]),
+            DropdownMenuPrimitive.SubMenuContent({ store: props.store.menu }, [
+              View(
+                {
+                  class: computed(menu_state_, (t) => {
+                    return [
+                      MENU_CONTENT_CLASS,
+                      t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
+                      t.exit ? "animate-out fade-out-0 zoom-out-95" : "",
+                    ].join(" ");
+                  }),
+                },
+                [
+                  For({
+                    each: computed(menu_state_, (t) => {
+                      return t.items;
+                    }),
+                    render(item: MenuItemCore) {
+                      return DropdownMenuItem({ store: item });
+                    },
+                  }),
+                ],
+              ),
+            ]),
           ])
         : null;
       // return Show({ when: has_submenu_ }, [inner$]);

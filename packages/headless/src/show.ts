@@ -33,9 +33,12 @@ export function Show(
   };
 
   const unmount = (removeDom = false) => {
+    console.log("[Show] unmount called, removeDom:", removeDom, "_currentChildren:", _currentChildren.length, "_currentNodes:", _currentNodes.length);
+
     // Lifecycle - 先调用 beforeUnmounted
     for (const child of _currentChildren) {
       if (isElement(child) && child.beforeUnmounted) {
+        console.log("[Show] calling beforeUnmounted on child:", child.t);
         child.beforeUnmounted();
       }
     }
@@ -44,24 +47,30 @@ export function Show(
       if (isElement(child)) {
         // 如果是 Portal 组件，调用其 cleanup 方法
         if (child.t === "portal" && typeof child.cleanup === "function") {
+          console.log("[Show] calling cleanup on Portal child");
           child.cleanup();
         } else if (child.onUnmounted) {
           // 否则调用标准的 onUnmounted
+          console.log("[Show] calling onUnmounted on child:", child.t);
           child.onUnmounted();
         }
       }
     }
     // DOM removal
-    const parent = anchor.parentNode;
-    if (removeDom && parent) {
+    if (removeDom) {
+      console.log("[Show] removing DOM nodes, count:", _currentNodes.length);
       for (const node of _currentNodes) {
-        if (node.parentNode === parent) {
-          parent.removeChild(node);
+        // 直接检查节点是否还有父节点，不依赖 anchor.parentNode
+        console.log("[Show] checking node:", node.nodeName, "parentNode:", !!node.parentNode);
+        if (node.parentNode) {
+          console.log("[Show] removing node from parent");
+          node.parentNode.removeChild(node);
         }
       }
     }
     _currentNodes = [];
     _currentChildren = [];
+    console.log("[Show] unmount completed");
   };
 
   const mount = (targetChildren: any[], parent?: Node, before?: Node) => {
@@ -137,6 +146,11 @@ export function Show(
   return {
     t: "show",
     $elm: anchor as any,
+    cleanup() {
+      console.log("[Show] cleanup called");
+      // 清理当前挂载的所有内容
+      unmount(true);
+    },
     render() {
       const condition = isRef(when) ? !!when.value : !!when;
       _prev_condition = condition;
