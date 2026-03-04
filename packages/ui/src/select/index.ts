@@ -1,4 +1,5 @@
 import { BaseDomain, Handler } from "@timeless/base";
+
 import { PopperCore } from "@/popper";
 import { CollectionCore } from "@/collection";
 import { DismissableLayerCore } from "@/dismissable-layer";
@@ -36,7 +37,7 @@ type SelectProps<T> = {
   onChange?: (v: T | null) => void;
 };
 type SelectState<T> = {
-  options: { value: T; label: string; selected: boolean }[];
+  options: { value: T; label: string; selected: boolean; focused: boolean }[];
   value: T | null;
   value2: { value: T; label: string } | null;
   /** 菜单是否展开 */
@@ -61,16 +62,15 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
   // options: { text: string; store: SelectItemCore<T> }[] = [];
   placeholder: string;
-  options: { value: T; label: string; selected: boolean }[] = [];
+  options: { value: T; label: string; selected: boolean; focused: boolean }[] = [];
   defaultValue: T | null = null;
   value: T | null = null;
   disabled: boolean = false;
   open: boolean = false;
 
   popper: PopperCore;
-  popover: PopoverCore;
   presence = new PresenceCore();
-  collection: CollectionCore;
+  // collection: CollectionCore;
   layer: DismissableLayerCore;
 
   position: "popper" | "item-aligned" = "popper";
@@ -116,13 +116,19 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   constructor(props: Partial<{ _name: string }> & SelectProps<T>) {
     super(props);
 
-    const { defaultValue, placeholder = "点击选择", options = [], onChange } = props;
+    const {
+      defaultValue,
+      placeholder = "点击选择",
+      options = [],
+      onChange,
+    } = props;
     // console.log("[DOMAIN]ui/select/index - constructor", defaultValue);
     this.options = options.map((opt) => {
       return {
         label: opt.label,
         value: opt.value,
         selected: opt.value === defaultValue,
+        focused: false,
       };
     });
     this.value = defaultValue;
@@ -134,9 +140,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       this.emit(Events.Change, defaultValue);
     }
     this.popper = new PopperCore();
-    this.popover = new PopoverCore();
     this.layer = new DismissableLayerCore();
-    this.collection = new CollectionCore();
+    // this.collection = new CollectionCore();
     this.popper.onReferenceMounted((reference) => {
       const { x, y, width, height } = reference.getRect();
       this.reference = {
@@ -154,7 +159,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       console.log(...this.log("this.layer.onDismiss"));
       this.hide();
     });
-    this.presence.onStateChange(() => this.emit(Events.StateChange, { ...this.state }));
+    this.presence.onStateChange(() =>
+      this.emit(Events.StateChange, { ...this.state }),
+    );
     if (onChange) {
       this.onChange(onChange);
     }
@@ -239,16 +246,18 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     //   return;
     // }
     if (this.value === value) {
+      this.hide();
       return;
     }
     this.value = value;
-    for (let i = 0; i < this.options.length; i += 1) {
-      const it = this.options[i];
-      it.selected = false;
-      if (it.value === value) {
-        it.selected = true;
-      }
-    }
+    this.options = this.options.map((opt) => {
+      return {
+        label: opt.label,
+        value: opt.value,
+        selected: opt.value === value,
+        focused: opt.focused,
+      };
+    });
     this.emit(Events.Change, value);
     this.emit(Events.StateChange, { ...this.state });
     this.hide();
@@ -262,6 +271,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         label: opt.label,
         value: opt.value,
         selected: opt.value === this.value,
+        focused: false,
       };
     });
     // console.log("[DOMAIN]ui/select - setOptions", this.unique_id, this.value, options);
@@ -291,6 +301,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         label: opt.label,
         value: opt.value,
         selected: opt.value === this.value,
+        focused: opt.focused,
       };
     });
     this.emit(Events.Change, v);
@@ -301,152 +312,45 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.emit(Events.StateChange, { ...this.state });
     this.emit(Events.Change, this.value);
   }
-  setPosition() {
-    // const { dir } = this.state;
-    // const wrapStyles = {
-    //   // width: 0,
-    //   height: 0,
-    //   minWidth: 0,
-    //   minHeight: 0,
-    //   maxWidth: 0,
-    //   maxHeight: 0,
-    //   top: 0,
-    //   right: 0,
-    //   bottom: 0,
-    //   left: 0,
-    //   margin: [0, 0, 0, 0],
-    // };
-    // console.log(
-    //   ...this.log(
-    //     "position",
-    //     this.trigger?.$node(),
-    //     // this.value?.$node(),
-    //     this.wrap?.$node(),
-    //     this.content?.$node(),
-    //     this.viewport?.$node(),
-    //     this.selectedItem?.$node(),
-    //     this.selectedItem?.text?.$node()
-    //   )
-    // );
-    // const itemRect = this.selectedItem.getRect();
-    // const contentRect = this.content.getRect();
-    // const valueRect = this.value.getRect();
-    // const triggerRect = this.trigger.getRect();
-    // // -----------------------------------------------------------------------------------------
-    // //  Horizontal positioning
-    // // -----------------------------------------------------------------------------------------
-    // if (dir !== "rtl") {
-    //   const itemTextOffset = itemRect.left - contentRect.left;
-    //   const left = valueRect.left - itemTextOffset;
-    //   const leftDelta = this.reference.left - left;
-    //   const minContentWidth = this.reference.width + leftDelta;
-    //   const contentWidth = Math.max(minContentWidth, contentRect.width);
-    //   const rightEdge = app.screen.width - CONTENT_MARGIN;
-    //   const clampedLeft = clamp(left, [CONTENT_MARGIN, rightEdge - contentWidth]);
-    //   wrapStyles.minWidth = minContentWidth;
-    //   wrapStyles.left = clampedLeft;
-    // } else {
-    //   const itemTextOffset = contentRect.right - itemRect.right;
-    //   const right = window.innerWidth - valueRect.right - itemTextOffset;
-    //   const rightDelta = window.innerWidth - this.reference.right - right;
-    //   const minContentWidth = this.reference.width + rightDelta;
-    //   const contentWidth = Math.max(minContentWidth, contentRect.width);
-    //   const leftEdge = window.innerWidth - CONTENT_MARGIN;
-    //   const clampedRight = clamp(right, [CONTENT_MARGIN, leftEdge - contentWidth]);
-    //   wrapStyles.minWidth = minContentWidth;
-    //   wrapStyles.right = clampedRight;
-    // }
-    // // -----------------------------------------------------------------------------------------
-    // // Vertical positioning
-    // // -----------------------------------------------------------------------------------------
-    // // const items = getItems();
-    // const availableHeight = app.screen.height - CONTENT_MARGIN * 2;
-    // const itemsHeight = this.viewport.scrollHeight;
-    // const contentStyles = this.content.getStyles();
-    // const contentBorderTopWidth = parseInt(contentStyles.borderTopWidth, 10);
-    // const contentPaddingTop = parseInt(contentStyles.paddingTop, 10);
-    // const contentBorderBottomWidth = parseInt(contentStyles.borderBottomWidth, 10);
-    // const contentPaddingBottom = parseInt(contentStyles.paddingBottom, 10);
-    // const fullContentHeight = contentBorderTopWidth + contentPaddingTop + itemsHeight + contentPaddingBottom + contentBorderBottomWidth; // prettier-ignore
-    // const minContentHeight = Math.min(this.selectedItem.offsetHeight * 5, fullContentHeight);
-    // const viewportStyles = this.viewport.getStyles();
-    // const viewportPaddingTop = parseInt(viewportStyles.paddingTop, 10);
-    // const viewportPaddingBottom = parseInt(viewportStyles.paddingBottom, 10);
-    // const topEdgeToTriggerMiddle = triggerRect.top + triggerRect.height / 2 - CONTENT_MARGIN;
-    // const triggerMiddleToBottomEdge = availableHeight - topEdgeToTriggerMiddle;
-    // const selectedItemHalfHeight = this.selectedItem.offsetHeight / 2;
-    // const itemOffsetMiddle = this.selectedItem.offsetTop + selectedItemHalfHeight;
-    // const contentTopToItemMiddle = contentBorderTopWidth + contentPaddingTop + itemOffsetMiddle;
-    // const itemMiddleToContentBottom = fullContentHeight - contentTopToItemMiddle;
-    // const willAlignWithoutTopOverflow = contentTopToItemMiddle <= topEdgeToTriggerMiddle;
-    // if (willAlignWithoutTopOverflow) {
-    //   const isLastItem = this.selectedItem === this.items[this.items.length - 1];
-    //   wrapStyles.bottom = 0;
-    //   const viewportOffsetBottom = this.content.clientHeight - this.viewport.offsetTop - this.viewport.offsetHeight;
-    //   const clampedTriggerMiddleToBottomEdge = Math.max(
-    //     triggerMiddleToBottomEdge,
-    //     selectedItemHalfHeight +
-    //       // viewport might have padding bottom, include it to avoid a scrollable viewport
-    //       (isLastItem ? viewportPaddingBottom : 0) +
-    //       viewportOffsetBottom +
-    //       contentBorderBottomWidth
-    //   );
-    //   const height = contentTopToItemMiddle + clampedTriggerMiddleToBottomEdge;
-    //   wrapStyles.height = height;
-    // } else {
-    //   const isFirstItem = this.selectedItem === this.items[0];
-    //   wrapStyles.top = 0;
-    //   const clampedTopEdgeToTriggerMiddle = Math.max(
-    //     topEdgeToTriggerMiddle,
-    //     contentBorderTopWidth +
-    //       this.viewport.offsetTop +
-    //       // viewport might have padding top, include it to avoid a scrollable viewport
-    //       (isFirstItem ? viewportPaddingTop : 0) +
-    //       selectedItemHalfHeight
-    //   );
-    //   const height = clampedTopEdgeToTriggerMiddle + itemMiddleToContentBottom;
-    //   wrapStyles.height = height;
-    //   // this.viewport.scrollTop =
-    //   //   contentTopToItemMiddle -
-    //   //   topEdgeToTriggerMiddle +
-    //   //   this.viewport.offsetTop;
-    // }
-    // wrapStyles.margin = [CONTENT_MARGIN, 0, 0, 0];
-    // wrapStyles.minHeight = minContentHeight;
-    // wrapStyles.minHeight = minContentHeight;
-    // wrapStyles.maxHeight = availableHeight;
-    // // -----------------------------------------------------------------------------------------
-    // // onPlaced?.();
-    // // we don't want the initial scroll position adjustment to trigger "expand on scroll"
-    // // so we explicitly turn it on only after they've registered.
-    // // requestAnimationFrame(() => (shouldExpandOnScrollRef.current = true));
-    // const styles = Object.keys(wrapStyles)
-    //   .map((k) => {
-    //     const v = wrapStyles[k];
-    //     if (typeof v === "number") {
-    //       return {
-    //         [k]: `${v}px`,
-    //       };
-    //     }
-    //     if (Array.isArray(v)) {
-    //       return {
-    //         [k]: v.map((vv) => `${vv}px`).join(" "),
-    //       };
-    //     }
-    //     return {
-    //       [k]: v,
-    //     };
-    //   })
-    //   .reduce((nextStyles, cur) => {
-    //     return {
-    //       ...nextStyles,
-    //       ...cur,
-    //     };
-    //   }, {} as CSSStyleDeclaration);
-    // this.state.styles = styles;
-    // // console.log(...this.log("position", styles));
-    // this.emit(Events.Placed);
-    // this.emit(Events.StateChange, { ...this.state });
+  focusOption(value: T) {
+    // 检查是否需要更新
+    const needsUpdate = this.options.some(
+      (opt) => (opt.value === value && !opt.focused) || (opt.value !== value && opt.focused)
+    );
+    if (!needsUpdate) {
+      return;
+    }
+    this.options = this.options.map((opt) => {
+      return {
+        label: opt.label,
+        value: opt.value,
+        selected: opt.selected,
+        focused: opt.value === value,
+      };
+    });
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  blurOption(value: T) {
+    // 检查是否需要更新
+    const needsUpdate = this.options.some(
+      (opt) => opt.value === value && opt.focused
+    );
+    if (!needsUpdate) {
+      return;
+    }
+    this.options = this.options.map((opt) => {
+      return {
+        label: opt.label,
+        value: opt.value,
+        selected: opt.selected,
+        focused: opt.value === value ? false : opt.focused,
+      };
+    });
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  setPosition(rect) {
+    this.reference = rect;
+    this.emit(Events.StateChange, { ...this.state });
   }
 
   onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) {
@@ -471,7 +375,9 @@ type TheTypesInListOfEvents<K extends string, T> = {
   [Events.StateChange]: SelectProps<T>;
 };
 
-export class SelectInListCore<K extends string, T> extends BaseDomain<TheTypesInListOfEvents<K, T>> {
+export class SelectInListCore<K extends string, T> extends BaseDomain<
+  TheTypesInListOfEvents<K, T>
+> {
   options: SelectProps<T>["options"] = [];
   list: SelectCore<T>[] = [];
   cached = new Map<K, SelectCore<T>>();
@@ -488,7 +394,7 @@ export class SelectInListCore<K extends string, T> extends BaseDomain<TheTypesIn
     unique_id: K,
     extra?: {
       defaultValue: T | null;
-    }
+    },
   ) {
     const { defaultValue } = extra || { defaultValue: null };
     const existing = this.cached.get(unique_id);
@@ -550,7 +456,9 @@ export class SelectInListCore<K extends string, T> extends BaseDomain<TheTypesIn
   onChange(handler: Handler<TheTypesInListOfEvents<K, T>[Events.Change]>) {
     this.on(Events.Change, handler);
   }
-  onStateChange(handler: Handler<TheTypesInListOfEvents<K, T>[Events.StateChange]>) {
+  onStateChange(
+    handler: Handler<TheTypesInListOfEvents<K, T>[Events.StateChange]>,
+  ) {
     this.on(Events.StateChange, handler);
   }
 }

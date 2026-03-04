@@ -20,6 +20,5 @@ const selectStore = new SelectCore({
 export function SelectExample() {
   return Select({
     store: selectStore,
-    placeholder: "Select a fruit",
   });
 }

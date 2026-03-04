@@ -189,7 +189,7 @@ export default function FormValidateView() {
         if (!matched_provider_configure) {
           return;
         }
-        configure$_.value = matched_provider_configure;
+        configure$_.as(matched_provider_configure);
       },
     }),
   });

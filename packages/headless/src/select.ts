@@ -52,13 +52,10 @@ export function Trigger(
           },
           { force: true },
         );
-
-        $e.addEventListener("pointerdown", () => {
-          if (store.disabled) return;
-
-          // 在点击时更新 reference，确保获取最新尺寸
+        setTimeout(() => {
+          console.log("[]Select Trigger Mounted", $e.getBoundingClientRect());
           const rect = $e.getBoundingClientRect();
-          store.reference = {
+          store.setPosition({
             width: rect.width,
             height: rect.height,
             x: rect.x,
@@ -67,7 +64,13 @@ export function Trigger(
             right: rect.right,
             top: rect.top,
             bottom: rect.bottom,
-          };
+          });
+        }, 0);
+        $e.addEventListener("pointerdown", () => {
+          if (store.disabled) {
+            return;
+          }
+          // 在点击时更新 reference，确保获取最新尺寸
 
           store.layer.pointerDown();
           if (store.open) {
@@ -88,10 +91,10 @@ export function Trigger(
 }
 
 export function Value(
-  props: ViewProps & { store: SelectCore<any>; placeholder?: string },
+  props: ViewProps & { store: SelectCore<any> },
   children?: ViewChildren,
 ) {
-  const { store, placeholder, ...rest } = props;
+  const { store, ...rest } = props;
   const state = refobj(store.state);
 
   store.onStateChange((v) => {
@@ -103,13 +106,15 @@ export function Value(
       ...rest,
       type: "span",
     },
-    children ||
-      Txt(
-        computed(state, (d) => {
-          const opt = (d.options || []).find((o: any) => o.value === d.value);
-          return opt ? opt.label : placeholder || d.placeholder || "Select...";
-        }),
-      ),
+    [
+      computed(state, (d) => {
+        const opt = (d.options || []).find((o) => o.value === d.value);
+        if (opt) {
+          return opt.label;
+        }
+        return d.placeholder || "Select...";
+      }),
+    ],
   );
 }
 
@@ -135,22 +140,40 @@ export function Content(
   children: ViewChildren,
 ) {
   const { store, animation, ...rest } = props;
+  const presenceState = refobj(store.presence.state);
 
-  return Presence(
-    {
-      store: store.presence,
-      animation,
-    },
-    [
-      PopperPrimitive.Content(
-        {
-          ...rest,
-          store: store.popper,
-        },
-        children,
-      ),
-    ],
-  );
+  store.presence.onStateChange((v) => {
+    presenceState.as(v);
+  });
+
+  return Presence({ store: store.presence }, [
+    PopperPrimitive.Content(
+      {
+        store: store.popper,
+        layer: store.layer,
+        isRootLayer: true,
+      },
+      [
+        View(
+          {
+            ...rest,
+            class: classNames([
+              rest.class,
+              computed(presenceState, (t) => {
+                return [
+                  t.enter && animation?.in ? animation.in : "",
+                  t.exit && animation?.out ? animation.out : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ");
+              }),
+            ]),
+          },
+          children,
+        ),
+      ],
+    ),
+  ]);
 }
 
 export function Viewport(
@@ -173,13 +196,19 @@ export function Item(
         store.select(value);
         store.hide();
       },
+      onMouseEnter() {
+        store.focusOption(value);
+      },
+      onMouseLeave() {
+        store.blurOption(value);
+      },
     },
     children,
   );
 }
 
 export function ItemText(props: ViewProps, children: ViewChildren) {
-  return View({ ...props, type: "span" }, children);
+  return View({ ...props, as: "span" }, children);
 }
 
 export function ItemIndicator(
