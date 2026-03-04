@@ -1,5 +1,8 @@
 export * from "./view";
 
+export const defaultWidth = "1em";
+export const defaultHeight = "1em";
+
 export function createIcon(svg: string) {
   return function (props: any = {}) {
     const span = document.createElement("span");

@@ -122,6 +122,16 @@
       "import": "./dist/folder-closed/index.esm.js",
       "require": "./dist/folder-closed/index.js"
     },
+    "./loader": {
+      "types": "./dist/loader/index.d.ts",
+      "import": "./dist/loader/index.esm.js",
+      "require": "./dist/loader/index.js"
+    },
+    "./loader-circle": {
+      "types": "./dist/loader-circle/index.d.ts",
+      "import": "./dist/loader-circle/index.esm.js",
+      "require": "./dist/loader-circle/index.js"
+    },
     "./pause": {
       "types": "./dist/pause/index.d.ts",
       "import": "./dist/pause/index.esm.js",

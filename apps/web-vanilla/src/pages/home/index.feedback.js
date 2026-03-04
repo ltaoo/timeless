@@ -506,6 +506,264 @@ export default function FeedbackView() {
         })(),
       ]),
     ]),
+    Section("Popover", [
+      Item("Side: Top", [
+        Popover(
+          {
+            store: new Timeless.ui.PopoverCore({
+              side: "top",
+            }),
+            content: [
+              View({ class: "p-4 space-y-2" }, [
+                View({ class: "font-semibold" }, ["Popover Title"]),
+                View({ class: "text-sm text-gray-600" }, [
+                  "This popover appears on top of the trigger button.",
+                ]),
+              ]),
+            ],
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
+                }),
+              },
+              ["Open Top"],
+            ),
+          ],
+        ),
+      ]),
+      Item("Side: Bottom", [
+        Popover(
+          {
+            store: new Timeless.ui.PopoverCore({
+              side: "bottom",
+            }),
+            content: [
+              View({ class: "p-4 space-y-2" }, [
+                View({ class: "font-semibold" }, ["Popover Title"]),
+                View({ class: "text-sm text-gray-600" }, [
+                  "This popover appears below the trigger button.",
+                ]),
+              ]),
+            ],
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
+                }),
+              },
+              ["Open Bottom"],
+            ),
+          ],
+        ),
+      ]),
+      Item("Side: Left", [
+        Popover(
+          {
+            store: new Timeless.ui.PopoverCore({
+              side: "left",
+            }),
+            content: [
+              View({ class: "p-2 space-y-2" }, [
+                View({ class: "font-semibold" }, ["Popover Title"]),
+                View({ class: "text-sm text-gray-600" }, [
+                  "This popover appears to the left",
+                ]),
+              ]),
+            ],
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
+                }),
+              },
+              ["Open Left"],
+            ),
+          ],
+        ),
+      ]),
+      Item("Side: Right", [
+        Popover(
+          {
+            store: new Timeless.ui.PopoverCore({
+              side: "right",
+            }),
+            content: [
+              View({ class: "p-4 space-y-2" }, [
+                View({ class: "font-semibold" }, ["Popover Title"]),
+                View({ class: "text-sm text-gray-600" }, [
+                  "This popover appears to the right of the trigger button.",
+                ]),
+              ]),
+            ],
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
+                }),
+              },
+              ["Open Right"],
+            ),
+          ],
+        ),
+      ]),
+      Item("Align: Start", [
+        Popover(
+          {
+            store: new Timeless.ui.PopoverCore({
+              side: "bottom",
+              align: "start",
+            }),
+            content: [
+              View({ class: "p-4 space-y-2" }, [
+                View({ class: "font-semibold" }, ["Align Start"]),
+                View({ class: "text-sm text-gray-600" }, [
+                  "Popover aligned to the start of the trigger.",
+                ]),
+              ]),
+            ],
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
+                }),
+              },
+              ["Align Start"],
+            ),
+          ],
+        ),
+      ]),
+      Item("Align: Center", [
+        Popover(
+          {
+            store: new Timeless.ui.PopoverCore({
+              side: "bottom",
+              align: "center",
+            }),
+            content: [
+              View({ class: "p-4 space-y-2" }, [
+                View({ class: "font-semibold" }, ["Align Center"]),
+                View({ class: "text-sm text-gray-600" }, [
+                  "Popover aligned to the center of the trigger.",
+                ]),
+              ]),
+            ],
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
+                }),
+              },
+              ["Align Center"],
+            ),
+          ],
+        ),
+      ]),
+      Item("Align: End", [
+        Popover(
+          {
+            store: new Timeless.ui.PopoverCore({
+              side: "bottom",
+              align: "end",
+            }),
+            content: [
+              View({ class: "p-4 space-y-2" }, [
+                View({ class: "font-semibold" }, ["Align End"]),
+                View({ class: "text-sm text-gray-600" }, [
+                  "Popover aligned to the end of the trigger.",
+                ]),
+              ]),
+            ],
+          },
+          [
+            Button(
+              {
+                size: "sm",
+                variant: "outline",
+                store: new Timeless.ui.ButtonCore({}),
+              },
+              ["Align End"],
+            ),
+          ],
+        ),
+      ]),
+      Item("Complex Content", [
+        Popover(
+          {
+            store: new Timeless.ui.PopoverCore({
+              side: "right",
+              align: "start",
+            }),
+            content: [
+              View({ class: "p-4 space-y-3 w-64" }, [
+                View({ class: "font-semibold text-lg" }, ["Account Settings"]),
+                View({ class: "space-y-2" }, [
+                  Button(
+                    {
+                      class: "w-full justify-start",
+                      store: new Timeless.ui.ButtonCore({
+                        size: "sm",
+                        variant: "ghost",
+                      }),
+                    },
+                    ["Profile"],
+                  ),
+                  Button(
+                    {
+                      class: "w-full justify-start",
+                      store: new Timeless.ui.ButtonCore({
+                        size: "sm",
+                        variant: "ghost",
+                      }),
+                    },
+                    ["Preferences"],
+                  ),
+                  Button(
+                    {
+                      class: "w-full justify-start",
+                      store: new Timeless.ui.ButtonCore({
+                        size: "sm",
+                        variant: "ghost",
+                      }),
+                    },
+                    ["Logout"],
+                  ),
+                ]),
+              ]),
+            ],
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
+                }),
+              },
+              ["User Settings"],
+            ),
+          ],
+        ),
+      ]),
+    ]),
     Section("Alert", [
       Item("Default", [
         Alert({}, [

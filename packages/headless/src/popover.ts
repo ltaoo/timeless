@@ -6,6 +6,12 @@ import { Fragment } from "./fragment";
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
+import { Align, Side } from "@timeless/ui/popper";
+
+export type PopoverProps = Partial<{
+  align: Align;
+  side: Side;
+}>;
 
 export function Root(props: ViewProps, children?: ViewChildren) {
   return Fragment(props, children);

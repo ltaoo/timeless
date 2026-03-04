@@ -1,7 +1,6 @@
 import { ref, computed } from "@timeless/reactive";
 import { ButtonCore } from "@timeless/ui";
 
-import { tp, merge } from "./theme";
 import { View, ViewChildren, ViewProps } from "./view";
 import { Show } from "./show";
 

@@ -7,33 +7,87 @@ export default function GeneralView() {
         Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
         Button(
           {
-            variant: "secondary",
-            store: new Timeless.ui.ButtonCore({}),
+            store: new Timeless.ui.ButtonCore({ variant: "secondary" }),
           },
           ["Secondary"],
         ),
-        Button({ variant: "outline", store: new Timeless.ui.ButtonCore({}) }, [
+        Button({ store: new Timeless.ui.ButtonCore({ variant: "outline" }) }, [
           "Outline",
         ]),
-        Button({ variant: "ghost", store: new Timeless.ui.ButtonCore({}) }, [
+        Button({ store: new Timeless.ui.ButtonCore({ variant: "ghost" }) }, [
           "Ghost",
         ]),
         Button(
-          { variant: "destructive", store: new Timeless.ui.ButtonCore({}) },
+          { store: new Timeless.ui.ButtonCore({ variant: "destructive" }) },
           ["Destructive"],
         ),
-        Button({ variant: "link", store: new Timeless.ui.ButtonCore({}) }, [
+        Button({ store: new Timeless.ui.ButtonCore({ variant: "link" }) }, [
           "Link",
         ]),
       ]),
       Item("Sizes", [
-        Button({ size: "sm", store: new Timeless.ui.ButtonCore({}) }, [
+        Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, [
           "Small",
         ]),
         Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
-        Button({ size: "lg", store: new Timeless.ui.ButtonCore({}) }, [
+        Button({ store: new Timeless.ui.ButtonCore({ size: "lg" }) }, [
           "Large",
         ]),
+      ]),
+      Item("Loading", [
+        (() => {
+          const store = new Timeless.ui.ButtonCore({
+            onClick: () => {
+              store.setLoading(true);
+              setTimeout(() => {
+                store.setLoading(false);
+              }, 2000);
+            },
+          });
+          return Button({ store }, ["Click to Load"]);
+        })(),
+        (() => {
+          const store = new Timeless.ui.ButtonCore({
+            variant: "secondary",
+            onClick: () => {
+              store.setLoading(true);
+              setTimeout(() => {
+                store.setLoading(false);
+              }, 2000);
+            },
+          });
+          return Button({ store }, ["Click to Load"]);
+        })(),
+        (() => {
+          const store = new Timeless.ui.ButtonCore({
+            variant: "outline",
+            onClick: () => {
+              store.setLoading(true);
+              setTimeout(() => {
+                store.setLoading(false);
+              }, 2000);
+            },
+          });
+          return Button({ store }, ["Click to Load"]);
+        })(),
+      ]),
+      Item("Disabled", [
+        Button(
+          { store: new Timeless.ui.ButtonCore({ disabled: true }) },
+          ["Disabled"],
+        ),
+        Button(
+          {
+            store: new Timeless.ui.ButtonCore({ variant: "secondary", disabled: true }),
+          },
+          ["Disabled"],
+        ),
+        Button(
+          {
+            store: new Timeless.ui.ButtonCore({ variant: "outline", disabled: true }),
+          },
+          ["Disabled"],
+        ),
       ]),
     ]),
     Section("Badge", [

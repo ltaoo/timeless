@@ -25,3 +25,5 @@ export * from "./trash";
 export * from "./undo-2";
 export * from "./x";
 export * from "./bolt";
+export * from "./loader";
+export * from "./loader-circle";

@@ -32,8 +32,8 @@ export default function OverlayView() {
           [
             Button(
               {
-                variant: "outline",
                 store: new Timeless.ui.ButtonCore({
+                  variant: "outline",
                   onClick() {
                     console.log("click Open Menu");
                   },
@@ -152,7 +152,7 @@ export default function OverlayView() {
           });
           return DropdownMenu({ store: dm$ }, [
             Button(
-              { variant: "outline", store: new Timeless.ui.ButtonCore({}) },
+              { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
               ["Dynamic Submenu"],
             ),
           ]);
@@ -187,7 +187,7 @@ export default function OverlayView() {
           },
           [
             Button(
-              { variant: "outline", store: new Timeless.ui.ButtonCore({}) },
+              { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
               ["Hover Me"],
             ),
           ],
@@ -423,8 +423,7 @@ export default function OverlayView() {
               [
                 Button(
                   {
-                    variant: "outline",
-                    store: new Timeless.ui.ButtonCore({}),
+                    store: new Timeless.ui.ButtonCore({ variant: "outline" }),
                   },
                   ["Open Popover"],
                 ),

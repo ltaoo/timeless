@@ -1,4 +1,5 @@
-import { ButtonPrimitive, ref, computed, Show } from "@timeless/headless";
+import { ButtonPrimitive, ref, computed, Show, View } from "@timeless/headless";
+import { LoaderCircleOutlined } from "@timeless/icons";
 
 const VARIANTS = {
   default:
@@ -37,10 +38,10 @@ export function Button(props: any, children: any) {
   const classname_ = computed(state_, (s) => {
     return [
       "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-      VARIANTS[variant] || VARIANTS.default,
-      SIZES[size] || SIZES.default,
-      s.loading ? "opacity-70 pointer-events-none" : "",
-      s.disabled ? "opacity-50 pointer-events-none" : "",
+      VARIANTS[s.variant] || VARIANTS.default,
+      SIZES[s.size] || SIZES.default,
+      s.loading ? "opacity-70 pointer-events-none cursor-not-allowed" : "",
+      s.disabled ? "opacity-50 pointer-events-none cursor-not-allowed" : "",
       cls,
     ]
       .filter(Boolean)
@@ -59,13 +60,17 @@ export function Button(props: any, children: any) {
       },
     },
     [
-      ButtonPrimitive.Loading({
-        store,
-        class:
-          "mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent",
-      }),
+      ButtonPrimitive.Loading({ store }, [
+        View(
+          {
+            class: "mr-2 inline-block h-4 w-4 animate-spin",
+            style: "transform-origin: center",
+          },
+          [LoaderCircleOutlined()],
+        ),
+      ]),
       Show({ when: !!prefix }, [ButtonPrimitive.Prefix({}, prefix)]),
       ButtonPrimitive.Content({}, children),
-    ].filter(Boolean),
+    ],
   );
 }

@@ -13,10 +13,15 @@ type ButtonState = {
   text: string;
   loading: boolean;
   disabled: boolean;
+  variant: string;
+  size: string;
 };
 type ButtonProps<T = unknown> = {
   disabled?: boolean;
-  onClick: (record: T | null) => void;
+  loading?: boolean;
+  variant?: string;
+  size?: string;
+  onClick?: (record: T | null) => void;
 };
 export class ButtonCore<T = unknown> extends BaseDomain<TheTypesOfEvents<T>> {
   id = this.uid();
@@ -26,6 +31,8 @@ export class ButtonCore<T = unknown> extends BaseDomain<TheTypesOfEvents<T>> {
     text: "Click it",
     loading: false,
     disabled: false,
+    variant: "default",
+    size: "default",
   };
 
   constructor(props: Partial<{ _name: string } & ButtonProps<T>> = {}) {
@@ -33,6 +40,15 @@ export class ButtonCore<T = unknown> extends BaseDomain<TheTypesOfEvents<T>> {
 
     if (props.disabled !== undefined) {
       this.state.disabled = props.disabled;
+    }
+    if (props.loading !== undefined) {
+      this.state.loading = props.loading;
+    }
+    if (props.variant !== undefined) {
+      this.state.variant = props.variant;
+    }
+    if (props.size !== undefined) {
+      this.state.size = props.size;
     }
     this.cur = new RefCore();
     if (props.onClick) {
@@ -72,6 +88,20 @@ export class ButtonCore<T = unknown> extends BaseDomain<TheTypesOfEvents<T>> {
       return;
     }
     this.state.loading = loading;
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  setVariant(variant: string) {
+    if (this.state.variant === variant) {
+      return;
+    }
+    this.state.variant = variant;
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  setSize(size: string) {
+    if (this.state.size === size) {
+      return;
+    }
+    this.state.size = size;
     this.emit(Events.StateChange, { ...this.state });
   }
 

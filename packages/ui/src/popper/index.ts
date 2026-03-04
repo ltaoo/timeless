@@ -62,7 +62,7 @@ type PopperState = {
   strategy: Strategy;
   x: number;
   y: number;
-  // placement: Placement;
+  placement: Placement;
   isPlaced: boolean;
   placedSide: Side;
   placedAlign: Align;
@@ -72,6 +72,7 @@ type PopperState = {
     x?: number;
     y?: number;
   } | null;
+  middlewareData: MiddlewareData;
 };
 export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   unique_id = "PopperCore";
@@ -110,11 +111,13 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     strategy: "absolute",
     x: 0,
     y: 0,
+    placement: "bottom",
     isPlaced: false,
     placedSide: "bottom",
     placedAlign: "center",
     reference: false,
     arrow: null,
+    middlewareData: {},
   };
 
   _enter = false;
@@ -322,11 +325,13 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       x: xWithOffset,
       y: yWithOffset,
       strategy: this.strategy,
+      placement: coords.placement,
       isPlaced: true,
       placedSide,
       placedAlign,
       reference: true,
       arrow: middlewareData.arrow || null,
+      middlewareData,
     };
     console.log(
       ...this.log("place - before emit placed", {
