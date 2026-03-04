@@ -64,13 +64,18 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
   );
 
-  const unlisten = [
+  [
     props.store.onStateChange((v) => {
       state_.as(v);
     }),
-    // props.store.menu.onStateChange((v) => {
-    //   state_.as(v);
-    // }),
+    (() => {
+      if (props.store.menu) {
+        return props.store.menu.onStateChange((v) => {
+          menu_state_.as(v);
+        });
+      }
+      return () => {};
+    })(),
   ];
 
   return View({ class: "t-dropdown-menu-item-wrap" }, [
@@ -125,7 +130,6 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
             ),
           ])
         : null;
-      // return Show({ when: has_submenu_ }, [inner$]);
       return View({}, [inner$]);
     })(),
   ]);

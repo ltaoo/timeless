@@ -112,6 +112,10 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
 
   setItems(items: MenuItemCore[]) {
     this.items = items;
+    this.menu.state.items = items;
+    this.menu.emit(Events.StateChange, {
+      ...this.menu.state,
+    });
     this.emit(Events.StateChange, {
       ...this.state,
     });
