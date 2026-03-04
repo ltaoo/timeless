@@ -23,7 +23,7 @@ import { Toggle } from "./toggle";
 import { Slider } from "./slider";
 import { Progress } from "./progress";
 import { Dialog } from "./dialog";
-import { Menu, MenuItem, MenuLabel, MenuSeparator } from "./menu";
+import { Menu } from "./menu";
 import { DropdownMenu } from "./dropdown-menu";
 import { ContextMenu } from "./context-menu";
 import { Tabs } from "./tabs";
@@ -77,9 +77,6 @@ export {
   Progress,
   Dialog,
   Menu,
-  MenuItem,
-  MenuLabel,
-  MenuSeparator,
   DropdownMenu,
   ContextMenu,
   Tabs,

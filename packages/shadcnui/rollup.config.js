@@ -61,6 +61,10 @@ const config = {
       tsconfig: "./tsconfig.json",
       declaration: true,
       declarationDir: "./dist",
+      compilerOptions: {
+        noUnusedLocals: false,
+        noUnusedParameters: false,
+      },
     }),
     postcss({
       extract: path.join(__dirname, "dist/timeless.shadcnui.css"),

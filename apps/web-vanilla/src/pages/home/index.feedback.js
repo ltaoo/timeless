@@ -7,6 +7,73 @@ export default function FeedbackView() {
   });
 
   return View({ class: "space-y-8" }, [
+    Section("Menu", [
+      Item("Default", [
+        Menu({
+          store: new Timeless.ui.MenuCore({
+            items: [
+              new Timeless.ui.MenuItemCore({
+                label: "Edit",
+                onClick() {
+                  console.log("edit");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Duplicate",
+                onClick() {
+                  console.log("duplicate");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Delete",
+                onClick() {
+                  console.log("delete");
+                },
+              }),
+            ],
+          }),
+        }),
+      ]),
+      Item("With Submenu", [
+        Menu({
+          store: new Timeless.ui.MenuCore({
+            items: [
+              new Timeless.ui.MenuItemCore({
+                label: "Cut",
+                onClick() {
+                  console.log("cut");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Copy",
+                onClick() {
+                  console.log("copy");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Share",
+                menu: new Timeless.ui.MenuCore({
+                  items: [
+                    new Timeless.ui.MenuItemCore({
+                      label: "Email",
+                      onClick() {
+                        console.log("email");
+                      },
+                    }),
+                    new Timeless.ui.MenuItemCore({
+                      label: "Message",
+                      onClick() {
+                        console.log("message");
+                      },
+                    }),
+                  ],
+                }),
+              }),
+            ],
+          }),
+        }),
+      ]),
+    ]),
     Section("Dialog", [
       Item("Default", [
         Button(
@@ -349,7 +416,8 @@ export default function FeedbackView() {
               [
                 Portal(
                   {
-                    class: "fixed inset-0 z-50 flex items-center justify-center bg-black/50",
+                    class:
+                      "fixed inset-0 z-50 flex items-center justify-center bg-black/50",
                     onClick(e) {
                       if (e.target === e.currentTarget) {
                         p$.hide();
@@ -359,27 +427,36 @@ export default function FeedbackView() {
                   [
                     View(
                       {
-                        class: "p-6 rounded-lg bg-white dark:bg-zinc-800 shadow-lg max-w-md",
+                        class:
+                          "p-6 rounded-lg bg-white dark:bg-zinc-800 shadow-lg max-w-md",
                       },
                       [
-                        View({ class: "flex items-center justify-between mb-4" }, [
-                          Txt("🎭 Presence inside Portal"),
-                          Button(
-                            {
-                              size: "sm",
-                              variant: "ghost",
-                              store: new Timeless.ui.ButtonCore({
-                                onClick() {
-                                  p$.hide();
-                                },
-                              }),
-                            },
-                            [Txt("✕")],
-                          ),
-                        ]),
-                        View({ class: "text-sm text-zinc-600 dark:text-zinc-400" }, [
-                          Txt("Click the X button or click outside to close. It should be properly destroyed."),
-                        ]),
+                        View(
+                          { class: "flex items-center justify-between mb-4" },
+                          [
+                            Txt("🎭 Presence inside Portal"),
+                            Button(
+                              {
+                                size: "sm",
+                                variant: "ghost",
+                                store: new Timeless.ui.ButtonCore({
+                                  onClick() {
+                                    p$.hide();
+                                  },
+                                }),
+                              },
+                              [Txt("✕")],
+                            ),
+                          ],
+                        ),
+                        View(
+                          { class: "text-sm text-zinc-600 dark:text-zinc-400" },
+                          [
+                            Txt(
+                              "Click the X button or click outside to close. It should be properly destroyed.",
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ],

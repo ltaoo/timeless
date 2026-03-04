@@ -35,7 +35,7 @@ const config = [
       }),
       resolve(),
       commonjs(),
-      typescript({ 
+      typescript({
         tsconfig: './tsconfig.json',
         declaration: false,
         outDir: null,
@@ -43,6 +43,8 @@ const config = [
           declaration: false,
           declarationMap: false,
           outDir: null,
+          noUnusedLocals: false,
+          noUnusedParameters: false,
         }
       }),
     ],

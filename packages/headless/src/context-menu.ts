@@ -97,7 +97,10 @@ export function Portal(
 }
 
 export function Content(
-  props: ViewProps & { store: ContextMenuCore },
+  props: ViewProps & {
+    store: ContextMenuCore;
+    animation?: { in: string; out: string };
+  },
   children: ViewChildren,
 ) {
   const { store, ...rest } = props;
@@ -171,7 +174,10 @@ export function SubMenuTrigger(
 }
 
 export function SubMenuContent(
-  props: ViewProps & { store: MenuCore },
+  props: ViewProps & {
+    store: MenuCore;
+    animation?: { in: string; out: string };
+  },
   children: ViewChildren,
 ) {
   // Get the parent ContextMenuCore from the menu's parent

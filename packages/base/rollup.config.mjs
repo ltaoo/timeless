@@ -43,6 +43,8 @@ const config = [
           declaration: false,
           declarationMap: false,
           outDir: null,
+          noUnusedLocals: false,
+          noUnusedParameters: false,
         },
       }),
     ],

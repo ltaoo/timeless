@@ -9,7 +9,7 @@ import { Txt } from "./text";
 
 export function Tabs<T>(
   props: ViewProps & {
-    store: TabHeaderCore<T>;
+    store: TabHeaderCore<any>;
     theme?: { root: any; tab: any; list: any; indicator: any; content: any };
   },
 ) {

@@ -47,6 +47,10 @@ const config = [
       typescript({
         tsconfig: "./tsconfig.json",
         declaration: false, // We use rollup-plugin-dts for declaration files
+        compilerOptions: {
+          noUnusedLocals: false,
+          noUnusedParameters: false,
+        },
       }),
     ],
   },

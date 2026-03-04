@@ -7,11 +7,9 @@ import { View, ViewProps } from "./view.js";
 export function Toggle(
   props: ViewProps & {
     store: ToggleCore;
-    disabled?: boolean;
-    theme?: any;
   },
 ) {
-  const { store, disabled, theme: t, class: cls, style: st } = props;
+  const { store, class: cls, style: st } = props;
 
   const state = ref(store.state);
   const events: any[] = [];
@@ -24,21 +22,8 @@ export function Toggle(
 
   return View(
     {
+      ...props,
       type: "button",
-      class: computed(state, (d) => {
-        return merge(
-          tp(t?.root, { on: d.checked || d.value, disabled: d.disabled }),
-          cls,
-          st,
-        ).class;
-      }),
-      // style: computed(state, (d) => {
-      //   return merge(
-      //     tp(t?.root, { on: isOn(d), disabled: d.disabled }),
-      //     cn,
-      //     st,
-      //   ).style;
-      // }),
       onClick() {
         store.toggle();
       },
@@ -50,12 +35,6 @@ export function Toggle(
     [
       View({
         type: "span",
-        class: computed(state, (d) => {
-          return merge(tp(t?.thumb, { on: d.checked || d.value })).class || "";
-        }),
-        style: computed(state, (d) => {
-          return merge(tp(t?.thumb, { on: d.checked || d.value })).style || "";
-        }),
       }),
     ],
   );

@@ -1,60 +1,209 @@
+import { ref, computed, refobj, classNames } from "@timeless/reactive";
+import {
+  MenuPrimitive,
+  For,
+  View,
+  Show,
+  ViewChildren,
+  ViewProps,
+} from "@timeless/headless";
+import { MenuCore, MenuItemCore } from "@timeless/ui";
+import { ChevronRightOutlined } from "@timeless/icons";
+
 const MENU_CONTENT_CLASS =
   "min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-700 shadow-md dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50";
 
-// Patch: fix item.menu.onEnter listener leak in MenuCore.listen_item
-{
-  const proto = MenuCore.prototype;
-  const orig = proto.listen_item;
-  proto.listen_item = function (this: any, e: any) {
-    if (e.menu) {
-      const origOnEnter = e.menu.onEnter.bind(e.menu);
-      let unsub: any = null;
-      e.menu.onEnter = function (handler: any) {
-        if (unsub) unsub();
-        unsub = origOnEnter(handler);
-        return unsub;
-      };
+const MENU_ITEM_CLASS =
+  "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors";
+
+export function Menu(props: ViewProps & { store: MenuCore }) {
+  const state_ = refobj(props.store.state);
+
+  console.log("[Menu] created, store:", props.store._name, "has layer:", !!props.store.layer);
+
+  // Create a function that returns all parent layers as an array
+  const getAllParentLayers = () => {
+    const layers: any[] = [];
+    let currentMenu = props.store.parent_menu;
+    while (currentMenu) {
+      if (currentMenu.layer) {
+        layers.push(currentMenu.layer);
+      }
+      currentMenu = currentMenu.parent_menu;
     }
-    return orig.call(this, e);
+    console.log("[Menu getAllParentLayers] found", layers.length, "parent layers");
+    return layers;
   };
+
+  // Determine if this is a root layer (no parent menu)
+  const isRootLayer = !props.store.parent_menu;
+  console.log("[Menu] isRootLayer:", isRootLayer, "parent_menu:", props.store.parent_menu?._name);
+
+  let handlePointerDown: any;
+
+  return View(
+    {
+      class: MENU_CONTENT_CLASS,
+      onMounted($el) {
+        console.log("[Menu onMounted] store:", props.store._name, "has layer:", !!props.store.layer, "isRootLayer:", isRootLayer);
+
+        // For root menu that's always visible, override layer.onDismiss to only close submenus
+        if (isRootLayer && props.store.layer) {
+          // Remove the default onDismiss handler that calls hide()
+          // and add a custom one that only closes submenus
+          props.store.layer.onDismiss(() => {
+            console.log("[Menu layer.onDismiss] closing submenus for always-visible root menu");
+            // Close current submenu if open
+            if (props.store.cur_item && props.store.cur_item.menu && props.store.cur_item.menu.state.open) {
+              console.log("[Menu layer.onDismiss] closing submenu", props.store.cur_item.menu._name);
+              props.store.cur_item.menu.hide();
+            }
+          });
+        }
+
+        // Register click outside handler for root menu
+        if (props.store.layer) {
+          // Only register document listener for root layer
+          if (isRootLayer) {
+            handlePointerDown = () => {
+              console.log("[Menu] handlePointerDownOnTop called on ROOT, store:", props.store._name);
+              props.store.layer.handlePointerDownOnTop();
+            };
+            document.addEventListener("pointerdown", handlePointerDown);
+            console.log("[Menu] registered document listener for ROOT, store:", props.store._name);
+          }
+
+          $el.addEventListener("pointerdown", (e) => {
+            console.log(
+              "[Menu] element pointerdown, store:", props.store._name,
+              "isRoot:", isRootLayer,
+              "target:", e.target
+            );
+            props.store.layer.pointerDown();
+            // Mark all parent layers as pointer inside
+            const parentLayers = getAllParentLayers();
+            console.log(
+              "[Menu] marking parent layers, count:",
+              parentLayers.length,
+            );
+            for (const parentLayer of parentLayers) {
+              if (parentLayer) {
+                console.log("[Menu] marking parent layer");
+                parentLayer.pointerDown();
+              }
+            }
+          });
+        } else {
+          console.warn("[Menu onMounted] NO LAYER for store:", props.store._name);
+        }
+        if (props.onMounted) {
+          props.onMounted($el);
+        }
+      },
+      onUnmounted() {
+        console.log(
+          "[Menu] unmounted, removing listeners, isRoot:",
+          isRootLayer,
+          "store:", props.store._name
+        );
+        if (props.store.layer && handlePointerDown) {
+          document.removeEventListener("pointerdown", handlePointerDown);
+          handlePointerDown = null;
+        }
+        if (props.onUnmounted) {
+          props.onUnmounted();
+        }
+      },
+    },
+    [
+      For({
+        each: computed(state_, (t) => {
+          console.log(
+            "[Menu For] items count:",
+            t.items.length,
+            t.items.map((i) => i.label),
+          );
+          return t.items;
+        }),
+        render(item: MenuItemCore) {
+          return MenuItem({ store: item });
+        },
+      }),
+    ],
+  );
 }
 
-import { MenuPrimitive } from "@timeless/headless";
-import { MenuCore } from "@timeless/ui";
+function MenuItem(props: ViewProps & { store: MenuItemCore }) {
+  const state_ = refobj(props.store.state);
+  const has_submenu_ = ref(!!props.store.menu);
+  const menu_state_ = refobj(
+    props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
+  );
 
-const t = {
-  animation: {
-    in: "animate-in fade-in-0 zoom-in-95",
-    out: "animate-out fade-out-0 zoom-out-95",
-  },
-  subAnimation: {
-    in: "animate-in fade-in-0",
-    out: "animate-out fade-out-0",
-  },
-  menu: { class: MENU_CONTENT_CLASS },
-  item: {
-    class:
-      "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:hover:bg-gray-800 dark:hover:text-gray-50",
-  },
-  itemHover: { class: "bg-gray-100 dark:bg-gray-800" },
-  label: {
-    class: "px-2 py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-50",
-  },
-  separator: { class: "-mx-1 my-1 h-px bg-gray-100 dark:bg-gray-800" },
-  submenuArrow: {
-    class: "ml-auto pl-2 text-xs text-gray-400 dark:text-gray-500",
-  },
-};
+  console.log("[MenuItem] created, label:", props.store.label, "has submenu:", !!props.store.menu);
+  if (props.store.menu) {
+    console.log("[MenuItem] submenu parent_menu:", props.store.menu.parent_menu?._name, "has layer:", !!props.store.menu.layer);
+  }
 
-export function Menu(p: any, c?: any) {
-  return MenuPrimitive.Root({ ...p, theme: t }, c);
-}
-export function MenuItem(p: any, c?: any) {
-  return MenuPrimitive.Item({ ...p, theme: t }, c);
-}
-export function MenuLabel(p: any, c?: any) {
-  return MenuPrimitive.Label({ ...p, theme: t }, c);
-}
-export function MenuSeparator(p: any) {
-  return MenuPrimitive.Root({ ...p, theme: t });
+  const unlisten = [
+    props.store.onStateChange((v) => {
+      state_.as(v);
+    }),
+  ];
+
+  return View({ class: "t-menu-item-wrap" }, [
+    MenuPrimitive.Item(
+      {
+        store: props.store,
+        class: classNames([
+          computed(state_, (t) => {
+            return t.focused
+              ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50"
+              : "";
+          }),
+          computed(state_, (t) => {
+            return t.disabled ? "pointer-events-none opacity-50" : "";
+          }),
+          computed(has_submenu_, (t) => {
+            return [MENU_ITEM_CLASS, t ? "flex justify-between" : ""].join(" ");
+          }),
+        ]),
+      },
+      [
+        props.store.label,
+        Show({ when: has_submenu_ }, [
+          ChevronRightOutlined({ class: "w-4 h-4" }),
+        ]),
+      ],
+    ),
+    (() => {
+      console.log("MenuItem render submenu for", props.store.label);
+      const inner$ = props.store.menu
+        ? MenuPrimitive.Portal({ store: props.store.menu }, [
+            MenuPrimitive.SubMenuContent(
+              {
+                store: props.store.menu,
+                animation: {
+                  in: "animate-in fade-in-0 zoom-in-95",
+                  out: "animate-out fade-out-0 zoom-out-95",
+                },
+              },
+              [
+                View({ class: MENU_CONTENT_CLASS }, [
+                  For({
+                    each: computed(menu_state_, (t) => {
+                      return t.items;
+                    }),
+                    render(item: MenuItemCore) {
+                      return MenuItem({ store: item });
+                    },
+                  }),
+                ]),
+              ],
+            ),
+          ])
+        : null;
+      return View({}, [inner$]);
+    })(),
+  ]);
 }

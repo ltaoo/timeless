@@ -28,7 +28,13 @@ const config = [
     plugins: [
       resolve(),
       commonjs(),
-      typescript({ tsconfig: "./tsconfig.json" }),
+      typescript({
+        tsconfig: "./tsconfig.json",
+        compilerOptions: {
+          noUnusedLocals: false,
+          noUnusedParameters: false,
+        },
+      }),
     ],
   },
   {
@@ -54,7 +60,13 @@ const config = [
     plugins: [
       resolve({ browser: true }),
       commonjs(),
-      typescript({ tsconfig: "./tsconfig.json" }),
+      typescript({
+        tsconfig: "./tsconfig.json",
+        compilerOptions: {
+          noUnusedLocals: false,
+          noUnusedParameters: false,
+        },
+      }),
       terser(),
     ],
   },

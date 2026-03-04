@@ -33,7 +33,12 @@ const config = {
   },
   external: ["@timeless/headless"],
   plugins: [
-    typescript(),
+    typescript({
+      compilerOptions: {
+        noUnusedLocals: false,
+        noUnusedParameters: false,
+      },
+    }),
     resolve({
       browser: true,
       preferBuiltins: false,

@@ -62,7 +62,12 @@ const configs = [
     ],
     external: ["@timeless/reactive", "@timeless/kit", "@timeless/ui"],
     plugins: [
-      typescript(),
+      typescript({
+        compilerOptions: {
+          noUnusedLocals: false,
+          noUnusedParameters: false,
+        },
+      }),
       resolve({
         browser: true,
         preferBuiltins: false,
@@ -106,6 +111,8 @@ const configs = [
           declarationMap: false,
           outDir: null,
           declarationDir: null,
+          noUnusedLocals: false,
+          noUnusedParameters: false,
         },
       }),
     ],
@@ -159,6 +166,8 @@ export default (args) => {
                 declarationMap: false,
                 outDir: null,
                 declarationDir: null,
+                noUnusedLocals: false,
+                noUnusedParameters: false,
               },
             }),
           ],

@@ -40,7 +40,12 @@ const config = {
   ],
   // No external because we want a full bundle
   plugins: [
-    typescript(),
+    typescript({
+      compilerOptions: {
+        noUnusedLocals: false,
+        noUnusedParameters: false,
+      },
+    }),
     resolve({
       browser: true,
       preferBuiltins: false,

@@ -72,6 +72,7 @@ export default [
         TableBody: "readonly",
         TableCell: "readonly",
         // feedback
+        Menu: "readonly",
         Dialog: "readonly",
         Toast: "readonly",
         Alert: "readonly",

@@ -28,7 +28,7 @@ export function ContextMenu(
   children?: ViewChildren,
 ) {
   const state_ = refobj(props.store.state);
-  const presence_state_ = refobj(props.store.menu.presence.state);
+  // const presence_state_ = refobj(props.store.menu.presence.state);
 
   return Fragment({}, [
     ContextMenuPrimitive.Trigger({ store: props.store }, children),
@@ -36,23 +36,22 @@ export function ContextMenu(
       ContextMenuPrimitive.Content(
         {
           ...props,
-          class: computed(presence_state_, (t) => {
-            return [
-              MENU_CONTENT_CLASS,
-              t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
-              t.exit ? "animate-out fade-out-0 zoom-out-95" : "",
-            ].join(" ");
-          }),
+          animation: {
+            in: "animate-in fade-in-0 zoom-in-95",
+            out: "animate-out fade-out-0 zoom-out-95",
+          },
         },
         [
-          For({
-            each: computed(state_, (t) => {
-              return t.items;
+          View({ class: MENU_CONTENT_CLASS }, [
+            For({
+              each: computed(state_, (t) => {
+                return t.items;
+              }),
+              render(item: MenuItemCore) {
+                return ContextMenuItem({ store: item });
+              },
             }),
-            render(item: MenuItemCore) {
-              return ContextMenuItem({ store: item });
-            },
-          }),
+          ]),
         ],
       ),
     ]),
@@ -65,19 +64,19 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
   const menu_state_ = refobj(
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
   );
-  const presence_state_ = refobj(
-    props.store.menu
-      ? props.store.menu.presence.state
-      : ({} as PresenceCore["state"]),
-  );
+  // const presence_state_ = refobj(
+  //   props.store.menu
+  //     ? props.store.menu.presence.state
+  //     : ({} as PresenceCore["state"]),
+  // );
 
-  const unlisten = [
+  [
     props.store.onStateChange((v) => {
       state_.as(v);
     }),
   ];
 
-  return Fragment({}, [
+  return View({ class: "t-context-menu-item-wrap" }, [
     ContextMenuPrimitive.Item(
       {
         store: props.store,
@@ -102,36 +101,33 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
         ]),
       ],
     ),
-    Show({ when: has_submenu_ }, [
-      (() => {
-        if (!props.store.menu) {
-          return null;
-        }
-        return ContextMenuPrimitive.Portal({ store: props.store.menu }, [
-          ContextMenuPrimitive.SubMenuContent(
-            {
-              store: props.store.menu,
-              class: computed(presence_state_, (t) => {
-                return [
-                  MENU_CONTENT_CLASS,
-                  t.enter ? "animate-in fade-in-0" : "",
-                  t.exit ? "animate-out fade-out-0" : "",
-                ].join(" ");
-              }),
-            },
-            [
-              For({
-                each: computed(menu_state_, (t) => {
-                  return t.items;
-                }),
-                render(item: MenuItemCore) {
-                  return ContextMenuItem({ store: item });
+    (() => {
+      const inner$ = props.store.menu
+        ? ContextMenuPrimitive.Portal({ store: props.store.menu }, [
+            ContextMenuPrimitive.SubMenuContent(
+              {
+                store: props.store.menu,
+                animation: {
+                  in: "animate-in fade-in-0 zoom-in-95",
+                  out: "animate-out fade-out-0 zoom-out-95",
                 },
-              }),
-            ],
-          ),
-        ]);
-      })(),
-    ]),
+              },
+              [
+                View({ class: MENU_CONTENT_CLASS }, [
+                  For({
+                    each: computed(menu_state_, (t) => {
+                      return t.items;
+                    }),
+                    render(item: MenuItemCore) {
+                      return ContextMenuItem({ store: item });
+                    },
+                  }),
+                ]),
+              ],
+            ),
+          ])
+        : null;
+      return View({}, [inner$]);
+    })(),
   ]);
 }
