@@ -277,11 +277,11 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
   showView(
     sub_view: RouteViewCore,
     options: Partial<{
-      reason: "show_sibling" | "back";
+      reason: "show_sibling" | "back" | "forward";
       destroy: boolean;
     }> = {},
   ) {
-    // console.log("[DOMAIN]route_view - showView", this.title, sub_view.title, this.curView?.title);
+    console.log("[DOMAIN]route_view - showView", "parent:", this.title, "sub_view:", sub_view.title, "curView:", this.curView?.title, "sub_view.visible:", sub_view.visible, "options:", options);
     if (sub_view === this) {
       console.warn("cannot show self");
       return;
@@ -293,7 +293,7 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     (() => {
       if (!this.visible) {
         // 如果自身是不可见状态，先让自身的父视图将自己 show
-        // console.log("[DOMAIN]route_view - show self by parent", this.title, this.parent?.title);
+        console.log("[DOMAIN]route_view - show self by parent", this.title, this.parent?.title);
         if (!this.parent) {
           if (!this.isRoot) {
             console.warn("no parent");
@@ -303,22 +303,25 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
         this.parent.showView(this, options);
       }
     })();
-    if (options.reason === "show_sibling" && this.curView) {
+    // 在显示新视图之前，隐藏当前视图
+    if ((options.reason === "show_sibling" || options.reason === "back" || options.reason === "forward") && this.curView) {
+      console.log("[DOMAIN]route_view - hiding curView", this.curView.title);
       this.curView.hide(options);
     }
     this.appendView(sub_view);
     this.emit(Events.BeforeShow);
-    // console.log("[DOMAIN]route_view - before this.curView = view 2", sub_view.title);
+    console.log("[DOMAIN]route_view - before this.curView = view", sub_view.title);
     this.curView = sub_view;
     sub_view.show();
     this.emit(Events.CurSubViewChange, this.curView);
   }
   /** 主动展示视图 */
   show() {
-    // console.log("[ROUTE_VIEW]show", this._name, this.state.visible);
+    console.log("[ROUTE_VIEW]show", this.title, "visible:", this.visible, "mounted:", this.mounted);
     if (this.visible) {
       // 为了让 presence 内部 hide 时判断 mounted 为 true
       this.$presence.state.mounted = true;
+      console.log("[ROUTE_VIEW]show - already visible, return");
       return;
     }
     this.$presence.show();

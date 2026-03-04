@@ -324,7 +324,11 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
     if (type !== "popstate") {
       return;
     }
-    const targetPathname = pathname;
+    // 移除 prefix 以获取正确的 pathname
+    let targetPathname = pathname;
+    if (NavigatorCore.prefix && pathname.startsWith(NavigatorCore.prefix)) {
+      targetPathname = pathname.replace(NavigatorCore.prefix, "");
+    }
     const prevPathname = this.pathname;
     this.setPrevPathname(prevPathname);
     this.setPathname(targetPathname);
