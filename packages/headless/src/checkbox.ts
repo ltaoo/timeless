@@ -1,89 +1,99 @@
 import { ref, computed } from "@timeless/reactive";
+import { CheckboxCore } from "@timeless/ui";
 
-import { tp, merge } from "./theme";
-import { View, ViewProps } from "./view";
+import { View, ViewChildren, ViewProps } from "./view";
+import { Show } from "./show";
 
-export function Checkbox(props: ViewProps & { store?: any; theme?: any }) {
-  const { store, theme: t, class: cls, style: st, ...rest } = props;
-  const state = ref(store.state);
-  const events: any[] = [];
-  const unsub = store.onStateChange
-    ? store.onStateChange(() => {
-        state.as(store.state);
-      })
-    : null;
-  if (unsub) events.push(unsub);
-  if (store.onChange)
-    events.push(
-      store.onChange(() => {
-        state.as(store.state);
-      }),
-    );
-
-  const m = (d?: any) => merge(tp(t?.root), cls, st);
+export function Root(
+  props: ViewProps & { store: CheckboxCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
 
   return View(
     {
       ...rest,
-      ...m(),
-      onClick() {
+      onClick(e) {
+        if (rest.onClick) rest.onClick(e);
         store.toggle();
+      },
+      onUnmounted() {
+        if (rest.onUnmounted) rest.onUnmounted();
+      },
+    },
+    children,
+  );
+}
+
+export function Box(
+  props: ViewProps & { store: CheckboxCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  const state = ref(store.state);
+  const events: any[] = [];
+
+  return View(
+    {
+      ...rest,
+      // "data-checked": computed(state, (d) => (d.checked ? "" : undefined)),
+      // "data-disabled": computed(state, (d) => (d.disabled ? "" : undefined)),
+      onMounted() {
+        events.push(
+          store.onStateChange(() => {
+            state.as(store.state);
+          }),
+        );
+        if (store.onChange) {
+          events.push(
+            store.onChange(() => {
+              state.as(store.state);
+            }),
+          );
+        }
       },
       onUnmounted() {
         for (const fn of events) if (typeof fn === "function") fn();
         if (rest.onUnmounted) rest.onUnmounted();
       },
     },
-    [
-      View(
-        {
-          class: computed(state, (d) => {
-            return (
-              merge(
-                tp(t?.box, {
-                  checked: d.checked,
-                  disabled: d.disabled,
-                }),
-              ).class || ""
-            );
-          }),
-          style: computed(state, (d) => {
-            return (
-              merge(
-                tp(t?.box, {
-                  checked: d.checked,
-                  disabled: d.disabled,
-                }),
-              ).style || ""
-            );
-          }),
-        },
-        [
-          View(
-            {
-              type: "span",
-              class: computed(state, (d) => {
-                return merge(tp(t?.check, { checked: d.checked })).class || "";
-              }),
-              style: computed(state, (d) => {
-                return merge(tp(t?.check, { checked: d.checked })).style || "";
-              }),
-            },
-            [
-              {
-                t: "text",
-                $elm: document.createTextNode("\u2713"),
-                render() {
-                  return this.$elm;
-                },
-                onMounted() {},
-                beforeUnmounted() {},
-                onUnmounted() {},
-              },
-            ],
-          ),
-        ],
-      ),
-    ],
+    children,
   );
+}
+
+export function Indicator(
+  props: ViewProps & { store: CheckboxCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  const state_ = ref(store.state);
+  const events: any[] = [];
+
+  return Show(
+    {
+      when: computed(state_, (d) => d.checked),
+      onMounted() {
+        events.push(
+          store.onStateChange(() => {
+            state_.as(store.state);
+          }),
+        );
+        if (store.onChange) {
+          events.push(
+            store.onChange(() => {
+              state_.as(store.state);
+            }),
+          );
+        }
+      },
+      onUnmounted() {
+        for (const fn of events) if (typeof fn === "function") fn();
+      },
+    },
+    children,
+  );
+}
+
+export function Label(props: ViewProps, children?: ViewChildren) {
+  return View(props, children);
 }

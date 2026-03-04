@@ -14,7 +14,6 @@ export * from "@timeless/reactive";
 // Reactive
 export * from "./for";
 export * from "./show";
-export * from "./match";
 export * from "./switch";
 
 // Primitives
@@ -48,16 +47,19 @@ export * as ButtonPrimitive from "./button";
 export * as MenuPrimitive from "./menu";
 export * as DropdownMenuPrimitive from "./dropdown-menu";
 export * as ContextMenuPrimitive from "./context-menu";
+export * as ResizablePanelsPrimitive from "./resizable-panels";
 export * from "./tabs";
 export * from "./accordion";
 
 // form
 export * from "./input";
 export * from "./textarea";
-export * from "./select";
-export * from "./checkbox";
+export * as SelectPrimitive from "./select";
+export * as CheckboxPrimitive from "./checkbox";
 export * from "./slider";
 export * from "./toggle";
+export * as FieldPrimitive from "./field";
+export * from "./field";
 
 // overlay
 export * as PopoverPrimitive from "./popover";

@@ -11,6 +11,7 @@ export default function HomePageView(props) {
     menus: [
       { title: "General", url: "root.home_layout.index.general" },
       { title: "Form", url: "root.home_layout.index.form" },
+      { title: "Form Validate", url: "root.home_layout.index.validate" },
       { title: "Data Display", url: "root.home_layout.index.data" },
       { title: "Feedback", url: "root.home_layout.index.feedback" },
       { title: "Navigation", url: "root.home_layout.index.nav" },

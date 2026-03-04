@@ -1,11 +1,18 @@
-import { Ref, isRef, isClassName, ClassNameRef } from "@timeless/reactive";
+import {
+  Ref,
+  isRef,
+  isClassName,
+  ClassNameRef,
+  isStyleRef,
+  StyleRef,
+} from "@timeless/reactive";
 import { Txt } from "./text";
 
 export interface ViewProps {
   as?: string;
   type?: string;
   id?: string | Ref<string>;
-  style?: string | Ref<string>;
+  style?: string | Ref<string> | StyleRef;
   class?: string | Ref<string> | ClassNameRef;
   dataset?: Record<string, string>;
   "tab-index"?: number | Ref<number | undefined>;
@@ -96,14 +103,20 @@ export function View(props: ViewProps = {}, children?: any) {
   if (style) {
     if (typeof style === "string") {
       $elm.style.cssText = style;
-    }
-    if (isRef(style)) {
+    } else if (isRef(style)) {
       $elm.style.cssText = style.value;
       style._subscribe({
         onChange(v: any) {
           $elm.style.cssText = v;
         },
       });
+    } else if (isStyleRef(style)) {
+      style._subscribe({
+        onChange(v: string) {
+          $elm.style.cssText = v;
+        },
+      });
+      $elm.style.cssText = style.toString();
     }
   }
   if (onClick) {
@@ -214,7 +227,10 @@ export function View(props: ViewProps = {}, children?: any) {
       }
     },
     onUnmounted() {
-      console.log("[View] onUnmounted called, children count:", _children.length);
+      console.log(
+        "[View] onUnmounted called, children count:",
+        _children.length,
+      );
       if (props.onUnmounted) {
         console.log("[View] calling props.onUnmounted");
         props.onUnmounted();
@@ -270,6 +286,7 @@ export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 export interface TimelessElement {
   t: string;
   $elm: HTMLElement | SVGElement | Text | DocumentFragment;
+  value?: any;
   render(): HTMLElement | SVGElement | Text | DocumentFragment | null;
   cleanup?: () => void;
   onMounted?(el: HTMLElement | SVGElement | Text | DocumentFragment): void;

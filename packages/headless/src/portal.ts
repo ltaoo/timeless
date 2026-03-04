@@ -106,7 +106,7 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
       _mountedChildren = instances;
       _mounted = true;
 
-      console.log("[Portal] appending to body, nodes count:", nodes.length);
+      // console.log("[Portal] appending to body, nodes count:", nodes.length);
       document.body.appendChild(fragment);
 
       // Lifecycle

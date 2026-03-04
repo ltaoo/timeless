@@ -93,6 +93,11 @@
       "import": "./dist/dropdown-menu/index.esm.js",
       "require": "./dist/dropdown-menu/index.js"
     },
+    "./field": {
+      "types": "./dist/field/index.d.ts",
+      "import": "./dist/field/index.esm.js",
+      "require": "./dist/field/index.js"
+    },
     "./flex": {
       "types": "./dist/flex/index.d.ts",
       "import": "./dist/flex/index.esm.js",
@@ -143,11 +148,6 @@
       "import": "./dist/lazy-view/index.esm.js",
       "require": "./dist/lazy-view/index.js"
     },
-    "./match": {
-      "types": "./dist/match/index.d.ts",
-      "import": "./dist/match/index.esm.js",
-      "require": "./dist/match/index.js"
-    },
     "./menu": {
       "types": "./dist/menu/index.d.ts",
       "import": "./dist/menu/index.esm.js",
@@ -182,6 +182,11 @@
       "types": "./dist/progress/index.d.ts",
       "import": "./dist/progress/index.esm.js",
       "require": "./dist/progress/index.js"
+    },
+    "./resizable-panels": {
+      "types": "./dist/resizable-panels/index.d.ts",
+      "import": "./dist/resizable-panels/index.esm.js",
+      "require": "./dist/resizable-panels/index.js"
     },
     "./select": {
       "types": "./dist/select/index.d.ts",

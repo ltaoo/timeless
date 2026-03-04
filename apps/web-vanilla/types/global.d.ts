@@ -38,7 +38,7 @@ declare const cn: typeof import("@timeless/reactive").cn;
 declare const Show: typeof import("@timeless/headless").Show;
 declare const For: typeof import("@timeless/headless").For;
 declare const Match: typeof import("@timeless/headless").Match;
-declare const Switch: typeof import("@timeless/headless").Toggle;
+declare const Switch: typeof import("@timeless/headless").Switch;
 declare const View: typeof import("@timeless/headless").View;
 declare const Txt: typeof import("@timeless/headless").Txt;
 declare const DangerouslyInnerHTML: typeof import("@timeless/headless").DangerouslyInnerHTML;
@@ -61,7 +61,6 @@ declare const Checkbox: typeof import("@timeless/shadcnui").Checkbox;
 declare const Select: typeof import("@timeless/shadcnui").Select;
 declare const Presence: typeof import("@timeless/shadcnui").Presence;
 declare const Portal: typeof import("@timeless/shadcnui").Portal;
-declare const Popper: typeof import("@timeless/shadcnui").Popper;
 declare const Toggle: typeof import("@timeless/shadcnui").Toggle;
 
 declare const Menu: typeof import("@timeless/shadcnui").Menu;
@@ -103,6 +102,8 @@ declare const TableBody: typeof import("@timeless/shadcnui").TableBody;
 declare const TableRow: typeof import("@timeless/shadcnui").TableRow;
 declare const TableHead: typeof import("@timeless/shadcnui").TableHead;
 declare const TableCell: typeof import("@timeless/shadcnui").TableCell;
+declare const Field: typeof import("@timeless/shadcnui").Field;
+declare const Form: typeof import("@timeless/shadcnui").Form;
 
 declare const Textarea: typeof import("@timeless/shadcnui").Textarea;
 declare const Label: typeof import("@timeless/shadcnui").Label;

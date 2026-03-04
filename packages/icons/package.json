@@ -42,6 +42,11 @@
       "import": "./dist/bolt/index.esm.js",
       "require": "./dist/bolt/index.js"
     },
+    "./check": {
+      "types": "./dist/check/index.d.ts",
+      "import": "./dist/check/index.esm.js",
+      "require": "./dist/check/index.js"
+    },
     "./chevron-right": {
       "types": "./dist/chevron-right/index.d.ts",
       "import": "./dist/chevron-right/index.esm.js",
@@ -176,11 +181,6 @@
       "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils/index.esm.js",
       "require": "./dist/utils/index.js"
-    },
-    "./view": {
-      "types": "./dist/view/index.d.ts",
-      "import": "./dist/view/index.esm.js",
-      "require": "./dist/view/index.js"
     },
     "./x": {
       "types": "./dist/x/index.d.ts",

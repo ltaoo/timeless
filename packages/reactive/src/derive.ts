@@ -1,10 +1,14 @@
 import { Subscriber, Ref, isRef } from "./types";
 
-type UnwrapRef<T> = T extends Ref<infer V> ? V : T;
+type UnwrapRef<T> = T extends Ref<infer V>
+  ? V extends Ref<any>
+    ? UnwrapRef<V>
+    : V
+  : T;
 
-export function derive<T extends any[], R>(
+export function derive<T extends readonly any[], R>(
   deps: readonly [...T],
-  fn: (...args: { [K in keyof T]: UnwrapRef<T[K]> }) => R,
+  fn: (...args: { [K in keyof T]: UnwrapRef<T[K]> } & { length: T["length"] }) => R,
 ): Ref<R>;
 export function derive<T extends Record<string, any>, R>(
   deps: T,

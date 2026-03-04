@@ -1,5 +1,3 @@
-export * from "./view";
-
 export const defaultWidth = "1em";
 export const defaultHeight = "1em";
 

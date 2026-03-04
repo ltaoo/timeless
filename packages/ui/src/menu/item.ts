@@ -138,22 +138,22 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
         placement: "right-start",
       });
       this.menu = menu;
-      console.log("[DOMAIN]ui/menu/item - bind menu", this.label, menu._name);
+      // console.log("[DOMAIN]ui/menu/item - bind menu", this.label, menu._name);
       menu.onShow(() => {
-        console.log(
-          "[DOMAIN]ui/menu/item - menu.onShow",
-          this.label,
-          menu._name,
-        );
+        // console.log(
+        //   "[DOMAIN]ui/menu/item - menu.onShow",
+        //   this.label,
+        //   menu._name,
+        // );
         this._open = true;
         this.emit(Events.Change, { ...this.state });
       });
       menu.onHiding(() => {
-        console.log(
-          "[DOMAIN]ui/menu/item - menu.onHiding",
-          this.label,
-          menu._name,
-        );
+        // console.log(
+        //   "[DOMAIN]ui/menu/item - menu.onHiding",
+        //   this.label,
+        //   menu._name,
+        // );
         this._open = false;
         this.emit(Events.Change, { ...this.state });
       });

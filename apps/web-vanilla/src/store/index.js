@@ -29,6 +29,11 @@ const routesConfigure = {
             pathname: "/home/index/form",
             component: lazy("@/pages/home/index.form.js"),
           },
+          validate: {
+            title: "表单组件",
+            pathname: "/home/index/validate",
+            component: lazy("@/pages/home/index.validate.js"),
+          },
           data: {
             title: "数据展示组件",
             pathname: "/home/index/data",

@@ -281,7 +281,7 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
       destroy: boolean;
     }> = {},
   ) {
-    console.log("[DOMAIN]route_view - showView", "parent:", this.title, "sub_view:", sub_view.title, "curView:", this.curView?.title, "sub_view.visible:", sub_view.visible, "options:", options);
+    // console.log("[DOMAIN]route_view - showView", "parent:", this.title, "sub_view:", sub_view.title, "curView:", this.curView?.title, "sub_view.visible:", sub_view.visible, "options:", options);
     if (sub_view === this) {
       console.warn("cannot show self");
       return;
@@ -293,7 +293,7 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     (() => {
       if (!this.visible) {
         // 如果自身是不可见状态，先让自身的父视图将自己 show
-        console.log("[DOMAIN]route_view - show self by parent", this.title, this.parent?.title);
+        // console.log("[DOMAIN]route_view - show self by parent", this.title, this.parent?.title);
         if (!this.parent) {
           if (!this.isRoot) {
             console.warn("no parent");
@@ -310,7 +310,7 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     }
     this.appendView(sub_view);
     this.emit(Events.BeforeShow);
-    console.log("[DOMAIN]route_view - before this.curView = view", sub_view.title);
+    // console.log("[DOMAIN]route_view - before this.curView = view", sub_view.title);
     this.curView = sub_view;
     sub_view.show();
     this.emit(Events.CurSubViewChange, this.curView);

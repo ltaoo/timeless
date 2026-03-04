@@ -1,143 +1,210 @@
-import { ref, computed } from "@timeless/reactive";
-import { ChevronRightOutlined } from "@timeless/icons";
-
-import { tp, merge } from "./theme.js";
-import { View, ViewProps } from "./view.js";
-import { Txt } from "./text.js";
-import { For } from "./for.js";
-import { Show } from "./show.js";
-import { Portal } from "./portal.js";
+import {
+  refobj,
+  computed,
+  isRef,
+  classNames,
+  sn,
+  combine,
+} from "@timeless/reactive";
 import { SelectCore } from "@timeless/ui";
 
-export function Select(
-  props: ViewProps & { store: SelectCore<any>; theme?: any },
-) {
-  const { store, theme: t, class: cls, style: st, ...rest } = props;
-  const state = ref(store.state);
-  const open = ref(false);
-  const pos = ref({ x: 0, y: 0, width: 0 });
-  const events: any[] = [];
-  const unsub = store.onStateChange(() => {
-    state.as(store.state);
-  });
-  if (unsub) events.push(unsub);
-  const options = computed(state, (d) => d.options);
+import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
+import { Txt } from "./text";
+import { Portal as NativePortal } from "./portal";
+import { Presence } from "./presence";
+import * as PopperPrimitive from "./popper";
 
-  let handleClickOutside: any = null;
+export function Root(
+  props: ViewProps & { store: SelectCore<any> },
+  children?: ViewChildren,
+) {
+  return PopperPrimitive.Root(
+    {
+      ...props,
+      store: props.store.popper,
+    },
+    children,
+  );
+}
+
+export function Trigger(
+  props: ViewProps & { store: SelectCore<any> },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  const state_ = refobj(store.state);
+
+  store.onStateChange((v) => {
+    state_.as(v);
+  });
 
   return View(
     {
       ...rest,
-      ...merge(tp(t?.root), cls, st),
-      onMounted($e: HTMLElement) {
-        handleClickOutside = (event: Event) => {
-          if ($e.contains(event.target as Node)) return;
-          if (
-            (event.target as Element).closest &&
-            (event.target as Element).closest(".portal")
-          )
-            return;
-          open.as(false);
-        };
-        document.addEventListener("click", handleClickOutside);
-      },
-      onUnmounted() {
-        if (handleClickOutside)
-          document.removeEventListener("click", handleClickOutside);
-        for (const fn of events) if (typeof fn === "function") fn();
-        if (rest.onUnmounted) rest.onUnmounted();
+      onMounted($e) {
+        // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
+        store.popper.setReference(
+          {
+            $el: $e,
+            getRect() {
+              return $e.getBoundingClientRect();
+            },
+          },
+          { force: true },
+        );
+
+        $e.addEventListener("pointerdown", () => {
+          if (store.disabled) return;
+
+          // 在点击时更新 reference，确保获取最新尺寸
+          const rect = $e.getBoundingClientRect();
+          store.reference = {
+            width: rect.width,
+            height: rect.height,
+            x: rect.x,
+            y: rect.y,
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+          };
+
+          store.layer.pointerDown();
+          if (store.open) {
+            store.hide();
+          } else {
+            store.presence.show();
+            store.show();
+          }
+        });
+
+        if (rest.onMounted) {
+          rest.onMounted($e);
+        }
       },
     },
-    [
-      View(
-        {
-          ...merge(tp(t?.trigger)),
-          onClick(event: Event) {
-            const rect = (
-              event.currentTarget as HTMLElement
-            ).getBoundingClientRect();
-            pos.as({ x: rect.left, y: rect.bottom + 4, width: rect.width });
-            open.as(!open.value);
-          },
-        },
-        [
-          View(
-            {
-              type: "span",
-              class: computed(state, (d) => {
-                return (
-                  merge(tp(t?.valueText, { hasValue: d.value != null }))
-                    .class || ""
-                );
-              }),
-              style: computed(state, (d) => {
-                return (
-                  merge(tp(t?.valueText, { hasValue: d.value != null }))
-                    .style || ""
-                );
-              }),
-            },
-            [
-              Txt(
-                computed(state, (d) => {
-                  const opt = (d.options || []).find(
-                    (o: any) => o.value === d.value,
-                  );
-                  return opt ? opt.label : d.placeholder || "Select...";
-                }),
-              ),
-            ],
-          ),
-          View({ ...merge(tp(t?.arrow)) }, [ChevronRightOutlined]),
-        ],
+    children,
+  );
+}
+
+export function Value(
+  props: ViewProps & { store: SelectCore<any>; placeholder?: string },
+  children?: ViewChildren,
+) {
+  const { store, placeholder, ...rest } = props;
+  const state = refobj(store.state);
+
+  store.onStateChange((v) => {
+    state.as(v);
+  });
+
+  return View(
+    {
+      ...rest,
+      type: "span",
+    },
+    children ||
+      Txt(
+        computed(state, (d) => {
+          const opt = (d.options || []).find((o: any) => o.value === d.value);
+          return opt ? opt.label : placeholder || d.placeholder || "Select...";
+        }),
       ),
-      Portal({}, [
-        Show({ when: open }, [
-          View(
-            {
-              ...merge(tp(t?.dropdown)),
-              style: computed(pos, (d) => {
-                return `${merge(tp(t?.dropdown)).style || ""}position:fixed;z-index:999;left:${d.x}px;top:${d.y}px;min-width:${d.width}px;`;
-              }),
-            },
-            [
-              View(
-                {
-                  ...merge(tp(t?.list)),
-                },
-                [
-                  For({
-                    each: options,
-                    render(opt: any) {
-                      return View(
-                        {
-                          class: computed(state, () => {
-                            return (
-                              merge(tp(t?.option, { selected: opt.selected }))
-                                .class || ""
-                            );
-                          }),
-                          style: computed(state, () => {
-                            return (
-                              merge(tp(t?.option, { selected: opt.selected }))
-                                .style || ""
-                            );
-                          }),
-                          onClick() {
-                            store.select(opt.value);
-                            open.as(false);
-                          },
-                        },
-                        [Txt(opt.label)],
-                      );
-                    },
-                  }),
-                ],
-              ),
-            ],
-          ),
-        ]),
-      ]),
+  );
+}
+
+export function Icon(props: ViewProps, children: ViewChildren) {
+  return View(props, children);
+}
+
+export function Portal(
+  props: ViewProps & {
+    store: SelectCore<any>;
+    animation?: { in: string; out: string };
+  },
+  children: ViewChildren = [],
+) {
+  return NativePortal({}, children);
+}
+
+export function Content(
+  props: ViewProps & {
+    store: SelectCore<any>;
+    animation?: { in: string; out: string };
+  },
+  children: ViewChildren,
+) {
+  const { store, animation, ...rest } = props;
+
+  return Presence(
+    {
+      store: store.presence,
+      animation,
+    },
+    [
+      PopperPrimitive.Content(
+        {
+          ...rest,
+          store: store.popper,
+        },
+        children,
+      ),
     ],
+  );
+}
+
+export function Viewport(
+  props: ViewProps & { store: SelectCore<any> },
+  children: ViewChildren,
+) {
+  return View(props, children);
+}
+
+export function Item(
+  props: ViewProps & { store: SelectCore<any>; value: any },
+  children: ViewChildren,
+) {
+  const { store, value, ...rest } = props;
+
+  return View(
+    {
+      ...rest,
+      onClick() {
+        store.select(value);
+        store.hide();
+      },
+    },
+    children,
+  );
+}
+
+export function ItemText(props: ViewProps, children: ViewChildren) {
+  return View({ ...props, type: "span" }, children);
+}
+
+export function ItemIndicator(
+  props: ViewProps & { store: SelectCore<any>; value: any },
+  children: ViewChildren,
+) {
+  const { store, value, ...rest } = props;
+  const state = refobj(store.state);
+
+  store.onStateChange((v) => {
+    state.as(v);
+  });
+
+  const selected = computed(state, (d) => d.value === value);
+
+  return View(
+    {
+      ...rest,
+      style: sn([
+        rest.style,
+        combine({ ss: rest.style, selected }, ({ ss, selected }) => {
+          return selected ? ss : "display:none;";
+        }),
+      ]),
+    },
+    children,
   );
 }

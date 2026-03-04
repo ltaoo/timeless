@@ -58,7 +58,7 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
   constructor(props: { _name?: string } & DropdownMenuProps = {}) {
     super(props);
 
-    console.log("[DropdownMenuCore] constructor", props);
+    // console.log("[DropdownMenuCore] constructor", props);
 
     const {
       _name,
@@ -113,9 +113,7 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
   setItems(items: MenuItemCore[]) {
     this.items = items;
     this.menu.state.items = items;
-    this.menu.emit(Events.StateChange, {
-      ...this.menu.state,
-    });
+    this.menu.refresh();
     this.emit(Events.StateChange, {
       ...this.state,
     });

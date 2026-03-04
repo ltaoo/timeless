@@ -1,3 +1,5 @@
+console.log("shadcn.version 1.1.0");
+
 import {
   View,
   Match,
@@ -56,6 +58,8 @@ import {
   TableHead,
   TableCell,
 } from "./table";
+import { Field, Form } from "./form";
+import { ResizablePanels, ResizablePanel, ResizableHandle } from "./resizable-panels";
 
 import "./index.css";
 
@@ -113,6 +117,9 @@ export {
   TableRow,
   TableHead,
   TableCell,
+  Field,
+  Form,
+  ResizablePanels,
+  ResizablePanel,
+  ResizableHandle,
 };
-
-console.log("shadcn.version 1.0.1");

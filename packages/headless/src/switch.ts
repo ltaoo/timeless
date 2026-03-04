@@ -1,22 +1,23 @@
-import { isRef } from "@timeless/reactive";
+import { isRef, Ref } from "@timeless/reactive";
 
-import { ViewChildren, isElement } from "./view";
+import { ViewProps, ViewChildren, isElement } from "./view";
 
 export function Switch(
   props: {
+    when: Ref<any> | any;
     fallback?: ViewChildren;
     onMounted?: ($fg: any) => void;
     beforeUnmounted?: () => void;
     onUnmounted?: () => void;
   },
-  children?: any[],
+  children?: ViewChildren,
 ) {
-  const { fallback, onMounted, beforeUnmounted, onUnmounted } = props;
+  const { when, fallback, onMounted, beforeUnmounted, onUnmounted } = props;
   const anchor = document.createTextNode("");
 
   let _currentNodes: Node[] = [];
   let _currentChildren: any[] = [];
-  let _prev_match: any = undefined;
+  let _prev_value: any = undefined;
 
   // Normalize children helper
   const normalize = (c: any) => {
@@ -26,18 +27,23 @@ export function Switch(
 
   const _fallback = normalize(fallback);
 
-  const getActiveMatch = () => {
-    if (!children) return null;
+  const get_active_match = () => {
+    if (!children) {
+      return null;
+    }
+    const when_value = isRef(when) ? when.value : when;
+
     for (const child of children) {
-      if (child && child.t === "match") {
-        const condition = isRef(child.when) ? !!child.when.value : !!child.when;
-        if (condition) return child;
+      if (isElement(child) && child.t === "match") {
+        if (child.value === when_value) {
+          return child;
+        }
       }
     }
     return null;
   };
 
-  const getTargetChildren = (match: any) => {
+  const get_target_children = (match: any) => {
     return match ? normalize(match.children) : _fallback;
   };
 
@@ -105,36 +111,41 @@ export function Switch(
   };
 
   const update = () => {
-    const activeMatch = getActiveMatch();
-    if (activeMatch === _prev_match) return;
-    _prev_match = activeMatch;
+    const whenValue = isRef(when) ? when.value : when;
+    if (whenValue === _prev_value) return;
+    _prev_value = whenValue;
 
     unmount(true);
-    const target = getTargetChildren(activeMatch);
+    const activeMatch = get_active_match();
+    const target = get_target_children(activeMatch);
     if (target.length > 0 && anchor.parentNode) {
       mount(target, anchor.parentNode, anchor);
     }
   };
 
-  if (children) {
-    for (const child of children) {
-      if (child && child.t === "match" && isRef(child.when)) {
-        child.when._subscribe({
-          onChange: update,
-        });
-      }
-    }
+  if (isRef(when)) {
+    when._subscribe({
+      onChange: update,
+    });
   }
 
   return {
     t: "switch",
     $elm: anchor as any,
     render() {
-      const activeMatch = getActiveMatch();
-      _prev_match = activeMatch;
+      const when_value = isRef(when) ? when.value : when;
+      _prev_value = when_value;
 
-      const target = getTargetChildren(activeMatch);
+      const active_match = get_active_match();
+      const target = get_target_children(active_match);
       const fragment = mount(target);
+
+      console.log(
+        "[]Switch find matched Match",
+        when_value,
+        active_match,
+        target,
+      );
 
       // Append anchor to the result fragment so it gets inserted into DOM
       fragment.appendChild(anchor);
@@ -155,6 +166,24 @@ export function Switch(
     onUnmounted() {
       if (onUnmounted) onUnmounted();
       unmount(false);
+    },
+  };
+}
+
+export function Match(
+  props: ViewProps & { value: any },
+  children?: ViewChildren,
+) {
+  const { value, ...rest } = props;
+
+  return {
+    t: "match",
+    value,
+    children,
+    // 用来给 Switch 满足 isElement(child) 判断
+    $elm: document.createDocumentFragment() as any,
+    render() {
+      return null;
     },
   };
 }

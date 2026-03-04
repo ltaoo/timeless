@@ -206,16 +206,23 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
 
     // Close all open submenus immediately
     if (this.cur_item && this.cur_item.menu && this.cur_item.menu.state.open) {
-      console.log("[DOMAIN]ui/menu/index - closing submenu", this.cur_item.menu._name);
+      console.log(
+        "[DOMAIN]ui/menu/index - closing submenu",
+        this.cur_item.menu._name,
+      );
       this.cur_item.menu.hide();
     }
 
     // this.log("hide");
     this.presence.hide();
-    console.log("[DOMAIN]ui/menu/index - hide AFTER presence.hide()", this._name, {
-      exit: this.presence.exit,
-      enter: this.presence.enter,
-    });
+    console.log(
+      "[DOMAIN]ui/menu/index - hide AFTER presence.hide()",
+      this._name,
+      {
+        exit: this.presence.exit,
+        enter: this.presence.enter,
+      },
+    );
     this.state.open = false;
     this.state.enter = this.presence.enter;
     this.state.exit = this.presence.exit;
@@ -307,11 +314,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     // this.subs.push(subMenu);
   }
   listen_items(items: MenuItemCore[]) {
-    console.log(
-      "[DOMAIN]ui/menu/index - listen_items",
-      this._name,
-      items.map((v) => v.label),
-    );
+    // console.log(
+    //   "[DOMAIN]ui/menu/index - listen_items",
+    //   this._name,
+    //   items.map((v) => v.label),
+    // );
     for (let i = 0; i < items.length; i += 1) {
       this.listen_item(items[i]);
     }
@@ -359,6 +366,9 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     for (let i = 0; i < this.items.length; i += 1) {
       this.items[i].reset();
     }
+  }
+  refresh() {
+    this.emit(Events.StateChange, { ...this.state });
   }
 
   handleLeave() {

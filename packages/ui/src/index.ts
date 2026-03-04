@@ -46,3 +46,4 @@ export * from "./form/tag-input";
 export * from "./form/image-upload";
 export * from "./form/field";
 export * from "./step";
+export * from "./resizable-panels";

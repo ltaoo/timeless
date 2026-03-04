@@ -1,4 +1,11 @@
-import { refobj, computed, cn } from "@timeless/reactive";
+import {
+  refobj,
+  computed,
+  cn,
+  sn,
+  isRef,
+  classNames,
+} from "@timeless/reactive";
 import { PopperCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "./view";
@@ -82,23 +89,28 @@ export function Content(
     {
       ...rest,
       class: cn(["t1-popper", rest.class]),
-      style: computed(state_, (t) => {
-        const ss: Record<string, any> = {
-          "z-index": zIndex,
-          position: "fixed",
-          left: 0,
-          top: 0,
-          opacity: t.isPlaced ? 100 : 0,
-          transform: t.isPlaced
-            ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
-            : "translate3d(0, 0, 0)",
-        };
-        return Object.keys(ss)
-          .map((k) => {
-            return `${k}: ${ss[k]}`;
-          })
-          .join("; ");
-      }),
+      style: sn([
+        rest.style,
+        computed(state_, (t) => {
+          const ss: Record<string, any> = {
+            "z-index": zIndex,
+            position: "fixed",
+            left: 0,
+            top: 0,
+            opacity: t.isPlaced ? 100 : 0,
+            transform: t.isPlaced
+              ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
+              : "translate3d(0, 0, 0)",
+          };
+          const r = Object.keys(ss)
+            .map((k) => {
+              return `${k}: ${ss[k]}`;
+            })
+            .join("; ");
+          console.log("rrrr", r);
+          return r;
+        }),
+      ]),
       onMounted($e: HTMLElement) {
         console.log(
           "[PopperPrimitive.Content] mounted, has layer:",
@@ -124,11 +136,18 @@ export function Content(
             // Check if this is a virtual element (no real DOM element)
             const refEl = (store.reference as any).$el;
             const isVirtualElement = !refEl || !(refEl instanceof Element);
-            console.log("[PopperPrimitive.Content] isVirtualElement:", isVirtualElement, "refEl:", refEl);
+            console.log(
+              "[PopperPrimitive.Content] isVirtualElement:",
+              isVirtualElement,
+              "refEl:",
+              refEl,
+            );
 
             // For virtual elements (like context menu), close on scroll
             if (isVirtualElement && onReferenceOutOfView) {
-              console.log("[PopperPrimitive.Content] virtual element detected, closing on scroll");
+              console.log(
+                "[PopperPrimitive.Content] virtual element detected, closing on scroll",
+              );
               onReferenceOutOfView();
               return;
             }
@@ -139,10 +158,15 @@ export function Content(
               refRect.left < window.innerWidth &&
               refRect.right > 0;
 
-            console.log("[PopperPrimitive.Content] isInViewport:", isInViewport);
+            console.log(
+              "[PopperPrimitive.Content] isInViewport:",
+              isInViewport,
+            );
 
             if (!isInViewport && onReferenceOutOfView) {
-              console.log("[PopperPrimitive.Content] calling onReferenceOutOfView");
+              console.log(
+                "[PopperPrimitive.Content] calling onReferenceOutOfView",
+              );
               onReferenceOutOfView();
               return;
             }
@@ -196,6 +220,9 @@ export function Content(
             }
           });
         }
+        if (rest.onMounted) {
+          rest.onMounted($e);
+        }
       },
       onUnmounted() {
         console.log(
@@ -213,6 +240,9 @@ export function Content(
         if (layer && handlePointerDown) {
           document.removeEventListener("pointerdown", handlePointerDown);
           handlePointerDown = null;
+        }
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
         }
       },
     },

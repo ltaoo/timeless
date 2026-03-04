@@ -120,11 +120,11 @@ export function ContentImpl(
   return Show(
     {
       when: combine([state, presenceState], (menuState, pState) => {
-        console.log("[ContentImpl Show when]", {
-          open: menuState.open,
-          exit: pState.exit,
-          result: menuState.open || pState.exit,
-        });
+        // console.log("[ContentImpl Show when]", {
+        //   open: menuState.open,
+        //   exit: pState.exit,
+        //   result: menuState.open || pState.exit,
+        // });
         // Keep mounted when open, or during exit animation
         return menuState.open || pState.exit;
       }),

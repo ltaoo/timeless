@@ -119,6 +119,11 @@
       "import": "./dist/node/index.esm.js",
       "require": "./dist/node/index.js"
     },
+    "./pointer": {
+      "types": "./dist/pointer/index.d.ts",
+      "import": "./dist/pointer/index.esm.js",
+      "require": "./dist/pointer/index.js"
+    },
     "./popover": {
       "types": "./dist/popover/index.d.ts",
       "import": "./dist/popover/index.esm.js",
@@ -138,6 +143,11 @@
       "types": "./dist/progress/index.d.ts",
       "import": "./dist/progress/index.esm.js",
       "require": "./dist/progress/index.js"
+    },
+    "./resizable-panels": {
+      "types": "./dist/resizable-panels/index.d.ts",
+      "import": "./dist/resizable-panels/index.esm.js",
+      "require": "./dist/resizable-panels/index.js"
     },
     "./roving-focus": {
       "types": "./dist/roving-focus/index.d.ts",

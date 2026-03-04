@@ -4,7 +4,7 @@ import { ViewChildren, isElement } from "./view";
 
 export function Show(
   props: {
-    when: Ref<boolean> | boolean;
+    when: Ref<boolean | undefined | null> | boolean;
     fallback?: ViewChildren;
     onMounted?: ($fg: any) => void;
     beforeUnmounted?: () => void;
@@ -33,7 +33,14 @@ export function Show(
   };
 
   const unmount = (removeDom = false) => {
-    console.log("[Show] unmount called, removeDom:", removeDom, "_currentChildren:", _currentChildren.length, "_currentNodes:", _currentNodes.length);
+    console.log(
+      "[Show] unmount called, removeDom:",
+      removeDom,
+      "_currentChildren:",
+      _currentChildren.length,
+      "_currentNodes:",
+      _currentNodes.length,
+    );
 
     // Lifecycle - 先调用 beforeUnmounted
     for (const child of _currentChildren) {
@@ -61,7 +68,12 @@ export function Show(
       console.log("[Show] removing DOM nodes, count:", _currentNodes.length);
       for (const node of _currentNodes) {
         // 直接检查节点是否还有父节点，不依赖 anchor.parentNode
-        console.log("[Show] checking node:", node.nodeName, "parentNode:", !!node.parentNode);
+        console.log(
+          "[Show] checking node:",
+          node.nodeName,
+          "parentNode:",
+          !!node.parentNode,
+        );
         if (node.parentNode) {
           console.log("[Show] removing node from parent");
           node.parentNode.removeChild(node);
@@ -121,7 +133,16 @@ export function Show(
     when._subscribe({
       onChange(value: boolean) {
         const condition = !!value;
-        console.log("[]Show onChange", condition, "_prev_condition:", _prev_condition, "_currentNodes.length:", _currentNodes.length, "anchor.parentNode:", !!anchor.parentNode);
+        console.log(
+          "[]Show onChange",
+          condition,
+          "_prev_condition:",
+          _prev_condition,
+          "_currentNodes.length:",
+          _currentNodes.length,
+          "anchor.parentNode:",
+          !!anchor.parentNode,
+        );
 
         // 如果条件没有变化，直接返回
         if (condition === _prev_condition) {
