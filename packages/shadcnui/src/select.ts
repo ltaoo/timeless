@@ -53,12 +53,12 @@ export function Select(props: ViewProps & { store: SelectCore<any>; id?: string 
           // 添加 minWidth 到 style，这样不会被 popper 的 computed style 覆盖
           style: computed(state_, () => {
             const width = store.reference?.width || 0;
-            console.log(
-              "[Select shadcnui] computed style, width:",
-              width,
-              "reference:",
-              store.reference,
-            );
+            // console.log(
+            //   "[Select shadcnui] computed style, width:",
+            //   width,
+            //   "reference:",
+            //   store.reference,
+            // );
             return width > 0 ? `min-width: ${width}px;` : "";
           }),
         },

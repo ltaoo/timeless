@@ -97,6 +97,14 @@ export class ResizablePanelsCore extends BaseDomain<TheTypesOfEvents> {
     const rect = this.element.getBoundingClientRect();
     const totalSize = this.direction === "horizontal" ? rect.width : rect.height;
 
+    console.log("[ResizablePanelsCore] resize", {
+      currentPosition,
+      startPosition: this.startPosition,
+      delta,
+      totalSize,
+      direction: this.direction
+    });
+
     if (totalSize === 0) return;
 
     const deltaPercent = (delta / totalSize) * 100;
@@ -108,11 +116,29 @@ export class ResizablePanelsCore extends BaseDomain<TheTypesOfEvents> {
     const originalTotal = this.startSizes.before + this.startSizes.after;
     const newTotal = newBeforeSize + newAfterSize;
 
+    console.log("[ResizablePanelsCore] calculated sizes", {
+      deltaPercent,
+      startSizes: this.startSizes,
+      newBeforeSize,
+      newAfterSize,
+      originalTotal,
+      newTotal,
+      diff: Math.abs(newTotal - originalTotal)
+    });
+
+    console.log("[ResizablePanelsCore] checking condition", {
+      condition: Math.abs(newTotal - originalTotal) < 0.1,
+      willUpdate: Math.abs(newTotal - originalTotal) < 0.1
+    });
+
     if (Math.abs(newTotal - originalTotal) < 0.1) {
+      console.log("[ResizablePanelsCore] updating panel sizes");
       this.resizingPanels.before.setSize(newBeforeSize);
       this.resizingPanels.after.setSize(newAfterSize);
 
       this.emit(Events.PanelResize, { panels: this.panels });
+    } else {
+      console.log("[ResizablePanelsCore] skipping update, total mismatch");
     }
   }
 
@@ -207,6 +233,13 @@ export class ResizablePanelCore extends BaseDomain<PanelTypesOfEvents> {
   setSize(size: number) {
     const clampedSize = Math.max(this.minSize, Math.min(this.maxSize, size));
 
+    console.log("[ResizablePanelCore] setSize", {
+      requestedSize: size,
+      clampedSize,
+      minSize: this.minSize,
+      maxSize: this.maxSize
+    });
+
     if (this.collapsible && clampedSize <= this.minSize) {
       this.size = this.collapsedSize;
       this.isCollapsed = true;
@@ -214,6 +247,8 @@ export class ResizablePanelCore extends BaseDomain<PanelTypesOfEvents> {
       this.size = clampedSize;
       this.isCollapsed = false;
     }
+
+    console.log("[ResizablePanelCore] new size:", this.size);
 
     this.emit(PanelEvents.StateChange, this.state);
   }

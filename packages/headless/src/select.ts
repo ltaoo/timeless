@@ -101,7 +101,7 @@ export function Trigger(
             bottom: rect.bottom,
           });
         }, 0);
-        $e.addEventListener("pointerdown", (e) => {
+        $e.addEventListener("pointerdown", (e: any) => {
           // 如果点击的是隐藏的 input，不要再次触发
           if (e.target.tagName === "INPUT") return;
           if (store.disabled) {

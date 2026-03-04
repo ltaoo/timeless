@@ -67,9 +67,18 @@ export function ResizableHandle(
   children?: ViewChildren,
 ) {
   const { store, panelBefore, panelAfter, withHandle = false, ...rest } = props;
-  const state_ = refobj(store.state);
+  const isHovered_ = ref(false);
+  const isResizing_ = ref(store.state.isResizing);
+  const direction_ = ref(store.state.direction);
 
-  const isHorizontal = computed(state_, (s) => s.direction === "horizontal");
+  // 监听 store 状态变化
+  store.onStateChange((state) => {
+    console.log("[ResizableHandle] store state changed", state);
+    isResizing_.as(state.isResizing);
+    direction_.as(state.direction);
+  });
+
+  const isHorizontal = computed(direction_, (d) => d === "horizontal");
 
   return ResizablePanelsPrimitive.Handle(
     {
@@ -77,15 +86,30 @@ export function ResizableHandle(
       store,
       panelBefore,
       panelAfter,
+      onMouseEnter() {
+        console.log("[ResizableHandle] onMouseEnter");
+        isHovered_.as(true);
+      },
+      onMouseLeave() {
+        console.log("[ResizableHandle] onMouseLeave");
+        isHovered_.as(false);
+      },
       class: classNames([
-        "relative flex items-center justify-center bg-gray-200 dark:bg-gray-800",
-        "transition-colors hover:bg-gray-300 dark:hover:bg-gray-700",
+        "relative flex items-center justify-center group",
+        "after:absolute after:inset-0 after:pointer-events-none after:transition-all",
+        combine({ isResizing: isResizing_, isHovered: isHovered_ }, (t) => {
+          console.log("[ResizableHandle] computed bg color", { active: t.isResizing, hovered: t.isHovered });
+          return t.isResizing || t.isHovered
+            ? "after:bg-gray-300 dark:after:bg-gray-700"
+            : "after:bg-gray-200 dark:after:bg-gray-800";
+        }),
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400",
-        computed(isHorizontal, (h) =>
-          h
-            ? "w-px cursor-col-resize hover:w-1"
-            : "h-px cursor-row-resize hover:h-1"
-        ),
+        combine({ isHorizontal, isResizing: isResizing_, isHovered: isHovered_ }, (t) => {
+          console.log("[ResizableHandle] computed size", { h: t.isHorizontal, active: t.isResizing, hovered: t.isHovered });
+          return t.isHorizontal
+            ? `w-1 cursor-col-resize after:w-px after:left-1/2 after:-translate-x-1/2 ${t.isResizing || t.isHovered ? 'after:w-1 after:translate-x-0 after:left-0' : ''}`
+            : `h-1 cursor-row-resize after:h-px after:top-1/2 after:-translate-y-1/2 ${t.isResizing || t.isHovered ? 'after:h-1 after:translate-y-0 after:top-0' : ''}`;
+        }),
         rest.class,
       ]),
     },

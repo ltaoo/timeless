@@ -104,6 +104,9 @@ declare const TableHead: typeof import("@timeless/shadcnui").TableHead;
 declare const TableCell: typeof import("@timeless/shadcnui").TableCell;
 declare const Field: typeof import("@timeless/shadcnui").Field;
 declare const Form: typeof import("@timeless/shadcnui").Form;
+declare const ResizableHandle: typeof import("@timeless/shadcnui").ResizableHandle;
+declare const ResizablePanel: typeof import("@timeless/shadcnui").ResizablePanel;
+declare const ResizablePanels: typeof import("@timeless/shadcnui").ResizablePanels;
 
 declare const Textarea: typeof import("@timeless/shadcnui").Textarea;
 declare const Label: typeof import("@timeless/shadcnui").Label;

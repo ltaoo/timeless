@@ -140,12 +140,12 @@ export function Switch(
       const target = get_target_children(active_match);
       const fragment = mount(target);
 
-      console.log(
-        "[]Switch find matched Match",
-        when_value,
-        active_match,
-        target,
-      );
+      // console.log(
+      //   "[]Switch find matched Match",
+      //   when_value,
+      //   active_match,
+      //   target,
+      // );
 
       // Append anchor to the result fragment so it gets inserted into DOM
       fragment.appendChild(anchor);

@@ -26,21 +26,23 @@ function ObjectFieldRender(props) {
         Show(
           {
             when: isCheckbox,
-            fallback: View(
-              {
-                class:
-                  "text-sm font-semibold text-gray-300 uppercase tracking-wider cursor-pointer",
-                as: "label",
-                htmlFor: fieldId,
-              },
-              [name],
-            ),
+            fallback: [
+              View(
+                {
+                  class:
+                    "text-sm font-semibold text-gray-300 uppercase tracking-wider cursor-pointer",
+                  as: "label",
+                  // htmlfor: fieldId,
+                },
+                [name],
+              ),
+            ],
           },
           [
-            CheckboxPrimitive.Label(
+            View(
               {
-                htmlFor: fieldId,
-                store: field$.input,
+                // htmlFor: fieldId,
+                // store: field$.input,
                 class:
                   "text-sm font-semibold text-gray-300 uppercase tracking-wider cursor-pointer",
               },
@@ -219,7 +221,10 @@ export default function FormValidateView() {
 
   return View({ class: "space-y-8 max-w-2xl" }, [
     Field({ store: field_provider$ }, [
-      Select({ store: field_provider$.input, id: `field-${field_provider$.name}` }),
+      Select({
+        store: field_provider$.input,
+        id: `field-${field_provider$.name}`,
+      }),
     ]),
     ObjectFieldRender(configure$_),
   ]);

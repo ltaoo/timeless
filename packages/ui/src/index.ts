@@ -1,4 +1,4 @@
-console.log("ui.version 0.1.2");
+console.log("ui.version 0.1.3");
 
 export * from "./menu"; // Export first
 export * from "./menu/item";
