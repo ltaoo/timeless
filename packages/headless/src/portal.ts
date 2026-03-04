@@ -13,9 +13,45 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
 
   const _children = normalize(children);
 
+  const cleanup = () => {
+    console.log(
+      "[Portal] cleanup, cleaning up",
+      _mountedNodes.length,
+      "nodes",
+    );
+    // Lifecycle
+    for (const child of _mountedChildren) {
+      if (isElement(child) && child.onUnmounted) {
+        child.onUnmounted();
+      }
+    }
+
+    // Remove DOM nodes
+    for (const node of _mountedNodes) {
+      console.log(
+        "[Portal] removing node:",
+        node.nodeName,
+        "parentNode:",
+        !!node.parentNode,
+      );
+      if (node.parentNode) {
+        node.parentNode.removeChild(node);
+      }
+    }
+
+    _mountedNodes = [];
+    _mountedChildren = [];
+    _mounted = false;
+
+    if (props.onUnmounted) {
+      props.onUnmounted();
+    }
+  };
+
   return {
     t: "portal",
     $elm: anchor as any,
+    cleanup,
     render() {
       if (_mounted) {
         return;
@@ -68,37 +104,7 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
       return null;
     },
     onUnmounted() {
-      console.log(
-        "[Portal] onUnmounted, cleaning up",
-        _mountedNodes.length,
-        "nodes",
-      );
-      // Lifecycle
-      for (const child of _mountedChildren) {
-        if (isElement(child) && child.onUnmounted) {
-          child.onUnmounted();
-        }
-      }
-
-      // Remove DOM nodes
-      for (const node of _mountedNodes) {
-        console.log(
-          "[Portal] removing node:",
-          node.nodeName,
-          "parentNode:",
-          !!node.parentNode,
-        );
-        if (node.parentNode) {
-          node.parentNode.removeChild(node);
-        }
-      }
-
-      _mountedNodes = [];
-      _mountedChildren = [];
-
-      if (props.onUnmounted) {
-        props.onUnmounted();
-      }
+      cleanup();
     },
   };
 }

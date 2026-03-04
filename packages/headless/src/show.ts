@@ -33,10 +33,22 @@ export function Show(
   };
 
   const unmount = (removeDom = false) => {
-    // Lifecycle
+    // Lifecycle - 先调用 beforeUnmounted
     for (const child of _currentChildren) {
-      if (isElement(child) && child.onUnmounted) {
-        child.onUnmounted();
+      if (isElement(child) && child.beforeUnmounted) {
+        child.beforeUnmounted();
+      }
+    }
+    // Lifecycle - 对于 Portal 组件，调用 cleanup 方法
+    for (const child of _currentChildren) {
+      if (isElement(child)) {
+        // 如果是 Portal 组件，调用其 cleanup 方法
+        if (child.t === "portal" && typeof child.cleanup === "function") {
+          child.cleanup();
+        } else if (child.onUnmounted) {
+          // 否则调用标准的 onUnmounted
+          child.onUnmounted();
+        }
       }
     }
     // DOM removal
@@ -61,6 +73,8 @@ export function Show(
       if (!node) continue;
       if (isElement(node)) {
         const result = node.render();
+        // 即使 render 返回 null（如 Portal），也要保存实例以便调用生命周期
+        newInstances.push(node);
         if (result) {
           if (result instanceof DocumentFragment) {
             newNodes.push(...Array.from(result.childNodes));
@@ -69,7 +83,6 @@ export function Show(
             newNodes.push(result);
             fragment.appendChild(result);
           }
-          newInstances.push(node);
         }
       } else if (typeof node === "string" || typeof node === "number") {
         const textNode = document.createTextNode(String(node));

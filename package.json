@@ -4,6 +4,7 @@
   "scripts": {
     "build": "pnpm --filter \"./packages/*\" --filter \"!./packages/solidjs\" --filter \"!./packages/weui\" --filter \"!./packages/vue\" -r run build",
     "build:whole": "pnpm --filter \"./packages/*\" --filter \"!./packages/solidjs\" --filter \"!./packages/vue\" -r run build -- --whole",
+    "build:lite": "pnpm --filter \"./packages/vanillalite\" -r run build",
     "dev": "node scripts/dev.js",
     "vanilla": "node scripts/vanilla.js",
     "test": "pnpm -r run test",

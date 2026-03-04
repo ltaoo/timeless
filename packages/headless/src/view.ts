@@ -259,6 +259,7 @@ export interface TimelessElement {
   t: string;
   $elm: HTMLElement | SVGElement | Text | DocumentFragment;
   render(): HTMLElement | SVGElement | Text | DocumentFragment | null;
+  cleanup?: () => void;
   onMounted?(el: HTMLElement | SVGElement | Text | DocumentFragment): void;
   beforeUnmounted?(): void;
   onUnmounted?(): void;

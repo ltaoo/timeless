@@ -5,6 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test For Component Duplicate</title>
   <style>
+    :root {
+      --background: #ededed;
+      --foreground: #171717;
+      --BG-0: #ffffff;
+      --BG-1: #f7f7f7;
+      --BG-2: #fff;
+      --BG-3: #f7f7f7;
+      --BG-4: #4c4c4c;
+      --BG-5: #fff;
+      --FG-0: rgba(0, 0, 0, 0.9);
+      --FG-0_5: rgba(0, 0, 0, 0.9);
+      --FG-1: rgba(0, 0, 0, 0.55);
+      --FG-2: rgba(0, 0, 0, 0.3);
+      --FG-3: rgba(0, 0, 0, 0.1);
+      --FG-4: rgba(0, 0, 0, 0.15);
+      --FG-5: rgba(0, 0, 0, 0.05);
+      --BG-COLOR-ACTIVE: #ececec;
+      --RED: #fa5151;
+      --GREEN: #07c160;
+      --border: oklch(92.2% 0 0);
+      --hh: 100vh;
+    }
+
+    [data-theme="dark"] {
+      --background: #111;
+      --foreground: #f3f4f6;
+      --BG-0: #111;
+      --BG-1: #1e1e1e;
+      --BG-2: #191919;
+      --BG-3: #202020;
+      --BG-4: #404040;
+      --BG-5: #2c2c2c;
+      --FG-0: rgba(255, 255, 255, 0.8);
+      --FG-0_5: rgba(255, 255, 255, 0.6);
+      --FG-1: rgba(255, 255, 255, 0.5);
+      --FG-2: rgba(255, 255, 255, 0.3);
+      --FG-3: rgba(255, 255, 255, 0.1);
+      --FG-4: rgba(255, 255, 255, 0.15);
+      --FG-5: rgba(255, 255, 255, 0.1);
+      --BG-COLOR-ACTIVE: #373737;
+      --RED: #fa5151;
+      --GREEN: #07c160;
+      --border: oklch(100% 0 0/.1);
+    }
+
     body {
       font-family: sans-serif;
       padding: 20px;
@@ -34,6 +79,7 @@
 </head>
 
 <body>
+  <script>!function () { try { var d = document.documentElement, n = 'data-theme', s = 'setAttribute'; var e = localStorage.getItem('theme'); if ('system' === e || (!e && true)) { var t = '(prefers-color-scheme: dark)', m = window.matchMedia(t); if (m.media !== t || m.matches) { d.style.colorScheme = 'dark'; d[s](n, 'dark') } else { d.style.colorScheme = 'light'; d[s](n, 'light') } } else if (e) { d[s](n, e || '') } if (e === 'light' || e === 'dark') d.style.colorScheme = e } catch (e) { } }()</script>
   <h1>Test For Component - Duplicate Issue</h1>
   <button id="toggle">Toggle List</button>
   <div id="container"></div>
@@ -45,15 +91,15 @@
 
     // Simple component - just a View
     function SimpleItem(props) {
-      console.log('[SimpleItem] created', props.label);
+      // console.log('[SimpleItem] created', props.label);
       return View(
         {
           class: 'menu-item item-simple',
           onMounted() {
-            console.log('[SimpleItem] mounted', props.label);
+            // console.log('[SimpleItem] mounted', props.label);
           },
           onUnmounted() {
-            console.log('[SimpleItem] unmounted', props.label);
+            // console.log('[SimpleItem] unmounted', props.label);
           }
         },
         ['Simple: ' + props.label]
@@ -62,82 +108,40 @@
 
     // Complex component - Fragment with multiple children (similar to ItemWithSubMenu)
     // Uses computed to create reactive children and Portal (like SubMenu)
-    function ComplexItem(props) {
-      console.log('[ComplexItem] created', props.label);
-
-      const state = refobj({ label: props.label, count: 0, showSubMenu: false, });
-
-      return Fragment(
-        {
-          onMounted() {
-            console.log('[ComplexItem] mounted', props.label);
-          },
-          onUnmounted() {
-            console.log('[ComplexItem] unmounted', props.label);
-          }
-        },
-        [
-          // Main item (like SubMenuTrigger)
-          View(
-            { class: 'menu-item item-complex' },
-            [
-              'Complex: ',
-              Timeless.computed(state, (s) => s.label),
-              View({
-                onClick() {
-                  state.as({
-                    ...state.value,
-                    showSubMenu: !state.value.showSubMenu,
-                  });
-                }
-              }, [
-                'Click it'
-              ]),
-            ]
-          ),
-          Portal({}, [
-            Show({
-              when: computed(state, (t) => {
-                return t.showSubMenu;
-              }),
-            }, [
-              View(
-                { class: 'item item-complex' },
-                [
-                  '  - Portal Child of ',
-                  Timeless.computed(state, (s) => s.label)
-                ]
-              )
-            ]),
-          ]),
-        ]
-      );
-    }
     function MenuItem(props) {
       // if (props.type === 'simple') {
       //   return SimpleItem({ label: item.label });
       // } else {
       //   return ComplexItem({ label: item.label });
       // }
-      const visible = ref(false);
+      const visible_ = ref(false);
 
       return View({}, [
         SimpleItem(props),
         Show({
-          when: computed(props, (t) => t.type !== "simple")
+          when: computed(props, (t) => t.type !== "simple"),
+          onUnmounted() {
+            console.log('[]submenu show is Unmounted');
+          },
         }, [
           View({}, [
             View({
+              class: 'menu-btn',
               onClick() {
-                visible.as((prev) => !prev);
+                visible_.as((prev) => !prev);
               },
             }, ["Click it"])
           ]),
-          // 如果我点击外面的 Toggle List，这里并不会消失（没有被卸载掉），应该就是这里的问题了？
-          // 所以，要排查为什么这里没有在父容器已经被卸载时，Show没有触发卸载逻辑
-          Portal({}, [
+          Portal({
+            onUnmounted() {
+              console.log('[]the sub menu portal is unmounted');
+            },
+          }, [
             Show({
-              when: visible,
+              when: visible_,
+              onUnmounted() {
+                console.log('the sub menu is unmounted');
+              }
             }, [
               View({
                 class: "",
@@ -161,67 +165,41 @@
 
       document.getElementById('toggle').addEventListener('click', () => {
         if (visible.value) {
-          console.log('=== UNMOUNTING ===');
           visible.as(false);
         } else {
-          console.log('=== MOUNTING ===');
           visible.as(true);
         }
       });
 
-      return Portal({}, [
-        Show({
-          when: visible,
+      return Portal({
+        onUnmounted() {
+          console.log('root portal is Unmounted');
+        },
+      }, [
+        Show({ when: visible, }, [View({
+          class: 'menu',
+          onUnmounted() {
+            console.log('[page]menu view unmounted');
+          },
         }, [
-          // View({
-          //   class: 'dropdown-menu',
-          // }, [
-          //   For({
-          //     each: items,
-          //     render(item, idx) {
-          //       console.log('[For render]', item.label, 'type:', item.type);
-          //       if (item.type === 'simple') {
-          //         return SimpleItem({ label: item.label });
-          //       } else {
-          //         return ComplexItem({ label: item.label });
-          //       }
-          //     },
-          //     onMounted() {
-          //       console.log('[For] mounted');
-          //     },
-          //     onUnmounted() {
-          //       console.log('[For] unmounted');
-          //     }
-          //   })
-          // ]),
-          View({
-            class: 'menu',
-          }, [
-            For({
-              each: items,
-              render(item, idx) {
-                console.log('[For render]', item.label, 'type:', item.type);
-                return MenuItem(item);
-              },
-              onMounted() {
-                console.log('[For] mounted');
-              },
-              onUnmounted() {
-                console.log('[For] unmounted');
-              }
-            })
-          ]),
+          MenuItem({ id: 1, label: "item", type: "complex" }),
+          // For({
+          //   each: items,
+          //   render(item) {
+          //     return MenuItem(item);
+          //   },
+          //   onUnmounted() {
+          //     console.log('[]menu items unmounted');
+          //   }
+          // })
+        ]),
         ]
         )
-      ])
+      ]);
     }
 
     const container = document.getElementById('container');
     render(AppView(), container)
-
-
-    console.log('Initial render complete. Check DOM for duplicates.');
-    console.log('Items in DOM:', document.querySelectorAll('.item').length, '(should be 4: 1 simple + 2 complex + 1 simple)');
   </script>
 </body>
 

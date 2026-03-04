@@ -132,7 +132,12 @@ export function For<T>(
       _$children[index] = res.elm;
     },
     _refresh(v: T[]) {
-      console.log("[For _refresh] called with", v.length, "items, current:", _values.length);
+      console.log(
+        "[For _refresh] called with",
+        v.length,
+        "items, current:",
+        _values.length,
+      );
       const new_items = v;
       const prev_items = _values;
       const prev_elements = _elements;
@@ -225,7 +230,14 @@ export function For<T>(
         }
       }
 
-      console.log("[For _refresh] removed:", removed_nodes.length, "added:", added_nodes.length, "updated:", updated_nodes.length);
+      console.log(
+        "[For _refresh] removed:",
+        removed_nodes.length,
+        "added:",
+        added_nodes.length,
+        "updated:",
+        updated_nodes.length,
+      );
       // console.log("1. removed_nodes", removed_nodes);
       // console.log("2. added_nodes", added_nodes);
       // console.log("3. updated_nodes", updated_nodes);
@@ -245,23 +257,23 @@ export function For<T>(
 
       // 4.2 Reorder / Insert nodes
       // Backward loop for correct insertion relative to anchor
-      let nextSibling: Node | null = anchor;
+      let next_sibling: Node | null = anchor;
       for (let i = new_children.length - 1; i >= 0; i--) {
         const node = new_children[i];
         if (!node) continue;
 
         // If node is already in correct position (immediately before nextSibling), skip.
-        if (node.nextSibling === nextSibling) {
-          nextSibling = node;
+        if (node.nextSibling === next_sibling) {
+          next_sibling = node;
           continue;
         }
 
         if ($parent) {
           // If node is already in DOM elsewhere, insertBefore moves it.
-          $parent.insertBefore(node, nextSibling);
+          $parent.insertBefore(node, next_sibling);
         }
 
-        nextSibling = node;
+        next_sibling = node;
       }
 
       // 4.3 Trigger Lifecycle (Mounted)
@@ -309,6 +321,7 @@ export function For<T>(
     render() {
       const nodes = (isRef(each) ? each.value : each) || [];
       // console.log("[For] render", nodes);
+
       const $fragment = document.createDocumentFragment();
       for (let i = 0; i < nodes.length; i += 1) {
         const item = nodes[i];
@@ -335,27 +348,14 @@ export function For<T>(
       $fragment.appendChild(anchor); // Add anchor to fragment
       _mounted = true;
 
-      // onMounted will be called by parent with the result of render(), which is the fragment.
-      // But props.onMounted expects an element?
       if (onMounted) {
         // onMounted($elm); // $elm is anchor.
         // We can pass anchor, but user might expect the container.
         // Since there is no container, we pass anchor.
         onMounted(anchor);
       }
-      // console.log("2. mounted", _children);
-      for (let i = 0; i < _elements.length; i += 1) {
-        const component = _elements[i];
-        if (isElement(component)) {
-          if (typeof component.onMounted === "function") {
-            // component.onMounted(_$children[i] as any as HTMLElement);
-            // _$children[i] is trackElm (possibly Anchor).
-            // Pass rendered element (from render() result) or trackElm?
-            // Usually onMounted expects the root element.
-            component.onMounted(component.$elm);
-          }
-        }
-      }
+      // onMounted will be called by parent with the result of render(), which is the fragment.
+      // But props.onMounted expects an element?
       return $fragment; // Return fragment with items + anchor
     },
     onUnmounted() {
