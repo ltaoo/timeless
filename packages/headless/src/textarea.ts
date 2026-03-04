@@ -8,6 +8,7 @@ export function Textarea(
   props: ViewProps & {
     store: InputCore<any>;
     theme?: any;
+    id?: string;
   },
 ) {
   const {
@@ -16,9 +17,14 @@ export function Textarea(
     class: cls,
     dataset = {},
     theme: t,
+    id,
     ...rest
   } = props;
   const $elm = document.createElement("textarea");
+
+  if (id) {
+    $elm.id = id;
+  }
 
   // Object.keys(rest).forEach((k) => {
   //   if (typeof rest[k] === "function") {

@@ -1,4 +1,5 @@
 export * from "./arrow-down-to-line";
+export * from "./chevron-down";
 export * from "./chevron-right";
 export * from "./circle-arrow-down";
 export * from "./clock-arrow-down";

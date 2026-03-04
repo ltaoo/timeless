@@ -5,7 +5,7 @@ import { ViewProps } from "./view";
 import { InputCore } from "@timeless/ui";
 
 export function Input(
-  props: ViewProps & { store?: InputCore<any>; theme?: any },
+  props: ViewProps & { store?: InputCore<any>; theme?: any; id?: string },
 ) {
   const {
     store,
@@ -13,9 +13,14 @@ export function Input(
     class: cls,
     dataset = {},
     theme: t,
+    id,
     ...rest
   } = props;
   const $elm = document.createElement("input");
+
+  if (id) {
+    $elm.id = id;
+  }
 
   // Object.keys(rest).forEach((k) => {
   //   if (typeof rest[k] === "function") return;

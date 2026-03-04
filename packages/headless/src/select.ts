@@ -28,15 +28,50 @@ export function Root(
 }
 
 export function Trigger(
-  props: ViewProps & { store: SelectCore<any> },
+  props: ViewProps & { store: SelectCore<any>; id?: string },
   children?: ViewChildren,
 ) {
-  const { store, ...rest } = props;
+  const { store, id, ...rest } = props;
   const state_ = refobj(store.state);
 
   store.onStateChange((v) => {
     state_.as(v);
   });
+
+  const events: any[] = [];
+
+  // 创建隐藏的 input 用于可访问性
+  const hiddenInput = View(
+    {
+      as: "input",
+      type: "text",
+      id,
+      style:
+        "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
+      onClick(e) {
+        e.stopPropagation();
+        if (store.disabled) {
+          return;
+        }
+        store.layer.pointerDown();
+        if (store.open) {
+          store.hide();
+        } else {
+          store.presence.show();
+          store.show();
+        }
+      },
+      onMounted(el) {
+        el.value = store.state.value || "";
+        events.push(
+          store.onStateChange(() => {
+            el.value = store.state.value || "";
+          }),
+        );
+      },
+    },
+    [],
+  );
 
   return View(
     {
@@ -66,7 +101,9 @@ export function Trigger(
             bottom: rect.bottom,
           });
         }, 0);
-        $e.addEventListener("pointerdown", () => {
+        $e.addEventListener("pointerdown", (e) => {
+          // 如果点击的是隐藏的 input，不要再次触发
+          if (e.target.tagName === "INPUT") return;
           if (store.disabled) {
             return;
           }
@@ -85,8 +122,12 @@ export function Trigger(
           rest.onMounted($e);
         }
       },
+      onUnmounted() {
+        for (const fn of events) if (typeof fn === "function") fn();
+        if (rest.onUnmounted) rest.onUnmounted();
+      },
     },
-    children,
+    [hiddenInput, ...(children || [])],
   );
 }
 
@@ -230,7 +271,7 @@ export function ItemIndicator(
       style: sn([
         rest.style,
         combine({ ss: rest.style, selected }, ({ ss, selected }) => {
-          return selected ? ss : "display:none;";
+          return selected ? (ss || "") : "display:none;";
         }),
       ]),
     },

@@ -13,10 +13,6 @@ export function Root(
   return View(
     {
       ...rest,
-      onClick(e) {
-        if (rest.onClick) rest.onClick(e);
-        store.toggle();
-      },
       onUnmounted() {
         if (rest.onUnmounted) rest.onUnmounted();
       },
@@ -26,16 +22,20 @@ export function Root(
 }
 
 export function Box(
-  props: ViewProps & { store: CheckboxCore },
+  props: ViewProps & { store: CheckboxCore; id?: string },
   children?: ViewChildren,
 ) {
-  const { store, ...rest } = props;
+  const { store, id, ...rest } = props;
   const state = ref(store.state);
   const events: any[] = [];
 
   return View(
     {
       ...rest,
+      onClick(e) {
+        if (rest.onClick) rest.onClick(e);
+        store.toggle();
+      },
       // "data-checked": computed(state, (d) => (d.checked ? "" : undefined)),
       // "data-disabled": computed(state, (d) => (d.disabled ? "" : undefined)),
       onMounted() {
@@ -94,6 +94,48 @@ export function Indicator(
   );
 }
 
-export function Label(props: ViewProps, children?: ViewChildren) {
-  return View(props, children);
+export function Label(
+  props: ViewProps & { htmlFor?: string; store?: CheckboxCore },
+  children?: ViewChildren,
+) {
+  const { htmlFor, store, ...rest } = props;
+  const events: any[] = [];
+
+  // 如果提供了 store，创建隐藏的 input 用于可访问性
+  const hiddenInput = store
+    ? View(
+        {
+          as: "input",
+          type: "checkbox",
+          id: htmlFor,
+          style:
+            "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
+          onClick(e) {
+            e.stopPropagation();
+            store.toggle();
+          },
+          onMounted(el) {
+            el.checked = store.state.checked;
+            events.push(
+              store.onStateChange(() => {
+                el.checked = store.state.checked;
+              }),
+            );
+          },
+        },
+        [],
+      )
+    : null;
+
+  return View(
+    {
+      ...rest,
+      as: "label",
+      onUnmounted() {
+        for (const fn of events) if (typeof fn === "function") fn();
+        if (rest.onUnmounted) rest.onUnmounted();
+      },
+    },
+    hiddenInput ? [hiddenInput, ...(children || [])] : children,
+  );
 }

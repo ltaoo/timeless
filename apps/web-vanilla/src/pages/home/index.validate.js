@@ -19,13 +19,34 @@ function ObjectFieldRender(props) {
       if (!field$) {
         return null;
       }
+      const fieldId = `field-${name}`;
+      const isCheckbox = computed(field$, (t) => t.input.shape === "checkbox");
+
       return View({ class: "field" }, [
-        View(
+        Show(
           {
-            class:
-              "text-sm font-semibold text-gray-300 uppercase tracking-wider",
+            when: isCheckbox,
+            fallback: View(
+              {
+                class:
+                  "text-sm font-semibold text-gray-300 uppercase tracking-wider cursor-pointer",
+                as: "label",
+                htmlFor: fieldId,
+              },
+              [name],
+            ),
           },
-          [name],
+          [
+            CheckboxPrimitive.Label(
+              {
+                htmlFor: fieldId,
+                store: field$.input,
+                class:
+                  "text-sm font-semibold text-gray-300 uppercase tracking-wider cursor-pointer",
+              },
+              [name],
+            ),
+          ],
         ),
         View({ class: "mt-2" }, [
           Switch(
@@ -38,11 +59,13 @@ function ObjectFieldRender(props) {
               Match({ value: "input" }, [
                 Input({
                   store: field$.input,
+                  id: fieldId,
                 }),
               ]),
               Match({ value: "checkbox" }, [
                 Checkbox({
                   store: field$.input,
+                  id: fieldId,
                 }),
               ]),
             ],
@@ -196,7 +219,7 @@ export default function FormValidateView() {
 
   return View({ class: "space-y-8 max-w-2xl" }, [
     Field({ store: field_provider$ }, [
-      Select({ store: field_provider$.input }),
+      Select({ store: field_provider$.input, id: `field-${field_provider$.name}` }),
     ]),
     ObjectFieldRender(configure$_),
   ]);

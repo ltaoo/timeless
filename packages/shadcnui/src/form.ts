@@ -28,9 +28,12 @@ export function Field(
     state_.as(v);
   });
 
+  // 生成唯一的 field id
+  const fieldId = `field-${props.store.name || Math.random().toString(36).substr(2, 9)}`;
+
   const label_class_ = computed(state_, (s) => {
     return [
-      "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+      "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer",
       s.error ? "text-red-500 dark:text-red-400" : "",
     ]
       .filter(Boolean)
@@ -46,10 +49,10 @@ export function Field(
     }
     if (props.autoRender) {
       return Switch({ when: computed(state_, (s) => s.input.shape) }, [
-        Match({ value: "input" }, [Input({ store: props.store.input })]),
-        Match({ value: "textarea" }, [Textarea({ store: props.store.input })]),
-        Match({ value: "checkbox" }, [Checkbox({ store: props.store.input })]),
-        Match({ value: "select" }, [Select({ store: props.store.input })]),
+        Match({ value: "input" }, [Input({ store: props.store.input, id: fieldId })]),
+        Match({ value: "textarea" }, [Textarea({ store: props.store.input, id: fieldId })]),
+        Match({ value: "checkbox" }, [Checkbox({ store: props.store.input, id: fieldId })]),
+        Match({ value: "select" }, [Select({ store: props.store.input, id: fieldId })]),
       ]);
     }
     return null;
@@ -58,7 +61,7 @@ export function Field(
   return View({ class: "space-y-2" }, [
     Show({ when: computed(state_, (s) => !!s.label) }, [
       View({ class: "flex items-center gap-1" }, [
-        View({ as: "label", class: label_class_ }, [
+        View({ as: "label", htmlFor: fieldId, class: label_class_ }, [
           computed(state_, (s) => s.label),
         ]),
         Show(

@@ -47,6 +47,11 @@
       "import": "./dist/check/index.esm.js",
       "require": "./dist/check/index.js"
     },
+    "./chevron-down": {
+      "types": "./dist/chevron-down/index.d.ts",
+      "import": "./dist/chevron-down/index.esm.js",
+      "require": "./dist/chevron-down/index.js"
+    },
     "./chevron-right": {
       "types": "./dist/chevron-right/index.d.ts",
       "import": "./dist/chevron-right/index.esm.js",

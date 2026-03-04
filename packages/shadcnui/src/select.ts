@@ -7,10 +7,10 @@ import {
   ViewProps,
 } from "@timeless/headless";
 import { SelectCore } from "@timeless/ui";
-import { CheckOutlined, ChevronRightOutlined } from "@timeless/icons";
+import { CheckOutlined, ChevronDownOutlined } from "@timeless/icons";
 
-export function Select(props: ViewProps & { store: SelectCore<any> }) {
-  const { store, ...rest } = props;
+export function Select(props: ViewProps & { store: SelectCore<any>; id?: string }) {
+  const { store, id, ...rest } = props;
   const state_ = refobj(store.state);
 
   store.onStateChange((v) => {
@@ -21,6 +21,7 @@ export function Select(props: ViewProps & { store: SelectCore<any> }) {
     SelectPrimitive.Trigger(
       {
         store,
+        id,
         class:
           "flex h-10 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:border-zinc-800 dark:bg-zinc-950 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus:ring-zinc-300",
       },
@@ -34,7 +35,7 @@ export function Select(props: ViewProps & { store: SelectCore<any> }) {
           }),
         }),
         SelectPrimitive.Icon({ class: "h-4 w-4 opacity-50" }, [
-          ChevronRightOutlined,
+          ChevronDownOutlined({}),
         ]),
       ],
     ),
@@ -91,9 +92,9 @@ export function Select(props: ViewProps & { store: SelectCore<any> }) {
                         store,
                         value: option.value,
                         class:
-                          "absolute left-2 flex h-3.5 w-3.5 items-center justify-center",
+                          "absolute left-2 flex h-4 w-4 items-center justify-center",
                       },
-                      [CheckOutlined],
+                      [CheckOutlined({})],
                     ),
                     SelectPrimitive.ItemText({}, [option.label]),
                   ],
