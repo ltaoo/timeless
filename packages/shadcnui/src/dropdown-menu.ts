@@ -27,18 +27,16 @@ export function DropdownMenu(
   return Show({ when: !!children }, [
     DropdownMenuPrimitive.Trigger({ store: props.store }, children),
     DropdownMenuPrimitive.Portal({ store: props.store.menu }, [
-      DropdownMenuPrimitive.Content({ ...props }, [
-        View(
-          {
-            class: computed(state_, (t) => {
-              return [
-                MENU_CONTENT_CLASS,
-                t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
-                t.exit ? "animate-out fade-out-0 zoom-out-95" : "",
-              ].join(" ");
-            }),
+      DropdownMenuPrimitive.Content(
+        {
+          ...props,
+          animation: {
+            in: "animate-in fade-in-0 zoom-in-95",
+            out: "animate-out fade-out-0 zoom-out-95",
           },
-          [
+        },
+        [
+          View({ class: MENU_CONTENT_CLASS }, [
             For({
               each: computed(state_, (t) => {
                 console.log(
@@ -52,9 +50,9 @@ export function DropdownMenu(
                 return DropdownMenuItem({ store: item });
               },
             }),
-          ],
-        ),
-      ]),
+          ]),
+        ],
+      ),
     ]),
   ]);
 }
@@ -104,18 +102,16 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
       console.log("DropdownMenuItem render", props.store.label);
       const inner$ = props.store.menu
         ? DropdownMenuPrimitive.Portal({ store: props.store.menu }, [
-            DropdownMenuPrimitive.SubMenuContent({ store: props.store.menu }, [
-              View(
-                {
-                  class: computed(menu_state_, (t) => {
-                    return [
-                      MENU_CONTENT_CLASS,
-                      t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
-                      t.exit ? "animate-out fade-out-0 zoom-out-95" : "",
-                    ].join(" ");
-                  }),
+            DropdownMenuPrimitive.SubMenuContent(
+              {
+                store: props.store.menu,
+                animation: {
+                  in: "animate-in fade-in-0 zoom-in-95",
+                  out: "animate-out fade-out-0 zoom-out-95",
                 },
-                [
+              },
+              [
+                View({ class: MENU_CONTENT_CLASS }, [
                   For({
                     each: computed(menu_state_, (t) => {
                       return t.items;
@@ -124,9 +120,9 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
                       return DropdownMenuItem({ store: item });
                     },
                   }),
-                ],
-              ),
-            ]),
+                ]),
+              ],
+            ),
           ])
         : null;
       // return Show({ when: has_submenu_ }, [inner$]);

@@ -41,6 +41,44 @@ export function Root(
   return MenuPrimitive.Root(props, children);
 }
 
+export function Portal(
+  props: ViewProps & {
+    store: MenuCore;
+    animation?: { in: string; out: string };
+  },
+  children: ViewChildren = [],
+) {
+  return MenuPrimitive.Portal(props, children);
+}
+
+export function Content(
+  props: ViewProps & {
+    store: DropdownMenuCore;
+    animation?: { in: string; out: string };
+  },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
+  // Add hover event handlers for hover trigger mode
+  const hoverHandlers =
+    store.trigger === "hover"
+      ? {
+          onMouseEnter() {
+            _hoverClearHide(store);
+          },
+          onMouseLeave() {
+            _hoverScheduleHide(store);
+          },
+        }
+      : {};
+
+  return MenuPrimitive.Content(
+    { ...rest, ...hoverHandlers, store: props.store.menu },
+    children,
+  );
+}
+
 export function Trigger(
   props: ViewProps & { store: DropdownMenuCore },
   children?: ViewChildren,
@@ -118,38 +156,6 @@ export function Trigger(
   );
 }
 
-export function Portal(
-  props: ViewProps & { store: MenuCore },
-  children: ViewChildren = [],
-) {
-  return MenuPrimitive.Portal({ store: props.store }, children);
-}
-
-export function Content(
-  props: ViewProps & { store: DropdownMenuCore },
-  children: ViewChildren,
-) {
-  const { store, ...rest } = props;
-
-  // Add hover event handlers for hover trigger mode
-  const hoverHandlers =
-    store.trigger === "hover"
-      ? {
-          onMouseEnter() {
-            _hoverClearHide(store);
-          },
-          onMouseLeave() {
-            _hoverScheduleHide(store);
-          },
-        }
-      : {};
-
-  return MenuPrimitive.Content(
-    { ...rest, ...hoverHandlers, store: props.store.menu },
-    children,
-  );
-}
-
 export function Group(props: ViewProps, children: ViewChildren) {
   return MenuPrimitive.Group(props, children);
 }
@@ -196,7 +202,10 @@ export function SubMenuTrigger(
 }
 
 export function SubMenuContent(
-  props: ViewProps & { store: MenuCore },
+  props: ViewProps & {
+    store: MenuCore;
+    animation?: { in: string; out: string };
+  },
   children: ViewChildren,
 ) {
   // Get the parent DropdownMenuCore from the menu's parent

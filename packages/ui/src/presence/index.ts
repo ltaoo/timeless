@@ -110,10 +110,11 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     this.visible = true;
     this.emit(Events.StateChange, { ...this.state });
     setTimeout(() => {
+      this.enter = false;
       this.emit(Events.Show);
-      // this.emit(Events.StateChange, { ...this.state });
-      // 180 是预计的动画时间
-    }, 180);
+      this.emit(Events.StateChange, { ...this.state });
+      // 150 是动画时间
+    }, 150);
   }
   hide(options: Partial<{ reason: "show_sibling" | "back" | "forward"; destroy: boolean }> = {}) {
     // console.log("[DOMAIN]ui/presence - hide", options);
@@ -129,10 +130,11 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
       }
       this.hide_timer = setTimeout(() => {
         this.hide_timer = null;
+        this.exit = false;
         this.visible = false;
         this.emit(Events.Hidden);
         this.emit(Events.StateChange, { ...this.state });
-      }, 180);
+      }, 150);
       return;
     }
     this.exit = true;
@@ -144,11 +146,12 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     }
     this.hide_timer = setTimeout(() => {
       this.hide_timer = null;
+      this.exit = false;
       this.visible = false;
       this.emit(Events.Hidden);
       this.emit(Events.StateChange, { ...this.state });
       this.unmount();
-    }, 180);
+    }, 150);
   }
   handleAnimationEnd() {
     if (this.hide_timer) {
@@ -156,13 +159,16 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
       this.hide_timer = null;
     }
     if (this.exit) {
+      this.exit = false;
       this.visible = false;
       this.emit(Events.Hidden);
       this.emit(Events.StateChange, { ...this.state });
       this.unmount();
     }
     if (this.enter) {
+      this.enter = false;
       this.emit(Events.Show);
+      this.emit(Events.StateChange, { ...this.state });
     }
   }
   /** 将 DOM 从页面卸载 */

@@ -1,3 +1,4 @@
+
 <html lang="en">
 
 <head>
@@ -75,59 +76,17 @@
       margin: 10px 0;
       cursor: pointer;
     }
-
-    @keyframes enter {
-      from {
-        opacity: var(--tw-enter-opacity, 1);
-        transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), var(--tw-enter-scale, 1));
-      }
-    }
-
-    @keyframes exit {
-      to {
-        opacity: var(--tw-exit-opacity, 1);
-        transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1));
-      }
-    }
-
-    .animate-in {
-      animation: enter 150ms ease-out;
-    }
-
-    .animate-out {
-      animation: exit 150ms ease-in forwards;
-    }
-
-    .fade-in-0 {
-      --tw-enter-opacity: 0;
-    }
-
-    .fade-out-0 {
-      --tw-exit-opacity: 0;
-    }
-
-    .zoom-in-95 {
-      --tw-enter-scale: 0.95;
-    }
-
-    .zoom-out-95 {
-      --tw-exit-scale: 0.95;
-    }
-
-    .slide-in-from-top {
-      --tw-enter-translate-y: -20px;
-    }
-
-    .slide-out-to-top {
-      --tw-exit-translate-y: -20px;
-    }
   </style>
 </head>
 
 <body>
   <script>!function () { try { var d = document.documentElement, n = 'data-theme', s = 'setAttribute'; var e = localStorage.getItem('theme'); if ('system' === e || (!e && true)) { var t = '(prefers-color-scheme: dark)', m = window.matchMedia(t); if (m.media !== t || m.matches) { d.style.colorScheme = 'dark'; d[s](n, 'dark') } else { d.style.colorScheme = 'light'; d[s](n, 'light') } } else if (e) { d[s](n, e || '') } if (e === 'light' || e === 'dark') d.style.colorScheme = e } catch (e) { } }()</script>
-  <script src="../../packages/vanillalite/dist/timeless.vanillalite.umd.min.js"></script>
+  <h1>Test For Component - Duplicate Issue</h1>
+  <button id="toggle">Toggle List</button>
   <div id="container"></div>
+
+  <script src="../../packages/vanillalite/dist/timeless.vanillalite.umd.min.js"></script>
+
   <script>
     const { ref, refobj, computed, For, Show, View, Fragment, Portal, render } = Timeless;
 
@@ -174,56 +133,46 @@
     }
 
     function AppView() {
-      const state_ = refobj({
-        mounted: false,
-        enter: false,
-        exit: false,
+      const items = ref([
+        { id: 1, label: 'Item 1', type: 'simple' },
+        { id: 2, label: 'Item 2', type: 'complex' },
+        { id: 3, label: 'Item 3', type: 'simple' },
+      ]);
+      const open_ = ref(false);
+
+      document.getElementById('toggle').addEventListener('click', () => {
+        if (open_.value) {
+          open_.as(false);
+        } else {
+          open_.as(true);
+        }
       });
 
-      return View({}, [
-        View({
-          onClick() {
-            if (state_.value.mounted) {
-              state_.as({
-                ...state_.value,
-                exit: true,
-                enter: false,
-              });
-              setTimeout(() => {
-                state_.as({
-                  ...state_.value,
-                  exit: false,
-                  mounted: false,
-                });
-              }, 150);
-              return
-            }
-            state_.as({
-              ...state_.value,
-              mounted: true,
-              enter: true,
-            });
-            setTimeout(() => {
-              state_.as({
-                ...state_.value,
-                enter: false,
-              });
-            }, 150);
+      return Portal({
+        onUnmounted() {
+          console.log('root portal is Unmounted');
+        },
+      }, [
+        Show({ when: open_, }, [View({
+          class: 'menu',
+          onUnmounted() {
+            console.log('[page]menu view unmounted');
           },
-        }, ["Click it"]),
-        Show({ when: computed(state_, (t) => t.mounted) }, [
-          View({
-            class: computed(state_, (t) => {
-              const classes = [];
-              if (t.enter) classes.push('animate-in', 'fade-in-0', 'slide-in-from-top');
-              if (t.exit) classes.push('animate-out', 'fade-out-0', 'slide-out-to-top');
-              return classes.join(' ');
-            }),
-            style: 'width: 120px; height: 120px; background: #e3f2fd; border: 1px solid #2196f3;'
-          })
+        }, [
+          MenuItem({ id: 1, label: "item", type: "complex" }),
+          // For({
+          //   each: items,
+          //   render(item) {
+          //     return MenuItem(item);
+          //   },
+          //   onUnmounted() {
+          //     console.log('[]menu items unmounted');
+          //   }
+          // })
         ]),
+        ]
+        )
       ]);
-
     }
 
     const container = document.getElementById('container');

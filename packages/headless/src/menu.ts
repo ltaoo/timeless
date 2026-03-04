@@ -1,4 +1,4 @@
-import { ref, refobj, computed } from "@timeless/reactive";
+import { ref, refobj, computed, combine } from "@timeless/reactive";
 import { MenuCore, MenuItemCore } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
 
@@ -52,32 +52,44 @@ export function Anchor(
 }
 
 export function Portal(
-  props: ViewProps & { store: MenuCore },
+  props: ViewProps & {
+    store: MenuCore;
+    animation?: { in: string; out: string };
+  },
   children: ViewChildren = [],
 ) {
-  return NativePortal({}, [
-    Presence({ store: props.store.presence }, children),
-  ]);
+  return NativePortal({}, children);
 }
 
 export function Content(
-  props: ViewProps & { store: MenuCore },
+  props: ViewProps & {
+    store: MenuCore;
+    animation?: { in: string; out: string };
+  },
   children: ViewChildren,
 ) {
   return ContentNonModal(props, children);
 }
 
 export function ContentNonModal(
-  props: ViewProps & { store: MenuCore },
+  props: ViewProps & {
+    store: MenuCore;
+    animation?: { in: string; out: string };
+  },
   children: ViewChildren,
 ) {
   return ContentImpl(props, children);
 }
 
 export function ContentImpl(
-  props: ViewProps & { store: MenuCore },
+  props: ViewProps & {
+    store: MenuCore;
+    animation?: { in: string; out: string };
+  },
   children: ViewChildren,
 ) {
+  const { animation, ...rest } = props;
+
   // Create a function that returns all parent layers as an array
   const getAllParentLayers = () => {
     const layers: any[] = [];
@@ -94,21 +106,55 @@ export function ContentImpl(
   // Determine if this is a root layer (no parent menu)
   const isRootLayer = !props.store.parent_menu;
 
-  return PopperPrimitive.Content(
+  const state = refobj(props.store.state);
+  const presenceState = refobj(props.store.presence.state);
+
+  props.store.onStateChange((v) => {
+    state.as(v);
+  });
+
+  props.store.presence.onStateChange((v) => {
+    presenceState.as(v);
+  });
+
+  return Show(
     {
-      ...props,
-      store: props.store.popper,
-      layer: props.store.layer,
-      getAllParentLayers,
-      isRootLayer,
-      onMouseLeave(event) {
-        props.store.handleLeave();
-        if (props.onMouseLeave) {
-          props.onMouseLeave(event);
-        }
-      },
+      when: combine([state, presenceState], (menuState, pState) => {
+        // Keep mounted when open, or during exit animation
+        return menuState.open || pState.exit;
+      }),
     },
-    children,
+    [
+      PopperPrimitive.Content(
+        {
+          store: props.store.popper,
+          layer: props.store.layer,
+          getAllParentLayers,
+          isRootLayer,
+          onMouseLeave(event) {
+            props.store.handleLeave();
+            if (rest.onMouseLeave) {
+              rest.onMouseLeave(event);
+            }
+          },
+        },
+        [
+          View(
+            {
+              class: computed(presenceState, (t) => {
+                return [
+                  t.enter && animation?.in ? animation.in : "",
+                  t.exit && animation?.out ? animation.out : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ");
+              }),
+            },
+            children,
+          ),
+        ],
+      ),
+    ],
   );
 }
 
@@ -250,7 +296,10 @@ export function SubMenuTrigger(
 }
 
 export function SubMenuContent(
-  props: ViewProps & { store: MenuCore },
+  props: ViewProps & {
+    store: MenuCore;
+    animation?: { in: string; out: string };
+  },
   children: ViewChildren,
 ) {
   return ContentImpl(

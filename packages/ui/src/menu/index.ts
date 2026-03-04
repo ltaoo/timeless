@@ -194,11 +194,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     console.log("[DOMAIN]ui/menu/index - hide", this._name);
+    // this.log("hide");
+    this.presence.hide();
     this.state.open = false;
     this.state.enter = this.presence.enter;
     this.state.exit = this.presence.exit;
-    // this.log("hide");
-    this.presence.hide();
     this.emit(Events.Hidden);
     this.emit(Events.StateChange, { ...this.state });
   }
