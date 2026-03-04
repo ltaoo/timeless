@@ -148,6 +148,15 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
         this._open = true;
         this.emit(Events.Change, { ...this.state });
       });
+      menu.onHiding(() => {
+        console.log(
+          "[DOMAIN]ui/menu/item - menu.onHiding",
+          this.label,
+          menu._name,
+        );
+        this._open = false;
+        this.emit(Events.Change, { ...this.state });
+      });
       menu.onHide(() => {
         console.log(
           "[DOMAIN]ui/menu/item - menu.onHide",

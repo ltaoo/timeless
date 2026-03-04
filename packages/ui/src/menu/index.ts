@@ -11,6 +11,7 @@ import { MenuItemCore } from "./item";
 
 enum Events {
   Show,
+  Hiding,
   Hidden,
   EnterItem,
   LeaveItem,
@@ -20,6 +21,7 @@ enum Events {
 }
 type TheTypesOfEvents = {
   [Events.Show]: void;
+  [Events.Hiding]: void;
   [Events.Hidden]: void;
   [Events.EnterItem]: MenuItemCore;
   [Events.LeaveItem]: MenuItemCore;
@@ -193,14 +195,36 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     if (this.state.open === false) {
       return;
     }
-    console.log("[DOMAIN]ui/menu/index - hide", this._name);
+    console.log("[DOMAIN]ui/menu/index - hide START", this._name, {
+      open: this.state.open,
+      exit: this.presence.exit,
+      enter: this.presence.enter,
+    });
+
+    // Emit Hiding event immediately so menu items can update their state
+    this.emit(Events.Hiding);
+
+    // Close all open submenus immediately
+    if (this.cur_item && this.cur_item.menu && this.cur_item.menu.state.open) {
+      console.log("[DOMAIN]ui/menu/index - closing submenu", this.cur_item.menu._name);
+      this.cur_item.menu.hide();
+    }
+
     // this.log("hide");
     this.presence.hide();
+    console.log("[DOMAIN]ui/menu/index - hide AFTER presence.hide()", this._name, {
+      exit: this.presence.exit,
+      enter: this.presence.enter,
+    });
     this.state.open = false;
     this.state.enter = this.presence.enter;
     this.state.exit = this.presence.exit;
-    this.emit(Events.Hidden);
+    // Don't emit Events.Hidden here - it should be emitted by presence.onHidden callback
     this.emit(Events.StateChange, { ...this.state });
+    console.log("[DOMAIN]ui/menu/index - hide END", this._name, {
+      open: this.state.open,
+      exit: this.state.exit,
+    });
   }
   /** 处理选项 */
   listen_item(item: MenuItemCore) {
@@ -250,7 +274,10 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         itemState: item.menu?.state,
       });
       this.emit(Events.LeaveItem, item);
-      item.blur();
+      // Don't blur if the item has an open submenu
+      if (!item._open) {
+        item.blur();
+      }
     });
     if (!item.menu) {
       return;
@@ -370,6 +397,9 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
 
   onShow(handler: Handler<TheTypesOfEvents[Events.Show]>) {
     return this.on(Events.Show, handler);
+  }
+  onHiding(handler: Handler<TheTypesOfEvents[Events.Hiding]>) {
+    return this.on(Events.Hiding, handler);
   }
   onHide(handler: Handler<TheTypesOfEvents[Events.Hidden]>) {
     return this.on(Events.Hidden, handler);

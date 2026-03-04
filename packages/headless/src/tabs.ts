@@ -7,9 +7,9 @@ import { For } from "./for";
 import { Show } from "./show";
 import { Txt } from "./text";
 
-export function Tabs(
+export function Tabs<T>(
   props: ViewProps & {
-    store: TabHeaderCore<any>;
+    store: TabHeaderCore<T>;
     theme?: { root: any; tab: any; list: any; indicator: any; content: any };
   },
 ) {
@@ -33,9 +33,9 @@ export function Tabs(
       },
     },
     [
-      View({ ...merge(tp(t?.list)) }, [
+      View({}, [
         For({
-          each: computed(items, (s) => s),
+          each: items,
           render(item: { value: string; label: string }, idx) {
             return View(
               {
@@ -92,7 +92,7 @@ export function Tabs(
       ]),
       View({ ...merge(tp(t?.content)) }, [
         For({
-          each: computed(state, (s) => s.items),
+          each: computed(state, (s) => s.tabs),
           render(item: any) {
             return Show(
               {

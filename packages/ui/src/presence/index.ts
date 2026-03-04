@@ -117,7 +117,12 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     }, 150);
   }
   hide(options: Partial<{ reason: "show_sibling" | "back" | "forward"; destroy: boolean }> = {}) {
-    // console.log("[DOMAIN]ui/presence - hide", options);
+    console.log("[DOMAIN]ui/presence - hide START", options, {
+      exit: this.exit,
+      enter: this.enter,
+      visible: this.visible,
+      mounted: this.mounted,
+    });
     const { destroy = true } = options;
     if (destroy === false) {
       // 不销毁，但是要隐藏
@@ -139,6 +144,10 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     }
     this.exit = true;
     this.enter = false;
+    console.log("[DOMAIN]ui/presence - hide AFTER set exit=true", {
+      exit: this.exit,
+      enter: this.enter,
+    });
     this.emit(Events.StateChange, { ...this.state });
     if (this.hide_timer) {
       clearTimeout(this.hide_timer);
