@@ -52,6 +52,7 @@ export function Content(
     getParentLayer?: () => any;
     getAllParentLayers?: () => any[];
     isRootLayer?: boolean;
+    onReferenceOutOfView?: () => void;
   },
   children: ViewChildren = [],
 ) {
@@ -62,6 +63,7 @@ export function Content(
     getParentLayer,
     getAllParentLayers,
     isRootLayer = true,
+    onReferenceOutOfView,
     ...rest
   } = props;
 
@@ -74,6 +76,7 @@ export function Content(
   ];
 
   let handlePointerDown: any;
+  let handleScroll: any;
 
   return View(
     {
@@ -109,6 +112,46 @@ export function Content(
             return $e.getBoundingClientRect();
           },
         });
+
+        // Add scroll listener to update position on scroll
+        handleScroll = () => {
+          console.log("[PopperPrimitive.Content] scroll event triggered");
+          // Check if reference element is in viewport
+          if (store.reference) {
+            const refRect = store.reference.getRect();
+            console.log("[PopperPrimitive.Content] refRect:", refRect);
+
+            // Check if this is a virtual element (no real DOM element)
+            const refEl = (store.reference as any).$el;
+            const isVirtualElement = !refEl || !(refEl instanceof Element);
+            console.log("[PopperPrimitive.Content] isVirtualElement:", isVirtualElement, "refEl:", refEl);
+
+            // For virtual elements (like context menu), close on scroll
+            if (isVirtualElement && onReferenceOutOfView) {
+              console.log("[PopperPrimitive.Content] virtual element detected, closing on scroll");
+              onReferenceOutOfView();
+              return;
+            }
+
+            const isInViewport =
+              refRect.top < window.innerHeight &&
+              refRect.bottom > 0 &&
+              refRect.left < window.innerWidth &&
+              refRect.right > 0;
+
+            console.log("[PopperPrimitive.Content] isInViewport:", isInViewport);
+
+            if (!isInViewport && onReferenceOutOfView) {
+              console.log("[PopperPrimitive.Content] calling onReferenceOutOfView");
+              onReferenceOutOfView();
+              return;
+            }
+          }
+          console.log("[PopperPrimitive.Content] calling store.place()");
+          store.place();
+        };
+        window.addEventListener("scroll", handleScroll, true);
+
         if (layer) {
           // Only register document listener for root layer
           if (isRootLayer) {
@@ -160,6 +203,13 @@ export function Content(
           isRootLayer,
         );
         store.setFloating(null);
+
+        // Remove scroll listener
+        if (handleScroll) {
+          window.removeEventListener("scroll", handleScroll, true);
+          handleScroll = null;
+        }
+
         if (layer && handlePointerDown) {
           document.removeEventListener("pointerdown", handlePointerDown);
           handlePointerDown = null;

@@ -101,7 +101,14 @@ export function Portal(
     [
       Presence({ store: props.store.presence }, [
         PopperPrimitive.Content(
-          { store: props.store.popper, layer: props.store.layer },
+          {
+            store: props.store.popper,
+            layer: props.store.layer,
+            onReferenceOutOfView() {
+              // Close the popover when reference is out of viewport
+              props.store.hide();
+            },
+          },
           children,
         ),
       ]),

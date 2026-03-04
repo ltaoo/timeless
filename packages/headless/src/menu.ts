@@ -136,6 +136,10 @@ export function ContentImpl(
           layer: props.store.layer,
           getAllParentLayers,
           isRootLayer,
+          onReferenceOutOfView() {
+            // Close the menu when reference is out of viewport
+            props.store.hide();
+          },
           onMouseEnter(event) {
             if (rest.onMouseEnter) {
               rest.onMouseEnter(event);

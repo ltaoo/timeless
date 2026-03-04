@@ -27,6 +27,24 @@ function _hoverClearHide(store: DropdownMenuCore) {
 
 function _hoverScheduleHide(store: DropdownMenuCore) {
   _hoverClearHide(store);
+
+  // Clear all submenu hide timers to ensure they close together
+  const clearAllSubTimers = (menu: any) => {
+    if (menu.hide_sub_timer) {
+      clearTimeout(menu.hide_sub_timer);
+      menu.hide_sub_timer = null;
+    }
+    // Clear timers for all items with submenus
+    if (menu.items) {
+      for (const item of menu.items) {
+        if (item.menu) {
+          clearAllSubTimers(item.menu);
+        }
+      }
+    }
+  };
+  clearAllSubTimers(store.menu);
+
   const state = getHoverTimer(store);
   state.timer = setTimeout(() => {
     store.hide();

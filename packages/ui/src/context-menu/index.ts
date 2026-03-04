@@ -46,6 +46,10 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
       left: 0,
     }),
   };
+  private initialScrollX = 0;
+  private initialScrollY = 0;
+  private clickX = 0;
+  private clickY = 0;
 
   constructor(
     options: Partial<
@@ -105,17 +109,28 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
       hasReference: !!this.menu.popper.reference,
     });
 
-    // Update virtual element position
-    this.virtualElement.getBoundingClientRect = () => ({
-      width: 0,
-      height: 0,
-      x,
-      y,
-      top: y,
-      right: x,
-      bottom: y,
-      left: x,
-    });
+    // Store initial scroll position and click position
+    this.initialScrollX = window.scrollX || window.pageXOffset;
+    this.initialScrollY = window.scrollY || window.pageYOffset;
+    this.clickX = x;
+    this.clickY = y;
+
+    // Update virtual element position to adjust for scroll
+    this.virtualElement.getBoundingClientRect = () => {
+      const adjustedX = this.clickX;
+      const adjustedY = this.clickY;
+
+      return {
+        width: 0,
+        height: 0,
+        x: adjustedX,
+        y: adjustedY,
+        top: adjustedY,
+        right: adjustedX,
+        bottom: adjustedY,
+        left: adjustedX,
+      };
+    };
 
     // Update reference with new position
     this.menu.popper.updateReference({
