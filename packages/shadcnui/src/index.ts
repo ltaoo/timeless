@@ -44,7 +44,7 @@ import {
 } from "./card";
 import { Avatar } from "./avatar";
 import { Skeleton } from "./skeleton";
-import { Tooltip } from "./tooltip";
+import { Tooltip, TooltipProvider } from "./tooltip";
 import { Alert, AlertTitle, AlertDescription } from "./alert";
 import { ScrollArea } from "./scroll-area";
 import { Sheet } from "./sheet";
@@ -59,7 +59,11 @@ import {
   TableCell,
 } from "./table";
 import { Field, Form } from "./form";
-import { ResizablePanels, ResizablePanel, ResizableHandle } from "./resizable-panels";
+import {
+  ResizablePanels,
+  ResizablePanel,
+  ResizableHandle,
+} from "./resizable-panels";
 
 import "./index.css";
 
@@ -104,6 +108,7 @@ export {
   Avatar,
   Skeleton,
   Tooltip,
+  TooltipProvider,
   Alert,
   AlertTitle,
   AlertDescription,

@@ -117,11 +117,11 @@ export function Handle(
         rest.onMouseLeave?.(e);
       },
       onPointerDown(e: PointerEvent) {
-        console.log("[ResizableHandle] onPointerDown triggered", e);
+        // console.log("[ResizableHandle] onPointerDown triggered", e);
         e.preventDefault();
         isDragging_.as(true);
         store.startResize(panelBefore, panelAfter, e);
-        console.log("[ResizableHandle] startResize called, isDragging:", isDragging_.value);
+        // console.log("[ResizableHandle] startResize called, isDragging:", isDragging_.value);
 
         // 设置全局光标样式
         const state = store.state;
@@ -132,21 +132,21 @@ export function Handle(
         rest.onPointerDown?.(e);
       },
       onMounted(el: TimelessElement) {
-        console.log("[ResizableHandle] mounted", el);
+        // console.log("[ResizableHandle] mounted", el);
         const state = store.state;
         const cursorClass = state.direction === "horizontal" ? "col-resize" : "row-resize";
 
         // 监听全局 pointer 事件
         const handlePointerMove = (e: PointerEvent) => {
           if (isDragging_.value) {
-            console.log("[ResizableHandle] pointermove", e.clientX, e.clientY);
+            // console.log("[ResizableHandle] pointermove", e.clientX, e.clientY);
             store.resize(e);
           }
         };
 
         const handlePointerUp = (e: PointerEvent) => {
           if (isDragging_.value) {
-            console.log("[ResizableHandle] pointerup");
+            // console.log("[ResizableHandle] pointerup");
             isDragging_.as(false);
             store.endResize();
             // 恢复光标

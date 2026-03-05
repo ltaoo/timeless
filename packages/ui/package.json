@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -199,6 +200,11 @@
       "import": "./dist/toggle/index.esm.js",
       "require": "./dist/toggle/index.js"
     },
+    "./tooltip": {
+      "types": "./dist/tooltip/index.d.ts",
+      "import": "./dist/tooltip/index.esm.js",
+      "require": "./dist/tooltip/index.js"
+    },
     "./tree": {
       "types": "./dist/tree/index.d.ts",
       "import": "./dist/tree/index.esm.js",
@@ -220,10 +226,9 @@
       "require": "./dist/waterfall/index.js"
     }
   },
-  "types": "dist/index.d.ts",
   "scripts": {
     "prebuild": "node scripts/update-exports.js",
-    "build": "rollup -c rollup.config.mjs"
+    "build": "vite build"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.5",
@@ -232,18 +237,5 @@
     "dayjs": "^1.11.19",
     "mitt": "^3.0.1"
   },
-  "devDependencies": {
-    "@rollup/plugin-alias": "^6.0.0",
-    "@rollup/plugin-commonjs": "^29.0.0",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^12.3.0",
-    "@types/node": "^25.0.9",
-    "rollup": "^4.59.0",
-    "rollup-plugin-analyzer": "^4.0.0",
-    "rollup-plugin-dts": "^6.3.0",
-    "rollup-plugin-visualizer": "^7.0.0",
-    "tslib": "^2.8.1",
-    "typescript": "^5.9.3"
-  }
+  "peerDependencies": {}
 }

@@ -42,85 +42,87 @@ export default function HomePageView(props) {
     minSize: 70,
   });
 
-  return View({ class: "w-full h-screen" }, [
-    ResizablePanels(
-      {
-        store: panelsGroup,
-        direction: "horizontal",
-        class: "w-full h-full",
-      },
-      [
-        // Sidebar Panel
-        ResizablePanel(
-          {
-            store: sidebarPanel,
-            group: panelsGroup,
-          },
-          [
-            View(
-              {
-                class:
-                  "border-r border-zinc-200 dark:border-zinc-800 py-4 h-full",
-              },
-              [
-                View(
-                  {
-                    class:
-                      "px-3 mb-3 text-xs font-bold text-zinc-400 uppercase tracking-widest",
-                  },
-                  [Txt("Components")],
-                ),
-                For({
-                  each: categories,
-                  render(menu) {
-                    return View(
-                      {
-                        class: cn([
-                          "px-3 py-2 text-sm cursor-pointer transition-colors",
-                          computed(curSubView, (d) => {
-                            return d && d.name === menu.url
-                              ? "text-zinc-900 bg-zinc-100 font-medium dark:text-zinc-50 dark:bg-zinc-800"
-                              : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50";
-                          }),
-                        ]),
-                        onClick() {
-                          props.history.push(menu.url);
-                        },
-                      },
-                      [Txt(menu.title)],
-                    );
-                  },
-                }),
-              ],
-            ),
-          ],
-        ),
-
-        // Resize Handle
-        ResizableHandle({
+  return TooltipProvider({}, [
+    View({ class: "w-full h-screen" }, [
+      ResizablePanels(
+        {
           store: panelsGroup,
-          panelBefore: sidebarPanel,
-          panelAfter: contentPanel,
-          withHandle: true,
-        }),
+          direction: "horizontal",
+          class: "w-full h-full",
+        },
+        [
+          // Sidebar Panel
+          ResizablePanel(
+            {
+              store: sidebarPanel,
+              group: panelsGroup,
+            },
+            [
+              View(
+                {
+                  class:
+                    "border-r border-zinc-200 dark:border-zinc-800 py-4 h-full",
+                },
+                [
+                  View(
+                    {
+                      class:
+                        "px-3 mb-3 text-xs font-bold text-zinc-400 uppercase tracking-widest",
+                    },
+                    [Txt("Components")],
+                  ),
+                  For({
+                    each: categories,
+                    render(menu) {
+                      return View(
+                        {
+                          class: cn([
+                            "px-3 py-2 text-sm cursor-pointer transition-colors",
+                            computed(curSubView, (d) => {
+                              return d && d.name === menu.url
+                                ? "text-zinc-900 bg-zinc-100 font-medium dark:text-zinc-50 dark:bg-zinc-800"
+                                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50";
+                            }),
+                          ]),
+                          onClick() {
+                            props.history.push(menu.url);
+                          },
+                        },
+                        [Txt(menu.title)],
+                      );
+                    },
+                  }),
+                ],
+              ),
+            ],
+          ),
 
-        // Content Panel
-        ResizablePanel(
-          {
-            store: contentPanel,
-            group: panelsGroup,
-          },
-          [
-            View({ class: "overflow-y-auto h-full" }, [
-              View({ class: "relative p-6" }, [
-                KeepAliveSubViews({
-                  ...props,
-                }),
+          // Resize Handle
+          ResizableHandle({
+            store: panelsGroup,
+            panelBefore: sidebarPanel,
+            panelAfter: contentPanel,
+            withHandle: true,
+          }),
+
+          // Content Panel
+          ResizablePanel(
+            {
+              store: contentPanel,
+              group: panelsGroup,
+            },
+            [
+              View({ class: "overflow-y-auto h-full" }, [
+                View({ class: "relative p-6" }, [
+                  KeepAliveSubViews({
+                    ...props,
+                  }),
+                ]),
               ]),
-            ]),
-          ],
-        ),
-      ],
-    ),
+            ],
+          ),
+        ],
+      ),
+    ]),
   ]);
 }

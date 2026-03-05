@@ -6,6 +6,7 @@ import {
   isStyleRef,
   StyleRef,
 } from "@timeless/reactive";
+
 import { Txt } from "./text";
 
 export interface ViewProps {
@@ -15,8 +16,9 @@ export interface ViewProps {
   style?: string | Ref<string> | StyleRef;
   class?: string | Ref<string> | ClassNameRef;
   dataset?: Record<string, string>;
+  htmlFor?: string;
   "tab-index"?: number | Ref<number | undefined>;
-  onMounted?(el: any): void;
+  onMounted?(el: any): void | (() => void);
   beforeUnmounted?(): void;
   onUnmounted?(): void;
   onClick?(e: any): void;
@@ -49,6 +51,7 @@ export function View(props: ViewProps = {}, children?: any) {
     ...rest
   } = props;
   const $elm = document.createElement(as || type);
+  let onMountedCleanup: (() => void) | undefined;
 
   Object.keys(rest).forEach((k) => {
     // @ts-ignore
@@ -202,7 +205,10 @@ export function View(props: ViewProps = {}, children?: any) {
       }
       // console.log("[baseui]View - invoke onMounted", $elm);
       if (onMounted) {
-        onMounted($elm);
+        const cleanup = onMounted($elm);
+        if (typeof cleanup === "function") {
+          onMountedCleanup = cleanup;
+        }
       }
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
@@ -231,6 +237,10 @@ export function View(props: ViewProps = {}, children?: any) {
         "[View] onUnmounted called, children count:",
         _children.length,
       );
+      if (onMountedCleanup) {
+        console.log("[View] calling onMounted cleanup function");
+        onMountedCleanup();
+      }
       if (props.onUnmounted) {
         console.log("[View] calling props.onUnmounted");
         props.onUnmounted();

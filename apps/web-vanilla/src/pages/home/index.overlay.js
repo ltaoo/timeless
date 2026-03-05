@@ -348,7 +348,7 @@ export default function OverlayView() {
       ]),
       Item("Tooltip", [
         View({ class: cn(["flex gap-2"]) }, [
-          Tooltip({ content: "Top tooltip" }, [
+          Tooltip({ content: ["Top tooltip"] }, [
             Button(
               {
                 variant: "outline",
@@ -358,7 +358,7 @@ export default function OverlayView() {
               ["Top"],
             ),
           ]),
-          Tooltip({ content: "Bottom tooltip", side: "bottom" }, [
+          Tooltip({ side: "bottom", content: ["Bottom tooltip"] }, [
             Button(
               {
                 variant: "outline",
@@ -368,7 +368,7 @@ export default function OverlayView() {
               ["Bottom"],
             ),
           ]),
-          Tooltip({ content: "Left tooltip", side: "left" }, [
+          Tooltip({ side: "left", content: ["Left tooltip"] }, [
             Button(
               {
                 variant: "outline",
@@ -378,7 +378,7 @@ export default function OverlayView() {
               ["Left"],
             ),
           ]),
-          Tooltip({ content: "Right tooltip", side: "right" }, [
+          Tooltip({ side: "right", content: ["Right tooltip"] }, [
             Button(
               {
                 variant: "outline",

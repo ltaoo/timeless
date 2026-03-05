@@ -24,7 +24,7 @@
     "tailwindcss": "^4.1.18"
   },
   "dependencies": {
-    "@timeless/shadcnui": "workspace:*",
+    "@timeless/shadcn": "workspace:*",
     "@timeless/weui": "workspace:*"
   }
 }

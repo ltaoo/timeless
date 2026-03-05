@@ -67,7 +67,7 @@ type SingleFieldCoreProps<T> = FormFieldCoreProps & {
 type SingleFieldCoreState<T> = {
   symbol: string;
   label: string;
-  // name: string;
+  name: string;
   hidden: boolean;
   focus: boolean;
   error: BizError | null;
@@ -83,7 +83,7 @@ type SingleFieldCoreState<T> = {
 export class SingleFieldCore<T extends FormInputInterface<any>> {
   symbol = "SingleFieldCore" as const;
   _label: string;
-  // _name: string;
+  _name: string;
   _hidden = false;
   _error: BizError | null = null;
   _status: FieldStatus = "normal";
@@ -97,7 +97,7 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
     return {
       symbol: this.symbol,
       label: this._label,
-      // name: this._name,
+      name: this._name,
       hidden: this._hidden,
       focus: this._focus,
       error: this._error,
@@ -112,6 +112,10 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
           this._input.shape === "select" ? this._input.options : undefined,
       },
     };
+  }
+
+  get name() {
+    return this._name;
   }
 
   constructor(props: SingleFieldCoreProps<T>) {

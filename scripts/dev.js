@@ -61,6 +61,8 @@ const buildRelations = {
 
 let buildQueue = null;
 let isBuilding = false;
+let buildTimeout = null;
+const BUILD_TIMEOUT_MS = 120000; // 2 minutes timeout
 
 function copyArtifacts() {
   console.log("Copying artifacts...");
@@ -153,7 +155,22 @@ function runBuild(pkgName) {
     shell: true,
   });
 
+  // Set timeout to kill build if it takes too long
+  buildTimeout = setTimeout(() => {
+    console.error(`\nBuild timeout after ${BUILD_TIMEOUT_MS / 1000}s, killing process...`);
+    child.kill('SIGTERM');
+    setTimeout(() => {
+      if (!child.killed) {
+        child.kill('SIGKILL');
+      }
+    }, 5000);
+  }, BUILD_TIMEOUT_MS);
+
   child.on("close", (code) => {
+    if (buildTimeout) {
+      clearTimeout(buildTimeout);
+      buildTimeout = null;
+    }
     isBuilding = false;
     if (code === 0) {
       console.log("Build success.");

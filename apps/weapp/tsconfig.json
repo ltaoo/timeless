@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "types": ["node", "wechat-miniprogram"],
+    "types": ["node"],
     "paths": {
       "@timeless/kit": ["../../packages/kit/src/index.ts"],
       "@timeless/biz": ["../../packages/biz/src/index.ts"],

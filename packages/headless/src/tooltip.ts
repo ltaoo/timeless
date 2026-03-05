@@ -1,107 +1,176 @@
-import { tp, merge } from "./theme";
+import { refobj, ref, computed, isRef } from "@timeless/reactive";
+import { TooltipCore, Align, Side } from "@timeless/ui";
+
 import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
+import { Fragment } from "./fragment";
+import { Portal as NativePortal } from "./portal";
+import * as PopperPrimitive from "./popper";
+import { Presence } from "./presence";
 
-export function Tooltip(
-  props: ViewProps & {
-    content?: Record<string, any>;
-    side?: "top" | "right" | "bottom" | "left";
-    destroyOnHide?: boolean;
-    theme?: any;
-  },
-  children?: ViewChildren,
-) {
-  const {
-    content,
-    side = "top",
-    destroyOnHide = false,
-    theme: t,
-    class: cn,
-    style: st,
-  } = props || {};
-  let $tip: any = null,
-    $wrapper: any = null;
-  const OFFSET = 8;
-  const SIDE_STYLE: any = {
-    top: (r: any, tr: any) =>
-      `left:${r.left + r.width / 2 - tr.width / 2}px;top:${r.top - tr.height - OFFSET}px;`,
-    bottom: (r: any, tr: any) =>
-      `left:${r.left + r.width / 2 - tr.width / 2}px;top:${r.bottom + OFFSET}px;`,
-    left: (r: any, tr: any) =>
-      `left:${r.left - tr.width - OFFSET}px;top:${r.top + r.height / 2 - tr.height / 2}px;`,
-    right: (r: any, tr: any) =>
-      `left:${r.right + OFFSET}px;top:${r.top + r.height / 2 - tr.height / 2}px;`,
-  };
+export type TooltipProps = Partial<{
+  align: Align;
+  side: Side;
+}>;
 
-  const tipM = merge(tp(t?.tip), cn, st);
-  const tip$ = View(
-    {
-      ...tipM,
-      style: `position:fixed;display:none;${tipM.style || ""}`,
-    },
-    [
-      typeof content === "object" && content.render
-        ? content
-        : {
-            t: "text",
-            $elm: document.createTextNode(String(content || "")),
-            render() {
-              return this.$elm;
-            },
-            onMounted() {},
-            beforeUnmounted() {},
-            onUnmounted() {},
-          },
-    ],
-  );
+// 全局单例 tooltip store
+let globalTooltipStore: TooltipCore | null = null;
+let globalTooltipContentRef: ReturnType<typeof ref> | null = null;
 
-  const TRANSITION = "opacity 150ms ease,transform 150ms ease";
-  const ENTER = { opacity: "1", transform: "scale(1)" };
-  const EXIT = { opacity: "0", transform: "scale(0.96)" };
-
-  function show() {
-    if (!$wrapper) return;
-    if (!$tip) {
-      document.body.appendChild(tip$.render());
-      $tip = tip$.$elm;
-    }
-    const rect = $wrapper.getBoundingClientRect();
-    $tip.style.cssText = `position:fixed;display:block;opacity:0;${tipM.style || ""}`;
-    const tipRect = $tip.getBoundingClientRect();
-    $tip.style.cssText = `position:fixed;z-index:999;display:block;pointer-events:none;transition:${TRANSITION};${(SIDE_STYLE[side] || SIDE_STYLE.top)(rect, tipRect)}${tipM.style || ""}`;
-    Object.assign($tip.style, EXIT);
-    if (tipM.class) $tip.className = tipM.class;
-    requestAnimationFrame(() => {
-      Object.assign($tip.style, ENTER);
+function getGlobalTooltipStore() {
+  if (!globalTooltipStore) {
+    globalTooltipStore = new TooltipCore({
+      side: "top",
+      align: "center",
     });
   }
-  function hide() {
-    if (!$tip) return;
-    Object.assign($tip.style, EXIT);
-    const onEnd = () => {
-      $tip.removeEventListener("transitionend", onEnd);
-      if (destroyOnHide) {
-        if ($tip.parentNode) $tip.parentNode.removeChild($tip);
-        $tip = null;
-      } else {
-        $tip.style.display = "none";
-      }
-    };
-    $tip.addEventListener("transitionend", onEnd);
-  }
+  return globalTooltipStore;
+}
 
-  const wM = merge(tp(t?.wrapper));
+function getGlobalTooltipContentRef() {
+  if (!globalTooltipContentRef) {
+    globalTooltipContentRef = ref<ViewChildren>([]);
+  }
+  return globalTooltipContentRef;
+}
+
+export function Root(props: ViewProps, children?: ViewChildren) {
+  return Fragment(props, children);
+}
+
+export function Content(
+  props: ViewProps & { store?: TooltipCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
   return View(
     {
-      ...wM,
-      onMounted(el: any) {
-        $wrapper = el;
-        el.addEventListener("mouseenter", show);
-        el.addEventListener("mouseleave", hide);
-      },
-      onUnmounted() {
-        if ($tip && $tip.parentNode) $tip.parentNode.removeChild($tip);
-      },
+      ...rest,
     },
     children,
+  );
+}
+
+export function Trigger(
+  props: ViewProps & { content?: ViewChildren; side?: Side; align?: Align },
+  children?: ViewChildren,
+) {
+  const { content, side = "top", align = "center", ...rest } = props;
+  const store = getGlobalTooltipStore();
+  const contentRef = getGlobalTooltipContentRef();
+
+  return View(
+    {
+      ...rest,
+      onMounted($e) {
+        const $ref = $e.firstElementChild || $e;
+
+        const handleMouseEnter = () => {
+          console.log("[Tooltip] handleMouseEnter", { side, align, content });
+
+          // 更新 reference
+          store.popper.setReference(
+            {
+              $el: $ref,
+              getRect() {
+                return $ref.getBoundingClientRect();
+              },
+            },
+            { force: true },
+          );
+
+          // 更新 side 和 align
+          const placement = (side +
+            (align !== "center" ? "-" + align : "")) as any;
+          console.log("[Tooltip] setConfig placement:", placement);
+          store.popper.setConfig({ placement });
+
+          // 更新内容
+          console.log("[Tooltip] update content", content);
+          contentRef.as(content);
+
+          // 显示
+          console.log("[Tooltip] calling store.show()");
+          store.show();
+        };
+
+        const handleMouseLeave = () => {
+          store.hide();
+        };
+
+        $e.addEventListener("mouseenter", handleMouseEnter);
+        $e.addEventListener("mouseleave", handleMouseLeave);
+
+        return () => {
+          $e.removeEventListener("mouseenter", handleMouseEnter);
+          $e.removeEventListener("mouseleave", handleMouseLeave);
+        };
+      },
+      onUnmounted() {},
+    },
+    children,
+  );
+}
+
+export function Portal(
+  props: ViewProps & { store?: TooltipCore },
+  children?: ViewChildren,
+) {
+  const store = props.store || getGlobalTooltipStore();
+  const state = refobj(store.state);
+  const contentRef = getGlobalTooltipContentRef();
+  const events: any[] = [];
+
+  events.push(
+    store.onStateChange(() => {
+      state.as(store.state);
+    }),
+  );
+
+  const { class: className, style: styleProps, ...restProps } = props;
+
+  return NativePortal(
+    {
+      onMounted() {
+        console.log("[Tooltip Portal] mounted");
+      },
+      onUnmounted() {
+        console.log("[Tooltip Portal] unmounted");
+        for (const fn of events) {
+          if (typeof fn === "function") {
+            fn();
+          }
+        }
+      },
+    },
+    [
+      PopperPrimitive.Content(
+        {
+          store: store.popper,
+          onReferenceOutOfView() {
+            store.hide();
+          },
+          class: className,
+          style: computed(state, (t) => {
+            const display = t.visible ? "" : "display:none";
+            if (styleProps) {
+              return typeof styleProps === "function"
+                ? `${display};${styleProps}`
+                : `${display};${styleProps}`;
+            }
+            return display;
+          }),
+          onMounted($el) {
+            console.log("[Tooltip Content] mounted", $el);
+          },
+        },
+        (() => {
+          if (isRef(contentRef)) {
+            return contentRef.value as any as ViewChildren;
+          }
+          return children;
+        })(),
+      ),
+    ],
   );
 }

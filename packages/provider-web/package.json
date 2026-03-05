@@ -5,7 +5,7 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rollup -c rollup.config.mjs"
+    "build": "vite build"
   },
   "dependencies": {
     "@timeless/base": "workspace:*",
@@ -15,14 +15,5 @@
     "@timeless/utils": "workspace:*",
     "axios": "^1.13.2"
   },
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^29.0.0",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^12.3.0",
-    "@types/node": "^22.0.0",
-    "rollup": "^4.59.0",
-    "tslib": "^2.8.1",
-    "typescript": "^5.9.3"
-  }
+  "peerDependencies": {}
 }

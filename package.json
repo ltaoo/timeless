@@ -2,7 +2,7 @@
   "name": "timeless-monorepo",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter \"./packages/*\" --filter \"!./packages/solidjs\" --filter \"!./packages/weui\" --filter \"!./packages/vue\" -r run build",
+    "build": "pnpm --filter \"./packages/*\" --filter \"!./packages/solidjs\" --filter \"!./apps/*\" --filter \"!./packages/weui\" --filter \"!./packages/provider-tauri\" --filter \"!./packages/provider-weapp\" --filter \"!./packages/vue\" -r run build",
     "build:whole": "pnpm --filter \"./packages/*\" --filter \"!./packages/solidjs\" --filter \"!./packages/vue\" -r run build -- --whole",
     "build:lite": "pnpm --filter \"./packages/vanillalite\" -r run build",
     "dev": "node scripts/dev.js",
@@ -13,7 +13,13 @@
   "devDependencies": {
     "typescript": "^5.9.3",
     "prettier": "^3.2.5",
-    "eslint": "^9.1.1"
+    "eslint": "^9.1.1",
+    "vite": "^8.0.0-beta.16",
+    "vite-plugin-dts": "^4.0.0",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite-plugin-solid": "^2.10.0",
+    "terser": "^5.31.0",
+    "@types/node": "^25.0.9"
   },
   "workspaces": [
     "packages/*",

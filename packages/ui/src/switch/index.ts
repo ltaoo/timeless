@@ -14,6 +14,9 @@ export function SwitchCore(props: SwitchCoreProps) {
     get value() {
       return _value;
     },
+    get checked() {
+      return _value;
+    },
     get disabled() {
       return _disabled;
     },

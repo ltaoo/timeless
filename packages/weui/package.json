@@ -1,8 +1,8 @@
 {
   "name": "@timeless/weui",
   "version": "1.0.0",
-  "main": "dist/weui.umd.min.js",
-  "module": "src/index.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {

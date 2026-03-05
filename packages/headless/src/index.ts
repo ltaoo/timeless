@@ -1,11 +1,4 @@
-import { LazyView } from "./lazy-view";
-import {
-  isElement,
-  isLazyElement,
-  TimelessComponent,
-  TimelessElement,
-  TimelessNormalComponent,
-} from "./view";
+import { isElement, TimelessElement } from "./view";
 
 console.log("headless v0.1.2");
 
@@ -25,7 +18,7 @@ export * from "./text";
 export * from "./html";
 export * from "./portal";
 export * from "./presence";
-export * from "./popper";
+export * as PopperPrimitive from "./popper";
 export * from "./transition";
 
 // content
@@ -59,56 +52,18 @@ export * as CheckboxPrimitive from "./checkbox";
 export * from "./slider";
 export * from "./toggle";
 export * as FieldPrimitive from "./field";
-export * from "./field";
 
 // overlay
 export * as PopoverPrimitive from "./popover";
-export { PopoverProps } from "./popover";
+export * as TooltipPrimitive from "./tooltip";
 export * from "./sheet";
 export * from "./dialog";
-export * from "./tooltip";
 export * from "./toast";
 
 export * from "./keep-alive-sub-views";
 export * from "./sub-views";
 
 // other
-export * from "./theme";
+// export * from "./theme";
 export * from "./lazy";
-
-export function render(elm: TimelessElement, $root: HTMLDivElement) {
-  if (!$root) {
-    console.error("[Render] Root element not found");
-    return;
-  }
-  if (!elm) {
-    console.error("[Render] Element is null");
-    return;
-  }
-  if (isElement(elm)) {
-    const $content = elm.render();
-    if (!$content) {
-      console.error("[Render] Element render return null");
-      return;
-    }
-    $root.appendChild($content);
-    return;
-  }
-  //   if (isLazyElement(elm)) {
-  //     elm.then((m) => {
-  //       const _elm = m.default();
-  //       if (!isElement(_elm)) {
-  //         console.error("[Render] Lazy component render return null");
-  //         return;
-  //       }
-  //       const $content = _elm.render();
-  //       if (!$content) {
-  //         console.error("[Render] Lazy component render return null");
-  //         return;
-  //       }
-  //       $root.appendChild($content);
-  //     });
-  //     return;
-  //   }
-  console.error("[Render] Root Element can't be lazy element");
-}
+export * from "./render";

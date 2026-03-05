@@ -1,12 +1,11 @@
 import { refobj } from "@timeless/reactive";
-import { PopoverCore } from "@timeless/ui";
+import { PopoverCore, Align, Side } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "./view";
 import { Fragment } from "./fragment";
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
-import { Align, Side } from "@timeless/ui/popper";
 
 export type PopoverProps = Partial<{
   align: Align;

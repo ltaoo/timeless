@@ -2,6 +2,7 @@ import { VideoPlayerCore } from "@timeless/ui";
 
 export function connect(
   store: VideoPlayerCore,
+  // @ts-ignore
   context: WechatMiniprogram.VideoContext,
 ) {
   store.bindAbstractNode({

@@ -1,4 +1,20 @@
 console.log("ui.version 0.1.3");
+import {
+  Result as _Result,
+  BizError as _BizError,
+  base as _base,
+  BaseDomain as _BaseDomain,
+} from "@timeless/base";
+
+export const Result = _Result;
+export const BizError = _BizError;
+export const BaseDomain = _BaseDomain;
+export const base = {
+  BaseDomain,
+  Result,
+  BizError,
+  base: _base,
+};
 
 export * from "./menu"; // Export first
 export * from "./menu/item";
@@ -47,3 +63,4 @@ export * from "./form/image-upload";
 export * from "./form/field";
 export * from "./step";
 export * from "./resizable-panels";
+export * from "./tooltip";

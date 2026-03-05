@@ -1,13 +1,16 @@
 import { provide_app } from "@timeless/provider-weapp";
 
+// @ts-ignore
 import { app } from "./store/index";
 
 /// <reference path="./node_modules/@types/wechat-miniprogram/index.d.ts" />
 
 interface IAppOption {
   globalData: {
+    // @ts-ignore
     userInfo?: WechatMiniprogram.UserInfo;
   };
+  // @ts-ignore
   userInfoReadyCallback?: WechatMiniprogram.GetUserInfoSuccessCallback;
 }
 

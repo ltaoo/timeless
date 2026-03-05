@@ -1,0 +1,66 @@
+import { resolve } from "path";
+import { defineConfig } from "vite";
+import pkg from "./package.json";
+import dts from "vite-plugin-dts";
+import { buildLibName } from "../../vite.config.base";
+
+const name = "timeless.shadcn";
+
+export default defineConfig({
+  css: {
+    postcss: "./postcss.config.js",
+    modules: false,
+  },
+  build: {
+    lib: {
+      entry: resolve(__dirname, "src/index.ts"),
+      formats: ["es", "cjs", "umd"],
+      fileName: (format) => {
+        if (format === "es") {
+          return `index.esm.js`;
+        }
+        if (format === "umd") {
+          return `${name}.umd.min.js`;
+        }
+        return "index.js";
+      },
+      name: buildLibName(name),
+    },
+    sourcemap: true,
+    rollupOptions: {
+      external: [
+        "@timeless/reactive",
+        "@timeless/headless",
+        "@timeless/kit",
+        "@timeless/ui",
+      ],
+      output: {
+        globals: {
+          "@timeless/reactive": "Timeless.reactive",
+          "@timeless/headless": "Timeless.headless",
+          "@timeless/kit": "Timeless.kit",
+          "@timeless/ui": "Timeless.ui",
+        },
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name === "style.css") {
+            return "timeless.shadcn.css";
+          }
+          return assetInfo.name || "assets/[name]-[hash][extname]";
+        },
+        footer: `if (typeof window !== "undefined") {
+        window.Timeless = window.Timeless || {};
+        if (window.Timeless.shadcn) {
+          Object.assign(window.Timeless, window.Timeless.shadcn);
+          Object.assign(window, window.Timeless);
+        }
+      }`,
+      },
+    },
+  },
+  plugins: [
+    dts({
+      insertTypesEntry: true,
+      rollupTypes: true,
+    }),
+  ],
+});

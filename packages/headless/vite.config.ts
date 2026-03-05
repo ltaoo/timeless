@@ -1,0 +1,92 @@
+import { resolve } from "path";
+import { defineConfig } from "vite";
+import fs from "fs";
+import dtsPlugin from "vite-plugin-dts";
+
+import pkg from "./package.json";
+import { buildLibName } from "../../vite.config.base";
+
+const isWhole = process.argv.includes("--whole");
+
+// 获取所有组件目录
+const components = fs.readdirSync(resolve(__dirname, "src")).filter((name) => {
+  const componentPath = resolve(__dirname, "src", name);
+  return (
+    fs.statSync(componentPath).isDirectory() &&
+    fs.existsSync(resolve(componentPath, "index.ts"))
+  );
+});
+
+const name = "timeless.headless";
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      "@": resolve(__dirname, "src"),
+    },
+  },
+  build: {
+    lib: {
+      entry: isWhole
+        ? components.reduce(
+            (entries, name) => {
+              // @ts-ignore
+              entries[name] = resolve(__dirname, `src/${name}/index.ts`);
+              return entries;
+            },
+            { index: resolve(__dirname, "src/index.ts") },
+          )
+        : resolve(__dirname, "src/index.ts"),
+      formats: ["es", "cjs", "umd"],
+      fileName: (format, entryName) => {
+        if (entryName === "index") {
+          if (format === "es") {
+            return `index.esm.js`;
+          }
+          if (format === "cjs") {
+            return "index.js";
+          }
+          if (format === "umd") {
+            return `${name}.umd.min.js`;
+          }
+        }
+        if (format === "es") {
+          return `${entryName}/index.esm.js`;
+        }
+        if (format === "cjs") {
+          return `${entryName}/index.js`;
+        }
+        return `${entryName}/index.${format}.js`;
+      },
+      name: buildLibName(name),
+    },
+    minify: false,
+    sourcemap: true,
+    rollupOptions: {
+      external: [
+        ...Object.keys(pkg.dependencies || {}),
+        ...Object.keys(pkg.peerDependencies || {}),
+      ],
+      output: {
+        globals: {
+          "@timeless/reactive": "Timeless.reactive",
+          "@timeless/kit": "Timeless",
+          "@timeless/ui": "Timeless.ui",
+        },
+        footer: `if (typeof window !== "undefined") {
+        window.Timeless = window.Timeless || {};
+        if (window.Timeless.headless) {
+          Object.assign(window.Timeless, window.Timeless.headless);
+          Object.assign(window, window.Timeless);
+        }
+      }`,
+      },
+    },
+  },
+  plugins: [
+    dtsPlugin({
+      insertTypesEntry: true,
+      rollupTypes: true,
+    }),
+  ],
+});

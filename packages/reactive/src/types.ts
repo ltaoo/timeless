@@ -1,8 +1,8 @@
-export interface Subscriber {
+export type Subscriber = {
   onChange: (v: any) => void;
   onPatch?: (c: any) => void;
   ignore?: boolean;
-}
+};
 
 export type Ref<T> = {
   __is_ref: true;
@@ -11,20 +11,20 @@ export type Ref<T> = {
   value: T;
 };
 
-export interface ClassNameRef {
+export type ClassNameRef = {
   __cn_ref: true;
   _subscribe(ctx: Subscriber): void;
   del(v: string): void;
   add(v: string): void;
   append(c: string): void;
   toString(): string;
-}
+};
 
-export interface StyleRef {
+export type StyleRef = {
   __style_ref: true;
   _subscribe(ctx: Subscriber): void;
   toString(): string;
-}
+};
 
 export function isRef(v: any): v is Ref<any> {
   if (v === null) {

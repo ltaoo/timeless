@@ -2,13 +2,13 @@ import { BaseDomain } from "@timeless/base";
 
 export class ToggleCore extends BaseDomain<any> {
   state = {
-    boolean: false,
+    checked: false,
   };
 
   constructor(props: any) {
     super(props);
     this.state = {
-      boolean: props.defaultValue || false,
+      checked: props.defaultValue || false,
     };
   }
 
@@ -17,7 +17,7 @@ export class ToggleCore extends BaseDomain<any> {
   }
 
   toggle() {
-    this.state.boolean = !this.state.boolean;
+    this.state.checked = !this.state.checked;
     this.emit("stateChange" as any, this.state);
   }
 }

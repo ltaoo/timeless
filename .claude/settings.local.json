@@ -8,7 +8,16 @@
       "Bash(npm run build:*)",
       "Bash(find:*)",
       "Bash(pnpm vanilla:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(kill:*)",
+      "Bash(pnpm:*)",
+      "Bash(node:*)",
+      "Bash(gtimeout 30:*)",
+      "Bash(xargs:*)",
+      "Bash(npm view:*)",
+      "Bash(git diff:*)",
+      "Bash(do echo:*)",
+      "Bash(read file:*)"
     ]
   }
 }
