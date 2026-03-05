@@ -50,145 +50,123 @@ export function View(props: ViewProps = {}, children?: any) {
     onMouseLeave,
     ...rest
   } = props;
-  const $elm = document.createElement(as || type);
   let onMountedCleanup: (() => void) | undefined;
-
-  Object.keys(rest).forEach((k) => {
-    // @ts-ignore
-    const vv = rest[k];
-    if (vv) {
-      if (isRef(vv)) {
-        vv._subscribe({
-          onChange(v) {
-            $elm.setAttribute(k, v);
-          },
-        });
-        $elm.setAttribute(k, vv.value);
-      } else if (typeof vv === "string" || typeof vv === "number") {
-        $elm.setAttribute(k, String(vv));
-      }
-    }
-  });
-  Object.keys(dataset).forEach((k) => {
-    if (dataset && dataset[k]) {
-      $elm.setAttribute(`data-${k}`, dataset[k]);
-    }
-  });
-
-  if (cls) {
-    if (typeof cls === "string") {
-      $elm.className = cls;
-    } else if (isRef(cls)) {
-      cls._subscribe({
-        onChange(v) {
-          $elm.className = v;
-        },
-      });
-      $elm.className = cls.value;
-    } else if (isClassName(cls)) {
-      cls._subscribe({
-        onChange(v: string[]) {
-          // console.log("[]view the className is changed", v);
-          $elm.className = v.join(" ");
-        },
-      });
-      $elm.className = cls.toString();
-    }
-  }
-  // if (tmpid) {
-  //   if (isRef(tmpid)) {
-  //     $elm.id = tmpid.value;
-  //   } else {
-  //     $elm.id = tmpid;
-  //   }
-  // }
-
-  if (style) {
-    if (typeof style === "string") {
-      $elm.style.cssText = style;
-    } else if (isRef(style)) {
-      $elm.style.cssText = style.value;
-      style._subscribe({
-        onChange(v: any) {
-          $elm.style.cssText = v;
-        },
-      });
-    } else if (isStyleRef(style)) {
-      style._subscribe({
-        onChange(v: string) {
-          $elm.style.cssText = v;
-        },
-      });
-      $elm.style.cssText = style.toString();
-    }
-  }
-  if (onClick) {
-    // console.log("[baseui]View - register click", props.class, props.dataset);
-    $elm.addEventListener("click", function (event: Event) {
-      // console.log("[baseui]View - click", event.target, props.dataset);
-      if (onClick) {
-        onClick(event);
-      }
-    });
-  }
-  if (onPointerDown) {
-    $elm.addEventListener("pointerdown", function (event: Event) {
-      if (onPointerDown) onPointerDown(event);
-    });
-  }
-  if (onFocus) {
-    $elm.addEventListener("focus", function (event: Event) {
-      onFocus(event);
-    });
-  }
-  if (onBlur) {
-    $elm.addEventListener("blur", function (event: Event) {
-      if (onBlur) onBlur(event);
-    });
-  }
-  if (onKeyDown) {
-    $elm.addEventListener("keydown", function (event: KeyboardEvent) {
-      if (onKeyDown) onKeyDown(event);
-    });
-  }
-  if (onMouseEnter) {
-    $elm.addEventListener("mouseenter", function (event: MouseEvent) {
-      onMouseEnter(event);
-    });
-  }
-  if (onMouseLeave) {
-    $elm.addEventListener("mouseleave", function (event: MouseEvent) {
-      onMouseLeave(event);
-    });
-  }
-
+  const $elm = document.createElement(as || type);
   let _children = children ?? [];
   if (!Array.isArray(_children)) {
     _children = [_children];
   }
 
-  for (let i = 0; i < _children.length; i++) {
-    const child = _children[i];
-    if (isRef(child)) {
-      _children[i] = Txt(child);
-    }
-  }
-
   return {
     t: "view",
     $elm,
-    // class$,
-    // onMounted() {
-
-    // },
-    append(node: any) {
-      _children.push(node);
-    },
-    setContent(html: string) {
-      $elm.innerHTML = html;
-    },
     render() {
-      // Clear existing content before re-rendering to avoid duplicates
+      for (let i = 0; i < _children.length; i++) {
+        const child = _children[i];
+        if (isRef(child)) {
+          _children[i] = Txt(child);
+        }
+      }
+
+      Object.keys(rest).forEach((k) => {
+        // @ts-ignore
+        const vv = rest[k];
+        if (vv) {
+          if (isRef(vv)) {
+            vv._subscribe({
+              onChange(v) {
+                $elm.setAttribute(k, v);
+              },
+            });
+            $elm.setAttribute(k, vv.value);
+          } else if (typeof vv === "string" || typeof vv === "number") {
+            $elm.setAttribute(k, String(vv));
+          }
+        }
+      });
+      Object.keys(dataset).forEach((k) => {
+        if (dataset && dataset[k]) {
+          $elm.setAttribute(`data-${k}`, dataset[k]);
+        }
+      });
+
+      if (cls) {
+        if (typeof cls === "string") {
+          $elm.className = cls;
+        } else if (isRef(cls)) {
+          cls._subscribe({
+            onChange(v) {
+              $elm.className = v;
+            },
+          });
+          $elm.className = cls.value;
+        } else if (isClassName(cls)) {
+          cls._subscribe({
+            onChange(v: string[]) {
+              $elm.className = v.join(" ");
+            },
+          });
+          $elm.className = cls.toString();
+        }
+      }
+
+      if (style) {
+        if (typeof style === "string") {
+          $elm.style.cssText = style;
+        } else if (isRef(style)) {
+          $elm.style.cssText = style.value;
+          style._subscribe({
+            onChange(v: any) {
+              $elm.style.cssText = v;
+            },
+          });
+        } else if (isStyleRef(style)) {
+          style._subscribe({
+            onChange(v: string) {
+              $elm.style.cssText = v;
+            },
+          });
+          $elm.style.cssText = style.toString();
+        }
+      }
+      if (onClick) {
+        $elm.addEventListener("click", function (event: Event) {
+          if (onClick) {
+            onClick(event);
+          }
+        });
+      }
+      if (onPointerDown) {
+        $elm.addEventListener("pointerdown", function (event: Event) {
+          if (onPointerDown) onPointerDown(event);
+        });
+      }
+      if (onFocus) {
+        $elm.addEventListener("focus", function (event: Event) {
+          onFocus(event);
+        });
+      }
+      if (onBlur) {
+        $elm.addEventListener("blur", function (event: Event) {
+          if (onBlur) onBlur(event);
+        });
+      }
+      if (onKeyDown) {
+        $elm.addEventListener("keydown", function (event: KeyboardEvent) {
+          if (onKeyDown) onKeyDown(event);
+        });
+      }
+      if (onMouseEnter) {
+        $elm.addEventListener("mouseenter", function (event: MouseEvent) {
+          onMouseEnter(event);
+        });
+      }
+      if (onMouseLeave) {
+        $elm.addEventListener("mouseleave", function (event: MouseEvent) {
+          onMouseLeave(event);
+        });
+      }
+
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
         if (!node) continue;
@@ -203,7 +181,6 @@ export function View(props: ViewProps = {}, children?: any) {
           }
         }
       }
-      // console.log("[baseui]View - invoke onMounted", $elm);
       if (onMounted) {
         const cleanup = onMounted($elm);
         if (typeof cleanup === "function") {
@@ -218,7 +195,6 @@ export function View(props: ViewProps = {}, children?: any) {
           }
         }
       }
-      // $elm.className = class$.toString();
       return $elm;
     },
     beforeUnmounted() {

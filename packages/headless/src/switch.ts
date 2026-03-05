@@ -1,6 +1,13 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { ViewProps, ViewChildren, isElement } from "./view";
+import {
+  ViewProps,
+  ViewChildren,
+  isElement,
+  TimelessElement,
+  TimelessComponent,
+  TimelessNormalComponent,
+} from "./view";
 
 export function Switch(
   props: {
@@ -45,7 +52,24 @@ export function Switch(
   }
 
   function get_target_children(match: any) {
-    return match ? normalize(match.children) : _fallback;
+    if (!match) return _fallback;
+    let children = match.children;
+
+    // 如果 children 是数组，检查数组内的元素
+    if (Array.isArray(children)) {
+      // 展开数组中的函数
+      children = children.map((child: any) =>
+        typeof child === "function" ? child() : child,
+      );
+      return normalize(children);
+    }
+
+    // 如果 children 是函数，调用它来获取实际的子元素
+    if (typeof children === "function") {
+      return normalize(children());
+    }
+
+    return normalize(children);
   }
 
   function unmount(removeDom = false) {
@@ -171,7 +195,10 @@ export function Switch(
   };
 }
 
-export function Match(value: any, children?: ViewChildren) {
+export function Match<T = any>(
+  value: any,
+  children: ViewChildren | (() => TimelessElement)[],
+) {
   return {
     t: "match",
     value,
@@ -181,5 +208,15 @@ export function Match(value: any, children?: ViewChildren) {
     render() {
       return null;
     },
+  };
+}
+
+// 创建延迟执行的组件包装器
+export function h<T extends TimelessNormalComponent>(
+  component: T,
+  props: Parameters<T>[0],
+) {
+  return () => {
+    return component(props);
   };
 }

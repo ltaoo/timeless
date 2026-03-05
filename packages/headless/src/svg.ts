@@ -17,79 +17,6 @@ export function SVG(props: ViewProps = {}, children?: any) {
   } = props;
   const $elm = document.createElementNS("http://www.w3.org/2000/svg", type);
 
-  Object.keys(rest).forEach((k) => {
-    // @ts-ignore
-    const vv = rest[k];
-    if (vv) {
-      if (isRef(vv)) {
-        vv._subscribe({
-          onChange(v) {
-            $elm.setAttribute(k, String(v));
-          },
-        });
-        $elm.setAttribute(k, String(vv.value));
-      } else if (typeof vv === "string" || typeof vv === "number") {
-        $elm.setAttribute(k, String(vv));
-      }
-    }
-  });
-  Object.keys(dataset).forEach((k) => {
-    if (dataset && dataset[k]) {
-      $elm.setAttribute(`data-${k}`, dataset[k]);
-    }
-  });
-
-  if (cls) {
-    if (typeof cls === "string") {
-      $elm.setAttribute("class", cls);
-    } else if (isRef(cls)) {
-      cls._subscribe({
-        onChange(v) {
-          $elm.setAttribute("class", v);
-        },
-      });
-      $elm.setAttribute("class", cls.value);
-    } else if (isClassName(cls)) {
-      cls._subscribe({
-        onChange(v: string[]) {
-          $elm.setAttribute("class", v.join(" "));
-        },
-      });
-      $elm.setAttribute("class", cls.toString());
-    }
-  }
-
-  if (style) {
-    if (typeof style === "string") {
-      $elm.style.cssText = style;
-    }
-    if (isRef(style)) {
-      $elm.style.cssText = style.value;
-      style._subscribe({
-        onChange(v: any) {
-          $elm.style.cssText = v;
-        },
-      });
-    }
-  }
-  if (onClick) {
-    $elm.addEventListener("click", function (event: Event) {
-      if (onClick) {
-        onClick(event);
-      }
-    });
-  }
-  if (onFocus) {
-    $elm.addEventListener("focus", function (event: Event) {
-      if (onFocus) onFocus(event);
-    });
-  }
-  if (onBlur) {
-    $elm.addEventListener("blur", function (event: Event) {
-      if (onBlur) onBlur(event);
-    });
-  }
-
   let _children = children ?? [];
   if (!Array.isArray(_children)) {
     _children = [_children];
@@ -127,6 +54,79 @@ export function SVG(props: ViewProps = {}, children?: any) {
       $elm.innerHTML = html;
     },
     render() {
+      Object.keys(rest).forEach((k) => {
+        // @ts-ignore
+        const vv = rest[k];
+        if (vv) {
+          if (isRef(vv)) {
+            vv._subscribe({
+              onChange(v) {
+                $elm.setAttribute(k, String(v));
+              },
+            });
+            $elm.setAttribute(k, String(vv.value));
+          } else if (typeof vv === "string" || typeof vv === "number") {
+            $elm.setAttribute(k, String(vv));
+          }
+        }
+      });
+      Object.keys(dataset).forEach((k) => {
+        if (dataset && dataset[k]) {
+          $elm.setAttribute(`data-${k}`, dataset[k]);
+        }
+      });
+
+      if (cls) {
+        if (typeof cls === "string") {
+          $elm.setAttribute("class", cls);
+        } else if (isRef(cls)) {
+          cls._subscribe({
+            onChange(v) {
+              $elm.setAttribute("class", v);
+            },
+          });
+          $elm.setAttribute("class", cls.value);
+        } else if (isClassName(cls)) {
+          cls._subscribe({
+            onChange(v: string[]) {
+              $elm.setAttribute("class", v.join(" "));
+            },
+          });
+          $elm.setAttribute("class", cls.toString());
+        }
+      }
+
+      if (style) {
+        if (typeof style === "string") {
+          $elm.style.cssText = style;
+        }
+        if (isRef(style)) {
+          $elm.style.cssText = style.value;
+          style._subscribe({
+            onChange(v: any) {
+              $elm.style.cssText = v;
+            },
+          });
+        }
+      }
+      if (onClick) {
+        $elm.addEventListener("click", function (event: Event) {
+          if (onClick) {
+            onClick(event);
+          }
+        });
+      }
+      if (onFocus) {
+        $elm.addEventListener("focus", function (event: Event) {
+          if (onFocus) onFocus(event);
+        });
+      }
+      if (onBlur) {
+        $elm.addEventListener("blur", function (event: Event) {
+          if (onBlur) onBlur(event);
+        });
+      }
+
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
         if (!node) continue;

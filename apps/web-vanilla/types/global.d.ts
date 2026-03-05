@@ -35,6 +35,11 @@ declare const computed: typeof import("@timeless/reactive").computed;
 declare const isRef: typeof import("@timeless/reactive").isRef;
 declare const cn: typeof import("@timeless/reactive").cn;
 
+declare const lazy: typeof import("@timeless/headless").lazy;
+declare const h: typeof import("@timeless/headless").h;
+
+declare const buildRoutes: typeof import("@timeless/kit").buildRoutes;
+declare const render: typeof import("@timeless/kit").render;
 declare const Show: typeof import("@timeless/headless").Show;
 declare const For: typeof import("@timeless/headless").For;
 declare const Match: typeof import("@timeless/headless").Match;
@@ -44,9 +49,6 @@ declare const Txt: typeof import("@timeless/headless").Txt;
 declare const DangerouslyInnerHTML: typeof import("@timeless/headless").DangerouslyInnerHTML;
 declare const RouteSubViews: typeof import("@timeless/headless").RouteSubViews;
 declare const KeepAliveSubViews: typeof import("@timeless/headless").KeepAliveSubViews;
-declare const lazy: typeof import("@timeless/headless").lazy;
-declare const buildRoutes: typeof import("@timeless/kit").buildRoutes;
-declare const render: typeof import("@timeless/kit").render;
 
 declare const Slider: typeof import("@timeless/shadcnui").Slider;
 declare const Slide: typeof import("@timeless/shadcnui").Slider;

@@ -1,6 +1,6 @@
 import { isElement, TimelessElement } from "./view";
 
-console.log("headless v0.1.2");
+console.log("headless v0.2.0");
 
 export * from "@timeless/reactive";
 

@@ -129,7 +129,7 @@
   <script src="../../packages/vanillalite/dist/timeless.vanillalite.umd.min.js"></script>
   <div id="container"></div>
   <script>
-    const { ref, refarr, refobj, computed, cn, sn, For, Show, Switch, Match, View, Fragment, Portal, render } = Timeless;
+    const { ref, refarr, refobj, computed, cn, sn, h, For, Show, Switch, Match, View, Fragment, Portal, render } = Timeless;
 
     function SubContent(props) {
       const visible_ = ref(false);
@@ -180,10 +180,10 @@
           each: items_,
           render(item) {
             return Switch({ when: computed(item, (t) => item.value) }, [
-              Match(1, [CustomView({ value: 'A' })]),
-              Match(2, [CustomView({ value: 'B' })]),
-              Match(3, [CustomView({ value: 'C' })]),
-              Match(4, [CustomView({ value: 'D' })]),
+              Match(1, [h(CustomView, { value: 'A' })]),
+              Match(2, [h(CustomView, { value: 'B' })]),
+              Match(3, [h(CustomView, { value: 'C' })]),
+              Match(4, [h(CustomView, { value: 'D' })]),
             ]);
           },
         }),

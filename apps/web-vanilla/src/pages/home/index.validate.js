@@ -18,29 +18,27 @@ function ObjectFieldRender(props) {
       }
       const fid = `field-${name}`;
       return Field({ store: field$ }, [
-        field$.input.shape,
         Switch(
           {
             when: computed(field$, (t) => {
-              console.log('[DEBUG] field name:', name, 'shape:', t.input.shape, 'store:', t.input);
               return t.input.shape;
             }),
           },
           [
             Match("select", [
-              Select({
+              h(Select, {
                 id: fid,
                 store: field$.input,
               }),
             ]),
             Match("input", [
-              Input({
+              h(Input, {
                 id: fid,
                 store: field$.input,
               }),
             ]),
             Match("checkbox", [
-              Checkbox({
+              h(Checkbox, {
                 store: field$.input,
               }),
             ]),

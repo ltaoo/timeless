@@ -12,6 +12,7 @@ import {
   Portal,
   lazy,
   render,
+  h,
 } from "@timeless/headless";
 
 export * from "@timeless/reactive";
@@ -30,4 +31,5 @@ export {
   Portal,
   lazy,
   render,
+  h,
 };

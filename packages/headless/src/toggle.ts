@@ -14,12 +14,6 @@ export function Toggle(
 
   const state = ref(store.state);
   const events: any[] = [];
-  if (store.onStateChange)
-    events.push(
-      store.onStateChange(() => {
-        state.as(store.state);
-      }),
-    );
 
   // 创建隐藏的 input 用于可访问性
   const hiddenInput = View(
@@ -53,6 +47,15 @@ export function Toggle(
         // 如果点击的是隐藏的 input，不要再次 toggle
         if (e.target.tagName === "INPUT") return;
         // store.toggle();
+      },
+      onMounted() {
+        if (store.onStateChange)
+          events.push(
+            store.onStateChange(() => {
+              state.as(store.state);
+            }),
+          );
+        if (props.onMounted) props.onMounted(this);
       },
       onUnmounted() {
         for (const fn of events) if (typeof fn === "function") fn();

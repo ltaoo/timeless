@@ -94,6 +94,7 @@ export default [
         KeepAliveSubViews: "readonly",
         BoltOutlined: "readonly",
         lazy: "readonly",
+        h: "readonly",
         buildRoutes: "readonly",
         render: "readonly",
       },
