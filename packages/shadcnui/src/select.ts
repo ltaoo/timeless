@@ -9,7 +9,9 @@ import {
 import { SelectCore } from "@timeless/ui";
 import { CheckOutlined, ChevronDownOutlined } from "@timeless/icons";
 
-export function Select(props: ViewProps & { store: SelectCore<any>; id?: string }) {
+export function Select(
+  props: ViewProps & { store: SelectCore<any>; id?: string },
+) {
   const { store, id, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -22,8 +24,23 @@ export function Select(props: ViewProps & { store: SelectCore<any>; id?: string 
       {
         store,
         id,
-        class:
-          "flex h-10 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:border-zinc-800 dark:bg-zinc-950 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus:ring-zinc-300",
+        class: computed(state_, (d) => {
+          const baseClass =
+            "flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus:ring-zinc-300";
+          const focusedClass = d.open
+            ? "border-zinc-950 bg-zinc-50 dark:border-zinc-300 dark:bg-zinc-900"
+            : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950";
+          return `${baseClass} ${focusedClass}`;
+        }),
+        onMounted(el) {
+          el.addEventListener("mousedown", (e) => {
+            e.stopPropagation();
+          });
+        },
+        // onmousedown: (e: MouseEvent) => {
+        //   // 阻止事件冒泡到 label，避免 label 的 htmlFor 机制触发额外的 click
+        //   e.stopPropagation();
+        // },
       },
       [
         SelectPrimitive.Value({
@@ -72,7 +89,9 @@ export function Select(props: ViewProps & { store: SelectCore<any>; id?: string 
                     store,
                     value: option.value,
                     class: computed(state_, (d) => {
-                      const opt = d.options.find((o) => o.value === option.value);
+                      const opt = d.options.find(
+                        (o) => o.value === option.value,
+                      );
                       return [
                         "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
                         opt?.focused

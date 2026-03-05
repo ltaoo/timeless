@@ -20,34 +20,35 @@ export function Switch(
   let _prev_value: any = undefined;
 
   // Normalize children helper
-  const normalize = (c: any) => {
+  function normalize(c: any) {
     if (Array.isArray(c)) return c;
     return [c];
-  };
+  }
 
   const _fallback = normalize(fallback);
 
-  const get_active_match = () => {
+  function get_active_match() {
     if (!children) {
       return null;
     }
     const when_value = isRef(when) ? when.value : when;
-
+    console.log("[Switch] when_value:", when_value, "children:", children);
     for (const child of children) {
       if (isElement(child) && child.t === "match") {
         if (child.value === when_value) {
+          console.log("[Switch] MATCHED!");
           return child;
         }
       }
     }
     return null;
-  };
+  }
 
-  const get_target_children = (match: any) => {
+  function get_target_children(match: any) {
     return match ? normalize(match.children) : _fallback;
-  };
+  }
 
-  const unmount = (removeDom = false) => {
+  function unmount(removeDom = false) {
     // Lifecycle
     for (const child of _currentChildren) {
       if (isElement(child) && child.onUnmounted) {
@@ -65,9 +66,9 @@ export function Switch(
     }
     _currentNodes = [];
     _currentChildren = [];
-  };
+  }
 
-  const mount = (targetChildren: any[], parent?: Node, before?: Node) => {
+  function mount(targetChildren: any[], parent?: Node, before?: Node) {
     const fragment = document.createDocumentFragment();
     const newNodes: Node[] = [];
     const newInstances: any[] = [];
@@ -108,9 +109,9 @@ export function Switch(
     }
 
     return fragment;
-  };
+  }
 
-  const update = () => {
+  function update() {
     const whenValue = isRef(when) ? when.value : when;
     if (whenValue === _prev_value) return;
     _prev_value = whenValue;
@@ -121,7 +122,7 @@ export function Switch(
     if (target.length > 0 && anchor.parentNode) {
       mount(target, anchor.parentNode, anchor);
     }
-  };
+  }
 
   if (isRef(when)) {
     when._subscribe({
@@ -170,12 +171,7 @@ export function Switch(
   };
 }
 
-export function Match(
-  props: ViewProps & { value: any },
-  children?: ViewChildren,
-) {
-  const { value, ...rest } = props;
-
+export function Match(value: any, children?: ViewChildren) {
   return {
     t: "match",
     value,

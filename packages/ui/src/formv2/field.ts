@@ -27,7 +27,6 @@ type FieldRuleCore = Partial<
 >;
 type FormFieldCoreProps = {
   label?: string;
-  /** @deprecated */
   name?: string;
   rules?: FieldRuleCore[];
 };
@@ -119,10 +118,10 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
   }
 
   constructor(props: SingleFieldCoreProps<T>) {
-    const { label = "", rules = [], input, hidden = false } = props;
+    const { label = "", name, rules = [], input, hidden = false } = props;
 
     this._label = label;
-    // this._name = name;
+    this._name = name;
     this._input = input;
     this._rules = rules;
     this._hidden = hidden;

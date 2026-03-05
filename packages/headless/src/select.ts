@@ -29,7 +29,7 @@ export function Root(
 
 export function Trigger(
   props: ViewProps & { store: SelectCore<any>; id?: string },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, id, ...rest } = props;
   const state_ = refobj(store.state);
@@ -40,26 +40,45 @@ export function Trigger(
 
   const events: any[] = [];
 
+  store.onFocus(() => {
+    if (store.open) {
+      store.hide();
+      return;
+    }
+    store.presence.show();
+    store.show();
+  });
+  store.onBlur(() => {
+    store.hide();
+  });
+
   // 创建隐藏的 input 用于可访问性
-  const hiddenInput = View(
+  const _input$ = View(
     {
       as: "input",
       type: "text",
       id,
       style:
         "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
-      onClick(e) {
-        e.stopPropagation();
-        if (store.disabled) {
+      onFocus() {
+        if (store.open) {
           return;
         }
-        store.layer.pointerDown();
-        if (store.open) {
-          store.hide();
-        } else {
-          store.presence.show();
-          store.show();
-        }
+        store.presence.show();
+        store.show();
+      },
+      onClick(e) {
+        e.stopPropagation();
+        // if (store.disabled) {
+        //   return;
+        // }
+        // store.layer.pointerDown();
+        // if (store.open) {
+        //   store.hide();
+        // } else {
+        //   store.presence.show();
+        //   store.show();
+        // }
       },
       onMounted(el) {
         el.value = store.state.value || "";
@@ -107,14 +126,13 @@ export function Trigger(
           if (store.disabled) {
             return;
           }
-          // 在点击时更新 reference，确保获取最新尺寸
-
           store.layer.pointerDown();
           if (store.open) {
-            store.hide();
+            props.store.blur();
           } else {
-            store.presence.show();
-            store.show();
+            props.store.focus();
+            // store.presence.show();
+            // store.show();
           }
         });
 
@@ -123,11 +141,15 @@ export function Trigger(
         }
       },
       onUnmounted() {
-        for (const fn of events) if (typeof fn === "function") fn();
-        if (rest.onUnmounted) rest.onUnmounted();
+        for (const fn of events) {
+          if (typeof fn === "function") fn();
+        }
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
+        }
       },
     },
-    [hiddenInput, ...(children || [])],
+    [_input$, ...children],
   );
 }
 
@@ -271,7 +293,7 @@ export function ItemIndicator(
       style: sn([
         rest.style,
         combine({ ss: rest.style, selected }, ({ ss, selected }) => {
-          return selected ? (ss || "") : "display:none;";
+          return selected ? ss || "" : "display:none;";
         }),
       ]),
     },

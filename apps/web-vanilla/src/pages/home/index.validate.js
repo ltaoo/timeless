@@ -1,5 +1,3 @@
-import { Section, Item } from "@/components/index.js";
-
 function ObjectFieldRender(props) {
   const field_names = computed(props, (t) => {
     if (!t) {
@@ -7,7 +5,6 @@ function ObjectFieldRender(props) {
     }
     return Object.keys(t.fields);
   });
-
   return For({
     class: "space-y-6",
     each: field_names,
@@ -19,60 +16,36 @@ function ObjectFieldRender(props) {
       if (!field$) {
         return null;
       }
-      const fieldId = `field-${name}`;
-      const isCheckbox = computed(field$, (t) => t.input.shape === "checkbox");
-
-      return View({ class: "field" }, [
-        Show(
+      const fid = `field-${name}`;
+      return Field({ store: field$ }, [
+        field$.input.shape,
+        Switch(
           {
-            when: isCheckbox,
-            fallback: [
-              View(
-                {
-                  class:
-                    "text-sm font-semibold text-gray-300 uppercase tracking-wider cursor-pointer",
-                  as: "label",
-                  // htmlfor: fieldId,
-                },
-                [name],
-              ),
-            ],
+            when: computed(field$, (t) => {
+              console.log('[DEBUG] field name:', name, 'shape:', t.input.shape, 'store:', t.input);
+              return t.input.shape;
+            }),
           },
           [
-            View(
-              {
-                // htmlFor: fieldId,
-                // store: field$.input,
-                class:
-                  "text-sm font-semibold text-gray-300 uppercase tracking-wider cursor-pointer",
-              },
-              [name],
-            ),
+            Match("select", [
+              Select({
+                id: fid,
+                store: field$.input,
+              }),
+            ]),
+            Match("input", [
+              Input({
+                id: fid,
+                store: field$.input,
+              }),
+            ]),
+            Match("checkbox", [
+              Checkbox({
+                store: field$.input,
+              }),
+            ]),
           ],
         ),
-        View({ class: "mt-2" }, [
-          Switch(
-            {
-              when: computed(field$, (t) => {
-                return t.input.shape;
-              }),
-            },
-            [
-              Match({ value: "input" }, [
-                Input({
-                  store: field$.input,
-                  id: fieldId,
-                }),
-              ]),
-              Match({ value: "checkbox" }, [
-                Checkbox({
-                  store: field$.input,
-                  id: fieldId,
-                }),
-              ]),
-            ],
-          ),
-        ]),
       ]);
     },
   });
@@ -112,15 +85,25 @@ export default function FormValidateView() {
         }),
         zone: new Timeless.ui.SingleFieldCore({
           label: "Zone",
-          input: new Timeless.ui.InputCore({
-            defaultValue: "",
-            placeholder: "请输入存储区域，如 z0, z1",
+          input: new Timeless.ui.SelectCore({
+            defaultValue: "z0",
+            placeholder: "请选择存储区域，如 z0, z1",
+            options: [
+              {
+                label: "z0",
+                value: "z0",
+              },
+              {
+                label: "z1",
+                value: "z1",
+              },
+            ],
           }),
         }),
         use_https: new Timeless.ui.SingleFieldCore({
           label: "使用 HTTPS",
           input: new Timeless.ui.CheckboxCore({
-            // defaultValue: "",
+            defaultValue: false,
           }),
         }),
       },
@@ -222,8 +205,8 @@ export default function FormValidateView() {
   return View({ class: "space-y-8 max-w-2xl" }, [
     Field({ store: field_provider$ }, [
       Select({
-        store: field_provider$.input,
         id: `field-${field_provider$.name}`,
+        store: field_provider$.input,
       }),
     ]),
     ObjectFieldRender(configure$_),

@@ -6,21 +6,21 @@ import {
   refobj,
   ViewProps,
   ViewChildren,
-  For,
   FieldPrimitive,
   Switch,
 } from "@timeless/headless";
 import { SingleFieldCore, ObjectFieldCore, ArrayFieldCore } from "@timeless/ui";
+import { XOutlined } from "@timeless/icons";
+
 import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { Checkbox } from "./checkbox";
 import { Select } from "./select";
 import { Button } from "./button";
-import { XOutlined } from "@timeless/icons";
 
 export function Field(
   props: ViewProps & { store: SingleFieldCore<any>; autoRender?: boolean },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const state_ = refobj(props.store.state);
 
@@ -41,40 +41,32 @@ export function Field(
   });
 
   const error_class_ = "text-sm text-red-500 dark:text-red-400 mt-1";
-  const help_class_ = "text-sm text-zinc-500 dark:text-zinc-400 mt-1";
-
-  const renderInput = () => {
-    if (children) {
-      return View({}, children);
-    }
-    if (props.autoRender) {
-      return Switch({ when: computed(state_, (s) => s.input.shape) }, [
-        Match({ value: "input" }, [Input({ store: props.store.input, id: fieldId })]),
-        Match({ value: "textarea" }, [Textarea({ store: props.store.input, id: fieldId })]),
-        Match({ value: "checkbox" }, [Checkbox({ store: props.store.input, id: fieldId })]),
-        Match({ value: "select" }, [Select({ store: props.store.input, id: fieldId })]),
-      ]);
-    }
-    return null;
-  };
+  // const help_class_ = "text-sm text-zinc-500 dark:text-zinc-400 mt-1";
 
   return View({ class: "space-y-2" }, [
     Show({ when: computed(state_, (s) => !!s.label) }, [
-      View({ class: "flex items-center gap-1" }, [
-        View({ as: "label", htmlFor: fieldId, class: label_class_ }, [
-          computed(state_, (s) => s.label),
+      View({ class: "" }, [
+        View({ as: "label", htmlFor: fieldId }, [
+          View({}, [
+            View(
+              {
+                class: label_class_,
+              },
+              [computed(state_, (s) => s.label)],
+            ),
+            Show(
+              {
+                when: computed(state_, (s) => {
+                  return s.input.type?.required || false;
+                }),
+              },
+              [View({ class: "text-red-500", style: "line-height:1;" }, ["*"])],
+            ),
+          ]),
+          View({ class: "mt-2" }, children),
         ]),
-        Show(
-          {
-            when: computed(state_, (s) => {
-              return s.input.type?.required || false;
-            }),
-          },
-          [View({ class: "text-red-500", style: "line-height:1;" }, ["*"])],
-        ),
       ]),
     ]),
-    renderInput(),
     Show({ when: computed(state_, (s) => !!s.error) }, [
       View({ class: error_class_ }, [
         computed(state_, (s) => s.error?.message || ""),

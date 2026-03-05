@@ -2,6 +2,7 @@ export * from "./arrow-down-to-line";
 export * from "./chevron-down";
 export * from "./chevron-right";
 export * from "./circle-arrow-down";
+export * from "./circle-x";
 export * from "./clock-arrow-down";
 export * from "./cloud-download";
 export * from "./download";

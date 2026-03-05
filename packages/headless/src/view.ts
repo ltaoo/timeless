@@ -138,7 +138,7 @@ export function View(props: ViewProps = {}, children?: any) {
   }
   if (onFocus) {
     $elm.addEventListener("focus", function (event: Event) {
-      if (onFocus) onFocus(event);
+      onFocus(event);
     });
   }
   if (onBlur) {

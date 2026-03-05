@@ -1,7 +1,7 @@
 import { resolve } from "path";
 import { defineConfig } from "vite";
-import pkg from "./package.json";
 import dts from "vite-plugin-dts";
+
 import { buildLibName } from "../../vite.config.base";
 
 const name = "timeless.shadcn";

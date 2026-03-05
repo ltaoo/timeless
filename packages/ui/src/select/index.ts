@@ -21,12 +21,14 @@ enum Events {
   StateChange,
   Change,
   Focus,
+  Blur,
   Placed,
 }
 type TheTypesOfEvents<T> = {
   [Events.StateChange]: SelectState<T>;
   [Events.Change]: T | null;
   [Events.Focus]: void;
+  [Events.Blur]: void;
   [Events.Placed]: void;
 };
 type SelectProps<T> = {
@@ -62,7 +64,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
   // options: { text: string; store: SelectItemCore<T> }[] = [];
   placeholder: string;
-  options: { value: T; label: string; selected: boolean; focused: boolean }[] = [];
+  options: { value: T; label: string; selected: boolean; focused: boolean }[] =
+    [];
   defaultValue: T | null = null;
   value: T | null = null;
   disabled: boolean = false;
@@ -265,6 +268,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   focus() {
     this.emit(Events.Focus);
   }
+  blur() {
+    this.emit(Events.Blur);
+  }
   setOptions(options: NonNullable<SelectProps<T>["options"]>) {
     this.options = options.map((opt) => {
       return {
@@ -315,7 +321,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   focusOption(value: T) {
     // 检查是否需要更新
     const needsUpdate = this.options.some(
-      (opt) => (opt.value === value && !opt.focused) || (opt.value !== value && opt.focused)
+      (opt) =>
+        (opt.value === value && !opt.focused) ||
+        (opt.value !== value && opt.focused),
     );
     if (!needsUpdate) {
       return;
@@ -333,7 +341,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   blurOption(value: T) {
     // 检查是否需要更新
     const needsUpdate = this.options.some(
-      (opt) => opt.value === value && opt.focused
+      (opt) => opt.value === value && opt.focused,
     );
     if (!needsUpdate) {
       return;
@@ -364,6 +372,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   }
   onFocus(handler: Handler<TheTypesOfEvents<T>[Events.Focus]>) {
     return this.on(Events.Focus, handler);
+  }
+  onBlur(handler: Handler<TheTypesOfEvents<T>[Events.Blur]>) {
+    return this.on(Events.Blur, handler);
   }
 }
 

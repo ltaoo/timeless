@@ -52,6 +52,11 @@
       "import": "./dist/circle-arrow-down/index.esm.js",
       "require": "./dist/circle-arrow-down/index.js"
     },
+    "./circle-x": {
+      "types": "./dist/circle-x/index.d.ts",
+      "import": "./dist/circle-x/index.esm.js",
+      "require": "./dist/circle-x/index.js"
+    },
     "./clock-arrow-down": {
       "types": "./dist/clock-arrow-down/index.d.ts",
       "import": "./dist/clock-arrow-down/index.esm.js",

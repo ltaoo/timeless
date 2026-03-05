@@ -45,7 +45,7 @@ export * from "./tabs";
 export * from "./accordion";
 
 // form
-export * from "./input";
+export * as InputPrimitive from "./input";
 export * from "./textarea";
 export * as SelectPrimitive from "./select";
 export * as CheckboxPrimitive from "./checkbox";
