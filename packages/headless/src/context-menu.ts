@@ -6,7 +6,6 @@ import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { For } from "./for";
-import { merge, tp } from "./theme";
 import * as MenuPrimitive from "./menu";
 import { Txt } from "./text";
 

@@ -2,7 +2,6 @@ import { ref, refobj, computed, combine } from "@timeless/reactive";
 import { MenuCore, MenuItemCore } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
 
-import { tp, merge } from "./theme";
 import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
 import { Txt } from "./text";
 import { For } from "./for";

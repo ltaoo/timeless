@@ -1,11 +1,93 @@
-import { Accordion as H } from "@timeless/headless";
+import { computed, refobj } from "@timeless/reactive";
+import {
+  AccordionPrimitive,
+  For,
+  View,
+  ViewChildren,
+  ViewProps,
+  Txt,
+} from "@timeless/headless";
+import { AccordionCore } from "@timeless/ui";
 
-const t = {
-  root: { class: "w-full" },
-  item: { class: "border-b border-zinc-200 dark:border-zinc-800" },
-  trigger: { class: "flex w-full items-center justify-between py-4 font-medium transition-all cursor-pointer hover:underline" },
-  chevron: ({ isOpen }) => ({ class: ["text-sm transition-transform duration-200", isOpen ? "rotate-180" : ""].join(" ") }),
-  content: ({ isOpen }) => ({ class: isOpen ? "overflow-hidden pb-4 pt-0 text-sm" : "hidden" }),
+type AccordionItem = {
+  title: string;
+  content: ViewChildren;
 };
 
-export function Accordion(p: any) { return H({ ...p, theme: t }); }
+export function Accordion(
+  props: ViewProps & {
+    store: AccordionCore;
+    items: AccordionItem[];
+  },
+) {
+  const { store, items, ...rest } = props;
+  const state_ = refobj(store.state);
+
+  store.onStateChange((v) => {
+    state_.as(v);
+  });
+
+  return AccordionPrimitive.Root(
+    {
+      store,
+      class: "w-full",
+      ...rest,
+    },
+    [
+      For({
+        each: items,
+        render(item: AccordionItem, index: number) {
+          return AccordionPrimitive.Item(
+            {
+              store,
+              index,
+              class: "border-b border-zinc-200 dark:border-zinc-800",
+            },
+            [
+              AccordionPrimitive.Trigger(
+                {
+                  store,
+                  index,
+                  class:
+                    "flex w-full items-center justify-between py-4 font-medium transition-all cursor-pointer hover:underline",
+                },
+                [
+                  Txt(item.title),
+                  AccordionPrimitive.Chevron(
+                    {
+                      store,
+                      index,
+                      class: computed(state_, (d) => {
+                        const isOpen = d.openItems.includes(index);
+                        return [
+                          "text-sm transition-transform duration-200",
+                          isOpen ? "rotate-180" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ");
+                      }),
+                    },
+                    [Txt("▾")],
+                  ),
+                ],
+              ),
+              AccordionPrimitive.Content(
+                {
+                  store,
+                  index,
+                  class: computed(state_, (d) => {
+                    const isOpen = d.openItems.includes(index);
+                    return isOpen
+                      ? "overflow-hidden pb-4 pt-0 text-sm"
+                      : "hidden";
+                  }),
+                },
+                item.content,
+              ),
+            ],
+          );
+        },
+      }),
+    ],
+  );
+}

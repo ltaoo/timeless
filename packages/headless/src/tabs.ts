@@ -1,108 +1,69 @@
-import { ref, refarr, computed } from "@timeless/reactive";
+import { computed } from "@timeless/reactive";
 import { TabHeaderCore } from "@timeless/ui";
 
-import { tp, merge } from "./theme";
-import { View, ViewProps } from "./view";
-import { For } from "./for";
-import { Show } from "./show";
+import { View, ViewProps, ViewChildren } from "./view";
 import { Txt } from "./text";
 
-export function Tabs<T>(
+export function Root(
+  props: ViewProps & { store: TabHeaderCore<any> },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return View(rest, children);
+}
+
+export function List(
+  props: ViewProps & { store: TabHeaderCore<any> },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return View(rest, children);
+}
+
+export function Tab(
   props: ViewProps & {
     store: TabHeaderCore<any>;
-    theme?: { root: any; tab: any; list: any; indicator: any; content: any };
+    value: string;
+    index: number;
   },
+  children?: ViewChildren,
 ) {
-  const { store, theme: t, class: cls, style: st } = props;
-
-  const state = ref(store.state);
-  const items = refarr(store.state.tabs);
-  const events: any[] = [];
-  events.push(
-    store.onStateChange(() => {
-      state.as(store.state);
-      items.as(store.state.tabs);
-    }),
-  );
+  const { store, value, index, ...rest } = props;
 
   return View(
     {
-      ...merge(tp(t?.root), cls, st),
-      onUnmounted() {
-        for (const fn of events) if (typeof fn === "function") fn();
+      type: "button",
+      ...rest,
+      onMounted($el) {
+        store.updateTabClient(index, {
+          rect() {
+            return $el.getBoundingClientRect();
+          },
+        });
+        if (rest.onMounted) {
+          rest.onMounted($el);
+        }
+      },
+      onClick() {
+        store.selectById(value);
       },
     },
-    [
-      View({}, [
-        For({
-          each: items,
-          render(item: { value: string; label: string }, idx) {
-            return View(
-              {
-                type: "button",
-                class: computed(state, (d) => {
-                  return (
-                    merge(tp(t?.tab, { active: d.curId === item.value }))
-                      .class || ""
-                  );
-                }),
-                style: computed(state, (d) => {
-                  return (
-                    merge(tp(t?.tab, { active: d.curId === item.value }))
-                      .style || ""
-                  );
-                }),
-                onMounted($el) {
-                  store.updateTabClient(idx, {
-                    rect() {
-                      return $el.getBoundingClientRect();
-                    },
-                  });
-                },
-                onClick() {
-                  store.selectById(item.value);
-                },
-              },
-              [
-                Txt(item.label),
-                View({
-                  class: computed(state, (d) => {
-                    return (
-                      merge(
-                        tp(t?.indicator, {
-                          active: d.curId === item.value,
-                        }),
-                      ).class || ""
-                    );
-                  }),
-                  style: computed(state, (d) => {
-                    return (
-                      merge(
-                        tp(t?.indicator, {
-                          active: d.curId === item.value,
-                        }),
-                      ).style || ""
-                    );
-                  }),
-                }),
-              ],
-            );
-          },
-        }),
-      ]),
-      View({ ...merge(tp(t?.content)) }, [
-        For({
-          each: computed(state, (s) => s.tabs),
-          render(item: any) {
-            return Show(
-              {
-                when: computed(state, (d) => d.curId === item.value),
-              },
-              [item.content],
-            );
-          },
-        }),
-      ]),
-    ],
+    children,
   );
+}
+
+export function Indicator(
+  props: ViewProps & { store: TabHeaderCore<any>; value: string },
+  children?: ViewChildren,
+) {
+  const { store, value, ...rest } = props;
+  return View(rest, children);
+}
+
+export function Content(
+  props: ViewProps & { store: TabHeaderCore<any>; value: string },
+  children?: ViewChildren,
+) {
+  const { store, value, ...rest } = props;
+  return View(rest, children);
 }

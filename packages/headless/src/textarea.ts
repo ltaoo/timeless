@@ -1,13 +1,11 @@
 import { cn } from "@timeless/reactive";
 
-import { tp, merge } from "./theme";
 import { ViewProps } from "./view";
 import { InputCore } from "@timeless/ui";
 
 export function Textarea(
   props: ViewProps & {
     store: InputCore<any>;
-    theme?: any;
     id?: string;
   },
 ) {
@@ -16,7 +14,6 @@ export function Textarea(
     style: st,
     class: cls,
     dataset = {},
-    theme: t,
     id,
     ...rest
   } = props;
@@ -36,15 +33,14 @@ export function Textarea(
         $elm.setAttribute(`data-${k}`, dataset[k]);
       });
 
-      const m = merge(tp(t?.root), cls, st);
-      const class$: any = cn([m.class || ""]);
+      const class$: any = cn([cls || ""]);
       class$._subscribe({
         onChange(v: any) {
           $elm.className = v.join(" ");
         },
       });
       $elm.className = class$.toString();
-      if (m.style) $elm.style.cssText = m.style;
+      if (st) $elm.style.cssText = st;
 
       if (store) {
         if (store.value !== undefined) $elm.value = store.value;

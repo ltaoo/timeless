@@ -31,7 +31,11 @@ export function For<T>(
         empty?: boolean;
         delete?: boolean;
       } = (() => {
-        const view$ = render(item, index);
+        let view$ = render(item, index);
+        // 处理 h() 返回的延迟执行函数
+        if (typeof view$ === "function") {
+          view$ = view$();
+        }
         if (!view$) {
           return { node: null, elm: null, trackElm: null, empty: true };
         }
@@ -60,7 +64,11 @@ export function For<T>(
         const item_prepare_insert = items[i];
         _values.splice(index + i, 0, item_prepare_insert);
         // @todo index + i 改为是 Ref 类型
-        const res = render(item_prepare_insert, index + i);
+        let res = render(item_prepare_insert, index + i);
+        // 处理 h() 返回的延迟执行函数
+        if (typeof res === "function") {
+          res = res();
+        }
         (() => {
           _elements.splice(index + i, 0, res);
           if (!res) {

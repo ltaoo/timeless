@@ -16,6 +16,7 @@ export const base = {
   base: _base,
 };
 
+export * from "./accordion";
 export * from "./menu"; // Export first
 export * from "./menu/item";
 export * from "./button";

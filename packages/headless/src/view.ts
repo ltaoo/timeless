@@ -18,20 +18,30 @@ export interface ViewProps {
   dataset?: Record<string, string>;
   htmlFor?: string;
   "tab-index"?: number | Ref<number | undefined>;
-  onMounted?(el: any): void | (() => void);
+  onMounted?(el: HTMLElement | SVGElement | Text | DocumentFragment): void | (() => void);
   beforeUnmounted?(): void;
   onUnmounted?(): void;
-  onClick?(e: any): void;
-  onPointerDown?: (e: any) => void;
-  onFocus?(e: any): void;
-  onBlur?(e: any): void;
+  onClick?(e: MouseEvent): void;
+  onDoubleClick?(e: MouseEvent): void;
+  onLongPress?(e: PointerEvent): void;
+  onPointerDown?: (e: PointerEvent) => void;
+  onFocus?(e: FocusEvent): void;
+  onBlur?(e: FocusEvent): void;
   onKeyDown?: (e: KeyboardEvent) => void;
   onMouseEnter?: (e: MouseEvent) => void;
   onMouseLeave?: (e: MouseEvent) => void;
-  key?: any;
+  onDragStart?: (e: DragEvent) => void;
+  onDrag?: (e: DragEvent) => void;
+  onDragEnd?: (e: DragEvent) => void;
+  onDragEnter?: (e: DragEvent) => void;
+  onDragOver?: (e: DragEvent) => void;
+  onDragLeave?: (e: DragEvent) => void;
+  onDrop?: (e: DragEvent) => void;
+  draggable?: boolean;
+  key?: string | number;
 }
 
-export function View(props: ViewProps = {}, children?: any) {
+export function View(props: ViewProps = {}, children?: ViewChildren | ViewChildren[number]) {
   const {
     type = "div",
     as,
@@ -42,12 +52,22 @@ export function View(props: ViewProps = {}, children?: any) {
     onUnmounted,
     beforeUnmounted,
     onClick,
+    onDoubleClick,
+    onLongPress,
     onFocus,
     onBlur,
     onPointerDown,
     onKeyDown,
     onMouseEnter,
     onMouseLeave,
+    onDragStart,
+    onDrag,
+    onDragEnd,
+    onDragEnter,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+    draggable,
     ...rest
   } = props;
   let onMountedCleanup: (() => void) | undefined;
@@ -62,7 +82,12 @@ export function View(props: ViewProps = {}, children?: any) {
     $elm,
     render() {
       for (let i = 0; i < _children.length; i++) {
-        const child = _children[i];
+        let child = _children[i];
+        // 处理 h() 返回的延迟执行函数
+        if (typeof child === "function") {
+          child = child();
+          _children[i] = child;
+        }
         if (isRef(child)) {
           _children[i] = Txt(child);
         }
@@ -136,6 +161,59 @@ export function View(props: ViewProps = {}, children?: any) {
           }
         });
       }
+
+      // Double click support for both mobile and desktop
+      if (onDoubleClick) {
+        $elm.addEventListener("dblclick", function (event: Event) {
+          if (onDoubleClick) {
+            onDoubleClick(event);
+          }
+        });
+      }
+
+      // Long press support for both mobile and desktop
+      if (onLongPress) {
+        let longPressTimer: number | null = null;
+        let startX = 0;
+        let startY = 0;
+        const longPressDuration = 500; // 500ms
+        const moveThreshold = 10; // 10px movement threshold
+
+        const handleStart = (event: PointerEvent) => {
+          startX = event.clientX;
+          startY = event.clientY;
+          longPressTimer = window.setTimeout(() => {
+            if (onLongPress) {
+              onLongPress(event);
+            }
+            longPressTimer = null;
+          }, longPressDuration);
+        };
+
+        const handleMove = (event: PointerEvent) => {
+          if (longPressTimer) {
+            const deltaX = Math.abs(event.clientX - startX);
+            const deltaY = Math.abs(event.clientY - startY);
+            if (deltaX > moveThreshold || deltaY > moveThreshold) {
+              window.clearTimeout(longPressTimer);
+              longPressTimer = null;
+            }
+          }
+        };
+
+        const handleEnd = () => {
+          if (longPressTimer) {
+            window.clearTimeout(longPressTimer);
+            longPressTimer = null;
+          }
+        };
+
+        $elm.addEventListener("pointerdown", handleStart);
+        $elm.addEventListener("pointermove", handleMove);
+        $elm.addEventListener("pointerup", handleEnd);
+        $elm.addEventListener("pointercancel", handleEnd);
+      }
+
       if (onPointerDown) {
         $elm.addEventListener("pointerdown", function (event: Event) {
           if (onPointerDown) onPointerDown(event);
@@ -164,6 +242,53 @@ export function View(props: ViewProps = {}, children?: any) {
       if (onMouseLeave) {
         $elm.addEventListener("mouseleave", function (event: MouseEvent) {
           onMouseLeave(event);
+        });
+      }
+
+      // Drag and drop events
+      if (draggable !== undefined) {
+        $elm.setAttribute("draggable", String(draggable));
+      }
+
+      if (onDragStart) {
+        $elm.addEventListener("dragstart", function (event: DragEvent) {
+          if (onDragStart) onDragStart(event);
+        });
+      }
+
+      if (onDrag) {
+        $elm.addEventListener("drag", function (event: DragEvent) {
+          if (onDrag) onDrag(event);
+        });
+      }
+
+      if (onDragEnd) {
+        $elm.addEventListener("dragend", function (event: DragEvent) {
+          if (onDragEnd) onDragEnd(event);
+        });
+      }
+
+      if (onDragEnter) {
+        $elm.addEventListener("dragenter", function (event: DragEvent) {
+          if (onDragEnter) onDragEnter(event);
+        });
+      }
+
+      if (onDragOver) {
+        $elm.addEventListener("dragover", function (event: DragEvent) {
+          if (onDragOver) onDragOver(event);
+        });
+      }
+
+      if (onDragLeave) {
+        $elm.addEventListener("dragleave", function (event: DragEvent) {
+          if (onDragLeave) onDragLeave(event);
+        });
+      }
+
+      if (onDrop) {
+        $elm.addEventListener("drop", function (event: DragEvent) {
+          if (onDrop) onDrop(event);
         });
       }
 
@@ -244,7 +369,7 @@ export function View(props: ViewProps = {}, children?: any) {
   };
 }
 
-export function isElement(v: any): v is TimelessElement {
+export function isElement(v: unknown): v is TimelessElement {
   if (v === null || v === undefined) {
     return false;
   }
@@ -253,17 +378,17 @@ export function isElement(v: any): v is TimelessElement {
   }
   return false;
 }
-export function isLazyElement(v: any): v is TimelessLazyComponent {
+export function isLazyElement(v: unknown): v is TimelessLazyComponent {
   if (v === null || v === undefined) {
     return false;
   }
-  if (v instanceof Promise || (v && typeof (v as any).then === "function")) {
+  if (v instanceof Promise || (v && typeof (v as Promise<unknown>).then === "function")) {
     return true;
   }
   return false;
 }
 
-export type TimelessNormalComponent = (...args: any[]) => TimelessElement;
+export type TimelessNormalComponent = (...args: unknown[]) => TimelessElement;
 export type TimelessLazyComponent = () => Promise<{
   default: TimelessNormalComponent;
 }>;
@@ -272,7 +397,7 @@ export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 export interface TimelessElement {
   t: string;
   $elm: HTMLElement | SVGElement | Text | DocumentFragment;
-  value?: any;
+  value?: unknown;
   render(): HTMLElement | SVGElement | Text | DocumentFragment | null;
   cleanup?: () => void;
   onMounted?(el: HTMLElement | SVGElement | Text | DocumentFragment): void;

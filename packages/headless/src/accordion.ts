@@ -1,60 +1,86 @@
-import { ref, refarr, computed } from "@timeless/reactive";
+import { refarr, computed } from "@timeless/reactive";
+import { AccordionCore } from "@timeless/ui";
 
-import { tp, merge } from "./theme";
-import { View } from "./view";
+import { View, ViewChildren, ViewProps } from "./view";
 import { Txt } from "./text";
 
-export function Accordion(props: any) {
-  const { items, type = "single", theme: t, class: cn, style: st } = props;
-  const openItems = refarr(type === "single" ? [0] : []);
+export function Root(
+  props: ViewProps & { store: AccordionCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return View(rest, children);
+}
 
-  return View({ ...merge(tp(t?.root), cn, st) }, [
-    ...items.map((item: any, index: number) => {
-      const isOpen = computed(openItems, (d) => d.includes(index));
-      const toggle = () => {
-        if (type === "single") {
-          openItems.as(openItems.includes(index) ? [] : [index]);
-        } else {
-          const nextopenItems = openItems.includes(index)
-            ? openItems.filter((i: number) => i !== index)
-            : [...openItems.value, index];
-          openItems.as(nextopenItems);
-        }
-      };
+export function Item(
+  props: ViewProps & { store: AccordionCore; index: number },
+  children: ViewChildren,
+) {
+  const { store, index, ...rest } = props;
+  return View(rest, children);
+}
 
-      return View({ ...merge(tp(t?.item)) }, [
-        View(
-          {
-            ...merge(tp(t?.trigger)),
-            onClick: toggle,
-          },
-          [
-            Txt(item.title),
-            View(
-              {
-                class: computed(isOpen, (d) => {
-                  return merge(tp(t?.chevron, { isOpen: d })).class || "";
-                }),
-                style: computed(isOpen, (d) => {
-                  return merge(tp(t?.chevron, { isOpen: d })).style || "";
-                }),
-              },
-              [Txt("\u25BE")],
-            ),
-          ],
-        ),
-        View(
-          {
-            class: computed(isOpen, (d) => {
-              return merge(tp(t?.content, { isOpen: d })).class || "";
-            }),
-            style: computed(isOpen, (d) => {
-              return merge(tp(t?.content, { isOpen: d })).style || "";
-            }),
-          },
-          [typeof item.content === "string" ? Txt(item.content) : item.content],
-        ),
-      ]);
-    }),
-  ]);
+export function Trigger(
+  props: ViewProps & { store: AccordionCore; index: number },
+  children: ViewChildren,
+) {
+  const { store, index, ...rest } = props;
+  const isOpen = computed(store.openItems, (d) => d.includes(index));
+
+  const toggle = () => {
+    if (store.type === "single") {
+      store.openItems.as(store.openItems.value.includes(index) ? [] : [index]);
+    } else {
+      const nextOpenItems = store.openItems.value.includes(index)
+        ? store.openItems.value.filter((i: number) => i !== index)
+        : [...store.openItems.value, index];
+      store.openItems.as(nextOpenItems);
+    }
+  };
+
+  return View(
+    {
+      ...rest,
+      onClick: toggle,
+    },
+    children,
+  );
+}
+
+export function Chevron(
+  props: ViewProps & { store: AccordionCore; index: number },
+  children?: ViewChildren,
+) {
+  const { store, index, ...rest } = props;
+  const isOpen = computed(store.openItems, (d) => d.includes(index));
+
+  return View(
+    {
+      ...rest,
+      class: computed(isOpen, (d) => {
+        const baseClass = rest.class || "";
+        return typeof baseClass === "string" ? baseClass : "";
+      }),
+    },
+    children || [Txt("▾")],
+  );
+}
+
+export function Content(
+  props: ViewProps & { store: AccordionCore; index: number },
+  children: ViewChildren,
+) {
+  const { store, index, ...rest } = props;
+  const isOpen = computed(store.openItems, (d) => d.includes(index));
+
+  return View(
+    {
+      ...rest,
+      class: computed(isOpen, (d) => {
+        const baseClass = rest.class || "";
+        return typeof baseClass === "string" ? baseClass : "";
+      }),
+    },
+    children,
+  );
 }

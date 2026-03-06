@@ -30,7 +30,7 @@ export * from "./avatar";
 export * from "./card";
 export * from "./label";
 export * from "./badge";
-export * from "./progress";
+export * as ProgressPrimitive from "./progress";
 export * from "./separator";
 export * from "./skeleton";
 export * from "./alert";
@@ -41,29 +41,29 @@ export * as MenuPrimitive from "./menu";
 export * as DropdownMenuPrimitive from "./dropdown-menu";
 export * as ContextMenuPrimitive from "./context-menu";
 export * as ResizablePanelsPrimitive from "./resizable-panels";
-export * from "./tabs";
-export * from "./accordion";
+export * as TabsPrimitive from "./tabs";
+export * as AccordionPrimitive from "./accordion";
 
 // form
 export * as InputPrimitive from "./input";
 export * from "./textarea";
 export * as SelectPrimitive from "./select";
 export * as CheckboxPrimitive from "./checkbox";
-export * from "./slider";
-export * from "./toggle";
+export * as SliderPrimitive from "./slider";
+export * as TogglePrimitive from "./toggle";
 export * as FieldPrimitive from "./field";
 
 // overlay
 export * as PopoverPrimitive from "./popover";
 export * as TooltipPrimitive from "./tooltip";
-export * from "./sheet";
-export * from "./dialog";
-export * from "./toast";
+export * as SheetPrimitive from "./sheet";
+export * as DialogPrimitive from "./dialog";
+export * as ToastPrimitive from "./toast";
 
 export * from "./keep-alive-sub-views";
 export * from "./sub-views";
 
 // other
-// export * from "./theme";
 export * from "./lazy";
 export * from "./render";
+export * from "./h";

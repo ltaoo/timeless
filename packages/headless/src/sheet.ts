@@ -1,143 +1,92 @@
-import { ref, refobj, computed } from "@timeless/reactive";
-import { XOutlined } from "@timeless/icons";
+import { computed } from "@timeless/reactive";
+import { DialogCore } from "@timeless/ui";
 
-import { tp, merge } from "./theme";
 import { View, ViewChildren, ViewProps } from "./view";
 import { Portal } from "./portal";
 import { Presence } from "./presence";
-import { DialogCore } from "@timeless/ui";
 
-export function Sheet(
-  props: ViewProps & {
-    store: DialogCore;
-    side?: "right" | "top" | "bottom" | "left";
-    theme?: any;
-  },
+export function Root(
+  props: ViewProps & { store: DialogCore },
   children?: ViewChildren,
 ) {
-  const {
-    store,
-    side = "right",
-    theme: t,
-    class: cn,
-    style: st,
-    ...rest
-  } = props;
-  const state = refobj(store.state);
-  const events: any[] = [];
-  events.push(
-    store.onStateChange(() => {
-      state.as(store.state);
-    }),
-  );
+  const { store, ...rest } = props;
 
   return Portal(
     {
       onUnmounted() {
-        for (const fn of events) {
-          if (typeof fn === "function") {
-            fn();
-          }
-        }
         if (rest.onUnmounted) {
           rest.onUnmounted();
         }
       },
     },
-    [
-      Presence({ store: store.presence }, [
-        View({
-          class: computed(state, (d) => {
-            return (
-              merge(tp(t?.overlay, { enter: d.enter, exit: d.exit })).class ||
-              ""
-            );
-          }),
-          style: computed(state, (d) => {
-            return (
-              merge(tp(t?.overlay, { enter: d.enter, exit: d.exit })).style ||
-              ""
-            );
-          }),
-          onClick() {
-            store.hide();
-          },
-        }),
-        View(
-          {
-            class: computed(state, (d) => {
-              return (
-                merge(
-                  tp(t?.wrapper, {
-                    side,
-                    visible: d.visible,
-                    enter: d.enter,
-                    exit: d.exit,
-                  }),
-                  cn,
-                  st,
-                ).class || ""
-              );
-            }),
-            style: computed(state, (d) => {
-              return (
-                merge(
-                  tp(t?.wrapper, {
-                    side,
-                    visible: d.visible,
-                    enter: d.enter,
-                    exit: d.exit,
-                  }),
-                  cn,
-                  st,
-                ).style || ""
-              );
-            }),
-          },
-          [
-            View(
-              {
-                class: computed(state, (d) => {
-                  return (
-                    merge(
-                      tp(t?.content, {
-                        side,
-                        visible: d.visible,
-                        enter: d.enter,
-                        exit: d.exit,
-                      }),
-                    ).class || ""
-                  );
-                }),
-                style: computed(state, (d) => {
-                  return (
-                    merge(
-                      tp(t?.content, {
-                        side,
-                        visible: d.visible,
-                        enter: d.enter,
-                        exit: d.exit,
-                      }),
-                    ).style || ""
-                  );
-                }),
-              },
-              [
-                View(
-                  {
-                    ...merge(tp(t?.closeBtn)),
-                    onClick() {
-                      store.hide();
-                    },
-                  },
-                  [XOutlined],
-                ),
-                ...(children || []),
-              ],
-            ),
-          ],
-        ),
-      ]),
-    ],
+    [Presence({ store: store.presence || store }, children)],
+  );
+}
+
+export function Overlay(
+  props: ViewProps & { store: DialogCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
+  return View(
+    {
+      ...rest,
+      onClick() {
+        if (store.closeable) {
+          store.hide();
+        }
+      },
+    },
+    children,
+  );
+}
+
+export function Content(
+  props: ViewProps & { store: DialogCore; side?: "right" | "top" | "bottom" | "left" },
+  children?: ViewChildren,
+) {
+  const { store, side = "right", ...rest } = props;
+  return View(rest, children);
+}
+
+export function Header(
+  props: ViewProps & { store: DialogCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return View(rest, children);
+}
+
+export function Title(
+  props: ViewProps & { store: DialogCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return View(rest, children);
+}
+
+export function Description(
+  props: ViewProps & { store: DialogCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return View(rest, children);
+}
+
+export function Close(
+  props: ViewProps & { store: DialogCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
+  return View(
+    {
+      ...rest,
+      onClick() {
+        store.hide();
+      },
+    },
+    children,
   );
 }

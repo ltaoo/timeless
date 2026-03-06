@@ -64,6 +64,7 @@ declare const Select: typeof import("@timeless/shadcnui").Select;
 declare const Presence: typeof import("@timeless/shadcnui").Presence;
 declare const Portal: typeof import("@timeless/shadcnui").Portal;
 declare const Toggle: typeof import("@timeless/shadcnui").Toggle;
+declare const TooltipProvider: typeof import("@timeless/shadcnui").TooltipProvider;
 
 declare const Menu: typeof import("@timeless/shadcnui").Menu;
 declare const MenuItem: typeof import("@timeless/shadcnui").MenuItem;

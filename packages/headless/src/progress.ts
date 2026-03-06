@@ -1,18 +1,17 @@
 import { ref, computed, isRef, Ref } from "@timeless/reactive";
 import { ProgressCore } from "@timeless/ui";
 
-import { tp, merge } from "./theme";
-import { View, ViewProps } from "./view";
+import { View, ViewProps, ViewChildren } from "./view";
 
-export function Progress(
+export function Root(
   props: ViewProps & {
-    store: ProgressCore;
-    theme?: any;
-    value: Ref<number>;
+    store?: ProgressCore;
+    value?: Ref<number> | number;
     max?: number;
   },
+  children?: ViewChildren,
 ) {
-  const { store, value, max = 100, theme: t, class: cls, style: st } = props;
+  const { store, value, max = 100, ...rest } = props;
 
   if (store) {
     const state = ref(store.state);
@@ -26,32 +25,67 @@ export function Progress(
 
     return View(
       {
-        ...merge(tp(t?.root), cls, st),
+        ...rest,
+        role: "progressbar",
+        "aria-valuemin": 0,
+        "aria-valuemax": computed(state, (d) => d.max ?? 100),
+        "aria-valuenow": computed(state, (d) => d.value ?? 0),
         onUnmounted() {
           for (const fn of events) if (typeof fn === "function") fn();
-          if (props.onUnmounted) props.onUnmounted();
+          if (rest.onUnmounted) rest.onUnmounted();
         },
       },
-      [
-        View({
-          ...merge(tp(t?.fill)),
-          style: computed(state, (d) => {
-            const v = d.value ?? 0;
-            const m = d.max ?? 100;
-            return `${merge(tp(t?.fill)).style || ""}width:${Math.min(Math.max((v / m) * 100, 0), 100)}%`;
-          }),
-        }),
-      ],
+      children,
     );
   }
 
-  return View({ ...merge(tp(t?.root), cls, st) }, [
-    View({
-      ...merge(tp(t?.fill)),
+  return View(
+    {
+      ...rest,
+      role: "progressbar",
+      "aria-valuemin": 0,
+      "aria-valuemax": max,
+      "aria-valuenow": isRef(value) ? computed(value, (v) => v) : value,
+    },
+    children,
+  );
+}
+
+export function Indicator(
+  props: ViewProps & {
+    store?: ProgressCore;
+    value?: Ref<number> | number;
+    max?: number;
+  },
+  children?: ViewChildren,
+) {
+  const { store, value, max = 100, ...rest } = props;
+
+  if (store) {
+    const state = ref(store.state);
+    return View(
+      {
+        ...rest,
+        style: computed(state, (d) => {
+          const v = d.value ?? 0;
+          const m = d.max ?? 100;
+          const baseStyle = rest.style || "";
+          return `${baseStyle}width:${Math.min(Math.max((v / m) * 100, 0), 100)}%`;
+        }),
+      },
+      children,
+    );
+  }
+
+  return View(
+    {
+      ...rest,
       style: computed(value, (d) => {
         const v = isRef(value) ? d : value;
-        return `${merge(tp(t?.fill)).style || ""}width:${Math.min(Math.max((v / max) * 100, 0), 100)}%`;
+        const baseStyle = rest.style || "";
+        return `${baseStyle}width:${Math.min(Math.max((v / max) * 100, 0), 100)}%`;
       }),
-    }),
-  ]);
+    },
+    children,
+  );
 }

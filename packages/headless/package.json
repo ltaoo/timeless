@@ -102,6 +102,11 @@
       "import": "./dist/fragment/index.esm.js",
       "require": "./dist/fragment/index.js"
     },
+    "./h": {
+      "types": "./dist/h/index.d.ts",
+      "import": "./dist/h/index.esm.js",
+      "require": "./dist/h/index.js"
+    },
     "./head": {
       "types": "./dist/head/index.d.ts",
       "import": "./dist/head/index.esm.js",

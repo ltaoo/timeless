@@ -1,16 +1,50 @@
-import { Toggle as H } from "@timeless/headless";
+import { computed, refobj } from "@timeless/reactive";
+import {
+  TogglePrimitive,
+  View,
+  ViewChildren,
+  ViewProps,
+} from "@timeless/headless";
+import { SwitchCore } from "@timeless/ui";
 
-const t = {
-  root: ({ on, disabled }) => ({
-    class: [
-      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50",
-      on ? "bg-zinc-900 dark:bg-zinc-50" : "bg-zinc-200 dark:bg-zinc-800",
-      disabled ? "opacity-50 cursor-not-allowed" : "",
-    ].filter(Boolean).join(" "),
-  }),
-  thumb: ({ on }) => ({
-    class: ["pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform dark:bg-zinc-950", on ? "translate-x-5" : "translate-x-0"].join(" "),
-  }),
-};
+export function Toggle(
+  props: ViewProps & { store: SwitchCore; id?: string },
+  children?: ViewChildren,
+) {
+  const { store, id, ...rest } = props;
+  const state_ = refobj(store.state);
 
-export function Toggle(p: any) { return H({ ...p, theme: t }); }
+  store.onStateChange((v) => {
+    state_.as(v);
+  });
+
+  return TogglePrimitive.Root(
+    {
+      store,
+      id,
+      class: computed(state_, (d) => {
+        const baseClass =
+          "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50";
+        const onClass = d.checked
+          ? "bg-zinc-900 dark:bg-zinc-50"
+          : "bg-zinc-200 dark:bg-zinc-800";
+        const disabledClass = d.disabled ? "opacity-50 cursor-not-allowed" : "";
+        return [baseClass, onClass, disabledClass].filter(Boolean).join(" ");
+      }),
+      ...rest,
+    },
+    [
+      TogglePrimitive.Thumb(
+        {
+          store,
+          class: computed(state_, (d) => {
+            const baseClass =
+              "pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform dark:bg-zinc-950";
+            const translateClass = d.checked ? "translate-x-5" : "translate-x-0";
+            return [baseClass, translateClass].join(" ");
+          }),
+        },
+      ),
+    ],
+  );
+}

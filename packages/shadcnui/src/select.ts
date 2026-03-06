@@ -61,8 +61,8 @@ export function Select(
         {
           ...rest,
           animation: {
-            in: "animate-in fade-in-0 slide-in-from-bottom-2",
-            out: "animate-out fade-out-0 slide-out-to-bottom-2",
+            in: "animate-in fade-in-0 slide-in-from-top-2",
+            out: "animate-out fade-out-0 slide-out-to-top-2",
           },
           store,
           class:
@@ -106,15 +106,15 @@ export function Select(
                     }),
                   },
                   [
-                    SelectPrimitive.ItemIndicator(
-                      {
-                        store,
-                        value: option.value,
-                        class:
-                          "absolute left-2 flex h-4 w-4 items-center justify-center",
-                      },
-                      [CheckOutlined({})],
-                    ),
+                    // SelectPrimitive.ItemIndicator(
+                    //   {
+                    //     store,
+                    //     value: option.value,
+                    //     class:
+                    //       "absolute left-2 flex h-4 w-4 items-center justify-center",
+                    //   },
+                    //   [CheckOutlined({})],
+                    // ),
                     SelectPrimitive.ItemText({}, [option.label]),
                   ],
                 );

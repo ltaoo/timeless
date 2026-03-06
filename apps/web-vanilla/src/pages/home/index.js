@@ -61,7 +61,7 @@ export default function HomePageView(props) {
               View(
                 {
                   class:
-                    "border-r border-zinc-200 dark:border-zinc-800 py-4 h-full",
+                    "border-r border-zinc-200 dark:border-zinc-950 py-4 h-full",
                 },
                 [
                   View(

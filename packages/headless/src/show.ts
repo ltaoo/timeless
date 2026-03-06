@@ -107,8 +107,12 @@ export function Show(
     const newNodes: Node[] = [];
     const newInstances: any[] = [];
 
-    for (const node of targetChildren) {
+    for (let node of targetChildren) {
       if (!node) continue;
+      // 处理 h() 返回的延迟执行函数
+      if (typeof node === "function") {
+        node = node();
+      }
       if (isElement(node)) {
         const result = node.render();
         // 即使 render 返回 null（如 Portal），也要保存实例以便调用生命周期

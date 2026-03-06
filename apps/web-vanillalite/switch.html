@@ -151,6 +151,7 @@
       ]);
     }
     function CustomView(props) {
+      console.log('invoke Custom View', props.value);
       return View({}, [props.value])
     }
     function AppView() {
@@ -176,6 +177,7 @@
           },
         }, ["Toggle"]),
         View({}, [computed(case_, (t) => t !== 0)]),
+        View({}, [h(View, {}, ["Hello"])]),
         For({
           each: items_,
           render(item) {

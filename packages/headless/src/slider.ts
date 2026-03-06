@@ -1,54 +1,34 @@
 import { computed, isRef, ref } from "@timeless/reactive";
 
-import { tp, merge } from "./theme";
-import { View, ViewProps } from "./view";
+import { View, ViewProps, ViewChildren } from "./view";
 
-export function Slider(
+export function Root(
   props: ViewProps & {
     value?: number;
     min?: number;
     max?: number;
     step?: number;
     disabled?: boolean;
-    theme?: any;
-    store?: any;
     onChange?: (v: number) => void;
   },
+  children?: ViewChildren,
 ) {
   const {
-    // store,
     min: _min = 0,
     max: _max = 100,
     step: _step = 1,
     disabled,
-    theme: t,
-    class: cn,
-    style: st,
     onChange,
+    ...rest
   } = props;
 
   const valueRef = ref(props.value ?? _min);
-  // const valueRef = store
-  //   ? ref(store.state?.value ?? 0)
-  //   : isRef(props.value)
-  //     ? props.value
-  //     : ref(props.value ?? _min);
-
-  const events: any[] = [];
-  // if (store && store.onStateChange) {
-  //   events.push(
-  //     store.onStateChange(() => {
-  //       valueRef.value = store.state.value;
-  //     }),
-  //   );
-  // }
+  const containerRef: { current: HTMLElement | null } = { current: null };
 
   const pct = computed(valueRef, (d) => {
     const v = Math.min(Math.max(d, _min), _max);
     return _max - _min === 0 ? 0 : ((v - _min) / (_max - _min)) * 100;
   });
-
-  const containerRef: { current: HTMLElement | null } = { current: null };
 
   const updateValue = (clientX: number) => {
     if (disabled || !containerRef.current) return;
@@ -58,10 +38,6 @@ export function Slider(
     if (_step > 0) newVal = _min + Math.round((newVal - _min) / _step) * _step;
     newVal = Math.max(_min, Math.min(newVal, _max));
     if (newVal !== valueRef.value) {
-      // if (store && store.setValue) {
-      //   store.setValue(newVal);
-      // } else {
-      // }
       valueRef.as(newVal);
       if (onChange) {
         onChange(newVal);
@@ -91,32 +67,61 @@ export function Slider(
 
   return View(
     {
-      ...merge(tp(t?.root, { disabled }), cn, st),
+      ...rest,
+      "data-percentage": pct,
       onMounted(elm: HTMLElement) {
         containerRef.current = elm;
         elm.addEventListener("pointerdown", onPointerDown);
+        if (rest.onMounted) {
+          rest.onMounted(elm);
+        }
       },
       onUnmounted() {
         if (cleanupDrag) cleanupDrag();
-        for (const fn of events) if (typeof fn === "function") fn();
-        if (props.onUnmounted) props.onUnmounted();
+        if (rest.onUnmounted) rest.onUnmounted();
       },
     },
-    [
-      View({ ...merge(tp(t?.track)) }, [
-        View({
-          ...merge(tp(t?.fill)),
-          style: computed(pct, (d) => {
-            return `${merge(tp(t?.fill)).style || ""}width:${d}%`;
-          }),
-        }),
-      ]),
-      View({
-        ...merge(tp(t?.thumb)),
-        style: computed(pct, (d) => {
-          return `${merge(tp(t?.thumb)).style || ""}left:${d}%;top:50%;transform:translate(-50%,-50%);`;
-        }),
+    children,
+  );
+}
+
+export function Track(
+  props: ViewProps,
+  children?: ViewChildren,
+) {
+  return View(props, children);
+}
+
+export function Range(
+  props: ViewProps & { percentage: any },
+  children?: ViewChildren,
+) {
+  const { percentage, ...rest } = props;
+  return View(
+    {
+      ...rest,
+      style: computed(percentage, (d) => {
+        const baseStyle = rest.style || "";
+        return `${baseStyle}width:${d}%`;
       }),
-    ],
+    },
+    children,
+  );
+}
+
+export function Thumb(
+  props: ViewProps & { percentage: any },
+  children?: ViewChildren,
+) {
+  const { percentage, ...rest } = props;
+  return View(
+    {
+      ...rest,
+      style: computed(percentage, (d) => {
+        const baseStyle = rest.style || "";
+        return `${baseStyle}left:${d}%;top:50%;transform:translate(-50%,-50%);`;
+      }),
+    },
+    children,
   );
 }

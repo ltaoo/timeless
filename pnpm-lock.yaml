@@ -522,6 +522,9 @@ importers:
       '@timeless/base':
         specifier: workspace:*
         version: link:../base
+      '@timeless/reactive':
+        specifier: workspace:*
+        version: link:../reactive
       '@timeless/utils':
         specifier: workspace:*
         version: link:../utils

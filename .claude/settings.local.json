@@ -17,7 +17,8 @@
       "Bash(npm view:*)",
       "Bash(git diff:*)",
       "Bash(do echo:*)",
-      "Bash(read file:*)"
+      "Bash(read file:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

@@ -10,6 +10,11 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.js"
     },
+    "./accordion": {
+      "types": "./dist/accordion/index.d.ts",
+      "import": "./dist/accordion/index.esm.js",
+      "require": "./dist/accordion/index.js"
+    },
     "./affix": {
       "types": "./dist/affix/index.d.ts",
       "import": "./dist/affix/index.esm.js",
@@ -232,6 +237,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.5",
+    "@timeless/reactive": "workspace:*",
     "@timeless/base": "workspace:*",
     "@timeless/utils": "workspace:*",
     "dayjs": "^1.11.19",

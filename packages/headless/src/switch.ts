@@ -211,12 +211,3 @@ export function Match<T = any>(
   };
 }
 
-// 创建延迟执行的组件包装器
-export function h<T extends TimelessNormalComponent>(
-  component: T,
-  props: Parameters<T>[0],
-) {
-  return () => {
-    return component(props);
-  };
-}

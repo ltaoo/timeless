@@ -1,72 +1,57 @@
-import { ref, computed } from "@timeless/reactive";
+import { computed } from "@timeless/reactive";
 import { SwitchCore, ToggleCore } from "@timeless/ui";
 
-import { tp, merge } from "./theme.js";
-import { View, ViewProps } from "./view.js";
+import { View, ViewProps, ViewChildren } from "./view.js";
 
-export function Toggle(
+export function Root(
   props: ViewProps & {
     store: SwitchCore;
     id?: string;
   },
+  children?: ViewChildren,
 ) {
-  const { store, id } = props;
-
-  const state = ref(store.state);
-  const events: any[] = [];
-
-  // 创建隐藏的 input 用于可访问性
-  const hiddenInput = View(
-    {
-      as: "input",
-      type: "checkbox",
-      id,
-      style:
-        "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
-      onClick(e) {
-        e.stopPropagation();
-        // store.toggle();
-      },
-      onMounted(el) {
-        el.checked = store.state.checked;
-        events.push(
-          store.onStateChange(() => {
-            el.checked = store.state.checked;
-          }),
-        );
-      },
-    },
-    [],
-  );
+  const { store, id, ...rest } = props;
 
   return View(
     {
-      ...props,
+      ...rest,
       type: "button",
+      role: "switch",
+      "aria-checked": computed(() => store.state.checked),
       onClick(e) {
-        // 如果点击的是隐藏的 input，不要再次 toggle
         if (e.target.tagName === "INPUT") return;
-        // store.toggle();
-      },
-      onMounted() {
-        if (store.onStateChange)
-          events.push(
-            store.onStateChange(() => {
-              state.as(store.state);
-            }),
-          );
-        if (props.onMounted) props.onMounted(this);
-      },
-      onUnmounted() {
-        for (const fn of events) if (typeof fn === "function") fn();
-        if (props.onUnmounted) props.onUnmounted();
+        store.toggle();
       },
     },
     [
-      hiddenInput,
-      View({
-        type: "span",
-      }),
+      View(
+        {
+          as: "input",
+          type: "checkbox",
+          id,
+          style:
+            "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
+          onClick(e) {
+            e.stopPropagation();
+          },
+          onMounted(el) {
+            el.checked = store.state.checked;
+            store.onStateChange(() => {
+              el.checked = store.state.checked;
+            });
+          },
+        },
+        [],
+      ),
+      ...(children || []),
     ],
   );
+}
+
+export function Thumb(
+  props: ViewProps & { store: SwitchCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return View(rest, children);
 }
