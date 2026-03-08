@@ -53,10 +53,12 @@ export type FormValidateResult = {
 
 enum SingleFieldEvents {
   Change,
+  Error,
   StateChange,
 }
 type TheSingleFieldCoreEvents<T extends FormInputInterface<any>["value"]> = {
   [SingleFieldEvents.Change]: T;
+  [SingleFieldEvents.Error]: BizError;
   [SingleFieldEvents.StateChange]: SingleFieldCoreState<T>;
 };
 type SingleFieldCoreProps<T> = FormFieldCoreProps & {
@@ -224,6 +226,7 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
       }
     }
     if (errors.length > 0) {
+      this._bus.emit(SingleFieldEvents.Error, new BizError(errors));
       return Result.Err(new BizError(errors));
     }
     return Result.Ok(value);
@@ -266,6 +269,11 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
   ) {
     return this._bus.on(SingleFieldEvents.Change, handler);
   }
+  onError(
+    handler: Handler<TheSingleFieldCoreEvents<T>[SingleFieldEvents.Error]>,
+  ) {
+    return this._bus.on(SingleFieldEvents.Error, handler);
+  }
   onStateChange(
     handler: Handler<
       TheSingleFieldCoreEvents<T>[SingleFieldEvents.StateChange]
@@ -302,6 +310,7 @@ type ArrayFieldCoreState = {
 };
 enum ArrayFieldEvents {
   Change,
+  Error,
   StateChange,
 }
 type TheArrayFieldCoreEvents<
@@ -310,6 +319,7 @@ type TheArrayFieldCoreEvents<
   ) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>,
 > = {
   [ArrayFieldEvents.Change]: { idx: number; id: number };
+  [ArrayFieldEvents.Error]: BizError;
   [ArrayFieldEvents.StateChange]: ArrayFieldValue<T>;
 };
 export class ArrayFieldCore<
@@ -493,6 +503,8 @@ export class ArrayFieldCore<
       })();
     }
     if (errors.length > 0) {
+      const error = new BizError(errors);
+      this._bus.emit(ArrayFieldEvents.Error, error);
       return Result.Err(errors);
     }
     return Result.Ok(results);
@@ -641,6 +653,11 @@ export class ArrayFieldCore<
   ) {
     return this._bus.on(ArrayFieldEvents.Change, handler);
   }
+  onError(
+    handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.Error]>,
+  ) {
+    return this._bus.on(ArrayFieldEvents.Error, handler);
+  }
   onStateChange(
     handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.StateChange]>,
   ) {
@@ -677,6 +694,7 @@ type ObjectFieldCoreState = {
 };
 enum ObjectFieldEvents {
   Change,
+  Error,
   StateChange,
 }
 type TheObjectFieldCoreEvents<
@@ -686,6 +704,7 @@ type TheObjectFieldCoreEvents<
   >,
 > = {
   [ObjectFieldEvents.Change]: ObjectValue<T>;
+  [ObjectFieldEvents.Error]: BizError;
   [ObjectFieldEvents.StateChange]: ObjectFieldCoreState;
 };
 
@@ -872,6 +891,8 @@ export class ObjectFieldCore<
       })();
     }
     if (errors.length > 0) {
+      const error = new BizError(errors);
+      this._bus.emit(ObjectFieldEvents.Error, error);
       return Result.Err(errors);
     }
     const errors2: string[] = [];
@@ -885,6 +906,8 @@ export class ObjectFieldCore<
       }
     }
     if (errors2.length > 0) {
+      const error = new BizError(errors2);
+      this._bus.emit(ObjectFieldEvents.Error, error);
       return Result.Err(errors2);
     }
     return Result.Ok(results);
@@ -922,6 +945,11 @@ export class ObjectFieldCore<
     handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.Change]>,
   ) {
     return this._bus.on(ObjectFieldEvents.Change, handler);
+  }
+  onError(
+    handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.Error]>,
+  ) {
+    return this._bus.on(ObjectFieldEvents.Error, handler);
   }
   onStateChange(
     handler: Handler<

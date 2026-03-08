@@ -8,14 +8,11 @@ import {
   ViewChildren,
   FieldPrimitive,
   Switch,
+  h,
 } from "@timeless/headless";
 import { SingleFieldCore, ObjectFieldCore, ArrayFieldCore } from "@timeless/ui";
 import { XOutlined } from "@timeless/icons";
 
-import { Input } from "./input";
-import { Textarea } from "./textarea";
-import { Checkbox } from "./checkbox";
-import { Select } from "./select";
 import { Button } from "./button";
 
 export function Field(
@@ -23,9 +20,13 @@ export function Field(
   children: ViewChildren = [],
 ) {
   const state_ = refobj(props.store.state);
+  const error_ = refobj(props.store.state.error);
 
   props.store.onStateChange((v) => {
     state_.as(v);
+  });
+  props.store.onError((v) => {
+    error_.as(v);
   });
 
   // 生成唯一的 field id
@@ -67,9 +68,9 @@ export function Field(
         ]),
       ]),
     ]),
-    Show({ when: computed(state_, (s) => !!s.error) }, [
-      View({ class: error_class_ }, [
-        computed(state_, (s) => s.error?.message || ""),
+    Show({ when: computed(error_, (t) => !!t) }, [
+      h(View, { class: error_class_ }, [
+        computed(error_, (t) => (t ? t.message : "")),
       ]),
     ]),
     // Show(

@@ -1,5 +1,5 @@
 import { combine, computed, refobj } from "@timeless/reactive";
-import { InputPrimitive, View, ViewProps } from "@timeless/headless";
+import { InputPrimitive, Show, View, ViewProps } from "@timeless/headless";
 import { InputCore } from "@timeless/ui";
 import { CircleXOutlined, LoaderOutlined } from "@timeless/icons";
 
@@ -34,32 +34,32 @@ export function Input(
         }),
         ...rest,
       }),
-      showClear
-        ? InputPrimitive.Clear(
-            {
-              store,
-              class: computed(hasValue, (has) =>
-                has
-                  ? "absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
-                  : "hidden",
-              ),
-            },
-            [CircleXOutlined({ class: "h-4 w-4" })],
-          )
-        : null,
-      showLoading
-        ? InputPrimitive.Loading(
-            {
-              store,
-              class: computed(isLoading, (loading) =>
-                loading
-                  ? "absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500"
-                  : "hidden",
-              ),
-            },
-            [LoaderOutlined({ class: "h-4 w-4 animate-spin" })],
-          )
-        : null,
+      Show({ when: computed(hasValue, (t) => t && showClear) }, [
+        InputPrimitive.Clear(
+          {
+            store,
+            class: computed(hasValue, (has) =>
+              has
+                ? "absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                : "hidden",
+            ),
+          },
+          [CircleXOutlined({ class: "h-4 w-4" })],
+        ),
+      ]),
+      Show({ when: computed(isLoading, (t) => t && showLoading) }, [
+        InputPrimitive.Loading(
+          {
+            store,
+            class: computed(isLoading, (loading) =>
+              loading
+                ? "absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500"
+                : "hidden",
+            ),
+          },
+          [LoaderOutlined({ class: "h-4 w-4 animate-spin" })],
+        ),
+      ]),
     ],
   );
 }

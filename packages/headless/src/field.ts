@@ -1,7 +1,9 @@
-import { View, ViewProps, ViewChildren } from "./view";
 import { computed, refobj } from "@timeless/reactive";
 import { SingleFieldCore, ObjectFieldCore, ArrayFieldCore } from "@timeless/ui";
+
+import { View, ViewProps, ViewChildren } from "./view";
 import { For } from "./for";
+import { Show } from "./show";
 
 export function Field(
   props: ViewProps & { store: SingleFieldCore<any> },
@@ -29,13 +31,22 @@ export namespace Field {
   }
 
   export function Error(
-    props: ViewProps & { store: SingleFieldCore<any> },
+    props: ViewProps & { store: SingleFieldCore<any>; fallback?: ViewChildren },
     children?: ViewChildren,
   ) {
     const state_ = refobj(props.store.state);
+
     props.store.onStateChange((v) => state_.as(v));
 
-    return View(props, children || [computed(state_, (s) => s.error?.message || "")]);
+    return Show(
+      {
+        when: computed(state_, (t) => {
+          return !!t.error;
+        }),
+        fallback: props.fallback,
+      },
+      children,
+    );
   }
 
   export function Help(
@@ -55,7 +66,10 @@ export function ObjectField(
 
 export namespace ObjectField {
   export function Fields(
-    props: ViewProps & { store: ObjectFieldCore<any>; render: (fieldName: string, field: SingleFieldCore<any>) => ViewChildren },
+    props: ViewProps & {
+      store: ObjectFieldCore<any>;
+      render: (fieldName: string, field: SingleFieldCore<any>) => ViewChildren;
+    },
   ) {
     const state_ = refobj(props.store.state);
     props.store.onStateChange((v) => state_.as(v));
@@ -80,7 +94,10 @@ export function ArrayField(
 
 export namespace ArrayField {
   export function Items(
-    props: ViewProps & { store: ArrayFieldCore<any>; render: (item: any, index: number) => ViewChildren },
+    props: ViewProps & {
+      store: ArrayFieldCore<any>;
+      render: (item: any, index: number) => ViewChildren;
+    },
   ) {
     const state_ = refobj(props.store.state);
     props.store.onStateChange((v) => state_.as(v));
@@ -106,13 +123,16 @@ export namespace ArrayField {
     children?: ViewChildren,
   ) {
     const { store, onClick, ...rest } = props;
-    return View({
-      ...rest,
-      onClick(e: any) {
-        store.append();
-        if (onClick) onClick(e);
+    return View(
+      {
+        ...rest,
+        onClick(e: any) {
+          store.append();
+          if (onClick) onClick(e);
+        },
       },
-    }, children);
+      children,
+    );
   }
 
   export function Remove(
@@ -120,13 +140,16 @@ export namespace ArrayField {
     children?: ViewChildren,
   ) {
     const { store, id, onClick, ...rest } = props;
-    return View({
-      ...rest,
-      onClick(e: any) {
-        store.remove(id);
-        if (onClick) onClick(e);
+    return View(
+      {
+        ...rest,
+        onClick(e: any) {
+          store.remove(id);
+          if (onClick) onClick(e);
+        },
       },
-    }, children);
+      children,
+    );
   }
 
   export function Unshift(
@@ -134,12 +157,15 @@ export namespace ArrayField {
     children?: ViewChildren,
   ) {
     const { store, onClick, ...rest } = props;
-    return View({
-      ...rest,
-      onClick(e: any) {
-        store.insertBefore(store.fields[0]?.id ?? 0);
-        if (onClick) onClick(e);
+    return View(
+      {
+        ...rest,
+        onClick(e: any) {
+          store.insertBefore(store.fields[0]?.id ?? 0);
+          if (onClick) onClick(e);
+        },
       },
-    }, children);
+      children,
+    );
   }
 }

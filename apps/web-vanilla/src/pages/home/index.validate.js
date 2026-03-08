@@ -59,6 +59,11 @@ export default function FormValidateView() {
             defaultValue: "",
             placeholder: "请输入 Access Key",
           }),
+          rules: [
+            {
+              required: true,
+            },
+          ],
         }),
         secret_key: new Timeless.ui.SingleFieldCore({
           label: "Secret Key",
@@ -208,5 +213,21 @@ export default function FormValidateView() {
       }),
     ]),
     ObjectFieldRender(configure$_),
+    Button(
+      {
+        store: new Timeless.ui.ButtonCore({
+          async onClick() {
+            const r = await configure$_.value.validate();
+            if (r.error) {
+              console.log(r.error);
+              return;
+            }
+            const values = r.data;
+            console.log(values);
+          },
+        }),
+      },
+      ["Submit"],
+    ),
   ]);
 }
