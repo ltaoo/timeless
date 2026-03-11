@@ -47,13 +47,13 @@ export function Popover(
           },
           [
             View({
-              onMounted($el) {
+              onMounted($el: HTMLDivElement) {
                 props.store.popper.setArrowElement($el);
               },
               class: computed(popper_state_, (t) => {
                 const side = t.placedSide;
                 const base =
-                  "absolute w-3 h-3 rotate-45 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800";
+                  "absolute w-3 h-3 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800";
                 // side is where the popover is placed.
                 // if side is 'bottom', arrow is at top, so we need border-t border-l
                 let borderClass = "";
