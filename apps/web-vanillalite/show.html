@@ -166,11 +166,6 @@
             })
           },
         }, ["Toggle"]),
-        Fragment({}, [
-          h(Show, { when: visible_ }, ["Visible1"]),
-          Show({ when: visible_ }, ["Visible2"]),
-          View({}, "hello")
-        ]),
         h(Show, { when: visible_ }, ["Visible3"]),
       ]);
 

@@ -3,6 +3,8 @@ function ApplicationRootView() {
     DropdownMenu(
       {
         store: new Timeless.ui.DropdownMenuCore({
+          side: "right",
+          align: "start",
           items: [
             new Timeless.ui.MenuItemCore({
               label: "Edit",
@@ -55,6 +57,7 @@ function ApplicationRootView() {
         Button(
           {
             variant: "outline",
+            style: "margin-top: 120px; margin-left: 48px;",
             store: new Timeless.ui.ButtonCore({
               onClick() {
                 console.log("click Open Menu");

@@ -98,31 +98,29 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
       ],
     ),
     (() => {
-      console.log("DropdownMenuItem render", props.store.label);
+      // console.log("DropdownMenuItem render", props.store.label);
       const inner$ = props.store.menu
-        ? DropdownMenuPrimitive.Portal({ store: props.store.menu }, [
-            DropdownMenuPrimitive.SubMenuContent(
-              {
-                store: props.store.menu,
-                animation: {
-                  in: "animate-in fade-in-0 zoom-in-95",
-                  out: "animate-out fade-out-0 zoom-out-95",
-                },
+        ? DropdownMenuPrimitive.SubMenuContent(
+            {
+              store: props.store.menu,
+              animation: {
+                in: "animate-in fade-in-0 zoom-in-95",
+                out: "animate-out fade-out-0 zoom-out-95",
               },
-              [
-                View({ class: MENU_CONTENT_CLASS }, [
-                  For({
-                    each: computed(menu_state_, (t) => {
-                      return t.items;
-                    }),
-                    render(item: MenuItemCore) {
-                      return DropdownMenuItem({ store: item });
-                    },
+            },
+            [
+              View({ class: MENU_CONTENT_CLASS }, [
+                For({
+                  each: computed(menu_state_, (t) => {
+                    return t.items;
                   }),
-                ]),
-              ],
-            ),
-          ])
+                  render(item: MenuItemCore) {
+                    return DropdownMenuItem({ store: item });
+                  },
+                }),
+              ]),
+            ],
+          )
         : null;
       return View({}, [inner$]);
     })(),

@@ -116,6 +116,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.hide();
     });
     this.presence.onStateChange(() => {
+      this.state.open = this.presence.state.mounted;
       this.state.enter = this.presence.state.enter;
       this.state.exit = this.presence.state.exit;
       this.emit(Events.StateChange, { ...this.state });
@@ -183,9 +184,9 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     }
     console.log("[DEBUG-MENU] show()", this._name);
     // console.trace("[DEBUG-MENU] show() call stack");
-    this.state.open = true;
-    this.state.enter = this.presence.enter;
-    this.state.exit = this.presence.exit;
+    // this.state.open = true;
+    // this.state.enter = this.presence.enter;
+    // this.state.exit = this.presence.exit;
     this.presence.show();
     this.popper.place();
     this.emit(Events.Show);

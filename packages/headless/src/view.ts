@@ -339,16 +339,16 @@ export function View(
       }
     },
     onUnmounted() {
-      console.log(
-        "[View] onUnmounted called, children count:",
-        _children.length,
-      );
+      // console.log(
+      //   "[View] onUnmounted called, children count:",
+      //   _children.length,
+      // );
       if (onMountedCleanup) {
-        console.log("[View] calling onMounted cleanup function");
+        // console.log("[View] calling onMounted cleanup function");
         onMountedCleanup();
       }
       if (props.onUnmounted) {
-        console.log("[View] calling props.onUnmounted");
+        // console.log("[View] calling props.onUnmounted");
         props.onUnmounted();
       }
       for (let i = 0; i < _children.length; i += 1) {
@@ -356,20 +356,20 @@ export function View(
         if (isElement(node)) {
           // 如果是 Portal 组件，调用其 cleanup 方法
           if (node.t === "portal" && typeof node.cleanup === "function") {
-            console.log("[View] calling cleanup on Portal child");
+            // console.log("[View] calling cleanup on Portal child");
             node.cleanup();
           } else if (node.onUnmounted) {
             // 否则调用标准的 onUnmounted
-            console.log("[View] calling onUnmounted on child:", node.t);
+            // console.log("[View] calling onUnmounted on child:", node.t);
             node.onUnmounted();
           }
         }
       }
-      console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
+      // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
       while ($elm.firstChild) {
         $elm.removeChild($elm.firstChild);
       }
-      console.log("[View] onUnmounted completed");
+      // console.log("[View] onUnmounted completed");
     },
   };
 }

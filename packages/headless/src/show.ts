@@ -25,8 +25,8 @@ export function Show(
   const onUnmounted = isObjectProps ? props.onUnmounted : undefined;
   const anchor = document.createTextNode("");
 
-  let _currentNodes: Node[] = [];
-  let _currentChildren: any[] = [];
+  let _current_nodes: Node[] = [];
+  let _current_children: any[] = [];
   let _prev_condition: boolean | null = null;
 
   // Normalize children helper
@@ -42,56 +42,60 @@ export function Show(
     return condition ? _children : _fallback;
   };
 
-  const unmount = (removeDom = false) => {
-    console.log(
-      "[Show] unmount called, removeDom:",
-      removeDom,
-      "_currentChildren:",
-      _currentChildren.length,
-      "_currentNodes:",
-      _currentNodes.length,
-    );
+  const unmount = (
+    event: Partial<{ reason: string; removeDom: boolean }> = {
+      removeDom: false,
+    },
+  ) => {
+    // console.log(
+    //   "[Show] unmount called, removeDom:",
+    //   event.removeDom,
+    //   "_currentChildren:",
+    //   _current_children.length,
+    //   "_currentNodes:",
+    //   _current_nodes.length,
+    // );
 
     // Lifecycle - 先调用 beforeUnmounted
-    for (const child of _currentChildren) {
+    for (const child of _current_children) {
       if (isElement(child) && child.beforeUnmounted) {
-        console.log("[Show] calling beforeUnmounted on child:", child.t);
+        // console.log("[Show] calling beforeUnmounted on child:", child.t);
         child.beforeUnmounted();
       }
     }
     // Lifecycle - 对于 Portal 组件，调用 cleanup 方法
-    for (const child of _currentChildren) {
+    for (const child of _current_children) {
       if (isElement(child)) {
         // 如果是 Portal 组件，调用其 cleanup 方法
         if (child.t === "portal" && typeof child.cleanup === "function") {
-          console.log("[Show] calling cleanup on Portal child");
+          // console.log("[Show] calling cleanup on Portal child");
           child.cleanup();
         } else if (child.onUnmounted) {
           // 否则调用标准的 onUnmounted
-          console.log("[Show] calling onUnmounted on child:", child.t);
+          // console.log("[Show] calling onUnmounted on child:", child.t);
           child.onUnmounted();
         }
       }
     }
     // DOM removal
-    if (removeDom) {
-      console.log("[Show] removing DOM nodes, count:", _currentNodes.length);
-      for (const node of _currentNodes) {
+    if (event.removeDom) {
+      // console.log("[Show] removing DOM nodes, count:", _current_nodes.length);
+      for (const node of _current_nodes) {
         // 直接检查节点是否还有父节点，不依赖 anchor.parentNode
-        console.log(
-          "[Show] checking node:",
-          node.nodeName,
-          "parentNode:",
-          !!node.parentNode,
-        );
+        // console.log(
+        //   "[Show] checking node:",
+        //   node.nodeName,
+        //   "parentNode:",
+        //   !!node.parentNode,
+        // );
         if (node.parentNode) {
-          console.log("[Show] removing node from parent");
+          // console.log("[Show] removing node from parent");
           node.parentNode.removeChild(node);
         }
       }
     }
-    _currentNodes = [];
-    _currentChildren = [];
+    _current_nodes = [];
+    _current_children = [];
     console.log("[Show] unmount completed");
   };
 
@@ -126,8 +130,8 @@ export function Show(
       }
     }
 
-    _currentNodes = newNodes;
-    _currentChildren = newInstances;
+    _current_nodes = newNodes;
+    _current_children = newInstances;
 
     if (parent) {
       parent.insertBefore(fragment, before || null);
@@ -147,16 +151,16 @@ export function Show(
     when._subscribe({
       onChange(value: boolean) {
         const condition = !!value;
-        console.log(
-          "[]Show onChange",
-          condition,
-          "_prev_condition:",
-          _prev_condition,
-          "_currentNodes.length:",
-          _currentNodes.length,
-          "anchor.parentNode:",
-          !!anchor.parentNode,
-        );
+        // console.log(
+        //   "[]Show onChange",
+        //   condition,
+        //   "_prev_condition:",
+        //   _prev_condition,
+        //   "_currentNodes.length:",
+        //   _current_nodes.length,
+        //   "anchor.parentNode:",
+        //   !!anchor.parentNode,
+        // );
 
         // 如果条件没有变化，直接返回
         if (condition === _prev_condition) {
@@ -167,7 +171,7 @@ export function Show(
         _prev_condition = condition;
 
         // 先卸载当前内容
-        unmount(true);
+        unmount({ reason: "handle when value change", removeDom: true });
 
         // 如果新条件为 true，挂载新内容
         const target = getTargetChildren(condition);
@@ -182,9 +186,12 @@ export function Show(
     t: "show",
     $elm: anchor as any,
     cleanup() {
-      console.log("[Show] cleanup called");
+      // console.log("[Show] cleanup called");
       // 清理当前挂载的所有内容
-      unmount(true);
+      unmount({
+        reason: "call cleanup",
+        removeDom: true,
+      });
     },
     render() {
       const condition = isRef(when) ? !!when.value : !!when;
@@ -203,15 +210,20 @@ export function Show(
     },
     beforeUnmounted() {
       if (beforeUnmounted) beforeUnmounted();
-      for (const child of _currentChildren) {
+      for (const child of _current_children) {
         if (isElement(child) && child.beforeUnmounted) {
           child.beforeUnmounted();
         }
       }
     },
     onUnmounted() {
-      if (onUnmounted) onUnmounted();
-      unmount(false);
+      if (onUnmounted) {
+        onUnmounted();
+      }
+      unmount({
+        reason: "onUnmounted handler",
+        removeDom: false,
+      });
     },
   };
 }

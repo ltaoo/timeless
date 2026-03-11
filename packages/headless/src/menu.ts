@@ -24,22 +24,7 @@ export function Anchor(
 ) {
   // console.log("[Menu Anchor] created");
   return PopperPrimitive.Anchor(
-    {
-      ...props,
-      store: props.store.popper,
-      onMounted($el) {
-        // console.log("[Menu Anchor] mounted");
-        if (props.onMounted) {
-          props.onMounted($el);
-        }
-      },
-      onUnmounted() {
-        // console.log("[Menu Anchor] unmounted");
-        if (props.onUnmounted) {
-          props.onUnmounted();
-        }
-      },
-    },
+    { ...props, store: props.store.popper },
     children,
   );
 }
@@ -86,60 +71,68 @@ export function ContentImpl(
   const state_ = refobj(props.store.state);
   const presence_ = refobj(props.store.presence.state);
 
-  props.store.onStateChange((v) => {
-    state_.as(v);
-  });
-
-  props.store.presence.onStateChange((v) => {
-    console.log(v.mounted, v.enter, v.exit);
-    presence_.as(v);
-  });
-
   return h(
     Show,
     {
       when: computed(presence_, (t) => {
         return t.mounted;
       }),
+      onMounted() {
+        const listeners = [
+          props.store.onStateChange((v) => {
+            state_.as(v);
+          }),
+          props.store.presence.onStateChange((v) => {
+            presence_.as(v);
+          }),
+        ];
+        return () => {
+          for (let i = 0; i < listeners.length; i += 1) {
+            listeners[i]();
+          }
+        };
+      },
     },
     [
-      PopperPrimitive.Content(
-        {
-          store: props.store.popper,
-          onDismiss() {
-            props.store.hide();
-          },
-          onReferenceOutOfView() {
-            props.store.hide();
-          },
-          onMouseEnter(event) {
-            if (rest.onMouseEnter) {
-              rest.onMouseEnter(event);
-            }
-          },
-          onMouseLeave(event) {
-            props.store.handleLeave();
-            if (rest.onMouseLeave) {
-              rest.onMouseLeave(event);
-            }
-          },
-        },
-        [
-          View(
-            {
-              class: computed(presence_, (t) => {
-                return [
-                  t.enter && animation?.in ? animation.in : "",
-                  t.exit && animation?.out ? animation.out : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ");
-              }),
+      NativePortal({}, [
+        PopperPrimitive.Content(
+          {
+            store: props.store.popper,
+            onDismiss() {
+              props.store.hide();
             },
-            children,
-          ),
-        ],
-      ),
+            onReferenceOutOfView() {
+              props.store.hide();
+            },
+            onMouseEnter(event) {
+              if (rest.onMouseEnter) {
+                rest.onMouseEnter(event);
+              }
+            },
+            onMouseLeave(event) {
+              props.store.handleLeave();
+              if (rest.onMouseLeave) {
+                rest.onMouseLeave(event);
+              }
+            },
+          },
+          [
+            View(
+              {
+                class: computed(presence_, (t) => {
+                  return [
+                    t.enter && animation?.in ? animation.in : "",
+                    t.exit && animation?.out ? animation.out : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ");
+                }),
+              },
+              children,
+            ),
+          ],
+        ),
+      ]),
     ],
   );
 }
@@ -238,7 +231,7 @@ export function SubMenu(
   props: ViewProps & { store: MenuCore },
   children: ViewChildren,
 ) {
-  return PopperPrimitive.Root(
+  return PopperPrimitive.Content(
     { ...props, store: props.store.popper },
     children,
   );
@@ -295,28 +288,28 @@ export function SubMenuContent(
       onMounted($el) {
         console.log("[SubMenuContent] mounted");
         // Add hover event listeners to keep submenu open
-        $el.addEventListener("mouseenter", () => {
-          console.log("[SubMenuContent] mouseenter");
-          if (props.store.hide_sub_timer) {
-            clearTimeout(props.store.hide_sub_timer);
-            props.store.hide_sub_timer = null;
-          }
-          // 清除父菜单的定时器
-          if (
-            props.store.parent_menu &&
-            props.store.parent_menu.hide_sub_timer
-          ) {
-            clearTimeout(props.store.parent_menu.hide_sub_timer);
-            props.store.parent_menu.hide_sub_timer = null;
-          }
-        });
-        $el.addEventListener("mouseleave", () => {
-          console.log("[SubMenuContent] mouseleave");
-          props.store.hide_sub_timer = setTimeout(() => {
-            props.store.hide_sub_timer = null;
-            props.store.hide();
-          }, 200);
-        });
+        // $el.addEventListener("mouseenter", () => {
+        //   console.log("[SubMenuContent] mouseenter");
+        //   if (props.store.hide_sub_timer) {
+        //     clearTimeout(props.store.hide_sub_timer);
+        //     props.store.hide_sub_timer = null;
+        //   }
+        //   // 清除父菜单的定时器
+        //   if (
+        //     props.store.parent_menu &&
+        //     props.store.parent_menu.hide_sub_timer
+        //   ) {
+        //     clearTimeout(props.store.parent_menu.hide_sub_timer);
+        //     props.store.parent_menu.hide_sub_timer = null;
+        //   }
+        // });
+        // $el.addEventListener("mouseleave", () => {
+        //   console.log("[SubMenuContent] mouseleave");
+        //   props.store.hide_sub_timer = setTimeout(() => {
+        //     props.store.hide_sub_timer = null;
+        //     props.store.hide();
+        //   }, 200);
+        // });
         if (props.onMounted) {
           props.onMounted($el);
         }

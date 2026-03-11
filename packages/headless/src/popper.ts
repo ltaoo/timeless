@@ -68,12 +68,6 @@ export function Content(
 
   const state_ = refobj(store.state);
 
-  const unlisteners = [
-    store.onStateChange((v) => {
-      state_.as(v);
-    }),
-  ];
-
   // 初始化全局监听器
   initGlobalPointerListener();
 
@@ -95,6 +89,7 @@ export function Content(
             left: 0,
             top: 0,
             opacity: t.isPlaced ? 1 : 0,
+            "pointer-event": t.isPlaced ? "initial" : "none",
             transform: t.isPlaced
               ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
               : "translate3d(0, 0, 0)",
@@ -150,7 +145,6 @@ export function Content(
                 return false;
               }
               const rect = $element.getBoundingClientRect();
-
               // 同时检查 anchor 元素
               const $anchor_el = (store.reference as any)?.$el as
                 | HTMLElement
@@ -182,7 +176,11 @@ export function Content(
         if (rest.onMounted) {
           rest.onMounted($e);
         }
+        const unlisten = store.onStateChange((v) => {
+          state_.as(v);
+        });
         return () => {
+          unlisten();
           store.setFloating(null);
           if (handleScroll) {
             window.removeEventListener("scroll", handleScroll, true);
@@ -196,9 +194,9 @@ export function Content(
       },
       onUnmounted() {
         // 清理监听器
-        for (const unlisten of unlisteners) {
-          unlisten();
-        }
+        // for (const unlisten of unlisteners) {
+        //   unlisten();
+        // }
         if (rest.onUnmounted) {
           rest.onUnmounted();
         }

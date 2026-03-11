@@ -134,8 +134,7 @@ export function Trigger(
               "[headless/dropdown-menu]Trigger - click button in pointerdown callback",
               rect,
             );
-            // props.store.toggle();
-            props.store.menu.presence.show();
+            props.store.menu.show();
           });
         }
         // Handle hover trigger
@@ -219,30 +218,30 @@ export function SubMenuContent(
   children: ViewChildren,
 ) {
   // Get the parent DropdownMenuCore from the menu's parent
-  const parentDropdown = (props.store as any).parentDropdown as
-    | DropdownMenuCore
-    | undefined;
+  // const parentDropdown = (props.store as any).parentDropdown as
+  //   | DropdownMenuCore
+  //   | undefined;
 
-  const hoverHandlers =
-    parentDropdown && parentDropdown.trigger === "hover"
-      ? {
-          onMouseEnter() {
-            console.log("[DropdownMenu SubMenuContent] mouseenter");
-            // Cancel parent dropdown hide timer when entering submenu
-            _hoverClearHide(parentDropdown);
-          },
-          onMouseLeave() {
-            console.log("[DropdownMenu SubMenuContent] mouseleave");
-            // Schedule parent dropdown hide when leaving submenu
-            _hoverScheduleHide(parentDropdown);
-          },
-        }
-      : {};
+  // const hoverHandlers =
+  //   parentDropdown && parentDropdown.trigger === "hover"
+  //     ? {
+  //         onMouseEnter() {
+  //           console.log("[DropdownMenu SubMenuContent] mouseenter");
+  //           // Cancel parent dropdown hide timer when entering submenu
+  //           _hoverClearHide(parentDropdown);
+  //         },
+  //         onMouseLeave() {
+  //           console.log("[DropdownMenu SubMenuContent] mouseleave");
+  //           // Schedule parent dropdown hide when leaving submenu
+  //           _hoverScheduleHide(parentDropdown);
+  //         },
+  //       }
+  //     : {};
 
-  return MenuPrimitive.SubMenuContent(
+  return MenuPrimitive.Content(
     {
       ...props,
-      ...hoverHandlers,
+      // ...hoverHandlers,
     },
     children,
   );
