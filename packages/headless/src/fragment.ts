@@ -44,8 +44,13 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
     render() {
       console.log("[Fragment] render, children count:", _children.length);
       for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+        let node = _children[i];
         if (!node) continue;
+        // 处理 h() 返回的延迟执行函数
+        if (typeof node === "function") {
+          node = node();
+          _children[i] = node;
+        }
         if (typeof node === "string" || typeof node === "number") {
           $fragment.appendChild(document.createTextNode(String(node)));
           continue;

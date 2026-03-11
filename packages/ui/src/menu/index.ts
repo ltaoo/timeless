@@ -80,13 +80,13 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     this.state.items = items;
     this.items = items;
 
-    console.log("[DOMAIN]ui/menu/index - constructor", {
-      name: this._name,
-      items: items.map((v) => v.label),
-      side,
-      align,
-      strategy,
-    });
+    // console.log("[DOMAIN]ui/menu/index - constructor", {
+    //   name: this._name,
+    //   items: items.map((v) => v.label),
+    //   side,
+    //   align,
+    //   strategy,
+    // });
 
     this.popper = new PopperCore({
       side,

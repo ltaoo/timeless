@@ -25,6 +25,7 @@ export * from "./context-menu";
 export * from "./dialog";
 export * from "./direction";
 export * from "./dismissable-layer";
+export * from "./layer";
 export * from "./dropdown-menu";
 export * from "./focus-scope";
 export * from "./form";

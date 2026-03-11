@@ -1,25 +1,19 @@
-import { ref, refobj, computed, combine } from "@timeless/reactive";
+import { refobj, computed, combine } from "@timeless/reactive";
 import { MenuCore, MenuItemCore } from "@timeless/ui";
-import { ChevronRightOutlined } from "@timeless/icons";
 
-import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
-import { Txt } from "./text";
-import { For } from "./for";
+import { View, ViewChildren, ViewProps } from "./view";
 import { Show } from "./show";
 import { Portal as NativePortal } from "./portal";
-import { Presence } from "./presence";
-import * as PopperPrimitive from "./popper";
 import { Arrow as NativeArrow } from "./arrow";
+import * as PopperPrimitive from "./popper";
+import { h } from "./h";
 
 export function Root(
   props: ViewProps & { store: MenuCore },
   children?: ViewChildren,
 ) {
   return PopperPrimitive.Root(
-    {
-      ...props,
-      store: props.store.popper,
-    },
+    { ...props, store: props.store.popper },
     children,
   );
 }
@@ -28,19 +22,19 @@ export function Anchor(
   props: ViewProps & { store: MenuCore },
   children: ViewChildren = [],
 ) {
-  console.log("[Menu Anchor] created");
+  // console.log("[Menu Anchor] created");
   return PopperPrimitive.Anchor(
     {
       ...props,
       store: props.store.popper,
       onMounted($el) {
-        console.log("[Menu Anchor] mounted");
+        // console.log("[Menu Anchor] mounted");
         if (props.onMounted) {
           props.onMounted($el);
         }
       },
       onUnmounted() {
-        console.log("[Menu Anchor] unmounted");
+        // console.log("[Menu Anchor] unmounted");
         if (props.onUnmounted) {
           props.onUnmounted();
         }
@@ -89,54 +83,33 @@ export function ContentImpl(
 ) {
   const { animation, ...rest } = props;
 
-  // Create a function that returns all parent layers as an array
-  const getAllParentLayers = () => {
-    const layers: any[] = [];
-    let currentMenu = props.store.parent_menu;
-    while (currentMenu) {
-      if (currentMenu.layer) {
-        layers.push(currentMenu.layer);
-      }
-      currentMenu = currentMenu.parent_menu;
-    }
-    return layers;
-  };
-
-  // Determine if this is a root layer (no parent menu)
-  const isRootLayer = !props.store.parent_menu;
-
-  const state = refobj(props.store.state);
-  const presenceState = refobj(props.store.presence.state);
+  const state_ = refobj(props.store.state);
+  const presence_ = refobj(props.store.presence.state);
 
   props.store.onStateChange((v) => {
-    state.as(v);
+    state_.as(v);
   });
 
   props.store.presence.onStateChange((v) => {
-    presenceState.as(v);
+    console.log(v.mounted, v.enter, v.exit);
+    presence_.as(v);
   });
 
-  return Show(
+  return h(
+    Show,
     {
-      when: combine([state, presenceState], (menuState, pState) => {
-        // console.log("[ContentImpl Show when]", {
-        //   open: menuState.open,
-        //   exit: pState.exit,
-        //   result: menuState.open || pState.exit,
-        // });
-        // Keep mounted when open, or during exit animation
-        return menuState.open || pState.exit;
+      when: computed(presence_, (t) => {
+        return t.mounted;
       }),
     },
     [
       PopperPrimitive.Content(
         {
           store: props.store.popper,
-          layer: props.store.layer,
-          getAllParentLayers,
-          isRootLayer,
+          onDismiss() {
+            props.store.hide();
+          },
           onReferenceOutOfView() {
-            // Close the menu when reference is out of viewport
             props.store.hide();
           },
           onMouseEnter(event) {
@@ -154,7 +127,7 @@ export function ContentImpl(
         [
           View(
             {
-              class: computed(presenceState, (t) => {
+              class: computed(presence_, (t) => {
                 return [
                   t.enter && animation?.in ? animation.in : "",
                   t.exit && animation?.out ? animation.out : "",
@@ -205,7 +178,7 @@ export function ItemImpl(
       "tab-index": computed(state_, (t) => {
         return t.disabled ? undefined : -1;
       }),
-      onMounted($el) {
+      onMounted($el: HTMLDivElement) {
         // console.log("[ItemImpl] mounted", props.store.label);
         if (props.store.menu) {
           props.store.menu.popper.setReference({
@@ -279,7 +252,7 @@ export function SubMenuTrigger(
     {
       class: "menu-item-with-sub-menu",
       store: props.store.menu!,
-      onMounted($el) {
+      onMounted($el: HTMLDivElement) {
         if (!props.store.menu) {
           return;
         }

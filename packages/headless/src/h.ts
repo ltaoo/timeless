@@ -1,11 +1,11 @@
-import { TimelessNormalComponent } from "./view";
+import { TimelessElement } from "./view";
 
 // 创建延迟执行的组件包装器
-export function h<T extends TimelessNormalComponent>(
-  component: T,
-  props: Parameters<T>[0],
-  children?: any,
-) {
+export function h<P, R extends TimelessElement>(
+  component: (props: P, children?: any) => R,
+  props: P,
+  children: any = [],
+): () => R {
   return () => {
     return component(props, children);
   };

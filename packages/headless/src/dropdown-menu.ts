@@ -104,7 +104,6 @@ export function Trigger(
 ) {
   const { store, ...rest } = props;
 
-  const layer = props.store.menu.layer;
   const state_ = refobj(store.state);
 
   store.onStateChange((v) => {
@@ -113,11 +112,8 @@ export function Trigger(
 
   return View(
     {
-      onMounted($e) {
-        // if (rest.onMounted) {
-        //   rest.onMounted($e);
-        // }
-        const $ref = $e.firstElementChild || $e;
+      onMounted($elm: HTMLDivElement) {
+        const $ref = $elm.firstElementChild || $elm;
         props.store.menu.popper.setReference(
           {
             $el: $ref,
@@ -127,45 +123,40 @@ export function Trigger(
           },
           { force: true },
         );
-        // console.log("[]has layer?", !!layer, $ref);
 
         // Handle click trigger
         if (store.trigger === "click") {
-          if (layer) {
-            $e.addEventListener("pointerdown", () => {
-              layer.pointerDown();
-              const rect = $e.getBoundingClientRect();
-              console.log("[]click button in pointerdown callback", rect);
-              props.store.toggle();
-            });
-          } else {
-            $e.addEventListener("pointerdown", () => {
-              const rect = $e.getBoundingClientRect();
-              props.store.toggle({
-                x: rect.left,
-                y: rect.bottom + 4,
-                width: rect.width,
-                height: rect.height,
-              });
-            });
-          }
+          $elm.addEventListener("pointerdown", (e) => {
+            // 阻止冒泡，避免 LayerManager 立即关闭菜单
+            e.stopPropagation();
+            const rect = $elm.getBoundingClientRect();
+            console.log(
+              "[headless/dropdown-menu]Trigger - click button in pointerdown callback",
+              rect,
+            );
+            // props.store.toggle();
+            props.store.menu.presence.show();
+          });
         }
-
         // Handle hover trigger
         if (store.trigger === "hover") {
-          $e.addEventListener("mouseenter", () => {
-            if (store.disabled) return;
+          $elm.addEventListener("mouseenter", () => {
+            if (store.disabled) {
+              return;
+            }
             _hoverClearHide(store);
             store.show();
           });
 
-          $e.addEventListener("mouseleave", () => {
-            if (store.disabled) return;
+          $elm.addEventListener("mouseleave", () => {
+            if (store.disabled) {
+              return;
+            }
             _hoverScheduleHide(store);
           });
 
           // Prevent click from closing the menu in hover mode
-          $e.addEventListener("pointerdown", (e: any) => {
+          $elm.addEventListener("pointerdown", (e) => {
             e.stopPropagation();
           });
         }

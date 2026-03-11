@@ -34,14 +34,9 @@ export function Trigger(
   props: ViewProps & { store: PopoverCore },
   children?: ViewChildren,
 ) {
-  const layer = props.store.layer;
-
   return View(
     {
-      onMounted($e) {
-        // if (rest.onMounted) {
-        //   rest.onMounted($e);
-        // }
+      onMounted($e: HTMLDivElement) {
         const $ref = $e.firstElementChild || $e;
         props.store.popper.setReference(
           {
@@ -52,29 +47,13 @@ export function Trigger(
           },
           { force: true },
         );
-        // console.log("[]has layer?", !!layer, $ref);
-        if (layer) {
-          $e.addEventListener("pointerdown", () => {
-            layer.pointerDown();
-            const rect = $e.getBoundingClientRect();
-            console.log("[]click", rect);
-            props.store.toggle();
-          });
-        } else {
-          $e.addEventListener("pointerdown", () => {
-            const rect = $e.getBoundingClientRect();
-            props.store.toggle({
-              x: rect.left,
-              y: rect.bottom + 4,
-              width: rect.width,
-              height: rect.height,
-            });
-          });
-        }
+
+        $e.addEventListener("pointerdown", (e: any) => {
+          // 阻止冒泡，避免 LayerManager 立即关闭
+          e.stopPropagation();
+          props.store.toggle();
+        });
       },
-      // onUnmounted() {
-      //   if (rest.onUnmounted) rest.onUnmounted();
-      // },
     },
     children,
   );
@@ -100,7 +79,6 @@ export function Portal(
             fn();
           }
         }
-        // if (rest.onUnmounted) rest.onUnmounted();
       },
     },
     [
@@ -108,9 +86,10 @@ export function Portal(
         PopperPrimitive.Content(
           {
             store: props.store.popper,
-            layer: props.store.layer,
+            onDismiss() {
+              props.store.hide();
+            },
             onReferenceOutOfView() {
-              // Close the popover when reference is out of viewport
               props.store.hide();
             },
           },

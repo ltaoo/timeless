@@ -17,6 +17,7 @@ import { TimelessComponent, TimelessElement, View, ViewProps } from "./view";
 import { For } from "./for";
 import { Show } from "./show";
 import { LazyView } from "./lazy-view";
+import { h } from "./h";
 
 export function RouteSubViews(
   props: ViewProps & {
@@ -58,7 +59,8 @@ export function RouteSubViews(
       if (!PageView) {
         return NotFoundPageView;
       }
-      return Show(
+      return h(
+        Show,
         {
           when: computed(cur_subview, (d) => d && d.name === subview.name),
         },

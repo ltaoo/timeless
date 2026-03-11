@@ -5,7 +5,7 @@ import { View, ViewProps, TimelessElement, isElement } from "./view";
 export function For<T>(
   props: ViewProps & {
     each: T[] | Ref<T[]>;
-    render: (item: T, idx: number) => TimelessElement | null;
+    render: (item: T, idx: number) => TimelessElement | (() => TimelessElement) | null;
     key?: string;
   },
 ) {
@@ -335,7 +335,11 @@ export function For<T>(
         const item = nodes[i];
         // console.log("before mounted", i, item);
         _values[i] = item;
-        const res = render(item, i);
+        let res = render(item, i);
+        // 处理 h() 返回的延迟执行函数
+        if (typeof res === "function") {
+          res = res();
+        }
         (() => {
           if (!res) {
             _elements[i] = null;

@@ -126,13 +126,12 @@ export function Trigger(
           if (store.disabled) {
             return;
           }
-          store.layer.pointerDown();
+          // 阻止事件冒泡到 document，避免 LayerManager 立即关闭
+          e.stopPropagation();
           if (store.open) {
             props.store.blur();
           } else {
             props.store.focus();
-            // store.presence.show();
-            // store.show();
           }
         });
 
@@ -213,8 +212,9 @@ export function Content(
     PopperPrimitive.Content(
       {
         store: store.popper,
-        layer: store.layer,
-        isRootLayer: true,
+        onDismiss() {
+          store.hide();
+        },
       },
       [
         View(

@@ -18,7 +18,9 @@ export interface ViewProps {
   dataset?: Record<string, string>;
   htmlFor?: string;
   "tab-index"?: number | Ref<number | undefined>;
-  onMounted?(el: HTMLElement | SVGElement | Text | DocumentFragment): void | (() => void);
+  onMounted?(
+    el: HTMLElement | SVGElement | Text | DocumentFragment,
+  ): void | (() => void);
   beforeUnmounted?(): void;
   onUnmounted?(): void;
   onClick?(e: MouseEvent): void;
@@ -41,7 +43,10 @@ export interface ViewProps {
   key?: string | number;
 }
 
-export function View(props: ViewProps = {}, children?: ViewChildren | ViewChildren[number]) {
+export function View(
+  props: ViewProps = {},
+  children?: ViewChildren | ViewChildren[number],
+) {
   const {
     type = "div",
     as,
@@ -155,7 +160,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren | ViewChildr
         }
       }
       if (onClick) {
-        $elm.addEventListener("click", function (event: Event) {
+        $elm.addEventListener("click", function (event: MouseEvent) {
           if (onClick) {
             onClick(event);
           }
@@ -164,7 +169,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren | ViewChildr
 
       // Double click support for both mobile and desktop
       if (onDoubleClick) {
-        $elm.addEventListener("dblclick", function (event: Event) {
+        $elm.addEventListener("dblclick", function (event: MouseEvent) {
           if (onDoubleClick) {
             onDoubleClick(event);
           }
@@ -215,17 +220,17 @@ export function View(props: ViewProps = {}, children?: ViewChildren | ViewChildr
       }
 
       if (onPointerDown) {
-        $elm.addEventListener("pointerdown", function (event: Event) {
+        $elm.addEventListener("pointerdown", function (event: PointerEvent) {
           if (onPointerDown) onPointerDown(event);
         });
       }
       if (onFocus) {
-        $elm.addEventListener("focus", function (event: Event) {
+        $elm.addEventListener("focus", function (event: FocusEvent) {
           onFocus(event);
         });
       }
       if (onBlur) {
-        $elm.addEventListener("blur", function (event: Event) {
+        $elm.addEventListener("blur", function (event: FocusEvent) {
           if (onBlur) onBlur(event);
         });
       }
@@ -373,6 +378,7 @@ export function isElement(v: unknown): v is TimelessElement {
   if (v === null || v === undefined) {
     return false;
   }
+  // @ts-ignore
   if (v.t && v.$elm) {
     return true;
   }
@@ -382,7 +388,10 @@ export function isLazyElement(v: unknown): v is TimelessLazyComponent {
   if (v === null || v === undefined) {
     return false;
   }
-  if (v instanceof Promise || (v && typeof (v as Promise<unknown>).then === "function")) {
+  if (
+    v instanceof Promise ||
+    (v && typeof (v as Promise<unknown>).then === "function")
+  ) {
     return true;
   }
   return false;

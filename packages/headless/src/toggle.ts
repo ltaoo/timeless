@@ -16,11 +16,15 @@ export function Root(
     {
       ...rest,
       type: "button",
-      role: "switch",
-      "aria-checked": computed(() => store.state.checked),
+      // role: "switch",
+      // "aria-checked": computed(() => store.state.checked),
       onClick(e) {
-        if (e.target.tagName === "INPUT") return;
-        store.toggle();
+        if (e.target) {
+          if ((e.target as any).tagName === "INPUT") {
+            return;
+          }
+          // store.toggle();
+        }
       },
     },
     [
@@ -34,7 +38,7 @@ export function Root(
           onClick(e) {
             e.stopPropagation();
           },
-          onMounted(el) {
+          onMounted(el: any) {
             el.checked = store.state.checked;
             store.onStateChange(() => {
               el.checked = store.state.checked;

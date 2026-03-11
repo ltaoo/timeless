@@ -3,18 +3,17 @@ import {
   DropdownMenuPrimitive,
   For,
   View,
-  Portal,
-  Fragment,
   Show,
   ViewChildren,
   ViewProps,
+  Fragment,
+  h,
 } from "@timeless/headless";
 import { DropdownMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
 
 const MENU_CONTENT_CLASS =
   "min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-700 shadow-md dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50";
-
 const MENU_ITEM_CLASS =
   "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors";
 
@@ -24,36 +23,31 @@ export function DropdownMenu(
 ) {
   const state_ = refobj(props.store.state);
 
-  return Show({ when: !!children }, [
-    DropdownMenuPrimitive.Trigger({ store: props.store }, children),
-    DropdownMenuPrimitive.Portal({ store: props.store.menu }, [
-      DropdownMenuPrimitive.Content(
-        {
-          ...props,
-          animation: {
-            in: "animate-in fade-in-0 zoom-in-95",
-            out: "animate-out fade-out-0 zoom-out-95",
-          },
-        },
-        [
-          View({ class: MENU_CONTENT_CLASS }, [
-            For({
-              each: computed(state_, (t) => {
-                console.log(
-                  "[DropdownMenu For] items count:",
-                  t.items.length,
-                  t.items.map((i) => i.label),
-                );
-                return t.items;
-              }),
-              render(item: MenuItemCore) {
-                return DropdownMenuItem({ store: item });
-              },
-            }),
-          ]),
-        ],
-      ),
+  return Fragment({}, [
+    h(Show, { when: !!children }, [
+      DropdownMenuPrimitive.Trigger({ store: props.store }, children),
     ]),
+    DropdownMenuPrimitive.Content(
+      {
+        ...props,
+        animation: {
+          in: "animate-in fade-in-0 zoom-in-95",
+          out: "animate-out fade-out-0 zoom-out-95",
+        },
+      },
+      [
+        View({ class: MENU_CONTENT_CLASS }, [
+          For({
+            each: computed(state_, (t) => {
+              return t.items;
+            }),
+            render(item: MenuItemCore) {
+              return DropdownMenuItem({ store: item });
+            },
+          }),
+        ]),
+      ],
+    ),
   ]);
 }
 

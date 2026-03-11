@@ -79,7 +79,7 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
       const nodes: Node[] = [];
       const instances: any[] = [];
 
-      console.log("[Portal] render, children count:", _children.length);
+      // console.log("[Portal] render, children count:", _children.length);
 
       for (const child of _children) {
         if (!child) continue;

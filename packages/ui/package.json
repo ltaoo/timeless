@@ -115,6 +115,11 @@
       "import": "./dist/image/index.esm.js",
       "require": "./dist/image/index.js"
     },
+    "./layer": {
+      "types": "./dist/layer/index.d.ts",
+      "import": "./dist/layer/index.esm.js",
+      "require": "./dist/layer/index.js"
+    },
     "./menu": {
       "types": "./dist/menu/index.d.ts",
       "import": "./dist/menu/index.esm.js",

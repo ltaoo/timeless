@@ -1,16 +1,15 @@
+import { refobj, computed, cn, sn } from "@timeless/reactive";
 import {
-  refobj,
-  computed,
-  cn,
-  sn,
-  isRef,
-  classNames,
-} from "@timeless/reactive";
-import { PopperCore } from "@timeless/ui";
+  PopperCore,
+  getGlobalLayerManager,
+  initGlobalPointerListener,
+  Layer,
+} from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "./view";
-// import { Arrow } from "./arrow";
 import { Fragment } from "./fragment";
+
+let layer_id_counter = 0;
 
 export function Root(
   props: ViewProps & { store: PopperCore },
@@ -24,16 +23,14 @@ export function Anchor(
   children: ViewChildren,
 ) {
   const { store, ...rest } = props;
-  console.log("[Popper Anchor] created");
   return View(
     {
       ...rest,
-      onMounted($el) {
-        console.log("[Popper Anchor] mounted");
+      onMounted($el: HTMLDivElement) {
         store.setReference({
+          $el,
           getRect() {
-            const rect = $el.getBoundingClientRect();
-            return rect;
+            return $el.getBoundingClientRect();
           },
         });
         if (rest.onMounted) {
@@ -41,7 +38,6 @@ export function Anchor(
         }
       },
       onUnmounted() {
-        console.log("[Popper Anchor] unmounted");
         if (rest.onUnmounted) {
           rest.onUnmounted();
         }
@@ -55,10 +51,9 @@ export function Content(
   props: ViewProps & {
     zIndex?: number;
     store: PopperCore;
-    layer?: any;
-    getParentLayer?: () => any;
-    getAllParentLayers?: () => any[];
-    isRootLayer?: boolean;
+    /** 点击外部时的回调 */
+    onDismiss?: () => void;
+    /** 参考元素离开视口时的回调 */
     onReferenceOutOfView?: () => void;
   },
   children: ViewChildren = [],
@@ -66,24 +61,21 @@ export function Content(
   const {
     store,
     zIndex = 99,
-    layer,
-    getParentLayer,
-    getAllParentLayers,
-    isRootLayer = true,
+    onDismiss,
     onReferenceOutOfView,
     ...rest
   } = props;
 
   const state_ = refobj(store.state);
 
-  const unsliten = [
+  const unlisteners = [
     store.onStateChange((v) => {
       state_.as(v);
     }),
   ];
 
-  let handlePointerDown: any;
-  let handleScroll: any;
+  // 初始化全局监听器
+  initGlobalPointerListener();
 
   return View(
     {
@@ -92,32 +84,29 @@ export function Content(
       style: sn([
         rest.style,
         computed(state_, (t) => {
+          console.log("[Popper Content] computed style", {
+            placed: t.isPlaced,
+            x: t.x,
+            y: t.y,
+          });
           const ss: Record<string, any> = {
             "z-index": zIndex,
             position: "fixed",
             left: 0,
             top: 0,
-            opacity: t.isPlaced ? 100 : 0,
+            opacity: t.isPlaced ? 1 : 0,
             transform: t.isPlaced
               ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
               : "translate3d(0, 0, 0)",
           };
-          const r = Object.keys(ss)
-            .map((k) => {
-              return `${k}: ${ss[k]}`;
-            })
+          return Object.keys(ss)
+            .map((k) => `${k}: ${ss[k]}`)
             .join("; ");
-          console.log("rrrr", r);
-          return r;
         }),
       ]),
-      onMounted($e: HTMLElement) {
-        console.log(
-          "[PopperPrimitive.Content] mounted, has layer:",
-          !!layer,
-          "isRootLayer:",
-          isRootLayer,
-        );
+      onMounted($e: HTMLDivElement) {
+        const $element = $e;
+        const layer_id = `popper-${++layer_id_counter}`;
         store.setFloating({
           $el: $e,
           getRect() {
@@ -125,121 +114,90 @@ export function Content(
           },
         });
 
-        // Add scroll listener to update position on scroll
-        handleScroll = () => {
-          console.log("[PopperPrimitive.Content] scroll event triggered");
-          // Check if reference element is in viewport
+        // 滚动监听
+        function handleScroll() {
           if (store.reference) {
-            const refRect = store.reference.getRect();
-            console.log("[PopperPrimitive.Content] refRect:", refRect);
-
-            // Check if this is a virtual element (no real DOM element)
-            const refEl = (store.reference as any).$el;
-            const isVirtualElement = !refEl || !(refEl instanceof Element);
-            console.log(
-              "[PopperPrimitive.Content] isVirtualElement:",
-              isVirtualElement,
-              "refEl:",
-              refEl,
-            );
-
-            // For virtual elements (like context menu), close on scroll
-            if (isVirtualElement && onReferenceOutOfView) {
-              console.log(
-                "[PopperPrimitive.Content] virtual element detected, closing on scroll",
-              );
+            const ref_rect = store.reference.getRect();
+            const $ref_el = (store.reference as any).$el;
+            const is_virtual_element =
+              !$ref_el || !($ref_el instanceof Element);
+            // 虚拟元素（如右键菜单），滚动时关闭
+            if (is_virtual_element && onReferenceOutOfView) {
               onReferenceOutOfView();
               return;
             }
-
-            const isInViewport =
-              refRect.top < window.innerHeight &&
-              refRect.bottom > 0 &&
-              refRect.left < window.innerWidth &&
-              refRect.right > 0;
-
-            console.log(
-              "[PopperPrimitive.Content] isInViewport:",
-              isInViewport,
-            );
-
-            if (!isInViewport && onReferenceOutOfView) {
-              console.log(
-                "[PopperPrimitive.Content] calling onReferenceOutOfView",
-              );
+            // 检查参考元素是否在视口内
+            const is_in_viewport =
+              ref_rect.top < window.innerHeight &&
+              ref_rect.bottom > 0 &&
+              ref_rect.left < window.innerWidth &&
+              ref_rect.right > 0;
+            if (!is_in_viewport && onReferenceOutOfView) {
               onReferenceOutOfView();
               return;
             }
           }
-          console.log("[PopperPrimitive.Content] calling store.place()");
           store.place();
-        };
+        }
         window.addEventListener("scroll", handleScroll, true);
+        // 注册到 LayerManager
+        if (onDismiss) {
+          const layer_manager = getGlobalLayerManager();
+          const layer: Layer = {
+            id: layer_id,
+            containsPoint(x: number, y: number) {
+              if (!$element) {
+                return false;
+              }
+              const rect = $element.getBoundingClientRect();
 
-        if (layer) {
-          // Only register document listener for root layer
-          if (isRootLayer) {
-            handlePointerDown = () => {
-              console.log(
-                "[PopperPrimitive.Content] handlePointerDownOnTop called on ROOT",
-              );
-              layer.handlePointerDownOnTop();
-            };
-            document.addEventListener("pointerdown", handlePointerDown);
-            console.log(
-              "[PopperPrimitive.Content] registered document listener for ROOT",
-            );
-          }
-          $e.addEventListener("pointerdown", () => {
-            console.log(
-              "[PopperPrimitive.Content] element pointerdown, marking layer, isRoot:",
-              isRootLayer,
-            );
-            layer.pointerDown();
-            // Mark all parent layers as pointer inside
-            if (getAllParentLayers) {
-              const parentLayers = getAllParentLayers();
-              console.log(
-                "[PopperPrimitive.Content] marking parent layers, count:",
-                parentLayers.length,
-              );
-              for (const parentLayer of parentLayers) {
-                if (parentLayer) {
-                  parentLayer.pointerDown();
+              // 同时检查 anchor 元素
+              const $anchor_el = (store.reference as any)?.$el as
+                | HTMLElement
+                | undefined;
+              if ($anchor_el) {
+                const anchor_rect = $anchor_el.getBoundingClientRect();
+                const in_anchor =
+                  x >= anchor_rect.left &&
+                  x <= anchor_rect.right &&
+                  y >= anchor_rect.top &&
+                  y <= anchor_rect.bottom;
+                if (in_anchor) {
+                  return true;
                 }
               }
-            } else if (getParentLayer) {
-              // Fallback to old recursive method for backward compatibility
-              let currentLayer = getParentLayer();
-              while (currentLayer) {
-                currentLayer.pointerDown();
-                currentLayer = currentLayer.getParentLayer
-                  ? currentLayer.getParentLayer()
-                  : null;
-              }
-            }
-          });
+              return (
+                x >= rect.left &&
+                x <= rect.right &&
+                y >= rect.top &&
+                y <= rect.bottom
+              );
+            },
+            dismiss() {
+              onDismiss();
+            },
+          };
+          layer_manager.register(layer);
         }
         if (rest.onMounted) {
           rest.onMounted($e);
         }
+        return () => {
+          store.setFloating(null);
+          if (handleScroll) {
+            window.removeEventListener("scroll", handleScroll, true);
+          }
+          // 从 LayerManager 注销
+          if (layer_id) {
+            const layerManager = getGlobalLayerManager();
+            layerManager.unregister(layer_id);
+          }
+        };
       },
       onUnmounted() {
-        console.log(
-          "[PopperPrimitive.Content] unmounted, removing listeners, isRoot:",
-          isRootLayer,
-        );
-        store.setFloating(null);
-
-        // Remove scroll listener
-        if (handleScroll) {
-          window.removeEventListener("scroll", handleScroll, true);
-          handleScroll = null;
-        }
-
-        if (layer && handlePointerDown) {
-          document.removeEventListener("pointerdown", handlePointerDown);
-          handlePointerDown = null;
+        // 清理监听器
+        for (const unlisten of unlisteners) {
+          unlisten();
         }
         if (rest.onUnmounted) {
           rest.onUnmounted();

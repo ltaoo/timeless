@@ -3,33 +3,26 @@ import { isRef, Ref } from "@timeless/reactive";
 import { ViewChildren, isElement } from "./view";
 
 export function Show(
-  propsOrWhen:
-    | {
-        when: Ref<boolean | undefined | null> | boolean;
-        fallback?: ViewChildren;
-        onMounted?: ($fg: any) => void;
-        beforeUnmounted?: () => void;
-        onUnmounted?: () => void;
-      }
-    | Ref<boolean | undefined | null>
-    | boolean,
-  children?: ViewChildren,
+  props: {
+    when: Ref<boolean | undefined | null> | boolean;
+    fallback?: ViewChildren;
+    onMounted?: ($fg: any) => void;
+    beforeUnmounted?: () => void;
+    onUnmounted?: () => void;
+  },
+  children: ViewChildren = [],
 ) {
   // 支持两种调用方式：
   // 1. Show({ when, fallback }, children)
   // 2. Show(condition, children)
   const isObjectProps =
-    typeof propsOrWhen === "object" &&
-    propsOrWhen !== null &&
-    "when" in propsOrWhen;
+    typeof props === "object" && props !== null && "when" in props;
 
-  const when = isObjectProps ? propsOrWhen.when : propsOrWhen;
-  const fallback = isObjectProps ? propsOrWhen.fallback : undefined;
-  const onMounted = isObjectProps ? propsOrWhen.onMounted : undefined;
-  const beforeUnmounted = isObjectProps
-    ? propsOrWhen.beforeUnmounted
-    : undefined;
-  const onUnmounted = isObjectProps ? propsOrWhen.onUnmounted : undefined;
+  const when = isObjectProps ? props.when : props;
+  const fallback = isObjectProps ? props.fallback : undefined;
+  const onMounted = isObjectProps ? props.onMounted : undefined;
+  const beforeUnmounted = isObjectProps ? props.beforeUnmounted : undefined;
+  const onUnmounted = isObjectProps ? props.onUnmounted : undefined;
   const anchor = document.createTextNode("");
 
   let _currentNodes: Node[] = [];

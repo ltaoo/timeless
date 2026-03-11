@@ -15,6 +15,7 @@ import {
 import { TimelessComponent, TimelessElement, View, ViewProps } from "./view";
 import { For } from "./for";
 import { LazyView } from "./lazy-view";
+import { h } from "./h";
 
 export function KeepAliveSubViews(
   props: ViewProps & {
@@ -55,7 +56,8 @@ export function KeepAliveSubViews(
       if (!PageView) {
         return NotFoundPageView;
       }
-      return View(
+      return h(
+        View,
         {
           style: computed(cur_subview, (d) => {
             return [

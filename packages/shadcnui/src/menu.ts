@@ -7,7 +7,7 @@ import {
   ViewChildren,
   ViewProps,
 } from "@timeless/headless";
-import { MenuCore, MenuItemCore } from "@timeless/ui";
+import { MenuCore, MenuItemCore, getGlobalLayerManager, initGlobalPointerListener, Layer } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
 
 const MENU_CONTENT_CLASS =
@@ -16,40 +16,39 @@ const MENU_CONTENT_CLASS =
 const MENU_ITEM_CLASS =
   "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors";
 
+let menuIdCounter = 0;
+
 export function Menu(props: ViewProps & { store: MenuCore }) {
   const state_ = refobj(props.store.state);
+  let $element: HTMLElement | null = null;
+  let layerId: string | null = null;
 
-  // Create a function that returns all parent layers as an array
-  const getAllParentLayers = () => {
-    const layers: any[] = [];
-    let currentMenu = props.store.parent_menu;
-    while (currentMenu) {
-      if (currentMenu.layer) {
-        layers.push(currentMenu.layer);
-      }
-      currentMenu = currentMenu.parent_menu;
-    }
-    return layers;
-  };
-
-  // Determine if this is a root layer (no parent menu)
-  const isRootLayer = !props.store.parent_menu;
-
-  let handlePointerDown: any;
+  initGlobalPointerListener();
 
   return View(
     {
       class: MENU_CONTENT_CLASS,
       onMounted($el) {
-        // For root menu that's always visible, override layer.onDismiss to only close submenus
-        if (isRootLayer && props.store.layer) {
-          // Remove the default onDismiss handler that calls hide()
-          // and add a custom one that only closes submenus
-          props.store.layer.onDismiss(() => {
-            console.log(
-              "[Menu layer.onDismiss] closing submenus for always-visible root menu",
+        $element = $el;
+
+        // Register to LayerManager
+        layerId = `menu-${++menuIdCounter}`;
+        const layerManager = getGlobalLayerManager();
+
+        const layer: Layer = {
+          id: layerId,
+          containsPoint(x: number, y: number) {
+            if (!$element) return false;
+            const rect = $element.getBoundingClientRect();
+            return (
+              x >= rect.left &&
+              x <= rect.right &&
+              y >= rect.top &&
+              y <= rect.bottom
             );
-            // Close current submenu if open
+          },
+          dismiss() {
+            // For always-visible root menu, only close submenus
             if (
               props.store.cur_item &&
               props.store.cur_item.menu &&
@@ -57,65 +56,24 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
             ) {
               props.store.cur_item.menu.hide();
             }
-          });
-        }
+          },
+        };
 
-        // Register click outside handler for root menu
-        if (props.store.layer) {
-          // Only register document listener for root layer
-          if (isRootLayer) {
-            handlePointerDown = () => {
-              console.log(
-                "[Menu] handlePointerDownOnTop called on ROOT, store:",
-                props.store._name,
-              );
-              props.store.layer.handlePointerDownOnTop();
-            };
-            document.addEventListener("pointerdown", handlePointerDown);
-            console.log(
-              "[Menu] registered document listener for ROOT, store:",
-              props.store._name,
-            );
-          }
+        layerManager.register(layer);
 
-          $el.addEventListener("pointerdown", (e) => {
-            console.log(
-              "[Menu] element pointerdown, store:",
-              props.store._name,
-              "isRoot:",
-              isRootLayer,
-              "target:",
-              e.target,
-            );
-            props.store.layer.pointerDown();
-            // Mark all parent layers as pointer inside
-            const parentLayers = getAllParentLayers();
-            console.log(
-              "[Menu] marking parent layers, count:",
-              parentLayers.length,
-            );
-            for (const parentLayer of parentLayers) {
-              if (parentLayer) {
-                console.log("[Menu] marking parent layer");
-                parentLayer.pointerDown();
-              }
-            }
-          });
-        } else {
-          console.warn(
-            "[Menu onMounted] NO LAYER for store:",
-            props.store._name,
-          );
-        }
         if (props.onMounted) {
           props.onMounted($el);
         }
       },
       onUnmounted() {
-        if (props.store.layer && handlePointerDown) {
-          document.removeEventListener("pointerdown", handlePointerDown);
-          handlePointerDown = null;
+        $element = null;
+
+        if (layerId) {
+          const layerManager = getGlobalLayerManager();
+          layerManager.unregister(layerId);
+          layerId = null;
         }
+
         if (props.onUnmounted) {
           props.onUnmounted();
         }
@@ -123,14 +81,7 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
     },
     [
       For({
-        each: computed(state_, (t) => {
-          console.log(
-            "[Menu For] items count:",
-            t.items.length,
-            t.items.map((i) => i.label),
-          );
-          return t.items;
-        }),
+        each: computed(state_, (t) => t.items),
         render(item: MenuItemCore) {
           return MenuItem({ store: item });
         },
@@ -147,26 +98,9 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
   );
 
-  console.log(
-    "[MenuItem] created, label:",
-    props.store.label,
-    "has submenu:",
-    !!props.store.menu,
-  );
-  if (props.store.menu) {
-    console.log(
-      "[MenuItem] submenu parent_menu:",
-      props.store.menu.parent_menu?._name,
-      "has layer:",
-      !!props.store.menu.layer,
-    );
-  }
-
-  const unlisten = [
-    props.store.onStateChange((v) => {
-      state_.as(v);
-    }),
-  ];
+  props.store.onStateChange((v) => {
+    state_.as(v);
+  });
 
   return View({ class: "t-menu-item-wrap" }, [
     MenuPrimitive.Item(
@@ -202,7 +136,6 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
       ],
     ),
     (() => {
-      console.log("MenuItem render submenu for", props.store.label);
       const inner$ = props.store.menu
         ? MenuPrimitive.Portal({ store: props.store.menu }, [
             MenuPrimitive.SubMenuContent(
@@ -216,9 +149,7 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
               [
                 View({ class: MENU_CONTENT_CLASS }, [
                   For({
-                    each: computed(menu_state_, (t) => {
-                      return t.items;
-                    }),
+                    each: computed(menu_state_, (t) => t.items),
                     render(item: MenuItemCore) {
                       return MenuItem({ store: item });
                     },

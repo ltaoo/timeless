@@ -317,11 +317,11 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 主动展示视图 */
   show() {
-    console.log("[ROUTE_VIEW]show", this.title, "visible:", this.visible, "mounted:", this.mounted);
+    // console.log("[ROUTE_VIEW]show", this.title, "visible:", this.visible, "mounted:", this.mounted);
     if (this.visible) {
       // 为了让 presence 内部 hide 时判断 mounted 为 true
       this.$presence.state.mounted = true;
-      console.log("[ROUTE_VIEW]show - already visible, return");
+      // console.log("[ROUTE_VIEW]show - already visible, return");
       return;
     }
     this.$presence.show();
