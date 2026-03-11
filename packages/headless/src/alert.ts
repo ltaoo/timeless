@@ -13,7 +13,8 @@ export function Alert(
     ...rest
   } = props || {};
   return View(
-    { ...rest, ...merge(tp(t?.root, { variant }), cls, st) },
+    {},
+    // { ...rest, ...merge(tp(t?.root, { variant }), cls, st) },
     children,
   );
 }

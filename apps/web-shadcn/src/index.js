@@ -68,73 +68,105 @@ function ApplicationRootView() {
     //     ),
     //   ],
     // ),
-    (() => {
-      const menu$ = new Timeless.ui.ContextMenuCore({
-        items: [
-          new Timeless.ui.MenuItemCore({
-            label: "Cut",
-            onClick() {
-              console.log("cut");
-            },
-          }),
-          new Timeless.ui.MenuItemCore({
-            label: "Copy",
-            onClick() {
-              console.log("copy");
-            },
-          }),
-          new Timeless.ui.MenuItemCore({
-            label: "Paste",
-            onClick() {
-              console.log("paste");
-            },
-          }),
-          new Timeless.ui.MenuItemCore({
-            label: "Delete",
-            onClick() {
-              console.log("delete");
-            },
-          }),
-          new Timeless.ui.MenuItemCore({
-            label: "More",
-            menu: new Timeless.ui.MenuCore({
-              items: [
-                new Timeless.ui.MenuItemCore({
-                  label: "Edit",
-                  onClick() {
-                    console.log("edit");
-                  },
-                }),
-                new Timeless.ui.MenuItemCore({
-                  label: "Duplicate",
-                  onClick() {
-                    console.log("duplicate");
-                  },
-                }),
-                new Timeless.ui.MenuItemCore({
-                  label: "Delete",
-                  onClick() {
-                    console.log("delete");
-                  },
-                }),
+    // (() => {
+    //   const menu$ = new Timeless.ui.ContextMenuCore({
+    //     items: [
+    //       new Timeless.ui.MenuItemCore({
+    //         label: "Cut",
+    //         onClick() {
+    //           console.log("cut");
+    //         },
+    //       }),
+    //       new Timeless.ui.MenuItemCore({
+    //         label: "Copy",
+    //         onClick() {
+    //           console.log("copy");
+    //         },
+    //       }),
+    //       new Timeless.ui.MenuItemCore({
+    //         label: "Paste",
+    //         onClick() {
+    //           console.log("paste");
+    //         },
+    //       }),
+    //       new Timeless.ui.MenuItemCore({
+    //         label: "Delete",
+    //         onClick() {
+    //           console.log("delete");
+    //         },
+    //       }),
+    //       new Timeless.ui.MenuItemCore({
+    //         label: "More",
+    //         menu: new Timeless.ui.MenuCore({
+    //           items: [
+    //             new Timeless.ui.MenuItemCore({
+    //               label: "Edit",
+    //               onClick() {
+    //                 console.log("edit");
+    //               },
+    //             }),
+    //             new Timeless.ui.MenuItemCore({
+    //               label: "Duplicate",
+    //               onClick() {
+    //                 console.log("duplicate");
+    //               },
+    //             }),
+    //             new Timeless.ui.MenuItemCore({
+    //               label: "Delete",
+    //               onClick() {
+    //                 console.log("delete");
+    //               },
+    //             }),
+    //           ],
+    //         }),
+    //         onClick() {
+    //           console.log("delete");
+    //         },
+    //       }),
+    //     ],
+    //   });
+    //   return ContextMenu({ store: menu$ }, [
+    //     View(
+    //       {
+    //         class:
+    //           "flex items-center justify-center w-[300px] h-[150px] rounded-md border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-sm text-zinc-500 select-none",
+    //       },
+    //       [Txt("Right click here")],
+    //     ),
+    //   ]);
+    // })(),
+    h(
+      View,
+      {
+        style: "padding: 12px;",
+      },
+      [
+        (() => {
+          const field$ = new Timeless.ui.SingleFieldCore({
+            name: "lunch",
+            label: "午餐",
+            input: new Timeless.ui.SelectCore({
+              placeholder: "请选择水果",
+              options: [
+                {
+                  value: "1",
+                  label: "Option 1",
+                },
+                {
+                  value: "2",
+                  label: "Option 2",
+                },
               ],
             }),
-            onClick() {
-              console.log("delete");
-            },
-          }),
-        ],
-      });
-      return ContextMenu({ store: menu$ }, [
-        View(
-          {
-            class:
-              "flex items-center justify-center w-[300px] h-[150px] rounded-md border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-sm text-zinc-500 select-none",
-          },
-          [Txt("Right click here")],
-        ),
-      ]);
-    })(),
+          });
+          return h(Field, { store: field$ }, [
+            h(Select, {
+              store: field$.input,
+            }),
+          ]);
+        })(),
+      ],
+    ),
   ]);
 }
 

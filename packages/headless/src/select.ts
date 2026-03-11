@@ -25,7 +25,7 @@ export function Trigger(
   props: ViewProps & { store: SelectCore<any>; id?: string },
   children: ViewChildren = [],
 ) {
-  const { store, id, ...rest } = props;
+  const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
   store.onStateChange((v) => {
@@ -34,33 +34,25 @@ export function Trigger(
 
   const events: any[] = [];
 
-  store.onFocus(() => {
-    if (store.presence.state.visible) {
-      // store.hide();
-      return;
-    }
-    store.presence.show();
-    store.popper.place();
-    // store.show();
-  });
-  store.onBlur(() => {
-    store.hide();
-  });
-
   // 创建隐藏的 input 用于可访问性
   const _input$ = View(
     {
       as: "input",
       type: "text",
-      id,
+      id: props.store.id || rest.id,
       style:
         "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
       onFocus() {
-        if (store.open) {
+        // if (store.open) {
+        //   return;
+        // }
+        // store.presence.show();
+        // store.show();
+        if (props.store.presence.state.visible) {
           return;
         }
-        store.presence.show();
-        store.show();
+        props.store.presence.show();
+        props.store.popper.place();
       },
       onClick(e) {
         e.stopPropagation();
@@ -130,6 +122,7 @@ export function Trigger(
           //   props.store.focus();
           // }
           if (props.store.presence.state.visible) {
+            props.store.presence.hide();
             return;
           }
           props.store.presence.show();

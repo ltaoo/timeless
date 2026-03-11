@@ -34,7 +34,7 @@ export function Tab(
     {
       type: "button",
       ...rest,
-      onMounted($el) {
+      onMounted($el: HTMLDivElement) {
         store.updateTabClient(index, {
           rect() {
             return $el.getBoundingClientRect();

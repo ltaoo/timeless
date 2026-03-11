@@ -6,6 +6,16 @@ import { BizError } from "@timeless/base";
 
 import { FormInputInterface } from "./types";
 
+function create_id() {
+  const crypto = (globalThis as any)?.crypto;
+  if (crypto && typeof crypto.randomUUID === "function") {
+    return `timeless-field-${crypto.randomUUID()}`;
+  }
+  return `timeless-field-${Date.now().toString(36)}-${Math.random()
+    .toString(36)
+    .slice(2, 10)}`;
+}
+
 type CommonRuleCore = {
   required: boolean;
 };
@@ -89,6 +99,7 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
   _error: BizError | null = null;
   _status: FieldStatus = "normal";
   _focus = false;
+  _id = null;
   _input: T;
   _rules: FieldRuleCore[];
   _dirty = false;
@@ -128,6 +139,12 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
     this._rules = rules;
     this._hidden = hidden;
 
+    const input_id = typeof this._name === "string" ? this._name : create_id();
+    if (typeof this._input.id !== "string") {
+      this._input.id = input_id;
+    }
+    this._id = input_id;
+
     // console.log("[]before this._input.onChange", this._input);
     setTimeout(() => {
       this._input.onChange(() => {
@@ -151,6 +168,9 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
   }
   get input() {
     return this._input;
+  }
+  get id() {
+    return this._id;
   }
   get value() {
     return this._input.value as T["value"];

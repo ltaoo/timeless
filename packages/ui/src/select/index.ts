@@ -32,6 +32,7 @@ type TheTypesOfEvents<T> = {
   [Events.Placed]: void;
 };
 type SelectProps<T> = {
+  id?: string;
   defaultValue: T | null;
   placeholder?: string;
   // options: SelectItemCore<T>[];
@@ -63,6 +64,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   debug = true;
 
   // options: { text: string; store: SelectItemCore<T> }[] = [];
+  id = null;
   placeholder: string;
   options: { value: T; label: string; selected: boolean; focused: boolean }[] =
     [];
@@ -120,20 +122,24 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     super(props);
 
     const {
+      id,
       defaultValue,
       placeholder = "点击选择",
       options = [],
       onChange,
     } = props;
     // console.log("[DOMAIN]ui/select/index - constructor", defaultValue);
-    this.options = options.map((opt) => {
+    this.options = options.map((opt, i) => {
       return {
         label: opt.label,
         value: opt.value,
         selected: opt.value === defaultValue,
-        focused: false,
+        focused: i === 0,
       };
     });
+    if (id !== undefined) {
+      this.id = id;
+    }
     this.value = defaultValue;
     this.defaultValue = defaultValue;
     this.placeholder = placeholder;
@@ -142,7 +148,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       this.emit(Events.StateChange, { ...this.state });
       this.emit(Events.Change, defaultValue);
     }
-    this.popper = new PopperCore();
+    this.popper = new PopperCore({
+      align: "start",
+    });
     this.layer = new DismissableLayerCore();
     // this.collection = new CollectionCore();
     this.popper.onReferenceMounted((reference) => {
@@ -291,6 +299,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.value = null;
     this.emit(Events.StateChange, { ...this.state });
     this.emit(Events.Change, this.value);
+  }
+  setId(v) {
+    this.id = v;
   }
   setValue(v: T | null) {
     if (v === null) {

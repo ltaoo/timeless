@@ -68,7 +68,7 @@ export function Root(
   return View(
     {
       ...rest,
-      "data-percentage": pct,
+      // "data-percentage": pct,
       onMounted(elm: HTMLElement) {
         containerRef.current = elm;
         elm.addEventListener("pointerdown", onPointerDown);

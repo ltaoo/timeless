@@ -30,7 +30,9 @@ export function Field(
   });
 
   // 生成唯一的 field id
-  const fieldId = `field-${props.store.name || Math.random().toString(36).substr(2, 9)}`;
+  const fid =
+    props.store.id ||
+    `field-${props.store.name || Math.random().toString(36).substr(2, 9)}`;
 
   const label_class_ = computed(state_, (s) => {
     return [
@@ -47,8 +49,8 @@ export function Field(
   return View({ class: "space-y-2" }, [
     Show({ when: computed(state_, (s) => !!s.label) }, [
       View({ class: "" }, [
-        View({ as: "label", htmlFor: fieldId }, [
-          View({}, [
+        View({ as: "label", htmlFor: fid }, [
+          View({ class: "pl-2" }, [
             View(
               {
                 class: label_class_,

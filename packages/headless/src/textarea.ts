@@ -9,14 +9,7 @@ export function Textarea(
     id?: string;
   },
 ) {
-  const {
-    store,
-    style: st,
-    class: cls,
-    dataset = {},
-    id,
-    ...rest
-  } = props;
+  const { store, style: st, class: cls, dataset = {}, id, ...rest } = props;
   const $elm = document.createElement("textarea");
 
   const events: any[] = [];
@@ -40,7 +33,9 @@ export function Textarea(
         },
       });
       $elm.className = class$.toString();
-      if (st) $elm.style.cssText = st;
+      if (st && typeof st === "string") {
+        $elm.style.cssText = st;
+      }
 
       if (store) {
         if (store.value !== undefined) $elm.value = store.value;
@@ -51,7 +46,10 @@ export function Textarea(
         });
         const unsub = store.onStateChange
           ? store.onStateChange(() => {
-              if (store.value !== undefined && $elm.value !== String(store.value))
+              if (
+                store.value !== undefined &&
+                $elm.value !== String(store.value)
+              )
                 $elm.value = store.value;
             })
           : null;

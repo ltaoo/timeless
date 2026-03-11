@@ -110,19 +110,19 @@ export function SVG(props: ViewProps = {}, children?: any) {
         }
       }
       if (onClick) {
-        $elm.addEventListener("click", function (event: Event) {
+        $elm.addEventListener("click", function (event) {
           if (onClick) {
             onClick(event);
           }
         });
       }
       if (onFocus) {
-        $elm.addEventListener("focus", function (event: Event) {
+        $elm.addEventListener("focus", function (event) {
           if (onFocus) onFocus(event);
         });
       }
       if (onBlur) {
-        $elm.addEventListener("blur", function (event: Event) {
+        $elm.addEventListener("blur", function (event) {
           if (onBlur) onBlur(event);
         });
       }

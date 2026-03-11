@@ -19,6 +19,7 @@ export type FormInputInterface<T> = {
     | "form"
     | "drag-select";
   // state: any;
+  id?: string;
   value: T;
   defaultValue: T;
   setValue: (v: T, extra?: Partial<{ silence: boolean }>) => void;

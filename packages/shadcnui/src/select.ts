@@ -65,7 +65,7 @@ export function Select(
         },
         store,
         class:
-          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
+          "select__content relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
         // 添加 minWidth 到 style，这样不会被 popper 的 computed style 覆盖
         style: computed(state_, () => {
           const width = store.reference?.width || 0;
@@ -89,13 +89,15 @@ export function Select(
                   value: option.value,
                   class: computed(state_, (d) => {
                     const opt = d.options.find((o) => o.value === option.value);
+                    const isFocused = Boolean(opt?.focused);
+                    const isSelected = Boolean(opt?.selected);
                     return [
                       "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-                      opt?.focused
-                        ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                      isSelected
+                        ? "bg-zinc-200/70 text-zinc-900 font-medium dark:bg-zinc-700/70 dark:text-zinc-50"
                         : "",
-                      opt?.selected && !opt?.focused
-                        ? "bg-zinc-100 dark:bg-zinc-800"
+                      !isSelected && isFocused
+                        ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
                         : "",
                     ]
                       .filter(Boolean)
@@ -103,15 +105,15 @@ export function Select(
                   }),
                 },
                 [
-                  // SelectPrimitive.ItemIndicator(
-                  //   {
-                  //     store,
-                  //     value: option.value,
-                  //     class:
-                  //       "absolute left-2 flex h-4 w-4 items-center justify-center",
-                  //   },
-                  //   [CheckOutlined({})],
-                  // ),
+                  SelectPrimitive.ItemIndicator(
+                    {
+                      store,
+                      value: option.value,
+                      class:
+                        "absolute left-2 flex h-4 w-4 items-center justify-center",
+                    },
+                    [CheckOutlined({})],
+                  ),
                   SelectPrimitive.ItemText({}, [option.label]),
                 ],
               );
