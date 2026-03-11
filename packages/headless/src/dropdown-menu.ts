@@ -2,8 +2,7 @@ import { refobj, computed } from "@timeless/reactive";
 import { DropdownMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
 
 import * as MenuPrimitive from "./menu";
-import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
-import * as PopperPrimitive from "./popper";
+import { View, ViewChildren, ViewProps } from "./view";
 
 // Shared hover timer state to coordinate between Trigger and Content
 const hoverTimers = new WeakMap<DropdownMenuCore, { timer: any }>();
@@ -59,45 +58,6 @@ export function Root(
   return MenuPrimitive.Root(props, children);
 }
 
-export function Portal(
-  props: ViewProps & {
-    store: MenuCore;
-    animation?: { in: string; out: string };
-  },
-  children: ViewChildren = [],
-) {
-  // Delegate to MenuPrimitive.Portal which uses Presence
-  return MenuPrimitive.Portal(props, children);
-}
-
-export function Content(
-  props: ViewProps & {
-    store: DropdownMenuCore;
-    animation?: { in: string; out: string };
-  },
-  children: ViewChildren,
-) {
-  const { store, ...rest } = props;
-
-  // Add hover event handlers for hover trigger mode
-  const hoverHandlers =
-    store.trigger === "hover"
-      ? {
-          onMouseEnter() {
-            _hoverClearHide(store);
-          },
-          onMouseLeave() {
-            _hoverScheduleHide(store);
-          },
-        }
-      : {};
-
-  return MenuPrimitive.Content(
-    { ...rest, ...hoverHandlers, store: props.store.menu },
-    children,
-  );
-}
-
 export function Trigger(
   props: ViewProps & { store: DropdownMenuCore },
   children?: ViewChildren,
@@ -123,17 +83,11 @@ export function Trigger(
           },
           { force: true },
         );
-
         // Handle click trigger
         if (store.trigger === "click") {
           $elm.addEventListener("pointerdown", (e) => {
             // 阻止冒泡，避免 LayerManager 立即关闭菜单
             e.stopPropagation();
-            const rect = $elm.getBoundingClientRect();
-            console.log(
-              "[headless/dropdown-menu]Trigger - click button in pointerdown callback",
-              rect,
-            );
             props.store.menu.show();
           });
         }
@@ -147,12 +101,12 @@ export function Trigger(
             store.show();
           });
 
-          $elm.addEventListener("mouseleave", () => {
-            if (store.disabled) {
-              return;
-            }
-            _hoverScheduleHide(store);
-          });
+          // $elm.addEventListener("mouseleave", () => {
+          //   if (store.disabled) {
+          //     return;
+          //   }
+          //   _hoverScheduleHide(store);
+          // });
 
           // Prevent click from closing the menu in hover mode
           $elm.addEventListener("pointerdown", (e) => {
@@ -161,6 +115,46 @@ export function Trigger(
         }
       },
     },
+    children,
+  );
+}
+
+export function Portal(
+  props: ViewProps & {
+    store: MenuCore;
+    animation?: { in: string; out: string };
+  },
+  children: ViewChildren = [],
+) {
+  // Delegate to MenuPrimitive.Portal which uses Presence
+  return MenuPrimitive.Portal(props, children);
+}
+
+export function Content(
+  props: ViewProps & {
+    store: DropdownMenuCore;
+    animation?: { in: string; out: string };
+  },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
+  // Add hover event handlers for hover trigger mode
+  const hoverHandlers = {};
+  // const hoverHandlers =
+  //   store.trigger === "hover"
+  //     ? {
+  //         onMouseEnter() {
+  //           _hoverClearHide(store);
+  //         },
+  //         onMouseLeave() {
+  //           _hoverScheduleHide(store);
+  //         },
+  //       }
+  //     : {};
+
+  return MenuPrimitive.Content(
+    { ...rest, ...hoverHandlers, store: props.store.menu },
     children,
   );
 }
@@ -189,12 +183,7 @@ export function Arrow(
   },
   children: ViewChildren,
 ) {
-  return MenuPrimitive.Arrow(
-    {
-      store: props.store.menu,
-    },
-    children,
-  );
+  return MenuPrimitive.Arrow({ store: props.store.menu }, children);
 }
 
 export function SubMenu(

@@ -71,6 +71,16 @@ export function ContentImpl(
   const state_ = refobj(props.store.state);
   const presence_ = refobj(props.store.presence.state);
 
+  const listeners = [
+    props.store.onStateChange((v) => {
+      state_.as(v);
+    }),
+    props.store.presence.onStateChange((v) => {
+      console.log("[Menu Content] presence change", v.mounted);
+      presence_.as(v);
+    }),
+  ];
+
   return h(
     Show,
     {
@@ -78,14 +88,6 @@ export function ContentImpl(
         return t.mounted;
       }),
       onMounted() {
-        const listeners = [
-          props.store.onStateChange((v) => {
-            state_.as(v);
-          }),
-          props.store.presence.onStateChange((v) => {
-            presence_.as(v);
-          }),
-        ];
         return () => {
           for (let i = 0; i < listeners.length; i += 1) {
             listeners[i]();
@@ -105,6 +107,17 @@ export function ContentImpl(
               props.store.hide();
             },
             onMouseEnter(event) {
+              // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
+              // console.log("[ContentImpl] onMouseEnter", props.store._name, {
+              //   hasParentMenu: !!props.store.parent_menu,
+              //   parentMenuName: props.store.parent_menu?._name,
+              //   parentHideSubTimer: props.store.parent_menu?.hide_sub_timer,
+              // });
+              // if (props.store.parent_menu && props.store.parent_menu.hide_sub_timer !== null) {
+              //   console.log("[ContentImpl] clearing parent hide_sub_timer");
+              //   clearTimeout(props.store.parent_menu.hide_sub_timer);
+              //   props.store.parent_menu.hide_sub_timer = null;
+              // }
               if (rest.onMouseEnter) {
                 rest.onMouseEnter(event);
               }
@@ -286,7 +299,7 @@ export function SubMenuContent(
       ...props,
       store: props.store,
       onMounted($el) {
-        console.log("[SubMenuContent] mounted");
+        // console.log("[SubMenuContent] mounted");
         // Add hover event listeners to keep submenu open
         // $el.addEventListener("mouseenter", () => {
         //   console.log("[SubMenuContent] mouseenter");

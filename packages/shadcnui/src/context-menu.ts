@@ -32,29 +32,27 @@ export function ContextMenu(
 
   return Fragment({}, [
     ContextMenuPrimitive.Trigger({ store: props.store }, children),
-    ContextMenuPrimitive.Portal({ store: props.store.menu }, [
-      ContextMenuPrimitive.Content(
-        {
-          ...props,
-          animation: {
-            in: "animate-in fade-in-0 zoom-in-95",
-            out: "animate-out fade-out-0 zoom-out-95",
-          },
+    ContextMenuPrimitive.Content(
+      {
+        ...props,
+        animation: {
+          in: "animate-in fade-in-0 zoom-in-95",
+          out: "animate-out fade-out-0 zoom-out-95",
         },
-        [
-          View({ class: MENU_CONTENT_CLASS }, [
-            For({
-              each: computed(state_, (t) => {
-                return t.items;
-              }),
-              render(item: MenuItemCore) {
-                return ContextMenuItem({ store: item });
-              },
+      },
+      [
+        View({ class: MENU_CONTENT_CLASS }, [
+          For({
+            each: computed(state_, (t) => {
+              return t.items;
             }),
-          ]),
-        ],
-      ),
-    ]),
+            render(item: MenuItemCore) {
+              return ContextMenuItem({ store: item });
+            },
+          }),
+        ]),
+      ],
+    ),
   ]);
 }
 
@@ -64,16 +62,18 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
   const menu_state_ = refobj(
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
   );
-  // const presence_state_ = refobj(
-  //   props.store.menu
-  //     ? props.store.menu.presence.state
-  //     : ({} as PresenceCore["state"]),
-  // );
-
   [
     props.store.onStateChange((v) => {
       state_.as(v);
     }),
+    (() => {
+      if (props.store.menu) {
+        return props.store.menu.onStateChange((v) => {
+          menu_state_.as(v);
+        });
+      }
+      return () => {};
+    })(),
   ];
 
   return View({ class: "t-context-menu-item-wrap" }, [
@@ -103,29 +103,27 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
     ),
     (() => {
       const inner$ = props.store.menu
-        ? ContextMenuPrimitive.Portal({ store: props.store.menu }, [
-            ContextMenuPrimitive.SubMenuContent(
-              {
-                store: props.store.menu,
-                animation: {
-                  in: "animate-in fade-in-0 zoom-in-95",
-                  out: "animate-out fade-out-0 zoom-out-95",
-                },
+        ? ContextMenuPrimitive.SubMenuContent(
+            {
+              store: props.store.menu,
+              animation: {
+                in: "animate-in fade-in-0 zoom-in-95",
+                out: "animate-out fade-out-0 zoom-out-95",
               },
-              [
-                View({ class: MENU_CONTENT_CLASS }, [
-                  For({
-                    each: computed(menu_state_, (t) => {
-                      return t.items;
-                    }),
-                    render(item: MenuItemCore) {
-                      return ContextMenuItem({ store: item });
-                    },
+            },
+            [
+              View({ class: MENU_CONTENT_CLASS }, [
+                For({
+                  each: computed(menu_state_, (t) => {
+                    return t.items;
                   }),
-                ]),
-              ],
-            ),
-          ])
+                  render(item: MenuItemCore) {
+                    return ContextMenuItem({ store: item });
+                  },
+                }),
+              ]),
+            ],
+          )
         : null;
       return View({}, [inner$]);
     })(),

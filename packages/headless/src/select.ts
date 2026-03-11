@@ -1,18 +1,12 @@
-import {
-  refobj,
-  computed,
-  isRef,
-  classNames,
-  sn,
-  combine,
-} from "@timeless/reactive";
+import { refobj, computed, classNames, sn, combine } from "@timeless/reactive";
 import { SelectCore } from "@timeless/ui";
 
-import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
-import { Txt } from "./text";
+import { View, ViewChildren, ViewProps } from "./view";
 import { Portal as NativePortal } from "./portal";
 import { Presence } from "./presence";
 import * as PopperPrimitive from "./popper";
+import { h } from "./h";
+import { Show } from "./show";
 
 export function Root(
   props: ViewProps & { store: SelectCore<any> },
@@ -41,12 +35,13 @@ export function Trigger(
   const events: any[] = [];
 
   store.onFocus(() => {
-    if (store.open) {
-      store.hide();
+    if (store.presence.state.visible) {
+      // store.hide();
       return;
     }
     store.presence.show();
-    store.show();
+    store.popper.place();
+    // store.show();
   });
   store.onBlur(() => {
     store.hide();
@@ -80,11 +75,11 @@ export function Trigger(
         //   store.show();
         // }
       },
-      onMounted(el) {
-        el.value = store.state.value || "";
+      onMounted($elm: HTMLInputElement) {
+        $elm.value = store.state.value || "";
         events.push(
           store.onStateChange(() => {
-            el.value = store.state.value || "";
+            $elm.value = store.state.value || "";
           }),
         );
       },
@@ -95,48 +90,54 @@ export function Trigger(
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted($elm: HTMLDivElement) {
         // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
         store.popper.setReference(
           {
-            $el: $e,
+            $el: $elm,
             getRect() {
-              return $e.getBoundingClientRect();
+              return $elm.getBoundingClientRect();
             },
           },
           { force: true },
         );
-        setTimeout(() => {
-          console.log("[]Select Trigger Mounted", $e.getBoundingClientRect());
-          const rect = $e.getBoundingClientRect();
-          store.setPosition({
-            width: rect.width,
-            height: rect.height,
-            x: rect.x,
-            y: rect.y,
-            left: rect.left,
-            right: rect.right,
-            top: rect.top,
-            bottom: rect.bottom,
-          });
-        }, 0);
-        $e.addEventListener("pointerdown", (e: any) => {
+        console.log("[]Select Trigger Mounted", $elm.getBoundingClientRect());
+        // const rect = $elm.getBoundingClientRect();
+        // store.setPosition({
+        //   width: rect.width,
+        //   height: rect.height,
+        //   x: rect.x,
+        //   y: rect.y,
+        //   left: rect.left,
+        //   right: rect.right,
+        //   top: rect.top,
+        //   bottom: rect.bottom,
+        // });
+        $elm.addEventListener("pointerdown", (e: any) => {
+          e.stopPropagation();
           // 如果点击的是隐藏的 input，不要再次触发
-          if (e.target.tagName === "INPUT") return;
+          if (e.target.tagName === "INPUT") {
+            return;
+          }
           if (store.disabled) {
             return;
           }
           // 阻止事件冒泡到 document，避免 LayerManager 立即关闭
-          e.stopPropagation();
-          if (store.open) {
-            props.store.blur();
-          } else {
-            props.store.focus();
+          // e.stopPropagation();
+          // if (store.open) {
+          //   props.store.blur();
+          // } else {
+          //   props.store.focus();
+          // }
+          if (props.store.presence.state.visible) {
+            return;
           }
+          props.store.presence.show();
+          props.store.popper.place();
         });
 
         if (rest.onMounted) {
-          rest.onMounted($e);
+          rest.onMounted($elm);
         }
       },
       onUnmounted() {
@@ -202,41 +203,53 @@ export function Content(
   children: ViewChildren,
 ) {
   const { store, animation, ...rest } = props;
-  const presenceState = refobj(store.presence.state);
+
+  const presence_ = refobj(store.presence.state);
 
   store.presence.onStateChange((v) => {
-    presenceState.as(v);
+    console.log("[]Select Content Presence State Change", v);
+    presence_.as(v);
   });
 
-  return Presence({ store: store.presence }, [
-    PopperPrimitive.Content(
-      {
-        store: store.popper,
-        onDismiss() {
-          store.hide();
-        },
-      },
-      [
-        View(
+  return h(
+    Show,
+    {
+      when: computed(presence_, (t) => {
+        return t.mounted;
+      }),
+    },
+    [
+      NativePortal({}, [
+        PopperPrimitive.Content(
           {
-            ...rest,
-            class: classNames([
-              rest.class,
-              computed(presenceState, (t) => {
-                return [
-                  t.enter && animation?.in ? animation.in : "",
-                  t.exit && animation?.out ? animation.out : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ");
-              }),
-            ]),
+            store: store.popper,
+            onDismiss() {
+              store.hide();
+            },
           },
-          children,
+          [
+            View(
+              {
+                ...rest,
+                class: classNames([
+                  rest.class,
+                  computed(presence_, (t) => {
+                    return [
+                      t.enter && animation?.in ? animation.in : "",
+                      t.exit && animation?.out ? animation.out : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ");
+                  }),
+                ]),
+              },
+              children,
+            ),
+          ],
         ),
-      ],
-    ),
-  ]);
+      ]),
+    ],
+  );
 }
 
 export function Viewport(

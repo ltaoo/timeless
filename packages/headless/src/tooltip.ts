@@ -62,7 +62,7 @@ export function Trigger(
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted($e: HTMLDivElement) {
         const $ref = $e.firstElementChild || $e;
 
         const handleMouseEnter = () => {

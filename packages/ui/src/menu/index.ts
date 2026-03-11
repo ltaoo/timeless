@@ -104,6 +104,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     this.popper.onEnter(() => {
       console.log("[DOMAIN]ui/menu/index - popper.onEnter", this._name);
       this.state.hover = true;
+      // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
+      if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
+        clearTimeout(this.parent_menu.hide_sub_timer);
+        this.parent_menu.hide_sub_timer = null;
+      }
       this.emit(Events.EnterMenu);
     });
     this.popper.onLeave(() => {
@@ -139,7 +144,10 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.reset();
       this.in_sub_menu = false;
       this.maybe_hide_sub = false;
-      this.hide_sub_timer = null;
+      if (this.hide_sub_timer !== null) {
+        clearTimeout(this.hide_sub_timer);
+        this.hide_sub_timer = null;
+      }
       this.state.open = false;
       this.popper.reset();
       for (let i = 0; i < this.items.length; i += 1) {
@@ -183,6 +191,13 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     console.log("[DEBUG-MENU] show()", this._name);
+    // 当子菜单显示时，清除父菜单的定时器
+    // 这是必要的，因为 mouseenter 事件可能不会在 DOM 动态挂载时触发
+    if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
+      console.log("[DEBUG-MENU] show() clearing parent hide_sub_timer", this._name);
+      clearTimeout(this.parent_menu.hide_sub_timer);
+      this.parent_menu.hide_sub_timer = null;
+    }
     // console.trace("[DEBUG-MENU] show() call stack");
     // this.state.open = true;
     // this.state.enter = this.presence.enter;
@@ -281,11 +296,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         hasMenu: !!item.menu,
         itemState: item.menu?.state,
       });
-      this.emit(Events.LeaveItem, item);
+      // this.emit(Events.LeaveItem, item);
       // Don't blur if the item has an open submenu
-      if (!item._open) {
-        item.blur();
-      }
+      // if (!item._open) {
+      //   item.blur();
+      // }
     });
     if (!item.menu) {
       return;
@@ -357,10 +372,13 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   reset() {
     // console.log("[]MenuCore - reset", this.items);
     this.in_sub_menu = false;
-    // this.cur_item = null;
+    this.cur_item = null;
     this.cur_sub = null;
     this.maybe_hide_sub = false;
-    this.hide_sub_timer = null;
+    if (this.hide_sub_timer !== null) {
+      clearTimeout(this.hide_sub_timer);
+      this.hide_sub_timer = null;
+    }
     this.state.open = false;
     this.presence.reset();
     this.popper.reset();
@@ -373,21 +391,30 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   }
 
   handleLeave() {
-    console.log("[]handleLeave", this.cur_item?.label, this.cur_item?._open);
+    console.log("[MenuCore] handleLeave", this._name, {
+      curItem: this.cur_item?.label,
+      curItemOpen: this.cur_item?._open,
+      hasMenu: !!this.cur_item?.menu,
+    });
     // 使用 cur_item 而不是查找 focused 状态的 item
     // 因为 item 的 handlePointerLeave 会先触发，将 _focused 设置为 false
     if (!this.cur_item) {
       return;
     }
     // 如果当前菜单项有子菜单且子菜单是打开的，延迟关闭它
-    // 使用较短的延迟时间(100ms)，让用户有时间移动到子菜单，同时保持快速响应
+    // 使用 300ms 延迟，让用户有时间移动到子菜单，同时保持快速响应
     if (this.cur_item.menu && this.cur_item._open) {
+      console.log("[MenuCore] setting hide_sub_timer", this._name);
       this.hide_sub_timer = setTimeout(() => {
+        console.log("[MenuCore] hide_sub_timer fired", this._name, {
+          curItem: this.cur_item?.label,
+          timerStillSet: this.hide_sub_timer !== null,
+        });
         this.hide_sub_timer = null;
-        if (this.cur_item && this.cur_item.menu) {
-          this.cur_item.menu.hide();
-        }
-      }, 100);
+        // if (this.cur_item && this.cur_item.menu) {
+        //   this.cur_item.menu.hide();
+        // }
+      }, 300);
     }
   }
 

@@ -1,13 +1,8 @@
-import { computed, ref, refobj, uncomputed } from "@timeless/reactive";
+import { refobj } from "@timeless/reactive";
 import { ContextMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
-import { ChevronRightOutlined } from "@timeless/icons";
 
-import { TimelessElement, View, ViewChildren, ViewProps } from "./view";
-import { Portal as NativePortal } from "./portal";
-import * as PopperPrimitive from "./popper";
-import { For } from "./for";
+import { View, ViewChildren, ViewProps } from "./view";
 import * as MenuPrimitive from "./menu";
-import { Txt } from "./text";
 
 // Shared hover timer state to coordinate between Trigger and Content
 const hoverTimers = new WeakMap<ContextMenuCore, { timer: any }>();
@@ -51,32 +46,39 @@ export function Trigger(
 ) {
   const { store, ...rest } = props;
 
+  const state_ = refobj(store.state);
+
+  store.onStateChange((v) => {
+    state_.as(v);
+  });
+
   return View(
     {
-      onMounted($e) {
+      onMounted($elm: HTMLDivElement) {
         // Don't set reference here - it will be set dynamically on contextmenu event
-
+        const $ref = $elm.firstElementChild || $elm;
         // Handle context menu (right-click)
-        $e.addEventListener("contextmenu", (e: MouseEvent) => {
+        $elm.addEventListener("contextmenu", (e) => {
           e.preventDefault();
-          if (store.disabled) return;
-
+          if (store.disabled) {
+            return;
+          }
           store.show({
             x: e.clientX,
-            y: e.clientY,
+            y: e.clientY - 4,
           });
         });
 
         // Handle hover trigger if enabled
         if (store.trigger === "hover") {
-          $e.addEventListener("mouseenter", () => {
+          $elm.addEventListener("mouseenter", () => {
             if (store.disabled) return;
             _hoverClearHide(store);
             store.show();
           });
 
           // Prevent click from closing the menu in hover mode
-          $e.addEventListener("pointerdown", (e: any) => {
+          $elm.addEventListener("pointerdown", (e: any) => {
             e.stopPropagation();
           });
         }
@@ -104,19 +106,20 @@ export function Content(
   const { store, ...rest } = props;
 
   // Add hover event handlers for hover trigger mode
-  const hoverHandlers =
-    store.trigger === "hover"
-      ? {
-          onMouseEnter() {
-            console.log("[ContextMenu Content] mouseenter");
-            _hoverClearHide(store);
-          },
-          onMouseLeave() {
-            console.log("[ContextMenu Content] mouseleave");
-            _hoverScheduleHide(store);
-          },
-        }
-      : {};
+  const hoverHandlers = {};
+  // const hoverHandlers =
+  //   store.trigger === "hover"
+  //     ? {
+  //         onMouseEnter() {
+  //           console.log("[ContextMenu Content] mouseenter");
+  //           _hoverClearHide(store);
+  //         },
+  //         onMouseLeave() {
+  //           console.log("[ContextMenu Content] mouseleave");
+  //           _hoverScheduleHide(store);
+  //         },
+  //       }
+  //     : {};
 
   return MenuPrimitive.Content(
     { ...rest, ...hoverHandlers, store: props.store.menu },
@@ -149,12 +152,7 @@ export function Arrow(
   },
   children: ViewChildren,
 ) {
-  return MenuPrimitive.Arrow(
-    {
-      store: props.store.menu,
-    },
-    children,
-  );
+  return MenuPrimitive.Arrow({ store: props.store.menu }, children);
 }
 
 export function SubMenu(
@@ -179,30 +177,29 @@ export function SubMenuContent(
   children: ViewChildren,
 ) {
   // Get the parent ContextMenuCore from the menu's parent
-  const parentContextMenu = (props.store as any).parentContextMenu as
-    | ContextMenuCore
-    | undefined;
+  // const parentContextMenu = (props.store as any).parentContextMenu as
+  //   | ContextMenuCore
+  //   | undefined;
 
-  const hoverHandlers =
-    parentContextMenu && parentContextMenu.trigger === "hover"
-      ? {
-          onMouseEnter() {
-            console.log("[ContextMenu SubMenuContent] mouseenter");
-            // Cancel parent context menu hide timer when entering submenu
-            _hoverClearHide(parentContextMenu);
-          },
-          onMouseLeave() {
-            console.log("[ContextMenu SubMenuContent] mouseleave");
-            // Schedule parent context menu hide when leaving submenu
-            _hoverScheduleHide(parentContextMenu);
-          },
-        }
-      : {};
+  // const hoverHandlers =
+  //   parentContextMenu && parentContextMenu.trigger === "hover"
+  //     ? {
+  //         onMouseEnter() {
+  //           console.log("[ContextMenu SubMenuContent] mouseenter");
+  //           // Cancel parent context menu hide timer when entering submenu
+  //           _hoverClearHide(parentContextMenu);
+  //         },
+  //         onMouseLeave() {
+  //           console.log("[ContextMenu SubMenuContent] mouseleave");
+  //           // Schedule parent context menu hide when leaving submenu
+  //           _hoverScheduleHide(parentContextMenu);
+  //         },
+  //       }
+  //     : {};
 
-  return MenuPrimitive.SubMenuContent(
+  return MenuPrimitive.Content(
     {
-      ...props,
-      ...hoverHandlers,
+      ...props, // ...hoverHandlers,
     },
     children,
   );

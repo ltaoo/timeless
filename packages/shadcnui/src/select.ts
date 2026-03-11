@@ -56,73 +56,69 @@ export function Select(
         ]),
       ],
     ),
-    SelectPrimitive.Portal({ store }, [
-      SelectPrimitive.Content(
-        {
-          ...rest,
-          animation: {
-            in: "animate-in fade-in-0 slide-in-from-top-2",
-            out: "animate-out fade-out-0 slide-out-to-top-2",
-          },
-          store,
-          class:
-            "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
-          // 添加 minWidth 到 style，这样不会被 popper 的 computed style 覆盖
-          style: computed(state_, () => {
-            const width = store.reference?.width || 0;
-            // console.log(
-            //   "[Select shadcnui] computed style, width:",
-            //   width,
-            //   "reference:",
-            //   store.reference,
-            // );
-            return width > 0 ? `min-width: ${width}px;` : "";
-          }),
+    SelectPrimitive.Content(
+      {
+        ...rest,
+        animation: {
+          in: "animate-in fade-in-0 slide-in-from-top-2",
+          out: "animate-out fade-out-0 slide-out-to-top-2",
         },
-        [
-          SelectPrimitive.Viewport({ store, class: "p-1" }, [
-            For({
-              each: computed(state_, (d) => d.options),
-              render(option: any) {
-                return SelectPrimitive.Item(
-                  {
-                    store,
-                    value: option.value,
-                    class: computed(state_, (d) => {
-                      const opt = d.options.find(
-                        (o) => o.value === option.value,
-                      );
-                      return [
-                        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-                        opt?.focused
-                          ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                          : "",
-                        opt?.selected && !opt?.focused
-                          ? "bg-zinc-100 dark:bg-zinc-800"
-                          : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ");
-                    }),
-                  },
-                  [
-                    // SelectPrimitive.ItemIndicator(
-                    //   {
-                    //     store,
-                    //     value: option.value,
-                    //     class:
-                    //       "absolute left-2 flex h-4 w-4 items-center justify-center",
-                    //   },
-                    //   [CheckOutlined({})],
-                    // ),
-                    SelectPrimitive.ItemText({}, [option.label]),
-                  ],
-                );
-              },
-            }),
-          ]),
-        ],
-      ),
-    ]),
+        store,
+        class:
+          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
+        // 添加 minWidth 到 style，这样不会被 popper 的 computed style 覆盖
+        style: computed(state_, () => {
+          const width = store.reference?.width || 0;
+          // console.log(
+          //   "[Select shadcnui] computed style, width:",
+          //   width,
+          //   "reference:",
+          //   store.reference,
+          // );
+          return width > 0 ? `min-width: ${width}px;` : "";
+        }),
+      },
+      [
+        SelectPrimitive.Viewport({ store, class: "p-1" }, [
+          For({
+            each: computed(state_, (d) => d.options),
+            render(option: any) {
+              return SelectPrimitive.Item(
+                {
+                  store,
+                  value: option.value,
+                  class: computed(state_, (d) => {
+                    const opt = d.options.find((o) => o.value === option.value);
+                    return [
+                      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                      opt?.focused
+                        ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                        : "",
+                      opt?.selected && !opt?.focused
+                        ? "bg-zinc-100 dark:bg-zinc-800"
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ");
+                  }),
+                },
+                [
+                  // SelectPrimitive.ItemIndicator(
+                  //   {
+                  //     store,
+                  //     value: option.value,
+                  //     class:
+                  //       "absolute left-2 flex h-4 w-4 items-center justify-center",
+                  //   },
+                  //   [CheckOutlined({})],
+                  // ),
+                  SelectPrimitive.ItemText({}, [option.label]),
+                ],
+              );
+            },
+          }),
+        ]),
+      ],
+    ),
   ]);
 }
