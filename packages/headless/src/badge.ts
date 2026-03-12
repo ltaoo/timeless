@@ -1,16 +1,16 @@
-import { tp, merge } from "./theme";
 import { View, ViewProps, ViewChildren } from "./view";
 
-export function Badge(props: any, children?: ViewChildren) {
-  const {
-    variant = "default",
-    theme: t,
-    class: cls,
-    style: st,
-    ...rest
-  } = props || {};
+export function Badge(
+  props: ViewProps & { variant?: "default" | "secondary" | "outline" | "destructive" },
+  children?: ViewChildren,
+) {
+  const { variant = "default", ...rest } = props || {};
   return View(
-    { ...rest, ...merge(tp(t?.root, { variant }), cls, st) },
+    {
+      ...rest,
+      // "data-badge": "",
+      // "data-variant": variant,
+    },
     children,
   );
 }

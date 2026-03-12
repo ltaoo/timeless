@@ -1,6 +1,5 @@
 import { cn, ref, refobj } from "@timeless/reactive";
 
-import { tp, merge } from "./theme";
 import { View, ViewProps, ViewChildren } from "./view";
 import { InputCore } from "@timeless/ui";
 
@@ -12,7 +11,7 @@ export function Root(
 }
 
 export function Input(
-  props: ViewProps & { store: InputCore<any>; id?: string; theme?: any },
+  props: ViewProps & { store: InputCore<any>; id?: string },
 ) {
   const { store, style: st, class: cls, dataset = {}, id, ...rest } = props;
 
@@ -201,13 +200,13 @@ export function Loading(
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted($elm: HTMLDivElement) {
         const updateDisplay = () => {
-          $e.style.display = loading$.value ? "" : "none";
+          $elm.style.display = loading$.value ? "" : "none";
         };
         loading$._subscribe({ onChange: updateDisplay });
         updateDisplay();
-        if (rest.onMounted) rest.onMounted($e);
+        if (rest.onMounted) rest.onMounted($elm);
       },
     },
     children,
@@ -230,17 +229,17 @@ export function Disabled(
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted($elm: HTMLDivElement) {
         const updateState = () => {
           if (disabled$.value) {
-            $e.setAttribute("data-disabled", "true");
+            $elm.setAttribute("data-disabled", "true");
           } else {
-            $e.removeAttribute("data-disabled");
+            $elm.removeAttribute("data-disabled");
           }
         };
         disabled$._subscribe({ onChange: updateState });
         updateState();
-        if (rest.onMounted) rest.onMounted($e);
+        if (rest.onMounted) rest.onMounted($elm);
       },
     },
     children,

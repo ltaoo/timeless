@@ -1,11 +1,50 @@
-import { Avatar as H } from "@timeless/headless";
+import { AvatarPrimitive, ViewProps, ViewChildren } from "@timeless/headless";
+import { cn, Ref } from "@timeless/reactive";
 
-const SIZES = { sm: "h-8 w-8 text-xs", default: "h-10 w-10 text-sm", lg: "h-12 w-12 text-base" };
-
-const t = {
-  root: ({ size }) => ({ class: ["relative flex shrink-0 overflow-hidden rounded-full", SIZES[size] || SIZES.default].join(" ") }),
-  image: { class: "aspect-square h-full w-full object-cover" },
-  fallback: { class: "flex h-full w-full items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-medium" },
+const SIZES = {
+  sm: "h-8 w-8 text-xs",
+  default: "h-10 w-10 text-sm",
+  lg: "h-12 w-12 text-base",
+  large: "h-12 w-12 text-base",
 };
 
-export function Avatar(p: any) { return H({ ...p, theme: t }); }
+export function Avatar(
+  props: ViewProps & {
+    src: string | Ref<string>;
+    alt?: string;
+    size?: "sm" | "default" | "lg" | "large";
+    fallback?: string;
+  },
+  children?: ViewChildren,
+) {
+  const { src, alt, fallback, size = "default", class: cls, ...rest } = props;
+
+  return AvatarPrimitive.Root(
+    {
+      ...rest,
+      size,
+      class: cn([
+        "relative flex shrink-0 overflow-hidden rounded-full",
+        SIZES[size] || SIZES.default,
+        cls,
+      ]),
+    },
+    [
+      AvatarPrimitive.Image({
+        src,
+        alt,
+        class: "aspect-square h-full w-full object-cover",
+        onLoadingStatusChange: (status) => {
+          // Image handles visibility internally based on error state
+        },
+      }),
+      AvatarPrimitive.Fallback(
+        {
+          class:
+            "flex h-full w-full items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-medium",
+        },
+        children ?? [fallback || (alt ? alt.charAt(0).toUpperCase() : "?")],
+      ),
+    ],
+  );
+}

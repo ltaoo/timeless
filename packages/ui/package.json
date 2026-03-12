@@ -35,6 +35,11 @@
       "import": "./dist/calendar/index.esm.js",
       "require": "./dist/calendar/index.js"
     },
+    "./cascader": {
+      "types": "./dist/cascader/index.d.ts",
+      "import": "./dist/cascader/index.esm.js",
+      "require": "./dist/cascader/index.js"
+    },
     "./checkbox": {
       "types": "./dist/checkbox/index.d.ts",
       "import": "./dist/checkbox/index.esm.js",
@@ -59,6 +64,11 @@
       "types": "./dist/date-picker/index.d.ts",
       "import": "./dist/date-picker/index.esm.js",
       "require": "./dist/date-picker/index.js"
+    },
+    "./date-range-picker": {
+      "types": "./dist/date-range-picker/index.d.ts",
+      "import": "./dist/date-range-picker/index.esm.js",
+      "require": "./dist/date-range-picker/index.js"
     },
     "./dialog": {
       "types": "./dist/dialog/index.d.ts",
@@ -135,6 +145,11 @@
       "import": "./dist/pointer/index.esm.js",
       "require": "./dist/pointer/index.js"
     },
+    "./popconfirm": {
+      "types": "./dist/popconfirm/index.d.ts",
+      "import": "./dist/popconfirm/index.esm.js",
+      "require": "./dist/popconfirm/index.js"
+    },
     "./popover": {
       "types": "./dist/popover/index.d.ts",
       "import": "./dist/popover/index.esm.js",
@@ -154,6 +169,16 @@
       "types": "./dist/progress/index.d.ts",
       "import": "./dist/progress/index.esm.js",
       "require": "./dist/progress/index.js"
+    },
+    "./radio": {
+      "types": "./dist/radio/index.d.ts",
+      "import": "./dist/radio/index.esm.js",
+      "require": "./dist/radio/index.js"
+    },
+    "./range-calendar": {
+      "types": "./dist/range-calendar/index.d.ts",
+      "import": "./dist/range-calendar/index.esm.js",
+      "require": "./dist/range-calendar/index.js"
     },
     "./resizable-panels": {
       "types": "./dist/resizable-panels/index.d.ts",
@@ -199,6 +224,16 @@
       "types": "./dist/tabs/index.d.ts",
       "import": "./dist/tabs/index.esm.js",
       "require": "./dist/tabs/index.js"
+    },
+    "./tag-select": {
+      "types": "./dist/tag-select/index.d.ts",
+      "import": "./dist/tag-select/index.esm.js",
+      "require": "./dist/tag-select/index.js"
+    },
+    "./time-picker": {
+      "types": "./dist/time-picker/index.d.ts",
+      "import": "./dist/time-picker/index.esm.js",
+      "require": "./dist/time-picker/index.js"
     },
     "./toast": {
       "types": "./dist/toast/index.d.ts",

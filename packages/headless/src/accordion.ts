@@ -49,7 +49,7 @@ export function Trigger(
 
 export function Chevron(
   props: ViewProps & { store: AccordionCore; index: number },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, index, ...rest } = props;
   const isOpen = computed(store.openItems, (d) => d.includes(index));
@@ -62,7 +62,7 @@ export function Chevron(
         return typeof baseClass === "string" ? baseClass : "";
       }),
     },
-    children || [Txt("▾")],
+    children,
   );
 }
 

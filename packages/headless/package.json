@@ -62,6 +62,11 @@
       "import": "./dist/card/index.esm.js",
       "require": "./dist/card/index.js"
     },
+    "./cascader": {
+      "types": "./dist/cascader/index.d.ts",
+      "import": "./dist/cascader/index.esm.js",
+      "require": "./dist/cascader/index.js"
+    },
     "./checkbox": {
       "types": "./dist/checkbox/index.d.ts",
       "import": "./dist/checkbox/index.esm.js",
@@ -71,6 +76,16 @@
       "types": "./dist/context-menu/index.d.ts",
       "import": "./dist/context-menu/index.esm.js",
       "require": "./dist/context-menu/index.js"
+    },
+    "./date-picker": {
+      "types": "./dist/date-picker/index.d.ts",
+      "import": "./dist/date-picker/index.esm.js",
+      "require": "./dist/date-picker/index.js"
+    },
+    "./date-range-picker": {
+      "types": "./dist/date-range-picker/index.d.ts",
+      "import": "./dist/date-range-picker/index.esm.js",
+      "require": "./dist/date-range-picker/index.js"
     },
     "./dialog": {
       "types": "./dist/dialog/index.d.ts",
@@ -147,10 +162,20 @@
       "import": "./dist/menu/index.esm.js",
       "require": "./dist/menu/index.js"
     },
+    "./number-input": {
+      "types": "./dist/number-input/index.d.ts",
+      "import": "./dist/number-input/index.esm.js",
+      "require": "./dist/number-input/index.js"
+    },
     "./paragraph": {
       "types": "./dist/paragraph/index.d.ts",
       "import": "./dist/paragraph/index.esm.js",
       "require": "./dist/paragraph/index.js"
+    },
+    "./popconfirm": {
+      "types": "./dist/popconfirm/index.d.ts",
+      "import": "./dist/popconfirm/index.esm.js",
+      "require": "./dist/popconfirm/index.js"
     },
     "./popover": {
       "types": "./dist/popover/index.d.ts",
@@ -177,6 +202,11 @@
       "import": "./dist/progress/index.esm.js",
       "require": "./dist/progress/index.js"
     },
+    "./radio": {
+      "types": "./dist/radio/index.d.ts",
+      "import": "./dist/radio/index.esm.js",
+      "require": "./dist/radio/index.js"
+    },
     "./render": {
       "types": "./dist/render/index.d.ts",
       "import": "./dist/render/index.esm.js",
@@ -186,6 +216,11 @@
       "types": "./dist/resizable-panels/index.d.ts",
       "import": "./dist/resizable-panels/index.esm.js",
       "require": "./dist/resizable-panels/index.js"
+    },
+    "./scroll-view": {
+      "types": "./dist/scroll-view/index.d.ts",
+      "import": "./dist/scroll-view/index.esm.js",
+      "require": "./dist/scroll-view/index.js"
     },
     "./select": {
       "types": "./dist/select/index.d.ts",
@@ -217,6 +252,11 @@
       "import": "./dist/slider/index.esm.js",
       "require": "./dist/slider/index.js"
     },
+    "./steps": {
+      "types": "./dist/steps/index.d.ts",
+      "import": "./dist/steps/index.esm.js",
+      "require": "./dist/steps/index.js"
+    },
     "./sub-views": {
       "types": "./dist/sub-views/index.d.ts",
       "import": "./dist/sub-views/index.esm.js",
@@ -242,6 +282,11 @@
       "import": "./dist/tabs/index.esm.js",
       "require": "./dist/tabs/index.js"
     },
+    "./tag-select": {
+      "types": "./dist/tag-select/index.d.ts",
+      "import": "./dist/tag-select/index.esm.js",
+      "require": "./dist/tag-select/index.js"
+    },
     "./text": {
       "types": "./dist/text/index.d.ts",
       "import": "./dist/text/index.esm.js",
@@ -256,6 +301,11 @@
       "types": "./dist/theme/index.d.ts",
       "import": "./dist/theme/index.esm.js",
       "require": "./dist/theme/index.js"
+    },
+    "./time-picker": {
+      "types": "./dist/time-picker/index.d.ts",
+      "import": "./dist/time-picker/index.esm.js",
+      "require": "./dist/time-picker/index.js"
     },
     "./toast": {
       "types": "./dist/toast/index.d.ts",

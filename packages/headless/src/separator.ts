@@ -1,17 +1,13 @@
-import { tp, merge } from "./theme";
 import { View, ViewProps } from "./view";
 
 export function Separator(
-  props: ViewProps & {
-    orientation: "horizontal" | "vertical";
-    theme?: any;
-  },
+  props: ViewProps & { orientation?: "horizontal" | "vertical" },
 ) {
-  const {
-    orientation = "horizontal",
-    theme: t,
-    class: cls,
-    style: st,
-  } = props || {};
-  return View({ ...merge(tp(t?.root, { orientation }), cls, st) });
+  const { orientation = "horizontal", ...rest } = props || {};
+  return View({
+    ...rest,
+    // "data-separator": "",
+    // "data-orientation": orientation,
+    // role: "separator",
+  });
 }

@@ -1,31 +1,67 @@
-import { tp, merge } from "./theme";
 import { View, ViewChildren, ViewProps } from "./view";
 
-function themed(
-  type: string,
-  part: string,
-  props: any,
-  children?: ViewChildren,
-) {
-  const { theme: t, class: cls, style: st, ...rest } = props || {};
-  return View({ type, ...rest, ...merge(tp(t?.[part]), cls, st) }, children);
+export function Table(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      type: "table",
+      ...props,
+      // "data-table": "",
+    },
+    children,
+  );
 }
 
-export function Table(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("table", "table", p, c);
+export function TableHeader(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      type: "thead",
+      ...props,
+      // "data-table-header": "",
+    },
+    children,
+  );
 }
-export function TableHeader(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("thead", "header", p, c);
+
+export function TableBody(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      type: "tbody",
+      ...props,
+      // "data-table-body": "",
+    },
+    children,
+  );
 }
-export function TableBody(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("tbody", "body", p, c);
+
+export function TableRow(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      type: "tr",
+      ...props,
+      // "data-table-row": "",
+    },
+    children,
+  );
 }
-export function TableRow(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("tr", "row", p, c);
+
+export function TableHead(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      type: "th",
+      ...props,
+      // "data-table-head": "",
+    },
+    children,
+  );
 }
-export function TableHead(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("th", "head", p, c);
-}
-export function TableCell(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("td", "cell", p, c);
+
+export function TableCell(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      type: "td",
+      ...props,
+      // "data-table-cell": "",
+    },
+    children,
+  );
 }

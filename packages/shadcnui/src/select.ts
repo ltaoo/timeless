@@ -65,7 +65,7 @@ export function Select(
         },
         store,
         class:
-          "select__content relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
+          "select__content relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
         // 添加 minWidth 到 style，这样不会被 popper 的 computed style 覆盖
         style: computed(state_, () => {
           const width = store.reference?.width || 0;

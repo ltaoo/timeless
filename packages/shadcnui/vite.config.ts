@@ -33,6 +33,7 @@ export default defineConfig({
         "@timeless/headless",
         "@timeless/kit",
         "@timeless/ui",
+        "@timeless/icons",
       ],
       output: {
         globals: {
@@ -40,6 +41,7 @@ export default defineConfig({
           "@timeless/headless": "Timeless.headless",
           "@timeless/kit": "Timeless.kit",
           "@timeless/ui": "Timeless.ui",
+          "@timeless/icons": "Timeless.icons",
         },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === "style.css") {

@@ -32,6 +32,11 @@
       "import": "./dist/bolt/index.esm.js",
       "require": "./dist/bolt/index.js"
     },
+    "./calendar": {
+      "types": "./dist/calendar/index.d.ts",
+      "import": "./dist/calendar/index.esm.js",
+      "require": "./dist/calendar/index.js"
+    },
     "./check": {
       "types": "./dist/check/index.d.ts",
       "import": "./dist/check/index.esm.js",
@@ -42,10 +47,20 @@
       "import": "./dist/chevron-down/index.esm.js",
       "require": "./dist/chevron-down/index.js"
     },
+    "./chevron-left": {
+      "types": "./dist/chevron-left/index.d.ts",
+      "import": "./dist/chevron-left/index.esm.js",
+      "require": "./dist/chevron-left/index.js"
+    },
     "./chevron-right": {
       "types": "./dist/chevron-right/index.d.ts",
       "import": "./dist/chevron-right/index.esm.js",
       "require": "./dist/chevron-right/index.js"
+    },
+    "./chevron-up": {
+      "types": "./dist/chevron-up/index.d.ts",
+      "import": "./dist/chevron-up/index.esm.js",
+      "require": "./dist/chevron-up/index.js"
     },
     "./circle-arrow-down": {
       "types": "./dist/circle-arrow-down/index.d.ts",
@@ -56,6 +71,11 @@
       "types": "./dist/circle-x/index.d.ts",
       "import": "./dist/circle-x/index.esm.js",
       "require": "./dist/circle-x/index.js"
+    },
+    "./clock": {
+      "types": "./dist/clock/index.d.ts",
+      "import": "./dist/clock/index.esm.js",
+      "require": "./dist/clock/index.js"
     },
     "./clock-arrow-down": {
       "types": "./dist/clock-arrow-down/index.d.ts",

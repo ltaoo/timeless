@@ -55,9 +55,13 @@ export function Arrow(
           .map(([k, v]) => `${k}:${v}`)
           .join(";");
       }),
-      onMounted($el) {
+      onMounted($el: HTMLDivElement) {
         if (store.setArrow) {
-          store.setArrow($el);
+          const { width, height } = $el.getBoundingClientRect();
+          store.setArrow({
+            width,
+            height,
+          });
         }
       },
       onUnmounted() {

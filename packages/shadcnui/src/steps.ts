@@ -1,75 +1,116 @@
-import { ref } from "@timeless/reactive";
-import { computed, View, For, Show, Txt } from "@timeless/headless";
+import { refobj, computed, classNames } from "@timeless/reactive";
+import { StepsPrimitive, For, Show, Txt, ViewProps } from "@timeless/headless";
+import { StepCore } from "@timeless/ui";
 
-export function Steps(props: {
-  current: number;
-  items: any[];
-  class?: string;
-}) {
-  const { current: cc, items, class: cn } = props;
+export type StepItem = {
+  title: string;
+  description?: string;
+};
 
-  const current = ref(cc);
+export function Steps(props: ViewProps & { store: StepCore; items: StepItem[] }) {
+  const { store, items, class: cn, ...rest } = props;
 
-  return View({ class: ["w-full", cn].filter(Boolean).join(" ") }, [
-    View({ class: "flex items-center justify-between" }, [
-      For({
-        each: items,
-        render: (item, index) => {
-          return View({ class: "flex flex-1 items-center" }, [
-            View({ class: "flex flex-col items-center relative z-10" }, [
-              View(
+  const state_ = refobj(store.state);
+
+  store.onStateChange((v) => {
+    state_.as(v);
+  });
+
+  return StepsPrimitive.Root(
+    {
+      store,
+      items,
+      class: classNames(["w-full", cn]),
+      ...rest,
+    },
+    [
+      StepsPrimitive.List(
+        {
+          store,
+          items,
+          class: "flex items-center justify-between",
+        },
+        [
+          For({
+            each: items,
+            render: (item, index) => {
+              return StepsPrimitive.Item(
                 {
-                  class: computed(current, (d) =>
-                    [
-                      "flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors",
-                      index < d
-                        ? "bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900"
-                        : "",
-                      index === d
-                        ? "border-2 border-zinc-900 text-zinc-900 dark:border-zinc-50 dark:text-zinc-50"
-                        : "",
-                      index > d
-                        ? "border-2 border-zinc-200 text-zinc-500 dark:border-zinc-700"
-                        : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" "),
-                  ),
+                  store,
+                  index,
+                  item,
+                  class: "flex flex-1 items-center",
                 },
                 [
-                  Txt(
-                    computed(current, (d) =>
-                      index < d ? "✓" : String(index + 1),
-                    ),
-                  ),
-                ],
-              ),
-              View(
-                {
-                  class:
-                    "mt-2 text-xs font-medium text-zinc-500 dark:text-zinc-400",
-                },
-                [Txt(item.title)],
-              ),
-            ]),
-            Show(
-              { when: computed(items, (items) => index < items.length - 1) },
-              [
-                View({
-                  class: computed(current, (d) =>
+                  StepsPrimitive.Indicator(
+                    {
+                      store,
+                      index,
+                      class: classNames([
+                        "flex flex-col items-center relative z-10",
+                      ]),
+                    },
                     [
-                      "h-[2px] w-full flex-1 mx-2 transition-colors",
-                      index < d
-                        ? "bg-zinc-900 dark:bg-zinc-50"
-                        : "bg-zinc-200 dark:bg-zinc-700",
-                    ].join(" "),
+                      StepIndicatorCircle({ store, index }),
+                      StepsPrimitive.Title(
+                        {
+                          class:
+                            "mt-2 text-xs font-medium text-zinc-500 dark:text-zinc-400",
+                        },
+                        [Txt(item.title)],
+                      ),
+                    ],
                   ),
-                }),
-              ],
-            ),
-          ]);
-        },
-      }),
-    ]),
-  ]);
+                  Show({ when: index < items.length - 1 }, [
+                    StepsPrimitive.Connector({
+                      store,
+                      index,
+                      class: classNames([
+                        "h-[2px] w-full flex-1 mx-2 transition-colors",
+                        computed(state_, (s) =>
+                          index < s.value
+                            ? "bg-zinc-900 dark:bg-zinc-50"
+                            : "bg-zinc-200 dark:bg-zinc-700",
+                        ),
+                      ]),
+                    }),
+                  ]),
+                ],
+              );
+            },
+          }),
+        ],
+      ),
+    ],
+  );
+}
+
+function StepIndicatorCircle(props: { store: StepCore; index: number }) {
+  const { store, index } = props;
+
+  const state_ = refobj(store.state);
+
+  store.onStateChange((v) => {
+    state_.as(v);
+  });
+
+  return StepsPrimitive.Indicator(
+    {
+      store,
+      index,
+      class: classNames([
+        "flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors",
+        computed(state_, (s) => {
+          if (index < s.value) {
+            return "bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900";
+          }
+          if (index === s.value) {
+            return "border-2 border-zinc-900 text-zinc-900 dark:border-zinc-50 dark:text-zinc-50";
+          }
+          return "border-2 border-zinc-200 text-zinc-500 dark:border-zinc-700";
+        }),
+      ]),
+    },
+    [Txt(computed(state_, (s) => (index < s.value ? "✓" : String(index + 1))))],
+  );
 }

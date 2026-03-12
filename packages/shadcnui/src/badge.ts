@@ -1,4 +1,5 @@
-import { Badge as H } from "@timeless/headless";
+import { Badge as H, ViewProps, ViewChildren } from "@timeless/headless";
+import { cn } from "@timeless/reactive";
 
 const VARIANTS = {
   default: "border-transparent bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900",
@@ -7,10 +8,21 @@ const VARIANTS = {
   destructive: "border-transparent bg-red-500 text-zinc-50",
 };
 
-const t = {
-  root: ({ variant }) => ({
-    class: ["inline-flex items-center rounded-full border border-zinc-200 px-2.5 py-0.5 text-xs font-semibold transition-colors dark:border-zinc-800", VARIANTS[variant] || VARIANTS.default].join(" "),
-  }),
-};
-
-export function Badge(p: any, c: any) { return H({ ...p, theme: t }, c); }
+export function Badge(
+  props: ViewProps & { variant?: "default" | "secondary" | "outline" | "destructive" },
+  children?: ViewChildren,
+) {
+  const { variant = "default", class: cls, ...rest } = props;
+  return H(
+    {
+      ...rest,
+      variant,
+      class: cn([
+        "inline-flex items-center rounded-full border border-zinc-200 px-2.5 py-0.5 text-xs font-semibold transition-colors dark:border-zinc-800",
+        VARIANTS[variant] || VARIANTS.default,
+        cls,
+      ]),
+    },
+    children,
+  );
+}

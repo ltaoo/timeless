@@ -204,6 +204,27 @@ export function Content(
     presence_.as(v);
   });
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        store.focusNextOption();
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        store.focusPrevOption();
+        break;
+      case "Enter":
+        e.preventDefault();
+        store.selectFocusedOption();
+        break;
+      case "Escape":
+        e.preventDefault();
+        store.hide();
+        break;
+    }
+  };
+
   return h(
     Show,
     {
@@ -224,6 +245,7 @@ export function Content(
             View(
               {
                 ...rest,
+                tabindex: "0",
                 class: classNames([
                   rest.class,
                   computed(presence_, (t) => {
@@ -235,6 +257,16 @@ export function Content(
                       .join(" ");
                   }),
                 ]),
+                onKeyDown: handleKeyDown,
+                onMounted($elm: HTMLElement) {
+                  // 自动聚焦以接收键盘事件
+                  setTimeout(() => {
+                    $elm.focus();
+                  }, 0);
+                  if (rest.onMounted) {
+                    rest.onMounted($elm);
+                  }
+                },
               },
               children,
             ),
@@ -250,6 +282,58 @@ export function Viewport(
   children: ViewChildren,
 ) {
   return View(props, children);
+}
+
+export function Search(
+  props: ViewProps & { store: SelectCore<any> },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  const state_ = refobj(store.state);
+
+  store.onStateChange((v) => {
+    state_.as(v);
+  });
+
+  return h(
+    Show,
+    {
+      when: computed(state_, (s) => s.search),
+    },
+    [
+      View(
+        {
+          ...rest,
+          as: "input",
+          type: "text",
+          placeholder: computed(state_, (s) => s.searchPlaceholder),
+          value: computed(state_, (s) => s.searchKeyword),
+          onInput(e: Event) {
+            const target = e.target as HTMLInputElement;
+            store.setSearchKeyword(target.value);
+          },
+          onMounted($elm: HTMLInputElement) {
+            // 自动聚焦搜索框
+            setTimeout(() => {
+              $elm.focus();
+            }, 0);
+            if (rest.onMounted) {
+              rest.onMounted($elm);
+            }
+          },
+          onClick(e: Event) {
+            // 阻止点击搜索框时关闭下拉菜单
+            e.stopPropagation();
+          },
+          onKeyDown(e: KeyboardEvent) {
+            // 阻止按键事件冒泡，避免影响 Select 的键盘导航
+            e.stopPropagation();
+          },
+        },
+        children,
+      ),
+    ],
+  );
 }
 
 export function Item(

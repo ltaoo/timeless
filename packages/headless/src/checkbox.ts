@@ -114,11 +114,11 @@ export function Label(
             e.stopPropagation();
             store.toggle();
           },
-          onMounted(el) {
-            el.checked = store.state.checked;
+          onMounted($elm: HTMLInputElement) {
+            $elm.checked = !!store.state.checked;
             events.push(
               store.onStateChange(() => {
-                el.checked = store.state.checked;
+                $elm.checked = !!store.state.checked;
               }),
             );
           },
@@ -137,5 +137,48 @@ export function Label(
       },
     },
     hiddenInput ? [hiddenInput, ...(children || [])] : children,
+  );
+}
+
+// CheckboxGroup primitives
+import { CheckboxGroupCore } from "@timeless/ui";
+
+export function Group(
+  props: ViewProps & { store: CheckboxGroupCore<any> },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
+  return View(
+    {
+      ...rest,
+      // role: "group",
+    },
+    children,
+  );
+}
+
+export function GroupItem(
+  props: ViewProps & {
+    store: CheckboxGroupCore<any>;
+    item: { label: string; value: any; core: CheckboxCore };
+    renderCheckbox?: (core: CheckboxCore) => ViewChildren;
+    renderLabel?: (label: string) => ViewChildren;
+  },
+  children?: ViewChildren,
+) {
+  const { store, item, renderCheckbox, renderLabel, ...rest } = props;
+
+  const checkboxContent = renderCheckbox
+    ? renderCheckbox(item.core)
+    : Box({ store: item.core }, [Indicator({ store: item.core }, children)]);
+
+  const labelContent = renderLabel ? renderLabel(item.label) : item.label;
+
+  return View(
+    {
+      ...rest,
+    },
+    [checkboxContent, labelContent],
   );
 }

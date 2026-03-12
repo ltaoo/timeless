@@ -38,9 +38,15 @@ type SelectProps<T> = {
   // options: SelectItemCore<T>[];
   options?: { value: T; label: string }[];
   onChange?: (v: T | null) => void;
+  /** 是否支持搜索过滤 */
+  search?: boolean;
+  /** 搜索框占位符 */
+  searchPlaceholder?: string;
 };
 type SelectState<T> = {
   options: { value: T; label: string; selected: boolean; focused: boolean }[];
+  /** 过滤后的选项列表 */
+  filteredOptions: { value: T; label: string; selected: boolean; focused: boolean }[];
   value: T | null;
   value2: { value: T; label: string } | null;
   /** 菜单是否展开 */
@@ -56,6 +62,12 @@ type SelectState<T> = {
   enter: boolean;
   visible: boolean;
   exit: boolean;
+  /** 是否启用搜索 */
+  search: boolean;
+  /** 搜索关键字 */
+  searchKeyword: string;
+  /** 搜索框占位符 */
+  searchPlaceholder: string;
 };
 
 export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
@@ -72,6 +84,12 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   value: T | null = null;
   disabled: boolean = false;
   open: boolean = false;
+  /** 是否启用搜索 */
+  search: boolean = false;
+  /** 搜索关键字 */
+  searchKeyword: string = "";
+  /** 搜索框占位符 */
+  searchPlaceholder: string = "搜索...";
 
   popper: PopperCore;
   presence = new PresenceCore();
@@ -101,9 +119,21 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
   _findFirstValidItem = false;
 
+  /** 获取过滤后的选项 */
+  get filteredOptions() {
+    if (!this.search || !this.searchKeyword) {
+      return this.options;
+    }
+    const keyword = this.searchKeyword.toLowerCase();
+    return this.options.filter((opt) =>
+      opt.label.toLowerCase().includes(keyword)
+    );
+  }
+
   get state(): SelectState<T> {
     return {
       options: this.options,
+      filteredOptions: this.filteredOptions,
       value: this.value,
       value2: this.options.find((opt) => opt.value === this.value) ?? null,
       open: this.open,
@@ -115,6 +145,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       enter: this.presence.state.enter,
       visible: this.presence.state.visible,
       exit: this.presence.state.exit,
+      search: this.search,
+      searchKeyword: this.searchKeyword,
+      searchPlaceholder: this.searchPlaceholder,
     };
   }
 
@@ -127,8 +160,12 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       placeholder = "点击选择",
       options = [],
       onChange,
+      search = false,
+      searchPlaceholder = "搜索...",
     } = props;
     // console.log("[DOMAIN]ui/select/index - constructor", defaultValue);
+    this.search = search;
+    this.searchPlaceholder = searchPlaceholder;
     this.options = options.map((opt, i) => {
       return {
         label: opt.label,
@@ -223,6 +260,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       return;
     }
     this.open = false;
+    // 关闭时清空搜索关键字
+    this.searchKeyword = "";
     this.emit(Events.StateChange, { ...this.state });
   }
   addNativeOption() {}
@@ -329,6 +368,22 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.emit(Events.StateChange, { ...this.state });
     this.emit(Events.Change, this.value);
   }
+  /** 设置搜索关键字 */
+  setSearchKeyword(keyword: string) {
+    if (this.searchKeyword === keyword) {
+      return;
+    }
+    this.searchKeyword = keyword;
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  /** 清空搜索关键字 */
+  clearSearch() {
+    if (!this.searchKeyword) {
+      return;
+    }
+    this.searchKeyword = "";
+    this.emit(Events.StateChange, { ...this.state });
+  }
   focusOption(value: T) {
     // 检查是否需要更新
     const needsUpdate = this.options.some(
@@ -366,6 +421,43 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       };
     });
     this.emit(Events.StateChange, { ...this.state });
+  }
+  /** 获取当前焦点选项的索引 */
+  getFocusedIndex(): number {
+    const options = this.filteredOptions;
+    return options.findIndex((opt) => opt.focused);
+  }
+  /** 聚焦下一个选项 */
+  focusNextOption() {
+    const options = this.filteredOptions;
+    if (options.length === 0) return;
+
+    const currentIndex = this.getFocusedIndex();
+    const nextIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
+    const nextOption = options[nextIndex];
+    if (nextOption) {
+      this.focusOption(nextOption.value);
+    }
+  }
+  /** 聚焦上一个选项 */
+  focusPrevOption() {
+    const options = this.filteredOptions;
+    if (options.length === 0) return;
+
+    const currentIndex = this.getFocusedIndex();
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
+    const prevOption = options[prevIndex];
+    if (prevOption) {
+      this.focusOption(prevOption.value);
+    }
+  }
+  /** 选择当前焦点的选项 */
+  selectFocusedOption() {
+    const options = this.filteredOptions;
+    const focusedOption = options.find((opt) => opt.focused);
+    if (focusedOption) {
+      this.select(focusedOption.value);
+    }
   }
   setPosition(rect) {
     this.reference = rect;

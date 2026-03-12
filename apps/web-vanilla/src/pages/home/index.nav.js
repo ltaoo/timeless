@@ -32,6 +32,7 @@ export default function NavigationView() {
     Section("Accordion", [
       Item("Default", [
         Accordion({
+          store: new Timeless.ui.AccordionCore({ type: "single" }),
           items: [
             {
               title: "Is it accessible?",

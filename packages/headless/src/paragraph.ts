@@ -4,12 +4,6 @@ export function Paragraph(props: ViewProps & {}, children?: ViewChildren) {
   const node$ = View({ type: "p" }, children);
   return {
     t: "view",
-    append(node: any) {
-      return node$.append(node);
-    },
-    setContent(v: any) {
-      return node$.setContent(v);
-    },
     render() {
       return node$.render();
     },

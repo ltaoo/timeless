@@ -19,7 +19,7 @@ export function Group(
       style: ["display: flex", "width: 100%", "height: 100%"]
         .filter(Boolean)
         .join("; "),
-      onMounted($el) {
+      onMounted($el: HTMLDivElement) {
         store.mount($el);
         rest.onMounted?.($el);
       },
@@ -60,7 +60,7 @@ export function Panel(
           size,
           flexBasis,
           flexGrow,
-          flexShrink
+          flexShrink,
         });
         return [
           `flex-basis: ${flexBasis}`,
@@ -71,7 +71,7 @@ export function Panel(
           .filter(Boolean)
           .join("; ");
       }),
-      onMounted($el) {
+      onMounted($el: HTMLDivElement) {
         store.mount($el);
         if (group) {
           group.registerPanel(store);
@@ -125,16 +125,18 @@ export function Handle(
 
         // 设置全局光标样式
         const state = store.state;
-        const cursor = state.direction === "horizontal" ? "col-resize" : "row-resize";
+        const cursor =
+          state.direction === "horizontal" ? "col-resize" : "row-resize";
         document.body.style.cursor = cursor;
         document.body.style.userSelect = "none";
 
         rest.onPointerDown?.(e);
       },
-      onMounted(el: TimelessElement) {
+      onMounted($el: HTMLDivElement) {
         // console.log("[ResizableHandle] mounted", el);
         const state = store.state;
-        const cursorClass = state.direction === "horizontal" ? "col-resize" : "row-resize";
+        const cursorClass =
+          state.direction === "horizontal" ? "col-resize" : "row-resize";
 
         // 监听全局 pointer 事件
         const handlePointerMove = (e: PointerEvent) => {
@@ -163,9 +165,9 @@ export function Handle(
           document.removeEventListener("pointermove", handlePointerMove);
           document.removeEventListener("pointerup", handlePointerUp);
         };
-        (el as any)._resizeCleanup = cleanup;
+        ($el as any)._resizeCleanup = cleanup;
 
-        rest.onMounted?.(el);
+        rest.onMounted?.($el);
       },
       beforeUnmounted() {
         rest.beforeUnmounted?.();

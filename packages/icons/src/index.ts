@@ -1,5 +1,7 @@
 export * from "./arrow-down-to-line";
+export * from "./calendar";
 export * from "./chevron-down";
+export * from "./chevron-left";
 export * from "./chevron-right";
 export * from "./circle-arrow-down";
 export * from "./circle-x";
@@ -30,3 +32,5 @@ export * from "./bolt";
 export * from "./loader";
 export * from "./loader-circle";
 export * from "./check";
+export * from "./chevron-up";
+export * from "./clock";

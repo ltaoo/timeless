@@ -24,16 +24,14 @@ type CalendarCoreProps = {
 function getMonthWeeks(date: Date) {
   const d = dayjs(date);
   const startOfMonth = d.startOf("month");
-  const endOfMonth = d.endOf("month");
   const startDay = startOfMonth.day();
   const diffStart = (startDay + 6) % 7;
   const startDate = startOfMonth.subtract(diffStart, "day");
-  const endDay = endOfMonth.day();
-  const diffEnd = (7 - endDay) % 7;
-  const endDate = endOfMonth.add(diffEnd, "day");
+
+  // 固定 6 周
   const weeks = [];
   let current = startDate;
-  while (current.isBefore(endDate) || current.isSame(endDate, "day")) {
+  for (let w = 0; w < 6; w++) {
     const dates = [];
     for (let i = 0; i < 7; i += 1) {
       dates.push(current.toDate());

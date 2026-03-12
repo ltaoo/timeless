@@ -18,7 +18,10 @@
       "Bash(git diff:*)",
       "Bash(do echo:*)",
       "Bash(read file:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(cd /Users/mayfair/Documents/other/timeless/packages/ui && pnpm build 2>&1 | tail -5 && cp dist/timeless.ui.umd.min.js /Users/mayfair/Documents/other/timeless/apps/web-vanilla/public/)",
+      "Bash(ls -la /Users/mayfair/Documents/other/timeless/packages/headless/src/popover*)",
+      "Bash(ls -la /Users/mayfair/Documents/other/timeless/packages/ui/src/popover* /Users/mayfair/Documents/other/timeless/packages/ui/src/popconfirm*)"
     ]
   }
 }

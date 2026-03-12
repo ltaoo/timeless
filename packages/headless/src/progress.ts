@@ -26,10 +26,10 @@ export function Root(
     return View(
       {
         ...rest,
-        role: "progressbar",
-        "aria-valuemin": 0,
-        "aria-valuemax": computed(state, (d) => d.max ?? 100),
-        "aria-valuenow": computed(state, (d) => d.value ?? 0),
+        // role: "progressbar",
+        // "aria-valuemin": 0,
+        // "aria-valuemax": computed(state, (d) => d.max ?? 100),
+        // "aria-valuenow": computed(state, (d) => d.value ?? 0),
         onUnmounted() {
           for (const fn of events) if (typeof fn === "function") fn();
           if (rest.onUnmounted) rest.onUnmounted();
@@ -42,10 +42,10 @@ export function Root(
   return View(
     {
       ...rest,
-      role: "progressbar",
-      "aria-valuemin": 0,
-      "aria-valuemax": max,
-      "aria-valuenow": isRef(value) ? computed(value, (v) => v) : value,
+      // role: "progressbar",
+      // "aria-valuemin": 0,
+      // "aria-valuemax": max,
+      // "aria-valuenow": isRef(value) ? computed(value, (v) => v) : value,
     },
     children,
   );
@@ -54,7 +54,7 @@ export function Root(
 export function Indicator(
   props: ViewProps & {
     store?: ProgressCore;
-    value?: Ref<number> | number;
+    value: Ref<number>;
     max?: number;
   },
   children?: ViewChildren,
@@ -81,7 +81,7 @@ export function Indicator(
     {
       ...rest,
       style: computed(value, (d) => {
-        const v = isRef(value) ? d : value;
+        const v = d;
         const baseStyle = rest.style || "";
         return `${baseStyle}width:${Math.min(Math.max((v / max) * 100, 0), 100)}%`;
       }),

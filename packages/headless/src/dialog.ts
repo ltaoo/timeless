@@ -2,7 +2,6 @@ import { computed } from "@timeless/reactive";
 import { DialogCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "./view";
-import { Txt } from "./text";
 import { Portal } from "./portal";
 import { Presence } from "./presence";
 
@@ -96,7 +95,7 @@ export function Close(
         store.hide();
       },
     },
-    children || [Txt("✕")],
+    children,
   );
 }
 
@@ -114,7 +113,7 @@ export function Cancel(
         store.hide();
       },
     },
-    children || [Txt("取消")],
+    children || ["取消"],
   );
 }
 
@@ -131,6 +130,6 @@ export function OK(
         store.ok();
       },
     },
-    children || [Txt("确认")],
+    children || ["确认"],
   );
 }

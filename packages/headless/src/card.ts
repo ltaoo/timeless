@@ -1,26 +1,61 @@
-import { tp, merge } from "./theme";
 import { View, ViewChildren, ViewProps } from "./view";
 
-function themed(part: string, props: any, children?: ViewChildren) {
-  const { theme: t, class: cn, style: st, ...rest } = props || {};
-  return View({ ...rest, ...merge(tp(t?.[part]), cn, st) }, children);
+export function Card(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      ...props,
+      // "data-card": "",
+    },
+    children,
+  );
 }
 
-export function Card(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("root", p, c);
+export function CardHeader(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      ...props,
+      // "data-card-header": "",
+    },
+    children,
+  );
 }
-export function CardHeader(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("header", p, c);
+
+export function CardTitle(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      ...props,
+      // "data-card-title": "",
+    },
+    children,
+  );
 }
-export function CardTitle(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("title", p, c);
+
+export function CardDescription(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      ...props,
+      // "data-card-description": "",
+    },
+    children,
+  );
 }
-export function CardDescription(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("description", p, c);
+
+export function CardContent(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      ...props,
+      // "data-card-content": "",
+    },
+    children,
+  );
 }
-export function CardContent(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("content", p, c);
-}
-export function CardFooter(p: ViewProps & { theme?: any }, c?: ViewChildren) {
-  return themed("footer", p, c);
+
+export function CardFooter(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      ...props,
+      // "data-card-footer": "",
+    },
+    children,
+  );
 }

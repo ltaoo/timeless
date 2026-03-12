@@ -1,86 +1,123 @@
-import { computed, ref, isRef } from "@timeless/reactive";
+import { computed, ref, isRef, Ref } from "@timeless/reactive";
 
-import { tp, merge } from "./theme";
 import { View, ViewChildren, ViewProps } from "./view";
-import { Txt } from "./text";
+// import { Txt } from "./text";
 
-export function Avatar(
+export function Root(
+  props: ViewProps & { size?: "default" | "large" },
+  children?: ViewChildren,
+) {
+  const { size = "default", ...rest } = props || {};
+  return View(
+    {
+      ...rest,
+      // "data-avatar": "",
+      // "data-size": size,
+    },
+    children,
+  );
+}
+
+export function Image(
   props: ViewProps & {
-    src: string;
+    src: string | Ref<string>;
     alt?: string;
-    size: "default" | "large";
-    theme?: any;
-    fallback?: string;
+    onLoadingStatusChange?: (status: "loading" | "loaded" | "error") => void;
   },
 ) {
-  const {
-    src,
-    alt,
-    fallback,
-    size = "default",
-    theme: t,
-    class: cls,
-    style: st,
-  } = props || {};
+  const { src, alt, onLoadingStatusChange, ...rest } = props || {};
+
+  const srcRef = isRef(src) ? src : ref(src || "");
+
+  const $img = document.createElement("img");
+
+  const updateSrc = (v: string) => {
+    if (v) {
+      $img.src = v;
+      $img.style.display = "";
+      onLoadingStatusChange?.("loading");
+    } else {
+      $img.style.display = "none";
+      onLoadingStatusChange?.("error");
+    }
+  };
+
+  updateSrc(srcRef.value);
+  if (isRef(src)) {
+    src._subscribe({ onChange: updateSrc });
+  }
+
+  $img.addEventListener("load", () => {
+    onLoadingStatusChange?.("loaded");
+  });
+
+  $img.addEventListener("error", () => {
+    onLoadingStatusChange?.("error");
+    $img.style.display = "none";
+  });
+
+  if (alt) $img.alt = alt;
+  if (rest.class) $img.className = String(rest.class);
+
+  return {
+    t: "view",
+    $elm: $img,
+    render() {
+      return $img;
+    },
+    onMounted() {},
+    beforeUnmounted() {},
+    onUnmounted() {},
+    append(node: any) {
+      $img.appendChild(node);
+    },
+    setContent(html: string) {
+      $img.innerHTML = html;
+    },
+    class$: null,
+  };
+}
+
+export function Fallback(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      ...props,
+      // "data-avatar-fallback": "",
+    },
+    children,
+  );
+}
+
+// Convenience component that combines Root, Image, and Fallback
+export function Avatar(
+  props: ViewProps & {
+    src: string | Ref<string>;
+    alt?: string;
+    size?: "default" | "large";
+    fallback?: string;
+  },
+  children?: ViewChildren,
+) {
+  const { src, alt, fallback, size = "default", ...rest } = props || {};
+
   const imgError = ref(false);
   const srcRef = isRef(src) ? src : ref(src || "");
 
-  return View({ ...merge(tp(t?.root, { size }), cls, st) }, [
-    (() => {
-      const $img = document.createElement("img");
-      const ir = merge(tp(t?.image));
-      if (ir.class) $img.className = ir.class;
-      if (ir.style) $img.style.cssText = ir.style;
-      const updateSrc = (v: string) => {
-        if (v) {
-          $img.src = v;
-          $img.style.display = "";
-        } else {
-          $img.style.display = "none";
-          imgError.as(true);
-        }
-      };
-      updateSrc(srcRef.value);
-      if (isRef(src)) src._subscribe({ onChange: updateSrc });
-      $img.addEventListener("load", () => {
-        imgError.as(false);
-      });
-      $img.addEventListener("error", () => {
-        imgError.as(true);
-        $img.style.display = "none";
-      });
-      if (alt) $img.alt = alt;
-      return {
-        t: "view",
-        $elm: $img,
-        render() {
-          return $img;
-        },
-        onMounted() {},
-        beforeUnmounted() {},
-        onUnmounted() {},
-        append(node: any) {
-          $img.appendChild(node);
-        },
-        setContent(html: string) {
-          $img.innerHTML = html;
-        },
-        class$: null,
-      };
-    })(),
-    View(
+  return Root({ ...rest, size }, [
+    Image({
+      src: srcRef,
+      alt,
+      onLoadingStatusChange: (status) => {
+        imgError.as(status === "error");
+      },
+    }),
+    Fallback(
       {
-        ...merge(tp(t?.fallback)),
         style: computed(imgError, (d) => {
-          const base = merge(tp(t?.fallback)).style || "";
-          return d || !srcRef.value ? base : base + "display:none;";
-        }),
-        class: computed(imgError, (d) => {
-          const base = merge(tp(t?.fallback)).class || "";
-          return d || !srcRef.value ? base : base + " hidden";
+          return d || !srcRef.value ? "" : "display:none;";
         }),
       },
-      [Txt(fallback || (alt ? alt.charAt(0).toUpperCase() : "?"))],
+      children ?? [fallback || (alt ? alt.charAt(0).toUpperCase() : "?")],
     ),
   ]);
 }

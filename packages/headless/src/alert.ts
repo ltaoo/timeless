@@ -1,30 +1,37 @@
-import { tp, merge } from "./theme";
 import { View, ViewChildren, ViewProps } from "./view";
 
 export function Alert(
-  props: ViewProps & { variant?: "default"; theme?: any },
+  props: ViewProps & { variant?: "default" | "destructive" },
   children?: ViewChildren,
 ) {
-  const {
-    variant = "default",
-    theme: t,
-    class: cls,
-    style: st,
-    ...rest
-  } = props || {};
+  const { variant = "default", ...rest } = props || {};
   return View(
-    {},
-    // { ...rest, ...merge(tp(t?.root, { variant }), cls, st) },
+    {
+      ...rest,
+      // "data-alert": "",
+      // "data-variant": variant,
+      // role: "alert",
+    },
     children,
   );
 }
 
-export function AlertTitle(props: any, children?: any) {
-  const { theme: t, class: cn, style: st, ...rest } = props || {};
-  return View({ ...rest, ...merge(tp(t?.title), cn, st) }, children);
+export function AlertTitle(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      ...props,
+      // "data-alert-title": "",
+    },
+    children,
+  );
 }
 
-export function AlertDescription(props: any, children?: any) {
-  const { theme: t, class: cn, style: st, ...rest } = props || {};
-  return View({ ...rest, ...merge(tp(t?.description), cn, st) }, children);
+export function AlertDescription(props: ViewProps, children?: ViewChildren) {
+  return View(
+    {
+      ...props,
+      // "data-alert-description": "",
+    },
+    children,
+  );
 }
