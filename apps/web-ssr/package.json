@@ -1,0 +1,14 @@
+{
+  "name": "@timeless/web-ssr",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@timeless/headless": "workspace:^",
+    "@timeless/reactive": "workspace:^",
+    "@timeless/ui": "workspace:^"
+  }
+}

@@ -16,13 +16,11 @@ export default createLibConfig({
   alias: {
     "@": resolve(__dirname, "src"),
   },
-  rollupConfig: {
-    footer: `if (typeof window !== "undefined") {
+  footer: `if (typeof window !== "undefined") {
         window.Timeless = window.Timeless || {};
         if (window.Timeless) {
           Object.assign(window.Timeless, window.Timeless.kit);
           Object.assign(window.Timeless, window.Timeless.kit.base);
         }
       }`,
-  },
 });

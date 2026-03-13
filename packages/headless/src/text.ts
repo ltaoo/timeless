@@ -1,8 +1,9 @@
 import { isRef, Ref } from "@timeless/reactive";
+import { safeCreateTextNode } from "./env";
 
 export function Txt(value: Ref<any> | string) {
   let _local_value = isRef(value) ? value.value : value;
-  const $elm = document.createTextNode(_local_value);
+  const $elm = safeCreateTextNode(_local_value);
 
   return {
     t: "text",

@@ -3,6 +3,8 @@ import { isElement, TimelessElement } from "./view";
 console.log("headless v0.2.0");
 
 export * from "@timeless/reactive";
+export * from "./env";
+export * from "./render-to-string";
 
 // Reactive
 export * from "./for";

@@ -21,7 +21,9 @@
       "Bash(npm run:*)",
       "Bash(cd /Users/mayfair/Documents/other/timeless/packages/ui && pnpm build 2>&1 | tail -5 && cp dist/timeless.ui.umd.min.js /Users/mayfair/Documents/other/timeless/apps/web-vanilla/public/)",
       "Bash(ls -la /Users/mayfair/Documents/other/timeless/packages/headless/src/popover*)",
-      "Bash(ls -la /Users/mayfair/Documents/other/timeless/packages/ui/src/popover* /Users/mayfair/Documents/other/timeless/packages/ui/src/popconfirm*)"
+      "Bash(ls -la /Users/mayfair/Documents/other/timeless/packages/ui/src/popover* /Users/mayfair/Documents/other/timeless/packages/ui/src/popconfirm*)",
+      "Bash(kill %1 2>/dev/null; lsof -ti:3100 | xargs kill 2>/dev/null; echo \"cleaned\")",
+      "Bash(ls /Users/mayfair/Documents/other/timeless/packages/reactive/dist/*.umd* /Users/mayfair/Documents/other/timeless/packages/headless/dist/*.umd* /Users/mayfair/Documents/other/timeless/packages/ui/dist/*.umd* /Users/mayfair/Documents/other/timeless/packages/kit/dist/*.umd* 2>&1)"
     ]
   }
 }

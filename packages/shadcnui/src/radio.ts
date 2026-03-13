@@ -10,17 +10,17 @@ export function Radio(props: { store: RadioCore; id?: string }) {
       store,
       id,
       class:
-        "aspect-square h-4 w-4 rounded-full border border-zinc-900 ring-offset-white focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-50 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 flex items-center justify-center cursor-pointer bg-white dark:bg-zinc-950 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
+        "aspect-square h-4 w-4 rounded-full border border-zinc-900 ring-offset-white focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:border-zinc-50 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 flex items-center justify-center cursor-pointer bg-white dark:bg-zinc-950 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
     },
     [
-      RadioPrimitive.Indicator(
-        { store },
-        [
-          View({
+      RadioPrimitive.Indicator({ store }, [
+        View(
+          {
             class: "h-2.5 w-2.5 rounded-full bg-zinc-900 dark:bg-zinc-50",
-          }, []),
-        ],
-      ),
+          },
+          [],
+        ),
+      ]),
     ],
   );
 }
@@ -80,18 +80,19 @@ export function RadioGroupItem(props: {
   return View(
     {
       class:
-        props.class ||
-        "flex items-center gap-2 cursor-pointer select-none",
+        props.class || "flex items-center gap-2 cursor-pointer select-none",
       onClick() {
         item.core.check();
       },
     },
     [
       Radio({ store: item.core }),
-      Txt({
-        class:
-          "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-      }, [item.label]),
+      View(
+        {
+          class: "text-sm font-medium leading-none",
+        },
+        [item.label],
+      ),
     ],
   );
 }

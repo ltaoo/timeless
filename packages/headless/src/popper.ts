@@ -6,6 +6,7 @@ import {
   Layer,
 } from "@timeless/ui";
 
+import { isBrowser } from "./env";
 import { View, ViewChildren, ViewProps } from "./view";
 import { Fragment } from "./fragment";
 
@@ -122,11 +123,12 @@ export function Content(
               return;
             }
             // 检查参考元素是否在视口内
-            const is_in_viewport =
-              ref_rect.top < window.innerHeight &&
-              ref_rect.bottom > 0 &&
-              ref_rect.left < window.innerWidth &&
-              ref_rect.right > 0;
+            const is_in_viewport = isBrowser
+              ? ref_rect.top < window.innerHeight &&
+                ref_rect.bottom > 0 &&
+                ref_rect.left < window.innerWidth &&
+                ref_rect.right > 0
+              : false;
             if (!is_in_viewport && onReferenceOutOfView) {
               onReferenceOutOfView();
               return;
@@ -134,7 +136,9 @@ export function Content(
           }
           store.place();
         }
-        window.addEventListener("scroll", handleScroll, true);
+        if (isBrowser) {
+          window.addEventListener("scroll", handleScroll, true);
+        }
         // 注册到 LayerManager
         if (onDismiss) {
           const layer_manager = getGlobalLayerManager();
@@ -182,7 +186,7 @@ export function Content(
         return () => {
           unlisten();
           store.setFloating(null);
-          if (handleScroll) {
+          if (handleScroll && isBrowser) {
             window.removeEventListener("scroll", handleScroll, true);
           }
           // 从 LayerManager 注销

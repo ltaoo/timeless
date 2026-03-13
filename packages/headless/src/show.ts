@@ -1,6 +1,7 @@
 import { isRef, Ref } from "@timeless/reactive";
 
 import { ViewChildren, isElement } from "./view";
+import { safeCreateTextNode, safeCreateDocumentFragment } from "./env";
 
 export function Show(
   props: {
@@ -23,7 +24,7 @@ export function Show(
   const onMounted = isObjectProps ? props.onMounted : undefined;
   const beforeUnmounted = isObjectProps ? props.beforeUnmounted : undefined;
   const onUnmounted = isObjectProps ? props.onUnmounted : undefined;
-  const anchor = document.createTextNode("");
+  const anchor = safeCreateTextNode("");
 
   let _current_nodes: Node[] = [];
   let _current_children: any[] = [];
@@ -100,7 +101,7 @@ export function Show(
   };
 
   const mount = (targetChildren: any[], parent?: Node, before?: Node) => {
-    const fragment = document.createDocumentFragment();
+    const fragment = safeCreateDocumentFragment();
     const newNodes: Node[] = [];
     const newInstances: any[] = [];
 
@@ -124,7 +125,7 @@ export function Show(
           }
         }
       } else if (typeof node === "string" || typeof node === "number") {
-        const textNode = document.createTextNode(String(node));
+        const textNode = safeCreateTextNode(String(node));
         fragment.appendChild(textNode);
         newNodes.push(textNode);
       }

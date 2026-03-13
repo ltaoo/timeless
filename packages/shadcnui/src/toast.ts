@@ -3,16 +3,14 @@ import {
   ToastPrimitive,
   For,
   Show,
-  View,
   ViewChildren,
   ViewProps,
-  Txt,
 } from "@timeless/headless";
 import { ToastCore } from "@timeless/ui";
 
 export function Toast(
   props: ViewProps & { store: ToastCore },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
@@ -31,7 +29,8 @@ export function Toast(
     ToastPrimitive.Viewport(
       {
         store,
-        class: "fixed left-1/2 top-1/2 z-[999] -translate-x-1/2 -translate-y-1/2",
+        class:
+          "fixed left-1/2 top-1/2 z-[999] -translate-x-1/2 -translate-y-1/2",
         ...rest,
       },
       [
@@ -64,16 +63,14 @@ export function Toast(
             For({
               each: computed(state_, (d) => d.texts || []),
               render(text: string) {
-                return ToastPrimitive.Text(
-                  {
-                    store,
-                    text,
-                    class: "text-sm text-center",
-                  },
-                );
+                return ToastPrimitive.Text({
+                  store,
+                  text,
+                  class: "text-sm text-center",
+                });
               },
             }),
-            children,
+            ...children,
           ],
         ),
       ],

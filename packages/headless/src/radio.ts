@@ -32,8 +32,8 @@ export function Box(
   return View(
     {
       ...rest,
-      "data-checked": computed(state, (d) => (d.checked ? "" : undefined)),
-      "data-disabled": computed(state, (d) => (d.disabled ? "" : undefined)),
+      // "data-checked": computed(state, (d) => (d.checked ? "" : undefined)),
+      // "data-disabled": computed(state, (d) => (d.disabled ? "" : undefined)),
       onClick(e) {
         if (rest.onClick) rest.onClick(e);
         store.check();
@@ -93,7 +93,7 @@ export function Label(
           as: "input",
           type: "radio",
           id: htmlFor,
-          name: htmlFor,
+          // name: htmlFor,
           style:
             "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
           onClick(e) {
@@ -136,7 +136,7 @@ export function Group(
   return View(
     {
       ...rest,
-      role: "radiogroup",
+      // role: "radiogroup",
     },
     children,
   );
@@ -153,11 +153,15 @@ export function GroupItem(
 ) {
   const { store, item, renderRadio, renderLabel, ...rest } = props;
 
-  const radioContent = renderRadio
-    ? renderRadio(item.core)
-    : Box({ store: item.core }, [Indicator({ store: item.core }, children)]);
+  // const radioContent = renderRadio
+  //   ? renderRadio(item.core)
+  //   : Box({ store: item.core }, [Indicator({ store: item.core }, children)]);
+  const radioContent = Box({ store: item.core }, [
+    Indicator({ store: item.core }, children),
+  ]);
 
-  const labelContent = renderLabel ? renderLabel(item.label) : item.label;
+  // const labelContent = renderLabel ? renderLabel(item.label) : item.label;
+  const labelContent = item.label;
 
   return View(
     {

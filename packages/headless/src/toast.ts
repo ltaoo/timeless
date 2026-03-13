@@ -1,4 +1,3 @@
-import { computed } from "@timeless/reactive";
 import { ToastCore } from "@timeless/ui";
 
 import { View, ViewProps, ViewChildren } from "./view";

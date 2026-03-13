@@ -172,12 +172,17 @@ export function getGlobalLayerManager(): LayerManager {
  * 初始化全局 pointerdown 监听器（Web 端）
  * 确保只注册一次
  */
+const isBrowser = typeof document !== 'undefined';
+
 export function initGlobalPointerListener() {
   if (globalListenerInitialized) {
     return;
   }
+  if (!isBrowser) {
+    return;
+  }
   globalListenerInitialized = true;
-  console.log("[LayerManager] initGlobalPointerListener");
+  // console.log("[LayerManager] initGlobalPointerListener");
 
   const layerManager = getGlobalLayerManager();
 

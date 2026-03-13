@@ -97,6 +97,11 @@
       "import": "./dist/dropdown-menu/index.esm.js",
       "require": "./dist/dropdown-menu/index.js"
     },
+    "./env": {
+      "types": "./dist/env/index.d.ts",
+      "import": "./dist/env/index.esm.js",
+      "require": "./dist/env/index.js"
+    },
     "./field": {
       "types": "./dist/field/index.d.ts",
       "import": "./dist/field/index.esm.js",
@@ -216,6 +221,11 @@
       "types": "./dist/render/index.d.ts",
       "import": "./dist/render/index.esm.js",
       "require": "./dist/render/index.js"
+    },
+    "./render-to-string": {
+      "types": "./dist/render-to-string/index.d.ts",
+      "import": "./dist/render-to-string/index.esm.js",
+      "require": "./dist/render-to-string/index.js"
     },
     "./resizable-panels": {
       "types": "./dist/resizable-panels/index.d.ts",

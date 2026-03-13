@@ -8,6 +8,7 @@ import {
 } from "@timeless/reactive";
 
 import { Txt } from "./text";
+import { safeCreateElement, safeCreateTextNode } from "./env";
 
 export interface ViewProps {
   as?: string;
@@ -77,7 +78,7 @@ export function View(
     ...rest
   } = props;
   let onMountedCleanup: (() => void) | undefined;
-  const $elm = document.createElement(as || type);
+  const $elm = safeCreateElement(as || type);
   let _children = children ?? [];
   if (!Array.isArray(_children)) {
     _children = [_children];
@@ -302,7 +303,7 @@ export function View(
         const node = _children[i];
         if (!node) continue;
         if (typeof node === "string" || typeof node === "number") {
-          $elm.appendChild(document.createTextNode(String(node)));
+          $elm.appendChild(safeCreateTextNode(String(node)));
           continue;
         }
         if (isElement(node)) {

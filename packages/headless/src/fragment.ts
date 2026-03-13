@@ -1,7 +1,8 @@
 import { ViewChildren, ViewProps, isElement } from "./view";
+import { safeCreateDocumentFragment, safeCreateTextNode } from "./env";
 
 export function Fragment(props: ViewProps, children: ViewChildren = []) {
-  const $fragment = document.createDocumentFragment();
+  const $fragment = safeCreateDocumentFragment();
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
 
   let _children = children;
@@ -52,7 +53,7 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
           _children[i] = node;
         }
         if (typeof node === "string" || typeof node === "number") {
-          $fragment.appendChild(document.createTextNode(String(node)));
+          $fragment.appendChild(safeCreateTextNode(String(node)));
           continue;
         }
         if (isElement(node)) {

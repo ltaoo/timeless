@@ -4,10 +4,16 @@ import {
   For,
   View,
   Show,
-  ViewChildren,
   ViewProps,
+  TimelessElement,
 } from "@timeless/headless";
-import { MenuCore, MenuItemCore, getGlobalLayerManager, initGlobalPointerListener, Layer } from "@timeless/ui";
+import {
+  MenuCore,
+  MenuItemCore,
+  getGlobalLayerManager,
+  initGlobalPointerListener,
+  Layer,
+} from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
 
 const MENU_CONTENT_CLASS =
@@ -28,7 +34,7 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
   return View(
     {
       class: MENU_CONTENT_CLASS,
-      onMounted($el) {
+      onMounted($el: HTMLDivElement) {
         $element = $el;
 
         // Register to LayerManager
@@ -126,7 +132,7 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
             {
               class: "mr-2 h-4 w-4 flex-shrink-0",
             },
-            [props.store.icon],
+            [props.store.icon as TimelessElement],
           ),
         ]),
         props.store.label,

@@ -1,7 +1,8 @@
 import { ViewChildren, ViewProps, isElement } from "./view";
+import { isBrowser, safeCreateTextNode, safeCreateDocumentFragment } from "./env";
 
 export function Portal(props: ViewProps & {}, children: ViewChildren) {
-  const anchor = document.createTextNode("");
+  const anchor = safeCreateTextNode("");
   let _mountedNodes: Node[] = [];
   let _mountedChildren: any[] = [];
   let _mounted = false;
@@ -75,7 +76,7 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
       if (_mounted) {
         return null;
       }
-      const fragment = document.createDocumentFragment();
+      const fragment = safeCreateDocumentFragment();
       const nodes: Node[] = [];
       const instances: any[] = [];
 
@@ -96,7 +97,7 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
             instances.push(child);
           }
         } else if (typeof child === "string" || typeof child === "number") {
-          const textNode = document.createTextNode(String(child));
+          const textNode = safeCreateTextNode(String(child));
           fragment.appendChild(textNode);
           nodes.push(textNode);
         }
@@ -107,7 +108,9 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
       _mounted = true;
 
       // console.log("[Portal] appending to body, nodes count:", nodes.length);
-      document.body.appendChild(fragment);
+      if (isBrowser) {
+        document.body.appendChild(fragment);
+      }
 
       // Lifecycle
       for (const child of instances) {

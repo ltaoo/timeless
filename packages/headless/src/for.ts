@@ -1,6 +1,7 @@
 import { ref, isRef, Ref } from "@timeless/reactive";
 
 import { View, ViewProps, TimelessElement, isElement } from "./view";
+import { safeCreateTextNode, safeCreateDocumentFragment } from "./env";
 
 export function For<T>(
   props: ViewProps & {
@@ -17,7 +18,7 @@ export function For<T>(
   let _elements: (TimelessElement | null)[] = [];
   let _$children: (TimelessElement["$elm"] | null)[] = [];
 
-  const anchor = document.createTextNode("");
+  const anchor = safeCreateTextNode("");
   const $elm = anchor as any;
 
   const _existing_map = new Map();
@@ -59,7 +60,7 @@ export function For<T>(
 
       if (!$parent) return;
 
-      const $fragment = document.createDocumentFragment();
+      const $fragment = safeCreateDocumentFragment();
       for (let i = 0; i < items.length; i++) {
         const item_prepare_insert = items[i];
         _values.splice(index + i, 0, item_prepare_insert);
@@ -330,7 +331,7 @@ export function For<T>(
       const nodes = (isRef(each) ? each.value : each) || [];
       // console.log("[For] render", nodes);
 
-      const $fragment = document.createDocumentFragment();
+      const $fragment = safeCreateDocumentFragment();
       for (let i = 0; i < nodes.length; i += 1) {
         const item = nodes[i];
         // console.log("before mounted", i, item);
