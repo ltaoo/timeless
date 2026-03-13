@@ -110,8 +110,10 @@ export function Cascader(
           [
             For({
               each: computed(state_, (d) => d.panels),
+              key: "key",
               render(
                 panel: {
+                  key: string;
                   options: (CascaderOption<any> & {
                     selected: boolean;
                     focused: boolean;
@@ -128,6 +130,7 @@ export function Cascader(
                   [
                     For({
                       each: panel.options,
+                      key: "value",
                       render(
                         option: CascaderOption<any> & {
                           selected: boolean;

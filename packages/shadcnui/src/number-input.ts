@@ -1,5 +1,10 @@
 import { combine, computed, refobj } from "@timeless/reactive";
-import { NumberInputPrimitive, Show, View, ViewProps } from "@timeless/headless";
+import {
+  NumberInputPrimitive,
+  Show,
+  View,
+  ViewProps,
+} from "@timeless/headless";
 import { NumberInputCore } from "@timeless/ui";
 import { ChevronUpOutlined, ChevronDownOutlined } from "@timeless/icons";
 
@@ -55,35 +60,31 @@ export function NumberInput(
             NumberInputPrimitive.IncreaseButton(
               {
                 store,
-                class: computed(
-                  combine({ canIncrease, isDisabled }),
-                  (t) =>
-                    [
-                      "flex-1 flex items-center justify-center px-1.5 rounded-tr-md",
-                      "hover:bg-accent hover:text-accent-foreground transition-colors",
-                      "border-b border-input",
-                      !t.canIncrease || t.isDisabled
-                        ? "opacity-30 cursor-not-allowed"
-                        : "cursor-pointer",
-                    ].join(" "),
-                ),
+                class: combine({ canIncrease, isDisabled }, (t) => {
+                  return [
+                    "flex-1 flex items-center justify-center px-1.5 rounded-tr-md",
+                    "hover:bg-accent hover:text-accent-foreground transition-colors",
+                    "border-b border-input",
+                    !t.canIncrease || t.isDisabled
+                      ? "opacity-30 cursor-not-allowed"
+                      : "cursor-pointer",
+                  ].join(" ");
+                }),
               },
               [ChevronUpOutlined({ class: "h-3 w-3" })],
             ),
             NumberInputPrimitive.DecreaseButton(
               {
                 store,
-                class: computed(
-                  combine({ canDecrease, isDisabled }),
-                  (t) =>
-                    [
-                      "flex-1 flex items-center justify-center px-1.5 rounded-br-md",
-                      "hover:bg-accent hover:text-accent-foreground transition-colors",
-                      !t.canDecrease || t.isDisabled
-                        ? "opacity-30 cursor-not-allowed"
-                        : "cursor-pointer",
-                    ].join(" "),
-                ),
+                class: combine({ canDecrease, isDisabled }, (t) => {
+                  return [
+                    "flex-1 flex items-center justify-center px-1.5 rounded-br-md",
+                    "hover:bg-accent hover:text-accent-foreground transition-colors",
+                    !t.canDecrease || t.isDisabled
+                      ? "opacity-30 cursor-not-allowed"
+                      : "cursor-pointer",
+                  ].join(" ");
+                }),
               },
               [ChevronDownOutlined({ class: "h-3 w-3" })],
             ),

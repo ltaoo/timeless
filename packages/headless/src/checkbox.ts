@@ -169,11 +169,14 @@ export function GroupItem(
 ) {
   const { store, item, renderCheckbox, renderLabel, ...rest } = props;
 
-  const checkboxContent = renderCheckbox
-    ? renderCheckbox(item.core)
-    : Box({ store: item.core }, [Indicator({ store: item.core }, children)]);
-
-  const labelContent = renderLabel ? renderLabel(item.label) : item.label;
+  // const checkboxContent = renderCheckbox
+  //   ? renderCheckbox(item.core)
+  //   : Box({ store: item.core }, [Indicator({ store: item.core }, children)]);
+  const checkboxContent = Box({ store: item.core }, [
+    Indicator({ store: item.core }, children),
+  ]);
+  // const labelContent = renderLabel ? renderLabel(item.label) : item.label;
+  const labelContent = item.label;
 
   return View(
     {

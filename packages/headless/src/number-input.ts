@@ -1,7 +1,7 @@
 import { cn, ref, refobj } from "@timeless/reactive";
+import { NumberInputCore } from "@timeless/ui";
 
 import { View, ViewProps, ViewChildren } from "./view";
-import { NumberInputCore } from "@timeless/ui";
 
 export function Root(
   props: ViewProps & { store?: NumberInputCore },
@@ -19,7 +19,7 @@ export function Input(
   $elm.type = "text";
   $elm.inputMode = "decimal";
 
-  const displayValue$ = refobj(store.displayValue || "");
+  const displayValue$ = ref(store.displayValue || "");
   const placeholder$ = ref(store.placeholder || "");
   const disabled$ = ref(store.disabled || false);
 
@@ -138,7 +138,7 @@ export function IncreaseButton(
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted($e: HTMLDivElement) {
         const updateState = () => {
           const canIncrease = canIncrease$.value;
           const disabled = disabled$.value;
@@ -154,6 +154,9 @@ export function IncreaseButton(
         disabled$._subscribe({ onChange: updateState });
         updateState();
 
+        $e.addEventListener("mousedown", (e: any) => {
+          e.preventDefault();
+        });
         $e.addEventListener("click", (e: any) => {
           e.preventDefault();
           e.stopPropagation();
@@ -184,7 +187,7 @@ export function DecreaseButton(
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted($e: HTMLDivElement) {
         const updateState = () => {
           const canDecrease = canDecrease$.value;
           const disabled = disabled$.value;
@@ -200,6 +203,9 @@ export function DecreaseButton(
         disabled$._subscribe({ onChange: updateState });
         updateState();
 
+        $e.addEventListener("mousedown", (e: any) => {
+          e.preventDefault();
+        });
         $e.addEventListener("click", (e: any) => {
           e.preventDefault();
           e.stopPropagation();
@@ -218,7 +224,7 @@ export function Value(
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
-  const value$ = refobj(store.value);
+  const value$ = ref(store.value);
 
   store.onStateChange(() => {
     value$.as(store.value);

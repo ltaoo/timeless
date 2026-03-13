@@ -18,6 +18,7 @@ export * from "./text";
 export * from "./html";
 export * from "./portal";
 export * from "./presence";
+export * from "./native-input";
 export * as PopperPrimitive from "./popper";
 export * from "./transition";
 

@@ -50,6 +50,8 @@ type CascaderState<T> = {
   value: T[] | null;
   /** 当前展开的面板数据 */
   panels: {
+    /** 面板唯一标识，用于 For 组件 diff */
+    key: string;
     options: (CascaderOption<T> & { selected: boolean; focused: boolean })[];
     selectedValue: T | null;
   }[];
@@ -121,6 +123,7 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
     // 第一级面板
     panels.push({
+      key: "panel-0",
       options: this.options.map((opt) => ({
         ...opt,
         selected: this.expandedPath[0] === opt.value,
@@ -139,6 +142,7 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       );
       if (selectedOpt?.children && selectedOpt.children.length > 0) {
         panels.push({
+          key: `panel-${i + 1}`,
           options: selectedOpt.children.map((opt, idx) => ({
             ...opt,
             selected: this.expandedPath[i + 1] === opt.value,
@@ -296,6 +300,26 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     return result;
   }
 
+  /** 根据面板索引和值查找原始选项 */
+  private findOptionByPanelAndValue(
+    panelIndex: number,
+    value: T,
+  ): CascaderOption<T> | null {
+    let currentOptions = this.options;
+
+    for (let i = 0; i < panelIndex; i++) {
+      const selectedValue = this.expandedPath[i];
+      const opt = currentOptions.find((o) => o.value === selectedValue);
+      if (opt?.children) {
+        currentOptions = opt.children;
+      } else {
+        return null;
+      }
+    }
+
+    return currentOptions.find((o) => o.value === value) || null;
+  }
+
   show() {
     if (this.disabled) {
       return;
@@ -347,12 +371,18 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       return;
     }
 
+    // 从原始选项树中查找选项，确保获取正确的 children 属性
+    const actualOption = this.findOptionByPanelAndValue(panelIndex, option.value);
+    if (!actualOption) {
+      return;
+    }
+
     // 更新展开路径
     this.expandedPath = this.expandedPath.slice(0, panelIndex);
-    this.expandedPath.push(option.value);
+    this.expandedPath.push(actualOption.value);
 
     // 如果没有子选项，则完成选择
-    if (!option.children || option.children.length === 0) {
+    if (!actualOption.children || actualOption.children.length === 0) {
       this.select([...this.expandedPath]);
     } else {
       this.emit(Events.StateChange, { ...this.state });
@@ -365,21 +395,32 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       return;
     }
 
-    if (this.expandTrigger === "hover") {
-      this.expand(panelIndex, option.value);
+    // 从原始选项树中查找选项，确保获取正确的 children 属性
+    const actualOption = this.findOptionByPanelAndValue(panelIndex, option.value);
+    if (!actualOption) {
+      return;
+    }
+
+    // 始终在 hover 时展开有子选项的选项，让用户可以预览子菜单
+    if (actualOption.children && actualOption.children.length > 0) {
+      // 直接更新展开路径，不调用 expand() 以避免多次触发 StateChange
+      this.expandedPath = this.expandedPath.slice(0, panelIndex);
+      this.expandedPath.push(actualOption.value);
     }
 
     // 更新焦点位置
     const panel = this.panels[panelIndex];
     if (panel) {
       const optionIndex = panel.options.findIndex(
-        (o) => o.value === option.value,
+        (o) => o.value === actualOption.value,
       );
       if (optionIndex >= 0) {
         this.focusedPosition = [panelIndex, optionIndex];
-        this.emit(Events.StateChange, { ...this.state });
       }
     }
+
+    // 只触发一次 StateChange
+    this.emit(Events.StateChange, { ...this.state });
   }
 
   /** 设置选项 */

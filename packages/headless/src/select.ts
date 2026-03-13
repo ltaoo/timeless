@@ -7,6 +7,7 @@ import { Presence } from "./presence";
 import * as PopperPrimitive from "./popper";
 import { h } from "./h";
 import { Show } from "./show";
+import { NativeInput } from "./native-input";
 
 export function Root(
   props: ViewProps & { store: SelectCore<any> },
@@ -106,6 +107,7 @@ export function Trigger(
         //   bottom: rect.bottom,
         // });
         $elm.addEventListener("pointerdown", (e: any) => {
+          e.preventDefault();
           e.stopPropagation();
           // 如果点击的是隐藏的 input，不要再次触发
           if (e.target.tagName === "INPUT") {
@@ -245,7 +247,7 @@ export function Content(
             View(
               {
                 ...rest,
-                tabindex: "0",
+                tabindex: 0,
                 class: classNames([
                   rest.class,
                   computed(presence_, (t) => {
@@ -301,37 +303,33 @@ export function Search(
       when: computed(state_, (s) => s.search),
     },
     [
-      View(
-        {
-          ...rest,
-          as: "input",
-          type: "text",
-          placeholder: computed(state_, (s) => s.searchPlaceholder),
-          value: computed(state_, (s) => s.searchKeyword),
-          onInput(e: Event) {
-            const target = e.target as HTMLInputElement;
-            store.setSearchKeyword(target.value);
-          },
-          onMounted($elm: HTMLInputElement) {
-            // 自动聚焦搜索框
-            setTimeout(() => {
-              $elm.focus();
-            }, 0);
-            if (rest.onMounted) {
-              rest.onMounted($elm);
-            }
-          },
-          onClick(e: Event) {
-            // 阻止点击搜索框时关闭下拉菜单
-            e.stopPropagation();
-          },
-          onKeyDown(e: KeyboardEvent) {
-            // 阻止按键事件冒泡，避免影响 Select 的键盘导航
-            e.stopPropagation();
-          },
+      NativeInput({
+        ...rest,
+        type: "text",
+        placeholder: computed(state_, (s) => s.searchPlaceholder),
+        value: computed(state_, (s) => s.searchKeyword),
+        onInput(e: Event) {
+          const target = e.target as HTMLInputElement;
+          store.setSearchKeyword(target.value);
         },
-        children,
-      ),
+        onMounted($elm: HTMLInputElement) {
+          // 自动聚焦搜索框
+          setTimeout(() => {
+            $elm.focus();
+          }, 0);
+          if (rest.onMounted) {
+            rest.onMounted($elm);
+          }
+        },
+        onClick(e: Event) {
+          // 阻止点击搜索框时关闭下拉菜单
+          e.stopPropagation();
+        },
+        onKeyDown(e: KeyboardEvent) {
+          // 阻止按键事件冒泡，避免影响 Select 的键盘导航
+          e.stopPropagation();
+        },
+      }),
     ],
   );
 }

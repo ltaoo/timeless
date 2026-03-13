@@ -6,6 +6,9 @@ import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { h } from "./h";
 import { Show } from "./show";
+import { NativeInput } from "./native-input";
+import { For } from "./for";
+import { Fragment } from "./fragment";
 
 export function Root(
   props: ViewProps & { store: TagSelectCore<any> },
@@ -77,6 +80,7 @@ export function Trigger(
         );
 
         $elm.addEventListener("pointerdown", (e: any) => {
+          e.preventDefault();
           e.stopPropagation();
           if (e.target.tagName === "INPUT") {
             return;
@@ -251,7 +255,12 @@ export function FilteredList(
   props: ViewProps & {
     store: TagSelectCore<any>;
     each: (
-      option: { value: any; label: string; selected: boolean; focused: boolean },
+      option: {
+        value: any;
+        label: string;
+        selected: boolean;
+        focused: boolean;
+      },
       index: number,
     ) => ViewChildren;
   },
@@ -264,8 +273,13 @@ export function FilteredList(
   });
 
   return View(rest, [
-    computed(state, (d) => {
-      return d.filteredOptions.map((opt, index) => each(opt, index));
+    For({
+      each: computed(state, (d) => {
+        return d.filteredOptions;
+      }),
+      render(item, index) {
+        return Fragment({}, each(item, index));
+      },
     }),
   ]);
 }
@@ -371,31 +385,27 @@ export function Search(
 ) {
   const { store, placeholder = "Search...", ...rest } = props;
 
-  return View(
-    {
-      ...rest,
-      as: "input",
-      type: "text",
-      placeholder,
-      onInput(e: Event) {
-        const target = e.target as HTMLInputElement;
-        store.setKeyword(target.value);
-      },
-      onClick(e: Event) {
-        e.stopPropagation();
-      },
-      onMounted($elm: HTMLInputElement) {
-        $elm.value = store.state.keyword;
-        store.onStateChange((state) => {
-          if ($elm.value !== state.keyword) {
-            $elm.value = state.keyword;
-          }
-        });
-        if (rest.onMounted) {
-          rest.onMounted($elm);
-        }
-      },
+  return NativeInput({
+    ...rest,
+    type: "text",
+    placeholder,
+    onInput(e: Event) {
+      const target = e.target as HTMLInputElement;
+      store.setKeyword(target.value);
     },
-    children,
-  );
+    onClick(e: Event) {
+      e.stopPropagation();
+    },
+    onMounted($elm: HTMLInputElement) {
+      $elm.value = store.state.keyword;
+      store.onStateChange((state) => {
+        if ($elm.value !== state.keyword) {
+          $elm.value = state.keyword;
+        }
+      });
+      if (rest.onMounted) {
+        rest.onMounted($elm);
+      }
+    },
+  });
 }

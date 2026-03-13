@@ -5,8 +5,10 @@ export default function FormView() {
     Section("Input", [
       Item("Default", [
         Input({
-          store: new Timeless.ui.InputCore({ defaultValue: "" }),
-          placeholder: "Type something...",
+          store: new Timeless.ui.InputCore({
+            defaultValue: "",
+            placeholder: "Type something...",
+          }),
         }),
       ]),
     ]),
@@ -58,9 +60,11 @@ export default function FormView() {
     Section("Textarea", [
       Item("Default", [
         Textarea({
-          store: new Timeless.ui.InputCore({ defaultValue: "" }),
-          placeholder: "Enter your message...",
-          rows: "3",
+          store: new Timeless.ui.InputCore({
+            defaultValue: "",
+            placeholder: "Enter your message...",
+          }),
+          // rows: "3",
         }),
       ]),
     ]),
@@ -69,8 +73,10 @@ export default function FormView() {
         View({ class: "space-y-2 w-full" }, [
           Label({}, [Txt("Email")]),
           Input({
-            store: new Timeless.ui.InputCore({ defaultValue: "" }),
-            placeholder: "email@example.com",
+            store: new Timeless.ui.InputCore({
+              defaultValue: "",
+              placeholder: "email@example.com",
+            }),
           }),
         ]),
       ]),
@@ -292,13 +298,11 @@ export default function FormView() {
       ]),
     ]),
     Section("Checkbox", [
-      Item("Default", [
-        Checkbox({ store: new Timeless.ui.CheckboxCore({}) }),
-      ]),
+      Item("Default", [Checkbox({ store: new Timeless.ui.CheckboxCore({}) })]),
       Item("With Label", [
         View({ class: "flex items-center gap-2" }, [
           Checkbox({ store: new Timeless.ui.CheckboxCore({ checked: true }) }),
-          Txt({ class: "text-sm" }, ["Accept terms and conditions"]),
+          View({ class: "text-sm" }, ["Accept terms and conditions"]),
         ]),
       ]),
     ]),

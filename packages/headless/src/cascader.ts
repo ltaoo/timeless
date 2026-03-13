@@ -87,6 +87,7 @@ export function Trigger(
         );
 
         $elm.addEventListener("pointerdown", (e: PointerEvent) => {
+          e.preventDefault();
           e.stopPropagation();
           if ((e.target as HTMLElement).tagName === "INPUT") {
             return;

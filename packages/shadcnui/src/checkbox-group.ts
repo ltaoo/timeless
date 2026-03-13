@@ -67,9 +67,14 @@ export function CheckboxGroupItem(props: {
     },
     [
       Checkbox({ store: item.core }),
-      Txt({ class: "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" }, [
-        item.label,
-      ]),
+      View(
+        {
+          as: "span",
+          class:
+            "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+        },
+        [Txt(item.label)],
+      ),
     ],
   );
 }

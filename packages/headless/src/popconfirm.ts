@@ -44,6 +44,7 @@ export function Trigger(
         );
 
         $e.addEventListener("pointerdown", (e: any) => {
+          e.preventDefault();
           e.stopPropagation();
           props.store.toggle();
         });

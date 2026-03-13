@@ -79,6 +79,7 @@ export function Trigger(
 
           // Prevent click from closing the menu in hover mode
           $elm.addEventListener("pointerdown", (e: any) => {
+            e.preventDefault();
             e.stopPropagation();
           });
         }

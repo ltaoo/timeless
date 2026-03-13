@@ -49,6 +49,7 @@ export function Trigger(
         );
 
         $e.addEventListener("pointerdown", (e: any) => {
+          e.preventDefault();
           // 阻止冒泡，避免 LayerManager 立即关闭
           e.stopPropagation();
           props.store.toggle();

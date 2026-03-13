@@ -86,6 +86,7 @@ export function Trigger(
         // Handle click trigger
         if (store.trigger === "click") {
           $elm.addEventListener("pointerdown", (e) => {
+            e.preventDefault();
             // 阻止冒泡，避免 LayerManager 立即关闭菜单
             e.stopPropagation();
             props.store.menu.show();

@@ -1,7 +1,7 @@
 import { refobj, computed, classNames } from "@timeless/reactive";
 import { DatePickerCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "./view";
+import { View, ViewChildren, ViewProps, TimelessElement } from "./view";
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
@@ -61,6 +61,7 @@ export function Trigger(
         );
 
         $elm.addEventListener("pointerdown", (e: PointerEvent) => {
+          e.preventDefault();
           e.stopPropagation();
           if ((e.target as HTMLElement).tagName === "INPUT") {
             return;
@@ -267,7 +268,7 @@ export function CalendarGridBody(
       is_today: boolean;
       is_prev_month: boolean;
       is_next_month: boolean;
-    }) => ViewChildren;
+    }) => TimelessElement | (() => TimelessElement) | null;
   },
   children?: ViewChildren,
 ) {

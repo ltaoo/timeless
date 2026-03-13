@@ -18,6 +18,7 @@ export interface ViewProps {
   dataset?: Record<string, string>;
   htmlFor?: string;
   "tab-index"?: number | Ref<number | undefined>;
+  tabindex?: number | Ref<number | undefined>;
   onMounted?(
     el: HTMLElement | SVGElement | Text | DocumentFragment,
   ): void | (() => void);

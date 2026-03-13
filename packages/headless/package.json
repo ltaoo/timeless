@@ -162,6 +162,11 @@
       "import": "./dist/menu/index.esm.js",
       "require": "./dist/menu/index.js"
     },
+    "./native-input": {
+      "types": "./dist/native-input/index.d.ts",
+      "import": "./dist/native-input/index.esm.js",
+      "require": "./dist/native-input/index.js"
+    },
     "./number-input": {
       "types": "./dist/number-input/index.d.ts",
       "import": "./dist/number-input/index.esm.js",

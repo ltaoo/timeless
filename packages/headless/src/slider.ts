@@ -48,6 +48,7 @@ export function Root(
   let cleanupDrag: any;
   const onPointerDown = (e: any) => {
     if (disabled) return;
+    e.preventDefault();
     updateValue(e.clientX);
     e.target.setPointerCapture(e.pointerId);
     const onMove = (ev: any) => updateValue(ev.clientX);
