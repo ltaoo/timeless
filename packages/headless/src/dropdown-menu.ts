@@ -48,7 +48,7 @@ function _hoverScheduleHide(store: DropdownMenuCore) {
   state.timer = setTimeout(() => {
     store.hide();
     state.timer = null;
-  }, 300);
+  }, 100);
 }
 
 export function Root(
@@ -102,12 +102,12 @@ export function Trigger(
             store.show();
           });
 
-          // $elm.addEventListener("mouseleave", () => {
-          //   if (store.disabled) {
-          //     return;
-          //   }
-          //   _hoverScheduleHide(store);
-          // });
+          $elm.addEventListener("mouseleave", () => {
+            if (store.disabled) {
+              return;
+            }
+            _hoverScheduleHide(store);
+          });
 
           // Prevent click from closing the menu in hover mode
           $elm.addEventListener("pointerdown", (e) => {
@@ -141,18 +141,17 @@ export function Content(
   const { store, ...rest } = props;
 
   // Add hover event handlers for hover trigger mode
-  const hoverHandlers = {};
-  // const hoverHandlers =
-  //   store.trigger === "hover"
-  //     ? {
-  //         onMouseEnter() {
-  //           _hoverClearHide(store);
-  //         },
-  //         onMouseLeave() {
-  //           _hoverScheduleHide(store);
-  //         },
-  //       }
-  //     : {};
+  const hoverHandlers =
+    store.trigger === "hover"
+      ? {
+          onMouseEnter() {
+            _hoverClearHide(store);
+          },
+          onMouseLeave() {
+            _hoverScheduleHide(store);
+          },
+        }
+      : {};
 
   return MenuPrimitive.Content(
     { ...rest, ...hoverHandlers, store: props.store.menu },
@@ -208,30 +207,28 @@ export function SubMenuContent(
   children: ViewChildren,
 ) {
   // Get the parent DropdownMenuCore from the menu's parent
-  // const parentDropdown = (props.store as any).parentDropdown as
-  //   | DropdownMenuCore
-  //   | undefined;
+  const parentDropdown = (props.store as any).parentDropdown as
+    | DropdownMenuCore
+    | undefined;
 
-  // const hoverHandlers =
-  //   parentDropdown && parentDropdown.trigger === "hover"
-  //     ? {
-  //         onMouseEnter() {
-  //           console.log("[DropdownMenu SubMenuContent] mouseenter");
-  //           // Cancel parent dropdown hide timer when entering submenu
-  //           _hoverClearHide(parentDropdown);
-  //         },
-  //         onMouseLeave() {
-  //           console.log("[DropdownMenu SubMenuContent] mouseleave");
-  //           // Schedule parent dropdown hide when leaving submenu
-  //           _hoverScheduleHide(parentDropdown);
-  //         },
-  //       }
-  //     : {};
+  const hoverHandlers =
+    parentDropdown && parentDropdown.trigger === "hover"
+      ? {
+          onMouseEnter() {
+            // Cancel parent dropdown hide timer when entering submenu
+            _hoverClearHide(parentDropdown);
+          },
+          onMouseLeave() {
+            // Schedule parent dropdown hide when leaving submenu
+            _hoverScheduleHide(parentDropdown);
+          },
+        }
+      : {};
 
   return MenuPrimitive.Content(
     {
       ...props,
-      // ...hoverHandlers,
+      ...hoverHandlers,
     },
     children,
   );
