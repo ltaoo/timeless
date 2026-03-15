@@ -6,8 +6,13 @@ export default createLibConfig({
   name: "timeless.reactive",
   formats: ["es", "cjs", "umd"],
   external: [],
-  minify: true,
+  minify: false,
+  sourcemap: false,
   dts: true,
+  rollupConfig: {
+    output: {
+    },
+  },
   footer: `if (typeof window !== "undefined") {
     window.Timeless = window.Timeless || {};
     Object.assign(window.Timeless, window.Timeless.reactive);

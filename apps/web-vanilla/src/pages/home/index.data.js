@@ -35,7 +35,9 @@ export default function DataDisplayView() {
     Section("Steps", [
       Item("3 Steps", [
         Steps({
-          current: stepIdx.value,
+          store: new Timeless.ui.StepCore({
+            current: stepIdx.value,
+          }),
           items: [
             { title: "Account" },
             { title: "Profile" },

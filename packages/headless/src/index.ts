@@ -17,6 +17,7 @@ export * from "./fragment";
 export * from "./svg";
 export * from "./lazy-view";
 export * from "./text";
+export * from "./img";
 export * from "./html";
 export * from "./portal";
 export * from "./presence";

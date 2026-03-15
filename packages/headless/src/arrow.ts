@@ -35,7 +35,8 @@ export function Arrow(
           top: y != null ? `${y}px` : "",
         };
         if (staticSide) {
-          style[staticSide] = "-4px";
+          // style[staticSide] = "calc(-1 * var(--t1-popper-arrow-offset, 4px))";
+          style[staticSide] = "calc(-1 * var(--t1-popper-arrow-offset, 6px))";
         }
 
         // Merge with user provided style
@@ -56,15 +57,22 @@ export function Arrow(
           .join(";");
       }),
       onMounted($el: HTMLDivElement) {
+        const { width, height } = $el.getBoundingClientRect();
+        $el.style.setProperty(
+          "--t1-popper-arrow-offset",
+          `${Math.ceil(Math.max(width, height) / 2)}px`,
+        );
+        if ((store as any).setArrowElement) {
+          (store as any).setArrowElement($el);
+        }
         if (store.setArrow) {
-          const { width, height } = $el.getBoundingClientRect();
-          store.setArrow({
-            width,
-            height,
-          });
+          store.setArrow({ width, height });
         }
       },
       onUnmounted() {
+        if ((store as any).setArrowElement) {
+          (store as any).setArrowElement(null);
+        }
         if (store.setArrow) {
           store.setArrow(null);
         }

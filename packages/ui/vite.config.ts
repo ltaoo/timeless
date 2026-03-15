@@ -58,8 +58,8 @@ export default defineConfig({
       },
       name: buildLibName(name),
     },
-    minify: false,
-    sourcemap: true,
+    minify: true,
+    sourcemap: false,
     rollupOptions: {
       external: ["@timeless/reactive", "@timeless/utils"],
       output: {

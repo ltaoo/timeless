@@ -13,11 +13,12 @@
     "dist"
   ],
   "dependencies": {
+    "@timeless/base": "workspace:^",
     "@timeless/headless": "workspace:^",
     "@timeless/icons": "workspace:^",
     "@timeless/kit": "workspace:^",
     "@timeless/reactive": "workspace:^",
-    "@timeless/shadcn": "workspace:^",
+    "@timeless/utils": "workspace:^",
     "@timeless/ui": "workspace:^"
   }
 }

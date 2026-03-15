@@ -60,8 +60,8 @@ export default defineConfig({
       },
       name: buildLibName(name),
     },
-    minify: false,
-    sourcemap: true,
+    minify: true,
+    sourcemap: false,
     rollupOptions: {
       external: [
         ...Object.keys(pkg.dependencies || {}),
@@ -77,7 +77,6 @@ export default defineConfig({
         window.Timeless = window.Timeless || {};
         if (window.Timeless.headless) {
           Object.assign(window.Timeless, window.Timeless.headless);
-          Object.assign(window, window.Timeless);
         }
       }`,
       },

@@ -20,7 +20,6 @@ export default createLibConfig({
         window.Timeless = window.Timeless || {};
         if (window.Timeless) {
           Object.assign(window.Timeless, window.Timeless.kit);
-          Object.assign(window.Timeless, window.Timeless.kit.base);
         }
       }`,
 });

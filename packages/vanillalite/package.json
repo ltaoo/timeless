@@ -1,5 +1,5 @@
 {
-  "name": "@timeless/vanillakit",
+  "name": "@timeless/vanillalite",
   "version": "1.0.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",

@@ -91,6 +91,18 @@ export function refObject<T extends Record<string, any>>(obj: T | null) {
       }
       notify({ type: "refresh" });
     },
+    assign(updated: Partial<T>) {
+      if (_v === null) {
+        // @ts-ignore
+        _v = updated;
+      } else {
+        Object.assign(_v, updated);
+      }
+      // Object.keys(updated).map((k) => {
+      //   const v = updated[k];
+      // });
+      notify({ type: "refresh" });
+    },
     refresh() {
       notify({ type: "refresh" });
     },

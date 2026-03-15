@@ -137,6 +137,11 @@
       "import": "./dist/html/index.esm.js",
       "require": "./dist/html/index.js"
     },
+    "./img": {
+      "types": "./dist/img/index.d.ts",
+      "import": "./dist/img/index.esm.js",
+      "require": "./dist/img/index.js"
+    },
     "./input": {
       "types": "./dist/input/index.d.ts",
       "import": "./dist/input/index.esm.js",

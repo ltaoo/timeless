@@ -6,8 +6,10 @@ export default createLibConfig({
   entry: resolve(__dirname, "src/index.ts"),
   name: "timeless.web",
   external: [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
+    "@timeless/reactive",
+    "@timeless/headless",
+    "@timeless/kit",
+    "@timeless/ui",
   ],
   globals: {
     "@timeless/reactive": "Timeless.reactive",

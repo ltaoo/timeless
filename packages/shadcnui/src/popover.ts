@@ -46,62 +46,26 @@ export function Popover(
             }),
           },
           [
-            View({
-              onMounted($el: HTMLDivElement) {
-                props.store.popper.setArrowElement($el);
+            PopoverPrimitive.Arrow(
+              {
+                store: props.store,
+                class: computed(popper_state_, (t) => {
+                  const side = t.placedSide;
+                  let borderClass = "";
+                  if (side === "bottom") borderClass = "border-t border-l";
+                  if (side === "top") borderClass = "border-b border-r";
+                  if (side === "right") borderClass = "border-b border-l";
+                  if (side === "left") borderClass = "border-t border-r";
+                  return [
+                    "absolute h-3 w-3 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800",
+                    "transform",
+                    borderClass,
+                  ].join(" ");
+                }),
+                style: "transform: rotate(45deg);",
               },
-              class: computed(popper_state_, (t) => {
-                const side = t.placedSide;
-                const base =
-                  "absolute w-3 h-3 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800";
-                // side is where the popover is placed.
-                // if side is 'bottom', arrow is at top, so we need border-t border-l
-                let borderClass = "";
-                if (side === "bottom") borderClass = "border-t border-l";
-                if (side === "top") borderClass = "border-b border-r";
-                if (side === "right") borderClass = "border-b border-l";
-                if (side === "left") borderClass = "border-t border-r";
-                return [base, borderClass].join(" ");
-              }),
-              style: computed(popper_state_, (s) => {
-                const side = s.placedSide;
-                const align = s.placedAlign;
-                const styles: any = {};
-                // Position based on side
-                if (side === "bottom") styles.top = "-6px";
-                if (side === "top") styles.bottom = "-6px";
-                if (side === "right") styles.left = "-6px";
-                if (side === "left") styles.right = "-6px";
-
-                // Alignment
-                let transform = "rotate(45deg)";
-                if (s.arrow && s.arrow.x != null) {
-                  styles.left = `${s.arrow.x}px`;
-                } else if (s.arrow && s.arrow.y != null) {
-                  styles.top = `${s.arrow.y}px`;
-                } else if (align === "center" || (align as any) === "middle") {
-                  if (side === "bottom" || side === "top") {
-                    styles.left = "50%";
-                    transform = "translateX(-50%) rotate(45deg)";
-                  } else {
-                    styles.top = "50%";
-                    transform = "translateY(-50%) rotate(45deg)";
-                  }
-                } else if (align === "start") {
-                  if (side === "bottom" || side === "top") styles.left = "16px";
-                  else styles.top = "16px";
-                } else if (align === "end") {
-                  if (side === "bottom" || side === "top")
-                    styles.right = "16px";
-                  else styles.bottom = "16px";
-                }
-                styles.transform = transform;
-
-                return Object.keys(styles)
-                  .map((k) => `${k}:${styles[k]}`)
-                  .join(";");
-              }),
-            }),
+              [],
+            ),
             Show({ when: ref(!!props.title) }, [
               View(
                 {
