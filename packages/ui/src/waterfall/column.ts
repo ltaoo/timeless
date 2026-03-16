@@ -3,7 +3,6 @@ import { throttle } from "@timeless/utils";
 import { remove_arr_item, toFixed } from "@timeless/utils";
 
 import { WaterfallCellModel } from "./cell";
-import { inRange } from "@timeless/utils";
 
 export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
   index?: number;
@@ -27,7 +26,12 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       }
       return false;
     })();
-    console.log("[]handleScrollForce - before if (!update", update, scrollTop, range);
+    console.log(
+      "[]handleScrollForce - before if (!update",
+      update,
+      scrollTop,
+      range,
+    );
     if (!update) {
       return;
     }
@@ -49,28 +53,36 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       _client_height = v;
     },
     /**
+     * 从 _dirty_from 开始批量重算 top，一次 O(n) 完成
+     */
+    recomputeTops() {
+      if (_dirty_from >= _$total_items.length) {
+        _dirty_from = Infinity;
+        return;
+      }
+      const from = Math.max(0, _dirty_from);
+      for (let i = from; i < _$total_items.length; i++) {
+        const $item = _$total_items[i];
+        const $prev = _$total_items[i - 1];
+        const newTop = $prev ? $prev.state.top + $prev.state.height + _gutter : 0;
+        $item.methods.setTop(newTop);
+      }
+      _dirty_from = Infinity;
+    },
+    /**
      * 放置一个 item 到列中
      */
     appendItem($item: WaterfallCellModel<T>) {
       $item.onHeightChange(([original_height, height_difference]) => {
         const idx = _$total_items.findIndex((v) => v.id === $item.id);
         if (idx !== -1) {
-          const $next = _$total_items[idx + 1];
-          if ($next) {
-            // console.log(
-            //   "[DOMAIN]appendItem - before setTopWithDifference",
-            //   [_index, $item.idx],
-            //   height_difference,
-            //   $next.state.top
-            // );
-            $next.methods.setTopWithDifference(height_difference);
-          }
+          _dirty_from = Math.min(_dirty_from, idx + 1);
         }
         console.log(
           "[DOMAIN]appendItem - after this.height += heightDiff",
           "加载完成，发现高度差异为",
           [_index, $item.uid, idx],
-          [original_height, height_difference]
+          [original_height, height_difference],
         );
         _height += height_difference;
         bus.emit(Events.HeightChange, _height);
@@ -79,14 +91,7 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
         });
         methods.refresh();
       });
-      $item.onTopChange(([, top_difference]) => {
-        const idx = _$total_items.findIndex((v) => v === $item);
-        if (idx !== -1) {
-          const $next = _$total_items[idx + 1];
-          if ($next) {
-            $next.methods.setTopWithDifference(top_difference);
-          }
-        }
+      $item.onTopChange(() => {
         bus.emit(Events.CellUpdate, {
           $item,
         });
@@ -114,54 +119,24 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
     /**
      * 往顶部插入一个 item 到列中
      */
-    unshiftItem($item: WaterfallCellModel<T>, opt: Partial<{ skipUpdateHeight: boolean }> = {}) {
+    unshiftItem(
+      $item: WaterfallCellModel<T>,
+      opt: Partial<{ skipUpdateHeight: boolean }> = {},
+    ) {
       $item.onHeightChange(([original_height, height_difference]) => {
         _height += height_difference;
         const idx = _$total_items.findIndex((v) => v === $item);
         if (idx !== -1) {
-          const $next = _$total_items[idx + 1];
-          if ($next) {
-            $next.methods.setTopWithDifference(height_difference);
-          }
+          _dirty_from = Math.min(_dirty_from, idx + 1);
         }
       });
-      $item.onTopChange(([, top_difference]) => {
-        const idx = _$total_items.findIndex((v) => v === $item);
-        console.log("[BIZ]waterfall/column - response the top change", idx, $first.id, $first.state.top, $item.height);
-        if (idx !== -1) {
-          const $next = _$total_items[idx + 1];
-          if ($next) {
-            $next.methods.setTopWithDifference(top_difference);
-          }
-        }
-      });
+      $item.onTopChange(() => {});
       const idx = _$total_items.length;
-      const $first = _$total_items[0];
-      if ($first) {
-        console.log("[BIZ]waterfall/column - before $first set top", idx, $first.id, $first.state.top, $item.height);
-        $first.methods.setTopWithDifference($item.height + _gutter);
-        // console.log("[BIZ]waterfall/column - after $first set top", idx, $first.id, $first.state.top, $item.height);
-      }
-      // const idx = _$items.findIndex((v) => v === $item);
-      // if (idx !== -1) {
-      //   const $next = _$items[idx + 1];
-      //   if ($next) {
-      //     $next.methods.setTopWithDifference(height_difference);
-      //   }
-      // }
-      // $item.methods.setIndex(idx);
       $item.methods.setColumnIdx(_index);
-      // if (!opt.skipUpdateHeight) {
       _height += $item.height + _gutter;
-      // }
       _$total_items.unshift($item);
-      // for (let i = 0; i < _$total_items.length; i += 1) {
-      //   const $next = _$total_items[i];
-      //   if ($next) {
-      //     console.log(i, $item.height);
-      //     $next.methods.setTopWithDifference($item.height + _gutter);
-      //   }
-      // }
+      // 新 item 插入到头部，从 index 1 开始所有 top 都需要重算
+      _dirty_from = Math.min(_dirty_from, 1);
       bus.emit(Events.HeightChange, _height);
       methods.refresh();
     },
@@ -169,22 +144,17 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       return _$total_items.find((v) => v.id === id);
     },
     deleteCell($item: WaterfallCellModel<T>) {
-      // const idx = $item.idx;
       const idx = _$total_items.findIndex((v) => v.id === $item.id);
       if (idx === -1) {
         return;
       }
-      const $next = _$total_items[idx + 1];
       const $backup = _$total_items[_end];
       const height_difference = $item.height + _gutter;
       _height -= height_difference;
-      console.log("[BIZ]waterfall/column - delete cell", idx, $next?.uid, height_difference);
-      if ($next) {
-        $next.methods.setTopWithDifference(-height_difference);
-      }
       _$total_items = remove_arr_item(_$total_items, idx);
+      // 删除后，从该位置开始所有后续 item 的 top 需要重算
+      _dirty_from = Math.min(_dirty_from, idx);
       const idx2 = _$items.findIndex((v) => v.id === $item.id);
-      // const idx3 = _$items
       if (idx2 !== -1) {
         _$items = remove_arr_item(_$items, idx2);
         if ($backup) {
@@ -197,6 +167,7 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       _$items = [];
       _$total_items = [];
       _height = 0;
+      _dirty_from = Infinity;
       bus.emit(Events.StateChange, { ..._state });
     },
     resetRange() {
@@ -207,7 +178,15 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       // methods.calcVisibleRange(0);
     },
     calcVisibleRange(scroll_top: number) {
-      console.log("[BIZ]waterfall/column - calcVisibleRange", scroll_top, _start, _end, _$items);
+      // 先批量重算脏区间的 top，保证二分查找数据正确
+      methods.recomputeTops();
+      console.log(
+        "[BIZ]waterfall/column - calcVisibleRange",
+        scroll_top,
+        _start,
+        _end,
+        _$items,
+      );
       // 找中点需要遍历几万个元素，不是最佳方案
       // const $middle_item = (() => {
       //   return _$total_items.find(($v) => {
@@ -229,41 +208,44 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       // console.log("before", this.range, start, end);
       let start = _start;
       let end = _end;
+      // 二分查找，快速定位第一个 top >= scroll_top 的元素
       (() => {
-        // for (let i = start; i < end + 1; i += 1) {
-        //   const $item = _$total_items[i];
-        //   if ($item) {
-        //     $item.methods.setTop(items_height_total);
-        //     items_height_total = toFixed(items_height_total + $item.state.height + _gutter, 0);
-        //   }
-        // }
-        // 这里是从全部列表中，找出应该从哪里开始展示的逻辑
-        for (let i = start; i < _$total_items.length; i += 1) {
-          const item = _$total_items[i];
-          if (item.state.top >= scroll_top) {
-            // 这个 -1 是为什么？
-            start = i;
-            end = start + _size;
-            return;
+        const len = _$total_items.length;
+        if (len === 0) {
+          return;
+        }
+        let lo = 0;
+        let hi = len - 1;
+        let found = len; // 默认值：没找到则指向末尾之后
+        while (lo <= hi) {
+          const mid = (lo + hi) >>> 1;
+          if (_$total_items[mid].state.top >= scroll_top) {
+            found = mid;
+            hi = mid - 1;
+          } else {
+            lo = mid + 1;
           }
         }
-        // const vvv = scroll_top + _client_height / 2;
-        // const idx = _$total_items.findIndex(($v) => {
-        //   return inRange(vvv, [$v.state.top - 100, $v.state.top + 100]);
-        // });
-        // if (idx === -1) {
-        //   return;
-        // }
-        // start = Math.max(0, idx - _size);
-        // end = Math.min(_$total_items.length, start + _size);
+        start = found;
+        end = start + _size;
       })();
       //     const count = this.buffer_size;
-      console.log("before Math.max", [start, start - _buffer_size], [end, _$total_items.length]);
-      const result = { start: Math.max(0, start - _buffer_size), end: Math.min(end, _$total_items.length) };
+      console.log(
+        "before Math.max",
+        [start, start - _buffer_size],
+        [end, _$total_items.length],
+      );
+      const result = {
+        start: Math.max(0, start - _buffer_size),
+        end: Math.min(end, _$total_items.length),
+      };
       return result;
     },
     update(range: { start: number; end: number }) {
-      console.log("[DOMAIN]waterfall/column - update case range is changed", range);
+      console.log(
+        "[DOMAIN]waterfall/column - update case range is changed",
+        range,
+      );
       const $visible_items = _$total_items.slice(range.start, range.end);
       const item = $visible_items[0];
       if (!item) {
@@ -299,6 +281,8 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
   // let _range = { start: 0, end: _size + _buffer_size };
   let _start = 0;
   let _end = _size + _buffer_size;
+  /** 标记从哪个下标开始 top 需要重算，Infinity 表示干净 */
+  let _dirty_from = Infinity;
 
   const _state = {
     get width() {
@@ -367,4 +351,5 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
   };
 }
 
-export type WaterfallColumnModel<T extends Record<string, unknown>> = ReturnType<typeof WaterfallColumnModel<T>>;
+export type WaterfallColumnModel<T extends Record<string, unknown>> =
+  ReturnType<typeof WaterfallColumnModel<T>>;

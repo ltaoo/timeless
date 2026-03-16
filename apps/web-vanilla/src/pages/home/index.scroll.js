@@ -458,6 +458,177 @@ export default function HomeIndexScrollViewExampleView() {
         })(),
       ]),
     ]),
+    Section("Virtual List (Waterfall)", [
+      Item("Infinite Scroll — Completed Downloads", [
+        (() => {
+          const ITEM_HEIGHT = 56;
+          let nextId = 1;
+
+          const fileNames = [
+            "project-archive.zip",
+            "design-assets.psd",
+            "video-tutorial.mp4",
+            "database-backup.sql",
+            "photo-gallery.jpg",
+            "report-2024.pdf",
+            "music-collection.mp3",
+            "source-code.tar.gz",
+            "presentation.pptx",
+            "firmware-update.bin",
+            "app-installer.dmg",
+            "font-pack.otf",
+            "dataset-train.csv",
+            "wallpaper-4k.png",
+            "ebook-guide.epub",
+          ];
+
+          function generateDownloads(count) {
+            return Array.from({ length: count }, () => {
+              const id = nextId++;
+              return {
+                id,
+                name: fileNames[(id - 1) % fileNames.length],
+                size: Math.floor(Math.random() * 500000000) + 1000000,
+                status: "completed",
+                progress: 100,
+                height: ITEM_HEIGHT,
+              };
+            });
+          }
+
+          const waterfall = new Timeless.ui.WaterfallModel({
+            column: 1,
+            size: 10,
+            buffer: 3,
+            gutter: 0,
+          });
+
+          // Initial data
+          let totalItemCount = 30;
+          waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+          const totalCount = ref(totalItemCount);
+
+          const scrollStore = new Timeless.ui.ScrollViewCore({
+            onScroll(pos) {
+              waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+            },
+            onReachBottom() {
+              const newItems = generateDownloads(10);
+              waterfall.methods.appendItems(newItems);
+              totalItemCount += 10;
+              totalCount.as(totalItemCount);
+              scrollStore.finishLoadingMore();
+            },
+          });
+
+          return View(
+            {
+              class: cn([
+                "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+              ]),
+            },
+            [
+              // Header
+              View(
+                {
+                  class: cn([
+                    "flex items-center justify-between px-3 py-2.5",
+                    "border-b border-zinc-200 dark:border-zinc-800",
+                    "bg-zinc-50 dark:bg-zinc-900",
+                  ]),
+                },
+                [
+                  View(
+                    {
+                      class: cn([
+                        "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                      ]),
+                    },
+                    [
+                      Txt("Completed Downloads"),
+                      Txt(computed(totalCount, (c) => ` (${c})`)),
+                    ],
+                  ),
+                ],
+              ),
+              // ScrollView + Waterfall
+              View({ class: "h-[300px]" }, [
+                ScrollView(
+                  {
+                    store: scrollStore,
+                    class: "bg-white dark:bg-zinc-950",
+                  },
+                  [
+                    Waterfall({
+                      store: waterfall,
+                      class: "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
+                      render(task) {
+                        return View(
+                          {
+                            class: cn([
+                              "flex items-center gap-3 px-3 py-2.5",
+                              "border-b border-zinc-100 dark:border-zinc-800",
+                            ]),
+                          },
+                          [
+                            View(
+                              {
+                                class: cn([
+                                  "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                ]),
+                              },
+                              [
+                                (() => {
+                                  const ext = task.name
+                                    .split(".")
+                                    .pop()
+                                    .toUpperCase();
+                                  return ext.length <= 4 ? ext : "FILE";
+                                })(),
+                              ],
+                            ),
+                            View({ class: "flex-1 min-w-0" }, [
+                              View(
+                                {
+                                  class:
+                                    "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                                },
+                                [task.name],
+                              ),
+                              View(
+                                {
+                                  class: "mt-0.5 text-xs text-emerald-500",
+                                },
+                                [formatSize(task.size)],
+                              ),
+                            ]),
+                            View(
+                              {
+                                class:
+                                  "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                              },
+                              ["Done"],
+                            ),
+                          ],
+                        );
+                      },
+                    }),
+                    View(
+                      {
+                        class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                      },
+                      [Txt("Scroll to bottom to load more")],
+                    ),
+                  ],
+                ),
+              ]),
+            ],
+          );
+        })(),
+      ]),
+    ]),
     Section("Download List", [
       Item("Real-world Scenario", [
         (() => {

@@ -223,7 +223,7 @@ export function Show(
       }
       unmount({
         reason: "onUnmounted handler",
-        removeDom: false,
+        removeDom: true,
       });
     },
   };

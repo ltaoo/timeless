@@ -99,6 +99,7 @@ declare const AlertDescription: typeof import("@timeless/shadcnui").AlertDescrip
 declare const ScrollArea: typeof import("@timeless/shadcnui").ScrollArea;
 declare const Sheet: typeof import("@timeless/shadcnui").Sheet;
 declare const AspectRatio: typeof import("@timeless/shadcnui").AspectRatio;
+declare const Waterfall: typeof import("@timeless/shadcnui").Waterfall;
 declare const Accordion: typeof import("@timeless/shadcnui").Accordion;
 declare const Table: typeof import("@timeless/shadcnui").Table;
 declare const TableHeader: typeof import("@timeless/shadcnui").TableHeader;
