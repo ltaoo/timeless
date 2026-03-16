@@ -31,6 +31,7 @@ declare interface Window {
 declare const ref: typeof import("@timeless/reactive").ref;
 declare const refarr: typeof import("@timeless/reactive").refarr;
 declare const refobj: typeof import("@timeless/reactive").refobj;
+declare const registryGet: typeof import("@timeless/reactive").registryGet;
 declare const computed: typeof import("@timeless/reactive").computed;
 declare const isRef: typeof import("@timeless/reactive").isRef;
 declare const cn: typeof import("@timeless/reactive").cn;

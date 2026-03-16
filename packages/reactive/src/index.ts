@@ -7,7 +7,7 @@ import { refArray } from "./reactive-array";
 import { refObject } from "./reactive-object";
 import { computed } from "./computed";
 import { derive } from "./derive";
-import { release } from "./registry";
+import { release, get as registryGet, set as registrySet } from "./registry";
 import { classNames } from "./class-names";
 import { styleNames } from "./style-names";
 
@@ -25,6 +25,8 @@ export {
   computed,
   derive,
   release,
+  registryGet,
+  registrySet,
   classNames,
   styleNames,
   // Legacy aliases

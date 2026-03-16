@@ -13,7 +13,3 @@ export function has(v: any) {
 export function get(v: any) {
   return global_refs.get(v);
 }
-if (typeof window !== "undefined") {
-  // @ts-ignore
-  window._global_refs = global_refs;
-}

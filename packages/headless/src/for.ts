@@ -1,4 +1,4 @@
-import { ref, isRef, Ref } from "@timeless/reactive";
+import { ref, isRef, Ref, registryGet, registrySet } from "@timeless/reactive";
 
 import { View, ViewProps, TimelessElement, isElement } from "./view";
 import { safeCreateTextNode, safeCreateDocumentFragment } from "./env";
@@ -180,10 +180,6 @@ export function For<T>(
         node: TimelessElement;
         elm: TimelessElement["$elm"];
       }[] = [];
-      const updated_nodes: {
-        node: TimelessElement;
-        elm: TimelessElement["$elm"];
-      }[] = [];
       const removed_nodes: {
         elm: TimelessElement["$elm"] | null;
         component: TimelessElement | null;
@@ -196,27 +192,22 @@ export function For<T>(
         const prev_indices = old_map.get(k);
 
         if (prev_indices && prev_indices.length > 0) {
-          // Reused
+          // Reused - same key found in old list
           const oldIndex = prev_indices.shift()!;
           const oldItem = prev_items[oldIndex];
 
-          if (item !== oldItem) {
-            const res = methods._render_item(item, i);
-            new_elements[i] = res.node;
-            new_children[i] = res.trackElm || res.elm; // Use trackElm
+          // Always reuse existing DOM element when key matches
+          new_elements[i] = prev_elements[oldIndex];
+          new_children[i] = prev_children[oldIndex];
 
-            removed_nodes.push({
-              elm: prev_children[oldIndex],
-              component: prev_elements[oldIndex],
-            });
-
-            if (res.node && res.elm && isElement(res.node)) {
-              added_nodes.push({ node: res.node, elm: res.elm });
-              updated_nodes.push({ node: res.node, elm: res.elm });
+          // If item data changed, update the reactive proxy so computed values re-evaluate
+          if (item !== oldItem && oldItem && typeof oldItem === "object") {
+            const proxy = registryGet(oldItem);
+            if (proxy && typeof (proxy as any).as === "function") {
+              (proxy as any).as(item);
+              // Update registry to map new item to the same proxy
+              registrySet(item, proxy);
             }
-          } else {
-            new_elements[i] = prev_elements[oldIndex];
-            new_children[i] = prev_children[oldIndex];
           }
         } else {
           // Added (New)
@@ -244,8 +235,6 @@ export function For<T>(
         removed_nodes.length,
         "added:",
         added_nodes.length,
-        "updated:",
-        updated_nodes.length,
       );
       // console.log("1. removed_nodes", removed_nodes);
       // console.log("2. added_nodes", added_nodes);

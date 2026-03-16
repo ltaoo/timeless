@@ -1,0 +1,244 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test For Component</title>
+  <style>
+    :root {
+      --background: #ededed;
+      --foreground: #171717;
+      --BG-0: #ffffff;
+      --BG-1: #f7f7f7;
+      --BG-2: #fff;
+      --BG-3: #f7f7f7;
+      --BG-4: #4c4c4c;
+      --BG-5: #fff;
+      --FG-0: rgba(0, 0, 0, 0.9);
+      --FG-0_5: rgba(0, 0, 0, 0.9);
+      --FG-1: rgba(0, 0, 0, 0.55);
+      --FG-2: rgba(0, 0, 0, 0.3);
+      --FG-3: rgba(0, 0, 0, 0.1);
+      --FG-4: rgba(0, 0, 0, 0.15);
+      --FG-5: rgba(0, 0, 0, 0.05);
+      --BG-COLOR-ACTIVE: #ececec;
+      --RED: #fa5151;
+      --GREEN: #07c160;
+      --border: oklch(92.2% 0 0);
+      --hh: 100vh;
+    }
+
+    [data-theme="dark"] {
+      --background: #111;
+      --foreground: #f3f4f6;
+      --BG-0: #111;
+      --BG-1: #1e1e1e;
+      --BG-2: #191919;
+      --BG-3: #202020;
+      --BG-4: #404040;
+      --BG-5: #2c2c2c;
+      --FG-0: rgba(255, 255, 255, 0.8);
+      --FG-0_5: rgba(255, 255, 255, 0.6);
+      --FG-1: rgba(255, 255, 255, 0.5);
+      --FG-2: rgba(255, 255, 255, 0.3);
+      --FG-3: rgba(255, 255, 255, 0.1);
+      --FG-4: rgba(255, 255, 255, 0.15);
+      --FG-5: rgba(255, 255, 255, 0.1);
+      --BG-COLOR-ACTIVE: #373737;
+      --RED: #fa5151;
+      --GREEN: #07c160;
+      --border: oklch(100% 0 0/.1);
+    }
+
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    .menu-item {
+      padding: 8px;
+      margin: 4px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .item-simple {
+      background: #e3f2fd;
+    }
+
+    .item-complex {
+      background: #fff3e0;
+    }
+
+    button {
+      padding: 8px 16px;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+
+    @keyframes enter {
+      from {
+        opacity: var(--tw-enter-opacity, 1);
+        transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), var(--tw-enter-scale, 1));
+      }
+    }
+
+    @keyframes exit {
+      to {
+        opacity: var(--tw-exit-opacity, 1);
+        transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1));
+      }
+    }
+
+    .animate-in {
+      animation: enter 150ms ease-out;
+    }
+
+    .animate-out {
+      animation: exit 150ms ease-in forwards;
+    }
+
+    .fade-in-0 {
+      --tw-enter-opacity: 0;
+    }
+
+    .fade-out-0 {
+      --tw-exit-opacity: 0;
+    }
+
+    .zoom-in-95 {
+      --tw-enter-scale: 0.95;
+    }
+
+    .zoom-out-95 {
+      --tw-exit-scale: 0.95;
+    }
+
+    .slide-in-from-top {
+      --tw-enter-translate-y: -20px;
+    }
+
+    .slide-out-to-top {
+      --tw-exit-translate-y: -20px;
+    }
+  </style>
+</head>
+
+<body>
+  <script>!function () { try { var d = document.documentElement, n = 'data-theme', s = 'setAttribute'; var e = localStorage.getItem('theme'); if ('system' === e || (!e && true)) { var t = '(prefers-color-scheme: dark)', m = window.matchMedia(t); if (m.media !== t || m.matches) { d.style.colorScheme = 'dark'; d[s](n, 'dark') } else { d.style.colorScheme = 'light'; d[s](n, 'light') } } else if (e) { d[s](n, e || '') } if (e === 'light' || e === 'dark') d.style.colorScheme = e } catch (e) { } }()</script>
+  <script src="../../packages/vanillalite/dist/timeless.vanillalite.umd.min.js"></script>
+  <div id="container"></div>
+  <script>
+    const { ref, refobj, refarr, computed, cn, sn, For, Show, View, Fragment, Portal, render } = Timeless;
+
+    function AppView() {
+      const state_ = refarr([
+        {
+          id: 1,
+          content: 'item1',
+        },
+        {
+          id: 2,
+          content: 'item2',
+        }
+      ]);
+
+      return View({
+      }, [
+        View({
+          onClick() {
+            state_.as([
+              {
+                id: 0,
+                content: 'item0',
+              },
+              {
+                id: 1,
+                content: 'item1_updated',
+              },
+              {
+                id: 2,
+                content: 'item2',
+              },
+              {
+                id: 3,
+                content: 'item3',
+              },
+            ])
+          },
+        }, ["Toggle"]),
+        For({
+          key: 'id',
+          each: state_,
+          render(item) {
+            return View({}, [computed(item, (t) => t.content)])
+          },
+        })
+      ]);
+
+    }
+
+    const container = document.getElementById('container');
+    render(AppView(), container)
+
+    // --- DOM 复用验证 ---
+    // 记录初始 DOM 节点引用
+    const initialNodes = new Map();
+    function snapshotNodes() {
+      initialNodes.clear();
+      const divs = container.querySelectorAll('div > div');
+      // 跳过第一个 (Toggle 按钮的父级)
+      divs.forEach((el) => {
+        const text = el.textContent.trim();
+        if (text && text !== 'Toggle') {
+          initialNodes.set(text, el);
+          // 给每个节点打上标记，方便肉眼确认
+          el.setAttribute('data-created-at', Date.now());
+          el.style.outline = '2px solid blue';
+        }
+      });
+      console.log('[验证] 已记录初始节点:', [...initialNodes.keys()]);
+    }
+
+    function verifyReuse() {
+      const currentDivs = container.querySelectorAll('div > div');
+      currentDivs.forEach((el) => {
+        const text = el.textContent.trim();
+        if (text && text !== 'Toggle') {
+          // 检查是否有 data-created-at 属性（只有复用的节点才会保留）
+          const createdAt = el.getAttribute('data-created-at');
+          const isReused = !!createdAt;
+          const hasOutline = el.style.outline === '2px solid blue';
+          console.log(
+            `[验证] "${text}": ${isReused ? '✅ 复用' : '🆕 新建'}`,
+            isReused ? `(created-at=${createdAt}, outline=${hasOutline})` : ''
+          );
+        }
+      });
+    }
+
+    // 初始快照
+    setTimeout(snapshotNodes, 100);
+
+    // 监听 DOM 变化
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.addedNodes.length) {
+          m.addedNodes.forEach(n => {
+            if (n.nodeType === 1) console.log('[MutationObserver] 新增节点:', n.tagName, n.textContent.trim());
+          });
+        }
+        if (m.removedNodes.length) {
+          m.removedNodes.forEach(n => {
+            if (n.nodeType === 1) console.log('[MutationObserver] 移除节点:', n.tagName, n.textContent.trim());
+          });
+        }
+      }
+      // 变化后自动验证
+      setTimeout(verifyReuse, 50);
+    });
+    observer.observe(container, { childList: true, subtree: true });
+  </script>
+</body>
+
+</html>

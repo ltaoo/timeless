@@ -74,6 +74,7 @@ export * as DialogPrimitive from "./dialog";
 export * as ToastPrimitive from "./toast";
 export * as StepsPrimitive from "./steps";
 export * as ScrollViewPrimitive from "./scroll-view";
+export * as WaterfallPrimitive from "./waterfall";
 
 export * from "./keep-alive-sub-views";
 export * from "./sub-views";

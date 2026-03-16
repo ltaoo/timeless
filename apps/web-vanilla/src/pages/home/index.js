@@ -15,6 +15,7 @@ export default function HomePageView(props) {
       { title: "Form", url: "root.home_layout.index.form" },
       { title: "Form Validate", url: "root.home_layout.index.validate" },
       { title: "Data Display", url: "root.home_layout.index.data" },
+      { title: "ScrollView", url: "root.home_layout.index.scroll" },
       { title: "Feedback", url: "root.home_layout.index.feedback" },
       { title: "Navigation", url: "root.home_layout.index.nav" },
       { title: "Overlay", url: "root.home_layout.index.overlay" },

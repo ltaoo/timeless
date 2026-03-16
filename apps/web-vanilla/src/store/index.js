@@ -39,6 +39,11 @@ const routesConfigure = {
             pathname: "/home/index/data",
             component: Timeless.lazy("@/pages/home/index.data.js"),
           },
+          scroll: {
+            title: "滚动容器",
+            pathname: "/home/index/scroll",
+            component: Timeless.lazy("@/pages/home/index.scroll.js"),
+          },
           feedback: {
             title: "反馈组件",
             pathname: "/home/index/feedback",

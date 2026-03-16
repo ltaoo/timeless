@@ -73,6 +73,8 @@ import {
   ResizableHandle,
 } from "./resizable-panels";
 
+import { Waterfall } from "./waterfall";
+
 import "./index.css";
 
 export {
@@ -146,4 +148,5 @@ export {
   ResizablePanels,
   ResizablePanel,
   ResizableHandle,
+  Waterfall,
 };
