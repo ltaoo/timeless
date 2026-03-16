@@ -15,10 +15,9 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@timeless/ui/presence": ["../ui/dist/presence/index.d.ts"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "../biz/src/qrcode", "../biz/src/file_browser", "../utils/src/result", "../biz/src/shortcut"],
+  "include": ["src/**/*"],
   "exclude": ["src/**/__tests__", "src/**/*.test.ts"]
 }

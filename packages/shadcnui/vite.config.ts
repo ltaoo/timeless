@@ -53,7 +53,9 @@ export default defineConfig({
         window.Timeless = window.Timeless || {};
         if (window.Timeless.shadcn) {
           Object.assign(window.Timeless, window.Timeless.shadcn);
-          Object.assign(window, window.Timeless);
+          Object.keys(window.Timeless).forEach((k) => {
+            window[k] = window.Timeless[k];
+          });
         }
       }`,
       },

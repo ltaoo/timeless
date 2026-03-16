@@ -4,7 +4,8 @@ import {
   base as _base,
   BaseDomain as _BaseDomain,
 } from "@timeless/base";
-export * as utils from "@timeless/utils";
+import * as _utils from "@timeless/utils";
+export const utils = _utils;
 
 export const Result = _Result;
 export const BizError = _BizError;

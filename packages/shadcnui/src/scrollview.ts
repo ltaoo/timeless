@@ -1,4 +1,8 @@
-import { ScrollViewPrimitive, ViewChildren, type ViewProps } from "@timeless/headless";
+import {
+  ScrollViewPrimitive,
+  ViewChildren,
+  type ViewProps,
+} from "@timeless/headless";
 import { cn } from "@timeless/reactive";
 import { ScrollViewCore } from "@timeless/ui";
 
@@ -22,20 +26,10 @@ export function ScrollView(
             "scroll-view-indicator relative w-full overflow-hidden text-center",
         },
         [
-          ScrollViewPrimitive.Progress(
-            {
-              store,
-              class: "absolute left-0 bottom-0 w-full min-h-[30px] py-[10px]",
-            },
-            [
-              ScrollViewPrimitive.Progress(
-                {
-                  store,
-                  class: "w-[50px] h-[50px] mx-auto rounded-full bg-w-bg-0",
-                },
-              ),
-            ],
-          ),
+          ScrollViewPrimitive.Progress({
+            store,
+            class: "absolute left-0 bottom-0 w-full min-h-[30px] py-[10px]",
+          }),
         ],
       ),
       ...children,

@@ -2,8 +2,8 @@
  * @file 构建 http 请求载荷
  */
 import { Result, UnpackedResult } from "@timeless/base";
-import { Unpacked } from "@timeless/types";
 import { qs_stringify } from "@timeless/utils";
+import { Unpacked } from "@timeless/types";
 
 export type RequestPayload<T> = {
   hostname?: string;
