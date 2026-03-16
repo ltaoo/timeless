@@ -321,6 +321,29 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     const [placedSide, placedAlign] = getSideAndAlignFromPlacement(
       coords.placement,
     );
+    // When the reference is wider/taller than the floating element,
+    // override arrow position based on alignment instead of pointing at reference center
+    // if (middlewareData.arrow && this.floating && this.reference) {
+    //   const floatRect = this.floating.getRect();
+    //   const refRect = this.reference.getRect();
+    //   const arrowPadding = 12;
+    //   const isVerticalSide = placedSide === "top" || placedSide === "bottom";
+    //   if (isVerticalSide && refRect.width > floatRect.width) {
+    //     const arrowWidth = this.arrow?.width || 10;
+    //     if (placedAlign === "start") {
+    //       middlewareData.arrow.x = arrowPadding;
+    //     } else if (placedAlign === "end") {
+    //       middlewareData.arrow.x = floatRect.width - arrowWidth - arrowPadding;
+    //     }
+    //   } else if (!isVerticalSide && refRect.height > floatRect.height) {
+    //     const arrowHeight = this.arrow?.height || 10;
+    //     if (placedAlign === "start") {
+    //       middlewareData.arrow.y = arrowPadding;
+    //     } else if (placedAlign === "end") {
+    //       middlewareData.arrow.y = floatRect.height - arrowHeight - arrowPadding;
+    //     }
+    //   }
+    // }
     this.state = {
       x: xWithOffset,
       y: yWithOffset,
@@ -411,7 +434,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       shift({ padding: 8 }),
     ];
     if (this.arrowElement) {
-      middleware.push(arrow({ element: this.arrowElement }));
+      middleware.push(arrow({ element: this.arrowElement, padding: 12 }));
     }
 
     // Reset floating element position and force reflow before computing

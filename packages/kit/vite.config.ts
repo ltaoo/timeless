@@ -19,7 +19,15 @@ export default createLibConfig({
   footer: `if (typeof window !== "undefined") {
         window.Timeless = window.Timeless || {};
         if (window.Timeless) {
-          Object.assign(window.Timeless, window.Timeless.kit);
+          if (window.Timeless.kit) {
+            Object.assign(window.Timeless, window.Timeless.kit);
+            if (window.Timeless.kit.base) {
+              Object.assign(window.Timeless, window.Timeless.kit.base);
+            }
+          }
+          if (window.Timeless.base) {
+            Object.assign(window.Timeless, window.Timeless.base);
+          }
         }
       }`,
 });

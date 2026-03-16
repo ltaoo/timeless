@@ -1,5 +1,5 @@
 import { refobj } from "@timeless/reactive";
-import { PopoverCore, Align, Side } from "@timeless/ui";
+import { PopoverCore, Align, Side, getGlobalLayerManager } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "./view";
 import { Fragment } from "./fragment";
@@ -35,10 +35,11 @@ export function Trigger(
   props: ViewProps & { store: PopoverCore },
   children?: ViewChildren,
 ) {
-  return View(
+  return Fragment(
     {
-      onMounted($e: HTMLDivElement) {
-        const $ref = $e.firstElementChild || $e;
+      onMounted($f: any) {
+        const $ref = $f.firstElementChild;
+        if (!$ref) return;
         props.store.popper.setReference(
           {
             $el: $ref,
@@ -48,10 +49,11 @@ export function Trigger(
           },
           { force: true },
         );
-
-        $e.addEventListener("pointerdown", (e: any) => {
+        $ref.addEventListener("pointerdown", (e: any) => {
           e.preventDefault();
-          // 阻止冒泡，避免 LayerManager 立即关闭
+          // 先让 LayerManager 处理，关闭其他已打开的浮动层
+          getGlobalLayerManager().handlePointerDown(e.clientX, e.clientY);
+          // 阻止冒泡，避免 document 上的监听器重复处理
           e.stopPropagation();
           props.store.toggle();
         });
