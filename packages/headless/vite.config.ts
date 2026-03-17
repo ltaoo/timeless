@@ -4,7 +4,7 @@ import fs from "fs";
 import dtsPlugin from "vite-plugin-dts";
 
 import pkg from "./package.json";
-import { buildLibName } from "../../vite.config.base";
+import { buildLibName, isProd } from "../../vite.config.base";
 
 const isWhole = process.argv.includes("--whole");
 
@@ -60,7 +60,14 @@ export default defineConfig({
       },
       name: buildLibName(name),
     },
-    minify: true,
+    minify: isProd ? "terser" : true,
+    ...(isProd && {
+      terserOptions: {
+        compress: {
+          drop_console: true,
+        },
+      },
+    }),
     sourcemap: false,
     rollupOptions: {
       external: [

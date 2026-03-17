@@ -233,6 +233,12 @@ function startDev() {
 // Main execution
 const args = process.argv.slice(2);
 const isBuildOnly = args.includes("--build");
+const isProd = args.includes("--prod");
+
+if (isProd) {
+  process.env.TIMELESS_PROD = "1";
+  console.log("Production mode: minify + drop console.log");
+}
 
 buildAll()
   .then(() => {

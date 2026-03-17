@@ -2,7 +2,7 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 
-import { buildLibName } from "../../vite.config.base";
+import { buildLibName, isProd } from "../../vite.config.base";
 
 const name = "timeless.shadcn";
 
@@ -26,7 +26,15 @@ export default defineConfig({
       },
       name: buildLibName(name),
     },
-    sourcemap: true,
+    minify: isProd ? "terser" : false,
+    ...(isProd && {
+      terserOptions: {
+        compress: {
+          drop_console: true,
+        },
+      },
+    }),
+    sourcemap: isProd ? false : true,
     rollupOptions: {
       external: [
         "@timeless/reactive",

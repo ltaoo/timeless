@@ -2,6 +2,8 @@ import { defineConfig, UserConfig } from "vite";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
+export const isProd = process.env.TIMELESS_PROD === "1";
+
 export interface BuildOptions {
   entry: string;
   name?: string;
@@ -73,8 +75,15 @@ export function createLibConfig(options: BuildOptions): UserConfig {
           return `index.${format}.js`;
         },
       },
-      minify: minify ? "terser" : false,
-      sourcemap,
+      minify: isProd ? "terser" : minify ? "terser" : false,
+      ...(isProd && {
+        terserOptions: {
+          compress: {
+            drop_console: true,
+          },
+        },
+      }),
+      sourcemap: isProd ? false : sourcemap,
       rollupOptions: {
         external,
         output: {
