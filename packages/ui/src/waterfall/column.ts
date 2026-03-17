@@ -99,7 +99,7 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       const idx = _$total_items.length;
       // $item.methods.setIndex(idx);
       $item.methods.setColumnIdx(_index);
-      _height += $item.state.height + _gutter;
+      _height += $item.state.height + (_$total_items.length > 0 ? _gutter : 0);
       _$total_items.push($item);
       const $prev = _$total_items[idx - 1];
       // console.log(
@@ -133,10 +133,13 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       $item.onTopChange(() => {});
       const idx = _$total_items.length;
       $item.methods.setColumnIdx(_index);
-      _height += $item.height + _gutter;
+      _height += $item.height + (_$total_items.length > 0 ? _gutter : 0);
       _$total_items.unshift($item);
       // 新 item 插入到头部，从 index 1 开始所有 top 都需要重算
       _dirty_from = Math.min(_dirty_from, 1);
+      methods.recomputeTops();
+      // 更新可见列表，与 appendItem 保持一致
+      _$items = _$total_items.slice(_start, _end + _buffer_size);
       bus.emit(Events.HeightChange, _height);
       methods.refresh();
     },
@@ -149,7 +152,7 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
         return;
       }
       const $backup = _$total_items[_end];
-      const height_difference = $item.height + _gutter;
+      const height_difference = $item.height + (_$total_items.length > 1 ? _gutter : 0);
       _height -= height_difference;
       _$total_items = remove_arr_item(_$total_items, idx);
       // 删除后，从该位置开始所有后续 item 的 top 需要重算

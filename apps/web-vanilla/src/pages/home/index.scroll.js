@@ -816,6 +816,405 @@ export default function HomeIndexScrollViewExampleView() {
           );
         })(),
       ]),
+      Item("Unshift Items with Gutter — Test Jitter", [
+        (() => {
+          const ITEM_HEIGHT = 56;
+          const GUTTER = 8;
+          let nextId = 1;
+
+          const fileNames = [
+            "backup-daily.zip",
+            "logs-server.txt",
+            "snapshot-db.sql",
+            "metrics-export.csv",
+            "config-prod.yaml",
+            "cert-renewal.pem",
+            "audit-trail.json",
+            "cache-dump.bin",
+          ];
+
+          function generateDownloads(count) {
+            return Array.from({ length: count }, () => {
+              const id = nextId++;
+              return {
+                id,
+                name: fileNames[(id - 1) % fileNames.length],
+                size: Math.floor(Math.random() * 500000000) + 1000000,
+                status: "completed",
+                progress: 100,
+                height: ITEM_HEIGHT,
+              };
+            });
+          }
+
+          const waterfall = new Timeless.ui.WaterfallModel({
+            column: 1,
+            size: 10,
+            buffer: 3,
+            gutter: GUTTER,
+          });
+
+          let totalItemCount = 20;
+          waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+          const totalCount = ref(totalItemCount);
+
+          let loadedMore = false;
+
+          const scrollStore = new Timeless.ui.ScrollViewCore({
+            onScroll(pos) {
+              waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+            },
+            onReachBottom() {
+              if (loadedMore) {
+                scrollStore.finishLoadingMore();
+                return;
+              }
+              loadedMore = true;
+              const newItems = generateDownloads(10);
+              waterfall.methods.appendItems(newItems);
+              totalItemCount += 10;
+              totalCount.as(totalItemCount);
+              scrollStore.finishLoadingMore();
+            },
+          });
+
+          function handleUnshift() {
+            const count = 5;
+            const newItems = generateDownloads(count);
+            waterfall.methods.unshiftItems(newItems);
+            totalItemCount += count;
+            totalCount.as(totalItemCount);
+            // Adjust scroll position: each prepended item adds its height + gutter
+            const addedHeight = count * (ITEM_HEIGHT + GUTTER);
+            scrollStore.addScrollTop(addedHeight);
+          }
+
+          return View(
+            {
+              class: cn([
+                "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+              ]),
+            },
+            [
+              // Header
+              View(
+                {
+                  class: cn([
+                    "flex items-center justify-between px-3 py-2.5",
+                    "border-b border-zinc-200 dark:border-zinc-800",
+                    "bg-zinc-50 dark:bg-zinc-900",
+                  ]),
+                },
+                [
+                  View(
+                    {
+                      class: cn([
+                        "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                      ]),
+                    },
+                    [
+                      Txt("Gutter Test"),
+                      Txt(computed(totalCount, (c) => ` (${c})`)),
+                    ],
+                  ),
+                  Button(
+                    {
+                      size: "sm",
+                      variant: "outline",
+                      store: new Timeless.ui.ButtonCore({
+                        onClick() {
+                          handleUnshift();
+                        },
+                      }),
+                    },
+                    ["+ Prepend 5"],
+                  ),
+                ],
+              ),
+              // ScrollView + Waterfall
+              View({ class: "h-[300px]" }, [
+                ScrollView(
+                  {
+                    store: scrollStore,
+                    class: "bg-zinc-100 dark:bg-zinc-900",
+                  },
+                  [
+                    Waterfall({
+                      store: waterfall,
+                      class:
+                        "bg-zinc-100 dark:bg-zinc-900 !overflow-visible !h-auto px-2 pt-2",
+                      /** @param {{id: number; name: string; size: number}} task */
+                      render(task) {
+                        return View(
+                          {
+                            class: cn([
+                              "flex items-center gap-3 px-3 py-2.5",
+                              "bg-white dark:bg-zinc-950",
+                              "rounded-lg",
+                              "shadow-sm",
+                            ]),
+                          },
+                          [
+                            View(
+                              {
+                                class: cn([
+                                  "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                  "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
+                                ]),
+                              },
+                              [
+                                (() => {
+                                  const ext = task.name
+                                    .split(".")
+                                    .pop()
+                                    .toUpperCase();
+                                  return ext.length <= 4 ? ext : "FILE";
+                                })(),
+                              ],
+                            ),
+                            View({ class: "flex-1 min-w-0" }, [
+                              View(
+                                {
+                                  class:
+                                    "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                                },
+                                [`#${task.id} ${task.name}`],
+                              ),
+                              View(
+                                {
+                                  class: "mt-0.5 text-xs text-zinc-400",
+                                },
+                                [formatSize(task.size)],
+                              ),
+                            ]),
+                            View(
+                              {
+                                class:
+                                  "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                              },
+                              ["Done"],
+                            ),
+                          ],
+                        );
+                      },
+                    }),
+                    // View(
+                    //   {
+                    //     class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                    //   },
+                    //   [Txt("Scroll to bottom to load more")],
+                    // ),
+                  ],
+                ),
+              ]),
+            ],
+          );
+        })(),
+      ]),
+      Item("Clear Downloads", [
+        (() => {
+          const ITEM_HEIGHT = 56;
+          let nextId = 1;
+
+          const fileNames = [
+            "project-archive.zip",
+            "design-assets.psd",
+            "video-tutorial.mp4",
+            "database-backup.sql",
+            "photo-gallery.jpg",
+            "report-2024.pdf",
+            "music-collection.mp3",
+            "source-code.tar.gz",
+          ];
+
+          function generateDownloads(count) {
+            return Array.from({ length: count }, () => {
+              const id = nextId++;
+              return {
+                id,
+                name: fileNames[(id - 1) % fileNames.length],
+                size: Math.floor(Math.random() * 500000000) + 1000000,
+                status: "completed",
+                progress: 100,
+                height: ITEM_HEIGHT,
+              };
+            });
+          }
+
+          const waterfall = new Timeless.ui.WaterfallModel({
+            column: 1,
+            size: 10,
+            buffer: 3,
+            gutter: 0,
+          });
+
+          let totalItemCount = 20;
+          waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+          const totalCount = ref(totalItemCount);
+
+          const scrollStore = new Timeless.ui.ScrollViewCore({
+            onScroll(pos) {
+              waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+            },
+            onReachBottom() {
+              const newItems = generateDownloads(10);
+              waterfall.methods.appendItems(newItems);
+              totalItemCount += 10;
+              totalCount.as(totalItemCount);
+              scrollStore.finishLoadingMore();
+            },
+          });
+
+          function handleClear() {
+            waterfall.methods.cleanColumns();
+            totalItemCount = 0;
+            totalCount.as(0);
+          }
+
+          function handleReload() {
+            waterfall.methods.cleanColumns();
+            nextId = 1;
+            totalItemCount = 20;
+            waterfall.methods.appendItems(generateDownloads(totalItemCount));
+            totalCount.as(totalItemCount);
+          }
+
+          return View(
+            {
+              class: cn([
+                "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+              ]),
+            },
+            [
+              // Header
+              View(
+                {
+                  class: cn([
+                    "flex items-center justify-between px-3 py-2.5",
+                    "border-b border-zinc-200 dark:border-zinc-800",
+                    "bg-zinc-50 dark:bg-zinc-900",
+                  ]),
+                },
+                [
+                  View(
+                    {
+                      class: cn([
+                        "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                      ]),
+                    },
+                    [
+                      Txt("Downloads"),
+                      Txt(computed(totalCount, (c) => ` (${c})`)),
+                    ],
+                  ),
+                  View({ class: "flex items-center gap-1" }, [
+                    Button(
+                      {
+                        size: "sm",
+                        variant: "outline",
+                        store: new Timeless.ui.ButtonCore({
+                          onClick() {
+                            handleReload();
+                          },
+                        }),
+                      },
+                      ["Reload"],
+                    ),
+                    Button(
+                      {
+                        size: "sm",
+                        variant: "ghost",
+                        store: new Timeless.ui.ButtonCore({
+                          onClick() {
+                            handleClear();
+                          },
+                        }),
+                      },
+                      ["Clear"],
+                    ),
+                  ]),
+                ],
+              ),
+              // ScrollView + Waterfall
+              View({ class: "h-[300px]" }, [
+                ScrollView(
+                  {
+                    store: scrollStore,
+                    class: "bg-white dark:bg-zinc-950",
+                  },
+                  [
+                    Waterfall({
+                      store: waterfall,
+                      class:
+                        "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
+                      /** @param {{id: number; name: string; size: number}} task */
+                      render(task) {
+                        return View(
+                          {
+                            class: cn([
+                              "flex items-center gap-3 px-3 py-2.5",
+                              "border-b border-zinc-100 dark:border-zinc-800",
+                            ]),
+                          },
+                          [
+                            View(
+                              {
+                                class: cn([
+                                  "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                ]),
+                              },
+                              [
+                                (() => {
+                                  const ext = task.name
+                                    .split(".")
+                                    .pop()
+                                    .toUpperCase();
+                                  return ext.length <= 4 ? ext : "FILE";
+                                })(),
+                              ],
+                            ),
+                            View({ class: "flex-1 min-w-0" }, [
+                              View(
+                                {
+                                  class:
+                                    "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                                },
+                                [`#${task.id} ${task.name}`],
+                              ),
+                              View(
+                                {
+                                  class: "mt-0.5 text-xs text-emerald-500",
+                                },
+                                [formatSize(task.size)],
+                              ),
+                            ]),
+                            View(
+                              {
+                                class:
+                                  "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                              },
+                              ["Done"],
+                            ),
+                          ],
+                        );
+                      },
+                    }),
+                    View(
+                      {
+                        class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                      },
+                      [Txt("Scroll to bottom to load more")],
+                    ),
+                  ],
+                ),
+              ]),
+            ],
+          );
+        })(),
+      ]),
     ]),
     Section("Download List", [
       Item("Real-world Scenario", [
