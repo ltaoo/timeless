@@ -5,6 +5,7 @@
     "moduleResolution": "node",
     "checkJs": true,
     "allowJs": true,
+    "types": ["@timeless/dev"],
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
@@ -17,7 +18,6 @@
   "include": [
     "src/**/*.js",
     "types/index.d.ts",
-    "types/global.d.ts",
     "types/timeless.umd.d.ts",
     "types/prosemirror.d.ts",
     "../web-vue/example-weui.js"

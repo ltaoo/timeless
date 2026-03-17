@@ -42,7 +42,7 @@ export function Sheet(
     store: DialogCore;
     side?: "right" | "top" | "bottom" | "left";
   },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, side = "right", ...rest } = props;
   const state_ = refobj(store.state);
@@ -52,17 +52,15 @@ export function Sheet(
   });
 
   return SheetPrimitive.Root({ store }, [
-    SheetPrimitive.Overlay(
-      {
-        store,
-        class: computed(state_, (d) => {
-          const baseClass = "fixed inset-0 z-50 bg-black/80";
-          const enterClass = d.enter ? "animate-in fade-in duration-300" : "";
-          const exitClass = d.exit ? "animate-out fade-out duration-300" : "";
-          return [baseClass, enterClass, exitClass].filter(Boolean).join(" ");
-        }),
-      },
-    ),
+    SheetPrimitive.Overlay({
+      store,
+      class: computed(state_, (d) => {
+        const baseClass = "fixed inset-0 z-50 bg-black/80";
+        const enterClass = d.enter ? "animate-in fade-in duration-300" : "";
+        const exitClass = d.exit ? "animate-out fade-out duration-300" : "";
+        return [baseClass, enterClass, exitClass].filter(Boolean).join(" ");
+      }),
+    }),
     View(
       {
         class: `fixed z-50 ${WRAPPER_CLASSES[side]}`,

@@ -1,0 +1,16 @@
+{
+  "name": "@timeless/dev",
+  "version": "1.0.0",
+  "type": "module",
+  "types": "./global.d.ts",
+  "exports": {
+    ".": { "types": "./global.d.ts" },
+    "./eslint": "./eslint.js"
+  },
+  "scripts": {
+    "generate": "npx tsx generate.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

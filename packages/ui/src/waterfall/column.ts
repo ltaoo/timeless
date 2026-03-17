@@ -37,6 +37,44 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
     }
     methods.update(range);
   }
+
+  /** 初始化固定数量的槽位 */
+  function _initSlots() {
+    const slotCount = _size + 2 * _buffer_size;
+    for (let i = 0; i < slotCount; i++) {
+      const slot = WaterfallCellModel<T>({
+        uid: -1,
+        height: 0,
+        payload: {} as T,
+        slotId: `slot-col${_index}-${i}`,
+      });
+      slot.methods.unbind();
+      // 槽位的高度变化需要转发给当前绑定的数据 Cell
+      slot.onHeightChange(([original_height, height_difference]) => {
+        if (!slot.state.bound || slot.state.dataId === undefined) {
+          return;
+        }
+        // 找到对应的数据 Cell 并更新其高度
+        const dataCell = _$total_items.find(
+          (v) => (v.state.id ?? v.uid) === slot.state.dataId,
+        );
+        if (dataCell) {
+          dataCell.methods.updateHeight(slot.state.height);
+          const idx = _$total_items.indexOf(dataCell);
+          if (idx !== -1) {
+            _dirty_from = Math.min(_dirty_from, idx + 1);
+          }
+        }
+        _height += height_difference;
+        bus.emit(Events.HeightChange, _height);
+        bus.emit(Events.CellUpdate, { $item: slot });
+        methods.refresh();
+      });
+      _slots.push(slot);
+      _freeSlots.push(slot);
+    }
+  }
+
   const methods = {
     refresh() {
       bus.emit(Events.StateChange, { ..._state });
@@ -68,13 +106,22 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
         $item.methods.setTop(newTop);
       }
       _dirty_from = Infinity;
+      // 同步已绑定槽位的 top
+      _syncBoundSlotTops();
     },
     /**
      * 放置一个 item 到列中
      */
     appendItem($item: WaterfallCellModel<T>) {
       $item.onHeightChange(([original_height, height_difference]) => {
-        const idx = _$total_items.findIndex((v) => v.id === $item.id);
+        const dataId = ($item.state as any).id ?? $item.uid;
+        // 找到绑定了此数据的槽位，同步高度
+        const boundSlot = _slotBindings.get(_dataIdStr(dataId));
+        if (boundSlot) {
+          // 槽位高度跟随数据 Cell
+          // 不需要额外操作，rebind 时会同步
+        }
+        const idx = _$total_items.findIndex((v) => v === $item);
         if (idx !== -1) {
           _dirty_from = Math.min(_dirty_from, idx + 1);
         }
@@ -86,35 +133,38 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
         );
         _height += height_difference;
         bus.emit(Events.HeightChange, _height);
-        bus.emit(Events.CellUpdate, {
-          $item,
-        });
         methods.refresh();
       });
       $item.onTopChange(() => {
-        bus.emit(Events.CellUpdate, {
-          $item,
-        });
+        // 同步绑定的槽位 top
+        const dataId = ($item.state as any).id ?? $item.uid;
+        const boundSlot = _slotBindings.get(_dataIdStr(dataId));
+        if (boundSlot) {
+          boundSlot.methods.setTop($item.state.top);
+        }
       });
       const idx = _$total_items.length;
-      // $item.methods.setIndex(idx);
       $item.methods.setColumnIdx(_index);
       _height += $item.state.height + (_$total_items.length > 0 ? _gutter : 0);
       _$total_items.push($item);
       const $prev = _$total_items[idx - 1];
-      // console.log(
-      //   "[DOMAIN]waterfall/column - append item",
-      //   idx,
-      //   $prev?.state.top,
-      //   $prev?.state.height,
-      //   $prev?.state.top + $prev?.state.height + _gutter
-      // );
       if ($prev) {
         $item.methods.setTop($prev.state.top + $prev.state.height + _gutter);
       }
-      _$items = _$total_items.slice(_start, _end + _buffer_size);
+      // 如果新 item 落入当前可见范围，绑定到空闲槽位
+      if (idx >= _start && idx < _end && _freeSlots.length > 0) {
+        const slot = _freeSlots.pop()!;
+        const dataId = ($item.state as any).id ?? $item.uid;
+        slot.methods.rebind({
+          payload: $item.state.payload,
+          uid: $item.uid,
+          dataId,
+          top: $item.state.top,
+          height: $item.state.height,
+        });
+        _slotBindings.set(_dataIdStr(dataId), slot);
+      }
       bus.emit(Events.HeightChange, _height);
-      // bus.emit(Events.StateChange, _state);
     },
     /**
      * 往顶部插入一个 item 到列中
@@ -130,55 +180,72 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
           _dirty_from = Math.min(_dirty_from, idx + 1);
         }
       });
-      $item.onTopChange(() => {});
-      const idx = _$total_items.length;
+      $item.onTopChange(() => {
+        const dataId = ($item.state as any).id ?? $item.uid;
+        const boundSlot = _slotBindings.get(_dataIdStr(dataId));
+        if (boundSlot) {
+          boundSlot.methods.setTop($item.state.top);
+        }
+      });
       $item.methods.setColumnIdx(_index);
       _height += $item.height + (_$total_items.length > 0 ? _gutter : 0);
       _$total_items.unshift($item);
       // 新 item 插入到头部，从 index 1 开始所有 top 都需要重算
       _dirty_from = Math.min(_dirty_from, 1);
       methods.recomputeTops();
-      // 更新可见列表，与 appendItem 保持一致
-      _$items = _$total_items.slice(_start, _end + _buffer_size);
+      // 重新计算可见范围并 rebind
+      methods.update({ start: _start, end: Math.min(_start + _size + _buffer_size, _$total_items.length) });
       bus.emit(Events.HeightChange, _height);
       methods.refresh();
     },
     findItemById(id: number) {
-      return _$total_items.find((v) => v.id === id);
+      return _$total_items.find((v) => (v.state as any).id === id);
     },
     deleteCell($item: WaterfallCellModel<T>) {
-      const idx = _$total_items.findIndex((v) => v.id === $item.id);
+      const dataId = ($item.state as any).id ?? $item.uid;
+      const idx = _$total_items.findIndex((v) => v === $item);
       if (idx === -1) {
         return;
       }
-      const $backup = _$total_items[_end];
+      // 如果被删除的 Cell 当前绑定了某个槽位，先 unbind
+      const boundSlot = _slotBindings.get(_dataIdStr(dataId));
+      if (boundSlot) {
+        boundSlot.methods.unbind();
+        _slotBindings.delete(_dataIdStr(dataId));
+        _freeSlots.push(boundSlot);
+      }
       const height_difference = $item.height + (_$total_items.length > 1 ? _gutter : 0);
       _height -= height_difference;
       _$total_items = remove_arr_item(_$total_items, idx);
       // 删除后，从该位置开始所有后续 item 的 top 需要重算
       _dirty_from = Math.min(_dirty_from, idx);
-      const idx2 = _$items.findIndex((v) => v.id === $item.id);
-      if (idx2 !== -1) {
-        _$items = remove_arr_item(_$items, idx2);
-        if ($backup) {
-          _$items.push($backup);
-        }
-      }
+      methods.recomputeTops();
+      // 重新计算可见范围并 rebind 替补 Cell
+      const range = methods.calcVisibleRange(_scroll.scrollTop);
+      methods.update(range);
       methods.refresh();
     },
     clean() {
-      _$items = [];
+      // unbind 所有槽位
+      for (const [key, slot] of _slotBindings) {
+        slot.methods.unbind();
+        _freeSlots.push(slot);
+      }
+      _slotBindings.clear();
       _$total_items = [];
       _height = 0;
       _dirty_from = Infinity;
+      _start = 0;
+      _end = _size + _buffer_size;
       bus.emit(Events.StateChange, { ..._state });
     },
     resetRange() {
       _start = 0;
       _end = _size + _buffer_size;
-      _$items = _$total_items.slice(_start, _end);
+      // 重新计算范围并 rebind 所有槽位
+      const range = { start: _start, end: Math.min(_end, _$total_items.length) };
+      methods.update(range);
       methods.refresh();
-      // methods.calcVisibleRange(0);
     },
     calcVisibleRange(scroll_top: number) {
       // 先批量重算脏区间的 top，保证二分查找数据正确
@@ -188,27 +255,7 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
         scroll_top,
         _start,
         _end,
-        _$items,
       );
-      // 找中点需要遍历几万个元素，不是最佳方案
-      // const $middle_item = (() => {
-      //   return _$total_items.find(($v) => {
-      //     console.log(vvv, [$v.state.top - 100, $v.state.top, $v.state.top + 100]);
-      //     return inRange(vvv, [$v.state.top - 100, $v.state.top + 100]);
-      //   });
-      // })();
-      // console.log($middle_item?.idx);
-
-      // const items = _$total_items;
-      // const $cur_first = _$items[0];
-      // if (!$cur_first) {
-      //   return {
-      //     start: _start,
-      //     end: _end,
-      //   };
-      // }
-      // let items_height_total = $cur_first.state.top;
-      // console.log("before", this.range, start, end);
       let start = _start;
       let end = _end;
       // 二分查找，快速定位第一个 top >= scroll_top 的元素
@@ -232,7 +279,6 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
         start = found;
         end = start + _size;
       })();
-      //     const count = this.buffer_size;
       console.log(
         "before Math.max",
         [start, start - _buffer_size],
@@ -249,20 +295,84 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
         "[DOMAIN]waterfall/column - update case range is changed",
         range,
       );
-      const $visible_items = _$total_items.slice(range.start, range.end);
-      const item = $visible_items[0];
-      if (!item) {
-        return;
-      }
-      // _range = range;
       _start = range.start;
       _end = range.end;
-      _$items = $visible_items;
+
+      const newDataCells = _$total_items.slice(range.start, range.end);
+      if (newDataCells.length === 0 && _$total_items.length === 0) {
+        return;
+      }
+
+      // 构建新数据 Cell 的 dataId Set
+      const newDataIdSet = new Set<string>();
+      for (const cell of newDataCells) {
+        const dataId = (cell.state as any).id ?? cell.uid;
+        newDataIdSet.add(_dataIdStr(dataId));
+      }
+
+      // 计算 exitingCells（当前绑定但不在 newDataCells 中的）
+      const exitingKeys: string[] = [];
+      for (const [key, slot] of _slotBindings) {
+        if (!newDataIdSet.has(key)) {
+          exitingKeys.push(key);
+        }
+      }
+
+      // 对 exitingCells: slot.unbind()，归还到 _freeSlots
+      for (const key of exitingKeys) {
+        const slot = _slotBindings.get(key)!;
+        slot.methods.unbind();
+        _slotBindings.delete(key);
+        _freeSlots.push(slot);
+      }
+
+      // 计算 enteringCells（在 newDataCells 中但当前未绑定的）
+      for (const cell of newDataCells) {
+        const dataId = (cell.state as any).id ?? cell.uid;
+        const key = _dataIdStr(dataId);
+        if (!_slotBindings.has(key)) {
+          // 从 _freeSlots 取槽位
+          if (_freeSlots.length > 0) {
+            const slot = _freeSlots.pop()!;
+            slot.methods.rebind({
+              payload: cell.state.payload,
+              uid: cell.uid,
+              dataId,
+              top: cell.state.top,
+              height: cell.state.height,
+            });
+            _slotBindings.set(key, slot);
+          }
+        } else {
+          // stayingCells — 仅更新 top/height
+          const slot = _slotBindings.get(key)!;
+          slot.methods.setTop(cell.state.top);
+        }
+      }
+
       methods.refresh();
     },
     handleScrollForce,
     handleScroll: throttle(100, handleScrollForce),
   };
+
+  function _dataIdStr(dataId: number | string): string {
+    return String(dataId);
+  }
+
+  /** 同步已绑定槽位的 top 值 */
+  function _syncBoundSlotTops() {
+    for (const [key, slot] of _slotBindings) {
+      if (!slot.state.bound) continue;
+      const dataCell = _$total_items.find((v) => {
+        const did = (v.state as any).id ?? v.uid;
+        return _dataIdStr(did) === key;
+      });
+      if (dataCell) {
+        slot.methods.setTop(dataCell.state.top);
+      }
+    }
+  }
 
   /** 该列下标 */
   let _index = props.index ?? 0;
@@ -271,8 +381,13 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
   let _width = 0;
   let _innerTop = 0;
   let _client_height = 0;
-  /** 显示的元素 */
-  let _$items: WaterfallCellModel<T>[] = [];
+  /** 固定槽位池 */
+  let _slots: WaterfallCellModel<T>[] = [];
+  /** 数据 dataId → 绑定的槽位 */
+  let _slotBindings = new Map<string, WaterfallCellModel<T>>();
+  /** 空闲槽位池 */
+  let _freeSlots: WaterfallCellModel<T>[] = [];
+  /** 完整数据列表 */
   let _$total_items: WaterfallCellModel<T>[] = [];
   /** 默认显示的数量 */
   let _size = props.size ?? 4;
@@ -281,11 +396,13 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
   /** 每个元素和下面元素的距离 */
   let _gutter = props.gutter ?? 0;
   let _scroll = { scrollTop: 0 };
-  // let _range = { start: 0, end: _size + _buffer_size };
   let _start = 0;
   let _end = _size + _buffer_size;
   /** 标记从哪个下标开始 top 需要重算，Infinity 表示干净 */
   let _dirty_from = Infinity;
+
+  // 初始化槽位
+  _initSlots();
 
   const _state = {
     get width() {
@@ -298,21 +415,18 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       return _size;
     },
     get items() {
-      return _$items.map((v) => {
+      return _slots.filter((v) => v.state.bound).map((v) => {
         return {
           ...v.state,
-          idx: _$total_items.indexOf(v),
         };
       });
     },
     get item_count() {
-      return _$items.length;
+      return _slotBindings.size;
     },
     get innerTop() {
       return _innerTop;
     },
-    //       visibleItems: this.totalItems,
-    //       range: this.range,
   };
 
   enum Events {
@@ -333,7 +447,7 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
   return {
     state: _state,
     get $cells() {
-      return _$items;
+      return _slots;
     },
     get range() {
       return {

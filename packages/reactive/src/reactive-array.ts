@@ -1,8 +1,51 @@
 import { set, has, get } from "./registry";
 import { refObject } from "./reactive-object";
-import { Subscriber, isClassName, isRef } from "./types";
+import { Subscriber, Ref, isClassName, isRef } from "./types";
 
-export function refArray<T>(items: T[], opt: Partial<{ key: any }> = {}) {
+export interface RefArray<T> extends Ref<T[]> {
+  key: any;
+  length: number;
+  get(idx: number): any;
+  set(idx: number, item: any): void;
+  splice(idx: number, dcount: number, ...items: any[]): any[];
+  insert(idx: number, ...items: any[]): number;
+  push(...items: any[]): number;
+  unshift(...items: any[]): number;
+  pop(): any;
+  shift(): any;
+  delete(idx: number): void;
+  remove(item: T): void;
+  as(items: T[] | ((cur: T[]) => T[])): void;
+  assign(items: T[]): void;
+  refresh(): void;
+  filter(predicate: (item: T, index: number, array: T[]) => boolean): any[];
+  includes(item: T): boolean;
+  reverse(): RefArray<T>;
+  sort(compareFn?: (a: T, b: T) => number): RefArray<T>;
+  fill(value: T, start?: number, end?: number): RefArray<T>;
+  copyWithin(target: number, start: number, end?: number): RefArray<T>;
+  concat(...items: (ConcatArray<T> | T)[]): T[];
+  join(separator?: string): string;
+  slice(start?: number, end?: number): any[];
+  indexOf(searchElement: T, fromIndex?: number): number;
+  lastIndexOf(searchElement: T, fromIndex?: number): number;
+  every(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): boolean;
+  some(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): boolean;
+  forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any): void;
+  map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
+  reduce(callbackfn: any, initialValue?: any): any;
+  reduceRight(callbackfn: any, initialValue?: any): any;
+  find(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): any;
+  findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): number;
+  entries(): IterableIterator<[number, T]>;
+  keys(): IterableIterator<number>;
+  values(): IterableIterator<T>;
+  flat(depth?: number): any[];
+  flatMap(callback: any, thisArg?: any): any[];
+  [Symbol.iterator](): Iterator<T>;
+}
+
+export function refArray<T>(items: T[], opt: Partial<{ key: any }> = {}): RefArray<T> {
   let _local_value = items;
   const deps: Subscriber[] = [];
   function notify(action: {

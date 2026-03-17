@@ -106,16 +106,22 @@ export function Cell(
 ): TimelessElement {
   const { store, ...rest } = props;
 
-  const top = ref(store.state.top);
-  const height = ref(store.state.height);
+  const cellStyle = ref({
+    top: store.state.top,
+    height: store.state.height,
+    bound: store.state.bound ?? true,
+  });
   store.onStateChange((v) => {
-    top.as(v.top);
-    height.as(v.height);
+    cellStyle.as({
+      top: v.top,
+      height: v.height,
+      bound: v.bound ?? true,
+    });
   });
 
-  const style = computed(top, (t) => {
-    const h = height.value;
-    return `position: absolute; top: ${t}px; height: ${h}px; width: 100%;`;
+  const style = computed(cellStyle, (s) => {
+    if (!s.bound) return 'display: none;';
+    return `position: absolute; top: ${s.top}px; height: ${s.height}px; width: 100%;`;
   });
 
   const view$ = View(

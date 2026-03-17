@@ -107,7 +107,7 @@ export function WaterfallModel<T extends Record<string, unknown>>(props: {
       }
       // _items.push(...createdItems);
       //     this.state.pendingItems.push(...createdItems);
-      methods.handleScroll(_scrollValues);
+      methods.handleScroll(_scrollValues, { force: true });
       console.log("[BIZ]Waterfall/waterfall - appendItems before StateChange", _state.columns[0].items);
       bus.emit(Events.StateChange, { ..._state });
       return createdItems;

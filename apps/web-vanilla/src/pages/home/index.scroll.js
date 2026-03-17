@@ -92,6 +92,12 @@ function formatSpeed(bytesPerSec) {
   return bytesPerSec + " B/s";
 }
 
+/**
+ *
+ * @param {object} props
+ * @param {{ name: string; status: string; size: number; speed?: number; progress: number }} props.task
+ * @returns
+ */
 function DownloadTaskItem(props) {
   const task = props.task;
 
@@ -262,7 +268,7 @@ function DownloadTaskItem(props) {
                         variant: "ghost",
                         store: new Timeless.ui.ButtonCore({
                           onClick() {
-                            registryGet(task).assign({
+                            getobj(task).assign({
                               status: "running",
                               speed: 1500000,
                             });
@@ -288,7 +294,7 @@ function DownloadTaskItem(props) {
                   variant: "ghost",
                   store: new Timeless.ui.ButtonCore({
                     onClick() {
-                      registryGet(task).assign({ status: "paused", speed: 0 });
+                      getobj(task).assign({ status: "paused", speed: 0 });
                     },
                   }),
                 },
@@ -583,11 +589,14 @@ export default function HomeIndexScrollViewExampleView() {
                               },
                               [
                                 (() => {
-                                  const ext = task.name
-                                    .split(".")
-                                    .pop()
-                                    .toUpperCase();
-                                  return ext.length <= 4 ? ext : "FILE";
+                                  if (task.name) {
+                                    const ext = task.name
+                                      .split(".")
+                                      .pop()
+                                      .toUpperCase();
+                                    return ext.length <= 4 ? ext : "FILE";
+                                  }
+                                  return "FILE";
                                 })(),
                               ],
                             ),
@@ -769,11 +778,14 @@ export default function HomeIndexScrollViewExampleView() {
                               },
                               [
                                 (() => {
-                                  const ext = task.name
-                                    .split(".")
-                                    .pop()
-                                    .toUpperCase();
-                                  return ext.length <= 4 ? ext : "FILE";
+                                  if (task.name) {
+                                    const ext = task.name
+                                      .split(".")
+                                      .pop()
+                                      .toUpperCase();
+                                    return ext.length <= 4 ? ext : "FILE";
+                                  }
+                                  return "FILE";
                                 })(),
                               ],
                             ),
@@ -965,11 +977,14 @@ export default function HomeIndexScrollViewExampleView() {
                               },
                               [
                                 (() => {
-                                  const ext = task.name
-                                    .split(".")
-                                    .pop()
-                                    .toUpperCase();
-                                  return ext.length <= 4 ? ext : "FILE";
+                                  if (task.name) {
+                                    const ext = task.name
+                                      .split(".")
+                                      .pop()
+                                      .toUpperCase();
+                                    return ext.length <= 4 ? ext : "FILE";
+                                  }
+                                  return "FILE";
                                 })(),
                               ],
                             ),
@@ -1168,11 +1183,14 @@ export default function HomeIndexScrollViewExampleView() {
                               },
                               [
                                 (() => {
-                                  const ext = task.name
-                                    .split(".")
-                                    .pop()
-                                    .toUpperCase();
-                                  return ext.length <= 4 ? ext : "FILE";
+                                  if (task.name) {
+                                    const ext = task.name
+                                      .split(".")
+                                      .pop()
+                                      .toUpperCase();
+                                    return ext.length <= 4 ? ext : "FILE";
+                                  }
+                                  return "FILE";
                                 })(),
                               ],
                             ),

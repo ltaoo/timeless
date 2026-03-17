@@ -26,7 +26,9 @@
       "Bash(ls /Users/mayfair/Documents/other/timeless/packages/reactive/dist/*.umd* /Users/mayfair/Documents/other/timeless/packages/headless/dist/*.umd* /Users/mayfair/Documents/other/timeless/packages/ui/dist/*.umd* /Users/mayfair/Documents/other/timeless/packages/kit/dist/*.umd* 2>&1)",
       "Bash(npx vite build)",
       "Bash(npx turbo:*)",
-      "Bash(ls /Users/mayfair/Documents/other/timeless/apps/web-vanilla/public/*.umd* 2>/dev/null | head -20)"
+      "Bash(ls /Users/mayfair/Documents/other/timeless/apps/web-vanilla/public/*.umd* 2>/dev/null | head -20)",
+      "Bash(cd /Users/mayfair/Documents/other/timeless/apps/web-vanilla && npx eslint src/pages/home/index.scroll.js 2>&1 | head -30)",
+      "Bash(npx eslint:*)"
     ]
   }
 }

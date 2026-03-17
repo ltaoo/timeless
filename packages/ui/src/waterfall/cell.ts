@@ -5,9 +5,26 @@ export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
   uid: number;
   height: number;
   payload: T;
+  slotId?: string;
 }) {
   const methods = {
     refresh() {
+      bus.emit(Events.StateChange, { ..._state });
+    },
+    rebind(p: { payload: T; uid: number; dataId: number | string; top: number; height: number }) {
+      _payload = p.payload;
+      _uid = p.uid;
+      _dataId = p.dataId;
+      _top = p.top;
+      _height = p.height;
+      _loaded = false;
+      _bound = true;
+      bus.emit(Events.Rebind, { payload: _payload });
+      bus.emit(Events.StateChange, { ..._state });
+    },
+    unbind() {
+      _bound = false;
+      _dataId = undefined;
       bus.emit(Events.StateChange, { ..._state });
     },
     /**
@@ -92,6 +109,12 @@ export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
   let _column_idx = 0;
   /** 该 item 定位 */
   let _position = { x: 0, y: 0 };
+  /** 槽位 ID（固定不变，作为 For 的 key） */
+  let _slotId = props.slotId;
+  /** 真实数据 ID，区别于作为槽位 key 的 _id */
+  let _dataId: number | string | undefined = undefined;
+  /** 槽位是否绑定了数据 */
+  let _bound = true;
 
   const _state = {
     get id() {
@@ -125,6 +148,15 @@ export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
     get payload() {
       return _payload;
     },
+    get bound() {
+      return _bound;
+    },
+    get dataId() {
+      return _dataId;
+    },
+    get slotId() {
+      return _slotId;
+    },
   };
 
   enum Events {
@@ -133,6 +165,7 @@ export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
     HeightChange,
     TopChange,
     Visible,
+    Rebind,
   }
   type TheTypesOfEvents = {
     [Events.StateChange]: typeof _state;
@@ -143,6 +176,7 @@ export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
     [Events.TopChange]: [number, number];
     [Events.HeightChange]: [number, number];
     [Events.Visible]: void;
+    [Events.Rebind]: { payload: T };
   };
 
   const bus = base<TheTypesOfEvents>();
@@ -151,7 +185,10 @@ export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
     state: _state,
     methods,
     get id() {
-      return _id;
+      return _slotId ?? _id;
+    },
+    get dataId() {
+      return _dataId;
     },
     get uid() {
       return _uid;
@@ -182,6 +219,10 @@ export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
      */
     onExposure(handler: Handler<TheTypesOfEvents[Events.Visible]>) {
       bus.on(Events.Visible, handler);
+    },
+    /** 监听槽位被 rebind 到新数据 */
+    onRebind(handler: Handler<TheTypesOfEvents[Events.Rebind]>) {
+      bus.on(Events.Rebind, handler);
     },
     /** 监听状态值改变 */
     onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {

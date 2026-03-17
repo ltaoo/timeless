@@ -8,6 +8,7 @@
     "dev": "node scripts/dev.js",
     "vanilla": "node scripts/vanilla.js",
     "test": "pnpm -r run test",
+    "generate:globals": "pnpm -C packages/globals run generate",
     "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules"
   },
   "devDependencies": {

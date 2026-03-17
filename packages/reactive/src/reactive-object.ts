@@ -6,6 +6,7 @@ export interface RefObject<T> extends Ref<T> {
   get(key: keyof T): any;
   delete(key: keyof T): void;
   as(nextObj: T | ((cur: T) => T)): void;
+  assign(updated: Partial<T>): void;
   refresh(): void;
 }
 

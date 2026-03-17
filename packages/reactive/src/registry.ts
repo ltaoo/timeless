@@ -1,4 +1,6 @@
 import { Ref } from "./types";
+import type { RefObject } from "./reactive-object";
+import type { RefArray } from "./reactive-array";
 
 const global_refs = new Map<any, Ref<any>>();
 export function release(ref: Ref<any>) {
@@ -12,4 +14,10 @@ export function has(v: any) {
 }
 export function get(v: any) {
   return global_refs.get(v);
+}
+export function getobj<T extends Record<string, any>>(v: any) {
+  return global_refs.get(v) as RefObject<T> | undefined;
+}
+export function getarr<T>(v: any) {
+  return global_refs.get(v) as RefArray<T> | undefined;
 }

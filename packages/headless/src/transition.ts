@@ -7,7 +7,7 @@ import { View, ViewChildren, ViewProps } from "./view";
 export function Transition(
   props: ViewProps & {
     store: PresenceCore;
-    animation?: { in: boolean; out: boolean };
+    animation?: { in: string; out: string };
   },
   children?: ViewChildren,
 ) {

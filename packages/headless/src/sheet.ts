@@ -7,7 +7,7 @@ import { Presence } from "./presence";
 
 export function Root(
   props: ViewProps & { store: DialogCore },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
 
@@ -25,7 +25,7 @@ export function Root(
 
 export function Overlay(
   props: ViewProps & { store: DialogCore },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
 
@@ -43,8 +43,11 @@ export function Overlay(
 }
 
 export function Content(
-  props: ViewProps & { store: DialogCore; side?: "right" | "top" | "bottom" | "left" },
-  children?: ViewChildren,
+  props: ViewProps & {
+    store: DialogCore;
+    side?: "right" | "top" | "bottom" | "left";
+  },
+  children: ViewChildren = [],
 ) {
   const { store, side = "right", ...rest } = props;
   return View(rest, children);
@@ -52,7 +55,7 @@ export function Content(
 
 export function Header(
   props: ViewProps & { store: DialogCore },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
   return View(rest, children);
@@ -60,7 +63,7 @@ export function Header(
 
 export function Title(
   props: ViewProps & { store: DialogCore },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
   return View(rest, children);
@@ -68,7 +71,7 @@ export function Title(
 
 export function Description(
   props: ViewProps & { store: DialogCore },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
   return View(rest, children);
@@ -76,7 +79,7 @@ export function Description(
 
 export function Close(
   props: ViewProps & { store: DialogCore },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
 
