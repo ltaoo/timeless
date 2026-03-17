@@ -1004,22 +1004,40 @@ export default function HomeIndexScrollViewExampleView() {
                               ),
                             ]),
                             View(
-                              {
-                                class:
-                                  "flex-shrink-0 text-xs text-emerald-500 font-medium",
-                              },
-                              ["Done"],
+                              { class: "flex-shrink-0 flex items-center gap-2" },
+                              [
+                                View(
+                                  {
+                                    class:
+                                      "text-xs text-emerald-500 font-medium",
+                                  },
+                                  ["Done"],
+                                ),
+                                h(
+                                  Button,
+                                  {
+                                    size: "sm",
+                                    variant: "ghost",
+                                    class:
+                                      "text-xs text-red-400 hover:text-red-600",
+                                    store: new Timeless.ui.ButtonCore({
+                                      onClick() {
+                                        waterfall.methods.deleteCell(
+                                          (v) => v.id === task.id,
+                                        );
+                                        totalItemCount -= 1;
+                                        totalCount.as(totalItemCount);
+                                      },
+                                    }),
+                                  },
+                                  ["Delete"],
+                                ),
+                              ],
                             ),
                           ],
                         );
                       },
                     }),
-                    // View(
-                    //   {
-                    //     class: cn(["py-3 text-center text-xs text-zinc-400"]),
-                    //   },
-                    //   [Txt("Scroll to bottom to load more")],
-                    // ),
                   ],
                 ),
               ]),
