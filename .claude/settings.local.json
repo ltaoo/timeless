@@ -28,7 +28,13 @@
       "Bash(npx turbo:*)",
       "Bash(ls /Users/mayfair/Documents/other/timeless/apps/web-vanilla/public/*.umd* 2>/dev/null | head -20)",
       "Bash(cd /Users/mayfair/Documents/other/timeless/apps/web-vanilla && npx eslint src/pages/home/index.scroll.js 2>&1 | head -30)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(for pkg:*)",
+      "Read(//Users/mayfair/Documents/other/timeless/packages/$pkg/**)",
+      "Bash(done)",
+      "Bash(cd /Users/mayfair/Documents/other/timeless/tools/registry && go mod init tools/registry 2>&1)",
+      "Bash(go build:*)",
+      "Bash(go vet:*)"
     ]
   }
 }
