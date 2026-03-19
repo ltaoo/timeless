@@ -45,6 +45,12 @@ export function refObject<T extends Record<string, any>>(obj: T | null) {
     get value() {
       return _v;
     },
+    isSame(v: T | null) {
+      return Object.is(_v, v);
+    },
+    isStrictEqual(v: T | null) {
+      return _v === v;
+    },
     set(key: keyof T, item: any) {
       let vv = item;
       if (_v && typeof item === "function") {

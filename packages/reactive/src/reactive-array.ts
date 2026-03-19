@@ -111,6 +111,12 @@ export function refArray<T>(items: T[], opt: Partial<{ key: any }> = {}): RefArr
     get value() {
       return _local_value;
     },
+    isSame(v: T[]) {
+      return Object.is(_local_value, v);
+    },
+    isStrictEqual(v: T[]) {
+      return _local_value === v;
+    },
     get length() {
       return _local_value.length;
     },

@@ -45,6 +45,12 @@ export function ref<T = any>(v: T) {
     eq(v: T) {
       return _local_value === v;
     },
+    isSame(v: T) {
+      return Object.is(_local_value, v);
+    },
+    isStrictEqual(v: T) {
+      return _local_value === v;
+    },
     as(value: T | ((cur: T) => T)) {
       if (typeof value === "function") {
         _local_value = (value as (cur: T) => T)(_local_value);

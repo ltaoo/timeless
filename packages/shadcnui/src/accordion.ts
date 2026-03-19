@@ -10,7 +10,7 @@ import {
 import { AccordionCore } from "@timeless/ui";
 
 type AccordionItem = {
-  title: string;
+  title: string | ViewChildren;
   content: ViewChildren;
 };
 
@@ -52,7 +52,7 @@ export function Accordion(
                     "flex w-full items-center justify-between py-4 font-medium transition-all cursor-pointer hover:underline",
                 },
                 [
-                  Txt(item.title),
+                  ...(typeof item.title === "string" ? [Txt(item.title)] : item.title),
                   AccordionPrimitive.Chevron(
                     {
                       store,
