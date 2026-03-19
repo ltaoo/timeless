@@ -1,7 +1,190 @@
-import { Ref, isRef, isClassName } from "@timeless/reactive";
-import { ViewProps, isElement } from "./view";
+import { Ref, isRef, isClassName, ClassNameRef } from "@timeless/reactive";
+import { isElement } from "./view";
 
-export function SVG(props: ViewProps = {}, children?: any) {
+type AttrValue = string | number | Ref<string> | Ref<number>;
+
+/** Props shared by all SVG elements (lifecycle, events, style, class) */
+interface SVGBaseProps {
+  style?: string | Ref<string>;
+  class?: string | Ref<string> | ClassNameRef;
+  dataset?: Record<string, string>;
+  id?: AttrValue;
+  tabindex?: AttrValue;
+  role?: string;
+  "aria-label"?: string;
+  "aria-hidden"?: "true" | "false";
+  "aria-describedby"?: string;
+  "aria-labelledby"?: string;
+  onMounted?(el: SVGElement): void;
+  beforeUnmounted?(): void;
+  onUnmounted?(): void;
+  onClick?(e: MouseEvent): void;
+  onPointerDown?(e: PointerEvent): void;
+  onPointerUp?(e: PointerEvent): void;
+  onPointerMove?(e: PointerEvent): void;
+  onMouseEnter?(e: MouseEvent): void;
+  onMouseLeave?(e: MouseEvent): void;
+  onFocus?(e: FocusEvent): void;
+  onBlur?(e: FocusEvent): void;
+}
+
+/** Common SVG presentation attributes */
+interface SVGPresentationAttrs {
+  fill?: AttrValue;
+  "fill-opacity"?: AttrValue;
+  "fill-rule"?: AttrValue;
+  stroke?: AttrValue;
+  "stroke-width"?: AttrValue;
+  "stroke-opacity"?: AttrValue;
+  "stroke-linecap"?: AttrValue;
+  "stroke-linejoin"?: AttrValue;
+  "stroke-dasharray"?: AttrValue;
+  "stroke-dashoffset"?: AttrValue;
+  opacity?: AttrValue;
+  transform?: AttrValue;
+  "clip-path"?: AttrValue;
+  "clip-rule"?: AttrValue;
+  mask?: AttrValue;
+  filter?: AttrValue;
+  visibility?: AttrValue;
+  display?: AttrValue;
+  "pointer-events"?: AttrValue;
+  cursor?: AttrValue;
+}
+
+export interface SVGProps extends SVGBaseProps, SVGPresentationAttrs {
+  viewBox?: AttrValue;
+  xmlns?: string;
+  width?: AttrValue;
+  height?: AttrValue;
+  x?: AttrValue;
+  y?: AttrValue;
+  preserveAspectRatio?: AttrValue;
+  overflow?: AttrValue;
+  color?: AttrValue;
+}
+
+export interface GProps extends SVGBaseProps, SVGPresentationAttrs {}
+
+export interface CircleProps extends SVGBaseProps, SVGPresentationAttrs {
+  cx?: AttrValue;
+  cy?: AttrValue;
+  r?: AttrValue;
+}
+
+export interface RectProps extends SVGBaseProps, SVGPresentationAttrs {
+  x?: AttrValue;
+  y?: AttrValue;
+  width?: AttrValue;
+  height?: AttrValue;
+  rx?: AttrValue;
+  ry?: AttrValue;
+}
+
+export interface PathProps extends SVGBaseProps, SVGPresentationAttrs {
+  d?: AttrValue;
+  pathLength?: AttrValue;
+}
+
+export interface LineProps extends SVGBaseProps, SVGPresentationAttrs {
+  x1?: AttrValue;
+  y1?: AttrValue;
+  x2?: AttrValue;
+  y2?: AttrValue;
+}
+
+export interface PolylineProps extends SVGBaseProps, SVGPresentationAttrs {
+  points?: AttrValue;
+}
+
+export interface PolygonProps extends SVGBaseProps, SVGPresentationAttrs {
+  points?: AttrValue;
+}
+
+export interface TextProps extends SVGBaseProps, SVGPresentationAttrs {
+  x?: AttrValue;
+  y?: AttrValue;
+  dx?: AttrValue;
+  dy?: AttrValue;
+  "text-anchor"?: AttrValue;
+  "dominant-baseline"?: AttrValue;
+  "font-size"?: AttrValue;
+  "font-family"?: AttrValue;
+  "font-weight"?: AttrValue;
+  "font-style"?: AttrValue;
+  "letter-spacing"?: AttrValue;
+  "word-spacing"?: AttrValue;
+  "text-decoration"?: AttrValue;
+  textLength?: AttrValue;
+  lengthAdjust?: AttrValue;
+  rotate?: AttrValue;
+}
+
+export interface DefsProps extends SVGBaseProps {}
+
+export interface SymbolProps extends SVGBaseProps {
+  viewBox?: AttrValue;
+}
+
+export interface UseProps extends SVGBaseProps, SVGPresentationAttrs {
+  href?: AttrValue;
+  x?: AttrValue;
+  y?: AttrValue;
+  width?: AttrValue;
+  height?: AttrValue;
+}
+
+export interface LinearGradientProps extends SVGBaseProps {
+  x1?: AttrValue;
+  y1?: AttrValue;
+  x2?: AttrValue;
+  y2?: AttrValue;
+  gradientUnits?: AttrValue;
+  gradientTransform?: AttrValue;
+  spreadMethod?: AttrValue;
+}
+
+export interface RadialGradientProps extends SVGBaseProps {
+  cx?: AttrValue;
+  cy?: AttrValue;
+  r?: AttrValue;
+  fx?: AttrValue;
+  fy?: AttrValue;
+  gradientUnits?: AttrValue;
+  gradientTransform?: AttrValue;
+  spreadMethod?: AttrValue;
+}
+
+export interface StopProps extends SVGBaseProps {
+  offset?: AttrValue;
+  "stop-color"?: AttrValue;
+  "stop-opacity"?: AttrValue;
+}
+
+export interface MaskProps extends SVGBaseProps {
+  x?: AttrValue;
+  y?: AttrValue;
+  width?: AttrValue;
+  height?: AttrValue;
+  maskUnits?: AttrValue;
+  maskContentUnits?: AttrValue;
+}
+
+export interface ClipPathProps extends SVGBaseProps {
+  clipPathUnits?: AttrValue;
+}
+
+export interface EllipseProps extends SVGBaseProps, SVGPresentationAttrs {
+  cx?: AttrValue;
+  cy?: AttrValue;
+  rx?: AttrValue;
+  ry?: AttrValue;
+}
+
+type InternalSVGProps = SVGBaseProps &
+  SVGPresentationAttrs & { type?: string } & Record<string, any>;
+
+function createSVGElement(props: InternalSVGProps = {}, children?: any) {
   const {
     type = "svg",
     style,
@@ -10,6 +193,11 @@ export function SVG(props: ViewProps = {}, children?: any) {
     onMounted,
     onUnmounted,
     onClick,
+    onPointerDown,
+    onPointerUp,
+    onPointerMove,
+    onMouseEnter,
+    onMouseLeave,
     onFocus,
     onBlur,
     beforeUnmounted,
@@ -126,6 +314,31 @@ export function SVG(props: ViewProps = {}, children?: any) {
           if (onBlur) onBlur(event);
         });
       }
+      if (onPointerDown) {
+        $elm.addEventListener("pointerdown", function (event) {
+          if (onPointerDown) onPointerDown(event);
+        });
+      }
+      if (onPointerUp) {
+        $elm.addEventListener("pointerup", function (event) {
+          if (onPointerUp) onPointerUp(event);
+        });
+      }
+      if (onPointerMove) {
+        $elm.addEventListener("pointermove", function (event) {
+          if (onPointerMove) onPointerMove(event);
+        });
+      }
+      if (onMouseEnter) {
+        $elm.addEventListener("mouseenter", function (event) {
+          if (onMouseEnter) onMouseEnter(event);
+        });
+      }
+      if (onMouseLeave) {
+        $elm.addEventListener("mouseleave", function (event) {
+          if (onMouseLeave) onMouseLeave(event);
+        });
+      }
 
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
@@ -157,70 +370,80 @@ export function SVG(props: ViewProps = {}, children?: any) {
   };
 }
 
-export function G(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "g" }, children);
+export function SVG(props: SVGProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "svg" } as InternalSVGProps, children);
 }
 
-export function Circle(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "circle" }, children);
+export function G(props: GProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "g" } as InternalSVGProps, children);
 }
 
-export function Rect(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "rect" }, children);
+export function Circle(props: CircleProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "circle" } as InternalSVGProps, children);
 }
 
-export function Path(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "path" }, children);
+export function Rect(props: RectProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "rect" } as InternalSVGProps, children);
 }
 
-export function Line(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "line" }, children);
+export function Path(props: PathProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "path" } as InternalSVGProps, children);
 }
 
-export function Polyline(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "polyline" }, children);
+export function Line(props: LineProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "line" } as InternalSVGProps, children);
 }
 
-export function Polygon(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "polygon" }, children);
+export function Polyline(props: PolylineProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "polyline" } as InternalSVGProps, children);
 }
 
-export function Text(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "text" }, children);
+export function Polygon(props: PolygonProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "polygon" } as InternalSVGProps, children);
 }
 
-export function Defs(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "defs" }, children);
+export function Text(props: TextProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "text" } as InternalSVGProps, children);
 }
 
-export function Symbol(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "symbol" }, children);
+export function Defs(props: DefsProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "defs" } as InternalSVGProps, children);
 }
 
-export function Use(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "use" }, children);
+export function Symbol(props: SymbolProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "symbol" } as InternalSVGProps, children);
 }
 
-export function LinearGradient(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "linearGradient" }, children);
+export function Use(props: UseProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "use" } as InternalSVGProps, children);
 }
 
-export function RadialGradient(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "radialGradient" }, children);
+export function LinearGradient(props: LinearGradientProps = {}, children?: any) {
+  return createSVGElement(
+    { ...props, type: "linearGradient" } as InternalSVGProps,
+    children,
+  );
 }
 
-export function Stop(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "stop" }, children);
+export function RadialGradient(props: RadialGradientProps = {}, children?: any) {
+  return createSVGElement(
+    { ...props, type: "radialGradient" } as InternalSVGProps,
+    children,
+  );
 }
 
-export function Mask(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "mask" }, children);
+export function Stop(props: StopProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "stop" } as InternalSVGProps, children);
 }
 
-export function ClipPath(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "clipPath" }, children);
+export function Mask(props: MaskProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "mask" } as InternalSVGProps, children);
 }
 
-export function Ellipse(props: ViewProps = {}, children?: any) {
-  return SVG({ ...props, type: "ellipse" }, children);
+export function ClipPath(props: ClipPathProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "clipPath" } as InternalSVGProps, children);
+}
+
+export function Ellipse(props: EllipseProps = {}, children?: any) {
+  return createSVGElement({ ...props, type: "ellipse" } as InternalSVGProps, children);
 }

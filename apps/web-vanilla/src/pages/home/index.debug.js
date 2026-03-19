@@ -74,7 +74,7 @@ export default function OverlayView() {
         ui.view$.finishLoadingMore();
       },
     }),
-    waterfall$: new Timeless.ui.WaterfallModel({
+    waterfall$: Timeless.ui.WaterfallModel({
       column: 1,
       size: 10,
       buffer: 3,

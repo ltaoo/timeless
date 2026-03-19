@@ -172,17 +172,13 @@ export default function HomeLayoutView(props) {
                     },
                   },
                   [
-                    View(
-                      {
-                        type: "img",
-                        class: "w-full h-full object-cover",
-                        onMounted($elm) {
-                          $elm.src = "public/avatar.jpeg";
-                          $elm.alt = "User Avatar";
-                        },
+                    Img({
+                      class: "w-full h-full object-cover",
+                      onMounted($elm) {
+                        $elm.src = "public/avatar.jpeg";
+                        $elm.alt = "User Avatar";
                       },
-                      [],
-                    ),
+                    }),
                   ],
                 ),
               ],

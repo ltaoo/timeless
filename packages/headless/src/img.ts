@@ -5,8 +5,20 @@ import { ViewProps } from "./view";
 export interface ImgProps extends Omit<ViewProps, "type" | "as"> {
   src?: string | Ref<string>;
   alt?: string | Ref<string>;
+  width?: number | string | Ref<number | string>;
+  height?: number | string | Ref<number | string>;
+  loading?: "lazy" | "eager" | Ref<string>;
+  decoding?: "async" | "sync" | "auto" | Ref<string>;
+  crossOrigin?: "anonymous" | "use-credentials" | "" | Ref<string>;
+  srcset?: string | Ref<string>;
+  sizes?: string | Ref<string>;
+  referrerPolicy?: ReferrerPolicy | Ref<string>;
+  fetchPriority?: "high" | "low" | "auto" | Ref<string>;
+  useMap?: string | Ref<string>;
+  isMap?: boolean;
   onLoad?(e: Event): void;
   onError?(e: Event): void;
+  onMounted?: ($elm: HTMLImageElement) => void;
 }
 
 export function Img(props: ImgProps = {}) {
@@ -34,6 +46,7 @@ export function Img(props: ImgProps = {}) {
     onDragLeave,
     onDrop,
     draggable,
+    isMap,
     onLoad,
     onError,
     ...rest
@@ -241,6 +254,10 @@ export function Img(props: ImgProps = {}) {
         $elm.addEventListener("drop", function (event: DragEvent) {
           if (onDrop) onDrop(event);
         });
+      }
+
+      if (isMap) {
+        $elm.setAttribute("ismap", "");
       }
 
       if (onLoad) {

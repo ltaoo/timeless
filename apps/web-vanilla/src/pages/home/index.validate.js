@@ -105,9 +105,7 @@ export default function FormValidateView() {
         }),
         use_https: new Timeless.ui.SingleFieldCore({
           label: "使用 HTTPS",
-          input: new Timeless.ui.CheckboxCore({
-            defaultValue: false,
-          }),
+          input: new Timeless.ui.CheckboxCore({}),
         }),
       },
     }),

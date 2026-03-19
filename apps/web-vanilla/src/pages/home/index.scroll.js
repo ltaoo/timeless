@@ -502,7 +502,7 @@ export default function HomeIndexScrollViewExampleView() {
             });
           }
 
-          const waterfall = new Timeless.ui.WaterfallModel({
+          const waterfall = Timeless.ui.WaterfallModel({
             column: 1,
             size: 10,
             buffer: 3,
@@ -669,7 +669,7 @@ export default function HomeIndexScrollViewExampleView() {
             });
           }
 
-          const waterfall = new Timeless.ui.WaterfallModel({
+          const waterfall = Timeless.ui.WaterfallModel({
             column: 1,
             size: 10,
             buffer: 3,
@@ -859,7 +859,7 @@ export default function HomeIndexScrollViewExampleView() {
             });
           }
 
-          const waterfall = new Timeless.ui.WaterfallModel({
+          const waterfall = Timeless.ui.WaterfallModel({
             column: 1,
             size: 10,
             buffer: 3,
@@ -1075,7 +1075,7 @@ export default function HomeIndexScrollViewExampleView() {
             });
           }
 
-          const waterfall = new Timeless.ui.WaterfallModel({
+          const waterfall = Timeless.ui.WaterfallModel({
             column: 1,
             size: 10,
             buffer: 3,
