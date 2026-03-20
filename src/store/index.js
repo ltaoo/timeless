@@ -174,29 +174,19 @@ export const app = new Timeless.ApplicationModel({
     const { pathname, query } = router;
     const route = routesWithPathname[pathname];
     console.log("[Store] beforeReady", pathname, route, routesWithPathname);
-    if (!route) {
-      history.push(notfoundRouteName, { replace: true });
-      return Timeless.Result.Err("not found");
-    }
-    // if (!route.options?.require?.includes("login")) {
-    //   if (!history.isLayout(route.name)) {
-    //     console.log("[Store] beforeReady push to fallback route", route.name);
-    //     history.push(route.name, query, { ignore: true });
-    //     return Timeless.Result.Ok(null);
+    // if (route.options?.require?.includes("login")) {
+    //   if (!user.isLogin) {
+    //     app.tip?.({ text: ["请先登录"] });
+    //     history.push("root.login", { redirect: route.pathname });
+    //     return Timeless.Result.Err("need login");
     //   }
-    //   return Timeless.Result.Err("can't goto layout");
     // }
-    // if (!user.isLogin) {
-    //   app.tip?.({ text: ["请先登录"] });
-    //   history.push("root.login", { redirect: route.pathname });
-    //   return Timeless.Result.Err("need login");
-    // }
-    // if (!history.isLayout(route.name)) {
-    // }
+    if (!route || history.isRoot(route.name)) {
+      history.push(defaultRouteName, {}, { ignore: true });
+      return Timeless.Result.Ok(null);
+    }
     history.push(route.name, query, { ignore: true });
     return Timeless.Result.Ok(null);
-    // history.push(defaultRouteName, {}, { ignore: true });
-    // return Timeless.Result.Ok(null);
   },
 });
 Timeless.web.provide_app(app);

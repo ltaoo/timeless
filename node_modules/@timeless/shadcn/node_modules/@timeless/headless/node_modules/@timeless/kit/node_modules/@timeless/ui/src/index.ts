@@ -74,3 +74,4 @@ export * from "./form/field";
 export * from "./step";
 export * from "./resizable-panels";
 export * from "./tooltip";
+export * from "./shortcut";

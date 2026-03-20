@@ -306,11 +306,11 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       offsetY: this.offsetY,
     });
     if (this.reference === null || this.floating === null) {
-      console.log(
-        "[DEBUG-POPPER] place() early return - missing ref or floating",
-        this.reference?.$el ?? null,
-        this.floating?.$el ?? null,
-      );
+      // console.log(
+      //   "[DEBUG-POPPER] place() early return - missing ref or floating",
+      //   this.reference?.$el ?? null,
+      //   this.floating?.$el ?? null,
+      // );
       return;
     }
     const coords = await this.computePosition();

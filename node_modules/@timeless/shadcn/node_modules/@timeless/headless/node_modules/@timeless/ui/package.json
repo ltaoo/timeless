@@ -200,6 +200,11 @@
       "import": "./dist/select/index.esm.js",
       "require": "./dist/select/index.js"
     },
+    "./shortcut": {
+      "types": "./dist/shortcut/index.d.ts",
+      "import": "./dist/shortcut/index.esm.js",
+      "require": "./dist/shortcut/index.js"
+    },
     "./simple-select": {
       "types": "./dist/simple-select/index.d.ts",
       "import": "./dist/simple-select/index.esm.js",

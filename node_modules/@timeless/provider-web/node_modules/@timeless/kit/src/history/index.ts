@@ -655,6 +655,13 @@ export class HistoryCore<
     });
     return created.buildUrlWithPrefix(query);
   }
+  isRoot(name: K) {
+    const route = this.routes[name];
+    if (!route) {
+      return null;
+    }
+    return !route.parent;
+  }
   isLayout(name: K) {
     const route = this.routes[name];
     if (!route) {
