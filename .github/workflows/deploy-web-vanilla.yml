@@ -27,19 +27,24 @@ jobs:
         run: pnpm install
 
       - name: Build assets
-        run: node scripts/dev.js --build
+        run: pnpm build:dist
 
       - name: Setup Pages
         run: |
-          mkdir -p dist
-          cp apps/web-vanilla/index.html dist/
-          cp apps/web-vanilla/index.html dist/404.html
-          cp -r apps/web-vanilla/public dist/
-          cp -r apps/web-vanilla/src dist/
+          # Read version from packages/reactive/package.json
+          VERSION=$(node -p "require('./packages/reactive/package.json').version")
+          echo "VERSION=$VERSION"
+
+          # Copy dist/timeless/{version}/ -> apps/web-vanilla/public/timeless/{version}/
+          mkdir -p apps/web-vanilla/public/timeless/$VERSION
+          cp dist/timeless/$VERSION/* apps/web-vanilla/public/timeless/$VERSION/
+
+          # Add 404.html for SPA routing
+          cp apps/web-vanilla/index.html apps/web-vanilla/404.html
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./apps/web-vanilla
           publish_branch: docs

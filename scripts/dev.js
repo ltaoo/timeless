@@ -9,7 +9,14 @@ const packagesDir = path.join(rootDir, "packages");
 const playgroundDir = path.join(rootDir, "apps/web-vanilla");
 // const playgroundDir = path.join(rootDir, "apps/reactive-playground");
 const serverRoot = playgroundDir;
-const targetDir = path.join(playgroundDir, "public");
+
+// Read version from first build target's package.json
+const version = JSON.parse(
+  fs.readFileSync(path.join(packagesDir, "reactive", "package.json"), "utf-8")
+).version;
+
+const distDir = path.join(rootDir, "dist", "timeless", version);
+const publicDir = path.join(playgroundDir, "public", "timeless", version);
 
 // Map of package names to their artifact paths and destination filenames
 const artifacts = [
@@ -17,6 +24,11 @@ const artifacts = [
     pkg: "reactive",
     src: "packages/reactive/dist/timeless.reactive.umd.min.js",
     dest: "timeless.reactive.umd.min.js",
+  },
+  {
+    pkg: "utils",
+    src: "packages/utils/dist/timeless.utils.umd.min.js",
+    dest: "timeless.utils.umd.min.js",
   },
   {
     pkg: "ui",
@@ -66,20 +78,50 @@ const BUILD_TIMEOUT_MS = 120000; // 2 minutes timeout
 
 function copyArtifacts() {
   console.log("Copying artifacts...");
-  if (!fs.existsSync(targetDir)) {
-    fs.mkdirSync(targetDir, { recursive: true });
+
+  // Ensure both output directories exist
+  for (const dir of [distDir, publicDir]) {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
   }
 
+  // Also copy CSS files from each package's dist/
+  const cssFiles = [];
+  const pkgDirs = fs.readdirSync(packagesDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name);
+  for (const pkg of pkgDirs) {
+    const pkgDist = path.join(packagesDir, pkg, "dist");
+    if (fs.existsSync(pkgDist)) {
+      fs.readdirSync(pkgDist)
+        .filter((f) => f.endsWith(".css"))
+        .forEach((f) => cssFiles.push({ src: path.join(pkgDist, f), dest: f }));
+    }
+  }
+
+  // Copy JS artifacts
   artifacts.forEach((item) => {
     const srcPath = path.join(rootDir, item.src);
-    const destPath = path.join(targetDir, item.dest);
     if (fs.existsSync(srcPath)) {
       try {
-        fs.copyFileSync(srcPath, destPath);
-        console.log(`Copied ${item.src} to ${item.dest}`);
+        fs.copyFileSync(srcPath, path.join(distDir, item.dest));
+        fs.copyFileSync(srcPath, path.join(publicDir, item.dest));
+        console.log(`Copied ${item.src} -> dist/timeless/${version}/ & public/timeless/${version}/`);
       } catch (e) {
         console.error(`Failed to copy ${item.src}:`, e.message);
       }
+    }
+  });
+
+  // Copy CSS files
+  cssFiles.forEach(({ src, dest }) => {
+    try {
+      fs.copyFileSync(src, path.join(distDir, dest));
+      fs.copyFileSync(src, path.join(publicDir, dest));
+      console.log(`Copied CSS ${dest} -> dist/timeless/${version}/ & public/timeless/${version}/`);
+    } catch (e) {
+      console.error(`Failed to copy CSS ${dest}:`, e.message);
     }
   });
 }
