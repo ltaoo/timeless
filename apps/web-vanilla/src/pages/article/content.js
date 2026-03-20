@@ -6,14 +6,12 @@ export default function ArticleContentPageView(props) {
   const article = refobj(null);
   const loading = ref(true);
 
-  setTimeout(() => {
-    loading.as(false);
-    const matched = articles.find((v) => v.id === id);
-    if (!matched) {
-      return;
-    }
-    article.as(matched);
-  }, 1000);
+  loading.as(false);
+  const matched = articles.find((v) => v.id === id);
+  if (!matched) {
+    return;
+  }
+  article.as(matched);
 
   return View({ class: "h-full" }, [
     Show(

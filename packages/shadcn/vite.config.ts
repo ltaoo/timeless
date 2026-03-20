@@ -52,7 +52,7 @@ export default defineConfig({
           "@timeless/icons": "Timeless.icons",
         },
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name === "style.css") {
+          if (assetInfo.name?.endsWith(".css")) {
             return "timeless.shadcn.css";
           }
           return assetInfo.name || "assets/[name]-[hash][extname]";

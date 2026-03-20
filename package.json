@@ -9,6 +9,7 @@
     "vanilla": "node scripts/vanilla.js",
     "test": "pnpm -r run test",
     "generate:dev": "pnpm -C packages/dev run generate",
+    "build:dist": "node scripts/build.js",
     "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules"
   },
   "devDependencies": {

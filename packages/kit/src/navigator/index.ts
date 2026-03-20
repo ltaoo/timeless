@@ -77,6 +77,7 @@ type TheTypesOfEvents = {
   [Events.Relaunch]: void;
   [Events.HistoriesChange]: {
     pathname: string;
+    href: string;
   }[];
 };
 type RouteLocation = {
@@ -143,8 +144,8 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
   /** 当前 URL */
   location: Partial<RouteLocation> = {};
   href: string = "/";
-  histories: { pathname: string }[] = [];
-  prevHistories: { pathname: string }[] = [];
+  histories: { pathname: string; href: string }[] = [];
+  prevHistories: { pathname: string; href: string }[] = [];
   /** 发生跳转前的 pathname */
   prevPathname: string | null = null;
 
@@ -199,11 +200,12 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
   start() {
-    const { pathname } = this._pending;
+    const { pathname, search } = this._pending;
     this.setPathname(pathname);
     this.histories = [
       {
         pathname,
+        href: search ? pathname + search : pathname,
       },
     ];
     this.emit(Events.PathnameChange, { ...this._pending });
@@ -223,9 +225,10 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
     const prevPathname = this.pathname;
     this.setPrevPathname(prevPathname);
     this.setPathname(realTargetPathname);
+    const targetHref = search ? realTargetPathname + search : realTargetPathname;
     // this.prevHistories = [...this.histories];
     // console.log("[DOMAIN]navigator - before push", prevPathname, realTargetPathname);
-    this.histories.push({ pathname: realTargetPathname });
+    this.histories.push({ pathname: realTargetPathname, href: targetHref });
     this.emit(Events.PushState, {
       from: prevPathname,
       to: realTargetPathname,
@@ -240,8 +243,10 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
     const { pathname: realTargetPathname, search } = r;
     this.setPrevPathname(this.pathname);
     this.setPathname(realTargetPathname);
+    const targetHref = search ? realTargetPathname + search : realTargetPathname;
     this.histories[this.histories.length - 1] = {
       pathname: realTargetPathname,
+      href: targetHref,
     };
     this.emit(Events.ReplaceState, {
       from: this.prevPathname,
@@ -329,17 +334,29 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
     if (NavigatorCore.prefix && pathname.startsWith(NavigatorCore.prefix)) {
       targetPathname = pathname.replace(NavigatorCore.prefix, "");
     }
+    // 从完整 URL 中提取 search，构建与 RouteViewCore.href 匹配的相对 href
+    const parsedUrl = (() => {
+      try {
+        return new URL(href);
+      } catch (e) {
+        return new URL(href, "http://localhost");
+      }
+    })();
+    const search = parsedUrl.search;
+    const targetHref = search ? targetPathname + search : targetPathname;
+
     const prevPathname = this.pathname;
     this.setPrevPathname(prevPathname);
     this.setPathname(targetPathname);
+    this.href = targetHref;
     const isForward = (() => {
       if (this.prevHistories.length === 0) {
         return false;
       }
       const lastStackWhenBack =
         this.prevHistories[this.prevHistories.length - 1];
-      // console.log("[DOMAIN]navigator -lastStackWhenBack", lastStackWhenBack.pathname, targetPathname);
-      if (lastStackWhenBack?.pathname === targetPathname) {
+      // 使用 href 而非 pathname 判断前进/后退，因为同一路由不同 query 的 pathname 相同
+      if (lastStackWhenBack?.href === targetHref) {
         return true;
       }
       return false;
@@ -368,31 +385,20 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
       this.emit(Events.PopState, { type: "forward", pathname, href });
       return;
     }
-    // if (this.histories.length === 1) {
-    //   return;
-    // }
     // back
     this.emit(Events.Back);
-    // var confirmationMessage = "您的输入还未完成，确认放弃吗？";
-    // if (confirm(confirmationMessage)) {
-    // } else {
-    //   history.pushState(null, null, window.location.href);
-    // }
     const theHistoryDestroy = this.histories[this.histories.length - 1];
     this.prevHistories = this.prevHistories
       .concat([theHistoryDestroy])
       .filter(Boolean);
-    // this.prevHistories = [...this.histories];
     this.setPrevPathname(this.pathname);
     this.setPathname(targetPathname);
-    // const cloneStacks = this.histories.slice(0, this.histories.length - 1);
     console.log(
       "[DOMAIN]navigator - before pop",
       this.histories.map((h) => h.pathname),
     );
     const cloneStacks = this.histories.slice(0, this.histories.length - 1);
     this.histories = cloneStacks.filter(Boolean);
-    // this.histories.pop();
     this.emit(Events.HistoriesChange, [...this.histories]);
     this.emit(Events.PopState, { type: "back", pathname, href });
   }

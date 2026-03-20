@@ -217,7 +217,7 @@ importers:
     dependencies:
       '@timeless/shadcn':
         specifier: workspace:*
-        version: link:../../packages/shadcnui
+        version: link:../../packages/shadcn
       '@timeless/weui':
         specifier: workspace:*
         version: link:../../packages/weui
@@ -481,7 +481,7 @@ importers:
 
   packages/reactive: {}
 
-  packages/shadcnui:
+  packages/shadcn:
     dependencies:
       '@timeless/headless':
         specifier: workspace:*

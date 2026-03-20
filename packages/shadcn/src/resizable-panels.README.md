@@ -15,7 +15,7 @@
    - `Panel`: 单个面板组件
    - `Handle`: 拖拽手柄组件
 
-3. **@timeless/shadcnui** - UI 层：提供带样式的最终组件
+3. **@timeless/shadcn** - UI 层：提供带样式的最终组件
    - `ResizablePanels`: 带样式的面板组
    - `ResizablePanel`: 带样式的面板
    - `ResizableHandle`: 带样式的拖拽手柄
@@ -23,7 +23,7 @@
 ## 安装
 
 ```bash
-npm install @timeless/shadcnui @timeless/ui
+npm install @timeless/shadcn @timeless/ui
 ```
 
 ## 基础用法
@@ -32,7 +32,7 @@ npm install @timeless/shadcnui @timeless/ui
 
 ```typescript
 import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
-import { ResizablePanels, ResizablePanel, ResizableHandle, View } from "@timeless/shadcnui";
+import { ResizablePanels, ResizablePanel, ResizableHandle, View } from "@timeless/shadcn";
 
 // 创建面板组
 const panelsGroup = new ResizablePanelsCore({

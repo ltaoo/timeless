@@ -1,9 +1,14 @@
 import { articles } from "./data.js";
 
 export default function ArticleListPageView(props) {
-  const curId = ref(props.view.query?.id || "");
+  const curId = ref(props.history.$router.query.id);
   props.history.onRouteChange(({ view }) => {
-    if (view?.query?.id) {
+    console.log(
+      "history.onRouteChange",
+      view.query.id,
+      props.history.$router.query.id,
+    );
+    if (view.query.id) {
       curId.as(view.query.id);
     }
   });
@@ -68,8 +73,8 @@ export default function ArticleListPageView(props) {
         ]),
       ],
     ),
-    View({ class: "flex-1 w-0 h-full overflow-y-auto" }, [
-      KeepAliveSubViews({
+    View({ class: "relative flex-1 w-0 h-full overflow-y-auto" }, [
+      RouteSubViews({
         ...props,
       }),
     ]),

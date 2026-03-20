@@ -5,7 +5,7 @@ import { safeCreateTextNode, safeCreateDocumentFragment } from "./env";
 
 export function Show(
   props: {
-    when: Ref<boolean | undefined | null> | boolean;
+    when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
     fallback?: ViewChildren;
     onMounted?: ($fg: any) => void;
     beforeUnmounted?: () => void;

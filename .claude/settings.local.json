@@ -37,7 +37,10 @@
       "Bash(go vet:*)",
       "Bash(sleep 25 && curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/ 2>/dev/null)",
       "Bash(npx tsx:*)",
-      "Bash(sleep 30 && curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/timeless/ 2>/dev/null)"
+      "Bash(sleep 30 && curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/timeless/ 2>/dev/null)",
+      "Bash(ls /Users/mayfair/Documents/other/timeless/packages/ui/dist/*.css 2>/dev/null; echo \"---\"; ls /Users/mayfair/Documents/other/timeless/packages/ui/dist/ 2>/dev/null | head -20)",
+      "Bash(ls /Users/mayfair/Documents/other/timeless/packages/weui/dist/*.css 2>/dev/null; ls /Users/mayfair/Documents/other/timeless/packages/weui/dist/ 2>/dev/null | tail -20)",
+      "Bash(git mv:*)"
     ]
   }
 }

@@ -62,7 +62,7 @@ export function KeepAliveSubViews(
           style: computed(cur_subview, (d) => {
             return [
               `z-index: ${idx + 1}; width: 100%; height: 100%;`,
-              d && d.name === subview.name
+              d && d.id === subview.id
                 ? "display: block;"
                 : "display: none;",
             ].join("");

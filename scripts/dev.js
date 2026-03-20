@@ -39,8 +39,8 @@ const artifacts = [
     dest: "timeless.icons.umd.min.js",
   },
   {
-    pkg: "shadcnui",
-    src: "packages/shadcnui/dist/timeless.shadcn.umd.min.js",
+    pkg: "shadcn",
+    src: "packages/shadcn/dist/timeless.shadcn.umd.min.js",
     dest: "timeless.shadcn.umd.min.js",
   },
   {
@@ -52,11 +52,11 @@ const artifacts = [
 
 // Explicit build dependencies
 const buildRelations = {
-  reactive: ["headless", "shadcnui"],
-  kit: ["headless", "shadcnui"],
-  ui: ["headless", "shadcnui"],
-  headless: ["icons", "shadcnui"],
-  icons: ["shadcnui"],
+  reactive: ["headless", "shadcn"],
+  kit: ["headless", "shadcn"],
+  ui: ["headless", "shadcn"],
+  headless: ["icons", "shadcn"],
+  icons: ["shadcn"],
 };
 
 let buildQueue = null;

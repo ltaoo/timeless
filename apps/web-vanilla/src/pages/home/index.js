@@ -1,6 +1,6 @@
 import { defaultRouteName } from "@/store/index.js";
 // import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
-// import { ResizablePanels, ResizablePanel, ResizableHandle } from "@timeless/shadcnui";
+// import { ResizablePanels, ResizablePanel, ResizableHandle } from "@timeless/shadcn";
 
 export default function HomePageView(props) {
   const curSubView = ref(props.view.curView);

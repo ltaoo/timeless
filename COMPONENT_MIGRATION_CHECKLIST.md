@@ -77,7 +77,7 @@
    - 将 `export * from "./component"` 改为 `export * as ComponentPrimitive from "./component"`
 
 4. **改造 Shadcn 层**
-   - 在 `packages/shadcnui/src/{component}.ts` 中
+   - 在 `packages/shadcn/src/{component}.ts` 中
    - 使用 `ComponentPrimitive` 组装
    - 使用 `refobj` 管理状态
    - 使用 `computed` 计算动态样式

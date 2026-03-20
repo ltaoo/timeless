@@ -70,7 +70,7 @@ export function Select(
         style: computed(state_, () => {
           const width = store.reference?.width || 0;
           // console.log(
-          //   "[Select shadcnui] computed style, width:",
+          //   "[Select shadcn] computed style, width:",
           //   width,
           //   "reference:",
           //   store.reference,

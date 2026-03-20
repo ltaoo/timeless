@@ -316,9 +316,9 @@ export class HistoryCore<
     this.emit(Events.StateChange, { ...this.state });
   }
   back(opt: Partial<{ data: any }> = {}) {
-    // 根据当前 router 的 pathname 找到对应的视图
-    const targetPathname = this.$router.pathname;
-    console.log("[DOMAIN]history - back", "cursor:", this.cursor, "targetPathname:", targetPathname, "stacks:", this.stacks.map(s => s.pathname));
+    // 根据当前 router 的 href 找到对应的视图（用 href 而非 pathname，因为同一路由不同 query 的 pathname 相同）
+    const targetHref = this.$router.href;
+    console.log("[DOMAIN]history - back", "cursor:", this.cursor, "targetHref:", targetHref, "stacks:", this.stacks.map(s => s.href));
 
     // 在 stacks 中查找匹配的视图
     let targetIndex = -1;
@@ -326,7 +326,7 @@ export class HistoryCore<
 
     for (let i = 0; i < this.stacks.length; i++) {
       const view = this.stacks[i];
-      if (view.pathname === targetPathname) {
+      if (view.href === targetHref) {
         targetIndex = i;
         view_prepare_to_show = view;
         break;
@@ -336,7 +336,7 @@ export class HistoryCore<
     // 如果在 stacks 中找不到，尝试从 views 中查找或创建
     if (!view_prepare_to_show) {
       console.log("[DOMAIN]history - back, view not in stacks, try to find in views");
-      const href = this.$router.href;
+      const href = targetHref;
       view_prepare_to_show = this.views[href];
 
       if (!view_prepare_to_show) {
@@ -391,9 +391,9 @@ export class HistoryCore<
     this.emit(Events.StateChange, { ...this.state });
   }
   forward() {
-    // 根据当前 router 的 pathname 找到对应的视图
-    const targetPathname = this.$router.pathname;
-    console.log("[DOMAIN]history - forward", "cursor:", this.cursor, "targetPathname:", targetPathname, "stacks:", this.stacks.map(s => s.pathname));
+    // 根据当前 router 的 href 找到对应的视图（用 href 而非 pathname，因为同一路由不同 query 的 pathname 相同）
+    const targetHref = this.$router.href;
+    console.log("[DOMAIN]history - forward", "cursor:", this.cursor, "targetHref:", targetHref, "stacks:", this.stacks.map(s => s.href));
 
     // 在 stacks 中查找匹配的视图
     let targetIndex = -1;
@@ -401,7 +401,7 @@ export class HistoryCore<
 
     for (let i = 0; i < this.stacks.length; i++) {
       const view = this.stacks[i];
-      if (view.pathname === targetPathname) {
+      if (view.href === targetHref) {
         targetIndex = i;
         viewPrepareShow = view;
         break;
@@ -411,7 +411,7 @@ export class HistoryCore<
     // 如果在 stacks 中找不到，尝试从 views 中查找
     if (!viewPrepareShow) {
       console.log("[DOMAIN]history - forward, view not in stacks, try to find in views");
-      const href = this.$router.href;
+      const href = targetHref;
       viewPrepareShow = this.views[href];
 
       if (!viewPrepareShow) {

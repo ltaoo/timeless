@@ -8,7 +8,7 @@
 
 1. **UI Core 层** (`packages/ui/src/accordion/index.ts`) - 状态管理和业务逻辑
 2. **Headless 层** (`packages/headless/src/accordion.ts`) - 无样式的 UI 组件
-3. **Shadcn 层** (`packages/shadcnui/src/accordion.ts`) - 带样式的完整组件
+3. **Shadcn 层** (`packages/shadcn/src/accordion.ts`) - 带样式的完整组件
 
 ## 第一步：创建 UI Core 层
 
@@ -267,7 +267,7 @@ export function Content(
 ## 第三步：创建 Shadcn 层
 
 ### 文件位置
-`packages/shadcnui/src/accordion.ts`
+`packages/shadcn/src/accordion.ts`
 
 ### 核心职责
 - 组装 Headless 层的 Primitive 组件
@@ -407,7 +407,7 @@ export function Accordion(
 
 ```typescript
 import { AccordionCore } from "@timeless/ui";
-import { Accordion } from "@timeless/shadcnui";
+import { Accordion } from "@timeless/shadcn";
 
 // 创建 store
 const store = AccordionCore({
@@ -448,7 +448,7 @@ Accordion({
   - [ ] 使用 `computed` 计算响应式状态
   - [ ] 处理用户交互（onClick 等）
 
-- [ ] 创建 Shadcn 层（`packages/shadcnui/src/accordion.ts`）
+- [ ] 创建 Shadcn 层（`packages/shadcn/src/accordion.ts`）
   - [ ] 导入 Primitive 组件
   - [ ] 使用 `refobj` 管理状态引用
   - [ ] 监听 `onStateChange` 事件
@@ -461,4 +461,4 @@ Accordion({
 可以参考以下已迁移的组件：
 - `packages/ui/src/switch/index.ts` - 简单的 Core 实现
 - `packages/ui/src/tabs/index.ts` - 复杂的 Core 实现（使用 class）
-- `packages/shadcnui/src/select.ts` - 完整的 Shadcn 层实现
+- `packages/shadcn/src/select.ts` - 完整的 Shadcn 层实现

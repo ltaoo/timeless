@@ -62,12 +62,17 @@ export function RouteSubViews(
       return h(
         Show,
         {
-          when: computed(cur_subview, (d) => d && d.name === subview.name),
+          when: computed(cur_subview, (d) => {
+            if (d && d.id === subview.id) {
+              return true;
+            }
+            return false;
+          }),
         },
         [
           View(
             {
-              style: `z-index: ${idx + 1}; position: absolute; width: 100%; height: 100%;"`,
+              style: `z-index: ${idx + 1}; position: absolute; left: 0; top: 0; right: 0; bottom: 0;"`,
               dataset: {
                 name: subview.name,
                 pathname: subview.pathname,
