@@ -1,12 +1,7 @@
 import { articles, categories } from "./data.js";
 
 export default function ArticleListPageView(props) {
-  const curId = ref(props.history.$router.query.cate_id);
-  // props.history.onRouteChange(({ view }) => {
-  //   if (view.query.id) {
-  //     curId.as(view.query.id);
-  //   }
-  // });
+  const curId = ref(props.view.query.id);
 
   console.log(
     "[]ArticleListPageView",
@@ -17,6 +12,20 @@ export default function ArticleListPageView(props) {
   const categoryId = props.view.query.cate_id;
   const category = categories.find((c) => c.id === categoryId);
   const filteredArticles = articles.filter((a) => a.categoryId === categoryId);
+
+  // 自动选中第一篇文章
+  const firstArticle = filteredArticles[0];
+  if (firstArticle && !props.view.query.id) {
+    curId.as(firstArticle.id);
+    props.history.replace("root.home_layout.article.category.content", {
+      ...props.view.query,
+      id: firstArticle.id,
+    });
+  }
+
+  props.history.onRouteChange(({ view }) => {
+    curId.as(view.query.id);
+  });
 
   return View({ class: "flex w-full h-full bg-white dark:bg-zinc-950" }, [
     View(
@@ -51,6 +60,7 @@ export default function ArticleListPageView(props) {
                     ),
                   ]),
                   onClick() {
+                    curId.as(article.id);
                     props.history.push(
                       "root.home_layout.article.category.content",
                       { ...props.view.query, id: article.id },
@@ -69,7 +79,7 @@ export default function ArticleListPageView(props) {
                         ),
                       ]),
                     },
-                    article.title,
+                    [View({}, [article.id, article.title])],
                   ),
                 ],
               );
@@ -79,7 +89,7 @@ export default function ArticleListPageView(props) {
       ],
     ),
     View({ class: "relative flex-1 w-0 h-full overflow-y-auto" }, [
-      h(RouteSubViews, {
+      RouteSubViews({
         ...props,
       }),
     ]),

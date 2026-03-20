@@ -196,6 +196,7 @@ export class HistoryCore<
     //   delete this.views[uniqueKey];
     // });
     this.views[uniqueKey] = created;
+    this.views[name as string] = created;
     this.ensureParent(created);
     if (!created.parent) {
       console.log("[DOMAIN]history/index - push 3. ", route.name);
@@ -247,10 +248,6 @@ export class HistoryCore<
       }
       this.$router.href = view.href;
       this.$router.name = view.name;
-      const theViewNeedDestroy = this.stacks[this.stacks.length - 1];
-      if (theViewNeedDestroy) {
-        theViewNeedDestroy.parent?.removeView(theViewNeedDestroy);
-      }
       this.stacks[this.stacks.length - 1] = view;
       // this.cursor = uniqueKey;
       view.parent.showView(view);
@@ -286,6 +283,7 @@ export class HistoryCore<
       parent: null,
     });
     this.views[uniqueKey] = created;
+    this.views[name as string] = created;
     this.ensureParent(created);
     if (!created.parent) {
       console.log("[DOMAIN]history/index - replace 3. ");
@@ -293,15 +291,6 @@ export class HistoryCore<
     }
     this.$router.href = created.href;
     this.$router.name = created.name;
-    const theViewNeedDestroy = this.stacks[this.stacks.length - 1];
-    if (theViewNeedDestroy) {
-      theViewNeedDestroy.parent?.removeView(theViewNeedDestroy, {
-        reason: "show_sibling",
-        callback: () => {
-          delete this.views[uniqueKey];
-        },
-      });
-    }
     this.stacks[this.stacks.length - 1] = created;
     created.parent.showView(created);
     this.emit(Events.RouteChange, {
@@ -374,6 +363,11 @@ export class HistoryCore<
       });
     }
 
+    // 如果目标视图已经可见（如 article 布局视图），showView 会直接 return，
+    // 导致其 curView（如 category）不会被隐藏。需要手动清理子视图。
+    if (view_prepare_to_show.visible && view_prepare_to_show.curView) {
+      view_prepare_to_show.clearCurView({ reason: "back", destroy: false });
+    }
     view_prepare_to_show.parent.showView(view_prepare_to_show, {
       reason: "back",
       destroy: false,
@@ -543,6 +537,7 @@ export class HistoryCore<
     //   delete this.views[uniqueKey];
     // });
     this.views[unique_key] = created;
+    this.views[route.name] = created;
     this.ensureParent(created);
     if (!created.parent) {
       console.log("[DOMAIN]history/index - push 3. ", route.name);
@@ -593,6 +588,7 @@ export class HistoryCore<
     const { parent } = route;
     if (this.views[parent.name]) {
       view.parent = this.views[parent.name];
+      view.parent.query = view.query;
       if (parent.name === "root") {
         return;
       }
@@ -607,6 +603,7 @@ export class HistoryCore<
       name: parent_route.name,
       pathname: parent_route.pathname,
       title: parent_route.title,
+      query: view.query,
       parent: null,
     });
     this.views[parent_route.name] = created_parent;

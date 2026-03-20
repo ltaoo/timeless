@@ -315,6 +315,20 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     sub_view.show();
     this.emit(Events.CurSubViewChange, this.curView);
   }
+  /** 清除当前子视图（隐藏并通知） */
+  clearCurView(
+    options: Partial<{
+      reason: "show_sibling" | "back" | "forward";
+      destroy: boolean;
+    }> = {},
+  ) {
+    if (!this.curView) {
+      return;
+    }
+    this.curView.hide(options);
+    this.curView = null;
+    this.emit(Events.CurSubViewChange, null as any);
+  }
   /** 主动展示视图 */
   show() {
     // console.log("[ROUTE_VIEW]show", this.title, "visible:", this.visible, "mounted:", this.mounted);

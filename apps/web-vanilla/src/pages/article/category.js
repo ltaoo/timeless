@@ -2,16 +2,15 @@ import { articles, categories } from "./data.js";
 
 export default function ArticleCategoryListPageView(props) {
   const curCateId = ref(props.history.$router.query.cate_id);
-  props.history.onRouteChange(({ view }) => {
-    if (view.query.cate_id) {
-      curCateId.as(view.query.cate_id);
-    }
-  });
 
   const articlesByCategory = categories.map((category) => ({
     ...category,
     articles: articles.filter((a) => a.categoryId === category.id),
   }));
+
+  props.history.onRouteChange(({ view }) => {
+    curCateId.as(view.query.cate_id);
+  });
 
   return View({ class: "flex w-full h-full bg-white dark:bg-zinc-950" }, [
     View(

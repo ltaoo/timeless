@@ -41,7 +41,9 @@
       "Bash(ls /Users/mayfair/Documents/other/timeless/packages/ui/dist/*.css 2>/dev/null; echo \"---\"; ls /Users/mayfair/Documents/other/timeless/packages/ui/dist/ 2>/dev/null | head -20)",
       "Bash(ls /Users/mayfair/Documents/other/timeless/packages/weui/dist/*.css 2>/dev/null; ls /Users/mayfair/Documents/other/timeless/packages/weui/dist/ 2>/dev/null | tail -20)",
       "Bash(git mv:*)",
-      "Bash(ls /Users/mayfair/Documents/other/timeless/packages/icons/src/*.ts | grep -v index.ts | grep -v utils.ts | wc -l)"
+      "Bash(ls /Users/mayfair/Documents/other/timeless/packages/icons/src/*.ts | grep -v index.ts | grep -v utils.ts | wc -l)",
+      "Bash(git checkout:*)",
+      "Bash(npx vitest:*)"
     ]
   }
 }
