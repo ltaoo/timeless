@@ -1,6 +1,6 @@
 node_modules
 dist
-**/*/public/*.min.js
+/apps/*/public/timeless
 .virtual-build
 
 .DS_Store
