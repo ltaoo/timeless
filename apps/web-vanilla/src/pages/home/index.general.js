@@ -71,6 +71,65 @@ export default function GeneralView() {
           return Button({ store }, ["Click to Load"]);
         })(),
       ]),
+      Item("With Prefix Icon", [
+        Button(
+          {
+            store: new Timeless.ui.ButtonCore({}),
+            prefix: [Timeless.icons.DownloadOutlined({ class: "w-4 h-4" })],
+          },
+          ["Download"],
+        ),
+        (() => {
+          const playing = ref(false);
+          const playStore = new Timeless.ui.ButtonCore({
+            variant: "secondary",
+            onClick: () => {
+              playing.as(true);
+            },
+          });
+          const cancelStore = new Timeless.ui.ButtonCore({
+            variant: "secondary",
+            onClick: () => {
+              playing.as(false);
+            },
+          });
+          return View({}, [
+            Show({ when: computed(playing, (v) => !v) }, [
+              Button(
+                {
+                  store: playStore,
+                  prefix: [Timeless.icons.PlayOutlined({ class: "w-4 h-4" })],
+                },
+                ["Play"],
+              ),
+            ]),
+            Show({ when: computed(playing, (v) => v) }, [
+              Button(
+                {
+                  store: cancelStore,
+                  prefix: [
+                    View(
+                      {
+                        class: "inline-block h-4 w-4 animate-spin",
+                        style: "transform-origin: center",
+                      },
+                      [Timeless.icons.LoaderCircleOutlined()],
+                    ),
+                  ],
+                },
+                ["取消"],
+              ),
+            ]),
+          ]);
+        })(),
+        Button(
+          {
+            store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+            prefix: [Timeless.icons.BoltOutlined({ class: "w-4 h-4" })],
+          },
+          ["Settings"],
+        ),
+      ]),
       Item("Disabled", [
         Button(
           { store: new Timeless.ui.ButtonCore({ disabled: true }) },

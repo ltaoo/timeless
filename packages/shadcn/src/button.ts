@@ -69,7 +69,7 @@ export function Button(props: any, children: any) {
           [LoaderCircleOutlined()],
         ),
       ]),
-      Show({ when: !!prefix }, [ButtonPrimitive.Prefix({}, prefix)]),
+      Show({ when: !!prefix }, [ButtonPrimitive.Prefix({ class: "mr-2 inline-flex items-center" }, prefix)]),
       ButtonPrimitive.Content({}, children),
     ],
   );

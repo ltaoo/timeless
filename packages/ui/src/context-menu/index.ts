@@ -18,6 +18,8 @@ type ContextMenuState = {
 };
 type ContextMenuProps = {
   items: MenuItemCore[];
+  offsetX?: number;
+  offsetY?: number;
   submenuOffsetX?: number;
   submenuOffsetY?: number;
   trigger?: "contextmenu" | "hover" | "manual";
@@ -50,6 +52,8 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
   private initialScrollY = 0;
   private clickX = 0;
   private clickY = 0;
+  private offsetX = 0;
+  private offsetY = 0;
 
   constructor(
     options: Partial<
@@ -62,6 +66,8 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
     const {
       _name,
       items = [],
+      offsetX = 0,
+      offsetY = 0,
       submenuOffsetX = -2,
       submenuOffsetY = -4,
       trigger = "contextmenu",
@@ -70,6 +76,8 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
     } = options;
     this.state.items = items;
     this.trigger = trigger;
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
     this.menu = new MenuCore({
       ...options,
       _name: _name ? `${_name}__menu` : "menu-in-context-menu",
@@ -117,8 +125,8 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
 
     // Update virtual element position to adjust for scroll
     this.virtualElement.getBoundingClientRect = () => {
-      const adjustedX = this.clickX;
-      const adjustedY = this.clickY;
+      const adjustedX = this.clickX + this.offsetX;
+      const adjustedY = this.clickY + this.offsetY;
 
       return {
         width: 0,

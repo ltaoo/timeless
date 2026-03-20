@@ -74,12 +74,19 @@ const routesConfigure = {
       article: {
         title: "博客",
         pathname: "/article",
-        component: Timeless.lazy("@/pages/article/index.js"),
+        component: Timeless.lazy("@/pages/article/category.js"),
         children: {
-          content: {
-            title: "博客详情",
-            pathname: "/article/detail",
-            component: Timeless.lazy("@/pages/article/content.js"),
+          category: {
+            title: "博客",
+            pathname: "/article/category",
+            component: Timeless.lazy("@/pages/article/index.js"),
+            children: {
+              content: {
+                title: "博客详情",
+                pathname: "/article/category/detail",
+                component: Timeless.lazy("@/pages/article/content.js"),
+              },
+            },
           },
         },
       },

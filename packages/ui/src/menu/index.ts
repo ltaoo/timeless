@@ -160,6 +160,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         this.cur_sub.hide();
         this.cur_sub = null;
       }
+      this.emit(Events.Hidden);
     });
   }
 

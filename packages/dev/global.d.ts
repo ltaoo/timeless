@@ -12,6 +12,8 @@ declare module "packages/reactive/src/types" {
         _subscribe: (ctx: Subscriber) => void;
         _destroy: () => void;
         value: T;
+        isSame: (v: T) => boolean;
+        isStrictEqual: (v: T) => boolean;
     };
     export type ClassNameRef = {
         __cn_ref: true;
@@ -117,6 +119,8 @@ declare module "packages/reactive/src/ref" {
         _destroy(): void;
         readonly value: T;
         eq(v: T): boolean;
+        isSame(v: T): boolean;
+        isStrictEqual(v: T): boolean;
         as(value: T | ((cur: T) => T)): void;
     };
 }
@@ -207,6 +211,7 @@ declare module "packages/headless/src/view" {
         onFocus?(e: FocusEvent): void;
         onBlur?(e: FocusEvent): void;
         onKeyDown?: (e: KeyboardEvent) => void;
+        onContextMenu?: (e: MouseEvent) => void;
         onMouseEnter?: (e: MouseEvent) => void;
         onMouseLeave?: (e: MouseEvent) => void;
         onDragStart?: (e: DragEvent) => void;
@@ -271,7 +276,7 @@ declare module "packages/headless/src/show" {
     import { Ref } from "packages/reactive/src/index";
     import { ViewChildren } from "packages/headless/src/view";
     export function Show(props: {
-        when: Ref<boolean | undefined | null> | boolean;
+        when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
         fallback?: ViewChildren;
         onMounted?: ($fg: any) => void;
         beforeUnmounted?: () => void;
@@ -1127,6 +1132,8 @@ declare module "packages/ui/src/context-menu/index" {
     };
     type ContextMenuProps = {
         items: MenuItemCore[];
+        offsetX?: number;
+        offsetY?: number;
         submenuOffsetX?: number;
         submenuOffsetY?: number;
         trigger?: "contextmenu" | "hover" | "manual";
@@ -1143,6 +1150,8 @@ declare module "packages/ui/src/context-menu/index" {
         private initialScrollY;
         private clickX;
         private clickY;
+        private offsetX;
+        private offsetY;
         constructor(options: Partial<{
             _name: string;
         } & ContextMenuProps>);
@@ -6604,6 +6613,66 @@ declare module "packages/ui/src/tooltip/index" {
         get [Symbol.toStringTag](): string;
     }
 }
+declare module "packages/ui/src/shortcut/index" {
+    import { Handler, BizError } from "packages/base/src/index";
+    type KeyboardEvent = {
+        code: string;
+        preventDefault: () => void;
+    };
+    export function ShortcutModel(props?: Partial<{
+        mode?: "normal" | "recording";
+    }>): {
+        methods: {
+            refresh(): void;
+            register(handlers: Record<string, (event: KeyboardEvent & {
+                step?: "keydown" | "keyup";
+            }) => void>): void;
+            clearPressedKeys(): void;
+            invokeHandlers(event: KeyboardEvent, key: string): void;
+            buildShortcut(): {
+                key1: string;
+                key2: string;
+            };
+            setRecordingCodes(codes: string): void;
+            reset(): void;
+            testShortcut(opt: {
+                /** 存在 pressing 时，进行拼接后的字符串，用于「组合快捷键」 */
+                key1: string;
+                /** 没有其他出于 pressing 状态的情况下，按下的按键拼接后的字符串，用于「单个快捷键或连按」 */
+                key2: string;
+                step: "keydown" | "keyup";
+            }, event: KeyboardEvent): void;
+            handleKeydown(event: {
+                code: string;
+                preventDefault: () => void;
+            }): void;
+            handleKeyup(event: {
+                code: string;
+                preventDefault: () => void;
+            }, opt?: Partial<{
+                fake: boolean;
+            }>): void;
+        };
+        ui: {};
+        state: {
+            readonly codes: string[];
+            readonly codes2: string[];
+        };
+        ready(): void;
+        destroy(): void;
+        onShortcut(handler: Handler<{
+            key: string;
+        }>): () => void;
+        onShortcutComplete(handler: Handler<{
+            codes: string[];
+        }>): () => void;
+        onStateChange(handler: Handler<{
+            readonly codes: string[];
+            readonly codes2: string[];
+        }>): () => void;
+        onError(handler: Handler<BizError>): () => void;
+    };
+}
 declare module "packages/ui/src/index" {
     import { Result as _Result, BizError as _BizError, base as _base, BaseDomain as _BaseDomain } from "packages/base/src/index";
     export const Result: {
@@ -6679,6 +6748,7 @@ declare module "packages/ui/src/index" {
     export * from "packages/ui/src/step/index";
     export * from "packages/ui/src/resizable-panels/index";
     export * from "packages/ui/src/tooltip/index";
+    export * from "packages/ui/src/shortcut/index";
 }
 declare module "packages/headless/src/presence" {
     import { PresenceCore } from "packages/ui/src/index";
@@ -10007,6 +10077,7 @@ declare module "packages/kit/src/history/index" {
         ensureParent(view: RouteViewCore): any;
         buildURL(name: K, query?: Record<string, string>): any;
         buildURLWithPrefix(name: K, query?: Record<string, string>): any;
+        isRoot(name: K): boolean;
         isLayout(name: K): any;
         handleClickLink(params: {
             href: string;
@@ -10070,6 +10141,7 @@ declare module "packages/kit/src/navigator/index" {
         [Events.Relaunch]: void;
         [Events.HistoriesChange]: {
             pathname: string;
+            href: string;
         }[];
     };
     type RouteLocation = {
@@ -10109,9 +10181,11 @@ declare module "packages/kit/src/navigator/index" {
         href: string;
         histories: {
             pathname: string;
+            href: string;
         }[];
         prevHistories: {
             pathname: string;
+            href: string;
         }[];
         /** 发生跳转前的 pathname */
         prevPathname: string | null;
@@ -11772,7 +11846,7 @@ declare module "packages/icons/src/index" {
     export * from "packages/icons/src/circle-ellipsis";
     export * from "packages/icons/src/utils";
 }
-declare module "packages/shadcnui/src/input" {
+declare module "packages/shadcn/src/input" {
     import { ViewProps } from "packages/headless/src/index";
     import { InputCore } from "packages/ui/src/index";
     export function Input(props: ViewProps & {
@@ -11788,7 +11862,7 @@ declare module "packages/shadcnui/src/input" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/number-input" {
+declare module "packages/shadcn/src/number-input" {
     import { ViewProps } from "packages/headless/src/index";
     import { NumberInputCore } from "packages/ui/src/index";
     export function NumberInput(props: ViewProps & {
@@ -11803,7 +11877,7 @@ declare module "packages/shadcnui/src/number-input" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/textarea" {
+declare module "packages/shadcn/src/textarea" {
     import { ViewProps } from "packages/headless/src/index";
     import { InputCore } from "packages/ui/src/index";
     export function Textarea(props: ViewProps & {
@@ -11819,7 +11893,7 @@ declare module "packages/shadcnui/src/textarea" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/label" {
+declare module "packages/shadcn/src/label" {
     import { ViewProps, ViewChildren } from "packages/headless/src/index";
     export function Label(props: ViewProps, children?: ViewChildren): {
         t: string;
@@ -11829,9 +11903,10 @@ declare module "packages/shadcnui/src/label" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/checkbox" {
+declare module "packages/shadcn/src/checkbox" {
+    import { ViewProps } from "packages/headless/src/index";
     import { CheckboxCore } from "packages/ui/src/index";
-    export function Checkbox(props: {
+    export function Checkbox(props: ViewProps & {
         store: CheckboxCore;
         id?: string;
     }): {
@@ -11842,7 +11917,7 @@ declare module "packages/shadcnui/src/checkbox" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/checkbox-group" {
+declare module "packages/shadcn/src/checkbox-group" {
     import { CheckboxGroupCore, CheckboxCore } from "packages/ui/src/index";
     export function CheckboxGroup(props: {
         store: CheckboxGroupCore<any>;
@@ -11872,7 +11947,7 @@ declare module "packages/shadcnui/src/checkbox-group" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/radio" {
+declare module "packages/shadcn/src/radio" {
     import { RadioGroupCore, RadioCore } from "packages/ui/src/index";
     export function Radio(props: {
         store: RadioCore;
@@ -11912,7 +11987,7 @@ declare module "packages/shadcnui/src/radio" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/select" {
+declare module "packages/shadcn/src/select" {
     import { ViewProps } from "packages/headless/src/index";
     import { SelectCore } from "packages/ui/src/index";
     export function Select(props: ViewProps & {
@@ -11927,7 +12002,7 @@ declare module "packages/shadcnui/src/select" {
         render(): DocumentFragment;
     };
 }
-declare module "packages/shadcnui/src/cascader" {
+declare module "packages/shadcn/src/cascader" {
     import { ViewProps } from "packages/headless/src/index";
     import { CascaderCore } from "packages/ui/src/index";
     export function Cascader(props: ViewProps & {
@@ -11942,7 +12017,7 @@ declare module "packages/shadcnui/src/cascader" {
         render(): DocumentFragment;
     };
 }
-declare module "packages/shadcnui/src/date-picker" {
+declare module "packages/shadcn/src/date-picker" {
     import { ViewProps } from "packages/headless/src/index";
     import { DatePickerCore } from "packages/ui/src/index";
     export function DatePicker(props: ViewProps & {
@@ -11958,7 +12033,7 @@ declare module "packages/shadcnui/src/date-picker" {
         render(): DocumentFragment;
     };
 }
-declare module "packages/shadcnui/src/tooltip" {
+declare module "packages/shadcn/src/tooltip" {
     import { Align, Side } from "packages/ui/src/index";
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     export function Tooltip(props: ViewProps & {
@@ -11981,7 +12056,7 @@ declare module "packages/shadcnui/src/tooltip" {
         render(): DocumentFragment;
     };
 }
-declare module "packages/shadcnui/src/date-range-picker" {
+declare module "packages/shadcn/src/date-range-picker" {
     import { ViewProps } from "packages/headless/src/index";
     import { DateRangePickerCore } from "packages/ui/src/index";
     export function DateRangePicker(props: ViewProps & {
@@ -11997,7 +12072,7 @@ declare module "packages/shadcnui/src/date-range-picker" {
         render(): DocumentFragment;
     };
 }
-declare module "packages/shadcnui/src/time-picker" {
+declare module "packages/shadcn/src/time-picker" {
     import { ViewProps } from "packages/headless/src/index";
     import { TimePickerCore } from "packages/ui/src/index";
     export function TimePicker(props: ViewProps & {
@@ -12013,7 +12088,7 @@ declare module "packages/shadcnui/src/time-picker" {
         render(): DocumentFragment;
     };
 }
-declare module "packages/shadcnui/src/popover" {
+declare module "packages/shadcn/src/popover" {
     import { PopoverCore } from "packages/ui/src/index";
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     export function Popover(props: ViewProps & {
@@ -12029,7 +12104,7 @@ declare module "packages/shadcnui/src/popover" {
         render(): DocumentFragment;
     };
 }
-declare module "packages/shadcnui/src/popconfirm" {
+declare module "packages/shadcn/src/popconfirm" {
     import { PopconfirmCore } from "packages/ui/src/index";
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     export function Popconfirm(props: ViewProps & {
@@ -12047,7 +12122,7 @@ declare module "packages/shadcnui/src/popconfirm" {
         render(): DocumentFragment;
     };
 }
-declare module "packages/shadcnui/src/toast" {
+declare module "packages/shadcn/src/toast" {
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     import { ToastCore } from "packages/ui/src/index";
     export function Toast(props: ViewProps & {
@@ -12060,7 +12135,7 @@ declare module "packages/shadcnui/src/toast" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/toggle" {
+declare module "packages/shadcn/src/toggle" {
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     import { SwitchCore } from "packages/ui/src/index";
     export function Toggle(props: ViewProps & {
@@ -12074,7 +12149,7 @@ declare module "packages/shadcnui/src/toggle" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/slider" {
+declare module "packages/shadcn/src/slider" {
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     export function Slider(props: ViewProps & {
         value?: number;
@@ -12091,7 +12166,7 @@ declare module "packages/shadcnui/src/slider" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/progress" {
+declare module "packages/shadcn/src/progress" {
     import { Ref } from "packages/reactive/src/index";
     import { ViewProps, ViewChildren } from "packages/headless/src/index";
     import { ProgressCore } from "packages/ui/src/index";
@@ -12107,7 +12182,7 @@ declare module "packages/shadcnui/src/progress" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/dialog" {
+declare module "packages/shadcn/src/dialog" {
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     import { DialogCore } from "packages/ui/src/index";
     export function Dialog(props: ViewProps & {
@@ -12120,7 +12195,7 @@ declare module "packages/shadcnui/src/dialog" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/menu" {
+declare module "packages/shadcn/src/menu" {
     import { ViewProps } from "packages/headless/src/index";
     import { MenuCore } from "packages/ui/src/index";
     export function Menu(props: ViewProps & {
@@ -12133,7 +12208,7 @@ declare module "packages/shadcnui/src/menu" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/dropdown-menu" {
+declare module "packages/shadcn/src/dropdown-menu" {
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     import { DropdownMenuCore } from "packages/ui/src/index";
     export function DropdownMenu(props: ViewProps & {
@@ -12147,7 +12222,7 @@ declare module "packages/shadcnui/src/dropdown-menu" {
         render(): DocumentFragment;
     };
 }
-declare module "packages/shadcnui/src/context-menu" {
+declare module "packages/shadcn/src/context-menu" {
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     import { ContextMenuCore } from "packages/ui/src/index";
     export function ContextMenu(props: ViewProps & {
@@ -12161,7 +12236,7 @@ declare module "packages/shadcnui/src/context-menu" {
         render(): DocumentFragment;
     };
 }
-declare module "packages/shadcnui/src/tabs" {
+declare module "packages/shadcn/src/tabs" {
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     import { TabHeaderCore } from "packages/ui/src/index";
     type TabItem = {
@@ -12180,7 +12255,7 @@ declare module "packages/shadcnui/src/tabs" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/steps" {
+declare module "packages/shadcn/src/steps" {
     import { ViewProps } from "packages/headless/src/index";
     import { StepCore } from "packages/ui/src/index";
     export type StepItem = {
@@ -12198,7 +12273,7 @@ declare module "packages/shadcnui/src/steps" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/button" {
+declare module "packages/shadcn/src/button" {
     export function Button(props: any, children: any): {
         t: string;
         $elm: HTMLElement;
@@ -12207,14 +12282,14 @@ declare module "packages/shadcnui/src/button" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/scrollview" {
+declare module "packages/shadcn/src/scrollview" {
     import { ViewChildren, type ViewProps } from "packages/headless/src/index";
     import { ScrollViewCore } from "packages/ui/src/index";
     export function ScrollView(props: ViewProps & {
         store: ScrollViewCore;
     }, children: ViewChildren): import("@timeless/headless").TimelessElement;
 }
-declare module "packages/shadcnui/src/badge" {
+declare module "packages/shadcn/src/badge" {
     import { ViewProps, ViewChildren } from "packages/headless/src/index";
     export function Badge(props: ViewProps & {
         variant?: "default" | "secondary" | "outline" | "destructive";
@@ -12226,7 +12301,7 @@ declare module "packages/shadcnui/src/badge" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/separator" {
+declare module "packages/shadcn/src/separator" {
     import { ViewProps } from "packages/headless/src/index";
     export function Separator(props: ViewProps & {
         orientation?: "horizontal" | "vertical";
@@ -12238,7 +12313,7 @@ declare module "packages/shadcnui/src/separator" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/card" {
+declare module "packages/shadcn/src/card" {
     import { ViewProps, ViewChildren } from "packages/headless/src/index";
     export function Card(props: ViewProps, children?: ViewChildren): {
         t: string;
@@ -12283,7 +12358,7 @@ declare module "packages/shadcnui/src/card" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/avatar" {
+declare module "packages/shadcn/src/avatar" {
     import { ViewProps, ViewChildren } from "packages/headless/src/index";
     import { Ref } from "packages/reactive/src/index";
     export function Avatar(props: ViewProps & {
@@ -12299,7 +12374,7 @@ declare module "packages/shadcnui/src/avatar" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/skeleton" {
+declare module "packages/shadcn/src/skeleton" {
     import { ViewProps } from "packages/headless/src/index";
     export function Skeleton(props: ViewProps): {
         t: string;
@@ -12309,7 +12384,7 @@ declare module "packages/shadcnui/src/skeleton" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/alert" {
+declare module "packages/shadcn/src/alert" {
     import { ViewProps, ViewChildren } from "packages/headless/src/index";
     export function Alert(props: ViewProps & {
         variant?: "default" | "destructive";
@@ -12335,7 +12410,7 @@ declare module "packages/shadcnui/src/alert" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/scroll-area" {
+declare module "packages/shadcn/src/scroll-area" {
     export function ScrollArea(props: any, children: any): {
         t: string;
         $elm: HTMLElement;
@@ -12344,7 +12419,7 @@ declare module "packages/shadcnui/src/scroll-area" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/sheet" {
+declare module "packages/shadcn/src/sheet" {
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     import { DialogCore } from "packages/ui/src/index";
     export function Sheet(props: ViewProps & {
@@ -12358,7 +12433,7 @@ declare module "packages/shadcnui/src/sheet" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/aspect-ratio" {
+declare module "packages/shadcn/src/aspect-ratio" {
     export function AspectRatio(props: any, children: any): {
         t: string;
         $elm: HTMLElement;
@@ -12367,11 +12442,11 @@ declare module "packages/shadcnui/src/aspect-ratio" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/accordion" {
+declare module "packages/shadcn/src/accordion" {
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     import { AccordionCore } from "packages/ui/src/index";
     type AccordionItem = {
-        title: string;
+        title: string | ViewChildren;
         content: ViewChildren;
     };
     export function Accordion(props: ViewProps & {
@@ -12385,7 +12460,7 @@ declare module "packages/shadcnui/src/accordion" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/table" {
+declare module "packages/shadcn/src/table" {
     import { ViewProps, ViewChildren } from "packages/headless/src/index";
     export function Table(props: ViewProps, children?: ViewChildren): {
         t: string;
@@ -12430,7 +12505,7 @@ declare module "packages/shadcnui/src/table" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/form" {
+declare module "packages/shadcn/src/form" {
     import { ViewProps, ViewChildren } from "packages/headless/src/index";
     import { SingleFieldCore, ObjectFieldCore, ArrayFieldCore } from "packages/ui/src/index";
     export function Field(props: ViewProps & {
@@ -12458,7 +12533,7 @@ declare module "packages/shadcnui/src/form" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/resizable-panels" {
+declare module "packages/shadcn/src/resizable-panels" {
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
     import { ResizablePanelsCore, ResizablePanelCore } from "packages/ui/src/index";
     export function ResizablePanels(props: ViewProps & {
@@ -12494,7 +12569,7 @@ declare module "packages/shadcnui/src/resizable-panels" {
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcnui/src/waterfall" {
+declare module "packages/shadcn/src/waterfall" {
     import { type ViewProps, type TimelessElement } from "packages/headless/src/index";
     import { WaterfallModel, WaterfallCellModel } from "packages/ui/src/index";
     export function Waterfall<T extends Record<string, unknown>>(props: ViewProps & {
@@ -12502,49 +12577,49 @@ declare module "packages/shadcnui/src/waterfall" {
         render: (payload: T, cell: WaterfallCellModel<T>) => TimelessElement;
     }): TimelessElement;
 }
-declare module "packages/shadcnui/src/index" {
+declare module "packages/shadcn/src/index" {
     import { View, Match, DangerouslyInnerHTML, Presence, Portal, Show, For, Flex, Txt, Head2, Paragraph } from "packages/headless/src/index";
-    import { Input } from "packages/shadcnui/src/input";
-    import { NumberInput } from "packages/shadcnui/src/number-input";
-    import { Textarea } from "packages/shadcnui/src/textarea";
-    import { Label } from "packages/shadcnui/src/label";
-    import { Checkbox } from "packages/shadcnui/src/checkbox";
-    import { CheckboxGroup, CheckboxGroupItem } from "packages/shadcnui/src/checkbox-group";
-    import { Radio, RadioGroup, RadioGroupItem } from "packages/shadcnui/src/radio";
-    import { Select } from "packages/shadcnui/src/select";
-    import { Cascader } from "packages/shadcnui/src/cascader";
-    import { DatePicker } from "packages/shadcnui/src/date-picker";
-    import { DateRangePicker } from "packages/shadcnui/src/date-range-picker";
-    import { TimePicker } from "packages/shadcnui/src/time-picker";
-    import { Popover } from "packages/shadcnui/src/popover";
-    import { Popconfirm } from "packages/shadcnui/src/popconfirm";
-    import { Toast } from "packages/shadcnui/src/toast";
-    import { Toggle } from "packages/shadcnui/src/toggle";
-    import { Slider } from "packages/shadcnui/src/slider";
-    import { Progress } from "packages/shadcnui/src/progress";
-    import { Dialog } from "packages/shadcnui/src/dialog";
-    import { Menu } from "packages/shadcnui/src/menu";
-    import { DropdownMenu } from "packages/shadcnui/src/dropdown-menu";
-    import { ContextMenu } from "packages/shadcnui/src/context-menu";
-    import { Tabs } from "packages/shadcnui/src/tabs";
-    import { Steps } from "packages/shadcnui/src/steps";
-    import { Button } from "packages/shadcnui/src/button";
-    import { ScrollView } from "packages/shadcnui/src/scrollview";
-    import { Badge } from "packages/shadcnui/src/badge";
-    import { Separator } from "packages/shadcnui/src/separator";
-    import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "packages/shadcnui/src/card";
-    import { Avatar } from "packages/shadcnui/src/avatar";
-    import { Skeleton } from "packages/shadcnui/src/skeleton";
-    import { Tooltip, TooltipProvider } from "packages/shadcnui/src/tooltip";
-    import { Alert, AlertTitle, AlertDescription } from "packages/shadcnui/src/alert";
-    import { ScrollArea } from "packages/shadcnui/src/scroll-area";
-    import { Sheet } from "packages/shadcnui/src/sheet";
-    import { AspectRatio } from "packages/shadcnui/src/aspect-ratio";
-    import { Accordion } from "packages/shadcnui/src/accordion";
-    import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "packages/shadcnui/src/table";
-    import { Field, Form } from "packages/shadcnui/src/form";
-    import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/shadcnui/src/resizable-panels";
-    import { Waterfall } from "packages/shadcnui/src/waterfall";
+    import { Input } from "packages/shadcn/src/input";
+    import { NumberInput } from "packages/shadcn/src/number-input";
+    import { Textarea } from "packages/shadcn/src/textarea";
+    import { Label } from "packages/shadcn/src/label";
+    import { Checkbox } from "packages/shadcn/src/checkbox";
+    import { CheckboxGroup, CheckboxGroupItem } from "packages/shadcn/src/checkbox-group";
+    import { Radio, RadioGroup, RadioGroupItem } from "packages/shadcn/src/radio";
+    import { Select } from "packages/shadcn/src/select";
+    import { Cascader } from "packages/shadcn/src/cascader";
+    import { DatePicker } from "packages/shadcn/src/date-picker";
+    import { DateRangePicker } from "packages/shadcn/src/date-range-picker";
+    import { TimePicker } from "packages/shadcn/src/time-picker";
+    import { Popover } from "packages/shadcn/src/popover";
+    import { Popconfirm } from "packages/shadcn/src/popconfirm";
+    import { Toast } from "packages/shadcn/src/toast";
+    import { Toggle } from "packages/shadcn/src/toggle";
+    import { Slider } from "packages/shadcn/src/slider";
+    import { Progress } from "packages/shadcn/src/progress";
+    import { Dialog } from "packages/shadcn/src/dialog";
+    import { Menu } from "packages/shadcn/src/menu";
+    import { DropdownMenu } from "packages/shadcn/src/dropdown-menu";
+    import { ContextMenu } from "packages/shadcn/src/context-menu";
+    import { Tabs } from "packages/shadcn/src/tabs";
+    import { Steps } from "packages/shadcn/src/steps";
+    import { Button } from "packages/shadcn/src/button";
+    import { ScrollView } from "packages/shadcn/src/scrollview";
+    import { Badge } from "packages/shadcn/src/badge";
+    import { Separator } from "packages/shadcn/src/separator";
+    import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "packages/shadcn/src/card";
+    import { Avatar } from "packages/shadcn/src/avatar";
+    import { Skeleton } from "packages/shadcn/src/skeleton";
+    import { Tooltip, TooltipProvider } from "packages/shadcn/src/tooltip";
+    import { Alert, AlertTitle, AlertDescription } from "packages/shadcn/src/alert";
+    import { ScrollArea } from "packages/shadcn/src/scroll-area";
+    import { Sheet } from "packages/shadcn/src/sheet";
+    import { AspectRatio } from "packages/shadcn/src/aspect-ratio";
+    import { Accordion } from "packages/shadcn/src/accordion";
+    import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "packages/shadcn/src/table";
+    import { Field, Form } from "packages/shadcn/src/form";
+    import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/shadcn/src/resizable-panels";
+    import { Waterfall } from "packages/shadcn/src/waterfall";
     import "./index.css";
     export { View, Match, DangerouslyInnerHTML, Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, Cascader, DatePicker, DateRangePicker, TimePicker, Presence, Portal, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Show, For, Flex, Button, Txt, ScrollView, Head2, Paragraph, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, };
 }
@@ -12553,7 +12628,7 @@ declare module "packages/shadcnui/src/index" {
 declare module "@timeless/reactive" { export * from "packages/reactive/src/index"; }
 declare module "@timeless/headless" { export * from "packages/headless/src/index"; }
 declare module "@timeless/kit" { export * from "packages/kit/src/index"; }
-declare module "@timeless/shadcnui" { export * from "packages/shadcnui/src/index"; }
+declare module "@timeless/shadcn" { export * from "packages/shadcn/src/index"; }
 declare module "@timeless/icons" { export * from "packages/icons/src/index"; }
 declare module "@timeless/ui" { export * from "packages/ui/src/index"; }
 
@@ -12562,7 +12637,7 @@ declare const Timeless: {
   reactive: typeof import("@timeless/reactive");
   headless: typeof import("@timeless/headless");
   kit: typeof import("@timeless/kit");
-  shadcnui: typeof import("@timeless/shadcnui");
+  shadcn: typeof import("@timeless/shadcn");
   icons: typeof import("@timeless/icons");
   ui: typeof import("@timeless/ui");
   [key: string]: any;
@@ -12704,78 +12779,78 @@ declare const request_factory: typeof import("@timeless/kit").request_factory;
 declare const system: typeof import("@timeless/kit").system;
 declare const utils: typeof import("@timeless/kit").utils;
 
-// @timeless/shadcnui
-declare const Accordion: typeof import("@timeless/shadcnui").Accordion;
-declare const Alert: typeof import("@timeless/shadcnui").Alert;
-declare const AlertDescription: typeof import("@timeless/shadcnui").AlertDescription;
-declare const AlertTitle: typeof import("@timeless/shadcnui").AlertTitle;
-declare const AspectRatio: typeof import("@timeless/shadcnui").AspectRatio;
-declare const Avatar: typeof import("@timeless/shadcnui").Avatar;
-declare const Badge: typeof import("@timeless/shadcnui").Badge;
-declare const Button: typeof import("@timeless/shadcnui").Button;
-declare const Card: typeof import("@timeless/shadcnui").Card;
-declare const CardContent: typeof import("@timeless/shadcnui").CardContent;
-declare const CardDescription: typeof import("@timeless/shadcnui").CardDescription;
-declare const CardFooter: typeof import("@timeless/shadcnui").CardFooter;
-declare const CardHeader: typeof import("@timeless/shadcnui").CardHeader;
-declare const CardTitle: typeof import("@timeless/shadcnui").CardTitle;
-declare const Cascader: typeof import("@timeless/shadcnui").Cascader;
-declare const Checkbox: typeof import("@timeless/shadcnui").Checkbox;
-declare const CheckboxGroup: typeof import("@timeless/shadcnui").CheckboxGroup;
-declare const CheckboxGroupItem: typeof import("@timeless/shadcnui").CheckboxGroupItem;
-declare const ContextMenu: typeof import("@timeless/shadcnui").ContextMenu;
-declare const DangerouslyInnerHTML: typeof import("@timeless/shadcnui").DangerouslyInnerHTML;
-declare const DatePicker: typeof import("@timeless/shadcnui").DatePicker;
-declare const DateRangePicker: typeof import("@timeless/shadcnui").DateRangePicker;
-declare const Dialog: typeof import("@timeless/shadcnui").Dialog;
-declare const DropdownMenu: typeof import("@timeless/shadcnui").DropdownMenu;
-declare const Field: typeof import("@timeless/shadcnui").Field;
-declare const Flex: typeof import("@timeless/shadcnui").Flex;
-declare const For: typeof import("@timeless/shadcnui").For;
-declare const Form: typeof import("@timeless/shadcnui").Form;
-declare const Head2: typeof import("@timeless/shadcnui").Head2;
-declare const Input: typeof import("@timeless/shadcnui").Input;
-declare const Label: typeof import("@timeless/shadcnui").Label;
-declare const Match: typeof import("@timeless/shadcnui").Match;
-declare const Menu: typeof import("@timeless/shadcnui").Menu;
-declare const NumberInput: typeof import("@timeless/shadcnui").NumberInput;
-declare const Paragraph: typeof import("@timeless/shadcnui").Paragraph;
-declare const Popconfirm: typeof import("@timeless/shadcnui").Popconfirm;
-declare const Popover: typeof import("@timeless/shadcnui").Popover;
-declare const Portal: typeof import("@timeless/shadcnui").Portal;
-declare const Presence: typeof import("@timeless/shadcnui").Presence;
-declare const Progress: typeof import("@timeless/shadcnui").Progress;
-declare const Radio: typeof import("@timeless/shadcnui").Radio;
-declare const RadioGroup: typeof import("@timeless/shadcnui").RadioGroup;
-declare const RadioGroupItem: typeof import("@timeless/shadcnui").RadioGroupItem;
-declare const ResizableHandle: typeof import("@timeless/shadcnui").ResizableHandle;
-declare const ResizablePanel: typeof import("@timeless/shadcnui").ResizablePanel;
-declare const ResizablePanels: typeof import("@timeless/shadcnui").ResizablePanels;
-declare const ScrollArea: typeof import("@timeless/shadcnui").ScrollArea;
-declare const ScrollView: typeof import("@timeless/shadcnui").ScrollView;
-declare const Select: typeof import("@timeless/shadcnui").Select;
-declare const Separator: typeof import("@timeless/shadcnui").Separator;
-declare const Sheet: typeof import("@timeless/shadcnui").Sheet;
-declare const Show: typeof import("@timeless/shadcnui").Show;
-declare const Skeleton: typeof import("@timeless/shadcnui").Skeleton;
-declare const Slider: typeof import("@timeless/shadcnui").Slider;
-declare const Steps: typeof import("@timeless/shadcnui").Steps;
-declare const Table: typeof import("@timeless/shadcnui").Table;
-declare const TableBody: typeof import("@timeless/shadcnui").TableBody;
-declare const TableCell: typeof import("@timeless/shadcnui").TableCell;
-declare const TableHead: typeof import("@timeless/shadcnui").TableHead;
-declare const TableHeader: typeof import("@timeless/shadcnui").TableHeader;
-declare const TableRow: typeof import("@timeless/shadcnui").TableRow;
-declare const Tabs: typeof import("@timeless/shadcnui").Tabs;
-declare const Textarea: typeof import("@timeless/shadcnui").Textarea;
-declare const TimePicker: typeof import("@timeless/shadcnui").TimePicker;
-declare const Toast: typeof import("@timeless/shadcnui").Toast;
-declare const Toggle: typeof import("@timeless/shadcnui").Toggle;
-declare const Tooltip: typeof import("@timeless/shadcnui").Tooltip;
-declare const TooltipProvider: typeof import("@timeless/shadcnui").TooltipProvider;
-declare const Txt: typeof import("@timeless/shadcnui").Txt;
-declare const View: typeof import("@timeless/shadcnui").View;
-declare const Waterfall: typeof import("@timeless/shadcnui").Waterfall;
+// @timeless/shadcn
+declare const Accordion: typeof import("@timeless/shadcn").Accordion;
+declare const Alert: typeof import("@timeless/shadcn").Alert;
+declare const AlertDescription: typeof import("@timeless/shadcn").AlertDescription;
+declare const AlertTitle: typeof import("@timeless/shadcn").AlertTitle;
+declare const AspectRatio: typeof import("@timeless/shadcn").AspectRatio;
+declare const Avatar: typeof import("@timeless/shadcn").Avatar;
+declare const Badge: typeof import("@timeless/shadcn").Badge;
+declare const Button: typeof import("@timeless/shadcn").Button;
+declare const Card: typeof import("@timeless/shadcn").Card;
+declare const CardContent: typeof import("@timeless/shadcn").CardContent;
+declare const CardDescription: typeof import("@timeless/shadcn").CardDescription;
+declare const CardFooter: typeof import("@timeless/shadcn").CardFooter;
+declare const CardHeader: typeof import("@timeless/shadcn").CardHeader;
+declare const CardTitle: typeof import("@timeless/shadcn").CardTitle;
+declare const Cascader: typeof import("@timeless/shadcn").Cascader;
+declare const Checkbox: typeof import("@timeless/shadcn").Checkbox;
+declare const CheckboxGroup: typeof import("@timeless/shadcn").CheckboxGroup;
+declare const CheckboxGroupItem: typeof import("@timeless/shadcn").CheckboxGroupItem;
+declare const ContextMenu: typeof import("@timeless/shadcn").ContextMenu;
+declare const DangerouslyInnerHTML: typeof import("@timeless/shadcn").DangerouslyInnerHTML;
+declare const DatePicker: typeof import("@timeless/shadcn").DatePicker;
+declare const DateRangePicker: typeof import("@timeless/shadcn").DateRangePicker;
+declare const Dialog: typeof import("@timeless/shadcn").Dialog;
+declare const DropdownMenu: typeof import("@timeless/shadcn").DropdownMenu;
+declare const Field: typeof import("@timeless/shadcn").Field;
+declare const Flex: typeof import("@timeless/shadcn").Flex;
+declare const For: typeof import("@timeless/shadcn").For;
+declare const Form: typeof import("@timeless/shadcn").Form;
+declare const Head2: typeof import("@timeless/shadcn").Head2;
+declare const Input: typeof import("@timeless/shadcn").Input;
+declare const Label: typeof import("@timeless/shadcn").Label;
+declare const Match: typeof import("@timeless/shadcn").Match;
+declare const Menu: typeof import("@timeless/shadcn").Menu;
+declare const NumberInput: typeof import("@timeless/shadcn").NumberInput;
+declare const Paragraph: typeof import("@timeless/shadcn").Paragraph;
+declare const Popconfirm: typeof import("@timeless/shadcn").Popconfirm;
+declare const Popover: typeof import("@timeless/shadcn").Popover;
+declare const Portal: typeof import("@timeless/shadcn").Portal;
+declare const Presence: typeof import("@timeless/shadcn").Presence;
+declare const Progress: typeof import("@timeless/shadcn").Progress;
+declare const Radio: typeof import("@timeless/shadcn").Radio;
+declare const RadioGroup: typeof import("@timeless/shadcn").RadioGroup;
+declare const RadioGroupItem: typeof import("@timeless/shadcn").RadioGroupItem;
+declare const ResizableHandle: typeof import("@timeless/shadcn").ResizableHandle;
+declare const ResizablePanel: typeof import("@timeless/shadcn").ResizablePanel;
+declare const ResizablePanels: typeof import("@timeless/shadcn").ResizablePanels;
+declare const ScrollArea: typeof import("@timeless/shadcn").ScrollArea;
+declare const ScrollView: typeof import("@timeless/shadcn").ScrollView;
+declare const Select: typeof import("@timeless/shadcn").Select;
+declare const Separator: typeof import("@timeless/shadcn").Separator;
+declare const Sheet: typeof import("@timeless/shadcn").Sheet;
+declare const Show: typeof import("@timeless/shadcn").Show;
+declare const Skeleton: typeof import("@timeless/shadcn").Skeleton;
+declare const Slider: typeof import("@timeless/shadcn").Slider;
+declare const Steps: typeof import("@timeless/shadcn").Steps;
+declare const Table: typeof import("@timeless/shadcn").Table;
+declare const TableBody: typeof import("@timeless/shadcn").TableBody;
+declare const TableCell: typeof import("@timeless/shadcn").TableCell;
+declare const TableHead: typeof import("@timeless/shadcn").TableHead;
+declare const TableHeader: typeof import("@timeless/shadcn").TableHeader;
+declare const TableRow: typeof import("@timeless/shadcn").TableRow;
+declare const Tabs: typeof import("@timeless/shadcn").Tabs;
+declare const Textarea: typeof import("@timeless/shadcn").Textarea;
+declare const TimePicker: typeof import("@timeless/shadcn").TimePicker;
+declare const Toast: typeof import("@timeless/shadcn").Toast;
+declare const Toggle: typeof import("@timeless/shadcn").Toggle;
+declare const Tooltip: typeof import("@timeless/shadcn").Tooltip;
+declare const TooltipProvider: typeof import("@timeless/shadcn").TooltipProvider;
+declare const Txt: typeof import("@timeless/shadcn").Txt;
+declare const View: typeof import("@timeless/shadcn").View;
+declare const Waterfall: typeof import("@timeless/shadcn").Waterfall;
 
 // @timeless/icons
 declare const ArrowDownloadToLineOutlined: typeof import("@timeless/icons").ArrowDownloadToLineOutlined;
@@ -12879,6 +12954,7 @@ declare const RovingFocusCore: typeof import("@timeless/ui").RovingFocusCore;
 declare const ScrollViewCore: typeof import("@timeless/ui").ScrollViewCore;
 declare const SelectCore: typeof import("@timeless/ui").SelectCore;
 declare const SelectInListCore: typeof import("@timeless/ui").SelectInListCore;
+declare const ShortcutModel: typeof import("@timeless/ui").ShortcutModel;
 declare const SimpleSelectCore: typeof import("@timeless/ui").SimpleSelectCore;
 declare const SingleFieldCore: typeof import("@timeless/ui").SingleFieldCore;
 declare const StepCore: typeof import("@timeless/ui").StepCore;

@@ -2,6 +2,7 @@ import { articles } from "./data.js";
 
 export default function ArticleContentPageView(props) {
   const { id } = props.view.query;
+  console.log('[]ArticleContentPageView create', id);
 
   const article = refobj(null);
   const loading = ref(true);

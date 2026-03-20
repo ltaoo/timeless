@@ -32,6 +32,7 @@ export interface ViewProps {
   onFocus?(e: FocusEvent): void;
   onBlur?(e: FocusEvent): void;
   onKeyDown?: (e: KeyboardEvent) => void;
+  onContextMenu?: (e: MouseEvent) => void;
   onMouseEnter?: (e: MouseEvent) => void;
   onMouseLeave?: (e: MouseEvent) => void;
   onDragStart?: (e: DragEvent) => void;
@@ -65,6 +66,7 @@ export function View(
     onBlur,
     onPointerDown,
     onKeyDown,
+    onContextMenu,
     onMouseEnter,
     onMouseLeave,
     onDragStart,
@@ -239,6 +241,11 @@ export function View(
       if (onKeyDown) {
         $elm.addEventListener("keydown", function (event: KeyboardEvent) {
           if (onKeyDown) onKeyDown(event);
+        });
+      }
+      if (onContextMenu) {
+        $elm.addEventListener("contextmenu", function (event: MouseEvent) {
+          if (onContextMenu) onContextMenu(event);
         });
       }
       if (onMouseEnter) {

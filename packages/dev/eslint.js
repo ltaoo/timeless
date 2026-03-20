@@ -301,6 +301,7 @@ export const globals = {
   ScrollViewCore: "readonly",
   SelectCore: "readonly",
   SelectInListCore: "readonly",
+  ShortcutModel: "readonly",
   SimpleSelectCore: "readonly",
   SingleFieldCore: "readonly",
   StepCore: "readonly",

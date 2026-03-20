@@ -64,6 +64,8 @@ export default function OverlayView() {
     { pageSize: 10 },
   );
 
+  const contextFocusedRecord_ = refobj(null);
+
   const ui = {
     view$: new Timeless.ui.ScrollViewCore({
       onScroll(pos) {
@@ -80,7 +82,27 @@ export default function OverlayView() {
       buffer: 3,
       gutter: 0,
     }),
+    contextMenu$: new Timeless.ui.ContextMenuCore({
+      offsetY: -6,
+      items: [
+        new Timeless.ui.MenuItemCore({
+          label: "Delete",
+          onClick() {
+            if (contextFocusedRecord_.value) {
+              const record = contextFocusedRecord_.value;
+              ui.waterfall$.methods.deleteCell((item) => item.id === record.id);
+              list$.deleteItem((item) => item.id === record.id);
+              ui.contextMenu$.hide();
+            }
+          },
+        }),
+      ],
+    }),
   };
+
+  ui.contextMenu$.menu.onHide(() => {
+    contextFocusedRecord_.as(null);
+  });
 
   list$.onDataSourceChange(({ dataSource, reason }) => {
     if (reason === "init") {
@@ -246,62 +268,77 @@ export default function OverlayView() {
           class: "bg-white dark:bg-zinc-950",
         },
         [
-          Waterfall({
-            store: ui.waterfall$,
-            class: "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
-            /** @param {{name: string; size: number}} task  */
-            render(task) {
-              return View(
-                {
-                  class: cn([
-                    "flex items-center gap-3 px-3 py-2.5",
-                    "border-b border-zinc-100 dark:border-zinc-800",
-                  ]),
-                },
-                [
-                  View(
-                    {
-                      class: cn([
-                        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                        "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                      ]),
+          ContextMenu({ store: ui.contextMenu$ }, [
+            Waterfall({
+              store: ui.waterfall$,
+              class: "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
+              /** @param {{ id: number; name: string; size: number}} task  */
+              render(task) {
+                return View(
+                  {
+                    // "data-context-id": task.id,
+                    class: cn([
+                      "flex items-center gap-3 px-3 py-2.5",
+                      "border-b border-zinc-100 dark:border-zinc-800",
+                      "transition-colors",
+                      computed(contextFocusedRecord_, (t) => {
+                        return t && t.id === task.id
+                          ? "bg-blue-50 dark:bg-blue-950/30"
+                          : "";
+                      }),
+                    ]),
+                    onContextMenu(event) {
+                      contextFocusedRecord_.as(task);
                     },
-                    [
-                      (() => {
-                        if (task.name) {
-                          const ext = task.name.split(".").pop().toUpperCase();
-                          return ext.length <= 4 ? ext : "FILE";
-                        }
-                        return "FILE";
-                      })(),
-                    ],
-                  ),
-                  View({ class: "flex-1 min-w-0" }, [
+                  },
+                  [
+                    View(
+                      {
+                        class: cn([
+                          "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                          "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                        ]),
+                      },
+                      [
+                        (() => {
+                          if (task.name) {
+                            const ext = task.name
+                              .split(".")
+                              .pop()
+                              .toUpperCase();
+                            return ext.length <= 4 ? ext : "FILE";
+                          }
+                          return "FILE";
+                        })(),
+                      ],
+                    ),
+                    View({ class: "flex-1 min-w-0" }, [
+                      View(
+                        {
+                          class:
+                            "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                        },
+                        [task.name],
+                      ),
+                      View(
+                        {
+                          class: "mt-0.5 text-xs text-emerald-500",
+                        },
+                        [task.size],
+                      ),
+                    ]),
                     View(
                       {
                         class:
-                          "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                          "flex-shrink-0 text-xs text-emerald-500 font-medium",
                       },
-                      [task.name],
+                      ["Done"],
                     ),
-                    View(
-                      {
-                        class: "mt-0.5 text-xs text-emerald-500",
-                      },
-                      [task.size],
-                    ),
-                  ]),
-                  View(
-                    {
-                      class:
-                        "flex-shrink-0 text-xs text-emerald-500 font-medium",
-                    },
-                    ["Done"],
-                  ),
-                ],
-              );
-            },
-          }),
+                  ],
+                );
+              },
+            }),
+          ]),
           View(
             {
               class: cn(["py-3 text-center text-xs text-zinc-400"]),
