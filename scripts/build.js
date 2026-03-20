@@ -14,6 +14,7 @@ const INCLUDED_PACKAGES = [
   "provider-web",
   "reactive",
   "shadcn",
+  "utils",
   "ui",
 ];
 
