@@ -71,6 +71,18 @@ const routesConfigure = {
         pathname: "/settings",
         component: Timeless.lazy("@/pages/settings/index.js"),
       },
+      article: {
+        title: "博客",
+        pathname: "/article",
+        component: Timeless.lazy("@/pages/article/index.js"),
+        children: {
+          content: {
+            title: "博客详情",
+            pathname: "/article/detail",
+            component: Timeless.lazy("@/pages/article/content.js"),
+          },
+        },
+      },
     },
     options: {
       require: [],
@@ -179,12 +191,12 @@ export const app = new Timeless.ApplicationModel({
     //   history.push("root.login", { redirect: route.pathname });
     //   return Timeless.Result.Err("need login");
     // }
-    if (!history.isLayout(route.name)) {
-      history.push(route.name, query, { ignore: true });
-      return Timeless.Result.Ok(null);
-    }
-    history.push(defaultRouteName, {}, { ignore: true });
+    // if (!history.isLayout(route.name)) {
+    // }
+    history.push(route.name, query, { ignore: true });
     return Timeless.Result.Ok(null);
+    // history.push(defaultRouteName, {}, { ignore: true });
+    // return Timeless.Result.Ok(null);
   },
 });
 Timeless.web.provide_app(app);

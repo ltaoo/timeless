@@ -116,10 +116,10 @@ export class HistoryCore<
     // console.log("-----------");
     // console.log("[DOMAIN]history/index - push target url is", name, "and cur href is", this.$router.href);
     const { ignore } = options;
-    if (this.isLayout(name)) {
-      console.log("[DOMAIN]history/index - the target url is layout", name);
-      return;
-    }
+    // if (this.isLayout(name)) {
+    //   console.log("[DOMAIN]history/index - the target url is layout", name);
+    //   return;
+    // }
     const route1 = this.routes[name];
     if (!route1) {
       console.log("[DOMAIN]history/index - push 2. no matched route", name);
@@ -478,10 +478,10 @@ export class HistoryCore<
     // console.log("-----------");
     // console.log("[DOMAIN]history/index - push target url is", name, "and cur href is", this.$router.href);
     const { ignore } = options;
-    if (this.isLayout(name)) {
-      console.warn("[timeless]history/index - the target url is layout", name);
-      return;
-    }
+    // if (this.isLayout(name)) {
+    //   console.warn("[timeless]history/index - the target url is layout", name);
+    //   return;
+    // }
     const route1 = this.routes[name];
     if (!route1) {
       console.warn("[timeless]history/index - push 2. no matched route", name);
