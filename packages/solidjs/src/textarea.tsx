@@ -1,19 +1,22 @@
 import { createSignal } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
-import * as ui from '@timeless/ui';
-import { ShortcutModel } from "@timeless/kit/src/shortcut/shortcut";
+import * as ui from "@timeless/ui";
 
 export interface TextareaProps extends HTMLTextAreaElement {}
 
-const Textarea = (props: { store: ui.InputCore<string> } & JSX.HTMLAttributes<HTMLTextAreaElement>) => {
+const Textarea = (
+  props: {
+    store: ui.InputCore<string>;
+  } & JSX.HTMLAttributes<HTMLTextAreaElement>,
+) => {
   const { store, class: className, ...restProps } = props;
 
   const [state, setState] = createSignal(store.state);
   store.onStateChange((nextState) => {
     setState(nextState);
   });
-  const $shortcut = ShortcutModel({});
+  const $shortcut = ui.ShortcutModel({});
   $shortcut.methods.register({
     "ShiftLeft+Enter"(event) {
       // ...
@@ -21,6 +24,7 @@ const Textarea = (props: { store: ui.InputCore<string> } & JSX.HTMLAttributes<HT
     Enter(event) {
       event.preventDefault();
       console.log($shortcut.state.codes);
+      // @ts-ignore
       store.handleKeyDown(event);
     },
   });
@@ -33,8 +37,7 @@ const Textarea = (props: { store: ui.InputCore<string> } & JSX.HTMLAttributes<HT
     <textarea
       ref={props.ref}
       classList={{
-        "flex h-20 w-full rounded-xl border-2 border-w-fg-3 text-w-fg-0 bg-transparent py-2 px-3 placeholder:text-w-fg-2 focus:outline-none focus:ring-2 focus:ring-w-bg-3 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-50 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-900":
-          true,
+        "flex h-20 w-full rounded-xl border-2 border-w-fg-3 text-w-fg-0 bg-transparent py-2 px-3 placeholder:text-w-fg-2 focus:outline-none focus:ring-2 focus:ring-w-bg-3 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-50 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-900": true,
         [props.class ?? ""]: true,
       }}
       value={value()}

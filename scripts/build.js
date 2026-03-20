@@ -5,29 +5,19 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
 const PACKAGES_DIR = path.join(ROOT, "packages");
 
-// Parse --filter "!./packages/xxx" from root package.json build script
-const rootPkg = JSON.parse(
-  fs.readFileSync(path.join(ROOT, "package.json"), "utf-8")
-);
-const buildScript = rootPkg.scripts.build;
-const ignorePattern = /--filter\s+"!\.\/packages\/([^"]+)"/g;
-const ignored = new Set();
-let match;
-while ((match = ignorePattern.exec(buildScript)) !== null) {
-  ignored.add(match[1]);
-}
+// Explicitly configure which packages to build
+const INCLUDED_PACKAGES = [
+  "base",
+  "headless",
+  "icons",
+  "kit",
+  "provider-web",
+  "reactive",
+  "shadcn",
+  "ui",
+];
 
-// Also ignore apps
-ignored.add("__apps__"); // placeholder so apps filter logic is separate
-
-console.log("Ignored packages:", [...ignored].filter((x) => x !== "__apps__"));
-
-// Scan packages/, filter out ignored and those without a build script
-const packageDirs = fs
-  .readdirSync(PACKAGES_DIR, { withFileTypes: true })
-  .filter((d) => d.isDirectory())
-  .map((d) => d.name)
-  .filter((name) => !ignored.has(name));
+const packageDirs = INCLUDED_PACKAGES;
 
 const buildTargets = [];
 for (const name of packageDirs) {
@@ -44,14 +34,10 @@ console.log(
   buildTargets.map((t) => t.dir)
 );
 
-// Reconstruct filter args
-const filterArgs = [
-  '--filter "./packages/*"',
-  '--filter "!./apps/*"',
-  ...Array.from(ignored)
-    .filter((x) => x !== "__apps__")
-    .map((x) => `--filter "!./packages/${x}"`),
-];
+// Construct filter args from inclusion list
+const filterArgs = INCLUDED_PACKAGES.map(
+  (name) => `--filter "./packages/${name}"`
+);
 
 const isProd = process.argv.includes("--prod");
 const env = isProd ? "TIMELESS_PROD=1 " : "";
