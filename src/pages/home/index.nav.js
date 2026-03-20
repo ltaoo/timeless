@@ -32,19 +32,21 @@ export default function NavigationView() {
     Section("Accordion", [
       Item("Default", [
         Accordion({
+          store: Timeless.ui.AccordionCore({ type: "single" }),
           items: [
             {
               title: "Is it accessible?",
-              content: "Yes. It adheres to the WAI-ARIA design pattern.",
+              content: ["Yes. It adheres to the WAI-ARIA design pattern."],
             },
             {
               title: "Is it styled?",
-              content:
+              content: [
                 "Yes. It comes with default styles that match the other components.",
+              ],
             },
             {
               title: "Is it animated?",
-              content: "Yes. It uses CSS transitions for smooth open/close.",
+              content: ["Yes. It uses CSS transitions for smooth open/close."],
             },
           ],
         }),

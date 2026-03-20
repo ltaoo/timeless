@@ -27,39 +27,61 @@ const routesConfigure = {
           form: {
             title: "表单组件",
             pathname: "/home/index/form",
-            component: lazy("@/pages/home/index.form.js"),
+            component: Timeless.lazy("@/pages/home/index.form.js"),
+          },
+          validate: {
+            title: "表单组件",
+            pathname: "/home/index/validate",
+            component: Timeless.lazy("@/pages/home/index.validate.js"),
           },
           data: {
             title: "数据展示组件",
             pathname: "/home/index/data",
-            component: lazy("@/pages/home/index.data.js"),
+            component: Timeless.lazy("@/pages/home/index.data.js"),
+          },
+          scroll: {
+            title: "滚动容器",
+            pathname: "/home/index/scroll",
+            component: Timeless.lazy("@/pages/home/index.scroll.js"),
           },
           feedback: {
             title: "反馈组件",
             pathname: "/home/index/feedback",
-            component: lazy("@/pages/home/index.feedback.js"),
+            component: Timeless.lazy("@/pages/home/index.feedback.js"),
           },
           nav: {
             title: "导航组件",
             pathname: "/home/index/nav",
-            component: lazy("@/pages/home/index.nav.js"),
+            component: Timeless.lazy("@/pages/home/index.nav.js"),
           },
           overlay: {
             title: "浮层组件",
             pathname: "/home/index/overlay",
-            component: lazy("@/pages/home/index.overlay.js"),
+            component: Timeless.lazy("@/pages/home/index.overlay.js"),
           },
           debug: {
             title: "调试",
             pathname: "/home/index/debug",
-            component: lazy("@/pages/home/index.debug.js"),
+            component: Timeless.lazy("@/pages/home/index.debug.js"),
           },
         },
       },
       settings: {
         title: "设置",
         pathname: "/settings",
-        component: lazy("@/pages/settings/index.js"),
+        component: Timeless.lazy("@/pages/settings/index.js"),
+      },
+      article: {
+        title: "博客",
+        pathname: "/article",
+        component: Timeless.lazy("@/pages/article/index.js"),
+        children: {
+          content: {
+            title: "博客详情",
+            pathname: "/article/detail",
+            component: Timeless.lazy("@/pages/article/content.js"),
+          },
+        },
       },
     },
     options: {
@@ -169,12 +191,12 @@ export const app = new Timeless.ApplicationModel({
     //   history.push("root.login", { redirect: route.pathname });
     //   return Timeless.Result.Err("need login");
     // }
-    if (!history.isLayout(route.name)) {
-      history.push(route.name, query, { ignore: true });
-      return Timeless.Result.Ok(null);
-    }
-    history.push(defaultRouteName, {}, { ignore: true });
+    // if (!history.isLayout(route.name)) {
+    // }
+    history.push(route.name, query, { ignore: true });
     return Timeless.Result.Ok(null);
+    // history.push(defaultRouteName, {}, { ignore: true });
+    // return Timeless.Result.Ok(null);
   },
 });
 Timeless.web.provide_app(app);

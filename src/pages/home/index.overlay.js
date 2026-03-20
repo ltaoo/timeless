@@ -32,14 +32,14 @@ export default function OverlayView() {
           [
             Button(
               {
-                variant: "outline",
                 store: new Timeless.ui.ButtonCore({
+                  variant: "outline",
                   onClick() {
                     console.log("click Open Menu");
                   },
                 }),
               },
-              [Txt("Open Menu")],
+              ["Open Menu"],
             ),
           ],
         ),
@@ -95,7 +95,7 @@ export default function OverlayView() {
               ],
             }),
           },
-          [Button({}, [Txt("With Submenu")])],
+          [Button({ store: new Timeless.ui.ButtonCore({}) }, ["With Submenu"])],
         ),
       ]),
       Item("Dynamic Submenu", [
@@ -151,7 +151,10 @@ export default function OverlayView() {
             ],
           });
           return DropdownMenu({ store: dm$ }, [
-            Button({ variant: "outline" }, [Txt("Dynamic Submenu")]),
+            Button(
+              { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
+              ["Dynamic Submenu"],
+            ),
           ]);
         })(),
       ]),
@@ -182,7 +185,12 @@ export default function OverlayView() {
               ],
             }),
           },
-          [Button({ variant: "outline" }, [Txt("Hover Me")])],
+          [
+            Button(
+              { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
+              ["Hover Me"],
+            ),
+          ],
         ),
       ]),
       Item("Context Menu", [
@@ -285,7 +293,12 @@ export default function OverlayView() {
                   ],
                 }),
               },
-              [Button({ variant: "outline" }, [Txt("Open Menu")])],
+              [
+                Button(
+                  { variant: "outline", store: new Timeless.ui.ButtonCore({}) },
+                  ["Open Menu"],
+                ),
+              ],
             ),
           ],
         ),
@@ -323,68 +336,59 @@ export default function OverlayView() {
                   ],
                 }),
               },
-              [Button({ variant: "outline" }, [Txt("Open Menu")])],
+              [
+                Button(
+                  { variant: "outline", store: new Timeless.ui.ButtonCore({}) },
+                  ["Open Menu"],
+                ),
+              ],
             ),
           ],
         ),
       ]),
       Item("Tooltip", [
         View({ class: cn(["flex gap-2"]) }, [
-          Tooltip({ content: "Top tooltip" }, [
-            Button({ variant: "outline", size: "sm" }, [Txt("Top")]),
+          Tooltip({ content: ["Top tooltip"] }, [
+            Button(
+              {
+                variant: "outline",
+                size: "sm",
+                store: new Timeless.ui.ButtonCore({}),
+              },
+              ["Top"],
+            ),
           ]),
-          Tooltip({ content: "Bottom tooltip", side: "bottom" }, [
-            Button({ variant: "outline", size: "sm" }, [Txt("Bottom")]),
+          Tooltip({ side: "bottom", content: ["Bottom tooltip"] }, [
+            Button(
+              {
+                variant: "outline",
+                size: "sm",
+                store: new Timeless.ui.ButtonCore({}),
+              },
+              ["Bottom"],
+            ),
           ]),
-          Tooltip({ content: "Left tooltip", side: "left" }, [
-            Button({ variant: "outline", size: "sm" }, [Txt("Left")]),
+          Tooltip({ side: "left", content: ["Left tooltip"] }, [
+            Button(
+              {
+                variant: "outline",
+                size: "sm",
+                store: new Timeless.ui.ButtonCore({}),
+              },
+              ["Left"],
+            ),
           ]),
-          Tooltip({ content: "Right tooltip", side: "right" }, [
-            Button({ variant: "outline", size: "sm" }, [Txt("Right")]),
+          Tooltip({ side: "right", content: ["Right tooltip"] }, [
+            Button(
+              {
+                variant: "outline",
+                size: "sm",
+                store: new Timeless.ui.ButtonCore({}),
+              },
+              ["Right"],
+            ),
           ]),
         ]),
-      ]),
-    ]),
-    Section("Popover", [
-      Item("Default", [
-        (() => {
-          const popover$ = new Timeless.ui.PopoverCore({
-            align: "middle",
-          });
-          return View({ class: cn(["inline-block"]) }, [
-            Popover(
-              {
-                store: popover$,
-                title: [
-                  View(
-                    {
-                      class:
-                        "w-[200px] h-[30px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
-                    },
-                    [Txt("Popover Title")],
-                  ),
-                ],
-                content: [
-                  View(
-                    {
-                      class:
-                        "w-[200px] h-[100px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
-                    },
-                    [Txt("Popover Content")],
-                  ),
-                ],
-              },
-              [
-                Button(
-                  {
-                    variant: "outline",
-                  },
-                  [Txt("Open Popover")],
-                ),
-              ],
-            ),
-          ]);
-        })(),
       ]),
     ]),
   ]);

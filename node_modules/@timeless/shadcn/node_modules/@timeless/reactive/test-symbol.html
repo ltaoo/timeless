@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Symbol Test</title>
+</head>
+<body>
+  <h1>Symbol Polyfill Test</h1>
+  <div id="result"></div>
+  
+  <script>
+    // 模拟 Symbol 被破坏的情况
+    const originalSymbol = window.Symbol;
+    window.Symbol = undefined;
+    
+    // 添加 polyfill
+    (function() {
+      if (typeof Symbol === 'undefined' || typeof Symbol.iterator === 'undefined') {
+        if (typeof Symbol === 'undefined') {
+          window.Symbol = function(description) {
+            return '__symbol_' + description + '_' + Math.random();
+          };
+          window.Symbol.for = function(key) {
+            return '__symbol_for_' + key;
+          };
+        }
+        if (typeof Symbol.iterator === 'undefined') {
+          Symbol.iterator = Symbol('iterator');
+        }
+        if (typeof Symbol.toStringTag === 'undefined') {
+          Symbol.toStringTag = Symbol('toStringTag');
+        }
+      }
+    })();
+    
+    // 测试
+    const result = document.getElementById('result');
+    try {
+      const iter = Symbol.iterator;
+      const tag = Symbol.toStringTag;
+      result.innerHTML = '<p style="color: green;">✓ Symbol polyfill works!</p>' +
+                        '<p>Symbol.iterator: ' + iter + '</p>' +
+                        '<p>Symbol.toStringTag: ' + tag + '</p>';
+    } catch (e) {
+      result.innerHTML = '<p style="color: red;">✗ Error: ' + e.message + '</p>';
+    }
+  </script>
+</body>
+</html>

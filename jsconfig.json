@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "checkJs": true,
+    "allowJs": true,
+    "types": ["@timeless/dev"],
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@timeless/shadcn": ["../../packages/shadcn/src/index.js"],
+      "@timeless/weui": ["../../packages/weui/src/index.js"],
+      "@timeless/headless": ["../../packages/headless/src/index.js"]
+    }
+  },
+  "include": [
+    "src/**/*.js",
+    "types/index.d.ts",
+    "types/timeless.umd.d.ts",
+    "types/prosemirror.d.ts",
+    "../web-vue/example-weui.js"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

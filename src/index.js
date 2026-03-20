@@ -33,5 +33,5 @@ document.addEventListener("DOMContentLoaded", function () {
     width: innerWidth,
     height: innerHeight,
   });
-  render(ApplicationRootView(), document.querySelector("#root"));
+  Timeless.render(ApplicationRootView(), document.querySelector("#root"));
 });

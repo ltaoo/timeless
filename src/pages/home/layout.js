@@ -17,6 +17,7 @@ export default function HomeLayoutView(props) {
     history: props.history,
     menus: [
       { title: "Home", url: "root.home_layout.index" },
+      { title: "Article", url: "root.home_layout.article" },
       { title: "Settings", url: "root.home_layout.settings" },
     ],
   });
@@ -60,7 +61,17 @@ export default function HomeLayoutView(props) {
         ),
 
         // Middle spacer
-        View({ class: "flex-1" }, []),
+        View({ class: "flex-1" }, [
+          View(
+            {
+              class: "cursor-pointer",
+              onClick() {
+                props.history.push("root.home_layout.article");
+              },
+            },
+            ["Article"],
+          ),
+        ]),
 
         // Bottom Actions
         View({ class: "flex flex-col gap-6 items-center mb-4" }, [
@@ -172,17 +183,13 @@ export default function HomeLayoutView(props) {
                     },
                   },
                   [
-                    View(
-                      {
-                        type: "img",
-                        class: "w-full h-full object-cover",
-                        onMounted($elm) {
-                          $elm.src = "public/avatar.jpeg";
-                          $elm.alt = "User Avatar";
-                        },
+                    Img({
+                      class: "w-full h-full object-cover",
+                      onMounted($elm) {
+                        $elm.src = "public/avatar.jpeg";
+                        $elm.alt = "User Avatar";
                       },
-                      [],
-                    ),
+                    }),
                   ],
                 ),
               ],

@@ -19,15 +19,17 @@ export default function NotFoundPageView(props) {
         View({ class: "mt-8" }, [
           Button(
             {
-              class: cn([
-                "px-6 py-3 rounded-lg font-medium transition-opacity",
-                "bg-[var(--foreground)] text-[var(--background)] hover:opacity-90"
-              ]),
-              onClick() {
-                props.history.push("root.home_layout.index");
-              },
+              store: new Timeless.ui.ButtonCore({
+                class: cn([
+                  "px-6 py-3 rounded-lg font-medium transition-opacity",
+                  "bg-[var(--foreground)] text-[var(--background)] hover:opacity-90",
+                ]),
+                onClick() {
+                  props.history.push("root.home_layout.index");
+                },
+              }),
             },
-            [Txt("返回首页")]
+            [Txt("返回首页")],
           ),
         ]),
       ]),
