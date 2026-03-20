@@ -5,8 +5,6 @@ import { useViewModelStore } from "@/hooks";
 import { Input as InputPrimitive } from "@/packages/ui/input";
 
 import * as ui from '@timeless/ui';
-// @ts-ignore
-import { connect } from "@timeless/kit/ui/form/input/connect.web";
 
 const Input = (props: { store: ui.InputCore<any>; prefix?: JSX.Element; class?: string }) => {
   // const { store, prefix } = props;

@@ -2,13 +2,15 @@
  * @file 输入框
  */
 import { JSX, onMount } from "solid-js";
+import { InputCore } from "@timeless/ui";
 
 import { useViewModelStore } from "@/hooks";
 
-import { InputCore } from "@/domains/ui/form/input";
-import { connect } from "@/domains/ui/form/input/connect.web";
+// import { connect } from "@/domains/ui/form/input/connect.web";
 
-const Input = (props: { store: InputCore<any> } & JSX.HTMLAttributes<HTMLInputElement>) => {
+const Input = (
+  props: { store: InputCore<any> } & JSX.HTMLAttributes<HTMLInputElement>,
+) => {
   let ref: HTMLInputElement | undefined;
   const [state, vm] = useViewModelStore(props.store);
 
@@ -17,7 +19,7 @@ const Input = (props: { store: InputCore<any> } & JSX.HTMLAttributes<HTMLInputEl
     if (!$input) {
       return;
     }
-    connect(vm, $input);
+    // connect(vm, $input);
     vm.setMounted();
   });
 
