@@ -10062,7 +10062,7 @@ declare module "packages/kit/src/history/index" {
             /** 不变更 history stack */
             ignore: boolean;
         }>): any;
-        replace(name: K, query?: Record<string, string>): any;
+        replace(name: K, query?: Record<string, string>): void;
         back(opt?: Partial<{
             data: any;
         }>): void;
@@ -10074,7 +10074,7 @@ declare module "packages/kit/src/history/index" {
             ignore: boolean;
         }>): any;
         /** 跳转到兄弟页面 */
-        ensureParent(view: RouteViewCore): any;
+        ensureParent(view: RouteViewCore, query?: Record<string, string>): any;
         buildURL(name: K, query?: Record<string, string>): any;
         buildURLWithPrefix(name: K, query?: Record<string, string>): any;
         isRoot(name: K): boolean;
@@ -10483,6 +10483,11 @@ declare module "packages/kit/src/route_view/index" {
         ready(): void;
         /** 让自身的一个子视图变为可见 */
         showView(sub_view: RouteViewCore, options?: Partial<{
+            reason: "show_sibling" | "back" | "forward";
+            destroy: boolean;
+        }>): void;
+        /** 清除当前子视图（隐藏并通知） */
+        clearCurView(options?: Partial<{
             reason: "show_sibling" | "back" | "forward";
             destroy: boolean;
         }>): void;
@@ -11271,14 +11276,15 @@ declare module "packages/kit/src/index" {
     export * from "packages/kit/src/multiple/index";
 }
 declare module "packages/headless/src/keep-alive-sub-views" {
-    import { RouteViewCore, HistoryCore, StorageCore, HttpClientCore } from "packages/kit/src/index";
+    import { RouteViewCore, HistoryCore, StorageCore, HttpClientCore, ApplicationModel } from "packages/kit/src/index";
     import { TimelessComponent, TimelessElement, ViewProps } from "packages/headless/src/view";
     export function KeepAliveSubViews(props: ViewProps & {
         view: RouteViewCore;
+        views: Record<string, TimelessComponent>;
+        app: ApplicationModel<any>;
         history: HistoryCore<any, any>;
         storage: StorageCore<any>;
         client: HttpClientCore;
-        views: Record<string, TimelessComponent>;
         NotFound?: (...args: any[]) => TimelessElement;
     }): {
         t: string;
@@ -11287,16 +11293,16 @@ declare module "packages/headless/src/keep-alive-sub-views" {
         onUnmounted(): void;
     };
 }
-declare module "packages/headless/src/sub-views" {
+declare module "packages/headless/src/standard-sub-views" {
     import { RouteViewCore, HistoryCore, StorageCore, HttpClientCore, ApplicationModel } from "packages/kit/src/index";
     import { TimelessComponent, TimelessElement, ViewProps } from "packages/headless/src/view";
-    export function RouteSubViews(props: ViewProps & {
+    export function StandardSubViews(props: ViewProps & {
         view: RouteViewCore;
+        views: Record<string, TimelessComponent>;
         app: ApplicationModel<any>;
         history: HistoryCore<any, any>;
         storage: StorageCore<any>;
         client: HttpClientCore;
-        views: Record<string, TimelessComponent>;
         NotFound?: (...args: any[]) => TimelessElement;
     }): {
         t: string;
@@ -11375,7 +11381,7 @@ declare module "packages/headless/src/index" {
     export * as ScrollViewPrimitive from "packages/headless/src/scroll-view";
     export * as WaterfallPrimitive from "packages/headless/src/waterfall";
     export * from "packages/headless/src/keep-alive-sub-views";
-    export * from "packages/headless/src/sub-views";
+    export * from "packages/headless/src/standard-sub-views";
     export * from "packages/headless/src/lazy";
     export * from "packages/headless/src/render";
     export * from "packages/headless/src/h";
@@ -12577,6 +12583,19 @@ declare module "packages/shadcn/src/waterfall" {
         render: (payload: T, cell: WaterfallCellModel<T>) => TimelessElement;
     }): TimelessElement;
 }
+declare module "packages/shadcn/src/history-panel" {
+    import { HistoryCore } from "packages/kit/src/index";
+    import { ViewProps } from "packages/headless/src/index";
+    export function HistoryPanel(props: ViewProps & {
+        store: HistoryCore<string, any>;
+    }): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
 declare module "packages/shadcn/src/index" {
     import { View, Match, DangerouslyInnerHTML, Presence, Portal, Show, For, Flex, Txt, Head2, Paragraph } from "packages/headless/src/index";
     import { Input } from "packages/shadcn/src/input";
@@ -12620,8 +12639,9 @@ declare module "packages/shadcn/src/index" {
     import { Field, Form } from "packages/shadcn/src/form";
     import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/shadcn/src/resizable-panels";
     import { Waterfall } from "packages/shadcn/src/waterfall";
+    import { HistoryPanel } from "packages/shadcn/src/history-panel";
     import "./index.css";
-    export { View, Match, DangerouslyInnerHTML, Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, Cascader, DatePicker, DateRangePicker, TimePicker, Presence, Portal, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Show, For, Flex, Button, Txt, ScrollView, Head2, Paragraph, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, };
+    export { View, Match, DangerouslyInnerHTML, Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, Cascader, DatePicker, DateRangePicker, TimePicker, Presence, Portal, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Show, For, Flex, Button, Txt, ScrollView, Head2, Paragraph, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, };
 }
 
 // === Package module aliases ===
@@ -12690,13 +12710,13 @@ declare const Ref: typeof import("@timeless/headless").Ref;
 declare const RefArray: typeof import("@timeless/headless").RefArray;
 declare const RefObject: typeof import("@timeless/headless").RefObject;
 declare const ResizablePanelsPrimitive: typeof import("@timeless/headless").ResizablePanelsPrimitive;
-declare const RouteSubViews: typeof import("@timeless/headless").RouteSubViews;
 declare const STUB_MARKER: typeof import("@timeless/headless").STUB_MARKER;
 declare const SVG: typeof import("@timeless/headless").SVG;
 declare const ScrollViewPrimitive: typeof import("@timeless/headless").ScrollViewPrimitive;
 declare const SelectPrimitive: typeof import("@timeless/headless").SelectPrimitive;
 declare const SheetPrimitive: typeof import("@timeless/headless").SheetPrimitive;
 declare const SliderPrimitive: typeof import("@timeless/headless").SliderPrimitive;
+declare const StandardSubViews: typeof import("@timeless/headless").StandardSubViews;
 declare const StepsPrimitive: typeof import("@timeless/headless").StepsPrimitive;
 declare const Stop: typeof import("@timeless/headless").Stop;
 declare const StyleRef: typeof import("@timeless/headless").StyleRef;
@@ -12809,6 +12829,7 @@ declare const Flex: typeof import("@timeless/shadcn").Flex;
 declare const For: typeof import("@timeless/shadcn").For;
 declare const Form: typeof import("@timeless/shadcn").Form;
 declare const Head2: typeof import("@timeless/shadcn").Head2;
+declare const HistoryPanel: typeof import("@timeless/shadcn").HistoryPanel;
 declare const Input: typeof import("@timeless/shadcn").Input;
 declare const Label: typeof import("@timeless/shadcn").Label;
 declare const Match: typeof import("@timeless/shadcn").Match;

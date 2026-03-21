@@ -45,6 +45,7 @@ export default function ArticleCategoryListPageView(props) {
                     ),
                   ]),
                   onClick() {
+                    curCateId.as(category.id);
                     props.history.push("root.home_layout.article.category", {
                       cate_id: category.id,
                     });
@@ -78,7 +79,7 @@ export default function ArticleCategoryListPageView(props) {
       ],
     ),
     View({ class: "relative flex-1 w-0 h-full overflow-y-auto" }, [
-      h(RouteSubViews, {
+      h(StandardSubViews, {
         ...props,
       }),
     ]),

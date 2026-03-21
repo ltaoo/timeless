@@ -272,15 +272,15 @@
       "import": "./dist/slider/index.esm.js",
       "require": "./dist/slider/index.js"
     },
+    "./standard-sub-views": {
+      "types": "./dist/standard-sub-views/index.d.ts",
+      "import": "./dist/standard-sub-views/index.esm.js",
+      "require": "./dist/standard-sub-views/index.js"
+    },
     "./steps": {
       "types": "./dist/steps/index.d.ts",
       "import": "./dist/steps/index.esm.js",
       "require": "./dist/steps/index.js"
-    },
-    "./sub-views": {
-      "types": "./dist/sub-views/index.d.ts",
-      "import": "./dist/sub-views/index.esm.js",
-      "require": "./dist/sub-views/index.js"
     },
     "./svg": {
       "types": "./dist/svg/index.d.ts",

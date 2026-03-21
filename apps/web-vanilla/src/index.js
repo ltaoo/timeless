@@ -15,15 +15,18 @@ function ApplicationRootView() {
     console.error(err);
   });
 
-  return RouteSubViews({
-    view: root_view$,
-    app,
-    client,
-    storage,
-    history,
-    views,
-    NotFound: NotFoundPageView,
-  });
+  return Fragment({}, [
+    StandardSubViews({
+      view: root_view$,
+      app,
+      client,
+      storage,
+      history,
+      views,
+      NotFound: NotFoundPageView,
+    }),
+    HistoryPanel({ store: history }),
+  ]);
 }
 
 document.addEventListener("DOMContentLoaded", function () {

@@ -89,7 +89,7 @@ export default function ArticleListPageView(props) {
       ],
     ),
     View({ class: "relative flex-1 w-0 h-full overflow-y-auto" }, [
-      RouteSubViews({
+      StandardSubViews({
         ...props,
       }),
     ]),

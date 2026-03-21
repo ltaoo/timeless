@@ -1,6 +1,7 @@
 /** 首页布局 */
 import { defaultRouteName } from "@/store/index.js";
 import NotFoundPageView from "@/pages/notfound/index.js";
+import { projects } from "@/pages/project/data.js";
 
 export default function HomeLayoutView(props) {
   const view = props.view;
@@ -18,6 +19,7 @@ export default function HomeLayoutView(props) {
     menus: [
       { title: "Home", url: "root.home_layout.index" },
       { title: "Article", url: "root.home_layout.article" },
+      { title: "Project", url: "root.home_layout.project" },
       { title: "Settings", url: "root.home_layout.settings" },
     ],
   });
@@ -61,7 +63,7 @@ export default function HomeLayoutView(props) {
         ),
 
         // Middle spacer
-        View({ class: "flex-1" }, [
+        View({ class: "flex-1 flex flex-col items-center gap-3" }, [
           View(
             {
               class: "cursor-pointer",
@@ -71,6 +73,30 @@ export default function HomeLayoutView(props) {
             },
             ["Article"],
           ),
+          Separator({ orientation: "horizontal", class: "w-8 mx-auto" }),
+          View({ class: "flex flex-col items-center gap-2" }, [
+            For({
+              each: projects,
+              render(project) {
+                return View(
+                  {
+                    class: computed(curMenu, (c) => {
+                      const isActive = c.startsWith("root.home_layout.project");
+                      return isActive
+                        ? "w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700 cursor-pointer transition-colors dark:bg-zinc-800 dark:text-white"
+                        : "w-10 h-10 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-black cursor-pointer transition-colors dark:hover:bg-zinc-800 dark:hover:text-white";
+                    }),
+                    onClick() {
+                      props.history.push("root.home_layout.project.workspace", {
+                        id: project.id,
+                      });
+                    },
+                  },
+                  [Txt(project.name.charAt(0))],
+                );
+              },
+            }),
+          ]),
         ]),
 
         // Bottom Actions

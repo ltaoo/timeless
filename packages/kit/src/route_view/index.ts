@@ -261,6 +261,12 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
       reason: options.reason,
       destroy: options.destroy,
     });
+    // destroy=false 时 PresenceCore 不会触发 Unmounted，不会走上面的 onUnmounted 回调
+    // 需要主动清除 curView 引用，避免后续 showView 返回 early 时 curView 仍指向已隐藏的子视图
+    if (options.destroy === false && this.curView === view) {
+      this.curView = null;
+      this.emit(Events.CurSubViewChange, null as any);
+    }
     this.emit(Events.SubViewChanged, view);
     this.emit(Events.SubViewsChange, [...this.subViews]);
   }
@@ -288,6 +294,17 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     }
     if (sub_view.visible) {
       console.warn("the sub view has been visible", sub_view.name);
+      // 即使子视图已可见，也需要将旧的 curView 隐藏，避免 curView 引用过期
+      if (
+        (options.reason === "show_sibling" ||
+          options.reason === "back" ||
+          options.reason === "forward") &&
+        this.curView &&
+        this.curView !== sub_view
+      ) {
+        this.curView.hide(options);
+        this.curView = null;
+      }
       return;
     }
     (() => {
@@ -304,7 +321,12 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
       }
     })();
     // 在显示新视图之前，隐藏当前视图
-    if ((options.reason === "show_sibling" || options.reason === "back" || options.reason === "forward") && this.curView) {
+    if (
+      (options.reason === "show_sibling" ||
+        options.reason === "back" ||
+        options.reason === "forward") &&
+      this.curView
+    ) {
       console.log("[DOMAIN]route_view - hiding curView", this.curView.title);
       this.curView.hide(options);
     }

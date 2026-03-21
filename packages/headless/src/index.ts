@@ -77,7 +77,7 @@ export * as ScrollViewPrimitive from "./scroll-view";
 export * as WaterfallPrimitive from "./waterfall";
 
 export * from "./keep-alive-sub-views";
-export * from "./sub-views";
+export * from "./standard-sub-views";
 
 // other
 export * from "./lazy";

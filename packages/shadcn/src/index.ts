@@ -74,6 +74,7 @@ import {
 } from "./resizable-panels";
 
 import { Waterfall } from "./waterfall";
+import { HistoryPanel } from "./history-panel";
 
 import "./index.css";
 
@@ -149,4 +150,5 @@ export {
   ResizablePanel,
   ResizableHandle,
   Waterfall,
+  HistoryPanel,
 };

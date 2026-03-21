@@ -19,14 +19,14 @@ import { Show } from "./show";
 import { LazyView } from "./lazy-view";
 import { h } from "./h";
 
-export function RouteSubViews(
+export function StandardSubViews(
   props: ViewProps & {
     view: RouteViewCore;
+    views: Record<string, TimelessComponent>;
     app: ApplicationModel<any>;
     history: HistoryCore<any, any>;
     storage: StorageCore<any>;
     client: HttpClientCore;
-    views: Record<string, TimelessComponent>;
     NotFound?: (...args: any[]) => TimelessElement;
   },
 ) {

@@ -1,5 +1,5 @@
 import { BaseDomain, Handler } from "@timeless/base";
-import { qs_stringify } from "@timeless/utils";
+import { qs_parse, qs_stringify } from "@timeless/utils";
 
 import { RouteViewCore } from "@/route_view";
 import { NavigatorCore } from "@/navigator";
@@ -134,7 +134,7 @@ export class HistoryCore<
     }
     const view = this.views[uniqueKey];
     if (view) {
-      this.ensureParent(view);
+      this.ensureParent(view, query);
       view.query = query;
       if (!view.parent) {
         console.log("[DOMAIN]history/index - error1");
@@ -197,7 +197,7 @@ export class HistoryCore<
     // });
     this.views[uniqueKey] = created;
     this.views[name as string] = created;
-    this.ensureParent(created);
+    this.ensureParent(created, query);
     if (!created.parent) {
       console.log("[DOMAIN]history/index - push 3. ", route.name);
       return;
@@ -210,6 +210,10 @@ export class HistoryCore<
     //   v.hide();
     // }
     this.stacks = this.stacks.slice(0, this.cursor + 1).concat(created);
+    console.log(
+      "[DOMAIN]history/index - push 4.",
+      this.stacks.map((v) => v.href),
+    );
     this.cursor += 1;
     created.parent.showView(created, {
       reason: "show_sibling",
@@ -228,7 +232,15 @@ export class HistoryCore<
     this.emit(Events.StateChange, { ...this.state });
   }
   replace(name: K, query: Record<string, string> = {}) {
-    const uniqueKey = [name, qs_stringify(query)].filter(Boolean).join("?");
+    const route = this.routes[name];
+    if (!route) {
+      console.log("[DOMAIN]history/index - replace 2. no matched route");
+      return;
+    }
+    // 与 push 保持一致：用 pathname 构建 key，否则 push 存的 view 在 replace 中找不到
+    const uniqueKey = [route.pathname, qs_stringify(query)]
+      .filter(Boolean)
+      .join("?");
     if (uniqueKey === this.$router.href) {
       console.log(
         "[DOMAIN]history/index - replace target url is",
@@ -240,7 +252,7 @@ export class HistoryCore<
     }
     const view = this.views[uniqueKey];
     if (view) {
-      this.ensureParent(view);
+      this.ensureParent(view, query);
       view.query = query;
       if (!view.parent) {
         console.log("[DOMAIN]history/index - replace 1");
@@ -249,7 +261,6 @@ export class HistoryCore<
       this.$router.href = view.href;
       this.$router.name = view.name;
       this.stacks[this.stacks.length - 1] = view;
-      // this.cursor = uniqueKey;
       view.parent.showView(view);
       this.emit(Events.RouteChange, {
         reason: "replace",
@@ -259,20 +270,8 @@ export class HistoryCore<
         pathname: view.pathname,
         query: view.query,
       });
-      // this.emit(Events.TopViewChange, view);
       this.emit(Events.StateChange, { ...this.state });
       return;
-    }
-    const route = (() => {
-      const m = this.routes[name];
-      if (!m) {
-        return null;
-      }
-      return m;
-    })();
-    if (!route) {
-      console.log("[DOMAIN]history/index - replace 2. no matched route");
-      return null;
     }
     const created = new RouteViewCore({
       name: route.name,
@@ -284,7 +283,7 @@ export class HistoryCore<
     });
     this.views[uniqueKey] = created;
     this.views[name as string] = created;
-    this.ensureParent(created);
+    this.ensureParent(created, query);
     if (!created.parent) {
       console.log("[DOMAIN]history/index - replace 3. ");
       return;
@@ -301,13 +300,20 @@ export class HistoryCore<
       pathname: created.pathname,
       query: created.query,
     });
-    // this.emit(Events.TopViewChange, created);
     this.emit(Events.StateChange, { ...this.state });
   }
   back(opt: Partial<{ data: any }> = {}) {
     // 根据当前 router 的 href 找到对应的视图（用 href 而非 pathname，因为同一路由不同 query 的 pathname 相同）
     const targetHref = this.$router.href;
-    console.log("[DOMAIN]history - back", "cursor:", this.cursor, "targetHref:", targetHref, "stacks:", this.stacks.map(s => s.href));
+    console.log(
+      "[DOMAIN]history - back",
+      "cursor:",
+      this.cursor,
+      "targetHref:",
+      targetHref,
+      "stacks:",
+      this.stacks.map((s) => s.href),
+    );
 
     // 在 stacks 中查找匹配的视图
     let targetIndex = -1;
@@ -324,7 +330,9 @@ export class HistoryCore<
 
     // 如果在 stacks 中找不到，尝试从 views 中查找或创建
     if (!view_prepare_to_show) {
-      console.log("[DOMAIN]history - back, view not in stacks, try to find in views");
+      console.log(
+        "[DOMAIN]history - back, view not in stacks, try to find in views",
+      );
       const href = targetHref;
       view_prepare_to_show = this.views[href];
 
@@ -372,6 +380,10 @@ export class HistoryCore<
       reason: "back",
       destroy: false,
     });
+    // const [, search] = this.$router.href.split("?");
+    // const realQuery = search
+    //   ? (qs_parse(search) as Record<string, string>)
+    //   : {};
     this.emit(Events.RouteChange, {
       reason: "back",
       view: view_prepare_to_show,
@@ -387,7 +399,15 @@ export class HistoryCore<
   forward() {
     // 根据当前 router 的 href 找到对应的视图（用 href 而非 pathname，因为同一路由不同 query 的 pathname 相同）
     const targetHref = this.$router.href;
-    console.log("[DOMAIN]history - forward", "cursor:", this.cursor, "targetHref:", targetHref, "stacks:", this.stacks.map(s => s.href));
+    console.log(
+      "[DOMAIN]history - forward",
+      "cursor:",
+      this.cursor,
+      "targetHref:",
+      targetHref,
+      "stacks:",
+      this.stacks.map((s) => s.href),
+    );
 
     // 在 stacks 中查找匹配的视图
     let targetIndex = -1;
@@ -404,7 +424,9 @@ export class HistoryCore<
 
     // 如果在 stacks 中找不到，尝试从 views 中查找
     if (!viewPrepareShow) {
-      console.log("[DOMAIN]history - forward, view not in stacks, try to find in views");
+      console.log(
+        "[DOMAIN]history - forward, view not in stacks, try to find in views",
+      );
       const href = targetHref;
       viewPrepareShow = this.views[href];
 
@@ -452,6 +474,10 @@ export class HistoryCore<
       href: viewPrepareShow.href,
       pathname: viewPrepareShow.pathname,
       query: viewPrepareShow.query,
+      // query: (() => {
+      //   const [, search] = this.$router.href.split("?");
+      //   return search ? (qs_parse(search) as Record<string, string>) : {};
+      // })(),
     });
     // this.emit(Events.TopViewChange, viewPrepareShow);
     this.emit(Events.Forward);
@@ -538,7 +564,7 @@ export class HistoryCore<
     // });
     this.views[unique_key] = created;
     this.views[route.name] = created;
-    this.ensureParent(created);
+    this.ensureParent(created, query);
     if (!created.parent) {
       console.log("[DOMAIN]history/index - push 3. ", route.name);
       return;
@@ -572,7 +598,7 @@ export class HistoryCore<
   // pushSibling() {
 
   // }
-  ensureParent(view: RouteViewCore) {
+  ensureParent(view: RouteViewCore, query?: Record<string, string>) {
     const { name } = view;
     if (view.parent) {
       if (view.parent.pathname === "/") {
@@ -586,13 +612,22 @@ export class HistoryCore<
       return;
     }
     const { parent } = route;
-    if (this.views[parent.name]) {
-      view.parent = this.views[parent.name];
-      view.parent.query = view.query;
+    // 计算父视图的查找 key：如果有 query，使用包含 query 的 uniqueKey
+    const parentLookupKey = (() => {
+      if (query && Object.keys(query).length) {
+        return [this.routes[parent.name as K]?.pathname, qs_stringify(query)]
+          .filter(Boolean)
+          .join("?");
+      }
+      return parent.name;
+    })();
+
+    if (this.views[parentLookupKey]) {
+      view.parent = this.views[parentLookupKey];
       if (parent.name === "root") {
         return;
       }
-      this.ensureParent(this.views[parent.name]);
+      this.ensureParent(this.views[parentLookupKey]);
       return;
     }
     const parent_route = this.routes[parent.name as K];
@@ -603,10 +638,11 @@ export class HistoryCore<
       name: parent_route.name,
       pathname: parent_route.pathname,
       title: parent_route.title,
-      query: view.query,
+      query: query || {},
       parent: null,
     });
-    this.views[parent_route.name] = created_parent;
+    // 用包含 query 的 key 存储，确保不同 query 的父视图相互独立
+    this.views[parentLookupKey] = created_parent;
     view.parent = created_parent;
     this.ensureParent(created_parent);
   }

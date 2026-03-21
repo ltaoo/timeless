@@ -278,7 +278,9 @@
   },
   "scripts": {
     "prebuild": "node scripts/update-exports.js",
-    "build": "vite build"
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.5",

@@ -12,7 +12,7 @@ const serverRoot = playgroundDir;
 
 // Read version from first build target's package.json
 const version = JSON.parse(
-  fs.readFileSync(path.join(packagesDir, "reactive", "package.json"), "utf-8")
+  fs.readFileSync(path.join(packagesDir, "reactive", "package.json"), "utf-8"),
 ).version;
 
 const distDir = path.join(rootDir, "dist", "timeless", version);
@@ -88,7 +88,8 @@ function copyArtifacts() {
 
   // Also copy CSS files from each package's dist/
   const cssFiles = [];
-  const pkgDirs = fs.readdirSync(packagesDir, { withFileTypes: true })
+  const pkgDirs = fs
+    .readdirSync(packagesDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => d.name);
   for (const pkg of pkgDirs) {
@@ -107,7 +108,9 @@ function copyArtifacts() {
       try {
         fs.copyFileSync(srcPath, path.join(distDir, item.dest));
         fs.copyFileSync(srcPath, path.join(publicDir, item.dest));
-        console.log(`Copied ${item.src} -> dist/timeless/${version}/ & public/timeless/${version}/`);
+        console.log(
+          `Copied ${item.src} -> dist/timeless/${version}/ & public/timeless/${version}/`,
+        );
       } catch (e) {
         console.error(`Failed to copy ${item.src}:`, e.message);
       }
@@ -119,7 +122,9 @@ function copyArtifacts() {
     try {
       fs.copyFileSync(src, path.join(distDir, dest));
       fs.copyFileSync(src, path.join(publicDir, dest));
-      console.log(`Copied CSS ${dest} -> dist/timeless/${version}/ & public/timeless/${version}/`);
+      console.log(
+        `Copied CSS ${dest} -> dist/timeless/${version}/ & public/timeless/${version}/`,
+      );
     } catch (e) {
       console.error(`Failed to copy CSS ${dest}:`, e.message);
     }
@@ -199,11 +204,13 @@ function runBuild(pkgName) {
 
   // Set timeout to kill build if it takes too long
   buildTimeout = setTimeout(() => {
-    console.error(`\nBuild timeout after ${BUILD_TIMEOUT_MS / 1000}s, killing process...`);
-    child.kill('SIGTERM');
+    console.error(
+      `\nBuild timeout after ${BUILD_TIMEOUT_MS / 1000}s, killing process...`,
+    );
+    child.kill("SIGTERM");
     setTimeout(() => {
       if (!child.killed) {
-        child.kill('SIGKILL');
+        child.kill("SIGKILL");
       }
     }, 5000);
   }, BUILD_TIMEOUT_MS);
@@ -297,6 +304,7 @@ buildAll()
       process.exit(1);
     } else {
       console.log("Initial build failed, starting watchers anyway...");
+      copyArtifacts();
       startDev();
     }
   });

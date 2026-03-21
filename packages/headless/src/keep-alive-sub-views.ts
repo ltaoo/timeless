@@ -10,6 +10,7 @@ import {
   HistoryCore,
   StorageCore,
   HttpClientCore,
+  ApplicationModel,
 } from "@timeless/kit";
 
 import { TimelessComponent, TimelessElement, View, ViewProps } from "./view";
@@ -20,10 +21,11 @@ import { h } from "./h";
 export function KeepAliveSubViews(
   props: ViewProps & {
     view: RouteViewCore;
+    views: Record<string, TimelessComponent>;
+    app: ApplicationModel<any>;
     history: HistoryCore<any, any>;
     storage: StorageCore<any>;
     client: HttpClientCore;
-    views: Record<string, TimelessComponent>;
     NotFound?: (...args: any[]) => TimelessElement;
   },
 ) {
@@ -62,9 +64,7 @@ export function KeepAliveSubViews(
           style: computed(cur_subview, (d) => {
             return [
               `z-index: ${idx + 1}; width: 100%; height: 100%;`,
-              d && d.id === subview.id
-                ? "display: block;"
-                : "display: none;",
+              d && d.id === subview.id ? "display: block;" : "display: none;",
             ].join("");
           }),
           dataset: {

@@ -16,7 +16,7 @@ description: "Build pages and use components in the Timeless framework (vanilla 
 - 响应式：`ref()`, `refobj()`, `refarr()`, `computed()`, `effect()`
 - 布局/控制流：`View()`, `Txt()`, `Flex()`, `Show()`, `For()`, `Switch()`, `Match()`, `Fragment()`, `Portal()`, `Transition()`, `Presence()`, `h()`
 - UI 组件：`Button()`, `Input()`, `NumberInput()`, `Textarea()`, `Select()`, `Cascader()`, `Checkbox()`, `CheckboxGroup()`, `RadioGroup()`, `Slider()`, `Toggle()`, `DatePicker()`, `DateRangePicker()`, `TimePicker()`, `Label()`, `Badge()`, `Separator()`, `Avatar()`, `Card()`, `CardHeader()`, `CardTitle()`, `CardDescription()`, `CardContent()`, `CardFooter()`, `Table()`, `TableHeader()`, `TableBody()`, `TableRow()`, `TableHead()`, `TableCell()`, `Tabs()`, `Accordion()`, `Steps()`, `Progress()`, `Skeleton()`, `ScrollArea()`, `AspectRatio()`, `Alert()`, `AlertTitle()`, `AlertDescription()`, `Menu()`, `DropdownMenu()`, `ContextMenu()`, `Popover()`, `Popconfirm()`, `Tooltip()`, `TooltipProvider()`, `Sheet()`, `Dialog()`, `Toast()`, `Field()`, `Form()`, `ResizablePanels()`, `ResizablePanel()`, `ResizableHandle()`
-- 路由：`RouteSubViews()`, `KeepAliveSubViews()`, `SubViews()`
+- 路由：`StandardSubViews()`, `KeepAliveSubViews()`
 - 工具：`cn()` — class name 合并
 
 ## 响应式 API

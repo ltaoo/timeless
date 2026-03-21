@@ -64,6 +64,11 @@ const routesConfigure = {
             pathname: "/home/index/debug",
             component: Timeless.lazy("@/pages/home/index.debug.js"),
           },
+          lifecycle: {
+            title: "生命周期",
+            pathname: "/home/index/lifecycle",
+            component: Timeless.lazy("@/pages/home/index.lifecycle.js"),
+          },
         },
       },
       settings: {
@@ -87,6 +92,23 @@ const routesConfigure = {
                 component: Timeless.lazy("@/pages/article/content.js"),
               },
             },
+          },
+        },
+      },
+      project: {
+        title: "项目",
+        pathname: "/home/project",
+        component: Timeless.lazy("@/pages/project/index.js"),
+        children: {
+          workspace: {
+            title: "项目工作台",
+            pathname: "/home/project/workspace",
+            component: Timeless.lazy("@/pages/project/workspace.js"),
+          },
+          history: {
+            title: "项目历史",
+            pathname: "/home/project/history",
+            component: Timeless.lazy("@/pages/project/history.js"),
           },
         },
       },
