@@ -95,6 +95,72 @@ function LifecyclePageC(props) {
   );
 }
 
+function LifecyclePageD(props) {
+  return View(
+    {
+      class: cn(["space-y-4"]),
+      onMounted() {
+        props.addLog?.("Page D: onMounted");
+      },
+      onUnmounted() {
+        props.addLog?.("Page D: onUnmounted");
+      },
+    },
+    [
+      View(
+        {
+          class:
+            "p-4 rounded-lg bg-purple-50 border border-purple-200 dark:bg-purple-950 dark:border-purple-800",
+        },
+        [
+          View(
+            {
+              class: "text-sm font-medium text-purple-900 dark:text-purple-100",
+            },
+            "页面 D",
+          ),
+          View({ class: "text-xs text-purple-600 dark:text-purple-400 mt-1" }, [
+            "第四个子页面，观察懒加载的页面能否正确触发生命周期",
+          ]),
+        ],
+      ),
+    ],
+  );
+}
+
+function LifecyclePageE(props) {
+  return View(
+    {
+      class: cn(["space-y-4"]),
+      onMounted() {
+        props.addLog?.("Page E: onMounted");
+      },
+      onUnmounted() {
+        props.addLog?.("Page E: onUnmounted");
+      },
+    },
+    [
+      View(
+        {
+          class:
+            "p-4 rounded-lg bg-purple-50 border border-purple-200 dark:bg-purple-950 dark:border-purple-800",
+        },
+        [
+          View(
+            {
+              class: "text-sm font-medium text-purple-900 dark:text-purple-100",
+            },
+            "页面 E",
+          ),
+          View({ class: "text-xs text-purple-600 dark:text-purple-400 mt-1" }, [
+            "第五个子页面，观察懒加载的页面能否正确触发生命周期",
+          ]),
+        ],
+      ),
+    ],
+  );
+}
+
 export default function LifecycleView(props) {
   const logs = refarr([]);
 
@@ -119,6 +185,26 @@ export default function LifecycleView(props) {
       title: "页面 C",
       pathname: "/page-c",
       component: (p) => LifecyclePageC({ ...p, addLog }),
+    },
+    paged: {
+      title: "页面 D",
+      pathname: "/page-d",
+      component: (p) => {
+        return new Promise(async (resolve) => {
+          setTimeout(() => {
+            resolve(LifecyclePageD);
+          }, 3000);
+        });
+      },
+    },
+    pagee: {
+      title: "页面 E",
+      pathname: "/page-e",
+      component: (p) => {
+        return new Promise((resolve) => {
+          resolve(LifecyclePageE);
+        });
+      },
     },
   };
 
@@ -150,7 +236,7 @@ export default function LifecycleView(props) {
       curRoute.as(view.name.split(".").pop());
     }
   });
-//   console.log('[]defaultRouteName', defaultRouteName);
+  //   console.log('[]defaultRouteName', defaultRouteName);
   subhistory$.push(defaultRouteName, {}, { ignore: true });
 
   return View({ class: cn(["space-y-8"]) }, [
@@ -164,6 +250,8 @@ export default function LifecycleView(props) {
                   { key: "pagea", label: "页面 A" },
                   { key: "pageb", label: "页面 B" },
                   { key: "pagec", label: "页面 C" },
+                  { key: "paged", label: "页面 D" },
+                  { key: "pagee", label: "页面 E" },
                 ],
                 render(item) {
                   return View(
@@ -185,15 +273,33 @@ export default function LifecycleView(props) {
                 },
               }),
             ]),
-            View({ class: "relative border rounded-lg p-4 dark:border-zinc-800" }, [
-              StandardSubViews({
-                view: rootview$,
-                views,
-                history: subhistory$,
-                app: props.app,
-                addLog,
-              }),
-            ]),
+            View(
+              { class: "relative border rounded-lg p-4 dark:border-zinc-800" },
+              [
+                StandardSubViews({
+                  view: rootview$,
+                  views,
+                  history: subhistory$,
+                  app: props.app,
+                  placeholder: [
+                    View({ class: "flex items-center justify-center h-full" }, [
+                      View({ class: "flex flex-col items-center gap-3" }, [
+                        View({
+                          class:
+                            "w-6 h-6 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin dark:border-zinc-600 dark:border-t-zinc-300",
+                        }),
+                        View(
+                          { class: "text-sm text-zinc-400 dark:text-zinc-500" },
+                          "加载中...",
+                        ),
+                      ]),
+                    ]),
+                  ],
+                  // @ts-ignore
+                  addLog,
+                }),
+              ],
+            ),
           ]),
           View(
             {

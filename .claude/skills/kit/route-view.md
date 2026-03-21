@@ -39,43 +39,57 @@ view.onStateChange(fn)
 将路由配置树转换为扁平路由表：
 
 ```js
-const { routes, views, defaultRouteName, notfoundRouteName } = Timeless.buildRoutes({
-  root: {
-    title: "Root",
-    pathname: "/",
-    children: {
-      login: { title: "Login", pathname: "/login", component: Timeless.lazy("@/pages/login.js") },
-      home_layout: {
-        title: "Home",
-        pathname: "/home",
-        layout: true,
-        component: Timeless.lazy("@/pages/home/layout.js"),
-        children: {
-          index: {
-            title: "Dashboard",
-            pathname: "/home/index",
-            component: Timeless.lazy("@/pages/home/index.js"),
-            options: { default: true },
+const { routes, views, defaultRouteName, notfoundRouteName } =
+  Timeless.buildRoutes({
+    root: {
+      title: "Root",
+      pathname: "/",
+      children: {
+        login: {
+          title: "Login",
+          pathname: "/login",
+          component: Timeless.lazy("@/pages/login.js"),
+        },
+        home_layout: {
+          title: "Home",
+          pathname: "/home",
+          layout: true,
+          component: Timeless.lazy("@/pages/home/layout.js"),
+          children: {
+            index: {
+              title: "Dashboard",
+              pathname: "/home/index",
+              component: Timeless.lazy("@/pages/home/index.js"),
+              options: { default: true },
+            },
           },
         },
+        notfound: {
+          title: "404",
+          pathname: "/notfound",
+          options: { notfound: true },
+        },
       },
-      notfound: { title: "404", pathname: "/notfound", options: { notfound: true } },
     },
-  },
-});
+  });
 ```
 
 ## RouteMenusModel
 
-创建与路由联动的侧边栏菜单模型：
+创建与路由联动的侧边栏菜单模型，通过 `view.curView` 自动跟踪当前路由：
 
 ```js
-const menus = Timeless.RouteMenusModel({
-  route: props.view.curView?.name,
-  history: props.history,
+const sidemenu$ = Timeless.RouteMenusModel({
+  view: props.view,
   menus: [
     { title: "Dashboard", url: "root.home_layout.index" },
     { title: "Settings", url: "root.home_layout.settings" },
   ],
 });
+
+// sidemenu$.cur — 当前活跃的 RouteViewCore（或 null）
+// sidemenu$.isSubRoute(url) — 当前路由是否为 url 的子路由
+// sidemenu$.isActive(url) — 当前路由是否精确匹配 url
+computed(sidemenu$.cur, () => sidemenu$.isSubRoute("root.home_layout.index"));
+computed(sidemenu$.cur, () => sidemenu$.isActive("root.home_layout.settings"));
 ```

@@ -9,6 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@timeless/reactive": "workspace:*",
     "@timeless/base": "workspace:*",
     "@timeless/ui": "workspace:*",
     "@timeless/types": "workspace:*",

@@ -8,11 +8,13 @@ import {
   View,
   ViewChildren,
   ViewProps,
+  TimelessElement,
 } from "@timeless/headless";
 import {
   ContextMenuCore,
   MenuCore,
   MenuItemCore,
+  MenuSeparatorCore,
   PresenceCore,
 } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
@@ -46,8 +48,11 @@ export function ContextMenu(
             each: computed(state_, (t) => {
               return t.items;
             }),
-            render(item: MenuItemCore) {
-              return ContextMenuItem({ store: item });
+            render(item: MenuItemCore | MenuSeparatorCore) {
+              if (item instanceof MenuSeparatorCore) {
+                return ContextMenuSeparator({});
+              }
+              return ContextMenuItem({ store: item as MenuItemCore });
             },
           }),
         ]),
@@ -56,9 +61,20 @@ export function ContextMenu(
   ]);
 }
 
+function ContextMenuSeparator(_props: ViewProps) {
+  return ContextMenuPrimitive.Separator(
+    {
+      class: "-mx-1 my-1 h-px bg-gray-200 dark:bg-gray-800",
+    },
+    [],
+  );
+}
+
 function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
   const state_ = refobj(props.store.state);
   const has_submenu_ = ref(!!props.store.menu);
+  const has_icon_ = computed(state_, (t) => !!t.icon);
+  const has_shortcut_ = computed(state_, (t) => !!t.shortcut);
   const menu_state_ = refobj(
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
   );
@@ -95,7 +111,24 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
         ]),
       },
       [
+        Show({ when: has_icon_ }, [
+          View(
+            {
+              class: "mr-2 h-4 w-4 flex-shrink-0",
+            },
+            [props.store.icon as TimelessElement],
+          ),
+        ]),
         props.store.label,
+        Show({ when: has_shortcut_ }, [
+          View(
+            {
+              class:
+                "ml-auto pl-4 text-xs tracking-widest text-gray-400 dark:text-gray-500",
+            },
+            [computed(state_, (t) => t.shortcut)],
+          ),
+        ]),
         Show({ when: has_submenu_ }, [
           ChevronRightOutlined({ class: "w-4 h-4" }),
         ]),
@@ -117,8 +150,11 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
                   each: computed(menu_state_, (t) => {
                     return t.items;
                   }),
-                  render(item: MenuItemCore) {
-                    return ContextMenuItem({ store: item });
+                  render(item: MenuItemCore | MenuSeparatorCore) {
+                    if (item instanceof MenuSeparatorCore) {
+                      return ContextMenuSeparator({});
+                    }
+                    return ContextMenuItem({ store: item as MenuItemCore });
                   },
                 }),
               ]),

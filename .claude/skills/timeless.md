@@ -22,15 +22,17 @@ description: "Build pages and use components in the Timeless framework (vanilla 
 ## 响应式 API
 
 ```js
-const count = ref(0);              // 基本值
-const obj = refobj({ a: 1 });     // 响应式对象
-const list = refarr([1, 2, 3]);   // 响应式数组
+const count = ref(0); // 基本值
+const obj = refobj({ a: 1 }); // 响应式对象
+const list = refarr([1, 2, 3]); // 响应式数组
 
-const double = computed(count, (v) => v * 2);  // 派生值
-effect(() => { console.log(count.value); });   // 副作用
+const double = computed(count, (v) => v * 2); // 派生值
+effect(() => {
+  console.log(count.value);
+}); // 副作用
 
-count.as(5);       // 更新值
-list.push(4);      // 数组方法可用
+count.as(5); // 更新值
+list.push(4); // 数组方法可用
 ```
 
 ## 组件用法
@@ -103,15 +105,21 @@ Switch({ when: computed(store, t => t.type) }, [Match("a", [...]), Match("b", [.
 
 ```js
 const field$ = new Timeless.ui.SingleFieldCore({
-  label: "Email", name: "email",
-  input: new Timeless.ui.InputCore({ defaultValue: "", placeholder: "email@example.com" }),
+  label: "Email",
+  name: "email",
+  input: new Timeless.ui.InputCore({
+    defaultValue: "",
+    placeholder: "email@example.com",
+  }),
   rules: [{ required: true }],
 });
 Field({ store: field$ }, [Input({ store: field$.input })]);
 
 const form$ = new Timeless.ui.ObjectFieldCore({ fields: { email: field$ } });
 const r = await form$.validate();
-if (r.error) { /* handle */ }
+if (r.error) {
+  /* handle */
+}
 const values = r.data;
 ```
 
@@ -133,8 +141,7 @@ props.history.destroyAllAndPush("root.login");
 
 // 侧边栏菜单
 Timeless.RouteMenusModel({
-  route: props.view.curView?.name,
-  history: props.history,
+  view: props.view,
   menus: [{ title: "Home", url: "root.home_layout.index" }],
 });
 

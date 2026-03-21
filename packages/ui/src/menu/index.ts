@@ -8,6 +8,7 @@ import { PresenceCore } from "@/presence";
 import { Direction } from "@/direction";
 
 import { MenuItemCore } from "./item";
+import { MenuSeparatorCore } from "./separator";
 
 enum Events {
   Show,
@@ -29,12 +30,13 @@ type TheTypesOfEvents = {
   [Events.LeaveMenu]: void;
   [Events.StateChange]: MenuCoreState;
 };
+type MenuEntry = MenuItemCore | MenuSeparatorCore;
 type MenuCoreState = {
   /** 是否是展开状态 */
   open: boolean;
   hover: boolean;
   /** 所有选项 */
-  items: MenuItemCore[];
+  items: MenuEntry[];
   enter?: boolean;
   exit?: boolean;
 };
@@ -42,7 +44,7 @@ type MenuCoreProps = {
   side: Side;
   align: Align;
   strategy: "fixed" | "absolute";
-  items: MenuItemCore[];
+  items: MenuEntry[];
   offsetX?: number;
   offsetY?: number;
 };
@@ -151,7 +153,9 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.state.open = false;
       this.popper.reset();
       for (let i = 0; i < this.items.length; i += 1) {
-        this.items[i].reset();
+        if (this.items[i] instanceof MenuItemCore) {
+          (this.items[i] as MenuItemCore).reset();
+        }
       }
       if (this.cur_item) {
         this.cur_item.blur();
@@ -165,7 +169,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   }
 
   // subs: MenuCore[] = [];
-  items: MenuItemCore[] = [];
+  items: MenuEntry[] = [];
   cur_sub: MenuCore | null = null;
   cur_item: MenuItemCore | null = null;
   /** 父菜单引用，用于子菜单清除父菜单的定时器 */
@@ -195,7 +199,10 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     // 当子菜单显示时，清除父菜单的定时器
     // 这是必要的，因为 mouseenter 事件可能不会在 DOM 动态挂载时触发
     if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
-      console.log("[DEBUG-MENU] show() clearing parent hide_sub_timer", this._name);
+      console.log(
+        "[DEBUG-MENU] show() clearing parent hide_sub_timer",
+        this._name,
+      );
       clearTimeout(this.parent_menu.hide_sub_timer);
       this.parent_menu.hide_sub_timer = null;
     }
@@ -330,17 +337,14 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     // }
     // this.subs.push(subMenu);
   }
-  listen_items(items: MenuItemCore[]) {
-    // console.log(
-    //   "[DOMAIN]ui/menu/index - listen_items",
-    //   this._name,
-    //   items.map((v) => v.label),
-    // );
+  listen_items(items: MenuEntry[]) {
     for (let i = 0; i < items.length; i += 1) {
-      this.listen_item(items[i]);
+      if (items[i] instanceof MenuItemCore) {
+        this.listen_item(items[i] as MenuItemCore);
+      }
     }
   }
-  setItems(items: MenuItemCore[]) {
+  setItems(items: MenuEntry[]) {
     console.log("[DOMAIN]ui/menu - set items", items);
     this.state.items = items;
     this.items = items;
@@ -384,7 +388,9 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     this.presence.reset();
     this.popper.reset();
     for (let i = 0; i < this.items.length; i += 1) {
-      this.items[i].reset();
+      if (this.items[i] instanceof MenuItemCore) {
+        (this.items[i] as MenuItemCore).reset();
+      }
     }
   }
   refresh() {
@@ -429,7 +435,9 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     //   this.subs[i].unmount();
     // }
     for (let i = 0; i < this.items.length; i += 1) {
-      this.items[i].unmount();
+      if (this.items[i] instanceof MenuItemCore) {
+        (this.items[i] as MenuItemCore).unmount();
+      }
     }
     this.reset();
   }

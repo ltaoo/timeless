@@ -44,6 +44,234 @@ export default function OverlayView() {
           ],
         ),
       ]),
+      Item("With Separator", [
+        DropdownMenu(
+          {
+            store: new Timeless.ui.DropdownMenuCore({
+              items: [
+                new Timeless.ui.MenuItemCore({
+                  label: "Cut",
+                  onClick() {
+                    console.log("cut");
+                  },
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Copy",
+                  onClick() {
+                    console.log("copy");
+                  },
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Paste",
+                  onClick() {
+                    console.log("paste");
+                  },
+                }),
+                new Timeless.ui.MenuSeparatorCore(),
+                new Timeless.ui.MenuItemCore({
+                  label: "Rename",
+                  onClick() {
+                    console.log("rename");
+                  },
+                }),
+                new Timeless.ui.MenuSeparatorCore(),
+                new Timeless.ui.MenuItemCore({
+                  label: "Delete",
+                  onClick() {
+                    console.log("delete");
+                  },
+                }),
+              ],
+            }),
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+              },
+              ["With Separator"],
+            ),
+          ],
+        ),
+      ]),
+      Item("With Shortcut", [
+        DropdownMenu(
+          {
+            store: new Timeless.ui.DropdownMenuCore({
+              items: [
+                new Timeless.ui.MenuItemCore({
+                  label: "Cut",
+                  shortcut: "⌘X",
+                  onClick() {
+                    console.log("cut");
+                  },
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Copy",
+                  shortcut: "⌘C",
+                  onClick() {
+                    console.log("copy");
+                  },
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Paste",
+                  shortcut: "⌘V",
+                  onClick() {
+                    console.log("paste");
+                  },
+                }),
+                new Timeless.ui.MenuSeparatorCore(),
+                new Timeless.ui.MenuItemCore({
+                  label: "Select All",
+                  shortcut: "⌘A",
+                  onClick() {
+                    console.log("select all");
+                  },
+                }),
+              ],
+            }),
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+              },
+              ["With Shortcut"],
+            ),
+          ],
+        ),
+      ]),
+      Item("With ShortcutModel", [
+        (() => {
+          const $shortcut = Timeless.ui.ShortcutModel({});
+          $shortcut.methods.register({
+            "MetaLeft+KeyX"() {
+              console.log("cut via shortcut");
+            },
+            "MetaLeft+KeyC"() {
+              console.log("copy via shortcut");
+            },
+            "MetaLeft+KeyV"() {
+              console.log("paste via shortcut");
+            },
+          });
+          document.addEventListener("keydown", (event) => {
+            $shortcut.methods.handleKeydown(event);
+          });
+          document.addEventListener("keyup", (event) => {
+            $shortcut.methods.handleKeyup(event);
+          });
+          return DropdownMenu(
+            {
+              store: new Timeless.ui.DropdownMenuCore({
+                items: [
+                  new Timeless.ui.MenuItemCore({
+                    label: "Cut",
+                    shortcut: "⌘X",
+                    onClick() {
+                      console.log("cut");
+                    },
+                  }),
+                  new Timeless.ui.MenuItemCore({
+                    label: "Copy",
+                    shortcut: "⌘C",
+                    onClick() {
+                      console.log("copy");
+                    },
+                  }),
+                  new Timeless.ui.MenuItemCore({
+                    label: "Paste",
+                    shortcut: "⌘V",
+                    onClick() {
+                      console.log("paste");
+                    },
+                  }),
+                ],
+              }),
+            },
+            [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                },
+                ["With ShortcutModel"],
+              ),
+            ],
+          );
+        })(),
+      ]),
+      Item("With Icon", [
+        DropdownMenu(
+          {
+            store: new Timeless.ui.DropdownMenuCore({
+              items: [
+                new Timeless.ui.MenuItemCore({
+                  label: "Undo",
+                  shortcut: "⌘Z",
+                  icon: Timeless.icons.Undo2Outlined({ class: "w-4 h-4" }),
+                  onClick() {
+                    console.log("undo");
+                  },
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Redo",
+                  shortcut: "⇧⌘Z",
+                  icon: Timeless.icons.RefreshCcwOutlined({ class: "w-4 h-4" }),
+                  onClick() {
+                    console.log("redo");
+                  },
+                }),
+                new Timeless.ui.MenuSeparatorCore(),
+                new Timeless.ui.MenuItemCore({
+                  label: "Cut",
+                  shortcut: "⌘X",
+                  icon: Timeless.icons.BoltOutlined({ class: "w-4 h-4" }),
+                  onClick() {
+                    console.log("cut");
+                  },
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Copy",
+                  shortcut: "⌘C",
+                  icon: Timeless.icons.FileSymlinkOutlined({
+                    class: "w-4 h-4",
+                  }),
+                  onClick() {
+                    console.log("copy");
+                  },
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Paste",
+                  shortcut: "⌘V",
+                  icon: Timeless.icons.ArrowDownloadToLineOutlined({
+                    class: "w-4 h-4",
+                  }),
+                  onClick() {
+                    console.log("paste");
+                  },
+                }),
+                new Timeless.ui.MenuSeparatorCore(),
+                new Timeless.ui.MenuItemCore({
+                  label: "Delete",
+                  shortcut: "⌘⌫",
+                  icon: Timeless.icons.Trash2Outlined({ class: "w-4 h-4" }),
+                  onClick() {
+                    console.log("delete");
+                  },
+                }),
+              ],
+            }),
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+              },
+              ["With Icon"],
+            ),
+          ],
+        ),
+      ]),
       Item("With Submenu", [
         DropdownMenu(
           {

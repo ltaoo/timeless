@@ -13,7 +13,13 @@ import {
   ApplicationModel,
 } from "@timeless/kit";
 
-import { TimelessComponent, TimelessElement, View, ViewProps } from "./view";
+import {
+  TimelessComponent,
+  TimelessElement,
+  View,
+  ViewChildren,
+  ViewProps,
+} from "./view";
 import { For } from "./for";
 import { LazyView } from "./lazy-view";
 import { h } from "./h";
@@ -27,6 +33,7 @@ export function KeepAliveSubViews(
     storage: StorageCore<any>;
     client: HttpClientCore;
     NotFound?: (...args: any[]) => TimelessElement;
+    placeholder?: ViewChildren;
   },
 ) {
   const subviews = refarr(props.view.subViews);
@@ -73,13 +80,16 @@ export function KeepAliveSubViews(
           },
         },
         [
-          LazyView(PageView, {
-            ...props,
-            view: subview,
-            onMounted() {
-              nodes.push(this);
+          LazyView(
+            {
+              ...props,
+              view: subview,
+              onMounted() {
+                nodes.push(this);
+              },
             },
-          }),
+            [PageView],
+          ),
         ],
       );
     },

@@ -3,26 +3,37 @@ import {
   TimelessElement,
   isElement,
   ViewProps,
+  ViewChildren,
   TimelessComponent,
 } from "./view";
 
 export function LazyView(
-  component: TimelessComponent,
-  props: ViewProps & Record<string, any>,
+  props: ViewProps & { placeholder?: ViewChildren } & Record<string, any>,
+  children: [TimelessComponent],
 ): TimelessElement {
-  const result = component(props);
+  let loadedComponent: TimelessElement | undefined;
+  const result = children[0](props);
   if (isElement(result)) {
+    loadedComponent = result;
     return result;
   }
-  const view$ = View(props);
+  const isLazy =
+    result instanceof Promise ||
+    (result && typeof (result as any).then === "function");
+
+  // let view$: TimelessElement;
+  // if (isLazy && props.placeholder) {
+  //   view$ = View(props, props.placeholder);
+  // } else {
+  //   view$ = View(props);
+  // }
+  const view$ = View(props, props.placeholder);
+
   return {
     t: "view",
     $elm: view$.$elm,
     render() {
-      if (
-        result instanceof Promise ||
-        (result && typeof (result as any).then === "function")
-      ) {
+      if (isLazy) {
         (result as Promise<any>).then((m) => {
           const Factory = m.default || m;
           if (typeof Factory === "function") {
@@ -30,6 +41,7 @@ export function LazyView(
             if (!elm_) {
               return;
             }
+            loadedComponent = elm_;
             const r = elm_.render();
             view$.$elm.parentNode?.replaceChild(elm_.$elm, view$.$elm);
             view$.$elm = elm_.$elm;
@@ -42,7 +54,19 @@ export function LazyView(
           }
         });
       }
+      view$.render();
       return view$.$elm;
+    },
+    beforeUnmounted() {
+      if (loadedComponent && loadedComponent.beforeUnmounted) {
+        loadedComponent.beforeUnmounted();
+      }
+    },
+    onUnmounted() {
+      if (loadedComponent && loadedComponent.onUnmounted) {
+        loadedComponent.onUnmounted();
+      }
+      loadedComponent = undefined;
     },
   };
 }

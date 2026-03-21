@@ -10,6 +10,7 @@ import {
 import {
   MenuCore,
   MenuItemCore,
+  MenuSeparatorCore,
   getGlobalLayerManager,
   initGlobalPointerListener,
   Layer,
@@ -88,11 +89,23 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
     [
       For({
         each: computed(state_, (t) => t.items),
-        render(item: MenuItemCore) {
-          return MenuItem({ store: item });
+        render(item: MenuItemCore | MenuSeparatorCore) {
+          if (item instanceof MenuSeparatorCore) {
+            return MenuSeparator({});
+          }
+          return MenuItem({ store: item as MenuItemCore });
         },
       }),
     ],
+  );
+}
+
+function MenuSeparator(_props: ViewProps) {
+  return MenuPrimitive.Separator(
+    {
+      class: "-mx-1 my-1 h-px bg-gray-200 dark:bg-gray-800",
+    },
+    [],
   );
 }
 
@@ -100,6 +113,7 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
   const state_ = refobj(props.store.state);
   const has_submenu_ = ref(!!props.store.menu);
   const has_icon_ = computed(state_, (t) => !!t.icon);
+  const has_shortcut_ = computed(state_, (t) => !!t.shortcut);
   const menu_state_ = refobj(
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
   );
@@ -136,6 +150,15 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
           ),
         ]),
         props.store.label,
+        Show({ when: has_shortcut_ }, [
+          View(
+            {
+              class:
+                "ml-auto pl-4 text-xs tracking-widest text-gray-400 dark:text-gray-500",
+            },
+            [computed(state_, (t) => t.shortcut)],
+          ),
+        ]),
         Show({ when: has_submenu_ }, [
           ChevronRightOutlined({ class: "w-4 h-4" }),
         ]),
@@ -156,8 +179,11 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
                 View({ class: MENU_CONTENT_CLASS }, [
                   For({
                     each: computed(menu_state_, (t) => t.items),
-                    render(item: MenuItemCore) {
-                      return MenuItem({ store: item });
+                    render(item: MenuItemCore | MenuSeparatorCore) {
+                      if (item instanceof MenuSeparatorCore) {
+                        return MenuSeparator({});
+                      }
+                      return MenuItem({ store: item as MenuItemCore });
                     },
                   }),
                 ]),

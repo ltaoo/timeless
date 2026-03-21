@@ -1,20 +1,10 @@
 /** 首页布局 */
-import { defaultRouteName } from "@/store/index.js";
 import NotFoundPageView from "@/pages/notfound/index.js";
 import { projects } from "@/pages/project/data.js";
 
 export default function HomeLayoutView(props) {
-  const view = props.view;
-  const subViews = refarr([]);
-  const curSubView = refobj(view.curView);
-  view.onCurViewChange((view) => {
-    curSubView.as(view);
-  });
-  view.onSubViewAppended((v) => {
-    subViews.push(v);
-  });
   const sidemenu$ = Timeless.RouteMenusModel({
-    route: props.view.curView ? props.view.curView.name : defaultRouteName,
+    view: props.view,
     history: props.history,
     menus: [
       { title: "Home", url: "root.home_layout.index" },
@@ -22,10 +12,6 @@ export default function HomeLayoutView(props) {
       { title: "Project", url: "root.home_layout.project" },
       { title: "Settings", url: "root.home_layout.settings" },
     ],
-  });
-  const curMenu = ref(sidemenu$.curMenu);
-  sidemenu$.onStateChange(() => {
-    curMenu.as(sidemenu$.curMenu);
   });
 
   return Flex({ class: "layout_home w-full h-full" }, [
@@ -48,8 +34,8 @@ export default function HomeLayoutView(props) {
             Txt("T"),
             Show(
               {
-                when: computed(curMenu, (c) => {
-                  return c.startsWith("root.home_layout.index");
+                when: computed(sidemenu$.cur, () => {
+                  return sidemenu$.isSubRoute("root.home_layout.index");
                 }),
               },
               [
@@ -80,8 +66,10 @@ export default function HomeLayoutView(props) {
               render(project) {
                 return View(
                   {
-                    class: computed(curMenu, (c) => {
-                      const isActive = c.startsWith("root.home_layout.project");
+                    class: computed(sidemenu$.cur, () => {
+                      const isActive = sidemenu$.isSubRoute(
+                        "root.home_layout.project",
+                      );
                       return isActive
                         ? "w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700 cursor-pointer transition-colors dark:bg-zinc-800 dark:text-white"
                         : "w-10 h-10 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-black cursor-pointer transition-colors dark:hover:bg-zinc-800 dark:hover:text-white";
@@ -92,7 +80,7 @@ export default function HomeLayoutView(props) {
                       });
                     },
                   },
-                  [Txt(project.name.charAt(0))],
+                  [project.name.charAt(0)],
                 );
               },
             }),
@@ -104,8 +92,8 @@ export default function HomeLayoutView(props) {
           // Settings Icon
           View(
             {
-              class: computed(curMenu, (c) => {
-                return c === "root.home_layout.settings"
+              class: computed(sidemenu$.cur, () => {
+                return sidemenu$.isActive("root.home_layout.settings")
                   ? "w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500 cursor-pointer transition-colors dark:bg-zinc-800 dark:text-white"
                   : "w-10 h-10 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-black cursor-pointer transition-colors dark:hover:bg-zinc-800 dark:hover:text-white";
               }),

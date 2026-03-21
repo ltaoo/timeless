@@ -1,6 +1,6 @@
 import { projects } from "./data.js";
 
-export default function ProjectIndexView(props) {
+export default function ProjectLayoutView(props) {
   const curProjectId = ref(props.view.query.id);
 
   console.log("[]ProjectIndexView", props.view.query);
@@ -32,10 +32,10 @@ export default function ProjectIndexView(props) {
     {
       class: "flex w-full h-full bg-white dark:bg-zinc-950",
       onMounted() {
-        console.log("[]ProjectIndexView onMounted", props.view.query);
+        console.log("[]ProjectLayoutView onMounted", props.view.query);
       },
       onUnmounted() {
-        console.log("[]ProjectIndexView onUnmounted", props.view.query);
+        console.log("[]ProjectLayoutView onUnmounted", props.view.query);
       },
     },
     [

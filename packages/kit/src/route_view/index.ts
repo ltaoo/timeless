@@ -1,6 +1,7 @@
 /**
  * @file 根据路由判断是否可见的视图块
  */
+import { refobj } from "@timeless/reactive";
 import { base, BaseDomain, Handler, BizError } from "@timeless/base";
 import { PresenceCore } from "@timeless/ui";
 import { qs_parse, qs_stringify } from "@timeless/utils";
@@ -546,36 +547,20 @@ function emitViewCreated(view: RouteViewCore) {
 
 export function RouteMenusModel<
   T extends { title: string; url?: unknown; onClick?: (m: T) => void },
->(props: { route: T["url"]; menus: T[]; history: HistoryCore<any, any> }) {
+>(props: { view: RouteViewCore; history: HistoryCore<any, any>; menus: T[] }) {
   const methods = {
     refresh() {
       bus.emit(Events.StateChange, { ..._state });
     },
-    setCurMenu(name: T["url"]) {
-      // const name = props.history.$router.name as PageKeys;
-      _route_name = name;
-      const keys = [
-        // "root.home_layout.workout_plan_layout.mine",
-        // "root.home_layout.workout_plan_layout.interval",
-        // "root.home_layout.workout_plan_layout.single",
-      ] as T["url"][];
-      if (keys.includes(name)) {
-        // _route_name = "root.home_layout.workout_plan_layout.recommend";
-      }
-      methods.refresh();
-    },
   };
-  const ui = {};
 
-  let _route_name = props.route;
+  let _cur = refobj(props.view.curView);
   let _menus = props.menus || [];
   let _state = {
     get menus() {
       return _menus;
     },
-    get curMenu() {
-      return _route_name;
-    },
+    cur: _cur,
   };
   enum Events {
     StateChange,
@@ -587,19 +572,31 @@ export function RouteMenusModel<
   };
   const bus = base<TheTypesOfEvents>();
 
-  const unlisten = props.history.onRouteChange(({ name }) => {
-    methods.setCurMenu(name);
+  // const unlisten = props.view.onCurViewChange((view) => {
+  //   _cur = view;
+  // });
+  const unlisten = props.history.onRouteChange(({ view }) => {
+    console.log("[]RouteMenusModel", view);
+    _cur.as(view);
   });
 
   return {
     methods,
-    ui,
     state: _state,
     get menus() {
       return _menus;
     },
-    get curMenu() {
-      return _route_name;
+    cur: _cur,
+    isSubRoute(url: string) {
+      const v = _cur.value;
+      return v ? v.name.startsWith(url) : false;
+    },
+    isActive(url: string) {
+      const v = _cur.value;
+      return v ? v.name === url : false;
+    },
+    handleClick(menu: T, query?: Record<string, string>) {
+      props.history.push(menu.url, query);
     },
     ready() {},
     destroy() {

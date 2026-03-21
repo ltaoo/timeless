@@ -8,8 +8,14 @@ import {
   ViewProps,
   Fragment,
   h,
+  TimelessElement,
 } from "@timeless/headless";
-import { DropdownMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
+import {
+  DropdownMenuCore,
+  MenuCore,
+  MenuItemCore,
+  MenuSeparatorCore,
+} from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
 
 const MENU_CONTENT_CLASS =
@@ -41,8 +47,11 @@ export function DropdownMenu(
             each: computed(state_, (t) => {
               return t.items;
             }),
-            render(item: MenuItemCore) {
-              return DropdownMenuItem({ store: item });
+            render(item: MenuItemCore | MenuSeparatorCore) {
+              if (item instanceof MenuSeparatorCore) {
+                return DropdownMenuSeparator({});
+              }
+              return DropdownMenuItem({ store: item as MenuItemCore });
             },
           }),
         ]),
@@ -51,9 +60,20 @@ export function DropdownMenu(
   ]);
 }
 
+function DropdownMenuSeparator(_props: ViewProps) {
+  return DropdownMenuPrimitive.Separator(
+    {
+      class: "-mx-1 my-1 h-px bg-gray-200 dark:bg-gray-800",
+    },
+    [],
+  );
+}
+
 function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
   const state_ = refobj(props.store.state);
   const has_submenu_ = ref(!!props.store.menu);
+  const has_icon_ = computed(state_, (t) => !!t.icon);
+  const has_shortcut_ = computed(state_, (t) => !!t.shortcut);
   const menu_state_ = refobj(
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
   );
@@ -91,7 +111,24 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
         ]),
       },
       [
+        Show({ when: has_icon_ }, [
+          View(
+            {
+              class: "mr-2 h-4 w-4 flex-shrink-0",
+            },
+            [props.store.icon as TimelessElement],
+          ),
+        ]),
         props.store.label,
+        Show({ when: has_shortcut_ }, [
+          View(
+            {
+              class:
+                "ml-auto pl-4 text-xs tracking-widest text-gray-400 dark:text-gray-500",
+            },
+            [computed(state_, (t) => t.shortcut)],
+          ),
+        ]),
         Show({ when: has_submenu_ }, [
           ChevronRightOutlined({ class: "w-4 h-4" }),
         ]),
@@ -114,8 +151,11 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
                   each: computed(menu_state_, (t) => {
                     return t.items;
                   }),
-                  render(item: MenuItemCore) {
-                    return DropdownMenuItem({ store: item });
+                  render(item: MenuItemCore | MenuSeparatorCore) {
+                    if (item instanceof MenuSeparatorCore) {
+                      return DropdownMenuSeparator({});
+                    }
+                    return DropdownMenuItem({ store: item as MenuItemCore });
                   },
                 }),
               ]),
