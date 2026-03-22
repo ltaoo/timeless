@@ -3,7 +3,12 @@ import { Section, Item } from "@/components/index.js";
 export default function FeedbackView() {
   const dialog$ = new Timeless.ui.DialogCore({
     title: "Dialog Title",
-    footer: true,
+    onOk() {
+      dialog$.okBtn.setLoading(true);
+      setTimeout(() => {
+        dialog$.okBtn.setLoading(false);
+      }, 3000);
+    },
   });
 
   return View({ class: "space-y-8" }, [

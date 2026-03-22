@@ -231,19 +231,49 @@ export default function LifecycleView(props) {
   //   addLog("LifecycleView: mounted");
   const curRoute = ref("pageA");
 
+  const backButtonStore = new Timeless.ui.ButtonCore({
+    onClick() {
+      subhistory$.back();
+    },
+  });
+  const forwardButtonStore = new Timeless.ui.ButtonCore({
+    onClick() {
+      subhistory$.forward();
+    },
+  });
+
+  const updateNavState = () => {
+    if (subhistory$.cursor > 0) {
+      backButtonStore.enable();
+    } else {
+      backButtonStore.disable();
+    }
+    if (subhistory$.cursor < subhistory$.stacks.length - 1) {
+      forwardButtonStore.enable();
+    } else {
+      forwardButtonStore.disable();
+    }
+  };
+
   subhistory$.onRouteChange(({ view }) => {
     if (view) {
       curRoute.as(view.name.split(".").pop());
     }
+    updateNavState();
   });
   //   console.log('[]defaultRouteName', defaultRouteName);
   subhistory$.push(defaultRouteName, {}, { ignore: true });
+  updateNavState();
 
   return View({ class: cn(["space-y-8"]) }, [
     Section("Page Lifecycle", [
       Item("onMounted / onUnmounted", [
         View({ class: "flex gap-4" }, [
           View({ class: "flex-1 flex flex-col gap-4" }, [
+            View({ class: "flex gap-2" }, [
+              Button({ store: backButtonStore }, ["返回"]),
+              Button({ store: forwardButtonStore }, ["前进"]),
+            ]),
             View({ class: "flex gap-2" }, [
               For({
                 each: [

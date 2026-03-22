@@ -192,6 +192,11 @@
       "import": "./dist/play/index.esm.js",
       "require": "./dist/play/index.js"
     },
+    "./plus": {
+      "types": "./dist/plus/index.d.ts",
+      "import": "./dist/plus/index.esm.js",
+      "require": "./dist/plus/index.js"
+    },
     "./refresh-ccw": {
       "types": "./dist/refresh-ccw/index.d.ts",
       "import": "./dist/refresh-ccw/index.esm.js",

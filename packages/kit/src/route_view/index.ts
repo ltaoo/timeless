@@ -546,7 +546,12 @@ function emitViewCreated(view: RouteViewCore) {
 }
 
 export function RouteMenusModel<
-  T extends { title: string; url?: unknown; onClick?: (m: T) => void },
+  T extends {
+    title: string;
+    url?: unknown;
+    onClick?: (m: T) => void;
+    children?: T["url"][];
+  },
 >(props: { view: RouteViewCore; history: HistoryCore<any, any>; menus: T[] }) {
   const methods = {
     refresh() {
@@ -594,6 +599,15 @@ export function RouteMenusModel<
     isActive(url: string) {
       const v = _cur.value;
       return v ? v.name === url : false;
+    },
+    isSelected(t: RouteViewCore | null, menu: T) {
+      if (!t) {
+        return false;
+      }
+      const isSameRoute = t.name === menu.url;
+      const isSubRoute = t.name.startsWith(menu.url as string);
+      const isCustomSubRoute = menu.children?.includes(t.name);
+      return isSameRoute || !!isSubRoute || !!isCustomSubRoute;
     },
     handleClick(menu: T, query?: Record<string, string>) {
       props.history.push(menu.url, query);

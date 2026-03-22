@@ -303,76 +303,35 @@ export class HistoryCore<
     this.emit(Events.StateChange, { ...this.state });
   }
   back(opt: Partial<{ data: any }> = {}) {
-    // 根据当前 router 的 href 找到对应的视图（用 href 而非 pathname，因为同一路由不同 query 的 pathname 相同）
-    const targetHref = this.$router.href;
-    console.log(
-      "[DOMAIN]history - back",
-      "cursor:",
-      this.cursor,
-      "targetHref:",
-      targetHref,
-      "stacks:",
-      this.stacks.map((s) => s.href),
-    );
-
-    // 在 stacks 中查找匹配的视图
-    let targetIndex = -1;
-    let view_prepare_to_show: RouteViewCore | null = null;
-
-    for (let i = 0; i < this.stacks.length; i++) {
-      const view = this.stacks[i];
-      if (view.href === targetHref) {
-        targetIndex = i;
-        view_prepare_to_show = view;
-        break;
-      }
-    }
-
-    // 如果在 stacks 中找不到，尝试从 views 中查找或创建
-    if (!view_prepare_to_show) {
-      console.log(
-        "[DOMAIN]history - back, view not in stacks, try to find in views",
-      );
-      const href = targetHref;
-      view_prepare_to_show = this.views[href];
-
-      if (!view_prepare_to_show) {
-        console.log("[DOMAIN]history - back, view not found, need to create");
-        // 视图不存在，可能是刷新页面或直接访问的情况
-        return;
-      }
-
-      // 视图存在但不在 stacks 中，需要重新构建 stacks
-      targetIndex = this.cursor; // 保持当前位置
-    }
-
-    if (!view_prepare_to_show) {
-      console.log("[DOMAIN]history - back, no view_prepare_to_show");
+    if (this.cursor <= 0) {
+      console.log("[DOMAIN]history - back, cursor is 0, cannot go back");
       return;
     }
 
-    const href = view_prepare_to_show.href;
+    const targetIndex = this.cursor - 1;
+    const view_prepare_to_show = this.stacks[targetIndex];
+
+    if (!view_prepare_to_show) {
+      console.log(
+        "[DOMAIN]history - back, no view at targetIndex",
+        targetIndex,
+      );
+      return;
+    }
     if (!view_prepare_to_show.parent) {
       console.log("[DOMAIN]history - back, no parent");
       return;
     }
 
-    this.$router.href = href;
+    this.$router.href = view_prepare_to_show.href;
     this.$router.name = view_prepare_to_show.name;
     this.cursor = targetIndex;
 
     const viewsAfter = this.stacks.slice(targetIndex + 1);
-    // 注意：back 时不销毁视图，只是隐藏，因为用户可能会 forward 回来
-    for (let i = 0; i < viewsAfter.length; i += 1) {
-      const v = viewsAfter[i];
-      v.parent?.removeView(v, {
-        reason: "back",
-        destroy: false,
-      });
+    for (const v of viewsAfter) {
+      v.parent?.removeView(v, { reason: "back", destroy: false });
     }
 
-    // 如果目标视图已经可见（如 article 布局视图），showView 会直接 return，
-    // 导致其 curView（如 category）不会被隐藏。需要手动清理子视图。
     if (view_prepare_to_show.visible && view_prepare_to_show.curView) {
       view_prepare_to_show.clearCurView({ reason: "back", destroy: false });
     }
@@ -380,10 +339,6 @@ export class HistoryCore<
       reason: "back",
       destroy: false,
     });
-    // const [, search] = this.$router.href.split("?");
-    // const realQuery = search
-    //   ? (qs_parse(search) as Record<string, string>)
-    //   : {};
     this.emit(Events.RouteChange, {
       reason: "back",
       view: view_prepare_to_show,
@@ -397,71 +352,35 @@ export class HistoryCore<
     this.emit(Events.StateChange, { ...this.state });
   }
   forward() {
-    // 根据当前 router 的 href 找到对应的视图（用 href 而非 pathname，因为同一路由不同 query 的 pathname 相同）
-    const targetHref = this.$router.href;
-    console.log(
-      "[DOMAIN]history - forward",
-      "cursor:",
-      this.cursor,
-      "targetHref:",
-      targetHref,
-      "stacks:",
-      this.stacks.map((s) => s.href),
-    );
-
-    // 在 stacks 中查找匹配的视图
-    let targetIndex = -1;
-    let viewPrepareShow: RouteViewCore | null = null;
-
-    for (let i = 0; i < this.stacks.length; i++) {
-      const view = this.stacks[i];
-      if (view.href === targetHref) {
-        targetIndex = i;
-        viewPrepareShow = view;
-        break;
-      }
+    if (this.cursor >= this.stacks.length - 1) {
+      console.log(
+        "[DOMAIN]history - forward, cursor at end, cannot go forward",
+      );
+      return;
     }
 
-    // 如果在 stacks 中找不到，尝试从 views 中查找
+    const targetIndex = this.cursor + 1;
+    const viewPrepareShow = this.stacks[targetIndex];
+
     if (!viewPrepareShow) {
       console.log(
-        "[DOMAIN]history - forward, view not in stacks, try to find in views",
+        "[DOMAIN]history - forward, no view at targetIndex",
+        targetIndex,
       );
-      const href = targetHref;
-      viewPrepareShow = this.views[href];
-
-      if (!viewPrepareShow) {
-        console.log("[DOMAIN]history - forward, view not found");
-        return;
-      }
-
-      // 视图存在但不在 stacks 中，添加到 stacks
-      this.stacks.push(viewPrepareShow);
-      targetIndex = this.stacks.length - 1;
-    }
-
-    if (!viewPrepareShow) {
-      console.log("[DOMAIN]history - forward no viewPrepareShow");
       return;
     }
     if (!viewPrepareShow.parent) {
-      console.log("[DOMAIN]history - forward no parent");
+      console.log("[DOMAIN]history - forward, no parent");
       return;
     }
 
-    const href = viewPrepareShow.href;
-    this.$router.href = href;
+    this.$router.href = viewPrepareShow.href;
     this.$router.name = viewPrepareShow.name;
     this.cursor = targetIndex;
 
     const viewsAfter = this.stacks.slice(targetIndex + 1);
-    // 注意：forward 时不销毁视图，只是隐藏，因为用户可能会 back 回来
-    for (let i = 0; i < viewsAfter.length; i += 1) {
-      const v = viewsAfter[i];
-      v.parent?.removeView(v, {
-        reason: "forward",
-        destroy: false,
-      });
+    for (const v of viewsAfter) {
+      v.parent?.removeView(v, { reason: "forward", destroy: false });
     }
     viewPrepareShow.parent.showView(viewPrepareShow, {
       reason: "forward",
@@ -474,12 +393,7 @@ export class HistoryCore<
       href: viewPrepareShow.href,
       pathname: viewPrepareShow.pathname,
       query: viewPrepareShow.query,
-      // query: (() => {
-      //   const [, search] = this.$router.href.split("?");
-      //   return search ? (qs_parse(search) as Record<string, string>) : {};
-      // })(),
     });
-    // this.emit(Events.TopViewChange, viewPrepareShow);
     this.emit(Events.Forward);
     this.emit(Events.StateChange, { ...this.state });
   }
