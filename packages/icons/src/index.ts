@@ -39,4 +39,5 @@ export * from "./clock";
 export * from "./grid-3x3";
 export * from "./menu";
 export * from "./circle-ellipsis";
+export * from "./house";
 export * from "./utils";

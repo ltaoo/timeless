@@ -45,10 +45,6 @@ export function Root(
     },
     render() {
       const $elm = view$.render();
-      store.methods.setClientHeight(view$.$elm.clientHeight);
-      (view$.$elm as HTMLElement).addEventListener("scroll", () => {
-        store.methods.handleScroll({ scrollTop: (view$.$elm as HTMLElement).scrollTop });
-      });
       if (props.onMounted) {
         props.onMounted($elm);
       }

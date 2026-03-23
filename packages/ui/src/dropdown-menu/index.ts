@@ -1,7 +1,8 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
-import { MenuCore } from "@/menu";
+import { MenuCore, MenuEntry } from "@/menu";
 import { MenuItemCore } from "@/menu/item";
+import { MenuGroupCore } from "@/menu/group";
 import { Side } from "@/popper/types";
 import { Align } from "@/popper";
 
@@ -88,14 +89,7 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
     });
     // Store reference to parent dropdown in menu for hover handling
     (this.menu as any).parentDropdown = this;
-    for (let i = 0; i < items.length; i += 1) {
-      const item = items[i];
-      if (item.menu) {
-        item.menu.setOffset({ x: submenuOffsetX, y: submenuOffsetY });
-        // Also set parent dropdown reference for submenus
-        (item.menu as any).parentDropdown = this;
-      }
-    }
+    this._configure_sub_menus(items);
     this.menu.onHide(() => {
       this.menu.reset();
       if (onHidden) {
@@ -108,6 +102,25 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
     // this.menu.popper.onStateChange(() => {
     //   this.emit(Events.StateChange, { ...this.state });
     // });
+  }
+
+  /** Recursively configure submenus inside items (including those nested in MenuGroupCore) */
+  private _configure_sub_menus(items: MenuEntry[]) {
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      if (item instanceof MenuItemCore && item.menu) {
+        item.menu.setOffset({
+          x: this.submenuOffsetX,
+          y: this.submenuOffsetY,
+        });
+        (item.menu as any).parentDropdown = this;
+        (item.menu as any)._is_root_menu = false;
+        // Recurse into the submenu's items as well
+        this._configure_sub_menus(item.menu.items);
+      } else if (item instanceof MenuGroupCore) {
+        this._configure_sub_menus(item.items);
+      }
+    }
   }
 
   setItems(items: MenuItemCore[]) {

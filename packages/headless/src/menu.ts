@@ -1,5 +1,5 @@
 import { refobj, computed, combine } from "@timeless/reactive";
-import { MenuCore, MenuItemCore } from "@timeless/ui";
+import { MenuCore, MenuItemCore, MenuGroupCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "./view";
 import { Show } from "./show";
@@ -108,16 +108,13 @@ export function ContentImpl(
             },
             onMouseEnter(event) {
               // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
-              // console.log("[ContentImpl] onMouseEnter", props.store._name, {
-              //   hasParentMenu: !!props.store.parent_menu,
-              //   parentMenuName: props.store.parent_menu?._name,
-              //   parentHideSubTimer: props.store.parent_menu?.hide_sub_timer,
-              // });
-              // if (props.store.parent_menu && props.store.parent_menu.hide_sub_timer !== null) {
-              //   console.log("[ContentImpl] clearing parent hide_sub_timer");
-              //   clearTimeout(props.store.parent_menu.hide_sub_timer);
-              //   props.store.parent_menu.hide_sub_timer = null;
-              // }
+              if (
+                props.store.parent_menu &&
+                props.store.parent_menu.hide_sub_timer !== null
+              ) {
+                clearTimeout(props.store.parent_menu.hide_sub_timer);
+                props.store.parent_menu.hide_sub_timer = null;
+              }
               if (rest.onMouseEnter) {
                 rest.onMouseEnter(event);
               }
@@ -150,7 +147,13 @@ export function ContentImpl(
   );
 }
 
-export function Group(props: ViewProps, children: ViewChildren) {
+export function Group(
+  props: ViewProps & { store?: MenuGroupCore },
+  children: ViewChildren,
+) {
+  return View(props, children);
+}
+export function GroupLabel(props: ViewProps, children: ViewChildren) {
   return View(props, children);
 }
 export function Label(props: ViewProps, children: ViewChildren) {
@@ -298,31 +301,17 @@ export function SubMenuContent(
     {
       ...props,
       store: props.store,
+      onMouseEnter() {
+        // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
+        if (
+          props.store.parent_menu &&
+          props.store.parent_menu.hide_sub_timer !== null
+        ) {
+          clearTimeout(props.store.parent_menu.hide_sub_timer);
+          props.store.parent_menu.hide_sub_timer = null;
+        }
+      },
       onMounted($el) {
-        // console.log("[SubMenuContent] mounted");
-        // Add hover event listeners to keep submenu open
-        // $el.addEventListener("mouseenter", () => {
-        //   console.log("[SubMenuContent] mouseenter");
-        //   if (props.store.hide_sub_timer) {
-        //     clearTimeout(props.store.hide_sub_timer);
-        //     props.store.hide_sub_timer = null;
-        //   }
-        //   // 清除父菜单的定时器
-        //   if (
-        //     props.store.parent_menu &&
-        //     props.store.parent_menu.hide_sub_timer
-        //   ) {
-        //     clearTimeout(props.store.parent_menu.hide_sub_timer);
-        //     props.store.parent_menu.hide_sub_timer = null;
-        //   }
-        // });
-        // $el.addEventListener("mouseleave", () => {
-        //   console.log("[SubMenuContent] mouseleave");
-        //   props.store.hide_sub_timer = setTimeout(() => {
-        //     props.store.hide_sub_timer = null;
-        //     props.store.hide();
-        //   }, 200);
-        // });
         if (props.onMounted) {
           props.onMounted($el);
         }

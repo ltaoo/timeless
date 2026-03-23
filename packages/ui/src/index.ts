@@ -20,6 +20,7 @@ export * from "./accordion";
 export * from "./menu"; // Export first
 export * from "./menu/item";
 export * from "./menu/separator";
+export * from "./menu/group";
 export * from "./button";
 export * from "./checkbox";
 export * from "./context-menu";
@@ -76,3 +77,4 @@ export * from "./step";
 export * from "./resizable-panels";
 export * from "./tooltip";
 export * from "./shortcut";
+export * from "./click-outside";

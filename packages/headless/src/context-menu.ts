@@ -1,5 +1,10 @@
 import { refobj } from "@timeless/reactive";
-import { ContextMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
+import {
+  ContextMenuCore,
+  MenuCore,
+  MenuItemCore,
+  MenuGroupCore,
+} from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "./view";
 import * as MenuPrimitive from "./menu";
@@ -128,7 +133,10 @@ export function Content(
   );
 }
 
-export function Group(props: ViewProps, children: ViewChildren) {
+export function Group(
+  props: ViewProps & { store?: MenuGroupCore },
+  children: ViewChildren,
+) {
   return MenuPrimitive.Group(props, children);
 }
 
@@ -177,30 +185,27 @@ export function SubMenuContent(
   },
   children: ViewChildren,
 ) {
-  // Get the parent ContextMenuCore from the menu's parent
-  // const parentContextMenu = (props.store as any).parentContextMenu as
-  //   | ContextMenuCore
-  //   | undefined;
-
-  // const hoverHandlers =
-  //   parentContextMenu && parentContextMenu.trigger === "hover"
-  //     ? {
-  //         onMouseEnter() {
-  //           console.log("[ContextMenu SubMenuContent] mouseenter");
-  //           // Cancel parent context menu hide timer when entering submenu
-  //           _hoverClearHide(parentContextMenu);
-  //         },
-  //         onMouseLeave() {
-  //           console.log("[ContextMenu SubMenuContent] mouseleave");
-  //           // Schedule parent context menu hide when leaving submenu
-  //           _hoverScheduleHide(parentContextMenu);
-  //         },
-  //       }
-  //     : {};
-
   return MenuPrimitive.Content(
     {
-      ...props, // ...hoverHandlers,
+      ...props,
+      onMouseEnter(event: MouseEvent) {
+        // Clear parent menu's hide timer when entering submenu
+        if (
+          props.store.parent_menu &&
+          props.store.parent_menu.hide_sub_timer !== null
+        ) {
+          clearTimeout(props.store.parent_menu.hide_sub_timer);
+          props.store.parent_menu.hide_sub_timer = null;
+        }
+        if (props.onMouseEnter) {
+          props.onMouseEnter(event);
+        }
+      },
+      onMouseLeave(event: MouseEvent) {
+        if (props.onMouseLeave) {
+          props.onMouseLeave(event);
+        }
+      },
     },
     children,
   );

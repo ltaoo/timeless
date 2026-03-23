@@ -421,6 +421,163 @@ export default function OverlayView() {
           ],
         ),
       ]),
+      Item("Full Featured Menu", [
+        DropdownMenu(
+          {
+            store: new Timeless.ui.DropdownMenuCore({
+              items: [
+                new Timeless.ui.MenuGroupCore({
+                  label: "Edit",
+                  items: [
+                    new Timeless.ui.MenuItemCore({
+                      label: "Undo",
+                      shortcut: "⌘Z",
+                      icon: Timeless.icons.Undo2Outlined({ class: "w-4 h-4" }),
+                      onClick() {
+                        console.log("undo");
+                      },
+                    }),
+                    new Timeless.ui.MenuItemCore({
+                      label: "Redo",
+                      shortcut: "⇧⌘Z",
+                      icon: Timeless.icons.RefreshCcwOutlined({
+                        class: "w-4 h-4",
+                      }),
+                      onClick() {
+                        console.log("redo");
+                      },
+                    }),
+                  ],
+                }),
+                new Timeless.ui.MenuSeparatorCore(),
+                new Timeless.ui.MenuGroupCore({
+                  label: "Clipboard",
+                  items: [
+                    new Timeless.ui.MenuItemCore({
+                      label: "Cut",
+                      // shortcut: "⌘X",
+                      icon: Timeless.icons.BoltOutlined({ class: "w-4 h-4" }),
+                      onClick() {
+                        console.log("cut");
+                      },
+                    }),
+                    new Timeless.ui.MenuItemCore({
+                      label: "Copy",
+                      shortcut: "⌘C",
+                      icon: Timeless.icons.FileSymlinkOutlined({
+                        class: "w-4 h-4",
+                      }),
+                      onClick() {
+                        console.log("copy");
+                      },
+                    }),
+                    new Timeless.ui.MenuItemCore({
+                      label: "Paste",
+                      shortcut: "⌘V",
+                      icon: Timeless.icons.ArrowDownloadToLineOutlined({
+                        class: "w-4 h-4",
+                      }),
+                      onClick() {
+                        console.log("paste");
+                      },
+                    }),
+                  ],
+                }),
+                new Timeless.ui.MenuSeparatorCore(),
+                new Timeless.ui.MenuGroupCore({
+                  label: "Share",
+                  items: [
+                    new Timeless.ui.MenuItemCore({
+                      label: "Email",
+                      icon: Timeless.icons.SearchOutlined({ class: "w-4 h-4" }),
+                      onClick() {
+                        console.log("email");
+                      },
+                    }),
+                    new Timeless.ui.MenuItemCore({
+                      label: "Home",
+                      shortcut: "⌘M",
+                      icon: Timeless.icons.HouseOutlined({ class: "w-4 h-4" }),
+                      onClick() {
+                        console.log("home");
+                      },
+                    }),
+                    new Timeless.ui.MenuItemCore({
+                      label: "More",
+                      icon: Timeless.icons.EllipsisOutlined({
+                        class: "w-4 h-4",
+                      }),
+                      menu: new Timeless.ui.MenuCore({
+                        items: [
+                          new Timeless.ui.MenuItemCore({
+                            label: "Slack",
+                            onClick() {
+                              console.log("slack");
+                            },
+                          }),
+                          new Timeless.ui.MenuItemCore({
+                            label: "Discord",
+                            onClick() {
+                              console.log("discord");
+                            },
+                          }),
+                          new Timeless.ui.MenuSeparatorCore(),
+                          new Timeless.ui.MenuItemCore({
+                            label: "WeChat",
+                            menu: new Timeless.ui.MenuCore({
+                              items: [
+                                new Timeless.ui.MenuItemCore({
+                                  label: "Chat",
+                                  onClick() {
+                                    console.log("wechat chat");
+                                  },
+                                }),
+                                new Timeless.ui.MenuItemCore({
+                                  label: "Moments",
+                                  onClick() {
+                                    console.log("wechat moments");
+                                  },
+                                }),
+                              ],
+                            }),
+                            onClick() {
+                              console.log("wechat");
+                            },
+                          }),
+                        ],
+                      }),
+                      onClick() {
+                        console.log("more");
+                      },
+                    }),
+                  ],
+                }),
+                new Timeless.ui.MenuSeparatorCore(),
+                new Timeless.ui.MenuGroupCore({
+                  items: [
+                    new Timeless.ui.MenuItemCore({
+                      label: "Delete",
+                      shortcut: "⌘⌫",
+                      icon: Timeless.icons.Trash2Outlined({ class: "w-4 h-4" }),
+                      onClick() {
+                        console.log("delete");
+                      },
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          },
+          [
+            Button(
+              {
+                store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+              },
+              ["Full Featured Menu"],
+            ),
+          ],
+        ),
+      ]),
       Item("Context Menu", [
         (() => {
           const menu$ = new Timeless.ui.ContextMenuCore({

@@ -14,6 +14,7 @@ export interface ViewProps {
   as?: string;
   type?: string;
   id?: string | Ref<string>;
+  title?: string | Ref<string>;
   style?: string | Ref<string> | StyleRef;
   class?: string | Ref<string> | ClassNameRef;
   dataset?: Record<string, string>;

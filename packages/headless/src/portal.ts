@@ -82,7 +82,12 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
 
       // console.log("[Portal] render, children count:", _children.length);
 
-      for (const child of _children) {
+      for (let child of _children) {
+        if (!child) continue;
+        // Handle lazy functions from h()
+        if (typeof child === "function") {
+          child = child();
+        }
         if (!child) continue;
         if (isElement(child)) {
           const result = child.render();

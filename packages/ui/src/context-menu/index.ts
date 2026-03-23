@@ -60,7 +60,7 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
       {
         _name: string;
       } & ContextMenuProps
-    >
+    >,
   ) {
     super(options);
     const {
@@ -106,6 +106,8 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
         item.menu.setOffset({ x: submenuOffsetX, y: submenuOffsetY });
         // Also set parent context menu reference for submenus
         (item.menu as any).parentContextMenu = this;
+        // Mark submenus as non-root so they don't auto-close sibling root menus
+        (item.menu as any)._is_root_menu = false;
       }
     }
   }

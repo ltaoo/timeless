@@ -1,4 +1,4 @@
-import { combine, computed, refobj } from "@timeless/reactive";
+import { cn, combine, computed, refobj } from "@timeless/reactive";
 import { InputPrimitive, Show, ViewProps } from "@timeless/headless";
 import { InputCore } from "@timeless/ui";
 import { CircleXOutlined, LoaderOutlined } from "@timeless/icons";
@@ -22,7 +22,7 @@ export function Input(
   const isLoading = computed(state_, (d) => d.loading || false);
 
   return InputPrimitive.Root(
-    { store, class: "relative inline-flex items-center" },
+    { store, class: cn(["relative flex items-center", props.class]) },
     [
       InputPrimitive.Input({
         store,
@@ -42,7 +42,7 @@ export function Input(
             store,
             class: computed(hasValue, (has) =>
               has
-                ? "absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                ? "absolute right-2 flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
                 : "hidden",
             ),
           },

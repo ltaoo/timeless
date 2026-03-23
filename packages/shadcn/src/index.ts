@@ -39,7 +39,7 @@ import { ContextMenu } from "./context-menu";
 import { Tabs } from "./tabs";
 import { Steps } from "./steps";
 import { Button } from "./button";
-import { ScrollView } from "./scrollview";
+import { ScrollView } from "./scroll-view";
 import { Badge } from "./badge";
 import { Separator } from "./separator";
 import {

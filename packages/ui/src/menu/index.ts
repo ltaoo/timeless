@@ -9,6 +9,7 @@ import { Direction } from "@/direction";
 
 import { MenuItemCore } from "./item";
 import { MenuSeparatorCore } from "./separator";
+import { MenuGroupCore } from "./group";
 
 enum Events {
   Show,
@@ -30,7 +31,7 @@ type TheTypesOfEvents = {
   [Events.LeaveMenu]: void;
   [Events.StateChange]: MenuCoreState;
 };
-type MenuEntry = MenuItemCore | MenuSeparatorCore;
+export type MenuEntry = MenuItemCore | MenuSeparatorCore | MenuGroupCore;
 type MenuCoreState = {
   /** 是否是展开状态 */
   open: boolean;
@@ -58,6 +59,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   layer: DismissableLayerCore;
 
   open_timer: NodeJS.Timeout | null = null;
+
+  /** Global registry of open root menus (excludes submenus) */
+  private static openRootMenus = new Set<MenuCore>();
+  /** Whether this menu is registered as a root menu (not a submenu) */
+  private _is_root_menu = true;
 
   state: MenuCoreState = {
     open: false,
@@ -123,7 +129,9 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.hide();
     });
     this.presence.onStateChange(() => {
-      this.state.open = this.presence.state.mounted;
+      // During exit animation, mounted is still true but we should treat the menu as closed
+      this.state.open =
+        this.presence.state.mounted && !this.presence.state.exit;
       this.state.enter = this.presence.state.enter;
       this.state.exit = this.presence.state.exit;
       this.emit(Events.StateChange, { ...this.state });
@@ -153,8 +161,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.state.open = false;
       this.popper.reset();
       for (let i = 0; i < this.items.length; i += 1) {
-        if (this.items[i] instanceof MenuItemCore) {
-          (this.items[i] as MenuItemCore).reset();
+        const item = this.items[i];
+        if (item instanceof MenuItemCore) {
+          item.reset();
+        } else if (item instanceof MenuGroupCore) {
+          item.reset();
         }
       }
       if (this.cur_item) {
@@ -206,10 +217,15 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       clearTimeout(this.parent_menu.hide_sub_timer);
       this.parent_menu.hide_sub_timer = null;
     }
-    // console.trace("[DEBUG-MENU] show() call stack");
-    // this.state.open = true;
-    // this.state.enter = this.presence.enter;
-    // this.state.exit = this.presence.exit;
+    // Close other open root menus when opening this one
+    if (this._is_root_menu) {
+      for (const menu of MenuCore.openRootMenus) {
+        if (menu !== this && menu.state.open) {
+          menu.hide();
+        }
+      }
+      MenuCore.openRootMenus.add(this);
+    }
     this.presence.show();
     this.popper.place();
     this.emit(Events.Show);
@@ -227,6 +243,9 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
 
     // Emit Hiding event immediately so menu items can update their state
     this.emit(Events.Hiding);
+
+    // Remove from global registry
+    MenuCore.openRootMenus.delete(this);
 
     // Close all open submenus immediately
     if (this.cur_item && this.cur_item.menu && this.cur_item.menu.state.open) {
@@ -341,6 +360,8 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     for (let i = 0; i < items.length; i += 1) {
       if (items[i] instanceof MenuItemCore) {
         this.listen_item(items[i] as MenuItemCore);
+      } else if (items[i] instanceof MenuGroupCore) {
+        this.listen_items((items[i] as MenuGroupCore).items);
       }
     }
   }
@@ -388,8 +409,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     this.presence.reset();
     this.popper.reset();
     for (let i = 0; i < this.items.length; i += 1) {
-      if (this.items[i] instanceof MenuItemCore) {
-        (this.items[i] as MenuItemCore).reset();
+      const item = this.items[i];
+      if (item instanceof MenuItemCore) {
+        item.reset();
+      } else if (item instanceof MenuGroupCore) {
+        item.reset();
       }
     }
   }
@@ -435,8 +459,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     //   this.subs[i].unmount();
     // }
     for (let i = 0; i < this.items.length; i += 1) {
-      if (this.items[i] instanceof MenuItemCore) {
-        (this.items[i] as MenuItemCore).unmount();
+      const item = this.items[i];
+      if (item instanceof MenuItemCore) {
+        item.unmount();
+      } else if (item instanceof MenuGroupCore) {
+        item.unmount();
       }
     }
     this.reset();

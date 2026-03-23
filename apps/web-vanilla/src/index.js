@@ -25,7 +25,7 @@ function ApplicationRootView() {
       views,
       NotFound: NotFoundPageView,
     }),
-    HistoryPanel({ store: history }),
+    // HistoryPanel({ store: history }),
   ]);
 }
 

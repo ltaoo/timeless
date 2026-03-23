@@ -15,6 +15,7 @@ import {
   MenuCore,
   MenuItemCore,
   MenuSeparatorCore,
+  MenuGroupCore,
   PresenceCore,
 } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
@@ -48,9 +49,12 @@ export function ContextMenu(
             each: computed(state_, (t) => {
               return t.items;
             }),
-            render(item: MenuItemCore | MenuSeparatorCore) {
+            render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
               if (item instanceof MenuSeparatorCore) {
                 return ContextMenuSeparator({});
+              }
+              if (item instanceof MenuGroupCore) {
+                return ContextMenuGroup({ store: item });
               }
               return ContextMenuItem({ store: item as MenuItemCore });
             },
@@ -68,6 +72,35 @@ function ContextMenuSeparator(_props: ViewProps) {
     },
     [],
   );
+}
+
+function ContextMenuGroup(props: ViewProps & { store: MenuGroupCore }) {
+  const state_ = refobj(props.store.state);
+  const has_label_ = computed(state_, (t) => !!t.label);
+
+  return ContextMenuPrimitive.Group({ store: props.store }, [
+    Show({ when: has_label_ }, [
+      ContextMenuPrimitive.Label(
+        {
+          class:
+            "px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400",
+        },
+        [computed(state_, (t) => t.label)],
+      ),
+    ]),
+    For({
+      each: computed(state_, (t) => t.items),
+      render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
+        if (item instanceof MenuSeparatorCore) {
+          return ContextMenuSeparator({});
+        }
+        if (item instanceof MenuGroupCore) {
+          return ContextMenuGroup({ store: item });
+        }
+        return ContextMenuItem({ store: item as MenuItemCore });
+      },
+    }),
+  ]);
 }
 
 function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
@@ -105,9 +138,7 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
           computed(state_, (t) => {
             return t.disabled ? "pointer-events-none opacity-50" : "";
           }),
-          computed(has_submenu_, (t) => {
-            return [MENU_ITEM_CLASS, t ? "flex justify-between" : ""].join(" ");
-          }),
+          MENU_ITEM_CLASS,
         ]),
       },
       [
@@ -130,7 +161,7 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
           ),
         ]),
         Show({ when: has_submenu_ }, [
-          ChevronRightOutlined({ class: "w-4 h-4" }),
+          ChevronRightOutlined({ class: "ml-auto w-4 h-4" }),
         ]),
       ],
     ),
@@ -150,9 +181,14 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
                   each: computed(menu_state_, (t) => {
                     return t.items;
                   }),
-                  render(item: MenuItemCore | MenuSeparatorCore) {
+                  render(
+                    item: MenuItemCore | MenuSeparatorCore | MenuGroupCore,
+                  ) {
                     if (item instanceof MenuSeparatorCore) {
                       return ContextMenuSeparator({});
+                    }
+                    if (item instanceof MenuGroupCore) {
+                      return ContextMenuGroup({ store: item });
                     }
                     return ContextMenuItem({ store: item as MenuItemCore });
                   },

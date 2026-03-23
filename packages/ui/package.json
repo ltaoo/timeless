@@ -45,6 +45,11 @@
       "import": "./dist/checkbox/index.esm.js",
       "require": "./dist/checkbox/index.js"
     },
+    "./click-outside": {
+      "types": "./dist/click-outside/index.d.ts",
+      "import": "./dist/click-outside/index.esm.js",
+      "require": "./dist/click-outside/index.js"
+    },
     "./collection": {
       "types": "./dist/collection/index.d.ts",
       "import": "./dist/collection/index.esm.js",

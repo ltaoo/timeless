@@ -1,5 +1,10 @@
 import { refobj, computed } from "@timeless/reactive";
-import { DropdownMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
+import {
+  DropdownMenuCore,
+  MenuCore,
+  MenuItemCore,
+  MenuGroupCore,
+} from "@timeless/ui";
 
 import * as MenuPrimitive from "./menu";
 import { View, ViewChildren, ViewProps } from "./view";
@@ -87,8 +92,6 @@ export function Trigger(
         if (store.trigger === "click") {
           $elm.addEventListener("pointerdown", (e) => {
             e.preventDefault();
-            // 阻止冒泡，避免 LayerManager 立即关闭菜单
-            e.stopPropagation();
             props.store.menu.show();
           });
         }
@@ -159,7 +162,10 @@ export function Content(
   );
 }
 
-export function Group(props: ViewProps, children: ViewChildren) {
+export function Group(
+  props: ViewProps & { store?: MenuGroupCore },
+  children: ViewChildren,
+) {
   return MenuPrimitive.Group(props, children);
 }
 export function Label(props: ViewProps, children: ViewChildren) {
@@ -211,24 +217,37 @@ export function SubMenuContent(
     | DropdownMenuCore
     | undefined;
 
-  const hoverHandlers =
-    parentDropdown && parentDropdown.trigger === "hover"
-      ? {
-          onMouseEnter() {
-            // Cancel parent dropdown hide timer when entering submenu
-            _hoverClearHide(parentDropdown);
-          },
-          onMouseLeave() {
-            // Schedule parent dropdown hide when leaving submenu
-            _hoverScheduleHide(parentDropdown);
-          },
-        }
-      : {};
+  const mergedHandlers: Record<string, any> = {
+    onMouseEnter(event: MouseEvent) {
+      // Clear parent menu's hide timer when entering submenu
+      if (
+        props.store.parent_menu &&
+        props.store.parent_menu.hide_sub_timer !== null
+      ) {
+        clearTimeout(props.store.parent_menu.hide_sub_timer);
+        props.store.parent_menu.hide_sub_timer = null;
+      }
+      if (parentDropdown && parentDropdown.trigger === "hover") {
+        _hoverClearHide(parentDropdown);
+      }
+      if (props.onMouseEnter) {
+        props.onMouseEnter(event);
+      }
+    },
+    onMouseLeave(event: MouseEvent) {
+      if (parentDropdown && parentDropdown.trigger === "hover") {
+        _hoverScheduleHide(parentDropdown);
+      }
+      if (props.onMouseLeave) {
+        props.onMouseLeave(event);
+      }
+    },
+  };
 
   return MenuPrimitive.Content(
     {
       ...props,
-      ...hoverHandlers,
+      ...mergedHandlers,
     },
     children,
   );
