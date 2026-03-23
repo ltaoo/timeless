@@ -11,6 +11,7 @@ export default function HomePageView(props) {
       { title: "Feedback", url: "root.home_layout.index.feedback" },
       { title: "Navigation", url: "root.home_layout.index.nav" },
       { title: "Overlay", url: "root.home_layout.index.overlay" },
+      { title: "Command", url: "root.home_layout.index.command" },
       { title: "Debug", url: "root.home_layout.index.debug" },
       { title: "Lifecycle", url: "root.home_layout.index.lifecycle" },
     ],

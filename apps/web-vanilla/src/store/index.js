@@ -69,6 +69,11 @@ const routesConfigure = {
             pathname: "/home/index/lifecycle",
             component: Timeless.lazy("@/pages/home/index.lifecycle.js"),
           },
+          command: {
+            title: "命令面板",
+            pathname: "/home/index/command",
+            component: Timeless.lazy("@/pages/home/index.command.js"),
+          },
         },
       },
       settings: {
