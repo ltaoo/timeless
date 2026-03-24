@@ -1,8 +1,7 @@
-import { isElement, TimelessElement } from "./view";
-
-console.log("headless v0.2.0");
+// console.log("headless v0.2.0");
 
 export * from "@timeless/reactive";
+
 export * from "./env";
 export * from "./render-to-string";
 
@@ -22,7 +21,6 @@ export * from "./html";
 export * from "./portal";
 export * from "./presence";
 export * from "./native-input";
-export * as PopperPrimitive from "./popper";
 export * from "./transition";
 
 // content
@@ -30,15 +28,15 @@ export * from "./flex";
 export * from "./head";
 export * from "./paragraph";
 export * from "./table";
-export * as AvatarPrimitive from "./avatar";
-export { Avatar } from "./avatar";
 export * from "./card";
 export * from "./label";
 export * from "./badge";
-export * as ProgressPrimitive from "./progress";
 export * from "./separator";
 export * from "./skeleton";
 export * from "./alert";
+export * as PopperPrimitive from "./popper";
+export * as AvatarPrimitive from "./avatar";
+export * as ProgressPrimitive from "./progress";
 
 // interactive
 export * as ButtonPrimitive from "./button";

@@ -1,4 +1,4 @@
-import { refobj } from "@timeless/reactive";
+import { refobj, computed } from "@timeless/reactive";
 import { PopoverCore, Align, Side, getGlobalLayerManager } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "./view";
@@ -90,6 +90,14 @@ export function Portal(
         PopperPrimitive.Content(
           {
             store: props.store.popper,
+            style: props.store.destroyOnClose === false
+              ? computed(state, (t) => {
+                  if (!t.visible && !t.enter && !t.exit) {
+                    return "display: none;";
+                  }
+                  return "";
+                })
+              : undefined,
             onDismiss() {
               props.store.hide();
             },

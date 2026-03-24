@@ -1004,7 +1004,9 @@ export default function HomeIndexScrollViewExampleView() {
                               ),
                             ]),
                             View(
-                              { class: "flex-shrink-0 flex items-center gap-2" },
+                              {
+                                class: "flex-shrink-0 flex items-center gap-2",
+                              },
                               [
                                 View(
                                   {
@@ -1252,6 +1254,401 @@ export default function HomeIndexScrollViewExampleView() {
         })(),
       ]),
     ]),
+    Section("Popover + Virtual List", [
+      Item("State Preservation on Reopen", [
+        (() => {
+          const ITEM_HEIGHT = 56;
+          let nextId = 1;
+
+          const fileNames = [
+            "project-archive.zip",
+            "design-assets.psd",
+            "video-tutorial.mp4",
+            "database-backup.sql",
+            "photo-gallery.jpg",
+            "report-2024.pdf",
+            "music-collection.mp3",
+            "source-code.tar.gz",
+            "presentation.pptx",
+            "firmware-update.bin",
+          ];
+
+          function generateDownloads(count) {
+            return Array.from({ length: count }, () => {
+              const id = nextId++;
+              return {
+                id,
+                name: fileNames[(id - 1) % fileNames.length],
+                size: Math.floor(Math.random() * 500000000) + 1000000,
+                status: "completed",
+                progress: 100,
+                height: ITEM_HEIGHT,
+              };
+            });
+          }
+
+          const waterfall = Timeless.ui.WaterfallModel({
+            column: 1,
+            size: 10,
+            buffer: 3,
+            gutter: 0,
+          });
+
+          let totalItemCount = 20;
+          waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+          const totalCount = ref(totalItemCount);
+
+          const scrollStore = new Timeless.ui.ScrollViewCore({
+            onScroll(pos) {
+              waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+            },
+            onReachBottom() {
+              const newItems = generateDownloads(10);
+              waterfall.methods.appendItems(newItems);
+              totalItemCount += 10;
+              totalCount.as(totalItemCount);
+              scrollStore.finishLoadingMore();
+            },
+          });
+
+          const popoverStore = new Timeless.ui.PopoverCore({
+            side: "bottom",
+            align: "start",
+            destroyOnClose: false,
+          });
+
+          return Popover(
+            {
+              store: popoverStore,
+              content: [
+                View(
+                  {
+                    class: cn([
+                      "w-[340px] rounded-lg overflow-hidden",
+                    ]),
+                  },
+                  [
+                    // Header
+                    View(
+                      {
+                        class: cn([
+                          "flex items-center justify-between px-3 py-2.5",
+                          "border-b border-zinc-200 dark:border-zinc-800",
+                          "bg-zinc-50 dark:bg-zinc-900",
+                        ]),
+                      },
+                      [
+                        View(
+                          {
+                            class: cn([
+                              "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                            ]),
+                          },
+                          [
+                            Txt("Downloads"),
+                            Txt(computed(totalCount, (c) => ` (${c})`)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    // ScrollView + Waterfall
+                    View({ class: "h-[300px]" }, [
+                      ScrollView(
+                        {
+                          store: scrollStore,
+                          class: "bg-white dark:bg-zinc-950",
+                        },
+                        [
+                          Waterfall({
+                            store: waterfall,
+                            class:
+                              "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
+                            /** @param {{id: number; name: string; size: number}} task */
+                            render(task) {
+                              return View(
+                                {
+                                  class: cn([
+                                    "flex items-center gap-3 px-3 py-2.5",
+                                    "border-b border-zinc-100 dark:border-zinc-800",
+                                  ]),
+                                },
+                                [
+                                  View(
+                                    {
+                                      class: cn([
+                                        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                        "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                      ]),
+                                    },
+                                    [
+                                      (() => {
+                                        if (task.name) {
+                                          const ext = task.name
+                                            .split(".")
+                                            .pop()
+                                            .toUpperCase();
+                                          return ext.length <= 4 ? ext : "FILE";
+                                        }
+                                        return "FILE";
+                                      })(),
+                                    ],
+                                  ),
+                                  View({ class: "flex-1 min-w-0" }, [
+                                    View(
+                                      {
+                                        class:
+                                          "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                                      },
+                                      [`#${task.id} ${task.name}`],
+                                    ),
+                                    View(
+                                      {
+                                        class: "mt-0.5 text-xs text-emerald-500",
+                                      },
+                                      [formatSize(task.size)],
+                                    ),
+                                  ]),
+                                  View(
+                                    {
+                                      class:
+                                        "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                    },
+                                    ["Done"],
+                                  ),
+                                ],
+                              );
+                            },
+                          }),
+                          View(
+                            {
+                              class: cn([
+                                "py-3 text-center text-xs text-zinc-400",
+                              ]),
+                            },
+                            [Txt("Scroll to bottom to load more")],
+                          ),
+                        ],
+                      ),
+                    ]),
+                  ],
+                ),
+              ],
+            },
+            [
+              Button(
+                {
+                  variant: "outline",
+                  store: new Timeless.ui.ButtonCore({}),
+                },
+                ["Open Downloads"],
+              ),
+            ],
+          );
+        })(),
+      ]),
+      Item("Destroy on Close (default)", [
+        (() => {
+          const ITEM_HEIGHT = 56;
+          const INITIAL_COUNT = 20;
+
+          const fileNames = [
+            "project-archive.zip",
+            "design-assets.psd",
+            "video-tutorial.mp4",
+            "database-backup.sql",
+            "photo-gallery.jpg",
+            "report-2024.pdf",
+            "music-collection.mp3",
+            "source-code.tar.gz",
+            "presentation.pptx",
+            "firmware-update.bin",
+          ];
+
+          let nextId = 1;
+          function generateDownloads(count) {
+            return Array.from({ length: count }, () => {
+              const id = nextId++;
+              return {
+                id,
+                name: fileNames[(id - 1) % fileNames.length],
+                size: Math.floor(Math.random() * 500000000) + 1000000,
+                status: "completed",
+                progress: 100,
+                height: ITEM_HEIGHT,
+              };
+            });
+          }
+
+          const waterfall = Timeless.ui.WaterfallModel({
+            column: 1,
+            size: 10,
+            buffer: 3,
+            gutter: 0,
+          });
+
+          let totalItemCount = INITIAL_COUNT;
+          waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+          const totalCount = ref(totalItemCount);
+
+          const scrollStore = new Timeless.ui.ScrollViewCore({
+            onScroll(pos) {
+              waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+            },
+            onReachBottom() {
+              const newItems = generateDownloads(10);
+              waterfall.methods.appendItems(newItems);
+              totalItemCount += 10;
+              totalCount.as(totalItemCount);
+              scrollStore.finishLoadingMore();
+            },
+          });
+
+          const popoverStore = new Timeless.ui.PopoverCore({
+            side: "bottom",
+            align: "start",
+          });
+
+          // 每次打开都重置为初始状态
+          popoverStore.onShow(() => {
+            waterfall.methods.cleanColumns();
+            nextId = 1;
+            totalItemCount = INITIAL_COUNT;
+            waterfall.methods.appendItems(generateDownloads(totalItemCount));
+            totalCount.as(totalItemCount);
+          });
+
+          return Popover(
+            {
+              store: popoverStore,
+              content: [
+                View(
+                  {
+                    class: cn([
+                      "w-[340px] rounded-lg overflow-hidden",
+                    ]),
+                  },
+                  [
+                    // Header
+                    View(
+                      {
+                        class: cn([
+                          "flex items-center justify-between px-3 py-2.5",
+                          "border-b border-zinc-200 dark:border-zinc-800",
+                          "bg-zinc-50 dark:bg-zinc-900",
+                        ]),
+                      },
+                      [
+                        View(
+                          {
+                            class: cn([
+                              "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                            ]),
+                          },
+                          [
+                            Txt("Downloads"),
+                            Txt(computed(totalCount, (c) => ` (${c})`)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    // ScrollView + Waterfall
+                    View({ class: "h-[300px]" }, [
+                      ScrollView(
+                        {
+                          store: scrollStore,
+                          class: "bg-white dark:bg-zinc-950",
+                        },
+                        [
+                          Waterfall({
+                            store: waterfall,
+                            class:
+                              "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
+                            /** @param {{id: number; name: string; size: number}} task */
+                            render(task) {
+                              return View(
+                                {
+                                  class: cn([
+                                    "flex items-center gap-3 px-3 py-2.5",
+                                    "border-b border-zinc-100 dark:border-zinc-800",
+                                  ]),
+                                },
+                                [
+                                  View(
+                                    {
+                                      class: cn([
+                                        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                        "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                      ]),
+                                    },
+                                    [
+                                      (() => {
+                                        if (task.name) {
+                                          const ext = task.name
+                                            .split(".")
+                                            .pop()
+                                            .toUpperCase();
+                                          return ext.length <= 4 ? ext : "FILE";
+                                        }
+                                        return "FILE";
+                                      })(),
+                                    ],
+                                  ),
+                                  View({ class: "flex-1 min-w-0" }, [
+                                    View(
+                                      {
+                                        class:
+                                          "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                                      },
+                                      [`#${task.id} ${task.name}`],
+                                    ),
+                                    View(
+                                      {
+                                        class: "mt-0.5 text-xs text-emerald-500",
+                                      },
+                                      [formatSize(task.size)],
+                                    ),
+                                  ]),
+                                  View(
+                                    {
+                                      class:
+                                        "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                    },
+                                    ["Done"],
+                                  ),
+                                ],
+                              );
+                            },
+                          }),
+                          View(
+                            {
+                              class: cn([
+                                "py-3 text-center text-xs text-zinc-400",
+                              ]),
+                            },
+                            [Txt("Scroll to bottom to load more")],
+                          ),
+                        ],
+                      ),
+                    ]),
+                  ],
+                ),
+              ],
+            },
+            [
+              Button(
+                {
+                  variant: "outline",
+                  store: new Timeless.ui.ButtonCore({}),
+                },
+                ["Open Downloads (Reset)"],
+              ),
+            ],
+          );
+        })(),
+      ]),
+    ]),
     Section("Download List", [
       Item("Real-world Scenario", [
         (() => {
@@ -1370,7 +1767,7 @@ export default function HomeIndexScrollViewExampleView() {
                 ],
               ),
               // Scrollable task list
-              View({ class: "h-[300px]" }, [
+              View({ class: "max-h-[400px] min-h-[120px] overflow-hidden" }, [
                 ScrollView(
                   {
                     store: scrollStore,

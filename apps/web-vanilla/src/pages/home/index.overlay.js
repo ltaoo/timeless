@@ -272,6 +272,77 @@ export default function OverlayView() {
           ],
         ),
       ]),
+      Item("With Popover", [
+        DropdownMenu(
+          {
+            store: new Timeless.ui.DropdownMenuCore({
+              items: [
+                new Timeless.ui.MenuItemCore({
+                  label: "Edit",
+                  onClick() {
+                    console.log("edit");
+                  },
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Preview",
+                  menu: new Timeless.ui.MenuCore({
+                    content: View({ class: "p-4 w-[200px]" }, [
+                      View({ class: "text-sm font-medium mb-2" }, [
+                        Txt("Preview Panel"),
+                      ]),
+                      View(
+                        {
+                          class:
+                            "text-xs text-gray-500 dark:text-gray-400 mb-3",
+                        },
+                        [Txt("This is custom popover content rendered instead of menu items.")],
+                      ),
+                      View(
+                        {
+                          class:
+                            "h-[80px] rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-400",
+                        },
+                        [Txt("Image placeholder")],
+                      ),
+                    ]),
+                  }),
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Share",
+                  menu: new Timeless.ui.MenuCore({
+                    items: [
+                      new Timeless.ui.MenuItemCore({
+                        label: "Email",
+                        onClick() {
+                          console.log("email");
+                        },
+                      }),
+                      new Timeless.ui.MenuItemCore({
+                        label: "Message",
+                        onClick() {
+                          console.log("message");
+                        },
+                      }),
+                    ],
+                  }),
+                }),
+                new Timeless.ui.MenuItemCore({
+                  label: "Delete",
+                  onClick() {
+                    console.log("delete");
+                  },
+                }),
+              ],
+            }),
+          },
+          [
+            Button(
+              { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
+              ["With Popover"],
+            ),
+          ],
+        ),
+      ]),
       Item("With Submenu", [
         DropdownMenu(
           {

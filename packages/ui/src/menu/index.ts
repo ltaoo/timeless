@@ -38,6 +38,8 @@ type MenuCoreState = {
   hover: boolean;
   /** 所有选项 */
   items: MenuEntry[];
+  /** 自定义内容（替代 items 渲染） */
+  content: unknown;
   enter?: boolean;
   exit?: boolean;
 };
@@ -46,6 +48,8 @@ type MenuCoreProps = {
   align: Align;
   strategy: "fixed" | "absolute";
   items: MenuEntry[];
+  /** 自定义内容，设置后渲染层显示该内容而非迭代 items */
+  content?: unknown;
   offsetX?: number;
   offsetY?: number;
 };
@@ -65,10 +69,13 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   /** Whether this menu is registered as a root menu (not a submenu) */
   private _is_root_menu = true;
 
+  content: unknown = null;
+
   state: MenuCoreState = {
     open: false,
     hover: false,
     items: [],
+    content: null,
   };
 
   constructor(options: Partial<{ _name: string } & MenuCoreProps> = {}) {
@@ -76,6 +83,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     const {
       _name,
       items = [],
+      content,
       side,
       align,
       strategy = "fixed",
@@ -87,6 +95,8 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     }
     this.state.items = items;
     this.items = items;
+    this.content = content ?? null;
+    this.state.content = this.content;
 
     // console.log("[DOMAIN]ui/menu/index - constructor", {
     //   name: this._name,

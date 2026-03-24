@@ -104,7 +104,7 @@ function DropdownMenuGroup(props: ViewProps & { store: MenuGroupCore }) {
 
 function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
   const state_ = refobj(props.store.state);
-  const has_submenu_ = ref(!!props.store.menu);
+  const show_chevron_ = ref(!!props.store.menu);
   const has_icon_ = computed(state_, (t) => !!t.icon);
   const has_shortcut_ = computed(state_, (t) => !!t.shortcut);
   const menu_state_ = refobj(
@@ -160,44 +160,66 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
             [computed(state_, (t) => t.shortcut)],
           ),
         ]),
-        Show({ when: has_submenu_ }, [
+        Show({ when: show_chevron_ }, [
           ChevronRightOutlined({ class: "ml-auto w-4 h-4" }),
         ]),
       ],
     ),
     (() => {
-      // console.log("DropdownMenuItem render", props.store.label);
-      const inner$ = props.store.menu
-        ? DropdownMenuPrimitive.SubMenuContent(
-            {
-              store: props.store.menu,
-              animation: {
-                in: "animate-in fade-in-0 zoom-in-95",
-                out: "animate-out fade-out-0 zoom-out-95",
-              },
+      if (!props.store.menu) {
+        return View({}, [null]);
+      }
+      const menu = props.store.menu;
+      if (menu.content) {
+        const inner$ = DropdownMenuPrimitive.SubMenuContent(
+          {
+            store: menu,
+            animation: {
+              in: "animate-in fade-in-0 zoom-in-95",
+              out: "animate-out fade-out-0 zoom-out-95",
             },
-            [
-              View({ class: MENU_CONTENT_CLASS }, [
-                For({
-                  each: computed(menu_state_, (t) => {
-                    return t.items;
-                  }),
-                  render(
-                    item: MenuItemCore | MenuSeparatorCore | MenuGroupCore,
-                  ) {
-                    if (item instanceof MenuSeparatorCore) {
-                      return DropdownMenuSeparator({});
-                    }
-                    if (item instanceof MenuGroupCore) {
-                      return DropdownMenuGroup({ store: item });
-                    }
-                    return DropdownMenuItem({ store: item as MenuItemCore });
-                  },
-                }),
-              ]),
-            ],
-          )
-        : null;
+          },
+          [
+            View(
+              {
+                class:
+                  "overflow-hidden rounded-md border border-gray-200 bg-white shadow-md dark:border-gray-800 dark:bg-gray-950",
+              },
+              [menu.content as TimelessElement],
+            ),
+          ],
+        );
+        return View({}, [inner$]);
+      }
+      const inner$ = DropdownMenuPrimitive.SubMenuContent(
+        {
+          store: menu,
+          animation: {
+            in: "animate-in fade-in-0 zoom-in-95",
+            out: "animate-out fade-out-0 zoom-out-95",
+          },
+        },
+        [
+          View({ class: MENU_CONTENT_CLASS }, [
+            For({
+              each: computed(menu_state_, (t) => {
+                return t.items;
+              }),
+              render(
+                item: MenuItemCore | MenuSeparatorCore | MenuGroupCore,
+              ) {
+                if (item instanceof MenuSeparatorCore) {
+                  return DropdownMenuSeparator({});
+                }
+                if (item instanceof MenuGroupCore) {
+                  return DropdownMenuGroup({ store: item });
+                }
+                return DropdownMenuItem({ store: item as MenuItemCore });
+              },
+            }),
+          ]),
+        ],
+      );
       return View({}, [inner$]);
     })(),
   ]);
