@@ -74,6 +74,11 @@ const routesConfigure = {
             pathname: "/home/index/command",
             component: Timeless.lazy("@/pages/home/index.command.js"),
           },
+          download_task: {
+            title: "下载任务",
+            pathname: "/home/index/download_task",
+            component: Timeless.lazy("@/pages/home/index.download_task.js"),
+          },
         },
       },
       settings: {

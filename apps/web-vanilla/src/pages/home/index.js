@@ -14,6 +14,7 @@ export default function HomePageView(props) {
       { title: "Command", url: "root.home_layout.index.command" },
       { title: "Debug", url: "root.home_layout.index.debug" },
       { title: "Lifecycle", url: "root.home_layout.index.lifecycle" },
+      { title: "Download Task", url: "root.home_layout.index.download_task" },
     ],
   });
 
