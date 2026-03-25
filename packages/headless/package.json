@@ -97,11 +97,6 @@
       "import": "./dist/dropdown-menu/index.esm.js",
       "require": "./dist/dropdown-menu/index.js"
     },
-    "./env": {
-      "types": "./dist/env/index.d.ts",
-      "import": "./dist/env/index.esm.js",
-      "require": "./dist/env/index.js"
-    },
     "./field": {
       "types": "./dist/field/index.d.ts",
       "import": "./dist/field/index.esm.js",
@@ -112,35 +107,10 @@
       "import": "./dist/flex/index.esm.js",
       "require": "./dist/flex/index.js"
     },
-    "./for": {
-      "types": "./dist/for/index.d.ts",
-      "import": "./dist/for/index.esm.js",
-      "require": "./dist/for/index.js"
-    },
-    "./fragment": {
-      "types": "./dist/fragment/index.d.ts",
-      "import": "./dist/fragment/index.esm.js",
-      "require": "./dist/fragment/index.js"
-    },
-    "./h": {
-      "types": "./dist/h/index.d.ts",
-      "import": "./dist/h/index.esm.js",
-      "require": "./dist/h/index.js"
-    },
     "./head": {
       "types": "./dist/head/index.d.ts",
       "import": "./dist/head/index.esm.js",
       "require": "./dist/head/index.js"
-    },
-    "./html": {
-      "types": "./dist/html/index.d.ts",
-      "import": "./dist/html/index.esm.js",
-      "require": "./dist/html/index.js"
-    },
-    "./img": {
-      "types": "./dist/img/index.d.ts",
-      "import": "./dist/img/index.esm.js",
-      "require": "./dist/img/index.js"
     },
     "./input": {
       "types": "./dist/input/index.d.ts",
@@ -157,25 +127,10 @@
       "import": "./dist/label/index.esm.js",
       "require": "./dist/label/index.js"
     },
-    "./lazy": {
-      "types": "./dist/lazy/index.d.ts",
-      "import": "./dist/lazy/index.esm.js",
-      "require": "./dist/lazy/index.js"
-    },
-    "./lazy-view": {
-      "types": "./dist/lazy-view/index.d.ts",
-      "import": "./dist/lazy-view/index.esm.js",
-      "require": "./dist/lazy-view/index.js"
-    },
     "./menu": {
       "types": "./dist/menu/index.d.ts",
       "import": "./dist/menu/index.esm.js",
       "require": "./dist/menu/index.js"
-    },
-    "./native-input": {
-      "types": "./dist/native-input/index.d.ts",
-      "import": "./dist/native-input/index.esm.js",
-      "require": "./dist/native-input/index.js"
     },
     "./number-input": {
       "types": "./dist/number-input/index.d.ts",
@@ -222,16 +177,6 @@
       "import": "./dist/radio/index.esm.js",
       "require": "./dist/radio/index.js"
     },
-    "./render": {
-      "types": "./dist/render/index.d.ts",
-      "import": "./dist/render/index.esm.js",
-      "require": "./dist/render/index.js"
-    },
-    "./render-to-string": {
-      "types": "./dist/render-to-string/index.d.ts",
-      "import": "./dist/render-to-string/index.esm.js",
-      "require": "./dist/render-to-string/index.js"
-    },
     "./resizable-panels": {
       "types": "./dist/resizable-panels/index.d.ts",
       "import": "./dist/resizable-panels/index.esm.js",
@@ -257,11 +202,6 @@
       "import": "./dist/sheet/index.esm.js",
       "require": "./dist/sheet/index.js"
     },
-    "./show": {
-      "types": "./dist/show/index.d.ts",
-      "import": "./dist/show/index.esm.js",
-      "require": "./dist/show/index.js"
-    },
     "./skeleton": {
       "types": "./dist/skeleton/index.d.ts",
       "import": "./dist/skeleton/index.esm.js",
@@ -282,16 +222,6 @@
       "import": "./dist/steps/index.esm.js",
       "require": "./dist/steps/index.js"
     },
-    "./svg": {
-      "types": "./dist/svg/index.d.ts",
-      "import": "./dist/svg/index.esm.js",
-      "require": "./dist/svg/index.js"
-    },
-    "./switch": {
-      "types": "./dist/switch/index.d.ts",
-      "import": "./dist/switch/index.esm.js",
-      "require": "./dist/switch/index.js"
-    },
     "./table": {
       "types": "./dist/table/index.d.ts",
       "import": "./dist/table/index.esm.js",
@@ -307,20 +237,10 @@
       "import": "./dist/tag-select/index.esm.js",
       "require": "./dist/tag-select/index.js"
     },
-    "./text": {
-      "types": "./dist/text/index.d.ts",
-      "import": "./dist/text/index.esm.js",
-      "require": "./dist/text/index.js"
-    },
     "./textarea": {
       "types": "./dist/textarea/index.d.ts",
       "import": "./dist/textarea/index.esm.js",
       "require": "./dist/textarea/index.js"
-    },
-    "./theme": {
-      "types": "./dist/theme/index.d.ts",
-      "import": "./dist/theme/index.esm.js",
-      "require": "./dist/theme/index.js"
     },
     "./time-picker": {
       "types": "./dist/time-picker/index.d.ts",
@@ -346,11 +266,6 @@
       "types": "./dist/transition/index.d.ts",
       "import": "./dist/transition/index.esm.js",
       "require": "./dist/transition/index.js"
-    },
-    "./view": {
-      "types": "./dist/view/index.d.ts",
-      "import": "./dist/view/index.esm.js",
-      "require": "./dist/view/index.js"
     },
     "./waterfall": {
       "types": "./dist/waterfall/index.d.ts",
