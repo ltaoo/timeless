@@ -131,7 +131,7 @@ export function Popconfirm(
                     class:
                       "inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 border border-zinc-200 bg-white hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
                   },
-                  cancelText,
+                  [cancelText],
                 ),
                 PopconfirmPrimitive.Confirm(
                   {
@@ -143,7 +143,7 @@ export function Popconfirm(
                       ].join(" ");
                     }),
                   },
-                  confirmText,
+                  [confirmText],
                 ),
               ],
             ),

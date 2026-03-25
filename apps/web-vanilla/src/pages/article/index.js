@@ -27,7 +27,7 @@ export default function ArticleListPageView(props) {
     curId.as(view.query.id);
   });
 
-  return View({ class: "flex w-full h-full bg-white dark:bg-zinc-950" }, [
+  return View({ class: "flex w-full h-full" }, [
     View(
       {
         class:

@@ -261,12 +261,9 @@ function DownloaderViewModel() {
 
   methods.fakeTask = function () {
     _fakeId++;
-    const name =
-      fakeFileNames[(_fakeId - 1) % fakeFileNames.length];
-    const totalSize =
-      Math.floor(Math.random() * 50000000) + 5000000;
-    const speed =
-      Math.floor(Math.random() * 2000000) + 500000;
+    const name = fakeFileNames[(_fakeId - 1) % fakeFileNames.length];
+    const totalSize = Math.floor(Math.random() * 50000000) + 5000000;
+    const speed = Math.floor(Math.random() * 2000000) + 500000;
     const id = "fake_" + _fakeId + "_" + Date.now();
 
     const task = {
@@ -619,41 +616,34 @@ export default function DownloadTaskPageView() {
               ),
               // List
               View({ class: "h-[400px]" }, [
-                ScrollView(
-                  {
-                    store: vm$.ui.scrollView$,
-                    class: "bg-white dark:bg-zinc-950",
-                  },
-                  [
-                    Show(
-                      {
-                        when: computed(task_count_, (d) => d > 0),
-                        fallback: [
-                          View(
-                            {
-                              class:
-                                "flex items-center justify-center h-[200px] text-sm text-zinc-400",
-                            },
-                            ["No download tasks"],
-                          ),
-                        ],
-                      },
-                      [
-                        Waterfall({
-                          store: vm$.ui.waterfall$,
-                          class:
-                            "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
-                          render(task) {
-                            return DownloadTaskItem({
-                              task,
-                              vm$,
-                            });
+                ScrollView({ store: vm$.ui.scrollView$ }, [
+                  Show(
+                    {
+                      when: computed(task_count_, (d) => d > 0),
+                      fallback: [
+                        View(
+                          {
+                            class:
+                              "flex items-center justify-center h-[200px] text-sm text-zinc-400",
                           },
-                        }),
+                          ["No download tasks"],
+                        ),
                       ],
-                    ),
-                  ],
-                ),
+                    },
+                    [
+                      Waterfall({
+                        store: vm$.ui.waterfall$,
+                        class: "!overflow-visible !h-auto",
+                        render(task) {
+                          return DownloadTaskItem({
+                            task,
+                            vm$,
+                          });
+                        },
+                      }),
+                    ],
+                  ),
+                ]),
               ]),
             ],
           ),

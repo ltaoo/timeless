@@ -262,91 +262,82 @@ export default function OverlayView() {
     //   ]),
     // ]),
     View({ class: "h-[300px]" }, [
-      ScrollView(
-        {
-          store: ui.view$,
-          class: "bg-white dark:bg-zinc-950",
-        },
-        [
-          ContextMenu({ store: ui.contextMenu$ }, [
-            Waterfall({
-              store: ui.waterfall$,
-              class: "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
-              /** @param {{ id: number; name: string; size: number}} task  */
-              render(task) {
-                return View(
-                  {
-                    // "data-context-id": task.id,
-                    class: cn([
-                      "flex items-center gap-3 px-3 py-2.5",
-                      "border-b border-zinc-100 dark:border-zinc-800",
-                      "transition-colors",
-                      computed(contextFocusedRecord_, (t) => {
-                        return t && t.id === task.id
-                          ? "bg-blue-50 dark:bg-blue-950/30"
-                          : "";
-                      }),
-                    ]),
-                    onContextMenu(event) {
-                      contextFocusedRecord_.as(task);
-                    },
+      ScrollView({ store: ui.view$ }, [
+        ContextMenu({ store: ui.contextMenu$ }, [
+          Waterfall({
+            store: ui.waterfall$,
+            class: "!overflow-visible !h-auto",
+            /** @param {{ id: number; name: string; size: number}} task  */
+            render(task) {
+              return View(
+                {
+                  // "data-context-id": task.id,
+                  class: cn([
+                    "flex items-center gap-3 px-3 py-2.5",
+                    "border-b border-zinc-100 dark:border-zinc-800",
+                    "transition-colors",
+                    computed(contextFocusedRecord_, (t) => {
+                      return t && t.id === task.id
+                        ? "bg-blue-50 dark:bg-blue-950/30"
+                        : "";
+                    }),
+                  ]),
+                  onContextMenu(event) {
+                    contextFocusedRecord_.as(task);
                   },
-                  [
-                    View(
-                      {
-                        class: cn([
-                          "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                          "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                        ]),
-                      },
-                      [
-                        (() => {
-                          if (task.name) {
-                            const ext = task.name
-                              .split(".")
-                              .pop()
-                              .toUpperCase();
-                            return ext.length <= 4 ? ext : "FILE";
-                          }
-                          return "FILE";
-                        })(),
-                      ],
-                    ),
-                    View({ class: "flex-1 min-w-0" }, [
-                      View(
-                        {
-                          class:
-                            "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                        },
-                        [task.name],
-                      ),
-                      View(
-                        {
-                          class: "mt-0.5 text-xs text-emerald-500",
-                        },
-                        [task.size],
-                      ),
-                    ]),
+                },
+                [
+                  View(
+                    {
+                      class: cn([
+                        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                        "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                      ]),
+                    },
+                    [
+                      (() => {
+                        if (task.name) {
+                          const ext = task.name.split(".").pop().toUpperCase();
+                          return ext.length <= 4 ? ext : "FILE";
+                        }
+                        return "FILE";
+                      })(),
+                    ],
+                  ),
+                  View({ class: "flex-1 min-w-0" }, [
                     View(
                       {
                         class:
-                          "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                          "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
                       },
-                      ["Done"],
+                      [task.name],
                     ),
-                  ],
-                );
-              },
-            }),
-          ]),
-          View(
-            {
-              class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                    View(
+                      {
+                        class: "mt-0.5 text-xs text-emerald-500",
+                      },
+                      [task.size],
+                    ),
+                  ]),
+                  View(
+                    {
+                      class:
+                        "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                    },
+                    ["Done"],
+                  ),
+                ],
+              );
             },
-            [Txt("Scroll to bottom to load more")],
-          ),
-        ],
-      ),
+          }),
+        ]),
+        View(
+          {
+            class: cn(["py-3 text-center text-xs text-zinc-400"]),
+          },
+          [Txt("Scroll to bottom to load more")],
+        ),
+      ]),
     ]),
   ]);
 }

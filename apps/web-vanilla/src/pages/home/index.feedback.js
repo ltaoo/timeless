@@ -434,7 +434,7 @@ export default function FeedbackView() {
                     View(
                       {
                         class:
-                          "p-6 rounded-lg bg-white dark:bg-zinc-800 shadow-lg max-w-md",
+                          "p-6 rounded-lg shadow-lg max-w-md",
                       },
                       [
                         View(

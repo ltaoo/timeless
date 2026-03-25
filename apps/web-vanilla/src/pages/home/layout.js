@@ -3,7 +3,7 @@ import NotFoundPageView from "@/pages/notfound/index.js";
 import { projects } from "@/pages/project/data.js";
 
 export default function HomeLayoutView(props) {
-  const sidemenu$ = Timeless.RouteMenusModel({
+  const sidemenu$ = Timeless.kit.RouteMenusModel({
     view: props.view,
     history: props.history,
     menus: [
@@ -18,14 +18,14 @@ export default function HomeLayoutView(props) {
     View(
       {
         class:
-          "sidebar-wrapper w-[72px] h-full flex flex-col items-center py-6 border-r border-zinc-200 bg-white dark:bg-zinc-950 dark:border-zinc-800",
+          "sidebar-wrapper w-[72px] h-full flex flex-col items-center py-6 border-r border-zinc-200 dark:border-zinc-800",
       },
       [
         // Logo
         View(
           {
             class:
-              "relative w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center font-bold text-xl mb-8 shadow-sm cursor-pointer hover:opacity-90 transition-opacity dark:bg-white dark:text-black",
+              "relative w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl mb-8 shadow-sm cursor-pointer hover:opacity-90 transition-opacity",
             onClick() {
               props.history.push("root.home_layout.index.general");
             },
@@ -41,7 +41,7 @@ export default function HomeLayoutView(props) {
               [
                 View({
                   class:
-                    "absolute top-[-4px] right-[-4px] w-2 h-2 rounded-full bg-black dark:bg-white",
+                    "absolute top-[-4px] right-[-4px] w-2 h-2 rounded-full",
                 }),
               ],
             ),

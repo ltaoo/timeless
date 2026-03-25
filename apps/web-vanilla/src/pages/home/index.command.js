@@ -230,7 +230,7 @@ export default function CommandView() {
           View(
             {
               class:
-                "fixed z-50 w-full max-w-[560px] pointer-events-auto bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden",
+                "fixed z-50 w-full max-w-[560px] pointer-events-auto rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden",
               /** @param {HTMLDivElement} $el */
               onMounted($el) {
                 $clickOutside.methods.setTargetRect(() =>

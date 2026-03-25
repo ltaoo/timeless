@@ -54,13 +54,12 @@ export function CheckboxGroupItem(props: {
   item: { label: string; value: any; core: CheckboxCore };
   class?: string;
 }) {
-  const { store, item } = props;
+  const { item } = props;
 
   return View(
     {
       class:
-        props.class ||
-        "flex items-center gap-2 cursor-pointer select-none",
+        props.class || "flex items-center gap-2 cursor-pointer select-none",
     },
     [
       Checkbox({ store: item.core }),

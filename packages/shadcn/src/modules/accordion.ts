@@ -2,7 +2,6 @@ import { computed, refobj } from "@timeless/reactive";
 import {
   AccordionPrimitive,
   For,
-  View,
   ViewChildren,
   ViewProps,
   Txt,
@@ -52,7 +51,9 @@ export function Accordion(
                     "flex w-full items-center justify-between py-4 font-medium transition-all cursor-pointer hover:underline",
                 },
                 [
-                  ...(typeof item.title === "string" ? [Txt(item.title)] : item.title),
+                  ...(typeof item.title === "string"
+                    ? [Txt(item.title)]
+                    : item.title),
                   AccordionPrimitive.Chevron(
                     {
                       store,

@@ -560,80 +560,73 @@ export default function HomeIndexScrollViewExampleView() {
               ),
               // ScrollView + Waterfall
               View({ class: "h-[300px]" }, [
-                ScrollView(
-                  {
-                    store: scrollStore,
-                    class: "bg-white dark:bg-zinc-950",
-                  },
-                  [
-                    Waterfall({
-                      store: waterfall,
-                      class:
-                        "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
-                      /** @param {{name: string; size: number}} task  */
-                      render(task) {
-                        return View(
-                          {
-                            class: cn([
-                              "flex items-center gap-3 px-3 py-2.5",
-                              "border-b border-zinc-100 dark:border-zinc-800",
-                            ]),
-                          },
-                          [
-                            View(
-                              {
-                                class: cn([
-                                  "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                                ]),
-                              },
-                              [
-                                (() => {
-                                  if (task.name) {
-                                    const ext = task.name
-                                      .split(".")
-                                      .pop()
-                                      .toUpperCase();
-                                    return ext.length <= 4 ? ext : "FILE";
-                                  }
-                                  return "FILE";
-                                })(),
-                              ],
-                            ),
-                            View({ class: "flex-1 min-w-0" }, [
-                              View(
-                                {
-                                  class:
-                                    "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                                },
-                                [task.name],
-                              ),
-                              View(
-                                {
-                                  class: "mt-0.5 text-xs text-emerald-500",
-                                },
-                                [formatSize(task.size)],
-                              ),
-                            ]),
+                ScrollView({ store: scrollStore }, [
+                  Waterfall({
+                    store: waterfall,
+                    class: "!overflow-visible !h-auto",
+                    /** @param {{name: string; size: number}} task  */
+                    render(task) {
+                      return View(
+                        {
+                          class: cn([
+                            "flex items-center gap-3 px-3 py-2.5",
+                            "border-b border-zinc-100 dark:border-zinc-800",
+                          ]),
+                        },
+                        [
+                          View(
+                            {
+                              class: cn([
+                                "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                              ]),
+                            },
+                            [
+                              (() => {
+                                if (task.name) {
+                                  const ext = task.name
+                                    .split(".")
+                                    .pop()
+                                    .toUpperCase();
+                                  return ext.length <= 4 ? ext : "FILE";
+                                }
+                                return "FILE";
+                              })(),
+                            ],
+                          ),
+                          View({ class: "flex-1 min-w-0" }, [
                             View(
                               {
                                 class:
-                                  "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                  "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
                               },
-                              ["Done"],
+                              [task.name],
                             ),
-                          ],
-                        );
-                      },
-                    }),
-                    View(
-                      {
-                        class: cn(["py-3 text-center text-xs text-zinc-400"]),
-                      },
-                      [Txt("Scroll to bottom to load more")],
-                    ),
-                  ],
-                ),
+                            View(
+                              {
+                                class: "mt-0.5 text-xs text-emerald-500",
+                              },
+                              [formatSize(task.size)],
+                            ),
+                          ]),
+                          View(
+                            {
+                              class:
+                                "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                            },
+                            ["Done"],
+                          ),
+                        ],
+                      );
+                    },
+                  }),
+                  View(
+                    {
+                      class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                    },
+                    [Txt("Scroll to bottom to load more")],
+                  ),
+                ]),
               ]),
             ],
           );
@@ -749,80 +742,73 @@ export default function HomeIndexScrollViewExampleView() {
               ),
               // ScrollView + Waterfall
               View({ class: "h-[300px]" }, [
-                ScrollView(
-                  {
-                    store: scrollStore,
-                    class: "bg-white dark:bg-zinc-950",
-                  },
-                  [
-                    Waterfall({
-                      store: waterfall,
-                      class:
-                        "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
-                      /** @param {{id: number; name: string; size: number}} task */
-                      render(task) {
-                        return View(
-                          {
-                            class: cn([
-                              "flex items-center gap-3 px-3 py-2.5",
-                              "border-b border-zinc-100 dark:border-zinc-800",
-                            ]),
-                          },
-                          [
-                            View(
-                              {
-                                class: cn([
-                                  "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                                ]),
-                              },
-                              [
-                                (() => {
-                                  if (task.name) {
-                                    const ext = task.name
-                                      .split(".")
-                                      .pop()
-                                      .toUpperCase();
-                                    return ext.length <= 4 ? ext : "FILE";
-                                  }
-                                  return "FILE";
-                                })(),
-                              ],
-                            ),
-                            View({ class: "flex-1 min-w-0" }, [
-                              View(
-                                {
-                                  class:
-                                    "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                                },
-                                [`#${task.id} ${task.name}`],
-                              ),
-                              View(
-                                {
-                                  class: "mt-0.5 text-xs text-emerald-500",
-                                },
-                                [formatSize(task.size)],
-                              ),
-                            ]),
+                ScrollView({ store: scrollStore }, [
+                  Waterfall({
+                    store: waterfall,
+                    class: "!overflow-visible !h-auto",
+                    /** @param {{id: number; name: string; size: number}} task */
+                    render(task) {
+                      return View(
+                        {
+                          class: cn([
+                            "flex items-center gap-3 px-3 py-2.5",
+                            "border-b border-zinc-100 dark:border-zinc-800",
+                          ]),
+                        },
+                        [
+                          View(
+                            {
+                              class: cn([
+                                "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                              ]),
+                            },
+                            [
+                              (() => {
+                                if (task.name) {
+                                  const ext = task.name
+                                    .split(".")
+                                    .pop()
+                                    .toUpperCase();
+                                  return ext.length <= 4 ? ext : "FILE";
+                                }
+                                return "FILE";
+                              })(),
+                            ],
+                          ),
+                          View({ class: "flex-1 min-w-0" }, [
                             View(
                               {
                                 class:
-                                  "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                  "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
                               },
-                              ["Done"],
+                              [`#${task.id} ${task.name}`],
                             ),
-                          ],
-                        );
-                      },
-                    }),
-                    View(
-                      {
-                        class: cn(["py-3 text-center text-xs text-zinc-400"]),
-                      },
-                      [Txt("Scroll to bottom to load more")],
-                    ),
-                  ],
-                ),
+                            View(
+                              {
+                                class: "mt-0.5 text-xs text-emerald-500",
+                              },
+                              [formatSize(task.size)],
+                            ),
+                          ]),
+                          View(
+                            {
+                              class:
+                                "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                            },
+                            ["Done"],
+                          ),
+                        ],
+                      );
+                    },
+                  }),
+                  View(
+                    {
+                      class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                    },
+                    [Txt("Scroll to bottom to load more")],
+                  ),
+                ]),
               ]),
             ],
           );
@@ -962,7 +948,6 @@ export default function HomeIndexScrollViewExampleView() {
                           {
                             class: cn([
                               "flex items-center gap-3 px-3 py-2.5",
-                              "bg-white dark:bg-zinc-950",
                               "rounded-lg",
                               "shadow-sm",
                             ]),
@@ -1174,80 +1159,73 @@ export default function HomeIndexScrollViewExampleView() {
               ),
               // ScrollView + Waterfall
               View({ class: "h-[300px]" }, [
-                ScrollView(
-                  {
-                    store: scrollStore,
-                    class: "bg-white dark:bg-zinc-950",
-                  },
-                  [
-                    Waterfall({
-                      store: waterfall,
-                      class:
-                        "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
-                      /** @param {{id: number; name: string; size: number}} task */
-                      render(task) {
-                        return View(
-                          {
-                            class: cn([
-                              "flex items-center gap-3 px-3 py-2.5",
-                              "border-b border-zinc-100 dark:border-zinc-800",
-                            ]),
-                          },
-                          [
-                            View(
-                              {
-                                class: cn([
-                                  "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                                ]),
-                              },
-                              [
-                                (() => {
-                                  if (task.name) {
-                                    const ext = task.name
-                                      .split(".")
-                                      .pop()
-                                      .toUpperCase();
-                                    return ext.length <= 4 ? ext : "FILE";
-                                  }
-                                  return "FILE";
-                                })(),
-                              ],
-                            ),
-                            View({ class: "flex-1 min-w-0" }, [
-                              View(
-                                {
-                                  class:
-                                    "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                                },
-                                [`#${task.id} ${task.name}`],
-                              ),
-                              View(
-                                {
-                                  class: "mt-0.5 text-xs text-emerald-500",
-                                },
-                                [formatSize(task.size)],
-                              ),
-                            ]),
+                ScrollView({ store: scrollStore }, [
+                  Waterfall({
+                    store: waterfall,
+                    class: "!overflow-visible !h-auto",
+                    /** @param {{id: number; name: string; size: number}} task */
+                    render(task) {
+                      return View(
+                        {
+                          class: cn([
+                            "flex items-center gap-3 px-3 py-2.5",
+                            "border-b border-zinc-100 dark:border-zinc-800",
+                          ]),
+                        },
+                        [
+                          View(
+                            {
+                              class: cn([
+                                "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                              ]),
+                            },
+                            [
+                              (() => {
+                                if (task.name) {
+                                  const ext = task.name
+                                    .split(".")
+                                    .pop()
+                                    .toUpperCase();
+                                  return ext.length <= 4 ? ext : "FILE";
+                                }
+                                return "FILE";
+                              })(),
+                            ],
+                          ),
+                          View({ class: "flex-1 min-w-0" }, [
                             View(
                               {
                                 class:
-                                  "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                  "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
                               },
-                              ["Done"],
+                              [`#${task.id} ${task.name}`],
                             ),
-                          ],
-                        );
-                      },
-                    }),
-                    View(
-                      {
-                        class: cn(["py-3 text-center text-xs text-zinc-400"]),
-                      },
-                      [Txt("Scroll to bottom to load more")],
-                    ),
-                  ],
-                ),
+                            View(
+                              {
+                                class: "mt-0.5 text-xs text-emerald-500",
+                              },
+                              [formatSize(task.size)],
+                            ),
+                          ]),
+                          View(
+                            {
+                              class:
+                                "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                            },
+                            ["Done"],
+                          ),
+                        ],
+                      );
+                    },
+                  }),
+                  View(
+                    {
+                      class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                    },
+                    [Txt("Scroll to bottom to load more")],
+                  ),
+                ]),
               ]),
             ],
           );
@@ -1324,9 +1302,7 @@ export default function HomeIndexScrollViewExampleView() {
               content: [
                 View(
                   {
-                    class: cn([
-                      "w-[340px] rounded-lg overflow-hidden",
-                    ]),
+                    class: cn(["w-[340px] rounded-lg overflow-hidden"]),
                   },
                   [
                     // Header
@@ -1354,82 +1330,75 @@ export default function HomeIndexScrollViewExampleView() {
                     ),
                     // ScrollView + Waterfall
                     View({ class: "h-[300px]" }, [
-                      ScrollView(
-                        {
-                          store: scrollStore,
-                          class: "bg-white dark:bg-zinc-950",
-                        },
-                        [
-                          Waterfall({
-                            store: waterfall,
-                            class:
-                              "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
-                            /** @param {{id: number; name: string; size: number}} task */
-                            render(task) {
-                              return View(
-                                {
-                                  class: cn([
-                                    "flex items-center gap-3 px-3 py-2.5",
-                                    "border-b border-zinc-100 dark:border-zinc-800",
-                                  ]),
-                                },
-                                [
-                                  View(
-                                    {
-                                      class: cn([
-                                        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                        "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                                      ]),
-                                    },
-                                    [
-                                      (() => {
-                                        if (task.name) {
-                                          const ext = task.name
-                                            .split(".")
-                                            .pop()
-                                            .toUpperCase();
-                                          return ext.length <= 4 ? ext : "FILE";
-                                        }
-                                        return "FILE";
-                                      })(),
-                                    ],
-                                  ),
-                                  View({ class: "flex-1 min-w-0" }, [
-                                    View(
-                                      {
-                                        class:
-                                          "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                                      },
-                                      [`#${task.id} ${task.name}`],
-                                    ),
-                                    View(
-                                      {
-                                        class: "mt-0.5 text-xs text-emerald-500",
-                                      },
-                                      [formatSize(task.size)],
-                                    ),
-                                  ]),
+                      ScrollView({ store: scrollStore }, [
+                        Waterfall({
+                          store: waterfall,
+                          class: "!overflow-visible !h-auto",
+                          /** @param {{id: number; name: string; size: number}} task */
+                          render(task) {
+                            return View(
+                              {
+                                class: cn([
+                                  "flex items-center gap-3 px-3 py-2.5",
+                                  "border-b border-zinc-100 dark:border-zinc-800",
+                                ]),
+                              },
+                              [
+                                View(
+                                  {
+                                    class: cn([
+                                      "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                      "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                    ]),
+                                  },
+                                  [
+                                    (() => {
+                                      if (task.name) {
+                                        const ext = task.name
+                                          .split(".")
+                                          .pop()
+                                          .toUpperCase();
+                                        return ext.length <= 4 ? ext : "FILE";
+                                      }
+                                      return "FILE";
+                                    })(),
+                                  ],
+                                ),
+                                View({ class: "flex-1 min-w-0" }, [
                                   View(
                                     {
                                       class:
-                                        "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                        "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
                                     },
-                                    ["Done"],
+                                    [`#${task.id} ${task.name}`],
                                   ),
-                                ],
-                              );
-                            },
-                          }),
-                          View(
-                            {
-                              class: cn([
-                                "py-3 text-center text-xs text-zinc-400",
-                              ]),
-                            },
-                            [Txt("Scroll to bottom to load more")],
-                          ),
-                        ],
-                      ),
+                                  View(
+                                    {
+                                      class: "mt-0.5 text-xs text-emerald-500",
+                                    },
+                                    [formatSize(task.size)],
+                                  ),
+                                ]),
+                                View(
+                                  {
+                                    class:
+                                      "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                  },
+                                  ["Done"],
+                                ),
+                              ],
+                            );
+                          },
+                        }),
+                        View(
+                          {
+                            class: cn([
+                              "py-3 text-center text-xs text-zinc-400",
+                            ]),
+                          },
+                          [Txt("Scroll to bottom to load more")],
+                        ),
+                      ]),
                     ]),
                   ],
                 ),
@@ -1525,9 +1494,7 @@ export default function HomeIndexScrollViewExampleView() {
               content: [
                 View(
                   {
-                    class: cn([
-                      "w-[340px] rounded-lg overflow-hidden",
-                    ]),
+                    class: cn(["w-[340px] rounded-lg overflow-hidden"]),
                   },
                   [
                     // Header
@@ -1555,82 +1522,75 @@ export default function HomeIndexScrollViewExampleView() {
                     ),
                     // ScrollView + Waterfall
                     View({ class: "h-[300px]" }, [
-                      ScrollView(
-                        {
-                          store: scrollStore,
-                          class: "bg-white dark:bg-zinc-950",
-                        },
-                        [
-                          Waterfall({
-                            store: waterfall,
-                            class:
-                              "bg-white dark:bg-zinc-950 !overflow-visible !h-auto",
-                            /** @param {{id: number; name: string; size: number}} task */
-                            render(task) {
-                              return View(
-                                {
-                                  class: cn([
-                                    "flex items-center gap-3 px-3 py-2.5",
-                                    "border-b border-zinc-100 dark:border-zinc-800",
-                                  ]),
-                                },
-                                [
-                                  View(
-                                    {
-                                      class: cn([
-                                        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                        "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                                      ]),
-                                    },
-                                    [
-                                      (() => {
-                                        if (task.name) {
-                                          const ext = task.name
-                                            .split(".")
-                                            .pop()
-                                            .toUpperCase();
-                                          return ext.length <= 4 ? ext : "FILE";
-                                        }
-                                        return "FILE";
-                                      })(),
-                                    ],
-                                  ),
-                                  View({ class: "flex-1 min-w-0" }, [
-                                    View(
-                                      {
-                                        class:
-                                          "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                                      },
-                                      [`#${task.id} ${task.name}`],
-                                    ),
-                                    View(
-                                      {
-                                        class: "mt-0.5 text-xs text-emerald-500",
-                                      },
-                                      [formatSize(task.size)],
-                                    ),
-                                  ]),
+                      ScrollView({ store: scrollStore }, [
+                        Waterfall({
+                          store: waterfall,
+                          class: "!overflow-visible !h-auto",
+                          /** @param {{id: number; name: string; size: number}} task */
+                          render(task) {
+                            return View(
+                              {
+                                class: cn([
+                                  "flex items-center gap-3 px-3 py-2.5",
+                                  "border-b border-zinc-100 dark:border-zinc-800",
+                                ]),
+                              },
+                              [
+                                View(
+                                  {
+                                    class: cn([
+                                      "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                      "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                    ]),
+                                  },
+                                  [
+                                    (() => {
+                                      if (task.name) {
+                                        const ext = task.name
+                                          .split(".")
+                                          .pop()
+                                          .toUpperCase();
+                                        return ext.length <= 4 ? ext : "FILE";
+                                      }
+                                      return "FILE";
+                                    })(),
+                                  ],
+                                ),
+                                View({ class: "flex-1 min-w-0" }, [
                                   View(
                                     {
                                       class:
-                                        "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                        "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
                                     },
-                                    ["Done"],
+                                    [`#${task.id} ${task.name}`],
                                   ),
-                                ],
-                              );
-                            },
-                          }),
-                          View(
-                            {
-                              class: cn([
-                                "py-3 text-center text-xs text-zinc-400",
-                              ]),
-                            },
-                            [Txt("Scroll to bottom to load more")],
-                          ),
-                        ],
-                      ),
+                                  View(
+                                    {
+                                      class: "mt-0.5 text-xs text-emerald-500",
+                                    },
+                                    [formatSize(task.size)],
+                                  ),
+                                ]),
+                                View(
+                                  {
+                                    class:
+                                      "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                  },
+                                  ["Done"],
+                                ),
+                              ],
+                            );
+                          },
+                        }),
+                        View(
+                          {
+                            class: cn([
+                              "py-3 text-center text-xs text-zinc-400",
+                            ]),
+                          },
+                          [Txt("Scroll to bottom to load more")],
+                        ),
+                      ]),
                     ]),
                   ],
                 ),
@@ -1768,39 +1728,33 @@ export default function HomeIndexScrollViewExampleView() {
               ),
               // Scrollable task list
               View({ class: "max-h-[400px] min-h-[120px] overflow-hidden" }, [
-                ScrollView(
-                  {
-                    store: scrollStore,
-                    class: "bg-white dark:bg-zinc-950",
-                  },
-                  [
-                    Show(
-                      {
-                        when: computed(taskCount_, (d) => d > 0),
-                        fallback: [
-                          View(
-                            {
-                              class:
-                                "flex items-center justify-center h-[200px] text-sm text-zinc-400",
-                            },
-                            ["No download tasks"],
-                          ),
-                        ],
-                      },
-                      [
-                        For({
-                          key: "id",
-                          each: tasks_,
-                          render(task) {
-                            return DownloadTaskItem({
-                              task,
-                            });
+                ScrollView({ store: scrollStore }, [
+                  Show(
+                    {
+                      when: computed(taskCount_, (d) => d > 0),
+                      fallback: [
+                        View(
+                          {
+                            class:
+                              "flex items-center justify-center h-[200px] text-sm text-zinc-400",
                           },
-                        }),
+                          ["No download tasks"],
+                        ),
                       ],
-                    ),
-                  ],
-                ),
+                    },
+                    [
+                      For({
+                        key: "id",
+                        each: tasks_,
+                        render(task) {
+                          return DownloadTaskItem({
+                            task,
+                          });
+                        },
+                      }),
+                    ],
+                  ),
+                ]),
               ]),
             ],
           );

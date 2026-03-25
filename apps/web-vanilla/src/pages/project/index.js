@@ -30,7 +30,7 @@ export default function ProjectLayoutView(props) {
 
   return View(
     {
-      class: "flex w-full h-full bg-white dark:bg-zinc-950",
+      class: "flex w-full h-full",
       onMounted() {
         console.log("[]ProjectLayoutView onMounted", props.view.query);
       },

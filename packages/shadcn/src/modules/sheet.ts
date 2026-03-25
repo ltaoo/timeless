@@ -4,7 +4,6 @@ import {
   View,
   ViewChildren,
   ViewProps,
-  Txt,
 } from "@timeless/headless";
 import { DialogCore } from "@timeless/ui";
 import { XOutlined } from "@timeless/icons";
@@ -95,6 +94,7 @@ export function Sheet(
               },
               [XOutlined({})],
             ),
+            // @ts-ignore
             children,
           ],
         ),

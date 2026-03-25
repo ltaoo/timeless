@@ -12,7 +12,7 @@ export default function ArticleCategoryListPageView(props) {
     curCateId.as(view.query.cate_id);
   });
 
-  return View({ class: "flex w-full h-full bg-white dark:bg-zinc-950" }, [
+  return View({ class: "flex w-full h-full" }, [
     View(
       {
         class:

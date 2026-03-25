@@ -1,8 +1,8 @@
-import { app, history, client, views, storage } from "./store/index.js";
+import { app, history$, client$, views, storage$ } from "./store/index.js";
 import NotFoundPageView from "./pages/notfound/index.js";
 
 function ApplicationRootView() {
-  const root_view$ = history.$view;
+  const root_view$ = history$.$view;
   // const toast$ = new Timeless.ToastCore();
   app.onTip((msg) => {
     const { text } = msg;
@@ -19,9 +19,9 @@ function ApplicationRootView() {
     StandardSubViews({
       view: root_view$,
       app,
-      client,
-      storage,
-      history,
+      client: client$,
+      storage: storage$,
+      history: history$,
       views,
       NotFound: NotFoundPageView,
     }),
@@ -31,7 +31,7 @@ function ApplicationRootView() {
 
 document.addEventListener("DOMContentLoaded", function () {
   const { innerWidth, innerHeight, location } = window;
-  history.$router.prepare(location);
+  history$.$router.prepare(location);
   app.start({
     width: innerWidth,
     height: innerHeight,

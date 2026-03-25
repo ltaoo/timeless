@@ -1,4 +1,4 @@
-import { ref, computed, combine, refobj, classNames } from "@timeless/reactive";
+import { ref, computed, combine, classNames } from "@timeless/reactive";
 import {
   ResizablePanelsPrimitive,
   View,

@@ -1,5 +1,5 @@
 import { ref, computed } from "@timeless/reactive";
-import { RadioPrimitive, View, For, Txt } from "@timeless/headless";
+import { RadioPrimitive, View, For } from "@timeless/headless";
 import { RadioGroupCore, RadioCore } from "@timeless/ui";
 
 export function Radio(props: { store: RadioCore; id?: string }) {
@@ -75,7 +75,7 @@ export function RadioGroupItem(props: {
   item: { label: string; value: any; core: RadioCore };
   class?: string;
 }) {
-  const { store, item } = props;
+  const { item } = props;
 
   return View(
     {

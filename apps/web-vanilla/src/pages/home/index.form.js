@@ -5,6 +5,7 @@ export default function FormView() {
     Section("Input", [
       Item("Default", [
         Input({
+          id: "input_default_1",
           store: new Timeless.ui.InputCore({
             defaultValue: "",
             placeholder: "Type something...",
@@ -377,8 +378,8 @@ export default function FormView() {
     //     Switch({ store: new Timeless.ui.CheckboxCore({}) }),
     //   ]),
     // ]),
-    Section("Slider", [
-      Item("Default", [Slider({ value: ref(50), min: 0, max: 100 })]),
-    ]),
+    // Section("Slider", [
+    //   Item("Default", [Slider({ value: ref(50), min: 0, max: 100 })]),
+    // ]),
   ]);
 }

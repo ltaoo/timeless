@@ -3,7 +3,6 @@ import {
   TabsPrimitive,
   For,
   Show,
-  View,
   ViewChildren,
   ViewProps,
   Txt,
@@ -64,40 +63,45 @@ export function Tabs(
                 },
                 [
                   Txt(item.label),
-                  TabsPrimitive.Indicator(
-                    {
-                      store,
-                      value: item.value,
-                      style: "display:none;",
-                    },
-                  ),
+                  TabsPrimitive.Indicator({
+                    store,
+                    value: item.value,
+                    style: "display:none;",
+                  }),
                 ],
               );
             },
           }),
         ],
       ),
-      children ||
-        For({
-          each: items || computed(state_, (d) => d.tabs),
-          render(item: TabItem) {
-            return Show(
-              {
-                when: computed(state_, (d) => d.curId === item.value),
-              },
-              [
-                TabsPrimitive.Content(
+      Show(
+        {
+          when: !!children,
+          fallback: [
+            For({
+              each: items || computed(state_, (d) => d.tabs),
+              render(item: TabItem) {
+                return Show(
                   {
-                    store,
-                    value: item.value,
-                    class: "mt-2",
+                    when: computed(state_, (d) => d.curId === item.value),
                   },
-                  item.content,
-                ),
-              ],
-            );
-          },
-        }),
+                  [
+                    TabsPrimitive.Content(
+                      {
+                        store,
+                        value: item.value,
+                        class: "mt-2",
+                      },
+                      item.content,
+                    ),
+                  ],
+                );
+              },
+            }),
+          ],
+        },
+        children,
+      ),
     ],
   );
 }

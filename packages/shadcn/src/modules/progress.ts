@@ -1,9 +1,5 @@
 import { Ref } from "@timeless/reactive";
-import {
-  ProgressPrimitive,
-  ViewProps,
-  ViewChildren,
-} from "@timeless/headless";
+import { ProgressPrimitive, ViewProps } from "@timeless/headless";
 import { ProgressCore } from "@timeless/ui";
 
 export function Progress(
@@ -12,7 +8,6 @@ export function Progress(
     value?: Ref<number> | number;
     max?: number;
   },
-  children?: ViewChildren,
 ) {
   const { store, value, max, ...rest } = props;
 
@@ -28,6 +23,7 @@ export function Progress(
     [
       ProgressPrimitive.Indicator({
         store,
+        // @ts-ignore
         value,
         max,
         class: "h-full bg-zinc-900 transition-all dark:bg-zinc-50",

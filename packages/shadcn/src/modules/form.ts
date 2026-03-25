@@ -1,13 +1,10 @@
+import { computed, refobj } from "@timeless/reactive";
 import {
   View,
   Show,
-  Match,
-  computed,
-  refobj,
   ViewProps,
   ViewChildren,
   FieldPrimitive,
-  Switch,
   h,
 } from "@timeless/headless";
 import { SingleFieldCore, ObjectFieldCore, ArrayFieldCore } from "@timeless/ui";
@@ -93,7 +90,7 @@ export function Form(
   if (props.store.symbol === "ObjectFieldCore") {
     return ObjectFieldPrimitive.Fields({
       store: props.store as ObjectFieldCore<any>,
-      render(fieldName, field) {
+      render() {
         // return [Field({ store: field, autoRender: true })];
         return [View({}, ["Hello"])];
       },
@@ -105,7 +102,7 @@ export function Form(
     return View({ class: "space-y-4" }, [
       ArrayFieldPrimitive.Items({
         store: arrayStore,
-        render(item, index) {
+        render(item) {
           return [
             View(
               {

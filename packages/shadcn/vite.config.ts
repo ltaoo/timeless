@@ -2,7 +2,7 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 
-import { buildLibName, isProd } from "../../vite.config.base";
+import { isProd } from "../../vite.config.base";
 
 const name = "timeless.shadcn";
 
@@ -24,7 +24,7 @@ export default defineConfig({
         }
         return "index.js";
       },
-      name: buildLibName(name),
+      name: "Timeless",
     },
     minify: isProd ? "terser" : false,
     ...(isProd && {
@@ -37,42 +37,37 @@ export default defineConfig({
     sourcemap: isProd ? false : true,
     rollupOptions: {
       external: [
-        "@timeless/reactive",
-        "@timeless/headless",
-        "@timeless/kit",
-        "@timeless/ui",
-        "@timeless/icons",
+        // "@timeless/base",
+        // "@timeless/reactive",
+        // "@timeless/headless",
+        // "@timeless/kit",
+        // "@timeless/ui",
+        // "@timeless/utils",
+        // "@timeless/icons",
       ],
       output: {
-        globals: {
-          "@timeless/reactive": "Timeless.reactive",
-          "@timeless/headless": "Timeless.headless",
-          "@timeless/kit": "Timeless.kit",
-          "@timeless/ui": "Timeless.ui",
-          "@timeless/icons": "Timeless.icons",
-        },
+        extend: true,
+        // globals: {
+        //   "@timeless/reactive": "Timeless.reactive",
+        //   "@timeless/headless": "Timeless.headless",
+        //   "@timeless/kit": "Timeless.kit",
+        //   "@timeless/ui": "Timeless.ui",
+        //   "@timeless/utils": "Timeless.utils",
+        //   "@timeless/icons": "Timeless.icons",
+        // },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name?.endsWith(".css")) {
             return "timeless.shadcn.css";
           }
           return assetInfo.name || "assets/[name]-[hash][extname]";
         },
-        footer: `if (typeof window !== "undefined") {
-        window.Timeless = window.Timeless || {};
-        if (window.Timeless.shadcn) {
-          Object.assign(window.Timeless, window.Timeless.shadcn);
-          Object.keys(window.Timeless).forEach((k) => {
-            window[k] = window.Timeless[k];
-          });
-        }
-      }`,
       },
     },
   },
   plugins: [
     dts({
       insertTypesEntry: true,
-      rollupTypes: true,
+      rollupTypes: false,
     }),
   ],
 });

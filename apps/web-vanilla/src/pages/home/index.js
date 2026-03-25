@@ -1,5 +1,5 @@
 export default function HomePageView(props) {
-  const sidemenu$ = Timeless.RouteMenusModel({
+  const sidemenu$ = Timeless.kit.RouteMenusModel({
     view: props.view,
     history: props.history,
     menus: [

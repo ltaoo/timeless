@@ -1,10 +1,5 @@
 import { computed, ref } from "@timeless/reactive";
-import {
-  SliderPrimitive,
-  View,
-  ViewChildren,
-  ViewProps,
-} from "@timeless/headless";
+import { SliderPrimitive, ViewProps } from "@timeless/headless";
 
 export function Slider(
   props: ViewProps & {
@@ -15,7 +10,6 @@ export function Slider(
     disabled?: boolean;
     onChange?: (v: number) => void;
   },
-  children?: ViewChildren,
 ) {
   const { disabled, value, min, max, step, onChange, ...rest } = props;
 

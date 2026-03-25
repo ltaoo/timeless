@@ -1,16 +1,8 @@
 import { computed, refobj } from "@timeless/reactive";
-import {
-  TogglePrimitive,
-  View,
-  ViewChildren,
-  ViewProps,
-} from "@timeless/headless";
+import { TogglePrimitive, ViewProps } from "@timeless/headless";
 import { SwitchCore } from "@timeless/ui";
 
-export function Toggle(
-  props: ViewProps & { store: SwitchCore; id?: string },
-  children?: ViewChildren,
-) {
+export function Toggle(props: ViewProps & { store: SwitchCore; id?: string }) {
   const { store, id, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -34,17 +26,15 @@ export function Toggle(
       ...rest,
     },
     [
-      TogglePrimitive.Thumb(
-        {
-          store,
-          class: computed(state_, (d) => {
-            const baseClass =
-              "pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform dark:bg-zinc-950";
-            const translateClass = d.checked ? "translate-x-5" : "translate-x-0";
-            return [baseClass, translateClass].join(" ");
-          }),
-        },
-      ),
+      TogglePrimitive.Thumb({
+        store,
+        class: computed(state_, (d) => {
+          const baseClass =
+            "pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform dark:bg-zinc-950";
+          const translateClass = d.checked ? "translate-x-5" : "translate-x-0";
+          return [baseClass, translateClass].join(" ");
+        }),
+      }),
     ],
   );
 }

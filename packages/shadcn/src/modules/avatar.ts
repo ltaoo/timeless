@@ -12,7 +12,7 @@ export function Avatar(
   props: ViewProps & {
     src: string | Ref<string>;
     alt?: string;
-    size?: "sm" | "default" | "lg" | "large";
+    size?: Parameters<typeof AvatarPrimitive.Root>[0]["size"];
     fallback?: string;
   },
   children?: ViewChildren,
@@ -34,7 +34,7 @@ export function Avatar(
         src,
         alt,
         class: "aspect-square h-full w-full object-cover",
-        onLoadingStatusChange: (status) => {
+        onLoadingStatusChange: () => {
           // Image handles visibility internally based on error state
         },
       }),

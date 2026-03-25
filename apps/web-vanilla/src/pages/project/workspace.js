@@ -54,7 +54,7 @@ function WorkspaceCard(label, value) {
   return View(
     {
       class:
-        "rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4",
+        "rounded-md border border-zinc-200 dark:border-zinc-700 p-4",
     },
     [
       View({ class: "text-xs text-zinc-400 dark:text-zinc-500 mb-1" }, label),

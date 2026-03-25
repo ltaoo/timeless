@@ -4,7 +4,6 @@ import {
   For,
   Fragment,
   Show,
-  Txt,
   View,
   ViewChildren,
   ViewProps,
@@ -16,7 +15,6 @@ import {
   MenuItemCore,
   MenuSeparatorCore,
   MenuGroupCore,
-  PresenceCore,
 } from "@timeless/ui";
 import { ChevronRightOutlined } from "@timeless/icons";
 
@@ -205,9 +203,7 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
               each: computed(menu_state_, (t) => {
                 return t.items;
               }),
-              render(
-                item: MenuItemCore | MenuSeparatorCore | MenuGroupCore,
-              ) {
+              render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
                 if (item instanceof MenuSeparatorCore) {
                   return ContextMenuSeparator({});
                 }

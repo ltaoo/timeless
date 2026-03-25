@@ -31,7 +31,9 @@
       "Bash(git checkout:*)",
       "Bash(npx vitest:*)",
       "Bash(./release.sh)",
-      "Bash(./release.sh invalid-version:*)"
+      "Bash(./release.sh invalid-version:*)",
+      "Bash(cat /Users/mayfair/Documents/other/timeless/packages/shadcn/dist/timeless.shadcn.css | tr ';' '\\\\n' | grep -E 'border-color|outline-color|background-color|@layer' | head -20)",
+      "Bash(cat /Users/mayfair/Documents/other/timeless/packages/shadcn/dist/timeless.shadcn.css | tr '{}' '\\\\n' | grep 'border-input')"
     ]
   }
 }

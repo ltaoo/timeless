@@ -1,5 +1,6 @@
-import { ButtonPrimitive, ref, computed, Show, View } from "@timeless/headless";
+import { ButtonPrimitive, Show, View } from "@timeless/headless";
 import { LoaderCircleOutlined } from "@timeless/icons";
+import { computed, ref } from "@timeless/reactive";
 
 const VARIANTS = {
   default:
