@@ -29,7 +29,7 @@ export function Textarea(
         id,
         class: combine({ isLoading, hasValue }, (t) => {
           const base =
-            "flex min-h-[80px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:border-zinc-950 focus-visible:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus-visible:border-zinc-300 dark:focus-visible:bg-zinc-900 dark:focus-visible:ring-zinc-300";
+            "flex min-h-[80px] w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40";
           const pr = showClear && t.hasValue ? "pr-8" : "";
           const prLoading = showLoading && t.isLoading ? "pr-8" : "";
           return [base, pr, prLoading].filter(Boolean).join(" ");
@@ -42,11 +42,11 @@ export function Textarea(
             store,
             class: computed(hasValue, (has) =>
               has
-                ? "absolute right-2 top-2 cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                ? "absolute right-2 top-2 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                 : "hidden",
             ),
           },
-          [CircleXOutlined({ class: "h-4 w-4" })],
+          [CircleXOutlined({ class: "size-4" })],
         ),
       ]),
       Show({ when: computed(isLoading, (t) => t && showLoading) }, [
@@ -55,11 +55,11 @@ export function Textarea(
             store,
             class: computed(isLoading, (loading) =>
               loading
-                ? "absolute right-2 top-2 text-zinc-400 dark:text-zinc-500"
+                ? "absolute right-2 top-2 text-muted-foreground"
                 : "hidden",
             ),
           },
-          [LoaderOutlined({ class: "h-4 w-4 animate-spin" })],
+          [LoaderOutlined({ class: "size-4 animate-spin" })],
         ),
       ]),
     ],

@@ -1,22 +1,38 @@
-import { ref, computed } from "@timeless/reactive";
-import { RadioPrimitive, View, For } from "@timeless/headless";
+import { ref, computed, cn } from "@timeless/reactive";
+import { RadioPrimitive, View, For, ViewProps } from "@timeless/headless";
 import { RadioGroupCore, RadioCore } from "@timeless/ui";
 
 export function Radio(props: { store: RadioCore; id?: string }) {
   const { store, id } = props;
+  const state = ref(store.state);
+  const unsub = store.onStateChange(() => {
+    state.as(store.state);
+  });
 
   return RadioPrimitive.Box(
     {
       store,
       id,
-      class:
-        "aspect-square h-4 w-4 rounded-full border border-zinc-900 ring-offset-white focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:border-zinc-50 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 flex items-center justify-center cursor-pointer bg-white dark:bg-zinc-950 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
+      class: cn([
+        "peer relative flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border outline-none cursor-pointer after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+        computed(state, (s) =>
+          s.checked
+            ? "border-primary bg-primary text-primary-foreground dark:bg-primary"
+            : "border-input dark:bg-input/30",
+        ),
+        computed(state, (s) =>
+          s.disabled ? "opacity-50 cursor-not-allowed" : "",
+        ),
+      ]),
+      onUnmounted() {
+        unsub();
+      },
     },
     [
       RadioPrimitive.Indicator({ store }, [
         View(
           {
-            class: "h-2.5 w-2.5 rounded-full bg-zinc-900 dark:bg-zinc-50",
+            class: "size-2 rounded-full bg-primary-foreground",
           },
           [],
         ),
@@ -25,17 +41,19 @@ export function Radio(props: { store: RadioCore; id?: string }) {
   );
 }
 
-export function RadioGroup(props: {
-  store: RadioGroupCore<any>;
-  class?: string;
-  itemClass?: string;
-  direction?: "horizontal" | "vertical";
-}) {
+export function RadioGroup(
+  props: ViewProps & {
+    store: RadioGroupCore<any>;
+    class?: string;
+    itemClass?: string;
+    direction?: "horizontal" | "vertical";
+  },
+) {
   const { store, direction = "vertical" } = props;
   const state = ref(store.state);
   const events: (() => void)[] = [];
 
-  const containerClass =
+  const container_class =
     direction === "horizontal"
       ? "flex flex-row flex-wrap gap-4"
       : "flex flex-col gap-2";
@@ -43,7 +61,7 @@ export function RadioGroup(props: {
   return RadioPrimitive.Group(
     {
       store,
-      class: props.class || containerClass,
+      class: props.class || container_class,
       onMounted() {
         events.push(
           store.onStateChange((v) => {
@@ -79,17 +97,19 @@ export function RadioGroupItem(props: {
 
   return View(
     {
-      class:
-        props.class || "flex items-center gap-2 cursor-pointer select-none",
+      class: cn(["flex items-center gap-3", props.class]),
       onClick() {
         item.core.check();
       },
     },
     [
-      Radio({ store: item.core }),
+      Radio({ id: item.value, store: item.core }),
       View(
         {
-          class: "text-sm font-medium leading-none",
+          htmlFor: item.value,
+          as: "label",
+          class:
+            "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
         },
         [item.label],
       ),

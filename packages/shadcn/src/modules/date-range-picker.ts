@@ -18,10 +18,10 @@ import { Tooltip } from "./tooltip";
 const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
 
 const NAV_BTN_CLASS =
-  "inline-flex items-center justify-center h-7 w-7 rounded-md border border-zinc-200 bg-transparent text-zinc-900 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800";
+  "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground";
 
 const NAV_BTN_DISABLED_CLASS =
-  "inline-flex items-center justify-center h-7 w-7 rounded-md border border-zinc-100 bg-transparent text-zinc-300 cursor-not-allowed dark:border-zinc-800 dark:text-zinc-600";
+  "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground/40 cursor-not-allowed";
 
 function NavButton(props: {
   store: DateRangePickerCore;
@@ -114,14 +114,14 @@ function CalendarPanel(props: {
         store,
         calendar_state_,
         type: side === "left" ? "leftPrev" : "rightPrev",
-        children: [ChevronLeftOutlined({ class: "h-4 w-4" })],
+        children: [ChevronLeftOutlined({ class: "size-4" })],
       }),
       Header({ store, class: "text-sm font-medium" }),
       NavButton({
         store,
         calendar_state_,
         type: side === "left" ? "leftNext" : "rightNext",
-        children: [ChevronRightOutlined({ class: "h-4 w-4" })],
+        children: [ChevronRightOutlined({ class: "size-4" })],
       }),
     ]),
     // Grid
@@ -134,7 +134,7 @@ function CalendarPanel(props: {
             {
               as: "span",
               class:
-                "text-center text-xs text-zinc-500 dark:text-zinc-400 w-9 h-8 flex items-center justify-center",
+                "text-center text-xs text-muted-foreground w-9 h-8 flex items-center justify-center",
             },
             [day],
           ),
@@ -171,12 +171,12 @@ function CalendarPanel(props: {
                       const isRangeEnd = store.$calendar.isRangeEnd(day.value);
 
                       const baseClass =
-                        "inline-flex items-center justify-center w-9 h-8 text-sm transition-colors focus:outline-none";
+                        "inline-flex items-center justify-center w-9 h-8 text-sm transition-colors outline-hidden";
                       const clas: string[] = [];
 
                       if (isRangeStart || isRangeEnd) {
                         clas.push(
-                          "bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900",
+                          "bg-primary text-primary-foreground",
                         );
                         if (isRangeStart && !isRangeEnd) {
                           clas.push("rounded-l-md rounded-r-none");
@@ -187,19 +187,19 @@ function CalendarPanel(props: {
                         }
                       } else if (isInRange) {
                         clas.push(
-                          "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50 rounded-none",
+                          "bg-accent text-accent-foreground rounded-none",
                         );
                       } else if (day.is_today) {
                         clas.push(
-                          "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50 rounded-md",
+                          "bg-accent text-accent-foreground rounded-md",
                         );
                       } else if (day.is_prev_month || day.is_next_month) {
                         clas.push(
-                          "text-zinc-400 hover:bg-zinc-100 dark:text-zinc-600 dark:hover:bg-zinc-800 rounded-md",
+                          "text-muted-foreground/50 hover:bg-accent hover:text-accent-foreground rounded-md",
                         );
                       } else {
                         clas.push(
-                          "text-zinc-900 hover:bg-zinc-100 dark:text-zinc-50 dark:hover:bg-zinc-800 rounded-md",
+                          "hover:bg-accent hover:text-accent-foreground rounded-md",
                         );
                       }
 
@@ -246,11 +246,11 @@ export function DateRangePicker(
         id,
         class: computed(presence_, (d) => {
           const baseClass =
-            "flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus:ring-zinc-300";
-          const focusedClass = d.visible
-            ? "border-zinc-950 bg-zinc-50 dark:border-zinc-300 dark:bg-zinc-900"
-            : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950";
-          return `${baseClass} ${focusedClass}`;
+            "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4";
+          const openClass = d.visible
+            ? "border-ring ring-3 ring-ring/50"
+            : "dark:hover:bg-input/50";
+          return `${baseClass} ${openClass}`;
         }),
       },
       [
@@ -259,32 +259,33 @@ export function DateRangePicker(
           placeholder,
           class: computed(state_, (d) => {
             return d.value != null
-              ? "text-zinc-900 dark:text-zinc-50"
-              : "text-zinc-500 dark:text-zinc-400";
+              ? "text-foreground"
+              : "text-muted-foreground";
           }),
         }),
-        DateRangePickerPrimitive.Icon({ class: "h-4 w-4 opacity-50" }, [
-          CalendarOutlined({}),
-        ]),
+        DateRangePickerPrimitive.Icon(
+          { class: "size-4 text-muted-foreground" },
+          [CalendarOutlined({})],
+        ),
       ],
     ),
     DateRangePickerPrimitive.Content(
       {
         ...rest,
         animation: {
-          in: "animate-in fade-in-0 zoom-in-95",
-          out: "animate-out fade-out-0 zoom-out-95",
+          in: "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2",
+          out: "animate-out fade-out-0 zoom-out-95 slide-out-to-top-2",
         },
         store,
         class:
-          "z-50 p-4 rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
+          "cn-menu-target cn-menu-translucent z-50 p-4 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
       [
         DateRangePickerPrimitive.Calendars({ store, class: "flex gap-4" }, [
           CalendarPanel({ store, side: "left", calendar_state_ }),
           // 分隔线
           View({
-            class: "w-px bg-zinc-200 dark:bg-zinc-800 self-stretch my-2",
+            class: "w-px bg-border self-stretch my-2",
           }),
           CalendarPanel({ store, side: "right", calendar_state_ }),
         ]),

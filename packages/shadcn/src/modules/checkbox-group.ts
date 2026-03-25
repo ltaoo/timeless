@@ -59,7 +59,7 @@ export function CheckboxGroupItem(props: {
   return View(
     {
       class:
-        props.class || "flex items-center gap-2 cursor-pointer select-none",
+        props.class || "flex items-center gap-2 cursor-pointer select-none group/field",
     },
     [
       Checkbox({ store: item.core }),
@@ -67,7 +67,7 @@ export function CheckboxGroupItem(props: {
         {
           as: "span",
           class:
-            "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+            "text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
           onClick() {
             item.core.toggle();
           },

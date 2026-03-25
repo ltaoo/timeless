@@ -26,16 +26,22 @@ export function Box(
   children?: ViewChildren,
 ) {
   const { store, id, ...rest } = props;
+
   const state = ref(store.state);
   const events: any[] = [];
 
   return View(
     {
       ...rest,
-      // "data-checked": computed(state, (d) => (d.checked ? "" : undefined)),
-      // "data-disabled": computed(state, (d) => (d.disabled ? "" : undefined)),
+      as: "button",
+      dataset: {
+        // checked: computed(state, (d) => (d.checked ? "" : undefined)),
+        // disabled: computed(state, (d) => (d.disabled ? "" : undefined)),
+      },
       onClick(e) {
-        if (rest.onClick) rest.onClick(e);
+        if (rest.onClick) {
+          rest.onClick(e);
+        }
         store.check();
       },
       onMounted() {
@@ -87,31 +93,33 @@ export function Label(
   const { htmlFor, store, ...rest } = props;
   const events: any[] = [];
 
-  const hiddenInput = store
-    ? View(
-        {
-          as: "input",
-          type: "radio",
-          id: htmlFor,
-          // name: htmlFor,
-          style:
-            "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
-          onClick(e) {
-            e.stopPropagation();
-            store.check();
-          },
-          onMounted($elm: HTMLInputElement) {
-            $elm.checked = !!store.state.checked;
-            events.push(
-              store.onStateChange(() => {
-                $elm.checked = !!store.state.checked;
-              }),
-            );
-          },
-        },
-        [],
-      )
-    : null;
+  // const hiddenInput = store
+  //   ? View(
+  //       {
+  //         as: "input",
+  //         dataset: {
+  //           type: "radio",
+  //         },
+  //         id: htmlFor,
+  //         // name: htmlFor,
+  //         style:
+  //           "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
+  //         onClick(e) {
+  //           e.stopPropagation();
+  //           store.check();
+  //         },
+  //         onMounted($elm: HTMLInputElement) {
+  //           $elm.checked = !!store.state.checked;
+  //           events.push(
+  //             store.onStateChange(() => {
+  //               $elm.checked = !!store.state.checked;
+  //             }),
+  //           );
+  //         },
+  //       },
+  //       [],
+  //     )
+  //   : null;
 
   return View(
     {
@@ -122,7 +130,8 @@ export function Label(
         if (rest.onUnmounted) rest.onUnmounted();
       },
     },
-    hiddenInput ? [hiddenInput, ...(children || [])] : children,
+    // hiddenInput ? [hiddenInput, ...(children || [])] : children,
+    children,
   );
 }
 

@@ -36,11 +36,11 @@ export function DatePicker(
         id,
         class: computed(presence_, (d) => {
           const baseClass =
-            "flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus:ring-zinc-300";
-          const focusedClass = d.visible
-            ? "border-zinc-950 bg-zinc-50 dark:border-zinc-300 dark:bg-zinc-900"
-            : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950";
-          return `${baseClass} ${focusedClass}`;
+            "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4";
+          const openClass = d.visible
+            ? "border-ring ring-3 ring-ring/50"
+            : "dark:hover:bg-input/50";
+          return `${baseClass} ${openClass}`;
         }),
       },
       [
@@ -49,25 +49,26 @@ export function DatePicker(
           placeholder,
           class: computed(state_, (d) => {
             return d.value != null
-              ? "text-zinc-900 dark:text-zinc-50"
-              : "text-zinc-500 dark:text-zinc-400";
+              ? "text-foreground"
+              : "text-muted-foreground";
           }),
         }),
-        DatePickerPrimitive.Icon({ class: "h-4 w-4 opacity-50" }, [
-          CalendarOutlined({}),
-        ]),
+        DatePickerPrimitive.Icon(
+          { class: "size-4 text-muted-foreground" },
+          [CalendarOutlined({})],
+        ),
       ],
     ),
     DatePickerPrimitive.Content(
       {
         ...rest,
         animation: {
-          in: "animate-in fade-in-0 zoom-in-95",
-          out: "animate-out fade-out-0 zoom-out-95",
+          in: "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2",
+          out: "animate-out fade-out-0 zoom-out-95 slide-out-to-top-2",
         },
         store,
         class:
-          "z-50 w-auto p-3 rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
+          "cn-menu-target cn-menu-translucent z-50 w-auto p-3 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
       [
         DatePickerPrimitive.Calendar({ store, class: "w-full" }, [
@@ -81,9 +82,9 @@ export function DatePicker(
                 {
                   store,
                   class:
-                    "inline-flex items-center justify-center h-7 w-7 rounded-md border border-zinc-200 bg-transparent text-zinc-900 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800",
+                    "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                 },
-                [ChevronLeftOutlined({ class: "h-4 w-4" })],
+                [ChevronLeftOutlined({ class: "size-4" })],
               ),
               DatePickerPrimitive.CalendarHeader({
                 store,
@@ -93,9 +94,9 @@ export function DatePicker(
                 {
                   store,
                   class:
-                    "inline-flex items-center justify-center h-7 w-7 rounded-md border border-zinc-200 bg-transparent text-zinc-900 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800",
+                    "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                 },
-                [ChevronRightOutlined({ class: "h-4 w-4" })],
+                [ChevronRightOutlined({ class: "size-4" })],
               ),
             ],
           ),
@@ -108,7 +109,7 @@ export function DatePicker(
                   {
                     as: "span",
                     class:
-                      "text-center text-xs text-zinc-500 dark:text-zinc-400 w-8 h-8 flex items-center justify-center",
+                      "text-center text-xs text-muted-foreground size-8 flex items-center justify-center",
                   },
                   [day],
                 ),
@@ -132,24 +133,24 @@ export function DatePicker(
                           class: computed(calendar_state_, (s) => {
                             const isSelected = s.selectedDay?.time === day.time;
                             const baseClass =
-                              "inline-flex items-center justify-center w-8 h-8 text-sm rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 dark:focus:ring-zinc-300";
+                              "inline-flex items-center justify-center size-8 text-sm rounded-md transition-colors outline-hidden";
                             const stateClasses = [];
 
                             if (isSelected) {
                               stateClasses.push(
-                                "bg-zinc-900 text-zinc-50 hover:bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50",
+                                "bg-primary text-primary-foreground hover:bg-primary",
                               );
                             } else if (day.is_today) {
                               stateClasses.push(
-                                "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50",
+                                "bg-accent text-accent-foreground",
                               );
                             } else if (day.is_prev_month || day.is_next_month) {
                               stateClasses.push(
-                                "text-zinc-400 hover:bg-zinc-100 dark:text-zinc-600 dark:hover:bg-zinc-800",
+                                "text-muted-foreground/50 hover:bg-accent hover:text-accent-foreground",
                               );
                             } else {
                               stateClasses.push(
-                                "text-zinc-900 hover:bg-zinc-100 dark:text-zinc-50 dark:hover:bg-zinc-800",
+                                "hover:bg-accent hover:text-accent-foreground",
                               );
                             }
 

@@ -26,9 +26,10 @@ export function Dialog(
     DialogPrimitive.Overlay({
       store,
       class: computed(state_, (d) => {
-        const baseClass = "fixed inset-0 z-50 bg-black/80";
-        const enterClass = d.enter ? "animate-in fade-in duration-300" : "";
-        const exitClass = d.exit ? "animate-out fade-out duration-300" : "";
+        const baseClass =
+          "fixed inset-0 isolate z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs";
+        const enterClass = d.enter ? "animate-in fade-in-0 duration-100" : "";
+        const exitClass = d.exit ? "animate-out fade-out-0 duration-100" : "";
         return [baseClass, enterClass, exitClass].filter(Boolean).join(" ");
       }),
     }),
@@ -47,12 +48,12 @@ export function Dialog(
             store,
             class: computed(state_, (d) => {
               const baseClass =
-                "relative w-full max-w-lg grid gap-4 border border-zinc-200 bg-white p-6 shadow-lg sm:rounded-lg dark:border-zinc-800 dark:bg-zinc-950";
+                "relative w-full max-w-sm grid gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none";
               const enterClass = d.enter
-                ? "animate-in fade-in-0 zoom-in-95 duration-300"
+                ? "animate-in fade-in-0 zoom-in-95 duration-100"
                 : "";
               const exitClass = d.exit
-                ? "animate-out fade-out-0 zoom-out-95 duration-300"
+                ? "animate-out fade-out-0 zoom-out-95 duration-100"
                 : "";
               return [baseClass, enterClass, exitClass]
                 .filter(Boolean)
@@ -65,14 +66,13 @@ export function Dialog(
               DialogPrimitive.Header(
                 {
                   store,
-                  class: "flex flex-col space-y-1.5 text-center sm:text-left",
+                  class: "flex flex-col gap-2",
                 },
                 [
                   DialogPrimitive.Title(
                     {
                       store,
-                      class:
-                        "text-lg font-semibold leading-none tracking-tight",
+                      class: "text-base leading-none font-medium",
                     },
                     [Txt(computed(state_, (d) => d.title || ""))],
                   ),
@@ -84,7 +84,7 @@ export function Dialog(
               {
                 store,
                 class:
-                  "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 cursor-pointer",
+                  "absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
               },
               [Txt("✕")],
             ),
@@ -93,10 +93,10 @@ export function Dialog(
                 {
                   store,
                   class:
-                    "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+                    "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
                 },
                 [
-                  Button({ store: store.cancelBtn, variant: "secondary" }, [
+                  Button({ store: store.cancelBtn, variant: "outline" }, [
                     "取消",
                   ]),
                   Button({ store: store.okBtn }, ["确认"]),

@@ -34,11 +34,11 @@ export function TimePicker(
         id,
         class: computed(presence_, (d) => {
           const baseClass =
-            "flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus:ring-zinc-300";
-          const focusedClass = d.visible
-            ? "border-zinc-950 bg-zinc-50 dark:border-zinc-300 dark:bg-zinc-900"
-            : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950";
-          return `${baseClass} ${focusedClass}`;
+            "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4";
+          const openClass = d.visible
+            ? "border-ring ring-3 ring-ring/50"
+            : "dark:hover:bg-input/50";
+          return `${baseClass} ${openClass}`;
         }),
       },
       [
@@ -47,25 +47,26 @@ export function TimePicker(
           placeholder,
           class: computed(state_, (d) => {
             return d.value != null
-              ? "text-zinc-900 dark:text-zinc-50"
-              : "text-zinc-500 dark:text-zinc-400";
+              ? "text-foreground"
+              : "text-muted-foreground";
           }),
         }),
-        TimePickerPrimitive.Icon({ class: "h-4 w-4 opacity-50" }, [
-          ClockOutlined({}),
-        ]),
+        TimePickerPrimitive.Icon(
+          { class: "size-4 text-muted-foreground" },
+          [ClockOutlined({})],
+        ),
       ],
     ),
     TimePickerPrimitive.Content(
       {
         ...rest,
         animation: {
-          in: "animate-in fade-in-0 zoom-in-95",
-          out: "animate-out fade-out-0 zoom-out-95",
+          in: "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2",
+          out: "animate-out fade-out-0 zoom-out-95 slide-out-to-top-2",
         },
         store,
         class:
-          "z-50 w-auto p-3 rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
+          "cn-menu-target cn-menu-translucent z-50 w-auto p-3 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
       [
         TimePickerPrimitive.TimePanel({ store, class: "flex flex-col gap-2" }, [
@@ -73,8 +74,7 @@ export function TimePicker(
             // Hour Column
             View(
               {
-                class:
-                  "flex flex-col h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700",
+                class: "flex flex-col h-48 overflow-y-auto",
               },
               [
                 For({
@@ -87,11 +87,11 @@ export function TimePicker(
                         class: computed(state_, (s) => {
                           const isSelected = s.tempHour === hour;
                           const baseClass =
-                            "w-12 h-8 text-sm rounded-md transition-colors focus:outline-none";
+                            "w-12 h-8 text-sm rounded-md transition-colors outline-hidden";
                           if (isSelected) {
-                            return `${baseClass} bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900`;
+                            return `${baseClass} bg-primary text-primary-foreground`;
                           }
-                          return `${baseClass} text-zinc-900 hover:bg-zinc-100 dark:text-zinc-50 dark:hover:bg-zinc-800`;
+                          return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
                         }),
                       },
                       [String(hour).padStart(2, "0")],
@@ -104,15 +104,14 @@ export function TimePicker(
             View(
               {
                 class:
-                  "flex items-center text-zinc-400 dark:text-zinc-600 text-lg font-medium",
+                  "flex items-center text-muted-foreground text-lg font-medium",
               },
               [":"],
             ),
             // Minute Column
             View(
               {
-                class:
-                  "flex flex-col h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700",
+                class: "flex flex-col h-48 overflow-y-auto",
               },
               [
                 For({
@@ -125,11 +124,11 @@ export function TimePicker(
                         class: computed(state_, (s) => {
                           const isSelected = s.tempMinute === minute;
                           const baseClass =
-                            "w-12 h-8 text-sm rounded-md transition-colors focus:outline-none";
+                            "w-12 h-8 text-sm rounded-md transition-colors outline-hidden";
                           if (isSelected) {
-                            return `${baseClass} bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900`;
+                            return `${baseClass} bg-primary text-primary-foreground`;
                           }
-                          return `${baseClass} text-zinc-900 hover:bg-zinc-100 dark:text-zinc-50 dark:hover:bg-zinc-800`;
+                          return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
                         }),
                       },
                       [String(minute).padStart(2, "0")],
@@ -147,14 +146,13 @@ export function TimePicker(
                 View(
                   {
                     class:
-                      "flex items-center text-zinc-400 dark:text-zinc-600 text-lg font-medium",
+                      "flex items-center text-muted-foreground text-lg font-medium",
                   },
                   [":"],
                 ),
                 View(
                   {
-                    class:
-                      "flex flex-col h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700",
+                    class: "flex flex-col h-48 overflow-y-auto",
                   },
                   [
                     For({
@@ -167,11 +165,11 @@ export function TimePicker(
                             class: computed(state_, (s) => {
                               const isSelected = s.tempSecond === second;
                               const baseClass =
-                                "w-12 h-8 text-sm rounded-md transition-colors focus:outline-none";
+                                "w-12 h-8 text-sm rounded-md transition-colors outline-hidden";
                               if (isSelected) {
-                                return `${baseClass} bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900`;
+                                return `${baseClass} bg-primary text-primary-foreground`;
                               }
-                              return `${baseClass} text-zinc-900 hover:bg-zinc-100 dark:text-zinc-50 dark:hover:bg-zinc-800`;
+                              return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
                             }),
                           },
                           [String(second).padStart(2, "0")],
@@ -186,15 +184,14 @@ export function TimePicker(
           // Footer with buttons
           View(
             {
-              class:
-                "flex justify-end gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800",
+              class: "flex justify-end gap-2 pt-2 border-t border-border",
             },
             [
               TimePickerPrimitive.ClearButton(
                 {
                   store,
                   class:
-                    "px-3 py-1 text-sm rounded-md text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors",
+                    "px-3 py-1 text-sm rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors",
                 },
                 ["清除"],
               ),
@@ -202,7 +199,7 @@ export function TimePicker(
                 {
                   store,
                   class:
-                    "px-3 py-1 text-sm rounded-md bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 transition-colors",
+                    "px-3 py-1 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors",
                 },
                 ["确定"],
               ),

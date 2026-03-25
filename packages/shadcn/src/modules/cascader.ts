@@ -25,11 +25,11 @@ export function Cascader(
         id,
         class: computed(state_, (d) => {
           const baseClass =
-            "flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus:ring-zinc-300";
-          const focusedClass = d.open
-            ? "border-zinc-950 bg-zinc-50 dark:border-zinc-300 dark:bg-zinc-900"
-            : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950";
-          return `${baseClass} ${focusedClass}`;
+            "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4";
+          const openClass = d.open
+            ? "border-ring ring-3 ring-ring/50"
+            : "dark:hover:bg-input/50";
+          return `${baseClass} ${openClass}`;
         }),
         onMounted(el: HTMLElement) {
           el.addEventListener("mousedown", (e) => {
@@ -42,25 +42,26 @@ export function Cascader(
           store,
           class: computed(state_, (d) => {
             return d.value != null && d.value.length > 0
-              ? "text-zinc-900 dark:text-zinc-50"
-              : "text-zinc-500 dark:text-zinc-400";
+              ? "text-foreground"
+              : "text-muted-foreground";
           }),
         }),
-        CascaderPrimitive.Icon({ class: "h-4 w-4 opacity-50" }, [
-          ChevronDownOutlined({}),
-        ]),
+        CascaderPrimitive.Icon(
+          { class: "size-4 text-muted-foreground" },
+          [ChevronDownOutlined({})],
+        ),
       ],
     ),
     CascaderPrimitive.Content(
       {
         ...rest,
         animation: {
-          in: "animate-in fade-in-0 slide-in-from-top-2",
-          out: "animate-out fade-out-0 slide-out-to-top-2",
+          in: "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2",
+          out: "animate-out fade-out-0 zoom-out-95 slide-out-to-top-2",
         },
         store,
         class:
-          "cascader__content relative z-50 flex overflow-hidden rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
+          "cn-menu-target cn-menu-translucent cascader__content relative z-50 flex overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
         style: computed(state_, () => {
           const width = store.reference?.width || 0;
           return width > 0 ? `min-width: ${width}px;` : "";
@@ -71,7 +72,7 @@ export function Cascader(
         CascaderPrimitive.Search({
           store,
           class:
-            "w-full border-b border-zinc-200 px-3 py-2 text-sm outline-none placeholder:text-zinc-500 dark:border-zinc-800 dark:placeholder:text-zinc-400",
+            "w-full border-b border-border px-3 py-2 text-sm outline-none placeholder:text-muted-foreground",
         }),
         // 搜索结果
         CascaderPrimitive.SearchResults(
@@ -88,7 +89,7 @@ export function Cascader(
                     store,
                     result,
                     class:
-                      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm outline-none transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800",
+                      "relative flex w-full cursor-default select-none items-center rounded-md py-1 px-1.5 text-sm outline-hidden transition-colors hover:bg-accent hover:text-accent-foreground",
                   },
                   [
                     View({ as: "span" }, [
@@ -125,7 +126,7 @@ export function Cascader(
                 return View(
                   {
                     class:
-                      "cascader__panel min-w-[140px] max-h-72 overflow-auto p-1 border-r border-zinc-200 last:border-r-0 dark:border-zinc-800",
+                      "cascader__panel min-w-36 max-h-72 overflow-auto p-1 border-r border-border last:border-r-0",
                   },
                   [
                     For({
@@ -146,15 +147,15 @@ export function Cascader(
                               const isSelected = option.selected;
                               const isFocused = option.focused;
                               return [
-                                "relative flex w-full cursor-default select-none items-center justify-between rounded-sm py-1.5 px-2 text-sm outline-none transition-colors",
+                                "relative flex w-full cursor-default select-none items-center justify-between gap-1.5 rounded-md py-1 px-1.5 text-sm outline-hidden transition-colors",
                                 option.disabled
                                   ? "opacity-50 cursor-not-allowed"
                                   : "",
                                 isSelected
-                                  ? "bg-zinc-200/70 text-zinc-900 font-medium dark:bg-zinc-700/70 dark:text-zinc-50"
+                                  ? "font-medium"
                                   : "",
-                                !isSelected && isFocused
-                                  ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                                isFocused
+                                  ? "bg-accent text-accent-foreground"
                                   : "",
                               ]
                                 .filter(Boolean)
@@ -169,7 +170,7 @@ export function Cascader(
                                 hasChildren: Boolean(
                                   option.children && option.children.length > 0,
                                 ),
-                                class: "h-4 w-4 opacity-50",
+                                class: "size-4 text-muted-foreground",
                               },
                               [ChevronRightOutlined({})],
                             ),

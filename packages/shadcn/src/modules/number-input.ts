@@ -41,11 +41,11 @@ export function NumberInput(
         store,
         id,
         class: [
-          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors",
-          "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+          "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none",
           "placeholder:text-muted-foreground",
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-          "disabled:cursor-not-allowed disabled:opacity-50",
+          "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+          "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50",
+          "md:text-sm dark:bg-input/30 dark:disabled:bg-input/80",
           showControls ? "pr-8" : "",
         ].join(" "),
         ...rest,
@@ -62,7 +62,7 @@ export function NumberInput(
                 store,
                 class: combine({ canIncrease, isDisabled }, (t) => {
                   return [
-                    "flex-1 flex items-center justify-center px-1.5 rounded-tr-md",
+                    "flex-1 flex items-center justify-center px-1.5 rounded-tr-lg",
                     "hover:bg-accent hover:text-accent-foreground transition-colors",
                     "border-b border-input",
                     !t.canIncrease || t.isDisabled
@@ -71,14 +71,14 @@ export function NumberInput(
                   ].join(" ");
                 }),
               },
-              [ChevronUpOutlined({ class: "h-3 w-3" })],
+              [ChevronUpOutlined({ class: "size-3" })],
             ),
             NumberInputPrimitive.DecreaseButton(
               {
                 store,
                 class: combine({ canDecrease, isDisabled }, (t) => {
                   return [
-                    "flex-1 flex items-center justify-center px-1.5 rounded-br-md",
+                    "flex-1 flex items-center justify-center px-1.5 rounded-br-lg",
                     "hover:bg-accent hover:text-accent-foreground transition-colors",
                     !t.canDecrease || t.isDisabled
                       ? "opacity-30 cursor-not-allowed"
@@ -86,7 +86,7 @@ export function NumberInput(
                   ].join(" ");
                 }),
               },
-              [ChevronDownOutlined({ class: "h-3 w-3" })],
+              [ChevronDownOutlined({ class: "size-3" })],
             ),
           ],
         ),

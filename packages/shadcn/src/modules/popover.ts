@@ -38,8 +38,7 @@ export function Popover(
             class: computed(state_, (t) => {
               return [
                 "popover-content",
-                "relative z-50 w-72 rounded-md border border-zinc-200 bg-white p-4 text-sm text-zinc-500 shadow-md outline-none",
-                "dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400",
+                "relative z-50 flex w-72 flex-col gap-2.5 rounded-lg bg-popover p-2.5 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
                 t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
                 t.exit ? "animate-out fade-out-0 zoom-out-95" : "",
               ].join(" ");
@@ -57,7 +56,7 @@ export function Popover(
                   if (side === "right") borderClass = "border-b border-l";
                   if (side === "left") borderClass = "border-t border-r";
                   return [
-                    "absolute h-3 w-3 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800",
+                    "absolute h-3 w-3 bg-popover border-foreground/10",
                     "transform",
                     borderClass,
                   ].join(" ");
@@ -69,8 +68,7 @@ export function Popover(
             Show({ when: ref(!!props.title) }, [
               View(
                 {
-                  class:
-                    "mb-2 text-sm font-medium text-zinc-950 dark:text-zinc-50",
+                  class: "flex flex-col gap-0.5 text-sm font-medium",
                 },
                 props.title,
               ),

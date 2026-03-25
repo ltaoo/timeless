@@ -35,7 +35,7 @@ export function Tooltip(
         View(
           {
             class:
-              "z-50 overflow-hidden rounded-md border border-zinc-200 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-50 shadow-md pointer-events-none dark:border-zinc-800 dark:bg-zinc-50 dark:text-zinc-900",
+              "z-50 inline-flex w-fit max-w-xs items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-xs text-background pointer-events-none",
           },
           content,
         ),
