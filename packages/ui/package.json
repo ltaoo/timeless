@@ -130,6 +130,16 @@
       "import": "./dist/image/index.esm.js",
       "require": "./dist/image/index.js"
     },
+    "./image-upload": {
+      "types": "./dist/image-upload/index.d.ts",
+      "import": "./dist/image-upload/index.esm.js",
+      "require": "./dist/image-upload/index.js"
+    },
+    "./input": {
+      "types": "./dist/input/index.d.ts",
+      "import": "./dist/input/index.esm.js",
+      "require": "./dist/input/index.js"
+    },
     "./layer": {
       "types": "./dist/layer/index.d.ts",
       "import": "./dist/layer/index.esm.js",
@@ -144,6 +154,11 @@
       "types": "./dist/node/index.d.ts",
       "import": "./dist/node/index.esm.js",
       "require": "./dist/node/index.js"
+    },
+    "./number-input": {
+      "types": "./dist/number-input/index.d.ts",
+      "import": "./dist/number-input/index.esm.js",
+      "require": "./dist/number-input/index.js"
     },
     "./pointer": {
       "types": "./dist/pointer/index.d.ts",
@@ -234,6 +249,11 @@
       "types": "./dist/tabs/index.d.ts",
       "import": "./dist/tabs/index.esm.js",
       "require": "./dist/tabs/index.js"
+    },
+    "./tag-input": {
+      "types": "./dist/tag-input/index.d.ts",
+      "import": "./dist/tag-input/index.esm.js",
+      "require": "./dist/tag-input/index.js"
     },
     "./tag-select": {
       "types": "./dist/tag-select/index.d.ts",

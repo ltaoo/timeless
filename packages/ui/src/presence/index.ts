@@ -58,6 +58,7 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
   exit = false;
 
   hide_timer: NodeJS.Timeout | null = null;
+  show_timer: NodeJS.Timeout | null = null;
 
   get state(): PresenceState {
     return {
@@ -102,6 +103,10 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
       clearTimeout(this.hide_timer);
       this.hide_timer = null;
     }
+    if (this.show_timer) {
+      clearTimeout(this.show_timer);
+      this.show_timer = null;
+    }
     if (this.mounted === false) {
       this.mounted = true;
     }
@@ -109,7 +114,8 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     this.enter = true;
     this.visible = true;
     this.emit(Events.StateChange, { ...this.state });
-    setTimeout(() => {
+    this.show_timer = setTimeout(() => {
+      this.show_timer = null;
       this.enter = false;
       this.emit(Events.Show);
       this.emit(Events.StateChange, { ...this.state });
@@ -123,6 +129,11 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
       visible: this.visible,
       mounted: this.mounted,
     });
+    // Cancel any pending show timer to prevent stale state emissions
+    if (this.show_timer) {
+      clearTimeout(this.show_timer);
+      this.show_timer = null;
+    }
     const { destroy = true } = options;
     if (destroy === false) {
       // 不销毁，但是要隐藏
@@ -182,10 +193,6 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 将 DOM 从页面卸载 */
   unmount() {
-    // console.log("[]PresenceCore - destroy", this.visible, this.exit);
-    // if (this.open) {
-    //   return;
-    // }
     this.mounted = false;
     this.enter = false;
     this.visible = false;
@@ -193,6 +200,10 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     if (this.hide_timer) {
       clearTimeout(this.hide_timer);
       this.hide_timer = null;
+    }
+    if (this.show_timer) {
+      clearTimeout(this.show_timer);
+      this.show_timer = null;
     }
     this.emit(Events.Unmounted);
     this.emit(Events.StateChange, { ...this.state });
@@ -202,6 +213,14 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     this.enter = false;
     this.visible = false;
     this.exit = false;
+    if (this.show_timer) {
+      clearTimeout(this.show_timer);
+      this.show_timer = null;
+    }
+    if (this.hide_timer) {
+      clearTimeout(this.hide_timer);
+      this.hide_timer = null;
+    }
     this.emit(Events.StateChange, { ...this.state });
   }
 

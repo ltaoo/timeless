@@ -4,13 +4,24 @@ export default function FormView() {
   return View({ class: "space-y-8" }, [
     Section("Input", [
       Item("Default", [
-        Input({
-          id: "input_default_1",
-          store: new Timeless.ui.InputCore({
-            defaultValue: "",
-            placeholder: "Type something...",
+        Flex({ col: true, gap: "4px" }, [
+          Input({
+            id: "input_default_1",
+            store: new Timeless.ui.InputCore({
+              defaultValue: "",
+              placeholder: "Type something...",
+              allowClear: false,
+            }),
           }),
-        }),
+          Input({
+            id: "input_default_2",
+            store: new Timeless.ui.InputCore({
+              defaultValue: "",
+              placeholder: "Type something...",
+              // allowClear: false,
+            }),
+          }),
+        ]),
       ]),
     ]),
     Section("NumberInput", [

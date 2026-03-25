@@ -3,6 +3,7 @@ import { ButtonCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "../primitive/view";
 import { Show } from "../primitive/show";
+import { Fragment } from "@/primitive/fragment";
 
 export function Root(
   props: ViewProps & { store: ButtonCore },
@@ -53,9 +54,9 @@ export function Loading(
 }
 
 export function Prefix(props: ViewProps, children?: ViewChildren) {
-  return View(props, children);
+  return Fragment(props, children);
 }
 
 export function Content(props: ViewProps, children?: ViewChildren) {
-  return View(props, children);
+  return Fragment(props, children);
 }

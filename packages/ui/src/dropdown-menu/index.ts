@@ -168,6 +168,10 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
   show(
     position?: Partial<{ x: number; y: number; width: number; height: number }>,
   ) {
+    // Don't reopen during exit animation
+    if (this.menu.presence.exit) {
+      return;
+    }
     if (position) {
       const { x = 0, y = 0, width = 8, height = 8 } = position;
       this.menu.popper.updateReference({

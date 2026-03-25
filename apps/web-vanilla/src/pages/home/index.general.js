@@ -1,7 +1,7 @@
 import { Section, Item } from "@/components/index.js";
 
 export default function GeneralView() {
-  return View({ class: cn(["space-y-8"]) }, [
+  return Flex({ col: true, gap: "24px" }, [
     Section("Button", [
       Item("Variants", [
         Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
@@ -26,12 +26,21 @@ export default function GeneralView() {
         ]),
       ]),
       Item("Sizes", [
-        Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, [
-          "Small",
-        ]),
+        Button({ store: new Timeless.ui.ButtonCore({ size: "xs" }) }, ["XS"]),
+        Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, ["SM"]),
         Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
-        Button({ store: new Timeless.ui.ButtonCore({ size: "lg" }) }, [
-          "Large",
+        Button({ store: new Timeless.ui.ButtonCore({ size: "lg" }) }, ["LG"]),
+        Button({ store: new Timeless.ui.ButtonCore({ size: "icon-xs" }) }, [
+          Timeless.icons.BoltOutlined(),
+        ]),
+        Button({ store: new Timeless.ui.ButtonCore({ size: "icon-sm" }) }, [
+          Timeless.icons.BoltOutlined(),
+        ]),
+        Button({ store: new Timeless.ui.ButtonCore({ size: "icon" }) }, [
+          Timeless.icons.BoltOutlined(),
+        ]),
+        Button({ store: new Timeless.ui.ButtonCore({ size: "icon-lg" }) }, [
+          Timeless.icons.BoltOutlined(),
         ]),
       ]),
       Item("Loading", [
@@ -131,19 +140,24 @@ export default function GeneralView() {
         ),
       ]),
       Item("Disabled", [
-        Button(
-          { store: new Timeless.ui.ButtonCore({ disabled: true }) },
-          ["Disabled"],
-        ),
+        Button({ store: new Timeless.ui.ButtonCore({ disabled: true }) }, [
+          "Disabled",
+        ]),
         Button(
           {
-            store: new Timeless.ui.ButtonCore({ variant: "secondary", disabled: true }),
+            store: new Timeless.ui.ButtonCore({
+              variant: "secondary",
+              disabled: true,
+            }),
           },
           ["Disabled"],
         ),
         Button(
           {
-            store: new Timeless.ui.ButtonCore({ variant: "outline", disabled: true }),
+            store: new Timeless.ui.ButtonCore({
+              variant: "outline",
+              disabled: true,
+            }),
           },
           ["Disabled"],
         ),
@@ -151,43 +165,41 @@ export default function GeneralView() {
     ]),
     Section("Badge", [
       Item("Variants", [
-        Badge({}, [Txt("Default")]),
-        Badge({ variant: "secondary" }, [Txt("Secondary")]),
-        Badge({ variant: "outline" }, [Txt("Outline")]),
-        Badge({ variant: "destructive" }, [Txt("Destructive")]),
+        Badge({}, ["Default"]),
+        Badge({ variant: "secondary" }, ["Secondary"]),
+        Badge({ variant: "outline" }, ["Outline"]),
+        Badge({ variant: "destructive" }, ["Destructive"]),
       ]),
     ]),
     Section("Separator", [
-      Item("Horizontal", [View({ class: cn(["w-full"]) }, [Separator({})])]),
+      Item("Horizontal", [View({ class: "w-full" }, [Separator({})])]),
       Item("Vertical", [
         View({ class: cn(["flex items-center h-6 gap-3"]) }, [
-          Txt("Left"),
+          "Left",
           Separator({ orientation: "vertical" }),
-          Txt("Right"),
+          "Right",
         ]),
       ]),
     ]),
-    Section("Avatar", [
-      Item("Sizes", [
-        Avatar({ src: "", fallback: "S", size: "sm" }),
-        Avatar({ src: "", fallback: "M" }),
-        Avatar({ src: "", fallback: "L", size: "lg" }),
-      ]),
-    ]),
+    // Section("Avatar", [
+    //   Item("Sizes", [
+    //     Avatar({ src: "", fallback: "S", size: "sm" }),
+    //     Avatar({ src: "", fallback: "M" }),
+    //     Avatar({ src: "", fallback: "L", size: "lg" }),
+    //   ]),
+    // ]),
     Section("Card", [
       Item("Default", [
-        Card({ class: cn(["w-[350px]"]) }, [
+        Card({ class: "w-[350px]" }, [
           CardHeader({}, [
-            CardTitle({}, [Txt("Card Title")]),
-            CardDescription({}, [Txt("Card description goes here.")]),
+            CardTitle({}, ["Card Title"]),
+            CardDescription({}, ["Card description goes here."]),
           ]),
           CardContent({}, [
-            View({ class: cn(["text-sm"]) }, [
-              Txt("This is the card content area."),
-            ]),
+            View({ class: "text-sm" }, ["This is the card content area."]),
           ]),
           CardFooter({}, [
-            Button({ size: "sm", store: new Timeless.ui.ButtonCore({}) }, [
+            Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, [
               "Action",
             ]),
           ]),

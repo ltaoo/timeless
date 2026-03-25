@@ -33,7 +33,8 @@
       "Bash(./release.sh)",
       "Bash(./release.sh invalid-version:*)",
       "Bash(cat /Users/mayfair/Documents/other/timeless/packages/shadcn/dist/timeless.shadcn.css | tr ';' '\\\\n' | grep -E 'border-color|outline-color|background-color|@layer' | head -20)",
-      "Bash(cat /Users/mayfair/Documents/other/timeless/packages/shadcn/dist/timeless.shadcn.css | tr '{}' '\\\\n' | grep 'border-input')"
+      "Bash(cat /Users/mayfair/Documents/other/timeless/packages/shadcn/dist/timeless.shadcn.css | tr '{}' '\\\\n' | grep 'border-input')",
+      "Bash(cat /Users/mayfair/Documents/other/timeless/node_modules/.pnpm/shadcn@4.1.0_@types+node@25.0.9_typescript@5.9.3/node_modules/shadcn/dist/tailwind.css 2>/dev/null || find /Users/mayfair/Documents/other/timeless/node_modules -path \"*/shadcn/dist/tailwind.css\" -exec cat {} \\\\; 2>/dev/null | head -100)"
     ]
   }
 }

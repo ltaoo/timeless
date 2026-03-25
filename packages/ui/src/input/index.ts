@@ -33,6 +33,7 @@ export type InputProps<T> = {
   placeholder?: string;
   type?: string;
   autoFocus?: boolean;
+  allowClear?: boolean;
   autoComplete?: boolean;
   ignoreEnterEvent?: boolean;
   onChange?: (v: T) => void;
@@ -62,14 +63,14 @@ export class InputCore<T>
   shape = "input" as const;
   defaultValue: T;
   value: T;
-  placeholder: string;
-  disabled: boolean;
-  allowClear: boolean = true;
-  autoComplete: boolean = false;
-  autoFocus: boolean = false;
+  placeholder = "Please input";
+  disabled = false;
+  allowClear = true;
+  autoComplete = false;
+  autoFocus = false;
   ignoreEnterEvent = false;
   isFocus = false;
-  type: string;
+  type = "text";
   loading = false;
   /** 被消费过的值，用于做比较判断 input 值是否发生改变 */
   valueUsed: unknown;
@@ -101,6 +102,7 @@ export class InputCore<T>
       disabled = false,
       autoFocus = false,
       autoComplete = false,
+      allowClear = true,
       ignoreEnterEvent = false,
       onChange,
       onBlur,
@@ -115,6 +117,7 @@ export class InputCore<T>
     this.type = type;
     this.disabled = disabled;
     this.autoComplete = autoComplete;
+    this.allowClear = allowClear;
     this.ignoreEnterEvent = ignoreEnterEvent;
     this.autoFocus = autoFocus;
     this.defaultValue = defaultValue;

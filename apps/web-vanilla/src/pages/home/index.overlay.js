@@ -272,6 +272,89 @@ export default function OverlayView() {
           ],
         ),
       ]),
+      Item("With Checkbox & RadioGroup", [
+        (() => {
+          const ui = Timeless["ui"];
+          return DropdownMenu(
+            {
+              store: new ui.DropdownMenuCore({
+                items: [
+                  new ui.MenuGroupCore({
+                    label: "Styles",
+                    items: [
+                      new ui.MenuCheckboxMenu({
+                        label: "Bold",
+                        defaultChecked: true,
+                        onCheckedChange(checked) {
+                          console.log("Bold:", checked);
+                        },
+                      }),
+                      new ui.MenuCheckboxMenu({
+                        label: "Italic",
+                        defaultChecked: false,
+                        onCheckedChange(checked) {
+                          console.log("Italic:", checked);
+                        },
+                      }),
+                      new ui.MenuCheckboxMenu({
+                        label: "Underline",
+                        defaultChecked: "indeterminate",
+                        onCheckedChange(checked) {
+                          console.log("Underline:", checked);
+                        },
+                      }),
+                    ],
+                  }),
+                  new ui.MenuSeparatorCore(),
+                  new ui.MenuGroupCore({
+                    label: "Align",
+                    items: [
+                      new ui.MenuRadioGroupItem({
+                        group: "overlay-align",
+                        label: "Left",
+                        defaultChecked: true,
+                        onCheckedChange(checked) {
+                          if (checked) {
+                            console.log("Align: Left");
+                          }
+                        },
+                      }),
+                      new ui.MenuRadioGroupItem({
+                        group: "overlay-align",
+                        label: "Center",
+                        defaultChecked: false,
+                        onCheckedChange(checked) {
+                          if (checked) {
+                            console.log("Align: Center");
+                          }
+                        },
+                      }),
+                      new ui.MenuRadioGroupItem({
+                        group: "overlay-align",
+                        label: "Right",
+                        defaultChecked: false,
+                        onCheckedChange(checked) {
+                          if (checked) {
+                            console.log("Align: Right");
+                          }
+                        },
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            },
+            [
+              Button(
+                {
+                  store: new ui.ButtonCore({ variant: "outline" }),
+                },
+                ["With Checkbox & RadioGroup"],
+              ),
+            ],
+          );
+        })(),
+      ]),
       Item("With Popover", [
         DropdownMenu(
           {
@@ -751,7 +834,9 @@ export default function OverlayView() {
               },
               [
                 Button(
-                  { variant: "outline", store: new Timeless.ui.ButtonCore({}) },
+                  {
+                    store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                  },
                   ["Open Menu"],
                 ),
               ],
@@ -794,7 +879,9 @@ export default function OverlayView() {
               },
               [
                 Button(
-                  { variant: "outline", store: new Timeless.ui.ButtonCore({}) },
+                  {
+                    store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                  },
                   ["Open Menu"],
                 ),
               ],
@@ -807,9 +894,10 @@ export default function OverlayView() {
           Tooltip({ content: ["Top tooltip"] }, [
             Button(
               {
-                variant: "outline",
-                size: "sm",
-                store: new Timeless.ui.ButtonCore({}),
+                store: new Timeless.ui.ButtonCore({
+                  variant: "outline",
+                  size: "sm",
+                }),
               },
               ["Top"],
             ),
@@ -817,9 +905,10 @@ export default function OverlayView() {
           Tooltip({ side: "bottom", content: ["Bottom tooltip"] }, [
             Button(
               {
-                variant: "outline",
-                size: "sm",
-                store: new Timeless.ui.ButtonCore({}),
+                store: new Timeless.ui.ButtonCore({
+                  variant: "outline",
+                  size: "sm",
+                }),
               },
               ["Bottom"],
             ),
@@ -827,9 +916,10 @@ export default function OverlayView() {
           Tooltip({ side: "left", content: ["Left tooltip"] }, [
             Button(
               {
-                variant: "outline",
-                size: "sm",
-                store: new Timeless.ui.ButtonCore({}),
+                store: new Timeless.ui.ButtonCore({
+                  variant: "outline",
+                  size: "sm",
+                }),
               },
               ["Left"],
             ),
@@ -837,9 +927,10 @@ export default function OverlayView() {
           Tooltip({ side: "right", content: ["Right tooltip"] }, [
             Button(
               {
-                variant: "outline",
-                size: "sm",
-                store: new Timeless.ui.ButtonCore({}),
+                store: new Timeless.ui.ButtonCore({
+                  variant: "outline",
+                  size: "sm",
+                }),
               },
               ["Right"],
             ),

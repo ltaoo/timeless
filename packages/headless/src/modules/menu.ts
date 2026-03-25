@@ -70,6 +70,8 @@ export function ContentImpl(
 
   const state_ = refobj(props.store.state);
   const presence_ = refobj(props.store.presence.state);
+  // Track exit animation to prevent flash when unmounting
+  let _was_exiting = false;
 
   const listeners = [
     props.store.onStateChange((v) => {
@@ -130,6 +132,19 @@ export function ContentImpl(
             View(
               {
                 class: computed(presence_, (t) => {
+                  if (t.exit) {
+                    _was_exiting = true;
+                  }
+                  // Keep exit animation class during unmount to prevent flash
+                  // When exit=false but mounted=false, the animation class would become ""
+                  // causing the element to snap to full opacity before DOM removal
+                  if (!t.mounted && _was_exiting) {
+                    _was_exiting = false;
+                    return animation?.out || "";
+                  }
+                  if (t.mounted) {
+                    _was_exiting = false;
+                  }
                   return [
                     t.enter && animation?.in ? animation.in : "",
                     t.exit && animation?.out ? animation.out : "",

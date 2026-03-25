@@ -1,5 +1,5 @@
 import { BaseDomain, Handler } from "@timeless/base";
-import { InputCore } from "@/form/input";
+import { InputCore } from "@/input";
 import { DatePickerCore } from "@/date-picker";
 
 import { ListContainerCore } from "./list";

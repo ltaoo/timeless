@@ -237,11 +237,6 @@
       "import": "./dist/undo-2/index.esm.js",
       "require": "./dist/undo-2/index.js"
     },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.esm.js",
-      "require": "./dist/utils/index.js"
-    },
     "./x": {
       "types": "./dist/x/index.d.ts",
       "import": "./dist/x/index.esm.js",

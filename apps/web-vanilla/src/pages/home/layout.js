@@ -7,7 +7,7 @@ export default function HomeLayoutView(props) {
     view: props.view,
     history: props.history,
     menus: [
-      { title: "Home", url: "root.home_layout.index" },
+      { title: "Home", url: "root.home_layout.index", children: [] },
       { title: "Article", url: "root.home_layout.article" },
       { title: "Project", url: "root.home_layout.project" },
       { title: "Settings", url: "root.home_layout.settings" },
@@ -34,14 +34,14 @@ export default function HomeLayoutView(props) {
             Txt("T"),
             Show(
               {
-                when: computed(sidemenu$.cur, () => {
-                  return sidemenu$.isSubRoute("root.home_layout.index");
+                when: computed(sidemenu$.cur, (t) => {
+                  return sidemenu$.isSelected(t, sidemenu$.menus[0]);
                 }),
               },
               [
                 View({
                   class:
-                    "absolute top-[-4px] right-[-4px] w-2 h-2 rounded-full",
+                    "absolute top-[-4px] right-[-4px] w-2 h-2 rounded-full bg-zinc-500",
                 }),
               ],
             ),

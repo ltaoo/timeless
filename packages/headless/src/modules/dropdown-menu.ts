@@ -91,14 +91,28 @@ export function Trigger(
         // Handle click trigger
         if (store.trigger === "click") {
           $elm.addEventListener("pointerdown", (e) => {
+            if (store.disabled) {
+              return;
+            }
             e.preventDefault();
-            props.store.menu.show();
+            e.stopPropagation();
+            if (store.menu.presence?.state.exit) {
+              return;
+            }
+            if (store.menu.state.open) {
+              store.hide();
+              return;
+            }
+            store.show();
           });
         }
         // Handle hover trigger
         if (store.trigger === "hover") {
           $elm.addEventListener("mouseenter", () => {
             if (store.disabled) {
+              return;
+            }
+            if (store.menu.presence?.state.exit) {
               return;
             }
             _hoverClearHide(store);
