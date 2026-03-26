@@ -1,4 +1,4 @@
-function ObjectFieldRender(props) {
+function FormRender(props) {
   const field_names = computed(props, (t) => {
     if (!t) {
       return [];
@@ -6,7 +6,6 @@ function ObjectFieldRender(props) {
     return Object.keys(t.fields);
   });
   return For({
-    class: "space-y-6",
     each: field_names,
     render(name) {
       if (!props.value.fields) {
@@ -17,34 +16,57 @@ function ObjectFieldRender(props) {
         return null;
       }
       const fid = `field-${name}`;
-      return Field({ store: field$ }, [
-        Switch(
-          {
-            when: computed(field$, (t) => {
-              return t.input.shape;
+      const inline = ["checkbox"].includes(field$.input.shape);
+      return View(
+        {
+          class: cn([
+            "t-form-item gap-2",
+            inline ? "flex items-center" : "flex flex-col",
+          ]),
+          // inline: ["checkbox"].includes(field$.input.shape)
+        },
+        [
+          Show({ when: !inline }, [
+            h(FieldLabel, {
+              for: fid,
+              store: field$,
             }),
-          },
-          [
-            Match("select", [
-              h(Select, {
-                id: fid,
-                store: field$.input,
+          ]),
+          Match(
+            {
+              when: computed(field$, (t) => {
+                return t.input.shape;
               }),
-            ]),
-            Match("input", [
-              h(Input, {
-                id: fid,
-                store: field$.input,
-              }),
-            ]),
-            Match("checkbox", [
-              h(Checkbox, {
-                store: field$.input,
-              }),
-            ]),
-          ],
-        ),
-      ]);
+            },
+            [
+              Case("select", [
+                h(Select, {
+                  id: fid,
+                  store: field$.input,
+                }),
+              ]),
+              Case("input", [
+                h(Input, {
+                  id: fid,
+                  store: field$.input,
+                }),
+              ]),
+              Case("checkbox", [
+                h(Checkbox, {
+                  id: fid,
+                  store: field$.input,
+                }),
+              ]),
+            ],
+          ),
+          Show({ when: inline }, [
+            h(FieldLabel, {
+              for: fid,
+              store: field$,
+            }),
+          ]),
+        ],
+      );
     },
   });
 }
@@ -198,7 +220,9 @@ function FieldDemoView() {
           View(
             {
               as: "label",
-              for: "same-as-shipping",
+              attributes: {
+                for: "same-as-shipping",
+              },
               class: "text-sm font-normal select-none",
             },
             ["Same as shipping address"],
@@ -409,7 +433,7 @@ export default function FormValidateView() {
         store: field_provider$.input,
       }),
     ]),
-    ObjectFieldRender(configure$_),
+    FormRender(configure$_),
     Button(
       {
         store: new Timeless.ui.ButtonCore({

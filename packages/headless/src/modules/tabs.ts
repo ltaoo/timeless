@@ -30,7 +30,7 @@ export function Tab(
 
   return View(
     {
-      type: "button",
+      as: "button",
       ...rest,
       onMounted($el: HTMLDivElement) {
         store.updateTabClient(index, {

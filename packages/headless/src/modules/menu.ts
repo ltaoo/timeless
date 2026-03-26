@@ -199,9 +199,12 @@ export function ItemImpl(
     {
       ...rest,
       class: props.class,
-      "tab-index": computed(state_, (t) => {
-        return t.disabled ? undefined : -1;
-      }),
+      attributes: {
+        ...(rest.attributes || {}),
+        "tab-index": computed(state_, (t) => {
+          return t.disabled ? undefined : -1;
+        }),
+      },
       onMounted($el: HTMLDivElement) {
         // console.log("[ItemImpl] mounted", props.store.label);
         if (props.store.menu) {

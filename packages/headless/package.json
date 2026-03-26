@@ -222,6 +222,11 @@
       "import": "./dist/steps/index.esm.js",
       "require": "./dist/steps/index.js"
     },
+    "./switch": {
+      "types": "./dist/switch/index.d.ts",
+      "import": "./dist/switch/index.esm.js",
+      "require": "./dist/switch/index.js"
+    },
     "./table": {
       "types": "./dist/table/index.d.ts",
       "import": "./dist/table/index.esm.js",

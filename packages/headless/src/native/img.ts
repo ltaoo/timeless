@@ -60,26 +60,48 @@ export function Img(props: ImgProps = {}) {
     t: "view",
     $elm,
     render() {
+      const applyAttr = (k: string, v: any) => {
+        if (v === undefined || v === null || v === false) {
+          $elm.removeAttribute(k);
+          return;
+        }
+        if (v === true) {
+          $elm.setAttribute(k, "");
+          return;
+        }
+        $elm.setAttribute(k, String(v));
+      };
+
       Object.keys(rest).forEach((k) => {
         const vv = rest[k];
         if (vv !== undefined && vv !== null) {
           if (isRef(vv)) {
             vv._subscribe({
               onChange(v) {
-                $elm.setAttribute(k, String(v));
+                applyAttr(k, v);
               },
             });
-            $elm.setAttribute(k, String(vv.value));
+            applyAttr(k, vv.value);
           } else if (typeof vv === "string" || typeof vv === "number") {
-            $elm.setAttribute(k, String(vv));
+            applyAttr(k, vv);
           }
         }
       });
 
       Object.keys(dataset).forEach((k) => {
-        if (dataset && dataset[k]) {
-          $elm.setAttribute(`data-${k}`, dataset[k]);
+        if (!dataset) return;
+        const vv = dataset[k];
+        const attrName = `data-${k}`;
+        if (isRef(vv)) {
+          vv._subscribe({
+            onChange(v) {
+              applyAttr(attrName, v);
+            },
+          });
+          applyAttr(attrName, vv.value);
+          return;
         }
+        applyAttr(attrName, vv);
       });
 
       if (cls) {

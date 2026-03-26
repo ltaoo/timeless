@@ -14,7 +14,7 @@ export function Root(
   return View(
     {
       ...rest,
-      type: "button",
+      as: "button",
       onClick(e) {
         if (rest.onClick) rest.onClick(e);
         store.click();

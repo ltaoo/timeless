@@ -1,5 +1,5 @@
 import {
-  Ref,
+  Signal,
   isRef,
   isClassName,
   ClassNameRef,
@@ -10,17 +10,18 @@ import {
 import { safeCreateElement, safeCreateTextNode } from "../util/env";
 import { Txt } from "./text";
 
+export type AttributeValue = string | number | boolean | undefined | null;
+export type MaybeSignal<T = AttributeValue> = T | Signal<T>;
+export type ViewAttributes = Record<string, MaybeSignal>;
+
 export interface ViewProps {
   as?: string;
-  type?: string;
-  id?: string | Ref<string>;
-  title?: string | Ref<string>;
-  style?: string | Ref<string> | StyleRef;
-  class?: string | Ref<string> | ClassNameRef;
-  dataset?: Record<string, string>;
-  for?: string;
-  "tab-index"?: number | Ref<number | undefined>;
-  tabindex?: number | Ref<number | undefined>;
+  key?: string | number;
+  style?: MaybeSignal<string> | StyleRef;
+  class?: MaybeSignal<string> | ClassNameRef;
+  draggable?: boolean;
+  attributes?: ViewAttributes;
+  dataset?: Record<string, MaybeSignal<AttributeValue>>;
   onMounted?(
     el: HTMLElement | SVGElement | Text | DocumentFragment,
   ): void | (() => void);
@@ -43,8 +44,6 @@ export interface ViewProps {
   onDragOver?: (e: DragEvent) => void;
   onDragLeave?: (e: DragEvent) => void;
   onDrop?: (e: DragEvent) => void;
-  draggable?: boolean;
-  key?: string | number;
 }
 
 export function View(
@@ -52,10 +51,11 @@ export function View(
   children?: ViewChildren | ViewChildren[number],
 ) {
   const {
-    type = "div",
-    as,
+    as = "div",
     style,
     class: cls,
+    draggable,
+    attributes,
     dataset = {},
     onMounted,
     onUnmounted,
@@ -77,12 +77,9 @@ export function View(
     onDragOver,
     onDragLeave,
     onDrop,
-    draggable,
-    for: htmlFor,
-    ...rest
   } = props;
   let onMountedCleanup: (() => void) | undefined;
-  const $elm = safeCreateElement(as || type);
+  const $elm = safeCreateElement(as);
   let _children = children ?? [];
   if (!Array.isArray(_children)) {
     _children = [_children];
@@ -104,31 +101,48 @@ export function View(
         }
       }
 
-      Object.keys(rest).forEach((k) => {
-        // @ts-ignore
-        const vv = rest[k];
-        if (vv) {
+      const applyAttr = (k: string, v: any) => {
+        if (v === undefined || v === null || v === false) {
+          $elm.removeAttribute(k);
+          return;
+        }
+        if (v === true) {
+          $elm.setAttribute(k, "");
+          return;
+        }
+        $elm.setAttribute(k, String(v));
+      };
+
+      if (attributes) {
+        Object.keys(attributes).forEach((k) => {
+          const vv = attributes[k];
           if (isRef(vv)) {
             vv._subscribe({
               onChange(v) {
-                $elm.setAttribute(k, v);
+                applyAttr(k, v);
               },
             });
-            $elm.setAttribute(k, vv.value);
-          } else if (typeof vv === "string" || typeof vv === "number") {
-            $elm.setAttribute(k, String(vv));
+            applyAttr(k, vv.value);
+            return;
           }
-        }
-      });
-      Object.keys(dataset).forEach((k) => {
-        if (dataset && dataset[k]) {
-          $elm.setAttribute(`data-${k}`, dataset[k]);
-        }
-      });
-
-      if (htmlFor) {
-        $elm.setAttribute("for", htmlFor);
+          applyAttr(k, vv);
+        });
       }
+      Object.keys(dataset).forEach((k) => {
+        if (!dataset) return;
+        const vv = dataset[k];
+        const attrName = `data-${k}`;
+        if (isRef(vv)) {
+          vv._subscribe({
+            onChange(v) {
+              applyAttr(attrName, v);
+            },
+          });
+          applyAttr(attrName, vv.value);
+          return;
+        }
+        applyAttr(attrName, vv);
+      });
 
       if (cls) {
         if (typeof cls === "string") {
@@ -434,6 +448,6 @@ export type ViewChildren = (
   | (() => TimelessElement)
   | string
   | number
-  | Ref<string | number>
+  | MaybeSignal<string | number>
   | null
 )[];

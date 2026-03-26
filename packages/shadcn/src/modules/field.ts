@@ -77,20 +77,22 @@ export function FieldLabel(
   const {
     class: cls,
     store,
+    for: htmlFor,
     weight = "medium",
     tone = "default",
     ...rest
   } = props;
 
-  if (store && !children) {
-    const state_ = refobj(store.state);
-    store.onStateChange((v) => state_.as(v));
-    children = [computed(state_, (s) => s.label)];
-  }
+  const state_ = refobj(store.state);
+  store.onStateChange((v) => state_.as(v));
 
-  return BaseLabel(
+  return View(
     {
       ...rest,
+      attributes: {
+        for: htmlFor,
+      },
+      as: "label",
       class: cn([
         "select-none",
         weight === "normal" ? "font-normal" : "font-medium",
@@ -98,67 +100,39 @@ export function FieldLabel(
         cls,
       ]),
     },
-    children,
+    [computed(state_, (s) => s.label)],
   );
 }
 
 export function Field(
-  props:
-    | (ViewProps & {
-        store: SingleFieldCore<any>;
-        autoRender?: boolean;
-        orientation?: "vertical" | "horizontal";
-        hideLabel?: boolean;
-        id?: string;
-      })
-    | (ViewProps & {
-        store?: undefined;
-        orientation?: "vertical" | "horizontal";
-      }),
+  props: ViewProps & {
+    store: SingleFieldCore<any>;
+    id?: string;
+    // autoRender?: boolean;
+    orientation?: "vertical" | "horizontal";
+    inline?: boolean;
+    // hideLabel?: boolean;
+  },
   children: ViewChildren = [],
 ) {
-  const { store } = props as any;
   const orientation = (props as any).orientation || "vertical";
 
-  if (!store) {
-    const { class: cls, ...rest } = props as ViewProps;
-    return View(
-      {
-        ...rest,
-        class: cn([
-          orientation === "horizontal"
-            ? "flex w-full items-center gap-3"
-            : "flex w-full flex-col gap-2",
-          cls,
-        ]),
-      },
-      children,
-    );
-  }
+  const state_ = refobj(props.store.state);
+  const error_ = refobj(props.store.state.error);
 
-  const storeProps = props as ViewProps & {
-    store: SingleFieldCore<any>;
-    orientation?: "vertical" | "horizontal";
-    hideLabel?: boolean;
-    id?: string;
-  };
-
-  const state_ = refobj(storeProps.store.state);
-  const error_ = refobj(storeProps.store.state.error);
-
-  storeProps.store.onStateChange((v) => {
+  props.store.onStateChange((v) => {
     state_.as(v);
   });
-  storeProps.store.onError((v) => {
+  props.store.onError((v) => {
     error_.as(v);
   });
 
   const fid =
-    storeProps.id ||
-    storeProps.store.id ||
-    `field-${storeProps.store.name || Math.random().toString(36).slice(2, 11)}`;
+    props.id ||
+    props.store.id ||
+    `field-${props.store.name || Math.random().toString(36).slice(2, 11)}`;
 
-  const { class: cls, hideLabel, ...rest } = storeProps;
+  const { class: cls, ...rest } = props;
 
   return View(
     {
@@ -172,15 +146,26 @@ export function Field(
       ]),
     },
     [
-      ...(hideLabel
-        ? []
-        : [
+      Show(
+        {
+          when: !props.inline,
+          fallback: [
+            ...children,
             FieldLabel({
-              store: storeProps.store,
+              class: "inline",
+              store: props.store,
               for: fid,
-            } as any),
-          ]),
-      ...children,
+            }),
+          ],
+        },
+        [
+          FieldLabel({
+            store: props.store,
+            for: fid,
+          }),
+          ...children,
+        ],
+      ),
       Show({ when: computed(error_, (t) => !!t) }, [
         h(View, { class: "text-sm font-normal text-destructive" }, [
           computed(error_, (t) => (t ? t.message : "")),

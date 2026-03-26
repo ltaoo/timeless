@@ -38,8 +38,10 @@ export function Trigger(
   const _input$ = View(
     {
       as: "input",
-      type: "text",
-      id: props.store.id || rest.id,
+      attributes: {
+        ...(rest.attributes || {}),
+        id: props.store.id || props.id || rest.attributes?.id,
+      },
       style:
         "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
       onFocus() {
@@ -161,7 +163,7 @@ export function Value(
   return View(
     {
       ...rest,
-      type: "span",
+      as: "span",
     },
     [
       computed(state, (d) => {
@@ -246,7 +248,10 @@ export function Content(
             View(
               {
                 ...rest,
-                tabindex: 0,
+                attributes: {
+                  ...(rest.attributes || {}),
+                  tabindex: 0,
+                },
                 class: classNames([
                   rest.class,
                   computed(presence_, (t) => {

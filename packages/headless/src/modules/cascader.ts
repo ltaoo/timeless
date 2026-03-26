@@ -33,11 +33,15 @@ export function Trigger(
 
   const events: any[] = [];
 
+  const mergedInputAttributes = {
+    ...(rest.attributes || {}),
+    id: props.store.id || props.id || rest.attributes?.id,
+  };
+
   const _input$ = View(
     {
       as: "input",
-      type: "text",
-      id: props.store.id || rest.id,
+      attributes: mergedInputAttributes,
       style:
         "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
       onFocus() {
@@ -205,7 +209,10 @@ export function Content(
             View(
               {
                 ...rest,
-                "tab-index": 0,
+                attributes: {
+                  ...(rest.attributes || {}),
+                  "tab-index": 0,
+                },
                 class: classNames([
                   rest.class,
                   computed(presence_, (t) => {
@@ -321,7 +328,6 @@ export function Search(
         {
           ...rest,
           as: "input",
-          type: "text",
           onMounted($elm: HTMLInputElement) {
             $elm.placeholder = store.state.searchPlaceholder;
             $elm.value = store.state.searchKeyword;

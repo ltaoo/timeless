@@ -31,8 +31,10 @@ export function Trigger(
   const _input$ = View(
     {
       as: "input",
-      type: "text",
-      id: rest.id,
+      attributes: {
+        ...(rest.attributes || {}),
+        id: props.id || rest.attributes?.id,
+      },
       style:
         "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
       onFocus() {

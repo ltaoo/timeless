@@ -810,7 +810,7 @@ function DownloaderPanelView(props, children) {
                             const btnStyle =
                               "color: var(--weui-FG-0); opacity: 0.8; margin-left: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;";
                             return [
-                              Switch(
+                              Match(
                                 {
                                   when: combine(
                                     {
@@ -836,7 +836,7 @@ function DownloaderPanelView(props, children) {
                                 },
                                 [
                                   // 场景 1: 已完成 -> 显示打开按钮
-                                  Match(1, [
+                                  Case(1, [
                                     Timeless.h(
                                       View,
                                       {
@@ -865,7 +865,7 @@ function DownloaderPanelView(props, children) {
                                     ),
                                   ]),
                                   // 场景 2: 正在运行 -> 显示暂停按钮
-                                  Match(2, [
+                                  Case(2, [
                                     Timeless.h(
                                       View,
                                       {
@@ -880,7 +880,7 @@ function DownloaderPanelView(props, children) {
                                     ),
                                   ]),
                                   // 场景 3: 暂停或失败且未达最大并发 -> 显示恢复按钮
-                                  Match(3, [
+                                  Case(3, [
                                     Timeless.h(
                                       View,
                                       {
@@ -901,7 +901,7 @@ function DownloaderPanelView(props, children) {
                                       [DangerouslyInnerHTML(PlayIcon)],
                                     ),
                                   ]),
-                                  Match(4, [
+                                  Case(4, [
                                     Timeless.h(
                                       View,
                                       {

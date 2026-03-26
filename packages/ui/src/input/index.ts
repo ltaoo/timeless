@@ -60,6 +60,13 @@ type InputState<T> = {
   minLength?: number;
 };
 
+export function InputModel(props: {
+  defaultValue?: string;
+  placeholder?: string;
+}) {
+
+}
+
 export class InputCore<T>
   extends BaseDomain<TheTypesOfEvents<T>>
   implements ValueInputInterface<T>

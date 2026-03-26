@@ -12,8 +12,8 @@ declare module "packages/reactive/src/types" {
         _subscribe: (ctx: Subscriber) => void;
         _destroy: () => void;
         value: T;
-        isSame: (v: T) => boolean;
-        isStrictEqual: (v: T) => boolean;
+        isSame: (v: unknown) => boolean;
+        isStrictEqual: (v: unknown) => boolean;
     };
     export type ClassNameRef = {
         __cn_ref: true;
@@ -119,10 +119,23 @@ declare module "packages/reactive/src/ref" {
         _destroy(): void;
         readonly value: T;
         eq(v: T): boolean;
-        isSame(v: T): boolean;
-        isStrictEqual(v: T): boolean;
+        isSame(v: unknown): boolean;
+        isStrictEqual(v: unknown): boolean;
         as(value: T | ((cur: T) => T)): void;
     };
+}
+declare module "packages/reactive/src/signal" {
+    import type { RefArray } from "packages/reactive/src/reactive-array";
+    import type { RefObject } from "packages/reactive/src/reactive-object";
+    import type { Ref } from "packages/reactive/src/types";
+    export type PrimitiveSignal<T> = Ref<T>;
+    export type ObjectSignal<T extends Record<string, any>> = RefObject<T>;
+    export type ArraySignal<T> = RefArray<T>;
+    export type Signal<T> = T extends readonly (infer U)[] ? ArraySignal<U> : T extends Record<string, any> ? ObjectSignal<T> : PrimitiveSignal<T>;
+    export function signal<T extends Ref<any>>(v: T): T;
+    export function signal<T>(v: T[]): ArraySignal<T>;
+    export function signal<T extends Record<string, any>>(v: T): ObjectSignal<T>;
+    export function signal<T>(v: T): PrimitiveSignal<T>;
 }
 declare module "packages/reactive/src/computed" {
     import { Ref } from "packages/reactive/src/types";
@@ -159,16 +172,18 @@ declare module "packages/reactive/src/index" {
     import type { Subscriber, Ref, ClassNameRef, StyleRef } from "packages/reactive/src/types";
     import type { RefObject } from "packages/reactive/src/reactive-object";
     import type { RefArray } from "packages/reactive/src/reactive-array";
+    import type { ArraySignal, ObjectSignal, PrimitiveSignal, Signal } from "packages/reactive/src/signal";
     import { isRef, isClassName, isStyleRef } from "packages/reactive/src/types";
     import { ref } from "packages/reactive/src/ref";
     import { refArray } from "packages/reactive/src/reactive-array";
     import { refObject } from "packages/reactive/src/reactive-object";
+    import { signal } from "packages/reactive/src/signal";
     import { computed } from "packages/reactive/src/computed";
     import { derive } from "packages/reactive/src/derive";
     import { release, get as registryGet, set as registrySet, getobj as registryGetObj, getarr as registryGetArr } from "packages/reactive/src/registry";
     import { classNames } from "packages/reactive/src/class-names";
     import { styleNames } from "packages/reactive/src/style-names";
-    export { Subscriber, Ref, RefObject, RefArray, isRef, ClassNameRef, isClassName, StyleRef, isStyleRef, ref, refArray as reactiveArray, refObject as reactiveObject, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, classNames, styleNames, classNames as cn, styleNames as sn, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
+    export { Subscriber, Ref, RefObject, RefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, ClassNameRef, isClassName, StyleRef, isStyleRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, classNames, styleNames, classNames as cn, styleNames as sn, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
 }
 declare module "packages/headless/src/util/env" {
     export const isBrowser: boolean;
@@ -190,18 +205,18 @@ declare module "packages/headless/src/primitive/text" {
     };
 }
 declare module "packages/headless/src/primitive/view" {
-    import { Ref, ClassNameRef, StyleRef } from "packages/reactive/src/index";
+    import { Signal, ClassNameRef, StyleRef } from "packages/reactive/src/index";
+    export type AttributeValue = string | number | boolean | undefined | null;
+    export type MaybeSignal<T = AttributeValue> = T | Signal<T>;
+    export type ViewAttributes = Record<string, MaybeSignal>;
     export interface ViewProps {
         as?: string;
-        type?: string;
-        id?: string | Ref<string>;
-        title?: string | Ref<string>;
-        style?: string | Ref<string> | StyleRef;
-        class?: string | Ref<string> | ClassNameRef;
-        dataset?: Record<string, string>;
-        htmlFor?: string;
-        "tab-index"?: number | Ref<number | undefined>;
-        tabindex?: number | Ref<number | undefined>;
+        key?: string | number;
+        style?: MaybeSignal<string> | StyleRef;
+        class?: MaybeSignal<string> | ClassNameRef;
+        draggable?: boolean;
+        attributes?: ViewAttributes;
+        dataset?: Record<string, MaybeSignal<AttributeValue>>;
         onMounted?(el: HTMLElement | SVGElement | Text | DocumentFragment): void | (() => void);
         beforeUnmounted?(): void;
         onUnmounted?(): void;
@@ -222,8 +237,6 @@ declare module "packages/headless/src/primitive/view" {
         onDragOver?: (e: DragEvent) => void;
         onDragLeave?: (e: DragEvent) => void;
         onDrop?: (e: DragEvent) => void;
-        draggable?: boolean;
-        key?: string | number;
     }
     export function View(props?: ViewProps, children?: ViewChildren | ViewChildren[number]): {
         t: string;
@@ -249,7 +262,7 @@ declare module "packages/headless/src/primitive/view" {
         beforeUnmounted?(): void;
         onUnmounted?(): void;
     }
-    export type ViewChildren = (TimelessElement | (() => TimelessElement) | string | number | Ref<string | number> | null)[];
+    export type ViewChildren = (TimelessElement | (() => TimelessElement) | string | number | MaybeSignal<string | number> | null)[];
 }
 declare module "packages/headless/src/primitive/for" {
     import { Ref } from "packages/reactive/src/index";
@@ -283,10 +296,10 @@ declare module "packages/headless/src/primitive/show" {
         onUnmounted(): void;
     };
 }
-declare module "packages/headless/src/primitive/switch" {
+declare module "packages/headless/src/primitive/match" {
     import { Ref } from "packages/reactive/src/index";
     import { ViewChildren, TimelessElement } from "packages/headless/src/primitive/view";
-    export function Switch(props: {
+    export function Match(props: {
         when: Ref<any> | any;
         fallback?: ViewChildren;
         onMounted?: ($fg: any) => void;
@@ -299,7 +312,7 @@ declare module "packages/headless/src/primitive/switch" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
-    export function Match<T = any>(value: any, children: ViewChildren | (() => TimelessElement)[]): {
+    export function Case<T = any>(value: any, children: ViewChildren | (() => TimelessElement)[]): {
         t: string;
         value: any;
         children: ViewChildren | (() => TimelessElement)[];
@@ -365,6 +378,7 @@ declare module "packages/headless/src/native/input" {
     import { Ref } from "packages/reactive/src/index";
     import { ViewProps } from "packages/headless/src/primitive/view";
     export interface NativeInputProps extends Omit<ViewProps, "as" | "type"> {
+        id?: string | Ref<string>;
         type?: string | Ref<string>;
         value?: string | Ref<string>;
         placeholder?: string | Ref<string>;
@@ -382,6 +396,94 @@ declare module "packages/headless/src/native/input" {
         onChange?: (e: Event) => void;
     }
     export function NativeInput(props?: NativeInputProps): {
+        t: string;
+        $elm: HTMLInputElement;
+        render(): HTMLInputElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/headless/src/native/label" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    export interface NativeLabelProps extends Omit<ViewProps, "as"> {
+        for?: string | Ref<string>;
+        htmlFor?: string | Ref<string>;
+    }
+    export function NativeLabel(props?: NativeLabelProps, children?: ViewChildren | ViewChildren[number]): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/headless/src/native/checkbox" {
+    import { Ref } from "packages/reactive/src/index";
+    import { NativeInputProps } from "packages/headless/src/native/input";
+    export interface NativeCheckboxProps extends Omit<NativeInputProps, "type"> {
+        checked?: boolean | Ref<boolean>;
+        indeterminate?: boolean | Ref<boolean>;
+    }
+    export function NativeCheckbox(props?: NativeCheckboxProps): {
+        t: string;
+        $elm: HTMLInputElement;
+        render(): HTMLInputElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/headless/src/native/select" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    type NativeSelectValue = string | string[];
+    export interface NativeSelectProps extends Omit<ViewProps, "as"> {
+        id?: string | Ref<string>;
+        name?: string | Ref<string>;
+        disabled?: boolean | Ref<boolean>;
+        required?: boolean | Ref<boolean>;
+        multiple?: boolean | Ref<boolean>;
+        size?: number | Ref<number>;
+        value?: NativeSelectValue | Ref<NativeSelectValue>;
+        onChange?: (e: Event) => void;
+        onInput?: (e: Event) => void;
+    }
+    export function NativeSelect(props?: NativeSelectProps, children?: ViewChildren | ViewChildren[number]): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/headless/src/native/slider" {
+    import { Ref } from "packages/reactive/src/index";
+    import { NativeInputProps } from "packages/headless/src/native/input";
+    type SliderNum = number | string;
+    export interface NativeSliderProps extends Omit<NativeInputProps, "type" | "value" | "minLength" | "maxLength"> {
+        value?: SliderNum | Ref<SliderNum>;
+        min?: SliderNum | Ref<SliderNum>;
+        max?: SliderNum | Ref<SliderNum>;
+        step?: SliderNum | Ref<SliderNum>;
+    }
+    export function NativeSlider(props?: NativeSliderProps): {
+        t: string;
+        $elm: HTMLInputElement;
+        render(): HTMLInputElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/headless/src/native/file-input" {
+    import { Ref } from "packages/reactive/src/index";
+    import { NativeInputProps } from "packages/headless/src/native/input";
+    export interface NativeFileInputProps extends Omit<NativeInputProps, "type" | "value" | "maxLength" | "minLength" | "pattern" | "inputMode"> {
+        accept?: string | Ref<string>;
+        multiple?: boolean | Ref<boolean>;
+        capture?: string | Ref<string>;
+        files?: Ref<FileList | null>;
+    }
+    export function NativeFileInput(props?: NativeFileInputProps): {
         t: string;
         $elm: HTMLInputElement;
         render(): HTMLInputElement;
@@ -721,6 +823,16 @@ declare module "packages/headless/src/primitive/lazy-view" {
         placeholder?: ViewChildren;
     } & Record<string, any>, children: [TimelessComponent]): TimelessElement;
 }
+declare module "packages/headless/src/modules/portal" {
+    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    export function Portal(props: ViewProps & {}, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        cleanup: () => void;
+        render(): any;
+        onUnmounted(): void;
+    };
+}
 declare module "packages/base/src/base" {
     /**
      * 注册的监听器
@@ -800,11 +912,11 @@ declare module "packages/ui/src/accordion/index" {
     };
     export function AccordionCore(props?: AccordionCoreProps): {
         shape: "accordion";
-        type: "single" | "multiple";
+        type: "multiple" | "single";
         openItems: import("@timeless/reactive").RefArray<number>;
         state: {
             readonly openItems: number[];
-            readonly type: "single" | "multiple";
+            readonly type: "multiple" | "single";
         };
         toggle(index: number): void;
         open(index: number): void;
@@ -812,7 +924,7 @@ declare module "packages/ui/src/accordion/index" {
         isOpen(index: number): boolean;
         onStateChange(handler: Handler<{
             readonly openItems: number[];
-            readonly type: "single" | "multiple";
+            readonly type: "multiple" | "single";
         }>): () => void;
         onOpenItemsChange(handler: Handler<number[]>): () => void;
     };
@@ -2464,6 +2576,10 @@ declare module "packages/ui/src/input/index" {
         maxLength?: number;
         minLength?: number;
     };
+    export function InputModel(props: {
+        defaultValue?: string;
+        placeholder?: string;
+    }): void;
     export class InputCore<T> extends BaseDomain<TheTypesOfEvents<T>> implements ValueInputInterface<T> {
         shape: "input";
         defaultValue: T;
@@ -7024,6 +7140,42 @@ declare module "packages/ui/src/index" {
     export * from "packages/ui/src/shortcut/index";
     export * from "packages/ui/src/click-outside/index";
 }
+declare module "packages/headless/src/modules/presence" {
+    import { PresenceCore } from "packages/ui/src/index";
+    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    export function Presence(props: ViewProps & {
+        store: PresenceCore;
+        animation?: {
+            in: string;
+            out: string;
+        };
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        cleanup(): void;
+        render(): DocumentFragment;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/headless/src/modules/transition" {
+    import { PresenceCore } from "packages/ui/src/index";
+    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    export function Transition(props: ViewProps & {
+        store: PresenceCore;
+        animation?: {
+            in: string;
+            out: string;
+        };
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        cleanup(): void;
+        render(): DocumentFragment;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
 declare module "packages/headless/src/modules/popper" {
     import { PopperCore } from "packages/ui/src/index";
     import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
@@ -7057,52 +7209,6 @@ declare module "packages/headless/src/modules/popper" {
         t: string;
         $elm: HTMLElement;
         render(): HTMLElement;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/headless/src/modules/portal" {
-    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
-    export function Portal(props: ViewProps & {}, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        cleanup: () => void;
-        render(): any;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/headless/src/modules/presence" {
-    import { PresenceCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
-    export function Presence(props: ViewProps & {
-        store: PresenceCore;
-        animation?: {
-            in: string;
-            out: string;
-        };
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        cleanup(): void;
-        render(): DocumentFragment;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/headless/src/modules/transition" {
-    import { PresenceCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
-    export function Transition(props: ViewProps & {
-        store: PresenceCore;
-        animation?: {
-            in: string;
-            out: string;
-        };
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        cleanup(): void;
-        render(): DocumentFragment;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -9010,7 +9116,6 @@ declare module "packages/headless/src/modules/time-picker" {
     };
     export function HourColumn(props: ViewProps & {
         store: TimePickerCore;
-        renderItem?: (hour: number, isSelected: boolean) => ViewChildren;
     }, children?: ViewChildren): {
         t: string;
         $elm: HTMLElement;
@@ -9030,7 +9135,6 @@ declare module "packages/headless/src/modules/time-picker" {
     };
     export function MinuteColumn(props: ViewProps & {
         store: TimePickerCore;
-        renderItem?: (minute: number, isSelected: boolean) => ViewChildren;
     }, children?: ViewChildren): {
         t: string;
         $elm: HTMLElement;
@@ -9050,7 +9154,6 @@ declare module "packages/headless/src/modules/time-picker" {
     };
     export function SecondColumn(props: ViewProps & {
         store: TimePickerCore;
-        renderItem?: (second: number, isSelected: boolean) => ViewChildren;
     }, children?: ViewChildren): {
         t: string;
         $elm: HTMLElement;
@@ -9093,13 +9196,7 @@ declare module "packages/headless/src/modules/checkbox" {
     import { NativeInputProps } from "packages/headless/src/native/input";
     export function Root(props: ViewProps & {
         store: CheckboxCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: HTMLElement;
-        render(): HTMLElement;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): any;
     export function Box(props: ViewProps & {
         store: CheckboxCore;
         id?: string;
@@ -9131,7 +9228,7 @@ declare module "packages/headless/src/modules/checkbox" {
         onUnmounted(): void;
     };
     export function Label(props: ViewProps & {
-        htmlFor?: string;
+        for?: string;
         store?: CheckboxCore;
     }, children?: ViewChildren): {
         t: string;
@@ -9170,15 +9267,10 @@ declare module "packages/headless/src/modules/checkbox" {
 declare module "packages/headless/src/modules/radio" {
     import { RadioCore, RadioGroupCore } from "packages/ui/src/index";
     import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    import { NativeInputProps } from "packages/headless/src/native/input";
     export function Root(props: ViewProps & {
         store: RadioCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: HTMLElement;
-        render(): HTMLElement;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): any;
     export function Box(props: ViewProps & {
         store: RadioCore;
         id?: string;
@@ -9199,8 +9291,18 @@ declare module "packages/headless/src/modules/radio" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
+    export function Input(props: NativeInputProps & {
+        store: RadioCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: HTMLInputElement;
+        render(): HTMLInputElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function Label(props: ViewProps & {
-        htmlFor?: string;
+        for?: string;
         store?: RadioCore;
     }, children?: ViewChildren): {
         t: string;
@@ -9280,6 +9382,29 @@ declare module "packages/headless/src/modules/slider" {
 declare module "packages/headless/src/modules/toggle" {
     import { SwitchCore } from "packages/ui/src/index";
     import { ViewProps, ViewChildren } from "packages/headless/src/primitive/view";
+    export function Root(props: ViewProps & {
+        store: SwitchCore;
+        id?: string;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Thumb(props: ViewProps & {
+        store: SwitchCore;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/headless/src/modules/switch" {
+    import { SwitchCore } from "packages/ui/src/index";
+    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
     export function Root(props: ViewProps & {
         store: SwitchCore;
         id?: string;
@@ -11529,19 +11654,24 @@ declare module "packages/headless/src/util/render" {
 declare module "packages/headless/src/index" {
     export * from "packages/headless/src/primitive/for";
     export * from "packages/headless/src/primitive/show";
-    export * from "packages/headless/src/primitive/switch";
+    export * from "packages/headless/src/primitive/match";
     export * from "packages/headless/src/primitive/view";
     export * from "packages/headless/src/primitive/fragment";
     export * from "packages/headless/src/primitive/html";
     export * from "packages/headless/src/primitive/text";
     export * from "packages/headless/src/native/img";
     export * from "packages/headless/src/native/input";
+    export * from "packages/headless/src/native/label";
+    export * from "packages/headless/src/native/checkbox";
+    export * from "packages/headless/src/native/select";
+    export * from "packages/headless/src/native/slider";
+    export * from "packages/headless/src/native/file-input";
     export * from "packages/headless/src/native/svg";
     export * from "packages/headless/src/primitive/lazy-view";
-    export * as PopperPrimitive from "packages/headless/src/modules/popper";
     export * from "packages/headless/src/modules/portal";
     export * from "packages/headless/src/modules/presence";
     export * from "packages/headless/src/modules/transition";
+    export * as PopperPrimitive from "packages/headless/src/modules/popper";
     export * from "packages/headless/src/modules/flex";
     export * from "packages/headless/src/modules/head";
     export * from "packages/headless/src/modules/paragraph";
@@ -11574,6 +11704,7 @@ declare module "packages/headless/src/index" {
     export * as RadioPrimitive from "packages/headless/src/modules/radio";
     export * as SliderPrimitive from "packages/headless/src/modules/slider";
     export * as TogglePrimitive from "packages/headless/src/modules/toggle";
+    export * as SwitchPrimitive from "packages/headless/src/modules/switch";
     export * as FieldPrimitive from "packages/headless/src/modules/field";
     export * as PopoverPrimitive from "packages/headless/src/modules/popover";
     export * as PopconfirmPrimitive from "packages/headless/src/modules/popconfirm";
@@ -12119,7 +12250,6 @@ declare module "packages/shadcn/src/modules/textarea" {
         showClear?: boolean;
         showLoading?: boolean;
         showCount?: boolean;
-        max: number;
     }): {
         t: string;
         $elm: HTMLElement;
@@ -12144,13 +12274,7 @@ declare module "packages/shadcn/src/modules/checkbox" {
     export function Checkbox(props: ViewProps & {
         store: CheckboxCore;
         id?: string;
-    }): {
-        t: string;
-        $elm: HTMLElement;
-        render(): HTMLElement;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): any;
 }
 declare module "packages/shadcn/src/modules/checkbox-group" {
     import { CheckboxGroupCore, CheckboxCore } from "packages/ui/src/index";
@@ -12188,13 +12312,7 @@ declare module "packages/shadcn/src/modules/radio" {
     export function Radio(props: {
         store: RadioCore;
         id?: string;
-    }): {
-        t: string;
-        $elm: HTMLElement;
-        render(): HTMLElement;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): any;
     export function RadioGroup(props: ViewProps & {
         store: RadioGroupCore<any>;
         class?: string;
@@ -12806,7 +12924,7 @@ declare module "packages/shadcn/src/modules/field" {
     };
     export function FieldLabel(props: ViewProps & {
         store?: SingleFieldCore<any>;
-        htmlFor?: string;
+        for?: string;
         weight?: "normal" | "medium";
         tone?: "default" | "destructive";
     }, children?: ViewChildren): {
@@ -12816,16 +12934,12 @@ declare module "packages/shadcn/src/modules/field" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
-    export function Field(props: (ViewProps & {
+    export function Field(props: ViewProps & {
         store: SingleFieldCore<any>;
-        autoRender?: boolean;
-        orientation?: "vertical" | "horizontal";
-        hideLabel?: boolean;
         id?: string;
-    }) | (ViewProps & {
-        store?: undefined;
         orientation?: "vertical" | "horizontal";
-    }), children?: ViewChildren): {
+        inline?: boolean;
+    }, children?: ViewChildren): {
         t: string;
         $elm: HTMLElement;
         render(): HTMLElement;
@@ -12986,6 +13100,7 @@ declare const AccordionPrimitive: typeof import("@timeless/shadcn").AccordionPri
 declare const Alert: typeof import("@timeless/shadcn").Alert;
 declare const AlertDescription: typeof import("@timeless/shadcn").AlertDescription;
 declare const AlertTitle: typeof import("@timeless/shadcn").AlertTitle;
+declare const ArraySignal: typeof import("@timeless/shadcn").ArraySignal;
 declare const AspectRatio: typeof import("@timeless/shadcn").AspectRatio;
 declare const Avatar: typeof import("@timeless/shadcn").Avatar;
 declare const AvatarPrimitive: typeof import("@timeless/shadcn").AvatarPrimitive;
@@ -13000,6 +13115,7 @@ declare const CardHeader: typeof import("@timeless/shadcn").CardHeader;
 declare const CardTitle: typeof import("@timeless/shadcn").CardTitle;
 declare const Cascader: typeof import("@timeless/shadcn").Cascader;
 declare const CascaderPrimitive: typeof import("@timeless/shadcn").CascaderPrimitive;
+declare const Case: typeof import("@timeless/shadcn").Case;
 declare const Checkbox: typeof import("@timeless/shadcn").Checkbox;
 declare const CheckboxGroup: typeof import("@timeless/shadcn").CheckboxGroup;
 declare const CheckboxGroupItem: typeof import("@timeless/shadcn").CheckboxGroupItem;
@@ -13049,9 +13165,15 @@ declare const Mask: typeof import("@timeless/shadcn").Mask;
 declare const Match: typeof import("@timeless/shadcn").Match;
 declare const Menu: typeof import("@timeless/shadcn").Menu;
 declare const MenuPrimitive: typeof import("@timeless/shadcn").MenuPrimitive;
+declare const NativeCheckbox: typeof import("@timeless/shadcn").NativeCheckbox;
+declare const NativeFileInput: typeof import("@timeless/shadcn").NativeFileInput;
 declare const NativeInput: typeof import("@timeless/shadcn").NativeInput;
+declare const NativeLabel: typeof import("@timeless/shadcn").NativeLabel;
+declare const NativeSelect: typeof import("@timeless/shadcn").NativeSelect;
+declare const NativeSlider: typeof import("@timeless/shadcn").NativeSlider;
 declare const NumberInput: typeof import("@timeless/shadcn").NumberInput;
 declare const NumberInputPrimitive: typeof import("@timeless/shadcn").NumberInputPrimitive;
+declare const ObjectSignal: typeof import("@timeless/shadcn").ObjectSignal;
 declare const Paragraph: typeof import("@timeless/shadcn").Paragraph;
 declare const Path: typeof import("@timeless/shadcn").Path;
 declare const Polygon: typeof import("@timeless/shadcn").Polygon;
@@ -13063,6 +13185,7 @@ declare const PopoverPrimitive: typeof import("@timeless/shadcn").PopoverPrimiti
 declare const PopperPrimitive: typeof import("@timeless/shadcn").PopperPrimitive;
 declare const Portal: typeof import("@timeless/shadcn").Portal;
 declare const Presence: typeof import("@timeless/shadcn").Presence;
+declare const PrimitiveSignal: typeof import("@timeless/shadcn").PrimitiveSignal;
 declare const Progress: typeof import("@timeless/shadcn").Progress;
 declare const ProgressPrimitive: typeof import("@timeless/shadcn").ProgressPrimitive;
 declare const RadialGradient: typeof import("@timeless/shadcn").RadialGradient;
@@ -13089,6 +13212,7 @@ declare const Separator: typeof import("@timeless/shadcn").Separator;
 declare const Sheet: typeof import("@timeless/shadcn").Sheet;
 declare const SheetPrimitive: typeof import("@timeless/shadcn").SheetPrimitive;
 declare const Show: typeof import("@timeless/shadcn").Show;
+declare const Signal: typeof import("@timeless/shadcn").Signal;
 declare const Skeleton: typeof import("@timeless/shadcn").Skeleton;
 declare const Slider: typeof import("@timeless/shadcn").Slider;
 declare const SliderPrimitive: typeof import("@timeless/shadcn").SliderPrimitive;
@@ -13098,7 +13222,7 @@ declare const StepsPrimitive: typeof import("@timeless/shadcn").StepsPrimitive;
 declare const Stop: typeof import("@timeless/shadcn").Stop;
 declare const StyleRef: typeof import("@timeless/shadcn").StyleRef;
 declare const Subscriber: typeof import("@timeless/shadcn").Subscriber;
-declare const Switch: typeof import("@timeless/shadcn").Switch;
+declare const SwitchPrimitive: typeof import("@timeless/shadcn").SwitchPrimitive;
 declare const Symbol: typeof import("@timeless/shadcn").Symbol;
 declare const Table: typeof import("@timeless/shadcn").Table;
 declare const TableBody: typeof import("@timeless/shadcn").TableBody;
@@ -13159,6 +13283,7 @@ declare const renderToString: typeof import("@timeless/shadcn").renderToString;
 declare const safeCreateDocumentFragment: typeof import("@timeless/shadcn").safeCreateDocumentFragment;
 declare const safeCreateElement: typeof import("@timeless/shadcn").safeCreateElement;
 declare const safeCreateTextNode: typeof import("@timeless/shadcn").safeCreateTextNode;
+declare const signal: typeof import("@timeless/shadcn").signal;
 declare const sn: typeof import("@timeless/shadcn").sn;
 declare const styleNames: typeof import("@timeless/shadcn").styleNames;
 declare const ui: typeof import("@timeless/shadcn").ui;
@@ -13245,6 +13370,7 @@ declare const ImageStep: typeof import("@timeless/ui").ImageStep;
 declare const ImageUploadCore: typeof import("@timeless/ui").ImageUploadCore;
 declare const InputCore: typeof import("@timeless/ui").InputCore;
 declare const InputInListCore: typeof import("@timeless/ui").InputInListCore;
+declare const InputModel: typeof import("@timeless/ui").InputModel;
 declare const LayerManager: typeof import("@timeless/ui").LayerManager;
 declare const MenuCheckboxMenu: typeof import("@timeless/ui").MenuCheckboxMenu;
 declare const MenuCore: typeof import("@timeless/ui").MenuCore;

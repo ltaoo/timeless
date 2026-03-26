@@ -3,7 +3,7 @@ import { View, ViewChildren, ViewProps } from "../primitive/view";
 export function Table(props: ViewProps, children?: ViewChildren) {
   return View(
     {
-      type: "table",
+      as: "table",
       ...props,
       // "data-table": "",
     },
@@ -14,7 +14,7 @@ export function Table(props: ViewProps, children?: ViewChildren) {
 export function TableHeader(props: ViewProps, children?: ViewChildren) {
   return View(
     {
-      type: "thead",
+      as: "thead",
       ...props,
       // "data-table-header": "",
     },
@@ -25,7 +25,7 @@ export function TableHeader(props: ViewProps, children?: ViewChildren) {
 export function TableBody(props: ViewProps, children?: ViewChildren) {
   return View(
     {
-      type: "tbody",
+      as: "tbody",
       ...props,
       // "data-table-body": "",
     },
@@ -36,7 +36,7 @@ export function TableBody(props: ViewProps, children?: ViewChildren) {
 export function TableRow(props: ViewProps, children?: ViewChildren) {
   return View(
     {
-      type: "tr",
+      as: "tr",
       ...props,
       // "data-table-row": "",
     },
@@ -47,7 +47,7 @@ export function TableRow(props: ViewProps, children?: ViewChildren) {
 export function TableHead(props: ViewProps, children?: ViewChildren) {
   return View(
     {
-      type: "th",
+      as: "th",
       ...props,
       // "data-table-head": "",
     },
@@ -58,7 +58,7 @@ export function TableHead(props: ViewProps, children?: ViewChildren) {
 export function TableCell(props: ViewProps, children?: ViewChildren) {
   return View(
     {
-      type: "td",
+      as: "td",
       ...props,
       // "data-table-cell": "",
     },

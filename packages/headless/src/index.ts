@@ -2,7 +2,7 @@
 // Primitive
 export * from "./primitive/for";
 export * from "./primitive/show";
-export * from "./primitive/switch";
+export * from "./primitive/match";
 export * from "./primitive/view";
 export * from "./primitive/fragment";
 export * from "./primitive/html";
@@ -11,15 +11,20 @@ export * from "./primitive/text";
 // Native
 export * from "./native/img";
 export * from "./native/input";
+export * from "./native/label";
+export * from "./native/checkbox";
+export * from "./native/select";
+export * from "./native/slider";
+export * from "./native/file-input";
 export * from "./native/svg";
 
 export * from "./primitive/lazy-view";
 
 // base component
-export * as PopperPrimitive from "./modules/popper";
 export * from "./modules/portal";
 export * from "./modules/presence";
 export * from "./modules/transition";
+export * as PopperPrimitive from "./modules/popper";
 
 // content
 export * from "./modules/flex";
@@ -58,6 +63,7 @@ export * as CheckboxPrimitive from "./modules/checkbox";
 export * as RadioPrimitive from "./modules/radio";
 export * as SliderPrimitive from "./modules/slider";
 export * as TogglePrimitive from "./modules/toggle";
+export * as SwitchPrimitive from "./modules/switch";
 export * as FieldPrimitive from "./modules/field";
 
 // overlay

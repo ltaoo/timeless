@@ -1,4 +1,4 @@
-import { cn, ref, refobj } from "@timeless/reactive";
+import { cn, ref, refobj, isRef } from "@timeless/reactive";
 import { InputCore } from "@timeless/ui";
 
 import { View, ViewProps, ViewChildren } from "../primitive/view";
@@ -41,6 +41,18 @@ export function Input(
     t: "view",
     $elm,
     render() {
+      const applyAttr = (k: string, v: any) => {
+        if (v === undefined || v === null || v === false) {
+          $elm.removeAttribute(k);
+          return;
+        }
+        if (v === true) {
+          $elm.setAttribute(k, "");
+          return;
+        }
+        $elm.setAttribute(k, String(v));
+      };
+
       if (id) {
         $elm.id = id;
       }
@@ -55,7 +67,18 @@ export function Input(
 
       // Apply dataset attributes
       Object.keys(dataset || {}).forEach((k) => {
-        $elm.setAttribute(`data-${k}`, dataset[k]);
+        const vv = dataset[k];
+        const attrName = `data-${k}`;
+        if (isRef(vv)) {
+          vv._subscribe({
+            onChange(v: any) {
+              applyAttr(attrName, v);
+            },
+          });
+          applyAttr(attrName, vv.value);
+          return;
+        }
+        applyAttr(attrName, vv);
       });
 
       // Apply classes

@@ -4,6 +4,7 @@ import { SingleFieldCore, ObjectFieldCore, ArrayFieldCore } from "@timeless/ui";
 import { View, ViewProps, ViewChildren } from "../primitive/view";
 import { For } from "../primitive/for";
 import { Show } from "../primitive/show";
+import { Fragment } from "../primitive/fragment";
 
 export function Field(
   props: ViewProps & { store: SingleFieldCore<any> },
@@ -71,15 +72,19 @@ export namespace ObjectField {
       render: (fieldName: string, field: SingleFieldCore<any>) => ViewChildren;
     },
   ) {
-    const state_ = refobj(props.store.state);
-    props.store.onStateChange((v) => state_.as(v));
+    const { store, render: renderChildren, key, ...rest } = props;
+    const state_ = refobj(store.state);
+    store.onStateChange((v) => state_.as(v));
 
     return For({
-      ...props,
+      ...rest,
       each: computed(state_, (s) => Object.keys(s.fields)),
+      key: typeof key === "string" ? key : undefined,
       render(fieldName: string) {
-        const field = props.store.fields[fieldName];
-        return props.render(fieldName, field);
+        const field = store.fields[fieldName];
+        const children = renderChildren(fieldName, field);
+        if (!children) return null;
+        return Fragment({}, children);
       },
     });
   }
@@ -99,14 +104,18 @@ export namespace ArrayField {
       render: (item: any, index: number) => ViewChildren;
     },
   ) {
-    const state_ = refobj(props.store.state);
-    props.store.onStateChange((v) => state_.as(v));
+    const { store, render: renderChildren, key, ...rest } = props;
+    const state_ = refobj(store.state);
+    store.onStateChange((v) => state_.as(v));
 
     return For({
-      ...props,
+      ...rest,
       each: computed(state_, (s) => s.fields),
+      key: typeof key === "string" ? key : undefined,
       render(item: any, index: number) {
-        return props.render(item, index);
+        const children = renderChildren(item, index);
+        if (!children) return null;
+        return Fragment({}, children);
       },
     });
   }

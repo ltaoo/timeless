@@ -17,7 +17,7 @@ export function Textarea(
     id,
     showClear = false,
     showLoading = false,
-    showCount = true,
+    showCount = false,
     ...rest
   } = props;
   const state_ = refobj(store.state);

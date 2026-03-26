@@ -31,8 +31,10 @@ export function Trigger(
   const _input$ = View(
     {
       as: "input",
-      type: "text",
-      id: rest.id,
+      attributes: {
+        ...(rest.attributes || {}),
+        id: props.id || rest.attributes?.id,
+      },
       style:
         "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
       onFocus() {
@@ -186,11 +188,10 @@ export function TimePanel(
 export function HourColumn(
   props: ViewProps & {
     store: TimePickerCore;
-    renderItem?: (hour: number, isSelected: boolean) => ViewChildren;
   },
   children?: ViewChildren,
 ) {
-  const { store, renderItem, ...rest } = props;
+  const { store, ...rest } = props;
   const state = refobj(store.state);
 
   store.onStateChange((v) => {
@@ -207,12 +208,6 @@ export function HourColumn(
     For({
       each: hours,
       render(hour) {
-        if (renderItem) {
-          return renderItem(
-            hour,
-            computed(state, (s) => s.tempHour === hour),
-          );
-        }
         return HourItem(
           {
             store,
@@ -249,11 +244,10 @@ export function HourItem(
 export function MinuteColumn(
   props: ViewProps & {
     store: TimePickerCore;
-    renderItem?: (minute: number, isSelected: boolean) => ViewChildren;
   },
   children?: ViewChildren,
 ) {
-  const { store, renderItem, ...rest } = props;
+  const { store, ...rest } = props;
   const state = refobj(store.state);
 
   store.onStateChange((v) => {
@@ -270,12 +264,6 @@ export function MinuteColumn(
     For({
       each: minutes,
       render(minute) {
-        if (renderItem) {
-          return renderItem(
-            minute,
-            computed(state, (s) => s.tempMinute === minute),
-          );
-        }
         return MinuteItem(
           {
             store,
@@ -312,11 +300,10 @@ export function MinuteItem(
 export function SecondColumn(
   props: ViewProps & {
     store: TimePickerCore;
-    renderItem?: (second: number, isSelected: boolean) => ViewChildren;
   },
   children?: ViewChildren,
 ) {
-  const { store, renderItem, ...rest } = props;
+  const { store, ...rest } = props;
   const state = refobj(store.state);
 
   store.onStateChange((v) => {
@@ -333,12 +320,6 @@ export function SecondColumn(
     For({
       each: seconds,
       render(second) {
-        if (renderItem) {
-          return renderItem(
-            second,
-            computed(state, (s) => s.tempSecond === second),
-          );
-        }
         return SecondItem(
           {
             store,

@@ -9,7 +9,7 @@ import {
   TimelessNormalComponent,
 } from "./view";
 
-export function Switch(
+export function Match(
   props: {
     when: Ref<any> | any;
     fallback?: ViewChildren;
@@ -26,7 +26,6 @@ export function Switch(
   let _currentChildren: any[] = [];
   let _prev_value: any = undefined;
 
-  // Normalize children helper
   function normalize(c: any) {
     if (Array.isArray(c)) return c;
     return [c];
@@ -41,7 +40,7 @@ export function Switch(
     const when_value = isRef(when) ? when.value : when;
     console.log("[Switch] when_value:", when_value, "children:", children);
     for (const child of children) {
-      if (isElement(child) && child.t === "match") {
+      if (isElement(child) && child.t === "case") {
         if (child.value === when_value) {
           console.log("[Switch] MATCHED!");
           return child;
@@ -55,16 +54,13 @@ export function Switch(
     if (!match) return _fallback;
     let children = match.children;
 
-    // 如果 children 是数组，检查数组内的元素
     if (Array.isArray(children)) {
-      // 展开数组中的函数
       children = children.map((child: any) =>
         typeof child === "function" ? child() : child,
       );
       return normalize(children);
     }
 
-    // 如果 children 是函数，调用它来获取实际的子元素
     if (typeof children === "function") {
       return normalize(children());
     }
@@ -73,13 +69,11 @@ export function Switch(
   }
 
   function unmount(removeDom = false) {
-    // Lifecycle
     for (const child of _currentChildren) {
       if (isElement(child) && child.onUnmounted) {
         child.onUnmounted();
       }
     }
-    // DOM removal
     const parent = anchor.parentNode;
     if (removeDom && parent) {
       for (const node of _currentNodes) {
@@ -125,7 +119,6 @@ export function Switch(
       parent.insertBefore(fragment, before || null);
     }
 
-    // Lifecycle
     for (const child of newInstances) {
       if (isElement(child) && child.onMounted) {
         child.onMounted(child.$elm);
@@ -155,7 +148,7 @@ export function Switch(
   }
 
   return {
-    t: "switch",
+    t: "match",
     $elm: anchor as any,
     render() {
       const when_value = isRef(when) ? when.value : when;
@@ -165,14 +158,6 @@ export function Switch(
       const target = get_target_children(active_match);
       const fragment = mount(target);
 
-      // console.log(
-      //   "[]Switch find matched Match",
-      //   when_value,
-      //   active_match,
-      //   target,
-      // );
-
-      // Append anchor to the result fragment so it gets inserted into DOM
       fragment.appendChild(anchor);
 
       if (onMounted) {
@@ -195,19 +180,17 @@ export function Switch(
   };
 }
 
-export function Match<T = any>(
+export function Case<T = any>(
   value: any,
   children: ViewChildren | (() => TimelessElement)[],
 ) {
   return {
-    t: "match",
+    t: "case",
     value,
     children,
-    // 用来给 Switch 满足 isElement(child) 判断
     $elm: document.createDocumentFragment() as any,
     render() {
       return null;
     },
   };
 }
-

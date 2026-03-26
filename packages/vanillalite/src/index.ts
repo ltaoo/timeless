@@ -1,8 +1,8 @@
 import {
   For,
   Show,
-  Switch,
   Match,
+  Case,
   Fragment,
   View,
   LazyView,
@@ -20,8 +20,8 @@ export * from "@timeless/reactive";
 export {
   For,
   Show,
-  Switch,
   Match,
+  Case,
   Fragment,
   View,
   LazyView,

@@ -3,6 +3,7 @@ import { Ref, isRef, isClassName, isStyleRef } from "@timeless/reactive";
 import { ViewProps } from "../primitive/view";
 
 export interface NativeInputProps extends Omit<ViewProps, "as" | "type"> {
+  id?: string | Ref<string>;
   type?: string | Ref<string>;
   value?: string | Ref<string>;
   placeholder?: string | Ref<string>;
@@ -22,6 +23,7 @@ export interface NativeInputProps extends Omit<ViewProps, "as" | "type"> {
 
 export function NativeInput(props: NativeInputProps = {}) {
   const {
+    id,
     type = "text",
     value,
     placeholder,
@@ -37,6 +39,7 @@ export function NativeInput(props: NativeInputProps = {}) {
     name,
     style,
     class: cls,
+    attributes,
     dataset = {},
     onMounted,
     onUnmounted,
@@ -52,7 +55,6 @@ export function NativeInput(props: NativeInputProps = {}) {
     onMouseLeave,
     onInput,
     onChange,
-    ...rest
   } = props;
 
   let onMountedCleanup: (() => void) | undefined;
@@ -62,6 +64,31 @@ export function NativeInput(props: NativeInputProps = {}) {
     t: "view",
     $elm,
     render() {
+      const applyAttr = (k: string, v: any) => {
+        if (v === undefined || v === null || v === false) {
+          $elm.removeAttribute(k);
+          return;
+        }
+        if (v === true) {
+          $elm.setAttribute(k, "");
+          return;
+        }
+        $elm.setAttribute(k, String(v));
+      };
+
+      if (id !== undefined) {
+        if (isRef(id)) {
+          id._subscribe({
+            onChange(v) {
+              $elm.id = String(v);
+            },
+          });
+          $elm.id = id.value;
+        } else {
+          $elm.id = id;
+        }
+      }
+
       // Handle type attribute
       if (isRef(type)) {
         type._subscribe({
@@ -196,7 +223,7 @@ export function NativeInput(props: NativeInputProps = {}) {
               $elm.autocomplete = v;
             },
           });
-          $elm.autocomplete = autocomplete.value;
+          $elm.autocomplete = autocomplete.value as any;
         } else {
           $elm.autocomplete = autocomplete as any;
         }
@@ -222,29 +249,37 @@ export function NativeInput(props: NativeInputProps = {}) {
         $elm.inputMode = inputMode;
       }
 
-      // Handle rest attributes (id, tab-index, etc.)
-      Object.keys(rest).forEach((k) => {
-        // @ts-ignore
-        const vv = rest[k];
-        if (vv !== undefined) {
+      if (attributes) {
+        Object.keys(attributes).forEach((k) => {
+          const vv = attributes[k];
           if (isRef(vv)) {
             vv._subscribe({
               onChange(v: any) {
-                $elm.setAttribute(k, v);
+                applyAttr(k, v);
               },
             });
-            $elm.setAttribute(k, vv.value);
-          } else if (typeof vv === "string" || typeof vv === "number") {
-            $elm.setAttribute(k, String(vv));
+            applyAttr(k, vv.value);
+            return;
           }
-        }
-      });
+          applyAttr(k, vv);
+        });
+      }
 
       // Handle dataset
       Object.keys(dataset).forEach((k) => {
-        if (dataset && dataset[k]) {
-          $elm.setAttribute(`data-${k}`, dataset[k]);
+        if (!dataset) return;
+        const vv = dataset[k];
+        const attrName = `data-${k}`;
+        if (isRef(vv)) {
+          vv._subscribe({
+            onChange(v: any) {
+              applyAttr(attrName, v);
+            },
+          });
+          applyAttr(attrName, vv.value);
+          return;
         }
+        applyAttr(attrName, vv);
       });
 
       // Handle class
