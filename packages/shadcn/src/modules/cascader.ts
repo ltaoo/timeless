@@ -130,7 +130,7 @@ export function Cascader(
                   },
                   [
                     For({
-                      each: panel.options,
+                      each: computed(state_, (d) => d.panels[panelIndex]?.options || []),
                       key: "value",
                       render(
                         option: CascaderOption<any> & {
@@ -143,9 +143,13 @@ export function Cascader(
                             store,
                             panelIndex,
                             option,
-                            class: computed(state_, () => {
-                              const isSelected = option.selected;
-                              const isFocused = option.focused;
+                            class: computed(state_, (d) => {
+                              const currentPanel = d.panels[panelIndex];
+                              const opt = currentPanel?.options.find(
+                                (o: any) => o.value === option.value,
+                              );
+                              const isSelected = Boolean(opt?.selected);
+                              const isFocused = Boolean(opt?.focused);
                               return [
                                 "relative flex w-full cursor-default select-none items-center justify-between gap-1.5 rounded-md py-1 px-1.5 text-sm outline-hidden transition-colors",
                                 option.disabled
@@ -172,7 +176,7 @@ export function Cascader(
                                 ),
                                 class: "size-4 text-muted-foreground",
                               },
-                              [ChevronRightOutlined({})],
+                              [ChevronRightOutlined({ class: "size-3" })],
                             ),
                           ],
                         );

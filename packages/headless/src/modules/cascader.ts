@@ -44,8 +44,7 @@ export function Trigger(
         if (props.store.presence.state.visible) {
           return;
         }
-        props.store.presence.show();
-        props.store.popper.place();
+        props.store.show();
       },
       onClick(e: Event) {
         e.stopPropagation();
@@ -88,11 +87,10 @@ export function Trigger(
             return;
           }
           if (props.store.presence.state.visible) {
-            props.store.presence.hide();
+            props.store.hide();
             return;
           }
-          props.store.presence.show();
-          props.store.popper.place();
+          props.store.show();
         });
 
         if (rest.onMounted) {

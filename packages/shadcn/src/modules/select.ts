@@ -41,10 +41,9 @@ export function Select(
               : "text-muted-foreground";
           }),
         }),
-        SelectPrimitive.Icon(
-          { class: "size-4 text-muted-foreground" },
-          [ChevronDownOutlined({})],
-        ),
+        SelectPrimitive.Icon({ class: "size-4 text-muted-foreground" }, [
+          ChevronDownOutlined({}),
+        ]),
       ],
     ),
     SelectPrimitive.Content(
@@ -65,6 +64,7 @@ export function Select(
       [
         SelectPrimitive.Viewport({ store, class: "p-1" }, [
           For({
+            key: "value",
             each: computed(state_, (d) => d.options),
             render(option: any) {
               return SelectPrimitive.Item(
@@ -77,12 +77,8 @@ export function Select(
                     const isSelected = Boolean(opt?.selected);
                     return [
                       "relative flex w-full cursor-default select-none items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-                      isSelected
-                        ? "font-medium"
-                        : "",
-                      isFocused
-                        ? "bg-accent text-accent-foreground"
-                        : "",
+                      isSelected ? "font-medium" : "",
+                      isFocused ? "bg-accent text-accent-foreground" : "",
                     ]
                       .filter(Boolean)
                       .join(" ");
