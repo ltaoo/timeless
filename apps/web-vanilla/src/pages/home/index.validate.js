@@ -82,9 +82,8 @@ function FieldDemoView(stores) {
     field_exp_year$,
     same_as_shipping$,
     field_comments$,
-    submit_configure_btn$,
+    submit_payment_btn$,
     cancel_btn$,
-    form$,
   } = stores;
 
   return View({ class: "w-full max-w-md rounded-xl border p-6" }, [
@@ -187,7 +186,7 @@ function FieldDemoView(stores) {
 
       // Buttons
       View({ class: "flex items-center gap-2" }, [
-        Button({ store: submit_configure_btn$ }, ["Submit"]),
+        Button({ store: submit_payment_btn$ }, ["Submit"]),
         Button({ store: cancel_btn$ }, ["Reset"]),
       ]),
     ]),
@@ -452,6 +451,38 @@ export default function FormValidateView() {
       console.log(values);
     },
   });
+  const submit_payment_btn$ = new Timeless.ui.ButtonCore({
+    async onClick() {
+      const r = await form$.validate();
+      if (r.error) {
+        const keys = Object.keys(form$.fields);
+        for (let i = 0; i < keys.length; i += 1) {
+          const key = keys[i];
+          const field$ = form$.fields[key];
+          const rr = await field$.validate();
+          if (rr.error) {
+            if (field$.input && field$.input.shape === "select" && typeof field$.input.show === "function") {
+              field$.input.show();
+            } else if (field$.input && typeof field$.input.focus === "function") {
+              field$.input.focus();
+            }
+            const id1 = field$.name;
+            const id2 = `field-${field$.name}`;
+            const $elm = typeof document !== "undefined"
+              ? document.getElementById(id1) || document.getElementById(id2)
+              : null;
+            if ($elm && typeof $elm.scrollIntoView === "function") {
+              $elm.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+            break;
+          }
+        }
+        return;
+      }
+      const values = r.data;
+      console.log(values);
+    },
+  });
   const cancel_btn$ = new Timeless.ui.ButtonCore({
     variant: "outline",
     async onClick() {
@@ -483,9 +514,8 @@ export default function FormValidateView() {
                 field_exp_year$,
                 same_as_shipping$,
                 field_comments$,
-                submit_configure_btn$,
+                submit_payment_btn$,
                 cancel_btn$,
-                form$,
               }),
               Separator({}),
               Field({ store: field_provider$ }, [
