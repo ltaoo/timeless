@@ -106,6 +106,7 @@ describe("PresenceCore", () => {
   describe("unmount", () => {
     it("应重置所有状态", () => {
       const presence = new PresenceCore({ visible: true });
+      presence.exit = true;
       presence.unmount();
       expect(presence.mounted).toBe(false);
       expect(presence.enter).toBe(false);
@@ -125,6 +126,7 @@ describe("PresenceCore", () => {
   describe("reset", () => {
     it("应重置所有状态", () => {
       const presence = new PresenceCore({ visible: true });
+      presence.exit = true;
       presence.reset();
       expect(presence.mounted).toBe(false);
       expect(presence.enter).toBe(false);

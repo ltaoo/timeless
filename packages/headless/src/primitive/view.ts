@@ -44,6 +44,7 @@ export interface ViewProps {
   onDragOver?: (e: DragEvent) => void;
   onDragLeave?: (e: DragEvent) => void;
   onDrop?: (e: DragEvent) => void;
+  onAnimationEnd?: (e: AnimationEvent) => void;
 }
 
 export function View(
@@ -77,6 +78,7 @@ export function View(
     onDragOver,
     onDragLeave,
     onDrop,
+    onAnimationEnd,
   } = props;
   let onMountedCleanup: (() => void) | undefined;
   const $elm = safeCreateElement(as);
@@ -323,6 +325,13 @@ export function View(
       if (onDrop) {
         $elm.addEventListener("drop", function (event: DragEvent) {
           if (onDrop) onDrop(event);
+        });
+      }
+      if (onAnimationEnd) {
+        $elm.addEventListener("animationend", function (event: AnimationEvent) {
+          if (onAnimationEnd) {
+            onAnimationEnd(event);
+          }
         });
       }
 

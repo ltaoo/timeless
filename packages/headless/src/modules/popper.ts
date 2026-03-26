@@ -6,9 +6,9 @@ import {
   Layer,
 } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { Fragment } from "../primitive/fragment";
-import { isBrowser } from "../util/env";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Fragment } from "@/primitive/fragment";
+import { isBrowser } from "@/util/env";
 
 let layer_id_counter = 0;
 
@@ -79,11 +79,11 @@ export function Content(
       style: sn([
         rest.style,
         computed(state_, (t) => {
-          console.log("[Popper Content] computed style", {
-            placed: t.isPlaced,
-            x: t.x,
-            y: t.y,
-          });
+          // console.log("[Popper Content] computed style", {
+          //   placed: t.isPlaced,
+          //   x: t.x,
+          //   y: t.y,
+          // });
           const ss: Record<string, any> = {
             "z-index": zIndex,
             position: "fixed",

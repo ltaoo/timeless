@@ -13,6 +13,8 @@ export function Transition(
 ) {
   const { store, animation, ...rest } = props;
   const state = refobj(store.state);
+  let _was_exiting = false;
+
   const visible = computed(state, (s) => {
     return s.mounted && (s.visible || s.enter || s.exit);
   });
@@ -39,6 +41,16 @@ export function Transition(
         {
           ...rest,
           class: computed(state, (s) => {
+            if (s.exit) {
+              _was_exiting = true;
+            }
+            if (!s.mounted && _was_exiting) {
+              _was_exiting = false;
+              return animation?.out ?? "fade-out";
+            }
+            if (s.mounted) {
+              _was_exiting = false;
+            }
             return [
               rest.class,
               s.enter ? (animation?.in ?? "fade-in") : "",
@@ -47,6 +59,14 @@ export function Transition(
               .filter(Boolean)
               .join(" ");
           }),
+          onAnimationEnd(e: AnimationEvent) {
+            if (e.target === e.currentTarget) {
+              store.handleAnimationEnd();
+            }
+            if (rest.onAnimationEnd) {
+              rest.onAnimationEnd(e);
+            }
+          },
         },
         children,
       ),

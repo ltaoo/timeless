@@ -152,6 +152,15 @@ export function ContentImpl(
                     .filter(Boolean)
                     .join(" ");
                 }),
+                onAnimationEnd(e: AnimationEvent) {
+                  if (e.target === e.currentTarget) {
+                    props.store.presence.handleAnimationEnd();
+                  }
+                  if (rest.onAnimationEnd) {
+                    // @ts-ignore
+                    rest.onAnimationEnd(e);
+                  }
+                },
               },
               children,
             ),

@@ -1,16 +1,17 @@
-import { refobj, computed, classNames, sn, combine } from "@timeless/reactive";
+import { refobj, computed, combine, sn, cn } from "@timeless/reactive";
 import { SelectCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { Show } from "../primitive/show";
-import { NativeInput } from "../native/input";
-import { h } from "../util/h";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Show } from "@/primitive/show";
+import { NativeInput } from "@/native/input";
+import { h } from "@/util/h";
+
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 
 export function Root(
   props: ViewProps & { store: SelectCore<any> },
-  children?: ViewChildren,
+  children: ViewChildren = [],
 ) {
   return PopperPrimitive.Root(
     {
@@ -201,9 +202,10 @@ export function Content(
   const { store, animation, ...rest } = props;
 
   const presence_ = refobj(store.presence.state);
+  let _was_exiting = false;
 
   store.presence.onStateChange((v) => {
-    console.log("[]Select Content Presence State Change", v);
+    // console.log("[]Select Content Presence State Change", v);
     presence_.as(v);
   });
 
@@ -252,9 +254,19 @@ export function Content(
                   ...(rest.attributes || {}),
                   tabindex: 0,
                 },
-                class: classNames([
+                class: cn([
                   rest.class,
                   computed(presence_, (t) => {
+                    if (t.exit) {
+                      _was_exiting = true;
+                    }
+                    if (!t.mounted && _was_exiting) {
+                      _was_exiting = false;
+                      return animation?.out || "";
+                    }
+                    if (t.mounted) {
+                      _was_exiting = false;
+                    }
                     return [
                       t.enter && animation?.in ? animation.in : "",
                       t.exit && animation?.out ? animation.out : "",
@@ -264,6 +276,15 @@ export function Content(
                   }),
                 ]),
                 onKeyDown: handleKeyDown,
+                onAnimationEnd(e: AnimationEvent) {
+                  if (e.target === e.currentTarget) {
+                    store.presence.handleAnimationEnd();
+                  }
+                  if (rest.onAnimationEnd) {
+                    // @ts-ignore
+                    rest.onAnimationEnd(e);
+                  }
+                },
                 onMounted($elm: HTMLElement) {
                   // 自动聚焦以接收键盘事件
                   setTimeout(() => {

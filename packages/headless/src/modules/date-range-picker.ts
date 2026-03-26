@@ -140,6 +140,7 @@ export function Content(
   const { store, animation, ...rest } = props;
 
   const presence_ = refobj(store.$presence.state);
+  let _was_exiting = false;
 
   store.$presence.onStateChange((v) => {
     presence_.as(v);
@@ -161,6 +162,16 @@ export function Content(
               class: classNames([
                 rest.class,
                 computed(presence_, (t) => {
+                  if (t.exit) {
+                    _was_exiting = true;
+                  }
+                  if (!t.mounted && _was_exiting) {
+                    _was_exiting = false;
+                    return animation?.out || "";
+                  }
+                  if (t.mounted) {
+                    _was_exiting = false;
+                  }
                   return [
                     t.enter && animation?.in ? animation.in : "",
                     t.exit && animation?.out ? animation.out : "",
@@ -169,6 +180,14 @@ export function Content(
                     .join(" ");
                 }),
               ]),
+              onAnimationEnd(e: AnimationEvent) {
+                if (e.target === e.currentTarget) {
+                  store.$presence.handleAnimationEnd();
+                }
+                if (rest.onAnimationEnd) {
+                  rest.onAnimationEnd(e);
+                }
+              },
             },
             children,
           ),

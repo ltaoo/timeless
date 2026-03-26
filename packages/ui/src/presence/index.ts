@@ -120,7 +120,7 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
       this.emit(Events.Show);
       this.emit(Events.StateChange, { ...this.state });
       // 150 是动画时间
-    }, 150);
+    }, 120);
   }
   hide(options: Partial<{ reason: "show_sibling" | "back" | "forward"; destroy: boolean }> = {}) {
     console.log("[DOMAIN]ui/presence - hide START", options, {
@@ -150,7 +150,7 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
         this.visible = false;
         this.emit(Events.Hidden);
         this.emit(Events.StateChange, { ...this.state });
-      }, 150);
+      }, 120);
       return;
     }
     this.exit = true;
@@ -166,7 +166,6 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     }
     this.hide_timer = setTimeout(() => {
       this.hide_timer = null;
-      this.exit = false;
       this.visible = false;
       this.emit(Events.Hidden);
       this.emit(Events.StateChange, { ...this.state });
@@ -179,7 +178,6 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
       this.hide_timer = null;
     }
     if (this.exit) {
-      this.exit = false;
       this.visible = false;
       this.emit(Events.Hidden);
       this.emit(Events.StateChange, { ...this.state });
