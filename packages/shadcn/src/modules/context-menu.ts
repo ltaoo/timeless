@@ -8,6 +8,7 @@ import {
   ViewChildren,
   ViewProps,
   TimelessElement,
+  h,
 } from "@timeless/headless";
 import {
   ContextMenuCore,
@@ -81,9 +82,10 @@ function ContextMenuGroup(props: ViewProps & { store: MenuGroupCore }) {
 
   return ContextMenuPrimitive.Group({ store: props.store }, [
     Show({ when: has_label_ }, [
-      ContextMenuPrimitive.Label(
+      h(
+        ContextMenuPrimitive.Label,
         {
-          class: "px-1.5 py-1 text-sm font-medium data-inset:pl-7",
+          class: "px-1.5 py-1.5 text-xs font-medium text-muted-foreground data-inset:pl-7",
         },
         [computed(state_, (t) => t.label)],
       ),
@@ -145,7 +147,8 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
       },
       [
         Show({ when: has_icon_ }, [
-          View(
+          h(
+            View,
             {
               class: "flex size-4 shrink-0 items-center justify-center",
             },
@@ -154,7 +157,8 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
         ]),
         props.store.label,
         Show({ when: has_shortcut_ }, [
-          View(
+          h(
+            View,
             {
               class:
                 "ml-auto text-xs tracking-widest text-muted-foreground group-focus/menubar-item:text-accent-foreground",
@@ -163,7 +167,7 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
           ),
         ]),
         Show({ when: show_chevron_ }, [
-          ChevronRightOutlined({ class: "cn-rtl-flip ml-auto size-4" }),
+          h(ChevronRightOutlined, { class: "cn-rtl-flip ml-auto size-4" }, []),
         ]),
       ],
     ),

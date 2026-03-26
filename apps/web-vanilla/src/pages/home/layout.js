@@ -108,6 +108,19 @@ export default function HomeLayoutView(props) {
               }),
             ],
           ),
+          Button(
+            {
+              store: new Timeless.ui.ButtonCore({
+                variant: "outline",
+                onClick() {
+                  const cur = props.app.getTheme();
+                  const next = cur === "dark" ? "light" : "dark";
+                  props.app.setTheme(next);
+                },
+              }),
+            },
+            [Timeless.icons.SunOutlined({ class: "size-4" })],
+          ),
           // User Avatar
           (() => {
             const dropdown$ = new Timeless.ui.DropdownMenuCore({

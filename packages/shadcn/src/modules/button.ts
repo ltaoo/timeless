@@ -4,6 +4,7 @@ import {
   View,
   ViewChildren,
   ViewProps,
+  h,
 } from "@timeless/headless";
 import { LoaderCircleOutlined } from "@timeless/icons";
 import { computed, ref } from "@timeless/reactive";
@@ -96,7 +97,7 @@ export function Button(
           [LoaderCircleOutlined()],
         ),
       ]),
-      Show({ when: !!prefix }, [ButtonPrimitive.Prefix({}, prefix)]),
+      Show({ when: !!prefix }, [h(ButtonPrimitive.Prefix, {}, prefix)]),
       ButtonPrimitive.Content({}, children),
     ],
   );

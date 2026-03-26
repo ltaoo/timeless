@@ -1,5 +1,5 @@
 import { refobj, computed, classNames } from "@timeless/reactive";
-import { StepsPrimitive, For, Show, Txt, ViewProps } from "@timeless/headless";
+import { StepsPrimitive, For, Show, Txt, ViewProps, h } from "@timeless/headless";
 import { StepCore } from "@timeless/ui";
 
 export type StepItem = {
@@ -62,18 +62,22 @@ export function Steps(props: ViewProps & { store: StepCore; items: StepItem[] })
                     ],
                   ),
                   Show({ when: index < items.length - 1 }, [
-                    StepsPrimitive.Connector({
-                      store,
-                      index,
-                      class: classNames([
-                        "h-[2px] w-full flex-1 mx-2 transition-colors",
-                        computed(state_, (s) =>
-                          index < s.value
-                            ? "bg-zinc-900 dark:bg-zinc-50"
-                            : "bg-zinc-200 dark:bg-zinc-700",
-                        ),
-                      ]),
-                    }),
+                    h(
+                      StepsPrimitive.Connector,
+                      {
+                        store,
+                        index,
+                        class: classNames([
+                          "h-[2px] w-full flex-1 mx-2 transition-colors",
+                          computed(state_, (s) =>
+                            index < s.value
+                              ? "bg-zinc-900 dark:bg-zinc-50"
+                              : "bg-zinc-200 dark:bg-zinc-700",
+                          ),
+                        ]),
+                      },
+                      [],
+                    ),
                   ]),
                 ],
               );

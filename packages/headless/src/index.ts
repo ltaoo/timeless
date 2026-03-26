@@ -11,6 +11,7 @@ export * from "./primitive/text";
 // Native
 export * from "./native/img";
 export * from "./native/input";
+export * from "./native/password";
 export * from "./native/label";
 export * from "./native/checkbox";
 export * from "./native/select";

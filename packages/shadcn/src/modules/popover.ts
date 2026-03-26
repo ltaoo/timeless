@@ -1,6 +1,6 @@
 import { PopoverCore } from "@timeless/ui";
 import { computed, ref, refobj } from "@timeless/reactive";
-import { View, Show, ViewChildren, ViewProps } from "@timeless/headless";
+import { View, Show, ViewChildren, ViewProps, h } from "@timeless/headless";
 import { PopoverPrimitive } from "@timeless/headless";
 
 export function Popover(
@@ -66,7 +66,8 @@ export function Popover(
               [],
             ),
             Show({ when: ref(!!props.title) }, [
-              View(
+              h(
+                View,
                 {
                   class: "flex flex-col gap-0.5 text-sm font-medium",
                 },

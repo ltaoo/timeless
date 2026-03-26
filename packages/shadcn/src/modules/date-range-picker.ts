@@ -6,6 +6,7 @@ import {
   View,
   ViewProps,
   Show,
+  h,
 } from "@timeless/headless";
 import { DateRangePickerCore, TooltipCore } from "@timeless/ui";
 import {
@@ -47,12 +48,13 @@ function NavButton(props: {
           when: computed(calendar_state_, (s) => !s.canLeftNext),
         },
         [
-          Tooltip(
+          h(
+            Tooltip,
             {
               store: tooltip$,
               content: ["不能超过右侧面板"],
             },
-            [View({ class: NAV_BTN_DISABLED_CLASS }, children)],
+            [h(View, { class: NAV_BTN_DISABLED_CLASS }, children)],
           ),
         ],
       ),
@@ -60,7 +62,7 @@ function NavButton(props: {
         {
           when: computed(calendar_state_, (s) => s.canLeftNext),
         },
-        [ButtonComponent({ store, class: NAV_BTN_CLASS }, children)],
+        [h(ButtonComponent, { store, class: NAV_BTN_CLASS }, children)],
       ),
     ]);
   }
@@ -73,12 +75,13 @@ function NavButton(props: {
           when: computed(calendar_state_, (s) => !s.canRightPrev),
         },
         [
-          Tooltip(
+          h(
+            Tooltip,
             {
               store: tooltip$,
               content: ["不能早于左侧面板"],
             },
-            [View({ class: NAV_BTN_DISABLED_CLASS }, children)],
+            [h(View, { class: NAV_BTN_DISABLED_CLASS }, children)],
           ),
         ],
       ),
@@ -86,7 +89,7 @@ function NavButton(props: {
         {
           when: computed(calendar_state_, (s) => s.canRightPrev),
         },
-        [ButtonComponent({ store, class: NAV_BTN_CLASS }, children)],
+        [h(ButtonComponent, { store, class: NAV_BTN_CLASS }, children)],
       ),
     ]);
   }

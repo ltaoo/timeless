@@ -85,6 +85,7 @@ function FieldDemoView() {
   const field_card_number$ = new Timeless.ui.SingleFieldCore({
     label: "Card Number",
     name: "card_number",
+    help: "Enter your 16-digit number.",
     input: new Timeless.ui.InputCore({
       defaultValue: "",
       placeholder: "1234 5678 9012 3456",
@@ -141,6 +142,16 @@ function FieldDemoView() {
     }),
   });
 
+  const form$ = new Timeless.ui.ObjectFieldCore({
+    fields: {
+      card_name: field_card_name$,
+      card_number: field_card_number$,
+      exp_month: field_exp_month$,
+      exp_year: field_exp_year$,
+      cvv: field_cvv$,
+    },
+  });
+
   return View({ class: "w-full max-w-md rounded-xl border p-6" }, [
     View({ class: "space-y-6" }, [
       // Payment Method fieldset
@@ -157,7 +168,7 @@ function FieldDemoView() {
         View({ class: "space-y-4" }, [
           Field({ store: field_card_name$ }, [
             Input({
-              id: `field-${field_card_name$.name}`,
+              id: field_card_name$.name,
               store: field_card_name$.input,
             }),
           ]),
@@ -165,18 +176,15 @@ function FieldDemoView() {
             View({ class: "col-span-2" }, [
               Field({ store: field_card_number$ }, [
                 Input({
-                  id: `field-${field_card_number$.name}`,
+                  id: field_card_number$.name,
                   store: field_card_number$.input,
                 }),
-                View({ class: "text-sm text-muted-foreground" }, [
-                  "Enter your 16-digit number.",
-                ]),
               ]),
             ]),
             View({ class: "col-span-1" }, [
               Field({ store: field_cvv$ }, [
                 Input({
-                  id: `field-${field_cvv$.name}`,
+                  id: field_cvv$.name,
                   store: field_cvv$.input,
                 }),
               ]),
@@ -185,13 +193,13 @@ function FieldDemoView() {
           View({ class: "grid grid-cols-2 gap-4" }, [
             Field({ store: field_exp_month$ }, [
               Select({
-                id: `field-${field_exp_month$.name}`,
+                id: field_exp_month$.name,
                 store: field_exp_month$.input,
               }),
             ]),
             Field({ store: field_exp_year$ }, [
               Select({
-                id: `field-${field_exp_year$.name}`,
+                id: field_exp_year$.name,
                 store: field_exp_year$.input,
               }),
             ]),
@@ -248,7 +256,13 @@ function FieldDemoView() {
           {
             store: new Timeless.ui.ButtonCore({
               async onClick() {
-                console.log("submit");
+                const r = await form$.validate();
+                if (r.error) {
+                  console.error(r.error);
+                  return;
+                }
+                const values = r.data;
+                console.log(values);
               },
             }),
           },
@@ -259,11 +273,11 @@ function FieldDemoView() {
             store: new Timeless.ui.ButtonCore({
               variant: "outline",
               async onClick() {
-                console.log("cancel");
+                form$.reset();
               },
             }),
           },
-          ["Cancel"],
+          ["Reset"],
         ),
       ]),
     ]),

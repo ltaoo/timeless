@@ -6,6 +6,7 @@ import {
   ViewProps,
   Show,
   Txt,
+  h,
 } from "@timeless/headless";
 import { DialogCore } from "@timeless/ui";
 
@@ -63,13 +64,15 @@ export function Dialog(
           },
           [
             Show({ when: computed(state_, (d) => !!d.title) }, [
-              DialogPrimitive.Header(
+              h(
+                DialogPrimitive.Header,
                 {
                   store,
                   class: "flex flex-col gap-2",
                 },
                 [
-                  DialogPrimitive.Title(
+                  h(
+                    DialogPrimitive.Title,
                     {
                       store,
                       class: "text-base leading-none font-medium",
@@ -89,15 +92,16 @@ export function Dialog(
               [Txt("✕")],
             ),
             Show({ when: computed(state_, (d) => !!d.footer) }, [
-              DialogPrimitive.Footer(
+              h(
+                DialogPrimitive.Footer,
                 {
                   store,
                   class:
                     "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
                 },
                 [
-                  Button({ store: store.cancelBtn }, ["取消"]),
-                  Button({ store: store.okBtn }, ["确认"]),
+                  h(Button, { store: store.cancelBtn }, ["取消"]),
+                  h(Button, { store: store.okBtn }, ["确认"]),
                 ],
               ),
             ]),

@@ -1,6 +1,6 @@
 import { TooltipCore, Align, Side } from "@timeless/ui";
 import { computed, refobj } from "@timeless/reactive";
-import { View, ViewChildren, ViewProps } from "@timeless/headless";
+import { Fragment, View, ViewChildren, ViewProps } from "@timeless/headless";
 import { TooltipPrimitive } from "@timeless/headless";
 
 // 全局单例 store
@@ -70,7 +70,7 @@ export function TooltipProvider(props: ViewProps, children?: ViewChildren) {
       },
     },
     [
-      ...children,
+      Fragment({}, children),
       TooltipPrimitive.Portal(
         {
           store,

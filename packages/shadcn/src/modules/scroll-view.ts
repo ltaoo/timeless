@@ -1,4 +1,5 @@
 import {
+  Fragment,
   ScrollViewPrimitive,
   ViewChildren,
   type ViewProps,
@@ -32,7 +33,7 @@ export function ScrollView(
           }),
         ],
       ),
-      ...children,
+      Fragment({}, children),
     ],
   );
 }

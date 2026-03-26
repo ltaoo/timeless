@@ -1,5 +1,5 @@
 import { combine, computed, refobj } from "@timeless/reactive";
-import { TextareaPrimitive, Show, ViewProps } from "@timeless/headless";
+import { TextareaPrimitive, Show, ViewProps, h } from "@timeless/headless";
 import { InputCore } from "@timeless/ui";
 import { CircleXOutlined, LoaderOutlined } from "@timeless/icons";
 
@@ -44,7 +44,8 @@ export function Textarea(
         ...rest,
       }),
       Show({ when: computed(hasValue, (t) => t && showClear) }, [
-        TextareaPrimitive.Clear(
+        h(
+          TextareaPrimitive.Clear,
           {
             store,
             class: computed(hasValue, (has) =>
@@ -53,11 +54,12 @@ export function Textarea(
                 : "hidden",
             ),
           },
-          [CircleXOutlined({ class: "size-4" })],
+          [h(CircleXOutlined, { class: "size-4" }, [])],
         ),
       ]),
       Show({ when: computed(isLoading, (t) => t && showLoading) }, [
-        TextareaPrimitive.Loading(
+        h(
+          TextareaPrimitive.Loading,
           {
             store,
             class: computed(isLoading, (loading) =>
@@ -66,15 +68,19 @@ export function Textarea(
                 : "hidden",
             ),
           },
-          [LoaderOutlined({ class: "size-4 animate-spin" })],
+          [h(LoaderOutlined, { class: "size-4 animate-spin" }, [])],
         ),
       ]),
     ]),
     Show({ when: showCount }, [
-      TextareaPrimitive.Count({
-        store,
-        class: "self-end text-xs text-muted-foreground",
-      }),
+      h(
+        TextareaPrimitive.Count,
+        {
+          store,
+          class: "self-end text-xs text-muted-foreground",
+        },
+        [],
+      ),
     ]),
   ]);
 }

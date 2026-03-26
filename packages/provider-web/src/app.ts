@@ -121,20 +121,27 @@ export function connect<T extends { storage: StorageCore<any>; user: any }>(
     // 设置主题，核心就这两行代码
     d.setAttribute(theme_attribute_key, theme);
     d.style.colorScheme = theme;
+    d.classList.toggle("dark", theme === "dark");
     return Result.Ok(null);
   }
   const color_schemes = ["light", "dark"];
   app.theme = get_theme();
+  set_theme(app.theme);
 
-  // app.setTheme = (theme: ThemeTypes) => {
-  //   set_theme(theme);
-  //   app.theme = theme;
-  //   app.emit(app.Events.StateChange, { ...app.state });
-  //   localStorage.setItem("theme", theme);
-  //   // app.$storage.set("theme", theme);
-  //   return Result.Ok(null);
-  // };
-  // app.getTheme = get_theme;
+  app.setTheme = (theme: ThemeTypes) => {
+    set_theme(theme);
+    app.theme = theme;
+    app.emit(app.Events.StateChange, { ...app.state });
+    localStorage.setItem("theme", theme);
+    return Result.Ok(null);
+  };
+  app.getTheme = get_theme;
+  (app as any).toggleTheme = () => {
+    const cur = get_theme();
+    const next: ThemeTypes = cur === "dark" ? "light" : "dark";
+    app.setTheme(next);
+    return next;
+  };
   const { availHeight, availWidth } = window.screen;
   if (window.navigator.userAgent.match(/iphone/i)) {
     const matched = [

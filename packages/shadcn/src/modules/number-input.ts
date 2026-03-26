@@ -4,6 +4,7 @@ import {
   Show,
   View,
   ViewProps,
+  h,
 } from "@timeless/headless";
 import { NumberInputCore } from "@timeless/ui";
 import { ChevronUpOutlined, ChevronDownOutlined } from "@timeless/icons";
@@ -51,13 +52,15 @@ export function NumberInput(
         ...rest,
       }),
       Show({ when: showControls }, [
-        View(
+        h(
+          View,
           {
             class:
               "absolute right-0 top-0 bottom-0 flex flex-col border-l border-input",
           },
           [
-            NumberInputPrimitive.IncreaseButton(
+            h(
+              NumberInputPrimitive.IncreaseButton,
               {
                 store,
                 class: combine({ canIncrease, isDisabled }, (t) => {
@@ -71,9 +74,10 @@ export function NumberInput(
                   ].join(" ");
                 }),
               },
-              [ChevronUpOutlined({ class: "size-3" })],
+              [h(ChevronUpOutlined, { class: "size-3" }, [])],
             ),
-            NumberInputPrimitive.DecreaseButton(
+            h(
+              NumberInputPrimitive.DecreaseButton,
               {
                 store,
                 class: combine({ canDecrease, isDisabled }, (t) => {
@@ -86,7 +90,7 @@ export function NumberInput(
                   ].join(" ");
                 }),
               },
-              [ChevronDownOutlined({ class: "size-3" })],
+              [h(ChevronDownOutlined, { class: "size-3" }, [])],
             ),
           ],
         ),

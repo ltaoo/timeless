@@ -3,6 +3,7 @@ import {
   ToastPrimitive,
   For,
   Show,
+  h,
   ViewChildren,
   ViewProps,
 } from "@timeless/headless";
@@ -21,10 +22,14 @@ export function Toast(
 
   return ToastPrimitive.Root({ store }, [
     Show({ when: computed(state_, (d) => !!d.mask) }, [
-      ToastPrimitive.Mask({
-        store,
-        class: "fixed inset-0 z-[998] bg-black/20",
-      }),
+      h(
+        ToastPrimitive.Mask,
+        {
+          store,
+          class: "fixed inset-0 z-[998] bg-black/20",
+        },
+        [],
+      ),
     ]),
     ToastPrimitive.Viewport(
       {
@@ -53,11 +58,15 @@ export function Toast(
                 when: computed(state_, (d) => d.icon === "loading"),
               },
               [
-                ToastPrimitive.Icon({
-                  store,
-                  class:
-                    "h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent",
-                }),
+                h(
+                  ToastPrimitive.Icon,
+                  {
+                    store,
+                    class:
+                      "h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent",
+                  },
+                  [],
+                ),
               ],
             ),
             For({

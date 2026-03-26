@@ -1,8 +1,16 @@
-import { computed, refobj, cn } from "@timeless/reactive";
-import { View, Show, ViewProps, ViewChildren, h } from "@timeless/headless";
+import { computed, refobj, cn, combine } from "@timeless/reactive";
+import {
+  View,
+  Show,
+  ViewProps,
+  ViewChildren,
+  h,
+  Match,
+  Case,
+  Fragment,
+} from "@timeless/headless";
 import { SingleFieldCore } from "@timeless/ui";
 
-import { Label as BaseLabel } from "./label";
 import { Separator as BaseSeparator } from "./separator";
 
 export function FieldGroup(props: ViewProps, children: ViewChildren = []) {
@@ -74,6 +82,7 @@ export function FieldLabel(
   },
   children?: ViewChildren,
 ) {
+  void children;
   const {
     class: cls,
     store,
@@ -104,6 +113,15 @@ export function FieldLabel(
   );
 }
 
+export function FieldHelp(props: {}, children: ViewChildren = []) {
+  void props;
+  return View({ class: "text-sm text-muted-foreground" }, children);
+}
+export function FieldError(props: {}, children: ViewChildren = []) {
+  void props;
+  return View({ class: "text-sm font-normal text-destructive" }, children);
+}
+
 export function Field(
   props: ViewProps & {
     store: SingleFieldCore<any>;
@@ -130,7 +148,7 @@ export function Field(
   const fid =
     props.id ||
     props.store.id ||
-    `field-${props.store.name || Math.random().toString(36).slice(2, 11)}`;
+    `${props.store.name || Math.random().toString(36).slice(2, 11)}`;
 
   const { class: cls, ...rest } = props;
 
@@ -150,27 +168,54 @@ export function Field(
         {
           when: !props.inline,
           fallback: [
-            ...children,
-            FieldLabel({
-              class: "inline",
-              store: props.store,
-              for: fid,
-            }),
+            h(Fragment, {}, children),
+            h(
+              FieldLabel,
+              {
+                class: "inline",
+                store: props.store,
+                for: fid,
+              },
+              [],
+            ),
           ],
         },
         [
-          FieldLabel({
-            store: props.store,
-            for: fid,
-          }),
-          ...children,
+          h(
+            FieldLabel,
+            {
+              store: props.store,
+              for: fid,
+            },
+            [],
+          ),
+          h(Fragment, {}, children),
         ],
       ),
-      Show({ when: computed(error_, (t) => !!t) }, [
-        h(View, { class: "text-sm font-normal text-destructive" }, [
-          computed(error_, (t) => (t ? t.message : "")),
-        ]),
-      ]),
+      Match(
+        {
+          when: combine({ state: state_, error: error_ }, (t) => {
+            // console.log("Field match", t.error);
+            if (t.error) {
+              return "error";
+            }
+            if (t.state.help) {
+              return "help";
+            }
+            return "none";
+          }),
+        },
+        [
+          Case("error", [
+            h(FieldError, { store: props.store }, [
+              computed(error_, (e) => e?.message || ""),
+            ]),
+          ]),
+          Case("help", [
+            h(FieldHelp, { store: props.store }, [props.store.help]),
+          ]),
+        ],
+      ),
     ],
   );
 }

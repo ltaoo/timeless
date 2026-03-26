@@ -187,6 +187,11 @@
       "import": "./dist/menu/index.esm.js",
       "require": "./dist/menu/index.js"
     },
+    "./moon": {
+      "types": "./dist/moon/index.d.ts",
+      "import": "./dist/moon/index.esm.js",
+      "require": "./dist/moon/index.js"
+    },
     "./pause": {
       "types": "./dist/pause/index.d.ts",
       "import": "./dist/pause/index.esm.js",
@@ -221,6 +226,11 @@
       "types": "./dist/square-arrow-down/index.d.ts",
       "import": "./dist/square-arrow-down/index.esm.js",
       "require": "./dist/square-arrow-down/index.js"
+    },
+    "./sun": {
+      "types": "./dist/sun/index.d.ts",
+      "import": "./dist/sun/index.esm.js",
+      "require": "./dist/sun/index.js"
     },
     "./trash": {
       "types": "./dist/trash/index.d.ts",

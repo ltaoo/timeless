@@ -6,6 +6,7 @@ import { For } from "../primitive/for";
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
+import { Fragment } from "@/primitive/fragment";
 
 export function Root(
   props: ViewProps & { store: TimePickerCore },
@@ -89,7 +90,7 @@ export function Trigger(
         }
       },
     },
-    [_input$, ...children],
+    [_input$, Fragment({}, children)],
   );
 }
 

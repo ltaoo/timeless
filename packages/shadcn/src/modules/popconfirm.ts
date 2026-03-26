@@ -1,6 +1,6 @@
 import { PopconfirmCore } from "@timeless/ui";
 import { computed, ref, refobj } from "@timeless/reactive";
-import { View, Show, ViewChildren, ViewProps } from "@timeless/headless";
+import { View, Show, ViewChildren, ViewProps, h } from "@timeless/headless";
 import { PopconfirmPrimitive } from "@timeless/headless";
 
 export function Popconfirm(
@@ -104,7 +104,8 @@ export function Popconfirm(
               }),
             }),
             Show({ when: ref(!!props.title) }, [
-              View(
+              h(
+                View,
                 {
                   class:
                     "mb-1 text-sm font-medium text-zinc-950 dark:text-zinc-50",
@@ -113,7 +114,8 @@ export function Popconfirm(
               ),
             ]),
             Show({ when: ref(!!props.description) }, [
-              View(
+              h(
+                View,
                 {
                   class: "mb-4 text-sm text-zinc-500 dark:text-zinc-400",
                 },

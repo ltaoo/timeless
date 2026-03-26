@@ -5,6 +5,7 @@ import {
   View,
   ViewProps,
   Show,
+  h,
 } from "@timeless/headless";
 import { TimePickerCore } from "@timeless/ui";
 import { ClockOutlined } from "@timeless/icons";
@@ -143,14 +144,16 @@ export function TimePicker(
                 when: store.showSeconds,
               },
               [
-                View(
+                h(
+                  View,
                   {
                     class:
                       "flex items-center text-muted-foreground text-lg font-medium",
                   },
                   [":"],
                 ),
-                View(
+                h(
+                  View,
                   {
                     class: "flex flex-col h-48 overflow-y-auto",
                   },

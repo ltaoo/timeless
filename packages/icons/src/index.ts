@@ -40,5 +40,7 @@ export * from "./icons/grid-3x3";
 export * from "./icons/menu";
 export * from "./icons/circle-ellipsis";
 export * from "./icons/house";
+export * from "./icons/moon";
+export * from "./icons/sun";
 
 export * from "./util/index";

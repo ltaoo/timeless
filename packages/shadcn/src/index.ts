@@ -44,6 +44,7 @@ import { ScrollArea } from "./modules/scroll-area";
 import { Sheet } from "./modules/sheet";
 import { AspectRatio } from "./modules/aspect-ratio";
 import { Accordion } from "./modules/accordion";
+import { Kbd, KbdGroup } from "./modules/kbd";
 import {
   Table,
   TableHeader,
@@ -128,6 +129,8 @@ export {
   Sheet,
   AspectRatio,
   Accordion,
+  Kbd,
+  KbdGroup,
   Table,
   TableHeader,
   TableBody,
