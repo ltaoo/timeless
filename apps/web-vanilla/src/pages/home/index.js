@@ -115,11 +115,9 @@ export default function HomePageView(props) {
             },
             [
               View({ class: "overflow-y-auto h-full" }, [
-                View({ class: "relative p-6" }, [
-                  KeepAliveSubViews({
-                    ...props,
-                  }),
-                ]),
+                KeepAliveSubViews({
+                  ...props,
+                }),
               ]),
             ],
           ),

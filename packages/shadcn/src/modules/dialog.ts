@@ -1,4 +1,4 @@
-import { computed, refobj } from "@timeless/reactive";
+import { computed, ref, refobj } from "@timeless/reactive";
 import {
   DialogPrimitive,
   View,
@@ -18,96 +18,127 @@ export function Dialog(
 ) {
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
+  const presence_state_ = refobj(store.presence.state);
+  const was_exiting_ = ref(false);
 
-  store.onStateChange((v) => {
-    state_.as(v);
-  });
-
-  return DialogPrimitive.Root({ store }, [
-    DialogPrimitive.Overlay({
-      store,
-      class: computed(state_, (d) => {
-        const baseClass =
-          "fixed inset-0 isolate z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs";
-        const enterClass = d.enter ? "animate-in fade-in-0 duration-100" : "";
-        const exitClass = d.exit ? "animate-out fade-out-0 duration-100" : "";
-        return [baseClass, enterClass, exitClass].filter(Boolean).join(" ");
-      }),
+  const unlistens = [
+    store.onStateChange((v) => {
+      state_.as(v);
     }),
-    View(
-      {
-        class: "fixed inset-0 z-50 flex items-center justify-center p-4",
-        onClick: (e: Event) => {
-          if (e.target === e.currentTarget && store.closeable) {
-            store.hide();
-          }
-        },
+    store.presence.onStateChange((v) => {
+      presence_state_.as(v);
+      if (v.exit) {
+        was_exiting_.as(true);
+      }
+      if (v.mounted) {
+        was_exiting_.as(false);
+      }
+    }),
+  ];
+
+  return DialogPrimitive.Root(
+    {
+      store,
+      onUnmounted() {
+        unlistens.forEach((fn) => fn());
       },
-      [
-        DialogPrimitive.Content(
-          {
-            store,
-            class: computed(state_, (d) => {
-              const baseClass =
-                "relative w-full max-w-sm grid gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none";
-              const enterClass = d.enter
-                ? "animate-in fade-in-0 zoom-in-95 duration-100"
-                : "";
-              const exitClass = d.exit
-                ? "animate-out fade-out-0 zoom-out-95 duration-100"
-                : "";
-              return [baseClass, enterClass, exitClass]
-                .filter(Boolean)
-                .join(" ");
-            }),
-            ...rest,
+    },
+    [
+      DialogPrimitive.Overlay({
+        store,
+        class: computed(presence_state_, (d) => {
+          const baseClass =
+            "fixed inset-0 isolate z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs";
+          const enterClass = d.enter
+            ? "animate-in fill-mode-both fade-in-0 duration-100"
+            : "";
+          const exitClass = d.exit
+            ? "animate-out fill-mode-both fade-out-0 duration-100"
+            : "";
+          const keepExitClass =
+            !d.mounted && was_exiting_.value ? exitClass : "";
+          return [baseClass, enterClass, exitClass, keepExitClass]
+            .filter(Boolean)
+            .join(" ");
+        }),
+      }),
+      View(
+        {
+          class: "fixed inset-0 z-50 flex items-center justify-center p-4",
+          onClick: (e: Event) => {
+            if (e.target === e.currentTarget && store.closeable) {
+              store.hide();
+            }
           },
-          [
-            Show({ when: computed(state_, (d) => !!d.title) }, [
-              h(
-                DialogPrimitive.Header,
-                {
-                  store,
-                  class: "flex flex-col gap-2",
-                },
-                [
-                  h(
-                    DialogPrimitive.Title,
-                    {
-                      store,
-                      class: "text-base leading-none font-medium",
-                    },
-                    [Txt(computed(state_, (d) => d.title || ""))],
-                  ),
-                ],
-              ),
-            ]),
-            DialogPrimitive.Body({ store }, children || []),
-            DialogPrimitive.Close(
-              {
-                store,
-                class:
-                  "absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
-              },
-              [Txt("✕")],
-            ),
-            Show({ when: computed(state_, (d) => !!d.footer) }, [
-              h(
-                DialogPrimitive.Footer,
+        },
+        [
+          DialogPrimitive.Content(
+            {
+              store,
+              class: computed(presence_state_, (d) => {
+                const baseClass =
+                  "relative w-full max-w-sm grid gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none";
+                const enterClass = d.enter
+                  ? "animate-in fill-mode-both fade-in-0 zoom-in-95 duration-100"
+                  : "";
+                const exitClass = d.exit
+                  ? "animate-out fill-mode-both fade-out-0 zoom-out-95 duration-100"
+                  : "";
+                const keepExitClass =
+                  !d.mounted && was_exiting_.value ? exitClass : "";
+                return [baseClass, enterClass, exitClass, keepExitClass]
+                  .filter(Boolean)
+                  .join(" ");
+              }),
+              ...rest,
+            },
+            [
+              Show({ when: computed(state_, (d) => !!d.title) }, [
+                h(
+                  DialogPrimitive.Header,
+                  {
+                    store,
+                    class: "flex flex-col gap-2",
+                  },
+                  [
+                    h(
+                      DialogPrimitive.Title,
+                      {
+                        store,
+                        class: "text-base leading-none font-medium",
+                      },
+                      [Txt(computed(state_, (d) => d.title || ""))],
+                    ),
+                  ],
+                ),
+              ]),
+              DialogPrimitive.Body({ store }, children || []),
+              DialogPrimitive.Close(
                 {
                   store,
                   class:
-                    "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
+                    "absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
                 },
-                [
-                  h(Button, { store: store.cancelBtn }, ["取消"]),
-                  h(Button, { store: store.okBtn }, ["确认"]),
-                ],
+                [Txt("✕")],
               ),
-            ]),
-          ],
-        ),
-      ],
-    ),
-  ]);
+              Show({ when: computed(state_, (d) => !!d.footer) }, [
+                h(
+                  DialogPrimitive.Footer,
+                  {
+                    store,
+                    class:
+                      "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
+                  },
+                  [
+                    h(Button, { store: store.cancelBtn }, ["取消"]),
+                    h(Button, { store: store.okBtn }, ["确认"]),
+                  ],
+                ),
+              ]),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
 }

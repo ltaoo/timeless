@@ -34,6 +34,7 @@ type TheTypesOfEvents<T> = {
 type SelectProps<T> = {
   id?: string;
   defaultValue: T | null;
+  disabled?: boolean;
   placeholder?: string;
   // options: SelectItemCore<T>[];
   options?: { value: T; label: string }[];
@@ -51,6 +52,8 @@ type SelectState<T> = {
   value2: { value: T; label: string } | null;
   /** 菜单是否展开 */
   open: boolean;
+  /** 加载中 */
+  loading: boolean;
   /** 提示 */
   placeholder: string;
   /** 禁用 */
@@ -84,6 +87,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   value: T | null = null;
   disabled: boolean = false;
   open: boolean = false;
+  /** 加载中 */
+  loading: boolean = false;
   /** 是否启用搜索 */
   search: boolean = false;
   /** 搜索关键字 */
@@ -137,6 +142,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       value: this.value,
       value2: this.options.find((opt) => opt.value === this.value) ?? null,
       open: this.open,
+      loading: this.loading,
       disabled: this.disabled,
       placeholder: this.placeholder,
       required: false,
@@ -157,6 +163,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     const {
       id,
       defaultValue,
+      disabled = false,
       placeholder = "点击选择",
       options = [],
       onChange,
@@ -177,6 +184,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     if (id !== undefined) {
       this.id = id;
     }
+    this.disabled = disabled;
     this.value = defaultValue;
     this.defaultValue = defaultValue;
     this.placeholder = placeholder;
@@ -247,6 +255,20 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     // if (this.open) {
     //   return;
     // }
+    if (this.value !== null) {
+      const focused = this.options.find((opt) => opt.focused);
+      if (!focused || focused.value !== this.value) {
+        this.options = this.options.map((opt) => {
+          return {
+            label: opt.label,
+            value: opt.value,
+            selected: opt.selected,
+            focused: opt.value === this.value,
+          };
+        });
+      }
+    }
+    this.presence.show();
     this.popper.place();
     // await sleep(800);
     this.open = true;
@@ -367,6 +389,14 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.value = null;
     this.emit(Events.StateChange, { ...this.state });
     this.emit(Events.Change, this.value);
+  }
+  /** 设置加载状态 */
+  setLoading(loading: boolean) {
+    if (this.loading === loading) {
+      return;
+    }
+    this.loading = loading;
+    this.emit(Events.StateChange, { ...this.state });
   }
   /** 设置搜索关键字 */
   setSearchKeyword(keyword: string) {

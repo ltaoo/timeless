@@ -42,7 +42,7 @@ export function Select(
             return hasSelection ? "text-foreground" : "text-muted-foreground";
           }),
         }),
-        SelectPrimitive.Icon({ class: "size-4 text-muted-foreground" }, [
+        SelectPrimitive.Icon({ store, class: "size-4 text-muted-foreground" }, [
           ChevronDownOutlined({}),
         ]),
       ],

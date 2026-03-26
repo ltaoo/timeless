@@ -71,86 +71,19 @@ function FormRender(props) {
   });
 }
 
-function FieldDemoView() {
-  const field_card_name$ = new Timeless.ui.SingleFieldCore({
-    label: "Name on Card",
-    name: "card_name",
-    input: new Timeless.ui.InputCore({
-      defaultValue: "",
-      placeholder: "John Doe",
-    }),
-    rules: [{ required: true }],
-  });
-
-  const field_card_number$ = new Timeless.ui.SingleFieldCore({
-    label: "Card Number",
-    name: "card_number",
-    help: "Enter your 16-digit number.",
-    input: new Timeless.ui.InputCore({
-      defaultValue: "",
-      placeholder: "1234 5678 9012 3456",
-    }),
-    rules: [{ required: true }],
-  });
-
-  const field_cvv$ = new Timeless.ui.SingleFieldCore({
-    label: "CVV",
-    name: "cvv",
-    input: new Timeless.ui.InputCore({
-      defaultValue: "",
-      placeholder: "123",
-    }),
-    rules: [{ required: true }],
-  });
-
-  const month_options = Array.from({ length: 12 }, (_, i) => {
-    const v = String(i + 1).padStart(2, "0");
-    return { label: v, value: v };
-  });
-  const field_exp_month$ = new Timeless.ui.SingleFieldCore({
-    label: "Month",
-    name: "exp_month",
-    input: new Timeless.ui.SelectCore({
-      defaultValue: "",
-      placeholder: "MM",
-      options: month_options,
-    }),
-  });
-
-  const year_options = [2024, 2025, 2026, 2027, 2028, 2029].map((y) => ({
-    label: String(y),
-    value: String(y),
-  }));
-  const field_exp_year$ = new Timeless.ui.SingleFieldCore({
-    label: "Year",
-    name: "exp_year",
-    input: new Timeless.ui.SelectCore({
-      defaultValue: "",
-      placeholder: "YYYY",
-      options: year_options,
-    }),
-  });
-
-  const same_as_shipping$ = new Timeless.ui.CheckboxCore({});
-
-  const field_comments$ = new Timeless.ui.SingleFieldCore({
-    label: "Comments",
-    name: "comments",
-    input: new Timeless.ui.InputCore({
-      defaultValue: "",
-      placeholder: "Add any additional comments",
-    }),
-  });
-
-  const form$ = new Timeless.ui.ObjectFieldCore({
-    fields: {
-      card_name: field_card_name$,
-      card_number: field_card_number$,
-      exp_month: field_exp_month$,
-      exp_year: field_exp_year$,
-      cvv: field_cvv$,
-    },
-  });
+function FieldDemoView(stores) {
+  const {
+    field_card_name$,
+    field_card_number$,
+    field_cvv$,
+    field_exp_month$,
+    field_exp_year$,
+    same_as_shipping$,
+    field_comments$,
+    submit_configure_btn$,
+    cancel_btn$,
+    form$,
+  } = stores;
 
   return View({ class: "w-full max-w-md rounded-xl border p-6" }, [
     View({ class: "space-y-6" }, [
@@ -252,39 +185,107 @@ function FieldDemoView() {
 
       // Buttons
       View({ class: "flex items-center gap-2" }, [
-        Button(
-          {
-            store: new Timeless.ui.ButtonCore({
-              async onClick() {
-                const r = await form$.validate();
-                if (r.error) {
-                  console.error(r.error);
-                  return;
-                }
-                const values = r.data;
-                console.log(values);
-              },
-            }),
-          },
-          ["Submit"],
-        ),
-        Button(
-          {
-            store: new Timeless.ui.ButtonCore({
-              variant: "outline",
-              async onClick() {
-                form$.reset();
-              },
-            }),
-          },
-          ["Reset"],
-        ),
+        Button({ store: submit_configure_btn$ }, ["Submit"]),
+        Button({ store: cancel_btn$ }, ["Reset"]),
       ]),
     ]),
   ]);
 }
 
 export default function FormValidateView() {
+  const field_card_name$ = new Timeless.ui.SingleFieldCore({
+    label: "Name on Card",
+    name: "card_name",
+    input: new Timeless.ui.InputCore({
+      defaultValue: "",
+      placeholder: "John Doe",
+    }),
+    rules: [{ required: true }],
+  });
+  const field_card_number$ = new Timeless.ui.SingleFieldCore({
+    label: "Card Number",
+    name: "card_number",
+    help: "Enter your 16-digit number.",
+    input: new Timeless.ui.InputCore({
+      defaultValue: "",
+      placeholder: "1234 5678 9012 3456",
+    }),
+    rules: [{ required: true }],
+  });
+  const field_cvv$ = new Timeless.ui.SingleFieldCore({
+    label: "CVV",
+    name: "cvv",
+    input: new Timeless.ui.InputCore({
+      defaultValue: "",
+      placeholder: "123",
+    }),
+    rules: [{ required: true }],
+  });
+  const month_options = Array.from({ length: 12 }, (_, i) => {
+    const v = String(i + 1).padStart(2, "0");
+    return { label: v, value: v };
+  });
+  const field_exp_month$ = new Timeless.ui.SingleFieldCore({
+    label: "Month",
+    name: "exp_month",
+    input: new Timeless.ui.SelectCore({
+      defaultValue: "",
+      placeholder: "MM",
+      options: month_options,
+    }),
+  });
+  const year_options = [2024, 2025, 2026, 2027, 2028, 2029].map((y) => ({
+    label: String(y),
+    value: String(y),
+  }));
+  const field_exp_year$ = new Timeless.ui.SingleFieldCore({
+    label: "Year",
+    name: "exp_year",
+    input: new Timeless.ui.SelectCore({
+      defaultValue: "",
+      placeholder: "YYYY",
+      options: year_options,
+    }),
+  });
+  const same_as_shipping$ = new Timeless.ui.CheckboxCore({});
+  const field_same_as_shipping$ = new Timeless.ui.SingleFieldCore({
+    label: "Same as shipping address",
+    name: "same_as_shipping",
+    input: same_as_shipping$,
+  });
+  const field_comments$ = new Timeless.ui.SingleFieldCore({
+    label: "Comments",
+    name: "comments",
+    input: new Timeless.ui.InputCore({
+      defaultValue: "",
+      placeholder: "Add any additional comments",
+    }),
+  });
+  const form$ = new Timeless.ui.ObjectFieldCore({
+    fields: {
+      card_name: field_card_name$,
+      card_number: field_card_number$,
+      exp_month: field_exp_month$,
+      exp_year: field_exp_year$,
+      cvv: field_cvv$,
+      same_as_shipping: field_same_as_shipping$,
+      comments: field_comments$,
+    },
+  });
+
+  const panelsGroup = new Timeless.ui.ResizablePanelsCore({
+    direction: "vertical",
+  });
+  const topPanel = new Timeless.ui.ResizablePanelCore({
+    defaultSize: 75,
+    minSize: 50,
+    maxSize: 90,
+  });
+  const bottomPanel = new Timeless.ui.ResizablePanelCore({
+    defaultSize: 25,
+    minSize: 10,
+    maxSize: 50,
+  });
   const providers_configure = {
     qiniu: new Timeless.ui.ObjectFieldCore({
       fields: {
@@ -438,31 +439,132 @@ export default function FormValidateView() {
     }),
   });
 
-  return View({ class: "space-y-8 max-w-2xl" }, [
-    FieldDemoView(),
-    Separator({}),
-    Field({ store: field_provider$ }, [
-      Select({
-        id: `field-${field_provider$.name}`,
-        store: field_provider$.input,
-      }),
-    ]),
-    FormRender(configure$_),
-    Button(
+  const submit_configure_btn$ = new Timeless.ui.ButtonCore({
+    async onClick() {
+      const r = await configure$_.value.validate();
+      if (r.error) {
+        console.log(r.error);
+        return;
+      }
+      const values = r.data;
+      console.log(values);
+    },
+  });
+  const cancel_btn$ = new Timeless.ui.ButtonCore({
+    variant: "outline",
+    async onClick() {
+      form$.reset();
+    },
+  });
+
+  return View({ class: "h-[calc(100vh-120px)]" }, [
+    ResizablePanels(
       {
-        store: new Timeless.ui.ButtonCore({
-          async onClick() {
-            const r = await configure$_.value.validate();
-            if (r.error) {
-              console.log(r.error);
-              return;
-            }
-            const values = r.data;
-            console.log(values);
-          },
-        }),
+        store: panelsGroup,
+        direction: "vertical",
+        class: "w-full h-full",
       },
-      ["Submit"],
+      [
+        ResizablePanel(
+          {
+            store: topPanel,
+            group: panelsGroup,
+          },
+          [
+            View({ class: "space-y-8 p-6 overflow-y-auto h-full" }, [
+              FieldDemoView({
+                field_card_name$,
+                field_card_number$,
+                field_cvv$,
+                field_exp_month$,
+                field_exp_year$,
+                same_as_shipping$,
+                field_comments$,
+                submit_configure_btn$,
+                cancel_btn$,
+                form$,
+              }),
+              Separator({}),
+              Field({ store: field_provider$ }, [
+                Select({
+                  id: `field-${field_provider$.name}`,
+                  store: field_provider$.input,
+                }),
+              ]),
+              FormRender(configure$_),
+              Button({ store: submit_configure_btn$ }, ["Submit"]),
+            ]),
+          ],
+        ),
+        ResizableHandle({
+          store: panelsGroup,
+          panelBefore: topPanel,
+          panelAfter: bottomPanel,
+          withHandle: true,
+        }),
+        ResizablePanel(
+          {
+            store: bottomPanel,
+            group: panelsGroup,
+          },
+          [
+            View({ class: "h-full p-3 flex items-center gap-2" }, [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    onClick() {
+                      field_card_name$.input.focus();
+                    },
+                  }),
+                },
+                ["Focus Name on Card"],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    onClick() {
+                      field_exp_month$.input.show();
+                    },
+                  }),
+                },
+                ["Focus Month Select"],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    variant: "outline",
+                    async onClick() {
+                      submit_configure_btn$.setLoading(true);
+                      field_card_name$.input.setLoading(true);
+                      field_card_number$.input.setLoading(true);
+                      field_cvv$.input.setLoading(true);
+                      field_comments$.input.setLoading(true);
+                      try {
+                        await new Promise((r) => setTimeout(r, 1200));
+                        field_card_name$.input.setValue("John Doe");
+                        field_card_number$.input.setValue(
+                          "4242 4242 4242 4242",
+                        );
+                        field_cvv$.input.setValue("123");
+                        field_exp_month$.input.setValue("12");
+                        field_exp_year$.input.setValue("2029");
+                        field_comments$.input.setValue("Some test comments");
+                      } finally {
+                        submit_configure_btn$.setLoading(false);
+                        field_card_name$.input.setLoading(false);
+                        field_card_number$.input.setLoading(false);
+                        field_cvv$.input.setLoading(false);
+                        field_comments$.input.setLoading(false);
+                      }
+                    },
+                  }),
+                },
+                ["Loading data"],
+              ),
+            ]),
+          ],
+        ),
+      ],
     ),
   ]);
 }

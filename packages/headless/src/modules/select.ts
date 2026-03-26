@@ -5,6 +5,7 @@ import { View, ViewChildren, ViewProps } from "@/primitive/view";
 import { Show } from "@/primitive/show";
 import { NativeInput } from "@/native/input";
 import { h } from "@/util/h";
+import { LoaderOutlined } from "@timeless/icons";
 
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
@@ -46,16 +47,10 @@ export function Trigger(
       style:
         "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
       onFocus() {
-        // if (store.open) {
-        //   return;
-        // }
-        // store.presence.show();
-        // store.show();
         if (props.store.presence.state.visible) {
           return;
         }
-        props.store.presence.show();
-        props.store.popper.place();
+        props.store.show();
       },
       onClick(e) {
         e.stopPropagation();
@@ -126,11 +121,10 @@ export function Trigger(
           //   props.store.focus();
           // }
           if (props.store.presence.state.visible) {
-            props.store.presence.hide();
+            props.store.hide();
             return;
           }
-          props.store.presence.show();
-          props.store.popper.place();
+          props.store.show();
         });
 
         if (rest.onMounted) {
@@ -178,8 +172,26 @@ export function Value(
   );
 }
 
-export function Icon(props: ViewProps, children: ViewChildren) {
-  return View(props, children);
+export function Icon(
+  props: ViewProps & { store?: SelectCore<any> },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props as any;
+  if (!store) {
+    return View(rest, children);
+  }
+  const state_ = refobj(store.state);
+  store.onStateChange((v: any) => {
+    state_.as(v);
+  });
+  return h(
+    Show,
+    {
+      when: computed(state_, (s: any) => s.loading || false),
+      fallback: [View(rest, children)],
+    },
+    [View(rest, [h(LoaderOutlined, { class: "h-4 w-4 animate-spin" })])],
+  );
 }
 
 export function Portal(

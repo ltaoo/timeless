@@ -4,7 +4,6 @@ import { PopoverCore, Align, Side, getGlobalLayerManager } from "@timeless/ui";
 import { View, ViewChildren, ViewProps } from "../primitive/view";
 import { Fragment } from "../primitive/fragment";
 import { Portal as NativePortal } from "./portal";
-import { Arrow as NativeArrow } from "./arrow";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
 
@@ -124,19 +123,6 @@ export function Close(
       onClick() {
         props.store.hide();
       },
-    },
-    children,
-  );
-}
-
-export function Arrow(
-  props: ViewProps & { store: PopoverCore },
-  children?: ViewChildren,
-) {
-  return NativeArrow(
-    {
-      ...props,
-      store: props.store.popper,
     },
     children,
   );
