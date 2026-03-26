@@ -35,6 +35,8 @@ export type InputProps<T> = {
   autoFocus?: boolean;
   allowClear?: boolean;
   autoComplete?: boolean;
+  maxLength?: number;
+  minLength?: number;
   ignoreEnterEvent?: boolean;
   onChange?: (v: T) => void;
   onKeyDown?: (v: { key: string; preventDefault: () => void }) => void;
@@ -54,6 +56,8 @@ type InputState<T> = {
   allowClear: boolean;
   autoFocus: boolean;
   autoComplete: boolean;
+  maxLength?: number;
+  minLength?: number;
 };
 
 export class InputCore<T>
@@ -72,6 +76,8 @@ export class InputCore<T>
   isFocus = false;
   type = "text";
   loading = false;
+  maxLength?: number;
+  minLength?: number;
   /** 被消费过的值，用于做比较判断 input 值是否发生改变 */
   valueUsed: unknown;
   tmpType = "";
@@ -88,6 +94,8 @@ export class InputCore<T>
       autoComplete: this.autoComplete,
       autoFocus: this.autoFocus,
       allowClear: this.allowClear,
+      maxLength: this.maxLength,
+      minLength: this.minLength,
     };
   }
 
@@ -103,6 +111,8 @@ export class InputCore<T>
       autoFocus = false,
       autoComplete = false,
       allowClear = true,
+      maxLength,
+      minLength,
       ignoreEnterEvent = false,
       onChange,
       onBlur,
@@ -118,6 +128,8 @@ export class InputCore<T>
     this.disabled = disabled;
     this.autoComplete = autoComplete;
     this.allowClear = allowClear;
+    this.maxLength = maxLength;
+    this.minLength = minLength;
     this.ignoreEnterEvent = ignoreEnterEvent;
     this.autoFocus = autoFocus;
     this.defaultValue = defaultValue;

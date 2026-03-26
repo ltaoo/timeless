@@ -34,7 +34,10 @@
       "Bash(./release.sh invalid-version:*)",
       "Bash(cat /Users/mayfair/Documents/other/timeless/packages/shadcn/dist/timeless.shadcn.css | tr ';' '\\\\n' | grep -E 'border-color|outline-color|background-color|@layer' | head -20)",
       "Bash(cat /Users/mayfair/Documents/other/timeless/packages/shadcn/dist/timeless.shadcn.css | tr '{}' '\\\\n' | grep 'border-input')",
-      "Bash(cat /Users/mayfair/Documents/other/timeless/node_modules/.pnpm/shadcn@4.1.0_@types+node@25.0.9_typescript@5.9.3/node_modules/shadcn/dist/tailwind.css 2>/dev/null || find /Users/mayfair/Documents/other/timeless/node_modules -path \"*/shadcn/dist/tailwind.css\" -exec cat {} \\\\; 2>/dev/null | head -100)"
+      "Bash(cat /Users/mayfair/Documents/other/timeless/node_modules/.pnpm/shadcn@4.1.0_@types+node@25.0.9_typescript@5.9.3/node_modules/shadcn/dist/tailwind.css 2>/dev/null || find /Users/mayfair/Documents/other/timeless/node_modules -path \"*/shadcn/dist/tailwind.css\" -exec cat {} \\\\; 2>/dev/null | head -100)",
+      "Bash(cat /Users/mayfair/Documents/other/timeless/apps/web-vanilla/public/timeless/0.3.0/timeless.shadcn.css | tr '{' '\\\\n{' | grep -A1 'data-theme\\\\|\\\\.dark' | head -40)",
+      "Bash(cat /Users/mayfair/Documents/other/timeless/apps/web-vanilla/public/timeless/0.3.0/timeless.shadcn.css | tr '{' '\\\\n{' | grep -B1 -A1 ':root\\\\b' | head -20)",
+      "Bash(cat /Users/mayfair/Documents/other/timeless/apps/web-vanilla/public/timeless/0.3.0/timeless.shadcn.css | tr '{' '\\\\n{' | grep -A1 'data-theme=dark' | head -10)"
     ]
   }
 }

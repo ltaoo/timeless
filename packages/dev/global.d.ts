@@ -2437,6 +2437,8 @@ declare module "packages/ui/src/input/index" {
         autoFocus?: boolean;
         allowClear?: boolean;
         autoComplete?: boolean;
+        maxLength?: number;
+        minLength?: number;
         ignoreEnterEvent?: boolean;
         onChange?: (v: T) => void;
         onKeyDown?: (v: {
@@ -2459,6 +2461,8 @@ declare module "packages/ui/src/input/index" {
         allowClear: boolean;
         autoFocus: boolean;
         autoComplete: boolean;
+        maxLength?: number;
+        minLength?: number;
     };
     export class InputCore<T> extends BaseDomain<TheTypesOfEvents<T>> implements ValueInputInterface<T> {
         shape: "input";
@@ -2473,6 +2477,8 @@ declare module "packages/ui/src/input/index" {
         isFocus: boolean;
         type: string;
         loading: boolean;
+        maxLength?: number;
+        minLength?: number;
         /** 被消费过的值，用于做比较判断 input 值是否发生改变 */
         valueUsed: unknown;
         tmpType: string;
@@ -8112,16 +8118,9 @@ declare module "packages/headless/src/modules/textarea" {
         onUnmounted(): void;
     };
     export function Textarea(props: ViewProps & {
+        id?: string | undefined;
         store: InputCore<any>;
-        id?: string;
-    }): {
-        t: string;
-        $elm: HTMLTextAreaElement;
-        render(): HTMLTextAreaElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): any;
     export function Value(props: ViewProps & {
         store: InputCore<any>;
     }, children?: ViewChildren): {
@@ -8141,6 +8140,15 @@ declare module "packages/headless/src/modules/textarea" {
         onUnmounted(): void;
     };
     export function Loading(props: ViewProps & {
+        store: InputCore<any>;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Count(props: ViewProps & {
         store: InputCore<any>;
     }, children?: ViewChildren): {
         t: string;
@@ -9082,6 +9090,7 @@ declare module "packages/headless/src/modules/time-picker" {
 declare module "packages/headless/src/modules/checkbox" {
     import { CheckboxCore } from "packages/ui/src/index";
     import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    import { NativeInputProps } from "packages/headless/src/native/input";
     export function Root(props: ViewProps & {
         store: CheckboxCore;
     }, children?: ViewChildren): {
@@ -9108,6 +9117,16 @@ declare module "packages/headless/src/modules/checkbox" {
         $elm: any;
         cleanup(): void;
         render(): DocumentFragment;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Input(props: NativeInputProps & {
+        store: CheckboxCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: HTMLInputElement;
+        render(): HTMLInputElement;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -12099,6 +12118,8 @@ declare module "packages/shadcn/src/modules/textarea" {
         id?: string;
         showClear?: boolean;
         showLoading?: boolean;
+        showCount?: boolean;
+        max: number;
     }): {
         t: string;
         $elm: HTMLElement;
@@ -12162,6 +12183,7 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
     };
 }
 declare module "packages/shadcn/src/modules/radio" {
+    import { ViewProps } from "packages/headless/src/index";
     import { RadioGroupCore, RadioCore } from "packages/ui/src/index";
     export function Radio(props: {
         store: RadioCore;
@@ -12173,7 +12195,7 @@ declare module "packages/shadcn/src/modules/radio" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
-    export function RadioGroup(props: {
+    export function RadioGroup(props: ViewProps & {
         store: RadioGroupCore<any>;
         class?: string;
         itemClass?: string;
@@ -12726,17 +12748,7 @@ declare module "packages/shadcn/src/modules/table" {
 }
 declare module "packages/shadcn/src/modules/form" {
     import { ViewProps, ViewChildren } from "packages/headless/src/index";
-    import { SingleFieldCore, ObjectFieldCore, ArrayFieldCore } from "packages/ui/src/index";
-    export function Field(props: ViewProps & {
-        store: SingleFieldCore<any>;
-        autoRender?: boolean;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: HTMLElement;
-        render(): HTMLElement;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    import { ObjectFieldCore, ArrayFieldCore } from "packages/ui/src/index";
     export function Form(props: ViewProps & {
         store: ObjectFieldCore<any> | ArrayFieldCore<any>;
     }, children?: ViewChildren): {
@@ -12749,6 +12761,75 @@ declare module "packages/shadcn/src/modules/form" {
         t: string;
         $elm: any;
         render(): DocumentFragment;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/shadcn/src/modules/field" {
+    import { ViewProps, ViewChildren } from "packages/headless/src/index";
+    import { SingleFieldCore } from "packages/ui/src/index";
+    export function FieldGroup(props: ViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function FieldSet(props: ViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function FieldLegend(props: ViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function FieldDescription(props: ViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function FieldSeparator(props?: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function FieldLabel(props: ViewProps & {
+        store?: SingleFieldCore<any>;
+        htmlFor?: string;
+        weight?: "normal" | "medium";
+        tone?: "default" | "destructive";
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Field(props: (ViewProps & {
+        store: SingleFieldCore<any>;
+        autoRender?: boolean;
+        orientation?: "vertical" | "horizontal";
+        hideLabel?: boolean;
+        id?: string;
+    }) | (ViewProps & {
+        store?: undefined;
+        orientation?: "vertical" | "horizontal";
+    }), children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
         onUnmounted(): void;
     };
 }
@@ -12848,7 +12929,8 @@ declare module "packages/shadcn/src/index" {
     import { AspectRatio } from "packages/shadcn/src/modules/aspect-ratio";
     import { Accordion } from "packages/shadcn/src/modules/accordion";
     import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "packages/shadcn/src/modules/table";
-    import { Field, Form } from "packages/shadcn/src/modules/form";
+    import { Form } from "packages/shadcn/src/modules/form";
+    import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from "packages/shadcn/src/modules/field";
     import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/shadcn/src/modules/resizable-panels";
     import { Waterfall } from "packages/shadcn/src/modules/waterfall";
     import { HistoryPanel } from "packages/shadcn/src/modules/history-panel";
@@ -12859,7 +12941,7 @@ declare module "packages/shadcn/src/index" {
     export * from "packages/reactive/src/index";
     export * as icons from "packages/icons/src/index";
     export * as kit from "packages/kit/src/index";
-    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, Cascader, DatePicker, DateRangePicker, TimePicker, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, };
+    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, Cascader, DatePicker, DateRangePicker, TimePicker, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, };
 }
 
 // === Package module aliases ===
@@ -12939,7 +13021,13 @@ declare const DropdownMenu: typeof import("@timeless/shadcn").DropdownMenu;
 declare const DropdownMenuPrimitive: typeof import("@timeless/shadcn").DropdownMenuPrimitive;
 declare const Ellipse: typeof import("@timeless/shadcn").Ellipse;
 declare const Field: typeof import("@timeless/shadcn").Field;
+declare const FieldDescription: typeof import("@timeless/shadcn").FieldDescription;
+declare const FieldGroup: typeof import("@timeless/shadcn").FieldGroup;
+declare const FieldLabel: typeof import("@timeless/shadcn").FieldLabel;
+declare const FieldLegend: typeof import("@timeless/shadcn").FieldLegend;
 declare const FieldPrimitive: typeof import("@timeless/shadcn").FieldPrimitive;
+declare const FieldSeparator: typeof import("@timeless/shadcn").FieldSeparator;
+declare const FieldSet: typeof import("@timeless/shadcn").FieldSet;
 declare const Flex: typeof import("@timeless/shadcn").Flex;
 declare const For: typeof import("@timeless/shadcn").For;
 declare const Form: typeof import("@timeless/shadcn").Form;

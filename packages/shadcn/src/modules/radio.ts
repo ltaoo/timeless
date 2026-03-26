@@ -9,36 +9,38 @@ export function Radio(props: { store: RadioCore; id?: string }) {
     state.as(store.state);
   });
 
-  return RadioPrimitive.Box(
-    {
-      store,
-      id,
-      class: cn([
-        "peer relative flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border outline-none cursor-pointer after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
-        computed(state, (s) =>
-          s.checked
-            ? "border-primary bg-primary text-primary-foreground dark:bg-primary"
-            : "border-input dark:bg-input/30",
-        ),
-        computed(state, (s) =>
-          s.disabled ? "opacity-50 cursor-not-allowed" : "",
-        ),
-      ]),
-      onUnmounted() {
-        unsub();
+  return RadioPrimitive.Root({ store }, [
+    RadioPrimitive.Input({ store, id }),
+    RadioPrimitive.Box(
+      {
+        store,
+        class: cn([
+          "peer relative flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border outline-none cursor-pointer after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+          computed(state, (s) =>
+            s.checked
+              ? "border-primary bg-primary text-primary-foreground dark:bg-primary"
+              : "border-input dark:bg-input/30",
+          ),
+          computed(state, (s) =>
+            s.disabled ? "opacity-50 cursor-not-allowed" : "",
+          ),
+        ]),
+        onUnmounted() {
+          unsub();
+        },
       },
-    },
-    [
-      RadioPrimitive.Indicator({ store }, [
-        View(
-          {
-            class: "size-2 rounded-full bg-primary-foreground",
-          },
-          [],
-        ),
-      ]),
-    ],
-  );
+      [
+        RadioPrimitive.Indicator({ store }, [
+          View(
+            {
+              class: "size-2 rounded-full bg-primary-foreground",
+            },
+            [],
+          ),
+        ]),
+      ],
+    ),
+  ]);
 }
 
 export function RadioGroup(
@@ -106,7 +108,7 @@ export function RadioGroupItem(props: {
       Radio({ id: item.value, store: item.core }),
       View(
         {
-          htmlFor: item.value,
+          for: item.value,
           as: "label",
           class:
             "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",

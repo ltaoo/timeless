@@ -7,8 +7,8 @@
     "build:prosemirror": "rollup --config rollup.config.js",
     "build:prosemirror:dts": "rollup --config rollup.dts.config.js",
     "build:editor": "rollup --config rollup.editor.config.js",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^29.0.0",

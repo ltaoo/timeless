@@ -113,7 +113,7 @@ export function Cascader(
               each: computed(state_, (d) => d.panels),
               key: "key",
               render(
-                panel: {
+                _panel: {
                   key: string;
                   options: (CascaderOption<any> & {
                     selected: boolean;

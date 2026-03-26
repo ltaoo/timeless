@@ -96,9 +96,7 @@ export function Dialog(
                     "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
                 },
                 [
-                  Button({ store: store.cancelBtn, variant: "outline" }, [
-                    "取消",
-                  ]),
+                  Button({ store: store.cancelBtn }, ["取消"]),
                   Button({ store: store.okBtn }, ["确认"]),
                 ],
               ),

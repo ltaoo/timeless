@@ -36,7 +36,10 @@ export function Select(
         SelectPrimitive.Value({
           store,
           class: computed(state_, (d) => {
-            return d.value != null
+            const hasSelection =
+              d.value != null &&
+              (d.options || []).some((o) => o.value === d.value);
+            return hasSelection
               ? "text-foreground"
               : "text-muted-foreground";
           }),
@@ -76,7 +79,7 @@ export function Select(
                     const isFocused = Boolean(opt?.focused);
                     const isSelected = Boolean(opt?.selected);
                     return [
-                      "relative flex w-full cursor-default select-none items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                      "relative flex w-full cursor-default select-none items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
                       isSelected ? "font-medium" : "",
                       isFocused ? "bg-accent text-accent-foreground" : "",
                     ]

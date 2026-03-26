@@ -52,7 +52,16 @@ import {
   TableHead,
   TableCell,
 } from "./modules/table";
-import { Field, Form } from "./modules/form";
+import { Form } from "./modules/form";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+} from "./modules/field";
 import {
   ResizablePanels,
   ResizablePanel,
@@ -126,6 +135,12 @@ export {
   TableHead,
   TableCell,
   Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
   Form,
   ResizablePanels,
   ResizablePanel,

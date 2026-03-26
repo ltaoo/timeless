@@ -3,6 +3,7 @@ import { CheckboxCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "../primitive/view";
 import { Show } from "../primitive/show";
+import { NativeInput, NativeInputProps } from "../native/input";
 
 export function Root(
   props: ViewProps & { store: CheckboxCore },
@@ -10,15 +11,7 @@ export function Root(
 ) {
   const { store, ...rest } = props;
 
-  return View(
-    {
-      ...rest,
-      onUnmounted() {
-        if (rest.onUnmounted) rest.onUnmounted();
-      },
-    },
-    children,
-  );
+  return Fragment({}, children);
 }
 
 export function Box(
@@ -32,12 +25,15 @@ export function Box(
   return View(
     {
       ...rest,
+      as: "button",
       onClick(e) {
         if (rest.onClick) rest.onClick(e);
         store.toggle();
       },
-      // "data-checked": computed(state, (d) => (d.checked ? "" : undefined)),
-      // "data-disabled": computed(state, (d) => (d.disabled ? "" : undefined)),
+      dataset: {
+        checked: computed(state, (d) => (d.checked ? "" : undefined)),
+        disabled: computed(state, (d) => (d.disabled ? "" : undefined)),
+      },
       onMounted() {
         events.push(
           store.onStateChange(() => {
@@ -71,7 +67,7 @@ export function Indicator(
 
   return Show(
     {
-      when: computed(state_, (d) => d.checked),
+      when: computed(state_, (d) => !!d.checked),
       onMounted() {
         events.push(
           store.onStateChange(() => {
@@ -94,39 +90,43 @@ export function Indicator(
   );
 }
 
-export function Label(
-  props: ViewProps & { htmlFor?: string; store?: CheckboxCore },
-  children?: ViewChildren,
+export function Input(
+  props: NativeInputProps & { store: CheckboxCore; id?: string },
 ) {
-  const { htmlFor, store, ...rest } = props;
+  const { store, id, ...rest } = props;
   const events: any[] = [];
 
-  // 如果提供了 store，创建隐藏的 input 用于可访问性
-  const hiddenInput = store
-    ? View(
-        {
-          as: "input",
-          type: "checkbox",
-          id: htmlFor,
-          style:
-            "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
-          onClick(e) {
-            e.stopPropagation();
-            store.toggle();
-          },
-          onMounted($elm: HTMLInputElement) {
-            $elm.checked = !!store.state.checked;
-            events.push(
-              store.onStateChange(() => {
-                $elm.checked = !!store.state.checked;
-              }),
-            );
-          },
-        },
-        [],
-      )
-    : null;
+  return NativeInput({
+    ...rest,
+    type: "checkbox",
+    id,
+    style:
+      "position: absolute; pointer-events: none; opacity: 0; margin: 0px; transform: translateX(-100%); width: 16px; height: 16px;",
+    onChange() {
+      store.toggle();
+    },
+    onMounted($elm: HTMLInputElement) {
+      $elm.checked = !!store.state.checked;
+      events.push(
+        store.onStateChange(() => {
+          $elm.checked = !!store.state.checked;
+        }),
+      );
+      if (rest.onMounted) rest.onMounted($elm);
+    },
+    onUnmounted() {
+      for (const fn of events) if (typeof fn === "function") fn();
+      if (rest.onUnmounted) rest.onUnmounted();
+    },
+  });
+}
 
+export function Label(
+  props: ViewProps & { for?: string; store?: CheckboxCore },
+  children?: ViewChildren,
+) {
+  const { for: htmlFor, store, ...rest } = props;
+  const events: any[] = [];
   return View(
     {
       ...rest,
@@ -136,12 +136,13 @@ export function Label(
         if (rest.onUnmounted) rest.onUnmounted();
       },
     },
-    hiddenInput ? [hiddenInput, ...(children || [])] : children,
+    children,
   );
 }
 
 // CheckboxGroup primitives
 import { CheckboxGroupCore } from "@timeless/ui";
+import { Fragment } from "@/primitive/fragment";
 
 export function Group(
   props: ViewProps & { store: CheckboxGroupCore<any> },

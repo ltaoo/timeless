@@ -3,22 +3,14 @@ import { RadioCore, RadioGroupCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "../primitive/view";
 import { Show } from "../primitive/show";
+import { NativeInput, NativeInputProps } from "../native/input";
+import { Fragment } from "@/primitive/fragment";
 
 export function Root(
   props: ViewProps & { store: RadioCore },
   children?: ViewChildren,
 ) {
-  const { store, ...rest } = props;
-
-  return View(
-    {
-      ...rest,
-      onUnmounted() {
-        if (rest.onUnmounted) rest.onUnmounted();
-      },
-    },
-    children,
-  );
+  return Fragment({}, children);
 }
 
 export function Box(
@@ -86,11 +78,42 @@ export function Indicator(
   );
 }
 
+export function Input(
+  props: NativeInputProps & { store: RadioCore; id?: string },
+) {
+  const { store, id, ...rest } = props;
+  const events: any[] = [];
+
+  return NativeInput({
+    ...rest,
+    type: "radio",
+    id,
+    style:
+      "position: absolute; pointer-events: none; opacity: 0; margin: 0px; transform: translateX(-100%); width: 16px; height: 16px;",
+    onChange() {
+      store.check();
+    },
+    onMounted($elm: HTMLInputElement) {
+      $elm.checked = !!store.state.checked;
+      events.push(
+        store.onStateChange(() => {
+          $elm.checked = !!store.state.checked;
+        }),
+      );
+      if (rest.onMounted) rest.onMounted($elm);
+    },
+    onUnmounted() {
+      for (const fn of events) if (typeof fn === "function") fn();
+      if (rest.onUnmounted) rest.onUnmounted();
+    },
+  });
+}
+
 export function Label(
-  props: ViewProps & { htmlFor?: string; store?: RadioCore },
+  props: ViewProps & { for?: string; store?: RadioCore },
   children?: ViewChildren,
 ) {
-  const { htmlFor, store, ...rest } = props;
+  const { for: htmlFor, store, ...rest } = props;
   const events: any[] = [];
 
   // const hiddenInput = store

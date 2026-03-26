@@ -5,6 +5,7 @@ export default [
     ignores: ["node_modules/", "dist/", "build/", "public/"],
   },
   {
+    files: ["**/*.{js,mjs,cjs}"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

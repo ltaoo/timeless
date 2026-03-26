@@ -18,7 +18,7 @@ export interface ViewProps {
   style?: string | Ref<string> | StyleRef;
   class?: string | Ref<string> | ClassNameRef;
   dataset?: Record<string, string>;
-  htmlFor?: string;
+  for?: string;
   "tab-index"?: number | Ref<number | undefined>;
   tabindex?: number | Ref<number | undefined>;
   onMounted?(
@@ -78,6 +78,7 @@ export function View(
     onDragLeave,
     onDrop,
     draggable,
+    for: htmlFor,
     ...rest
   } = props;
   let onMountedCleanup: (() => void) | undefined;
@@ -124,6 +125,10 @@ export function View(
           $elm.setAttribute(`data-${k}`, dataset[k]);
         }
       });
+
+      if (htmlFor) {
+        $elm.setAttribute("for", htmlFor);
+      }
 
       if (cls) {
         if (typeof cls === "string") {
