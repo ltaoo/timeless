@@ -114,7 +114,7 @@ export default function HomePageView(props) {
               group: panelsGroup,
             },
             [
-              View({ class: "overflow-y-auto h-full" }, [
+              View({ class: "overflow-hidden h-full" }, [
                 KeepAliveSubViews({
                   ...props,
                 }),

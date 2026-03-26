@@ -5,70 +5,72 @@ function FormRender(props) {
     }
     return Object.keys(t.fields);
   });
-  return For({
-    each: field_names,
-    render(name) {
-      if (!props.value.fields) {
-        return null;
-      }
-      const field$ = props.value.fields[name];
-      if (!field$) {
-        return null;
-      }
-      const fid = `field-${name}`;
-      const inline = ["checkbox"].includes(field$.input.shape);
-      return View(
-        {
-          class: cn([
-            "t-form-item gap-2",
-            inline ? "flex items-center" : "flex flex-col",
-          ]),
-          // inline: ["checkbox"].includes(field$.input.shape)
-        },
-        [
-          Show({ when: !inline }, [
-            h(FieldLabel, {
-              for: fid,
-              store: field$,
-            }),
-          ]),
-          Match(
-            {
-              when: computed(field$, (t) => {
-                return t.input.shape;
+  return View({ class: "space-y-8" }, [
+    For({
+      each: field_names,
+      render(name) {
+        if (!props.value.fields) {
+          return null;
+        }
+        const field$ = props.value.fields[name];
+        if (!field$) {
+          return null;
+        }
+        const fid = `field-${name}`;
+        const inline = ["checkbox"].includes(field$.input.shape);
+        return View(
+          {
+            class: cn([
+              "t-form-item gap-2",
+              inline ? "flex items-center" : "flex flex-col",
+            ]),
+            // inline: ["checkbox"].includes(field$.input.shape)
+          },
+          [
+            Show({ when: !inline }, [
+              h(FieldLabel, {
+                for: fid,
+                store: field$,
               }),
-            },
-            [
-              Case("select", [
-                h(Select, {
-                  id: fid,
-                  store: field$.input,
+            ]),
+            Match(
+              {
+                when: computed(field$, (t) => {
+                  return t.input.shape;
                 }),
-              ]),
-              Case("input", [
-                h(Input, {
-                  id: fid,
-                  store: field$.input,
-                }),
-              ]),
-              Case("checkbox", [
-                h(Checkbox, {
-                  id: fid,
-                  store: field$.input,
-                }),
-              ]),
-            ],
-          ),
-          Show({ when: inline }, [
-            h(FieldLabel, {
-              for: fid,
-              store: field$,
-            }),
-          ]),
-        ],
-      );
-    },
-  });
+              },
+              [
+                Case("select", [
+                  h(Select, {
+                    id: fid,
+                    store: field$.input,
+                  }),
+                ]),
+                Case("input", [
+                  h(Input, {
+                    id: fid,
+                    store: field$.input,
+                  }),
+                ]),
+                Case("checkbox", [
+                  h(Checkbox, {
+                    id: fid,
+                    store: field$.input,
+                  }),
+                ]),
+              ],
+            ),
+            Show({ when: inline }, [
+              h(FieldLabel, {
+                for: fid,
+                store: field$,
+              }),
+            ]),
+          ],
+        );
+      },
+    }),
+  ]);
 }
 
 function FieldDemoView(stores) {
@@ -457,7 +459,7 @@ export default function FormValidateView() {
     },
   });
 
-  return View({ class: "h-[calc(100vh-120px)]" }, [
+  return View({ class: "w-full h-full min-w-0 min-h-0 overflow-hidden" }, [
     ResizablePanels(
       {
         store: panelsGroup,
@@ -469,9 +471,10 @@ export default function FormValidateView() {
           {
             store: topPanel,
             group: panelsGroup,
+            class: "min-h-0",
           },
           [
-            View({ class: "space-y-8 p-6 overflow-y-auto h-full" }, [
+            View({ class: "space-y-8 p-6 overflow-y-auto h-full min-h-0" }, [
               FieldDemoView({
                 field_card_name$,
                 field_card_number$,
@@ -506,9 +509,10 @@ export default function FormValidateView() {
           {
             store: bottomPanel,
             group: panelsGroup,
+            class: "min-h-0",
           },
           [
-            View({ class: "h-full p-3 flex items-center gap-2" }, [
+            View({ class: "p-3 flex items-center gap-2" }, [
               Button(
                 {
                   store: new Timeless.ui.ButtonCore({
