@@ -16,8 +16,6 @@ import {
   ChevronRightOutlined,
 } from "@timeless/icons";
 
-import { ScrollView } from "./scroll-view";
-
 export function DateTimePicker(
   props: ViewProps & {
     date: DatePickerCore;

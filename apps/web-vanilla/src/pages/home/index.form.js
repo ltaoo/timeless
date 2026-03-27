@@ -3,6 +3,66 @@ import { Section, Item } from "@/components/index.js";
 export default function FormView() {
   const view$ = new Timeless.ui.ScrollViewCore({});
 
+  const searchSelect$ = new Timeless.ui.SelectCore({
+    defaultValue: null,
+    placeholder: "输入关键词搜索",
+    options: [],
+    search: false,
+    searchPlaceholder: "输入水果名...",
+  });
+
+  const mockClient = new Timeless.HttpClientCore({});
+  mockClient.fetch = async (options) => {
+    await new Promise((r) => setTimeout(r, 400));
+    const url = new URL(options.url, "http://localhost");
+    const keyword = (url.searchParams.get("keyword") || "").toLowerCase();
+    const all = [
+      { value: "apple", label: "苹果" },
+      { value: "banana", label: "香蕉" },
+      { value: "orange", label: "橙子" },
+      { value: "grape", label: "葡萄" },
+      { value: "watermelon", label: "西瓜" },
+      { value: "peach", label: "桃子" },
+      { value: "pear", label: "梨" },
+      { value: "strawberry", label: "草莓" },
+    ];
+    const matched = keyword
+      ? all.filter((o) => {
+          const v = String(o.value).toLowerCase();
+          const l = String(o.label).toLowerCase();
+          return v.includes(keyword) || l.includes(keyword);
+        })
+      : [];
+    return {
+      data: {
+        options: matched.slice(0, 8),
+      },
+    }
+  };
+
+  const request = Timeless.kit.request_factory({
+    headers: { "Content-Type": "application/json" },
+  });
+  const searchSelectOptionsReq = new Timeless.kit.RequestCore(
+    (params) => request.get("/api/mock/select/search", params),
+    {
+      client: mockClient,
+      process(r) {
+        if (r.error) return r.error;
+        const options = r.data?.options || [];
+        return Timeless.Result.Ok(options);
+      },
+    },
+  );
+
+  async function fetchSearchSelectOptions(keyword) {
+    const r = await searchSelectOptionsReq.run({ keyword });
+    if (r.error) {
+      return [];
+    }
+    return r.data;
+  }
+
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
       Section("Input", [
@@ -108,6 +168,16 @@ export default function FormView() {
               ],
             }),
           }),
+        ]),
+        Item("Search Remote", [
+          View({ class: "space-y-2 w-[240px]" }, [
+            SearchSelect({
+              store: searchSelect$,
+              fetchOptions: fetchSearchSelectOptions,
+              minLength: 1,
+              debounce: 300,
+            }),
+          ]),
         ]),
       ]),
       Section("Cascader", [

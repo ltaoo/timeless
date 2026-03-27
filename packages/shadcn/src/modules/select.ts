@@ -1,5 +1,5 @@
 import { cn, computed, refobj } from "@timeless/reactive";
-import { SelectPrimitive, For, ViewProps } from "@timeless/headless";
+import { SelectPrimitive, For, ViewProps, Show, View } from "@timeless/headless";
 import { SelectCore } from "@timeless/ui";
 import { CheckOutlined, ChevronDownOutlined } from "@timeless/icons";
 
@@ -64,46 +64,62 @@ export function Select(
       },
       [
         SelectPrimitive.Viewport({ store, class: "p-1" }, [
-          For({
-            key: "value",
-            each: computed(state_, (t) => t.options),
-            render(option: any) {
-              return SelectPrimitive.Item(
-                {
-                  store,
-                  value: option.value,
-                  class: cn([
-                    "relative flex w-full cursor-default select-none items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
-                    computed(state_, (d) => {
-                      const opt = d.options.find(
-                        (o) => o.value === option.value,
-                      );
-                      const isFocused = Boolean(opt?.focused);
-                      const isSelected = Boolean(opt?.selected);
-                      return [
-                        isSelected ? "font-medium" : "",
-                        isFocused ? "bg-accent text-accent-foreground" : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ");
-                    }),
-                  ]),
-                },
-                [
-                  SelectPrimitive.ItemIndicator(
+          Show(
+            {
+              when: computed(state_, (t) => (t.options || []).length > 0),
+              fallback: [
+                View(
+                  {
+                    class:
+                      "py-6 text-center text-sm text-muted-foreground select-none",
+                  },
+                  [computed(state_, (t) => (t.loading ? "加载中..." : "暂无数据"))],
+                ),
+              ],
+            },
+            [
+              For({
+                key: "value",
+                each: computed(state_, (t) => t.options),
+                render(option: any) {
+                  return SelectPrimitive.Item(
                     {
                       store,
                       value: option.value,
-                      class:
-                        "pointer-events-none absolute right-2 flex size-4 items-center justify-center",
+                      class: cn([
+                        "relative flex w-full cursor-default select-none items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+                        computed(state_, (d) => {
+                          const opt = d.options.find(
+                            (o) => o.value === option.value,
+                          );
+                          const isFocused = Boolean(opt?.focused);
+                          const isSelected = Boolean(opt?.selected);
+                          return [
+                            isSelected ? "font-medium" : "",
+                            isFocused ? "bg-accent text-accent-foreground" : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ");
+                        }),
+                      ]),
                     },
-                    [CheckOutlined({})],
-                  ),
-                  SelectPrimitive.ItemText({}, [option.label]),
-                ],
-              );
-            },
-          }),
+                    [
+                      SelectPrimitive.ItemIndicator(
+                        {
+                          store,
+                          value: option.value,
+                          class:
+                            "pointer-events-none absolute right-2 flex size-4 items-center justify-center",
+                        },
+                        [CheckOutlined({})],
+                      ),
+                      SelectPrimitive.ItemText({}, [option.label]),
+                    ],
+                  );
+                },
+              }),
+            ],
+          ),
         ]),
       ],
     ),
