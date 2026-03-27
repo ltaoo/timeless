@@ -1,4 +1,4 @@
-import { computed, refobj } from "@timeless/reactive";
+import { cn, combine, computed, refobj } from "@timeless/reactive";
 import {
   TimePickerPrimitive,
   For,
@@ -6,8 +6,9 @@ import {
   ViewProps,
   Show,
   h,
+  ScrollViewPrimitive,
 } from "@timeless/headless";
-import { TimePickerCore } from "@timeless/ui";
+import { ScrollViewCore, TimePickerCore } from "@timeless/ui";
 import { ClockOutlined } from "@timeless/icons";
 
 export function TimePicker(
@@ -27,6 +28,40 @@ export function TimePicker(
   store.$presence.onStateChange((v) => {
     presence_.as(v);
   });
+
+  const empty_time_text = store.showSeconds ? "--:--:--" : "--:--";
+  const item_height = 32;
+  const scroll_padding_items = 2;
+
+  const hourview$ = new ScrollViewCore({});
+  const minuteview$ = new ScrollViewCore({});
+  const secondview$ = new ScrollViewCore({});
+
+  function format_temp_time(s: {
+    t_hour: number | null;
+    t_minute: number | null;
+    t_second: number | null;
+  }) {
+    if (s.t_hour == null || s.t_minute == null) {
+      return empty_time_text;
+    }
+    if (store.showSeconds && s.t_second == null) {
+      return empty_time_text;
+    }
+    const h = String(s.t_hour).padStart(2, "0");
+    const m = String(s.t_minute).padStart(2, "0");
+    if (store.showSeconds) {
+      const sec = String(s.t_second).padStart(2, "0");
+      return `${h}:${m}:${sec}`;
+    }
+    return `${h}:${m}`;
+  }
+
+  function scroll_to_index(view$: ScrollViewCore, index: number) {
+    const safeIndex = index >= 0 ? index : 0;
+    const top = Math.max(0, (safeIndex - scroll_padding_items) * item_height);
+    view$.scrollTo({ top });
+  }
 
   return TimePickerPrimitive.Root({ store }, [
     TimePickerPrimitive.Trigger(
@@ -52,10 +87,9 @@ export function TimePicker(
               : "text-muted-foreground";
           }),
         }),
-        TimePickerPrimitive.Icon(
-          { class: "size-4 text-muted-foreground" },
-          [ClockOutlined({})],
-        ),
+        TimePickerPrimitive.Icon({ class: "size-4 text-muted-foreground" }, [
+          ClockOutlined({}),
+        ]),
       ],
     ),
     TimePickerPrimitive.Content(
@@ -67,95 +101,161 @@ export function TimePicker(
         },
         store,
         class:
-          "cn-menu-target cn-menu-translucent z-50 w-auto p-3 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
+          "cn-menu-target cn-menu-translucent z-50 w-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
       [
-        TimePickerPrimitive.TimePanel({ store, class: "flex flex-col gap-2" }, [
-          View({ class: "flex gap-1" }, [
-            // Hour Column
-            View(
-              {
-                class: "flex flex-col h-48 overflow-y-auto",
-              },
-              [
-                For({
-                  each: store.generateHours(),
-                  render(hour) {
-                    return TimePickerPrimitive.HourItem(
-                      {
-                        store,
-                        value: hour,
-                        class: computed(state_, (s) => {
-                          const isSelected = s.tempHour === hour;
-                          const baseClass =
-                            "w-12 h-8 text-sm rounded-md transition-colors outline-hidden";
-                          if (isSelected) {
-                            return `${baseClass} bg-primary text-primary-foreground`;
-                          }
-                          return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
-                        }),
-                      },
-                      [String(hour).padStart(2, "0")],
-                    );
+        View(
+          {
+            as: "style",
+          },
+          [
+            `
+            .overlay-scrollbar { scrollbar-width: none; }
+            .overlay-scrollbar::-webkit-scrollbar { width: 0; height: 0; }
+            .overlay-scrollbar::-webkit-scrollbar-thumb { background: transparent; }
+            .overlay-scrollbar::-webkit-scrollbar-track { background: transparent; }
+            `,
+          ],
+        ),
+        View({ class: "flex flex-col" }, [
+          View(
+            {
+              class: "pt-3 px-3 flex items-center text-sm font-medium mb-2",
+            },
+            [
+              View(
+                {
+                  class: cn([
+                    "h-[28px] text-center",
+                    store.showSeconds ? "w-30" : "w-18",
+                  ]),
+                  style: "line-height: 28px;",
+                },
+                [
+                  combine({ time: state_ }, (t) => {
+                    return `${format_temp_time({
+                      t_hour: t.time.tempHour,
+                      t_minute: t.time.tempMinute,
+                      t_second: t.time.tempSecond,
+                    })}`;
+                  }),
+                ],
+              ),
+            ],
+          ),
+          View(
+            {
+              class: cn([
+                "grid h-48",
+                store.showSeconds ? "grid-cols-3 w-36" : "grid-cols-2 w-24",
+              ]),
+            },
+            [
+              ScrollViewPrimitive.Root(
+                {
+                  store: hourview$,
+                  class:
+                    "min-w-12 w-full h-full border-r border-border overflow-y-auto overlay-scrollbar p-2",
+                  onMounted() {
+                    const hours = store.generateHours();
+                    const target = store.state.tempHour;
+                    const index =
+                      typeof target === "number" ? hours.indexOf(target) : -1;
+                    setTimeout(() => {
+                      if (index !== -1) {
+                        scroll_to_index(hourview$, index);
+                      }
+                    }, 0);
                   },
-                }),
-              ],
-            ),
-            // Separator
-            View(
-              {
-                class:
-                  "flex items-center text-muted-foreground text-lg font-medium",
-              },
-              [":"],
-            ),
-            // Minute Column
-            View(
-              {
-                class: "flex flex-col h-48 overflow-y-auto",
-              },
-              [
-                For({
-                  each: store.generateMinutes(),
-                  render(minute) {
-                    return TimePickerPrimitive.MinuteItem(
-                      {
-                        store,
-                        value: minute,
-                        class: computed(state_, (s) => {
-                          const isSelected = s.tempMinute === minute;
-                          const baseClass =
-                            "w-12 h-8 text-sm rounded-md transition-colors outline-hidden";
-                          if (isSelected) {
-                            return `${baseClass} bg-primary text-primary-foreground`;
-                          }
-                          return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
-                        }),
-                      },
-                      [String(minute).padStart(2, "0")],
-                    );
+                },
+                [
+                  For({
+                    each: store.generateHours(),
+                    render(hour) {
+                      return TimePickerPrimitive.HourItem(
+                        {
+                          store,
+                          value: hour,
+                          class: cn([
+                            "w-full h-8 text-sm rounded-md transition-colors outline-hidden",
+                            computed(state_, (s) => {
+                              const isSelected = s.tempHour === hour;
+                              if (isSelected) {
+                                return `bg-primary text-primary-foreground`;
+                              }
+                              return `hover:bg-accent hover:text-accent-foreground`;
+                            }),
+                          ]),
+                        },
+                        [String(hour).padStart(2, "0")],
+                      );
+                    },
+                  }),
+                ],
+              ),
+              ScrollViewPrimitive.Root(
+                {
+                  store: minuteview$,
+                  class: cn([
+                    "min-w-12 w-full h-full overflow-y-auto overlay-scrollbar p-2",
+                    store.showSeconds ? "border-border border-r" : "",
+                  ]),
+                  onMounted() {
+                    const minutes = store.generateMinutes();
+                    const target = store.state.tempMinute;
+                    const index =
+                      typeof target === "number" ? minutes.indexOf(target) : -1;
+                    setTimeout(() => {
+                      if (index !== -1) {
+                        scroll_to_index(minuteview$, index);
+                      }
+                    }, 0);
                   },
-                }),
-              ],
-            ),
-            // Second Column (conditional)
-            Show(
-              {
-                when: store.showSeconds,
-              },
-              [
+                },
+                [
+                  For({
+                    each: store.generateMinutes(),
+                    render(minute) {
+                      return TimePickerPrimitive.MinuteItem(
+                        {
+                          store,
+                          value: minute,
+                          class: computed(state_, (s) => {
+                            const isSelected = s.tempMinute === minute;
+                            const baseClass =
+                              "w-full h-8 text-sm rounded-md transition-colors outline-hidden";
+                            if (isSelected) {
+                              return `${baseClass} bg-primary text-primary-foreground`;
+                            }
+                            return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
+                          }),
+                        },
+                        [String(minute).padStart(2, "0")],
+                      );
+                    },
+                  }),
+                ],
+              ),
+              Show({ when: store.showSeconds }, [
                 h(
-                  View,
+                  ScrollViewPrimitive.Root,
                   {
+                    store: secondview$,
                     class:
-                      "flex items-center text-muted-foreground text-lg font-medium",
-                  },
-                  [":"],
-                ),
-                h(
-                  View,
-                  {
-                    class: "flex flex-col h-48 overflow-y-auto",
+                      "min-w-12 w-full h-full overflow-y-auto overlay-scrollbar p-2",
+                    onMounted() {
+                      const seconds = store.generateSeconds();
+                      const target = store.state.tempSecond;
+                      const index =
+                        typeof target === "number"
+                          ? seconds.indexOf(target)
+                          : -1;
+                      setTimeout(() => {
+                        if (index !== -1) {
+                          scroll_to_index(secondview$, index);
+                        }
+                      }, 0);
+                    },
                   },
                   [
                     For({
@@ -168,7 +268,7 @@ export function TimePicker(
                             class: computed(state_, (s) => {
                               const isSelected = s.tempSecond === second;
                               const baseClass =
-                                "w-12 h-8 text-sm rounded-md transition-colors outline-hidden";
+                                "w-full h-8 text-sm rounded-md transition-colors outline-hidden";
                               if (isSelected) {
                                 return `${baseClass} bg-primary text-primary-foreground`;
                               }
@@ -181,13 +281,12 @@ export function TimePicker(
                     }),
                   ],
                 ),
-              ],
-            ),
-          ]),
-          // Footer with buttons
+              ]),
+            ],
+          ),
           View(
             {
-              class: "flex justify-end gap-2 pt-2 border-t border-border",
+              class: "flex justify-end gap-2 border-t border-border p-3",
             },
             [
               TimePickerPrimitive.ClearButton(

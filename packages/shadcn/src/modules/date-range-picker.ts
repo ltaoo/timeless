@@ -110,7 +110,7 @@ function CalendarPanel(props: {
       ? DateRangePickerPrimitive.LeftCalendarHeader
       : DateRangePickerPrimitive.RightCalendarHeader;
 
-  return View({ class: "w-[280px]" }, [
+  return View({ class: "w-full" }, [
     // Header
     View({ class: "flex items-center justify-between mb-2" }, [
       NavButton({
@@ -137,7 +137,7 @@ function CalendarPanel(props: {
             {
               as: "span",
               class:
-                "text-center text-xs text-muted-foreground w-9 h-8 flex items-center justify-center",
+                "text-center text-xs text-muted-foreground w-full h-8 flex items-center justify-center",
             },
             [day],
           ),
@@ -166,50 +166,89 @@ function CalendarPanel(props: {
                     isToday: day.is_today,
                     isPrevMonth: day.is_prev_month,
                     isNextMonth: day.is_next_month,
-                    class: computed(calendar_state_, () => {
+                    class: computed(calendar_state_, (s) => {
                       const isInRange = store.$calendar.isInRange(day.value);
                       const isRangeStart = store.$calendar.isRangeStart(
                         day.value,
                       );
                       const isRangeEnd = store.$calendar.isRangeEnd(day.value);
+                      const hasEnd = Boolean(s.endDate || s.hoverDate);
+                      const isSingle = isRangeStart && !hasEnd;
 
                       const baseClass =
-                        "inline-flex items-center justify-center w-9 h-8 text-sm transition-colors outline-hidden";
+                        "relative w-full h-8 inline-flex items-center justify-center text-sm transition-colors outline-hidden select-none";
                       const clas: string[] = [];
 
-                      if (isRangeStart || isRangeEnd) {
+                      if (isInRange) {
                         clas.push(
-                          "bg-primary text-primary-foreground",
+                          "before:content-[''] before:absolute before:inset-y-1 before:left-0 before:right-0 before:bg-accent/70",
                         );
-                        if (isRangeStart && !isRangeEnd) {
-                          clas.push("rounded-l-md rounded-r-none");
+                        if (isSingle) {
+                          clas.push("before:rounded-md");
+                        } else if (isRangeStart && !isRangeEnd) {
+                          clas.push("before:rounded-l-md");
                         } else if (isRangeEnd && !isRangeStart) {
-                          clas.push("rounded-r-md rounded-l-none");
-                        } else {
-                          clas.push("rounded-md");
+                          clas.push("before:rounded-r-md");
+                        } else if (isRangeStart && isRangeEnd) {
+                          clas.push("before:rounded-md");
                         }
-                      } else if (isInRange) {
-                        clas.push(
-                          "bg-accent text-accent-foreground rounded-none",
-                        );
-                      } else if (day.is_today) {
-                        clas.push(
-                          "bg-accent text-accent-foreground rounded-md",
-                        );
-                      } else if (day.is_prev_month || day.is_next_month) {
-                        clas.push(
-                          "text-muted-foreground/50 hover:bg-accent hover:text-accent-foreground rounded-md",
-                        );
-                      } else {
-                        clas.push(
-                          "hover:bg-accent hover:text-accent-foreground rounded-md",
-                        );
                       }
 
                       return [baseClass, ...clas].join(" ");
                     }),
                   },
-                  [day.text],
+                  [
+                    View(
+                      {
+                        as: "span",
+                        class: computed(calendar_state_, (s) => {
+                          const isInRange = store.$calendar.isInRange(
+                            day.value,
+                          );
+                          const isRangeStart = store.$calendar.isRangeStart(
+                            day.value,
+                          );
+                          const isRangeEnd = store.$calendar.isRangeEnd(
+                            day.value,
+                          );
+                          const hasEnd = Boolean(s.endDate || s.hoverDate);
+                          const isSingle = isRangeStart && !hasEnd;
+
+                          const baseClass =
+                            "relative z-10 inline-flex size-8 items-center justify-center rounded-md";
+                          const clas: string[] = [];
+
+                          if (isSingle || isRangeStart || isRangeEnd) {
+                            clas.push("bg-primary text-primary-foreground");
+                          } else if (isInRange) {
+                            clas.push("text-accent-foreground");
+                          } else if (day.is_prev_month || day.is_next_month) {
+                            clas.push(
+                              "text-muted-foreground/50 hover:bg-accent hover:text-accent-foreground",
+                            );
+                          } else if (day.is_today) {
+                            clas.push(
+                              "bg-accent text-accent-foreground font-medium",
+                            );
+                          } else {
+                            clas.push(
+                              "hover:bg-accent hover:text-accent-foreground",
+                            );
+                          }
+
+                          if (
+                            day.is_today &&
+                            !(isSingle || isRangeStart || isRangeEnd)
+                          ) {
+                            clas.push("ring-1 ring-ring/50");
+                          }
+
+                          return [baseClass, ...clas].join(" ");
+                        }),
+                      },
+                      [day.text],
+                    ),
+                  ],
                 );
               },
             }),
@@ -281,16 +320,18 @@ export function DateRangePicker(
         },
         store,
         class:
-          "cn-menu-target cn-menu-translucent z-50 p-4 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
+          "cn-menu-target cn-menu-translucent z-50 w-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
       [
-        DateRangePickerPrimitive.Calendars({ store, class: "flex gap-4" }, [
-          CalendarPanel({ store, side: "left", calendar_state_ }),
-          // 分隔线
-          View({
-            class: "w-px bg-border self-stretch my-2",
-          }),
-          CalendarPanel({ store, side: "right", calendar_state_ }),
+        DateRangePickerPrimitive.Calendars({ store, class: "w-full" }, [
+          View({ class: "grid grid-cols-[280px_280px] items-start gap-0" }, [
+            View({ class: "w-[280px] p-3 border-r border-border" }, [
+              CalendarPanel({ store, side: "left", calendar_state_ }),
+            ]),
+            View({ class: "w-[280px] p-3" }, [
+              CalendarPanel({ store, side: "right", calendar_state_ }),
+            ]),
+          ]),
         ]),
       ],
     ),

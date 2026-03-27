@@ -68,102 +68,108 @@ export function DatePicker(
         },
         store,
         class:
-          "cn-menu-target cn-menu-translucent z-50 w-auto p-3 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
+          "cn-menu-target cn-menu-translucent z-50 w-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
       [
-        DatePickerPrimitive.Calendar({ store, class: "w-full" }, [
-          // Calendar Header
-          View(
-            {
-              class: "flex items-center justify-between mb-2",
-            },
-            [
-              DatePickerPrimitive.CalendarPrevButton(
-                {
-                  store,
-                  class:
-                    "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-                },
-                [ChevronLeftOutlined({ class: "size-4" })],
-              ),
-              DatePickerPrimitive.CalendarHeader({
-                store,
-                class: "text-sm font-medium",
-              }),
-              DatePickerPrimitive.CalendarNextButton(
-                {
-                  store,
-                  class:
-                    "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-                },
-                [ChevronRightOutlined({ class: "size-4" })],
-              ),
-            ],
-          ),
-          // Calendar Grid
-          DatePickerPrimitive.CalendarGrid({ store, class: "w-full" }, [
-            // Weekday Headers
-            View({ class: "grid grid-cols-7 mb-1" }, [
-              ...["一", "二", "三", "四", "五", "六", "日"].map((day) =>
-                View(
-                  {
-                    as: "span",
-                    class:
-                      "text-center text-xs text-muted-foreground size-8 flex items-center justify-center",
-                  },
-                  [day],
-                ),
-              ),
-            ]),
-            // Calendar Body
-            For({
-              each: computed(calendar_state_, (s) => s.weeks),
-              render(week) {
-                return View({ class: "grid grid-cols-7" }, [
-                  For({
-                    each: computed(week, (t) => t.dates),
-                    render(day) {
-                      return DatePickerPrimitive.CalendarCell(
-                        {
-                          store,
-                          value: day.value,
-                          isToday: day.is_today,
-                          isPrevMonth: day.is_prev_month,
-                          isNextMonth: day.is_next_month,
-                          class: computed(calendar_state_, (s) => {
-                            const isSelected = s.selectedDay?.time === day.time;
-                            const baseClass =
-                              "inline-flex items-center justify-center size-8 text-sm rounded-md transition-colors outline-hidden";
-                            const stateClasses = [];
-
-                            if (isSelected) {
-                              stateClasses.push(
-                                "bg-primary text-primary-foreground hover:bg-primary",
-                              );
-                            } else if (day.is_today) {
-                              stateClasses.push(
-                                "bg-accent text-accent-foreground",
-                              );
-                            } else if (day.is_prev_month || day.is_next_month) {
-                              stateClasses.push(
-                                "text-muted-foreground/50 hover:bg-accent hover:text-accent-foreground",
-                              );
-                            } else {
-                              stateClasses.push(
-                                "hover:bg-accent hover:text-accent-foreground",
-                              );
-                            }
-
-                            return [baseClass, ...stateClasses].join(" ");
-                          }),
-                        },
-                        [day.text],
-                      );
-                    },
-                  }),
-                ]);
+        View({ class: "w-[280px] p-3" }, [
+          DatePickerPrimitive.Calendar({ store, class: "w-full" }, [
+            // Calendar Header
+            View(
+              {
+                class: "flex items-center justify-between mb-2",
               },
-            }),
+              [
+                DatePickerPrimitive.CalendarPrevButton(
+                  {
+                    store,
+                    class:
+                      "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                  },
+                  [ChevronLeftOutlined({ class: "size-4" })],
+                ),
+                DatePickerPrimitive.CalendarHeader({
+                  store,
+                  class: "text-sm font-medium",
+                }),
+                DatePickerPrimitive.CalendarNextButton(
+                  {
+                    store,
+                    class:
+                      "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                  },
+                  [ChevronRightOutlined({ class: "size-4" })],
+                ),
+              ],
+            ),
+            // Calendar Grid
+            DatePickerPrimitive.CalendarGrid({ store, class: "w-full" }, [
+              // Weekday Headers
+              View({ class: "grid grid-cols-7 mb-1" }, [
+                ...["一", "二", "三", "四", "五", "六", "日"].map((day) =>
+                  View(
+                    {
+                      as: "span",
+                      class:
+                        "text-center text-xs text-muted-foreground size-8 flex items-center justify-center",
+                    },
+                    [day],
+                  ),
+                ),
+              ]),
+              // Calendar Body
+              For({
+                each: computed(calendar_state_, (s) => s.weeks),
+                render(week) {
+                  return View({ class: "grid grid-cols-7" }, [
+                    For({
+                      each: computed(week, (t) => t.dates),
+                      render(day) {
+                        return DatePickerPrimitive.CalendarCell(
+                          {
+                            store,
+                            value: day.value,
+                            isToday: day.is_today,
+                            isPrevMonth: day.is_prev_month,
+                            isNextMonth: day.is_next_month,
+                            class: computed(calendar_state_, (s) => {
+                              const isSelected =
+                                s.selectedDay?.time === day.time;
+                              const baseClass =
+                                "inline-flex items-center justify-center size-8 text-sm rounded-md transition-colors outline-hidden";
+                              const stateClasses = [];
+
+                              if (isSelected) {
+                                stateClasses.push(
+                                  "bg-primary text-primary-foreground hover:bg-primary",
+                                );
+                              } else if (day.is_today) {
+                                stateClasses.push(
+                                  "bg-accent text-accent-foreground",
+                                );
+                              } else if (
+                                day.is_prev_month ||
+                                day.is_next_month
+                              ) {
+                                stateClasses.push(
+                                  "text-muted-foreground/50 hover:bg-accent hover:text-accent-foreground",
+                                );
+                              } else {
+                                stateClasses.push(
+                                  "hover:bg-accent hover:text-accent-foreground",
+                                );
+                              }
+
+                              return [baseClass, ...stateClasses].join(" ");
+                            }),
+                          },
+                          [day.text],
+                        );
+                      },
+                    }),
+                  ]);
+                },
+              }),
+            ]),
           ]),
         ]),
       ],

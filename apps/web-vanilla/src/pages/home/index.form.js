@@ -335,9 +335,12 @@ export default function FormView() {
         Item("With Label", [
           View({ class: "flex items-center gap-2" }, [
             Checkbox({
+              id: "checkbox_with_label1",
               store: new Timeless.ui.CheckboxCore({ checked: true }),
             }),
-            View({ class: "text-sm" }, ["Accept terms and conditions"]),
+            NativeLabel({ for: "checkbox_with_label1", class: "text-sm" }, [
+              "Accept terms and conditions",
+            ]),
           ]),
         ]),
       ]),
