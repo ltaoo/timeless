@@ -56,29 +56,35 @@ export function Flex(
   } & ViewProps,
   children?: ViewChildren,
 ) {
-  const { direction, justify, items, gap, class: cls, style: userStyle, ...rest } =
-    props;
+  const {
+    direction,
+    justify,
+    items,
+    gap,
+    class: cls,
+    style: stl,
+    ...rest
+  } = props;
 
-  const styleParts: string[] = ["display: flex"];
+  const style_parts: string[] = ["display: flex"];
   if (direction === "col") {
-    styleParts.push("flex-direction: column");
+    style_parts.push("flex-direction: column");
   } else if (direction === "col-reverse") {
-    styleParts.push("flex-direction: column-reverse");
+    style_parts.push("flex-direction: column-reverse");
   } else if (direction === "reverse") {
-    styleParts.push("flex-direction: row-reverse");
+    style_parts.push("flex-direction: row-reverse");
   }
   if (justify) {
-    styleParts.push(`justify-content: ${normalizeJustify(justify)}`);
+    style_parts.push(`justify-content: ${normalizeJustify(justify)}`);
   }
   if (items) {
-    styleParts.push(`align-items: ${normalizeItems(items)}`);
+    style_parts.push(`align-items: ${normalizeItems(items)}`);
   }
   if (gap) {
-    styleParts.push(`gap: ${normalizeGap(gap)}`);
+    style_parts.push(`gap: ${normalizeGap(gap)}`);
   }
-  const baseStyle = styleParts.filter(Boolean).join("; ");
-  const style$ = sn([baseStyle, userStyle as any]);
+  const st = style_parts.filter(Boolean).join("; ");
+  const style_ = sn([st, stl as any]);
 
-  const view$ = View({ ...rest, class: cls, style: style$ }, children);
-  return view$;
+  return View({ ...rest, class: cls, style: style_ }, children);
 }

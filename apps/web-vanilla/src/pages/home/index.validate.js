@@ -168,16 +168,10 @@ function PaymentFormView(props) {
             id: "same_as_shipping",
             store: same_as_shipping$,
           }),
-          FieldInlineLabel(
-            {
-              for: "same_as_shipping",
-              store: store.ui.form$.fields.same_as_shipping,
-              onClick() {
-                same_as_shipping$.toggle();
-              },
-            },
-            ["Same as shipping address"],
-          ),
+          FieldInlineLabel({
+            for: "same_as_shipping",
+            store: store.ui.form$.fields.same_as_shipping,
+          }),
         ]),
       ]),
 
@@ -512,7 +506,7 @@ export default function FormValidateView() {
   });
   const payment$ = PaymentViewModel();
 
-  return PageContent({ class: "" }, [
+  return PageContent({ class: "page--validate overflow-x-hidden" }, [
     SplitLayout({
       direction: "vertical",
       items: [
