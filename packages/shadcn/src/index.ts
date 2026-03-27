@@ -12,6 +12,7 @@ import { Cascader } from "./modules/cascader";
 import { DatePicker } from "./modules/date-picker";
 import { DateRangePicker } from "./modules/date-range-picker";
 import { TimePicker } from "./modules/time-picker";
+import { DateTimePicker } from "./modules/date-time-picker";
 import { Popover } from "./modules/popover";
 import { Popconfirm } from "./modules/popconfirm";
 import { Toast } from "./modules/toast";
@@ -76,6 +77,7 @@ import "./index.css";
 import "./styles/globals.css";
 
 export * as ui from "@timeless/ui";
+export * as base from "@timeless/base";
 export * from "@timeless/headless";
 export * from "@timeless/reactive";
 export * as icons from "@timeless/icons";
@@ -97,6 +99,7 @@ export {
   DatePicker,
   DateRangePicker,
   TimePicker,
+  DateTimePicker,
   Popover,
   Popconfirm,
   Toast,

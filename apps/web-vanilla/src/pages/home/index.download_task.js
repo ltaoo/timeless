@@ -1,5 +1,4 @@
 import { Section, Item } from "@/components/index.js";
-import { PageContent } from "@/components/layout.js";
 
 // const API_HOSTNAME = "http://127.0.0.1:18686";
 // const API_HOSTNAME = "https://remoteapi.weixin.qq.com";
@@ -547,7 +546,8 @@ export default function DownloadTaskPageView() {
   const vm$ = DownloaderViewModel();
   const { task_count: task_count_ } = vm$.state;
 
-  return PageContent({ class: "p-6" }, [
+  const view$ = new Timeless.ui.ScrollViewCore({});
+  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View(
       {
         class: "space-y-8",

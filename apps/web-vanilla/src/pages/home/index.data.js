@@ -1,11 +1,11 @@
 import { Section, Item } from "@/components/index.js";
-import { PageContent } from "@/components/layout.js";
 
 export default function DataDisplayView() {
+  const view$ = new Timeless.ui.ScrollViewCore({});
   const progressVal = ref(60);
   const stepIdx = ref(1);
 
-  return PageContent({ class: "p-6" }, [
+  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
       Section("Progress", [
         Item("60%", [Progress({ value: progressVal, max: 100 })]),

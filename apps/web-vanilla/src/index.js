@@ -18,11 +18,11 @@ function ApplicationRootView() {
   return Fragment({}, [
     StandardSubViews({
       view: root_view$,
+      views,
+      history: history$,
       app,
       client: client$,
       storage: storage$,
-      history: history$,
-      views,
       NotFound: NotFoundPageView,
     }),
     // HistoryPanel({ store: history }),

@@ -1,5 +1,4 @@
 import { Section, Item } from "@/components/index.js";
-import { PageContent } from "@/components/layout.js";
 
 export default function FeedbackView() {
   const dialog$ = new Timeless.ui.DialogCore({
@@ -12,7 +11,8 @@ export default function FeedbackView() {
     },
   });
 
-  return PageContent({ class: "p-6" }, [
+  const view$ = new Timeless.ui.ScrollViewCore({});
+  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
     Section("Menu", [
       Item("Default", [

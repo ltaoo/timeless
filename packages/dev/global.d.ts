@@ -7228,8 +7228,9 @@ declare module "packages/headless/src/modules/flex" {
     import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
     export type FlexJustify = "start" | "end" | "center" | "between" | "around" | "evenly";
     export type FlexItems = "start" | "end" | "center" | "baseline" | "stretch";
+    export type FlexDirection = "col" | "col-reverse" | "reverse";
     export function Flex(props: {
-        col?: boolean;
+        direction?: FlexDirection;
         justify?: FlexJustify;
         items?: FlexItems;
         gap?: string;
@@ -7535,8 +7536,8 @@ declare module "packages/headless/src/modules/button" {
     export function Content(props: ViewProps, children?: ViewChildren): any;
 }
 declare module "packages/headless/src/util/h" {
-    import { TimelessElement } from "packages/headless/src/primitive/view";
-    export function h<P, R extends TimelessElement>(component: (props: P, children?: any) => R, props: P, children?: any): () => R;
+    import { TimelessElement, ViewChildren } from "@/primitive/view";
+    export function h<P, R extends TimelessElement>(component: (props: P, children?: any) => R, props: P, children?: ViewChildren): () => R;
 }
 declare module "packages/headless/src/modules/arrow" {
     import { PopperCore } from "packages/ui/src/index";
@@ -10599,7 +10600,7 @@ declare module "packages/kit/src/app/index" {
         }): Promise<Result<any>>;
         /** 应用指定主题 */
         setTheme(theme: ThemeTypes): import("@timeless/base").Resp<null>;
-        getTheme(): string;
+        getTheme(): ThemeTypes;
         tipUpdate(): void;
         tip(arg: {
             icon?: unknown;
@@ -12267,6 +12268,16 @@ declare module "packages/shadcn/src/modules/time-picker" {
         placeholder?: string;
     }): any;
 }
+declare module "packages/shadcn/src/modules/date-time-picker" {
+    import { ViewProps } from "packages/headless/src/index";
+    import { DatePickerCore, TimePickerCore } from "packages/ui/src/index";
+    export function DateTimePicker(props: ViewProps & {
+        date: DatePickerCore;
+        time: TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): any;
+}
 declare module "packages/shadcn/src/modules/popover" {
     import { PopoverCore } from "packages/ui/src/index";
     import { ViewChildren, ViewProps } from "packages/headless/src/index";
@@ -12883,6 +12894,7 @@ declare module "packages/shadcn/src/index" {
     import { DatePicker } from "packages/shadcn/src/modules/date-picker";
     import { DateRangePicker } from "packages/shadcn/src/modules/date-range-picker";
     import { TimePicker } from "packages/shadcn/src/modules/time-picker";
+    import { DateTimePicker } from "packages/shadcn/src/modules/date-time-picker";
     import { Popover } from "packages/shadcn/src/modules/popover";
     import { Popconfirm } from "packages/shadcn/src/modules/popconfirm";
     import { Toast } from "packages/shadcn/src/modules/toast";
@@ -12918,11 +12930,12 @@ declare module "packages/shadcn/src/index" {
     import "./index.css";
     import "./styles/globals.css";
     export * as ui from "packages/ui/src/index";
+    export * as base from "packages/base/src/index";
     export * from "packages/headless/src/index";
     export * from "packages/reactive/src/index";
     export * as icons from "packages/icons/src/index";
     export * as kit from "packages/kit/src/index";
-    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, Cascader, DatePicker, DateRangePicker, TimePicker, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, };
+    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, };
 }
 
 // === Package module aliases ===
@@ -12997,6 +13010,7 @@ declare const DatePicker: typeof import("@timeless/shadcn").DatePicker;
 declare const DatePickerPrimitive: typeof import("@timeless/shadcn").DatePickerPrimitive;
 declare const DateRangePicker: typeof import("@timeless/shadcn").DateRangePicker;
 declare const DateRangePickerPrimitive: typeof import("@timeless/shadcn").DateRangePickerPrimitive;
+declare const DateTimePicker: typeof import("@timeless/shadcn").DateTimePicker;
 declare const Defs: typeof import("@timeless/shadcn").Defs;
 declare const Dialog: typeof import("@timeless/shadcn").Dialog;
 declare const DialogPrimitive: typeof import("@timeless/shadcn").DialogPrimitive;

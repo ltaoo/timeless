@@ -1,8 +1,8 @@
 import { Section, Item } from "@/components/index.js";
-import { PageContent } from "@/components/layout.js";
 
 export default function NavigationView() {
-  return PageContent({ class: "p-6" }, [
+  const view$ = new Timeless.ui.ScrollViewCore({});
+  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: cn(["space-y-8"]) }, [
       Section("Tabs", [
         Item("Default", [

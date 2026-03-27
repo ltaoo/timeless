@@ -49,6 +49,7 @@ export const globals = {
   DatePickerPrimitive: "readonly",
   DateRangePicker: "readonly",
   DateRangePickerPrimitive: "readonly",
+  DateTimePicker: "readonly",
   Defs: "readonly",
   Dialog: "readonly",
   DialogPrimitive: "readonly",

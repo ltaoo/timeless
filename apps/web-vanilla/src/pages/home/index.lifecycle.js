@@ -1,5 +1,4 @@
 import { Section, Item } from "@/components/index.js";
-import { PageContent } from "@/components/layout.js";
 
 function LifecyclePageA(props) {
   return View(
@@ -163,6 +162,7 @@ function LifecyclePageE(props) {
 }
 
 export default function LifecycleView(props) {
+  const view$ = new Timeless.ui.ScrollViewCore({});
   const logs = refarr([]);
 
   const addLog = (message) => {
@@ -266,7 +266,7 @@ export default function LifecycleView(props) {
   subhistory$.push(defaultRouteName, {}, { ignore: true });
   updateNavState();
 
-  return PageContent({ class: "p-6" }, [
+  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: cn(["space-y-8"]) }, [
       Section("Page Lifecycle", [
         Item("onMounted / onUnmounted", [

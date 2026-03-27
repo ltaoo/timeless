@@ -1,12 +1,13 @@
 import { Section, Item } from "@/components/index.js";
-import { PageContent } from "@/components/layout.js";
 
 export default function FormView() {
-  return PageContent({ class: "p-6" }, [
+  const view$ = new Timeless.ui.ScrollViewCore({});
+
+  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
       Section("Input", [
         Item("Default", [
-          Flex({ col: true, gap: "4px" }, [
+          Flex({ direction: "col", gap: "4px" }, [
             Input({
               id: "input_default_1",
               store: new Timeless.ui.InputCore({
@@ -308,6 +309,22 @@ export default function FormView() {
               defaultValue: { hour: 9, minute: 30 },
             }),
             placeholder: "选择时间",
+          }),
+        ]),
+      ]),
+      Section("DateTimePicker", [
+        Item("Default", [
+          DateTimePicker({
+            date: Timeless.ui.DatePickerCore({ today: new Date() }),
+            time: Timeless.ui.TimePickerCore({}),
+            placeholder: "选择日期时间",
+          }),
+        ]),
+        Item("With Seconds", [
+          DateTimePicker({
+            date: Timeless.ui.DatePickerCore({ today: new Date() }),
+            time: Timeless.ui.TimePickerCore({ showSeconds: true }),
+            placeholder: "选择日期时间（含秒）",
           }),
         ]),
       ]),

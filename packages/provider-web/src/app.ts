@@ -100,8 +100,7 @@ export function connect<T extends { storage: StorageCore<any>; user: any }>(
     }
   }
   function get_theme(): ThemeTypes {
-    // const existing_theme = app.$storage.get("theme");
-    const existing_theme = localStorage.getItem("theme") as ThemeTypes;
+    const existing_theme = app.$storage.get("theme") as ThemeTypes;
     if (!existing_theme || existing_theme === "system") {
       return get_system_theme();
     }
@@ -132,7 +131,7 @@ export function connect<T extends { storage: StorageCore<any>; user: any }>(
     set_theme(theme);
     app.theme = theme;
     app.emit(app.Events.StateChange, { ...app.state });
-    localStorage.setItem("theme", theme);
+    app.$storage.set("theme", theme);
     return Result.Ok(null);
   };
   app.getTheme = get_theme;

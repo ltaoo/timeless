@@ -18,6 +18,7 @@ export * from "./native/select";
 export * from "./native/slider";
 export * from "./native/file-input";
 export * from "./native/svg";
+export * from "./native/style";
 
 export * from "./primitive/lazy-view";
 

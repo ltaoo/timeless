@@ -12,6 +12,8 @@ export type FlexJustify =
 
 export type FlexItems = "start" | "end" | "center" | "baseline" | "stretch";
 
+export type FlexDirection = "col" | "col-reverse" | "reverse";
+
 function normalizeJustify(justify: string) {
   const map: Record<string, string> = {
     start: "flex-start",
@@ -46,7 +48,7 @@ function normalizeGap(gap: string) {
 
 export function Flex(
   props: {
-    col?: boolean;
+    direction?: FlexDirection;
     justify?: FlexJustify;
     items?: FlexItems;
     gap?: string;
@@ -54,12 +56,16 @@ export function Flex(
   } & ViewProps,
   children?: ViewChildren,
 ) {
-  const { col, justify, items, gap, class: cls, style: userStyle, ...rest } =
+  const { direction, justify, items, gap, class: cls, style: userStyle, ...rest } =
     props;
 
   const styleParts: string[] = ["display: flex"];
-  if (col) {
+  if (direction === "col") {
     styleParts.push("flex-direction: column");
+  } else if (direction === "col-reverse") {
+    styleParts.push("flex-direction: column-reverse");
+  } else if (direction === "reverse") {
+    styleParts.push("flex-direction: row-reverse");
   }
   if (justify) {
     styleParts.push(`justify-content: ${normalizeJustify(justify)}`);

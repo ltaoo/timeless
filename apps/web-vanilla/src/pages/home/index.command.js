@@ -1,7 +1,7 @@
 import { Section, Item } from "@/components/index.js";
-import { PageContent } from "@/components/layout";
 
 export default function CommandView() {
+  const view$ = new Timeless.ui.ScrollViewCore({});
   const isOpen = ref(false);
   const searchQuery = ref("");
   const selectedIndex = ref(0);
@@ -195,7 +195,7 @@ export default function CommandView() {
     },
   });
 
-  return PageContent({ class: "p-6" }, [
+  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     Section("Command Palette", [
       Item("Press Ctrl+P to open", [
         Button(

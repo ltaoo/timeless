@@ -1,5 +1,4 @@
 import { Section, Item } from "@/components/index.js";
-import { PageContent } from "@/components/layout.js";
 
 function createMockTasks() {
   return [
@@ -310,7 +309,8 @@ function DownloadTaskItem(props) {
 }
 
 export default function HomeIndexScrollViewExampleView() {
-  return PageContent({ class: "p-6" }, [
+  const view$ = new Timeless.ui.ScrollViewCore({});
+  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
       Section("ScrollView", [
         Item("Basic", [

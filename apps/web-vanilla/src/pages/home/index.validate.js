@@ -76,6 +76,11 @@ function FormRender(props, children) {
   ]);
 }
 
+/**
+ *
+ * @param {{ store: ReturnType<typeof PaymentViewModel>}} props
+ * @returns
+ */
 function PaymentFormView(props) {
   const { store } = props;
   const {
@@ -166,7 +171,7 @@ function PaymentFormView(props) {
           FieldInlineLabel(
             {
               for: "same_as_shipping",
-              store: same_as_shipping$,
+              store: store.ui.form$.fields.same_as_shipping,
               onClick() {
                 same_as_shipping$.toggle();
               },
@@ -182,7 +187,7 @@ function PaymentFormView(props) {
       View({ class: "space-y-4" }, [
         Field({ store: field_comments$ }, [
           Textarea({
-            id: `field-${field_comments$.name}`,
+            id: field_comments$.name,
             store: field_comments$.input,
           }),
         ]),
@@ -524,7 +529,7 @@ export default function FormValidateView() {
             View({ class: "w-full max-w-md rounded-xl border p-6" }, [
               Field({ store: field_provider$ }, [
                 Select({
-                  id: `field-${field_provider$.name}`,
+                  id: field_provider$.name,
                   store: field_provider$.input,
                 }),
               ]),

@@ -25,46 +25,26 @@ export function Root(
   props: ViewProps & { store: ScrollViewCore },
   children: ViewChildren,
 ): TimelessElement {
-  const { store, class: cls, ...rest } = props;
+  const { store, ...rest } = props;
 
-  const view$ = View(
+  return View(
     {
       ...rest,
-      class: cls,
-      // "data-scroll-view-root": "",
+      onMounted($elm: HTMLElement) {
+        store.setRect({
+          width: $elm.clientWidth,
+          height: $elm.clientHeight,
+        });
+        if (typeof Timeless !== "undefined" && Timeless.web) {
+          Timeless.web.provide_ui_scroll_view_scroll(store, $elm);
+        }
+        if (props.onMounted) {
+          props.onMounted($elm);
+        }
+      },
     },
     children,
   );
-
-  return {
-    t: "view",
-    $elm: view$.$elm,
-    beforeUnmounted() {
-      if (props.beforeUnmounted) {
-        props.beforeUnmounted();
-      }
-    },
-    onUnmounted() {
-      view$.onUnmounted();
-      if (props.onUnmounted) {
-        props.onUnmounted();
-      }
-    },
-    render() {
-      const $elm = view$.render();
-      store.setRect({
-        width: view$.$elm.clientWidth,
-        height: view$.$elm.clientHeight,
-      });
-      if (typeof Timeless !== "undefined" && Timeless.web) {
-        Timeless.web.provide_ui_scroll_view_scroll(store, view$.$elm);
-      }
-      if (props.onMounted) {
-        props.onMounted($elm);
-      }
-      return $elm;
-    },
-  };
 }
 
 export function Indicator(

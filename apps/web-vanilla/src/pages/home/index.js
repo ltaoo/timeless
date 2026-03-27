@@ -30,7 +30,7 @@ export default function HomePageView(props) {
           maxSize: 50,
           scroll: false,
           children: [
-            Flex({ col: true, class: "py-4" }, [
+            Flex({ direction: "col", class: "py-4" }, [
               Flex(
                 { items: "center", justify: "between", class: "px-3 mb-3" },
                 [

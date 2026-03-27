@@ -1,4 +1,4 @@
-import { computed, refobj, cn, combine } from "@timeless/reactive";
+import { computed, ref, refobj, cn, combine } from "@timeless/reactive";
 import {
   View,
   Show,
@@ -93,7 +93,9 @@ export function FieldLabel(
   } = props;
 
   const state_ = refobj(store.state);
+  const error_ = ref(store.state.error);
   store.onStateChange((v) => state_.as(v));
+  store.onError((v) => error_.as(v));
 
   return NativeLabel(
     {
@@ -101,6 +103,8 @@ export function FieldLabel(
       class: cn([
         "select-none",
         weight === "normal" ? "font-normal" : "font-medium",
+        "group-data-[invalid]:text-destructive",
+        combine({ error: error_ }, (t) => (t.error ? "text-destructive" : "")),
         tone === "destructive" ? "text-destructive" : "",
         cls,
       ]),
@@ -118,12 +122,19 @@ export function FieldInlineLabel(
   const { class: cls, store, ...rest } = props;
 
   const state_ = refobj(store.state);
+  const error_ = ref(store.state.error);
   store.onStateChange((v) => state_.as(v));
+  store.onError((v) => error_.as(v));
 
   return NativeLabel(
     {
       ...rest,
-      class: cn(["text-sm font-normal select-none cursor-pointer", cls]),
+      class: cn([
+        "text-sm font-normal select-none cursor-pointer",
+        "group-data-[invalid]:text-destructive",
+        combine({ error: error_ }, (t) => (t.error ? "text-destructive" : "")),
+        cls,
+      ]),
     },
     [
       computed(state_, (t) => t.label),
@@ -163,31 +174,71 @@ export function Field(
 
   const state_ = refobj(props.store.state);
   const error_ = refobj(props.store.state.error);
+  const invalid_ = computed(error_, (e) => !!e);
 
-  props.store.onStateChange((v) => {
-    state_.as(v);
-  });
-  props.store.onError((v) => {
-    error_.as(v);
-  });
+  let $root: HTMLElement | null = null;
+  const applyInvalidToControls = (invalid: boolean) => {
+    if (!$root) return;
+    const controls = $root.querySelectorAll("input, textarea, select");
+    for (let i = 0; i < controls.length; i += 1) {
+      const el = controls[i] as HTMLElement;
+      if (invalid) {
+        if (!el.hasAttribute("aria-invalid")) {
+          el.setAttribute("data-field-aria-invalid", "");
+          el.setAttribute("aria-invalid", "true");
+        }
+        continue;
+      }
+      if (el.hasAttribute("data-field-aria-invalid")) {
+        el.removeAttribute("data-field-aria-invalid");
+        el.removeAttribute("aria-invalid");
+      }
+    }
+  };
 
-  const fid =
-    props.id ||
-    props.store.id ||
-    `${props.store.name || Math.random().toString(36).slice(2, 11)}`;
+  const unlistens = [
+    props.store.onStateChange((v) => {
+      state_.as(v);
+    }),
+    props.store.onError((v) => {
+      error_.as(v);
+      applyInvalidToControls(!!v);
+    }),
+  ];
 
-  const { class: cls, ...rest } = props;
+  const fid = props.id || props.store.name || props.store.id;
+
+  const { class: cls, dataset, onMounted, onUnmounted, ...rest } = props;
 
   return View(
     {
       ...rest,
+      dataset: {
+        ...(dataset || {}),
+        invalid: invalid_,
+      },
       class: cn([
+        "group",
         "text-neutral-800 dark:text-neutral-300",
         orientation === "horizontal"
           ? "flex w-full items-center gap-3"
           : "flex w-full flex-col gap-2",
         cls,
       ]),
+      onMounted(el: HTMLElement) {
+        $root = el;
+        applyInvalidToControls(invalid_.value);
+        if (onMounted) {
+          return onMounted(el);
+        }
+      },
+      onUnmounted() {
+        $root = null;
+        unlistens.forEach((fn) => fn && fn());
+        if (onUnmounted) {
+          onUnmounted();
+        }
+      },
     },
     [
       Show(
