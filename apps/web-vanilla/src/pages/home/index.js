@@ -19,110 +19,90 @@ export default function HomePageView(props) {
   });
 
   // 创建 ResizablePanels 实例
-  const panelsGroup = new Timeless.ui.ResizablePanelsCore({
+  const resizeable$ = new Timeless.ui.ResizablePanelsCore({
     direction: "horizontal",
   });
 
   // 创建侧边栏面板
-  const sidebarPanel = new Timeless.ui.ResizablePanelCore({
+  const siderpanel$ = new Timeless.ui.ResizablePanelCore({
     defaultSize: 25,
     minSize: 20,
     maxSize: 50,
   });
 
   // 创建主内容面板
-  const contentPanel = new Timeless.ui.ResizablePanelCore({
+  const contentpanel$ = new Timeless.ui.ResizablePanelCore({
     defaultSize: 85,
     minSize: 70,
   });
 
-  return TooltipProvider({}, [
-    View({ class: "w-full h-screen bg-background text-foreground" }, [
-      ResizablePanels(
-        {
-          store: panelsGroup,
-          direction: "horizontal",
-          class: "w-full h-full",
-        },
-        [
-          // Sidebar Panel
-          ResizablePanel(
-            {
-              store: sidebarPanel,
-              group: panelsGroup,
-            },
-            [
-              View(
-                {
-                  class: "py-4 h-full flex flex-col",
-                },
+  const view$ = new Timeless.ui.ScrollViewCore({});
+  return View({}, [
+    ResizablePanels(
+      {
+        store: resizeable$,
+        direction: "horizontal",
+        class: "w-full h-full",
+      },
+      [
+        // Sidebar Panel
+        ResizablePanel(
+          {
+            store: siderpanel$,
+            group: resizeable$,
+          },
+          [
+            Flex({ col: true, class: "py-4" }, [
+              Flex(
+                { items: "center", justify: "between", class: "px-3 mb-3" },
                 [
                   View(
                     {
-                      class: "px-3 mb-3 flex items-center justify-between",
+                      class:
+                        "text-xs font-bold text-zinc-400 uppercase tracking-widest",
                     },
-                    [
-                      View(
-                        {
-                          class:
-                            "text-xs font-bold text-zinc-400 uppercase tracking-widest",
-                        },
-                        [Txt("Components")],
-                      ),
-                    ],
+                    ["Components"],
                   ),
-                  View({ class: "flex-1 overflow-y-auto" }, [
-                    For({
-                      each: sidemenu$.menus,
-                      render(menu) {
-                        return View(
-                          {
-                            class: cn([
-                              "px-3 py-2 text-sm cursor-pointer transition-colors",
-                              computed(sidemenu$.cur, (t) => {
-                                return t && t.name === menu.url
-                                  ? "text-zinc-900 bg-zinc-100 font-medium dark:text-zinc-50 dark:bg-zinc-800"
-                                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50";
-                              }),
-                            ]),
-                            onClick() {
-                              sidemenu$.handleClick(menu);
-                            },
-                          },
-                          [menu.title],
-                        );
-                      },
-                    }),
-                  ]),
                 ],
               ),
-            ],
-          ),
-
-          // Resize Handle
-          ResizableHandle({
-            store: panelsGroup,
-            panelBefore: sidebarPanel,
-            panelAfter: contentPanel,
-            withHandle: true,
-          }),
-
-          // Content Panel
-          ResizablePanel(
-            {
-              store: contentPanel,
-              group: panelsGroup,
-            },
-            [
-              View({ class: "overflow-hidden h-full" }, [
-                KeepAliveSubViews({
-                  ...props,
+              View({ class: "flex-1 overflow-y-auto" }, [
+                For({
+                  each: sidemenu$.menus,
+                  render(menu) {
+                    return View(
+                      {
+                        class: cn([
+                          "px-3 py-2 text-sm cursor-pointer transition-colors",
+                          computed(sidemenu$.cur, (t) => {
+                            return t && t.name === menu.url
+                              ? "text-zinc-900 bg-zinc-100 font-medium dark:text-zinc-50 dark:bg-zinc-800"
+                              : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50";
+                          }),
+                        ]),
+                        onClick() {
+                          sidemenu$.handleClick(menu);
+                        },
+                      },
+                      [menu.title],
+                    );
+                  },
                 }),
               ]),
-            ],
-          ),
-        ],
-      ),
-    ]),
+            ]),
+          ],
+        ),
+        // Resize Handle
+        ResizableHandle({
+          store: resizeable$,
+          panelBefore: siderpanel$,
+          panelAfter: contentpanel$,
+          withHandle: true,
+        }),
+        // Content Panel
+        ResizablePanel({ style: 'overflow-y: auto; height: 100vh;', store: contentpanel$, group: resizeable$ }, [
+          KeepAliveSubViews(props),
+        ]),
+      ],
+    ),
   ]);
 }

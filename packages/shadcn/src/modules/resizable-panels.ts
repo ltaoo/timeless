@@ -1,4 +1,4 @@
-import { ref, computed, classNames } from "@timeless/reactive";
+import { ref, computed, cn } from "@timeless/reactive";
 import {
   ResizablePanelsPrimitive,
   View,
@@ -22,7 +22,7 @@ export function ResizablePanels(
       ...rest,
       store,
       direction,
-      class: classNames([
+      class: cn([
         "flex h-full w-full",
         direction === "horizontal" ? "flex-row" : "flex-col",
         rest.class,
@@ -47,7 +47,6 @@ export function ResizablePanel(
       ...rest,
       store,
       group,
-      class: classNames([rest.class]),
     },
     children,
   );
@@ -78,7 +77,7 @@ export function ResizableHandle(
       store,
       panelBefore,
       panelAfter,
-      class: classNames([
+      class: cn([
         "relative flex items-center justify-center bg-border",
         "after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2",
         "focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",

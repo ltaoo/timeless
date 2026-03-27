@@ -77,7 +77,8 @@ export function StandardSubViews(
           }),
         },
         [
-          View(
+          h(
+            View,
             {
               style: `z-index: ${idx + 1}; position: absolute; left: 0; top: 0; right: 0; bottom: 0;"`,
               dataset: {

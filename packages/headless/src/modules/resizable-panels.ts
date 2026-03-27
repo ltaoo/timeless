@@ -1,4 +1,4 @@
-import { refobj, computed, ref, classNames } from "@timeless/reactive";
+import { refobj, computed, ref, sn } from "@timeless/reactive";
 import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "../primitive/view";
@@ -53,25 +53,22 @@ export function Panel(
   return View(
     {
       ...rest,
-      style: computed(size_, (size) => {
-        const flexBasis = size ? `${size}%` : "auto";
-        const flexGrow = size ? 0 : 1;
-        const flexShrink = 1;
-        console.log("[ResizablePanel] style computed", {
-          size,
-          flexBasis,
-          flexGrow,
-          flexShrink,
-        });
-        return [
-          `flex-basis: ${flexBasis}`,
-          `flex-grow: ${flexGrow}`,
-          `flex-shrink: ${flexShrink}`,
-          "overflow: hidden",
-        ]
-          .filter(Boolean)
-          .join("; ");
-      }),
+      style: sn([
+        computed(size_, (size) => {
+          const flexBasis = size ? `${size}%` : "auto";
+          const flexGrow = size ? 0 : 1;
+          const flexShrink = 1;
+          return [
+            `flex-basis: ${flexBasis}`,
+            `flex-grow: ${flexGrow}`,
+            `flex-shrink: ${flexShrink}`,
+            // "overflow: hidden",
+          ]
+            .filter(Boolean)
+            .join("; ");
+        }),
+        props.style,
+      ]),
       onMounted($el: HTMLDivElement) {
         store.mount($el);
         if (group) {

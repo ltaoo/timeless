@@ -156,16 +156,15 @@ function FieldDemoView(stores) {
         ]),
         View({ class: "flex items-center gap-2" }, [
           Checkbox({
-            id: "same-as-shipping",
             store: same_as_shipping$,
           }),
           View(
             {
               as: "label",
-              attributes: {
-                for: "same-as-shipping",
+              class: "text-sm font-normal select-none cursor-pointer",
+              onClick() {
+                same_as_shipping$.toggle();
               },
-              class: "text-sm font-normal select-none",
             },
             ["Same as shipping address"],
           ),
@@ -274,15 +273,15 @@ export default function FormValidateView() {
     },
   });
 
-  const panelsGroup = new Timeless.ui.ResizablePanelsCore({
+  const resizable$ = new Timeless.ui.ResizablePanelsCore({
     direction: "vertical",
   });
-  const topPanel = new Timeless.ui.ResizablePanelCore({
+  const paneltop$ = new Timeless.ui.ResizablePanelCore({
     defaultSize: 75,
     minSize: 50,
     maxSize: 90,
   });
-  const bottomPanel = new Timeless.ui.ResizablePanelCore({
+  const panelbottom$ = new Timeless.ui.ResizablePanelCore({
     defaultSize: 25,
     minSize: 10,
     maxSize: 50,
@@ -461,16 +460,24 @@ export default function FormValidateView() {
           const field$ = form$.fields[key];
           const rr = await field$.validate();
           if (rr.error) {
-            if (field$.input && field$.input.shape === "select" && typeof field$.input.show === "function") {
+            if (
+              field$.input &&
+              field$.input.shape === "select" &&
+              typeof field$.input.show === "function"
+            ) {
               field$.input.show();
-            } else if (field$.input && typeof field$.input.focus === "function") {
+            } else if (
+              field$.input &&
+              typeof field$.input.focus === "function"
+            ) {
               field$.input.focus();
             }
             const id1 = field$.name;
             const id2 = `field-${field$.name}`;
-            const $elm = typeof document !== "undefined"
-              ? document.getElementById(id1) || document.getElementById(id2)
-              : null;
+            const $elm =
+              typeof document !== "undefined"
+                ? document.getElementById(id1) || document.getElementById(id2)
+                : null;
             if ($elm && typeof $elm.scrollIntoView === "function") {
               $elm.scrollIntoView({ behavior: "smooth", block: "center" });
             }
@@ -489,60 +496,90 @@ export default function FormValidateView() {
       form$.reset();
     },
   });
+  const vm$ = new Timeless.ui.ScrollViewCore({});
+
+  // return ScrollView(
+  //   { class: "p-6", store: new Timeless.ui.ScrollViewCore({}) },
+  //   [
+  //     FieldDemoView({
+  //       field_card_name$,
+  //       field_card_number$,
+  //       field_cvv$,
+  //       field_exp_month$,
+  //       field_exp_year$,
+  //       same_as_shipping$,
+  //       field_comments$,
+  //       submit_payment_btn$,
+  //       cancel_btn$,
+  //     }),
+  //     Separator({}),
+  //     Field({ store: field_provider$ }, [
+  //       Select({
+  //         id: `field-${field_provider$.name}`,
+  //         store: field_provider$.input,
+  //       }),
+  //     ]),
+  //     FormRender(configure$_),
+  //     Button({ store: submit_configure_btn$ }, ["Submit"]),
+  //   ],
+  // );
 
   return View({ class: "w-full h-full min-w-0 min-h-0 overflow-hidden" }, [
     ResizablePanels(
       {
-        store: panelsGroup,
+        store: resizable$,
         direction: "vertical",
         class: "w-full h-full",
       },
       [
         ResizablePanel(
           {
-            store: topPanel,
-            group: panelsGroup,
+            store: paneltop$,
+            group: resizable$,
             class: "min-h-0",
           },
           [
-            View({ class: "space-y-8 p-6 overflow-y-auto h-full min-h-0" }, [
-              FieldDemoView({
-                field_card_name$,
-                field_card_number$,
-                field_cvv$,
-                field_exp_month$,
-                field_exp_year$,
-                same_as_shipping$,
-                field_comments$,
-                submit_payment_btn$,
-                cancel_btn$,
-              }),
-              Separator({}),
-              Field({ store: field_provider$ }, [
-                Select({
-                  id: `field-${field_provider$.name}`,
-                  store: field_provider$.input,
+            ScrollView(
+              { class: "p-6", store: new Timeless.ui.ScrollViewCore({}) },
+              [
+                FieldDemoView({
+                  field_card_name$,
+                  field_card_number$,
+                  field_cvv$,
+                  field_exp_month$,
+                  field_exp_year$,
+                  same_as_shipping$,
+                  field_comments$,
+                  submit_payment_btn$,
+                  cancel_btn$,
                 }),
-              ]),
-              FormRender(configure$_),
-              Button({ store: submit_configure_btn$ }, ["Submit"]),
-            ]),
+                Separator({}),
+                Field({ store: field_provider$ }, [
+                  Select({
+                    id: `field-${field_provider$.name}`,
+                    store: field_provider$.input,
+                  }),
+                ]),
+                FormRender(configure$_),
+                Button({ store: submit_configure_btn$ }, ["Submit"]),
+              ],
+            ),
           ],
         ),
         ResizableHandle({
-          store: panelsGroup,
-          panelBefore: topPanel,
-          panelAfter: bottomPanel,
+          store: resizable$,
+          panelBefore: paneltop$,
+          panelAfter: panelbottom$,
           withHandle: true,
         }),
         ResizablePanel(
           {
-            store: bottomPanel,
-            group: panelsGroup,
+            store: panelbottom$,
+            group: resizable$,
             class: "min-h-0",
           },
           [
-            View({ class: "p-3 flex items-center gap-2" }, [
+            View({ class: "p-6 flex items-center gap-2" }, [
               Button(
                 {
                   store: new Timeless.ui.ButtonCore({

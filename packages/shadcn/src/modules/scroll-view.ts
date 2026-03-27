@@ -15,25 +15,10 @@ export function ScrollView(
 
   return ScrollViewPrimitive.Root(
     {
-      store,
-      class: cn(["scroll-view w-full h-full overflow-y-auto", cls]),
       ...rest,
+      store,
+      class: cn(["scroll-view overflow-y-auto w-full h-full", cls]),
     },
-    [
-      ScrollViewPrimitive.Indicator(
-        {
-          store,
-          class:
-            "scroll-view-indicator relative w-full overflow-hidden text-center",
-        },
-        [
-          ScrollViewPrimitive.Progress({
-            store,
-            class: "absolute left-0 bottom-0 w-full min-h-[30px] py-[10px]",
-          }),
-        ],
-      ),
-      Fragment({}, children),
-    ],
+    children,
   );
 }

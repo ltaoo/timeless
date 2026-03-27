@@ -1,10 +1,4 @@
-import {
-  ref,
-  refobj,
-  refarr,
-  computed,
-  ClassNameRef,
-} from "@timeless/reactive";
+import { ref, refobj, refarr, computed } from "@timeless/reactive";
 import {
   RouteViewCore,
   HistoryCore,
@@ -19,10 +13,10 @@ import {
   View,
   ViewChildren,
   ViewProps,
-} from "../primitive/view";
-import { For } from "../primitive/for";
-import { h } from "../util/h";
-import { LazyView } from "../primitive/lazy-view";
+} from "@/primitive/view";
+import { For } from "@/primitive/for";
+import { LazyView } from "@/primitive/lazy-view";
+import { h } from "@/util/h";
 
 export function KeepAliveSubViews(
   props: ViewProps & {
@@ -56,12 +50,11 @@ export function KeepAliveSubViews(
     return View({ class: ref("not-found") }, ["Not Found"]);
   })();
 
-  const nodes: any[] = [];
-
   return For({
     each: subviews,
-    render(subview: any, idx) {
+    render(subview) {
       const PageView = props.views[subview.name];
+      const idx = subviews.indexOf(subview);
       if (!PageView) {
         return NotFoundPageView;
       }
@@ -70,7 +63,7 @@ export function KeepAliveSubViews(
         {
           style: computed(cur_subview, (d) => {
             return [
-              `z-index: ${idx + 1}; width: 100%; height: 100%;`,
+              `z-index: ${idx + 1}; position: relative; width: 100%;`,
               d && d.id === subview.id ? "display: block;" : "display: none;",
             ].join("");
           }),
@@ -84,9 +77,6 @@ export function KeepAliveSubViews(
             {
               ...props,
               view: subview,
-              onMounted() {
-                nodes.push(this);
-              },
             },
             [PageView],
           ),

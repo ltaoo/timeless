@@ -1,206 +1,211 @@
 import { Section, Item } from "@/components/index.js";
 
 export default function GeneralView() {
-  return Flex({ col: true, gap: "24px" }, [
-    Section("Button", [
-      Item("Variants", [
-        Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
-        Button(
-          {
-            store: new Timeless.ui.ButtonCore({ variant: "secondary" }),
-          },
-          ["Secondary"],
-        ),
-        Button({ store: new Timeless.ui.ButtonCore({ variant: "outline" }) }, [
-          "Outline",
-        ]),
-        Button({ store: new Timeless.ui.ButtonCore({ variant: "ghost" }) }, [
-          "Ghost",
-        ]),
-        Button(
-          { store: new Timeless.ui.ButtonCore({ variant: "destructive" }) },
-          ["Destructive"],
-        ),
-        Button({ store: new Timeless.ui.ButtonCore({ variant: "link" }) }, [
-          "Link",
-        ]),
-      ]),
-      Item("Sizes", [
-        Button({ store: new Timeless.ui.ButtonCore({ size: "xs" }) }, ["XS"]),
-        Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, ["SM"]),
-        Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
-        Button({ store: new Timeless.ui.ButtonCore({ size: "lg" }) }, ["LG"]),
-        Button({ store: new Timeless.ui.ButtonCore({ size: "icon-xs" }) }, [
-          Timeless.icons.BoltOutlined(),
-        ]),
-        Button({ store: new Timeless.ui.ButtonCore({ size: "icon-sm" }) }, [
-          Timeless.icons.BoltOutlined(),
-        ]),
-        Button({ store: new Timeless.ui.ButtonCore({ size: "icon" }) }, [
-          Timeless.icons.BoltOutlined(),
-        ]),
-        Button({ store: new Timeless.ui.ButtonCore({ size: "icon-lg" }) }, [
-          Timeless.icons.BoltOutlined(),
-        ]),
-      ]),
-      Item("Loading", [
-        (() => {
-          const store = new Timeless.ui.ButtonCore({
-            onClick: () => {
-              store.setLoading(true);
-              setTimeout(() => {
-                store.setLoading(false);
-              }, 2000);
+  const view$ = new Timeless.ui.ScrollViewCore({});
+
+  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
+    Flex({ col: true, gap: "24px" }, [
+      Section("Button", [
+        Item("Variants", [
+          Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
+          Button(
+            {
+              store: new Timeless.ui.ButtonCore({ variant: "secondary" }),
             },
-          });
-          return Button({ store }, ["Click to Load"]);
-        })(),
-        (() => {
-          const store = new Timeless.ui.ButtonCore({
-            variant: "secondary",
-            onClick: () => {
-              store.setLoading(true);
-              setTimeout(() => {
-                store.setLoading(false);
-              }, 2000);
-            },
-          });
-          return Button({ store }, ["Click to Load"]);
-        })(),
-        (() => {
-          const store = new Timeless.ui.ButtonCore({
-            variant: "outline",
-            onClick: () => {
-              store.setLoading(true);
-              setTimeout(() => {
-                store.setLoading(false);
-              }, 2000);
-            },
-          });
-          return Button({ store }, ["Click to Load"]);
-        })(),
-      ]),
-      Item("With Prefix Icon", [
-        Button(
-          {
-            store: new Timeless.ui.ButtonCore({}),
-            prefix: [Timeless.icons.DownloadOutlined({ class: "w-4 h-4" })],
-          },
-          ["Download"],
-        ),
-        (() => {
-          const playing = ref(false);
-          const playStore = new Timeless.ui.ButtonCore({
-            variant: "secondary",
-            onClick: () => {
-              playing.as(true);
-            },
-          });
-          const cancelStore = new Timeless.ui.ButtonCore({
-            variant: "secondary",
-            onClick: () => {
-              playing.as(false);
-            },
-          });
-          return View({}, [
-            Show({ when: computed(playing, (v) => !v) }, [
-              Button(
-                {
-                  store: playStore,
-                  prefix: [Timeless.icons.PlayOutlined({ class: "w-4 h-4" })],
-                },
-                ["Play"],
-              ),
-            ]),
-            Show({ when: computed(playing, (v) => v) }, [
-              Button(
-                {
-                  store: cancelStore,
-                  prefix: [
-                    View(
-                      {
-                        class: "inline-block h-4 w-4 animate-spin",
-                        style: "transform-origin: center",
-                      },
-                      [Timeless.icons.LoaderCircleOutlined()],
-                    ),
-                  ],
-                },
-                ["取消"],
-              ),
-            ]),
-          ]);
-        })(),
-        Button(
-          {
-            store: new Timeless.ui.ButtonCore({ variant: "outline" }),
-            prefix: [Timeless.icons.BoltOutlined({ class: "w-4 h-4" })],
-          },
-          ["Settings"],
-        ),
-      ]),
-      Item("Disabled", [
-        Button({ store: new Timeless.ui.ButtonCore({ disabled: true }) }, [
-          "Disabled",
+            ["Secondary"],
+          ),
+          Button(
+            { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
+            ["Outline"],
+          ),
+          Button({ store: new Timeless.ui.ButtonCore({ variant: "ghost" }) }, [
+            "Ghost",
+          ]),
+          Button(
+            { store: new Timeless.ui.ButtonCore({ variant: "destructive" }) },
+            ["Destructive"],
+          ),
+          Button({ store: new Timeless.ui.ButtonCore({ variant: "link" }) }, [
+            "Link",
+          ]),
         ]),
-        Button(
-          {
-            store: new Timeless.ui.ButtonCore({
+        Item("Sizes", [
+          Button({ store: new Timeless.ui.ButtonCore({ size: "xs" }) }, ["XS"]),
+          Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, ["SM"]),
+          Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
+          Button({ store: new Timeless.ui.ButtonCore({ size: "lg" }) }, ["LG"]),
+          Button({ store: new Timeless.ui.ButtonCore({ size: "icon-xs" }) }, [
+            Timeless.icons.BoltOutlined(),
+          ]),
+          Button({ store: new Timeless.ui.ButtonCore({ size: "icon-sm" }) }, [
+            Timeless.icons.BoltOutlined(),
+          ]),
+          Button({ store: new Timeless.ui.ButtonCore({ size: "icon" }) }, [
+            Timeless.icons.BoltOutlined(),
+          ]),
+          Button({ store: new Timeless.ui.ButtonCore({ size: "icon-lg" }) }, [
+            Timeless.icons.BoltOutlined(),
+          ]),
+        ]),
+        Item("Loading", [
+          (() => {
+            const store = new Timeless.ui.ButtonCore({
+              onClick: () => {
+                store.setLoading(true);
+                setTimeout(() => {
+                  store.setLoading(false);
+                }, 2000);
+              },
+            });
+            return Button({ store }, ["Click to Load"]);
+          })(),
+          (() => {
+            const store = new Timeless.ui.ButtonCore({
               variant: "secondary",
-              disabled: true,
-            }),
-          },
-          ["Disabled"],
-        ),
-        Button(
-          {
-            store: new Timeless.ui.ButtonCore({
+              onClick: () => {
+                store.setLoading(true);
+                setTimeout(() => {
+                  store.setLoading(false);
+                }, 2000);
+              },
+            });
+            return Button({ store }, ["Click to Load"]);
+          })(),
+          (() => {
+            const store = new Timeless.ui.ButtonCore({
               variant: "outline",
-              disabled: true,
-            }),
-          },
-          ["Disabled"],
-        ),
-      ]),
-    ]),
-    Section("Badge", [
-      Item("Variants", [
-        Badge({}, ["Default"]),
-        Badge({ variant: "secondary" }, ["Secondary"]),
-        Badge({ variant: "outline" }, ["Outline"]),
-        Badge({ variant: "destructive" }, ["Destructive"]),
-      ]),
-    ]),
-    Section("Separator", [
-      Item("Horizontal", [View({ class: "w-full" }, [Separator({})])]),
-      Item("Vertical", [
-        View({ class: cn(["flex items-center h-6 gap-3"]) }, [
-          "Left",
-          Separator({ orientation: "vertical" }),
-          "Right",
+              onClick: () => {
+                store.setLoading(true);
+                setTimeout(() => {
+                  store.setLoading(false);
+                }, 2000);
+              },
+            });
+            return Button({ store }, ["Click to Load"]);
+          })(),
+        ]),
+        Item("With Prefix Icon", [
+          Button(
+            {
+              store: new Timeless.ui.ButtonCore({}),
+              prefix: [Timeless.icons.DownloadOutlined({ class: "w-4 h-4" })],
+            },
+            ["Download"],
+          ),
+          (() => {
+            const playing = ref(false);
+            const playStore = new Timeless.ui.ButtonCore({
+              variant: "secondary",
+              onClick: () => {
+                playing.as(true);
+              },
+            });
+            const cancelStore = new Timeless.ui.ButtonCore({
+              variant: "secondary",
+              onClick: () => {
+                playing.as(false);
+              },
+            });
+            return View({}, [
+              Show({ when: computed(playing, (v) => !v) }, [
+                Button(
+                  {
+                    store: playStore,
+                    prefix: [Timeless.icons.PlayOutlined({ class: "w-4 h-4" })],
+                  },
+                  ["Play"],
+                ),
+              ]),
+              Show({ when: computed(playing, (v) => v) }, [
+                Button(
+                  {
+                    store: cancelStore,
+                    prefix: [
+                      View(
+                        {
+                          class: "inline-block h-4 w-4 animate-spin",
+                          style: "transform-origin: center",
+                        },
+                        [Timeless.icons.LoaderCircleOutlined()],
+                      ),
+                    ],
+                  },
+                  ["取消"],
+                ),
+              ]),
+            ]);
+          })(),
+          Button(
+            {
+              store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+              prefix: [Timeless.icons.BoltOutlined({ class: "w-4 h-4" })],
+            },
+            ["Settings"],
+          ),
+        ]),
+        Item("Disabled", [
+          Button({ store: new Timeless.ui.ButtonCore({ disabled: true }) }, [
+            "Disabled",
+          ]),
+          Button(
+            {
+              store: new Timeless.ui.ButtonCore({
+                variant: "secondary",
+                disabled: true,
+              }),
+            },
+            ["Disabled"],
+          ),
+          Button(
+            {
+              store: new Timeless.ui.ButtonCore({
+                variant: "outline",
+                disabled: true,
+              }),
+            },
+            ["Disabled"],
+          ),
         ]),
       ]),
-    ]),
-    // Section("Avatar", [
-    //   Item("Sizes", [
-    //     Avatar({ src: "", fallback: "S", size: "sm" }),
-    //     Avatar({ src: "", fallback: "M" }),
-    //     Avatar({ src: "", fallback: "L", size: "lg" }),
-    //   ]),
-    // ]),
-    Section("Card", [
-      Item("Default", [
-        Card({ class: "w-[350px]" }, [
-          CardHeader({}, [
-            CardTitle({}, ["Card Title"]),
-            CardDescription({}, ["Card description goes here."]),
+      Section("Badge", [
+        Item("Variants", [
+          Badge({}, ["Default"]),
+          Badge({ variant: "secondary" }, ["Secondary"]),
+          Badge({ variant: "outline" }, ["Outline"]),
+          Badge({ variant: "destructive" }, ["Destructive"]),
+        ]),
+      ]),
+      Section("Separator", [
+        Item("Horizontal", [View({ class: "w-full" }, [Separator({})])]),
+        Item("Vertical", [
+          View({ class: cn(["flex items-center h-6 gap-3"]) }, [
+            "Left",
+            Separator({ orientation: "vertical" }),
+            "Right",
           ]),
-          CardContent({}, [
-            View({ class: "text-sm" }, ["This is the card content area."]),
-          ]),
-          CardFooter({}, [
-            Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, [
-              "Action",
+        ]),
+      ]),
+      // Section("Avatar", [
+      //   Item("Sizes", [
+      //     Avatar({ src: "", fallback: "S", size: "sm" }),
+      //     Avatar({ src: "", fallback: "M" }),
+      //     Avatar({ src: "", fallback: "L", size: "lg" }),
+      //   ]),
+      // ]),
+      Section("Card", [
+        Item("Default", [
+          Card({ class: "w-[350px]" }, [
+            CardHeader({}, [
+              CardTitle({}, ["Card Title"]),
+              CardDescription({}, ["Card description goes here."]),
+            ]),
+            CardContent({}, [
+              View({ class: "text-sm" }, ["This is the card content area."]),
+            ]),
+            CardFooter({}, [
+              Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, [
+                "Action",
+              ]),
             ]),
           ]),
         ]),
