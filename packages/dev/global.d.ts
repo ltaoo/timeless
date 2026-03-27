@@ -1443,7 +1443,9 @@ declare module "packages/ui/src/checkbox/index" {
         check(): void;
         uncheck(): void;
         reset(): void;
-        setValue(v: boolean): void;
+        setValue(v: boolean, extra?: Partial<{
+            silence: boolean;
+        }>): void;
         onChange(handler: Handler<TheTypesOfEvents[Events.Change]>): () => void;
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
     }
@@ -3833,6 +3835,7 @@ declare module "packages/ui/src/select/index" {
     type SelectProps<T> = {
         id?: string;
         defaultValue: T | null;
+        disabled?: boolean;
         placeholder?: string;
         options?: {
             value: T;
@@ -3865,6 +3868,8 @@ declare module "packages/ui/src/select/index" {
         } | null;
         /** 菜单是否展开 */
         open: boolean;
+        /** 加载中 */
+        loading: boolean;
         /** 提示 */
         placeholder: string;
         /** 禁用 */
@@ -3899,6 +3904,8 @@ declare module "packages/ui/src/select/index" {
         value: T | null;
         disabled: boolean;
         open: boolean;
+        /** 加载中 */
+        loading: boolean;
         /** 是否启用搜索 */
         search: boolean;
         /** 搜索关键字 */
@@ -3963,6 +3970,8 @@ declare module "packages/ui/src/select/index" {
         setId(v: any): void;
         setValue(v: T | null): void;
         clear(): void;
+        /** 设置加载状态 */
+        setLoading(loading: boolean): void;
         /** 设置搜索关键字 */
         setSearchKeyword(keyword: string): void;
         /** 清空搜索关键字 */
@@ -8211,6 +8220,517 @@ declare module "packages/headless/src/modules/textarea" {
         onUnmounted(): void;
     };
 }
+declare module "packages/icons/src/util/index" {
+    export const defaultWidth = "24";
+    export const defaultHeight = "24";
+    export type IconSize = string | number;
+    export type IconProps = {
+        class?: string;
+        className?: string;
+        style?: string;
+        size?: IconSize;
+        onClick?: (event: MouseEvent) => void;
+        id?: string;
+        onMounted?: (svg: SVGSVGElement) => void;
+        beforeUnmounted?: () => void;
+        onUnmounted?: () => void;
+    };
+    export function createIcon(svg: string): (props?: IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/arrow-down-to-line" {
+    export const ArrowDownloadToLineOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/calendar" {
+    export const CalendarOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/chevron-down" {
+    export const ChevronDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/chevron-left" {
+    export const ChevronLeftOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/chevron-right" {
+    export const ChevronRightOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/circle-arrow-down" {
+    export const CircleArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/circle-x" {
+    export const CircleXOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/clock-arrow-down" {
+    export const ClockArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/cloud-download" {
+    export const CloudDownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/download" {
+    export const DownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/ellipsis-vertical" {
+    export const EllipsisVerticalOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/ellipsis" {
+    export const EllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/file-box" {
+    export const FileBoxOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/file-image" {
+    export const FileImageOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/file-lock" {
+    export const FileLockOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/file-play" {
+    export const FilePlayOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/file-symlink" {
+    export const FileSymlinkOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/file-video-camera" {
+    export const FileVideoCameraOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/file-volume" {
+    export const FileVolumeOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/file" {
+    export const FileOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/folder-closed" {
+    export const FolderClosedOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/folder" {
+    export const FolderOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/pause" {
+    export const PauseOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/play" {
+    export const PlayOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/refresh-ccw" {
+    export const RefreshCcwOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/rss" {
+    export const RSSOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/square-arrow-down" {
+    export const SquareArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/trash-2" {
+    export const Trash2Outlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/trash" {
+    export const TrashOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/search" {
+    export const SearchOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/undo-2" {
+    export const Undo2Outlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/x" {
+    export const XOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/bolt" {
+    export const BoltOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/loader" {
+    export const LoaderOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/loader-circle" {
+    export const LoaderCircleOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/check" {
+    export const CheckOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/chevron-up" {
+    export const ChevronUpOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/clock" {
+    export const ClockOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/grid-3x3" {
+    export const Grid3x3Outlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/menu" {
+    export const MenuOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/circle-ellipsis" {
+    export const CircleEllipsisDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/house" {
+    export const HouseOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/moon" {
+    export const MoonOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/icons/sun" {
+    export const SunOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+        t: string;
+        $elm: SVGSVGElement;
+        render(): SVGSVGElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/icons/src/index" {
+    export * from "packages/icons/src/icons/arrow-down-to-line";
+    export * from "packages/icons/src/icons/calendar";
+    export * from "packages/icons/src/icons/chevron-down";
+    export * from "packages/icons/src/icons/chevron-left";
+    export * from "packages/icons/src/icons/chevron-right";
+    export * from "packages/icons/src/icons/circle-arrow-down";
+    export * from "packages/icons/src/icons/circle-x";
+    export * from "packages/icons/src/icons/clock-arrow-down";
+    export * from "packages/icons/src/icons/cloud-download";
+    export * from "packages/icons/src/icons/download";
+    export * from "packages/icons/src/icons/ellipsis-vertical";
+    export * from "packages/icons/src/icons/ellipsis";
+    export * from "packages/icons/src/icons/file-box";
+    export * from "packages/icons/src/icons/file-image";
+    export * from "packages/icons/src/icons/file-lock";
+    export * from "packages/icons/src/icons/file-play";
+    export * from "packages/icons/src/icons/file-symlink";
+    export * from "packages/icons/src/icons/file-video-camera";
+    export * from "packages/icons/src/icons/file-volume";
+    export * from "packages/icons/src/icons/file";
+    export * from "packages/icons/src/icons/folder-closed";
+    export * from "packages/icons/src/icons/folder";
+    export * from "packages/icons/src/icons/pause";
+    export * from "packages/icons/src/icons/play";
+    export * from "packages/icons/src/icons/refresh-ccw";
+    export * from "packages/icons/src/icons/rss";
+    export * from "packages/icons/src/icons/square-arrow-down";
+    export * from "packages/icons/src/icons/trash-2";
+    export * from "packages/icons/src/icons/trash";
+    export * from "packages/icons/src/icons/search";
+    export * from "packages/icons/src/icons/undo-2";
+    export * from "packages/icons/src/icons/x";
+    export * from "packages/icons/src/icons/bolt";
+    export * from "packages/icons/src/icons/loader";
+    export * from "packages/icons/src/icons/loader-circle";
+    export * from "packages/icons/src/icons/check";
+    export * from "packages/icons/src/icons/chevron-up";
+    export * from "packages/icons/src/icons/clock";
+    export * from "packages/icons/src/icons/grid-3x3";
+    export * from "packages/icons/src/icons/menu";
+    export * from "packages/icons/src/icons/circle-ellipsis";
+    export * from "packages/icons/src/icons/house";
+    export * from "packages/icons/src/icons/moon";
+    export * from "packages/icons/src/icons/sun";
+    export * from "packages/icons/src/util/index";
+}
 declare module "packages/headless/src/modules/select" {
     import { SelectCore } from "packages/ui/src/index";
     import { ViewChildren, ViewProps } from "@/primitive/view";
@@ -8224,7 +8744,9 @@ declare module "packages/headless/src/modules/select" {
     export function Value(props: ViewProps & {
         store: SelectCore<any>;
     }, children?: ViewChildren): any;
-    export function Icon(props: ViewProps, children: ViewChildren): any;
+    export function Icon(props: ViewProps & {
+        store?: SelectCore<any>;
+    }, children: ViewChildren): any;
     export function Portal(props: ViewProps & {
         store: SelectCore<any>;
         animation?: {
@@ -9440,15 +9962,6 @@ declare module "packages/headless/src/modules/popover" {
         onUnmounted(): void;
     };
     export function Close(props: ViewProps & {
-        store: PopoverCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: HTMLElement;
-        render(): HTMLElement;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Arrow(props: ViewProps & {
         store: PopoverCore;
     }, children?: ViewChildren): {
         t: string;
@@ -11440,7 +11953,7 @@ declare module "packages/kit/src/index" {
 }
 declare module "packages/headless/src/modules/keep-alive-sub-views" {
     import { RouteViewCore, HistoryCore, StorageCore, HttpClientCore, ApplicationModel } from "packages/kit/src/index";
-    import { TimelessComponent, TimelessElement, ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    import { TimelessComponent, TimelessElement, ViewChildren, ViewProps } from "@/primitive/view";
     export function KeepAliveSubViews(props: ViewProps & {
         view: RouteViewCore;
         views: Record<string, TimelessComponent>;
@@ -11450,12 +11963,7 @@ declare module "packages/headless/src/modules/keep-alive-sub-views" {
         client: HttpClientCore;
         NotFound?: (...args: any[]) => TimelessElement;
         placeholder?: ViewChildren;
-    }): {
-        t: string;
-        $elm: any;
-        render(): DocumentFragment;
-        onUnmounted(): void;
-    };
+    }): any;
 }
 declare module "packages/headless/src/modules/standard-sub-views" {
     import { RouteViewCore, HistoryCore, StorageCore, HttpClientCore, ApplicationModel } from "packages/kit/src/index";
@@ -11563,517 +12071,6 @@ declare module "packages/headless/src/index" {
     export * from "packages/headless/src/util/lazy";
     export * from "packages/headless/src/util/render";
     export * from "packages/headless/src/util/h";
-}
-declare module "packages/icons/src/util/index" {
-    export const defaultWidth = "24";
-    export const defaultHeight = "24";
-    export type IconSize = string | number;
-    export type IconProps = {
-        class?: string;
-        className?: string;
-        style?: string;
-        size?: IconSize;
-        onClick?: (event: MouseEvent) => void;
-        id?: string;
-        onMounted?: (svg: SVGSVGElement) => void;
-        beforeUnmounted?: () => void;
-        onUnmounted?: () => void;
-    };
-    export function createIcon(svg: string): (props?: IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/arrow-down-to-line" {
-    export const ArrowDownloadToLineOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/calendar" {
-    export const CalendarOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/chevron-down" {
-    export const ChevronDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/chevron-left" {
-    export const ChevronLeftOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/chevron-right" {
-    export const ChevronRightOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/circle-arrow-down" {
-    export const CircleArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/circle-x" {
-    export const CircleXOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/clock-arrow-down" {
-    export const ClockArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/cloud-download" {
-    export const CloudDownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/download" {
-    export const DownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/ellipsis-vertical" {
-    export const EllipsisVerticalOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/ellipsis" {
-    export const EllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/file-box" {
-    export const FileBoxOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/file-image" {
-    export const FileImageOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/file-lock" {
-    export const FileLockOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/file-play" {
-    export const FilePlayOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/file-symlink" {
-    export const FileSymlinkOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/file-video-camera" {
-    export const FileVideoCameraOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/file-volume" {
-    export const FileVolumeOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/file" {
-    export const FileOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/folder-closed" {
-    export const FolderClosedOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/folder" {
-    export const FolderOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/pause" {
-    export const PauseOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/play" {
-    export const PlayOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/refresh-ccw" {
-    export const RefreshCcwOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/rss" {
-    export const RSSOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/square-arrow-down" {
-    export const SquareArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/trash-2" {
-    export const Trash2Outlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/trash" {
-    export const TrashOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/search" {
-    export const SearchOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/undo-2" {
-    export const Undo2Outlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/x" {
-    export const XOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/bolt" {
-    export const BoltOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/loader" {
-    export const LoaderOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/loader-circle" {
-    export const LoaderCircleOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/check" {
-    export const CheckOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/chevron-up" {
-    export const ChevronUpOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/clock" {
-    export const ClockOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/grid-3x3" {
-    export const Grid3x3Outlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/menu" {
-    export const MenuOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/circle-ellipsis" {
-    export const CircleEllipsisDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/house" {
-    export const HouseOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/moon" {
-    export const MoonOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/icons/sun" {
-    export const SunOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/icons/src/index" {
-    export * from "packages/icons/src/icons/arrow-down-to-line";
-    export * from "packages/icons/src/icons/calendar";
-    export * from "packages/icons/src/icons/chevron-down";
-    export * from "packages/icons/src/icons/chevron-left";
-    export * from "packages/icons/src/icons/chevron-right";
-    export * from "packages/icons/src/icons/circle-arrow-down";
-    export * from "packages/icons/src/icons/circle-x";
-    export * from "packages/icons/src/icons/clock-arrow-down";
-    export * from "packages/icons/src/icons/cloud-download";
-    export * from "packages/icons/src/icons/download";
-    export * from "packages/icons/src/icons/ellipsis-vertical";
-    export * from "packages/icons/src/icons/ellipsis";
-    export * from "packages/icons/src/icons/file-box";
-    export * from "packages/icons/src/icons/file-image";
-    export * from "packages/icons/src/icons/file-lock";
-    export * from "packages/icons/src/icons/file-play";
-    export * from "packages/icons/src/icons/file-symlink";
-    export * from "packages/icons/src/icons/file-video-camera";
-    export * from "packages/icons/src/icons/file-volume";
-    export * from "packages/icons/src/icons/file";
-    export * from "packages/icons/src/icons/folder-closed";
-    export * from "packages/icons/src/icons/folder";
-    export * from "packages/icons/src/icons/pause";
-    export * from "packages/icons/src/icons/play";
-    export * from "packages/icons/src/icons/refresh-ccw";
-    export * from "packages/icons/src/icons/rss";
-    export * from "packages/icons/src/icons/square-arrow-down";
-    export * from "packages/icons/src/icons/trash-2";
-    export * from "packages/icons/src/icons/trash";
-    export * from "packages/icons/src/icons/search";
-    export * from "packages/icons/src/icons/undo-2";
-    export * from "packages/icons/src/icons/x";
-    export * from "packages/icons/src/icons/bolt";
-    export * from "packages/icons/src/icons/loader";
-    export * from "packages/icons/src/icons/loader-circle";
-    export * from "packages/icons/src/icons/check";
-    export * from "packages/icons/src/icons/chevron-up";
-    export * from "packages/icons/src/icons/clock";
-    export * from "packages/icons/src/icons/grid-3x3";
-    export * from "packages/icons/src/icons/menu";
-    export * from "packages/icons/src/icons/circle-ellipsis";
-    export * from "packages/icons/src/icons/house";
-    export * from "packages/icons/src/icons/moon";
-    export * from "packages/icons/src/icons/sun";
-    export * from "packages/icons/src/util/index";
 }
 declare module "packages/shadcn/src/modules/input" {
     import { ViewProps } from "packages/headless/src/index";
@@ -12779,6 +12776,16 @@ declare module "packages/shadcn/src/modules/field" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
+    export function FieldInlineLabel(props: ViewProps & {
+        store?: SingleFieldCore<any>;
+        for?: string;
+    }, children: any): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function FieldHelp(props: {}, children?: ViewChildren): {
         t: string;
         $elm: HTMLElement;
@@ -12904,7 +12911,7 @@ declare module "packages/shadcn/src/index" {
     import { Kbd, KbdGroup } from "packages/shadcn/src/modules/kbd";
     import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "packages/shadcn/src/modules/table";
     import { Form } from "packages/shadcn/src/modules/form";
-    import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from "packages/shadcn/src/modules/field";
+    import { Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet } from "packages/shadcn/src/modules/field";
     import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/shadcn/src/modules/resizable-panels";
     import { Waterfall } from "packages/shadcn/src/modules/waterfall";
     import { HistoryPanel } from "packages/shadcn/src/modules/history-panel";
@@ -12915,7 +12922,7 @@ declare module "packages/shadcn/src/index" {
     export * from "packages/reactive/src/index";
     export * as icons from "packages/icons/src/index";
     export * as kit from "packages/kit/src/index";
-    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, Cascader, DatePicker, DateRangePicker, TimePicker, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, };
+    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, Cascader, DatePicker, DateRangePicker, TimePicker, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, };
 }
 
 // === Package module aliases ===
@@ -12999,6 +13006,7 @@ declare const Ellipse: typeof import("@timeless/shadcn").Ellipse;
 declare const Field: typeof import("@timeless/shadcn").Field;
 declare const FieldDescription: typeof import("@timeless/shadcn").FieldDescription;
 declare const FieldGroup: typeof import("@timeless/shadcn").FieldGroup;
+declare const FieldInlineLabel: typeof import("@timeless/shadcn").FieldInlineLabel;
 declare const FieldLabel: typeof import("@timeless/shadcn").FieldLabel;
 declare const FieldLegend: typeof import("@timeless/shadcn").FieldLegend;
 declare const FieldPrimitive: typeof import("@timeless/shadcn").FieldPrimitive;

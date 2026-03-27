@@ -58,6 +58,7 @@ export const globals = {
   Field: "readonly",
   FieldDescription: "readonly",
   FieldGroup: "readonly",
+  FieldInlineLabel: "readonly",
   FieldLabel: "readonly",
   FieldLegend: "readonly",
   FieldPrimitive: "readonly",

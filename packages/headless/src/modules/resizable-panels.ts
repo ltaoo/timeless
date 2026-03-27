@@ -17,9 +17,7 @@ export function Group(
   return View(
     {
       ...rest,
-      style: ["display: flex", "width: 100%", "height: 100%"]
-        .filter(Boolean)
-        .join("; "),
+      style: sn(["display: flex; width: 100%; height: 100%;", props.style]),
       onMounted($el: HTMLDivElement) {
         store.mount($el);
         rest.onMounted?.($el);

@@ -1,9 +1,8 @@
 import { Section, Item } from "@/components/index.js";
+import { PageContent } from "@/components/layout.js";
 
 export default function FormView() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
-
-  return ScrollView({ class: "p-6", store: view$ }, [
+  return PageContent({ class: "p-6" }, [
     View({ class: "space-y-8" }, [
       Section("Input", [
         Item("Default", [

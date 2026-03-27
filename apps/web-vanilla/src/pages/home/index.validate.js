@@ -1,18 +1,20 @@
-function FormRender(props) {
-  const field_names = computed(props, (t) => {
+import { PageContent, SplitLayout } from "@/components/layout.js";
+
+function FormRender(props, children) {
+  const field_names = computed(props.store, (t) => {
     if (!t) {
       return [];
     }
     return Object.keys(t.fields);
   });
-  return View({ class: "space-y-8" }, [
+  return View({ class: cn([props.class, "space-y-6"]) }, [
     For({
       each: field_names,
       render(name) {
-        if (!props.value.fields) {
+        if (!props.store.value.fields) {
           return null;
         }
-        const field$ = props.value.fields[name];
+        const field$ = props.store.value.fields[name];
         if (!field$) {
           return null;
         }
@@ -61,7 +63,7 @@ function FormRender(props) {
               ],
             ),
             Show({ when: inline }, [
-              h(FieldLabel, {
+              h(FieldInlineLabel, {
                 for: fid,
                 store: field$,
               }),
@@ -70,10 +72,12 @@ function FormRender(props) {
         );
       },
     }),
+    Fragment({}, children),
   ]);
 }
 
-function FieldDemoView(stores) {
+function PaymentFormView(props) {
+  const { store } = props;
   const {
     field_card_name$,
     field_card_number$,
@@ -84,7 +88,7 @@ function FieldDemoView(stores) {
     field_comments$,
     submit_payment_btn$,
     cancel_btn$,
-  } = stores;
+  } = store.ui;
 
   return View({ class: "w-full max-w-md rounded-xl border p-6" }, [
     View({ class: "space-y-6" }, [
@@ -156,12 +160,13 @@ function FieldDemoView(stores) {
         ]),
         View({ class: "flex items-center gap-2" }, [
           Checkbox({
+            id: "same_as_shipping",
             store: same_as_shipping$,
           }),
-          View(
+          FieldInlineLabel(
             {
-              as: "label",
-              class: "text-sm font-normal select-none cursor-pointer",
+              for: "same_as_shipping",
+              store: same_as_shipping$,
               onClick() {
                 same_as_shipping$.toggle();
               },
@@ -192,7 +197,7 @@ function FieldDemoView(stores) {
   ]);
 }
 
-export default function FormValidateView() {
+function PaymentViewModel() {
   const field_card_name$ = new Timeless.ui.SingleFieldCore({
     label: "Name on Card",
     name: "card_name",
@@ -273,19 +278,69 @@ export default function FormValidateView() {
     },
   });
 
-  const resizable$ = new Timeless.ui.ResizablePanelsCore({
-    direction: "vertical",
+  const submit_payment_btn$ = new Timeless.ui.ButtonCore({
+    async onClick() {
+      const r = await form$.validate();
+      if (r.error) {
+        const keys = Object.keys(form$.fields);
+        for (let i = 0; i < keys.length; i += 1) {
+          const key = keys[i];
+          const field$ = form$.fields[key];
+          const rr = await field$.validate();
+          if (rr.error) {
+            if (
+              field$.input &&
+              field$.input.shape === "select" &&
+              typeof field$.input.show === "function"
+            ) {
+              field$.input.show();
+            } else if (
+              field$.input &&
+              typeof field$.input.focus === "function"
+            ) {
+              field$.input.focus();
+            }
+            const id1 = field$.name;
+            const id2 = `field-${field$.name}`;
+            const $elm =
+              typeof document !== "undefined"
+                ? document.getElementById(id1) || document.getElementById(id2)
+                : null;
+            if ($elm && typeof $elm.scrollIntoView === "function") {
+              $elm.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+            break;
+          }
+        }
+        return;
+      }
+      const values = r.data;
+      console.log(values);
+    },
   });
-  const paneltop$ = new Timeless.ui.ResizablePanelCore({
-    defaultSize: 75,
-    minSize: 50,
-    maxSize: 90,
+  const cancel_btn$ = new Timeless.ui.ButtonCore({
+    variant: "outline",
+    async onClick() {
+      form$.reset();
+    },
   });
-  const panelbottom$ = new Timeless.ui.ResizablePanelCore({
-    defaultSize: 25,
-    minSize: 10,
-    maxSize: 50,
-  });
+
+  const ui = {
+    field_card_name$,
+    field_card_number$,
+    field_cvv$,
+    field_exp_month$,
+    field_exp_year$,
+    same_as_shipping$,
+    field_comments$,
+    submit_payment_btn$,
+    cancel_btn$,
+    form$,
+  };
+  return { ui };
+}
+
+export default function FormValidateView() {
   const providers_configure = {
     qiniu: new Timeless.ui.ObjectFieldCore({
       fields: {
@@ -450,141 +505,46 @@ export default function FormValidateView() {
       console.log(values);
     },
   });
-  const submit_payment_btn$ = new Timeless.ui.ButtonCore({
-    async onClick() {
-      const r = await form$.validate();
-      if (r.error) {
-        const keys = Object.keys(form$.fields);
-        for (let i = 0; i < keys.length; i += 1) {
-          const key = keys[i];
-          const field$ = form$.fields[key];
-          const rr = await field$.validate();
-          if (rr.error) {
-            if (
-              field$.input &&
-              field$.input.shape === "select" &&
-              typeof field$.input.show === "function"
-            ) {
-              field$.input.show();
-            } else if (
-              field$.input &&
-              typeof field$.input.focus === "function"
-            ) {
-              field$.input.focus();
-            }
-            const id1 = field$.name;
-            const id2 = `field-${field$.name}`;
-            const $elm =
-              typeof document !== "undefined"
-                ? document.getElementById(id1) || document.getElementById(id2)
-                : null;
-            if ($elm && typeof $elm.scrollIntoView === "function") {
-              $elm.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
-            break;
-          }
-        }
-        return;
-      }
-      const values = r.data;
-      console.log(values);
-    },
-  });
-  const cancel_btn$ = new Timeless.ui.ButtonCore({
-    variant: "outline",
-    async onClick() {
-      form$.reset();
-    },
-  });
-  const vm$ = new Timeless.ui.ScrollViewCore({});
+  const payment$ = PaymentViewModel();
 
-  // return ScrollView(
-  //   { class: "p-6", store: new Timeless.ui.ScrollViewCore({}) },
-  //   [
-  //     FieldDemoView({
-  //       field_card_name$,
-  //       field_card_number$,
-  //       field_cvv$,
-  //       field_exp_month$,
-  //       field_exp_year$,
-  //       same_as_shipping$,
-  //       field_comments$,
-  //       submit_payment_btn$,
-  //       cancel_btn$,
-  //     }),
-  //     Separator({}),
-  //     Field({ store: field_provider$ }, [
-  //       Select({
-  //         id: `field-${field_provider$.name}`,
-  //         store: field_provider$.input,
-  //       }),
-  //     ]),
-  //     FormRender(configure$_),
-  //     Button({ store: submit_configure_btn$ }, ["Submit"]),
-  //   ],
-  // );
-
-  return View({ class: "w-full h-full min-w-0 min-h-0 overflow-hidden" }, [
-    ResizablePanels(
-      {
-        store: resizable$,
-        direction: "vertical",
-        class: "w-full h-full",
-      },
-      [
-        ResizablePanel(
-          {
-            store: paneltop$,
-            group: resizable$,
-            class: "min-h-0",
-          },
-          [
-            ScrollView(
-              { class: "p-6", store: new Timeless.ui.ScrollViewCore({}) },
-              [
-                FieldDemoView({
-                  field_card_name$,
-                  field_card_number$,
-                  field_cvv$,
-                  field_exp_month$,
-                  field_exp_year$,
-                  same_as_shipping$,
-                  field_comments$,
-                  submit_payment_btn$,
-                  cancel_btn$,
+  return PageContent({ class: "" }, [
+    SplitLayout({
+      direction: "vertical",
+      items: [
+        {
+          defaultSize: 75,
+          minSize: 50,
+          maxSize: 90,
+          class: "p-6",
+          children: [
+            PaymentFormView({
+              store: payment$,
+            }),
+            Separator({ class: "my-6" }),
+            View({ class: "w-full max-w-md rounded-xl border p-6" }, [
+              Field({ store: field_provider$ }, [
+                Select({
+                  id: `field-${field_provider$.name}`,
+                  store: field_provider$.input,
                 }),
-                Separator({}),
-                Field({ store: field_provider$ }, [
-                  Select({
-                    id: `field-${field_provider$.name}`,
-                    store: field_provider$.input,
-                  }),
-                ]),
-                FormRender(configure$_),
+              ]),
+              FormRender({ class: "mt-6", store: configure$_ }, [
                 Button({ store: submit_configure_btn$ }, ["Submit"]),
-              ],
-            ),
+              ]),
+            ]),
           ],
-        ),
-        ResizableHandle({
-          store: resizable$,
-          panelBefore: paneltop$,
-          panelAfter: panelbottom$,
-          withHandle: true,
-        }),
-        ResizablePanel(
-          {
-            store: panelbottom$,
-            group: resizable$,
-            class: "min-h-0",
-          },
-          [
-            View({ class: "p-6 flex items-center gap-2" }, [
+        },
+        {
+          defaultSize: 25,
+          minSize: 10,
+          maxSize: 50,
+          children: [
+            View({ class: "flex items-center gap-2 p-6" }, [
               Button(
                 {
                   store: new Timeless.ui.ButtonCore({
                     onClick() {
-                      field_card_name$.input.focus();
+                      payment$.ui.form$.fields.card_name.input.focus();
                     },
                   }),
                 },
@@ -594,7 +554,7 @@ export default function FormValidateView() {
                 {
                   store: new Timeless.ui.ButtonCore({
                     onClick() {
-                      field_exp_month$.input.show();
+                      payment$.ui.form$.fields.exp_month.input.show();
                     },
                   }),
                 },
@@ -605,27 +565,36 @@ export default function FormValidateView() {
                   store: new Timeless.ui.ButtonCore({
                     variant: "outline",
                     async onClick() {
-                      submit_configure_btn$.setLoading(true);
-                      field_card_name$.input.setLoading(true);
-                      field_card_number$.input.setLoading(true);
-                      field_cvv$.input.setLoading(true);
-                      field_comments$.input.setLoading(true);
+                      payment$.ui.submit_payment_btn$.setLoading(true);
+                      payment$.ui.form$.fields.card_name.input.setLoading(true);
+                      payment$.ui.form$.fields.card_number.input.setLoading(
+                        true,
+                      );
+                      payment$.ui.form$.fields.cvv.input.setLoading(true);
+                      payment$.ui.form$.fields.comments.input.setLoading(true);
+                      payment$.ui.form$.fields.exp_year.input.setLoading(true);
                       try {
                         await new Promise((r) => setTimeout(r, 1200));
-                        field_card_name$.input.setValue("John Doe");
-                        field_card_number$.input.setValue(
-                          "4242 4242 4242 4242",
-                        );
-                        field_cvv$.input.setValue("123");
-                        field_exp_month$.input.setValue("12");
-                        field_exp_year$.input.setValue("2029");
-                        field_comments$.input.setValue("Some test comments");
+                        payment$.ui.form$.setValue({
+                          card_name: "John Doe",
+                          card_number: "4242 4242 4242 4242",
+                          cvv: "123",
+                          exp_month: "12",
+                          exp_year: "2029",
+                          comments: "Some test comments",
+                        });
                       } finally {
                         submit_configure_btn$.setLoading(false);
-                        field_card_name$.input.setLoading(false);
-                        field_card_number$.input.setLoading(false);
-                        field_cvv$.input.setLoading(false);
-                        field_comments$.input.setLoading(false);
+                        payment$.ui.form$.fields.card_name.input.setLoading(
+                          false,
+                        );
+                        payment$.ui.form$.fields.card_number.input.setLoading(
+                          false,
+                        );
+                        payment$.ui.form$.fields.cvv.input.setLoading(false);
+                        payment$.ui.form$.fields.comments.input.setLoading(
+                          false,
+                        );
                       }
                     },
                   }),
@@ -634,8 +603,8 @@ export default function FormValidateView() {
               ),
             ]),
           ],
-        ),
+        },
       ],
-    ),
+    }),
   ]);
 }

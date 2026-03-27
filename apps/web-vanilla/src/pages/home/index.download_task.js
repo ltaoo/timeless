@@ -1,4 +1,5 @@
 import { Section, Item } from "@/components/index.js";
+import { PageContent } from "@/components/layout.js";
 
 // const API_HOSTNAME = "http://127.0.0.1:18686";
 // const API_HOSTNAME = "https://remoteapi.weixin.qq.com";
@@ -489,9 +490,9 @@ function DownloadTaskItem(props) {
           h(
             Button,
             {
-              size: "sm",
-              variant: "ghost",
               store: new Timeless.ui.ButtonCore({
+                size: "sm",
+                variant: "ghost",
                 onClick() {
                   vm$.methods.pauseTask(task);
                 },
@@ -505,9 +506,9 @@ function DownloadTaskItem(props) {
           h(
             Button,
             {
-              size: "sm",
-              variant: "ghost",
               store: new Timeless.ui.ButtonCore({
+                size: "sm",
+                variant: "ghost",
                 onClick() {
                   vm$.methods.resumeTask(task);
                 },
@@ -526,10 +527,10 @@ function DownloadTaskItem(props) {
         h(
           Button,
           {
-            size: "sm",
-            variant: "ghost",
             class: "text-zinc-400 hover:text-red-500",
             store: new Timeless.ui.ButtonCore({
+              size: "sm",
+              variant: "ghost",
               onClick() {
                 vm$.methods.deleteTask(task);
               },
@@ -546,109 +547,113 @@ export default function DownloadTaskPageView() {
   const vm$ = DownloaderViewModel();
   const { task_count: task_count_ } = vm$.state;
 
-  return View(
-    {
-      class: "space-y-8",
-      onMounted() {
-        vm$.ready();
+  return PageContent({ class: "p-6" }, [
+    View(
+      {
+        class: "space-y-8",
+        onMounted() {
+          vm$.ready();
+        },
       },
-    },
-    [
-      Section("Download Task", [
-        Item("Real API Download List", [
-          View(
-            {
-              class: cn([
-                "w-[420px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
-              ]),
-            },
-            [
-              // Header
-              View(
-                {
-                  class: cn([
-                    "flex items-center justify-between px-3 py-2.5",
-                    "border-b border-zinc-200 dark:border-zinc-800",
-                    "bg-zinc-50 dark:bg-zinc-900",
-                  ]),
-                },
-                [
-                  View(
-                    {
-                      class: cn([
-                        "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
-                      ]),
-                    },
-                    [
-                      Txt("Downloads"),
-                      Txt(
-                        computed(task_count_, (d) => (d > 0 ? ` (${d})` : "")),
-                      ),
-                    ],
-                  ),
-                  View({ class: "flex items-center gap-1" }, [
-                    Button(
+      [
+        Section("Download Task", [
+          Item("Real API Download List", [
+            View(
+              {
+                class: cn([
+                  "w-[420px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+                ]),
+              },
+              [
+                // Header
+                View(
+                  {
+                    class: cn([
+                      "flex items-center justify-between px-3 py-2.5",
+                      "border-b border-zinc-200 dark:border-zinc-800",
+                      "bg-zinc-50 dark:bg-zinc-900",
+                    ]),
+                  },
+                  [
+                    View(
                       {
-                        size: "sm",
-                        variant: "outline",
-                        store: new Timeless.ui.ButtonCore({
-                          onClick() {
-                            vm$.methods.fakeTask();
-                          },
-                        }),
+                        class: cn([
+                          "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                        ]),
                       },
-                      ["+ Fake"],
-                    ),
-                    Button(
-                      {
-                        size: "sm",
-                        variant: "ghost",
-                        store: new Timeless.ui.ButtonCore({
-                          onClick() {
-                            vm$.methods.clearTasks();
-                          },
-                        }),
-                      },
-                      ["Clear"],
-                    ),
-                  ]),
-                ],
-              ),
-              // List
-              View({ class: "h-[400px]" }, [
-                ScrollView({ store: vm$.ui.scrollView$ }, [
-                  Show(
-                    {
-                      when: computed(task_count_, (d) => d > 0),
-                      fallback: [
-                        View(
-                          {
-                            class:
-                              "flex items-center justify-center h-[200px] text-sm text-zinc-400",
-                          },
-                          ["No download tasks"],
+                      [
+                        Txt("Downloads"),
+                        Txt(
+                          computed(task_count_, (d) =>
+                            d > 0 ? ` (${d})` : "",
+                          ),
                         ),
                       ],
-                    },
-                    [
-                      Waterfall({
-                        store: vm$.ui.waterfall$,
-                        class: "!overflow-visible !h-auto",
-                        render(task) {
-                          return DownloadTaskItem({
-                            task,
-                            vm$,
-                          });
+                    ),
+                    View({ class: "flex items-center gap-1" }, [
+                      Button(
+                        {
+                          store: new Timeless.ui.ButtonCore({
+                            size: "sm",
+                            variant: "outline",
+                            onClick() {
+                              vm$.methods.fakeTask();
+                            },
+                          }),
                         },
-                      }),
-                    ],
-                  ),
+                        ["+ Fake"],
+                      ),
+                      Button(
+                        {
+                          store: new Timeless.ui.ButtonCore({
+                            size: "sm",
+                            variant: "ghost",
+                            onClick() {
+                              vm$.methods.clearTasks();
+                            },
+                          }),
+                        },
+                        ["Clear"],
+                      ),
+                    ]),
+                  ],
+                ),
+                // List
+                View({ class: "h-[400px]" }, [
+                  ScrollView({ store: vm$.ui.scrollView$ }, [
+                    Show(
+                      {
+                        when: computed(task_count_, (d) => d > 0),
+                        fallback: [
+                          View(
+                            {
+                              class:
+                                "flex items-center justify-center h-[200px] text-sm text-zinc-400",
+                            },
+                            ["No download tasks"],
+                          ),
+                        ],
+                      },
+                      [
+                        Waterfall({
+                          store: vm$.ui.waterfall$,
+                          class: "!overflow-visible !h-auto",
+                          render(task) {
+                            return DownloadTaskItem({
+                              task,
+                              vm$,
+                            });
+                          },
+                        }),
+                      ],
+                    ),
+                  ]),
                 ]),
-              ]),
-            ],
-          ),
+              ],
+            ),
+          ]),
         ]),
-      ]),
-    ],
-  );
+      ],
+    ),
+  ]);
 }

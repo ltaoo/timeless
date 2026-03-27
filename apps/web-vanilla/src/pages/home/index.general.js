@@ -1,9 +1,8 @@
 import { Section, Item } from "@/components/index.js";
+import { PageContent } from "@/components/layout.js";
 
 export default function GeneralView() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
-
-  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
+  return PageContent({ class: "p-6" }, [
     Flex({ col: true, gap: "24px" }, [
       Section("Button", [
         Item("Variants", [

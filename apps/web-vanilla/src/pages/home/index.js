@@ -1,3 +1,5 @@
+import { SplitLayout } from "../../components/layout.js";
+
 export default function HomePageView(props) {
   const sidemenu$ = Timeless.kit.RouteMenusModel({
     view: props.view,
@@ -18,40 +20,16 @@ export default function HomePageView(props) {
     ],
   });
 
-  // 创建 ResizablePanels 实例
-  const resizeable$ = new Timeless.ui.ResizablePanelsCore({
-    direction: "horizontal",
-  });
-
-  // 创建侧边栏面板
-  const siderpanel$ = new Timeless.ui.ResizablePanelCore({
-    defaultSize: 25,
-    minSize: 20,
-    maxSize: 50,
-  });
-
-  // 创建主内容面板
-  const contentpanel$ = new Timeless.ui.ResizablePanelCore({
-    defaultSize: 85,
-    minSize: 70,
-  });
-
-  const view$ = new Timeless.ui.ScrollViewCore({});
-  return View({}, [
-    ResizablePanels(
-      {
-        store: resizeable$,
-        direction: "horizontal",
-        class: "w-full h-full",
-      },
-      [
-        // Sidebar Panel
-        ResizablePanel(
-          {
-            store: siderpanel$,
-            group: resizeable$,
-          },
-          [
+  return View({ class: "h-full" }, [
+    SplitLayout({
+      direction: "horizontal",
+      items: [
+        {
+          defaultSize: 25,
+          minSize: 20,
+          maxSize: 50,
+          scroll: false,
+          children: [
             Flex({ col: true, class: "py-4" }, [
               Flex(
                 { items: "center", justify: "between", class: "px-3 mb-3" },
@@ -90,19 +68,16 @@ export default function HomePageView(props) {
               ]),
             ]),
           ],
-        ),
-        // Resize Handle
-        ResizableHandle({
-          store: resizeable$,
-          panelBefore: siderpanel$,
-          panelAfter: contentpanel$,
-          withHandle: true,
-        }),
-        // Content Panel
-        ResizablePanel({ style: 'overflow-y: auto; height: 100vh;', store: contentpanel$, group: resizeable$ }, [
-          KeepAliveSubViews(props),
-        ]),
+        },
+        {
+          defaultSize: 85,
+          minSize: 70,
+          scroll: false,
+          children: [
+            KeepAliveSubViews(props),
+          ],
+        },
       ],
-    ),
+    }),
   ]);
 }

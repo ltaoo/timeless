@@ -1,6 +1,7 @@
 /** 首页布局 */
 import NotFoundPageView from "@/pages/notfound/index.js";
 import { projects } from "@/pages/project/data.js";
+import { SidebarLayout } from "@/components/layout.js";
 
 export default function HomeLayoutView(props) {
   const sidemenu$ = Timeless.kit.RouteMenusModel({
@@ -13,16 +14,16 @@ export default function HomeLayoutView(props) {
       { title: "Settings", url: "root.home_layout.settings" },
     ],
   });
-  const vm$ = new Timeless.ui.ScrollViewCore({});
 
-  return View({ class: "h-full" }, [
-    Flex({ class: "h-full" }, [
+  return SidebarLayout({
+    sidebarWidth: "72px",
+    sidebarClass: "sidebar-wrapper py-6 border-r border-zinc-200 dark:border-zinc-800",
+    sidebar: [
       Flex(
         {
           col: true,
           items: "center",
-          class:
-            "sidebar-wrapper w-[72px] h-full py-6 border-r border-zinc-200 dark:border-zinc-800",
+          class: "h-full",
         },
         [
           // Logo
@@ -234,12 +235,11 @@ export default function HomeLayoutView(props) {
           ]),
         ],
       ),
-      View({ class: "relative flex-1 w-0" }, [
-        KeepAliveSubViews({
-          ...props,
-          NotFound: NotFoundPageView,
-        }),
-      ]),
-    ]),
+    ],
+  }, [
+    KeepAliveSubViews({
+      ...props,
+      NotFound: NotFoundPageView,
+    }),
   ]);
 }

@@ -1,4 +1,5 @@
 import { Section, Item } from "@/components/index.js";
+import { PageContent } from "@/components/layout.js";
 
 export default function OverlayView() {
   const ITEM_HEIGHT = 56;
@@ -115,7 +116,8 @@ export default function OverlayView() {
 
   list$.init();
 
-  return View({ class: "space-y-8" }, [
+  return PageContent({ class: "p-6" }, [
+    View({ class: "space-y-8" }, [
     // Section("Popover", [
     //   Item("Default", [
     //     Popover(
@@ -261,7 +263,7 @@ export default function OverlayView() {
     //     ),
     //   ]),
     // ]),
-    View({ class: "h-[300px]" }, [
+      View({ class: "h-[300px]" }, [
       ScrollView({ store: ui.view$ }, [
         ContextMenu({ store: ui.contextMenu$ }, [
           Waterfall({
@@ -337,6 +339,7 @@ export default function OverlayView() {
           },
           [Txt("Scroll to bottom to load more")],
         ),
+      ]),
       ]),
     ]),
   ]);

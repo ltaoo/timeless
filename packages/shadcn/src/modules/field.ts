@@ -8,6 +8,7 @@ import {
   Match,
   Case,
   Fragment,
+  NativeLabel,
 } from "@timeless/headless";
 import { SingleFieldCore } from "@timeless/ui";
 
@@ -86,7 +87,6 @@ export function FieldLabel(
   const {
     class: cls,
     store,
-    for: htmlFor,
     weight = "medium",
     tone = "default",
     ...rest
@@ -95,13 +95,9 @@ export function FieldLabel(
   const state_ = refobj(store.state);
   store.onStateChange((v) => state_.as(v));
 
-  return View(
+  return NativeLabel(
     {
       ...rest,
-      attributes: {
-        for: htmlFor,
-      },
-      as: "label",
       class: cn([
         "select-none",
         weight === "normal" ? "font-normal" : "font-medium",
@@ -112,7 +108,37 @@ export function FieldLabel(
     [computed(state_, (s) => s.label)],
   );
 }
+export function FieldInlineLabel(
+  props: ViewProps & {
+    store?: SingleFieldCore<any>;
+    for?: string;
+  },
+  children,
+) {
+  const { class: cls, store, ...rest } = props;
 
+  const state_ = refobj(store.state);
+  store.onStateChange((v) => state_.as(v));
+
+  return NativeLabel(
+    {
+      ...rest,
+      class: cn(["text-sm font-normal select-none cursor-pointer", cls]),
+    },
+    [
+      computed(state_, (t) => t.label),
+      Show(
+        {
+          when: computed(children, (t) => {
+            return !!(t && t.length);
+          }),
+          fallback: [h(Fragment, {}, [computed(state_, (t) => t.label)])],
+        },
+        [h(Fragment, {}, children)],
+      ),
+    ],
+  );
+}
 export function FieldHelp(props: {}, children: ViewChildren = []) {
   void props;
   return View({ class: "text-sm text-muted-foreground" }, children);

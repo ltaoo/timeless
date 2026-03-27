@@ -1,7 +1,9 @@
 import { Section, Item } from "@/components/index.js";
+import { PageContent } from "@/components/layout.js";
 
 export default function OverlayView() {
-  return View({ class: "space-y-8" }, [
+  return PageContent({ class: "p-6" }, [
+    View({ class: "space-y-8" }, [
     Section("Dropdown Menu", [
       Item("Default", [
         DropdownMenu(
@@ -937,6 +939,7 @@ export default function OverlayView() {
           ]),
         ]),
       ]),
+    ]),
     ]),
   ]);
 }

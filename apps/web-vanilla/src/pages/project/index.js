@@ -1,4 +1,5 @@
 import { projects } from "./data.js";
+import { StackLayout } from "@/components/layout.js";
 
 export default function ProjectLayoutView(props) {
   const curProjectId = ref(props.view.query.id);
@@ -28,44 +29,23 @@ export default function ProjectLayoutView(props) {
     }
   });
 
-  return View(
-    {
-      class: "flex w-full h-full",
-      onMounted() {
-        console.log("[]ProjectLayoutView onMounted", props.view.query);
-      },
-      onUnmounted() {
-        console.log("[]ProjectLayoutView onUnmounted", props.view.query);
-      },
-    },
-    [
-      View({ class: "relative flex-1 w-0 h-full flex flex-col" }, [
-        // Tab bar
-        View(
-          {
-            class:
-              "flex items-center gap-1 px-6 py-3 border-b border-zinc-200 dark:border-zinc-800 shrink-0",
-          },
-          [
-            TabItem(
-              "Workspace",
-              "workspace",
-              curTab,
-              props.history,
-              curProjectId,
-            ),
-            TabItem("History", "history", curTab, props.history, curProjectId),
-          ],
-        ),
-        // Content
-        View({ class: "relative flex-1 overflow-y-auto" }, [
-          StandardSubViews({
-            ...props,
-          }),
-        ]),
-      ]),
+  return StackLayout({
+    header: [
+      TabItem(
+        "Workspace",
+        "workspace",
+        curTab,
+        props.history,
+        curProjectId,
+      ),
+      TabItem("History", "history", curTab, props.history, curProjectId),
     ],
-  );
+    headerClass: "flex items-center gap-1 px-6 py-3 border-b border-zinc-200 dark:border-zinc-800",
+  }, [
+    StandardSubViews({
+      ...props,
+    }),
+  ]);
 }
 
 function TabItem(label, tabName, curTab, history, curProjectId) {

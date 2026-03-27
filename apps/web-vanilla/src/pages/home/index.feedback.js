@@ -1,4 +1,5 @@
 import { Section, Item } from "@/components/index.js";
+import { PageContent } from "@/components/layout.js";
 
 export default function FeedbackView() {
   const dialog$ = new Timeless.ui.DialogCore({
@@ -11,7 +12,8 @@ export default function FeedbackView() {
     },
   });
 
-  return View({ class: "space-y-8" }, [
+  return PageContent({ class: "p-6" }, [
+    View({ class: "space-y-8" }, [
     Section("Menu", [
       Item("Default", [
         Menu({
@@ -114,8 +116,8 @@ export default function FeedbackView() {
           return View({ class: cn(["flex gap-2"]) }, [
             Button(
               {
-                size: "sm",
                 store: new Timeless.ui.ButtonCore({
+                  size: "sm",
                   onClick() {
                     sheetR$.show();
                   },
@@ -125,9 +127,9 @@ export default function FeedbackView() {
             ),
             Button(
               {
-                size: "sm",
-                variant: "outline",
                 store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
                   onClick() {
                     sheetL$.show();
                   },
@@ -137,9 +139,9 @@ export default function FeedbackView() {
             ),
             Button(
               {
-                size: "sm",
-                variant: "outline",
                 store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
                   onClick() {
                     sheetB$.show();
                   },
@@ -173,9 +175,9 @@ export default function FeedbackView() {
           return View({ class: "space-y-2" }, [
             Button(
               {
-                size: "sm",
-                variant: "outline",
                 store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
                   onClick() {
                     p$.show();
                   },
@@ -185,9 +187,9 @@ export default function FeedbackView() {
             ),
             Button(
               {
-                size: "sm",
-                variant: "outline",
                 store: new Timeless.ui.ButtonCore({
+                  size: "sm",
+                  variant: "outline",
                   onClick() {
                     p$.hide();
                   },
@@ -212,9 +214,9 @@ export default function FeedbackView() {
             View({ class: "flex gap-2" }, [
               Button(
                 {
-                  size: "sm",
-                  variant: "outline",
                   store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
                     onClick() {
                       p$.show();
                     },
@@ -224,9 +226,9 @@ export default function FeedbackView() {
               ),
               Button(
                 {
-                  size: "sm",
-                  variant: "outline",
                   store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
                     onClick() {
                       p$.hide();
                     },
@@ -257,9 +259,9 @@ export default function FeedbackView() {
             View({ class: "flex gap-2" }, [
               Button(
                 {
-                  size: "sm",
-                  variant: "outline",
                   store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
                     onClick() {
                       p$.show();
                     },
@@ -269,9 +271,9 @@ export default function FeedbackView() {
               ),
               Button(
                 {
-                  size: "sm",
-                  variant: "outline",
                   store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
                     onClick() {
                       p$.hide();
                     },
@@ -302,9 +304,9 @@ export default function FeedbackView() {
             View({ class: "flex gap-2" }, [
               Button(
                 {
-                  size: "sm",
-                  variant: "outline",
                   store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
                     onClick() {
                       p$.show();
                     },
@@ -314,9 +316,9 @@ export default function FeedbackView() {
               ),
               Button(
                 {
-                  size: "sm",
-                  variant: "outline",
                   store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
                     onClick() {
                       p$.hide();
                     },
@@ -347,9 +349,9 @@ export default function FeedbackView() {
             View({ class: "flex gap-2" }, [
               Button(
                 {
-                  size: "sm",
-                  variant: "outline",
                   store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
                     onClick() {
                       p$.show();
                     },
@@ -359,9 +361,9 @@ export default function FeedbackView() {
               ),
               Button(
                 {
-                  size: "sm",
-                  variant: "outline",
                   store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
                     onClick() {
                       p$.hide();
                     },
@@ -392,9 +394,9 @@ export default function FeedbackView() {
             View({ class: "flex gap-2" }, [
               Button(
                 {
-                  size: "sm",
-                  variant: "outline",
                   store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
                     onClick() {
                       p$.show();
                     },
@@ -404,9 +406,9 @@ export default function FeedbackView() {
               ),
               Button(
                 {
-                  size: "sm",
-                  variant: "outline",
                   store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
                     onClick() {
                       p$.hide();
                     },
@@ -443,9 +445,9 @@ export default function FeedbackView() {
                             Txt("🎭 Presence inside Portal"),
                             Button(
                               {
-                                size: "sm",
-                                variant: "ghost",
                                 store: new Timeless.ui.ButtonCore({
+                                  size: "sm",
+                                  variant: "ghost",
                                   onClick() {
                                     p$.hide();
                                   },
@@ -480,8 +482,8 @@ export default function FeedbackView() {
           return View({ class: "flex gap-2" }, [
             Button(
               {
-                size: "sm",
                 store: new Timeless.ui.ButtonCore({
+                  size: "sm",
                   onClick() {
                     toast$.show({ texts: ["Operation successful!"] });
                   },
@@ -831,6 +833,7 @@ export default function FeedbackView() {
           ]),
         ]),
       ]),
+    ]),
     ]),
   ]);
 }
