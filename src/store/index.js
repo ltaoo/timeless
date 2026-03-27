@@ -7,7 +7,7 @@ import HomeLayoutView from "@/pages/home/layout.js";
 import HomeIndexPageView from "@/pages/home/index.js";
 import HomeIndexGeneralView from "@/pages/home/index.general.js";
 
-const routesConfigure = {
+const router = Timeless.kit.buildRoutes({
   home_layout: {
     title: "首页",
     pathname: "/home",
@@ -19,6 +19,7 @@ const routesConfigure = {
         component: HomeIndexPageView,
         children: {
           general: {
+            // @ts-ignore
             default: true,
             title: "通用组件",
             pathname: "/home/index/general",
@@ -64,6 +65,21 @@ const routesConfigure = {
             pathname: "/home/index/debug",
             component: Timeless.lazy("@/pages/home/index.debug.js"),
           },
+          lifecycle: {
+            title: "生命周期",
+            pathname: "/home/index/lifecycle",
+            component: Timeless.lazy("@/pages/home/index.lifecycle.js"),
+          },
+          command: {
+            title: "命令面板",
+            pathname: "/home/index/command",
+            component: Timeless.lazy("@/pages/home/index.command.js"),
+          },
+          download_task: {
+            title: "下载任务",
+            pathname: "/home/index/download_task",
+            component: Timeless.lazy("@/pages/home/index.download_task.js"),
+          },
         },
       },
       settings: {
@@ -74,12 +90,36 @@ const routesConfigure = {
       article: {
         title: "博客",
         pathname: "/article",
-        component: Timeless.lazy("@/pages/article/index.js"),
+        component: Timeless.lazy("@/pages/article/category.js"),
         children: {
-          content: {
-            title: "博客详情",
-            pathname: "/article/detail",
-            component: Timeless.lazy("@/pages/article/content.js"),
+          category: {
+            title: "博客",
+            pathname: "/article/category",
+            component: Timeless.lazy("@/pages/article/index.js"),
+            children: {
+              content: {
+                title: "博客详情",
+                pathname: "/article/category/detail",
+                component: Timeless.lazy("@/pages/article/content.js"),
+              },
+            },
+          },
+        },
+      },
+      project: {
+        title: "项目",
+        pathname: "/home/project",
+        component: Timeless.lazy("@/pages/project/index.js"),
+        children: {
+          workspace: {
+            title: "项目工作台",
+            pathname: "/home/project/workspace",
+            component: Timeless.lazy("@/pages/project/workspace.js"),
+          },
+          history: {
+            title: "项目历史",
+            pathname: "/home/project/history",
+            component: Timeless.lazy("@/pages/project/history.js"),
           },
         },
       },
@@ -97,21 +137,15 @@ const routesConfigure = {
     title: "404",
     pathname: "/notfound",
     component: NotFoundPageView,
+    // @ts-ignore
     notfound: true,
   },
-};
+});
 
-const {
-  routes,
-  routesWithPathname,
-  views: generatedViews,
-  defaultRouteName: generatedDefaultRouteName,
-  notfoundRouteName: generatedNotfoundRouteName,
-} = Timeless.buildRoutes(routesConfigure);
-
-export const views = generatedViews;
-export const defaultRouteName = generatedDefaultRouteName;
-export const notfoundRouteName = generatedNotfoundRouteName;
+const routes = router.routes;
+export const views = router.views;
+export const defaultRouteName = router.defaultRouteName;
+export const notfoundRouteName = router.notfoundRouteName;
 
 // LocalStorage
 const DEFAULT_CACHE_VALUES = {
@@ -126,7 +160,7 @@ const DEFAULT_CACHE_VALUES = {
 };
 const key = "timeless";
 const e = globalThis.localStorage.getItem(key);
-export const storage = new Timeless.StorageCore({
+export const storage$ = new Timeless.kit.StorageCore({
   key,
   defaultValues: DEFAULT_CACHE_VALUES,
   values: (() => {
@@ -138,17 +172,15 @@ export const storage = new Timeless.StorageCore({
   client: globalThis.localStorage,
 });
 // HttpClient
-export const client = new Timeless.HttpClientCore({
+export const client$ = new Timeless.kit.HttpClientCore({
   headers: {
     "Content-Type": "application/json",
   },
 });
-Timeless.web.provide_http_client(client);
-export const user = /** @type {any} */ ({});
-// History
-Timeless.NavigatorCore.prefix = "/timeless";
-export const router = new Timeless.NavigatorCore();
-export const rootview = new Timeless.RouteViewCore({
+Timeless.web.provide_http_client(client$);
+Timeless.kit.NavigatorCore.prefix = "/timeless";
+export const router$ = new Timeless.kit.NavigatorCore();
+export const view$ = new Timeless.kit.RouteViewCore({
   name: "root",
   pathname: "/",
   title: "ROOT",
@@ -156,24 +188,30 @@ export const rootview = new Timeless.RouteViewCore({
   parent: null,
   views: [],
 });
-rootview.isRoot = true;
-export const history = new Timeless.HistoryCore({
-  view: rootview,
-  router,
+view$.isRoot = true;
+export const history$ = new Timeless.kit.HistoryCore({
+  view: view$,
+  router: router$,
   routes,
   views: {
-    root: rootview,
+    root: view$,
   },
 });
-Timeless.web.provide_history(history);
+Timeless.web.provide_history(history$);
 
-export const app = new Timeless.ApplicationModel({
-  user,
-  storage,
+const clipboard = Timeless.kit.ClipboardModel();
+export const app = new Timeless.kit.ApplicationModel({
+  clipboard,
+  storage: storage$,
   async beforeReady() {
-    const { pathname, query } = router;
-    const route = routesWithPathname[pathname];
-    console.log("[Store] beforeReady", pathname, route, routesWithPathname);
+    const { pathname, query } = router$;
+    const route = router.routesWithPathname[pathname];
+    console.log(
+      "[Store] beforeReady",
+      pathname,
+      route,
+      router.routesWithPathname,
+    );
     // if (route.options?.require?.includes("login")) {
     //   if (!user.isLogin) {
     //     app.tip?.({ text: ["请先登录"] });
@@ -181,17 +219,17 @@ export const app = new Timeless.ApplicationModel({
     //     return Timeless.Result.Err("need login");
     //   }
     // }
-    if (!route || history.isRoot(route.name)) {
-      history.push(defaultRouteName, {}, { ignore: true });
+    if (!route || history$.isRoot(route.name)) {
+      history$.push(defaultRouteName, {}, { ignore: true });
       return Timeless.Result.Ok(null);
     }
-    history.push(route.name, query, { ignore: true });
+    history$.push(route.name, query, { ignore: true });
     return Timeless.Result.Ok(null);
   },
 });
 Timeless.web.provide_app(app);
 
-history.onRouteChange(({ reason, view, href, ignore }) => {
+history$.onRouteChange(({ reason, view, href, ignore }) => {
   const { title } = view || {};
   if (title) {
     app.setTitle(title);
@@ -200,15 +238,15 @@ history.onRouteChange(({ reason, view, href, ignore }) => {
     return;
   }
   if (reason === "push") {
-    router.pushState(href);
+    router$.pushState(href);
   }
   if (reason === "replace") {
-    router.replaceState(href);
+    router$.replaceState(href);
   }
 });
-history.onClickLink(({ href, target }) => {
+history$.onClickLink(({ href, target }) => {
   const { pathname, query } = Timeless.NavigatorCore.parse(href);
-  const route = routesWithPathname[pathname];
+  const route = router.routesWithPathname[pathname];
   if (!route) {
     app.tip?.({ text: ["没有匹配的页面"] });
     return;
@@ -217,5 +255,5 @@ history.onClickLink(({ href, target }) => {
     window.open(href);
     return;
   }
-  history.push(route.name, query);
+  history$.push(route.name, query);
 });

@@ -7,7 +7,7 @@ import { Subscriber, Ref, isRef } from "./types";
 export function computed<T, R>(deps: Ref<T>, fn: (val: T) => R): Ref<R>;
 export function computed<T extends object, R>(deps: T, fn: (val: T) => R): Ref<R>;
 export function computed<T = any>(
-  deps: Ref<any> | object,
+  deps: any,
   fn: (t: any) => T,
 ): Ref<T> {
   // const dep = global_refs.get(deps);
@@ -52,11 +52,11 @@ export function computed<T = any>(
       if (isRef(deps)) {
         return deps;
       }
-      if (typeof deps === "object" && deps !== null) {
-        return refObject(deps);
-      }
       if (Array.isArray(deps)) {
         return refArray(deps);
+      }
+      if (typeof deps === "object" && deps !== null) {
+        return refObject(deps);
       }
       return ref(deps);
     })();
@@ -82,6 +82,12 @@ export function computed<T = any>(
     },
     get value() {
       return _local_value;
+    },
+    isSame(v: unknown) {
+      return Object.is(_local_value, v);
+    },
+    isStrictEqual(v: unknown) {
+      return _local_value === v;
     },
   };
 

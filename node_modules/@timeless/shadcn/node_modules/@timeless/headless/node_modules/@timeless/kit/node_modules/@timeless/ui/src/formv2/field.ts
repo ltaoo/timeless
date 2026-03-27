@@ -74,11 +74,13 @@ type TheSingleFieldCoreEvents<T extends FormInputInterface<any>["value"]> = {
 type SingleFieldCoreProps<T> = FormFieldCoreProps & {
   input: T;
   hidden?: boolean;
+  help?: string;
 };
 type SingleFieldCoreState<T> = {
   symbol: string;
   label: string;
   name: string;
+  help: string;
   hidden: boolean;
   focus: boolean;
   error: BizError | null;
@@ -95,6 +97,7 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
   symbol = "SingleFieldCore" as const;
   _label: string;
   _name: string;
+  _help = "";
   _hidden = false;
   _error: BizError | null = null;
   _status: FieldStatus = "normal";
@@ -110,6 +113,7 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
       symbol: this.symbol,
       label: this._label,
       name: this._name,
+      help: this._help,
       hidden: this._hidden,
       focus: this._focus,
       error: this._error,
@@ -131,10 +135,18 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
   }
 
   constructor(props: SingleFieldCoreProps<T>) {
-    const { label = "", name, rules = [], input, hidden = false } = props;
+    const {
+      label = "",
+      name,
+      rules = [],
+      input,
+      hidden = false,
+      help = "",
+    } = props;
 
     this._label = label;
     this._name = name;
+    this._help = help;
     this._input = input;
     this._rules = rules;
     this._hidden = hidden;
@@ -156,6 +168,9 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
   }
   get label() {
     return this._label;
+  }
+  get help() {
+    return this._help;
   }
   // get name() {
   //   return this._name;
@@ -194,32 +209,41 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
   clear() {
     this.setValue(this._input.defaultValue);
   }
+  reset() {
+    this.setValue(this._input.defaultValue);
+    this._error = null;
+    this._status = "normal";
+    this._focus = false;
+    this._dirty = false;
+    this._bus.emit(SingleFieldEvents.Error, null);
+    this._bus.emit(SingleFieldEvents.StateChange, { ...this.state });
+  }
   async validate() {
     const value = this._input.value;
     const errors: string[] = [];
     for (let i = 0; i < this._rules.length; i += 1) {
       const rule = this._rules[i];
       if (rule.required && !value) {
-        errors.push(`${this._label}不能为空`);
+        errors.push(`${this._label} 不能为空`);
       }
       if (rule.maxLength && value) {
         if (String(value).length > rule.maxLength) {
-          errors.push(`${this._label}长度不能超过${rule.maxLength}个字符`);
+          errors.push(`${this._label} 长度不能超过 ${rule.maxLength} 个字符`);
         }
       }
       if (rule.minLength && value) {
         if (String(value).length < rule.minLength) {
-          errors.push(`${this._label}长度不能小于${rule.minLength}个字符`);
+          errors.push(`${this._label}长度不能小于 ${rule.minLength} 个字符`);
         }
       }
       if (rule.max) {
         if (typeof value === "number" && value > rule.max) {
-          errors.push(`${this._label}不能大于${rule.max}`);
+          errors.push(`${this._label} 不能大于 ${rule.max}`);
         }
       }
       if (rule.min) {
         if (typeof value === "number" && value < rule.min) {
-          errors.push(`${this._label}不能小于${rule.min}`);
+          errors.push(`${this._label} 不能小于 ${rule.min}`);
         }
       }
       if (rule.mode && value) {
@@ -228,13 +252,13 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
           );
           if (!is_valid_email) {
-            errors.push(`${this._label}格式错误`);
+            errors.push(`${this._label} 格式错误`);
           }
         }
         if (rule.mode === "number") {
           const is_valid_num = !Number.isNaN(Number(value));
           if (!is_valid_num) {
-            errors.push(`${this._label}格式错误`);
+            errors.push(`${this._label} 格式错误`);
           }
         }
       }
@@ -246,8 +270,13 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
       }
     }
     if (errors.length > 0) {
-      this._bus.emit(SingleFieldEvents.Error, new BizError(errors));
+      this._error = new BizError(errors);
+      this._bus.emit(SingleFieldEvents.Error, this._error);
       return Result.Err(new BizError(errors));
+    }
+    if (this._error) {
+      this._error = null;
+      this._bus.emit(SingleFieldEvents.Error, null);
     }
     return Result.Ok(value);
   }
@@ -506,6 +535,9 @@ export class ArrayFieldCore<
     this._bus.emit(ArrayFieldEvents.StateChange, { ...this.state });
   }
   clear() {
+    this.setValue([]);
+  }
+  reset() {
     this.setValue([]);
   }
   async validate(): Promise<Result<ArrayFieldValue<T>[]>> {
@@ -892,6 +924,22 @@ export class ObjectFieldCore<
       const field = this.fields[key];
       field.clear();
     }
+  }
+  reset() {
+    const keys = Object.keys(this.fields);
+    for (let i = 0; i < keys.length; i += 1) {
+      const key = keys[i];
+      const field = this.fields[key];
+      // @ts-ignore
+      if (typeof field.reset === "function") {
+        // @ts-ignore
+        field.reset();
+      } else {
+        field.clear();
+      }
+    }
+    this._dirty = false;
+    this._bus.emit(ObjectFieldEvents.StateChange, { ...this.state });
   }
   async validate(): Promise<Result<ObjectValue<T>>> {
     const results: ObjectValue<T> = {} as ObjectValue<T>;

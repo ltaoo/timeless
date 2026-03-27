@@ -63,7 +63,9 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
 
   presence = new PresenceCore();
   okBtn = new ButtonCore();
-  cancelBtn = new ButtonCore();
+  cancelBtn = new ButtonCore({
+    variant: "secondary",
+  });
 
   get state(): DialogState {
     return {

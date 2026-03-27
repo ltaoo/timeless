@@ -128,8 +128,10 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         ...opt,
         selected: this.expandedPath[0] === opt.value,
         focused:
-          this.focusedPosition[0] === 0 &&
-          this.options[this.focusedPosition[1]]?.value === opt.value,
+          (this.focusedPosition[0] === 0 &&
+            this.options[this.focusedPosition[1]]?.value === opt.value) ||
+          (this.focusedPosition[0] > 0 &&
+            this.expandedPath[0] === opt.value),
       })),
       selectedValue: this.expandedPath[0] ?? null,
     });
@@ -141,16 +143,19 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         (o) => o.value === this.expandedPath[i],
       );
       if (selectedOpt?.children && selectedOpt.children.length > 0) {
+        const panelLevel = i + 1;
         panels.push({
-          key: `panel-${i + 1}`,
+          key: `panel-${panelLevel}`,
           options: selectedOpt.children.map((opt, idx) => ({
             ...opt,
-            selected: this.expandedPath[i + 1] === opt.value,
+            selected: this.expandedPath[panelLevel] === opt.value,
             focused:
-              this.focusedPosition[0] === i + 1 &&
-              this.focusedPosition[1] === idx,
+              (this.focusedPosition[0] === panelLevel &&
+                this.focusedPosition[1] === idx) ||
+              (this.focusedPosition[0] > panelLevel &&
+                this.expandedPath[panelLevel] === opt.value),
           })),
-          selectedValue: this.expandedPath[i + 1] ?? null,
+          selectedValue: this.expandedPath[panelLevel] ?? null,
         });
         currentOptions = selectedOpt.children;
       }
@@ -324,6 +329,7 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     if (this.disabled) {
       return;
     }
+    this.presence.show();
     this.popper.place();
     this.open = true;
     // 重置展开路径为当前选中值
@@ -332,7 +338,22 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     } else {
       this.expandedPath = [];
     }
-    this.focusedPosition = [0, 0];
+    // 将焦点定位到已选中值的最深层级
+    if (this.expandedPath.length > 0) {
+      const lastPanelIndex = this.expandedPath.length - 1;
+      const panels = this.panels;
+      const lastPanel = panels[lastPanelIndex];
+      if (lastPanel) {
+        const optIndex = lastPanel.options.findIndex(
+          (o) => o.value === this.expandedPath[lastPanelIndex],
+        );
+        this.focusedPosition = [lastPanelIndex, Math.max(0, optIndex)];
+      } else {
+        this.focusedPosition = [0, 0];
+      }
+    } else {
+      this.focusedPosition = [0, 0];
+    }
     this.emit(Events.StateChange, { ...this.state });
   }
 

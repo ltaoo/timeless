@@ -198,6 +198,12 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
       search,
       type: "initialize",
     };
+    this.histories = [
+      {
+        pathname: clean_pathname,
+        href: search ? clean_pathname + search : clean_pathname,
+      },
+    ];
   }
   start() {
     const { pathname, search } = this._pending;
@@ -225,7 +231,9 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
     const prevPathname = this.pathname;
     this.setPrevPathname(prevPathname);
     this.setPathname(realTargetPathname);
-    const targetHref = search ? realTargetPathname + search : realTargetPathname;
+    const targetHref = search
+      ? realTargetPathname + search
+      : realTargetPathname;
     // this.prevHistories = [...this.histories];
     // console.log("[DOMAIN]navigator - before push", prevPathname, realTargetPathname);
     this.histories.push({ pathname: realTargetPathname, href: targetHref });
@@ -243,7 +251,9 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
     const { pathname: realTargetPathname, search } = r;
     this.setPrevPathname(this.pathname);
     this.setPathname(realTargetPathname);
-    const targetHref = search ? realTargetPathname + search : realTargetPathname;
+    const targetHref = search
+      ? realTargetPathname + search
+      : realTargetPathname;
     this.histories[this.histories.length - 1] = {
       pathname: realTargetPathname,
       href: targetHref,

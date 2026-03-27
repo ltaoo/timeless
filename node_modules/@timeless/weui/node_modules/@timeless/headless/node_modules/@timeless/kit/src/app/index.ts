@@ -170,10 +170,8 @@ export class ApplicationModel<
     console.warn(tip);
     return Result.Err(tip);
   }
-  getTheme() {
-    const tip = "请在 connect.web 中实现 getTheme 方法";
-    console.warn(tip);
-    return "light";
+  getTheme(): ThemeTypes {
+    return this.theme;
   }
   // getSystemTheme(e?: any): Result<string> {
   //   const tip = "请在 connect.web 中实现 getSystemTheme 方法";

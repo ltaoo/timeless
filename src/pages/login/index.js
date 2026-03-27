@@ -59,10 +59,7 @@ export default function LoginPage(props) {
       View({ class: cn(["mt-8 sm:mx-auto sm:w-full sm:max-w-md"]) }, [
         View(
           {
-            class: cn([
-              "bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 space-y-6",
-              "dark:bg-zinc-800", // Dark mode card background
-            ]),
+            class: cn(["py-8 px-4 shadow sm:rounded-lg sm:px-10 space-y-6"]),
           },
           [
             // Username Input

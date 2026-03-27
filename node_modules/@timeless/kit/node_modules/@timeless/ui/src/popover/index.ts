@@ -35,6 +35,8 @@ type PopoverProps = {
   align?: Align;
   strategy?: "fixed" | "absolute";
   closeable?: boolean;
+  /** 关闭时是否销毁内容 DOM，默认 true。设为 false 时关闭仅隐藏，再次打开恢复原状态 */
+  destroyOnClose?: boolean;
 };
 
 export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
@@ -45,6 +47,7 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
   _side: Side;
   _align: Align;
   _closeable: boolean;
+  destroyOnClose: boolean;
 
   toBody = true;
   visible = false;
@@ -74,10 +77,12 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
       align = "end",
       strategy = "fixed",
       closeable = true,
+      destroyOnClose = true,
     } = props;
     this._side = side;
     this._align = align;
     this._closeable = closeable;
+    this.destroyOnClose = destroyOnClose;
 
     this.popper = new PopperCore({
       side,
@@ -172,7 +177,7 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     this.visible = false;
-    this.presence.hide();
+    this.presence.hide({ destroy: this.destroyOnClose !== false });
     this.emit(Events.Hidden);
   }
   unmount() {

@@ -161,6 +161,8 @@ export function WaterfallModel<T extends Record<string, unknown>>(props: {
       }
       _$items = [];
       _height = 0;
+      _index = -1;
+      _scrollValues = { scrollTop: 0, clientHeight: 0 };
       bus.emit(Events.StateChange, { ..._state });
     },
     setClientHeight(v: number) {

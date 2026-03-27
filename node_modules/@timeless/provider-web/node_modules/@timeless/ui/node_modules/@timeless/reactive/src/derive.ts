@@ -57,7 +57,7 @@ export function derive(deps: any, fn: any): Ref<any> {
   });
 
   return {
-    __is_ref: true,
+    __is_ref: true as const,
     _subscribe(ctx: Subscriber) {
       _deps.push(ctx);
     },
@@ -66,6 +66,12 @@ export function derive(deps: any, fn: any): Ref<any> {
     },
     get value() {
       return _local_value;
+    },
+    isSame(v: unknown) {
+      return Object.is(_local_value, v);
+    },
+    isStrictEqual(v: unknown) {
+      return _local_value === v;
     },
   };
 }

@@ -1,4 +1,5 @@
 declare var dayjs_locale_zh_cn: any;
+declare const SearchSelect: any;
 
 declare namespace Dayjs {
   interface Dayjs {

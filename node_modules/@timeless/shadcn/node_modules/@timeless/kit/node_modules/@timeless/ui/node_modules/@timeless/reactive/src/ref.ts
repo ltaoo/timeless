@@ -45,10 +45,10 @@ export function ref<T = any>(v: T) {
     eq(v: T) {
       return _local_value === v;
     },
-    isSame(v: T) {
+    isSame(v: unknown) {
       return Object.is(_local_value, v);
     },
-    isStrictEqual(v: T) {
+    isStrictEqual(v: unknown) {
       return _local_value === v;
     },
     as(value: T | ((cur: T) => T)) {

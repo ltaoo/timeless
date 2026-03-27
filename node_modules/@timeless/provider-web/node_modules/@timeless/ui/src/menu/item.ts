@@ -51,6 +51,8 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
   _name = "MenuItemCore";
   debug = true;
 
+  readonly type: "item" | "checkbox" | "radio" | "radio-group" = "item";
+
   label: string;
   tooltip?: string;
   icon?: unknown;
@@ -311,5 +313,237 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
 
   get [Symbol.toStringTag]() {
     return "MenuItem";
+  }
+}
+
+export type MenuItemCheckedState = boolean | "indeterminate";
+
+type MenuCheckboxMenuProps = MenuItemCoreProps & {
+  checked?: MenuItemCheckedState;
+  defaultChecked?: MenuItemCheckedState;
+  onCheckedChange?: (checked: MenuItemCheckedState) => void;
+};
+
+export class MenuCheckboxMenu extends MenuItemCore {
+  readonly type = "checkbox" as const;
+
+  _checked: MenuItemCheckedState = false;
+  onCheckedChange?: (checked: MenuItemCheckedState) => void;
+
+  get checked() {
+    return this._checked;
+  }
+
+  override get state() {
+    return {
+      ...super.state,
+      checked: this._checked,
+    };
+  }
+
+  constructor(options: Partial<{ _name: string }> & MenuCheckboxMenuProps) {
+    super(options);
+    const { checked, defaultChecked = false, onCheckedChange } = options;
+    this.onCheckedChange = onCheckedChange;
+    this._checked = checked ?? defaultChecked;
+  }
+
+  setChecked(checked: MenuItemCheckedState) {
+    if (this._checked === checked) {
+      return;
+    }
+    this._checked = checked;
+    if (this.onCheckedChange) {
+      this.onCheckedChange(checked);
+    }
+    this.emit(Events.Change, { ...(this.state as any) });
+  }
+
+  toggle() {
+    if (this._checked === "indeterminate") {
+      this.setChecked(true);
+      return;
+    }
+    this.setChecked(!this._checked);
+  }
+
+  override handleClick() {
+    if (this._disabled) {
+      return;
+    }
+    this.toggle();
+    this.emit(Events.Click);
+  }
+
+  get [Symbol.toStringTag]() {
+    return "MenuCheckboxMenu";
+  }
+}
+
+type MenuRadioItemProps = MenuItemCoreProps & {
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+};
+
+export class MenuRadioItem extends MenuItemCore {
+  readonly type = "radio" as const;
+
+  _checked = false;
+  onCheckedChange?: (checked: boolean) => void;
+
+  get checked() {
+    return this._checked;
+  }
+
+  override get state() {
+    return {
+      ...super.state,
+      checked: this._checked,
+    };
+  }
+
+  constructor(options: Partial<{ _name: string }> & MenuRadioItemProps) {
+    super(options);
+    const { checked, defaultChecked = false, onCheckedChange } = options;
+    this.onCheckedChange = onCheckedChange;
+    this._checked = checked ?? defaultChecked;
+  }
+
+  setChecked(checked: boolean) {
+    if (this._checked === checked) {
+      return;
+    }
+    this._checked = checked;
+    if (this.onCheckedChange) {
+      this.onCheckedChange(checked);
+    }
+    this.emit(Events.Change, { ...(this.state as any) });
+  }
+
+  override handleClick() {
+    if (this._disabled) {
+      return;
+    }
+    this.setChecked(true);
+    this.emit(Events.Click);
+  }
+
+  get [Symbol.toStringTag]() {
+    return "MenuRadioItem";
+  }
+}
+
+type MenuRadioGroupItemProps = MenuItemCoreProps & {
+  group: string;
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+};
+
+export class MenuRadioGroupItem extends MenuItemCore {
+  private static groups = new Map<string, Set<MenuRadioGroupItem>>();
+
+  readonly type = "radio-group" as const;
+
+  group: string;
+  _checked = false;
+  onCheckedChange?: (checked: boolean) => void;
+
+  get checked() {
+    return this._checked;
+  }
+
+  override get state() {
+    return {
+      ...super.state,
+      checked: this._checked,
+    };
+  }
+
+  constructor(options: Partial<{ _name: string }> & MenuRadioGroupItemProps) {
+    super(options);
+    const {
+      group,
+      checked,
+      defaultChecked = false,
+      onCheckedChange,
+    } = options;
+    this.group = group;
+    this.onCheckedChange = onCheckedChange;
+    this._checked = checked ?? defaultChecked;
+    this._register();
+    if (this._checked) {
+      this._enforceGroupSelection();
+    }
+  }
+
+  private _register() {
+    let set = MenuRadioGroupItem.groups.get(this.group);
+    if (!set) {
+      set = new Set<MenuRadioGroupItem>();
+      MenuRadioGroupItem.groups.set(this.group, set);
+    }
+    set.add(this);
+  }
+
+  private _unregister() {
+    const set = MenuRadioGroupItem.groups.get(this.group);
+    if (!set) {
+      return;
+    }
+    set.delete(this);
+    if (set.size === 0) {
+      MenuRadioGroupItem.groups.delete(this.group);
+    }
+  }
+
+  private _setCheckedInternal(checked: boolean) {
+    if (this._checked === checked) {
+      return;
+    }
+    this._checked = checked;
+    if (this.onCheckedChange) {
+      this.onCheckedChange(checked);
+    }
+    this.emit(Events.Change, { ...(this.state as any) });
+  }
+
+  private _enforceGroupSelection() {
+    const set = MenuRadioGroupItem.groups.get(this.group);
+    if (!set) {
+      return;
+    }
+    for (const item of set) {
+      if (item !== this && item._checked) {
+        item._setCheckedInternal(false);
+      }
+    }
+  }
+
+  setChecked(checked: boolean) {
+    if (checked) {
+      this._setCheckedInternal(true);
+      this._enforceGroupSelection();
+      return;
+    }
+    this._setCheckedInternal(false);
+  }
+
+  override handleClick() {
+    if (this._disabled) {
+      return;
+    }
+    this.setChecked(true);
+    this.emit(Events.Click);
+  }
+
+  override unmount() {
+    this._unregister();
+    super.unmount();
+  }
+
+  get [Symbol.toStringTag]() {
+    return "MenuRadioGroupItem";
   }
 }

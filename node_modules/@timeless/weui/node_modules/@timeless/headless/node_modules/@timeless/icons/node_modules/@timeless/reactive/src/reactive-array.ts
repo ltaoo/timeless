@@ -111,10 +111,10 @@ export function refArray<T>(items: T[], opt: Partial<{ key: any }> = {}): RefArr
     get value() {
       return _local_value;
     },
-    isSame(v: T[]) {
+    isSame(v: unknown) {
       return Object.is(_local_value, v);
     },
-    isStrictEqual(v: T[]) {
+    isStrictEqual(v: unknown) {
       return _local_value === v;
     },
     get length() {
@@ -199,6 +199,11 @@ export function refArray<T>(items: T[], opt: Partial<{ key: any }> = {}): RefArr
       } else {
         _local_value = items;
       }
+      notify({ type: "refresh" });
+    },
+    assign(items: T[]) {
+      _local_value = items;
+      _inner.length = 0;
       notify({ type: "refresh" });
     },
     filter(predicate: (item: T, index: number, array: T[]) => boolean) {

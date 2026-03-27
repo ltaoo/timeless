@@ -45,10 +45,10 @@ export function refObject<T extends Record<string, any>>(obj: T | null) {
     get value() {
       return _v;
     },
-    isSame(v: T | null) {
+    isSame(v: unknown) {
       return Object.is(_v, v);
     },
-    isStrictEqual(v: T | null) {
+    isStrictEqual(v: unknown) {
       return _v === v;
     },
     set(key: keyof T, item: any) {

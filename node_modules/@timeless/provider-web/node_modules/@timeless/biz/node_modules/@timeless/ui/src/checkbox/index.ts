@@ -103,10 +103,15 @@ export class CheckboxCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, { ...this.state });
   }
   reset() {
-    this.checked = this.defaultChecked;
+    this.setValue(this.defaultChecked);
   }
-  setValue(v: boolean) {
+  setValue(v: boolean, extra: Partial<{ silence: boolean }> = {}) {
+    const prev_checked = this.checked;
     this.checked = v;
+    if (!extra.silence && prev_checked !== v) {
+      this.emit(Events.Change, this.checked);
+      this.emit(Events.StateChange, { ...this.state });
+    }
   }
 
   onChange(handler: Handler<TheTypesOfEvents[Events.Change]>) {

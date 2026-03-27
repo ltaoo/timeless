@@ -4,6 +4,8 @@
 // export * from "./timeless.umd";
 // import * as ProsemirrorMod from './prosemirror';
 
+declare const SearchSelect: any;
+
 declare global {
   interface Window {}
 

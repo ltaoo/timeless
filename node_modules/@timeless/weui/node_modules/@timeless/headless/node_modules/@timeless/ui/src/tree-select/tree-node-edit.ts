@@ -1,7 +1,7 @@
 import { base, Handler } from "@timeless/base";
 import { BizError } from "@timeless/base";
 import { PopoverCore } from "@/popover";
-import { InputCore } from "@/form/input";
+import { InputCore } from "@/input";
 import { ButtonCore } from "@/button";
 
 export function TreeNodeEditModel<

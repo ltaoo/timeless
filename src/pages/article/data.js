@@ -1,6 +1,13 @@
+export const categories = [
+  { id: "a", name: "JavaScript" },
+  { id: "b", name: "CSS" },
+  { id: "c", name: "Web 平台" },
+];
+
 export const articles = [
   {
     id: "1",
+    categoryId: "a",
     name: "JavaScript 异步编程",
     title: "深入理解 JavaScript 异步编程",
     content:
@@ -8,6 +15,7 @@ export const articles = [
   },
   {
     id: "2",
+    categoryId: "b",
     name: "CSS Grid 布局",
     title: "CSS Grid 布局实战指南",
     content:
@@ -15,6 +23,7 @@ export const articles = [
   },
   {
     id: "3",
+    categoryId: "c",
     name: "前端性能优化",
     title: "前端性能优化的常见策略",
     content:
@@ -22,6 +31,7 @@ export const articles = [
   },
   {
     id: "4",
+    categoryId: "a",
     name: "TypeScript 类型体操",
     title: "TypeScript 高级类型技巧",
     content:
@@ -29,6 +39,7 @@ export const articles = [
   },
   {
     id: "5",
+    categoryId: "c",
     name: "Web Components",
     title: "Web Components 入门与实践",
     content:

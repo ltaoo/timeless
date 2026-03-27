@@ -7,15 +7,14 @@ const __dirname = path.dirname(__filename);
 
 const iconsPackagePath = path.resolve(__dirname, '..');
 const srcPath = path.join(iconsPackagePath, 'src');
+const iconsSrcPath = path.join(srcPath, 'icons');
 const pkgPath = path.join(iconsPackagePath, 'package.json');
 
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
 
-// Get all .ts files in src except index.ts and d.ts files
-const icons = fs.readdirSync(srcPath).filter(name => {
-  return name.endsWith('.ts') && 
-         name !== 'index.ts' && 
-         !name.endsWith('.d.ts');
+// Get all .ts files in src/icons except d.ts files
+const icons = fs.readdirSync(iconsSrcPath).filter(name => {
+  return name.endsWith('.ts') && !name.endsWith('.d.ts');
 }).map(name => name.replace('.ts', ''));
 
 const exportsConfig = {

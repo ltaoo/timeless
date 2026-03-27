@@ -2,14 +2,16 @@ import { articles } from "./data.js";
 
 export default function ArticleContentPageView(props) {
   const { id } = props.view.query;
+  console.log("[]ArticleContentPageView create", id);
 
   const article = refobj(null);
-  const loading = ref(true);
+  const loading = ref(false);
 
-  loading.as(false);
   const matched = articles.find((v) => v.id === id);
   if (!matched) {
-    return;
+    return View({ class: "h-full" }, [
+      "Please select article to load content.",
+    ]);
   }
   article.as(matched);
 
@@ -37,7 +39,7 @@ export default function ArticleContentPageView(props) {
       {
         when: computed(article, (t) => !!t),
       },
-      [h(ArticleContent, { data: article })],
+      [h(ArticleContent, { data: article.value })],
     ),
   ]);
 }
@@ -50,7 +52,7 @@ function ArticleContent(props) {
           class:
             "text-2xl font-bold text-zinc-900 leading-tight dark:text-zinc-100",
         },
-        computed(props.data, (d) => d?.title || ""),
+        props.data.title,
       ),
     ]),
     Separator({ orientation: "horizontal" }),
@@ -59,7 +61,7 @@ function ArticleContent(props) {
         {
           class: "text-base text-zinc-700 leading-relaxed dark:text-zinc-300",
         },
-        computed(props.data, (d) => d?.content || ""),
+        props.data.content,
       ),
     ]),
   ]);

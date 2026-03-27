@@ -9,8 +9,8 @@ export type Ref<T> = {
   _subscribe: (ctx: Subscriber) => void;
   _destroy: () => void;
   value: T;
-  isSame: (v: T) => boolean;
-  isStrictEqual: (v: T) => boolean;
+  isSame: (v: unknown) => boolean;
+  isStrictEqual: (v: unknown) => boolean;
 };
 
 export type ClassNameRef = {

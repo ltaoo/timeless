@@ -7,15 +7,14 @@ const __dirname = path.dirname(__filename);
 
 const packagePath = path.resolve(__dirname, '..');
 const srcPath = path.join(packagePath, 'src');
+const modulesPath = path.join(srcPath, 'modules');
 const pkgPath = path.join(packagePath, 'package.json');
 
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
 
 // Get all .ts files in src except index.ts and d.ts files
-const components = fs.readdirSync(srcPath).filter(name => {
-  return name.endsWith('.ts') && 
-         name !== 'index.ts' && 
-         !name.endsWith('.d.ts');
+const components = fs.readdirSync(modulesPath).filter(name => {
+  return name.endsWith('.ts') && !name.endsWith('.d.ts');
 }).map(name => name.replace('.ts', ''));
 
 const exportsConfig = {

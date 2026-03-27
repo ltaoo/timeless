@@ -10,7 +10,7 @@ const isWhole = process.argv.includes("--whole");
 
 // Get all .ts files in src except index.ts and d.ts files
 const icons = fs
-  .readdirSync(resolve(__dirname, "src"))
+  .readdirSync(resolve(__dirname, "src/icons"))
   .filter((name) => {
     return (
       name.endsWith(".ts") && name !== "index.ts" && !name.endsWith(".d.ts")
@@ -27,13 +27,13 @@ export default defineConfig({
         ? icons.reduce(
             (entries, name) => {
               // @ts-ignore
-              entries[name] = resolve(__dirname, `src/${name}.ts`);
+              entries[name] = resolve(__dirname, `src/icons/${name}.ts`);
               return entries;
             },
             { index: resolve(__dirname, "src/index.ts") },
           )
         : resolve(__dirname, "src/index.ts"),
-      formats: ["es", "cjs", "umd"],
+      formats: isWhole ? ["es", "cjs"] : ["es", "cjs", "umd"],
       fileName: (format, entryName) => {
         if (entryName === "index") {
           if (format === "es") {
