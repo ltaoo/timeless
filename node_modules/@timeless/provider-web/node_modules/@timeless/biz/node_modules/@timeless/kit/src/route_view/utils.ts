@@ -48,6 +48,19 @@ export type OriginalRouteConfigure = Record<
     children?: OriginalRouteConfigure;
   }
 >;
+
+export type ConfigureForPageKeys<T> = {
+  [K in keyof T]: T[K] extends { children: infer C }
+    ? {
+        title: string;
+        pathname: string;
+        children: ConfigureForPageKeys<C>;
+      }
+    : {
+        title: string;
+        pathname: string;
+      };
+};
 export type PageKeysType<
   T extends OriginalRouteConfigure,
   K = keyof T,
@@ -140,32 +153,26 @@ function apply<T>(
   }, []);
 }
 
-export function build<T>(configure: OriginalRouteConfigure) {
+export function build<T extends string>(configure: OriginalRouteConfigure) {
   const configs = apply<T>(configure);
-  const routes: Record<PathnameKey, RouteConfig<T>> = configs
-    .map((a) => {
-      return {
-        [a.name as string]: a,
-      };
-    })
-    .reduce((a, b) => {
+  const routes: Record<T, RouteConfig<T>> = configs.reduce(
+    (a, b) => {
       return {
         ...a,
-        ...b,
+        [b.name as T]: b,
       };
-    }, {});
-  const routesWithPathname: Record<PathnameKey, RouteConfig<T>> = configs
-    .map((a) => {
-      return {
-        [a.pathname]: a,
-      };
-    })
-    .reduce((a, b) => {
+    },
+    {} as Record<T, RouteConfig<T>>,
+  );
+  const routesWithPathname: Record<PathnameKey, RouteConfig<T>> = configs.reduce(
+    (a, b) => {
       return {
         ...a,
-        ...b,
+        [b.pathname]: b,
       };
-    }, {});
+    },
+    {} as Record<PathnameKey, RouteConfig<T>>,
+  );
 
   return {
     routes,
@@ -191,10 +198,27 @@ type RouteInner = {
 };
 export type RouteConfigure = Record<PathnameKey, RouteInner>;
 
-export function buildRoutes(routes: RouteConfigure) {
-  const views = {};
-  let defaultRouteName = "root.home_layout.index";
-  let notfoundRouteName = "root.notfound";
+type RouteConfigurePageKeys<T, K = keyof T> = K extends keyof T & (string | number)
+  ?
+      | `${K}`
+      | (T[K] extends object
+          ? T[K] extends { children: infer C }
+            ? C extends object
+              ? `${K}.${RouteConfigurePageKeys<C>}`
+              : never
+            : never
+          : never)
+  : never;
+
+export type BuildRoutesPageKeys<T extends RouteConfigure> =
+  | "root"
+  | `root.${RouteConfigurePageKeys<T>}`;
+
+export function buildRoutes<T extends RouteConfigure>(routes: T) {
+  type K = BuildRoutesPageKeys<T>;
+  const views: Partial<Record<Exclude<K, "root">, any>> = {};
+  let defaultRouteName = "root.home_layout.index" as Exclude<K, "root">;
+  let notfoundRouteName = "root.notfound" as Exclude<K, "root">;
 
   function traverse(config: Record<string, any>, parentName: string) {
     const children = {};
@@ -203,15 +227,15 @@ export function buildRoutes(routes: RouteConfigure) {
       const currentName = `${parentName}.${key}`;
 
       if (item.component) {
-        views[currentName] = item.component;
+        (views as any)[currentName] = item.component;
       }
 
       if (item.default) {
-        defaultRouteName = currentName;
+        defaultRouteName = currentName as Exclude<K, "root">;
       }
 
       if (item.notfound) {
-        notfoundRouteName = currentName;
+        notfoundRouteName = currentName as Exclude<K, "root">;
       }
 
       const node: RouteInner = {
@@ -242,7 +266,7 @@ export function buildRoutes(routes: RouteConfigure) {
       children: rootChildren,
     },
   };
-  const result = build(configure);
+  const result = build<K>(configure as any);
 
   return {
     routes: result.routes,

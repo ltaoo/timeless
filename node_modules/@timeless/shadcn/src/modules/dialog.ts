@@ -1,4 +1,4 @@
-import { computed, ref, refobj } from "@timeless/reactive";
+import { computed, ref, refobj, sn } from "@timeless/reactive";
 import {
   DialogPrimitive,
   View,
@@ -17,6 +17,7 @@ export function Dialog(
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
+  const { class: cls, style: sty, ...contentRest } = rest as any;
   const state_ = refobj(store.state);
   const presence_state_ = refobj(store.presence.state);
   const was_exiting_ = ref(false);
@@ -50,10 +51,10 @@ export function Dialog(
           const baseClass =
             "fixed inset-0 isolate z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs";
           const enterClass = d.enter
-            ? "animate-in fill-mode-both fade-in-0 duration-100"
+            ? "animate-in fill-mode-both fade-in-0 duration-100 ease-out"
             : "";
           const exitClass = d.exit
-            ? "animate-out fill-mode-both fade-out-0 duration-100"
+            ? "animate-out fill-mode-both fade-out-0 duration-100 ease-in"
             : "";
           const keepExitClass =
             !d.mounted && was_exiting_.value ? exitClass : "";
@@ -72,69 +73,89 @@ export function Dialog(
           },
         },
         [
-          DialogPrimitive.Content(
+          View(
             {
-              store,
-              class: computed(presence_state_, (d) => {
-                const baseClass =
-                  "relative w-full max-w-sm grid gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none";
-                const enterClass = d.enter
-                  ? "animate-in fill-mode-both fade-in-0 zoom-in-95 duration-100"
-                  : "";
-                const exitClass = d.exit
-                  ? "animate-out fill-mode-both fade-out-0 zoom-out-95 duration-100"
-                  : "";
-                const keepExitClass =
-                  !d.mounted && was_exiting_.value ? exitClass : "";
-                return [baseClass, enterClass, exitClass, keepExitClass]
-                  .filter(Boolean)
-                  .join(" ");
+              style: computed(state_, (s) => {
+                const rect = s.viewportRect;
+                if (!rect) return "";
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                return `position: fixed; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%);`;
               }),
-              ...rest,
             },
             [
-              Show({ when: computed(state_, (d) => !!d.title) }, [
-                h(
-                  DialogPrimitive.Header,
-                  {
-                    store,
-                    class: "flex flex-col gap-2",
-                  },
-                  [
-                    h(
-                      DialogPrimitive.Title,
-                      {
-                        store,
-                        class: "text-base leading-none font-medium",
-                      },
-                      [Txt(computed(state_, (d) => d.title || ""))],
-                    ),
-                  ],
-                ),
-              ]),
-              DialogPrimitive.Body({ store }, children || []),
-              DialogPrimitive.Close(
+              DialogPrimitive.Content(
                 {
                   store,
-                  class:
-                    "absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                  ...contentRest,
+                  class: computed(presence_state_, (d) => {
+                    const baseClass =
+                      "relative w-full max-w-sm grid gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none transform-gpu";
+                    const enterClass = d.enter
+                      ? "animate-in fill-mode-both fade-in-0 zoom-in-95 slide-in-from-top-2 duration-120 ease-out"
+                      : "";
+                    const exitClass = d.exit
+                      ? "animate-out fill-mode-both fade-out-0 zoom-out-95 slide-out-to-top-2 duration-100 ease-in"
+                      : "";
+                    const keepExitClass =
+                      !d.mounted && was_exiting_.value ? exitClass : "";
+                    return [
+                      baseClass,
+                      enterClass,
+                      exitClass,
+                      keepExitClass,
+                      cls,
+                    ]
+                      .filter(Boolean)
+                      .join(" ");
+                  }),
+                  style: sn([sty]),
                 },
-                [Txt("✕")],
+                [
+                  Show({ when: computed(state_, (d) => !!d.title) }, [
+                    h(
+                      DialogPrimitive.Header,
+                      {
+                        store,
+                        class: "flex flex-col gap-2",
+                      },
+                      [
+                        h(
+                          DialogPrimitive.Title,
+                          {
+                            store,
+                            class: "text-base leading-none font-medium",
+                          },
+                          [Txt(computed(state_, (d) => d.title || ""))],
+                        ),
+                      ],
+                    ),
+                  ]),
+                  DialogPrimitive.Body({ store }, children || []),
+                  DialogPrimitive.Close(
+                    {
+                      store,
+                      class:
+                        "absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                    },
+                    [Txt("✕")],
+                  ),
+                  Show({ when: computed(state_, (d) => !!d.footer) }, [
+                    h(
+                      DialogPrimitive.Footer,
+                      {
+                        store,
+                        class:
+                          "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
+                      },
+                      [
+                        h(Button, { store: store.cancelBtn }, ["取消"]),
+                        h(Button, { store: store.okBtn }, ["确认"]),
+                      ],
+                    ),
+                  ]),
+                ],
               ),
-              Show({ when: computed(state_, (d) => !!d.footer) }, [
-                h(
-                  DialogPrimitive.Footer,
-                  {
-                    store,
-                    class:
-                      "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
-                  },
-                  [
-                    h(Button, { store: store.cancelBtn }, ["取消"]),
-                    h(Button, { store: store.okBtn }, ["确认"]),
-                  ],
-                ),
-              ]),
             ],
           ),
         ],

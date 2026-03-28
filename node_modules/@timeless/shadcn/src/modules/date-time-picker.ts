@@ -55,7 +55,6 @@ export function DateTimePicker(
   const has_date_ = computed(date_state_, (d) => d.value != null);
   const has_time_ = computed(time_state_, (d) => d.value != null);
   // const time_headers = time$.showSeconds ? ["时", "分", "秒"] : ["时", "分"];
-  const time_cols_class = time$.showSeconds ? "grid-cols-3" : "grid-cols-2";
   const empty_time_text = time$.showSeconds ? "--:--:--" : "--:--";
   const item_height = 32;
   const scroll_padding_items = 2;

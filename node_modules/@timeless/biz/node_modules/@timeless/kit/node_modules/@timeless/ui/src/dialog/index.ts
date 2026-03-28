@@ -49,9 +49,27 @@ type DialogState = {
   /** 能否手动关闭 */
   closeable: boolean;
   mask: boolean;
+  viewported: boolean;
+  viewportRect: null | {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  };
   enter: boolean;
   visible: boolean;
   exit: boolean;
+};
+
+export type DialogViewportRect = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+export type DialogViewport = {
+  getRect?: () => DialogViewportRect | null | undefined;
 };
 
 export class DialogCore extends BaseDomain<TheTypesOfEvents> {
@@ -60,6 +78,8 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
   footer = true;
   closeable = true;
   mask = true;
+  viewport: DialogViewport = {};
+  viewportRect: DialogViewportRect | null = null;
 
   presence = new PresenceCore();
   okBtn = new ButtonCore();
@@ -74,6 +94,8 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
       footer: this.footer,
       closeable: this.closeable,
       mask: this.mask,
+      viewported: !!this.viewport.getRect,
+      viewportRect: this.viewportRect,
       enter: this.presence.state.enter,
       visible: this.presence.state.visible,
       exit: this.presence.state.exit,
@@ -143,6 +165,7 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
       this.presence.hide();
       return;
     }
+    this.syncViewportRect();
     this.presence.show();
   }
   /** 显示弹窗 */
@@ -151,6 +174,8 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
     if (this.open) {
       return;
     }
+    this.syncViewportRect();
+    this.emit(Events.StateChange, { ...this.state });
     // this.emit(Events.BeforeShow);
     this.presence.show();
   }
@@ -171,6 +196,24 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
   setTitle(title: string) {
     this.title = title;
     this.emit(Events.StateChange, { ...this.state });
+  }
+
+  setViewport(opt: DialogViewport = {}) {
+    this.viewport.getRect = opt.getRect;
+    this.syncViewportRect();
+    this.emit(Events.StateChange, { ...this.state });
+  }
+
+  private syncViewportRect() {
+    const getRect = this.viewport.getRect;
+    if (!getRect) {
+      this.viewportRect = null;
+      return;
+    }
+    const rect = getRect();
+    this.viewportRect = rect
+      ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
+      : null;
   }
 
   onShow(handler: Handler<TheTypesOfEvents[Events.Show]>) {

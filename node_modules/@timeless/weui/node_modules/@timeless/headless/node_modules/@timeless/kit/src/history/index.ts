@@ -526,15 +526,8 @@ export class HistoryCore<
       return;
     }
     const { parent } = route;
-    // 计算父视图的查找 key：如果有 query，使用包含 query 的 uniqueKey
-    const parentLookupKey = (() => {
-      if (query && Object.keys(query).length) {
-        return [this.routes[parent.name as K]?.pathname, qs_stringify(query)]
-          .filter(Boolean)
-          .join("?");
-      }
-      return parent.name;
-    })();
+    // 父视图不应受子视图 query 影响，使用父视图的 name 作为稳定查找 key
+    const parentLookupKey = parent.name;
 
     if (this.views[parentLookupKey]) {
       view.parent = this.views[parentLookupKey];
@@ -552,10 +545,11 @@ export class HistoryCore<
       name: parent_route.name,
       pathname: parent_route.pathname,
       title: parent_route.title,
-      query: query || {},
+      // 父视图保持自身稳定的 query（与子视图解耦）
+      query: {},
       parent: null,
     });
-    // 用包含 query 的 key 存储，确保不同 query 的父视图相互独立
+    // 仅用稳定 key 存储父视图，确保所有子视图复用同一个父视图实例
     this.views[parentLookupKey] = created_parent;
     view.parent = created_parent;
     this.ensureParent(created_parent);

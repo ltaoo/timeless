@@ -199,6 +199,9 @@ export function Clear(
           e.preventDefault();
           e.stopPropagation();
           store.clear();
+          setTimeout(() => {
+            store.focus();
+          }, 0);
         });
         if (rest.onMounted) rest.onMounted($e);
       },

@@ -10,8 +10,16 @@ export { NavigatorCore } from "./navigator";
 export { HttpClientCore } from "./http_client";
 export { RouteViewCore, RouteMenusModel } from "./route_view";
 export { buildRoutes } from "./route_view/utils";
+export type {
+  OriginalRouteConfigure,
+  PageKeysType,
+  PathnameKey,
+  RouteConfig,
+  RouteConfigure,
+  BuildRoutesPageKeys,
+  ConfigureForPageKeys,
+} from "./route_view/utils";
 export { ListCore } from "./list";
 export { RequestCore, type RequestPayload } from "./request";
 export { request_factory } from "./request/utils";
 // export * from "./multiple";
-

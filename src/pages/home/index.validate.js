@@ -95,7 +95,7 @@ function PaymentFormView(props) {
     cancel_btn$,
   } = store.ui;
 
-  return View({ class: "w-full max-w-md rounded-xl border p-6" }, [
+  return View({ class: "w-full max-w-md rounded-xl border border-border p-6" }, [
     View({ class: "space-y-6" }, [
       // Payment Method fieldset
       View({ class: "space-y-4" }, [
@@ -168,16 +168,10 @@ function PaymentFormView(props) {
             id: "same_as_shipping",
             store: same_as_shipping$,
           }),
-          FieldInlineLabel(
-            {
-              for: "same_as_shipping",
-              store: store.ui.form$.fields.same_as_shipping,
-              onClick() {
-                same_as_shipping$.toggle();
-              },
-            },
-            ["Same as shipping address"],
-          ),
+          FieldInlineLabel({
+            for: "same_as_shipping",
+            store: store.ui.form$.fields.same_as_shipping,
+          }),
         ]),
       ]),
 
@@ -512,7 +506,7 @@ export default function FormValidateView() {
   });
   const payment$ = PaymentViewModel();
 
-  return PageContent({ class: "" }, [
+  return PageContent({ class: "page--validate overflow-x-hidden" }, [
     SplitLayout({
       direction: "vertical",
       items: [
@@ -526,7 +520,7 @@ export default function FormValidateView() {
               store: payment$,
             }),
             Separator({ class: "my-6" }),
-            View({ class: "w-full max-w-md rounded-xl border p-6" }, [
+            View({ class: "w-full max-w-md rounded-xl border border-border p-6" }, [
               Field({ store: field_provider$ }, [
                 Select({
                   id: field_provider$.name,

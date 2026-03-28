@@ -1,6 +1,6 @@
 {
   "name": "@timeless/biz",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Biz logic for Timeless",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",

@@ -1,5 +1,6 @@
 /** 首页布局 */
 import { SidebarLayout } from "@/components/layout.js";
+import { projects } from "@/pages/project/data.js";
 
 export default function HomeLayoutView(props) {
   const sidemenu$ = Timeless.kit.RouteMenusModel({
@@ -57,49 +58,64 @@ export default function HomeLayoutView(props) {
             ),
 
             // Middle spacer
-            // Flex({ direction: "col", items: "center", class: "flex-1 flex gap-3" }, [
-            //   View(
-            //     {
-            //       class: "cursor-pointer",
-            //       onClick() {
-            //         props.history.push("root.home_layout.article");
-            //       },
-            //     },
-            //     ["Article"],
-            //   ),
-            //   Separator({ orientation: "horizontal", class: "w-8 mx-auto" }),
-            //   Flex({ direction: "col", items: "center", class: "gap-2" }, [
-            //     For({
-            //       each: projects,
-            //       render(project) {
-            //         return View(
-            //           {
-            //             class: computed(sidemenu$.cur, () => {
-            //               const isActive = sidemenu$.isSubRoute(
-            //                 "root.home_layout.project",
-            //               );
-            //               return isActive
-            //                 ? "w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700 cursor-pointer transition-colors dark:bg-zinc-800 dark:text-white"
-            //                 : "w-10 h-10 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-black cursor-pointer transition-colors dark:hover:bg-zinc-800 dark:hover:text-white";
-            //             }),
-            //             onClick() {
-            //               props.history.push(
-            //                 "root.home_layout.project.workspace",
-            //                 {
-            //                   id: project.id,
-            //                 },
-            //               );
-            //             },
-            //           },
-            //           [project.name.charAt(0)],
-            //         );
-            //       },
-            //     }),
-            //   ]),
-            // ]),
+            Flex({ direction: "col", items: "center", class: "flex-1 flex gap-3" }, [
+              View(
+                {
+                  class: computed(sidemenu$.cur, () => {
+                    return sidemenu$.isActive("root.home_layout.article")
+                      ? "w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700 cursor-pointer transition-colors dark:bg-zinc-800 dark:text-white"
+                      : "w-10 h-10 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-black cursor-pointer transition-colors dark:hover:bg-zinc-800 dark:hover:text-white";
+                  }),
+                  onClick() {
+                    props.history.push("root.home_layout.article");
+                  },
+                },
+                [Timeless.icons.RSSOutlined({ class: "size-4" })],
+              ),
+              Separator({ orientation: "horizontal", class: "w-8 mx-auto" }),
+              Flex({ direction: "col", items: "center", class: "gap-2" }, [
+                For({
+                  each: projects,
+                  render(project) {
+                    return View(
+                      {
+                        class: computed(sidemenu$.cur, () => {
+                          const isActive = sidemenu$.isSubRoute(
+                            "root.home_layout.project",
+                          );
+                          return isActive
+                            ? "w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700 cursor-pointer transition-colors dark:bg-zinc-800 dark:text-white"
+                            : "w-10 h-10 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-black cursor-pointer transition-colors dark:hover:bg-zinc-800 dark:hover:text-white";
+                        }),
+                        onClick() {
+                          props.history.push(
+                            "root.home_layout.project.workspace",
+                            {
+                              id: project.id,
+                            },
+                          );
+                        },
+                      },
+                      [project.name.charAt(0)],
+                    );
+                  },
+                }),
+              ]),
+            ]),
 
             // Bottom Actions
             Flex({ direction: "col", items: "center", class: "gap-6 mb-4" }, [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    variant: "outline",
+                    onClick() {
+                      props.history.push("root.admin_layout.dashboard");
+                    },
+                  }),
+                },
+                [Timeless.icons.Grid3x3Outlined({ class: "size-4" })],
+              ),
               // Settings Icon
               // View(
               //   {
