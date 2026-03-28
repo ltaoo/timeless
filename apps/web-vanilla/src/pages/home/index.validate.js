@@ -95,7 +95,7 @@ function PaymentFormView(props) {
     cancel_btn$,
   } = store.ui;
 
-  return View({ class: "w-full max-w-md rounded-xl border p-6" }, [
+  return View({ class: "w-full max-w-md rounded-xl border border-border p-6" }, [
     View({ class: "space-y-6" }, [
       // Payment Method fieldset
       View({ class: "space-y-4" }, [
@@ -520,7 +520,7 @@ export default function FormValidateView() {
               store: payment$,
             }),
             Separator({ class: "my-6" }),
-            View({ class: "w-full max-w-md rounded-xl border p-6" }, [
+            View({ class: "w-full max-w-md rounded-xl border border-border p-6" }, [
               Field({ store: field_provider$ }, [
                 Select({
                   id: field_provider$.name,

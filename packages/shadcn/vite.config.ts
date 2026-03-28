@@ -47,6 +47,7 @@ export default defineConfig({
       ],
       output: {
         extend: true,
+        footer: `(function(){try{var g=typeof globalThis!=="undefined"?globalThis:typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var t=g.Timeless;if(!t)return;if(t.kit)Object.assign(t,t.kit);Object.assign(g,t)}catch(e){}})();`,
         // globals: {
         //   "@timeless/reactive": "Timeless.reactive",
         //   "@timeless/headless": "Timeless.headless",
