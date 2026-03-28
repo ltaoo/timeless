@@ -237,18 +237,14 @@ export const view$ = new Timeless.kit.RouteViewCore({
   views: [],
 });
 view$.isRoot = true;
-export const history$ =
-  /** @type {HistoryCore} */
-  (
-    new Timeless.kit.HistoryCore({
-      view: view$,
-      router: router$,
-      routes,
-      views: {
-        root: view$,
-      },
-    })
-  );
+export const history$ = new Timeless.kit.HistoryCore({
+  view: view$,
+  router: router$,
+  routes,
+  views: /** @type {Record<PageKey, RouteViewCore>} */ ({
+    root: view$,
+  }),
+});
 Timeless.web.provide_history(history$);
 
 const clipboard = Timeless.kit.ClipboardModel();
