@@ -830,6 +830,18 @@ declare module "packages/headless/src/native/svg" {
         render(): SVGElement;
     };
 }
+declare module "packages/headless/src/native/style" {
+    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    export interface NativeStyleProps extends Omit<ViewProps, "as"> {
+    }
+    export function NativeStyle(props?: NativeStyleProps, children?: ViewChildren | ViewChildren[number]): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
 declare module "packages/headless/src/primitive/lazy-view" {
     import { TimelessElement, ViewProps, ViewChildren, TimelessComponent } from "packages/headless/src/primitive/view";
     export function LazyView(props: ViewProps & {
@@ -1560,9 +1572,25 @@ declare module "packages/ui/src/dialog/index" {
         /** 能否手动关闭 */
         closeable: boolean;
         mask: boolean;
+        viewported: boolean;
+        viewportRect: null | {
+            left: number;
+            top: number;
+            width: number;
+            height: number;
+        };
         enter: boolean;
         visible: boolean;
         exit: boolean;
+    };
+    export type DialogViewportRect = {
+        left: number;
+        top: number;
+        width: number;
+        height: number;
+    };
+    export type DialogViewport = {
+        getRect?: () => DialogViewportRect | null | undefined;
     };
     export class DialogCore extends BaseDomain<TheTypesOfEvents> {
         open: boolean;
@@ -1570,6 +1598,8 @@ declare module "packages/ui/src/dialog/index" {
         footer: boolean;
         closeable: boolean;
         mask: boolean;
+        viewport: DialogViewport;
+        viewportRect: DialogViewportRect | null;
         presence: any;
         okBtn: any;
         cancelBtn: any;
@@ -1587,6 +1617,8 @@ declare module "packages/ui/src/dialog/index" {
         ok(): void;
         cancel(): void;
         setTitle(title: string): void;
+        setViewport(opt?: DialogViewport): void;
+        private syncViewportRect;
         onShow(handler: Handler<TheTypesOfEvents[Events.Show]>): () => void;
         onHidden(handler: Handler<TheTypesOfEvents[Events.Hidden]>): () => void;
         onUnmounted(handler: Handler<TheTypesOfEvents[Events.Unmounted]>): () => void;
@@ -11281,8 +11313,9 @@ declare module "packages/kit/src/route_view/index" {
     export function RouteMenusModel<T extends {
         title: string;
         url?: unknown;
-        onClick?: (m: T) => void;
+        query?: Record<string, string>;
         children?: T["url"][];
+        onClick?: (m: T) => void;
     }>(props: {
         view: RouteViewCore;
         history: HistoryCore<any, any>;
@@ -12017,6 +12050,7 @@ declare module "packages/headless/src/index" {
     export * from "packages/headless/src/native/slider";
     export * from "packages/headless/src/native/file-input";
     export * from "packages/headless/src/native/svg";
+    export * from "packages/headless/src/native/style";
     export * from "packages/headless/src/primitive/lazy-view";
     export * from "packages/headless/src/modules/portal";
     export * from "packages/headless/src/modules/presence";
@@ -12208,6 +12242,21 @@ declare module "packages/shadcn/src/modules/select" {
     export function Select(props: ViewProps & {
         store: SelectCore<any>;
         id?: string;
+    }): any;
+}
+declare module "packages/shadcn/src/modules/search-select" {
+    import { ViewProps } from "packages/headless/src/index";
+    import { SelectCore } from "packages/ui/src/index";
+    export function SearchSelect<T>(props: ViewProps & {
+        store: SelectCore<T>;
+        fetchOptions: (keyword: string) => Promise<{
+            value: T;
+            label: string;
+        }[]>;
+        debounce?: number;
+        minLength?: number;
+        emptyText?: string;
+        loadingText?: string;
     }): any;
 }
 declare module "packages/shadcn/src/modules/cascader" {
@@ -12890,6 +12939,7 @@ declare module "packages/shadcn/src/index" {
     import { CheckboxGroup, CheckboxGroupItem } from "packages/shadcn/src/modules/checkbox-group";
     import { Radio, RadioGroup, RadioGroupItem } from "packages/shadcn/src/modules/radio";
     import { Select } from "packages/shadcn/src/modules/select";
+    import { SearchSelect } from "packages/shadcn/src/modules/search-select";
     import { Cascader } from "packages/shadcn/src/modules/cascader";
     import { DatePicker } from "packages/shadcn/src/modules/date-picker";
     import { DateRangePicker } from "packages/shadcn/src/modules/date-range-picker";
@@ -12935,7 +12985,7 @@ declare module "packages/shadcn/src/index" {
     export * from "packages/reactive/src/index";
     export * as icons from "packages/icons/src/index";
     export * as kit from "packages/kit/src/index";
-    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, };
+    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, };
 }
 
 // === Package module aliases ===
@@ -13056,6 +13106,7 @@ declare const NativeLabel: typeof import("@timeless/shadcn").NativeLabel;
 declare const NativePassword: typeof import("@timeless/shadcn").NativePassword;
 declare const NativeSelect: typeof import("@timeless/shadcn").NativeSelect;
 declare const NativeSlider: typeof import("@timeless/shadcn").NativeSlider;
+declare const NativeStyle: typeof import("@timeless/shadcn").NativeStyle;
 declare const NumberInput: typeof import("@timeless/shadcn").NumberInput;
 declare const NumberInputPrimitive: typeof import("@timeless/shadcn").NumberInputPrimitive;
 declare const ObjectSignal: typeof import("@timeless/shadcn").ObjectSignal;
@@ -13091,6 +13142,7 @@ declare const SVG: typeof import("@timeless/shadcn").SVG;
 declare const ScrollArea: typeof import("@timeless/shadcn").ScrollArea;
 declare const ScrollView: typeof import("@timeless/shadcn").ScrollView;
 declare const ScrollViewPrimitive: typeof import("@timeless/shadcn").ScrollViewPrimitive;
+declare const SearchSelect: typeof import("@timeless/shadcn").SearchSelect;
 declare const Select: typeof import("@timeless/shadcn").Select;
 declare const SelectPrimitive: typeof import("@timeless/shadcn").SelectPrimitive;
 declare const Separator: typeof import("@timeless/shadcn").Separator;

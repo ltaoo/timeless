@@ -5,8 +5,9 @@ export default function CommandView() {
   const isOpen = ref(false);
   const searchQuery = ref("");
   const selectedIndex = ref(0);
-  const contentLeft = ref(0);
-  const contentWidth = ref(0);
+  const contentHostEl = ref(null);
+  const contentCenterX = ref(0);
+  const contentTop = ref(0);
 
   const searchInput = new Timeless.ui.InputCore({
     placeholder: "Type a command...",
@@ -71,15 +72,45 @@ export default function CommandView() {
     CopyOutlined: Timeless.icons.FileSymlinkOutlined,
   };
 
+  let resizeListener;
+  function getContentHostRect() {
+    const el = contentHostEl.value;
+    if (el instanceof HTMLElement) return el.getBoundingClientRect();
+    return document.documentElement.getBoundingClientRect();
+  }
+
+  function syncPaletteAnchor() {
+    const rect = getContentHostRect();
+    contentCenterX.as(rect.left + rect.width / 2);
+    contentTop.as(rect.top + rect.height * 0.2);
+  }
+
+  function activateResizeSync() {
+    if (resizeListener) return;
+    resizeListener = () => {
+      syncPaletteAnchor();
+    };
+    window.addEventListener("resize", resizeListener);
+  }
+
+  function deactivateResizeSync() {
+    if (!resizeListener) return;
+    window.removeEventListener("resize", resizeListener);
+    resizeListener = undefined;
+  }
+
   function open() {
     isOpen.as(true);
     searchQuery.as("");
     searchInput.setValue("");
     selectedIndex.as(0);
+    syncPaletteAnchor();
+    activateResizeSync();
   }
 
   function close() {
     $clickOutside.methods.deactivate();
+    deactivateResizeSync();
     isOpen.as(false);
   }
 
@@ -195,7 +226,15 @@ export default function CommandView() {
     },
   });
 
-  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
+  return ScrollView(
+    {
+      class: "p-6 h-screen",
+      store: view$,
+      onMounted($el) {
+        contentHostEl.as($el);
+      },
+    },
+    [
     Section("Command Palette", [
       Item("Press Ctrl+P to open", [
         Button(
@@ -220,19 +259,23 @@ export default function CommandView() {
         View(
           {
             class:
-              "fixed z-50 w-full max-w-[560px] pointer-events-auto rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden",
+              "fixed z-50 w-full max-w-[560px] pointer-events-auto rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-white dark:bg-zinc-900",
             /** @param {HTMLDivElement} $el */
             onMounted($el) {
+              syncPaletteAnchor();
               $clickOutside.methods.setTargetRect(() =>
                 $el.getBoundingClientRect(),
               );
               $clickOutside.methods.activate();
             },
             style: sn([
-              "top: 20vh",
-              computed(contentLeft, (t) => {
-                return `left: ${t}px`;
+              computed(contentTop, (t) => {
+                return `top: ${t}px`;
               }),
+              computed(contentCenterX, (x) => {
+                return `left: ${x}px`;
+              }),
+              "transform: translateX(-50%)",
             ]),
             onClick(event) {
               event.stopPropagation();
@@ -346,5 +389,6 @@ export default function CommandView() {
         ),
       ]),
     ]),
-  ]);
+  ],
+  );
 }

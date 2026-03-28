@@ -29,6 +29,7 @@ export default function ArticleListPageView(props) {
   });
 
   return SidebarLayout({
+    class: 'h-full',
     sidebarWidth: "240px",
     sidebarClass: "border-r border-zinc-200 dark:border-zinc-800 flex flex-col",
     sidebar: [

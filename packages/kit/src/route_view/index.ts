@@ -549,8 +549,9 @@ export function RouteMenusModel<
   T extends {
     title: string;
     url?: unknown;
-    onClick?: (m: T) => void;
+    query?: Record<string, string>;
     children?: T["url"][];
+    onClick?: (m: T) => void;
   },
 >(props: { view: RouteViewCore; history: HistoryCore<any, any>; menus: T[] }) {
   const methods = {
@@ -610,7 +611,7 @@ export function RouteMenusModel<
       return isSameRoute || !!isSubRoute || !!isCustomSubRoute;
     },
     handleClick(menu: T, query?: Record<string, string>) {
-      props.history.push(menu.url, query);
+      props.history.push(menu.url, query || menu.query);
     },
     ready() {},
     destroy() {
