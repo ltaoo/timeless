@@ -8,7 +8,7 @@ import HomeIndexPageView from "@/pages/home/index.js";
 import HomeIndexGeneralView from "@/pages/home/index.general.js";
 import AdminLayoutView from "@/pages/admin/layout.js";
 
-const router = Timeless.kit.buildRoutes({
+const routes_configure_for_types = /** @type {const} */ ({
   home_layout: {
     title: "首页",
     pathname: "/home",
@@ -126,7 +126,7 @@ const router = Timeless.kit.buildRoutes({
       },
     },
     options: {
-      require: [],
+      require: /** @type {string[]} */ ([]),
     },
   },
   admin_layout: {
@@ -180,6 +180,16 @@ const router = Timeless.kit.buildRoutes({
   },
 });
 
+export const routes_configure = routes_configure_for_types;
+export const routes_configure_with_root = /** @type {const} */ ({
+  root: {
+    title: "ROOT",
+    pathname: "/",
+    children: routes_configure_for_types,
+  },
+});
+const router = Timeless.kit.buildRoutes(routes_configure);
+
 const routes = router.routes;
 export const views = router.views;
 export const defaultRouteName = router.defaultRouteName;
@@ -227,14 +237,18 @@ export const view$ = new Timeless.kit.RouteViewCore({
   views: [],
 });
 view$.isRoot = true;
-export const history$ = new Timeless.kit.HistoryCore({
-  view: view$,
-  router: router$,
-  routes,
-  views: {
-    root: view$,
-  },
-});
+export const history$ =
+  /** @type {HistoryCore} */
+  (
+    new Timeless.kit.HistoryCore({
+      view: view$,
+      router: router$,
+      routes,
+      views: {
+        root: view$,
+      },
+    })
+  );
 Timeless.web.provide_history(history$);
 
 const clipboard = Timeless.kit.ClipboardModel();
@@ -257,11 +271,15 @@ export const app = new Timeless.kit.ApplicationModel({
     //     return Timeless.Result.Err("need login");
     //   }
     // }
-    if (!route || history$.isRoot(String(route.name))) {
-      history$.push(String(defaultRouteName), {}, { ignore: true });
+    if (!route || history$.isRoot(/** @type {PageKey} */ (route.name))) {
+      history$.push(
+        /** @type {PageKey} */ (defaultRouteName),
+        {},
+        { ignore: true },
+      );
       return Timeless.Result.Ok(null);
     }
-    history$.push(String(route.name), query, { ignore: true });
+    history$.push(route.name, query, { ignore: true });
     return Timeless.Result.Ok(null);
   },
 });
@@ -294,5 +312,5 @@ history$.onClickLink(({ href, target }) => {
     window.open(hrefText);
     return;
   }
-  history$.push(String(route.name), query);
+  history$.push(/** @type {PageKey} */ (route.name), query);
 });

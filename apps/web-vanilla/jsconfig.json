@@ -10,17 +10,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@timeless/shadcn": ["../../packages/shadcn/src/index.js"],
-      "@timeless/weui": ["../../packages/weui/src/index.js"],
-      "@timeless/headless": ["../../packages/headless/src/index.js"]
     }
   },
   "include": [
     "src/**/*.js",
+    "types/global.d.ts",
     "types/index.d.ts",
-    "types/timeless.umd.d.ts",
-    "types/prosemirror.d.ts",
-    "../web-vue/example-weui.js"
   ],
   "exclude": ["node_modules", "dist"]
 }

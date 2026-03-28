@@ -11071,6 +11071,18 @@ declare module "packages/kit/src/route_view/utils" {
         }>;
         children?: OriginalRouteConfigure;
     }>;
+    export type ConfigureForPageKeys<T> = {
+        [K in keyof T]: T[K] extends {
+            children: infer C;
+        } ? {
+            title: string;
+            pathname: string;
+            children: ConfigureForPageKeys<C>;
+        } : {
+            title: string;
+            pathname: string;
+        };
+    };
     export type PageKeysType<T extends OriginalRouteConfigure, K = keyof T> = K extends keyof T & (string | number) ? `${K}` | (T[K] extends object ? T[K]["children"] extends object ? `${K}.${PageKeysType<T[K]["children"]>}` : never : never) : never;
     export type PathnameKey = string;
     export type RouteConfig<T> = {
@@ -11094,8 +11106,8 @@ declare module "packages/kit/src/route_view/utils" {
             };
         }>;
     };
-    export function build<T>(configure: OriginalRouteConfigure): {
-        routes: Record<string, RouteConfig<T>>;
+    export function build<T extends string>(configure: OriginalRouteConfigure): {
+        routes: Record<T, RouteConfig<T>>;
         routesWithPathname: Record<string, RouteConfig<T>>;
     };
     type RouteInner = {
@@ -11115,12 +11127,16 @@ declare module "packages/kit/src/route_view/utils" {
         children?: RouteConfigure;
     };
     export type RouteConfigure = Record<PathnameKey, RouteInner>;
-    export function buildRoutes(routes: RouteConfigure): {
-        routes: Record<string, RouteConfig<unknown>>;
-        routesWithPathname: Record<string, RouteConfig<unknown>>;
-        views: {};
-        defaultRouteName: string;
-        notfoundRouteName: string;
+    type RouteConfigurePageKeys<T, K = keyof T> = K extends keyof T & (string | number) ? `${K}` | (T[K] extends object ? T[K] extends {
+        children: infer C;
+    } ? C extends object ? `${K}.${RouteConfigurePageKeys<C>}` : never : never : never) : never;
+    export type BuildRoutesPageKeys<T extends RouteConfigure> = "root" | `root.${RouteConfigurePageKeys<T>}`;
+    export function buildRoutes<T extends RouteConfigure>(routes: T): {
+        routes: Record<BuildRoutesPageKeys<T>, RouteConfig<BuildRoutesPageKeys<T>>>;
+        routesWithPathname: Record<string, RouteConfig<BuildRoutesPageKeys<T>>>;
+        views: Partial<Record<Exclude<`root.${RouteConfigurePageKeys<T, keyof T>}`, "root">, any>>;
+        defaultRouteName: Exclude<`root.${RouteConfigurePageKeys<T, keyof T>}`, "root">;
+        notfoundRouteName: Exclude<`root.${RouteConfigurePageKeys<T, keyof T>}`, "root">;
     };
 }
 declare module "packages/kit/src/route_view/index" {
@@ -11981,6 +11997,7 @@ declare module "packages/kit/src/index" {
     export { HttpClientCore } from "packages/kit/src/http_client/index";
     export { RouteViewCore, RouteMenusModel } from "packages/kit/src/route_view/index";
     export { buildRoutes } from "packages/kit/src/route_view/utils";
+    export type { OriginalRouteConfigure, PageKeysType, PathnameKey, RouteConfig, RouteConfigure, BuildRoutesPageKeys, ConfigureForPageKeys, } from "packages/kit/src/route_view/utils";
     export { ListCore } from "packages/kit/src/list/index";
     export { RequestCore, type RequestPayload } from "packages/kit/src/request/index";
     export { request_factory } from "packages/kit/src/request/utils";

@@ -1,5 +1,10 @@
-import { SplitLayout } from "../../components/layout.js";
+import { SplitLayout } from "@/components/layout.js";
 
+/**
+ *
+ * @param {ViewComponentProps} props
+ * @returns
+ */
 export default function HomePageView(props) {
   const sidemenu$ = Timeless.kit.RouteMenusModel({
     view: props.view,
@@ -73,9 +78,7 @@ export default function HomePageView(props) {
           defaultSize: 85,
           minSize: 70,
           scroll: false,
-          children: [
-            KeepAliveSubViews(props),
-          ],
+          children: [KeepAliveSubViews(props)],
         },
       ],
     }),
