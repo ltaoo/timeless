@@ -219,11 +219,10 @@ export function WaterfallModel<T extends Record<string, unknown>>(props: {
       _ticking = false;
     },
     handleScroll(values: { scrollTop: number; clientHeight?: number }, opt: Partial<{ force: boolean }> = {}) {
-      if (values.scrollTop) {
+      if (values.scrollTop !== undefined) {
         _scrollValues.scrollTop = values.scrollTop;
-        // _last_scroll_position = values.scrollTop;
       }
-      if (values.clientHeight) {
+      if (values.clientHeight !== undefined) {
         _scrollValues.clientHeight = values.clientHeight;
       }
       // if (!_ticking) {

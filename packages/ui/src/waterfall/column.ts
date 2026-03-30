@@ -276,8 +276,9 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
             lo = mid + 1;
           }
         }
-        start = found;
-        end = start + _size;
+        const baseStart = Math.min(len - 1, Math.max(0, found - 1));
+        start = Math.max(0, baseStart - _buffer_size);
+        end = Math.min(baseStart + _size + _buffer_size, len);
       })();
       console.log(
         "before Math.max",
@@ -285,8 +286,8 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
         [end, _$total_items.length],
       );
       const result = {
-        start: Math.max(0, start - _buffer_size),
-        end: Math.min(end, _$total_items.length),
+        start,
+        end,
       };
       return result;
     },
