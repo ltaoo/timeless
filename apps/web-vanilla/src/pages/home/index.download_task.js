@@ -199,90 +199,99 @@ function DownloadTaskItem({ task, vm$ }) {
 export default function DownloadTaskPageView(props) {
   const vm$ = DownloadTaskViewModel(props);
 
-  return ScrollView({ class: "p-6 h-screen", store: vm$.ui.scrollView$ }, [
-    View({ class: "space-y-8" }, [
-      Section("Download Task", [
-        Item("Download List", [
-          View(
-            {
-              class:
-                "w-full rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
-            },
-            [
-              View(
-                {
-                  class:
-                    "flex items-center justify-between px-3 py-2.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900",
-                },
-                [
-                  View(
+  return ScrollView({ class: "p-6 h-screen", store: vm$.ui.view_page$ }, [
+    View(
+      {
+        class: "h-full",
+        onMounted() {
+          vm$.methods.init();
+        },
+      },
+      [
+        // Section("Download Task", [Item("Download List", [,])]),
+        View(
+          {
+            class:
+              "flex flex-col w-full h-full rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+          },
+          [
+            View(
+              {
+                class:
+                  "flex items-center justify-between h-[50px] px-3 py-2.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900",
+              },
+              [
+                View(
+                  {
+                    class:
+                      "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                  },
+                  [
+                    "Downloads",
+                    computed(vm$.state.taskCount, (d) =>
+                      d > 0 ? ` (${d})` : "",
+                    ),
+                  ],
+                ),
+                View({ class: "flex items-center gap-1" }, [
+                  Button(
                     {
-                      class:
-                        "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                      store: new Timeless.ui.ButtonCore({
+                        size: "sm",
+                        variant: "outline",
+                      }),
                     },
-                    [
-                      "Downloads",
-                      computed(vm$.state.taskCount, (d) =>
-                        d > 0 ? ` (${d})` : "",
-                      ),
-                    ],
+                    ["+ Fake"],
                   ),
-                  View({ class: "flex items-center gap-1" }, [
-                    Button(
-                      {
-                        store: new Timeless.ui.ButtonCore({
-                          size: "sm",
-                          variant: "outline",
-                        }),
-                      },
-                      ["+ Fake"],
-                    ),
-                    Button(
-                      {
-                        store: new Timeless.ui.ButtonCore({
-                          size: "sm",
-                          variant: "ghost",
-                          onClick() {
-                            vm$.methods.clearTasks();
-                          },
-                        }),
-                      },
-                      ["Clear"],
-                    ),
-                  ]),
-                ],
-              ),
-              View({ class: "h-[400px]" }, [
-                ScrollView({ store: vm$.ui.scrollView$ }, [
-                  Show(
+                  Button(
                     {
-                      when: computed(vm$.state.taskCount, (d) => d > 0),
-                      fallback: [
-                        View(
-                          {
-                            class:
-                              "flex items-center justify-center h-[200px] text-sm text-zinc-400",
-                          },
-                          ["No download tasks"],
-                        ),
-                      ],
-                    },
-                    [
-                      Waterfall({
-                        store: vm$.ui.waterfall$,
-                        class: "!overflow-visible !h-auto",
-                        render(task) {
-                          return DownloadTaskItem({ task, vm$: props.model });
+                      store: new Timeless.ui.ButtonCore({
+                        size: "sm",
+                        variant: "ghost",
+                        onClick() {
+                          vm$.methods.clearTasks();
                         },
                       }),
-                    ],
+                    },
+                    ["Clear"],
                   ),
                 ]),
+              ],
+            ),
+            View({ class: "flex-1 h-0" }, [
+              ScrollView({ class: "", store: vm$.ui.view_downloadtask$ }, [
+                Show(
+                  {
+                    when: computed(vm$.state.taskCount, (d) => d > 0),
+                    fallback: [
+                      h(
+                        View,
+                        {
+                          class:
+                            "flex items-center justify-center h-[200px] text-sm text-zinc-400",
+                        },
+                        ["No download tasks"],
+                      ),
+                    ],
+                  },
+                  [
+                    h(Waterfall, {
+                      store: vm$.ui.waterfall$,
+                      class: "!overflow-visible !h-auto",
+                      render(task) {
+                        return DownloadTaskItem({
+                          task,
+                          vm$: props.model,
+                        });
+                      },
+                    }),
+                  ],
+                ),
               ]),
-            ],
-          ),
-        ]),
-      ]),
-    ]),
+            ]),
+          ],
+        ),
+      ],
+    ),
   ]);
 }

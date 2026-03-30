@@ -1,16 +1,37 @@
-import { request } from "@/biz/request.js";
-
 const API_HOSTNAME = "http://100.78.198.69:2022";
+const client = new Timeless.kit.HttpClientCore({
+  hostname: API_HOSTNAME,
+});
+Timeless.web.provide_http_client(client);
+const request = Timeless.kit.request_factory({
+  hostnames: {
+    dev: API_HOSTNAME,
+    prod: API_HOSTNAME,
+  },
+  headers: { "Content-Type": "application/json" },
+  process(r) {
+    if (r.error) {
+      return r;
+    }
+    const { code, msg, data } = r.data;
+    if (code !== 0) {
+      return Timeless.Result.Err(msg || "Unknown error");
+    }
+    return Timeless.Result.Ok(data);
+  },
+});
+
+// const client = new Timeless
 const ITEM_HEIGHT = 64;
 const GUTTER = 0;
 const PAGE_SIZE = 50;
 
-export const DownloadTaskViewModel = defineModel((props) => {
-  const loading = ref(false);
-  const tasks = refarr([]);
-  const taskCount = ref(0);
-  const runningCount = computed(
-    tasks,
+export const DownloadTaskViewModel = defineModel(() => {
+  const loading_ = ref(false);
+  const tasks_ = refarr([]);
+  const taskCount_ = ref(0);
+  const runningCount_ = computed(
+    tasks_,
     (t) => t.filter((v) => v.status === "running").length,
   );
 
@@ -38,52 +59,57 @@ export const DownloadTaskViewModel = defineModel((props) => {
     list: new Timeless.kit.RequestCore(
       (params) => request.get("/api/task/list", params),
       {
-        client: props.client,
+        client,
         process(r) {
-          if (r.error) return r.error;
+          if (r.error) return r;
+          const {
+            list = [],
+            total = 0,
+            page = 1,
+            page_size = PAGE_SIZE,
+          } = r.data;
           return Timeless.Result.Ok({
-            list: (r.data.list || []).map(formatTask),
-            total: r.data.total || 0,
-            page: r.data.page || 1,
-            pageSize: r.data.page_size || PAGE_SIZE,
+            list: list.map(formatTask),
+            total: total,
+            page: page,
+            pageSize: page_size,
           });
         },
       },
     ),
     delete: new Timeless.kit.RequestCore(
-      (id) => props.request.post("/api/task/delete", { id }),
-      { client: props.client },
+      (id) => request.post("/api/task/delete", { id }),
+      { client },
     ),
     pause: new Timeless.kit.RequestCore(
-      (id) => props.request.post("/api/task/pause", { id }),
-      { client: props.client },
+      (id) => request.post("/api/task/pause", { id }),
+      { client },
     ),
     resume: new Timeless.kit.RequestCore(
-      (id) => props.request.post("/api/task/resume", { id }),
-      { client: props.client },
+      (id) => request.post("/api/task/resume", { id }),
+      { client },
     ),
-    clear: new Timeless.kit.RequestCore(
-      () => props.request.post("/api/task/clear"),
-      { client: props.client },
-    ),
+    clear: new Timeless.kit.RequestCore(() => request.post("/api/task/clear"), {
+      client,
+    }),
   };
 
-  const listCore = new Timeless.kit.ListCore(services.list, {
+  const list$ = new Timeless.kit.ListCore(services.list, {
     pageSize: PAGE_SIZE,
   });
 
-  const scrollView$ = new Timeless.ui.ScrollViewCore({
+  const view_page$ = new Timeless.ui.ScrollViewCore({});
+  const view_downloadtask$ = new Timeless.ui.ScrollViewCore({
     onScroll(pos) {
+      // console.log(pos);
       waterfall$.methods.handleScroll({ scrollTop: pos.scrollTop });
     },
     async onReachBottom() {
-      if (listCore.response.loading) return;
-      if (listCore.response.noMore) {
-        scrollView$.finishLoadingMore();
+      if (list$.response.loading || list$.response.noMore) {
         return;
       }
-      await listCore.loadMore();
-      scrollView$.finishLoadingMore();
+      await list$.loadMore();
+      view_downloadtask$.finishLoadingMore();
     },
   });
 
@@ -95,13 +121,14 @@ export const DownloadTaskViewModel = defineModel((props) => {
   });
 
   const state = {
-    loading,
-    tasks,
-    taskCount,
-    runningCount,
+    loading: loading_,
+    tasks: tasks_,
+    taskCount: taskCount_,
+    runningCount: runningCount_,
   };
   const ui = {
-    scrollView$,
+    view_page$,
+    view_downloadtask$,
     waterfall$,
   };
 
@@ -109,36 +136,36 @@ export const DownloadTaskViewModel = defineModel((props) => {
     async pauseTask(task) {
       const r = await services.pause.run(task.id);
       if (r.error) return;
-      listCore.modifyItem((t) =>
+      list$.modifyItem((t) =>
         t.id === task.id ? { ...t, status: "paused" } : t,
       );
-      const matched = tasks.find((t) => t.id === task.id);
+      const matched = tasks_.find((t) => t.id === task.id);
       if (matched) matched.assign({ status: "paused" });
     },
 
     async resumeTask(task) {
       const r = await services.resume.run(task.id);
       if (r.error) return;
-      listCore.modifyItem((t) =>
+      list$.modifyItem((t) =>
         t.id === task.id ? { ...t, status: "running" } : t,
       );
-      const matched = tasks.find((t) => t.id === task.id);
+      const matched = tasks_.find((t) => t.id === task.id);
       if (matched) matched.assign({ status: "running" });
     },
 
     async deleteTask(task) {
       const r = await services.delete.run(task.id);
       if (r.error) return;
-      tasks.remove((t) => t.id === task.id);
-      taskCount.as((prev) => prev - 1);
-      listCore.deleteItem((t) => t.id === task.id);
+      tasks_.remove((t) => t.id === task.id);
+      taskCount_.as((prev) => prev - 1);
+      list$.deleteItem((t) => t.id === task.id);
     },
 
     async clearTasks() {
       await services.clear.run();
-      listCore.clear();
-      tasks.as([]);
-      taskCount.as(0);
+      list$.clear();
+      tasks_.as([]);
+      taskCount_.as(0);
     },
 
     connect() {
@@ -173,7 +200,7 @@ export const DownloadTaskViewModel = defineModel((props) => {
       const toInsert = [];
       for (const t of newTasks) {
         if (!t?.id) continue;
-        const matched = tasks.find((v) => v.id === t.id);
+        const matched = tasks_.find((v) => v.id === t.id);
         if (matched) {
           matched.assign(t);
         } else {
@@ -181,17 +208,17 @@ export const DownloadTaskViewModel = defineModel((props) => {
         }
       }
       if (toInsert.length) {
-        tasks.unshift(...toInsert);
-        taskCount.as((prev) => prev + toInsert.length);
+        tasks_.unshift(...toInsert);
+        taskCount_.as((prev) => prev + toInsert.length);
       }
     },
 
     upsert(task) {
       if (!task?.id) return;
-      const matched = tasks.find((v) => v.id === task.id);
+      const matched = tasks_.find((v) => v.id === task.id);
       if (!matched) {
-        taskCount.as((prev) => prev + 1);
-        tasks.unshift(task);
+        taskCount_.as((prev) => prev + 1);
+        tasks_.unshift(task);
         return;
       }
       matched.assign(task);
@@ -199,13 +226,26 @@ export const DownloadTaskViewModel = defineModel((props) => {
 
     async init() {
       methods.connect();
-      const r = await listCore.init();
+      const r = await list$.init();
       if (r.error) return;
-      const taskList = listCore.response.dataSource;
-      tasks.as(taskList);
-      taskCount.as(listCore.response.total);
+      const tasks = list$.response.dataSource || [];
+      tasks_.as([]);
+      tasks_.push(...tasks);
+      taskCount_.as(list$.response.total);
+      ui.waterfall$.methods.cleanColumns();
+      ui.waterfall$.methods.appendItems(tasks);
     },
   };
 
-  return { state, methods, ui, services };
+  list$.onDataSourceAdded((tasks) => {
+    tasks_.push(...tasks);
+    ui.waterfall$.methods.appendItems(tasks);
+  });
+
+  return {
+    state,
+    methods,
+    ui,
+    services,
+  };
 });
