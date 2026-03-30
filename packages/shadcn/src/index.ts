@@ -18,6 +18,7 @@ import { Popover } from "./modules/popover";
 import { Popconfirm } from "./modules/popconfirm";
 import { Toast } from "./modules/toast";
 import { Toggle } from "./modules/toggle";
+import { Switch } from "./modules/switch";
 import { Slider } from "./modules/slider";
 import { Progress } from "./modules/progress";
 import { Dialog } from "./modules/dialog";
@@ -73,6 +74,7 @@ import {
 } from "./modules/resizable-panels";
 import { Waterfall } from "./modules/waterfall";
 import { HistoryPanel } from "./modules/history-panel";
+import { LLMProviderForm } from "./modules/llm-provider-form";
 
 import "./index.css";
 import "./styles/globals.css";
@@ -106,6 +108,7 @@ export {
   Popconfirm,
   Toast,
   Toggle,
+  Switch,
   Slider,
   Progress,
   Dialog,
@@ -157,4 +160,5 @@ export {
   ResizableHandle,
   Waterfall,
   HistoryPanel,
+  LLMProviderForm,
 };

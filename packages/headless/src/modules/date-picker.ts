@@ -126,6 +126,30 @@ export function Icon(props: ViewProps, children: ViewChildren) {
   return View(props, children);
 }
 
+export function Clear(
+  props: ViewProps & { store: DatePickerCore },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
+  return View(
+    {
+      ...rest,
+      onPointerDown(e: PointerEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+      },
+      onClick(e: MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.clear();
+        store.$presence.hide();
+      },
+    },
+    children,
+  );
+}
+
 export function Portal(
   props: ViewProps & {
     store: DatePickerCore;

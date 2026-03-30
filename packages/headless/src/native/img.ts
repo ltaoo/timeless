@@ -22,7 +22,7 @@ export interface ImgProps extends Omit<ViewProps, "type" | "as"> {
   onMounted?: ($elm: HTMLImageElement) => void;
 }
 
-export function Img(props: ImgProps = {}) {
+export function NativeImg(props: ImgProps = {}) {
   const {
     style,
     class: cls,

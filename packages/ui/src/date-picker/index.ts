@@ -6,8 +6,8 @@ import { ButtonCore } from "@/button";
 import { PopperCore } from "@/popper";
 import { PresenceCore } from "@/presence";
 
-export function DatePickerCore(props: { today: Date }) {
-  const { today } = props;
+export function DatePickerCore(props: { today: Date; allowClear?: boolean }) {
+  const { today, allowClear = false } = props;
 
   const presence$ = new PresenceCore({});
   const popper$ = new PopperCore({
@@ -21,6 +21,7 @@ export function DatePickerCore(props: { today: Date }) {
   const btn$ = new ButtonCore({});
   calendar$.onChange(() => {
     bus.emit(Events.Change, _state.value);
+    bus.emit(Events.StateChange, { ..._state });
     // 当日历内容变化时（月份切换），重新计算 popper 位置
     if (popper$.state.isPlaced) {
       popper$.place();
@@ -36,6 +37,9 @@ export function DatePickerCore(props: { today: Date }) {
     },
     get value() {
       return calendar$.value;
+    },
+    get allowClear() {
+      return allowClear;
     },
   };
   enum Events {
@@ -61,6 +65,9 @@ export function DatePickerCore(props: { today: Date }) {
     setValue(v: Date) {
       // console.log("[DOMAIN]ui/date-picker - setValue");
       calendar$.selectDay(v);
+    },
+    clear() {
+      calendar$.clear();
     },
     onChange(handler: Handler<TheTypesOfEvents[Events.Change]>) {
       return bus.on(Events.Change, handler);

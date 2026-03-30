@@ -194,6 +194,30 @@ export function Icon(
   );
 }
 
+export function Clear(
+  props: ViewProps & { store: SelectCore<any> },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
+  return View(
+    {
+      ...rest,
+      onPointerDown(e: PointerEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+      },
+      onClick(e: MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.clear();
+        store.hide();
+      },
+    },
+    children,
+  );
+}
+
 export function Portal(
   props: ViewProps & {
     store: SelectCore<any>;
@@ -298,8 +322,14 @@ export function Content(
                   }
                 },
                 onMounted($elm: HTMLElement) {
-                  // 自动聚焦以接收键盘事件
                   setTimeout(() => {
+                    if (store.state.search) {
+                      const input = $elm.querySelector("input");
+                      if (input instanceof HTMLInputElement) {
+                        input.focus();
+                        return;
+                      }
+                    }
                     $elm.focus();
                   }, 0);
                   if (rest.onMounted) {
@@ -372,22 +402,32 @@ export function Search(
 }
 
 export function Item(
-  props: ViewProps & { store: SelectCore<any>; value: any },
+  props: ViewProps & { store: SelectCore<any>; value: any; disabled?: boolean },
   children: ViewChildren,
 ) {
-  const { store, value, ...rest } = props;
+  const { store, value, disabled = false, ...rest } = props as any;
 
   return View(
     {
       ...rest,
+      "data-disabled": disabled ? "" : undefined,
       onClick() {
+        if (disabled) {
+          return;
+        }
         store.select(value);
         store.hide();
       },
       onMouseEnter() {
+        if (disabled) {
+          return;
+        }
         store.focusOption(value);
       },
       onMouseLeave() {
+        if (disabled) {
+          return;
+        }
         store.blurOption(value);
       },
     },

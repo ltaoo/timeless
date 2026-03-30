@@ -114,7 +114,7 @@ export function CalendarCore(props: CalendarCoreProps) {
     value: today,
     time: today.valueOf(),
   };
-  let _selectedDay = {
+  let _selectedDay: { text: string; value: Date; time: number } | null = {
     text: today.toLocaleDateString() + today.toLocaleTimeString(),
     value: today,
     time: today.valueOf(),
@@ -159,6 +159,10 @@ export function CalendarCore(props: CalendarCoreProps) {
     state: _state,
     get value() {
       return _selectedDay ? _selectedDay.value : null;
+    },
+    clear() {
+      _selectedDay = null;
+      bus.emit(Events.Change, { ..._state });
     },
     selectDay(day: Date) {
       //       console.log("[DOMAIN]ui/calendar - selectDay");

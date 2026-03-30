@@ -30,6 +30,7 @@ type CascaderProps<T> = {
   id?: string;
   defaultValue?: T[];
   placeholder?: string;
+  allowClear?: boolean;
   options?: CascaderOption<T>[];
   onChange?: (value: T[] | null, selectedOptions: CascaderOption<T>[]) => void;
   /** 是否支持搜索过滤 */
@@ -61,6 +62,7 @@ type CascaderState<T> = {
   placeholder: string;
   /** 禁用 */
   disabled: boolean;
+  allowClear: boolean;
   /** 显示文本 */
   displayText: string;
   /** 是否启用搜索 */
@@ -85,6 +87,7 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   value: T[] | null = null;
   disabled: boolean = false;
   open: boolean = false;
+  allowClear: boolean = false;
   expandTrigger: "click" | "hover" = "click";
   showFullPath: boolean = true;
   pathSeparator: string = " / ";
@@ -206,6 +209,7 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       open: this.open,
       disabled: this.disabled,
       placeholder: this.placeholder,
+      allowClear: this.allowClear,
       displayText: this.displayText,
       search: this.search,
       searchKeyword: this.searchKeyword,
@@ -221,6 +225,7 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       id,
       defaultValue,
       placeholder = "请选择",
+      allowClear = false,
       options = [],
       onChange,
       search = false,
@@ -244,6 +249,7 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.value = defaultValue ?? null;
     this.defaultValue = defaultValue ?? null;
     this.placeholder = placeholder;
+    this.allowClear = allowClear;
 
     // 如果有默认值，展开到默认值路径
     if (defaultValue && defaultValue.length > 0) {

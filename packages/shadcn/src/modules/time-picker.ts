@@ -1,4 +1,4 @@
-import { cn, combine, computed, refobj } from "@timeless/reactive";
+import { cn, combine, computed, ref, refobj } from "@timeless/reactive";
 import {
   TimePickerPrimitive,
   For,
@@ -9,7 +9,7 @@ import {
   ScrollViewPrimitive,
 } from "@timeless/headless";
 import { ScrollViewCore, TimePickerCore } from "@timeless/ui";
-import { ClockOutlined } from "@timeless/icons";
+import { CircleXOutlined, ClockOutlined } from "@timeless/icons";
 
 export function TimePicker(
   props: ViewProps & {
@@ -28,6 +28,14 @@ export function TimePicker(
   store.$presence.onStateChange((v) => {
     presence_.as(v);
   });
+
+  const allowClear = computed(state_, (d) => d.allowClear || false);
+  const hasValue = computed(state_, (d) => d.value != null);
+  const hovering = ref(false);
+  const showClear = combine(
+    { hovering, allowClear, hasValue },
+    (t) => t.hovering && t.allowClear && t.hasValue,
+  );
 
   const empty_time_text = store.showSeconds ? "--:--:--" : "--:--";
   const item_height = 32;
@@ -76,6 +84,12 @@ export function TimePicker(
             : "dark:hover:bg-input/50";
           return `${baseClass} ${openClass}`;
         }),
+        onMouseEnter() {
+          hovering.as(true);
+        },
+        onMouseLeave() {
+          hovering.as(false);
+        },
       },
       [
         TimePickerPrimitive.Value({
@@ -87,9 +101,27 @@ export function TimePicker(
               : "text-muted-foreground";
           }),
         }),
-        TimePickerPrimitive.Icon({ class: "size-4 text-muted-foreground" }, [
-          ClockOutlined({}),
-        ]),
+        Show(
+          {
+            when: showClear,
+            fallback: [
+              TimePickerPrimitive.Icon(
+                { class: "size-4 text-muted-foreground" },
+                [ClockOutlined({})],
+              ),
+            ],
+          },
+          [
+            TimePickerPrimitive.Clear(
+              {
+                store,
+                class:
+                  "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
+              },
+              [CircleXOutlined({ class: "size-4" })],
+            ),
+          ],
+        ),
       ],
     ),
     TimePickerPrimitive.Content(

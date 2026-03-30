@@ -1,12 +1,17 @@
-import { computed, refobj } from "@timeless/reactive";
+import { combine, computed, ref, refobj } from "@timeless/reactive";
 import {
   CascaderPrimitive,
   For,
+  Show,
   View,
   ViewProps,
 } from "@timeless/headless";
 import { CascaderCore, CascaderOption } from "@timeless/ui";
-import { ChevronDownOutlined, ChevronRightOutlined } from "@timeless/icons";
+import {
+  ChevronDownOutlined,
+  ChevronRightOutlined,
+  CircleXOutlined,
+} from "@timeless/icons";
 
 export function Cascader(
   props: ViewProps & { store: CascaderCore<any>; id?: string },
@@ -17,6 +22,14 @@ export function Cascader(
   store.onStateChange((v) => {
     state_.as(v);
   });
+
+  const allowClear = computed(state_, (d) => d.allowClear);
+  const hasValue = computed(state_, (d) => d.value != null && d.value.length > 0);
+  const hovering = ref(false);
+  const showClear = combine(
+    { hovering, allowClear, hasValue },
+    (t) => t.hovering && t.allowClear && t.hasValue,
+  );
 
   return CascaderPrimitive.Root({ store }, [
     CascaderPrimitive.Trigger(
@@ -31,6 +44,12 @@ export function Cascader(
             : "dark:hover:bg-input/50";
           return `${baseClass} ${openClass}`;
         }),
+        onMouseEnter() {
+          hovering.as(true);
+        },
+        onMouseLeave() {
+          hovering.as(false);
+        },
         onMounted(el: HTMLElement) {
           el.addEventListener("mousedown", (e) => {
             e.stopPropagation();
@@ -46,9 +65,26 @@ export function Cascader(
               : "text-muted-foreground";
           }),
         }),
-        CascaderPrimitive.Icon(
-          { class: "size-4 text-muted-foreground" },
-          [ChevronDownOutlined({})],
+        Show(
+          {
+            when: showClear,
+            fallback: [
+              CascaderPrimitive.Icon(
+                { class: "size-4 text-muted-foreground" },
+                [ChevronDownOutlined({})],
+              ),
+            ],
+          },
+          [
+            CascaderPrimitive.Clear(
+              {
+                store,
+                class:
+                  "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
+              },
+              [CircleXOutlined({ class: "size-4" })],
+            ),
+          ],
         ),
       ],
     ),
@@ -61,7 +97,7 @@ export function Cascader(
         },
         store,
         class:
-          "cn-menu-target cn-menu-translucent cascader__content relative z-50 flex overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
+          "cn-menu-target cn-menu-translucent cascader__content relative z-50 flex flex-col overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
         style: computed(state_, () => {
           const width = store.reference?.width || 0;
           return width > 0 ? `min-width: ${width}px;` : "";

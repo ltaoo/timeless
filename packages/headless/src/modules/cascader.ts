@@ -145,6 +145,30 @@ export function Icon(props: ViewProps, children: ViewChildren) {
   return View(props, children);
 }
 
+export function Clear(
+  props: ViewProps & { store: CascaderCore<any> },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
+  return View(
+    {
+      ...rest,
+      onPointerDown(e: PointerEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+      },
+      onClick(e: MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.clear();
+        store.hide();
+      },
+    },
+    children,
+  );
+}
+
 export function Content(
   props: ViewProps & {
     store: CascaderCore<any>;

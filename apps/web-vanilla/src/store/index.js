@@ -36,6 +36,11 @@ const routes_configure_for_types = /** @type {const} */ ({
             pathname: "/home/index/validate",
             component: Timeless.lazy("@/pages/home/index.validate.js"),
           },
+          llm: {
+            title: "LLM",
+            pathname: "/home/index/llm",
+            component: Timeless.lazy("@/pages/home/index.llm.js"),
+          },
           data: {
             title: "数据展示组件",
             pathname: "/home/index/data",

@@ -11,6 +11,7 @@ export type TimeValue = {
 
 export function TimePickerCore(props: {
   defaultValue?: TimeValue;
+  allowClear?: boolean;
   showSeconds?: boolean;
   hourStep?: number;
   minuteStep?: number;
@@ -19,6 +20,7 @@ export function TimePickerCore(props: {
 }) {
   const {
     defaultValue,
+    allowClear = false,
     showSeconds = false,
     hourStep = 1,
     minuteStep = 1,
@@ -68,6 +70,9 @@ export function TimePickerCore(props: {
     },
     get use12Hours() {
       return use12Hours;
+    },
+    get allowClear() {
+      return allowClear;
     },
   };
 

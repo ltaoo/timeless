@@ -62,7 +62,7 @@ export function CardContent(props: ViewProps, children?: ViewChildren) {
   return HC(
     {
       ...rest,
-      class: cn(["p-6 pt-0", cls]),
+      class: cn(["p-6", cls]),
     },
     children,
   );

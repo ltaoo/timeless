@@ -14,7 +14,9 @@ import { SelectValueCore } from "./value";
 import { SelectTriggerCore } from "./trigger";
 import { SelectWrapCore } from "./wrap";
 import { SelectItemCore } from "./item";
+import { SelectGroupCore } from "./group";
 import { clamp } from "./utils";
+import { InputCore } from "@/input";
 
 const CONTENT_MARGIN = 10;
 enum Events {
@@ -31,13 +33,33 @@ type TheTypesOfEvents<T> = {
   [Events.Blur]: void;
   [Events.Placed]: void;
 };
+
+export type SelectOption<T> = { value: T; label: string; disabled?: boolean };
+export type SelectEntry<T> = SelectOption<T> | SelectGroupCore<T>;
+type SelectOptionState<T> = {
+  value: T;
+  label: string;
+  selected: boolean;
+  focused: boolean;
+  disabled: boolean;
+  key?: any;
+};
+type SelectGroupState<T> = {
+  type: "group";
+  label?: unknown;
+  key: any;
+  items: SelectEntryState<T>[];
+};
+type SelectEntryState<T> = SelectOptionState<T> | SelectGroupState<T>;
+
 type SelectProps<T> = {
   id?: string;
   defaultValue: T | null;
   disabled?: boolean;
   placeholder?: string;
+  allowClear?: boolean;
   // options: SelectItemCore<T>[];
-  options?: { value: T; label: string }[];
+  options?: SelectEntry<T>[];
   onChange?: (v: T | null) => void;
   /** 是否支持搜索过滤 */
   search?: boolean;
@@ -45,11 +67,17 @@ type SelectProps<T> = {
   searchPlaceholder?: string;
 };
 type SelectState<T> = {
-  options: { value: T; label: string; selected: boolean; focused: boolean }[];
+  options: SelectOptionState<T>[];
+  entries: SelectEntryState<T>[];
   /** 过滤后的选项列表 */
-  filteredOptions: { value: T; label: string; selected: boolean; focused: boolean }[];
+  // filteredOptions: {
+  //   value: T;
+  //   label: string;
+  //   selected: boolean;
+  //   focused: boolean;
+  // }[];
   value: T | null;
-  value2: { value: T; label: string } | null;
+  value2: SelectOption<T> | null;
   /** 菜单是否展开 */
   open: boolean;
   /** 加载中 */
@@ -67,11 +95,61 @@ type SelectState<T> = {
   exit: boolean;
   /** 是否启用搜索 */
   search: boolean;
+  allowClear: boolean;
   /** 搜索关键字 */
   searchKeyword: string;
   /** 搜索框占位符 */
   searchPlaceholder: string;
 };
+
+function flattenEntries<T>(entries: SelectEntry<T>[]): SelectOption<T>[] {
+  const result: SelectOption<T>[] = [];
+  for (let i = 0; i < entries.length; i += 1) {
+    const entry = entries[i];
+    if (entry instanceof SelectGroupCore) {
+      result.push(...flattenEntries(entry.items));
+      continue;
+    }
+    result.push(entry);
+  }
+  return result;
+}
+
+function buildEntriesState<T>(
+  entries: SelectEntry<T>[],
+  optionByValue: Map<any, SelectOptionState<T>>,
+  prefix = "",
+): SelectEntryState<T>[] {
+  const result: SelectEntryState<T>[] = [];
+  for (let i = 0; i < entries.length; i += 1) {
+    const entry = entries[i];
+    if (entry instanceof SelectGroupCore) {
+      const groupKey = `${prefix}g:${entry.label ?? ""}:${i}`;
+      result.push({
+        type: "group",
+        label: entry.label,
+        key: groupKey,
+        items: buildEntriesState(entry.items, optionByValue, `${groupKey}/`),
+      });
+      continue;
+    }
+    const optionKey = `${prefix}o:${String(entry.value)}`;
+    const matched = optionByValue.get(entry.value);
+    result.push(
+      matched
+        ? { ...matched, key: optionKey }
+        : {
+            value: entry.value,
+            label: entry.label,
+            selected: false,
+            focused: false,
+            disabled: !!(entry as any).disabled,
+            key: optionKey,
+          },
+    );
+  }
+  return result;
+}
 
 export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   shape = "select" as const;
@@ -81,25 +159,27 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   // options: { text: string; store: SelectItemCore<T> }[] = [];
   id = null;
   placeholder: string;
-  options: { value: T; label: string; selected: boolean; focused: boolean }[] =
-    [];
+  entries: SelectEntry<T>[] = [];
+  options: SelectOptionState<T>[] = [];
   defaultValue: T | null = null;
   value: T | null = null;
   disabled: boolean = false;
   open: boolean = false;
+  allowClear: boolean = false;
   /** 加载中 */
   loading: boolean = false;
   /** 是否启用搜索 */
   search: boolean = false;
-  /** 搜索关键字 */
-  searchKeyword: string = "";
-  /** 搜索框占位符 */
-  searchPlaceholder: string = "搜索...";
+  // /** 搜索关键字 */
+  // searchKeyword: string = "";
+  // /** 搜索框占位符 */
+  // searchPlaceholder: string = "搜索...";
 
   popper: PopperCore;
   presence = new PresenceCore();
   // collection: CollectionCore;
   layer: DismissableLayerCore;
+  input = new InputCore({ defaultValue: "", placeholder: "搜索" });
 
   position: "popper" | "item-aligned" = "popper";
 
@@ -124,21 +204,32 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
   _findFirstValidItem = false;
 
-  /** 获取过滤后的选项 */
-  get filteredOptions() {
-    if (!this.search || !this.searchKeyword) {
-      return this.options;
-    }
-    const keyword = this.searchKeyword.toLowerCase();
-    return this.options.filter((opt) =>
-      opt.label.toLowerCase().includes(keyword)
-    );
+  private _isDisabledValue(value: T) {
+    const matched = this.options.find((o) => o.value === value);
+    return Boolean(matched?.disabled);
   }
 
+  /** 获取过滤后的选项 */
+  // get filteredOptions() {
+  //   if (!this.search || !this.searchKeyword) {
+  //     return this.options;
+  //   }
+  //   const keyword = this.searchKeyword.toLowerCase();
+  //   return this.options.filter((opt) =>
+  //     opt.label.toLowerCase().includes(keyword),
+  //   );
+  // }
+
   get state(): SelectState<T> {
+    const optionByValue = new Map<any, SelectOptionState<T>>();
+    for (let i = 0; i < this.options.length; i += 1) {
+      const opt = this.options[i];
+      optionByValue.set(opt.value, opt);
+    }
     return {
       options: this.options,
-      filteredOptions: this.filteredOptions,
+      entries: buildEntriesState(this.entries, optionByValue),
+      // filteredOptions: this.filteredOptions,
       value: this.value,
       value2: this.options.find((opt) => opt.value === this.value) ?? null,
       open: this.open,
@@ -152,8 +243,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       visible: this.presence.state.visible,
       exit: this.presence.state.exit,
       search: this.search,
-      searchKeyword: this.searchKeyword,
-      searchPlaceholder: this.searchPlaceholder,
+      allowClear: this.allowClear,
+      searchKeyword: this.input.value,
+      searchPlaceholder: this.input.placeholder,
     };
   }
 
@@ -165,6 +257,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       defaultValue,
       disabled = false,
       placeholder = "点击选择",
+      allowClear = false,
       options = [],
       onChange,
       search = false,
@@ -172,19 +265,23 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     } = props;
     // console.log("[DOMAIN]ui/select/index - constructor", defaultValue);
     this.search = search;
-    this.searchPlaceholder = searchPlaceholder;
-    this.options = options.map((opt, i) => {
+    this.input.setPlaceholder(searchPlaceholder);
+    this.entries = options;
+    const flatOptions = flattenEntries(options);
+    this.options = flatOptions.map((opt, i) => {
       return {
         label: opt.label,
         value: opt.value,
         selected: opt.value === defaultValue,
         focused: i === 0,
+        disabled: !!opt.disabled,
       };
     });
     if (id !== undefined) {
       this.id = id;
     }
     this.disabled = disabled;
+    this.allowClear = allowClear;
     this.value = defaultValue;
     this.defaultValue = defaultValue;
     this.placeholder = placeholder;
@@ -256,6 +353,13 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     //   return;
     // }
     if (this.value !== null) {
+      if (this._isDisabledValue(this.value)) {
+        this.presence.show();
+        this.popper.place();
+        this.open = true;
+        this.emit(Events.StateChange, { ...this.state });
+        return;
+      }
       const focused = this.options.find((opt) => opt.focused);
       if (!focused || focused.value !== this.value) {
         this.options = this.options.map((opt) => {
@@ -264,6 +368,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
             value: opt.value,
             selected: opt.selected,
             focused: opt.value === this.value,
+            disabled: opt.disabled,
           };
         });
       }
@@ -283,7 +388,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     }
     this.open = false;
     // 关闭时清空搜索关键字
-    this.searchKeyword = "";
+    this.input.setValue("");
     this.emit(Events.StateChange, { ...this.state });
   }
   addNativeOption() {}
@@ -313,6 +418,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   // }
   /** 选择 item */
   select(value: T) {
+    if (this._isDisabledValue(value)) {
+      return;
+    }
     // if (item.state.selected) {
     //   this.hide();
     //   return;
@@ -328,6 +436,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         value: opt.value,
         selected: opt.value === value,
         focused: opt.focused,
+        disabled: opt.disabled,
       };
     });
     this.emit(Events.Change, value);
@@ -341,12 +450,15 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.emit(Events.Blur);
   }
   setOptions(options: NonNullable<SelectProps<T>["options"]>) {
-    this.options = options.map((opt) => {
+    this.entries = options;
+    const flatOptions = flattenEntries(options);
+    this.options = flatOptions.map((opt) => {
       return {
         label: opt.label,
         value: opt.value,
         selected: opt.value === this.value,
         focused: false,
+        disabled: !!opt.disabled,
       };
     });
     // console.log("[DOMAIN]ui/select - setOptions", this.unique_id, this.value, options);
@@ -380,6 +492,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         value: opt.value,
         selected: opt.value === this.value,
         focused: opt.focused,
+        disabled: opt.disabled,
       };
     });
     this.emit(Events.Change, v);
@@ -400,21 +513,24 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   }
   /** 设置搜索关键字 */
   setSearchKeyword(keyword: string) {
-    if (this.searchKeyword === keyword) {
+    if (this.input.value === keyword) {
       return;
     }
-    this.searchKeyword = keyword;
+    this.input.setValue(keyword);
     this.emit(Events.StateChange, { ...this.state });
   }
   /** 清空搜索关键字 */
   clearSearch() {
-    if (!this.searchKeyword) {
+    if (this.input.value === "") {
       return;
     }
-    this.searchKeyword = "";
+    this.input.setValue("");
     this.emit(Events.StateChange, { ...this.state });
   }
   focusOption(value: T) {
+    if (this._isDisabledValue(value)) {
+      return;
+    }
     // 检查是否需要更新
     const needsUpdate = this.options.some(
       (opt) =>
@@ -430,6 +546,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         value: opt.value,
         selected: opt.selected,
         focused: opt.value === value,
+        disabled: opt.disabled,
       };
     });
     this.emit(Events.StateChange, { ...this.state });
@@ -448,49 +565,66 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         value: opt.value,
         selected: opt.selected,
         focused: opt.value === value ? false : opt.focused,
+        disabled: opt.disabled,
       };
     });
     this.emit(Events.StateChange, { ...this.state });
   }
   /** 获取当前焦点选项的索引 */
   getFocusedIndex(): number {
-    const options = this.filteredOptions;
+    const options = this.options;
     return options.findIndex((opt) => opt.focused);
   }
   /** 聚焦下一个选项 */
   focusNextOption() {
-    const options = this.filteredOptions;
+    const options = this.options;
     if (options.length === 0) return;
 
     const currentIndex = this.getFocusedIndex();
-    const nextIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
-    const nextOption = options[nextIndex];
-    if (nextOption) {
-      this.focusOption(nextOption.value);
+    for (let i = 0; i < options.length; i += 1) {
+      const idx = currentIndex < 0
+        ? i
+        : (currentIndex + 1 + i) % options.length;
+      const nextOption = options[idx];
+      if (nextOption && !nextOption.disabled) {
+        this.focusOption(nextOption.value);
+        break;
+      }
     }
   }
   /** 聚焦上一个选项 */
   focusPrevOption() {
-    const options = this.filteredOptions;
+    const options = this.options;
     if (options.length === 0) return;
 
     const currentIndex = this.getFocusedIndex();
-    const prevIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
-    const prevOption = options[prevIndex];
-    if (prevOption) {
-      this.focusOption(prevOption.value);
+    for (let i = 0; i < options.length; i += 1) {
+      const idx = currentIndex < 0
+        ? options.length - 1 - i
+        : (currentIndex - 1 - i + options.length * 10) % options.length;
+      const prevOption = options[idx];
+      if (prevOption && !prevOption.disabled) {
+        this.focusOption(prevOption.value);
+        break;
+      }
     }
   }
   /** 选择当前焦点的选项 */
   selectFocusedOption() {
-    const options = this.filteredOptions;
+    const options = this.options;
     const focusedOption = options.find((opt) => opt.focused);
     if (focusedOption) {
+      if (focusedOption.disabled) {
+        return;
+      }
       this.select(focusedOption.value);
     }
   }
   setPosition(rect) {
     this.reference = rect;
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  refresh() {
     this.emit(Events.StateChange, { ...this.state });
   }
 
@@ -607,4 +741,5 @@ export class SelectInListCore<K extends string, T> extends BaseDomain<
   }
 }
 
+export { SelectGroupCore };
 export { clamp } from "./utils";

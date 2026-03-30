@@ -1,10 +1,11 @@
-import { computed, refobj } from "@timeless/reactive";
-import { DatePickerPrimitive, For, View, ViewProps } from "@timeless/headless";
+import { combine, computed, ref, refobj } from "@timeless/reactive";
+import { DatePickerPrimitive, For, Show, View, ViewProps } from "@timeless/headless";
 import { DatePickerCore } from "@timeless/ui";
 import {
   CalendarOutlined,
   ChevronLeftOutlined,
   ChevronRightOutlined,
+  CircleXOutlined,
 } from "@timeless/icons";
 
 export function DatePicker(
@@ -29,6 +30,14 @@ export function DatePicker(
     presence_.as(v);
   });
 
+  const allowClear = computed(state_, (d) => d.allowClear || false);
+  const hasValue = computed(state_, (d) => d.value != null);
+  const hovering = ref(false);
+  const showClear = combine(
+    { hovering, allowClear, hasValue },
+    (t) => t.hovering && t.allowClear && t.hasValue,
+  );
+
   return DatePickerPrimitive.Root({ store }, [
     DatePickerPrimitive.Trigger(
       {
@@ -42,6 +51,12 @@ export function DatePicker(
             : "dark:hover:bg-input/50";
           return `${baseClass} ${openClass}`;
         }),
+        onMouseEnter() {
+          hovering.as(true);
+        },
+        onMouseLeave() {
+          hovering.as(false);
+        },
       },
       [
         DatePickerPrimitive.Value({
@@ -53,9 +68,26 @@ export function DatePicker(
               : "text-muted-foreground";
           }),
         }),
-        DatePickerPrimitive.Icon(
-          { class: "size-4 text-muted-foreground" },
-          [CalendarOutlined({})],
+        Show(
+          {
+            when: showClear,
+            fallback: [
+              DatePickerPrimitive.Icon(
+                { class: "size-4 text-muted-foreground" },
+                [CalendarOutlined({})],
+              ),
+            ],
+          },
+          [
+            DatePickerPrimitive.Clear(
+              {
+                store,
+                class:
+                  "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
+              },
+              [CircleXOutlined({ class: "size-4" })],
+            ),
+          ],
         ),
       ],
     ),

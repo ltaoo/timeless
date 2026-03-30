@@ -367,7 +367,7 @@ declare module "packages/headless/src/native/img" {
         onError?(e: Event): void;
         onMounted?: ($elm: HTMLImageElement) => void;
     }
-    export function Img(props?: ImgProps): {
+    export function NativeImg(props?: ImgProps): {
         t: string;
         $elm: HTMLImageElement;
         render(): HTMLImageElement;
@@ -3836,6 +3836,40 @@ declare module "packages/ui/src/select/item" {
         onBlur(handler: Handler<TheTypesOfEvents<T>[Events.Blur]>): () => void;
     }
 }
+declare module "packages/ui/src/select/group" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    import type { SelectEntry } from "packages/ui/src/select/index";
+    enum Events {
+        Change = 0
+    }
+    type TheTypesOfEvents<T> = {
+        [Events.Change]: SelectGroupCoreState<T>;
+    };
+    type SelectGroupCoreProps<T> = {
+        label?: unknown;
+        items: SelectEntry<T>[];
+    };
+    type SelectGroupCoreState<T> = {
+        label?: unknown;
+        items: SelectEntry<T>[];
+    };
+    export class SelectGroupCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
+        _name: string;
+        debug: boolean;
+        readonly type: "group";
+        label?: unknown;
+        items: SelectEntry<T>[];
+        get state(): SelectGroupCoreState<T>;
+        constructor(options: Partial<{
+            _name: string;
+        }> & SelectGroupCoreProps<T>);
+        setItems(items: SelectEntry<T>[]): void;
+        reset(): void;
+        unmount(): void;
+        onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
+        get [Symbol.toStringTag](): string;
+    }
+}
 declare module "packages/ui/src/select/utils" {
     export function clamp(value: number, [min, max]: [number, number]): number;
 }
@@ -3850,6 +3884,7 @@ declare module "packages/ui/src/select/index" {
     import { SelectTriggerCore } from "packages/ui/src/select/trigger";
     import { SelectWrapCore } from "packages/ui/src/select/wrap";
     import { SelectItemCore } from "packages/ui/src/select/item";
+    import { SelectGroupCore } from "packages/ui/src/select/group";
     enum Events {
         StateChange = 0,
         Change = 1,
@@ -3864,15 +3899,34 @@ declare module "packages/ui/src/select/index" {
         [Events.Blur]: void;
         [Events.Placed]: void;
     };
+    export type SelectOption<T> = {
+        value: T;
+        label: string;
+        disabled?: boolean;
+    };
+    export type SelectEntry<T> = SelectOption<T> | SelectGroupCore<T>;
+    type SelectOptionState<T> = {
+        value: T;
+        label: string;
+        selected: boolean;
+        focused: boolean;
+        disabled: boolean;
+        key?: any;
+    };
+    type SelectGroupState<T> = {
+        type: "group";
+        label?: string;
+        key: any;
+        items: SelectEntryState<T>[];
+    };
+    type SelectEntryState<T> = SelectOptionState<T> | SelectGroupState<T>;
     type SelectProps<T> = {
         id?: string;
         defaultValue: T | null;
         disabled?: boolean;
         placeholder?: string;
-        options?: {
-            value: T;
-            label: string;
-        }[];
+        allowClear?: boolean;
+        options?: SelectEntry<T>[];
         onChange?: (v: T | null) => void;
         /** 是否支持搜索过滤 */
         search?: boolean;
@@ -3880,24 +3934,11 @@ declare module "packages/ui/src/select/index" {
         searchPlaceholder?: string;
     };
     type SelectState<T> = {
-        options: {
-            value: T;
-            label: string;
-            selected: boolean;
-            focused: boolean;
-        }[];
+        options: SelectOptionState<T>[];
+        entries: SelectEntryState<T>[];
         /** 过滤后的选项列表 */
-        filteredOptions: {
-            value: T;
-            label: string;
-            selected: boolean;
-            focused: boolean;
-        }[];
         value: T | null;
-        value2: {
-            value: T;
-            label: string;
-        } | null;
+        value2: SelectOption<T> | null;
         /** 菜单是否展开 */
         open: boolean;
         /** 加载中 */
@@ -3915,6 +3956,7 @@ declare module "packages/ui/src/select/index" {
         exit: boolean;
         /** 是否启用搜索 */
         search: boolean;
+        allowClear: boolean;
         /** 搜索关键字 */
         searchKeyword: string;
         /** 搜索框占位符 */
@@ -3926,27 +3968,21 @@ declare module "packages/ui/src/select/index" {
         debug: boolean;
         id: any;
         placeholder: string;
-        options: {
-            value: T;
-            label: string;
-            selected: boolean;
-            focused: boolean;
-        }[];
+        entries: SelectEntry<T>[];
+        options: SelectOptionState<T>[];
         defaultValue: T | null;
         value: T | null;
         disabled: boolean;
         open: boolean;
+        allowClear: boolean;
         /** 加载中 */
         loading: boolean;
         /** 是否启用搜索 */
         search: boolean;
-        /** 搜索关键字 */
-        searchKeyword: string;
-        /** 搜索框占位符 */
-        searchPlaceholder: string;
         popper: PopperCore;
         presence: any;
         layer: DismissableLayerCore;
+        input: any;
         position: "popper" | "item-aligned";
         /** 参考点位置 */
         triggerPos: {
@@ -3965,22 +4001,11 @@ declare module "packages/ui/src/select/index" {
         selectedItem: SelectItemCore<T> | null;
         _findFirstValidItem: boolean;
         /** 获取过滤后的选项 */
-        get filteredOptions(): {
-            value: T;
-            label: string;
-            selected: boolean;
-            focused: boolean;
-        }[];
         get state(): SelectState<T>;
         constructor(props: Partial<{
             _name: string;
         }> & SelectProps<T>);
-        mapViewModelWithIndex(index: number): {
-            value: T;
-            label: string;
-            selected: boolean;
-            focused: boolean;
-        };
+        mapViewModelWithIndex(index: number): SelectOptionState<T>;
         setTriggerPointerDownPos(pos: {
             x: number;
             y: number;
@@ -4019,6 +4044,7 @@ declare module "packages/ui/src/select/index" {
         /** 选择当前焦点的选项 */
         selectFocusedOption(): void;
         setPosition(rect: any): void;
+        refresh(): void;
         onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
         onValueChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
         onChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
@@ -4052,6 +4078,7 @@ declare module "packages/ui/src/select/index" {
         onChange(handler: Handler<TheTypesInListOfEvents<K, T>[Events.Change]>): void;
         onStateChange(handler: Handler<TheTypesInListOfEvents<K, T>[Events.StateChange]>): void;
     }
+    export { SelectGroupCore };
     export { clamp } from "packages/ui/src/select/utils";
 }
 declare module "packages/ui/src/cascader/index" {
@@ -4081,6 +4108,7 @@ declare module "packages/ui/src/cascader/index" {
         id?: string;
         defaultValue?: T[];
         placeholder?: string;
+        allowClear?: boolean;
         options?: CascaderOption<T>[];
         onChange?: (value: T[] | null, selectedOptions: CascaderOption<T>[]) => void;
         /** 是否支持搜索过滤 */
@@ -4114,6 +4142,7 @@ declare module "packages/ui/src/cascader/index" {
         placeholder: string;
         /** 禁用 */
         disabled: boolean;
+        allowClear: boolean;
         /** 显示文本 */
         displayText: string;
         /** 是否启用搜索 */
@@ -4139,6 +4168,7 @@ declare module "packages/ui/src/cascader/index" {
         value: T[] | null;
         disabled: boolean;
         open: boolean;
+        allowClear: boolean;
         expandTrigger: "click" | "hover";
         showFullPath: boolean;
         pathSeparator: string;
@@ -5018,6 +5048,7 @@ declare module "packages/ui/src/calendar/index" {
             };
         };
         readonly value: Date;
+        clear(): void;
         selectDay(day: Date): void;
         nextMonth(): void;
         prevMonth(): void;
@@ -5974,11 +6005,13 @@ declare module "packages/ui/src/date-picker/index" {
     import { Handler } from "packages/base/src/index";
     export function DatePickerCore(props: {
         today: Date;
+        allowClear?: boolean;
     }): {
         shape: "date-picker";
         state: {
             readonly date: string;
             readonly value: any;
+            readonly allowClear: boolean;
         };
         readonly value: any;
         $presence: any;
@@ -5986,10 +6019,12 @@ declare module "packages/ui/src/date-picker/index" {
         $calendar: any;
         $btn: any;
         setValue(v: Date): void;
+        clear(): void;
         onChange(handler: Handler<any>): () => void;
         onStateChange(handler: Handler<{
             readonly date: string;
             readonly value: any;
+            readonly allowClear: boolean;
         }>): () => void;
     };
     export type DatePickerCore = ReturnType<typeof DatePickerCore>;
@@ -6699,6 +6734,7 @@ declare module "packages/ui/src/time-picker/index" {
     };
     export function TimePickerCore(props: {
         defaultValue?: TimeValue;
+        allowClear?: boolean;
         showSeconds?: boolean;
         hourStep?: number;
         minuteStep?: number;
@@ -6714,6 +6750,7 @@ declare module "packages/ui/src/time-picker/index" {
             readonly tempSecond: number;
             readonly showSeconds: boolean;
             readonly use12Hours: boolean;
+            readonly allowClear: boolean;
         };
         readonly value: TimeValue;
         $presence: any;
@@ -6741,6 +6778,7 @@ declare module "packages/ui/src/time-picker/index" {
             readonly tempSecond: number;
             readonly showSeconds: boolean;
             readonly use12Hours: boolean;
+            readonly allowClear: boolean;
         }>): () => void;
     };
     export type TimePickerCore = ReturnType<typeof TimePickerCore>;
@@ -7166,6 +7204,7 @@ declare module "packages/ui/src/index" {
     export * from "packages/ui/src/roving-focus/index";
     export * from "packages/ui/src/scroll-view/index";
     export * from "packages/ui/src/select/index";
+    export * from "packages/ui/src/select/group";
     export * from "packages/ui/src/cascader/index";
     export * from "packages/ui/src/tabs/index";
     export * from "packages/ui/src/toast/index";
@@ -8780,6 +8819,9 @@ declare module "packages/headless/src/modules/select" {
     export function Icon(props: ViewProps & {
         store?: SelectCore<any>;
     }, children: ViewChildren): any;
+    export function Clear(props: ViewProps & {
+        store: SelectCore<any>;
+    }, children: ViewChildren): any;
     export function Portal(props: ViewProps & {
         store: SelectCore<any>;
         animation?: {
@@ -8809,6 +8851,7 @@ declare module "packages/headless/src/modules/select" {
     export function Item(props: ViewProps & {
         store: SelectCore<any>;
         value: any;
+        disabled?: boolean;
     }, children: ViewChildren): any;
     export function ItemText(props: ViewProps, children: ViewChildren): any;
     export function ItemIndicator(props: ViewProps & {
@@ -8842,6 +8885,15 @@ declare module "packages/headless/src/modules/cascader" {
         onUnmounted(): void;
     };
     export function Icon(props: ViewProps, children: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Clear(props: ViewProps & {
+        store: CascaderCore<any>;
+    }, children: ViewChildren): {
         t: string;
         $elm: HTMLElement;
         render(): HTMLElement;
@@ -9144,6 +9196,15 @@ declare module "packages/headless/src/modules/date-picker" {
         onUnmounted(): void;
     };
     export function Icon(props: ViewProps, children: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Clear(props: ViewProps & {
+        store: DatePickerCore;
+    }, children: ViewChildren): {
         t: string;
         $elm: HTMLElement;
         render(): HTMLElement;
@@ -9471,6 +9532,15 @@ declare module "packages/headless/src/modules/time-picker" {
         onUnmounted(): void;
     };
     export function Icon(props: ViewProps, children: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Clear(props: ViewProps & {
+        store: TimePickerCore;
+    }, children: ViewChildren): {
         t: string;
         $elm: HTMLElement;
         render(): HTMLElement;
@@ -12405,6 +12475,20 @@ declare module "packages/shadcn/src/modules/toggle" {
         onUnmounted(): void;
     };
 }
+declare module "packages/shadcn/src/modules/switch" {
+    import { ViewProps } from "packages/headless/src/index";
+    import { SwitchCore } from "packages/ui/src/index";
+    export function Switch(props: ViewProps & {
+        store: SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
 declare module "packages/shadcn/src/modules/slider" {
     import { ViewProps } from "packages/headless/src/index";
     export function Slider(props: ViewProps & {
@@ -12947,6 +13031,65 @@ declare module "packages/shadcn/src/modules/history-panel" {
         onUnmounted(): void;
     };
 }
+declare module "packages/shadcn/src/modules/llm-provider-form" {
+    import { ViewProps } from "packages/headless/src/index";
+    export type LLMProviderFormProviderModel = {
+        id: string;
+        name: string;
+        enabled: boolean;
+        builtin: boolean;
+    };
+    export type LLMProviderFormProvider = {
+        id: string;
+        name: string;
+        logo_uri?: string;
+        placeholder?: string;
+        enabled: boolean;
+        apiProxyAddress?: string;
+        apiKey?: string;
+        models: LLMProviderFormProviderModel[];
+    };
+    export type LLMProviderFormStore = {
+        state: {
+            providers: LLMProviderFormProvider[];
+        };
+        onStateChange?: (handler: (state: LLMProviderFormStore["state"]) => void) => () => void;
+        toggleProviderEnabled?: (payload: {
+            provider_id: string;
+            enabled: boolean;
+        }) => void;
+        updateProviderApiProxyAddress?: (payload: {
+            provider_id: string;
+            apiProxyAddress: string;
+        }) => void;
+        updateProviderApiKey?: (payload: {
+            provider_id: string;
+            apiKey: string;
+        }) => void;
+        toggleModelEnabled?: (payload: {
+            provider_id: string;
+            model_id: string;
+            enabled: boolean;
+        }) => void;
+        deleteProviderModel?: (payload: {
+            provider_id: string;
+            model_id: string;
+        }) => void;
+        addPendingModel?: (payload: {
+            provider_id: string;
+            model_id?: string;
+        }) => void;
+    };
+    export function LLMProviderForm(props: ViewProps & {
+        store: LLMProviderFormStore;
+    }): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
 declare module "packages/shadcn/src/index" {
     import { Input } from "packages/shadcn/src/modules/input";
     import { NumberInput } from "packages/shadcn/src/modules/number-input";
@@ -12966,6 +13109,7 @@ declare module "packages/shadcn/src/index" {
     import { Popconfirm } from "packages/shadcn/src/modules/popconfirm";
     import { Toast } from "packages/shadcn/src/modules/toast";
     import { Toggle } from "packages/shadcn/src/modules/toggle";
+    import { Switch } from "packages/shadcn/src/modules/switch";
     import { Slider } from "packages/shadcn/src/modules/slider";
     import { Progress } from "packages/shadcn/src/modules/progress";
     import { Dialog } from "packages/shadcn/src/modules/dialog";
@@ -12994,6 +13138,7 @@ declare module "packages/shadcn/src/index" {
     import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/shadcn/src/modules/resizable-panels";
     import { Waterfall } from "packages/shadcn/src/modules/waterfall";
     import { HistoryPanel } from "packages/shadcn/src/modules/history-panel";
+    import { LLMProviderForm } from "packages/shadcn/src/modules/llm-provider-form";
     import "./index.css";
     import "./styles/globals.css";
     export * as ui from "packages/ui/src/index";
@@ -13002,7 +13147,7 @@ declare module "packages/shadcn/src/index" {
     export * from "packages/reactive/src/index";
     export * as icons from "packages/icons/src/index";
     export * as kit from "packages/kit/src/index";
-    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, };
+    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, };
 }
 
 // === Package module aliases ===
@@ -13102,12 +13247,12 @@ declare const Head1: typeof import("@timeless/shadcn").Head1;
 declare const Head2: typeof import("@timeless/shadcn").Head2;
 declare const Head3: typeof import("@timeless/shadcn").Head3;
 declare const HistoryPanel: typeof import("@timeless/shadcn").HistoryPanel;
-declare const Img: typeof import("@timeless/shadcn").Img;
 declare const Input: typeof import("@timeless/shadcn").Input;
 declare const InputPrimitive: typeof import("@timeless/shadcn").InputPrimitive;
 declare const Kbd: typeof import("@timeless/shadcn").Kbd;
 declare const KbdGroup: typeof import("@timeless/shadcn").KbdGroup;
 declare const KeepAliveSubViews: typeof import("@timeless/shadcn").KeepAliveSubViews;
+declare const LLMProviderForm: typeof import("@timeless/shadcn").LLMProviderForm;
 declare const Label: typeof import("@timeless/shadcn").Label;
 declare const LazyView: typeof import("@timeless/shadcn").LazyView;
 declare const Line: typeof import("@timeless/shadcn").Line;
@@ -13118,6 +13263,7 @@ declare const Menu: typeof import("@timeless/shadcn").Menu;
 declare const MenuPrimitive: typeof import("@timeless/shadcn").MenuPrimitive;
 declare const NativeCheckbox: typeof import("@timeless/shadcn").NativeCheckbox;
 declare const NativeFileInput: typeof import("@timeless/shadcn").NativeFileInput;
+declare const NativeImg: typeof import("@timeless/shadcn").NativeImg;
 declare const NativeInput: typeof import("@timeless/shadcn").NativeInput;
 declare const NativeLabel: typeof import("@timeless/shadcn").NativeLabel;
 declare const NativePassword: typeof import("@timeless/shadcn").NativePassword;
@@ -13176,6 +13322,7 @@ declare const StepsPrimitive: typeof import("@timeless/shadcn").StepsPrimitive;
 declare const Stop: typeof import("@timeless/shadcn").Stop;
 declare const StyleRef: typeof import("@timeless/shadcn").StyleRef;
 declare const Subscriber: typeof import("@timeless/shadcn").Subscriber;
+declare const Switch: typeof import("@timeless/shadcn").Switch;
 declare const SwitchPrimitive: typeof import("@timeless/shadcn").SwitchPrimitive;
 declare const Symbol: typeof import("@timeless/shadcn").Symbol;
 declare const Table: typeof import("@timeless/shadcn").Table;
@@ -13354,6 +13501,7 @@ declare const Result: typeof import("@timeless/ui").Result;
 declare const RovingFocusCore: typeof import("@timeless/ui").RovingFocusCore;
 declare const ScrollViewCore: typeof import("@timeless/ui").ScrollViewCore;
 declare const SelectCore: typeof import("@timeless/ui").SelectCore;
+declare const SelectGroupCore: typeof import("@timeless/ui").SelectGroupCore;
 declare const SelectInListCore: typeof import("@timeless/ui").SelectInListCore;
 declare const ShortcutModel: typeof import("@timeless/ui").ShortcutModel;
 declare const SimpleSelectCore: typeof import("@timeless/ui").SimpleSelectCore;

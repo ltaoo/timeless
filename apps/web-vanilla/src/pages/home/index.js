@@ -13,6 +13,7 @@ export default function HomePageView(props) {
       { title: "General", url: "root.home_layout.index.general" },
       { title: "Input", url: "root.home_layout.index.form" },
       { title: "Field", url: "root.home_layout.index.validate" },
+      { title: "LLM", url: "root.home_layout.index.llm" },
       { title: "Data Display", url: "root.home_layout.index.data" },
       { title: "ScrollView", url: "root.home_layout.index.scroll" },
       { title: "Feedback", url: "root.home_layout.index.feedback" },
