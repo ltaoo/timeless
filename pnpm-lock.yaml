@@ -407,6 +407,18 @@ importers:
         specifier: workspace:*
         version: link:../utils
 
+  packages/provider-memory:
+    dependencies:
+      '@timeless/base':
+        specifier: workspace:*
+        version: link:../base
+      '@timeless/kit':
+        specifier: workspace:*
+        version: link:../kit
+      '@timeless/utils':
+        specifier: workspace:*
+        version: link:../utils
+
   packages/provider-tauri:
     dependencies:
       '@tauri-apps/api':

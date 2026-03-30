@@ -7,6 +7,91 @@ declare module "packages/reactive/src/types" {
         onPatch?: (c: any) => void;
         ignore?: boolean;
     };
+    export type TimelessRef<T> = {
+        __is_ref: true;
+        _subscribe: (ctx: Subscriber) => void;
+        _destroy: () => void;
+        value: T;
+        eq: (v: T) => boolean;
+        isSame: (v: unknown) => boolean;
+        isStrictEqual: (v: unknown) => boolean;
+        as: (value: T | ((cur: T) => T)) => void;
+    };
+    export type TimelessRefObject<T> = {
+        __is_ref: true;
+        _subscribe: (ctx: Subscriber) => void;
+        _destroy: () => void;
+        value: T;
+        isSame: (v: unknown) => boolean;
+        isStrictEqual: (v: unknown) => boolean;
+        set: (key: keyof T, item: any) => void;
+        get: (key: keyof T) => any;
+        delete: (key: keyof T) => void;
+        as: (nextObj: T | ((cur: T) => T)) => void;
+        assign: (updated: Partial<T>) => void;
+        refresh: () => void;
+    };
+    export type TimelessRefObjectNullable<T> = {
+        __is_ref: true;
+        _subscribe: (ctx: Subscriber) => void;
+        _destroy: () => void;
+        value: T | null;
+        isSame: (v: unknown) => boolean;
+        isStrictEqual: (v: unknown) => boolean;
+        set: (key: keyof T, item: any) => void;
+        get: (key: keyof T) => any;
+        delete: (key: keyof T) => void;
+        as: (nextObj: T | ((cur: T | null) => T)) => void;
+        refresh: () => void;
+    };
+    export type TimelessRefArray<T> = {
+        __is_ref: true;
+        _subscribe: (ctx: Subscriber) => void;
+        _destroy: () => void;
+        value: T[];
+        isSame: (v: unknown) => boolean;
+        isStrictEqual: (v: unknown) => boolean;
+        key: any;
+        length: number;
+        get: (idx: number) => any;
+        set: (idx: number, item: any) => void;
+        splice: (idx: number, dcount: number, ...items: any[]) => any[];
+        insert: (idx: number, ...items: any[]) => number;
+        push: (...items: any[]) => number;
+        unshift: (...items: any[]) => number;
+        pop: () => any;
+        shift: () => any;
+        delete: (idx: number) => void;
+        remove: (item: T) => void;
+        as: (items: T[] | ((cur: T[]) => T[])) => void;
+        assign: (items: T[]) => void;
+        refresh: () => void;
+        filter: (predicate: (item: T, index: number, array: T[]) => boolean) => any[];
+        includes: (item: T) => boolean;
+        reverse: () => TimelessRefArray<T>;
+        sort: (compareFn?: (a: T, b: T) => number) => TimelessRefArray<T>;
+        fill: (value: T, start?: number, end?: number) => TimelessRefArray<T>;
+        copyWithin: (target: number, start: number, end?: number) => TimelessRefArray<T>;
+        concat: (...items: any[]) => T[];
+        join: (separator?: string) => string;
+        slice: (start?: number, end?: number) => any[];
+        indexOf: (searchElement: T, fromIndex?: number) => number;
+        lastIndexOf: (searchElement: T, fromIndex?: number) => number;
+        every: (predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any) => boolean;
+        some: (predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any) => boolean;
+        forEach: (callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any) => void;
+        map: <U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any) => U[];
+        reduce: (callbackfn: any, initialValue?: any) => any;
+        reduceRight: (callbackfn: any, initialValue?: any) => any;
+        find: (predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any) => any;
+        findIndex: (predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any) => number;
+        entries: () => IterableIterator<[number, T]>;
+        keys: () => IterableIterator<number>;
+        values: () => IterableIterator<T>;
+        flat: (depth?: number) => any[];
+        flatMap: (callback: any, thisArg?: any) => any[];
+        [Symbol.iterator]: () => Iterator<T>;
+    };
     export type Ref<T> = {
         __is_ref: true;
         _subscribe: (ctx: Subscriber) => void;
@@ -33,7 +118,7 @@ declare module "packages/reactive/src/types" {
     export function isStyleRef(v: any): v is StyleRef;
 }
 declare module "packages/reactive/src/reactive-array" {
-    import { Ref } from "packages/reactive/src/types";
+    import { Ref, TimelessRefArray } from "packages/reactive/src/types";
     export interface RefArray<T> extends Ref<T[]> {
         key: any;
         length: number;
@@ -78,7 +163,7 @@ declare module "packages/reactive/src/reactive-array" {
     }
     export function refArray<T>(items: T[], opt?: Partial<{
         key: any;
-    }>): RefArray<T>;
+    }>): TimelessRefArray<T>;
 }
 declare module "packages/reactive/src/registry" {
     import { Ref } from "packages/reactive/src/types";
@@ -92,7 +177,7 @@ declare module "packages/reactive/src/registry" {
     export function getarr<T>(v: any): RefArray<T> | undefined;
 }
 declare module "packages/reactive/src/reactive-object" {
-    import { Ref } from "packages/reactive/src/types";
+    import { Ref, TimelessRefObject, TimelessRefObjectNullable } from "packages/reactive/src/types";
     export interface RefObject<T> extends Ref<T> {
         set(key: keyof T, item: any): void;
         get(key: keyof T): any;
@@ -108,21 +193,12 @@ declare module "packages/reactive/src/reactive-object" {
         as(nextObj: T | ((cur: T | null) => T)): void;
         refresh(): void;
     }
-    export function refObject<T extends Record<string, any>>(obj: T): RefObject<T>;
-    export function refObject<T extends Record<string, any>>(obj: T | null): RefObjectNullable<T>;
+    export function refObject<T extends Record<string, any>>(obj: T): TimelessRefObject<T>;
+    export function refObject<T extends Record<string, any>>(obj: T | null): TimelessRefObjectNullable<T>;
 }
 declare module "packages/reactive/src/ref" {
-    import { Subscriber } from "packages/reactive/src/types";
-    export function ref<T = any>(v: T): {
-        __is_ref: true;
-        _subscribe(ctx: Subscriber): void;
-        _destroy(): void;
-        readonly value: T;
-        eq(v: T): boolean;
-        isSame(v: unknown): boolean;
-        isStrictEqual(v: unknown): boolean;
-        as(value: T | ((cur: T) => T)): void;
-    };
+    import { TimelessRef } from "packages/reactive/src/types";
+    export function ref<T = any>(v: T): TimelessRef<T>;
 }
 declare module "packages/reactive/src/signal" {
     import type { RefArray } from "packages/reactive/src/reactive-array";
@@ -141,6 +217,35 @@ declare module "packages/reactive/src/computed" {
     import { Ref } from "packages/reactive/src/types";
     export function computed<T, R>(deps: Ref<T>, fn: (val: T) => R): Ref<R>;
     export function computed<T extends object, R>(deps: T, fn: (val: T) => R): Ref<R>;
+}
+declare module "packages/reactive/src/model" {
+    import { Ref } from "packages/reactive/src/types";
+    type UnwrapState<S> = {
+        [K in keyof S]: S[K] extends Ref<infer V> ? V : never;
+    };
+    type Unlisten = () => void;
+    type OnMethodHandlers<M> = {
+        [K in keyof M as `on${Capitalize<string & K>}`]: (handler: (...args: M[K] extends (...args: infer A) => any ? A : never) => void) => Unlisten;
+    };
+    type TimelessViewModel<S extends Record<string, any>, M extends Record<string, (...args: any[]) => any>, H extends Record<string, any> = {}, U extends Record<string, any> = {}, Sr extends Record<string, any> = {}> = {
+        state: S;
+        methods: M;
+        handlers: H;
+        ui: U;
+        services: Sr;
+        onStateChange: (listener: (state: UnwrapState<S>) => void) => Unlisten;
+        onError: (handler: (error: Error) => void) => Unlisten;
+        ready: (handler: () => void) => Unlisten;
+        onDestroy: (handler: () => void) => Unlisten;
+        destroy: () => void;
+    } & OnMethodHandlers<M>;
+    export function defineModel<P, S extends Record<string, any>, M extends Record<string, (...args: any[]) => any>, H extends Record<string, any> = {}, U extends Record<string, any> = {}, Sr extends Record<string, any> = {}>(factory: (params: P) => {
+        state: S;
+        methods: M;
+        handlers?: H;
+        ui?: U;
+        services?: Sr;
+    }): (params: P) => TimelessViewModel<S, M, H, U, Sr>;
 }
 declare module "packages/reactive/src/derive" {
     import { Ref } from "packages/reactive/src/types";
@@ -177,13 +282,14 @@ declare module "packages/reactive/src/index" {
     import { ref } from "packages/reactive/src/ref";
     import { refArray } from "packages/reactive/src/reactive-array";
     import { refObject } from "packages/reactive/src/reactive-object";
+    import { defineModel } from "packages/reactive/src/model";
     import { signal } from "packages/reactive/src/signal";
     import { computed } from "packages/reactive/src/computed";
     import { derive } from "packages/reactive/src/derive";
     import { release, get as registryGet, set as registrySet, getobj as registryGetObj, getarr as registryGetArr } from "packages/reactive/src/registry";
     import { classNames } from "packages/reactive/src/class-names";
     import { styleNames } from "packages/reactive/src/style-names";
-    export { Subscriber, Ref, RefObject, RefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, ClassNameRef, isClassName, StyleRef, isStyleRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, classNames, styleNames, classNames as cn, styleNames as sn, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
+    export { Subscriber, Ref, RefObject, RefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, ClassNameRef, isClassName, StyleRef, isStyleRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, classNames, styleNames, classNames as cn, styleNames as sn, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
 }
 declare module "packages/headless/src/util/env" {
     export const isBrowser: boolean;
@@ -938,7 +1044,7 @@ declare module "packages/ui/src/accordion/index" {
     export function AccordionCore(props?: AccordionCoreProps): {
         shape: "accordion";
         type: "multiple" | "single";
-        openItems: import("@timeless/reactive").RefArray<number>;
+        openItems: import("packages/reactive/src/types").TimelessRefArray<number>;
         state: {
             readonly openItems: number[];
             readonly type: "multiple" | "single";
@@ -2716,6 +2822,96 @@ declare module "packages/ui/src/input/index" {
         onStateChange(handler: Handler<TheTypesInListOfEvents<K, T>[Events.StateChange]>): void;
     }
 }
+declare module "packages/ui/src/file-input/index" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    enum Events {
+        Change = 10,
+        StateChange = 11,
+        Mounted = 12,
+        Focus = 13,
+        Blur = 14,
+        Clear = 15,
+        Click = 16
+    }
+    type TheTypesOfEvents = {
+        [Events.Mounted]: void;
+        [Events.Change]: FileList | null;
+        [Events.Blur]: FileList | null;
+        [Events.Focus]: void;
+        [Events.Clear]: void;
+        [Events.Click]: {
+            x: number;
+            y: number;
+        };
+        [Events.StateChange]: FileInputState;
+    };
+    export type FileInputProps = {
+        name?: string;
+        disabled?: boolean;
+        defaultValue?: FileList | null;
+        placeholder?: string;
+        accept?: string;
+        multiple?: boolean;
+        capture?: string;
+        autoFocus?: boolean;
+        onChange?: (v: FileList | null) => void;
+        onBlur?: (v: FileList | null) => void;
+        onClear?: () => void;
+        onMounted?: () => void;
+    };
+    type FileInputState = {
+        value: FileList | null;
+        placeholder: string;
+        disabled: boolean;
+        loading: boolean;
+        focus: boolean;
+        accept?: string;
+        multiple: boolean;
+        autoFocus: boolean;
+    };
+    export class FileInputCore extends BaseDomain<TheTypesOfEvents> {
+        shape: "file-input";
+        defaultValue: FileList | null;
+        value: FileList | null;
+        placeholder: string;
+        disabled: boolean;
+        accept?: string;
+        multiple: boolean;
+        capture?: string;
+        autoFocus: boolean;
+        isFocus: boolean;
+        loading: boolean;
+        /** 被消费过的值，用于做比较判断值是否发生改变 */
+        valueUsed: unknown;
+        get state(): FileInputState;
+        constructor(props: {
+            unique_id?: string;
+        } & FileInputProps);
+        setMounted(): void;
+        handleFocus(): void;
+        handleBlur(): void;
+        handleClick(event: {
+            x: number;
+            y: number;
+        }): void;
+        handleChange(event: unknown): void;
+        setValue(value: FileList | null, extra?: Partial<{
+            silence: boolean;
+        }>): void;
+        setAccept(accept: string): void;
+        setMultiple(multiple: boolean): void;
+        setLoading(loading: boolean): void;
+        clear(): void;
+        focus(): void;
+        onChange(handler: Handler<TheTypesOfEvents[Events.Change]>): () => void;
+        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
+        onMounted(handler: Handler<TheTypesOfEvents[Events.Mounted]>): () => void;
+        onFocus(handler: Handler<TheTypesOfEvents[Events.Focus]>): () => void;
+        onBlur(handler: Handler<TheTypesOfEvents[Events.Blur]>): () => void;
+        onClick(handler: Handler<TheTypesOfEvents[Events.Click]>): () => void;
+        onClear(handler: Handler<TheTypesOfEvents[Events.Clear]>): () => void;
+    }
+}
 declare module "packages/ui/src/number-input/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
     import { ValueInputInterface } from "@/form/types";
@@ -3915,7 +4111,7 @@ declare module "packages/ui/src/select/index" {
     };
     type SelectGroupState<T> = {
         type: "group";
-        label?: string;
+        label?: unknown;
         key: any;
         items: SelectEntryState<T>[];
     };
@@ -4000,6 +4196,7 @@ declare module "packages/ui/src/select/index" {
         /** 选中的 item */
         selectedItem: SelectItemCore<T> | null;
         _findFirstValidItem: boolean;
+        private _isDisabledValue;
         /** 获取过滤后的选项 */
         get state(): SelectState<T>;
         constructor(props: Partial<{
@@ -7194,6 +7391,7 @@ declare module "packages/ui/src/index" {
     export * from "packages/ui/src/formv2/index";
     export * from "packages/ui/src/image/index";
     export * from "packages/ui/src/input/index";
+    export * from "packages/ui/src/file-input/index";
     export * from "packages/ui/src/number-input/index";
     export * from "packages/ui/src/node/index";
     export * from "packages/ui/src/popover/index";
@@ -8162,6 +8360,57 @@ declare module "packages/headless/src/modules/input" {
     };
     export function Disabled(props: ViewProps & {
         store: InputCore<any>;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/headless/src/modules/file-input" {
+    import { FileInputCore } from "packages/ui/src/index";
+    import { ViewProps, ViewChildren } from "packages/headless/src/primitive/view";
+    export function Root(props: ViewProps & {
+        store?: FileInputCore;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Input(props: ViewProps & {
+        store: FileInputCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: HTMLInputElement;
+        render(): HTMLInputElement;
+        onMounted(): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Clear(props: ViewProps & {
+        store: FileInputCore;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Loading(props: ViewProps & {
+        store: FileInputCore;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Disabled(props: ViewProps & {
+        store: FileInputCore;
     }, children?: ViewChildren): {
         t: string;
         $elm: HTMLElement;
@@ -11412,10 +11661,10 @@ declare module "packages/kit/src/route_view/index" {
         };
         state: {
             readonly menus: T[];
-            cur: import("@timeless/reactive").RefObject<RouteViewCore>;
+            cur: import("packages/reactive/src/types").TimelessRefObject<RouteViewCore>;
         };
         readonly menus: T[];
-        cur: import("@timeless/reactive").RefObject<RouteViewCore>;
+        cur: import("packages/reactive/src/types").TimelessRefObject<RouteViewCore>;
         isSubRoute(url: string): boolean;
         isActive(url: string): boolean;
         isSelected(t: RouteViewCore | null, menu: T): boolean;
@@ -11424,7 +11673,7 @@ declare module "packages/kit/src/route_view/index" {
         destroy(): void;
         onStateChange(handler: Handler<{
             readonly menus: T[];
-            cur: import("@timeless/reactive").RefObject<RouteViewCore>;
+            cur: import("packages/reactive/src/types").TimelessRefObject<RouteViewCore>;
         }>): () => void;
         onError(handler: Handler<BizError>): () => void;
     };
@@ -12163,6 +12412,7 @@ declare module "packages/headless/src/index" {
     export * as TabsPrimitive from "packages/headless/src/modules/tabs";
     export * as AccordionPrimitive from "packages/headless/src/modules/accordion";
     export * as InputPrimitive from "packages/headless/src/modules/input";
+    export * as FileInputPrimitive from "packages/headless/src/modules/file-input";
     export * as NumberInputPrimitive from "packages/headless/src/modules/number-input";
     export * as TextareaPrimitive from "packages/headless/src/modules/textarea";
     export * as SelectPrimitive from "packages/headless/src/modules/select";
@@ -12199,6 +12449,20 @@ declare module "packages/shadcn/src/modules/input" {
     import { InputCore } from "packages/ui/src/index";
     export function Input(props: ViewProps & {
         store: InputCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/shadcn/src/modules/file-input" {
+    import { ViewProps } from "packages/headless/src/index";
+    import { FileInputCore } from "packages/ui/src/index";
+    export function FileInput(props: ViewProps & {
+        store: FileInputCore;
         id?: string;
     }): {
         t: string;
@@ -13092,6 +13356,7 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
 }
 declare module "packages/shadcn/src/index" {
     import { Input } from "packages/shadcn/src/modules/input";
+    import { FileInput } from "packages/shadcn/src/modules/file-input";
     import { NumberInput } from "packages/shadcn/src/modules/number-input";
     import { Textarea } from "packages/shadcn/src/modules/textarea";
     import { Label } from "packages/shadcn/src/modules/label";
@@ -13147,7 +13412,7 @@ declare module "packages/shadcn/src/index" {
     export * from "packages/reactive/src/index";
     export * as icons from "packages/icons/src/index";
     export * as kit from "packages/kit/src/index";
-    export { Input, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, };
+    export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, };
 }
 
 // === Package module aliases ===
@@ -13238,6 +13503,8 @@ declare const FieldLegend: typeof import("@timeless/shadcn").FieldLegend;
 declare const FieldPrimitive: typeof import("@timeless/shadcn").FieldPrimitive;
 declare const FieldSeparator: typeof import("@timeless/shadcn").FieldSeparator;
 declare const FieldSet: typeof import("@timeless/shadcn").FieldSet;
+declare const FileInput: typeof import("@timeless/shadcn").FileInput;
+declare const FileInputPrimitive: typeof import("@timeless/shadcn").FileInputPrimitive;
 declare const Flex: typeof import("@timeless/shadcn").Flex;
 declare const For: typeof import("@timeless/shadcn").For;
 declare const Form: typeof import("@timeless/shadcn").Form;
@@ -13356,6 +13623,7 @@ declare const classNames: typeof import("@timeless/shadcn").classNames;
 declare const cn: typeof import("@timeless/shadcn").cn;
 declare const combine: typeof import("@timeless/shadcn").combine;
 declare const computed: typeof import("@timeless/shadcn").computed;
+declare const defineModel: typeof import("@timeless/shadcn").defineModel;
 declare const derive: typeof import("@timeless/shadcn").derive;
 declare const getarr: typeof import("@timeless/shadcn").getarr;
 declare const getobj: typeof import("@timeless/shadcn").getobj;
@@ -13464,6 +13732,7 @@ declare const DropdownMenuCore: typeof import("@timeless/ui").DropdownMenuCore;
 declare const DynamicContentCore: typeof import("@timeless/ui").DynamicContentCore;
 declare const DynamicContentInListCore: typeof import("@timeless/ui").DynamicContentInListCore;
 declare const ElementCore: typeof import("@timeless/ui").ElementCore;
+declare const FileInputCore: typeof import("@timeless/ui").FileInputCore;
 declare const FocusScopeCore: typeof import("@timeless/ui").FocusScopeCore;
 declare const FormCore: typeof import("@timeless/ui").FormCore;
 declare const FormFieldCore: typeof import("@timeless/ui").FormFieldCore;

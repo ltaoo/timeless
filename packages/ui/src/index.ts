@@ -34,6 +34,7 @@ export * from "./form";
 export * from "./formv2";
 export * from "./image";
 export * from "./input";
+export * from "./file-input";
 export * from "./number-input";
 export * from "./node";
 export * from "./popover";

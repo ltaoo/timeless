@@ -1,6 +1,7 @@
 console.log("shadcn.version 0.3.0");
 
 import { Input } from "./modules/input";
+import { FileInput } from "./modules/file-input";
 import { NumberInput } from "./modules/number-input";
 import { Textarea } from "./modules/textarea";
 import { Label } from "./modules/label";
@@ -88,6 +89,7 @@ export * as kit from "@timeless/kit";
 // export const Result = kit.Result;
 export {
   Input,
+  FileInput,
   NumberInput,
   Textarea,
   Label,

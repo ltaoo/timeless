@@ -1,5 +1,6 @@
 import { base, Handler } from "@timeless/base";
 import { refarr } from "@timeless/reactive";
+import type { RefArray } from "@timeless/reactive";
 
 type AccordionCoreProps = {
   type?: "single" | "multiple";
@@ -9,7 +10,7 @@ type AccordionCoreProps = {
 export function AccordionCore(props: AccordionCoreProps = {}) {
   const { type = "single", defaultOpenItems = [] } = props;
 
-  const openItems = refarr(defaultOpenItems);
+  const openItems: RefArray<number> = refarr(defaultOpenItems);
 
   const _state = {
     get openItems() {

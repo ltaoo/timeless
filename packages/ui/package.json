@@ -110,6 +110,11 @@
       "import": "./dist/element/index.esm.js",
       "require": "./dist/element/index.js"
     },
+    "./file-input": {
+      "types": "./dist/file-input/index.d.ts",
+      "import": "./dist/file-input/index.esm.js",
+      "require": "./dist/file-input/index.js"
+    },
     "./focus-scope": {
       "types": "./dist/focus-scope/index.d.ts",
       "import": "./dist/focus-scope/index.esm.js",

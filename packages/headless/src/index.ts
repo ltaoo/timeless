@@ -53,6 +53,7 @@ export * as AccordionPrimitive from "./modules/accordion";
 
 // form
 export * as InputPrimitive from "./modules/input";
+export * as FileInputPrimitive from "./modules/file-input";
 export * as NumberInputPrimitive from "./modules/number-input";
 export * as TextareaPrimitive from "./modules/textarea";
 export * as SelectPrimitive from "./modules/select";

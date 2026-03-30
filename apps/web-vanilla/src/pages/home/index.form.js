@@ -2,7 +2,6 @@ import { Section, Item } from "@/components/index.js";
 
 export default function FormView() {
   const view$ = new Timeless.ui.ScrollViewCore({});
-
   const searchSelect$ = new Timeless.ui.SelectCore({
     defaultValue: null,
     placeholder: "输入关键词搜索",
@@ -37,7 +36,7 @@ export default function FormView() {
       data: {
         options: matched.slice(0, 8),
       },
-    }
+    };
   };
 
   const request = Timeless.kit.request_factory({
@@ -85,6 +84,30 @@ export default function FormView() {
               }),
             }),
           ]),
+        ]),
+      ]),
+      Section("FileInput", [
+        Item("Default", [
+          FileInput({
+            store: new Timeless.ui.FileInputCore({
+              accept: "image/*",
+              defaultValue: null,
+              onChange(e) {
+                console.log("File selected:", e);
+              },
+            }),
+          }),
+        ]),
+        Item("Multiple", [
+          FileInput({
+            store: new Timeless.ui.FileInputCore({
+              accept: "*/*",
+              multiple: true,
+              onChange(e) {
+                console.log("Files selected:", e);
+              },
+            }),
+          }),
         ]),
       ]),
       Section("NumberInput", [

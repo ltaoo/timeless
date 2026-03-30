@@ -1,6 +1,6 @@
-import { Subscriber, Ref, isRef } from "./types";
+import { Subscriber, Ref, isRef, TimelessRef } from "./types";
 
-export function ref<T = any>(v: T) {
+export function ref<T = any>(v: T): TimelessRef<T> {
   let _local_value = v;
   const deps: Subscriber[] = [];
   function notify(action: {

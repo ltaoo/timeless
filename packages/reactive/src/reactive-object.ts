@@ -1,4 +1,10 @@
-import { Subscriber, Ref, isRef } from "./types";
+import {
+  Subscriber,
+  Ref,
+  isRef,
+  TimelessRefObject,
+  TimelessRefObjectNullable,
+} from "./types";
 import { get, has } from "./registry";
 
 export interface RefObject<T> extends Ref<T> {
@@ -18,11 +24,15 @@ export interface RefObjectNullable<T> extends Ref<T | null> {
   refresh(): void;
 }
 
-export function refObject<T extends Record<string, any>>(obj: T): RefObject<T>;
+export function refObject<T extends Record<string, any>>(
+  obj: T,
+): TimelessRefObject<T>;
 export function refObject<T extends Record<string, any>>(
   obj: T | null,
-): RefObjectNullable<T>;
-export function refObject<T extends Record<string, any>>(obj: T | null) {
+): TimelessRefObjectNullable<T>;
+export function refObject<T extends Record<string, any>>(
+  obj: T | null,
+): TimelessRefObject<T> | TimelessRefObjectNullable<T> {
   let _v = obj;
   const deps: Subscriber[] = [];
   function notify(action: { type: string }) {

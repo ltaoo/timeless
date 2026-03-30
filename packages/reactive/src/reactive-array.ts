@@ -1,6 +1,6 @@
 import { set, has, get } from "./registry";
 import { refObject } from "./reactive-object";
-import { Subscriber, Ref, isClassName, isRef } from "./types";
+import { Subscriber, Ref, isClassName, isRef, TimelessRefArray } from "./types";
 
 export interface RefArray<T> extends Ref<T[]> {
   key: any;
@@ -29,14 +29,32 @@ export interface RefArray<T> extends Ref<T[]> {
   slice(start?: number, end?: number): any[];
   indexOf(searchElement: T, fromIndex?: number): number;
   lastIndexOf(searchElement: T, fromIndex?: number): number;
-  every(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): boolean;
-  some(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): boolean;
-  forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any): void;
-  map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
+  every(
+    predicate: (value: T, index: number, array: T[]) => unknown,
+    thisArg?: any,
+  ): boolean;
+  some(
+    predicate: (value: T, index: number, array: T[]) => unknown,
+    thisArg?: any,
+  ): boolean;
+  forEach(
+    callbackfn: (value: T, index: number, array: T[]) => void,
+    thisArg?: any,
+  ): void;
+  map<U>(
+    callbackfn: (value: T, index: number, array: T[]) => U,
+    thisArg?: any,
+  ): U[];
   reduce(callbackfn: any, initialValue?: any): any;
   reduceRight(callbackfn: any, initialValue?: any): any;
-  find(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): any;
-  findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): number;
+  find(
+    predicate: (value: T, index: number, obj: T[]) => unknown,
+    thisArg?: any,
+  ): any;
+  findIndex(
+    predicate: (value: T, index: number, obj: T[]) => unknown,
+    thisArg?: any,
+  ): number;
   entries(): IterableIterator<[number, T]>;
   keys(): IterableIterator<number>;
   values(): IterableIterator<T>;
@@ -45,7 +63,10 @@ export interface RefArray<T> extends Ref<T[]> {
   [Symbol.iterator](): Iterator<T>;
 }
 
-export function refArray<T>(items: T[], opt: Partial<{ key: any }> = {}): RefArray<T> {
+export function refArray<T>(
+  items: T[],
+  opt: Partial<{ key: any }> = {},
+): TimelessRefArray<T> {
   let _local_value = items;
   const deps: Subscriber[] = [];
   function notify(action: {
