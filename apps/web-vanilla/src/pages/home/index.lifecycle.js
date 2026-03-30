@@ -313,6 +313,7 @@ export default function LifecycleView(props) {
                     views,
                     history: subhistory$,
                     app: props.app,
+                    ErrorFallback: props.ErrorFallback,
                     placeholder: [
                       View(
                         { class: "flex items-center justify-center h-full" },

@@ -6,6 +6,7 @@ import {
   ViewChildren,
   TimelessComponent,
 } from "./view";
+import { defaultErrorView } from "./error-boundary";
 
 export function LazyView(
   props: ViewProps & { placeholder?: ViewChildren } & Record<string, any>,
@@ -21,38 +22,50 @@ export function LazyView(
     result instanceof Promise ||
     (result && typeof (result as any).then === "function");
 
-  // let view$: TimelessElement;
-  // if (isLazy && props.placeholder) {
-  //   view$ = View(props, props.placeholder);
-  // } else {
-  //   view$ = View(props);
-  // }
   const view$ = View(props, props.placeholder);
 
-  return {
+  const self: TimelessElement = {
     t: "view",
     $elm: view$.$elm,
     render() {
       if (isLazy) {
-        (result as Promise<any>).then((m) => {
-          const Factory = m.default || m;
-          if (typeof Factory === "function") {
-            const elm_ = Factory(props);
-            if (!elm_) {
-              return;
-            }
-            loadedComponent = elm_;
-            const r = elm_.render();
-            view$.$elm.parentNode?.replaceChild(elm_.$elm, view$.$elm);
-            view$.$elm = elm_.$elm;
-            if (!r) {
-              return;
-            }
-            if (props.onMounted) {
-              props.onMounted(elm_.$elm);
-            }
+        const replaceWithError = (err: unknown) => {
+          const error = err instanceof Error ? err : new Error(String(err));
+          console.error("[LazyView] Error loading async component:", error);
+          const renderError = props.ErrorFallback || defaultErrorView;
+          const errorView = renderError(error, props.view?.name || "unknown");
+          errorView.render();
+          if (self.$elm.parentNode) {
+            self.$elm.parentNode.replaceChild(errorView.$elm, self.$elm);
           }
-        });
+          self.$elm = errorView.$elm;
+        };
+        (result as Promise<any>)
+          .then((m) => {
+            try {
+              const Factory = m.default || m;
+              if (typeof Factory === "function") {
+                const elm_ = Factory(props);
+                if (!elm_) {
+                  return;
+                }
+                loadedComponent = elm_;
+                const r = elm_.render();
+                view$.$elm.parentNode?.replaceChild(elm_.$elm, view$.$elm);
+                view$.$elm = elm_.$elm;
+                self.$elm = elm_.$elm;
+                if (!r) {
+                  return;
+                }
+                if (props.onMounted) {
+                  props.onMounted(elm_.$elm);
+                }
+              }
+            } catch (err) {
+              replaceWithError(err);
+            }
+          })
+          .catch(replaceWithError);
       }
       view$.render();
       return view$.$elm;
@@ -69,4 +82,5 @@ export function LazyView(
       loadedComponent = undefined;
     },
   };
+  return self;
 }

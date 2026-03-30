@@ -1,6 +1,6 @@
 import { Section, Item } from "@/components/index.js";
 
-import { DownloadTaskViewModel } from "./index.download_task.model";
+import { DownloadTaskViewModel } from "./index.download_task.model.js";
 
 function formatSpeed(bps) {
   if (!bps) return "0 B/s";
@@ -206,7 +206,7 @@ export default function DownloadTaskPageView(props) {
           View(
             {
               class:
-                "w-[420px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+                "w-full rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
             },
             [
               View(

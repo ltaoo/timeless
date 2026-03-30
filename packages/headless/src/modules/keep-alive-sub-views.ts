@@ -16,6 +16,7 @@ import {
 } from "@/primitive/view";
 import { For } from "@/primitive/for";
 import { LazyView } from "@/primitive/lazy-view";
+import { ErrorFallbackFn, withErrorBoundary } from "@/primitive/error-boundary";
 import { h } from "@/util/h";
 
 export function KeepAliveSubViews(
@@ -27,6 +28,7 @@ export function KeepAliveSubViews(
     storage: StorageCore<any>;
     client: HttpClientCore;
     NotFound?: (...args: any[]) => TimelessElement;
+    ErrorFallback?: ErrorFallbackFn;
     placeholder?: ViewChildren;
   },
 ) {
@@ -73,12 +75,17 @@ export function KeepAliveSubViews(
           },
         },
         [
-          LazyView(
-            {
-              ...props,
-              view: subview,
-            },
-            [PageView],
+          withErrorBoundary(
+            () =>
+              LazyView(
+                {
+                  ...props,
+                  view: subview,
+                },
+                [PageView],
+              ),
+            subview.name,
+            props.ErrorFallback,
           ),
         ],
       );
