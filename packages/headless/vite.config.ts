@@ -71,21 +71,18 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       external: [
-        ...Object.keys(pkg.dependencies || {}),
-        ...Object.keys(pkg.peerDependencies || {}),
+        "@timeless/reactive",
+        "@timeless/kit",
+        "@timeless/ui",
+        "@timeless/icons",
       ],
       output: {
         globals: {
           "@timeless/reactive": "Timeless.reactive",
           "@timeless/kit": "Timeless",
           "@timeless/ui": "Timeless.ui",
+          "@timeless/icons": "Timeless.icons",
         },
-        footer: `if (typeof window !== "undefined") {
-        window.Timeless = window.Timeless || {};
-        if (window.Timeless.headless) {
-          Object.assign(window.Timeless, window.Timeless.headless);
-        }
-      }`,
       },
     },
   },

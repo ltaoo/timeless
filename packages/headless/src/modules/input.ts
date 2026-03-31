@@ -3,6 +3,16 @@ import { InputCore } from "@timeless/ui";
 
 import { View, ViewProps, ViewChildren } from "../primitive/view";
 
+type Provider = Partial<{
+  provide_ui_input: (store: InputCore<any>, $input: HTMLInputElement) => void;
+}>;
+
+let global_provider: Provider | undefined;
+
+export function setInputProvider(provider?: Provider) {
+  global_provider = provider;
+}
+
 export function Root(
   props: ViewProps & { store?: InputCore<any> },
   children?: ViewChildren,

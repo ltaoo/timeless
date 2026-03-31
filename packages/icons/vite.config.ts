@@ -66,10 +66,7 @@ export default defineConfig({
     }),
     sourcemap: isProd ? false : true,
     rollupOptions: {
-      external: [
-        ...Object.keys(pkg.dependencies || {}),
-        ...Object.keys(pkg.peerDependencies || {}),
-      ],
+      external: ["@timeless/reactive"],
       output: {
         globals: {
           "@timeless/reactive": "Timeless.reactive",

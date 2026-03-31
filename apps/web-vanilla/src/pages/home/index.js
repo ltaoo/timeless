@@ -58,7 +58,7 @@ export default function HomePageView(props) {
                         class: cn([
                           "px-3 py-2 text-sm cursor-pointer transition-colors",
                           computed(sidemenu$.cur, (t) => {
-                            return t && t.name === menu.name
+                            return sidemenu$.isSelected(t, menu)
                               ? "text-zinc-900 bg-zinc-100 font-medium dark:text-zinc-50 dark:bg-zinc-800"
                               : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50";
                           }),

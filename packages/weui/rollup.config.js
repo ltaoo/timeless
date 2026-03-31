@@ -23,14 +23,23 @@ const minify = terser({
 
 const config = {
   input: path.join(__dirname, "src/index.ts"),
-  output: {
-    file: path.join(__dirname, "dist/timeless.weui.umd.min.js"),
-    format: "umd",
-    name: "WeUI",
-    globals: {
-      "@timeless/headless": "Headless",
+  output: [
+    {
+      file: path.join(__dirname, "dist/timeless.weui.umd.min.js"),
+      format: "umd",
+      name: "WeUI",
+      globals: {
+        "@timeless/headless": "Headless",
+      },
     },
-  },
+    {
+      file: path.join(__dirname, "dist/timeless.weui.esm.js"),
+      format: "es",
+      globals: {
+        "@timeless/headless": "Headless",
+      },
+    },
+  ],
   external: ["@timeless/headless"],
   plugins: [
     typescript({

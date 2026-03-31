@@ -1,9 +1,9 @@
 {
   "name": "@timeless/kit",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Kit for Timeless",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "module": "dist/timeless.kit.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "vite build"

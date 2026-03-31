@@ -33,6 +33,7 @@ export * as PopperPrimitive from "./modules/popper";
 export * from "./modules/flex";
 export * from "./modules/head";
 export * from "./modules/paragraph";
+export * as ImagePrimitive from "./modules/image";
 export * from "./modules/table";
 export * from "./modules/card";
 export * from "./modules/label";
@@ -79,6 +80,7 @@ export * as DialogPrimitive from "./modules/dialog";
 export * as ToastPrimitive from "./modules/toast";
 export * as StepsPrimitive from "./modules/steps";
 export * as ScrollViewPrimitive from "./modules/scroll-view";
+export * as VideoPlayerPrimitive from "./modules/video-player";
 export * as WaterfallPrimitive from "./modules/waterfall";
 
 // biz

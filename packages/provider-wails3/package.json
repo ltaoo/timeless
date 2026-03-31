@@ -1,8 +1,8 @@
 {
   "name": "@timeless/provider-wails3",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
+  "module": "dist/timeless.wails3.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "vite build"

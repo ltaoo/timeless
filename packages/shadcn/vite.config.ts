@@ -36,27 +36,9 @@ export default defineConfig({
     }),
     sourcemap: isProd ? false : true,
     rollupOptions: {
-      external: [
-        "@timeless/base",
-        "@timeless/reactive",
-        "@timeless/headless",
-        "@timeless/kit",
-        "@timeless/ui",
-        "@timeless/utils",
-        "@timeless/icons",
-      ],
       output: {
         extend: true,
         footer: `(function(){try{var g=typeof globalThis!=="undefined"?globalThis:typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var t=g.Timeless;if(!t)return;if(t.kit)Object.assign(t,t.kit);Object.assign(g,t)}catch(e){}})();`,
-        globals: {
-          "@timeless/base": "Timeless.base",
-          "@timeless/reactive": "Timeless.reactive",
-          "@timeless/headless": "Timeless.headless",
-          "@timeless/kit": "Timeless.kit",
-          "@timeless/ui": "Timeless.ui",
-          "@timeless/utils": "Timeless.utils",
-          "@timeless/icons": "Timeless.icons",
-        },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name?.endsWith(".css")) {
             return "timeless.shadcn.css";

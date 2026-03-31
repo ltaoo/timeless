@@ -7577,6 +7577,18 @@ declare module "packages/headless/src/modules/paragraph" {
         onUnmounted(): void;
     };
 }
+declare module "packages/headless/src/modules/image" {
+    import { ImageCore } from "packages/ui/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/headless/src/primitive/view";
+    type Provider = Partial<{
+        provide_ui_image: (store: ImageCore, $img: HTMLDivElement) => void;
+    }>;
+    export function setImageProvider(provider?: Provider): void;
+    export function Root(props: ViewProps, children?: ViewChildren): TimelessElement;
+    export function Image(props: ViewProps & {
+        store: ImageCore;
+    }, children?: ViewChildren): TimelessElement;
+}
 declare module "packages/headless/src/modules/table" {
     import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
     export function Table(props: ViewProps, children?: ViewChildren): {
@@ -8343,6 +8355,10 @@ declare module "packages/headless/src/modules/accordion" {
 declare module "packages/headless/src/modules/input" {
     import { InputCore } from "packages/ui/src/index";
     import { ViewProps, ViewChildren } from "packages/headless/src/primitive/view";
+    type Provider = Partial<{
+        provide_ui_input: (store: InputCore<any>, $input: HTMLInputElement) => void;
+    }>;
+    export function setInputProvider(provider?: Provider): void;
     export function Root(props: ViewProps & {
         store?: InputCore<any>;
     }, children?: ViewChildren): {
@@ -10772,6 +10788,11 @@ declare module "packages/headless/src/modules/steps" {
 declare module "packages/headless/src/modules/scroll-view" {
     import { ScrollViewCore } from "packages/ui/src/index";
     import { ViewChildren, ViewProps, TimelessElement } from "packages/headless/src/primitive/view";
+    type Provider = Partial<{
+        provide_ui_scroll_view_indicator: (store: ScrollViewCore, $elm: HTMLElement) => void;
+        provide_ui_scroll_view_scroll: (store: ScrollViewCore, $elm: HTMLElement) => void;
+    }>;
+    export function setScrollViewProvider(provider?: Provider): void;
     export function Root(props: ViewProps & {
         store: ScrollViewCore;
     }, children: ViewChildren): TimelessElement;
@@ -10780,6 +10801,18 @@ declare module "packages/headless/src/modules/scroll-view" {
     }, children: ViewChildren): TimelessElement;
     export function Progress(props: ViewProps & {
         store: ScrollViewCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/headless/src/modules/video-player" {
+    import { VideoPlayerCore } from "packages/ui/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "@/primitive/view";
+    type Provider = Partial<{
+        provide_ui_video_player: ($video: HTMLVideoElement, store: VideoPlayerCore) => void;
+    }>;
+    export function setVideoPlayerProvider(provider?: Provider): void;
+    export function Root(props: ViewProps, children?: ViewChildren): TimelessElement;
+    export function Video(props: ViewProps & {
+        store: VideoPlayerCore;
     }, children?: ViewChildren): TimelessElement;
 }
 declare module "packages/headless/src/modules/waterfall" {
@@ -12433,6 +12466,7 @@ declare module "packages/headless/src/index" {
     export * from "packages/headless/src/modules/flex";
     export * from "packages/headless/src/modules/head";
     export * from "packages/headless/src/modules/paragraph";
+    export * as ImagePrimitive from "packages/headless/src/modules/image";
     export * from "packages/headless/src/modules/table";
     export * from "packages/headless/src/modules/card";
     export * from "packages/headless/src/modules/label";
@@ -12473,6 +12507,7 @@ declare module "packages/headless/src/index" {
     export * as ToastPrimitive from "packages/headless/src/modules/toast";
     export * as StepsPrimitive from "packages/headless/src/modules/steps";
     export * as ScrollViewPrimitive from "packages/headless/src/modules/scroll-view";
+    export * as VideoPlayerPrimitive from "packages/headless/src/modules/video-player";
     export * as WaterfallPrimitive from "packages/headless/src/modules/waterfall";
     export * from "packages/headless/src/modules/keep-alive-sub-views";
     export * from "packages/headless/src/modules/standard-sub-views";
@@ -13563,6 +13598,7 @@ declare const Head1: typeof import("@timeless/shadcn").Head1;
 declare const Head2: typeof import("@timeless/shadcn").Head2;
 declare const Head3: typeof import("@timeless/shadcn").Head3;
 declare const HistoryPanel: typeof import("@timeless/shadcn").HistoryPanel;
+declare const ImagePrimitive: typeof import("@timeless/shadcn").ImagePrimitive;
 declare const Input: typeof import("@timeless/shadcn").Input;
 declare const InputPrimitive: typeof import("@timeless/shadcn").InputPrimitive;
 declare const Kbd: typeof import("@timeless/shadcn").Kbd;
@@ -13667,6 +13703,7 @@ declare const TooltipProvider: typeof import("@timeless/shadcn").TooltipProvider
 declare const Transition: typeof import("@timeless/shadcn").Transition;
 declare const Txt: typeof import("@timeless/shadcn").Txt;
 declare const Use: typeof import("@timeless/shadcn").Use;
+declare const VideoPlayerPrimitive: typeof import("@timeless/shadcn").VideoPlayerPrimitive;
 declare const View: typeof import("@timeless/shadcn").View;
 declare const Waterfall: typeof import("@timeless/shadcn").Waterfall;
 declare const WaterfallPrimitive: typeof import("@timeless/shadcn").WaterfallPrimitive;

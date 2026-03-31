@@ -8,18 +8,16 @@ import {
   TimelessElement,
 } from "../primitive/view";
 
-declare const Timeless: {
-  web: {
-    provide_ui_scroll_view_indicator: (
-      store: ScrollViewCore,
-      $elm: HTMLElement,
-    ) => void;
-    provide_ui_scroll_view_scroll: (
-      store: ScrollViewCore,
-      $elm: HTMLElement,
-    ) => void;
-  };
-};
+type Provider = Partial<{
+  provide_ui_scroll_view_indicator: (store: ScrollViewCore, $elm: HTMLElement) => void;
+  provide_ui_scroll_view_scroll: (store: ScrollViewCore, $elm: HTMLElement) => void;
+}>;
+
+let global_provider: Provider | undefined;
+
+export function setScrollViewProvider(provider?: Provider) {
+  global_provider = provider;
+}
 
 export function Root(
   props: ViewProps & { store: ScrollViewCore },
@@ -35,9 +33,8 @@ export function Root(
           width: $elm.clientWidth,
           height: $elm.clientHeight,
         });
-        if (typeof Timeless !== "undefined" && Timeless.web) {
-          Timeless.web.provide_ui_scroll_view_scroll(store, $elm);
-        }
+        const provide = global_provider?.provide_ui_scroll_view_scroll;
+        if (typeof provide === "function") provide(store, $elm);
         if (props.onMounted) {
           props.onMounted($elm);
         }
@@ -77,9 +74,8 @@ export function Indicator(
     },
     render() {
       const $elm = indicator$.render();
-      if (typeof Timeless !== "undefined" && Timeless.web) {
-        Timeless.web.provide_ui_scroll_view_indicator(store, indicator$.$elm);
-      }
+      const provide = global_provider?.provide_ui_scroll_view_indicator;
+      if (typeof provide === "function") provide(store, indicator$.$elm);
       if (props.onMounted) {
         props.onMounted($elm);
       }

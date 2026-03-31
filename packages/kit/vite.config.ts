@@ -4,19 +4,19 @@ import pkg from "./package.json";
 
 export default createLibConfig({
   entry: resolve(__dirname, "src/index.ts"),
-  name: "Timeless.kit",
+  name: "timeless.kit",
   formats: ["es", "cjs", "umd"],
   external: [
-    // "@timeless/reactive",
-    // "@timeless/headless",
-    // "@timeless/ui",
-    // "@timeless/utils",
+    "@timeless/reactive",
+    "@timeless/base",
+    "@timeless/ui",
+    "@timeless/utils",
   ],
   globals: {
-    // "@timeless/reactive": "Timeless.reactive",
-    // "@timeless/headless": "Timeless.headless",
-    // "@timeless/ui": "Timeless.ui",
-    // "@timeless/utils": "Timeless.utils",
+    "@timeless/reactive": "Timeless.reactive",
+    "@timeless/base": "Timeless.base",
+    "@timeless/ui": "Timeless.ui",
+    "@timeless/utils": "Timeless.utils",
   },
   minify: true,
   alias: {

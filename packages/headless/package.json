@@ -1,6 +1,6 @@
 {
   "name": "@timeless/headless",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -116,6 +116,11 @@
       "types": "./dist/head/index.d.ts",
       "import": "./dist/head/index.esm.js",
       "require": "./dist/head/index.js"
+    },
+    "./image": {
+      "types": "./dist/image/index.d.ts",
+      "import": "./dist/image/index.esm.js",
+      "require": "./dist/image/index.js"
     },
     "./input": {
       "types": "./dist/input/index.d.ts",
@@ -276,6 +281,11 @@
       "types": "./dist/transition/index.d.ts",
       "import": "./dist/transition/index.esm.js",
       "require": "./dist/transition/index.js"
+    },
+    "./video-player": {
+      "types": "./dist/video-player/index.d.ts",
+      "import": "./dist/video-player/index.esm.js",
+      "require": "./dist/video-player/index.js"
     },
     "./waterfall": {
       "types": "./dist/waterfall/index.d.ts",

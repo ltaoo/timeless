@@ -8,6 +8,8 @@ import HomeIndexPageView from "@/pages/home/index.js";
 import HomeIndexGeneralView from "@/pages/home/index.general.js";
 import AdminLayoutView from "@/pages/admin/layout.js";
 
+Timeless.kit.NavigatorCore.prefix = "/";
+
 const routes_configure_for_types = /** @type {const} */ ({
   home_layout: {
     title: "首页",
@@ -231,7 +233,6 @@ export const client$ = new Timeless.kit.HttpClientCore({
   },
 });
 Timeless.web.provide_http_client(client$);
-Timeless.kit.NavigatorCore.prefix = "/timeless";
 export const router$ = new Timeless.kit.NavigatorCore();
 export const view$ = new Timeless.kit.RouteViewCore({
   name: "root",
@@ -285,6 +286,8 @@ export const app = new Timeless.kit.ApplicationModel({
   },
 });
 Timeless.web.provide_app(app);
+
+ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
 
 history$.onRouteChange(({ reason, view, href, ignore }) => {
   const { title } = view || {};
