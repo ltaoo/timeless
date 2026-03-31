@@ -1,8 +1,8 @@
 import { ref, refobj, computed, classNames } from "@timeless/reactive";
 import { PresenceCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { Show } from "../primitive/show";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Show } from "@/primitive/show";
 
 export function Presence(
   props: ViewProps & {

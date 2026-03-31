@@ -1,7 +1,8 @@
 import { refobj, computed, ref, sn } from "@timeless/reactive";
 import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { getHost } from "@/host";
 
 // ResizablePanels Group - 容器组件
 export function Group(
@@ -92,6 +93,7 @@ export function Handle(
   },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, panelBefore, panelAfter, ...rest } = props;
   const state_ = refobj(store.state);
   const isDragging_ = ref(false);
@@ -123,8 +125,7 @@ export function Handle(
         const state = store.state;
         const cursor =
           state.direction === "horizontal" ? "col-resize" : "row-resize";
-        document.body.style.cursor = cursor;
-        document.body.style.userSelect = "none";
+        host.patchBodyStyle?.({ cursor, userSelect: "none" });
 
         rest.onPointerDown?.(e);
       },
@@ -148,18 +149,17 @@ export function Handle(
             isDragging_.as(false);
             store.endResize();
             // 恢复光标
-            document.body.style.cursor = "";
-            document.body.style.userSelect = "";
+            host.patchBodyStyle?.({ cursor: "", userSelect: "" });
           }
         };
 
-        document.addEventListener("pointermove", handlePointerMove);
-        document.addEventListener("pointerup", handlePointerUp);
+        host.addDocumentEventListener?.("pointermove", handlePointerMove);
+        host.addDocumentEventListener?.("pointerup", handlePointerUp);
 
         // 保存清理函数到元素上
         const cleanup = () => {
-          document.removeEventListener("pointermove", handlePointerMove);
-          document.removeEventListener("pointerup", handlePointerUp);
+          host.removeDocumentEventListener?.("pointermove", handlePointerMove);
+          host.removeDocumentEventListener?.("pointerup", handlePointerUp);
         };
         ($el as any)._resizeCleanup = cleanup;
 

@@ -6,6 +6,18 @@ import { BaseDomain, Handler } from "@timeless/base";
 import { qs_parse } from "@timeless/utils";
 import { JSONObject } from "@timeless/types";
 
+function baseOrigin(origin: string) {
+  if (origin) {
+    return origin;
+  }
+  return "http://localhost";
+}
+
+function withPrefix(url: string) {
+  const prefix = NavigatorCore.prefix || "";
+  return (prefix + url).replace(/^\/\//, "/");
+}
+
 function parse(url: string) {
   let u: URL;
   const isAbsolute =
@@ -224,44 +236,73 @@ export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 调用该方法来「改变地址」 */
   pushState(url: string) {
-    const pathname = (NavigatorCore.prefix + url).replace(/^\/\//, "/");
-    const u = `${this.origin}${pathname}`;
-    const r = new URL(u);
-    const { pathname: realTargetPathname, search } = r;
+    const u =
+      url && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("//"))
+        ? url
+        : withPrefix(url);
+    const r = new URL(u, baseOrigin(this.origin));
+    const { pathname: browserPathname, search } = r;
     const prevPathname = this.pathname;
     this.setPrevPathname(prevPathname);
-    this.setPathname(realTargetPathname);
-    const targetHref = search
-      ? realTargetPathname + search
-      : realTargetPathname;
+    const cleanPathname = (() => {
+      const prefix = NavigatorCore.prefix;
+      if (
+        prefix &&
+        prefix.match(/^\/[a-z0-9A-Z]{1,}/) &&
+        browserPathname.startsWith(prefix)
+      ) {
+        const next = browserPathname.replace(prefix, "");
+        return next || "/";
+      }
+      return browserPathname;
+    })();
+    this.setPathname(cleanPathname);
+    const targetHref = search ? cleanPathname + search : cleanPathname;
     // this.prevHistories = [...this.histories];
     // console.log("[DOMAIN]navigator - before push", prevPathname, realTargetPathname);
-    this.histories.push({ pathname: realTargetPathname, href: targetHref });
+    this.histories.push({ pathname: cleanPathname, href: targetHref });
     this.emit(Events.PushState, {
       from: prevPathname,
-      to: realTargetPathname,
-      path: realTargetPathname + search,
-      pathname: realTargetPathname,
+      to: cleanPathname,
+      path: browserPathname + search,
+      pathname: cleanPathname,
     });
     this.emit(Events.HistoriesChange, [...this.histories]);
   }
   async replaceState(url: string) {
-    const u = `${this.origin}${NavigatorCore.prefix}${url}`;
-    const r = new URL(u);
-    const { pathname: realTargetPathname, search } = r;
+    const u =
+      url && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("//"))
+        ? url
+        : withPrefix(url);
+    const r = new URL(u, baseOrigin(this.origin));
+    const { pathname: browserPathname, search } = r;
     this.setPrevPathname(this.pathname);
-    this.setPathname(realTargetPathname);
-    const targetHref = search
-      ? realTargetPathname + search
-      : realTargetPathname;
-    this.histories[this.histories.length - 1] = {
-      pathname: realTargetPathname,
-      href: targetHref,
-    };
+    const cleanPathname = (() => {
+      const prefix = NavigatorCore.prefix;
+      if (
+        prefix &&
+        prefix.match(/^\/[a-z0-9A-Z]{1,}/) &&
+        browserPathname.startsWith(prefix)
+      ) {
+        const next = browserPathname.replace(prefix, "");
+        return next || "/";
+      }
+      return browserPathname;
+    })();
+    this.setPathname(cleanPathname);
+    const targetHref = search ? cleanPathname + search : cleanPathname;
+    if (this.histories.length === 0) {
+      this.histories = [{ pathname: cleanPathname, href: targetHref }];
+    } else {
+      this.histories[this.histories.length - 1] = {
+        pathname: cleanPathname,
+        href: targetHref,
+      };
+    }
     this.emit(Events.ReplaceState, {
       from: this.prevPathname,
-      path: realTargetPathname + search,
-      pathname: realTargetPathname,
+      path: browserPathname + search,
+      pathname: cleanPathname,
     });
     this.emit(Events.HistoriesChange, [...this.histories]);
     // this.emit(Events.PathnameChange, { ...this._pending });

@@ -1,7 +1,9 @@
 import { isRef, Ref } from "@timeless/reactive";
 
+import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
+import { getHost } from "@/host";
+
 import { ViewChildren, isElement } from "./view";
-import { safeCreateTextNode, safeCreateDocumentFragment } from "../util/env";
 
 export function Show(
   props: {
@@ -13,6 +15,7 @@ export function Show(
   },
   children: ViewChildren = [],
 ) {
+  const host = getHost();
   // 支持两种调用方式：
   // 1. Show({ when, fallback }, children)
   // 2. Show(condition, children)
@@ -26,7 +29,7 @@ export function Show(
   const onUnmounted = isObjectProps ? props.onUnmounted : undefined;
   const anchor = safeCreateTextNode("");
 
-  let _current_nodes: Node[] = [];
+  let _current_nodes: any[] = [];
   let _current_children: any[] = [];
   let _prev_condition: boolean | null = null;
 
@@ -89,9 +92,9 @@ export function Show(
         //   "parentNode:",
         //   !!node.parentNode,
         // );
-        if (node.parentNode) {
-          // console.log("[Show] removing node from parent");
-          node.parentNode.removeChild(node);
+        const parent = host.getParentNode(node);
+        if (parent) {
+          host.removeChild(parent, node);
         }
       }
     }
@@ -100,9 +103,9 @@ export function Show(
     console.log("[Show] unmount completed");
   };
 
-  const mount = (targetChildren: any[], parent?: Node, before?: Node) => {
+  const mount = (targetChildren: any[], parent?: any, before?: any) => {
     const fragment = safeCreateDocumentFragment();
-    const newNodes: Node[] = [];
+    const newNodes: any[] = [];
     const newInstances: any[] = [];
 
     for (let node of targetChildren) {
@@ -116,17 +119,16 @@ export function Show(
         // 即使 render 返回 null（如 Portal），也要保存实例以便调用生命周期
         newInstances.push(node);
         if (result) {
-          if (result instanceof DocumentFragment) {
-            newNodes.push(...Array.from(result.childNodes));
-            fragment.appendChild(result);
+          if (host.isDocumentFragment(result)) {
+            newNodes.push(...host.getChildNodes(result));
           } else {
             newNodes.push(result);
-            fragment.appendChild(result);
           }
+          host.appendChild(fragment, result);
         }
       } else if (typeof node === "string" || typeof node === "number") {
         const textNode = safeCreateTextNode(String(node));
-        fragment.appendChild(textNode);
+        host.appendChild(fragment, textNode);
         newNodes.push(textNode);
       }
     }
@@ -135,7 +137,7 @@ export function Show(
     _current_children = newInstances;
 
     if (parent) {
-      parent.insertBefore(fragment, before || null);
+      host.insertBefore(parent, fragment, before || null);
     }
 
     // Lifecycle
@@ -176,8 +178,9 @@ export function Show(
 
         // 如果新条件为 true，挂载新内容
         const target = getTargetChildren(condition);
-        if (target.length > 0 && anchor.parentNode) {
-          mount(target, anchor.parentNode, anchor);
+        const parent = host.getParentNode(anchor);
+        if (target.length > 0 && parent) {
+          mount(target, parent, anchor);
         }
       },
     });
@@ -202,7 +205,7 @@ export function Show(
       const fragment = mount(target);
 
       // Append anchor to the result fragment so it gets inserted into DOM
-      fragment.appendChild(anchor);
+      host.appendChild(fragment, anchor);
 
       if (onMounted) {
         onMounted(anchor);

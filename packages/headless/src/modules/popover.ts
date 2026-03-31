@@ -1,8 +1,10 @@
 import { refobj, computed } from "@timeless/reactive";
 import { PopoverCore, Align, Side, getGlobalLayerManager } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { Fragment } from "../primitive/fragment";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Fragment } from "@/primitive/fragment";
+import { getHost } from "@/host";
+
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
@@ -34,28 +36,34 @@ export function Trigger(
   props: ViewProps & { store: PopoverCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   return Fragment(
     {
       onMounted($f: any) {
-        const $ref = $f.firstElementChild;
+        const nodes = host.getChildNodes($f);
+        const $ref = nodes.find((n: any) => n?.nodeType === 1) || nodes[0];
         if (!$ref) return;
         props.store.popper.setReference(
           {
             $el: $ref,
             getRect() {
-              return $ref.getBoundingClientRect();
+              return host.getBoundingClientRect?.($ref) as any;
             },
           },
           { force: true },
         );
-        $ref.addEventListener("pointerdown", (e: any) => {
+        const handlePointerDown = (e: any) => {
           e.preventDefault();
           // 先让 LayerManager 处理，关闭其他已打开的浮动层
           getGlobalLayerManager().handlePointerDown(e.clientX, e.clientY);
           // 阻止冒泡，避免 document 上的监听器重复处理
           e.stopPropagation();
           props.store.toggle();
-        });
+        };
+        host.addEventListener($ref, "pointerdown", handlePointerDown);
+        return () => {
+          host.removeEventListener($ref, "pointerdown", handlePointerDown);
+        };
       },
     },
     children,

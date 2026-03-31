@@ -1,11 +1,12 @@
-import { ViewChildren, ViewProps, isElement } from "../primitive/view";
+import { ViewChildren, ViewProps, isElement } from "@/primitive/view";
 import {
-  isBrowser,
   safeCreateTextNode,
   safeCreateDocumentFragment,
-} from "../util/env";
+} from "@/util/env";
+import { getHost } from "@/host";
 
 export function Portal(props: ViewProps & {}, children: ViewChildren) {
+  const host = getHost();
   const anchor = safeCreateTextNode("");
   let _mountedNodes: Node[] = [];
   let _mountedChildren: any[] = [];
@@ -55,9 +56,9 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
         "parentNode:",
         !!node.parentNode,
       );
-      if (node.parentNode) {
-        console.log("[Portal] removing node from parent");
-        node.parentNode.removeChild(node);
+      const parent = host.getParentNode(node);
+      if (parent) {
+        host.removeChild(parent, node);
       }
     }
 
@@ -81,7 +82,7 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
         return null;
       }
       const fragment = safeCreateDocumentFragment();
-      const nodes: Node[] = [];
+      const nodes: any[] = [];
       const instances: any[] = [];
 
       // console.log("[Portal] render, children count:", _children.length);
@@ -96,18 +97,17 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
         if (isElement(child)) {
           const result = child.render();
           if (result) {
-            if (result instanceof DocumentFragment) {
-              nodes.push(...Array.from(result.childNodes));
-              fragment.appendChild(result);
+            if (host.isDocumentFragment(result)) {
+              nodes.push(...host.getChildNodes(result));
             } else {
               nodes.push(result);
-              fragment.appendChild(result);
             }
+            host.appendChild(fragment, result);
             instances.push(child);
           }
         } else if (typeof child === "string" || typeof child === "number") {
           const textNode = safeCreateTextNode(String(child));
-          fragment.appendChild(textNode);
+          host.appendChild(fragment, textNode);
           nodes.push(textNode);
         }
       }
@@ -117,9 +117,8 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
       _mounted = true;
 
       // console.log("[Portal] appending to body, nodes count:", nodes.length);
-      if (isBrowser) {
-        document.body.appendChild(fragment);
-      }
+      const body = host.getBody?.();
+      if (body) host.appendChild(body, fragment);
 
       // Lifecycle
       for (const child of instances) {

@@ -1,6 +1,7 @@
 import { computed, isRef, ref } from "@timeless/reactive";
 
-import { View, ViewProps, ViewChildren } from "../primitive/view";
+import { View, ViewProps, ViewChildren } from "@/primitive/view";
+import { getHost } from "@/host";
 
 export function Root(
   props: ViewProps & {
@@ -13,6 +14,7 @@ export function Root(
   },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const {
     min: _min = 0,
     max: _max = 100,
@@ -23,7 +25,7 @@ export function Root(
   } = props;
 
   const valueRef = ref(props.value ?? _min);
-  const containerRef: { current: HTMLElement | null } = { current: null };
+  const containerRef: { current: any | null } = { current: null };
 
   const pct = computed(valueRef, (d) => {
     const v = Math.min(Math.max(d, _min), _max);
@@ -32,7 +34,8 @@ export function Root(
 
   const updateValue = (clientX: number) => {
     if (disabled || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
+    const rect = host.getBoundingClientRect?.(containerRef.current) as any;
+    if (!rect || !rect.width) return;
     const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
     let newVal = _min + (x / rect.width) * (_max - _min);
     if (_step > 0) newVal = _min + Math.round((newVal - _min) / _step) * _step;
@@ -50,19 +53,19 @@ export function Root(
     if (disabled) return;
     e.preventDefault();
     updateValue(e.clientX);
-    e.target.setPointerCapture(e.pointerId);
+    host.setPointerCapture?.(e.target, e.pointerId);
     const onMove = (ev: any) => updateValue(ev.clientX);
     const onUp = (ev: any) => {
-      ev.target.releasePointerCapture(ev.pointerId);
-      document.removeEventListener("pointermove", onMove);
-      document.removeEventListener("pointerup", onUp);
+      host.releasePointerCapture?.(ev.target, ev.pointerId);
+      host.removeDocumentEventListener?.("pointermove", onMove);
+      host.removeDocumentEventListener?.("pointerup", onUp);
       cleanupDrag = null;
     };
-    document.addEventListener("pointermove", onMove);
-    document.addEventListener("pointerup", onUp);
+    host.addDocumentEventListener?.("pointermove", onMove);
+    host.addDocumentEventListener?.("pointerup", onUp);
     cleanupDrag = () => {
-      document.removeEventListener("pointermove", onMove);
-      document.removeEventListener("pointerup", onUp);
+      host.removeDocumentEventListener?.("pointermove", onMove);
+      host.removeDocumentEventListener?.("pointerup", onUp);
     };
   };
 
@@ -70,12 +73,15 @@ export function Root(
     {
       ...rest,
       // "data-percentage": pct,
-      onMounted(elm: HTMLElement) {
+      onMounted(elm: any) {
         containerRef.current = elm;
-        elm.addEventListener("pointerdown", onPointerDown);
+        host.addEventListener(elm, "pointerdown", onPointerDown);
         if (rest.onMounted) {
           rest.onMounted(elm);
         }
+        return () => {
+          host.removeEventListener(elm, "pointerdown", onPointerDown);
+        };
       },
       onUnmounted() {
         if (cleanupDrag) cleanupDrag();

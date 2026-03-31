@@ -1,6 +1,6 @@
 import { ImageCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps, TimelessElement } from "../primitive/view";
+import { View, ViewChildren, ViewProps, TimelessElement } from "@/primitive/view";
 
 type Provider = Partial<{
   provide_ui_image: (store: ImageCore, $img: HTMLDivElement) => void;

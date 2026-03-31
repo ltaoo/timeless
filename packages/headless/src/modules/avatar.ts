@@ -1,6 +1,8 @@
 import { computed, ref, isRef, Ref } from "@timeless/reactive";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { getHost } from "@/host";
+import { safeCreateElement } from "@/util/env";
 
 export function Root(
   props: ViewProps & { size?: "default" | "large" },
@@ -24,19 +26,29 @@ export function Image(
     onLoadingStatusChange?: (status: "loading" | "loaded" | "error") => void;
   },
 ) {
+  const host = getHost();
   const { src, alt, onLoadingStatusChange, ...rest } = props || {};
 
   const srcRef = isRef(src) ? src : ref(src || "");
 
-  const $img = document.createElement("img");
+  const $img = safeCreateElement("img");
+  let rendered = false;
+
+  const setProp = (key: string, value: any) => {
+    if (host.setProperty) {
+      host.setProperty($img, key, value);
+      return;
+    }
+    ($img as any)[key] = value;
+  };
 
   const updateSrc = (v: string) => {
     if (v) {
-      $img.src = v;
-      $img.style.display = "";
+      setProp("src", v);
+      host.patchStyle?.($img, { display: "" });
       onLoadingStatusChange?.("loading");
     } else {
-      $img.style.display = "none";
+      host.patchStyle?.($img, { display: "none" });
       onLoadingStatusChange?.("error");
     }
   };
@@ -46,32 +58,42 @@ export function Image(
     src._subscribe({ onChange: updateSrc });
   }
 
-  $img.addEventListener("load", () => {
+  const handleLoad = () => {
     onLoadingStatusChange?.("loaded");
-  });
+  };
 
-  $img.addEventListener("error", () => {
+  const handleError = () => {
     onLoadingStatusChange?.("error");
-    $img.style.display = "none";
-  });
+    host.patchStyle?.($img, { display: "none" });
+  };
 
-  if (alt) $img.alt = alt;
-  if (rest.class) $img.className = String(rest.class);
+  host.addEventListener($img, "load", handleLoad);
+  host.addEventListener($img, "error", handleError);
+
+  if (alt) setProp("alt", alt);
+  if (rest.class) host.setClassName($img, String(rest.class));
 
   return {
     t: "view",
     $elm: $img,
     render() {
+      if (rendered) {
+        return $img;
+      }
+      rendered = true;
       return $img;
     },
     onMounted() {},
     beforeUnmounted() {},
-    onUnmounted() {},
+    onUnmounted() {
+      host.removeEventListener($img, "load", handleLoad);
+      host.removeEventListener($img, "error", handleError);
+    },
     append(node: any) {
-      $img.appendChild(node);
+      host.appendChild($img, node);
     },
     setContent(html: string) {
-      $img.innerHTML = html;
+      host.setInnerHTML?.($img, html);
     },
     class$: null,
   };

@@ -1,7 +1,16 @@
 import { ref, computed } from "@timeless/reactive";
-import { WaterfallModel, WaterfallColumnModel, WaterfallCellModel } from "@timeless/ui";
+import {
+  WaterfallModel,
+  WaterfallColumnModel,
+  WaterfallCellModel,
+} from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps, TimelessElement } from "../primitive/view";
+import {
+  View,
+  ViewChildren,
+  ViewProps,
+  TimelessElement,
+} from "@/primitive/view";
 
 export function Root(
   props: ViewProps & { store: WaterfallModel<any> },
@@ -16,7 +25,10 @@ export function Root(
 
   const inner$ = View(
     {
-      style: computed(innerHeight, (h) => `height: ${h}px; position: relative;`),
+      style: computed(
+        innerHeight,
+        (h) => `height: ${h}px; position: relative;`,
+      ),
     },
     children,
   );
@@ -67,7 +79,10 @@ export function Column(
   const view$ = View(
     {
       ...rest,
-      style: computed(columnHeight, (h) => `position: relative; height: ${h}px;`),
+      style: computed(
+        columnHeight,
+        (h) => `position: relative; height: ${h}px;`,
+      ),
     },
     children,
   );
@@ -116,7 +131,7 @@ export function Cell(
   });
 
   const style = computed(cellStyle, (s) => {
-    if (!s.bound) return 'display: none;';
+    if (!s.bound) return "display: none;";
     return `position: absolute; top: ${s.top}px; height: ${s.height}px; width: 100%;`;
   });
 

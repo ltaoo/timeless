@@ -5,7 +5,7 @@ import {
   ViewAttributes,
   ViewChildren,
   ViewProps,
-} from "../primitive/view";
+} from "@/primitive/view";
 
 export interface NativeLinkProps extends Omit<ViewProps, "as"> {
   href?: string | Ref<string>;

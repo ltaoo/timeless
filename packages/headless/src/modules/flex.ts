@@ -1,6 +1,6 @@
 import { sn, ClassNameRef, Ref } from "@timeless/reactive";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
 
 export type FlexJustify =
   | "start"

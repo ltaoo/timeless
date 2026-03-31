@@ -1,13 +1,9 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import {
-  ViewProps,
-  ViewChildren,
-  isElement,
-  TimelessElement,
-  TimelessComponent,
-  TimelessNormalComponent,
-} from "./view";
+import { getHost } from "@/host";
+import { safeCreateDocumentFragment, safeCreateTextNode } from "@/util/env";
+
+import { ViewChildren, isElement, TimelessElement } from "./view";
 
 export function Match(
   props: {
@@ -20,9 +16,10 @@ export function Match(
   children?: ViewChildren,
 ) {
   const { when, fallback, onMounted, beforeUnmounted, onUnmounted } = props;
-  const anchor = document.createTextNode("");
+  const host = getHost();
+  const anchor = safeCreateTextNode("");
 
-  let _currentNodes: Node[] = [];
+  let _currentNodes: any[] = [];
   let _currentChildren: any[] = [];
   let _prev_value: any = undefined;
 
@@ -74,11 +71,11 @@ export function Match(
         child.onUnmounted();
       }
     }
-    const parent = anchor.parentNode;
+    const parent = host.getParentNode(anchor);
     if (removeDom && parent) {
       for (const node of _currentNodes) {
-        if (node.parentNode === parent) {
-          parent.removeChild(node);
+        if (host.getParentNode(node) === parent) {
+          host.removeChild(parent, node);
         }
       }
     }
@@ -86,9 +83,9 @@ export function Match(
     _currentChildren = [];
   }
 
-  function mount(targetChildren: any[], parent?: Node, before?: Node) {
-    const fragment = document.createDocumentFragment();
-    const newNodes: Node[] = [];
+  function mount(targetChildren: any[], parent?: any, before?: any) {
+    const fragment = safeCreateDocumentFragment();
+    const newNodes: any[] = [];
     const newInstances: any[] = [];
 
     for (const node of targetChildren) {
@@ -96,18 +93,17 @@ export function Match(
       if (isElement(node)) {
         const result = node.render();
         if (result) {
-          if (result instanceof DocumentFragment) {
-            newNodes.push(...Array.from(result.childNodes));
-            fragment.appendChild(result);
+          if (host.isDocumentFragment(result)) {
+            newNodes.push(...host.getChildNodes(result));
           } else {
             newNodes.push(result);
-            fragment.appendChild(result);
           }
+          host.appendChild(fragment, result);
           newInstances.push(node);
         }
       } else if (typeof node === "string" || typeof node === "number") {
-        const textNode = document.createTextNode(String(node));
-        fragment.appendChild(textNode);
+        const textNode = safeCreateTextNode(String(node));
+        host.appendChild(fragment, textNode);
         newNodes.push(textNode);
       }
     }
@@ -116,7 +112,7 @@ export function Match(
     _currentChildren = newInstances;
 
     if (parent) {
-      parent.insertBefore(fragment, before || null);
+      host.insertBefore(parent, fragment, before || null);
     }
 
     for (const child of newInstances) {
@@ -136,8 +132,9 @@ export function Match(
     unmount(true);
     const activeMatch = get_active_match();
     const target = get_target_children(activeMatch);
-    if (target.length > 0 && anchor.parentNode) {
-      mount(target, anchor.parentNode, anchor);
+    const parent = host.getParentNode(anchor);
+    if (target.length > 0 && parent) {
+      mount(target, parent, anchor);
     }
   }
 
@@ -158,7 +155,7 @@ export function Match(
       const target = get_target_children(active_match);
       const fragment = mount(target);
 
-      fragment.appendChild(anchor);
+      host.appendChild(fragment, anchor);
 
       if (onMounted) {
         onMounted(anchor);
@@ -188,7 +185,7 @@ export function Case<T = any>(
     t: "case",
     value,
     children,
-    $elm: document.createDocumentFragment() as any,
+    $elm: safeCreateDocumentFragment() as any,
     render() {
       return null;
     },

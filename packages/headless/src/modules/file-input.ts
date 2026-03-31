@@ -1,7 +1,9 @@
-import { cn, ref, refobj } from "@timeless/reactive";
+import { cn, ref } from "@timeless/reactive";
 import { FileInputCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "../primitive/view";
+import { View, ViewProps, ViewChildren } from "@/primitive/view";
+import { getHost } from "@/host";
+import { safeCreateElement } from "@/util/env";
 
 export function Root(
   props: ViewProps & { store?: FileInputCore },
@@ -13,9 +15,12 @@ export function Root(
 export function Input(
   props: ViewProps & { store: FileInputCore; id?: string },
 ) {
+  const host = getHost();
   const { store, style: st, class: cls, dataset = {}, id, ...rest } = props;
 
-  const $elm = document.createElement("input");
+  const $elm = safeCreateElement("input");
+  let rendered = false;
+  const listenerCleanups: (() => void)[] = [];
 
   const accept$ = ref(store.accept || "");
   const multiple$ = ref(store.multiple || false);
@@ -45,30 +50,42 @@ export function Input(
     t: "view",
     $elm,
     render() {
+      if (rendered) {
+        return $elm;
+      }
+      rendered = true;
+
+      const setProp = (key: string, value: any) => {
+        if (host.setProperty) {
+          host.setProperty($elm, key, value);
+          return;
+        }
+        ($elm as any)[key] = value;
+      };
       const applyAttr = (k: string, v: any) => {
         if (v === undefined || v === null || v === false) {
-          $elm.removeAttribute(k);
+          host.removeAttribute($elm, k);
           return;
         }
         if (v === true) {
-          $elm.setAttribute(k, "");
+          host.setAttribute($elm, k, "");
           return;
         }
-        $elm.setAttribute(k, String(v));
+        host.setAttribute($elm, k, String(v));
       };
 
       if (id) {
-        $elm.id = id;
+        setProp("id", id);
       }
 
       // Set initial attributes
-      $elm.type = "file";
-      $elm.disabled = disabled$.value;
+      setProp("type", "file");
+      setProp("disabled", disabled$.value);
       if (accept$.value) {
-        $elm.setAttribute("accept", accept$.value);
+        host.setAttribute($elm, "accept", accept$.value);
       }
       if (multiple$.value) {
-        $elm.setAttribute("multiple", "");
+        host.setAttribute($elm, "multiple", "");
       }
 
       // Apply dataset attributes
@@ -90,52 +107,70 @@ export function Input(
       // Apply classes
       class$._subscribe({
         onChange(v: any) {
-          $elm.className = v.join(" ");
+          host.setClassName($elm, v.join(" "));
         },
       });
-      $elm.className = class$.toString();
+      host.setClassName($elm, class$.toString());
+
+      if (typeof st === "string") {
+        host.setStyleText($elm, st);
+      }
 
       // Subscribe to reactive state changes
       accept$._subscribe({
         onChange(v: any) {
           if (v) {
-            $elm.setAttribute("accept", v);
+            host.setAttribute($elm, "accept", v);
           } else {
-            $elm.removeAttribute("accept");
+            host.removeAttribute($elm, "accept");
           }
         },
       });
       multiple$._subscribe({
         onChange(v: any) {
           if (v) {
-            $elm.setAttribute("multiple", "");
+            host.setAttribute($elm, "multiple", "");
           } else {
-            $elm.removeAttribute("multiple");
+            host.removeAttribute($elm, "multiple");
           }
         },
       });
       disabled$._subscribe({
         onChange(v: any) {
-          $elm.disabled = v;
+          setProp("disabled", v);
         },
       });
 
       // Event handlers
-      $elm.addEventListener("change", (e: Event) => {
+      const handleChange = (e: any) => {
         store.handleChange(e);
-      });
+      };
 
-      $elm.addEventListener("focus", () => {
+      const handleFocus = () => {
         store.handleFocus();
-      });
+      };
 
-      $elm.addEventListener("blur", () => {
+      const handleBlur = () => {
         store.handleBlur();
-      });
+      };
+
+      host.addEventListener($elm, "change", handleChange);
+      host.addEventListener($elm, "focus", handleFocus);
+      host.addEventListener($elm, "blur", handleBlur);
+
+      listenerCleanups.push(() =>
+        host.removeEventListener($elm, "change", handleChange),
+      );
+      listenerCleanups.push(() =>
+        host.removeEventListener($elm, "focus", handleFocus),
+      );
+      listenerCleanups.push(() =>
+        host.removeEventListener($elm, "blur", handleBlur),
+      );
 
       // Connect store focus method to element
       store.focus = () => {
-        $elm.focus();
+        host.focus?.($elm);
       };
 
       return $elm;
@@ -144,7 +179,7 @@ export function Input(
       if (props.onMounted) props.onMounted(this.$elm);
       store.setMounted();
       if (store.autoFocus) {
-        this.$elm.focus();
+        host.focus?.(this.$elm);
       }
     },
     beforeUnmounted() {
@@ -152,6 +187,8 @@ export function Input(
     },
     onUnmounted() {
       for (const fn of events) if (typeof fn === "function") fn();
+      for (const fn of listenerCleanups) fn();
+      listenerCleanups.length = 0;
       if (props.onUnmounted) props.onUnmounted();
     },
   };
@@ -161,21 +198,26 @@ export function Clear(
   props: ViewProps & { store: FileInputCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
 
   return View(
     {
       ...rest,
       onMounted($e) {
-        $e.addEventListener("click", (e: any) => {
+        const handleClick = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           store.clear();
-          setTimeout(() => {
+          host.setTimeout(() => {
             store.focus();
           }, 0);
-        });
+        };
+        host.addEventListener($e, "click", handleClick);
         if (rest.onMounted) rest.onMounted($e);
+        return () => {
+          host.removeEventListener($e, "click", handleClick);
+        };
       },
     },
     children,
@@ -186,6 +228,7 @@ export function Loading(
   props: ViewProps & { store: FileInputCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const loading$ = ref(store.loading || false);
 
@@ -198,9 +241,9 @@ export function Loading(
   return View(
     {
       ...rest,
-      onMounted($elm: HTMLDivElement) {
+      onMounted($elm: any) {
         const updateDisplay = () => {
-          $elm.style.display = loading$.value ? "" : "none";
+          host.patchStyle?.($elm, { display: loading$.value ? "" : "none" });
         };
         loading$._subscribe({ onChange: updateDisplay });
         updateDisplay();
@@ -215,6 +258,7 @@ export function Disabled(
   props: ViewProps & { store: FileInputCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const disabled$ = ref(store.disabled || false);
 
@@ -227,12 +271,12 @@ export function Disabled(
   return View(
     {
       ...rest,
-      onMounted($elm: HTMLDivElement) {
+      onMounted($elm: any) {
         const updateState = () => {
           if (disabled$.value) {
-            $elm.setAttribute("data-disabled", "true");
+            host.setAttribute($elm, "data-disabled", "true");
           } else {
-            $elm.removeAttribute("data-disabled");
+            host.removeAttribute($elm, "data-disabled");
           }
         };
         disabled$._subscribe({ onChange: updateState });

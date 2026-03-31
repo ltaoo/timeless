@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { View, Show, For, Txt, Fragment, ref, isBrowser, renderToString } from "@timeless/headless";
+import { View, isBrowser, renderToString } from "@timeless/headless";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../../..");
@@ -17,7 +17,9 @@ function App() {
 
   return View({ type: "div", class: "app" }, [
     View({ type: "h1" }, ["Timeless SSR Demo"]),
-    View({ type: "p", class: "info" }, ["Rendered on server. JavaScript will make it interactive."]),
+    View({ type: "p", class: "info" }, [
+      "Rendered on server. JavaScript will make it interactive.",
+    ]),
     View({ type: "div", class: "counter-section" }, [
       View({ type: "h2" }, ["Counter"]),
       View({ type: "div", class: "counter" }, [
@@ -28,7 +30,10 @@ function App() {
     ]),
     View({ type: "div", class: "list-section" }, [
       View({ type: "h2" }, ["Fruit List"]),
-      View({ type: "ul" }, items.map((item) => View({ type: "li" }, [item]))),
+      View(
+        { type: "ul" },
+        items.map((item) => View({ type: "li" }, [item])),
+      ),
     ]),
   ]);
 }
@@ -47,10 +52,20 @@ const MIME = {
 // --- UMD bundle paths ---
 
 const LIB_MAP = {
-  "/lib/reactive.js": path.join(ROOT, "packages/reactive/dist/timeless.reactive.umd.min.js"),
+  "/lib/reactive.js": path.join(
+    ROOT,
+    "packages/reactive/dist/timeless.reactive.umd.min.js",
+  ),
   "/lib/ui.js": path.join(ROOT, "packages/ui/dist/timeless.ui.umd.min.js"),
   "/lib/kit.js": path.join(ROOT, "packages/kit/dist/timeless.kit.umd.min.js"),
-  "/lib/headless.js": path.join(ROOT, "packages/headless/dist/timeless.headless.umd.min.js"),
+  "/lib/headless.js": path.join(
+    ROOT,
+    "packages/headless/dist/timeless.headless.umd.min.js",
+  ),
+  "/lib/headless-dom.js": path.join(
+    ROOT,
+    "packages/headless-dom/dist/timeless.headless-dom.umd.min.js",
+  ),
 };
 
 // --- HTML template ---
@@ -97,6 +112,7 @@ function buildPage(ssrContent) {
   <script src="/lib/ui.js"></script>
   <script src="/lib/kit.js"></script>
   <script src="/lib/headless.js"></script>
+  <script src="/lib/headless-dom.js"></script>
   <script src="/client.js"></script>
 </body>
 </html>`;
@@ -133,7 +149,9 @@ const server = http.createServer((req, res) => {
       return;
     }
     res.writeHead(404);
-    res.end(`UMD bundle not found: ${file}\nRun "pnpm run build" in the project root first.`);
+    res.end(
+      `UMD bundle not found: ${file}\nRun "pnpm run build" in the project root first.`,
+    );
     return;
   }
 

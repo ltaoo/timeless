@@ -1,8 +1,8 @@
 import { ref, computed } from "@timeless/reactive";
 import { ButtonCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { Show } from "../primitive/show";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Show } from "@/primitive/show";
 import { Fragment } from "@/primitive/fragment";
 
 export function Root(

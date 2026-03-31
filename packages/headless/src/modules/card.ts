@@ -1,4 +1,4 @@
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
 
 export function Card(props: ViewProps, children?: ViewChildren) {
   return View(

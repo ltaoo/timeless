@@ -7,6 +7,7 @@ export * from "./primitive/view";
 export * from "./primitive/fragment";
 export * from "./primitive/html";
 export * from "./primitive/text";
+export * from "./primitive/lazy-view";
 
 // Native
 export * from "./native/img";
@@ -20,8 +21,6 @@ export * from "./native/slider";
 export * from "./native/file-input";
 export * from "./native/svg";
 export * from "./native/style";
-
-export * from "./primitive/lazy-view";
 
 // base component
 export * from "./modules/portal";
@@ -92,3 +91,5 @@ export * from "./util/render-to-string";
 export * from "./util/lazy";
 export * from "./util/render";
 export * from "./util/h";
+
+export * from "./host";

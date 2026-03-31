@@ -1,7 +1,9 @@
-import { ref, isRef, Ref, registryGet, registrySet } from "@timeless/reactive";
+import { isRef, Ref, registryGet, registrySet } from "@timeless/reactive";
 
-import { View, ViewProps, TimelessElement, isElement } from "./view";
-import { safeCreateTextNode, safeCreateDocumentFragment } from "../util/env";
+import { getHost } from "@/host";
+import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
+
+import { ViewProps, TimelessElement, isElement } from "./view";
 
 export function For<T>(
   props: ViewProps & {
@@ -13,6 +15,7 @@ export function For<T>(
     key?: string;
   },
 ) {
+  const host = getHost();
   const { each, key, render, onMounted, onUnmounted, ...restProps } = props;
 
   const _key = key;
@@ -43,15 +46,8 @@ export function For<T>(
         if (!view$) {
           return { node: null, elm: null, trackElm: null, empty: true };
         }
-        // is component
-        // if (isComponent(view$)) {
         const elm = view$.render();
         return { node: view$, elm, trackElm: view$.$elm };
-        // }
-        // if (typeof view$ === "string" || typeof view$ === "number") {
-        //   return { node: null, elm: document.createTextNode(String(view$)) };
-        // }
-        // return { node: null, elm: view$ };
       })();
       return rr;
     },
@@ -59,7 +55,7 @@ export function For<T>(
       // const new_children: (TimelessElement | null)[] = new Array(items.length);
       // const new_elms: (HTMLElement | Text | null)[] = new Array(items.length);
       const $base = _$children[index] || anchor;
-      const $parent = anchor.parentNode;
+      const $parent = host.getParentNode(anchor);
 
       if (!$parent) return;
 
@@ -82,24 +78,24 @@ export function For<T>(
             const $elm_prepare_insert = res.render();
             _$children.splice(index + i, 0, res.$elm);
             if ($elm_prepare_insert) {
-              $fragment.appendChild($elm_prepare_insert);
+              host.appendChild($fragment, $elm_prepare_insert);
             }
           }
         })();
       }
-      $parent.insertBefore($fragment, $base);
+      host.insertBefore($parent, $fragment, $base);
       // console.log("[headless]For - insert items", index, items, _$children);
     },
     _remove(index: number, count: number) {
-      const $parent = anchor.parentNode;
+      const $parent = host.getParentNode(anchor);
       if (!$parent) return;
 
       for (let i = 0; i < count; i += 1) {
         const elm = _$children[index + i];
         // console.log(i, index + i, elm, _$children);
-        if (elm && elm.parentNode === $parent) {
+        if (elm && host.getParentNode(elm) === $parent) {
           try {
-            $parent.removeChild(elm);
+            host.removeChild($parent, elm);
           } catch (e) {
             // ignore
           }
@@ -114,7 +110,7 @@ export function For<T>(
       }
     },
     _update(index: number, item: any) {
-      const $parent = anchor.parentNode;
+      const $parent = host.getParentNode(anchor);
       if (!$parent) return;
 
       const res = methods._render_item(item, index);
@@ -125,10 +121,10 @@ export function For<T>(
         return;
       }
       const old = _$children[index];
-      if (old && old.parentNode === $parent && res.elm) {
-        $parent.replaceChild(res.elm, old);
+      if (old && host.getParentNode(old) === $parent && res.elm) {
+        host.replaceChild($parent, res.elm, old);
       } else if (res.elm) {
-        $parent.insertBefore(res.elm, anchor);
+        host.insertBefore($parent, res.elm, anchor);
         // if (res.onMounted) {
         //   res.onMounted();
         // }
@@ -155,7 +151,7 @@ export function For<T>(
       const prev_elements = _elements;
       const prev_children = _$children;
 
-      const $parent = anchor.parentNode;
+      const $parent = host.getParentNode(anchor);
       if (!$parent) return;
 
       // 1. Prepare target state
@@ -246,8 +242,8 @@ export function For<T>(
 
       // 4.1 Remove nodes
       for (const { elm, component } of removed_nodes) {
-        if (elm && elm.parentNode === $parent) {
-          $parent.removeChild(elm);
+        if (elm && host.getParentNode(elm) === $parent) {
+          host.removeChild($parent, elm);
         }
         if (component && isElement(component)) {
           if (typeof component.onUnmounted === "function") {
@@ -258,20 +254,20 @@ export function For<T>(
 
       // 4.2 Reorder / Insert nodes
       // Backward loop for correct insertion relative to anchor
-      let next_sibling: Node | null = anchor;
+      let next_sibling: any | null = anchor;
       for (let i = new_children.length - 1; i >= 0; i--) {
         const node = new_children[i];
         if (!node) continue;
 
         // If node is already in correct position (immediately before nextSibling), skip.
-        if (node.nextSibling === next_sibling) {
+        if (host.getNextSibling(node) === next_sibling) {
           next_sibling = node;
           continue;
         }
 
         if ($parent) {
           // If node is already in DOM elsewhere, insertBefore moves it.
-          $parent.insertBefore(node, next_sibling);
+          host.insertBefore($parent, node, next_sibling);
         }
 
         next_sibling = node;
@@ -343,14 +339,14 @@ export function For<T>(
             const $sub = res.render();
             _$children[i] = res.$elm;
             if ($sub) {
-              $fragment.appendChild($sub);
+              host.appendChild($fragment, $sub);
             }
           } else {
             _elements[i] = null;
           }
         })();
       }
-      $fragment.appendChild(anchor); // Add anchor to fragment
+      host.appendChild($fragment, anchor); // Add anchor to fragment
       _mounted = true;
 
       if (onMounted) {
@@ -377,12 +373,12 @@ export function For<T>(
       }
 
       // Remove DOM nodes
-      const $parent = anchor.parentNode;
+      const $parent = host.getParentNode(anchor);
       if ($parent) {
         for (const elm of _$children) {
-          if (elm && elm.parentNode === $parent) {
+          if (elm && host.getParentNode(elm) === $parent) {
             try {
-              $parent.removeChild(elm);
+              host.removeChild($parent, elm);
             } catch (e) {
               // ignore
             }

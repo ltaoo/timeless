@@ -1,9 +1,11 @@
 import { refobj, computed, combine } from "@timeless/reactive";
 import { MenuCore, MenuItemCore, MenuGroupCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { Show } from "../primitive/show";
-import { h } from "../util/h";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Show } from "@/primitive/show";
+import { h } from "@/util/h";
+import { getHost } from "@/host";
+
 import { Portal as NativePortal } from "./portal";
 import { Arrow as NativeArrow } from "./arrow";
 import * as PopperPrimitive from "./popper";
@@ -114,7 +116,7 @@ export function ContentImpl(
                 props.store.parent_menu &&
                 props.store.parent_menu.hide_sub_timer !== null
               ) {
-                clearTimeout(props.store.parent_menu.hide_sub_timer);
+                getHost().clearTimeout(props.store.parent_menu.hide_sub_timer);
                 props.store.parent_menu.hide_sub_timer = null;
               }
               if (rest.onMouseEnter) {
@@ -195,6 +197,7 @@ export function ItemImpl(
   props: ViewProps & { store: MenuItemCore },
   children: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(props.store.state);
 
@@ -220,15 +223,15 @@ export function ItemImpl(
           props.store.menu.popper.setReference({
             $el,
             getRect() {
-              return $el.getBoundingClientRect();
+              return host.getBoundingClientRect?.($el) as any;
             },
           });
         }
         props.store.onFocus(() => {
-          $el.focus();
+          host.focus?.($el);
         });
         props.store.onBlur(() => {
-          $el.blur();
+          host.blur?.($el);
         });
       },
       onClick() {
@@ -284,6 +287,7 @@ export function SubMenuTrigger(
   props: ViewProps & { store: MenuItemCore },
   children: ViewChildren,
 ) {
+  const host = getHost();
   return Anchor(
     {
       class: "menu-item-with-sub-menu",
@@ -294,8 +298,7 @@ export function SubMenuTrigger(
         }
         props.store.menu.popper.setReference({
           getRect() {
-            const rect = $el.getBoundingClientRect();
-            return rect;
+            return host.getBoundingClientRect?.($el) as any;
           },
         });
       },
@@ -324,6 +327,7 @@ export function SubMenuContent(
   },
   children: ViewChildren,
 ) {
+  const host = getHost();
   return ContentImpl(
     {
       ...props,
@@ -334,7 +338,7 @@ export function SubMenuContent(
           props.store.parent_menu &&
           props.store.parent_menu.hide_sub_timer !== null
         ) {
-          clearTimeout(props.store.parent_menu.hide_sub_timer);
+          host.clearTimeout(props.store.parent_menu.hide_sub_timer);
           props.store.parent_menu.hide_sub_timer = null;
         }
       },

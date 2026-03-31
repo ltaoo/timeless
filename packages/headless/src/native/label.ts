@@ -5,7 +5,7 @@ import {
   ViewAttributes,
   ViewChildren,
   ViewProps,
-} from "../primitive/view";
+} from "@/primitive/view";
 
 export interface NativeLabelProps extends Omit<ViewProps, "as"> {
   for?: string | Ref<string>;

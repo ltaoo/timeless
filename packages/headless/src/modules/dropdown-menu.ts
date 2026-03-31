@@ -1,4 +1,4 @@
-import { refobj, computed } from "@timeless/reactive";
+import { refobj } from "@timeless/reactive";
 import {
   DropdownMenuCore,
   MenuCore,
@@ -6,7 +6,9 @@ import {
   MenuGroupCore,
 } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { getHost } from "@/host";
+
 import * as MenuPrimitive from "./menu";
 
 // Shared hover timer state to coordinate between Trigger and Content
@@ -22,20 +24,22 @@ function getHoverTimer(store: DropdownMenuCore) {
 }
 
 function _hoverClearHide(store: DropdownMenuCore) {
+  const host = getHost();
   const state = getHoverTimer(store);
   if (state.timer) {
-    clearTimeout(state.timer);
+    host.clearTimeout(state.timer);
     state.timer = null;
   }
 }
 
 function _hoverScheduleHide(store: DropdownMenuCore) {
+  const host = getHost();
   _hoverClearHide(store);
 
   // Clear all submenu hide timers to ensure they close together
   const clearAllSubTimers = (menu: any) => {
     if (menu.hide_sub_timer) {
-      clearTimeout(menu.hide_sub_timer);
+      host.clearTimeout(menu.hide_sub_timer);
       menu.hide_sub_timer = null;
     }
     // Clear timers for all items with submenus
@@ -50,7 +54,7 @@ function _hoverScheduleHide(store: DropdownMenuCore) {
   clearAllSubTimers(store.menu);
 
   const state = getHoverTimer(store);
-  state.timer = setTimeout(() => {
+  state.timer = host.setTimeout(() => {
     store.hide();
     state.timer = null;
   }, 100);
@@ -67,6 +71,7 @@ export function Trigger(
   props: ViewProps & { store: DropdownMenuCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
@@ -78,19 +83,20 @@ export function Trigger(
   return View(
     {
       onMounted($elm: HTMLDivElement) {
-        const $ref = $elm.firstElementChild || $elm;
+        const nodes = host.getChildNodes($elm);
+        const $ref = nodes.find((n: any) => n?.nodeType === 1) || $elm;
         props.store.menu.popper.setReference(
           {
             $el: $ref,
             getRect() {
-              return $ref.getBoundingClientRect();
+              return host.getBoundingClientRect?.($ref) as any;
             },
           },
           { force: true },
         );
         // Handle click trigger
         if (store.trigger === "click") {
-          $elm.addEventListener("pointerdown", (e) => {
+          const handlePointerDown = (e: any) => {
             if (store.disabled) {
               return;
             }
@@ -104,11 +110,15 @@ export function Trigger(
               return;
             }
             store.show();
-          });
+          };
+          host.addEventListener($elm, "pointerdown", handlePointerDown);
+          return () => {
+            host.removeEventListener($elm, "pointerdown", handlePointerDown);
+          };
         }
         // Handle hover trigger
         if (store.trigger === "hover") {
-          $elm.addEventListener("mouseenter", () => {
+          const handleMouseEnter = () => {
             if (store.disabled) {
               return;
             }
@@ -117,19 +127,29 @@ export function Trigger(
             }
             _hoverClearHide(store);
             store.show();
-          });
+          };
 
-          $elm.addEventListener("mouseleave", () => {
+          const handleMouseLeave = () => {
             if (store.disabled) {
               return;
             }
             _hoverScheduleHide(store);
-          });
+          };
 
           // Prevent click from closing the menu in hover mode
-          $elm.addEventListener("pointerdown", (e) => {
+          const handlePointerDown = (e: any) => {
             e.stopPropagation();
-          });
+          };
+
+          host.addEventListener($elm, "mouseenter", handleMouseEnter);
+          host.addEventListener($elm, "mouseleave", handleMouseLeave);
+          host.addEventListener($elm, "pointerdown", handlePointerDown);
+
+          return () => {
+            host.removeEventListener($elm, "mouseenter", handleMouseEnter);
+            host.removeEventListener($elm, "mouseleave", handleMouseLeave);
+            host.removeEventListener($elm, "pointerdown", handlePointerDown);
+          };
         }
       },
     },
@@ -226,6 +246,7 @@ export function SubMenuContent(
   },
   children: ViewChildren,
 ) {
+  const host = getHost();
   // Get the parent DropdownMenuCore from the menu's parent
   const parentDropdown = (props.store as any).parentDropdown as
     | DropdownMenuCore
@@ -238,7 +259,7 @@ export function SubMenuContent(
         props.store.parent_menu &&
         props.store.parent_menu.hide_sub_timer !== null
       ) {
-        clearTimeout(props.store.parent_menu.hide_sub_timer);
+        host.clearTimeout(props.store.parent_menu.hide_sub_timer);
         props.store.parent_menu.hide_sub_timer = null;
       }
       if (parentDropdown && parentDropdown.trigger === "hover") {

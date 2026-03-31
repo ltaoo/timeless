@@ -1,9 +1,9 @@
 import { ref, computed } from "@timeless/reactive";
 import { CheckboxCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { Show } from "../primitive/show";
-import { NativeInput, NativeInputProps } from "../native/input";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Show } from "@/primitive/show";
+import { NativeInput, NativeInputProps } from "@/native/input";
 
 export function Root(
   props: ViewProps & { store: CheckboxCore },

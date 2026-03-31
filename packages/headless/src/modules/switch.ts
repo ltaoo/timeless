@@ -1,7 +1,7 @@
 import { computed, refobj } from "@timeless/reactive";
 import { SwitchCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
 import { NativeCheckbox } from "@/native/checkbox";
 
 export function Root(

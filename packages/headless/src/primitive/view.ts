@@ -7,7 +7,9 @@ import {
   StyleRef,
 } from "@timeless/reactive";
 
-import { safeCreateElement, safeCreateTextNode } from "../util/env";
+import { getHost } from "@/host";
+import { safeCreateElement, safeCreateTextNode } from "@/util/env";
+
 import { Txt } from "./text";
 
 export type AttributeValue = string | number | boolean | undefined | null;
@@ -22,9 +24,7 @@ export interface ViewProps {
   draggable?: boolean;
   attributes?: ViewAttributes;
   dataset?: Record<string, MaybeSignal<AttributeValue>>;
-  onMounted?(
-    el: HTMLElement | SVGElement | Text | DocumentFragment,
-  ): void | (() => void);
+  onMounted?(el: any): void | (() => void);
   beforeUnmounted?(): void;
   onUnmounted?(): void;
   onClick?(e: MouseEvent): void;
@@ -51,6 +51,7 @@ export function View(
   props: ViewProps = {},
   children?: ViewChildren | ViewChildren[number],
 ) {
+  const host = getHost();
   const {
     as = "div",
     style,
@@ -81,6 +82,8 @@ export function View(
     onAnimationEnd,
   } = props;
   let onMountedCleanup: (() => void) | undefined;
+  const listenerCleanups: (() => void)[] = [];
+  let rendered = false;
   const $elm = safeCreateElement(as);
   let _children = children ?? [];
   if (!Array.isArray(_children)) {
@@ -91,6 +94,23 @@ export function View(
     t: "view",
     $elm,
     render() {
+      if (rendered) {
+        return $elm;
+      }
+      rendered = true;
+
+      const listen = (
+        target: any,
+        type: string,
+        handler: (event: any) => void,
+        options?: any,
+      ) => {
+        host.addEventListener(target, type, handler, options);
+        listenerCleanups.push(() => {
+          host.removeEventListener(target, type, handler, options);
+        });
+      };
+
       for (let i = 0; i < _children.length; i++) {
         let child = _children[i];
         // 处理 h() 返回的延迟执行函数
@@ -105,14 +125,14 @@ export function View(
 
       const applyAttr = (k: string, v: any) => {
         if (v === undefined || v === null || v === false) {
-          $elm.removeAttribute(k);
+          host.removeAttribute($elm, k);
           return;
         }
         if (v === true) {
-          $elm.setAttribute(k, "");
+          host.setAttribute($elm, k, "");
           return;
         }
-        $elm.setAttribute(k, String(v));
+        host.setAttribute($elm, k, String(v));
       };
 
       if (attributes) {
@@ -148,63 +168,65 @@ export function View(
 
       if (cls) {
         if (typeof cls === "string") {
-          $elm.className = cls;
+          host.setClassName($elm, cls);
         } else if (isRef(cls)) {
           cls._subscribe({
             onChange(v) {
-              $elm.className = v;
+              host.setClassName($elm, v);
             },
           });
-          $elm.className = cls.value;
+          host.setClassName($elm, cls.value);
         } else if (isClassName(cls)) {
           cls._subscribe({
             onChange(v: string[]) {
-              $elm.className = v.join(" ");
+              host.setClassName($elm, v.join(" "));
             },
           });
-          $elm.className = cls.toString();
+          host.setClassName($elm, cls.toString());
         }
       }
 
       if (style) {
         if (typeof style === "string") {
-          $elm.style.cssText = style;
+          host.setStyleText($elm, style);
         } else if (isRef(style)) {
-          $elm.style.cssText = style.value;
+          host.setStyleText($elm, style.value);
           style._subscribe({
             onChange(v: any) {
-              $elm.style.cssText = v;
+              host.setStyleText($elm, v);
             },
           });
         } else if (isStyleRef(style)) {
           style._subscribe({
             onChange(v: string) {
-              $elm.style.cssText = v;
+              host.setStyleText($elm, v);
             },
           });
-          $elm.style.cssText = style.toString();
+          host.setStyleText($elm, style.toString());
         }
       }
       if (onClick) {
-        $elm.addEventListener("click", function (event: MouseEvent) {
+        const handler = function (event: MouseEvent) {
           if (onClick) {
             onClick(event);
           }
-        });
+        };
+        listen($elm, "click", handler);
       }
 
       // Double click support for both mobile and desktop
       if (onDoubleClick) {
-        $elm.addEventListener("dblclick", function (event: MouseEvent) {
+        const handler = function (event: MouseEvent) {
           if (onDoubleClick) {
             onDoubleClick(event);
           }
-        });
+        };
+        listen($elm, "dblclick", handler);
       }
 
       // Long press support for both mobile and desktop
       if (onLongPress) {
-        let longPressTimer: number | null = null;
+        let longPressTimer: any = null;
         let startX = 0;
         let startY = 0;
         const longPressDuration = 500; // 500ms
@@ -213,7 +235,7 @@ export function View(
         const handleStart = (event: PointerEvent) => {
           startX = event.clientX;
           startY = event.clientY;
-          longPressTimer = window.setTimeout(() => {
+          longPressTimer = host.setTimeout(() => {
             if (onLongPress) {
               onLongPress(event);
             }
@@ -226,7 +248,7 @@ export function View(
             const deltaX = Math.abs(event.clientX - startX);
             const deltaY = Math.abs(event.clientY - startY);
             if (deltaX > moveThreshold || deltaY > moveThreshold) {
-              window.clearTimeout(longPressTimer);
+              host.clearTimeout(longPressTimer);
               longPressTimer = null;
             }
           }
@@ -234,118 +256,133 @@ export function View(
 
         const handleEnd = () => {
           if (longPressTimer) {
-            window.clearTimeout(longPressTimer);
+            host.clearTimeout(longPressTimer);
             longPressTimer = null;
           }
         };
 
-        $elm.addEventListener("pointerdown", handleStart);
-        $elm.addEventListener("pointermove", handleMove);
-        $elm.addEventListener("pointerup", handleEnd);
-        $elm.addEventListener("pointercancel", handleEnd);
+        listen($elm, "pointerdown", handleStart);
+        listen($elm, "pointermove", handleMove);
+        listen($elm, "pointerup", handleEnd);
+        listen($elm, "pointercancel", handleEnd);
       }
 
       if (onPointerDown) {
-        $elm.addEventListener("pointerdown", function (event: PointerEvent) {
+        const handler = function (event: PointerEvent) {
           if (onPointerDown) onPointerDown(event);
-        });
+        };
+        listen($elm, "pointerdown", handler);
       }
       if (onFocus) {
-        $elm.addEventListener("focus", function (event: FocusEvent) {
+        const handler = function (event: FocusEvent) {
           onFocus(event);
-        });
+        };
+        listen($elm, "focus", handler);
       }
       if (onBlur) {
-        $elm.addEventListener("blur", function (event: FocusEvent) {
+        const handler = function (event: FocusEvent) {
           if (onBlur) onBlur(event);
-        });
+        };
+        listen($elm, "blur", handler);
       }
       if (onKeyDown) {
-        $elm.addEventListener("keydown", function (event: KeyboardEvent) {
+        const handler = function (event: KeyboardEvent) {
           if (onKeyDown) onKeyDown(event);
-        });
+        };
+        listen($elm, "keydown", handler);
       }
       if (onContextMenu) {
-        $elm.addEventListener("contextmenu", function (event: MouseEvent) {
+        const handler = function (event: MouseEvent) {
           if (onContextMenu) onContextMenu(event);
-        });
+        };
+        listen($elm, "contextmenu", handler);
       }
       if (onMouseEnter) {
-        $elm.addEventListener("mouseenter", function (event: MouseEvent) {
+        const handler = function (event: MouseEvent) {
           onMouseEnter(event);
-        });
+        };
+        listen($elm, "mouseenter", handler);
       }
       if (onMouseLeave) {
-        $elm.addEventListener("mouseleave", function (event: MouseEvent) {
+        const handler = function (event: MouseEvent) {
           onMouseLeave(event);
-        });
+        };
+        listen($elm, "mouseleave", handler);
       }
 
       // Drag and drop events
       if (draggable !== undefined) {
-        $elm.setAttribute("draggable", String(draggable));
+        host.setAttribute($elm, "draggable", String(draggable));
       }
 
       if (onDragStart) {
-        $elm.addEventListener("dragstart", function (event: DragEvent) {
+        const handler = function (event: DragEvent) {
           if (onDragStart) onDragStart(event);
-        });
+        };
+        listen($elm, "dragstart", handler);
       }
 
       if (onDrag) {
-        $elm.addEventListener("drag", function (event: DragEvent) {
+        const handler = function (event: DragEvent) {
           if (onDrag) onDrag(event);
-        });
+        };
+        listen($elm, "drag", handler);
       }
 
       if (onDragEnd) {
-        $elm.addEventListener("dragend", function (event: DragEvent) {
+        const handler = function (event: DragEvent) {
           if (onDragEnd) onDragEnd(event);
-        });
+        };
+        listen($elm, "dragend", handler);
       }
 
       if (onDragEnter) {
-        $elm.addEventListener("dragenter", function (event: DragEvent) {
+        const handler = function (event: DragEvent) {
           if (onDragEnter) onDragEnter(event);
-        });
+        };
+        listen($elm, "dragenter", handler);
       }
 
       if (onDragOver) {
-        $elm.addEventListener("dragover", function (event: DragEvent) {
+        const handler = function (event: DragEvent) {
           if (onDragOver) onDragOver(event);
-        });
+        };
+        listen($elm, "dragover", handler);
       }
 
       if (onDragLeave) {
-        $elm.addEventListener("dragleave", function (event: DragEvent) {
+        const handler = function (event: DragEvent) {
           if (onDragLeave) onDragLeave(event);
-        });
+        };
+        listen($elm, "dragleave", handler);
       }
 
       if (onDrop) {
-        $elm.addEventListener("drop", function (event: DragEvent) {
+        const handler = function (event: DragEvent) {
           if (onDrop) onDrop(event);
-        });
+        };
+        listen($elm, "drop", handler);
       }
       if (onAnimationEnd) {
-        $elm.addEventListener("animationend", function (event: AnimationEvent) {
+        const handler = function (event: AnimationEvent) {
           if (onAnimationEnd) {
             onAnimationEnd(event);
           }
-        });
+        };
+        listen($elm, "animationend", handler);
       }
 
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
         if (!node) continue;
         if (typeof node === "string" || typeof node === "number") {
-          $elm.appendChild(safeCreateTextNode(String(node)));
+          host.appendChild($elm, safeCreateTextNode(String(node)));
           continue;
         }
         if (isElement(node)) {
           const result = node.render();
           if (result) {
-            $elm.appendChild(result);
+            host.appendChild($elm, result);
           }
         }
       }
@@ -389,6 +426,10 @@ export function View(
         // console.log("[View] calling props.onUnmounted");
         props.onUnmounted();
       }
+      for (const fn of listenerCleanups) {
+        fn();
+      }
+      listenerCleanups.length = 0;
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
         if (isElement(node)) {
@@ -404,9 +445,7 @@ export function View(
         }
       }
       // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
-      while ($elm.firstChild) {
-        $elm.removeChild($elm.firstChild);
-      }
+      host.clearChildren($elm);
       // console.log("[View] onUnmounted completed");
     },
   };
@@ -443,11 +482,11 @@ export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 
 export interface TimelessElement {
   t: string;
-  $elm: HTMLElement | SVGElement | Text | DocumentFragment;
+  $elm: any;
   value?: unknown;
-  render(): HTMLElement | SVGElement | Text | DocumentFragment | null;
+  render(): any;
   cleanup?: () => void;
-  onMounted?(el: HTMLElement | SVGElement | Text | DocumentFragment): void;
+  onMounted?(el: any): void;
   beforeUnmounted?(): void;
   onUnmounted?(): void;
 }

@@ -1,4 +1,4 @@
-import { ref, refobj, computed } from "@timeless/reactive";
+import { ref, computed } from "@timeless/reactive";
 import { ScrollViewCore } from "@timeless/ui";
 
 import {
@@ -6,11 +6,17 @@ import {
   ViewChildren,
   ViewProps,
   TimelessElement,
-} from "../primitive/view";
+} from "@/primitive/view";
 
 type Provider = Partial<{
-  provide_ui_scroll_view_indicator: (store: ScrollViewCore, $elm: HTMLElement) => void;
-  provide_ui_scroll_view_scroll: (store: ScrollViewCore, $elm: HTMLElement) => void;
+  provide_ui_scroll_view_indicator: (
+    store: ScrollViewCore,
+    $elm: HTMLElement,
+  ) => void;
+  provide_ui_scroll_view_scroll: (
+    store: ScrollViewCore,
+    $elm: HTMLElement,
+  ) => void;
 }>;
 
 let global_provider: Provider | undefined;

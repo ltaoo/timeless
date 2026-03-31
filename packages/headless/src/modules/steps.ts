@@ -1,10 +1,10 @@
 import { refobj, computed } from "@timeless/reactive";
 import { StepCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { For } from "../primitive/for";
-import { Txt } from "../primitive/text";
-import { h } from "../util/h";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { For } from "@/primitive/for";
+import { Txt } from "@/primitive/text";
+import { h } from "@/util/h";
 
 export type StepItem = {
   title: string;

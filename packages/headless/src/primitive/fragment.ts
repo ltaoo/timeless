@@ -1,10 +1,14 @@
-import { safeCreateDocumentFragment, safeCreateTextNode } from "../util/env";
+import { safeCreateDocumentFragment, safeCreateTextNode } from "@/util/env";
+import { getHost } from "@/host";
 
 import { ViewChildren, ViewProps, isElement } from "./view";
 
 export function Fragment(props: ViewProps, children: ViewChildren = []) {
+  const host = getHost();
   const $fragment = safeCreateDocumentFragment();
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
+  let onMountedCleanup: (() => void) | undefined;
+  let rendered = false;
 
   let _children = children;
   if (!Array.isArray(_children)) {
@@ -30,6 +34,10 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
     },
     onUnmounted() {
       // console.log("[Fragment] onUnmounted");
+      if (onMountedCleanup) {
+        onMountedCleanup();
+        onMountedCleanup = undefined;
+      }
       if (onUnmounted) {
         onUnmounted();
       }
@@ -44,6 +52,10 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       _children.push(node);
     },
     render() {
+      if (rendered) {
+        return $fragment;
+      }
+      rendered = true;
       // console.log("[Fragment] render, children count:", _children.length);
       for (let i = 0; i < _children.length; i += 1) {
         let node = _children[i];
@@ -54,19 +66,22 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
           _children[i] = node;
         }
         if (typeof node === "string" || typeof node === "number") {
-          $fragment.appendChild(safeCreateTextNode(String(node)));
+          host.appendChild($fragment, safeCreateTextNode(String(node)));
           continue;
         }
         if (isElement(node)) {
           const result = node.render();
           if (result) {
-            $fragment.appendChild(result);
+            host.appendChild($fragment, result);
           }
         }
       }
 
       if (onMounted) {
-        onMounted($fragment as any);
+        const cleanup = onMounted($fragment as any);
+        if (typeof cleanup === "function") {
+          onMountedCleanup = cleanup;
+        }
       }
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];

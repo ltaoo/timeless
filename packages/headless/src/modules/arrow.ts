@@ -1,12 +1,14 @@
 import { refobj, computed } from "@timeless/reactive";
 import { PopperCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { getHost } from "@/host";
 
 export function Arrow(
   props: ViewProps & { store: PopperCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const state = refobj(store.state);
 
@@ -57,11 +59,12 @@ export function Arrow(
           .join(";");
       }),
       onMounted($el: HTMLDivElement) {
-        const { width, height } = $el.getBoundingClientRect();
-        $el.style.setProperty(
-          "--t1-popper-arrow-offset",
-          `${Math.ceil(Math.max(width, height) / 2)}px`,
-        );
+        const rect = host.getBoundingClientRect?.($el) as any;
+        const width = rect?.width ?? 0;
+        const height = rect?.height ?? 0;
+        host.patchStyle?.($el, {
+          "--t1-popper-arrow-offset": `${Math.ceil(Math.max(width, height) / 2)}px`,
+        });
         if ((store as any).setArrowElement) {
           (store as any).setArrowElement($el);
         }

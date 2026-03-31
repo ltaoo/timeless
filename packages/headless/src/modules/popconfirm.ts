@@ -1,8 +1,10 @@
 import { refobj } from "@timeless/reactive";
 import { PopconfirmCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { Fragment } from "../primitive/fragment";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Fragment } from "@/primitive/fragment";
+import { getHost } from "@/host";
+
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
@@ -29,25 +31,31 @@ export function Trigger(
   props: ViewProps & { store: PopconfirmCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   return View(
     {
       onMounted($e: HTMLDivElement) {
-        const $ref = $e.firstElementChild || $e;
+        const nodes = host.getChildNodes($e);
+        const $ref = nodes.find((n: any) => n?.nodeType === 1) || $e;
         props.store.popper.setReference(
           {
             $el: $ref,
             getRect() {
-              return $ref.getBoundingClientRect();
+              return host.getBoundingClientRect?.($ref) as any;
             },
           },
           { force: true },
         );
 
-        $e.addEventListener("pointerdown", (e: any) => {
+        const handlePointerDown = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           props.store.toggle();
-        });
+        };
+        host.addEventListener($e, "pointerdown", handlePointerDown);
+        return () => {
+          host.removeEventListener($e, "pointerdown", handlePointerDown);
+        };
       },
     },
     children,

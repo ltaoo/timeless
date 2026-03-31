@@ -1,7 +1,6 @@
-import { computed } from "@timeless/reactive";
-import { SwitchCore, ToggleCore } from "@timeless/ui";
+import { SwitchCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "../primitive/view.js";
+import { View, ViewProps, ViewChildren } from "@/primitive/view.js";
 import { NativeCheckbox } from "@/native/checkbox.js";
 
 export function Root(

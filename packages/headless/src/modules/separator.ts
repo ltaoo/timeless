@@ -1,4 +1,4 @@
-import { View, ViewProps } from "../primitive/view";
+import { View, ViewProps } from "@/primitive/view";
 
 export function Separator(
   props: ViewProps & { orientation?: "horizontal" | "vertical" },
@@ -6,8 +6,12 @@ export function Separator(
   const { orientation = "horizontal", ...rest } = props || {};
   return View({
     ...rest,
-    // "data-separator": "",
-    // "data-orientation": orientation,
-    // role: "separator",
+    dataset: {
+      separator: "",
+      orientation,
+    },
+    attributes: {
+      role: "separator",
+    },
   });
 }

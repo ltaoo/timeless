@@ -1,10 +1,12 @@
 import { cn, ref, refobj, isRef } from "@timeless/reactive";
 import { InputCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "../primitive/view";
+import { View, ViewProps, ViewChildren } from "@/primitive/view";
+import { getHost } from "@/host";
+import { safeCreateElement } from "@/util/env";
 
 type Provider = Partial<{
-  provide_ui_input: (store: InputCore<any>, $input: HTMLInputElement) => void;
+  provide_ui_input: (store: InputCore<any>, $input: any) => void;
 }>;
 
 let global_provider: Provider | undefined;
@@ -23,9 +25,12 @@ export function Root(
 export function Input(
   props: ViewProps & { store: InputCore<any>; id?: string },
 ) {
+  const host = getHost();
   const { store, style: st, class: cls, dataset = {}, id, ...rest } = props;
 
-  const $elm = document.createElement("input");
+  const $elm = safeCreateElement("input");
+  let rendered = false;
+  const listenerCleanups: (() => void)[] = [];
 
   const value$ = refobj(store.value || "");
   const placeholder$ = ref(store.placeholder || "");
@@ -51,29 +56,41 @@ export function Input(
     t: "view",
     $elm,
     render() {
+      if (rendered) {
+        return $elm;
+      }
+      rendered = true;
+
+      const setProp = (key: string, value: any) => {
+        if (host.setProperty) {
+          host.setProperty($elm, key, value);
+          return;
+        }
+        ($elm as any)[key] = value;
+      };
       const applyAttr = (k: string, v: any) => {
         if (v === undefined || v === null || v === false) {
-          $elm.removeAttribute(k);
+          host.removeAttribute($elm, k);
           return;
         }
         if (v === true) {
-          $elm.setAttribute(k, "");
+          host.setAttribute($elm, k, "");
           return;
         }
-        $elm.setAttribute(k, String(v));
+        host.setAttribute($elm, k, String(v));
       };
 
       if (id) {
-        $elm.id = id;
+        setProp("id", id);
       }
 
       // Set initial attributes
-      $elm.value = value$.value;
-      $elm.placeholder = placeholder$.value;
-      $elm.disabled = disabled$.value;
-      $elm.type = type$.value;
-      $elm.setAttribute("autocomplete", store.autoComplete ? "on" : "off");
-      $elm.setAttribute("autocorrect", "off");
+      setProp("value", value$.value);
+      setProp("placeholder", placeholder$.value);
+      setProp("disabled", disabled$.value);
+      setProp("type", type$.value);
+      host.setAttribute($elm, "autocomplete", store.autoComplete ? "on" : "off");
+      host.setAttribute($elm, "autocorrect", "off");
 
       // Apply dataset attributes
       Object.keys(dataset || {}).forEach((k) => {
@@ -94,59 +111,80 @@ export function Input(
       // Apply classes
       class$._subscribe({
         onChange(v: any) {
-          $elm.className = v.join(" ");
+          host.setClassName($elm, v.join(" "));
         },
       });
-      $elm.className = class$.toString();
+      host.setClassName($elm, class$.toString());
       // if (m.style) $elm.style.cssText = m.style;
+
+      if (typeof st === "string") {
+        host.setStyleText($elm, st);
+      } else if (isRef(st)) {
+        host.setStyleText($elm, st.value);
+        st._subscribe({
+          onChange(v: any) {
+            host.setStyleText($elm, v);
+          },
+        });
+      }
 
       // Subscribe to reactive state changes
       value$._subscribe({
         onChange(v: any) {
-          if ($elm.value !== String(v)) {
-            $elm.value = v;
-          }
+          setProp("value", v);
         },
       });
       placeholder$._subscribe({
         onChange(v: any) {
-          $elm.placeholder = v;
+          setProp("placeholder", v);
         },
       });
       disabled$._subscribe({
         onChange(v: any) {
-          $elm.disabled = v;
+          setProp("disabled", v);
         },
       });
       type$._subscribe({
         onChange(v: any) {
-          $elm.type = v;
+          setProp("type", v);
         },
       });
 
       // Event handlers
-      $elm.addEventListener("input", (e: Event) => {
+      const handleInput = (e: any) => {
         store.handleChange(e);
-      });
+      };
 
-      $elm.addEventListener("keydown", (e: KeyboardEvent) => {
+      const handleKeyDown = (e: any) => {
         store.handleKeyDown({
           key: e.key,
           preventDefault: () => e.preventDefault(),
         });
-      });
+      };
 
-      $elm.addEventListener("focus", () => {
+      const handleFocus = () => {
         store.handleFocus();
-      });
+      };
 
-      $elm.addEventListener("blur", () => {
+      const handleBlur = () => {
         store.handleBlur();
-      });
+      };
+
+      host.addEventListener($elm, "input", handleInput);
+      host.addEventListener($elm, "keydown", handleKeyDown);
+      host.addEventListener($elm, "focus", handleFocus);
+      host.addEventListener($elm, "blur", handleBlur);
+
+      listenerCleanups.push(() => host.removeEventListener($elm, "input", handleInput));
+      listenerCleanups.push(() =>
+        host.removeEventListener($elm, "keydown", handleKeyDown),
+      );
+      listenerCleanups.push(() => host.removeEventListener($elm, "focus", handleFocus));
+      listenerCleanups.push(() => host.removeEventListener($elm, "blur", handleBlur));
 
       // Connect store focus method to element
       store.focus = () => {
-        $elm.focus();
+        host.focus?.($elm);
       };
 
       return $elm;
@@ -155,7 +193,7 @@ export function Input(
       if (props.onMounted) props.onMounted(this.$elm);
       store.setMounted();
       if (store.autoFocus) {
-        this.$elm.focus();
+        host.focus?.(this.$elm);
       }
     },
     beforeUnmounted() {
@@ -163,6 +201,8 @@ export function Input(
     },
     onUnmounted() {
       for (const fn of events) if (typeof fn === "function") fn();
+      for (const fn of listenerCleanups) fn();
+      listenerCleanups.length = 0;
       if (props.onUnmounted) props.onUnmounted();
     },
   };
@@ -172,6 +212,7 @@ export function Value(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const value$ = refobj(store.value || "");
 
@@ -184,7 +225,7 @@ export function Value(
       ...rest,
       onMounted($e) {
         const updateText = () => {
-          $e.textContent = value$.value;
+          host.setTextContent($e, value$.value);
         };
         value$._subscribe({ onChange: updateText });
         updateText();
@@ -199,21 +240,26 @@ export function Clear(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
 
   return View(
     {
       ...rest,
       onMounted($e) {
-        $e.addEventListener("click", (e: any) => {
+        const handleClick = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           store.clear();
-          setTimeout(() => {
+          host.setTimeout(() => {
             store.focus();
           }, 0);
-        });
+        };
+        host.addEventListener($e, "click", handleClick);
         if (rest.onMounted) rest.onMounted($e);
+        return () => {
+          host.removeEventListener($e, "click", handleClick);
+        };
       },
     },
     children,
@@ -224,6 +270,7 @@ export function Loading(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const loading$ = ref(store.loading || false);
 
@@ -238,7 +285,7 @@ export function Loading(
       ...rest,
       onMounted($elm: HTMLDivElement) {
         const updateDisplay = () => {
-          $elm.style.display = loading$.value ? "" : "none";
+          host.patchStyle?.($elm, { display: loading$.value ? "" : "none" });
         };
         loading$._subscribe({ onChange: updateDisplay });
         updateDisplay();
@@ -253,6 +300,7 @@ export function Disabled(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const disabled$ = ref(store.disabled || false);
 
@@ -268,9 +316,9 @@ export function Disabled(
       onMounted($elm: HTMLDivElement) {
         const updateState = () => {
           if (disabled$.value) {
-            $elm.setAttribute("data-disabled", "true");
+            host.setAttribute($elm, "data-disabled", "true");
           } else {
-            $elm.removeAttribute("data-disabled");
+            host.removeAttribute($elm, "data-disabled");
           }
         };
         disabled$._subscribe({ onChange: updateState });

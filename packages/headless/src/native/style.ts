@@ -1,4 +1,4 @@
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
 
 export interface NativeStyleProps extends Omit<ViewProps, "as"> {}
 

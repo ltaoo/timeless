@@ -1,8 +1,10 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { safeCreateTextNode } from "../util/env";
+import { getHost } from "@/host";
+import { safeCreateTextNode } from "@/util/env";
 
 export function Txt(value: Ref<any> | string) {
+  const host = getHost();
   let _local_value = isRef(value) ? value.value : value;
   const $elm = safeCreateTextNode(_local_value);
 
@@ -18,7 +20,7 @@ export function Txt(value: Ref<any> | string) {
               return;
             }
             _local_value = v;
-            $elm.textContent = _local_value;
+            host.setTextContent($elm, _local_value);
           },
         });
       }

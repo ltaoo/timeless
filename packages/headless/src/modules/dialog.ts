@@ -1,7 +1,7 @@
-import { computed } from "@timeless/reactive";
 import { DialogCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+
 import { Portal } from "./portal";
 import { Presence } from "./presence";
 

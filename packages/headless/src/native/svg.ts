@@ -1,6 +1,8 @@
 import { Ref, isRef, isClassName, ClassNameRef } from "@timeless/reactive";
 
-import { isElement } from "../primitive/view";
+import { isElement } from "@/primitive/view";
+import { getHost } from "@/host";
+import { safeCreateElementNS, safeCreateTextNode } from "@/util/env";
 
 type AttrValue = string | number | Ref<string> | Ref<number>;
 
@@ -186,6 +188,7 @@ type InternalSVGProps = SVGBaseProps &
   SVGPresentationAttrs & { type?: string } & Record<string, any>;
 
 function createSVGElement(props: InternalSVGProps = {}, children?: any) {
+  const host = getHost();
   const {
     type = "svg",
     style,
@@ -204,7 +207,7 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
     beforeUnmounted,
     ...rest
   } = props;
-  const $elm = document.createElementNS("http://www.w3.org/2000/svg", type);
+  const $elm = safeCreateElementNS("http://www.w3.org/2000/svg", type);
 
   let _children = children ?? [];
   if (!Array.isArray(_children)) {
@@ -240,7 +243,7 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
       _children.push(node);
     },
     setContent(html: string) {
-      $elm.innerHTML = html;
+      host.setInnerHTML?.($elm, html);
     },
     render() {
       Object.keys(rest).forEach((k) => {
@@ -250,93 +253,93 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
           if (isRef(vv)) {
             vv._subscribe({
               onChange(v) {
-                $elm.setAttribute(k, String(v));
+                host.setAttribute($elm, k, String(v));
               },
             });
-            $elm.setAttribute(k, String(vv.value));
+            host.setAttribute($elm, k, String(vv.value));
           } else if (typeof vv === "string" || typeof vv === "number") {
-            $elm.setAttribute(k, String(vv));
+            host.setAttribute($elm, k, String(vv));
           }
         }
       });
       Object.keys(dataset).forEach((k) => {
         if (dataset && dataset[k]) {
-          $elm.setAttribute(`data-${k}`, dataset[k]);
+          host.setAttribute($elm, `data-${k}`, dataset[k]);
         }
       });
 
       if (cls) {
         if (typeof cls === "string") {
-          $elm.setAttribute("class", cls);
+          host.setAttribute($elm, "class", cls);
         } else if (isRef(cls)) {
           cls._subscribe({
             onChange(v) {
-              $elm.setAttribute("class", v);
+              host.setAttribute($elm, "class", v);
             },
           });
-          $elm.setAttribute("class", cls.value);
+          host.setAttribute($elm, "class", cls.value);
         } else if (isClassName(cls)) {
           cls._subscribe({
             onChange(v: string[]) {
-              $elm.setAttribute("class", v.join(" "));
+              host.setAttribute($elm, "class", v.join(" "));
             },
           });
-          $elm.setAttribute("class", cls.toString());
+          host.setAttribute($elm, "class", cls.toString());
         }
       }
 
       if (style) {
         if (typeof style === "string") {
-          $elm.style.cssText = style;
+          host.setStyleText($elm, style);
         }
         if (isRef(style)) {
-          $elm.style.cssText = style.value;
+          host.setStyleText($elm, style.value);
           style._subscribe({
             onChange(v: any) {
-              $elm.style.cssText = v;
+              host.setStyleText($elm, v);
             },
           });
         }
       }
       if (onClick) {
-        $elm.addEventListener("click", function (event) {
+        host.addEventListener($elm, "click", function (event: any) {
           if (onClick) {
             onClick(event);
           }
         });
       }
       if (onFocus) {
-        $elm.addEventListener("focus", function (event) {
+        host.addEventListener($elm, "focus", function (event: any) {
           if (onFocus) onFocus(event);
         });
       }
       if (onBlur) {
-        $elm.addEventListener("blur", function (event) {
+        host.addEventListener($elm, "blur", function (event: any) {
           if (onBlur) onBlur(event);
         });
       }
       if (onPointerDown) {
-        $elm.addEventListener("pointerdown", function (event) {
+        host.addEventListener($elm, "pointerdown", function (event: any) {
           if (onPointerDown) onPointerDown(event);
         });
       }
       if (onPointerUp) {
-        $elm.addEventListener("pointerup", function (event) {
+        host.addEventListener($elm, "pointerup", function (event: any) {
           if (onPointerUp) onPointerUp(event);
         });
       }
       if (onPointerMove) {
-        $elm.addEventListener("pointermove", function (event) {
+        host.addEventListener($elm, "pointermove", function (event: any) {
           if (onPointerMove) onPointerMove(event);
         });
       }
       if (onMouseEnter) {
-        $elm.addEventListener("mouseenter", function (event) {
+        host.addEventListener($elm, "mouseenter", function (event: any) {
           if (onMouseEnter) onMouseEnter(event);
         });
       }
       if (onMouseLeave) {
-        $elm.addEventListener("mouseleave", function (event) {
+        host.addEventListener($elm, "mouseleave", function (event: any) {
           if (onMouseLeave) onMouseLeave(event);
         });
       }
@@ -345,13 +348,13 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
         const node = _children[i];
         if (!node) continue;
         if (typeof node === "string" || typeof node === "number") {
-          $elm.appendChild(document.createTextNode(String(node)));
+          host.appendChild($elm, safeCreateTextNode(String(node)));
           continue;
         }
         if (isElement(node)) {
           const result = node.render();
           if (result) {
-            $elm.appendChild(result);
+            host.appendChild($elm, result);
           }
         }
       }

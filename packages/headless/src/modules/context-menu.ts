@@ -6,7 +6,9 @@ import {
   MenuGroupCore,
 } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { getHost } from "@/host";
+
 import * as MenuPrimitive from "./menu";
 
 // Shared hover timer state to coordinate between Trigger and Content
@@ -22,17 +24,19 @@ function getHoverTimer(store: ContextMenuCore) {
 }
 
 function _hoverClearHide(store: ContextMenuCore) {
+  const host = getHost();
   const state = getHoverTimer(store);
   if (state.timer) {
-    clearTimeout(state.timer);
+    host.clearTimeout(state.timer);
     state.timer = null;
   }
 }
 
 function _hoverScheduleHide(store: ContextMenuCore) {
+  const host = getHost();
   _hoverClearHide(store);
   const state = getHoverTimer(store);
-  state.timer = setTimeout(() => {
+  state.timer = host.setTimeout(() => {
     store.hide();
     state.timer = null;
   }, 300);
@@ -49,6 +53,7 @@ export function Trigger(
   props: ViewProps & { store: ContextMenuCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
@@ -61,9 +66,8 @@ export function Trigger(
     {
       onMounted($elm: HTMLDivElement) {
         // Don't set reference here - it will be set dynamically on contextmenu event
-        const $ref = $elm.firstElementChild || $elm;
         // Handle context menu (right-click)
-        $elm.addEventListener("contextmenu", (e) => {
+        const handleContextMenu = (e: any) => {
           e.preventDefault();
           if (store.disabled) {
             return;
@@ -72,22 +76,36 @@ export function Trigger(
             x: e.clientX,
             y: e.clientY - 4,
           });
-        });
+        };
+        host.addEventListener($elm, "contextmenu", handleContextMenu);
 
         // Handle hover trigger if enabled
         if (store.trigger === "hover") {
-          $elm.addEventListener("mouseenter", () => {
+          const handleMouseEnter = () => {
             if (store.disabled) return;
             _hoverClearHide(store);
             store.show();
-          });
+          };
 
           // Prevent click from closing the menu in hover mode
-          $elm.addEventListener("pointerdown", (e: any) => {
+          const handlePointerDown = (e: any) => {
             e.preventDefault();
             e.stopPropagation();
-          });
+          };
+
+          host.addEventListener($elm, "mouseenter", handleMouseEnter);
+          host.addEventListener($elm, "pointerdown", handlePointerDown);
+
+          return () => {
+            host.removeEventListener($elm, "contextmenu", handleContextMenu);
+            host.removeEventListener($elm, "mouseenter", handleMouseEnter);
+            host.removeEventListener($elm, "pointerdown", handlePointerDown);
+          };
         }
+
+        return () => {
+          host.removeEventListener($elm, "contextmenu", handleContextMenu);
+        };
       },
     },
     children,

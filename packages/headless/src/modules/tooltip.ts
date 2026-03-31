@@ -1,13 +1,10 @@
-import { refobj, ref, computed, isRef } from "@timeless/reactive";
+import { refobj, ref, computed } from "@timeless/reactive";
 import { TooltipCore, Align, Side } from "@timeless/ui";
 
-import {
-  TimelessElement,
-  View,
-  ViewChildren,
-  ViewProps,
-} from "../primitive/view";
-import { Fragment } from "../primitive/fragment";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Fragment } from "@/primitive/fragment";
+import { getHost } from "@/host";
+
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 
@@ -18,7 +15,7 @@ export type TooltipProps = Partial<{
 
 // 全局单例 tooltip store
 let globalTooltipStore: TooltipCore | null = null;
-let globalTooltipContentRef: ReturnType<typeof ref> | null = null;
+let globalTooltipContentRef: ReturnType<typeof ref<ViewChildren>> | null = null;
 
 function getGlobalTooltipStore() {
   if (!globalTooltipStore) {
@@ -59,56 +56,52 @@ export function Trigger(
   props: ViewProps & { content?: ViewChildren; side?: Side; align?: Align },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { content, side = "top", align = "center", ...rest } = props;
+  const userOnMounted = rest.onMounted;
+  const userOnMouseEnter = rest.onMouseEnter;
+  const userOnMouseLeave = rest.onMouseLeave;
   const store = getGlobalTooltipStore();
   const contentRef = getGlobalTooltipContentRef();
+  let $ref: any = null;
 
   return View(
     {
       ...rest,
       onMounted($e: HTMLDivElement) {
-        const $ref = $e.firstElementChild || $e;
+        const nodes = host.getChildNodes($e);
+        $ref = nodes.find((n: any) => n?.nodeType === 1) || $e;
 
-        const handleMouseEnter = () => {
-          console.log("[Tooltip] handleMouseEnter", { side, align, content });
-
-          // 更新 reference
-          store.popper.setReference(
-            {
-              $el: $ref,
-              getRect() {
-                return $ref.getBoundingClientRect();
-              },
-            },
-            { force: true },
-          );
-
-          // 更新 side 和 align
-          const placement = (side +
-            (align !== "center" ? "-" + align : "")) as any;
-          console.log("[Tooltip] setConfig placement:", placement);
-          store.popper.setConfig({ placement });
-
-          // 更新内容
-          console.log("[Tooltip] update content", content);
-          contentRef.as(content);
-
-          // 显示
-          console.log("[Tooltip] calling store.show()");
-          store.show();
-        };
-
-        const handleMouseLeave = () => {
-          store.hide();
-        };
-
-        $e.addEventListener("mouseenter", handleMouseEnter);
-        $e.addEventListener("mouseleave", handleMouseLeave);
-
+        const cleanup = userOnMounted ? userOnMounted($e) : undefined;
         return () => {
-          $e.removeEventListener("mouseenter", handleMouseEnter);
-          $e.removeEventListener("mouseleave", handleMouseLeave);
+          if (typeof cleanup === "function") cleanup();
         };
+      },
+      onMouseEnter(e) {
+        if (userOnMouseEnter) {
+          userOnMouseEnter(e);
+        }
+        if (!$ref) return;
+        const placement = (side +
+          (align !== "center" ? "-" + align : "")) as any;
+        store.popper.setConfig({ placement });
+        store.popper.setReference(
+          {
+            $el: $ref,
+            getRect() {
+              return host.getBoundingClientRect?.($ref) as any;
+            },
+          },
+          { force: true },
+        );
+        contentRef.as(content ?? []);
+        store.show();
+      },
+      onMouseLeave(e) {
+        if (userOnMouseLeave) {
+          userOnMouseLeave(e);
+        }
+        store.hide();
       },
       onUnmounted() {},
     },
@@ -135,11 +128,7 @@ export function Portal(
 
   return NativePortal(
     {
-      onMounted() {
-        console.log("[Tooltip Portal] mounted");
-      },
       onUnmounted() {
-        console.log("[Tooltip Portal] unmounted");
         for (const fn of events) {
           if (typeof fn === "function") {
             fn();
@@ -157,23 +146,13 @@ export function Portal(
           class: className,
           style: computed(state, (t) => {
             const display = t.visible ? "" : "display:none";
-            if (styleProps) {
-              return typeof styleProps === "function"
-                ? `${display};${styleProps}`
-                : `${display};${styleProps}`;
+            if (typeof styleProps === "string" && styleProps) {
+              return `${display};${styleProps}`;
             }
             return display;
           }),
-          onMounted($el: HTMLDivElement) {
-            console.log("[Tooltip Content] mounted", $el);
-          },
         },
-        (() => {
-          if (isRef(contentRef)) {
-            return contentRef.value as any as ViewChildren;
-          }
-          return children;
-        })(),
+        contentRef.value?.length ? (contentRef.value as any) : (children ?? []),
       ),
     ],
   );

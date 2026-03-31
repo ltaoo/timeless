@@ -1,9 +1,9 @@
-import { cn, computed, ref, refobj } from "@timeless/reactive";
+import { computed, ref, refobj } from "@timeless/reactive";
 import { InputCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "../primitive/view";
+import { View, ViewProps, ViewChildren } from "@/primitive/view";
 import { NativeTextarea } from "@/native/textarea";
-import { Fragment } from "@/primitive/fragment";
+import { getHost } from "@/host";
 
 export function Root(
   props: ViewProps & { store?: InputCore<any> },
@@ -22,6 +22,7 @@ export function Value(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const value$ = refobj(store.value || "");
 
@@ -34,7 +35,7 @@ export function Value(
       ...rest,
       onMounted($e) {
         const updateText = () => {
-          $e.textContent = value$.value;
+          host.setTextContent($e, value$.value);
         };
         value$._subscribe({ onChange: updateText });
         updateText();
@@ -49,18 +50,23 @@ export function Clear(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
 
   return View(
     {
       ...rest,
       onMounted($e) {
-        $e.addEventListener("click", (e: any) => {
+        const handleClick = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           store.clear();
-        });
+        };
+        host.addEventListener($e, "click", handleClick);
         if (rest.onMounted) rest.onMounted($e);
+        return () => {
+          host.removeEventListener($e, "click", handleClick);
+        };
       },
     },
     children,
@@ -71,6 +77,7 @@ export function Loading(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const loading$ = ref(store.loading || false);
 
@@ -85,7 +92,7 @@ export function Loading(
       ...rest,
       onMounted($elm: HTMLDivElement) {
         const updateDisplay = () => {
-          $elm.style.display = loading$.value ? "" : "none";
+          host.patchStyle?.($elm, { display: loading$.value ? "" : "none" });
         };
         loading$._subscribe({ onChange: updateDisplay });
         updateDisplay();
@@ -119,6 +126,7 @@ export function Disabled(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const disabled$ = ref(store.disabled || false);
 
@@ -134,9 +142,9 @@ export function Disabled(
       onMounted($elm: HTMLDivElement) {
         const updateState = () => {
           if (disabled$.value) {
-            $elm.setAttribute("data-disabled", "true");
+            host.setAttribute($elm, "data-disabled", "true");
           } else {
-            $elm.removeAttribute("data-disabled");
+            host.removeAttribute($elm, "data-disabled");
           }
         };
         disabled$._subscribe({ onChange: updateState });

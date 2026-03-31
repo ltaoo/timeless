@@ -1,7 +1,9 @@
 import { cn, ref, refobj, isRef } from "@timeless/reactive";
 import { NumberInputCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "../primitive/view";
+import { View, ViewProps, ViewChildren } from "@/primitive/view";
+import { getHost } from "@/host";
+import { safeCreateElement } from "@/util/env";
 
 export function Root(
   props: ViewProps & { store?: NumberInputCore },
@@ -13,11 +15,12 @@ export function Root(
 export function Input(
   props: ViewProps & { store: NumberInputCore; id?: string },
 ) {
+  const host = getHost();
   const { store, style: st, class: cls, dataset = {}, id, ...rest } = props;
 
-  const $elm = document.createElement("input");
-  $elm.type = "text";
-  $elm.inputMode = "decimal";
+  const $elm = safeCreateElement("input");
+  let rendered = false;
+  const listenerCleanups: (() => void)[] = [];
 
   const displayValue$ = ref(store.displayValue || "");
   const placeholder$ = ref(store.placeholder || "");
@@ -40,27 +43,41 @@ export function Input(
     t: "view",
     $elm,
     render() {
+      if (rendered) {
+        return $elm;
+      }
+      rendered = true;
+
+      const setProp = (key: string, value: any) => {
+        if (host.setProperty) {
+          host.setProperty($elm, key, value);
+          return;
+        }
+        ($elm as any)[key] = value;
+      };
       const applyAttr = (k: string, v: any) => {
         if (v === undefined || v === null || v === false) {
-          $elm.removeAttribute(k);
+          host.removeAttribute($elm, k);
           return;
         }
         if (v === true) {
-          $elm.setAttribute(k, "");
+          host.setAttribute($elm, k, "");
           return;
         }
-        $elm.setAttribute(k, String(v));
+        host.setAttribute($elm, k, String(v));
       };
 
       if (id) {
-        $elm.id = id;
+        setProp("id", id);
       }
 
-      $elm.value = displayValue$.value;
-      $elm.placeholder = placeholder$.value;
-      $elm.disabled = disabled$.value;
-      $elm.setAttribute("autocomplete", "off");
-      $elm.setAttribute("autocorrect", "off");
+      setProp("type", "text");
+      setProp("inputMode", "decimal");
+      setProp("value", displayValue$.value);
+      setProp("placeholder", placeholder$.value);
+      setProp("disabled", disabled$.value);
+      host.setAttribute($elm, "autocomplete", "off");
+      host.setAttribute($elm, "autocorrect", "off");
 
       Object.keys(dataset || {}).forEach((k) => {
         const vv = dataset[k];
@@ -79,50 +96,71 @@ export function Input(
 
       class$._subscribe({
         onChange(v: any) {
-          $elm.className = v.join(" ");
+          host.setClassName($elm, v.join(" "));
         },
       });
-      $elm.className = class$.toString();
+      host.setClassName($elm, class$.toString());
+
+      if (typeof st === "string") {
+        host.setStyleText($elm, st);
+      } else if (isRef(st)) {
+        host.setStyleText($elm, st.value);
+        st._subscribe({
+          onChange(v: any) {
+            host.setStyleText($elm, v);
+          },
+        });
+      }
 
       displayValue$._subscribe({
         onChange(v: any) {
-          if ($elm.value !== String(v)) {
-            $elm.value = v;
-          }
+          setProp("value", v);
         },
       });
       placeholder$._subscribe({
         onChange(v: any) {
-          $elm.placeholder = v;
+          setProp("placeholder", v);
         },
       });
       disabled$._subscribe({
         onChange(v: any) {
-          $elm.disabled = v;
+          setProp("disabled", v);
         },
       });
 
-      $elm.addEventListener("input", (e: Event) => {
+      const handleInput = (e: any) => {
         store.handleChange(e);
-      });
+      };
 
-      $elm.addEventListener("keydown", (e: KeyboardEvent) => {
+      const handleKeyDown = (e: any) => {
         store.handleKeyDown({
           key: e.key,
           preventDefault: () => e.preventDefault(),
         });
-      });
+      };
 
-      $elm.addEventListener("focus", () => {
+      const handleFocus = () => {
         store.handleFocus();
-      });
+      };
 
-      $elm.addEventListener("blur", () => {
+      const handleBlur = () => {
         store.handleBlur();
-      });
+      };
+
+      host.addEventListener($elm, "input", handleInput);
+      host.addEventListener($elm, "keydown", handleKeyDown);
+      host.addEventListener($elm, "focus", handleFocus);
+      host.addEventListener($elm, "blur", handleBlur);
+
+      listenerCleanups.push(() => host.removeEventListener($elm, "input", handleInput));
+      listenerCleanups.push(() =>
+        host.removeEventListener($elm, "keydown", handleKeyDown),
+      );
+      listenerCleanups.push(() => host.removeEventListener($elm, "focus", handleFocus));
+      listenerCleanups.push(() => host.removeEventListener($elm, "blur", handleBlur));
 
       store.focus = () => {
-        $elm.focus();
+        host.focus?.($elm);
       };
 
       return $elm;
@@ -131,7 +169,7 @@ export function Input(
       if (props.onMounted) props.onMounted(this.$elm);
       store.setMounted();
       if (store.autoFocus) {
-        this.$elm.focus();
+        host.focus?.(this.$elm);
       }
     },
     beforeUnmounted() {
@@ -139,6 +177,8 @@ export function Input(
     },
     onUnmounted() {
       for (const fn of events) if (typeof fn === "function") fn();
+      for (const fn of listenerCleanups) fn();
+      listenerCleanups.length = 0;
       if (props.onUnmounted) props.onUnmounted();
     },
   };
@@ -148,6 +188,7 @@ export function IncreaseButton(
   props: ViewProps & { store: NumberInputCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
 
   const canIncrease$ = ref(store.canIncrease());
@@ -161,32 +202,38 @@ export function IncreaseButton(
   return View(
     {
       ...rest,
-      onMounted($e: HTMLDivElement) {
+      onMounted($e: any) {
         const updateState = () => {
           const canIncrease = canIncrease$.value;
           const disabled = disabled$.value;
           if (disabled || !canIncrease) {
-            $e.setAttribute("data-disabled", "true");
-            $e.setAttribute("aria-disabled", "true");
+            host.setAttribute($e, "data-disabled", "true");
+            host.setAttribute($e, "aria-disabled", "true");
           } else {
-            $e.removeAttribute("data-disabled");
-            $e.removeAttribute("aria-disabled");
+            host.removeAttribute($e, "data-disabled");
+            host.removeAttribute($e, "aria-disabled");
           }
         };
         canIncrease$._subscribe({ onChange: updateState });
         disabled$._subscribe({ onChange: updateState });
         updateState();
 
-        $e.addEventListener("mousedown", (e: any) => {
+        const handleMouseDown = (e: any) => {
           e.preventDefault();
-        });
-        $e.addEventListener("click", (e: any) => {
+        };
+        const handleClick = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           store.increase();
-        });
+        };
+        host.addEventListener($e, "mousedown", handleMouseDown);
+        host.addEventListener($e, "click", handleClick);
 
         if (rest.onMounted) rest.onMounted($e);
+        return () => {
+          host.removeEventListener($e, "mousedown", handleMouseDown);
+          host.removeEventListener($e, "click", handleClick);
+        };
       },
     },
     children,
@@ -197,6 +244,7 @@ export function DecreaseButton(
   props: ViewProps & { store: NumberInputCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
 
   const canDecrease$ = ref(store.canDecrease());
@@ -210,32 +258,38 @@ export function DecreaseButton(
   return View(
     {
       ...rest,
-      onMounted($e: HTMLDivElement) {
+      onMounted($e: any) {
         const updateState = () => {
           const canDecrease = canDecrease$.value;
           const disabled = disabled$.value;
           if (disabled || !canDecrease) {
-            $e.setAttribute("data-disabled", "true");
-            $e.setAttribute("aria-disabled", "true");
+            host.setAttribute($e, "data-disabled", "true");
+            host.setAttribute($e, "aria-disabled", "true");
           } else {
-            $e.removeAttribute("data-disabled");
-            $e.removeAttribute("aria-disabled");
+            host.removeAttribute($e, "data-disabled");
+            host.removeAttribute($e, "aria-disabled");
           }
         };
         canDecrease$._subscribe({ onChange: updateState });
         disabled$._subscribe({ onChange: updateState });
         updateState();
 
-        $e.addEventListener("mousedown", (e: any) => {
+        const handleMouseDown = (e: any) => {
           e.preventDefault();
-        });
-        $e.addEventListener("click", (e: any) => {
+        };
+        const handleClick = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           store.decrease();
-        });
+        };
+        host.addEventListener($e, "mousedown", handleMouseDown);
+        host.addEventListener($e, "click", handleClick);
 
         if (rest.onMounted) rest.onMounted($e);
+        return () => {
+          host.removeEventListener($e, "mousedown", handleMouseDown);
+          host.removeEventListener($e, "click", handleClick);
+        };
       },
     },
     children,
@@ -246,6 +300,7 @@ export function Value(
   props: ViewProps & { store: NumberInputCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const value$ = ref(store.value);
 
@@ -258,7 +313,10 @@ export function Value(
       ...rest,
       onMounted($e) {
         const updateText = () => {
-          $e.textContent = value$.value !== null ? String(value$.value) : "";
+          host.setTextContent(
+            $e,
+            value$.value !== null ? String(value$.value) : "",
+          );
         };
         value$._subscribe({ onChange: updateText });
         updateText();
@@ -273,6 +331,7 @@ export function Disabled(
   props: ViewProps & { store: NumberInputCore },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const disabled$ = ref(store.disabled || false);
 
@@ -285,12 +344,12 @@ export function Disabled(
   return View(
     {
       ...rest,
-      onMounted($elm: HTMLDivElement) {
+      onMounted($elm: any) {
         const updateState = () => {
           if (disabled$.value) {
-            $elm.setAttribute("data-disabled", "true");
+            host.setAttribute($elm, "data-disabled", "true");
           } else {
-            $elm.removeAttribute("data-disabled");
+            host.removeAttribute($elm, "data-disabled");
           }
         };
         disabled$._subscribe({ onChange: updateState });

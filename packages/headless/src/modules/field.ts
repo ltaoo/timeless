@@ -1,10 +1,10 @@
 import { computed, refobj } from "@timeless/reactive";
 import { SingleFieldCore, ObjectFieldCore, ArrayFieldCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "../primitive/view";
-import { For } from "../primitive/for";
-import { Show } from "../primitive/show";
-import { Fragment } from "../primitive/fragment";
+import { View, ViewProps, ViewChildren } from "@/primitive/view";
+import { For } from "@/primitive/for";
+import { Show } from "@/primitive/show";
+import { Fragment } from "@/primitive/fragment";
 
 export function Field(
   props: ViewProps & { store: SingleFieldCore<any> },

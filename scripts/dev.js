@@ -10,6 +10,14 @@ const playgroundDir = path.join(rootDir, "apps/web-vanilla");
 // const playgroundDir = path.join(rootDir, "apps/download-task-list");
 // const playgroundDir = path.join(rootDir, "apps/reactive-playground");
 const serverRoot = playgroundDir;
+const AssetServerPrefix = "/";
+const NormalizedAssetServerPrefix = (() => {
+  const raw = String(AssetServerPrefix || "").trim();
+  if (!raw || raw === "/") return "/";
+  const withLeadingSlash = raw.startsWith("/") ? raw : `/${raw}`;
+  const withoutTrailingSlashes = withLeadingSlash.replace(/\/+$/, "");
+  return withoutTrailingSlashes || "/";
+})();
 
 // Read version from first build target's package.json
 const version = JSON.parse(
@@ -21,40 +29,45 @@ const publicDir = path.join(playgroundDir, "public", "timeless", version);
 
 // Map of package names to their artifact paths and destination filenames
 const artifacts = [
-  {
-    pkg: "reactive",
-    src: "packages/reactive/dist/timeless.reactive.umd.min.js",
-    dest: "timeless.reactive.umd.min.js",
-  },
-  {
-    pkg: "utils",
-    src: "packages/utils/dist/timeless.utils.umd.min.js",
-    dest: "timeless.utils.umd.min.js",
-  },
-  {
-    pkg: "ui",
-    src: "packages/ui/dist/timeless.ui.umd.min.js",
-    dest: "timeless.ui.umd.min.js",
-  },
-  {
-    pkg: "kit",
-    src: "packages/kit/dist/timeless.kit.umd.min.js",
-    dest: "timeless.kit.umd.min.js",
-  },
-  {
-    pkg: "headless",
-    src: "packages/headless/dist/timeless.headless.umd.min.js",
-    dest: "timeless.headless.umd.min.js",
-  },
-  {
-    pkg: "icons",
-    src: "packages/icons/dist/timeless.icons.umd.min.js",
-    dest: "timeless.icons.umd.min.js",
-  },
+  // {
+  //   pkg: "reactive",
+  //   src: "packages/reactive/dist/timeless.reactive.umd.min.js",
+  //   dest: "timeless.reactive.umd.min.js",
+  // },
+  // {
+  //   pkg: "utils",
+  //   src: "packages/utils/dist/timeless.utils.umd.min.js",
+  //   dest: "timeless.utils.umd.min.js",
+  // },
+  // {
+  //   pkg: "ui",
+  //   src: "packages/ui/dist/timeless.ui.umd.min.js",
+  //   dest: "timeless.ui.umd.min.js",
+  // },
+  // {
+  //   pkg: "kit",
+  //   src: "packages/kit/dist/timeless.kit.umd.min.js",
+  //   dest: "timeless.kit.umd.min.js",
+  // },
+  // {
+  //   pkg: "headless",
+  //   src: "packages/headless/dist/timeless.headless.umd.min.js",
+  //   dest: "timeless.headless.umd.min.js",
+  // },
+  // {
+  //   pkg: "icons",
+  //   src: "packages/icons/dist/timeless.icons.umd.min.js",
+  //   dest: "timeless.icons.umd.min.js",
+  // },
   {
     pkg: "shadcn",
     src: "packages/shadcn/dist/timeless.shadcn.umd.min.js",
     dest: "timeless.shadcn.umd.min.js",
+  },
+  {
+    pkg: "headless-dom",
+    src: "packages/headless-dom/dist/timeless.headless-dom.umd.min.js",
+    dest: "timeless.headless-dom.umd.min.js",
   },
   {
     pkg: "provider-web",
@@ -68,7 +81,7 @@ const buildRelations = {
   reactive: ["headless", "shadcn"],
   kit: ["headless", "shadcn"],
   ui: ["headless", "shadcn"],
-  headless: ["icons", "shadcn"],
+  headless: ["icons", "shadcn", "headless-dom"],
   icons: ["shadcn"],
 };
 
@@ -336,24 +349,44 @@ function startServer() {
 
   const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url);
-    const prefix = "/timeless";
 
-    if (parsedUrl.pathname === "/") {
-      res.writeHead(302, { Location: prefix + "/" });
-      res.end();
-      return;
+    const prefix = NormalizedAssetServerPrefix;
+    const requestPath = parsedUrl.pathname || "/";
+
+    if (prefix !== "/") {
+      if (requestPath === "/") {
+        res.writeHead(302, { Location: `${prefix}/` });
+        res.end();
+        return;
+      }
+
+      if (requestPath === prefix) {
+        res.writeHead(302, { Location: `${prefix}/` });
+        res.end();
+        return;
+      }
     }
 
-    let targetPath = parsedUrl.pathname;
-    if (targetPath.startsWith(prefix)) {
-      targetPath = targetPath.slice(prefix.length) || "/";
-    } else {
-      res.statusCode = 404;
-      res.end(`Not found (Path must start with ${prefix})`);
-      return;
+    let relativePath = requestPath;
+    if (prefix !== "/") {
+      if (relativePath === prefix) {
+        relativePath = "";
+      } else if (relativePath.startsWith(`${prefix}/`)) {
+        relativePath = relativePath.slice(prefix.length);
+      } else {
+        res.statusCode = 404;
+        res.end(`Not found (Path must start with ${prefix})`);
+        return;
+      }
     }
 
-    let pathname = path.join(serverRoot, targetPath);
+    relativePath = relativePath.replace(/^\/+/, "");
+    let pathname = path.normalize(path.join(serverRoot, relativePath));
+    if (!pathname.startsWith(serverRoot)) {
+      res.statusCode = 403;
+      res.end("Forbidden");
+      return;
+    }
 
     fs.stat(pathname, (err, stats) => {
       if (err) {
@@ -402,6 +435,6 @@ function startServer() {
   server.listen(port, () => {
     console.log(`\nStatic server listening on port ${port}`);
     console.log(`Root: ${serverRoot}`);
-    console.log(`Url: http://localhost:${port}/timeless/`);
+    console.log(`Url: http://127.0.0.1:${port}${NormalizedAssetServerPrefix}/`);
   });
 }

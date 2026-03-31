@@ -1,6 +1,8 @@
 import { Ref, isRef, isClassName, isStyleRef } from "@timeless/reactive";
 
-import { ViewProps } from "../primitive/view";
+import { ViewProps } from "@/primitive/view";
+import { getHost } from "@/host";
+import { safeCreateElement } from "@/util/env";
 
 export interface NativeInputProps extends Omit<ViewProps, "as" | "type"> {
   id?: string | Ref<string>;
@@ -22,6 +24,7 @@ export interface NativeInputProps extends Omit<ViewProps, "as" | "type"> {
 }
 
 export function NativeInput(props: NativeInputProps = {}) {
+  const host = getHost();
   const {
     id,
     type = "text",
@@ -58,34 +61,59 @@ export function NativeInput(props: NativeInputProps = {}) {
   } = props;
 
   let onMountedCleanup: (() => void) | undefined;
-  const $elm = document.createElement("input");
+  const listenerCleanups: (() => void)[] = [];
+  let rendered = false;
+  const $elm = safeCreateElement("input");
 
   return {
     t: "view",
     $elm,
     render() {
+      if (rendered) {
+        return $elm;
+      }
+      rendered = true;
+
+      const listen = (
+        type: string,
+        handler: (event: any) => void,
+        options?: any,
+      ) => {
+        host.addEventListener($elm, type, handler, options);
+        listenerCleanups.push(() => {
+          host.removeEventListener($elm, type, handler, options);
+        });
+      };
+
+      const setProp = (key: string, value: any) => {
+        if (host.setProperty) {
+          host.setProperty($elm, key, value);
+          return;
+        }
+        ($elm as any)[key] = value;
+      };
       const applyAttr = (k: string, v: any) => {
         if (v === undefined || v === null || v === false) {
-          $elm.removeAttribute(k);
+          host.removeAttribute($elm, k);
           return;
         }
         if (v === true) {
-          $elm.setAttribute(k, "");
+          host.setAttribute($elm, k, "");
           return;
         }
-        $elm.setAttribute(k, String(v));
+        host.setAttribute($elm, k, String(v));
       };
 
       if (id !== undefined) {
         if (isRef(id)) {
           id._subscribe({
             onChange(v) {
-              $elm.id = String(v);
+              setProp("id", String(v));
             },
           });
-          $elm.id = id.value;
+          setProp("id", id.value);
         } else {
-          $elm.id = id;
+          setProp("id", id);
         }
       }
 
@@ -93,12 +121,12 @@ export function NativeInput(props: NativeInputProps = {}) {
       if (isRef(type)) {
         type._subscribe({
           onChange(v) {
-            $elm.type = v;
+            setProp("type", v);
           },
         });
-        $elm.type = type.value;
+        setProp("type", type.value);
       } else {
-        $elm.type = type as any;
+        setProp("type", type as any);
       }
 
       // Handle value attribute
@@ -106,14 +134,12 @@ export function NativeInput(props: NativeInputProps = {}) {
         if (isRef(value)) {
           value._subscribe({
             onChange(v) {
-              if ($elm.value !== v) {
-                $elm.value = v;
-              }
+              setProp("value", v);
             },
           });
-          $elm.value = value.value;
+          setProp("value", value.value);
         } else {
-          $elm.value = value as string;
+          setProp("value", value as string);
         }
       }
 
@@ -122,12 +148,12 @@ export function NativeInput(props: NativeInputProps = {}) {
         if (isRef(placeholder)) {
           placeholder._subscribe({
             onChange(v) {
-              $elm.placeholder = v;
+              setProp("placeholder", v);
             },
           });
-          $elm.placeholder = placeholder.value;
+          setProp("placeholder", placeholder.value);
         } else {
-          $elm.placeholder = placeholder as string;
+          setProp("placeholder", placeholder as string);
         }
       }
 
@@ -136,12 +162,12 @@ export function NativeInput(props: NativeInputProps = {}) {
         if (isRef(disabled)) {
           disabled._subscribe({
             onChange(v) {
-              $elm.disabled = v;
+              setProp("disabled", v);
             },
           });
-          $elm.disabled = disabled.value;
+          setProp("disabled", disabled.value);
         } else {
-          $elm.disabled = disabled as boolean;
+          setProp("disabled", disabled as boolean);
         }
       }
 
@@ -150,12 +176,12 @@ export function NativeInput(props: NativeInputProps = {}) {
         if (isRef(readonly)) {
           readonly._subscribe({
             onChange(v) {
-              $elm.readOnly = v;
+              setProp("readOnly", v);
             },
           });
-          $elm.readOnly = readonly.value;
+          setProp("readOnly", readonly.value);
         } else {
-          $elm.readOnly = readonly as boolean;
+          setProp("readOnly", readonly as boolean);
         }
       }
 
@@ -164,12 +190,12 @@ export function NativeInput(props: NativeInputProps = {}) {
         if (isRef(maxLength)) {
           maxLength._subscribe({
             onChange(v) {
-              $elm.maxLength = v;
+              setProp("maxLength", v);
             },
           });
-          $elm.maxLength = maxLength.value;
+          setProp("maxLength", maxLength.value);
         } else {
-          $elm.maxLength = maxLength as number;
+          setProp("maxLength", maxLength as number);
         }
       }
 
@@ -178,12 +204,12 @@ export function NativeInput(props: NativeInputProps = {}) {
         if (isRef(minLength)) {
           minLength._subscribe({
             onChange(v) {
-              $elm.minLength = v;
+              setProp("minLength", v);
             },
           });
-          $elm.minLength = minLength.value;
+          setProp("minLength", minLength.value);
         } else {
-          $elm.minLength = minLength as any;
+          setProp("minLength", minLength as any);
         }
       }
 
@@ -192,12 +218,12 @@ export function NativeInput(props: NativeInputProps = {}) {
         if (isRef(pattern)) {
           pattern._subscribe({
             onChange(v) {
-              $elm.pattern = v;
+              setProp("pattern", v);
             },
           });
-          $elm.pattern = pattern.value;
+          setProp("pattern", pattern.value);
         } else {
-          $elm.pattern = pattern as string;
+          setProp("pattern", pattern as string);
         }
       }
 
@@ -206,12 +232,12 @@ export function NativeInput(props: NativeInputProps = {}) {
         if (isRef(required)) {
           required._subscribe({
             onChange(v) {
-              $elm.required = v;
+              setProp("required", v);
             },
           });
-          $elm.required = required.value;
+          setProp("required", required.value);
         } else {
-          $elm.required = required as boolean;
+          setProp("required", required as boolean);
         }
       }
 
@@ -220,12 +246,12 @@ export function NativeInput(props: NativeInputProps = {}) {
         if (isRef(autocomplete)) {
           autocomplete._subscribe({
             onChange(v) {
-              $elm.autocomplete = v;
+              setProp("autocomplete", v);
             },
           });
-          $elm.autocomplete = autocomplete.value as any;
+          setProp("autocomplete", autocomplete.value as any);
         } else {
-          $elm.autocomplete = autocomplete as any;
+          setProp("autocomplete", autocomplete as any);
         }
       }
 
@@ -234,19 +260,19 @@ export function NativeInput(props: NativeInputProps = {}) {
         if (isRef(name)) {
           name._subscribe({
             onChange(v) {
-              $elm.name = v;
+              setProp("name", v);
             },
           });
-          $elm.name = name.value;
+          setProp("name", name.value);
         } else {
-          $elm.name = name as string;
+          setProp("name", name as string);
         }
       }
 
       // Set static attributes
-      $elm.setAttribute("autocorrect", autocorrect);
+      host.setAttribute($elm, "autocorrect", autocorrect);
       if (inputMode) {
-        $elm.inputMode = inputMode;
+        setProp("inputMode", inputMode);
       }
 
       if (attributes) {
@@ -285,60 +311,62 @@ export function NativeInput(props: NativeInputProps = {}) {
       // Handle class
       if (cls) {
         if (typeof cls === "string") {
-          $elm.className = cls;
+          host.setClassName($elm, cls);
         } else if (isRef(cls)) {
           cls._subscribe({
             onChange(v) {
-              $elm.className = v;
+              host.setClassName($elm, v);
             },
           });
-          $elm.className = cls.value;
+          host.setClassName($elm, cls.value);
         } else if (isClassName(cls)) {
           cls._subscribe({
             onChange(v: string[]) {
-              $elm.className = v.join(" ");
+              host.setClassName($elm, v.join(" "));
             },
           });
-          $elm.className = cls.toString();
+          host.setClassName($elm, cls.toString());
         }
       }
 
       // Handle style
       if (style) {
         if (typeof style === "string") {
-          $elm.style.cssText = style;
+          host.setStyleText($elm, style);
         } else if (isRef(style)) {
-          $elm.style.cssText = style.value;
+          host.setStyleText($elm, style.value);
           style._subscribe({
             onChange(v: any) {
-              $elm.style.cssText = v;
+              host.setStyleText($elm, v);
             },
           });
         } else if (isStyleRef(style)) {
           style._subscribe({
             onChange(v: string) {
-              $elm.style.cssText = v;
+              host.setStyleText($elm, v);
             },
           });
-          $elm.style.cssText = style.toString();
+          host.setStyleText($elm, style.toString());
         }
       }
 
       // Event listeners
       if (onClick) {
-        $elm.addEventListener("click", function (event: MouseEvent) {
+        const handler = function (event: MouseEvent) {
           onClick(event);
-        });
+        };
+        listen("click", handler);
       }
 
       if (onDoubleClick) {
-        $elm.addEventListener("dblclick", function (event: MouseEvent) {
+        const handler = function (event: MouseEvent) {
           onDoubleClick(event);
-        });
+        };
+        listen("dblclick", handler);
       }
 
       if (onLongPress) {
-        let longPressTimer: number | null = null;
+        let longPressTimer: any = null;
         let startX = 0;
         let startY = 0;
         const longPressDuration = 500;
@@ -347,7 +375,7 @@ export function NativeInput(props: NativeInputProps = {}) {
         const handleStart = (event: PointerEvent) => {
           startX = event.clientX;
           startY = event.clientY;
-          longPressTimer = window.setTimeout(() => {
+          longPressTimer = host.setTimeout(() => {
             onLongPress(event);
             longPressTimer = null;
           }, longPressDuration);
@@ -358,7 +386,7 @@ export function NativeInput(props: NativeInputProps = {}) {
             const deltaX = Math.abs(event.clientX - startX);
             const deltaY = Math.abs(event.clientY - startY);
             if (deltaX > moveThreshold || deltaY > moveThreshold) {
-              window.clearTimeout(longPressTimer);
+              host.clearTimeout(longPressTimer);
               longPressTimer = null;
             }
           }
@@ -366,63 +394,71 @@ export function NativeInput(props: NativeInputProps = {}) {
 
         const handleEnd = () => {
           if (longPressTimer) {
-            window.clearTimeout(longPressTimer);
+            host.clearTimeout(longPressTimer);
             longPressTimer = null;
           }
         };
 
-        $elm.addEventListener("pointerdown", handleStart);
-        $elm.addEventListener("pointermove", handleMove);
-        $elm.addEventListener("pointerup", handleEnd);
-        $elm.addEventListener("pointercancel", handleEnd);
+        listen("pointerdown", handleStart);
+        listen("pointermove", handleMove);
+        listen("pointerup", handleEnd);
+        listen("pointercancel", handleEnd);
       }
 
       if (onPointerDown) {
-        $elm.addEventListener("pointerdown", function (event: PointerEvent) {
+        const handler = function (event: PointerEvent) {
           onPointerDown(event);
-        });
+        };
+        listen("pointerdown", handler);
       }
 
       if (onFocus) {
-        $elm.addEventListener("focus", function (event: FocusEvent) {
+        const handler = function (event: FocusEvent) {
           onFocus(event);
-        });
+        };
+        listen("focus", handler);
       }
 
       if (onBlur) {
-        $elm.addEventListener("blur", function (event: FocusEvent) {
+        const handler = function (event: FocusEvent) {
           onBlur(event);
-        });
+        };
+        listen("blur", handler);
       }
 
       if (onKeyDown) {
-        $elm.addEventListener("keydown", function (event: KeyboardEvent) {
+        const handler = function (event: KeyboardEvent) {
           onKeyDown(event);
-        });
+        };
+        listen("keydown", handler);
       }
 
       if (onMouseEnter) {
-        $elm.addEventListener("mouseenter", function (event: MouseEvent) {
+        const handler = function (event: MouseEvent) {
           onMouseEnter(event);
-        });
+        };
+        listen("mouseenter", handler);
       }
 
       if (onMouseLeave) {
-        $elm.addEventListener("mouseleave", function (event: MouseEvent) {
+        const handler = function (event: MouseEvent) {
           onMouseLeave(event);
-        });
+        };
+        listen("mouseleave", handler);
       }
 
       if (onInput) {
-        $elm.addEventListener("input", function (event: Event) {
+        const handler = function (event: Event) {
           onInput(event);
-        });
+        };
+        listen("input", handler);
       }
 
       if (onChange) {
-        $elm.addEventListener("change", function (event: Event) {
+        const handler = function (event: Event) {
           onChange(event);
-        });
+        };
+        listen("change", handler);
       }
 
       if (onMounted) {
@@ -440,6 +476,10 @@ export function NativeInput(props: NativeInputProps = {}) {
       }
     },
     onUnmounted() {
+      for (const fn of listenerCleanups) {
+        fn();
+      }
+      listenerCleanups.length = 0;
       if (onMountedCleanup) {
         onMountedCleanup();
       }

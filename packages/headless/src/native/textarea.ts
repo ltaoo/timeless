@@ -1,13 +1,17 @@
-import { ViewProps } from "@/primitive/view";
 import { cn, ref, refobj, isRef } from "@timeless/reactive";
 import { InputCore } from "@timeless/ui";
+
+import { ViewProps } from "@/primitive/view";
+import { getHost } from "@/host";
+import { safeCreateElement } from "@/util/env";
 
 export function NativeTextarea(
   props: ViewProps & { store: InputCore<any>; id?: string },
 ) {
+  const host = getHost();
   const { store, style: st, class: cls, dataset = {}, id, ...rest } = props;
 
-  const $elm = document.createElement("textarea");
+  const $elm = safeCreateElement("textarea");
 
   const value$ = refobj(store.value || "");
   const placeholder$ = ref(store.placeholder || "");
@@ -31,28 +35,39 @@ export function NativeTextarea(
     t: "view",
     $elm,
     render() {
+      const setProp = (key: string, value: any) => {
+        if (host.setProperty) {
+          host.setProperty($elm, key, value);
+          return;
+        }
+        ($elm as any)[key] = value;
+      };
       const applyAttr = (k: string, v: any) => {
         if (v === undefined || v === null || v === false) {
-          $elm.removeAttribute(k);
+          host.removeAttribute($elm, k);
           return;
         }
         if (v === true) {
-          $elm.setAttribute(k, "");
+          host.setAttribute($elm, k, "");
           return;
         }
-        $elm.setAttribute(k, String(v));
+        host.setAttribute($elm, k, String(v));
       };
 
       if (id) {
-        $elm.id = id;
+        setProp("id", id);
       }
 
       // Set initial attributes
-      $elm.value = value$.value;
-      $elm.placeholder = placeholder$.value;
-      $elm.disabled = disabled$.value;
-      $elm.setAttribute("autocomplete", store.autoComplete ? "on" : "off");
-      $elm.setAttribute("autocorrect", "off");
+      setProp("value", value$.value);
+      setProp("placeholder", placeholder$.value);
+      setProp("disabled", disabled$.value);
+      host.setAttribute(
+        $elm,
+        "autocomplete",
+        store.autoComplete ? "on" : "off",
+      );
+      host.setAttribute($elm, "autocorrect", "off");
 
       // Apply dataset attributes
       Object.keys(dataset || {}).forEach((k) => {
@@ -73,58 +88,56 @@ export function NativeTextarea(
       // Apply classes
       class$._subscribe({
         onChange(v: any) {
-          $elm.className = v.join(" ");
+          host.setClassName($elm, v.join(" "));
         },
       });
-      $elm.className = class$.toString();
+      host.setClassName($elm, class$.toString());
 
       // Apply style
       if (st && typeof st === "string") {
-        $elm.style.cssText = st;
+        host.setStyleText($elm, st);
       }
 
       // Subscribe to reactive state changes
       value$._subscribe({
         onChange(v: any) {
-          if ($elm.value !== String(v)) {
-            $elm.value = v;
-          }
+          setProp("value", v);
         },
       });
       placeholder$._subscribe({
         onChange(v: any) {
-          $elm.placeholder = v;
+          setProp("placeholder", v);
         },
       });
       disabled$._subscribe({
         onChange(v: any) {
-          $elm.disabled = v;
+          setProp("disabled", v);
         },
       });
 
       // Event handlers
-      $elm.addEventListener("input", (e: Event) => {
+      host.addEventListener($elm, "input", (e: any) => {
         store.handleChange(e);
       });
 
-      $elm.addEventListener("keydown", (e: KeyboardEvent) => {
+      host.addEventListener($elm, "keydown", (e: any) => {
         store.handleKeyDown({
           key: e.key,
           preventDefault: () => e.preventDefault(),
         });
       });
 
-      $elm.addEventListener("focus", () => {
+      host.addEventListener($elm, "focus", () => {
         store.handleFocus();
       });
 
-      $elm.addEventListener("blur", () => {
+      host.addEventListener($elm, "blur", () => {
         store.handleBlur();
       });
 
       // Connect store focus method to element
       store.focus = () => {
-        $elm.focus();
+        host.focus?.($elm);
       };
 
       return $elm;
@@ -133,7 +146,7 @@ export function NativeTextarea(
       if (props.onMounted) props.onMounted(this.$elm);
       store.setMounted();
       if (store.autoFocus) {
-        this.$elm.focus();
+        host.focus?.(this.$elm);
       }
     },
     beforeUnmounted() {

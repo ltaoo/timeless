@@ -1,4 +1,4 @@
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
 
 export function Alert(
   props: ViewProps & { variant?: "default" | "destructive" },
@@ -8,9 +8,13 @@ export function Alert(
   return View(
     {
       ...rest,
-      // "data-alert": "",
-      // "data-variant": variant,
-      // role: "alert",
+      dataset: {
+        alert: "",
+        variant,
+      },
+      attributes: {
+        role: "alert",
+      },
     },
     children,
   );

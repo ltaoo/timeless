@@ -1,8 +1,10 @@
 import { refobj, computed, classNames } from "@timeless/reactive";
 import { DateRangePickerCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { For } from "../primitive/for";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { For } from "@/primitive/for";
+import { getHost } from "@/host";
+
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
@@ -24,6 +26,7 @@ export function Trigger(
   props: ViewProps & { store: DateRangePickerCore; id?: string },
   children: ViewChildren = [],
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
 
   const events: (() => void)[] = [];
@@ -56,13 +59,13 @@ export function Trigger(
           {
             $el: $elm,
             getRect() {
-              return $elm.getBoundingClientRect();
+              return host.getBoundingClientRect?.($elm) as any;
             },
           },
           { force: true },
         );
 
-        $elm.addEventListener("pointerdown", (e: PointerEvent) => {
+        const handlePointerDown = (e: PointerEvent) => {
           e.preventDefault();
           e.stopPropagation();
           if ((e.target as HTMLElement).tagName === "INPUT") {
@@ -74,11 +77,15 @@ export function Trigger(
           }
           store.$presence.show();
           store.$popper.place();
-        });
+        };
+        host.addEventListener($elm, "pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
           rest.onMounted($elm);
         }
+        return () => {
+          host.removeEventListener($elm, "pointerdown", handlePointerDown);
+        };
       },
       onUnmounted() {
         for (const fn of events) {

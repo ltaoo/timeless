@@ -1,6 +1,7 @@
-import { isElement, TimelessElement } from "../primitive/view";
+import { isElement, TimelessElement } from "@/primitive/view";
+import { getHost } from "@/host";
 
-export function render(elm: TimelessElement, $root: HTMLDivElement) {
+export function render(elm: TimelessElement, $root: any) {
   if (!$root) {
     console.error("[Render] Root element not found");
     return;
@@ -10,12 +11,13 @@ export function render(elm: TimelessElement, $root: HTMLDivElement) {
     return;
   }
   if (isElement(elm)) {
+    const host = getHost();
     const $content = elm.render();
     if (!$content) {
       console.error("[Render] Element render return null");
       return;
     }
-    $root.appendChild($content);
+    host.appendChild($root, $content);
     return;
   }
   //   if (isLazyElement(elm)) {

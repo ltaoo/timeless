@@ -1,4 +1,5 @@
-import { TimelessElement } from "../primitive/view";
+import { TimelessElement } from "@/primitive/view";
+
 import { STUB_MARKER } from "./env";
 
 const VOID_ELEMENTS = new Set([

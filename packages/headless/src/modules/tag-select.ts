@@ -1,12 +1,14 @@
 import { refobj, computed, classNames, sn, combine } from "@timeless/reactive";
 import { TagSelectCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "../primitive/view";
-import { Show } from "../primitive/show";
-import { For } from "../primitive/for";
-import { Fragment } from "../primitive/fragment";
-import { NativeInput } from "../native/input";
-import { h } from "../util/h";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Show } from "@/primitive/show";
+import { For } from "@/primitive/for";
+import { Fragment } from "@/primitive/fragment";
+import { NativeInput } from "@/native/input";
+import { h } from "@/util/h";
+import { getHost } from "@/host";
+
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 
@@ -27,6 +29,7 @@ export function Trigger(
   props: ViewProps & { store: TagSelectCore<any>; id?: string },
   children: ViewChildren = [],
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -56,10 +59,14 @@ export function Trigger(
         e.stopPropagation();
       },
       onMounted($elm: HTMLInputElement) {
-        $elm.value = store.state.values.join(",") || "";
+        host.setProperty?.($elm, "value", store.state.values.join(",") || "");
         events.push(
           store.onStateChange(() => {
-            $elm.value = store.state.values.join(",") || "";
+            host.setProperty?.(
+              $elm,
+              "value",
+              store.state.values.join(",") || "",
+            );
           }),
         );
       },
@@ -75,13 +82,13 @@ export function Trigger(
           {
             $el: $elm,
             getRect() {
-              return $elm.getBoundingClientRect();
+              return host.getBoundingClientRect?.($elm) as any;
             },
           },
           { force: true },
         );
 
-        $elm.addEventListener("pointerdown", (e: any) => {
+        const handlePointerDown = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           if (e.target.tagName === "INPUT") {
@@ -96,11 +103,15 @@ export function Trigger(
           }
           props.store.presence.show();
           props.store.popper.place();
-        });
+        };
+        host.addEventListener($elm, "pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
           rest.onMounted($elm);
         }
+        return () => {
+          host.removeEventListener($elm, "pointerdown", handlePointerDown);
+        };
       },
       onUnmounted() {
         for (const fn of events) {

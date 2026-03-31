@@ -6,6 +6,7 @@ import { Show } from "@/primitive/show";
 import { NativeInput } from "@/native/input";
 import { h } from "@/util/h";
 import { LoaderOutlined } from "@timeless/icons";
+import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
@@ -27,6 +28,7 @@ export function Trigger(
   props: ViewProps & { store: SelectCore<any>; id?: string },
   children: ViewChildren = [],
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -66,10 +68,10 @@ export function Trigger(
         // }
       },
       onMounted($elm: HTMLInputElement) {
-        $elm.value = store.state.value || "";
+        host.setProperty?.($elm, "value", store.state.value || "");
         events.push(
           store.onStateChange(() => {
-            $elm.value = store.state.value || "";
+            host.setProperty?.($elm, "value", store.state.value || "");
           }),
         );
       },
@@ -86,12 +88,15 @@ export function Trigger(
           {
             $el: $elm,
             getRect() {
-              return $elm.getBoundingClientRect();
+              return host.getBoundingClientRect?.($elm) as any;
             },
           },
           { force: true },
         );
-        console.log("[]Select Trigger Mounted", $elm.getBoundingClientRect());
+        console.log(
+          "[]Select Trigger Mounted",
+          host.getBoundingClientRect?.($elm),
+        );
         // const rect = $elm.getBoundingClientRect();
         // store.setPosition({
         //   width: rect.width,
@@ -103,7 +108,7 @@ export function Trigger(
         //   top: rect.top,
         //   bottom: rect.bottom,
         // });
-        $elm.addEventListener("pointerdown", (e: any) => {
+        const handlePointerDown = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           // 如果点击的是隐藏的 input，不要再次触发
@@ -125,11 +130,15 @@ export function Trigger(
             return;
           }
           props.store.show();
-        });
+        };
+        host.addEventListener($elm, "pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
           rest.onMounted($elm);
         }
+        return () => {
+          host.removeEventListener($elm, "pointerdown", handlePointerDown);
+        };
       },
       onUnmounted() {
         for (const fn of events) {
@@ -235,6 +244,7 @@ export function Content(
   },
   children: ViewChildren,
 ) {
+  const host = getHost();
   const { store, animation, ...rest } = props;
 
   const presence_ = refobj(store.presence.state);
@@ -322,15 +332,15 @@ export function Content(
                   }
                 },
                 onMounted($elm: HTMLElement) {
-                  setTimeout(() => {
+                  host.setTimeout(() => {
                     if (store.state.search) {
-                      const input = $elm.querySelector("input");
+                      const input = host.querySelector?.($elm, "input");
                       if (input instanceof HTMLInputElement) {
-                        input.focus();
+                        host.focus?.(input);
                         return;
                       }
                     }
-                    $elm.focus();
+                    host.focus?.($elm);
                   }, 0);
                   if (rest.onMounted) {
                     rest.onMounted($elm);
@@ -357,6 +367,7 @@ export function Search(
   props: ViewProps & { store: SelectCore<any> },
   children?: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -381,8 +392,8 @@ export function Search(
         },
         onMounted($elm: HTMLInputElement) {
           // 自动聚焦搜索框
-          setTimeout(() => {
-            $elm.focus();
+          host.setTimeout(() => {
+            host.focus?.($elm);
           }, 0);
           if (rest.onMounted) {
             rest.onMounted($elm);

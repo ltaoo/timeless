@@ -8,7 +8,7 @@ import {
 
 import { View, ViewChildren, ViewProps } from "@/primitive/view";
 import { Fragment } from "@/primitive/fragment";
-import { isBrowser } from "@/util/env";
+import { getHost } from "@/host";
 
 let layer_id_counter = 0;
 
@@ -23,6 +23,7 @@ export function Anchor(
   props: ViewProps & { store: PopperCore },
   children: ViewChildren,
 ) {
+  const host = getHost();
   const { store, ...rest } = props;
   return View(
     {
@@ -31,7 +32,7 @@ export function Anchor(
         store.setReference({
           $el,
           getRect() {
-            return $el.getBoundingClientRect();
+            return host.getBoundingClientRect?.($el) as any;
           },
         });
         if (rest.onMounted) {
@@ -59,6 +60,7 @@ export function Content(
   },
   children: ViewChildren = [],
 ) {
+  const host = getHost();
   const {
     store,
     zIndex = 99,
@@ -106,7 +108,7 @@ export function Content(
         store.setFloating({
           $el: $e,
           getRect() {
-            return $e.getBoundingClientRect();
+            return host.getBoundingClientRect?.($e) as any;
           },
         });
 
@@ -116,19 +118,19 @@ export function Content(
             const ref_rect = store.reference.getRect();
             const $ref_el = (store.reference as any).$el;
             const is_virtual_element =
-              !$ref_el || !($ref_el instanceof Element);
+              !$ref_el || typeof ($ref_el as any).getBoundingClientRect !== "function";
             // 虚拟元素（如右键菜单），滚动时关闭
             if (is_virtual_element && onReferenceOutOfView) {
               onReferenceOutOfView();
               return;
             }
             // 检查参考元素是否在视口内
-            const is_in_viewport = isBrowser
-              ? ref_rect.top < window.innerHeight &&
-                ref_rect.bottom > 0 &&
-                ref_rect.left < window.innerWidth &&
-                ref_rect.right > 0
-              : false;
+            const viewport = host.getViewportSize?.() ?? { width: 0, height: 0 };
+            const is_in_viewport =
+              ref_rect.top < viewport.height &&
+              ref_rect.bottom > 0 &&
+              ref_rect.left < viewport.width &&
+              ref_rect.right > 0;
             if (!is_in_viewport && onReferenceOutOfView) {
               onReferenceOutOfView();
               return;
@@ -136,9 +138,7 @@ export function Content(
           }
           store.place();
         }
-        if (isBrowser) {
-          window.addEventListener("scroll", handleScroll, true);
-        }
+        host.addDocumentEventListener?.("scroll", handleScroll, true);
         // 注册到 LayerManager
         if (onDismiss) {
           const layer_manager = getGlobalLayerManager();
@@ -148,13 +148,13 @@ export function Content(
               if (!$element) {
                 return false;
               }
-              const rect = $element.getBoundingClientRect();
+              const rect = host.getBoundingClientRect?.($element) as any;
               // 同时检查 anchor 元素
               const $anchor_el = (store.reference as any)?.$el as
                 | HTMLElement
                 | undefined;
               if ($anchor_el) {
-                const anchor_rect = $anchor_el.getBoundingClientRect();
+                const anchor_rect = host.getBoundingClientRect?.($anchor_el) as any;
                 const in_anchor =
                   x >= anchor_rect.left &&
                   x <= anchor_rect.right &&
@@ -186,9 +186,7 @@ export function Content(
         return () => {
           unlisten();
           store.setFloating(null);
-          if (handleScroll && isBrowser) {
-            window.removeEventListener("scroll", handleScroll, true);
-          }
+          host.removeDocumentEventListener?.("scroll", handleScroll, true);
           // 从 LayerManager 注销
           if (layer_id) {
             const layerManager = getGlobalLayerManager();

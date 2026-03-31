@@ -1,4 +1,4 @@
-import { View, ViewChildren, ViewProps } from "../primitive/view";
+import { View, ViewChildren, ViewProps } from "@/primitive/view";
 
 export function Paragraph(props: ViewProps & {}, children?: ViewChildren) {
   const node$ = View({ ...props, as: "p" }, children);

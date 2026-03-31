@@ -1,10 +1,4 @@
-import {
-  ref,
-  refobj,
-  refarr,
-  computed,
-  ClassNameRef,
-} from "@timeless/reactive";
+import { ref, refobj, refarr, computed } from "@timeless/reactive";
 import {
   RouteViewCore,
   HistoryCore,
@@ -19,12 +13,12 @@ import {
   View,
   ViewChildren,
   ViewProps,
-} from "../primitive/view";
-import { For } from "../primitive/for";
-import { Show } from "../primitive/show";
-import { LazyView } from "../primitive/lazy-view";
-import { ErrorFallbackFn, withErrorBoundary } from "../primitive/error-boundary";
-import { h } from "../util/h";
+} from "@/primitive/view";
+import { For } from "@/primitive/for";
+import { Show } from "@/primitive/show";
+import { LazyView } from "@/primitive/lazy-view";
+import { ErrorFallbackFn, withErrorBoundary } from "@/primitive/error-boundary";
+import { h } from "@/util/h";
 
 export function StandardSubViews(
   props: ViewProps & {
