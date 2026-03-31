@@ -18,8 +18,8 @@ const sidemenu$ = Timeless.kit.RouteMenusModel({
   view: props.view,
   history: props.history,
   menus: [
-    { title: "首页", url: "root.home.index" },
-    { title: "设置", url: "root.home.settings" },
+    { title: "首页", name: "root.home.index" },
+    { title: "设置", name: "root.home.settings" },
   ],
 });
 

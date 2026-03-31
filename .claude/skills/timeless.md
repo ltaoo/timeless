@@ -142,7 +142,7 @@ props.history.destroyAllAndPush("root.login");
 // 侧边栏菜单
 Timeless.RouteMenusModel({
   view: props.view,
-  menus: [{ title: "Home", url: "root.home_layout.index" }],
+  menus: [{ title: "Home", name: "root.home_layout.index" }],
 });
 
 // 布局页使用子视图

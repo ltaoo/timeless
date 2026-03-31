@@ -9,21 +9,21 @@ export default function HomePageView(props) {
   const sidemenu$ = Timeless.kit.RouteMenusModel({
     view: props.view,
     history: props.history,
-    menus: [
-      { title: "General", url: "root.home_layout.index.general" },
-      { title: "Input", url: "root.home_layout.index.form" },
-      { title: "Field", url: "root.home_layout.index.validate" },
-      { title: "LLM", url: "root.home_layout.index.llm" },
-      { title: "Data Display", url: "root.home_layout.index.data" },
-      { title: "ScrollView", url: "root.home_layout.index.scroll" },
-      { title: "Feedback", url: "root.home_layout.index.feedback" },
-      { title: "Navigation", url: "root.home_layout.index.nav" },
-      { title: "Overlay", url: "root.home_layout.index.overlay" },
-      { title: "Command", url: "root.home_layout.index.command" },
-      { title: "Debug", url: "root.home_layout.index.debug" },
-      { title: "Lifecycle", url: "root.home_layout.index.lifecycle" },
-      { title: "Download Task", url: "root.home_layout.index.download_task" },
-    ],
+    menus: /** @type {{ title: string; name: PageKey }[]} */ ([
+      { title: "General", name: "root.home_layout.index.general" },
+      { title: "Input", name: "root.home_layout.index.form" },
+      { title: "Field", name: "root.home_layout.index.validate" },
+      { title: "LLM", name: "root.home_layout.index.llm" },
+      { title: "Data Display", name: "root.home_layout.index.data" },
+      { title: "ScrollView", name: "root.home_layout.index.scroll" },
+      { title: "Feedback", name: "root.home_layout.index.feedback" },
+      { title: "Navigation", name: "root.home_layout.index.nav" },
+      { title: "Overlay", name: "root.home_layout.index.overlay" },
+      { title: "Command", name: "root.home_layout.index.command" },
+      { title: "Debug", name: "root.home_layout.index.debug" },
+      { title: "Lifecycle", name: "root.home_layout.index.lifecycle" },
+      { title: "Download Task", name: "root.home_layout.index.download_task" },
+    ]),
   });
 
   return View({ class: "h-full" }, [
@@ -58,13 +58,13 @@ export default function HomePageView(props) {
                         class: cn([
                           "px-3 py-2 text-sm cursor-pointer transition-colors",
                           computed(sidemenu$.cur, (t) => {
-                            return t && t.name === menu.url
+                            return t && t.name === menu.name
                               ? "text-zinc-900 bg-zinc-100 font-medium dark:text-zinc-50 dark:bg-zinc-800"
                               : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50";
                           }),
                         ]),
                         onClick() {
-                          sidemenu$.handleClick(menu);
+                          props.history.push(menu.name);
                         },
                       },
                       [menu.title],

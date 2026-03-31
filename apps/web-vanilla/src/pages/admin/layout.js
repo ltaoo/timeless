@@ -64,20 +64,20 @@ export default function AdminLayoutView(props) {
     view: props.view,
     history: props.history,
     menus: [
-      { title: "仪表盘", url: "root.admin_layout.dashboard" },
+      { title: "仪表盘", name: "root.admin_layout.dashboard" },
       {
         title: "用户管理",
-        url: "root.admin_layout.users",
+        name: "root.admin_layout.users",
         children: ["root.admin_layout.user_detail"],
       },
       {
         title: "用户1",
-        url: "root.admin_layout.user_detail",
+        name: "root.admin_layout.user_detail",
         query: { id: "3" },
       },
-      { title: "角色权限", url: "root.admin_layout.roles" },
-      { title: "操作日志", url: "root.admin_layout.logs" },
-      { title: "系统设置", url: "root.admin_layout.system" },
+      { title: "角色权限", name: "root.admin_layout.roles" },
+      { title: "操作日志", name: "root.admin_layout.logs" },
+      { title: "系统设置", name: "root.admin_layout.system" },
     ],
   });
 

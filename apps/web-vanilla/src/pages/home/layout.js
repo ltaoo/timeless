@@ -7,10 +7,10 @@ export default function HomeLayoutView(props) {
     view: props.view,
     history: props.history,
     menus: [
-      { title: "Home", url: "root.home_layout.index", children: [] },
-      { title: "Article", url: "root.home_layout.article" },
-      { title: "Project", url: "root.home_layout.project" },
-      { title: "Settings", url: "root.home_layout.settings" },
+      { title: "Home", name: "root.home_layout.index", children: [] },
+      { title: "Article", name: "root.home_layout.article" },
+      { title: "Project", name: "root.home_layout.project" },
+      { title: "Settings", name: "root.home_layout.settings" },
     ],
   });
 

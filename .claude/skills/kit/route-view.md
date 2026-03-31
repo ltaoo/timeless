@@ -82,8 +82,8 @@ const { routes, views, defaultRouteName, notfoundRouteName } =
 const sidemenu$ = Timeless.RouteMenusModel({
   view: props.view,
   menus: [
-    { title: "Dashboard", url: "root.home_layout.index" },
-    { title: "Settings", url: "root.home_layout.settings" },
+    { title: "Dashboard", name: "root.home_layout.index" },
+    { title: "Settings", name: "root.home_layout.settings" },
   ],
 });
 

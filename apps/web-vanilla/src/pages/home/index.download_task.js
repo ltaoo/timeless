@@ -1,6 +1,7 @@
-import { Section, Item } from "@/components/index.js";
-
-import { DownloadTaskViewModel } from "./index.download_task.model.js";
+import {
+  DownloadTaskViewModel,
+  API_HOSTNAME,
+} from "./index.download_task.model.js";
 
 function formatSpeed(bps) {
   if (!bps) return "0 B/s";
@@ -24,7 +25,8 @@ function formatPercent(t) {
   return Math.min(100, Math.floor((cur * 100) / total));
 }
 
-function DownloadTaskItem({ task, vm$ }) {
+function DownloadTaskCard(props) {
+  const { task, vm$ } = props;
   const state_ = computed(task, (t) => {
     const pr = formatPercent(t);
     const isCompleted =
@@ -113,10 +115,12 @@ function DownloadTaskItem({ task, vm$ }) {
         [fileExt],
       ),
       View({ class: "flex-1 min-w-0" }, [
-        View(
+        Link(
           {
             class:
               "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+            target: "_blank",
+            href: API_HOSTNAME + "/preview?id=" + task.id,
           },
           [computed(task, (t) => t.name || "unknown")],
         ),
@@ -199,99 +203,97 @@ function DownloadTaskItem({ task, vm$ }) {
 export default function DownloadTaskPageView(props) {
   const vm$ = DownloadTaskViewModel(props);
 
-  return ScrollView({ class: "p-6 h-screen", store: vm$.ui.view_page$ }, [
-    View(
-      {
-        class: "h-full",
-        onMounted() {
-          vm$.methods.init();
-        },
+  return ScrollView(
+    {
+      class: "p-6 h-screen",
+      store: vm$.ui.view_page$,
+      onMounted() {
+        vm$.methods.init();
       },
-      [
-        // Section("Download Task", [Item("Download List", [,])]),
-        View(
-          {
-            class:
-              "flex flex-col w-full h-full rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
-          },
-          [
-            View(
-              {
-                class:
-                  "flex items-center justify-between h-[50px] px-3 py-2.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900",
-              },
-              [
-                View(
+    },
+    [
+      Flex(
+        {
+          direction: "col",
+          class:
+            "w-full h-full rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+        },
+        [
+          View(
+            {
+              class:
+                "flex items-center justify-between h-[50px] px-3 py-2.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900",
+            },
+            [
+              View(
+                {
+                  class:
+                    "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                },
+                [
+                  "Downloads",
+                  computed(vm$.state.taskCount, (d) =>
+                    d > 0 ? ` (${d})` : "",
+                  ),
+                ],
+              ),
+              View({ class: "flex items-center gap-1" }, [
+                Button(
                   {
-                    class:
-                      "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                    store: new Timeless.ui.ButtonCore({
+                      size: "sm",
+                      variant: "outline",
+                    }),
                   },
-                  [
-                    "Downloads",
-                    computed(vm$.state.taskCount, (d) =>
-                      d > 0 ? ` (${d})` : "",
-                    ),
-                  ],
+                  ["+ Fake"],
                 ),
-                View({ class: "flex items-center gap-1" }, [
-                  Button(
-                    {
-                      store: new Timeless.ui.ButtonCore({
-                        size: "sm",
-                        variant: "outline",
-                      }),
-                    },
-                    ["+ Fake"],
-                  ),
-                  Button(
-                    {
-                      store: new Timeless.ui.ButtonCore({
-                        size: "sm",
-                        variant: "ghost",
-                        onClick() {
-                          vm$.methods.clearTasks();
-                        },
-                      }),
-                    },
-                    ["Clear"],
-                  ),
-                ]),
-              ],
-            ),
-            View({ class: "flex-1 h-0" }, [
-              ScrollView({ class: "", store: vm$.ui.view_downloadtask$ }, [
-                Show(
+                Button(
                   {
-                    when: computed(vm$.state.taskCount, (d) => d > 0),
-                    fallback: [
-                      h(
-                        View,
-                        {
-                          class:
-                            "flex items-center justify-center h-[200px] text-sm text-zinc-400",
-                        },
-                        ["No download tasks"],
-                      ),
-                    ],
-                  },
-                  [
-                    h(Waterfall, {
-                      store: vm$.ui.waterfall$,
-                      class: "!overflow-visible !h-auto",
-                      render(task) {
-                        return DownloadTaskItem({
-                          task,
-                          vm$: props.model,
-                        });
+                    store: new Timeless.ui.ButtonCore({
+                      size: "sm",
+                      variant: "ghost",
+                      onClick() {
+                        vm$.methods.clearTasks();
                       },
                     }),
-                  ],
+                  },
+                  ["Clear"],
                 ),
               ]),
+            ],
+          ),
+          View({ class: "flex-1 h-0" }, [
+            ScrollView({ store: vm$.ui.view_downloadtask$ }, [
+              Show(
+                {
+                  when: computed(vm$.state.taskCount, (d) => d > 0),
+                  fallback: [
+                    h(
+                      View,
+                      {
+                        class:
+                          "flex items-center justify-center h-[200px] text-sm text-zinc-400",
+                      },
+                      ["No download tasks"],
+                    ),
+                  ],
+                },
+                [
+                  h(Waterfall, {
+                    store: vm$.ui.waterfall$,
+                    render(task) {
+                      return DownloadTaskCard({
+                        task,
+                        vm$: props.model,
+                      });
+                    },
+                  }),
+                ],
+              ),
             ]),
-          ],
-        ),
-      ],
-    ),
-  ]);
+          ]),
+        ],
+      ),
+    ],
+  );
 }

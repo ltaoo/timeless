@@ -13,6 +13,7 @@ export * from "./native/img";
 export * from "./native/input";
 export * from "./native/password";
 export * from "./native/label";
+export * from "./native/link";
 export * from "./native/checkbox";
 export * from "./native/select";
 export * from "./native/slider";

@@ -548,9 +548,10 @@ function emitViewCreated(view: RouteViewCore) {
 export function RouteMenusModel<
   T extends {
     title: string;
+    name?: unknown;
     url?: unknown;
     query?: Record<string, string>;
-    children?: T["url"][];
+    children?: T["name"][];
     onClick?: (m: T) => void;
   },
 >(props: { view: RouteViewCore; history: HistoryCore<any, any>; menus: T[] }) {
@@ -593,25 +594,25 @@ export function RouteMenusModel<
       return _menus;
     },
     cur: _cur,
-    isSubRoute(url: string) {
+    isSubRoute(name: string) {
       const v = _cur.value;
-      return v ? v.name.startsWith(url) : false;
+      return v ? v.name.startsWith(name) : false;
     },
-    isActive(url: string) {
+    isActive(name: string) {
       const v = _cur.value;
-      return v ? v.name === url : false;
+      return v ? v.name === name : false;
     },
     isSelected(t: RouteViewCore | null, menu: T) {
       if (!t) {
         return false;
       }
-      const isSameRoute = t.name === menu.url;
-      const isSubRoute = t.name.startsWith(menu.url as string);
+      const isSameRoute = t.name === menu.name;
+      const isSubRoute = t.name.startsWith(menu.name as string);
       const isCustomSubRoute = menu.children?.includes(t.name);
       return isSameRoute || !!isSubRoute || !!isCustomSubRoute;
     },
     handleClick(menu: T, query?: Record<string, string>) {
-      props.history.push(menu.url, query || menu.query);
+      props.history.push(menu.name, query || menu.query);
     },
     ready() {},
     destroy() {

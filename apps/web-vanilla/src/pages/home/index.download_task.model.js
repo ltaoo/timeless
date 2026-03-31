@@ -1,4 +1,4 @@
-const API_HOSTNAME = "http://100.78.198.69:2022";
+export const API_HOSTNAME = "http://100.78.198.69:2022";
 const client = new Timeless.kit.HttpClientCore({
   hostname: API_HOSTNAME,
 });
@@ -26,7 +26,7 @@ const ITEM_HEIGHT = 64;
 const GUTTER = 0;
 const PAGE_SIZE = 50;
 
-export const DownloadTaskViewModel = defineModel(() => {
+export function DownloadTaskViewModel(props) {
   const loading_ = ref(false);
   const tasks_ = refarr([]);
   const taskCount_ = ref(0);
@@ -236,16 +236,21 @@ export const DownloadTaskViewModel = defineModel(() => {
       ui.waterfall$.methods.appendItems(tasks);
     },
   };
+  const handlers = {
+    handleClickTask() {},
+  };
+  const listeners = [
+    list$.onDataSourceAdded((tasks) => {
+      tasks_.push(...tasks);
+      ui.waterfall$.methods.appendItems(tasks);
+    }),
+  ];
 
-  list$.onDataSourceAdded((tasks) => {
-    tasks_.push(...tasks);
-    ui.waterfall$.methods.appendItems(tasks);
-  });
-
-  return {
+  return defineModel({
     state,
     methods,
     ui,
     services,
-  };
-});
+    listeners,
+  });
+}

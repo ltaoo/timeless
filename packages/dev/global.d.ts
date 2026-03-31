@@ -213,15 +213,10 @@ declare module "packages/reactive/src/signal" {
     export function signal<T extends Record<string, any>>(v: T): ObjectSignal<T>;
     export function signal<T>(v: T): PrimitiveSignal<T>;
 }
-declare module "packages/reactive/src/computed" {
-    import { Ref } from "packages/reactive/src/types";
-    export function computed<T, R>(deps: Ref<T>, fn: (val: T) => R): Ref<R>;
-    export function computed<T extends object, R>(deps: T, fn: (val: T) => R): Ref<R>;
-}
 declare module "packages/reactive/src/model" {
     import { Ref } from "packages/reactive/src/types";
     type UnwrapState<S> = {
-        [K in keyof S]: S[K] extends Ref<infer V> ? V : never;
+        [K in keyof S]: S[K] extends Ref<infer V> ? V : S[K];
     };
     type Unlisten = () => void;
     type OnMethodHandlers<M> = {
@@ -239,13 +234,19 @@ declare module "packages/reactive/src/model" {
         onDestroy: (handler: () => void) => Unlisten;
         destroy: () => void;
     } & OnMethodHandlers<M>;
-    export function defineModel<P, S extends Record<string, any>, M extends Record<string, (...args: any[]) => any>, H extends Record<string, any> = {}, U extends Record<string, any> = {}, Sr extends Record<string, any> = {}>(factory: (params: P) => {
+    export function defineModel<S extends Record<string, any>, M extends Record<string, (...args: any[]) => any>, H extends Record<string, any> = {}, U extends Record<string, any> = {}, Sr extends Record<string, any> = {}>(model: {
         state: S;
         methods: M;
         handlers?: H;
         ui?: U;
         services?: Sr;
-    }): (params: P) => TimelessViewModel<S, M, H, U, Sr>;
+        listeners?: Array<Unlisten | undefined | null>;
+    }): TimelessViewModel<S, M, H, U, Sr>;
+}
+declare module "packages/reactive/src/computed" {
+    import { Ref } from "packages/reactive/src/types";
+    export function computed<T, R>(deps: Ref<T>, fn: (val: T) => R): Ref<R>;
+    export function computed<T extends object, R>(deps: T, fn: (val: T) => R): Ref<R>;
 }
 declare module "packages/reactive/src/derive" {
     import { Ref } from "packages/reactive/src/types";
@@ -530,6 +531,30 @@ declare module "packages/headless/src/native/label" {
         htmlFor?: string | Ref<string>;
     }
     export function NativeLabel(props?: NativeLabelProps, children?: ViewChildren | ViewChildren[number]): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/headless/src/native/link" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    export interface NativeLinkProps extends Omit<ViewProps, "as"> {
+        href?: string | Ref<string>;
+        target?: NativeLinkTarget | Ref<NativeLinkTarget>;
+        rel?: string | Ref<string>;
+        disabled?: boolean | Ref<boolean>;
+        download?: boolean | string | Ref<boolean | string>;
+        referrerPolicy?: ReferrerPolicy | Ref<string>;
+        hreflang?: string | Ref<string>;
+        hrefLang?: string | Ref<string>;
+        type?: string | Ref<string>;
+        ping?: string | Ref<string>;
+    }
+    export type NativeLinkTarget = "_self" | "_blank" | "_parent" | "_top" | (string & {});
+    export function NativeLink(props?: NativeLinkProps, children?: ViewChildren | ViewChildren[number]): {
         t: string;
         $elm: HTMLElement;
         render(): HTMLElement;
@@ -948,6 +973,12 @@ declare module "packages/headless/src/native/style" {
         onUnmounted(): void;
     };
 }
+declare module "packages/headless/src/primitive/error-boundary" {
+    import { TimelessElement } from "packages/headless/src/primitive/view";
+    export type ErrorFallbackFn = (error: Error, viewName: string) => TimelessElement;
+    export function defaultErrorView(error: Error, viewName: string): TimelessElement;
+    export function withErrorBoundary(createView: () => TimelessElement, viewName: string, ErrorFallback?: ErrorFallbackFn): TimelessElement;
+}
 declare module "packages/headless/src/primitive/lazy-view" {
     import { TimelessElement, ViewProps, ViewChildren, TimelessComponent } from "packages/headless/src/primitive/view";
     export function LazyView(props: ViewProps & {
@@ -1037,6 +1068,7 @@ declare module "packages/base/src/index" {
 }
 declare module "packages/ui/src/accordion/index" {
     import { Handler } from "packages/base/src/index";
+    import type { RefArray } from "packages/reactive/src/index";
     type AccordionCoreProps = {
         type?: "single" | "multiple";
         defaultOpenItems?: number[];
@@ -1044,7 +1076,7 @@ declare module "packages/ui/src/accordion/index" {
     export function AccordionCore(props?: AccordionCoreProps): {
         shape: "accordion";
         type: "multiple" | "single";
-        openItems: import("packages/reactive/src/types").TimelessRefArray<number>;
+        openItems: RefArray<number>;
         state: {
             readonly openItems: number[];
             readonly type: "multiple" | "single";
@@ -11647,9 +11679,10 @@ declare module "packages/kit/src/route_view/index" {
     export function onViewCreated(fn: (views: RouteViewCore) => void): void;
     export function RouteMenusModel<T extends {
         title: string;
+        name?: unknown;
         url?: unknown;
         query?: Record<string, string>;
-        children?: T["url"][];
+        children?: T["name"][];
         onClick?: (m: T) => void;
     }>(props: {
         view: RouteViewCore;
@@ -11665,8 +11698,8 @@ declare module "packages/kit/src/route_view/index" {
         };
         readonly menus: T[];
         cur: import("packages/reactive/src/types").TimelessRefObject<RouteViewCore>;
-        isSubRoute(url: string): boolean;
-        isActive(url: string): boolean;
+        isSubRoute(name: string): boolean;
+        isActive(name: string): boolean;
         isSelected(t: RouteViewCore | null, menu: T): boolean;
         handleClick(menu: T, query?: Record<string, string>): void;
         ready(): void;
@@ -12324,6 +12357,7 @@ declare module "packages/kit/src/index" {
 declare module "packages/headless/src/modules/keep-alive-sub-views" {
     import { RouteViewCore, HistoryCore, StorageCore, HttpClientCore, ApplicationModel } from "packages/kit/src/index";
     import { TimelessComponent, TimelessElement, ViewChildren, ViewProps } from "@/primitive/view";
+    import { ErrorFallbackFn } from "@/primitive/error-boundary";
     export function KeepAliveSubViews(props: ViewProps & {
         view: RouteViewCore;
         views: Record<string, TimelessComponent>;
@@ -12332,12 +12366,14 @@ declare module "packages/headless/src/modules/keep-alive-sub-views" {
         storage: StorageCore<any>;
         client: HttpClientCore;
         NotFound?: (...args: any[]) => TimelessElement;
+        ErrorFallback?: ErrorFallbackFn;
         placeholder?: ViewChildren;
     }): any;
 }
 declare module "packages/headless/src/modules/standard-sub-views" {
     import { RouteViewCore, HistoryCore, StorageCore, HttpClientCore, ApplicationModel } from "packages/kit/src/index";
     import { TimelessComponent, TimelessElement, ViewChildren, ViewProps } from "packages/headless/src/primitive/view";
+    import { ErrorFallbackFn } from "packages/headless/src/primitive/error-boundary";
     export function StandardSubViews(props: ViewProps & {
         view: RouteViewCore;
         views: Record<string, TimelessComponent>;
@@ -12347,6 +12383,7 @@ declare module "packages/headless/src/modules/standard-sub-views" {
         client: HttpClientCore;
         placeholder?: ViewChildren;
         NotFound?: (...args: any[]) => TimelessElement;
+        ErrorFallback?: ErrorFallbackFn;
     }): {
         t: string;
         $elm: any;
@@ -12381,6 +12418,7 @@ declare module "packages/headless/src/index" {
     export * from "packages/headless/src/native/input";
     export * from "packages/headless/src/native/password";
     export * from "packages/headless/src/native/label";
+    export * from "packages/headless/src/native/link";
     export * from "packages/headless/src/native/checkbox";
     export * from "packages/headless/src/native/select";
     export * from "packages/headless/src/native/slider";
@@ -12609,6 +12647,16 @@ declare module "packages/shadcn/src/modules/search-select" {
         emptyText?: string;
         loadingText?: string;
     }): any;
+}
+declare module "packages/shadcn/src/modules/link" {
+    import { NativeLinkProps, ViewChildren } from "packages/headless/src/index";
+    export function Link(props?: NativeLinkProps, children?: ViewChildren | ViewChildren[number]): {
+        t: string;
+        $elm: HTMLElement;
+        render(): HTMLElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/cascader" {
     import { ViewProps } from "packages/headless/src/index";
@@ -13365,6 +13413,7 @@ declare module "packages/shadcn/src/index" {
     import { Radio, RadioGroup, RadioGroupItem } from "packages/shadcn/src/modules/radio";
     import { Select } from "packages/shadcn/src/modules/select";
     import { SearchSelect } from "packages/shadcn/src/modules/search-select";
+    import { Link } from "packages/shadcn/src/modules/link";
     import { Cascader } from "packages/shadcn/src/modules/cascader";
     import { DatePicker } from "packages/shadcn/src/modules/date-picker";
     import { DateRangePicker } from "packages/shadcn/src/modules/date-range-picker";
@@ -13412,7 +13461,7 @@ declare module "packages/shadcn/src/index" {
     export * from "packages/reactive/src/index";
     export * as icons from "packages/icons/src/index";
     export * as kit from "packages/kit/src/index";
-    export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, };
+    export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, };
 }
 
 // === Package module aliases ===
@@ -13524,6 +13573,7 @@ declare const Label: typeof import("@timeless/shadcn").Label;
 declare const LazyView: typeof import("@timeless/shadcn").LazyView;
 declare const Line: typeof import("@timeless/shadcn").Line;
 declare const LinearGradient: typeof import("@timeless/shadcn").LinearGradient;
+declare const Link: typeof import("@timeless/shadcn").Link;
 declare const Mask: typeof import("@timeless/shadcn").Mask;
 declare const Match: typeof import("@timeless/shadcn").Match;
 declare const Menu: typeof import("@timeless/shadcn").Menu;
@@ -13533,6 +13583,7 @@ declare const NativeFileInput: typeof import("@timeless/shadcn").NativeFileInput
 declare const NativeImg: typeof import("@timeless/shadcn").NativeImg;
 declare const NativeInput: typeof import("@timeless/shadcn").NativeInput;
 declare const NativeLabel: typeof import("@timeless/shadcn").NativeLabel;
+declare const NativeLink: typeof import("@timeless/shadcn").NativeLink;
 declare const NativePassword: typeof import("@timeless/shadcn").NativePassword;
 declare const NativeSelect: typeof import("@timeless/shadcn").NativeSelect;
 declare const NativeSlider: typeof import("@timeless/shadcn").NativeSlider;

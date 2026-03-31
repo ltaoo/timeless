@@ -10,6 +10,7 @@ import { CheckboxGroup, CheckboxGroupItem } from "./modules/checkbox-group";
 import { Radio, RadioGroup, RadioGroupItem } from "./modules/radio";
 import { Select } from "./modules/select";
 import { SearchSelect } from "./modules/search-select";
+import { Link } from "./modules/link";
 import { Cascader } from "./modules/cascader";
 import { DatePicker } from "./modules/date-picker";
 import { DateRangePicker } from "./modules/date-range-picker";
@@ -101,6 +102,7 @@ export {
   RadioGroupItem,
   Select,
   SearchSelect,
+  Link,
   Cascader,
   DatePicker,
   DateRangePicker,

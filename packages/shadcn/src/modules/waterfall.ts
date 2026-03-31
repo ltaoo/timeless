@@ -20,7 +20,7 @@ export function Waterfall<T extends Record<string, unknown>>(
     {
       ...rest,
       store,
-      class: cn(["w-full h-full overflow-y-auto", cls]),
+      class: cn(["w-full h-full overflow-y-auto", "!overflow-visible !h-auto"]),
     },
     [
       For({
