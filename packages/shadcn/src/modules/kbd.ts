@@ -1,4 +1,4 @@
-import { View, ViewChildren, ViewProps } from "@timeless/headless";
+import { View, ViewChildren, ViewProps } from "@timeless/timeless";
 import { cn } from "@timeless/reactive";
 
 export function Kbd(props: ViewProps, children?: ViewChildren) {

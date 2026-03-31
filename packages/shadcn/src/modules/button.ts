@@ -5,7 +5,7 @@ import {
   ViewChildren,
   ViewProps,
   h,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { LoaderCircleOutlined } from "@timeless/icons";
 import { computed, ref } from "@timeless/reactive";
 import { ButtonCore } from "@timeless/ui";

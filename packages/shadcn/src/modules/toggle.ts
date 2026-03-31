@@ -1,5 +1,5 @@
 import { computed, refobj } from "@timeless/reactive";
-import { TogglePrimitive, ViewProps } from "@timeless/headless";
+import { TogglePrimitive, ViewProps } from "@timeless/timeless";
 import { SwitchCore } from "@timeless/ui";
 
 export function Toggle(props: ViewProps & { store: SwitchCore; id?: string }) {

@@ -1460,7 +1460,6 @@ function __wx_download_btn_handler() {
 
 if (typeof window.Timeless !== undefined) {
   Object.assign(Timeless, Timeless.kit);
-  Object.assign(Timeless, Timeless.headless);
   // Rendering
   window.h = Timeless.h;
   window.View = Timeless.View;

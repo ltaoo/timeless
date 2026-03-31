@@ -77,7 +77,7 @@ class MenuItemCore extends BaseDomain {
 }
 ```
 
-### Headless 层 (`packages/headless`)
+### Headless 层 (`packages/timeless`)
 
 **职责**：连接 UI 层和 DOM，提供无样式的组件原语
 
@@ -263,7 +263,7 @@ export class MyComponentCore extends BaseDomain {
 ### 2. 创建 Headless 层原语
 
 ```typescript
-// packages/headless/src/my-component.ts
+// packages/timeless/src/my-component.ts
 export function Trigger(
   props: ViewProps & { store: MyComponentCore },
   children: ViewChildren,

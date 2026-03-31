@@ -7,7 +7,7 @@ import {
   ViewProps,
   TimelessElement,
   h,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import {
   MenuCore,
   MenuItemCore,

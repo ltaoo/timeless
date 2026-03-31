@@ -46,7 +46,7 @@ export function createIcon(svg: string) {
 ## 使用示例
 
 ```ts
-import { View } from "@timeless/headless";
+import { View } from "@timeless/timeless";
 import { SearchOutlined } from "@timeless/icons/search";
 
 View(() => [

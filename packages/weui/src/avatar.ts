@@ -1,4 +1,4 @@
-import { Avatar as H } from "@timeless/headless";
+import { Avatar as H } from "@timeless/timeless";
 
 const SIZES = {
   sm: "width:32px;height:32px;font-size:var(--weui-FONT-SIZE-XS);",

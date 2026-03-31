@@ -3,7 +3,7 @@ import {
   View,
   ViewChildren,
   ViewProps,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { ButtonCore } from "@timeless/ui";
 
 const S = {

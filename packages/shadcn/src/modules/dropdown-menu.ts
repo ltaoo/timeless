@@ -9,7 +9,7 @@ import {
   Fragment,
   h,
   TimelessElement,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import {
   DropdownMenuCore,
   MenuCore,

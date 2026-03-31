@@ -8,7 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@timeless/biz": "workspace:*", "@timeless/kit": "workspace:*", "@timeless/utils": "workspace:*",
+    "@timeless/biz": "workspace:*",
+    "@timeless/kit": "workspace:*",
+    "@timeless/utils": "workspace:*",
     "@timeless/provider-wails3": "workspace:*",
     "@timeless/provider-web": "workspace:*",
     "@timeless/ui": "workspace:*",

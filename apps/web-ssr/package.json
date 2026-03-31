@@ -7,7 +7,7 @@
     "start": "node src/index.js"
   },
   "dependencies": {
-    "@timeless/headless": "workspace:^",
+    "@timeless/timeless": "workspace:^",
     "@timeless/reactive": "workspace:^",
     "@timeless/ui": "workspace:^"
   }

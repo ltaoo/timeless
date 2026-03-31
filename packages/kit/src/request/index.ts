@@ -12,8 +12,13 @@ import { sleep } from "@timeless/utils";
 
 import { HttpClientCore } from "@/http_client/index";
 
-import { RequestPayload, UnpackedRequestPayload } from "./utils";
-export type { RequestPayload, UnpackedRequestPayload };
+import {
+  RequestPayload,
+  UnpackedRequestPayload,
+  TmpRequestResp,
+} from "./utils";
+
+export type { RequestPayload, UnpackedRequestPayload, TmpRequestResp };
 
 enum Events {
   BeforeRequest,

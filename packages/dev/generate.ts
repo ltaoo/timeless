@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, "../..");
 
 const PACKAGES: { name: string; entry: string; namespace: string }[] = [
   { name: "@timeless/reactive", entry: "packages/reactive/src/index.ts", namespace: "reactive" },
-  { name: "@timeless/headless", entry: "packages/headless/src/index.ts", namespace: "headless" },
+  { name: "@timeless/timeless", entry: "packages/timeless/src/index.ts", namespace: "timeless" },
   { name: "@timeless/kit", entry: "packages/kit/src/index.ts", namespace: "kit" },
   { name: "@timeless/shadcn", entry: "packages/shadcn/src/index.ts", namespace: "shadcn" },
   { name: "@timeless/icons", entry: "packages/icons/src/index.ts", namespace: "icons" },

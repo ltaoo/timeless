@@ -1,4 +1,4 @@
-import { Accordion as H } from "@timeless/headless";
+import { Accordion as H } from "@timeless/timeless";
 
 const t = {
   root: {

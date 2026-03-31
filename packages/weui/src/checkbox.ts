@@ -1,4 +1,4 @@
-import { Checkbox as H } from "@timeless/headless";
+import { Checkbox as H } from "@timeless/timeless";
 
 const t = {
   root: { style: "display:flex;align-items:center;gap:8px;cursor:pointer;" },

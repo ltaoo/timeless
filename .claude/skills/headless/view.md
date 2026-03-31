@@ -1,6 +1,6 @@
 # View / TimelessElement / 生命周期
 
-源文件：`packages/headless/src/view.ts`
+源文件：`packages/timeless/src/view.ts`
 
 ## TimelessElement — 通用返回接口
 

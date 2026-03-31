@@ -1,4 +1,4 @@
-import { Sheet as H } from "@timeless/headless";
+import { Sheet as H } from "@timeless/timeless";
 
 const SIDE_TRANSFORM = {
   right: { base: "translateX(100%)", enter: "translateX(0)" },

@@ -29,18 +29,18 @@ const config = {
       format: "umd",
       name: "WeUI",
       globals: {
-        "@timeless/headless": "Headless",
+        "@timeless/timeless": "Headless",
       },
     },
     {
       file: path.join(__dirname, "dist/timeless.weui.esm.js"),
       format: "es",
       globals: {
-        "@timeless/headless": "Headless",
+        "@timeless/timeless": "Headless",
       },
     },
   ],
-  external: ["@timeless/headless"],
+  external: ["@timeless/timeless"],
   plugins: [
     typescript({
       compilerOptions: {

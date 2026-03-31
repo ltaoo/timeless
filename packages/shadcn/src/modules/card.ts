@@ -1,18 +1,9 @@
-import {
-  Card as H,
-  CardHeader as HH,
-  CardTitle as HT,
-  CardDescription as HD,
-  CardContent as HC,
-  CardFooter as HF,
-  ViewProps,
-  ViewChildren,
-} from "@timeless/headless";
+import { CardPrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
 import { cn } from "@timeless/reactive";
 
 export function Card(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return H(
+  return CardPrimitive.Card(
     {
       ...rest,
       class: cn([
@@ -26,7 +17,7 @@ export function Card(props: ViewProps, children?: ViewChildren) {
 
 export function CardHeader(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HH(
+  return CardPrimitive.CardHeader(
     {
       ...rest,
       class: cn(["flex flex-col space-y-1.5 p-6", cls]),
@@ -37,7 +28,7 @@ export function CardHeader(props: ViewProps, children?: ViewChildren) {
 
 export function CardTitle(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HT(
+  return CardPrimitive.CardTitle(
     {
       ...rest,
       class: cn(["text-2xl font-semibold leading-none tracking-tight", cls]),
@@ -48,7 +39,7 @@ export function CardTitle(props: ViewProps, children?: ViewChildren) {
 
 export function CardDescription(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HD(
+  return CardPrimitive.CardDescription(
     {
       ...rest,
       class: cn(["text-sm text-zinc-500 dark:text-zinc-400", cls]),
@@ -59,7 +50,7 @@ export function CardDescription(props: ViewProps, children?: ViewChildren) {
 
 export function CardContent(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HC(
+  return CardPrimitive.CardContent(
     {
       ...rest,
       class: cn(["p-6", cls]),
@@ -70,7 +61,7 @@ export function CardContent(props: ViewProps, children?: ViewChildren) {
 
 export function CardFooter(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HF(
+  return CardPrimitive.CardFooter(
     {
       ...rest,
       class: cn(["flex items-center p-6 pt-0", cls]),

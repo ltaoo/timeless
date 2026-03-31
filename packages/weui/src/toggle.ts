@@ -1,4 +1,4 @@
-import { Toggle as H } from "@timeless/headless";
+import { Toggle as H } from "@timeless/timeless";
 
 const t = {
   root: ({ on, disabled }) => ({

@@ -19,15 +19,15 @@ const artifacts = [
     dest: "timeless.reactive.umd.min.js",
   },
   {
-    pkg: "headless",
-    src: "packages/headless/dist/timeless.headless.umd.min.js",
-    dest: "timeless.headless.umd.min.js",
+    pkg: "timeless",
+    src: "packages/timeless/dist/timeless.umd.min.js",
+    dest: "timeless.umd.min.js",
   },
 ];
 
 // Explicit build dependencies
 const buildRelations = {
-  reactive: ["headless"],
+  reactive: ["timeless"],
 };
 
 let buildQueue = null;
@@ -172,8 +172,8 @@ function startDev() {
         // But runBuild filters based on the changed package.
         // If we change 'icons' (which is not in artifacts but is a dependency), runBuild('icons') will run.
         // runBuild('icons') uses filter './packages/icons...'.
-        // This builds 'icons' and things that depend on it (like 'headless').
-        // 'headless' IS in our artifacts. So changing 'icons' will rebuild 'headless'.
+        // This builds 'icons' and things that depend on it (like 'timeless').
+        // 'timeless' IS in our artifacts. So changing 'icons' will rebuild 'timeless'.
         // So we should watch everything.
         
         console.log(`Watching @timeless/${pkg}`);

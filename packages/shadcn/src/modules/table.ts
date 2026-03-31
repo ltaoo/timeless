@@ -1,18 +1,9 @@
-import {
-  Table as H,
-  TableHeader as HH,
-  TableBody as HB,
-  TableRow as HR,
-  TableHead as HTh,
-  TableCell as HTd,
-  ViewProps,
-  ViewChildren,
-} from "@timeless/headless";
+import { TablePrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
 import { cn } from "@timeless/reactive";
 
 export function Table(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return H(
+  return TablePrimitive.Table(
     {
       ...rest,
       class: cn(["w-full caption-bottom text-sm", cls]),
@@ -23,7 +14,7 @@ export function Table(props: ViewProps, children?: ViewChildren) {
 
 export function TableHeader(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HH(
+  return TablePrimitive.TableHeader(
     {
       ...rest,
       class: cn(["[&_tr]:border-b", cls]),
@@ -34,7 +25,7 @@ export function TableHeader(props: ViewProps, children?: ViewChildren) {
 
 export function TableBody(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HB(
+  return TablePrimitive.TableBody(
     {
       ...rest,
       class: cn(["[&_tr:last-child]:border-0", cls]),
@@ -45,7 +36,7 @@ export function TableBody(props: ViewProps, children?: ViewChildren) {
 
 export function TableRow(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HR(
+  return TablePrimitive.TableRow(
     {
       ...rest,
       class: cn([
@@ -59,7 +50,7 @@ export function TableRow(props: ViewProps, children?: ViewChildren) {
 
 export function TableHead(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HTh(
+  return TablePrimitive.TableHead(
     {
       ...rest,
       class: cn([
@@ -73,7 +64,7 @@ export function TableHead(props: ViewProps, children?: ViewChildren) {
 
 export function TableCell(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HTd(
+  return TablePrimitive.TableCell(
     {
       ...rest,
       class: cn(["p-4 align-middle", cls]),

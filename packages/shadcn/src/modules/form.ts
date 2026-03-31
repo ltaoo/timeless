@@ -3,7 +3,7 @@ import {
   ViewProps,
   ViewChildren,
   FieldPrimitive,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { ObjectFieldCore, ArrayFieldCore } from "@timeless/ui";
 import { XOutlined } from "@timeless/icons";
 

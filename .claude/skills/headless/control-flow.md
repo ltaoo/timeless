@@ -1,6 +1,6 @@
 # Show / For / Switch+Match
 
-源文件：`packages/headless/src/show.ts`, `for.ts`, `switch.ts`
+源文件：`packages/timeless/src/show.ts`, `for.ts`, `switch.ts`
 
 ## Show — 条件渲染
 

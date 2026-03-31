@@ -1,4 +1,4 @@
-import { Tabs as H } from "@timeless/headless";
+import { Tabs as H } from "@timeless/timeless";
 
 const t = {
   root: { style: "width:100%;" },

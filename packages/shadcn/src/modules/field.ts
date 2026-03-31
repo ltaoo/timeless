@@ -9,7 +9,7 @@ import {
   Case,
   Fragment,
   NativeLabel,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { SingleFieldCore } from "@timeless/ui";
 
 import { Separator as BaseSeparator } from "./separator";

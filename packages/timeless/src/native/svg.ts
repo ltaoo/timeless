@@ -444,12 +444,12 @@ export function Defs(props: DefsProps = {}, children?: any) {
   );
 }
 
-export function Symbol(props: SymbolProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "symbol" } as InternalSVGProps,
-    children,
-  );
-}
+// export function Symbol(props: SymbolProps = {}, children?: any) {
+//   return createSVGElement(
+//     { ...props, type: "symbol" } as InternalSVGProps,
+//     children,
+//   );
+// }
 
 export function Use(props: UseProps = {}, children?: any) {
   return createSVGElement(

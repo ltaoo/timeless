@@ -1,4 +1,4 @@
-import { SwitchPrimitive, ViewProps } from "@timeless/headless";
+import { SwitchPrimitive, ViewProps } from "@timeless/timeless";
 import { cn } from "@timeless/reactive";
 import { SwitchCore } from "@timeless/ui";
 

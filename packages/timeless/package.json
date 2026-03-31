@@ -1,6 +1,6 @@
 {
-  "name": "@timeless/headless",
-  "version": "0.6.0",
+  "name": "@timeless/timeless",
+  "version": "0.7.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -19,7 +19,9 @@
     "@timeless/icons": "workspace:^",
     "@timeless/kit": "workspace:^",
     "@timeless/reactive": "workspace:^",
-    "@timeless/ui": "workspace:^"
+    "@timeless/ui": "workspace:^",
+    "@timeless/utils": "workspace:^",
+    "@timeless/base": "workspace:^"
   },
   "exports": {
     ".": {

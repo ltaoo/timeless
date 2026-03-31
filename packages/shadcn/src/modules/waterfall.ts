@@ -4,7 +4,7 @@ import {
   type ViewProps,
   type TimelessElement,
   isElement,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { cn, refarr } from "@timeless/reactive";
 import { WaterfallModel, WaterfallCellModel } from "@timeless/ui";
 

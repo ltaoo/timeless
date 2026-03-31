@@ -7,7 +7,7 @@ import {
   Show,
   h,
   ScrollViewPrimitive,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { ScrollViewCore, TimePickerCore } from "@timeless/ui";
 import { CircleXOutlined, ClockOutlined } from "@timeless/icons";
 

@@ -1,4 +1,4 @@
-import { setHost, type HeadlessHost } from "@timeless/headless";
+import { setHost, type HeadlessHost } from "@timeless/timeless";
 
 type AnyEventHandler = (event: any) => void;
 

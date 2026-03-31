@@ -1,4 +1,4 @@
-import { Slider as H } from "@timeless/headless";
+import { Slider as H } from "@timeless/timeless";
 
 const t = {
   root: ({ disabled }) => ({

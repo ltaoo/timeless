@@ -1,6 +1,6 @@
 {
   "name": "@timeless/vanillalite",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "main": "dist/index.js",
   "module": "dist/timeless.vanillalite.esm.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,7 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/headless": "workspace:^",
+    "@timeless/timeless": "workspace:^",
     "@timeless/reactive": "workspace:^"
   }
 }

@@ -8,7 +8,7 @@ import {
   h,
   Show,
   ScrollViewPrimitive,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { DatePickerCore, ScrollViewCore, TimePickerCore } from "@timeless/ui";
 import {
   CalendarOutlined,

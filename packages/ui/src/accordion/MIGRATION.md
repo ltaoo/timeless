@@ -7,7 +7,7 @@
 新架构分为三层：
 
 1. **UI Core 层** (`packages/ui/src/accordion/index.ts`) - 状态管理和业务逻辑
-2. **Headless 层** (`packages/headless/src/accordion.ts`) - 无样式的 UI 组件
+2. **Headless 层** (`packages/timeless/src/accordion.ts`) - 无样式的 UI 组件
 3. **Shadcn 层** (`packages/shadcn/src/accordion.ts`) - 带样式的完整组件
 
 ## 第一步：创建 UI Core 层
@@ -129,7 +129,7 @@ export * from "./accordion";
 ## 第二步：创建 Headless 层
 
 ### 文件位置
-`packages/headless/src/accordion.ts`
+`packages/timeless/src/accordion.ts`
 
 ### 核心职责
 - 提供无样式的 UI 组件（Root, Item, Trigger, Chevron, Content）
@@ -278,7 +278,7 @@ export function Content(
 
 **旧架构（theme 配置）：**
 ```typescript
-import { Accordion as H } from "@timeless/headless";
+import { Accordion as H } from "@timeless/timeless";
 
 const t = {
   root: { class: "w-full" },
@@ -302,7 +302,7 @@ import {
   ViewChildren,
   ViewProps,
   Txt,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { AccordionCore } from "@timeless/ui";
 
 type AccordionItem = {
@@ -442,7 +442,7 @@ Accordion({
 
 - [ ] 导出 Core 到 `packages/ui/src/index.ts`
 
-- [ ] 创建 Headless 层（`packages/headless/src/accordion.ts`）
+- [ ] 创建 Headless 层（`packages/timeless/src/accordion.ts`）
   - [ ] 拆分为多个 Primitive 组件（Root, Item, Trigger, Chevron, Content）
   - [ ] 每个组件接收 `store` 和必要的 props
   - [ ] 使用 `computed` 计算响应式状态

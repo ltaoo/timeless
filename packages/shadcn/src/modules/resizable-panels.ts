@@ -4,7 +4,7 @@ import {
   View,
   ViewChildren,
   ViewProps,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
 
 // ResizablePanels Group 组件

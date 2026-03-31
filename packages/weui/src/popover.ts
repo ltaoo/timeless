@@ -1,4 +1,4 @@
-// import { Popover as H } from "@timeless/headless";
+// import { Popover as H } from "@timeless/timeless";
 
 // const t = {
 //   wrapper: { style: "position:fixed;z-index:999;left:0;top:0;" },
@@ -11,8 +11,8 @@
 
 import { PopoverCore } from "@timeless/ui";
 import { computed, ref, refobj } from "@timeless/reactive";
-import { View, Show, ViewChildren, ViewProps } from "@timeless/headless";
-import { PopoverPrimitive } from "@timeless/headless";
+import { View, Show, ViewChildren, ViewProps } from "@timeless/timeless";
+import { PopoverPrimitive } from "@timeless/timeless";
 
 export function Popover(
   props: ViewProps & {

@@ -1,6 +1,6 @@
 # Primitive 模式
 
-源文件：`packages/headless/src/` 下各组件文件
+源文件：`packages/timeless/src/` 下各组件文件
 
 ## 什么是 Primitive
 
@@ -68,4 +68,4 @@ animation: {
 }
 ```
 
-需要查看具体 Primitive 的子元素和 props → 直接读取 `packages/headless/src/<name>.ts`。
+需要查看具体 Primitive 的子元素和 props → 直接读取 `packages/timeless/src/<name>.ts`。

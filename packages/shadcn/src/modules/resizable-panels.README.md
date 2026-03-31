@@ -10,7 +10,7 @@
    - `ResizablePanelsCore`: 管理面板组和调整大小逻辑
    - `ResizablePanelCore`: 管理单个面板的状态
 
-2. **@timeless/headless** - Headless 层：提供无样式的基础组件
+2. **@timeless/timeless** - Headless 层：提供无样式的基础组件
    - `Group`: 面板容器组件
    - `Panel`: 单个面板组件
    - `Handle`: 拖拽手柄组件

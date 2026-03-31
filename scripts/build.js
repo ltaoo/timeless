@@ -7,15 +7,10 @@ const PACKAGES_DIR = path.join(ROOT, "packages");
 
 // Explicitly configure which packages to build
 const INCLUDED_PACKAGES = [
-  "base",
-  "headless",
-  "icons",
-  "kit",
+  "timeless",
+  "timeless-dom",
   "provider-web",
-  "reactive",
   "shadcn",
-  "utils",
-  "ui",
 ];
 
 const packageDirs = INCLUDED_PACKAGES;

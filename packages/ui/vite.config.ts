@@ -68,9 +68,10 @@ export default defineConfig({
     }),
     sourcemap: false,
     rollupOptions: {
-      external: ["@timeless/reactive", "@timeless/utils"],
+      external: ["@timeless/base", "@timeless/reactive", "@timeless/utils"],
       output: {
         globals: {
+          "@timeless/base": "Timeless.base",
           "@timeless/reactive": "Timeless.reactive",
           "@timeless/utils": "Timeless.utils",
         },

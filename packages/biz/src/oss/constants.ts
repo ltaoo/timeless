@@ -1,5 +1,3 @@
-// import { getCookie } from '@cf2e/utils';
-
 const uploadCookieName = "";
 export const Config = {
   uploadUrl: "",

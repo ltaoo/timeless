@@ -1,4 +1,4 @@
-import { Toast as H } from "@timeless/headless";
+import { Toast as H } from "@timeless/timeless";
 
 const t = {
   mask: { style: "position:fixed;inset:0;z-index:998;background:transparent;" },

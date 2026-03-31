@@ -5,7 +5,7 @@ import {
   ViewChildren,
   ViewProps,
   Txt,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { AccordionCore } from "@timeless/ui";
 
 type AccordionItem = {

@@ -1,4 +1,4 @@
-import { Alert as H, AlertTitle as HT, AlertDescription as HD } from "@timeless/headless";
+import { Alert as H, AlertTitle as HT, AlertDescription as HD } from "@timeless/timeless";
 
 const VARIANTS = {
   default: "border-left:4px solid var(--weui-BRAND);",

@@ -1,4 +1,4 @@
-import { ViewProps, ViewChildren, View } from "@timeless/headless";
+import { ViewProps, ViewChildren, View } from "@timeless/timeless";
 import { cn } from "@timeless/reactive";
 
 export function Label(props: ViewProps, children?: ViewChildren) {

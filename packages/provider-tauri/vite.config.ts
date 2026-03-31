@@ -12,7 +12,7 @@ export default createLibConfig({
   globals: {
     '@tauri-apps/api': 'tauri.api',
     '@timeless/reactive': 'Timeless.reactive',
-    '@timeless/headless': 'Timeless.headless',
+    '@timeless/timeless': 'Timeless',
     '@timeless/kit': 'Timeless',
     '@timeless/ui': 'Timeless.ui'
   },

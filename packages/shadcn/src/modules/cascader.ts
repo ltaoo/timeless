@@ -5,7 +5,7 @@ import {
   Show,
   View,
   ViewProps,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { CascaderCore, CascaderOption } from "@timeless/ui";
 import {
   ChevronDownOutlined,

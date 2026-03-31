@@ -1,5 +1,5 @@
 import { cn, combine, computed, ref, refobj } from "@timeless/reactive";
-import { SelectPrimitive, For, ViewProps, Show, View } from "@timeless/headless";
+import { SelectPrimitive, For, ViewProps, Show, View } from "@timeless/timeless";
 import { SelectCore } from "@timeless/ui";
 import {
   CheckOutlined,

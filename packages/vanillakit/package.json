@@ -1,6 +1,6 @@
 {
   "name": "@timeless/vanillakit",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "main": "dist/index.js",
   "module": "dist/timeless.vanillakit.esm.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,7 @@
   ],
   "dependencies": {
     "@timeless/base": "workspace:^",
-    "@timeless/headless": "workspace:^",
+    "@timeless/timeless": "workspace:^",
     "@timeless/icons": "workspace:^",
     "@timeless/kit": "workspace:^",
     "@timeless/reactive": "workspace:^",

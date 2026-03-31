@@ -12,7 +12,7 @@ const buildConfig = [
     exports: ["*"], // Use ['*'] for all, or specific exports like ['createSignal', 'createEffect']
   },
   {
-    pkg: "@timeless/headless",
+    pkg: "@timeless/timeless",
     exports: ["Show"],
   },
 ];

@@ -13,7 +13,7 @@ import {
   lazy,
   render,
   h,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 
 export * from "@timeless/reactive";
 

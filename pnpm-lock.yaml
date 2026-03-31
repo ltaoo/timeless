@@ -208,67 +208,24 @@ importers:
 
   apps/web-ssr:
     dependencies:
-      '@timeless/headless':
-        specifier: workspace:^
-        version: link:../../packages/headless
       '@timeless/reactive':
         specifier: workspace:^
         version: link:../../packages/reactive
+      '@timeless/timeless':
+        specifier: workspace:^
+        version: link:../../packages/timeless
       '@timeless/ui':
         specifier: workspace:^
         version: link:../../packages/ui
 
   apps/web-vanilla:
-    dependencies:
-      '@timeless/shadcn':
-        specifier: workspace:*
-        version: link:../../packages/shadcn
-      '@timeless/weui':
-        specifier: workspace:*
-        version: link:../../packages/weui
     devDependencies:
-      '@rollup/plugin-commonjs':
-        specifier: ^29.0.0
-        version: 29.0.0(rollup@4.59.0)
-      '@rollup/plugin-node-resolve':
-        specifier: ^16.0.3
-        version: 16.0.3(rollup@4.59.0)
-      '@rollup/plugin-terser':
-        specifier: ^0.4.4
-        version: 0.4.4(rollup@4.59.0)
-      '@timeless/biz':
-        specifier: workspace:*
-        version: link:../../packages/biz
       '@timeless/dev':
         specifier: workspace:*
         version: link:../../packages/dev
-      '@timeless/kit':
-        specifier: workspace:*
-        version: link:../../packages/kit
-      '@timeless/provider-web':
-        specifier: workspace:*
-        version: link:../../packages/provider-web
-      '@timeless/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
-      autoprefixer:
-        specifier: ^10.4.23
-        version: 10.4.24(postcss@8.5.6)
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
-      postcss:
-        specifier: ^8.5.6
-        version: 8.5.6
-      rollup:
-        specifier: ^4.56.0
-        version: 4.59.0
-      rollup-plugin-dts:
-        specifier: ^6.3.0
-        version: 6.3.0(rollup@4.59.0)(typescript@5.9.3)
-      tailwindcss:
-        specifier: ^4.1.18
-        version: 4.2.1
 
   apps/web-vue:
     dependencies:
@@ -367,30 +324,6 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  packages/headless:
-    dependencies:
-      '@timeless/icons':
-        specifier: workspace:^
-        version: link:../icons
-      '@timeless/kit':
-        specifier: workspace:^
-        version: link:../kit
-      '@timeless/reactive':
-        specifier: workspace:^
-        version: link:../reactive
-      '@timeless/ui':
-        specifier: workspace:^
-        version: link:../ui
-      tailwindcss:
-        specifier: ^3.0.0 || ^4.0.0
-        version: 4.2.1
-
-  packages/headless-dom:
-    dependencies:
-      '@timeless/headless':
-        specifier: workspace:*
-        version: link:../headless
-
   packages/icons:
     dependencies:
       '@timeless/reactive':
@@ -435,9 +368,6 @@ importers:
       '@timeless/base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/biz':
-        specifier: workspace:*
-        version: link:../biz
       '@timeless/kit':
         specifier: workspace:*
         version: link:../kit
@@ -453,9 +383,6 @@ importers:
       '@timeless/base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/biz':
-        specifier: workspace:*
-        version: link:../biz
       '@timeless/kit':
         specifier: workspace:*
         version: link:../kit
@@ -471,9 +398,6 @@ importers:
       '@timeless/base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/biz':
-        specifier: workspace:*
-        version: link:../biz
       '@timeless/kit':
         specifier: workspace:*
         version: link:../kit
@@ -489,9 +413,6 @@ importers:
       '@timeless/base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/biz':
-        specifier: workspace:*
-        version: link:../biz
       '@timeless/kit':
         specifier: workspace:*
         version: link:../kit
@@ -512,9 +433,6 @@ importers:
       '@timeless/base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/headless':
-        specifier: workspace:*
-        version: link:../headless
       '@timeless/icons':
         specifier: workspace:*
         version: link:../icons
@@ -524,6 +442,9 @@ importers:
       '@timeless/reactive':
         specifier: workspace:*
         version: link:../reactive
+      '@timeless/timeless':
+        specifier: workspace:*
+        version: link:../timeless
       '@timeless/ui':
         specifier: workspace:*
         version: link:../ui
@@ -574,6 +495,30 @@ importers:
         specifier: ^2.2.0
         version: 2.6.1
 
+  packages/timeless:
+    dependencies:
+      '@timeless/icons':
+        specifier: workspace:^
+        version: link:../icons
+      '@timeless/kit':
+        specifier: workspace:^
+        version: link:../kit
+      '@timeless/reactive':
+        specifier: workspace:^
+        version: link:../reactive
+      '@timeless/ui':
+        specifier: workspace:^
+        version: link:../ui
+      tailwindcss:
+        specifier: ^3.0.0 || ^4.0.0
+        version: 4.2.1
+
+  packages/timeless-dom:
+    dependencies:
+      '@timeless/timeless':
+        specifier: workspace:*
+        version: link:../timeless
+
   packages/types: {}
 
   packages/ui:
@@ -617,9 +562,6 @@ importers:
       '@timeless/base':
         specifier: workspace:^
         version: link:../base
-      '@timeless/headless':
-        specifier: workspace:^
-        version: link:../headless
       '@timeless/icons':
         specifier: workspace:^
         version: link:../icons
@@ -629,6 +571,9 @@ importers:
       '@timeless/reactive':
         specifier: workspace:^
         version: link:../reactive
+      '@timeless/timeless':
+        specifier: workspace:^
+        version: link:../timeless
       '@timeless/ui':
         specifier: workspace:^
         version: link:../ui
@@ -638,12 +583,12 @@ importers:
 
   packages/vanillalite:
     dependencies:
-      '@timeless/headless':
-        specifier: workspace:^
-        version: link:../headless
       '@timeless/reactive':
         specifier: workspace:^
         version: link:../reactive
+      '@timeless/timeless':
+        specifier: workspace:^
+        version: link:../timeless
 
   packages/vue:
     dependencies:
@@ -690,12 +635,12 @@ importers:
 
   packages/weui:
     dependencies:
-      '@timeless/headless':
-        specifier: workspace:*
-        version: link:../headless
       '@timeless/reactive':
         specifier: workspace:*
         version: link:../reactive
+      '@timeless/timeless':
+        specifier: workspace:*
+        version: link:../timeless
       '@timeless/ui':
         specifier: workspace:*
         version: link:../ui
@@ -3463,13 +3408,6 @@ packages:
     resolution: {integrity: sha512-B8vFPV1ADyegoYfhg+E7RAucYKv0xdVlwYYsIJgfPNeiSxZGWNxts9RqhyGzC11ULK/VaeXyKezGCwpMiH8Ktw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
-
-  rollup-plugin-dts@6.3.0:
-    resolution: {integrity: sha512-d0UrqxYd8KyZ6i3M2Nx7WOMy708qsV/7fTHMHxCMCBOAe3V/U7OMPu5GkX8hC+cmkHhzGnfeYongl1IgiooddA==}
-    engines: {node: '>=16'}
-    peerDependencies:
-      rollup: ^3.29.4 || ^4
-      typescript: ^4.5 || ^5.0
 
   rollup@3.30.0:
     resolution: {integrity: sha512-kQvGasUgN+AlWGliFn2POSajRQEsULVYFGTvOZmK06d7vCD+YhZztt70kGk3qaeAXeWYL5eO7zx+rAubBc55eA==}
@@ -6712,14 +6650,6 @@ snapshots:
       '@rolldown/binding-wasm32-wasi': 1.0.0-rc.6
       '@rolldown/binding-win32-arm64-msvc': 1.0.0-rc.6
       '@rolldown/binding-win32-x64-msvc': 1.0.0-rc.6
-
-  rollup-plugin-dts@6.3.0(rollup@4.59.0)(typescript@5.9.3):
-    dependencies:
-      magic-string: 0.30.21
-      rollup: 4.59.0
-      typescript: 5.9.3
-    optionalDependencies:
-      '@babel/code-frame': 7.29.0
 
   rollup@3.30.0:
     optionalDependencies:

@@ -30,16 +30,16 @@ export * as PopperPrimitive from "./modules/popper";
 
 // content
 export * from "./modules/flex";
-export * from "./modules/head";
-export * from "./modules/paragraph";
+export * as HeadPrimitive from "./modules/head";
+export * as ParagraphPrimitive from "./modules/paragraph";
 export * as ImagePrimitive from "./modules/image";
-export * from "./modules/table";
-export * from "./modules/card";
-export * from "./modules/label";
-export * from "./modules/badge";
-export * from "./modules/separator";
-export * from "./modules/skeleton";
-export * from "./modules/alert";
+export * as TablePrimitive from "./modules/table";
+export * as CardPrimitive from "./modules/card";
+export * as LabelPrimitive from "./modules/label";
+export * as BadgePrimitive from "./modules/badge";
+export * as SeparatorPrimitive from "./modules/separator";
+export * as SkeletonPrimitive from "./modules/skeleton";
+export * as AlertPrimitive from "./modules/alert";
 export * as AvatarPrimitive from "./modules/avatar";
 export * as ProgressPrimitive from "./modules/progress";
 
@@ -93,3 +93,13 @@ export * from "./util/render";
 export * from "./util/h";
 
 export * from "./host";
+
+export * as base from "@timeless/base";
+export * as reactive from "@timeless/reactive";
+export * as utils from "@timeless/utils";
+export * as ui from "@timeless/ui";
+export * as kit from "@timeless/kit";
+export * as icons from "@timeless/icons";
+export * from "@timeless/reactive";
+export * from "@timeless/ui";
+export { HistoryCore } from "@timeless/kit";

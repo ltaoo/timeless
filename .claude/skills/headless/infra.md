@@ -1,6 +1,6 @@
 # Portal / Presence / Popper / Transition
 
-源文件：`packages/headless/src/portal.ts`, `presence.ts`, `popper.ts`, `transition.ts`
+源文件：`packages/timeless/src/portal.ts`, `presence.ts`, `popper.ts`, `transition.ts`
 
 ## Portal
 
@@ -74,10 +74,10 @@ p$.hide();  // 触发退出动画
 NativeInput({ store: inputCore, class: "..." });
 ```
 
-源文件：`packages/headless/src/native-input.ts`
+源文件：`packages/timeless/src/native-input.ts`
 
 ## 环境抽象
 
-`packages/headless/src/env.ts` 提供跨端 DOM 创建：
+`packages/timeless/src/env.ts` 提供跨端 DOM 创建：
 - `safeCreateElement(tag)` — 浏览器用真实 DOM，服务端用 stub 对象
 - `isBrowser` — 环境检测

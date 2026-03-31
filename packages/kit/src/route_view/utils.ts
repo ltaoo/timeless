@@ -164,7 +164,10 @@ export function build<T extends string>(configure: OriginalRouteConfigure) {
     },
     {} as Record<T, RouteConfig<T>>,
   );
-  const routesWithPathname: Record<PathnameKey, RouteConfig<T>> = configs.reduce(
+  const routesWithPathname: Record<
+    PathnameKey,
+    RouteConfig<T>
+  > = configs.reduce(
     (a, b) => {
       return {
         ...a,
@@ -183,7 +186,7 @@ export function build<T extends string>(configure: OriginalRouteConfigure) {
 type RouteInner = {
   title: string;
   pathname: string;
-  component: any;
+  component?: any;
   options?: Partial<{
     keep_alive?: boolean;
     animation?: Partial<{
@@ -198,7 +201,8 @@ type RouteInner = {
 };
 export type RouteConfigure = Record<PathnameKey, RouteInner>;
 
-type RouteConfigurePageKeys<T, K = keyof T> = K extends keyof T & (string | number)
+type RouteConfigurePageKeys<T, K = keyof T> = K extends keyof T &
+  (string | number)
   ?
       | `${K}`
       | (T[K] extends object

@@ -1,4 +1,4 @@
-import { Badge as H } from "@timeless/headless";
+import { Badge as H } from "@timeless/timeless";
 
 const VARIANTS = {
   default: "background:var(--weui-BRAND);color:#fff;",

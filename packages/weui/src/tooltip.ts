@@ -1,6 +1,6 @@
-// import { Tooltip } from "@timeless/headless";
+// import { Tooltip } from "@timeless/timeless";
 
-import { View, ViewChildren, ViewProps } from "@timeless/headless";
+import { View, ViewChildren, ViewProps } from "@timeless/timeless";
 
 // const t = {
 //   wrapper: { style: "display:inline-block;" },

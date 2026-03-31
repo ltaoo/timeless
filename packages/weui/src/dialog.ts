@@ -1,4 +1,4 @@
-import { Dialog as H } from "@timeless/headless";
+import { Dialog as H } from "@timeless/timeless";
 
 const t = {
   overlay: ({ enter, exit }) => ({

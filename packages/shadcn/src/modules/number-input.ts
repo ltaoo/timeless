@@ -5,7 +5,7 @@ import {
   View,
   ViewProps,
   h,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { NumberInputCore } from "@timeless/ui";
 import { ChevronUpOutlined, ChevronDownOutlined } from "@timeless/icons";
 

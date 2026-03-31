@@ -1,4 +1,4 @@
-import { AvatarPrimitive, ViewProps, ViewChildren } from "@timeless/headless";
+import { AvatarPrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
 import { cn, Ref } from "@timeless/reactive";
 
 const SIZES = {

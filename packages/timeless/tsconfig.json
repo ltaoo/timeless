@@ -13,7 +13,14 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@timeless/base": ["../base/src/index.ts"],
+      "@timeless/reactive": ["../reactive/src/index.ts"],
+      "@timeless/utils": ["../utils/src/index.ts"],
+      "@timeless/ui": ["../ui/src/index.ts"],
+      "@timeless/kit": ["../kit/src/index.ts"],
+      "@timeless/types": ["../types/src/index.ts"],
+      "@timeless/icons": ["../icons/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

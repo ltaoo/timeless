@@ -7,7 +7,7 @@ import {
   ViewProps,
   Txt,
   h,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { TabHeaderCore } from "@timeless/ui";
 
 type TabItem = {

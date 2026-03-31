@@ -6,7 +6,7 @@ import {
   Show,
   View,
   ViewProps,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { SelectCore } from "@timeless/ui";
 import { CheckOutlined, ChevronDownOutlined } from "@timeless/icons";
 

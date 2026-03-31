@@ -2,7 +2,7 @@ import {
   ScrollViewPrimitive,
   ViewChildren,
   type ViewProps,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { cn } from "@timeless/reactive";
 import { ScrollViewCore } from "@timeless/ui";
 

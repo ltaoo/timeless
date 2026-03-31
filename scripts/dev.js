@@ -29,45 +29,20 @@ const publicDir = path.join(playgroundDir, "public", "timeless", version);
 
 // Map of package names to their artifact paths and destination filenames
 const artifacts = [
-  // {
-  //   pkg: "reactive",
-  //   src: "packages/reactive/dist/timeless.reactive.umd.min.js",
-  //   dest: "timeless.reactive.umd.min.js",
-  // },
-  // {
-  //   pkg: "utils",
-  //   src: "packages/utils/dist/timeless.utils.umd.min.js",
-  //   dest: "timeless.utils.umd.min.js",
-  // },
-  // {
-  //   pkg: "ui",
-  //   src: "packages/ui/dist/timeless.ui.umd.min.js",
-  //   dest: "timeless.ui.umd.min.js",
-  // },
-  // {
-  //   pkg: "kit",
-  //   src: "packages/kit/dist/timeless.kit.umd.min.js",
-  //   dest: "timeless.kit.umd.min.js",
-  // },
-  // {
-  //   pkg: "headless",
-  //   src: "packages/headless/dist/timeless.headless.umd.min.js",
-  //   dest: "timeless.headless.umd.min.js",
-  // },
-  // {
-  //   pkg: "icons",
-  //   src: "packages/icons/dist/timeless.icons.umd.min.js",
-  //   dest: "timeless.icons.umd.min.js",
-  // },
+  {
+    pkg: "timeless",
+    src: "packages/timeless/dist/timeless.umd.min.js",
+    dest: "timeless.umd.min.js",
+  },
   {
     pkg: "shadcn",
     src: "packages/shadcn/dist/timeless.shadcn.umd.min.js",
     dest: "timeless.shadcn.umd.min.js",
   },
   {
-    pkg: "headless-dom",
-    src: "packages/headless-dom/dist/timeless.headless-dom.umd.min.js",
-    dest: "timeless.headless-dom.umd.min.js",
+    pkg: "timeless-dom",
+    src: "packages/timeless-dom/dist/timeless.dom.umd.min.js",
+    dest: "timeless.dom.umd.min.js",
   },
   {
     pkg: "provider-web",
@@ -78,11 +53,7 @@ const artifacts = [
 
 // Explicit build dependencies
 const buildRelations = {
-  reactive: ["headless", "shadcn"],
-  kit: ["headless", "shadcn"],
-  ui: ["headless", "shadcn"],
-  headless: ["icons", "shadcn", "headless-dom"],
-  icons: ["shadcn"],
+  timeless: ["shadcn", "timeless-dom"],
 };
 
 let buildQueue = null;
@@ -100,19 +71,34 @@ function copyArtifacts() {
     }
   }
 
+  // Clean up unrelated artifacts, keep only the whitelisted files
+  const keepFiles = new Set([
+    "timeless.umd.min.js",
+    "timeless.dom.umd.min.js",
+    "timeless.shadcn.umd.min.js",
+    "timeless.shadcn.css",
+    "timeless.web.umd.min.js",
+  ]);
+  for (const dir of [distDir, publicDir]) {
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir)) {
+      if (!keepFiles.has(f)) {
+        try {
+          fs.unlinkSync(path.join(dir, f));
+        } catch {}
+      }
+    }
+  }
+
   // Also copy CSS files from each package's dist/
   const cssFiles = [];
-  const pkgDirs = fs
-    .readdirSync(packagesDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name);
-  for (const pkg of pkgDirs) {
+  const cssWhitelist = new Set(["shadcn"]);
+  for (const pkg of cssWhitelist) {
     const pkgDist = path.join(packagesDir, pkg, "dist");
-    if (fs.existsSync(pkgDist)) {
-      fs.readdirSync(pkgDist)
-        .filter((f) => f.endsWith(".css"))
-        .forEach((f) => cssFiles.push({ src: path.join(pkgDist, f), dest: f }));
-    }
+    if (!fs.existsSync(pkgDist)) continue;
+    fs.readdirSync(pkgDist)
+      .filter((f) => f.endsWith(".css"))
+      .forEach((f) => cssFiles.push({ src: path.join(pkgDist, f), dest: f }));
   }
 
   // Copy JS artifacts

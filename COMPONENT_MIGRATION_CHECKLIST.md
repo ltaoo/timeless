@@ -1,6 +1,6 @@
 # 组件迁移清单
 
-本文档列出了 `packages/headless/src` 中需要从 theme-based 架构迁移到 Core + Primitive + Shadcn 三层架构的组件。
+本文档列出了 `packages/timeless/src` 中需要从 theme-based 架构迁移到 Core + Primitive + Shadcn 三层架构的组件。
 
 ## 迁移状态说明
 
@@ -73,7 +73,7 @@
    - 每个 Primitive 接收 `store` 参数
 
 3. **更新导出配置**
-   - 在 `packages/headless/src/index.ts` 中
+   - 在 `packages/timeless/src/index.ts` 中
    - 将 `export * from "./component"` 改为 `export * as ComponentPrimitive from "./component"`
 
 4. **改造 Shadcn 层**

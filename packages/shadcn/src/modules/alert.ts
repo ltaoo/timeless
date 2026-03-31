@@ -1,9 +1,11 @@
-import { Alert as H, AlertTitle as HT, AlertDescription as HD, ViewProps, ViewChildren } from "@timeless/headless";
+import { AlertPrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
 import { cn } from "@timeless/reactive";
 
 const VARIANTS = {
-  default: "bg-white text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50 [&>div.alert-icon]:text-zinc-950 dark:[&>div.alert-icon]:text-zinc-50",
-  destructive: "border-red-500/50 text-red-500 dark:border-red-500 [&>div.alert-icon]:text-red-500",
+  default:
+    "bg-white text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50 [&>div.alert-icon]:text-zinc-950 dark:[&>div.alert-icon]:text-zinc-50",
+  destructive:
+    "border-red-500/50 text-red-500 dark:border-red-500 [&>div.alert-icon]:text-red-500",
 };
 
 export function Alert(
@@ -11,7 +13,7 @@ export function Alert(
   children?: ViewChildren,
 ) {
   const { variant = "default", class: cls, ...rest } = props;
-  return H(
+  return AlertPrimitive.Alert(
     {
       ...rest,
       variant,
@@ -27,7 +29,7 @@ export function Alert(
 
 export function AlertTitle(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HT(
+  return AlertPrimitive.AlertTitle(
     {
       ...rest,
       class: cn(["mb-1 font-medium leading-none tracking-tight", cls]),
@@ -38,7 +40,7 @@ export function AlertTitle(props: ViewProps, children?: ViewChildren) {
 
 export function AlertDescription(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return HD(
+  return AlertPrimitive.AlertDescription(
     {
       ...rest,
       class: cn(["text-sm [&_p]:leading-relaxed", cls]),

@@ -3,10 +3,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@timeless/kit": ["../../packages/kit/src/index.ts"],
-      "@timeless/biz": ["../../packages/biz/src/index.ts"],
-      "@timeless/utils": ["../../packages/utils/src/index.ts"],
-      "@timeless/types": ["../../packages/types/src/index.ts"],
       "~/*": ["./*"]
     },
     "jsx": "preserve",

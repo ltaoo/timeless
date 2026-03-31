@@ -4,7 +4,7 @@ import {
   View,
   ViewChildren,
   ViewProps,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { DialogCore } from "@timeless/ui";
 import { XOutlined } from "@timeless/icons";
 

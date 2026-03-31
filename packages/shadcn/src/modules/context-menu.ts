@@ -9,7 +9,7 @@ import {
   ViewProps,
   TimelessElement,
   h,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import {
   ContextMenuCore,
   MenuCore,

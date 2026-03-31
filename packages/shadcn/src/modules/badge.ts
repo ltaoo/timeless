@@ -1,19 +1,23 @@
-import { Badge as H, ViewProps, ViewChildren } from "@timeless/headless";
+import { BadgePrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
 import { cn } from "@timeless/reactive";
 
 const VARIANTS = {
-  default: "border-transparent bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900",
-  secondary: "border-transparent bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50",
+  default:
+    "border-transparent bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900",
+  secondary:
+    "border-transparent bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50",
   outline: "text-zinc-950 dark:text-zinc-50",
   destructive: "border-transparent bg-red-500 text-zinc-50",
 };
 
 export function Badge(
-  props: ViewProps & { variant?: "default" | "secondary" | "outline" | "destructive" },
+  props: ViewProps & {
+    variant?: "default" | "secondary" | "outline" | "destructive";
+  },
   children?: ViewChildren,
 ) {
   const { variant = "default", class: cls, ...rest } = props;
-  return H(
+  return BadgePrimitive.Badge(
     {
       ...rest,
       variant,

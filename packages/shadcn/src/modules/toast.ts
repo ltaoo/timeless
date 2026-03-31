@@ -6,7 +6,7 @@ import {
   h,
   ViewChildren,
   ViewProps,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { ToastCore } from "@timeless/ui";
 
 export function Toast(

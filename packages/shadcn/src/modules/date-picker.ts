@@ -1,5 +1,5 @@
 import { combine, computed, ref, refobj } from "@timeless/reactive";
-import { DatePickerPrimitive, For, Show, View, ViewProps } from "@timeless/headless";
+import { DatePickerPrimitive, For, Show, View, ViewProps } from "@timeless/timeless";
 import { DatePickerCore } from "@timeless/ui";
 import {
   CalendarOutlined,

@@ -8,14 +8,12 @@ export default createLibConfig({
   external: [
     "@timeless/utils",
     "@timeless/base",
-    "@timeless/biz",
     "@timeless/kit",
     "@timeless/ui",
   ],
   globals: {
     "@timeless/utils": "Timeless.utils",
     "@timeless/base": "Timeless.base",
-    "@timeless/biz": "Timeless.biz",
     "@timeless/kit": "Timeless.kit",
     "@timeless/ui": "Timeless.ui",
   },

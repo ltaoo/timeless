@@ -7,7 +7,7 @@ import {
   Show,
   Txt,
   h,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { DialogCore } from "@timeless/ui";
 
 import { Button } from "./button";

@@ -1,5 +1,5 @@
 import { cn, computed, refobj } from "@timeless/reactive";
-import { For, NativeImg, Show, View, ViewProps } from "@timeless/headless";
+import { For, NativeImg, Show, View, ViewProps } from "@timeless/timeless";
 import { ButtonCore, CheckboxCore, InputCore } from "@timeless/ui";
 
 import { Button } from "./button";

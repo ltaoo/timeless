@@ -1,6 +1,6 @@
 import { HistoryCore } from "@timeless/kit";
 import { computed, refarr, refobj, ref } from "@timeless/reactive";
-import { View, ViewProps, For, Show, Txt, h } from "@timeless/headless";
+import { View, ViewProps, For, Show, Txt, h } from "@timeless/timeless";
 import { ChevronDownOutlined, ChevronUpOutlined } from "@timeless/icons";
 
 export function HistoryPanel(

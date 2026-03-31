@@ -1,6 +1,6 @@
 {
   "name": "@timeless/weui",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "main": "dist/index.js",
   "module": "dist/timeless.weui.esm.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
   "dependencies": {
     "@timeless/reactive": "workspace:*",
     "@timeless/ui": "workspace:*",
-    "@timeless/headless": "workspace:*"
+    "@timeless/timeless": "workspace:*"
   },
   "peerDependencies": {
     "tailwindcss": "^3.0.0 || ^4.0.0"

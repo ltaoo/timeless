@@ -7,7 +7,7 @@ import {
   ViewProps,
   Show,
   h,
-} from "@timeless/headless";
+} from "@timeless/timeless";
 import { DateRangePickerCore, TooltipCore } from "@timeless/ui";
 import {
   CalendarOutlined,

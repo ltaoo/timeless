@@ -81,12 +81,6 @@ import { LLMProviderForm } from "./modules/llm-provider-form";
 import "./index.css";
 import "./styles/globals.css";
 
-export * as ui from "@timeless/ui";
-export * as base from "@timeless/base";
-export * from "@timeless/headless";
-export * from "@timeless/reactive";
-export * as icons from "@timeless/icons";
-export * as kit from "@timeless/kit";
 // export const Result = kit.Result;
 export {
   Input,

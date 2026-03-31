@@ -5,7 +5,7 @@
 //   MenuLabel as HLabel,
 //   MenuSeparator as HSep,
 //   DropdownMenu as HDrop,
-// } from "@timeless/headless";
+// } from "@timeless/timeless";
 
 // {
 //   const proto = MenuCore.prototype;

@@ -11,6 +11,7 @@ export interface BuildOptions {
   external?: string[];
   globals?: Record<string, string>;
   formats?: ("es" | "cjs" | "umd")[];
+  fileName?: (format: string) => string;
   minify?: boolean;
   sourcemap?: boolean;
   dts?: boolean;
@@ -32,6 +33,7 @@ export function createLibConfig(options: BuildOptions): UserConfig {
     external = [],
     globals = {},
     formats = ["es", "cjs"],
+    fileName,
     minify = false,
     sourcemap = true,
     dts: need_generate_dts = true,
@@ -63,6 +65,7 @@ export function createLibConfig(options: BuildOptions): UserConfig {
         name: buildLibName(name, globalName),
         formats,
         fileName: (format) => {
+          if (fileName) return fileName(format);
           if (format === "es") {
             return name ? `${name}.esm.js` : "index.esm.js";
           }

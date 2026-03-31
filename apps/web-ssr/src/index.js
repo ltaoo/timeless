@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { View, isBrowser, renderToString } from "@timeless/headless";
+import { View, isBrowser, renderToString } from "@timeless/timeless";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../../..");
@@ -58,13 +58,13 @@ const LIB_MAP = {
   ),
   "/lib/ui.js": path.join(ROOT, "packages/ui/dist/timeless.ui.umd.min.js"),
   "/lib/kit.js": path.join(ROOT, "packages/kit/dist/timeless.kit.umd.min.js"),
-  "/lib/headless.js": path.join(
+  "/lib/timeless.js": path.join(
     ROOT,
-    "packages/headless/dist/timeless.headless.umd.min.js",
+    "packages/timeless/dist/timeless.umd.min.js",
   ),
-  "/lib/headless-dom.js": path.join(
+  "/lib/timeless-dom.js": path.join(
     ROOT,
-    "packages/headless-dom/dist/timeless.headless-dom.umd.min.js",
+    "packages/timeless-dom/dist/timeless.dom.umd.min.js",
   ),
 };
 
@@ -111,8 +111,8 @@ function buildPage(ssrContent) {
   <script src="/lib/reactive.js"></script>
   <script src="/lib/ui.js"></script>
   <script src="/lib/kit.js"></script>
-  <script src="/lib/headless.js"></script>
-  <script src="/lib/headless-dom.js"></script>
+  <script src="/lib/timeless.js"></script>
+  <script src="/lib/timeless-dom.js"></script>
   <script src="/client.js"></script>
 </body>
 </html>`;

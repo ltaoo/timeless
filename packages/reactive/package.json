@@ -1,6 +1,6 @@
 {
   "name": "@timeless/reactive",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "main": "dist/index.js",
   "module": "dist/timeless.reactive.esm.js",
   "types": "dist/index.d.ts",
@@ -12,6 +12,9 @@
     "src",
     "dist"
   ],
+  "dependencies": {
+    "@timeless/base": "workspace:*"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

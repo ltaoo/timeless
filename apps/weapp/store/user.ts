@@ -1,4 +1,4 @@
-import {  UserCore  } from "@timeless/biz";);
+import { UserCore } from "@timeless/biz";
 
 class ExtendsUser extends UserCore {
   say() {
@@ -13,7 +13,7 @@ export const user = new ExtendsUser(
     token,
     expires_at: 0,
   },
-  client
+  client,
 );
 
 // user.walk = () => {

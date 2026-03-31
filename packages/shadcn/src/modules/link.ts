@@ -1,4 +1,4 @@
-import { NativeLink, NativeLinkProps, ViewChildren } from "@timeless/headless";
+import { NativeLink, NativeLinkProps, ViewChildren } from "@timeless/timeless";
 import { cn } from "@timeless/reactive";
 
 export function Link(

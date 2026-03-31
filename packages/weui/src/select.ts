@@ -1,4 +1,4 @@
-import { Select as H } from "@timeless/headless";
+import { Select as H } from "@timeless/timeless";
 
 const t = {
   root: { style: "position:relative;flex:1;" },

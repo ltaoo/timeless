@@ -1,21 +1,21 @@
 import { resolve } from "path";
 import { createLibConfig } from "../../vite.config.base";
-import pkg from "./package.json";
 
 export default createLibConfig({
   entry: resolve(__dirname, "src/index.ts"),
-  name: "timeless.wails3",
-  external: [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
-  ],
+  name: "timeless.dom",
+  globalName: "Timeless.DOM",
+  external: ["@timeless/timeless"],
   globals: {
-    "@timeless/reactive": "Timeless.reactive",
     "@timeless/timeless": "Timeless",
-    "@timeless/kit": "Timeless",
-    "@timeless/ui": "Timeless.ui",
   },
   formats: ["es", "cjs", "umd"],
+  fileName: (format) => {
+    if (format === "es") return "timeless.dom.esm.js";
+    if (format === "cjs") return "index.js";
+    if (format === "umd") return "timeless.dom.umd.min.js";
+    return `index.${format}.js`;
+  },
   minify: true,
   alias: {
     "@": resolve(__dirname, "src"),

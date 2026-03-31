@@ -5,7 +5,10 @@ export default createLibConfig({
   entry: resolve(__dirname, "src/index.ts"),
   name: "timeless.reactive",
   formats: ["es", "cjs", "umd"],
-  external: [],
+  external: ["@timeless/base"],
+  globals: {
+    "@timeless/base": "Timeless.base",
+  },
   minify: false,
   sourcemap: false,
   dts: true,

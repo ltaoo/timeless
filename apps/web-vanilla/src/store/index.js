@@ -10,7 +10,7 @@ import AdminLayoutView from "@/pages/admin/layout.js";
 
 Timeless.kit.NavigatorCore.prefix = "/";
 
-const routes_configure_for_types = /** @type {const} */ ({
+const routes_configure = /** @type {const} */ ({
   home_layout: {
     title: "首页",
     pathname: "/home",
@@ -187,14 +187,6 @@ const routes_configure_for_types = /** @type {const} */ ({
   },
 });
 
-export const routes_configure = routes_configure_for_types;
-export const routes_configure_with_root = /** @type {const} */ ({
-  root: {
-    title: "ROOT",
-    pathname: "/",
-    children: routes_configure_for_types,
-  },
-});
 const router = Timeless.kit.buildRoutes(routes_configure);
 
 const routes = router.routes;

@@ -1,4 +1,4 @@
-import { CheckboxPrimitive, ViewProps } from "@timeless/headless";
+import { CheckboxPrimitive, ViewProps } from "@timeless/timeless";
 import { CheckOutlined } from "@timeless/icons";
 import { ref, computed, cn } from "@timeless/reactive";
 import { CheckboxCore } from "@timeless/ui";
