@@ -1,7 +1,6 @@
 /**
  * @file Store 入口 - 路由管理
  */
-import LoginPage from "@/pages/login/index.js";
 import NotFoundPageView from "@/pages/notfound/index.js";
 import HomeLayoutView from "@/pages/home/layout.js";
 import HomeIndexPageView from "@/pages/home/index.js";
@@ -22,8 +21,7 @@ const routes_configure = /** @type {const} */ ({
         component: HomeIndexPageView,
         children: {
           general: {
-            // @ts-ignore
-            default: true,
+            is_default: true,
             title: "通用组件",
             pathname: "/home/index/general",
             component: HomeIndexGeneralView,
@@ -132,9 +130,6 @@ const routes_configure = /** @type {const} */ ({
         },
       },
     },
-    options: {
-      require: /** @type {string[]} */ ([]),
-    },
   },
   admin_layout: {
     title: "管理后台",
@@ -172,17 +167,19 @@ const routes_configure = /** @type {const} */ ({
         component: Timeless.lazy("@/pages/admin/system.js"),
       },
     },
+    options: {
+      require: /** @type {string[]} */ (["login"]),
+    },
   },
   login: {
     title: "登录",
     pathname: "/login",
-    component: LoginPage,
+    component: Timeless.lazy("@/pages/login/index.js"),
   },
   notfound: {
     title: "404",
     pathname: "/notfound",
     component: NotFoundPageView,
-    // @ts-ignore
     notfound: true,
   },
 });
@@ -193,6 +190,22 @@ const routes = router.routes;
 export const views = router.views;
 export const defaultRouteName = router.defaultRouteName;
 export const notfoundRouteName = router.notfoundRouteName;
+
+function routeHasRequirement(route, requireKey) {
+  let cur = route;
+  while (cur) {
+    const requires = cur.options?.require;
+    if (Array.isArray(requires) && requires.includes(requireKey)) {
+      return true;
+    }
+    const parentName = cur.parent?.name;
+    if (!parentName) {
+      return false;
+    }
+    cur = routes[parentName];
+  }
+  return false;
+}
 
 // LocalStorage
 const DEFAULT_CACHE_VALUES = {
@@ -224,6 +237,57 @@ export const client$ = new Timeless.kit.HttpClientCore({
     "Content-Type": "application/json",
   },
 });
+export const user$ = (() => {
+  let profile = storage$.get("user");
+  const loginListeners = [];
+  const logoutListeners = [];
+
+  storage$.onStateChange(() => {
+    profile = storage$.get("user");
+  });
+
+  function removeListener(list, cb) {
+    const idx = list.indexOf(cb);
+    if (idx >= 0) list.splice(idx, 1);
+  }
+
+  return {
+    get profile() {
+      return profile;
+    },
+    get token() {
+      return profile?.token || "";
+    },
+    get isLogin() {
+      return !!(profile && profile.token);
+    },
+    login(nextProfile) {
+      const merged = {
+        ...profile,
+        ...(nextProfile || {}),
+      };
+      profile = merged;
+      storage$.set("user", merged);
+      client$.appendHeaders({ Authorization: merged.token || "" });
+      for (const cb of loginListeners) cb(merged);
+    },
+    logout() {
+      storage$.clear("user");
+      profile = storage$.get("user");
+      client$.appendHeaders({ Authorization: "" });
+      for (const cb of logoutListeners) cb();
+    },
+    onLogin(cb) {
+      loginListeners.push(cb);
+      return () => removeListener(loginListeners, cb);
+    },
+    onLogout(cb) {
+      logoutListeners.push(cb);
+      return () => removeListener(logoutListeners, cb);
+    },
+  };
+})();
+client$.appendHeaders({ Authorization: user$.token });
 Timeless.web.provide_http_client(client$);
 export const router$ = new Timeless.kit.NavigatorCore();
 export const view$ = new Timeless.kit.RouteViewCore({
@@ -239,9 +303,9 @@ export const history$ = new Timeless.kit.HistoryCore({
   view: view$,
   router: router$,
   routes,
-  views: /** @type {Record<PageKey, RouteViewCore>} */ ({
+  views: {
     root: view$,
-  }),
+  },
 });
 Timeless.web.provide_history(history$);
 
@@ -258,20 +322,16 @@ export const app = new Timeless.kit.ApplicationModel({
       route,
       router.routesWithPathname,
     );
-    // if (route.options?.require?.includes("login")) {
-    //   if (!user.isLogin) {
-    //     app.tip?.({ text: ["请先登录"] });
-    //     history.push("root.login", { redirect: route.pathname });
-    //     return Timeless.Result.Err("need login");
-    //   }
-    // }
-    if (!route || history$.isRoot(/** @type {PageKey} */ (route.name))) {
-      history$.push(
-        /** @type {PageKey} */ (defaultRouteName),
-        {},
-        { ignore: true },
-      );
+    if (!route) {
+      history$.push("root.home_layout", {}, { ignore: true });
       return Timeless.Result.Ok(null);
+    }
+    if (routeHasRequirement(route, "login") && !user$.isLogin) {
+      history$.push("root.login", {
+        redirect: route.name,
+        redirect_query: encodeURIComponent(JSON.stringify(query || {})),
+      });
+      return Timeless.Result.Err("need login");
     }
     history$.push(route.name, query, { ignore: true });
     return Timeless.Result.Ok(null);
@@ -282,6 +342,17 @@ Timeless.web.provide_app(app);
 ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
 
 history$.onRouteChange(({ reason, view, href, ignore }) => {
+  if (!ignore) {
+    const pathname = String(view?.pathname || "");
+    const route = router.routesWithPathname[pathname];
+    if (route && routeHasRequirement(route, "login") && !user$.isLogin) {
+      history$.replace("root.login", {
+        redirect: route.name,
+        redirect_query: encodeURIComponent(JSON.stringify(view?.query || {})),
+      });
+      return;
+    }
+  }
   const { title } = view || {};
   if (title) {
     app.setTitle(title);

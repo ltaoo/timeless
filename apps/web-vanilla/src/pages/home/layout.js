@@ -63,8 +63,8 @@ export default function HomeLayoutView(props) {
               [
                 View(
                   {
-                    class: computed(sidemenu$.cur, () => {
-                      return sidemenu$.isActive("root.home_layout.article")
+                    class: computed(sidemenu$.cur, (t) => {
+                      return sidemenu$.isSelected(t, sidemenu$.menus[1])
                         ? "w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700 cursor-pointer transition-colors dark:bg-zinc-800 dark:text-white"
                         : "w-10 h-10 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-black cursor-pointer transition-colors dark:hover:bg-zinc-800 dark:hover:text-white";
                     }),

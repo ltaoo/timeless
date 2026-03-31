@@ -172,7 +172,7 @@ export default function LifecycleView(props) {
 
   const routesConfigure = {
     pagea: {
-      default: true,
+      is_default: true,
       title: "页面 A",
       pathname: "/page-a",
       component: (p) => LifecyclePageA({ ...p, addLog }),
@@ -210,10 +210,21 @@ export default function LifecycleView(props) {
   };
 
   const { routes, views, defaultRouteName } =
-    Timeless.buildRoutes(routesConfigure);
+    Timeless.kit.buildRoutes(routesConfigure);
 
-  const router$ = new Timeless.NavigatorCore();
-  const rootview$ = new Timeless.RouteViewCore({
+  /** @typedef {keyof typeof routes} PageKey */
+
+  /** @type {{ key: string; label: string; name: PageKey }[]} */
+  const routeTabs = [
+    { key: "pagea", label: "页面 A", name: "root.pagea" },
+    { key: "pageb", label: "页面 B", name: "root.pageb" },
+    { key: "pagec", label: "页面 C", name: "root.pagec" },
+    { key: "paged", label: "页面 D", name: "root.paged" },
+    { key: "pagee", label: "页面 E", name: "root.pagee" },
+  ];
+
+  const router$ = new Timeless.kit.NavigatorCore();
+  const rootview$ = new Timeless.kit.RouteViewCore({
     name: "root",
     pathname: "/",
     title: "Lifecycle Demo",
@@ -223,14 +234,14 @@ export default function LifecycleView(props) {
   });
   rootview$.isRoot = true;
 
-  const subhistory$ = new Timeless.HistoryCore({
+  const subhistory$ = new Timeless.kit.HistoryCore({
     view: rootview$,
     router: router$,
     routes,
     views: { root: rootview$ },
   });
   //   addLog("LifecycleView: mounted");
-  const curRoute = ref("pageA");
+  const curRoute = ref("pagea");
 
   const backButtonStore = new Timeless.ui.ButtonCore({
     onClick() {
@@ -278,13 +289,7 @@ export default function LifecycleView(props) {
               ]),
               View({ class: "flex gap-2" }, [
                 For({
-                  each: [
-                    { key: "pagea", label: "页面 A" },
-                    { key: "pageb", label: "页面 B" },
-                    { key: "pagec", label: "页面 C" },
-                    { key: "paged", label: "页面 D" },
-                    { key: "pagee", label: "页面 E" },
-                  ],
+                  each: routeTabs,
                   render(item) {
                     return View(
                       {
@@ -297,7 +302,7 @@ export default function LifecycleView(props) {
                           ),
                         ]),
                         onClick() {
-                          subhistory$.push(`root.${item.key}`);
+                          subhistory$.push(item.name);
                         },
                       },
                       item.label,
@@ -306,7 +311,9 @@ export default function LifecycleView(props) {
                 }),
               ]),
               View(
-                { class: "relative border rounded-lg p-4 dark:border-zinc-800" },
+                {
+                  class: "relative border rounded-lg p-4 dark:border-zinc-800",
+                },
                 [
                   StandardSubViews({
                     view: rootview$,

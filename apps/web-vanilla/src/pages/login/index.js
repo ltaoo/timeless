@@ -1,29 +1,50 @@
-export default function LoginPage(props) {
-  const ui = {
-    input_username: new Timeless.ui.InputCore({
-      defaultValue: "",
-    }),
-    input_pwd: new Timeless.ui.InputCore({
-      defaultValue: "",
-    }),
-  };
+import { user$ } from "@/store/index.js";
 
-  const handleLogin = () => {
+export default function LoginPage(props) {
+  function handleLogin() {
     const username = ui.input_username.value;
     const password = ui.input_pwd.value;
 
     if (username === "admin" && password === "123456") {
-      // Login successful
-      console.log("Login successful");
-      // Redirect to home page
-      // Assuming the route name is "root.home_layout.index" based on views.js
-      props.history.replace("root.home_layout.index.general");
+      user$.login({
+        id: "1",
+        username,
+        email: "admin@example.com",
+        token: "token",
+      });
+      const redirect = props.view?.query?.redirect;
+      const redirectQuery = (() => {
+        const raw = props.view?.query?.redirect_query;
+        if (!raw) return {};
+        try {
+          return JSON.parse(decodeURIComponent(String(raw)));
+        } catch {
+          return {};
+        }
+      })();
+      if (redirect) {
+        props.history.replace(redirect, redirectQuery);
+        return;
+      }
+      props.history.replace("root.admin_layout.dashboard");
       return;
     }
-    // props.app.tip({
-    //   msg: ["Invalid username or password"],
-    // });
     alert("Invalid username or password");
+  }
+
+  const ui = {
+    input_username: new Timeless.ui.InputCore({
+      defaultValue: "",
+      placeholder: "Enter your username",
+    }),
+    input_pwd: new Timeless.ui.InputCore({
+      defaultValue: "",
+      placeholder: "Enter your password",
+      type: "password",
+    }),
+    btn_login: new Timeless.ui.ButtonCore({
+      onClick: handleLogin,
+    }),
   };
 
   return View(
@@ -76,7 +97,6 @@ export default function LoginPage(props) {
               View({ class: "mt-1" }, [
                 Input({
                   store: ui.input_username,
-                  placeholder: "Enter your username",
                   class: cn([
                     "block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm",
                     "dark:bg-zinc-900 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500", // Dark mode input styles
@@ -99,8 +119,6 @@ export default function LoginPage(props) {
               View({ class: "mt-1" }, [
                 Input({
                   store: ui.input_pwd,
-                  type: "password",
-                  placeholder: "Enter your password",
                   class: cn([
                     "block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm",
                     "dark:bg-zinc-900 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500", // Dark mode input styles
@@ -113,13 +131,11 @@ export default function LoginPage(props) {
             View({}, [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
-                    class: cn([
-                      "flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
-                      "dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-400", // Dark mode button styles
-                    ]),
-                    onClick: handleLogin,
-                  }),
+                  store: ui.btn_login,
+                  class: cn([
+                    "flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
+                    "dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-400", // Dark mode button styles
+                  ]),
                 },
                 [Txt("Sign in")],
               ),
@@ -137,7 +153,7 @@ export default function LoginPage(props) {
                 Txt("Hint: Use username "),
                 View(
                   {
-                    type: "span",
+                    as: "span",
                     class: cn([
                       "font-mono font-medium text-gray-700",
                       "dark:text-zinc-300", // Dark mode code text
@@ -148,7 +164,7 @@ export default function LoginPage(props) {
                 Txt(" and password "),
                 View(
                   {
-                    type: "span",
+                    as: "span",
                     class: cn([
                       "font-mono font-medium text-gray-700",
                       "dark:text-zinc-300", // Dark mode code text

@@ -91,6 +91,10 @@ type RouteViewCoreProps = {
   visible?: boolean;
   /** 该视图是布局视图 */
   layout?: boolean;
+  defaultName?: string;
+  notfoundFallbackName?: string;
+  is_default?: boolean;
+  is_notfound_fallback?: boolean;
   animation?: Partial<{
     in: string;
     out: string;
@@ -112,6 +116,11 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
   name: string;
   pathname: string;
   title: string;
+  layout = false;
+  defaultName: string | undefined;
+  notfoundFallbackName: string | undefined;
+  is_default = false;
+  is_notfound_fallback = false;
   animation: Partial<{
     in: string;
     out: string;
@@ -165,6 +174,11 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
       title,
       query = {},
       visible = false,
+      layout = false,
+      defaultName,
+      notfoundFallbackName,
+      is_default = false,
+      is_notfound_fallback = false,
       animation = {},
       parent = null,
       views = [],
@@ -174,6 +188,11 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     this.parent = parent;
     this.title = title;
     this.unique_id = title;
+    this.layout = !!layout;
+    this.defaultName = defaultName;
+    this.notfoundFallbackName = notfoundFallbackName;
+    this.is_default = !!is_default;
+    this.is_notfound_fallback = !!is_notfound_fallback;
     this.animation = animation;
     this.subViews = views;
     // console.log("[DOMAIN]route_view - constructor", title, { destroyAfterHide });

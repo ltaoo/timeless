@@ -39,7 +39,7 @@ type HistoryCoreProps<K extends string, R extends Record<string, any>> = {
   view: RouteViewCore;
   router: NavigatorCore;
   routes: Record<K, R>;
-  views: Record<K, RouteViewCore>;
+  views: Record<string, RouteViewCore>;
   /** 是否采用虚拟路由（不改变浏览器历史） */
   virtual?: boolean;
 };
@@ -105,6 +105,17 @@ export class HistoryCore<
     this.virtual = virtual;
   }
 
+  resolveLayoutDefaultName(name: K) {
+    const route = this.routes[name];
+    if (!route) {
+      return name;
+    }
+    if (route.layout && route.defaultName && route.defaultName !== name) {
+      return route.defaultName as K;
+    }
+    return name;
+  }
+
   push(
     name: K,
     query: Record<string, string> = {},
@@ -113,6 +124,10 @@ export class HistoryCore<
       ignore: boolean;
     }> = {},
   ) {
+    const resolvedName = this.resolveLayoutDefaultName(name);
+    if (resolvedName !== name) {
+      return this.push(resolvedName, query, options);
+    }
     // console.log("-----------");
     // console.log("[DOMAIN]history/index - push target url is", name, "and cur href is", this.$router.href);
     const { ignore } = options;
@@ -136,6 +151,11 @@ export class HistoryCore<
     if (view) {
       this.ensureParent(view, query);
       view.query = query;
+      view.layout = !!route1.layout;
+      view.defaultName = route1.defaultName;
+      view.notfoundFallbackName = route1.notfoundFallbackName;
+      view.is_default = !!route1.is_default;
+      view.is_notfound_fallback = !!route1.is_notfound_fallback;
       if (!view.parent) {
         console.log("[DOMAIN]history/index - error1");
         return;
@@ -189,6 +209,11 @@ export class HistoryCore<
       title: route.title,
       query,
       animation: route.options?.animation,
+      layout: !!route.layout,
+      defaultName: route.defaultName,
+      notfoundFallbackName: route.notfoundFallbackName,
+      is_default: !!route.is_default,
+      is_notfound_fallback: !!route.is_notfound_fallback,
       parent: null,
     });
     // created.onUnmounted(() => {
@@ -232,6 +257,10 @@ export class HistoryCore<
     this.emit(Events.StateChange, { ...this.state });
   }
   replace(name: K, query: Record<string, string> = {}) {
+    const resolvedName = this.resolveLayoutDefaultName(name);
+    if (resolvedName !== name) {
+      return this.replace(resolvedName, query);
+    }
     const route = this.routes[name];
     if (!route) {
       console.log("[DOMAIN]history/index - replace 2. no matched route");
@@ -254,6 +283,11 @@ export class HistoryCore<
     if (view) {
       this.ensureParent(view, query);
       view.query = query;
+      view.layout = !!route.layout;
+      view.defaultName = route.defaultName;
+      view.notfoundFallbackName = route.notfoundFallbackName;
+      view.is_default = !!route.is_default;
+      view.is_notfound_fallback = !!route.is_notfound_fallback;
       if (!view.parent) {
         console.log("[DOMAIN]history/index - replace 1");
         return;
@@ -279,6 +313,11 @@ export class HistoryCore<
       title: route.title,
       query,
       animation: route.options?.animation,
+      layout: !!route.layout,
+      defaultName: route.defaultName,
+      notfoundFallbackName: route.notfoundFallbackName,
+      is_default: !!route.is_default,
+      is_notfound_fallback: !!route.is_notfound_fallback,
       parent: null,
     });
     this.views[uniqueKey] = created;
@@ -409,6 +448,10 @@ export class HistoryCore<
       ignore: boolean;
     }> = {},
   ) {
+    const resolvedName = this.resolveLayoutDefaultName(name);
+    if (resolvedName !== name) {
+      return this.destroyAllAndPush(resolvedName, query, options);
+    }
     // console.log("-----------");
     // console.log("[DOMAIN]history/index - push target url is", name, "and cur href is", this.$router.href);
     const { ignore } = options;
@@ -470,6 +513,11 @@ export class HistoryCore<
       title: route.title,
       query,
       animation: route.options?.animation,
+      layout: !!route.layout,
+      defaultName: route.defaultName,
+      notfoundFallbackName: route.notfoundFallbackName,
+      is_default: !!route.is_default,
+      is_notfound_fallback: !!route.is_notfound_fallback,
       parent: null,
     });
     // created.onUnmounted(() => {
@@ -547,6 +595,11 @@ export class HistoryCore<
       title: parent_route.title,
       // 父视图保持自身稳定的 query（与子视图解耦）
       query: {},
+      layout: !!parent_route.layout,
+      defaultName: parent_route.defaultName,
+      notfoundFallbackName: parent_route.notfoundFallbackName,
+      is_default: !!parent_route.is_default,
+      is_notfound_fallback: !!parent_route.is_notfound_fallback,
       parent: null,
     });
     // 仅用稳定 key 存储父视图，确保所有子视图复用同一个父视图实例
@@ -555,6 +608,10 @@ export class HistoryCore<
     this.ensureParent(created_parent);
   }
   buildURL(name: K, query: Record<string, string> = {}) {
+    const resolvedName = this.resolveLayoutDefaultName(name);
+    if (resolvedName !== name) {
+      return this.buildURL(resolvedName, query);
+    }
     const route = (() => {
       const m = this.routes[name];
       if (!m) {
@@ -571,11 +628,20 @@ export class HistoryCore<
       pathname: route.pathname,
       title: route.title,
       query,
+      layout: !!route.layout,
+      defaultName: route.defaultName,
+      notfoundFallbackName: route.notfoundFallbackName,
+      is_default: !!route.is_default,
+      is_notfound_fallback: !!route.is_notfound_fallback,
       parent: null,
     });
     return created.buildUrl(query);
   }
   buildURLWithPrefix(name: K, query: Record<string, string> = {}) {
+    const resolvedName = this.resolveLayoutDefaultName(name);
+    if (resolvedName !== name) {
+      return this.buildURLWithPrefix(resolvedName, query);
+    }
     const route = (() => {
       const m = this.routes[name];
       if (!m) {
@@ -592,6 +658,11 @@ export class HistoryCore<
       pathname: route.pathname,
       title: route.title,
       query,
+      layout: !!route.layout,
+      defaultName: route.defaultName,
+      notfoundFallbackName: route.notfoundFallbackName,
+      is_default: !!route.is_default,
+      is_notfound_fallback: !!route.is_notfound_fallback,
       parent: null,
     });
     return created.buildUrlWithPrefix(query);

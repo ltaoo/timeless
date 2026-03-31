@@ -35,6 +35,8 @@ export type OriginalRouteConfigure = Record<
   {
     title: string;
     pathname: string;
+    is_default?: boolean;
+    is_notfound_fallback?: boolean;
     options?: Partial<{
       keep_alive?: boolean;
       animation?: Partial<{
@@ -83,6 +85,10 @@ export type RouteConfig<T> = {
   pathname: PathnameKey;
   /** 是否为布局 */
   layout?: boolean;
+  defaultName?: T;
+  notfoundFallbackName?: T;
+  is_default?: boolean;
+  is_notfound_fallback?: boolean;
   parent: {
     name: string;
   };
@@ -99,7 +105,68 @@ export type RouteConfig<T> = {
   // component: unknown;
 };
 
-function apply<T>(
+function resolveDefaultNameFromChildren<T extends string>(
+  children: OriginalRouteConfigure | undefined,
+  parentName: T,
+): T | undefined {
+  if (!children) {
+    return undefined;
+  }
+  for (const childKey in children) {
+    const child = children[childKey];
+    if (child?.is_default) {
+      return [parentName, childKey].filter(Boolean).join(".") as unknown as T;
+    }
+  }
+  for (const childKey in children) {
+    const child = children[childKey];
+    if (!child?.children) {
+      continue;
+    }
+    const childName = [parentName, childKey]
+      .filter(Boolean)
+      .join(".") as unknown as T;
+    const deep = resolveDefaultNameFromChildren(child.children, childName);
+    if (deep) {
+      return deep;
+    }
+  }
+  return undefined;
+}
+
+function resolveNotfoundFallbackNameFromChildren<T extends string>(
+  children: OriginalRouteConfigure | undefined,
+  parentName: T,
+): T | undefined {
+  if (!children) {
+    return undefined;
+  }
+  for (const childKey in children) {
+    const child = children[childKey];
+    if (child?.is_notfound_fallback) {
+      return [parentName, childKey].filter(Boolean).join(".") as unknown as T;
+    }
+  }
+  for (const childKey in children) {
+    const child = children[childKey];
+    if (!child?.children) {
+      continue;
+    }
+    const childName = [parentName, childKey]
+      .filter(Boolean)
+      .join(".") as unknown as T;
+    const deep = resolveNotfoundFallbackNameFromChildren(
+      child.children,
+      childName,
+    );
+    if (deep) {
+      return deep;
+    }
+  }
+  return undefined;
+}
+
+function apply<T extends string>(
   configure: OriginalRouteConfigure,
   parent: null | {
     pathname: PathnameKey;
@@ -108,12 +175,25 @@ function apply<T>(
 ): RouteConfig<T>[] {
   const routes = Object.keys(configure).map((key) => {
     const config = configure[key];
-    const { title, pathname, options, children } = config;
+    const {
+      title,
+      pathname,
+      options,
+      children,
+      is_default,
+      is_notfound_fallback,
+    } = config;
     // 一个 hack 操作，过滤掉 root
     const name = parent
       ? ([parent.name, key].filter(Boolean).join(".") as T)
-      : key;
+      : (key as T);
     if (children) {
+      const defaultName = resolveDefaultNameFromChildren(children, name);
+      const notfoundFallbackName = resolveNotfoundFallbackNameFromChildren(
+        children,
+        name,
+      );
+
       const subRoutes = apply(children, {
         name,
         pathname,
@@ -125,6 +205,10 @@ function apply<T>(
           pathname,
           options,
           layout: true,
+          defaultName,
+          notfoundFallbackName,
+          is_default,
+          is_notfound_fallback,
           parent: parent
             ? {
                 name: parent.name,
@@ -140,6 +224,8 @@ function apply<T>(
         name,
         pathname,
         options,
+        is_default,
+        is_notfound_fallback,
         parent: parent
           ? {
               name: parent.name,
@@ -187,14 +273,16 @@ type RouteInner = {
   title: string;
   pathname: string;
   component?: any;
+  is_default?: boolean;
+  is_notfound_fallback?: boolean;
   options?: Partial<{
-    keep_alive?: boolean;
-    animation?: Partial<{
-      in: string;
-      out: string;
-      show: string;
-      hide: string;
-    }>;
+    // keep_alive?: boolean;
+    // animation?: Partial<{
+    //   in: string;
+    //   out: string;
+    //   show: string;
+    //   hide: string;
+    // }>;
     require?: string[];
   }>;
   children?: RouteConfigure;
@@ -234,7 +322,7 @@ export function buildRoutes<T extends RouteConfigure>(routes: T) {
         (views as any)[currentName] = item.component;
       }
 
-      if (item.default) {
+      if (item.default || item.is_default) {
         defaultRouteName = currentName as Exclude<K, "root">;
       }
 
@@ -246,6 +334,8 @@ export function buildRoutes<T extends RouteConfigure>(routes: T) {
         title: item.title,
         pathname: item.pathname,
         component: null,
+        is_default: item.is_default,
+        is_notfound_fallback: item.is_notfound_fallback,
       };
 
       if (item.options) {
