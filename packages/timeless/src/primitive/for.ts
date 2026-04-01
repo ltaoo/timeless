@@ -313,8 +313,12 @@ export function For<T>(
     each._subscribe(ctx);
   }
   return {
-    t: "view",
+    t: "for",
     $elm,
+    _props: { each, render, key },
+    _values,
+    _elements,
+    _$children,
     render() {
       const nodes = (isRef(each) ? each.value : each) || [];
       // console.log("[For] render", nodes);
@@ -358,6 +362,69 @@ export function For<T>(
       // onMounted will be called by parent with the result of render(), which is the fragment.
       // But props.onMounted expects an element?
       return $fragment; // Return fragment with items + anchor
+    },
+    hydrate(startDom: any, parentDom?: any) {
+      const nodes = (isRef(each) ? each.value : each) || [];
+      let currentDom = startDom;
+
+      for (let i = 0; i < nodes.length; i += 1) {
+        const item = nodes[i];
+        _values[i] = item;
+
+        let res = render(item, i);
+        if (typeof res === "function") {
+          res = res();
+        }
+
+        if (!res) {
+          _elements[i] = null;
+          continue;
+        }
+
+        if (isElement(res)) {
+          _elements[i] = res;
+          if (currentDom && typeof (res as any).hydrate === "function") {
+            (res as any).hydrate(currentDom);
+            _$children[i] = res.$elm;
+            currentDom = host.getNextSibling(res.$elm || currentDom);
+          } else if (currentDom) {
+            res.$elm = currentDom;
+            res.render();
+            _$children[i] = res.$elm;
+            currentDom = host.getNextSibling(currentDom);
+          }
+        }
+      }
+
+      // The anchor is after the last list item (or a text node marker)
+      // For SSR, we need to handle this specially - anchor might be a comment or text node
+      // In most cases, anchor should be placed after the list items
+      // For now, we'll create a new anchor if needed or use the currentDom
+      const $parent = parentDom || (startDom ? host.getParentNode(startDom) : null);
+      if ($parent) {
+        // Insert anchor after the last child element
+        if (currentDom) {
+          host.insertBefore($parent, anchor, currentDom);
+        } else {
+          host.appendChild($parent, anchor);
+        }
+      }
+
+      _mounted = true;
+
+      if (onMounted) {
+        onMounted(anchor);
+      }
+
+      // Call onMounted for children
+      for (let i = 0; i < _elements.length; i += 1) {
+        const el = _elements[i];
+        if (isElement(el) && el.onMounted) {
+          el.onMounted(el.$elm);
+        }
+      }
+
+      return anchor;
     },
     onUnmounted() {
       if (onUnmounted) {

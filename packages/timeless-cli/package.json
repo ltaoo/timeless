@@ -1,0 +1,33 @@
+{
+  "name": "@timeless/cli",
+  "version": "0.1.0",
+  "description": "CLI for Timeless SSR framework",
+  "type": "module",
+  "bin": {
+    "timeless": "./dist/index.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --dts --watch"
+  },
+  "files": [
+    "dist",
+    "runtime"
+  ],
+  "dependencies": {
+    "@timeless/timeless": "workspace:^",
+    "@timeless/timeless-dom": "workspace:^",
+    "cac": "^6.7.14",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.3.5"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0"
+  }
+}

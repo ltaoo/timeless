@@ -189,6 +189,9 @@ export function Show(
   return {
     t: "show",
     $elm: anchor as any,
+    _props: { when, fallback },
+    _children,
+    _fallback,
     cleanup() {
       // console.log("[Show] cleanup called");
       // 清理当前挂载的所有内容
@@ -211,6 +214,67 @@ export function Show(
         onMounted(anchor);
       }
       return fragment;
+    },
+    hydrate(startDom: any, parentDom?: any) {
+      const condition = isRef(when) ? !!when.value : !!when;
+      _prev_condition = condition;
+
+      const targetChildren = getTargetChildren(condition);
+      let currentDom = startDom;
+      const newNodes: any[] = [];
+      const newInstances: any[] = [];
+
+      for (let node of targetChildren) {
+        if (!node) continue;
+        if (typeof node === "function") {
+          node = node();
+        }
+
+        if (isElement(node)) {
+          newInstances.push(node);
+          if (currentDom && typeof (node as any).hydrate === "function") {
+            (node as any).hydrate(currentDom);
+            newNodes.push(node.$elm);
+            currentDom = host.getNextSibling(node.$elm || currentDom);
+          } else if (currentDom) {
+            node.$elm = currentDom;
+            node.render();
+            newNodes.push(node.$elm);
+            currentDom = host.getNextSibling(currentDom);
+          }
+        } else if (typeof node === "string" || typeof node === "number") {
+          if (currentDom) {
+            newNodes.push(currentDom);
+            currentDom = host.getNextSibling(currentDom);
+          }
+        }
+      }
+
+      _current_nodes = newNodes;
+      _current_children = newInstances;
+
+      // Insert anchor after the content
+      const $parent = parentDom || (startDom ? host.getParentNode(startDom) : null);
+      if ($parent) {
+        if (currentDom) {
+          host.insertBefore($parent, anchor, currentDom);
+        } else {
+          host.appendChild($parent, anchor);
+        }
+      }
+
+      if (onMounted) {
+        onMounted(anchor);
+      }
+
+      // Call onMounted for children
+      for (const child of newInstances) {
+        if (isElement(child) && child.onMounted) {
+          child.onMounted(child.$elm);
+        }
+      }
+
+      return anchor;
     },
     beforeUnmounted() {
       if (beforeUnmounted) beforeUnmounted();

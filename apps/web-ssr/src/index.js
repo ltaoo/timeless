@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { View, isBrowser, renderToString } from "@timeless/timeless";
+import { View, For, isBrowser, renderToString } from "@timeless/timeless";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../../..");
@@ -11,29 +11,36 @@ const ROOT = path.resolve(__dirname, "../../..");
 console.log("isBrowser:", isBrowser);
 
 // --- Build the component tree on the server ---
+// Note: Server-side uses static data, client-side will use reactive refs
 
 function App() {
   const items = ["Apple", "Banana", "Cherry"];
 
-  return View({ type: "div", class: "app" }, [
-    View({ type: "h1" }, ["Timeless SSR Demo"]),
-    View({ type: "p", class: "info" }, [
+  return View({ as: "div", class: "app" }, [
+    View({ as: "h1" }, ["Timeless SSR Demo"]),
+    View({ as: "p", class: "info" }, [
       "Rendered on server. JavaScript will make it interactive.",
     ]),
-    View({ type: "div", class: "counter-section" }, [
-      View({ type: "h2" }, ["Counter"]),
-      View({ type: "div", class: "counter" }, [
-        View({ type: "button", id: "dec" }, ["-"]),
-        View({ type: "span", id: "count" }, ["0"]),
-        View({ type: "button", id: "inc" }, ["+"]),
+    View({ as: "div", class: "counter-section" }, [
+      View({ as: "h2" }, ["Counter"]),
+      View({ as: "div", class: "counter" }, [
+        View({ as: "button" }, ["-"]),
+        View({ as: "span" }, ["0"]),
+        View({ as: "button" }, ["+"]),
       ]),
     ]),
-    View({ type: "div", class: "list-section" }, [
-      View({ type: "h2" }, ["Fruit List"]),
-      View(
-        { type: "ul" },
-        items.map((item) => View({ type: "li" }, [item])),
-      ),
+    View({ as: "div", class: "list-section" }, [
+      View({ as: "h2" }, ["Fruit List"]),
+      View({ as: "ul" }, [
+        For({
+          each: items,
+          render: (item) => View({ as: "li" }, [item]),
+        }),
+      ]),
+      View({ as: "div", style: "margin-top: 12px; display: flex; gap: 8px;" }, [
+        View({ as: "button", style: "padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;" }, ["Add Fruit"]),
+        View({ as: "button", style: "padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;" }, ["Remove Last"]),
+      ]),
     ]),
   ]);
 }
@@ -52,12 +59,6 @@ const MIME = {
 // --- UMD bundle paths ---
 
 const LIB_MAP = {
-  "/lib/reactive.js": path.join(
-    ROOT,
-    "packages/reactive/dist/timeless.reactive.umd.min.js",
-  ),
-  "/lib/ui.js": path.join(ROOT, "packages/ui/dist/timeless.ui.umd.min.js"),
-  "/lib/kit.js": path.join(ROOT, "packages/kit/dist/timeless.kit.umd.min.js"),
   "/lib/timeless.js": path.join(
     ROOT,
     "packages/timeless/dist/timeless.umd.min.js",
@@ -108,9 +109,6 @@ function buildPage(ssrContent) {
   <div id="root">${ssrContent}</div>
 
   <!-- UMD bundles for client-side rendering -->
-  <script src="/lib/reactive.js"></script>
-  <script src="/lib/ui.js"></script>
-  <script src="/lib/kit.js"></script>
   <script src="/lib/timeless.js"></script>
   <script src="/lib/timeless-dom.js"></script>
   <script src="/client.js"></script>

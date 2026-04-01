@@ -1,89 +1,104 @@
 // Client-side hydration script
-// Loaded after UMD bundles: Timeless globals (View, ref, For, Show, Txt, render) are available
+// Loaded after UMD bundles: Timeless globals (View, ref, For, Show, render, hydrate) are available
 
 (function () {
   var View = Timeless.View;
-  var Txt = Timeless.Txt;
   var For = Timeless.For;
   var ref = Timeless.ref;
   var refarr = Timeless.refarr;
-  var render = Timeless.render;
+  var hydrate = Timeless.hydrate;
 
-  var count$ = ref(0);
+  var count_ = ref(0);
   var fruits$ = refarr(["Apple", "Banana", "Cherry"]);
 
+  // App structure must match the server-rendered HTML for proper hydration
   function App() {
-    return View({ type: "div", class: "app" }, [
-      View({ type: "h1" }, ["Timeless SSR Demo"]),
-      View({ type: "p", class: "info" }, [
-        "Client hydrated. The page is now interactive!",
+    return View({ as: "div", class: "app" }, [
+      View({ as: "h1" }, ["Timeless SSR Demo"]),
+      View({ as: "p", class: "info" }, [
+        "Rendered on server. JavaScript will make it interactive.",
       ]),
-      View({ type: "span", class: "ssr-badge client" }, ["Client Rendered"]),
-      View({ type: "div", class: "counter-section" }, [
-        View({ type: "h2" }, ["Counter"]),
-        View({ type: "div", class: "counter" }, [
+      View({ as: "div", class: "counter-section" }, [
+        View({ as: "h2" }, ["Counter"]),
+        View({ as: "div", class: "counter" }, [
           View(
             {
-              type: "button",
+              as: "button",
               onClick: function () {
-                count$.value--;
+                count_.as((prev) => prev - 1);
               },
             },
-            ["-"]
+            ["-"],
           ),
-          View({ type: "span" }, [Txt(count$)]),
+          View({ as: "span" }, [count_]),
           View(
             {
-              type: "button",
+              as: "button",
               onClick: function () {
-                count$.value++;
+                count_.as((prev) => prev + 1);
               },
             },
-            ["+"]),
+            ["+"],
+          ),
         ]),
       ]),
-      View({ type: "div", class: "list-section" }, [
-        View({ type: "h2" }, ["Fruit List"]),
-        For({
-          each: fruits$,
-          render: function (item) {
-            return View({ type: "li", style: "padding:8px 12px;margin-bottom:4px;background:#fff;border-radius:6px;border:1px solid #e0e0e0;" }, [item]);
-          },
-        }),
-        View({ type: "div", style: "margin-top: 12px; display: flex; gap: 8px;" }, [
-          View(
-            {
-              type: "button",
-              style: "padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;",
-              onClick: function () {
-                var names = ["Mango", "Grape", "Peach", "Kiwi", "Pear", "Plum"];
-                var pick = names[Math.floor(Math.random() * names.length)];
-                fruits$.push(pick);
-              },
+      View({ as: "div", class: "list-section" }, [
+        View({ as: "h2" }, ["Fruit List"]),
+        View({ as: "ul" }, [
+          For({
+            each: fruits$,
+            render(item) {
+              return View({ as: "li" }, [item]);
             },
-            ["Add Fruit"]
-          ),
-          View(
-            {
-              type: "button",
-              style: "padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;",
-              onClick: function () {
-                if (fruits$.value.length > 0) {
-                  fruits$.splice(fruits$.value.length - 1, 1);
-                }
-              },
-            },
-            ["Remove Last"]
-          ),
+          }),
         ]),
+        View(
+          { as: "div", style: "margin-top: 12px; display: flex; gap: 8px;" },
+          [
+            View(
+              {
+                as: "button",
+                style:
+                  "padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;",
+                onClick() {
+                  var names = [
+                    "Mango",
+                    "Grape",
+                    "Peach",
+                    "Kiwi",
+                    "Pear",
+                    "Plum",
+                  ];
+                  var pick = names[Math.floor(Math.random() * names.length)];
+                  fruits$.push(pick);
+                },
+              },
+              ["Add Fruit"],
+            ),
+            View(
+              {
+                as: "button",
+                style:
+                  "padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;",
+                onClick() {
+                  fruits$.pop();
+                },
+              },
+              ["Remove Last"],
+            ),
+          ],
+        ),
       ]),
     ]);
   }
 
-  // Replace SSR content with interactive client version
+  // Hydrate: reuse existing SSR DOM nodes, attach event listeners and reactive subscriptions
   var root = document.getElementById("root");
-  root.innerHTML = "";
-  render(App(), root);
+  var originalFirstChild = root.firstChild;
 
-  console.log("[SSR Demo] Client hydration complete");
+  hydrate(App(), root);
+
+  // Verify DOM was reused (for debugging)
+  console.log("[SSR] Hydration complete");
+  console.log("[SSR] DOM reused:", root.firstChild === originalFirstChild);
 })();

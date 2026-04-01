@@ -3,6 +3,7 @@
  */
 import { BaseDomain, Handler } from "@timeless/base";
 import { PresenceCore } from "@/presence";
+import { SonnerCore, ToastT, ExternalToast, ToastTypes } from "@/sonner-core";
 
 enum Events {
   BeforeShow,
@@ -41,6 +42,7 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
   name = "ToastCore";
 
   presence = new PresenceCore();
+  sonner = SonnerCore.getInstance();
   delay = 1200;
   timer: NodeJS.Timeout | null = null;
   open = false;
@@ -67,16 +69,16 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
       this.delay = delay;
     }
     this.presence.onShow(() => {
-      // console.log("[]ToastCore - this.present.onShow");
       this.open = true;
       this.emit(Events.OpenChange, true);
     });
     this.presence.onHidden(() => {
-      // console.log("[]ToastCore - this.present.onHide");
       this.open = false;
       this.emit(Events.OpenChange, false);
     });
-    this.presence.onStateChange(() => this.emit(Events.StateChange, { ...this.state }));
+    this.presence.onStateChange(() =>
+      this.emit(Events.StateChange, { ...this.state }),
+    );
   }
 
   /** 显示弹窗 */
@@ -89,9 +91,7 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
 
     if (this.timer !== null) {
       this.clearTimer();
-      // 已经有 toast 存在了，将之前的「等待」销毁，重新定时，等于 第一个3s 还没到，第二个 3s toast 又要出现，本质上就是延长了 toast 的时间
       if (this._icon === "loading") {
-        // 如果是 loading，直接不要定时了，就会一直存在，直到外部手动隐藏
         return;
       }
       this.timer = setTimeout(() => {
@@ -120,6 +120,34 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
     this.clearTimer();
   }
 
+  toast(message: unknown, data?: ExternalToast) {
+    return this.sonner.toast(message, data);
+  }
+
+  success(message: unknown, data?: ExternalToast) {
+    return this.sonner.success(message, data);
+  }
+
+  error(message: unknown, data?: ExternalToast) {
+    return this.sonner.error(message, data);
+  }
+
+  info(message: unknown, data?: ExternalToast) {
+    return this.sonner.info(message, data);
+  }
+
+  warning(message: unknown, data?: ExternalToast) {
+    return this.sonner.warning(message, data);
+  }
+
+  loading(message: unknown, data?: ExternalToast) {
+    return this.sonner.loading(message, data);
+  }
+
+  dismiss(id?: number | string) {
+    return this.sonner.dismiss(id);
+  }
+
   onShow(handler: Handler<TheTypesOfEvents[Events.Show]>) {
     return this.on(Events.Show, handler);
   }
@@ -137,3 +165,10 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
     return "ToastCore";
   }
 }
+
+export type {
+  ToastT,
+  ExternalToast,
+  ToastTypes,
+  ToastToDismiss,
+} from "@/sonner-core";

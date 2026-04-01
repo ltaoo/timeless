@@ -1,10 +1,12 @@
-import { ToastCore } from "@timeless/ui";
+import { ToastCore, ExternalToast, SonnerCore } from "@timeless/ui";
 
 import { View, ViewProps, ViewChildren } from "@/primitive/view";
 import { Txt } from "@/primitive/text";
 
 import { Portal } from "./portal";
 import { Presence } from "./presence";
+
+const sonner = SonnerCore.getInstance();
 
 export function Root(
   props: ViewProps & { store: ToastCore },
@@ -70,4 +72,32 @@ export function Close(
     },
     children || [Txt("✕")],
   );
+}
+
+export function toast(message: unknown, data?: ExternalToast) {
+  return sonner.toast(message, data);
+}
+
+export function success(message: unknown, data?: ExternalToast) {
+  return sonner.success(message, data);
+}
+
+export function error(message: unknown, data?: ExternalToast) {
+  return sonner.error(message, data);
+}
+
+export function info(message: unknown, data?: ExternalToast) {
+  return sonner.info(message, data);
+}
+
+export function warning(message: unknown, data?: ExternalToast) {
+  return sonner.warning(message, data);
+}
+
+export function loading(message: unknown, data?: ExternalToast) {
+  return sonner.loading(message, data);
+}
+
+export function dismiss(id?: number | string) {
+  return sonner.dismiss(id);
 }

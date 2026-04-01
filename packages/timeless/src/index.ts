@@ -90,6 +90,8 @@ export * from "./util/env";
 export * from "./util/render-to-string";
 export * from "./util/lazy";
 export * from "./util/render";
+export * from "./util/hydrate";
+export * from "./util/reactive-data";
 export * from "./util/h";
 
 export * from "./host";

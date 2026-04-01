@@ -250,6 +250,11 @@
       "import": "./dist/simple-select/index.esm.js",
       "require": "./dist/simple-select/index.js"
     },
+    "./sonner-core": {
+      "types": "./dist/sonner-core/index.d.ts",
+      "import": "./dist/sonner-core/index.esm.js",
+      "require": "./dist/sonner-core/index.js"
+    },
     "./step": {
       "types": "./dist/step/index.d.ts",
       "import": "./dist/step/index.esm.js",

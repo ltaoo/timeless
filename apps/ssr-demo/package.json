@@ -1,0 +1,16 @@
+{
+  "name": "@timeless/ssr-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "timeless dev",
+    "build": "timeless build",
+    "start": "timeless start"
+  },
+  "dependencies": {
+    "@timeless/timeless": "workspace:^",
+    "@timeless/timeless-dom": "workspace:^",
+    "@timeless/cli": "workspace:^"
+  }
+}
