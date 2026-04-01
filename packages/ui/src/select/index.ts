@@ -1,22 +1,18 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
+import { InputCore } from "@/input";
 import { PopperCore } from "@/popper";
-import { CollectionCore } from "@/collection";
+import { Rect } from "@/popper/types";
 import { DismissableLayerCore } from "@/dismissable-layer";
-import { PopoverCore } from "@/popover";
 import { Direction } from "@/direction";
 import { PresenceCore } from "@/presence";
-import { Rect } from "@/popper/types";
 
 import { SelectContentCore } from "./content";
 import { SelectViewportCore } from "./viewport";
-import { SelectValueCore } from "./value";
 import { SelectTriggerCore } from "./trigger";
 import { SelectWrapCore } from "./wrap";
 import { SelectItemCore } from "./item";
 import { SelectGroupCore } from "./group";
-import { clamp } from "./utils";
-import { InputCore } from "@/input";
 
 const CONTENT_MARGIN = 10;
 enum Events {
@@ -582,9 +578,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
     const currentIndex = this.getFocusedIndex();
     for (let i = 0; i < options.length; i += 1) {
-      const idx = currentIndex < 0
-        ? i
-        : (currentIndex + 1 + i) % options.length;
+      const idx =
+        currentIndex < 0 ? i : (currentIndex + 1 + i) % options.length;
       const nextOption = options[idx];
       if (nextOption && !nextOption.disabled) {
         this.focusOption(nextOption.value);
@@ -599,9 +594,10 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
     const currentIndex = this.getFocusedIndex();
     for (let i = 0; i < options.length; i += 1) {
-      const idx = currentIndex < 0
-        ? options.length - 1 - i
-        : (currentIndex - 1 - i + options.length * 10) % options.length;
+      const idx =
+        currentIndex < 0
+          ? options.length - 1 - i
+          : (currentIndex - 1 - i + options.length * 10) % options.length;
       const prevOption = options[idx];
       if (prevOption && !prevOption.disabled) {
         this.focusOption(prevOption.value);

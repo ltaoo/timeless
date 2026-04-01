@@ -1,4 +1,4 @@
-import { cn, combine, computed, ref, refobj } from "@timeless/reactive";
+import { cn, combine, computed, ref, refobj } from "@timeless/primitive";
 import {
   TimePickerPrimitive,
   For,
@@ -7,7 +7,7 @@ import {
   Show,
   h,
   ScrollViewPrimitive,
-} from "@timeless/timeless";
+} from "@timeless/primitive";
 import { ScrollViewCore, TimePickerCore } from "@timeless/ui";
 import { CircleXOutlined, ClockOutlined } from "@timeless/icons";
 

@@ -114,6 +114,34 @@ importers:
         specifier: workspace:^
         version: link:../../packages/timeless-dom
 
+  apps/ssr-shadcn:
+    dependencies:
+      '@timeless/cli':
+        specifier: workspace:^
+        version: link:../../packages/timeless-cli
+      '@timeless/shadcn':
+        specifier: workspace:^
+        version: link:../../packages/shadcn
+      '@timeless/timeless':
+        specifier: workspace:^
+        version: link:../../packages/timeless
+      '@timeless/timeless-dom':
+        specifier: workspace:^
+        version: link:../../packages/timeless-dom
+      '@timeless/ui':
+        specifier: workspace:^
+        version: link:../../packages/ui
+    devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.1.0
+        version: 4.2.1
+      postcss:
+        specifier: ^8.5.0
+        version: 8.5.6
+      tailwindcss:
+        specifier: ^4.1.0
+        version: 4.2.1
+
   apps/weapp:
     dependencies:
       '@timeless/biz':
@@ -338,9 +366,9 @@ importers:
 
   packages/icons:
     dependencies:
-      '@timeless/reactive':
+      '@timeless/primitive':
         specifier: workspace:*
-        version: link:../reactive
+        version: link:../primitive
 
   packages/kit:
     dependencies:
@@ -359,6 +387,27 @@ importers:
       '@timeless/utils':
         specifier: workspace:*
         version: link:../utils
+
+  packages/primitive:
+    dependencies:
+      '@timeless/base':
+        specifier: workspace:^
+        version: link:../base
+      '@timeless/kit':
+        specifier: workspace:^
+        version: link:../kit
+      '@timeless/reactive':
+        specifier: workspace:^
+        version: link:../reactive
+      '@timeless/ui':
+        specifier: workspace:^
+        version: link:../ui
+      '@timeless/utils':
+        specifier: workspace:^
+        version: link:../utils
+      tailwindcss:
+        specifier: ^3.0.0 || ^4.0.0
+        version: 4.2.1
 
   packages/provider-memory:
     dependencies:
@@ -449,9 +498,12 @@ importers:
       '@timeless/icons':
         specifier: workspace:*
         version: link:../icons
-      '@timeless/timeless':
+      '@timeless/primitive':
         specifier: workspace:*
-        version: link:../timeless
+        version: link:../primitive
+      '@timeless/ui':
+        specifier: workspace:*
+        version: link:../ui
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.2.1
@@ -501,12 +553,12 @@ importers:
       '@timeless/base':
         specifier: workspace:^
         version: link:../base
-      '@timeless/icons':
-        specifier: workspace:^
-        version: link:../icons
       '@timeless/kit':
         specifier: workspace:^
         version: link:../kit
+      '@timeless/primitive':
+        specifier: workspace:^
+        version: link:../primitive
       '@timeless/reactive':
         specifier: workspace:^
         version: link:../reactive
@@ -555,9 +607,6 @@ importers:
 
   packages/ui:
     dependencies:
-      '@floating-ui/dom':
-        specifier: ^1.7.5
-        version: 1.7.5
       '@timeless/base':
         specifier: workspace:*
         version: link:../base
@@ -567,12 +616,6 @@ importers:
       '@timeless/utils':
         specifier: workspace:*
         version: link:../utils
-      dayjs:
-        specifier: ^1.11.19
-        version: 1.11.19
-      mitt:
-        specifier: ^3.0.1
-        version: 3.0.1
 
   packages/utils:
     dependencies:
@@ -1487,15 +1530,6 @@ packages:
   '@eslint/plugin-kit@0.4.1':
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@floating-ui/core@1.7.4':
-    resolution: {integrity: sha512-C3HlIdsBxszvm5McXlB8PeOEWfBhcGBTZGkGlWc2U0KFY5IwG5OQEuQ8rq52DZmcHDlPLd+YFBK+cZcytwIFWg==}
-
-  '@floating-ui/dom@1.7.5':
-    resolution: {integrity: sha512-N0bD2kIPInNHUHehXhMke1rBGs1dwqvC9O9KYMyyjK7iXt7GAhnro7UlcuYcGdS/yYOlq0MAVgrow8IbWJwyqg==}
-
-  '@floating-ui/utils@0.2.10':
-    resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
   '@hono/node-server@1.19.11':
     resolution: {integrity: sha512-dr8/3zEaB+p0D2n/IUrlPF1HZm586qgJNXK1a9fhg/PzdtkK7Ksd5l312tJX2yBuALqDYBlG20QEbayqPyxn+g==}
@@ -5075,17 +5109,6 @@ snapshots:
     dependencies:
       '@eslint/core': 0.17.0
       levn: 0.4.1
-
-  '@floating-ui/core@1.7.4':
-    dependencies:
-      '@floating-ui/utils': 0.2.10
-
-  '@floating-ui/dom@1.7.5':
-    dependencies:
-      '@floating-ui/core': 1.7.4
-      '@floating-ui/utils': 0.2.10
-
-  '@floating-ui/utils@0.2.10': {}
 
   '@hono/node-server@1.19.11(hono@4.12.9)':
     dependencies:

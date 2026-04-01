@@ -79,17 +79,19 @@ import { HistoryPanel } from "./modules/history-panel";
 import { LLMProviderForm } from "./modules/llm-provider-form";
 import {
   Toaster,
-  toast,
-  success,
-  error,
-  info,
-  warning,
-  loading,
-  dismiss,
+  // toast,
+  // success,
+  // error,
+  // info,
+  // warning,
+  // loading,
+  // dismiss,
 } from "./modules/sonner";
 
 import "./index.css";
 import "./styles/globals.css";
+
+export * as icons from '@timeless/icons';
 
 // export const Result = kit.Result;
 export {
@@ -170,11 +172,11 @@ export {
   HistoryPanel,
   LLMProviderForm,
   Toaster,
-  toast,
-  success,
-  error,
-  info,
-  warning,
-  loading,
-  dismiss,
+  // toast,
+  // success,
+  // error,
+  // info,
+  // warning,
+  // loading,
+  // dismiss,
 };

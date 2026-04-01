@@ -1,7 +1,8 @@
-import { Subscriber, Ref, isRef, TimelessRef } from "./types";
+import { Subscriber, TimelessRef } from "./types";
 
 export function ref<T = any>(v: T): TimelessRef<T> {
   let _local_value = v;
+  const _initial_value = v;
   const deps: Subscriber[] = [];
   function notify(action: {
     type: string;
@@ -58,6 +59,68 @@ export function ref<T = any>(v: T): TimelessRef<T> {
         _local_value = value;
       }
       notify({ type: "refresh" });
+    },
+    set(value: T) {
+      _local_value = value;
+      notify({ type: "refresh" });
+    },
+    update(fn: (current: T) => T) {
+      _local_value = fn(_local_value);
+      notify({ type: "refresh" });
+    },
+    reset() {
+      _local_value = _initial_value;
+      notify({ type: "refresh" });
+    },
+    toggle(): boolean {
+      _local_value = !(_local_value as any) as T;
+      notify({ type: "refresh" });
+      return _local_value as any;
+    },
+    increment(amount: number = 1): number {
+      _local_value = ((_local_value as any) + amount) as T;
+      notify({ type: "refresh" });
+      return _local_value as any;
+    },
+    decrement(amount: number = 1): number {
+      _local_value = ((_local_value as any) - amount) as T;
+      notify({ type: "refresh" });
+      return _local_value as any;
+    },
+    append(suffix: string): string {
+      _local_value = ((_local_value as any) + suffix) as T;
+      notify({ type: "refresh" });
+      return _local_value as any;
+    },
+    prepend(prefix: string): string {
+      _local_value = (prefix + (_local_value as any)) as T;
+      notify({ type: "refresh" });
+      return _local_value as any;
+    },
+    clear() {
+      if (typeof _local_value === "string") {
+        _local_value = "" as T;
+      } else if (typeof _local_value === "number") {
+        _local_value = 0 as T;
+      } else if (typeof _local_value === "boolean") {
+        _local_value = false as T;
+      } else if (Array.isArray(_local_value)) {
+        (_local_value as any).length = 0;
+      } else {
+        _local_value = null as T;
+      }
+      notify({ type: "refresh" });
+    },
+    clone(): T {
+      if (_local_value === null || _local_value === undefined)
+        return _local_value;
+      if (typeof _local_value === "object") {
+        return JSON.parse(JSON.stringify(_local_value));
+      }
+      return _local_value;
+    },
+    isNullish(): boolean {
+      return _local_value === null || _local_value === undefined;
     },
   };
   return r;

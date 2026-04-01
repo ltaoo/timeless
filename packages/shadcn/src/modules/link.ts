@@ -1,5 +1,5 @@
-import { NativeLink, NativeLinkProps, ViewChildren } from "@timeless/timeless";
-import { cn } from "@timeless/reactive";
+import { NativeLink, NativeLinkProps, ViewChildren } from "@timeless/primitive";
+import { cn } from "@timeless/primitive";
 
 export function Link(
   props: NativeLinkProps = {},

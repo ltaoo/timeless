@@ -1,10 +1,10 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
 import { PopperCore } from "@/popper";
+import { Rect } from "@/popper/types";
 import { DismissableLayerCore } from "@/dismissable-layer";
 import { PresenceCore } from "@/presence";
 import { Direction } from "@/direction";
-import { Rect } from "@/popper/types";
 
 enum Events {
   StateChange,

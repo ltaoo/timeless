@@ -152,7 +152,7 @@ export function Show(
 
   if (isRef(when)) {
     when._subscribe({
-      onChange(value: boolean) {
+      onChange(value) {
         const condition = !!value;
         // console.log(
         //   "[]Show onChange",
@@ -254,7 +254,8 @@ export function Show(
       _current_children = newInstances;
 
       // Insert anchor after the content
-      const $parent = parentDom || (startDom ? host.getParentNode(startDom) : null);
+      const $parent =
+        parentDom || (startDom ? host.getParentNode(startDom) : null);
       if ($parent) {
         if (currentDom) {
           host.insertBefore($parent, anchor, currentDom);

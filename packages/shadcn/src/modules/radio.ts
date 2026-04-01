@@ -1,5 +1,5 @@
-import { ref, computed, cn } from "@timeless/reactive";
-import { RadioPrimitive, View, For, ViewProps } from "@timeless/timeless";
+import { ref, computed, cn } from "@timeless/primitive";
+import { RadioPrimitive, View, For, ViewProps } from "@timeless/primitive";
 import { RadioGroupCore, RadioCore } from "@timeless/ui";
 
 export function Radio(props: { store: RadioCore; id?: string }) {

@@ -70,7 +70,9 @@ export function classNames(
     notify({ type: "refresh" });
     // ctx.onChange(_names);
   }
-  function addSourceFromItem(item: any) {
+  function addSourceFromItem(
+    item: string | Ref<string> | ClassNameRef | undefined,
+  ) {
     if (!item && item !== "") {
       return;
     }
@@ -88,7 +90,7 @@ export function classNames(
       return;
     }
     if (isRef(item)) {
-      sources.push(item);
+      sources.push(item as Ref<string>);
       item._subscribe({
         onChange() {
           recompute();

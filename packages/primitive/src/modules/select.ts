@@ -4,8 +4,6 @@ import { SelectCore } from "@timeless/ui";
 import { View, ViewChildren, ViewProps } from "@/primitive/view";
 import { Show } from "@/primitive/show";
 import { NativeInput } from "@/native/input";
-import { h } from "@/util/h";
-import { LoaderOutlined } from "@timeless/icons";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
@@ -186,21 +184,7 @@ export function Icon(
   children: ViewChildren,
 ) {
   const { store, ...rest } = props as any;
-  if (!store) {
-    return View(rest, children);
-  }
-  const state_ = refobj(store.state);
-  store.onStateChange((v: any) => {
-    state_.as(v);
-  });
-  return h(
-    Show,
-    {
-      when: computed(state_, (s: any) => s.loading || false),
-      fallback: [View(rest, children)],
-    },
-    [View(rest, [h(LoaderOutlined, { class: "h-4 w-4 animate-spin" })])],
-  );
+  return View(rest, children);
 }
 
 export function Clear(

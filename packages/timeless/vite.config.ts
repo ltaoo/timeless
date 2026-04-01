@@ -5,21 +5,10 @@ import dtsPlugin from "vite-plugin-dts";
 
 import { buildLibName, isProd } from "../../vite.config.base";
 
-const isWhole = process.argv.includes("--whole");
-
-// 获取所有组件目录
-const components = fs.readdirSync(resolve(__dirname, "src")).filter((name) => {
-  const componentPath = resolve(__dirname, "src", name);
-  return (
-    fs.statSync(componentPath).isDirectory() &&
-    fs.existsSync(resolve(componentPath, "index.ts"))
-  );
-});
-
 const name = "timeless";
 
 function multiWorkspaceAtAlias() {
-  const timelessSrc = resolve(__dirname, "src");
+  const primitiveSrc = resolve(__dirname, "../primitive/src");
   const uiSrc = resolve(__dirname, "../ui/src");
   const kitSrc = resolve(__dirname, "../kit/src");
   const baseSrc = resolve(__dirname, "../base/src");
@@ -81,6 +70,9 @@ function multiWorkspaceAtAlias() {
       const subpath = source.slice(2);
       const normalizedImporter = normalizeImporter(importer);
 
+      if (normalizedImporter.includes("/packages/primitive/src/")) {
+        return resolveFile(primitiveSrc, subpath);
+      }
       if (normalizedImporter.includes("/packages/ui/src/")) {
         return resolveFile(uiSrc, subpath);
       }
@@ -90,52 +82,7 @@ function multiWorkspaceAtAlias() {
       if (normalizedImporter.includes("/packages/base/src/")) {
         return resolveFile(baseSrc, subpath);
       }
-      return resolveFile(timelessSrc, subpath);
-    },
-  };
-}
-
-function rewriteDtsWorkspaceImports() {
-  const distDir = resolve(__dirname, "dist");
-  const replacements: Array<[string, string]> = [
-    ['"../../../ui/src"', '"@timeless/ui"'],
-    ["'../../../ui/src'", "'@timeless/ui'"],
-    ['"../../../reactive/src"', '"@timeless/reactive"'],
-    ["'../../../reactive/src'", "'@timeless/reactive'"],
-    ['"../../../kit/src"', '"@timeless/kit"'],
-    ["'../../../kit/src'", "'@timeless/kit'"],
-    ['"../../../base/src"', '"@timeless/base"'],
-    ["'../../../base/src'", "'@timeless/base'"],
-    ['"../../../utils/src"', '"@timeless/utils"'],
-    ["'../../../utils/src'", "'@timeless/utils'"],
-  ];
-
-  function walk(dir: string) {
-    if (!fs.existsSync(dir)) return;
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const fullPath = resolve(dir, entry.name);
-      if (entry.isDirectory()) {
-        walk(fullPath);
-        continue;
-      }
-      if (!entry.isFile() || !fullPath.endsWith(".d.ts")) continue;
-      const before = fs.readFileSync(fullPath, "utf-8");
-      let after = before;
-      for (const [from, to] of replacements) {
-        after = after.split(from).join(to);
-      }
-      if (after !== before) {
-        fs.writeFileSync(fullPath, after, "utf-8");
-      }
-    }
-  }
-
-  return {
-    name: "timeless-rewrite-dts-workspace-imports",
-    apply: "build",
-    enforce: "post",
-    closeBundle() {
-      walk(distDir);
+      return resolveFile(primitiveSrc, subpath);
     },
   };
 }
@@ -144,46 +91,24 @@ export default defineConfig({
   resolve: {
     alias: {
       "@timeless/base": resolve(__dirname, "../base/src"),
+      "@timeless/icons": resolve(__dirname, "../icons/src"),
       "@timeless/reactive": resolve(__dirname, "../reactive/src"),
       "@timeless/utils": resolve(__dirname, "../utils/src"),
       "@timeless/ui": resolve(__dirname, "../ui/src"),
       "@timeless/kit": resolve(__dirname, "../kit/src"),
       "@timeless/types": resolve(__dirname, "../types/src"),
-      "@timeless/icons": resolve(__dirname, "../icons/src"),
+      "@timeless/primitive": resolve(__dirname, "../primitive/src"),
     },
   },
   build: {
     lib: {
-      entry: isWhole
-        ? components.reduce(
-            (entries, name) => {
-              // @ts-ignore
-              entries[name] = resolve(__dirname, `src/${name}/index.ts`);
-              return entries;
-            },
-            { index: resolve(__dirname, "src/index.ts") },
-          )
-        : resolve(__dirname, "src/index.ts"),
+      entry: resolve(__dirname, "src/index.ts"),
       formats: ["es", "cjs", "umd"],
-      fileName: (format, entryName) => {
-        if (entryName === "index") {
-          if (format === "es") {
-            return `index.esm.js`;
-          }
-          if (format === "cjs") {
-            return "index.js";
-          }
-          if (format === "umd") {
-            return `${name}.umd.min.js`;
-          }
-        }
-        if (format === "es") {
-          return `${entryName}/index.esm.js`;
-        }
-        if (format === "cjs") {
-          return `${entryName}/index.js`;
-        }
-        return `${entryName}/index.${format}.js`;
+      fileName: (format) => {
+        if (format === "es") return `index.esm.js`;
+        if (format === "cjs") return "index.js";
+        if (format === "umd") return `${name}.umd.min.js`;
+        return `index.${format}.js`;
       },
       name: buildLibName(name),
     },
@@ -209,6 +134,5 @@ export default defineConfig({
       insertTypesEntry: true,
       rollupTypes: false,
     }),
-    rewriteDtsWorkspaceImports(),
   ],
 });

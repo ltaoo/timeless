@@ -7,6 +7,8 @@ import { cn as nzhcn } from "./nzh";
 dayjs.extend(relative_time);
 dayjs.locale("zh-cn");
 
+export { dayjs };
+
 export * from "./primitive";
 export * from "./download";
 export * from "./lodash/debounce";

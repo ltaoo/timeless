@@ -1,5 +1,5 @@
-import { base, Handler } from "@timeless/base";
-import { BizError } from "@timeless/base";
+import { base, Handler, BizError } from "@timeless/base";
+
 import { PopoverCore } from "@/popover";
 import { InputCore } from "@/input";
 import { ButtonCore } from "@/button";

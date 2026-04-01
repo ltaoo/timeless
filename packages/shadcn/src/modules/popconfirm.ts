@@ -1,7 +1,7 @@
 import { PopconfirmCore } from "@timeless/ui";
-import { computed, ref, refobj } from "@timeless/reactive";
-import { View, Show, ViewChildren, ViewProps, h } from "@timeless/timeless";
-import { PopconfirmPrimitive } from "@timeless/timeless";
+import { computed, ref, refobj } from "@timeless/primitive";
+import { View, Show, ViewChildren, ViewProps, h } from "@timeless/primitive";
+import { PopconfirmPrimitive } from "@timeless/primitive";
 
 export function Popconfirm(
   props: ViewProps & {

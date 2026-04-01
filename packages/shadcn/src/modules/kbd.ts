@@ -1,5 +1,5 @@
-import { View, ViewChildren, ViewProps } from "@timeless/timeless";
-import { cn } from "@timeless/reactive";
+import { View, ViewChildren, ViewProps } from "@timeless/primitive";
+import { cn } from "@timeless/primitive";
 
 export function Kbd(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;

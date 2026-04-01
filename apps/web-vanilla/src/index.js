@@ -1,10 +1,12 @@
 import { app, history$, client$, views, storage$ } from "./store/index.js";
 import NotFoundPageView from "./pages/notfound/index.js";
+// import { initToaster } from "./components/toaster.js";
 
 function ErrorFallbackView(error, viewName) {
   return View(
     {
-      class: "flex flex-col items-center justify-center gap-4 p-8 min-h-[200px]",
+      class:
+        "flex flex-col items-center justify-center gap-4 p-8 min-h-[200px]",
     },
     [
       View(
@@ -24,8 +26,7 @@ function ErrorFallbackView(error, viewName) {
             View(
               {
                 as: "span",
-                class:
-                  "text-sm font-semibold text-red-700 dark:text-red-300",
+                class: "text-sm font-semibold text-red-700 dark:text-red-300",
               },
               [`"${viewName}" render error`],
             ),
@@ -106,5 +107,5 @@ document.addEventListener("DOMContentLoaded", function () {
     width: innerWidth,
     height: innerHeight,
   });
-  Timeless.render(ApplicationRootView(), document.querySelector("#root"));
+  Timeless.DOM.render(ApplicationRootView(), document.querySelector("#root"));
 });

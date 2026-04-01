@@ -1,5 +1,5 @@
-import { Ref } from "@timeless/reactive";
-import { ProgressPrimitive, ViewProps } from "@timeless/timeless";
+import { Ref } from "@timeless/primitive";
+import { ProgressPrimitive, ViewProps } from "@timeless/primitive";
 import { ProgressCore } from "@timeless/ui";
 
 export function Progress(

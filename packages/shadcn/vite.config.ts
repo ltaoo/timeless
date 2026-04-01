@@ -7,15 +7,14 @@ import { isProd } from "../../vite.config.base";
 
 const name = "timeless.shadcn";
 
-function redirectToTimeless() {
+function redirectToPrimitive() {
   const redirects = new Map<string, string>([
-    ["@timeless/reactive", "@timeless/timeless"],
-    ["@timeless/ui", "@timeless/timeless"],
-    ["@timeless/kit", "@timeless/timeless"],
+    ["@timeless/reactive", "@timeless/primitive"],
+    ["@timeless/kit", "@timeless/primitive"],
   ]);
 
   return {
-    name: "shadcn-redirect-to-timeless",
+    name: "shadcn-redirect-to-primitive",
     enforce: "pre",
     resolveId(source: string) {
       const redirected = redirects.get(source);
@@ -25,15 +24,13 @@ function redirectToTimeless() {
   };
 }
 
-function rewriteDtsImportsToTimeless() {
+function rewriteDtsImports() {
   const distDir = resolve(__dirname, "dist");
   const replacements: Array<[string, string]> = [
-    ['"@timeless/reactive"', '"@timeless/timeless"'],
-    ["'@timeless/reactive'", "'@timeless/timeless'"],
-    ['"@timeless/ui"', '"@timeless/timeless"'],
-    ["'@timeless/ui'", "'@timeless/timeless'"],
-    ['"@timeless/kit"', '"@timeless/timeless"'],
-    ["'@timeless/kit'", "'@timeless/timeless'"],
+    ['"@timeless/reactive"', '"@timeless/primitive"'],
+    ["'@timeless/reactive'", "'@timeless/primitive'"],
+    ['"@timeless/kit"', '"@timeless/primitive"'],
+    ["'@timeless/kit'", "'@timeless/primitive'"],
   ];
 
   function walk(dir: string) {
@@ -57,7 +54,7 @@ function rewriteDtsImportsToTimeless() {
   }
 
   return {
-    name: "shadcn-rewrite-dts-imports-to-timeless",
+    name: "shadcn-rewrite-dts-imports",
     apply: "build",
     enforce: "post",
     closeBundle() {
@@ -67,6 +64,11 @@ function rewriteDtsImportsToTimeless() {
 }
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@timeless/icons": resolve(__dirname, "../icons/src"),
+    },
+  },
   css: {
     postcss: "./postcss.config.js",
     modules: false,
@@ -97,12 +99,14 @@ export default defineConfig({
     sourcemap: isProd ? false : true,
     rollupOptions: {
       external: [
-        "@timeless/timeless",
+        "@timeless/primitive",
+        "@timeless/ui",
       ],
       output: {
         extend: true,
         globals: {
-          "@timeless/timeless": "Timeless",
+          "@timeless/primitive": "Timeless",
+          "@timeless/ui": "Timeless.ui",
         },
         footer: `(function(){try{var g=typeof globalThis!=="undefined"?globalThis:typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var t=g.Timeless;if(!t)return;if(t.kit)Object.assign(t,t.kit);Object.assign(g,t)}catch(e){}})();`,
         assetFileNames: (assetInfo) => {
@@ -115,11 +119,11 @@ export default defineConfig({
     },
   },
   plugins: [
-    redirectToTimeless(),
+    redirectToPrimitive(),
     dts({
       insertTypesEntry: true,
       rollupTypes: false,
     }),
-    rewriteDtsImportsToTimeless(),
+    rewriteDtsImports(),
   ],
 });

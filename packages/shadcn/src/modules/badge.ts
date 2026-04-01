@@ -1,5 +1,5 @@
-import { BadgePrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
-import { cn } from "@timeless/reactive";
+import { BadgePrimitive, ViewProps, ViewChildren } from "@timeless/primitive";
+import { cn } from "@timeless/primitive";
 
 const VARIANTS = {
   default:

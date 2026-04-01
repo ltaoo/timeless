@@ -1,4 +1,4 @@
-import { View } from "@timeless/timeless";
+import { View } from "@timeless/primitive";
 
 export function AspectRatio(props: any, children: any) {
   const { ratio = 16 / 9, class: cn, ...rest } = props || {};

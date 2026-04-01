@@ -1,5 +1,5 @@
-import { ref, computed } from "@timeless/reactive";
-import { CheckboxPrimitive, View, For, Txt } from "@timeless/timeless";
+import { ref, computed } from "@timeless/primitive";
+import { CheckboxPrimitive, View, For, Txt } from "@timeless/primitive";
 import { CheckboxGroupCore, CheckboxCore } from "@timeless/ui";
 
 import { Checkbox } from "./checkbox";

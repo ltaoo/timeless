@@ -1,5 +1,5 @@
-import { AvatarPrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
-import { cn, Ref } from "@timeless/reactive";
+import { AvatarPrimitive, ViewProps, ViewChildren } from "@timeless/primitive";
+import { cn, Ref } from "@timeless/primitive";
 
 const SIZES = {
   sm: "h-8 w-8 text-xs",

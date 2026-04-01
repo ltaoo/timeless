@@ -1,6 +1,6 @@
 {
   "name": "@timeless/icons",
-  "version": "0.7.0",
+  "version": "0.8.3",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,7 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/reactive": "workspace:*"
+    "@timeless/primitive": "workspace:*"
   },
   "peerDependencies": {},
   "exports": {

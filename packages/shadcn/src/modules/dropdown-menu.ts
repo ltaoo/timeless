@@ -1,4 +1,4 @@
-import { ref, computed, refobj, classNames } from "@timeless/reactive";
+import { ref, computed, refobj, classNames } from "@timeless/primitive";
 import {
   DropdownMenuPrimitive,
   For,
@@ -9,7 +9,7 @@ import {
   Fragment,
   h,
   TimelessElement,
-} from "@timeless/timeless";
+} from "@timeless/primitive";
 import {
   DropdownMenuCore,
   MenuCore,

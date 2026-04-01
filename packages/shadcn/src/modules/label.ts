@@ -1,5 +1,5 @@
-import { ViewProps, ViewChildren, View } from "@timeless/timeless";
-import { cn } from "@timeless/reactive";
+import { ViewProps, ViewChildren, View } from "@timeless/primitive";
+import { cn } from "@timeless/primitive";
 
 export function Label(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;

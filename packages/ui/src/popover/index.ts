@@ -2,12 +2,13 @@
  * @file 气泡
  */
 import { BaseDomain, Handler } from "@timeless/base";
+
 import { PresenceCore } from "@/presence";
 import { PopperCore, Align, Side } from "@/popper";
 import { DismissableLayerCore } from "@/dismissable-layer";
 
-const SIDE_OPTIONS = ["top", "right", "bottom", "left"] as const;
-const ALIGN_OPTIONS = ["start", "center", "end"] as const;
+// const SIDE_OPTIONS = ["top", "right", "bottom", "left"] as const;
+// const ALIGN_OPTIONS = ["start", "center", "end"] as const;
 // export type Align = (typeof ALIGN_OPTIONS)[number];
 // export type Side = (typeof SIDE_OPTIONS)[number];
 

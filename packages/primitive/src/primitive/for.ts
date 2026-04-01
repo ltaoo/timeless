@@ -310,6 +310,7 @@ export function For<T>(
   };
 
   if (isRef(each)) {
+    // @ts-ignore
     each._subscribe(ctx);
   }
   return {

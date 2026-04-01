@@ -1,4 +1,4 @@
-import { computed, ref, refobj, cn, combine } from "@timeless/reactive";
+import { computed, ref, refobj, cn, combine } from "@timeless/primitive";
 import {
   View,
   Show,
@@ -9,7 +9,7 @@ import {
   Case,
   Fragment,
   NativeLabel,
-} from "@timeless/timeless";
+} from "@timeless/primitive";
 import { SingleFieldCore } from "@timeless/ui";
 
 import { Separator as BaseSeparator } from "./separator";

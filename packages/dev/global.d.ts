@@ -3,8 +3,8 @@
 // === Bundled package type declarations ===
 declare module "packages/reactive/src/types" {
     export type Subscriber = {
-        onChange: (v: any) => void;
-        onPatch?: (c: any) => void;
+        onChange: (v: unknown) => void;
+        onPatch?: (c: unknown) => void;
         ignore?: boolean;
     };
     export type TimelessRef<T> = {
@@ -16,6 +16,17 @@ declare module "packages/reactive/src/types" {
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
         as: (value: T | ((cur: T) => T)) => void;
+        set: (value: T) => void;
+        update: (fn: (current: T) => T) => void;
+        reset: () => void;
+        toggle: () => boolean;
+        increment: (amount?: number) => number;
+        decrement: (amount?: number) => number;
+        append: (suffix: string) => string;
+        prepend: (prefix: string) => string;
+        clear: () => void;
+        clone: () => T;
+        isNullish: () => boolean;
     };
     export type TimelessRefObject<T> = {
         __is_ref: true;
@@ -24,12 +35,33 @@ declare module "packages/reactive/src/types" {
         value: T;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
-        set: (key: keyof T, item: any) => void;
-        get: (key: keyof T) => any;
+        set: (key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])) => void;
+        get: (key: keyof T) => unknown;
         delete: (key: keyof T) => void;
         as: (nextObj: T | ((cur: T) => T)) => void;
         assign: (updated: Partial<T>) => void;
         refresh: () => void;
+        has: (key: keyof T) => boolean;
+        keys: () => (keyof T)[];
+        values: () => T[keyof T][];
+        entries: () => [keyof T, T[keyof T]][];
+        isEmpty: () => boolean;
+        size: () => number;
+        pick: <K extends keyof T>(...keys: K[]) => Pick<T, K>;
+        omit: <K extends keyof T>(...keys: K[]) => Omit<T, K>;
+        toggle: (key: keyof T) => void;
+        increment: (key: keyof T, amount?: number) => void;
+        decrement: (key: keyof T, amount?: number) => void;
+        clear: () => void;
+        merge: (source: Partial<T>) => void;
+        clone: () => T;
+        renameKey: (oldKey: keyof T, newKey: string) => void;
+        mapValues: <U>(fn: (value: T[keyof T], key: keyof T) => U) => Record<string, U>;
+        toJSON: () => T;
+        getIn: (path: string) => unknown;
+        setIn: (path: string, value: unknown) => void;
+        hasIn: (path: string) => boolean;
+        update: (key: keyof T, fn: (current: T[keyof T]) => T[keyof T]) => void;
     };
     export type TimelessRefObjectNullable<T> = {
         __is_ref: true;
@@ -38,11 +70,32 @@ declare module "packages/reactive/src/types" {
         value: T | null;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
-        set: (key: keyof T, item: any) => void;
-        get: (key: keyof T) => any;
+        set: (key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])) => void;
+        get: (key: keyof T) => unknown;
         delete: (key: keyof T) => void;
         as: (nextObj: T | ((cur: T | null) => T)) => void;
         refresh: () => void;
+        has: (key: keyof T) => boolean;
+        keys: () => (keyof T)[];
+        values: () => T[keyof T][];
+        entries: () => [keyof T, T[keyof T]][];
+        isEmpty: () => boolean;
+        size: () => number;
+        pick: <K extends keyof T>(...keys: K[]) => Pick<T, K> | null;
+        omit: <K extends keyof T>(...keys: K[]) => Omit<T, K> | null;
+        toggle: (key: keyof T) => void;
+        increment: (key: keyof T, amount?: number) => void;
+        decrement: (key: keyof T, amount?: number) => void;
+        clear: () => void;
+        merge: (source: Partial<T>) => void;
+        clone: () => T | null;
+        renameKey: (oldKey: keyof T, newKey: string) => void;
+        mapValues: <U>(fn: (value: T[keyof T], key: keyof T) => U) => Record<string, U>;
+        toJSON: () => T | null;
+        getIn: (path: string) => unknown;
+        setIn: (path: string, value: unknown) => void;
+        hasIn: (path: string) => boolean;
+        update: (key: keyof T, fn: (current: T[keyof T]) => T[keyof T]) => void;
     };
     export type TimelessRefArray<T> = {
         __is_ref: true;
@@ -51,46 +104,84 @@ declare module "packages/reactive/src/types" {
         value: T[];
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
-        key: any;
+        key: unknown;
         length: number;
-        get: (idx: number) => any;
-        set: (idx: number, item: any) => void;
-        splice: (idx: number, dcount: number, ...items: any[]) => any[];
-        insert: (idx: number, ...items: any[]) => number;
-        push: (...items: any[]) => number;
-        unshift: (...items: any[]) => number;
-        pop: () => any;
-        shift: () => any;
+        get: (idx: number) => T | undefined;
+        set: (idx: number, item: T) => void;
+        splice: (idx: number, dcount: number, ...items: T[]) => T[];
+        insert: (idx: number, ...items: T[]) => number;
+        push: (...items: T[]) => number;
+        unshift: (...items: T[]) => number;
+        pop: () => T | undefined;
+        shift: () => T | undefined;
         delete: (idx: number) => void;
         remove: (item: T) => void;
         as: (items: T[] | ((cur: T[]) => T[])) => void;
         assign: (items: T[]) => void;
         refresh: () => void;
-        filter: (predicate: (item: T, index: number, array: T[]) => boolean) => any[];
+        filter: (predicate: (item: T, index: number, array: T[]) => boolean) => T[];
         includes: (item: T) => boolean;
         reverse: () => TimelessRefArray<T>;
         sort: (compareFn?: (a: T, b: T) => number) => TimelessRefArray<T>;
         fill: (value: T, start?: number, end?: number) => TimelessRefArray<T>;
         copyWithin: (target: number, start: number, end?: number) => TimelessRefArray<T>;
-        concat: (...items: any[]) => T[];
+        concat: (...items: (ConcatArray<T> | T)[]) => T[];
         join: (separator?: string) => string;
-        slice: (start?: number, end?: number) => any[];
+        slice: (start?: number, end?: number) => T[];
         indexOf: (searchElement: T, fromIndex?: number) => number;
         lastIndexOf: (searchElement: T, fromIndex?: number) => number;
-        every: (predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any) => boolean;
-        some: (predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any) => boolean;
-        forEach: (callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any) => void;
-        map: <U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any) => U[];
-        reduce: (callbackfn: any, initialValue?: any) => any;
-        reduceRight: (callbackfn: any, initialValue?: any) => any;
-        find: (predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any) => any;
-        findIndex: (predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any) => number;
+        every: (predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown) => boolean;
+        some: (predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown) => boolean;
+        forEach: (callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: unknown) => void;
+        map: <U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: unknown) => U[];
+        reduce: {
+            <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U): U;
+            (callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T): T;
+        };
+        reduceRight: {
+            <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U): U;
+            (callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T): T;
+        };
+        find: (predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: unknown) => T | undefined;
+        findIndex: (predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: unknown) => number;
         entries: () => IterableIterator<[number, T]>;
         keys: () => IterableIterator<number>;
         values: () => IterableIterator<T>;
-        flat: (depth?: number) => any[];
-        flatMap: (callback: any, thisArg?: any) => any[];
+        flat(depth?: number): any[];
+        flatMap: (callback: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown) => any[];
         [Symbol.iterator]: () => Iterator<T>;
+        move: (fromIndex: number, toIndex: number) => TimelessRefArray<T>;
+        swap: (indexA: number, indexB: number) => TimelessRefArray<T>;
+        moveToFirst: (index: number) => TimelessRefArray<T>;
+        moveToLast: (index: number) => TimelessRefArray<T>;
+        toggle: (item: T) => TimelessRefArray<T>;
+        removeBy: (predicate: (item: T, index: number) => boolean) => void;
+        clear: () => void;
+        replace: (oldItem: T, newItem: T) => boolean;
+        prepend: (...items: T[]) => number;
+        first: () => T | undefined;
+        last: () => T | undefined;
+        nth: (index: number) => T | undefined;
+        count: (predicate?: (item: T, index: number) => boolean) => number;
+        distinct: (keyFn?: (item: T) => unknown) => T[];
+        groupBy: (keyFn: (item: T) => string | number) => Record<string | number, T[]>;
+        chunk: (size: number) => T[][];
+        partition: (predicate: (item: T, index: number) => boolean) => [T[], T[]];
+        intersect: (other: T[]) => T[];
+        union: (...others: T[][]) => T[];
+        diff: (other: T[]) => T[];
+        symmetricDiff: (other: T[]) => T[];
+        sum: (fn?: (item: T) => number) => number;
+        min: (fn?: (item: T) => number) => T | undefined;
+        max: (fn?: (item: T) => number) => T | undefined;
+        shuffle: () => TimelessRefArray<T>;
+        rotate: (n: number) => TimelessRefArray<T>;
+        compact: () => T[];
+        take: (n: number) => T[];
+        skip: (n: number) => T[];
+        isEmpty: () => boolean;
+        at: (index: number) => T | undefined;
+        toArray: () => T[];
     };
     export type Ref<T> = {
         __is_ref: true;
@@ -113,29 +204,29 @@ declare module "packages/reactive/src/types" {
         _subscribe(ctx: Subscriber): void;
         toString(): string;
     };
-    export function isRef(v: any): v is Ref<any>;
-    export function isClassName(v: any): v is ClassNameRef;
-    export function isStyleRef(v: any): v is StyleRef;
+    export function isRef(v: unknown): v is Ref<unknown>;
+    export function isClassName(v: unknown): v is ClassNameRef;
+    export function isStyleRef(v: unknown): v is StyleRef;
 }
 declare module "packages/reactive/src/reactive-array" {
     import { Ref, TimelessRefArray } from "packages/reactive/src/types";
     export interface RefArray<T> extends Ref<T[]> {
-        key: any;
+        key: unknown;
         length: number;
-        get(idx: number): any;
-        set(idx: number, item: any): void;
-        splice(idx: number, dcount: number, ...items: any[]): any[];
-        insert(idx: number, ...items: any[]): number;
-        push(...items: any[]): number;
-        unshift(...items: any[]): number;
-        pop(): any;
-        shift(): any;
+        get(idx: number): T | undefined;
+        set(idx: number, item: T): void;
+        splice(idx: number, dcount: number, ...items: T[]): T[];
+        insert(idx: number, ...items: T[]): number;
+        push(...items: T[]): number;
+        unshift(...items: T[]): number;
+        pop(): T | undefined;
+        shift(): T | undefined;
         delete(idx: number): void;
         remove(item: T): void;
         as(items: T[] | ((cur: T[]) => T[])): void;
         assign(items: T[]): void;
         refresh(): void;
-        filter(predicate: (item: T, index: number, array: T[]) => boolean): any[];
+        filter(predicate: (item: T, index: number, array: T[]) => boolean): T[];
         includes(item: T): boolean;
         reverse(): RefArray<T>;
         sort(compareFn?: (a: T, b: T) => number): RefArray<T>;
@@ -143,23 +234,61 @@ declare module "packages/reactive/src/reactive-array" {
         copyWithin(target: number, start: number, end?: number): RefArray<T>;
         concat(...items: (ConcatArray<T> | T)[]): T[];
         join(separator?: string): string;
-        slice(start?: number, end?: number): any[];
+        slice(start?: number, end?: number): T[];
         indexOf(searchElement: T, fromIndex?: number): number;
         lastIndexOf(searchElement: T, fromIndex?: number): number;
-        every(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): boolean;
-        some(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): boolean;
-        forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any): void;
-        map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
-        reduce(callbackfn: any, initialValue?: any): any;
-        reduceRight(callbackfn: any, initialValue?: any): any;
-        find(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): any;
-        findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): number;
+        every(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown): boolean;
+        some(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown): boolean;
+        forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: unknown): void;
+        map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: unknown): U[];
+        reduce: {
+            <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U): U;
+            (callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T): T;
+        };
+        reduceRight: {
+            <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U): U;
+            (callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T): T;
+        };
+        find(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: unknown): T | undefined;
+        findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: unknown): number;
         entries(): IterableIterator<[number, T]>;
         keys(): IterableIterator<number>;
         values(): IterableIterator<T>;
-        flat(depth?: number): any[];
-        flatMap(callback: any, thisArg?: any): any[];
+        flat<D extends number = 1>(depth?: D): FlatArray<T[], D>[];
+        flatMap(callback: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown): any[];
         [Symbol.iterator](): Iterator<T>;
+        move(fromIndex: number, toIndex: number): RefArray<T>;
+        swap(indexA: number, indexB: number): RefArray<T>;
+        moveToFirst(index: number): RefArray<T>;
+        moveToLast(index: number): RefArray<T>;
+        toggle(item: T): RefArray<T>;
+        removeBy(predicate: (item: T, index: number) => boolean): void;
+        clear(): void;
+        replace(oldItem: T, newItem: T): boolean;
+        prepend(...items: T[]): number;
+        first(): T | undefined;
+        last(): T | undefined;
+        nth(index: number): T | undefined;
+        count(predicate?: (item: T, index: number) => boolean): number;
+        distinct(keyFn?: (item: T) => unknown): T[];
+        groupBy(keyFn: (item: T) => string | number): Record<string | number, T[]>;
+        chunk(size: number): T[][];
+        partition(predicate: (item: T, index: number) => boolean): [T[], T[]];
+        intersect(other: T[]): T[];
+        union(...others: T[][]): T[];
+        diff(other: T[]): T[];
+        symmetricDiff(other: T[]): T[];
+        sum(fn?: (item: T) => number): number;
+        min(fn?: (item: T) => number): T | undefined;
+        max(fn?: (item: T) => number): T | undefined;
+        shuffle(): RefArray<T>;
+        rotate(n: number): RefArray<T>;
+        compact(): T[];
+        take(n: number): T[];
+        skip(n: number): T[];
+        isEmpty(): boolean;
+        at(index: number): T | undefined;
+        toArray(): T[];
     }
     export function refArray<T>(items: T[], opt?: Partial<{
         key: any;
@@ -179,19 +308,61 @@ declare module "packages/reactive/src/registry" {
 declare module "packages/reactive/src/reactive-object" {
     import { Ref, TimelessRefObject, TimelessRefObjectNullable } from "packages/reactive/src/types";
     export interface RefObject<T> extends Ref<T> {
-        set(key: keyof T, item: any): void;
-        get(key: keyof T): any;
+        set(key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])): void;
+        get(key: keyof T): unknown;
         delete(key: keyof T): void;
         as(nextObj: T | ((cur: T) => T)): void;
         assign(updated: Partial<T>): void;
         refresh(): void;
+        has(key: keyof T): boolean;
+        keys(): (keyof T)[];
+        values(): T[keyof T][];
+        entries(): [keyof T, T[keyof T]][];
+        isEmpty(): boolean;
+        size(): number;
+        pick<K extends keyof T>(...keys: K[]): Pick<T, K>;
+        omit<K extends keyof T>(...keys: K[]): Omit<T, K>;
+        toggle(key: keyof T): void;
+        increment(key: keyof T, amount?: number): void;
+        decrement(key: keyof T, amount?: number): void;
+        clear(): void;
+        merge(source: Partial<T>): void;
+        clone(): T;
+        renameKey(oldKey: keyof T, newKey: string): void;
+        mapValues<U>(fn: (value: T[keyof T], key: keyof T) => U): Record<string, U>;
+        toJSON(): T;
+        getIn(path: string): unknown;
+        setIn(path: string, value: unknown): void;
+        hasIn(path: string): boolean;
+        update(key: keyof T, fn: (current: T[keyof T]) => T[keyof T]): void;
     }
     export interface RefObjectNullable<T> extends Ref<T | null> {
-        set(key: keyof T, item: any): void;
-        get(key: keyof T): any;
+        set(key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])): void;
+        get(key: keyof T): unknown;
         delete(key: keyof T): void;
         as(nextObj: T | ((cur: T | null) => T)): void;
         refresh(): void;
+        has(key: keyof T): boolean;
+        keys(): (keyof T)[];
+        values(): T[keyof T][];
+        entries(): [keyof T, T[keyof T]][];
+        isEmpty(): boolean;
+        size(): number;
+        pick<K extends keyof T>(...keys: K[]): Pick<T, K> | null;
+        omit<K extends keyof T>(...keys: K[]): Omit<T, K> | null;
+        toggle(key: keyof T): void;
+        increment(key: keyof T, amount?: number): void;
+        decrement(key: keyof T, amount?: number): void;
+        clear(): void;
+        merge(source: Partial<T>): void;
+        clone(): T | null;
+        renameKey(oldKey: keyof T, newKey: string): void;
+        mapValues<U>(fn: (value: T[keyof T], key: keyof T) => U): Record<string, U>;
+        toJSON(): T | null;
+        getIn(path: string): unknown;
+        setIn(path: string, value: unknown): void;
+        hasIn(path: string): boolean;
+        update(key: keyof T, fn: (current: T[keyof T]) => T[keyof T]): void;
     }
     export function refObject<T extends Record<string, any>>(obj: T): TimelessRefObject<T>;
     export function refObject<T extends Record<string, any>>(obj: T | null): TimelessRefObjectNullable<T>;
@@ -297,7 +468,9 @@ declare module "packages/timeless/src/primitive/text" {
     export function Txt(value: Ref<any> | string): {
         t: string;
         $elm: any;
+        _value: string | Ref<any>;
         render(): any;
+        hydrate(existingDom: any): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -341,7 +514,10 @@ declare module "packages/timeless/src/primitive/view" {
     export function View(props?: ViewProps, children?: ViewChildren | ViewChildren[number]): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -357,6 +533,7 @@ declare module "packages/timeless/src/primitive/view" {
         $elm: any;
         value?: unknown;
         render(): any;
+        hydrate?(existingDom: any): any;
         cleanup?: () => void;
         onMounted?(el: any): void;
         beforeUnmounted?(): void;
@@ -374,7 +551,16 @@ declare module "packages/timeless/src/primitive/for" {
     }): {
         t: string;
         $elm: any;
+        _props: {
+            each: T[] | Ref<T[]>;
+            render: (item: T, idx: number) => TimelessElement | (() => TimelessElement) | null;
+            key: string;
+        };
+        _values: T[];
+        _elements: TimelessElement[];
+        _$children: any[];
         render(): any;
+        hydrate(startDom: any, parentDom?: any): any;
         onUnmounted(): void;
     };
 }
@@ -390,8 +576,21 @@ declare module "packages/timeless/src/primitive/show" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: {
+            when: boolean | Ref<boolean> | {
+                when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
+                fallback?: ViewChildren;
+                onMounted?: ($fg: any) => void;
+                beforeUnmounted?: () => void;
+                onUnmounted?: () => void;
+            };
+            fallback: ViewChildren;
+        };
+        _children: any[];
+        _fallback: any[];
         cleanup(): void;
         render(): any;
+        hydrate(startDom: any, parentDom?: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -954,80 +1153,9 @@ declare module "packages/timeless/src/modules/portal" {
         onUnmounted(): void;
     };
 }
-declare module "packages/base/src/base" {
-    /**
-     * 注册的监听器
-     */
-    import { EventType, Handler } from "mitt";
-    export type { Handler, EventType };
-    export enum BaseEvents {
-        Loading = "__loading",
-        Destroy = "__destroy"
-    }
-    type TheTypesOfBaseEvents = {
-        [BaseEvents.Destroy]: void;
-    };
-    type BaseDomainEvents<E> = TheTypesOfBaseEvents & E;
-    export function base<Events extends Record<EventType, unknown>>(): {
-        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
-        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
-        uid: () => number;
-        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
-        destroy(): void;
-    };
-    export class BaseDomain<Events extends Record<EventType, unknown>> {
-        /** 用于自己区别同名 Domain 不同实例的标志 */
-        unique_id: string;
-        debug: boolean;
-        _emitter: import("mitt").Emitter<BaseDomainEvents<Events>>;
-        listeners: Record<keyof BaseDomainEvents<Events>, (() => void)[]>;
-        constructor(props?: {});
-        uid(): number;
-        log(...args: unknown[]): unknown[];
-        errorTip(...args: unknown[]): void;
-        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
-        offEvent<Key extends keyof BaseDomainEvents<Events>>(k: Key): void;
-        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
-        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
-        /** 主动销毁所有的监听事件 */
-        destroy(): void;
-        onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
-        get [Symbol.toStringTag](): string;
-    }
-    export function applyMixins(derivedCtor: any, constructors: any[]): void;
-}
-declare module "packages/base/src/result/index" {
-    import { BizError } from "@/error";
-    export type Resp<T> = {
-        data: T extends null ? null : T;
-        error: T extends null ? BizError : null;
-    };
-    export type Result<T> = Resp<T> | Resp<null>;
-    export type UnpackedResult<T> = NonNullable<T extends Resp<infer U> ? (U extends null ? U : U) : T>;
-    /** 构造一个结果对象 */
-    export const Result: {
-        /** 构造成功结果 */
-        Ok: <T>(value: T) => Result<T>;
-        /** 构造失败结果 */
-        Err: <T>(message: string | string[] | BizError | Error | Result<null>, code?: string | number, data?: unknown) => Resp<null>;
-    };
-}
-declare module "packages/base/src/error/index" {
-    export class BizError extends Error {
-        messages: string[];
-        code?: string | number;
-        data: unknown | null;
-        constructor(msg: string[], code?: string | number, data?: unknown);
-    }
-}
-declare module "packages/base/src/index" {
-    export * from "packages/base/src/base";
-    export * from "packages/base/src/result/index";
-    export * from "packages/base/src/error/index";
-}
 declare module "packages/ui/src/accordion/index" {
-    import { Handler } from "packages/base/src/index";
-    import type { RefArray } from "packages/reactive/src/index";
+    import { Handler } from "packages/timeless/src/index";
+    import type { RefArray } from "packages/timeless/src/index";
     type AccordionCoreProps = {
         type?: "single" | "multiple";
         defaultOpenItems?: number[];
@@ -1047,8 +1175,8 @@ declare module "packages/ui/src/accordion/index" {
         onStateChange(handler: Handler<{
             readonly openItems: number[];
             readonly type: "multiple" | "single";
-        }>): () => void;
-        onOpenItemsChange(handler: Handler<number[]>): () => void;
+        }>): any;
+        onOpenItemsChange(handler: Handler<number[]>): any;
     };
     export type AccordionCore = ReturnType<typeof AccordionCore>;
 }
@@ -1056,7 +1184,7 @@ declare module "packages/ui/src/menu/item" {
     /**
      * @file 菜单项
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import type { MenuCore } from "packages/ui/src/menu/index";
     enum Events {
         Enter = 0,
@@ -1284,7 +1412,7 @@ declare module "packages/ui/src/menu/separator" {
     /**
      * @file 菜单分割线
      */
-    import { BaseDomain } from "packages/base/src/index";
+    import { BaseDomain } from "packages/timeless/src/index";
     type TheTypesOfEvents = {};
     export class MenuSeparatorCore extends BaseDomain<TheTypesOfEvents> {
         _name: string;
@@ -1300,7 +1428,7 @@ declare module "packages/ui/src/menu/group" {
     /**
      * @file 菜单组
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import type { MenuEntry } from "packages/ui/src/menu/index";
     enum Events {
         Change = 0
@@ -1339,7 +1467,7 @@ declare module "packages/ui/src/menu/index" {
     /**
      * @file 菜单 组件
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { PopperCore, Side, Align } from "@/popper";
     import { DismissableLayerCore } from "@/dismissable-layer";
     import { PresenceCore } from "@/presence";
@@ -1443,7 +1571,7 @@ declare module "packages/ui/src/menu/index" {
     }
 }
 declare module "packages/ui/src/button/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { RefCore } from "@/cur";
     enum Events {
         Click = 0,
@@ -1514,7 +1642,7 @@ declare module "packages/ui/src/button/index" {
     }
 }
 declare module "packages/ui/src/checkbox/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { PresenceCore } from "@/presence";
     enum Events {
         StateChange = 0,
@@ -1560,7 +1688,7 @@ declare module "packages/ui/src/checkbox/index" {
     }
 }
 declare module "packages/ui/src/context-menu/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { MenuCore } from "@/menu";
     import { MenuItemCore } from "@/menu/item";
     import { Rect, Side, Align } from "@/popper/types";
@@ -1625,7 +1753,7 @@ declare module "packages/ui/src/dialog/index" {
     /**
      * @file 弹窗核心类
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         BeforeShow = 0,
         Show = 1,
@@ -1746,7 +1874,7 @@ declare module "packages/ui/src/layer/index" {
      * - Swift: layer.containsPoint 用 view.frame.contains(CGPoint)
      * - Kotlin: layer.containsPoint 用 Rect.contains(x, y)
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     export interface Layer {
         id: string;
         /** 检查坐标是否在层内（各平台实现不同） */
@@ -1801,7 +1929,7 @@ declare module "packages/ui/src/layer/index" {
     export function resetGlobalLayerManager(): void;
 }
 declare module "packages/ui/src/dismissable-layer/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { LayerManager } from "packages/ui/src/layer/index";
     enum Events {
         Dismiss = 0,
@@ -1859,7 +1987,7 @@ declare module "packages/ui/src/dismissable-layer/index" {
     }
 }
 declare module "packages/ui/src/dropdown-menu/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { MenuCore } from "@/menu";
     import { MenuItemCore } from "@/menu/item";
     import { Side } from "@/popper/types";
@@ -1926,7 +2054,7 @@ declare module "packages/ui/src/dropdown-menu/index" {
     }
 }
 declare module "packages/ui/src/focus-scope/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0,
         Focusin = 1,
@@ -1969,7 +2097,7 @@ declare module "packages/ui/src/form/list" {
     /**
      * @file 一个用于表单中的动态列表组件
      */
-    import { Handler } from "packages/base/src/index";
+    import { Handler } from "packages/timeless/src/index";
     export function ListContainerCore<T extends {
         defaultValue: any;
         factory: () => any;
@@ -1996,7 +2124,7 @@ declare module "packages/ui/src/form/list" {
         };
         removeFieldByIndex(index: number): void;
         setValue(v: ReturnType<T["factory"]>["value"][]): void;
-        onChange(handler: Handler<ReturnType<T["factory"]>["value"][]>): () => void;
+        onChange(handler: Handler<ReturnType<T["factory"]>["value"][]>): any;
         onStateChange(handler: Handler<{
             readonly list: {
                 index: number;
@@ -2004,7 +2132,7 @@ declare module "packages/ui/src/form/list" {
             }[];
             readonly value: ReturnType<T["factory"]>["value"][];
             readonly canRemove: boolean;
-        }>): () => void;
+        }>): any;
     };
     export type ListContainerCore<T extends {
         defaultValue: any;
@@ -2012,7 +2140,7 @@ declare module "packages/ui/src/form/list" {
     }> = ReturnType<typeof ListContainerCore<T>>;
 }
 declare module "packages/ui/src/form/field" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { ValueInputInterface } from "packages/ui/src/form/types";
     enum Events {
         Show = 0,
@@ -2060,10 +2188,9 @@ declare module "packages/ui/src/form/index" {
     /**
      * @file 多字段 Input
      */
-    import { Handler } from "packages/base/src/index";
+    import { base, Handler } from "packages/timeless/src/index";
     import { FormFieldCore } from "packages/ui/src/form/field";
     import { ValueInputInterface } from "packages/ui/src/form/types";
-    import { Result } from "packages/base/src/index";
     type FormProps<F extends Record<string, FormFieldCore<any>>> = {
         fields: F;
     };
@@ -2091,10 +2218,10 @@ declare module "packages/ui/src/form/index" {
         setInline(v: boolean): void;
         input<Key extends keyof F>(key: Key, value: { [K in keyof F]: F[K]["$input"]["value"]; }[Key]): void;
         submit(): void;
-        validate(): Result<{ [K in keyof F]: F[K]["$input"]["value"]; }>;
+        validate(): base.Result<{ [K in keyof F]: F[K]["$input"]["value"]; }>;
         onSubmit(handler: Handler<{ [K in keyof F]: F[K]["$input"]["value"]; }>): void;
         onInput(handler: Handler<{ [K in keyof F]: F[K]["$input"]["value"]; }>): void;
-        onChange(handler: Handler<{ [K in keyof F]: F[K]["$input"]["value"]; }>): () => void;
+        onChange(handler: Handler<{ [K in keyof F]: F[K]["$input"]["value"]; }>): any;
         onStateChange(handler: Handler<{
             readonly value: { [K in keyof F]: F[K]["$input"]["value"]; };
             readonly fields: FormFieldCore<{
@@ -2103,177 +2230,13 @@ declare module "packages/ui/src/form/index" {
                 input: ValueInputInterface<any>;
             }>[];
             readonly inline: boolean;
-        }>): () => void;
+        }>): any;
     };
     export type FormCore<F extends Record<string, FormFieldCore<{
         label: string;
         name: string;
         input: ValueInputInterface<any>;
     }>> = {}> = ReturnType<typeof FormCore<F>>;
-}
-declare module "packages/utils/src/nzh/langs/cn_b" {
-    export const lang_cn_b: {
-        ch: string;
-        ch_u: string;
-        ch_f: string;
-        ch_d: string;
-        m_t: string;
-        m_z: string;
-        m_u: string;
-    };
-}
-declare module "packages/utils/src/nzh/langs/cn_s" {
-    export const lang_cn_s: {
-        ch: string;
-        ch_u: string;
-        ch_f: string;
-        ch_d: string;
-    };
-}
-declare module "packages/utils/src/nzh/utils" {
-    /**
-     * 科学计数法转十进制
-     *
-     * @param {string} num 科学记数法字符串
-     * @returns string
-     */
-    export function e2ten(num: string): string;
-    /**
-     * 分析数字字符串
-     *
-     * @param {string} num NumberString
-     * @returns object
-     */
-    export function getNumbResult(num: number | string): {
-        int: string;
-        decimal: string;
-        minus: boolean;
-        num: string;
-    };
-    /**
-     * 数组归一 (按索引覆盖合并数组,并清空被合并的数组)
-     *
-     * @param {array} baseArray 基础数组
-     * @param {...array} array1
-     * @returns array
-     */
-    export function centerArray(baseArray: unknown[], array1: unknown[], array2?: unknown[]): unknown[];
-    /**
-     * 检查对像属性 (非原型链)
-     *
-     * @param {object} obj
-     * @param {string} key
-     * @returns
-     */
-    export function hasAttr(obj: Record<string, unknown>, key: string): any;
-    /**
-     * 扩展对像(浅复制)
-     *
-     * @param {object} obj
-     * @param {object} obj1
-     * @returns
-     */
-    export function extend(...args: unknown[]): any;
-    /**
-     * 获取真实数位
-     *
-     * @param {number} index 中文单位的索引
-     */
-    export function getDigit(index: number): number;
-    /**
-     * 往数组头部插入0
-     *
-     * @param {array} arr
-     * @param {number} n
-     */
-    export function unshiftZero(arr: unknown[], n: number): void;
-    /**
-     * 清理多余"零"
-     *
-     * @param {any} str
-     * @param {any} zero "零"字符
-     * @param {any} type 清理模式 ^ - 开头, $ - 结尾, nto1 - 多个连续变一个
-     * @returns
-     */
-    export function clearZero(str: string, zero: string, type?: string): string;
-}
-declare module "packages/utils/src/nzh/index" {
-    /**
-     * 中文数字转阿拉伯数字
-     *
-     * @param {string} cnnumb 中文数字字符串
-     * @returns Number
-     */
-    export const cn: {
-        encodeS(num: number | string, options?: Record<string, unknown>): string;
-        encodeB(num: string, options?: Record<string, unknown>): string;
-        decodeS(num: string, options?: Record<string, unknown>): number;
-    };
-}
-declare module "packages/utils/src/primitive" {
-    export function toNumber<T extends number | undefined>(v: any, default_v?: T): T extends undefined ? number | null : number;
-    export function inRange(v: number, [a, b]: [number, number]): boolean;
-}
-declare module "packages/utils/src/download" {
-    export function downloadFile(url: string, filename: string): void;
-}
-declare module "packages/utils/src/lodash/debounce" {
-    export function debounce<T extends (...args: any[]) => any>(wait: number, func: T): (...args: Parameters<T>) => void;
-}
-declare module "packages/utils/src/lodash/throttle" {
-    export function throttle<T extends (...args: any[]) => any>(delay: number, func: T): (...args: Parameters<T>) => any;
-}
-declare module "packages/utils/src/qs/index" {
-    /**
-     * A simple implementation of qs.parse and qs.stringify
-     * Handles basic query string parsing/stringifying
-     */
-    export function qs_parse(str: string, options?: {
-        ignoreQueryPrefix?: boolean;
-    }): Record<string, any>;
-    export function qs_stringify(obj: Record<string, any>): string;
-}
-declare module "packages/utils/src/json" {
-    import { Result } from "packages/base/src/index";
-    /** 解析一段 json 字符串 */
-    export function parseJSONStr<T extends any>(json: string): Result<T>;
-}
-declare module "packages/utils/src/browser" {
-    import { Result } from "packages/base/src/index";
-    export function loadImage(data: any): Promise<Result<HTMLImageElement>>;
-    export function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer>;
-    export function readFileAsURL(file: File): Promise<Result<string>>;
-    export function readFileAsArrayBuffer(file: File): Promise<Result<ArrayBuffer>>;
-}
-declare module "packages/utils/src/index" {
-    import "dayjs/locale/zh-cn";
-    export * from "packages/utils/src/primitive";
-    export * from "packages/utils/src/download";
-    export * from "packages/utils/src/lodash/debounce";
-    export * from "packages/utils/src/lodash/throttle";
-    export * from "packages/utils/src/qs/index";
-    export * from "packages/utils/src/json";
-    export * from "packages/utils/src/browser";
-    export function toFixed(v: any, n?: number): number;
-    export function uidFactory(): () => number;
-    /**
-     * 返回一个指定长度的随机字符串
-     * @param length
-     * @returns
-     */
-    export function random_key(length: number): string;
-    export function padding_zero(str: number | string): string;
-    export function remove_str(filename: string, index: number, length: number): string;
-    /**
-     * 阿拉伯数字转中文数字
-     * @param num
-     * @returns
-     */
-    export function num_to_chinese(num: number): string;
-    export function chinese_num_to_num(str: string): number;
-    export function update_arr_item<T>(arr: T[], index: number, v2: T): T[];
-    export function remove_arr_item<T>(arr: T[], index: number): T[];
-    export function sleep(ms: number): Promise<unknown>;
 }
 declare module "packages/ui/src/formv2/types" {
     export type FormInputInterface<T> = {
@@ -2289,9 +2252,9 @@ declare module "packages/ui/src/formv2/types" {
     };
 }
 declare module "packages/ui/src/formv2/field" {
-    import { Handler } from "packages/base/src/index";
-    import { Result } from "packages/base/src/index";
-    import { BizError } from "packages/base/src/index";
+    import { base, Handler } from "packages/timeless/src/index";
+    import { Result } from "packages/timeless/src/index";
+    import { BizError } from "packages/timeless/src/index";
     import { FormInputInterface } from "packages/ui/src/formv2/types";
     type CommonRuleCore = {
         required: boolean;
@@ -2368,19 +2331,7 @@ declare module "packages/ui/src/formv2/field" {
         _input: T;
         _rules: FieldRuleCore[];
         _dirty: boolean;
-        _bus: {
-            off<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheSingleFieldCoreEvents<T>>(event: Key, handler: Handler<({
-                __destroy: void;
-            } & TheSingleFieldCoreEvents<T>)[Key]>): void;
-            on<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheSingleFieldCoreEvents<T>>(event: Key, handler: Handler<({
-                __destroy: void;
-            } & TheSingleFieldCoreEvents<T>)[Key]>): () => void;
-            uid: () => number;
-            emit<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheSingleFieldCoreEvents<T>>(event: Key, value?: ({
-                __destroy: void;
-            } & TheSingleFieldCoreEvents<T>)[Key]): void;
-            destroy(): void;
-        };
+        _bus: any;
         get state(): SingleFieldCoreState<T>;
         get name(): string;
         constructor(props: SingleFieldCoreProps<T>);
@@ -2398,7 +2349,7 @@ declare module "packages/ui/src/formv2/field" {
         setFieldValue(key: string, v: any): void;
         clear(): void;
         reset(): void;
-        validate(): Promise<Result<any>>;
+        validate(): Promise<base.Result<any>>;
         setValue(value: T["value"], extra?: Partial<{
             key: string;
             idx: number;
@@ -2409,9 +2360,9 @@ declare module "packages/ui/src/formv2/field" {
         handleValueChange(value: T["value"]): void;
         ready(): void;
         destroy(): void;
-        onChange(handler: Handler<TheSingleFieldCoreEvents<T>[SingleFieldEvents.Change]>): () => void;
-        onError(handler: Handler<TheSingleFieldCoreEvents<T>[SingleFieldEvents.Error]>): () => void;
-        onStateChange(handler: Handler<TheSingleFieldCoreEvents<T>[SingleFieldEvents.StateChange]>): () => void;
+        onChange(handler: Handler<TheSingleFieldCoreEvents<T>[SingleFieldEvents.Change]>): any;
+        onError(handler: Handler<TheSingleFieldCoreEvents<T>[SingleFieldEvents.Error]>): any;
+        onStateChange(handler: Handler<TheSingleFieldCoreEvents<T>[SingleFieldEvents.StateChange]>): any;
     }
     type ArrayFieldCoreProps<T extends (count: number) => SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>> = FormFieldCoreProps & {
         field: T;
@@ -2449,19 +2400,7 @@ declare module "packages/ui/src/formv2/field" {
             field: ReturnType<T>;
         }[];
         _field: T;
-        _bus: {
-            off<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheArrayFieldCoreEvents<T>>(event: Key, handler: Handler<({
-                __destroy: void;
-            } & TheArrayFieldCoreEvents<T>)[Key]>): void;
-            on<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheArrayFieldCoreEvents<T>>(event: Key, handler: Handler<({
-                __destroy: void;
-            } & TheArrayFieldCoreEvents<T>)[Key]>): () => void;
-            uid: () => number;
-            emit<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheArrayFieldCoreEvents<T>>(event: Key, value?: ({
-                __destroy: void;
-            } & TheArrayFieldCoreEvents<T>)[Key]): void;
-            destroy(): void;
-        };
+        _bus: any;
         get state(): ArrayFieldCoreState;
         constructor(props: ArrayFieldCoreProps<T>);
         mapFieldWithIndex(index: number): {
@@ -2504,9 +2443,9 @@ declare module "packages/ui/src/formv2/field" {
         downIdx(id: number): void;
         ready(): void;
         destroy(): void;
-        onChange(handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.Change]>): () => void;
-        onError(handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.Error]>): () => void;
-        onStateChange(handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.StateChange]>): () => void;
+        onChange(handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.Change]>): any;
+        onError(handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.Error]>): any;
+        onStateChange(handler: Handler<TheArrayFieldCoreEvents<T>[ArrayFieldEvents.StateChange]>): any;
     }
     type ObjectValue<O extends Record<string, SingleFieldCore<any> | ArrayFieldCore<any> | ObjectFieldCore<any>>> = {
         [K in keyof O]: O[K] extends SingleFieldCore<any> ? O[K]["value"] : O[K] extends ArrayFieldCore<any> ? O[K]["value"] : O[K] extends ObjectFieldCore<any> ? O[K]["value"] : never;
@@ -2542,19 +2481,7 @@ declare module "packages/ui/src/formv2/field" {
         _dirty: boolean;
         fields: T;
         rules: FieldRuleCore[];
-        _bus: {
-            off<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheObjectFieldCoreEvents<T>>(event: Key, handler: Handler<({
-                __destroy: void;
-            } & TheObjectFieldCoreEvents<T>)[Key]>): void;
-            on<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheObjectFieldCoreEvents<T>>(event: Key, handler: Handler<({
-                __destroy: void;
-            } & TheObjectFieldCoreEvents<T>)[Key]>): () => void;
-            uid: () => number;
-            emit<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheObjectFieldCoreEvents<T>>(event: Key, value?: ({
-                __destroy: void;
-            } & TheObjectFieldCoreEvents<T>)[Key]): void;
-            destroy(): void;
-        };
+        _bus: any;
         get state(): ObjectFieldCoreState;
         constructor(props: ObjectFieldCoreProps<T>);
         get label(): string;
@@ -2583,9 +2510,9 @@ declare module "packages/ui/src/formv2/field" {
         };
         ready(): void;
         destroy(): void;
-        onChange(handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.Change]>): () => void;
-        onError(handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.Error]>): () => void;
-        onStateChange(handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.StateChange]>): () => void;
+        onChange(handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.Change]>): any;
+        onError(handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.Error]>): any;
+        onStateChange(handler: Handler<TheObjectFieldCoreEvents<T>[ObjectFieldEvents.StateChange]>): any;
     }
 }
 declare module "packages/ui/src/formv2/index" {
@@ -2595,8 +2522,7 @@ declare module "packages/ui/src/formv2/index" {
     export { ObjectFieldCore, SingleFieldCore, ArrayFieldCore } from "packages/ui/src/formv2/field";
 }
 declare module "packages/ui/src/image/index" {
-    import { Handler } from "mitt";
-    import { BaseDomain } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0,
         StartLoad = 1,
@@ -2660,7 +2586,7 @@ declare module "packages/ui/src/image/index" {
     }
 }
 declare module "packages/ui/src/input/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { ValueInputInterface } from "@/form/types";
     enum Events {
         Change = 10,
@@ -2814,7 +2740,7 @@ declare module "packages/ui/src/input/index" {
     }
 }
 declare module "packages/ui/src/file-input/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         Change = 10,
         StateChange = 11,
@@ -2904,7 +2830,7 @@ declare module "packages/ui/src/file-input/index" {
     }
 }
 declare module "packages/ui/src/number-input/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { ValueInputInterface } from "@/form/types";
     enum Events {
         Change = 10,
@@ -3053,7 +2979,7 @@ declare module "packages/ui/src/number-input/index" {
     }
 }
 declare module "packages/ui/src/node/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         Click = 0,
         ContextMenu = 1,
@@ -3082,7 +3008,7 @@ declare module "packages/ui/src/popover/index" {
     /**
      * @file 气泡
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { PresenceCore } from "@/presence";
     import { PopperCore, Align, Side } from "@/popper";
     import { DismissableLayerCore } from "@/dismissable-layer";
@@ -3159,7 +3085,7 @@ declare module "packages/ui/src/popconfirm/index" {
     /**
      * @file 确认气泡
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { PresenceCore } from "@/presence";
     import { PopperCore, Align, Side } from "@/popper";
     import { DismissableLayerCore } from "@/dismissable-layer";
@@ -3220,6 +3146,497 @@ declare module "packages/ui/src/popconfirm/index" {
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
         get [Symbol.toStringTag](): string;
     }
+}
+declare module "packages/ui/src/popper/floating/utils" {
+    type Prettify<T> = {
+        [K in keyof T]: T[K];
+    } & {};
+    export type Alignment = "start" | "end";
+    export type Side = "top" | "right" | "bottom" | "left";
+    export type AlignedPlacement = `${Side}-${Alignment}`;
+    export type Placement = Prettify<Side | AlignedPlacement>;
+    export type Strategy = "absolute" | "fixed";
+    export type Axis = "x" | "y";
+    export type Coords = {
+        [key in Axis]: number;
+    };
+    export type Length = "width" | "height";
+    export type Dimensions = {
+        [key in Length]: number;
+    };
+    export type SideObject = {
+        [key in Side]: number;
+    };
+    export type Rect = Prettify<Coords & Dimensions>;
+    export type Padding = number | Prettify<Partial<SideObject>>;
+    export type ClientRectObject = Prettify<Rect & SideObject>;
+    export interface ElementRects {
+        reference: Rect;
+        floating: Rect;
+    }
+    /**
+     * Custom positioning reference element.
+     * @see https://floating-ui.com/docs/virtual-elements
+     */
+    export interface VirtualElement {
+        getBoundingClientRect(): ClientRectObject;
+        getClientRects?(): Array<ClientRectObject>;
+        contextElement?: any;
+    }
+    export const sides: Side[];
+    export const alignments: Alignment[];
+    export const placements: Placement[];
+    export const min: (...values: number[]) => number;
+    export const max: (...values: number[]) => number;
+    export const round: (x: number) => number;
+    export const floor: (x: number) => number;
+    export const createCoords: (v: number) => {
+        x: number;
+        y: number;
+    };
+    export function clamp(start: number, value: number, end: number): number;
+    export function evaluate<T, P>(value: T | ((param: P) => T), param: P): T;
+    export function getSide(placement: Placement): Side;
+    export function getAlignment(placement: Placement): Alignment | undefined;
+    export function getOppositeAxis(axis: Axis): Axis;
+    export function getAxisLength(axis: Axis): Length;
+    export function getSideAxis(placement: Placement): Axis;
+    export function getAlignmentAxis(placement: Placement): Axis;
+    export function getAlignmentSides(placement: Placement, rects: ElementRects, rtl?: boolean): [Side, Side];
+    export function getExpandedPlacements(placement: Placement): Array<Placement>;
+    export function getOppositeAlignmentPlacement<T extends string>(placement: T): T;
+    export function getOppositeAxisPlacements(placement: Placement, flipAlignment: boolean, direction: "none" | Alignment, rtl?: boolean): Placement[];
+    export function getOppositePlacement<T extends string>(placement: T): T;
+    export function expandPaddingObject(padding: Partial<SideObject>): SideObject;
+    export function getPaddingObject(padding: Padding): SideObject;
+    export function rectToClientRect(rect: Rect): ClientRectObject;
+}
+declare module "packages/ui/src/popper/floating/compute-coords" {
+    import type { Coords, ElementRects, Placement } from "packages/ui/src/popper/floating/utils";
+    export function computeCoordsFromPlacement({ reference, floating }: ElementRects, placement: Placement, rtl?: boolean): Coords;
+}
+declare module "packages/ui/src/popper/floating/types" {
+    import type { Axis, ClientRectObject, Coords, Dimensions, ElementRects, Placement, Rect, SideObject, Strategy } from "packages/ui/src/popper/floating/utils";
+    import type { detectOverflow } from "packages/ui/src/popper/floating/detect-overflow";
+    type Promisable<T> = T | Promise<T>;
+    /**
+     * Function option to derive middleware options from state.
+     */
+    export type Derivable<T> = (state: MiddlewareState) => T;
+    /**
+     * Platform interface methods to work with the current platform.
+     * @see https://floating-ui.com/docs/platform
+     */
+    export interface Platform {
+        getElementRects: (args: {
+            reference: ReferenceElement;
+            floating: FloatingElement;
+            strategy: Strategy;
+        }) => Promisable<ElementRects>;
+        getClippingRect: (args: {
+            element: any;
+            boundary: Boundary;
+            rootBoundary: RootBoundary;
+            strategy: Strategy;
+        }) => Promisable<Rect>;
+        getDimensions: (element: any) => Promisable<Dimensions>;
+        convertOffsetParentRelativeRectToViewportRelativeRect?: (args: {
+            elements?: Elements;
+            rect: Rect;
+            offsetParent: any;
+            strategy: Strategy;
+        }) => Promisable<Rect>;
+        getOffsetParent?: (element: any) => Promisable<any>;
+        isElement?: (value: any) => Promisable<boolean>;
+        getDocumentElement?: (element: any) => Promisable<any>;
+        getClientRects?: (element: any) => Promisable<Array<ClientRectObject>>;
+        isRTL?: (element: any) => Promisable<boolean>;
+        getScale?: (element: any) => Promisable<{
+            x: number;
+            y: number;
+        }>;
+        detectOverflow?: typeof detectOverflow;
+    }
+    export interface MiddlewareData {
+        [key: string]: any;
+        arrow?: Partial<Coords> & {
+            centerOffset: number;
+            alignmentOffset?: number;
+        };
+        autoPlacement?: {
+            index?: number;
+            overflows: Array<{
+                placement: Placement;
+                overflows: Array<number>;
+            }>;
+        };
+        flip?: {
+            index?: number;
+            overflows: Array<{
+                placement: Placement;
+                overflows: Array<number>;
+            }>;
+        };
+        hide?: {
+            referenceHidden?: boolean;
+            escaped?: boolean;
+            referenceHiddenOffsets?: SideObject;
+            escapedOffsets?: SideObject;
+        };
+        offset?: Coords & {
+            placement: Placement;
+        };
+        shift?: Coords & {
+            enabled: {
+                [key in Axis]: boolean;
+            };
+        };
+    }
+    export interface ComputePositionConfig {
+        /**
+         * Object to interface with the current platform.
+         */
+        platform: Platform;
+        /**
+         * Where to place the floating element relative to the reference element.
+         */
+        placement?: Placement;
+        /**
+         * The strategy to use when positioning the floating element.
+         */
+        strategy?: Strategy;
+        /**
+         * Array of middleware objects to modify the positioning or provide data for
+         * rendering.
+         */
+        middleware?: Array<Middleware | null | undefined | false>;
+    }
+    export interface ComputePositionReturn extends Coords {
+        /**
+         * The final chosen placement of the floating element.
+         */
+        placement: Placement;
+        /**
+         * The strategy used to position the floating element.
+         */
+        strategy: Strategy;
+        /**
+         * Object containing data returned from all middleware, keyed by their name.
+         */
+        middlewareData: MiddlewareData;
+    }
+    export type ComputePosition = (reference: unknown, floating: unknown, config: ComputePositionConfig) => Promise<ComputePositionReturn>;
+    export interface MiddlewareReturn extends Partial<Coords> {
+        data?: {
+            [key: string]: any;
+        };
+        reset?: boolean | {
+            placement?: Placement;
+            rects?: boolean | ElementRects;
+        };
+    }
+    export type Middleware = {
+        name: string;
+        options?: any;
+        fn: (state: MiddlewareState) => Promisable<MiddlewareReturn>;
+    };
+    export type ReferenceElement = any;
+    export type FloatingElement = any;
+    export interface Elements {
+        reference: ReferenceElement;
+        floating: FloatingElement;
+    }
+    export interface MiddlewareState extends Coords {
+        initialPlacement: Placement;
+        placement: Placement;
+        strategy: Strategy;
+        middlewareData: MiddlewareData;
+        elements: Elements;
+        rects: ElementRects;
+        platform: {
+            detectOverflow: typeof detectOverflow;
+        } & Platform;
+    }
+    /**
+     * @deprecated use `MiddlewareState` instead.
+     */
+    export type MiddlewareArguments = MiddlewareState;
+    export type Boundary = any;
+    export type RootBoundary = "viewport" | "document" | Rect;
+    export type ElementContext = "reference" | "floating";
+}
+declare module "packages/ui/src/popper/floating/detect-overflow" {
+    import type { Padding, SideObject } from "packages/ui/src/popper/floating/utils";
+    import type { Boundary, Derivable, ElementContext, MiddlewareState, RootBoundary } from "packages/ui/src/popper/floating/types";
+    export interface DetectOverflowOptions {
+        /**
+         * The clipping element(s) or area in which overflow will be checked.
+         * @default 'clippingAncestors'
+         */
+        boundary?: Boundary;
+        /**
+         * The root clipping area in which overflow will be checked.
+         * @default 'viewport'
+         */
+        rootBoundary?: RootBoundary;
+        /**
+         * The element in which overflow is being checked relative to a boundary.
+         * @default 'floating'
+         */
+        elementContext?: ElementContext;
+        /**
+         * Whether to check for overflow using the alternate element's boundary
+         * (`clippingAncestors` boundary only).
+         * @default false
+         */
+        altBoundary?: boolean;
+        /**
+         * Virtual padding for the resolved overflow detection offsets.
+         * @default 0
+         */
+        padding?: Padding;
+    }
+    /**
+     * Resolves with an object of overflow side offsets that determine how much the
+     * element is overflowing a given clipping boundary on each side.
+     * - positive = overflowing the boundary by that number of pixels
+     * - negative = how many pixels left before it will overflow
+     * - 0 = lies flush with the boundary
+     * @see https://floating-ui.com/docs/detectOverflow
+     */
+    export function detectOverflow(state: MiddlewareState, options?: DetectOverflowOptions | Derivable<DetectOverflowOptions>): Promise<SideObject>;
+}
+declare module "packages/ui/src/popper/floating/compute-position" {
+    import type { ComputePosition } from "packages/ui/src/popper/floating/types";
+    /**
+     * Computes the `x` and `y` coordinates that will place the floating element
+     * next to a given reference element.
+     *
+     * This export does not have any `platform` interface logic. You will need to
+     * write one for the platform you are using Floating UI with.
+     */
+    export const computePosition: ComputePosition;
+}
+declare module "packages/ui/src/popper/floating/platform/dom" {
+    import type { Platform } from "packages/ui/src/popper/floating/types";
+    /**
+     * Create a DOM platform implementation
+     * This is a factory function to avoid accessing DOM APIs at module level
+     */
+    export function getDOMPlatform(): Platform;
+}
+declare module "packages/ui/src/popper/floating/platform/index" {
+    export { getDOMPlatform } from "packages/ui/src/popper/floating/platform/dom";
+    export type { Platform } from "packages/ui/src/popper/floating/types";
+}
+declare module "packages/ui/src/popper/floating/constants" {
+    export const originSides: Set<string>;
+}
+declare module "packages/ui/src/popper/floating/middleware/offset" {
+    import type { Coords } from "packages/ui/src/popper/floating/utils";
+    import type { Derivable, Middleware, MiddlewareState } from "packages/ui/src/popper/floating/types";
+    type OffsetValue = number | {
+        /**
+         * The axis that runs along the side of the floating element. Represents
+         * the distance (gutter or margin) between the reference and floating
+         * element.
+         * @default 0
+         */
+        mainAxis?: number;
+        /**
+         * The axis that runs along the alignment of the floating element.
+         * Represents the skidding between the reference and floating element.
+         * @default 0
+         */
+        crossAxis?: number;
+        /**
+         * The same axis as `crossAxis` but applies only to aligned placements
+         * and inverts the `end` alignment. When set to a number, it overrides the
+         * `crossAxis` value.
+         *
+         * A positive number will move the floating element in the direction of
+         * the opposite edge to the one that is aligned, while a negative number
+         * the reverse.
+         * @default null
+         */
+        alignmentAxis?: number | null;
+    };
+    export type OffsetOptions = OffsetValue | Derivable<OffsetValue>;
+    export function convertValueToCoords(state: MiddlewareState, options: OffsetOptions): Promise<Coords>;
+    /**
+     * Modifies the placement by translating the floating element along the
+     * specified axes.
+     * A number (shorthand for `mainAxis` or distance), or an axes configuration
+     * object may be passed.
+     * @see https://floating-ui.com/docs/offset
+     */
+    export const offset: (options?: OffsetOptions) => Middleware;
+}
+declare module "packages/ui/src/popper/floating/middleware/flip" {
+    import type { Placement } from "packages/ui/src/popper/floating/utils";
+    import type { DetectOverflowOptions } from "packages/ui/src/popper/floating/detect-overflow";
+    import type { Derivable, Middleware } from "packages/ui/src/popper/floating/types";
+    export interface FlipOptions extends DetectOverflowOptions {
+        /**
+         * The axis that runs along the side of the floating element. Determines
+         * whether overflow along this axis is checked to perform a flip.
+         * @default true
+         */
+        mainAxis?: boolean;
+        /**
+         * The axis that runs along the alignment of the floating element. Determines
+         * whether overflow along this axis is checked to perform a flip.
+         * - `true`: Whether to check cross axis overflow for both side and alignment flipping.
+         * - `false`: Whether to disable all cross axis overflow checking.
+         * - `'alignment'`: Whether to check cross axis overflow for alignment flipping only.
+         * @default true
+         */
+        crossAxis?: boolean | "alignment";
+        /**
+         * Placements to try sequentially if the preferred `placement` does not fit.
+         * @default [oppositePlacement] (computed)
+         */
+        fallbackPlacements?: Array<Placement>;
+        /**
+         * What strategy to use when no placements fit.
+         * @default 'bestFit'
+         */
+        fallbackStrategy?: "bestFit" | "initialPlacement";
+        /**
+         * Whether to allow fallback to the perpendicular axis of the preferred
+         * placement, and if so, which side direction along the axis to prefer.
+         * @default 'none' (disallow fallback)
+         */
+        fallbackAxisSideDirection?: "none" | "start" | "end";
+        /**
+         * Whether to flip to placements with the opposite alignment if they fit
+         * better.
+         * @default true
+         */
+        flipAlignment?: boolean;
+    }
+    /**
+     * Optimizes the visibility of the floating element by flipping the `placement`
+     * in order to keep it in view when the preferred placement(s) will overflow the
+     * clipping boundary. Alternative to `autoPlacement`.
+     * @see https://floating-ui.com/docs/flip
+     */
+    export const flip: (options?: FlipOptions | Derivable<FlipOptions>) => Middleware;
+}
+declare module "packages/ui/src/popper/floating/middleware/shift" {
+    import type { Coords } from "packages/ui/src/popper/floating/utils";
+    import type { DetectOverflowOptions } from "packages/ui/src/popper/floating/detect-overflow";
+    import type { Derivable, Middleware, MiddlewareState } from "packages/ui/src/popper/floating/types";
+    export interface ShiftOptions extends DetectOverflowOptions {
+        /**
+         * The axis that runs along the alignment of the floating element. Determines
+         * whether overflow along this axis is checked to perform shifting.
+         * @default true
+         */
+        mainAxis?: boolean;
+        /**
+         * The axis that runs along the side of the floating element. Determines
+         * whether overflow along this axis is checked to perform shifting.
+         * @default false
+         */
+        crossAxis?: boolean;
+        /**
+         * Accepts a function that limits the shifting done in order to prevent
+         * detachment.
+         */
+        limiter?: {
+            fn: (state: MiddlewareState) => Coords;
+            options?: any;
+        };
+    }
+    /**
+     * Optimizes the visibility of the floating element by shifting it in order to
+     * keep it in view when it will overflow the clipping boundary.
+     * @see https://floating-ui.com/docs/shift
+     */
+    export const shift: (options?: ShiftOptions | Derivable<ShiftOptions>) => Middleware;
+    type LimitShiftOffset = number | {
+        /**
+         * Offset the limiting of the axis that runs along the alignment of the
+         * floating element.
+         */
+        mainAxis?: number;
+        /**
+         * Offset the limiting of the axis that runs along the side of the
+         * floating element.
+         */
+        crossAxis?: number;
+    };
+    export interface LimitShiftOptions {
+        /**
+         * Offset when limiting starts. `0` will limit when the opposite edges of the
+         * reference and floating elements are aligned.
+         * - positive = start limiting earlier
+         * - negative = start limiting later
+         */
+        offset?: LimitShiftOffset | Derivable<LimitShiftOffset>;
+        /**
+         * Whether to limit the axis that runs along the alignment of the floating
+         * element.
+         */
+        mainAxis?: boolean;
+        /**
+         * Whether to limit the axis that runs along the side of the floating element.
+         */
+        crossAxis?: boolean;
+    }
+    /**
+     * Built-in `limiter` that will stop `shift()` at a certain point.
+     */
+    export const limitShift: (options?: LimitShiftOptions | Derivable<LimitShiftOptions>) => {
+        options: any;
+        fn: (state: MiddlewareState) => Coords;
+    };
+}
+declare module "packages/ui/src/popper/floating/middleware/arrow" {
+    import type { Padding } from "packages/ui/src/popper/floating/utils";
+    import type { Derivable, Middleware } from "packages/ui/src/popper/floating/types";
+    export interface ArrowOptions {
+        /**
+         * The arrow element to be positioned.
+         * @default undefined
+         */
+        element: any;
+        /**
+         * The padding between the arrow element and the floating element edges.
+         * Useful when the floating element has rounded corners.
+         * @default 0
+         */
+        padding?: Padding;
+    }
+    /**
+     * Provides data to position an inner element of the floating element so that it
+     * appears centered to the reference element.
+     * @see https://floating-ui.com/docs/arrow
+     */
+    export const arrow: (options: ArrowOptions | Derivable<ArrowOptions>) => Middleware;
+}
+declare module "packages/ui/src/popper/floating/middleware/index" {
+    export { offset } from "packages/ui/src/popper/floating/middleware/offset";
+    export type { OffsetOptions } from "packages/ui/src/popper/floating/middleware/offset";
+    export { flip } from "packages/ui/src/popper/floating/middleware/flip";
+    export type { FlipOptions } from "packages/ui/src/popper/floating/middleware/flip";
+    export { shift, limitShift } from "packages/ui/src/popper/floating/middleware/shift";
+    export type { ShiftOptions, LimitShiftOptions } from "packages/ui/src/popper/floating/middleware/shift";
+    export { arrow } from "packages/ui/src/popper/floating/middleware/arrow";
+    export type { ArrowOptions } from "packages/ui/src/popper/floating/middleware/arrow";
+}
+declare module "packages/ui/src/popper/floating/index" {
+    export { computePosition } from "packages/ui/src/popper/floating/compute-position";
+    export { detectOverflow } from "packages/ui/src/popper/floating/detect-overflow";
+    export type { DetectOverflowOptions } from "packages/ui/src/popper/floating/detect-overflow";
+    export { getDOMPlatform } from "packages/ui/src/popper/floating/platform/index";
+    export type { Platform } from "packages/ui/src/popper/floating/types";
+    export { offset, flip, shift, limitShift, arrow } from "packages/ui/src/popper/floating/middleware/index";
+    export type { OffsetOptions, FlipOptions, ShiftOptions, LimitShiftOptions, ArrowOptions, } from "packages/ui/src/popper/floating/middleware/index";
+    export type { Middleware, MiddlewareData, MiddlewareReturn, MiddlewareState, ComputePositionConfig, ComputePositionReturn, Elements, Boundary, RootBoundary, ElementContext, Derivable, } from "packages/ui/src/popper/floating/types";
+    export type { Alignment, Side, AlignedPlacement, Placement, Strategy, Axis, Coords, Length, Dimensions, SideObject, Rect, Padding, ClientRectObject, ElementRects, VirtualElement, } from "packages/ui/src/popper/floating/utils";
+    export { sides, alignments, placements, getSide, getAlignment, getSideAxis, getAlignmentAxis, getAxisLength, getOppositeAxis, getOppositePlacement, getExpandedPlacements, getOppositeAxisPlacements, getAlignmentSides, clamp, evaluate, getPaddingObject, rectToClientRect, } from "packages/ui/src/popper/floating/utils";
 }
 declare module "packages/ui/src/popper/types" {
     export type Alignment = "start" | "end";
@@ -3331,9 +3748,8 @@ declare module "packages/ui/src/popper/types" {
     export type ElementContext = "reference" | "floating";
 }
 declare module "packages/ui/src/popper/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
-    import { Rect } from "@/popper/types";
-    import type { Placement, Strategy, MiddlewareData } from "packages/ui/src/popper/types";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
+    import type { Rect, Placement, Strategy, MiddlewareData } from "packages/ui/src/popper/types";
     const SIDE_OPTIONS: readonly ["top", "right", "bottom", "left"];
     const ALIGN_OPTIONS: readonly ["start", "center", "end"];
     export type Side = (typeof SIDE_OPTIONS)[number];
@@ -3474,7 +3890,7 @@ declare module "packages/ui/src/presence/index" {
     /**
      * @file 支持动画的 Popup
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0,
         PresentChange = 1,
@@ -3539,7 +3955,7 @@ declare module "packages/ui/src/presence/index" {
     }
 }
 declare module "packages/ui/src/progress/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     type ProgressState = "indeterminate" | "complete" | "loading";
     enum Events {
         ValueChange = 0,
@@ -3571,7 +3987,7 @@ declare module "packages/ui/src/progress/index" {
     }
 }
 declare module "packages/ui/src/roving-focus/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { Direction, Orientation } from "@/direction";
     import { CollectionCore } from "@/collection";
     enum Events {
@@ -3648,7 +4064,7 @@ declare module "packages/ui/src/scroll-view/utils" {
     }): number;
 }
 declare module "packages/ui/src/scroll-view/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     export * from "packages/ui/src/scroll-view/utils";
     export function onCreateScrollView(h: (v: ScrollViewCore) => void): void;
     type PullToRefreshStep = "pending" | "pulling" | "refreshing" | "releasing";
@@ -3865,7 +4281,7 @@ declare module "packages/ui/src/scroll-view/index" {
     export * from "packages/ui/src/scroll-view/utils";
 }
 declare module "packages/ui/src/select/content" {
-    import { BaseDomain } from "packages/base/src/index";
+    import { BaseDomain } from "packages/timeless/src/index";
     type TheTypesOfEvents = {};
     type SelectContentProps = {
         $node: () => HTMLElement;
@@ -3883,7 +4299,7 @@ declare module "packages/ui/src/select/content" {
     }
 }
 declare module "packages/ui/src/select/viewport" {
-    import { BaseDomain } from "packages/base/src/index";
+    import { BaseDomain } from "packages/timeless/src/index";
     type TheTypesOfEvents = {};
     export class SelectViewportCore extends BaseDomain<TheTypesOfEvents> {
         constructor(options?: Partial<{
@@ -3902,7 +4318,7 @@ declare module "packages/ui/src/select/viewport" {
     }
 }
 declare module "packages/ui/src/select/value" {
-    import { BaseDomain } from "packages/base/src/index";
+    import { BaseDomain } from "packages/timeless/src/index";
     type TheTypesOfEvents = {};
     export class SelectValueCore extends BaseDomain<TheTypesOfEvents> {
         constructor(options?: Partial<{
@@ -3917,7 +4333,7 @@ declare module "packages/ui/src/select/value" {
     }
 }
 declare module "packages/ui/src/select/trigger" {
-    import { BaseDomain } from "packages/base/src/index";
+    import { BaseDomain } from "packages/timeless/src/index";
     type TheTypesOfEvents = {};
     export class SelectTriggerCore extends BaseDomain<TheTypesOfEvents> {
         constructor(options?: Partial<{
@@ -3932,7 +4348,7 @@ declare module "packages/ui/src/select/trigger" {
     }
 }
 declare module "packages/ui/src/select/wrap" {
-    import { BaseDomain } from "packages/base/src/index";
+    import { BaseDomain } from "packages/timeless/src/index";
     type TheTypesOfEvents = {};
     export class SelectWrapCore extends BaseDomain<TheTypesOfEvents> {
         constructor(options?: Partial<{
@@ -3950,7 +4366,7 @@ declare module "packages/ui/src/select/item" {
     /**
      * @file Select 选项
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0,
         Select = 1,
@@ -4024,7 +4440,7 @@ declare module "packages/ui/src/select/item" {
     }
 }
 declare module "packages/ui/src/select/group" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import type { SelectEntry } from "packages/ui/src/select/index";
     enum Events {
         Change = 0
@@ -4061,7 +4477,7 @@ declare module "packages/ui/src/select/utils" {
     export function clamp(value: number, [min, max]: [number, number]): number;
 }
 declare module "packages/ui/src/select/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { PopperCore } from "@/popper";
     import { DismissableLayerCore } from "@/dismissable-layer";
     import { Direction } from "@/direction";
@@ -4270,7 +4686,7 @@ declare module "packages/ui/src/select/index" {
     export { clamp } from "packages/ui/src/select/utils";
 }
 declare module "packages/ui/src/cascader/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { PopperCore } from "@/popper";
     import { DismissableLayerCore } from "@/dismissable-layer";
     import { Rect } from "@/popper/types";
@@ -4429,7 +4845,7 @@ declare module "packages/ui/src/cascader/index" {
     }
 }
 declare module "packages/ui/src/tabs/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { RovingFocusCore } from "@/roving-focus";
     import { Direction, Orientation } from "@/direction";
     import { PresenceCore } from "@/presence";
@@ -4476,7 +4892,8 @@ declare module "packages/ui/src/toast/index" {
     /**
      * @file 弹窗核心类
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
+    import { ExternalToast } from "@/sonner-core";
     enum Events {
         BeforeShow = 0,
         Show = 1,
@@ -4511,6 +4928,7 @@ declare module "packages/ui/src/toast/index" {
     export class ToastCore extends BaseDomain<TheTypesOfEvents> {
         name: string;
         presence: any;
+        sonner: any;
         delay: number;
         timer: NodeJS.Timeout | null;
         open: boolean;
@@ -4530,12 +4948,20 @@ declare module "packages/ui/src/toast/index" {
         clearTimer(): void;
         /** 隐藏弹窗 */
         hide(): void;
+        toast(message: unknown, data?: ExternalToast): any;
+        success(message: unknown, data?: ExternalToast): any;
+        error(message: unknown, data?: ExternalToast): any;
+        info(message: unknown, data?: ExternalToast): any;
+        warning(message: unknown, data?: ExternalToast): any;
+        loading(message: unknown, data?: ExternalToast): any;
+        dismiss(id?: number | string): any;
         onShow(handler: Handler<TheTypesOfEvents[Events.Show]>): () => void;
         onHide(handler: Handler<TheTypesOfEvents[Events.Hidden]>): () => void;
         onOpenChange(handler: Handler<TheTypesOfEvents[Events.OpenChange]>): () => void;
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
         get [Symbol.toStringTag](): string;
     }
+    export type { ToastT, ExternalToast, ToastTypes, ToastToDismiss, } from "@/sonner-core";
 }
 declare module "packages/ui/src/tree/constants" {
     export enum TARGET_POSITION_TYPE {
@@ -4692,7 +5118,7 @@ declare module "packages/ui/src/tree/utils" {
     };
 }
 declare module "packages/ui/src/tree/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import * as Utils from "packages/ui/src/tree/utils";
     export { Utils };
     enum Events {
@@ -4710,8 +5136,8 @@ declare module "packages/ui/src/video-player/index" {
     /**
      * @file 播放器
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
-    import { Result } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
+    import { Result } from "packages/timeless/src/index";
     /** 影片分辨率 */
     enum MediaResolutionTypes {
         /** 标清 */
@@ -5031,7 +5457,7 @@ declare module "packages/ui/src/checkbox/group" {
     /**
      * @file 多选
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { CheckboxCore } from "packages/ui/src/checkbox/index";
     enum Events {
         StateChange = 0,
@@ -5090,7 +5516,7 @@ declare module "packages/ui/src/radio/index" {
     /**
      * @file 单选框
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { PresenceCore } from "@/presence";
     enum RadioEvents {
         StateChange = 0,
@@ -5182,8 +5608,245 @@ declare module "packages/ui/src/radio/index" {
         onStateChange(handler: Handler<RadioGroupTypesOfEvents<T>[RadioGroupEvents.StateChange]>): () => void;
     }
 }
+declare module "packages/utils/src/nzh/langs/cn_b" {
+    export const lang_cn_b: {
+        ch: string;
+        ch_u: string;
+        ch_f: string;
+        ch_d: string;
+        m_t: string;
+        m_z: string;
+        m_u: string;
+    };
+}
+declare module "packages/utils/src/nzh/langs/cn_s" {
+    export const lang_cn_s: {
+        ch: string;
+        ch_u: string;
+        ch_f: string;
+        ch_d: string;
+    };
+}
+declare module "packages/utils/src/nzh/utils" {
+    /**
+     * 科学计数法转十进制
+     *
+     * @param {string} num 科学记数法字符串
+     * @returns string
+     */
+    export function e2ten(num: string): string;
+    /**
+     * 分析数字字符串
+     *
+     * @param {string} num NumberString
+     * @returns object
+     */
+    export function getNumbResult(num: number | string): {
+        int: string;
+        decimal: string;
+        minus: boolean;
+        num: string;
+    };
+    /**
+     * 数组归一 (按索引覆盖合并数组,并清空被合并的数组)
+     *
+     * @param {array} baseArray 基础数组
+     * @param {...array} array1
+     * @returns array
+     */
+    export function centerArray(baseArray: unknown[], array1: unknown[], array2?: unknown[]): unknown[];
+    /**
+     * 检查对像属性 (非原型链)
+     *
+     * @param {object} obj
+     * @param {string} key
+     * @returns
+     */
+    export function hasAttr(obj: Record<string, unknown>, key: string): any;
+    /**
+     * 扩展对像(浅复制)
+     *
+     * @param {object} obj
+     * @param {object} obj1
+     * @returns
+     */
+    export function extend(...args: unknown[]): any;
+    /**
+     * 获取真实数位
+     *
+     * @param {number} index 中文单位的索引
+     */
+    export function getDigit(index: number): number;
+    /**
+     * 往数组头部插入0
+     *
+     * @param {array} arr
+     * @param {number} n
+     */
+    export function unshiftZero(arr: unknown[], n: number): void;
+    /**
+     * 清理多余"零"
+     *
+     * @param {any} str
+     * @param {any} zero "零"字符
+     * @param {any} type 清理模式 ^ - 开头, $ - 结尾, nto1 - 多个连续变一个
+     * @returns
+     */
+    export function clearZero(str: string, zero: string, type?: string): string;
+}
+declare module "packages/utils/src/nzh/index" {
+    /**
+     * 中文数字转阿拉伯数字
+     *
+     * @param {string} cnnumb 中文数字字符串
+     * @returns Number
+     */
+    export const cn: {
+        encodeS(num: number | string, options?: Record<string, unknown>): string;
+        encodeB(num: string, options?: Record<string, unknown>): string;
+        decodeS(num: string, options?: Record<string, unknown>): number;
+    };
+}
+declare module "packages/utils/src/primitive" {
+    export function toNumber<T extends number | undefined>(v: any, default_v?: T): T extends undefined ? number | null : number;
+    export function inRange(v: number, [a, b]: [number, number]): boolean;
+}
+declare module "packages/utils/src/download" {
+    export function downloadFile(url: string, filename: string): void;
+}
+declare module "packages/utils/src/lodash/debounce" {
+    export function debounce<T extends (...args: any[]) => any>(wait: number, func: T): (...args: Parameters<T>) => void;
+}
+declare module "packages/utils/src/lodash/throttle" {
+    export function throttle<T extends (...args: any[]) => any>(delay: number, func: T): (...args: Parameters<T>) => any;
+}
+declare module "packages/utils/src/qs/index" {
+    /**
+     * A simple implementation of qs.parse and qs.stringify
+     * Handles basic query string parsing/stringifying
+     */
+    export function qs_parse(str: string, options?: {
+        ignoreQueryPrefix?: boolean;
+    }): Record<string, any>;
+    export function qs_stringify(obj: Record<string, any>): string;
+}
+declare module "packages/base/src/base" {
+    /**
+     * 注册的监听器
+     */
+    import { EventType, Handler } from "mitt";
+    export type { Handler, EventType };
+    export enum BaseEvents {
+        Loading = "__loading",
+        Destroy = "__destroy"
+    }
+    type TheTypesOfBaseEvents = {
+        [BaseEvents.Destroy]: void;
+    };
+    type BaseDomainEvents<E> = TheTypesOfBaseEvents & E;
+    export function base<Events extends Record<EventType, unknown>>(): {
+        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
+        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
+        uid: () => number;
+        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
+        destroy(): void;
+    };
+    export class BaseDomain<Events extends Record<EventType, unknown>> {
+        /** 用于自己区别同名 Domain 不同实例的标志 */
+        unique_id: string;
+        debug: boolean;
+        _emitter: import("mitt").Emitter<BaseDomainEvents<Events>>;
+        listeners: Record<keyof BaseDomainEvents<Events>, (() => void)[]>;
+        constructor(props?: {});
+        uid(): number;
+        log(...args: unknown[]): unknown[];
+        errorTip(...args: unknown[]): void;
+        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
+        offEvent<Key extends keyof BaseDomainEvents<Events>>(k: Key): void;
+        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
+        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
+        /** 主动销毁所有的监听事件 */
+        destroy(): void;
+        onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
+        get [Symbol.toStringTag](): string;
+    }
+    export function applyMixins(derivedCtor: any, constructors: any[]): void;
+}
+declare module "packages/base/src/result/index" {
+    import { BizError } from "@/error";
+    export type Resp<T> = {
+        data: T extends null ? null : T;
+        error: T extends null ? BizError : null;
+    };
+    export type Result<T> = Resp<T> | Resp<null>;
+    export type UnpackedResult<T> = NonNullable<T extends Resp<infer U> ? (U extends null ? U : U) : T>;
+    /** 构造一个结果对象 */
+    export const Result: {
+        /** 构造成功结果 */
+        Ok: <T>(value: T) => Result<T>;
+        /** 构造失败结果 */
+        Err: <T>(message: string | string[] | BizError | Error | Result<null>, code?: string | number, data?: unknown) => Resp<null>;
+    };
+}
+declare module "packages/base/src/error/index" {
+    export class BizError extends Error {
+        messages: string[];
+        code?: string | number;
+        data: unknown | null;
+        constructor(msg: string[], code?: string | number, data?: unknown);
+    }
+}
+declare module "packages/base/src/index" {
+    export * from "packages/base/src/base";
+    export * from "packages/base/src/result/index";
+    export * from "packages/base/src/error/index";
+}
+declare module "packages/utils/src/json" {
+    import { Result } from "packages/base/src/index";
+    /** 解析一段 json 字符串 */
+    export function parseJSONStr<T extends any>(json: string): Result<T>;
+}
+declare module "packages/utils/src/browser" {
+    import { Result } from "packages/base/src/index";
+    export function loadImage(data: any): Promise<Result<HTMLImageElement>>;
+    export function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer>;
+    export function readFileAsURL(file: File): Promise<Result<string>>;
+    export function readFileAsArrayBuffer(file: File): Promise<Result<ArrayBuffer>>;
+}
+declare module "packages/utils/src/index" {
+    import dayjs from "dayjs";
+    import "dayjs/locale/zh-cn";
+    export { dayjs };
+    export * from "packages/utils/src/primitive";
+    export * from "packages/utils/src/download";
+    export * from "packages/utils/src/lodash/debounce";
+    export * from "packages/utils/src/lodash/throttle";
+    export * from "packages/utils/src/qs/index";
+    export * from "packages/utils/src/json";
+    export * from "packages/utils/src/browser";
+    export function toFixed(v: any, n?: number): number;
+    export function uidFactory(): () => number;
+    /**
+     * 返回一个指定长度的随机字符串
+     * @param length
+     * @returns
+     */
+    export function random_key(length: number): string;
+    export function padding_zero(str: number | string): string;
+    export function remove_str(filename: string, index: number, length: number): string;
+    /**
+     * 阿拉伯数字转中文数字
+     * @param num
+     * @returns
+     */
+    export function num_to_chinese(num: number): string;
+    export function chinese_num_to_num(str: string): number;
+    export function update_arr_item<T>(arr: T[], index: number, v2: T): T[];
+    export function remove_arr_item<T>(arr: T[], index: number): T[];
+    export function sleep(ms: number): Promise<unknown>;
+}
 declare module "packages/ui/src/calendar/index" {
-    import { Handler } from "packages/base/src/index";
+    import { Handler } from "packages/timeless/src/index";
     type CalendarWeek = {
         id: number;
         dates: {
@@ -5241,7 +5904,7 @@ declare module "packages/ui/src/calendar/index" {
         nextMonth(): void;
         prevMonth(): void;
         buildMonthText: (d: Date) => string;
-        onSelectDay(handler: Handler<Date>): () => void;
+        onSelectDay(handler: Handler<Date>): any;
         onChange(handler: Handler<{
             readonly day: {
                 text: string;
@@ -5275,12 +5938,12 @@ declare module "packages/ui/src/calendar/index" {
                 value: Date;
                 time: number;
             };
-        }>): () => void;
+        }>): any;
     };
     export type CalendarCore = ReturnType<typeof CalendarCore>;
 }
 declare module "packages/ui/src/range-calendar/index" {
-    import { Handler } from "packages/base/src/index";
+    import { Handler } from "packages/timeless/src/index";
     type CalendarWeek = {
         id: number;
         dates: {
@@ -5334,7 +5997,7 @@ declare module "packages/ui/src/range-calendar/index" {
         isInRange(day: Date): boolean;
         isRangeStart(day: Date): boolean;
         isRangeEnd(day: Date): boolean;
-        onSelectDay(handler: Handler<Date>): () => void;
+        onSelectDay(handler: Handler<Date>): any;
         onChange(handler: Handler<{
             readonly left: CalendarPanel;
             readonly right: CalendarPanel;
@@ -5343,16 +6006,16 @@ declare module "packages/ui/src/range-calendar/index" {
             readonly hoverDate: Date;
             readonly canLeftNext: boolean;
             readonly canRightPrev: boolean;
-        }>): () => void;
+        }>): any;
         onRangeComplete(handler: Handler<{
             start: Date;
             end: Date;
-        }>): () => void;
+        }>): any;
     };
     export type RangeCalendarCore = ReturnType<typeof RangeCalendarCore>;
 }
 declare module "packages/ui/src/tab-header/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0,
         Scroll = 1,
@@ -5499,7 +6162,7 @@ declare module "packages/ui/src/tab-header/index" {
     }
 }
 declare module "packages/ui/src/waterfall/cell" {
-    import { Handler } from "packages/base/src/index";
+    import { Handler } from "packages/timeless/src/index";
     export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
         uid: number;
         height: number;
@@ -5606,7 +6269,7 @@ declare module "packages/ui/src/waterfall/cell" {
     export type WaterfallCellModel<T extends Record<string, unknown>> = ReturnType<typeof WaterfallCellModel<T>>;
 }
 declare module "packages/ui/src/waterfall/column" {
-    import { Handler } from "packages/base/src/index";
+    import { Handler } from "packages/timeless/src/index";
     import { WaterfallCellModel } from "packages/ui/src/waterfall/cell";
     export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
         index?: number;
@@ -5679,9 +6342,7 @@ declare module "packages/ui/src/waterfall/column" {
             handleScrollForce: (values: {
                 scrollTop: number;
             }) => void;
-            handleScroll: (values: {
-                scrollTop: number;
-            }) => any;
+            handleScroll: any;
         };
         onStateChange(handler: Handler<{
             readonly width: number;
@@ -5717,7 +6378,7 @@ declare module "packages/ui/src/waterfall/column" {
     export type WaterfallColumnModel<T extends Record<string, unknown>> = ReturnType<typeof WaterfallColumnModel<T>>;
 }
 declare module "packages/ui/src/waterfall/waterfall" {
-    import { Handler } from "packages/base/src/index";
+    import { base, Handler } from "packages/timeless/src/index";
     import { WaterfallColumnModel } from "packages/ui/src/waterfall/column";
     import { WaterfallCellModel } from "packages/ui/src/waterfall/cell";
     export function WaterfallModel<T extends Record<string, unknown>>(props: {
@@ -5836,15 +6497,15 @@ declare module "packages/ui/src/waterfall/waterfall" {
                 readonly height: number;
                 onHeightChange(handler: Handler<[number, number]>): void;
                 onTopChange(handler: Handler<[number, number]>): void;
-                onLoad(handler: Handler<{
+                onLoad(handler: base.Handler<{
                     width: number;
                     height: number;
                 }>): void;
                 onExposure(handler: Handler<void>): void;
-                onRebind(handler: Handler<{
+                onRebind(handler: base.Handler<{
                     payload: T;
                 }>): void;
-                onStateChange(handler: Handler<{
+                onStateChange(handler: base.Handler<{
                     readonly id: string | number;
                     readonly uid: number;
                     readonly position: {
@@ -5925,15 +6586,15 @@ declare module "packages/ui/src/waterfall/waterfall" {
                 readonly height: number;
                 onHeightChange(handler: Handler<[number, number]>): void;
                 onTopChange(handler: Handler<[number, number]>): void;
-                onLoad(handler: Handler<{
+                onLoad(handler: base.Handler<{
                     width: number;
                     height: number;
                 }>): void;
                 onExposure(handler: Handler<void>): void;
-                onRebind(handler: Handler<{
+                onRebind(handler: base.Handler<{
                     payload: T;
                 }>): void;
-                onStateChange(handler: Handler<{
+                onStateChange(handler: base.Handler<{
                     readonly id: string | number;
                     readonly uid: number;
                     readonly position: {
@@ -6042,7 +6703,7 @@ declare module "packages/ui/src/affix/index" {
     /**
      * @file 固钉
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         /** 变成固定 */
         Fixed = 0,
@@ -6111,7 +6772,7 @@ declare module "packages/ui/src/affix/index" {
         }): void;
         fix(): void;
         unfix(): void;
-        setTop: (top: any) => void;
+        setTop: any;
         set(nextState: {
             fixed: boolean;
             top: number;
@@ -6123,8 +6784,7 @@ declare module "packages/ui/src/affix/index" {
     }
 }
 declare module "packages/ui/src/back-to-top/index" {
-    import { Handler } from "packages/base/src/index";
-    import { BizError } from "packages/base/src/index";
+    import { base, Handler } from "packages/timeless/src/index";
     export function BackToTopModel(props: {
         clientHeight?: number;
     }): {
@@ -6142,12 +6802,12 @@ declare module "packages/ui/src/back-to-top/index" {
         destroy(): void;
         onStateChange(handler: Handler<{
             readonly showBackTop: boolean;
-        }>): () => void;
-        onError(handler: Handler<BizError>): () => void;
+        }>): any;
+        onError(handler: Handler<base.BizError>): any;
     };
 }
 declare module "packages/ui/src/collection/index" {
-    import { BaseDomain } from "packages/base/src/index";
+    import { BaseDomain } from "packages/timeless/src/index";
     type TheTypesOfEvents = {};
     export class CollectionCore extends BaseDomain<TheTypesOfEvents> {
         itemMap: Map<unknown, unknown>;
@@ -6162,7 +6822,7 @@ declare module "packages/ui/src/cur/index" {
      * @file 一个缓存/当前值
      * 类似 useRef
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0
     }
@@ -6190,7 +6850,7 @@ declare module "packages/ui/src/cur/index" {
     }
 }
 declare module "packages/ui/src/date-picker/index" {
-    import { Handler } from "packages/base/src/index";
+    import { Handler } from "packages/timeless/src/index";
     export function DatePickerCore(props: {
         today: Date;
         allowClear?: boolean;
@@ -6208,17 +6868,17 @@ declare module "packages/ui/src/date-picker/index" {
         $btn: any;
         setValue(v: Date): void;
         clear(): void;
-        onChange(handler: Handler<any>): () => void;
+        onChange(handler: Handler<any>): any;
         onStateChange(handler: Handler<{
             readonly date: string;
             readonly value: any;
             readonly allowClear: boolean;
-        }>): () => void;
+        }>): any;
     };
     export type DatePickerCore = ReturnType<typeof DatePickerCore>;
 }
 declare module "packages/ui/src/date-range-picker/index" {
-    import { Handler } from "packages/base/src/index";
+    import { Handler } from "packages/timeless/src/index";
     export function DateRangePickerCore(props: {
         today: Date;
     }): {
@@ -6235,18 +6895,18 @@ declare module "packages/ui/src/date-range-picker/index" {
         $calendar: any;
         setValue(start: Date | null, end: Date | null): void;
         clear(): void;
-        onChange(handler: Handler<any>): () => void;
+        onChange(handler: Handler<any>): any;
         onStateChange(handler: Handler<{
             readonly dateText: string;
             readonly value: any;
             readonly startDate: any;
             readonly endDate: any;
-        }>): () => void;
+        }>): any;
     };
     export type DateRangePickerCore = ReturnType<typeof DateRangePickerCore>;
 }
 declare module "packages/ui/src/drag-zone/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0,
         Change = 1
@@ -6294,7 +6954,7 @@ declare module "packages/ui/src/drag-zone/index" {
     }
 }
 declare module "packages/ui/src/dynamic-content/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0
     }
@@ -6340,7 +7000,7 @@ declare module "packages/ui/src/dynamic-content/index" {
     }
 }
 declare module "packages/ui/src/element/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         Mounted = 0,
         Unmounted = 1
@@ -6357,7 +7017,7 @@ declare module "packages/ui/src/element/index" {
     }
 }
 declare module "packages/ui/src/simple-select/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0
     }
@@ -6392,7 +7052,7 @@ declare module "packages/ui/src/simple-select/index" {
     }
 }
 declare module "packages/ui/src/switch/index" {
-    import { Handler } from "packages/base/src/index";
+    import { Handler } from "packages/timeless/src/index";
     type SwitchCoreProps = {
         defaultValue: boolean;
         disabled?: boolean;
@@ -6408,19 +7068,19 @@ declare module "packages/ui/src/switch/index" {
         disable(): void;
         enable(): void;
         handleChange(v: boolean): void;
-        onOpen(handler: Handler<void>): () => void;
-        onClose(handler: Handler<void>): () => void;
-        onChange(handler: Handler<boolean>): () => void;
+        onOpen(handler: Handler<void>): any;
+        onClose(handler: Handler<void>): any;
+        onChange(handler: Handler<boolean>): any;
         onStateChange(handler: Handler<{
             readonly value: boolean;
             readonly checked: boolean;
             readonly disabled: boolean;
-        }>): () => void;
+        }>): any;
     };
     export type SwitchCore = ReturnType<typeof SwitchCore>;
 }
 declare module "packages/ui/src/toggle/index" {
-    import { BaseDomain } from "packages/base/src/index";
+    import { BaseDomain } from "packages/timeless/src/index";
     export class ToggleCore extends BaseDomain<any> {
         state: {
             checked: boolean;
@@ -6431,8 +7091,7 @@ declare module "packages/ui/src/toggle/index" {
     }
 }
 declare module "packages/ui/src/tree-select/tree-select" {
-    import { Handler } from "packages/base/src/index";
-    import { BizError } from "packages/base/src/index";
+    import { base, Handler } from "packages/timeless/src/index";
     import { PopoverCore } from "@/popover";
     import { InputCore } from "@/input";
     export function TreeSelectModel<T extends {
@@ -6494,15 +7153,15 @@ declare module "packages/ui/src/tree-select/tree-select" {
                 };
                 ready(): void;
                 destroy(): void;
-                onStateChange(handler: Handler<{
+                onStateChange(handler: base.Handler<{
                     readonly uid: string;
                     readonly idx: number;
                     readonly level: number;
                     readonly value: T["id"][];
                     readonly node: T;
                     readonly children: T[];
-                }>): () => void;
-                onError(handler: Handler<BizError>): () => void;
+                }>): any;
+                onError(handler: Handler<base.BizError>): any;
             };
             appendNode(v: {
                 node: T;
@@ -6539,15 +7198,15 @@ declare module "packages/ui/src/tree-select/tree-select" {
                 };
                 ready(): void;
                 destroy(): void;
-                onStateChange(handler: Handler<{
+                onStateChange(handler: base.Handler<{
                     readonly uid: string;
                     readonly idx: number;
                     readonly level: number;
                     readonly value: T["id"][];
                     readonly node: T;
                     readonly children: T[];
-                }>): () => void;
-                onError(handler: Handler<BizError>): () => void;
+                }>): any;
+                onError(handler: Handler<base.BizError>): any;
             };
             findParentWithUID(uid: string): {
                 Symbol: "TreeSelectNodeModel";
@@ -6578,15 +7237,15 @@ declare module "packages/ui/src/tree-select/tree-select" {
                 };
                 ready(): void;
                 destroy(): void;
-                onStateChange(handler: Handler<{
+                onStateChange(handler: base.Handler<{
                     readonly uid: string;
                     readonly idx: number;
                     readonly level: number;
                     readonly value: T["id"][];
                     readonly node: T;
                     readonly children: T[];
-                }>): () => void;
-                onError(handler: Handler<BizError>): () => void;
+                }>): any;
+                onError(handler: Handler<base.BizError>): any;
             };
             appendNodeWithUID(uid: string, node: T): boolean;
             setNodeWithUID(uid: string, node: T): boolean;
@@ -6610,9 +7269,9 @@ declare module "packages/ui/src/tree-select/tree-select" {
         onStateChange(handler: Handler<{
             readonly nodes: T[];
             readonly value: T["id"][];
-        }>): () => void;
-        onChange(handler: Handler<T["id"][]>): () => void;
-        onError(handler: Handler<BizError>): () => void;
+        }>): any;
+        onChange(handler: Handler<T["id"][]>): any;
+        onError(handler: Handler<base.BizError>): any;
     };
     export type TreeSelectModel<T extends {
         id: number | string;
@@ -6688,12 +7347,12 @@ declare module "packages/ui/src/tree-select/tree-select" {
                 setValue(v: number[]): void;
                 ready(): void;
                 destroy(): void;
-                onStateChange(handler: Handler<{
+                onStateChange(handler: base.Handler<{
                     readonly nodes: T[];
                     readonly value: T["id"][];
-                }>): () => void;
-                onChange(handler: Handler<T["id"][]>): () => void;
-                onError(handler: Handler<BizError>): () => void;
+                }>): any;
+                onChange(handler: base.Handler<T["id"][]>): any;
+                onError(handler: Handler<base.BizError>): any;
             };
         };
         state: {
@@ -6713,8 +7372,8 @@ declare module "packages/ui/src/tree-select/tree-select" {
             readonly value: T["id"][];
             readonly node: T;
             readonly children: T[];
-        }>): () => void;
-        onError(handler: Handler<BizError>): () => void;
+        }>): any;
+        onError(handler: Handler<base.BizError>): any;
     };
     export type TreeSelectNodeModel<T extends {
         id: number | string;
@@ -6723,8 +7382,7 @@ declare module "packages/ui/src/tree-select/tree-select" {
     }> = ReturnType<typeof TreeSelectNodeModel<T>>;
 }
 declare module "packages/ui/src/tree-select/tree-node-edit" {
-    import { Handler } from "packages/base/src/index";
-    import { BizError } from "packages/base/src/index";
+    import { base, Handler } from "packages/timeless/src/index";
     export function TreeNodeEditModel<T extends {
         id: number | string;
         label: string;
@@ -6785,22 +7443,22 @@ declare module "packages/ui/src/tree-select/tree-node-edit" {
             idx: number;
             uid: string;
             value: string;
-        }>): () => void;
+        }>): any;
         onEdit(handler: Handler<{
             node: T;
             level: number;
             idx: number;
             uid: string;
             value: string;
-        }>): () => void;
+        }>): any;
         onDelete(handler: Handler<{
             node: T;
             level: number;
             idx: number;
             uid: string;
-        }>): () => void;
-        onStateChange(handler: Handler<{}>): () => void;
-        onError(handler: Handler<BizError>): () => void;
+        }>): any;
+        onStateChange(handler: Handler<{}>): any;
+        onError(handler: Handler<base.BizError>): any;
     };
     export type TreeNodeEditModel = ReturnType<typeof TreeNodeEditModel>;
 }
@@ -6809,7 +7467,7 @@ declare module "packages/ui/src/tree-select/index" {
     export * from "packages/ui/src/tree-select/tree-node-edit";
 }
 declare module "packages/ui/src/tag-select/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { PopperCore } from "@/popper";
     import { DismissableLayerCore } from "@/dismissable-layer";
     import { Direction } from "@/direction";
@@ -6914,7 +7572,7 @@ declare module "packages/ui/src/tag-select/index" {
     }
 }
 declare module "packages/ui/src/time-picker/index" {
-    import { Handler } from "packages/base/src/index";
+    import { Handler } from "packages/timeless/src/index";
     export type TimeValue = {
         hour: number;
         minute: number;
@@ -6957,7 +7615,7 @@ declare module "packages/ui/src/time-picker/index" {
         confirm(): void;
         clear(): void;
         setValue(v: TimeValue | null): void;
-        onChange(handler: Handler<TimeValue>): () => void;
+        onChange(handler: Handler<TimeValue>): any;
         onStateChange(handler: Handler<{
             readonly time: string;
             readonly value: TimeValue;
@@ -6967,12 +7625,12 @@ declare module "packages/ui/src/time-picker/index" {
             readonly showSeconds: boolean;
             readonly use12Hours: boolean;
             readonly allowClear: boolean;
-        }>): () => void;
+        }>): any;
     };
     export type TimePickerCore = ReturnType<typeof TimePickerCore>;
 }
 declare module "packages/ui/src/tag-input/index" {
-    import { Handler } from "packages/base/src/index";
+    import { Handler } from "packages/timeless/src/index";
     type TagInputCoreProps = {
         defaultValue?: string[];
     };
@@ -6993,19 +7651,7 @@ declare module "packages/ui/src/tag-input/index" {
         inputValue: string;
         value: string[];
         defaultValue: string[];
-        _bus: {
-            off<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheTagInputEvents>(event: Key, handler: Handler<({
-                __destroy: void;
-            } & TheTagInputEvents)[Key]>): void;
-            on<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheTagInputEvents>(event: Key, handler: Handler<({
-                __destroy: void;
-            } & TheTagInputEvents)[Key]>): () => void;
-            uid: () => number;
-            emit<Key extends import("@timeless/base").BaseEvents.Destroy | keyof TheTagInputEvents>(event: Key, value?: ({
-                __destroy: void;
-            } & TheTagInputEvents)[Key]): void;
-            destroy(): void;
-        };
+        _bus: any;
         constructor(props: TagInputCoreProps);
         get state(): TagInputCoreState;
         setValue(value: string[]): void;
@@ -7013,8 +7659,8 @@ declare module "packages/ui/src/tag-input/index" {
         addTag(tag?: string): void;
         removeTag(v: string): void;
         clear(): void;
-        onChange(handler: Handler<TheTagInputEvents[Events.Change]>): () => void;
-        onStateChange(handler: Handler<TheTagInputEvents[Events.StateChange]>): () => void;
+        onChange(handler: Handler<TheTagInputEvents[Events.Change]>): any;
+        onStateChange(handler: Handler<TheTagInputEvents[Events.StateChange]>): any;
     }
 }
 declare module "packages/ui/src/image-upload/types" {
@@ -7032,7 +7678,7 @@ declare module "packages/ui/src/image-upload/types" {
     }
 }
 declare module "packages/ui/src/image-upload/index" {
-    import { Handler, BizError } from "packages/base/src/index";
+    import { base, Handler } from "packages/timeless/src/index";
     import { Uploader } from "packages/ui/src/image-upload/types";
     export function ImageUploadCore(props: {
         tip?: string;
@@ -7051,7 +7697,7 @@ declare module "packages/ui/src/image-upload/index" {
             readonly file: File;
             readonly uploading: boolean;
             readonly percent: number;
-            readonly error: BizError;
+            readonly error: base.BizError;
         };
         readonly value: {
             key: string;
@@ -7069,7 +7715,7 @@ declare module "packages/ui/src/image-upload/index" {
         clear(): void;
         onChange(handler: Handler<{
             key: string;
-        }>): () => void;
+        }>): any;
         onStateChange(handler: Handler<{
             readonly value: {
                 key: string;
@@ -7078,13 +7724,13 @@ declare module "packages/ui/src/image-upload/index" {
             readonly file: File;
             readonly uploading: boolean;
             readonly percent: number;
-            readonly error: BizError;
-        }>): () => void;
+            readonly error: base.BizError;
+        }>): any;
     };
     export type ImageUploadCore = ReturnType<typeof ImageUploadCore>;
 }
 declare module "packages/ui/src/step/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0,
         Change = 1
@@ -7109,7 +7755,7 @@ declare module "packages/ui/src/step/index" {
     }
 }
 declare module "packages/ui/src/resizable-panels/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     enum Events {
         StateChange = 0,
         PanelResize = 1
@@ -7193,7 +7839,7 @@ declare module "packages/ui/src/tooltip/index" {
     /**
      * @file 提示框
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
     import { PresenceCore } from "@/presence";
     import { PopperCore, Align, Side } from "@/popper";
     enum Events {
@@ -7241,7 +7887,7 @@ declare module "packages/ui/src/tooltip/index" {
     }
 }
 declare module "packages/ui/src/shortcut/index" {
-    import { Handler, BizError } from "packages/base/src/index";
+    import { base, Handler } from "packages/timeless/src/index";
     type KeyboardEvent = {
         code: string;
         preventDefault: () => void;
@@ -7292,16 +7938,16 @@ declare module "packages/ui/src/shortcut/index" {
         }>): () => void;
         onShortcutComplete(handler: Handler<{
             codes: string[];
-        }>): () => void;
+        }>): any;
         onStateChange(handler: Handler<{
             readonly codes: string[];
             readonly codes2: string[];
-        }>): () => void;
-        onError(handler: Handler<BizError>): () => void;
+        }>): any;
+        onError(handler: Handler<base.BizError>): any;
     };
 }
 declare module "packages/ui/src/click-outside/index" {
-    import { Handler, BizError } from "packages/base/src/index";
+    import { Handler, BizError } from "packages/timeless/src/index";
     enum Events {
         ClickOutside = 0,
         Error = 1
@@ -7343,23 +7989,142 @@ declare module "packages/ui/src/click-outside/index" {
         };
         ready(): void;
         destroy(): void;
-        onClickOutside(handler: Handler<TheTypesOfEvents[Events.ClickOutside]>): () => void;
-        onError(handler: Handler<TheTypesOfEvents[Events.Error]>): () => void;
+        onClickOutside(handler: Handler<TheTypesOfEvents[Events.ClickOutside]>): any;
+        onError(handler: Handler<TheTypesOfEvents[Events.Error]>): any;
     };
 }
+declare module "packages/ui/src/sonner-core/index" {
+    /**
+     * @file SonnerCore - Toast 通知系统核心类
+     * 基于 sonner 的设计，抽象 toast 管理逻辑
+     */
+    import { BaseDomain, Handler } from "packages/timeless/src/index";
+    export type ToastTypes = "normal" | "action" | "success" | "info" | "warning" | "error" | "loading" | "default";
+    export type PromiseT<Data = any> = Promise<Data> | (() => Promise<Data>);
+    export interface ToastT {
+        id: number | string;
+        toasterId?: string;
+        title?: (() => unknown) | unknown;
+        type?: ToastTypes;
+        icon?: unknown;
+        jsx?: unknown;
+        richColors?: boolean;
+        invert?: boolean;
+        closeButton?: boolean;
+        dismissible?: boolean;
+        description?: (() => unknown) | unknown;
+        duration?: number;
+        delete?: boolean;
+        action?: Action;
+        cancel?: Action;
+        onDismiss?: (toast: ToastT) => void;
+        onAutoClose?: (toast: ToastT) => void;
+        promise?: PromiseT;
+        cancelButtonStyle?: Record<string, unknown>;
+        actionButtonStyle?: Record<string, unknown>;
+        style?: Record<string, unknown>;
+        unstyled?: boolean;
+        className?: string;
+        descriptionClassName?: string;
+        position?: Position;
+        testId?: string;
+    }
+    export interface Action {
+        label: unknown;
+        onClick: (event: unknown) => void;
+        actionButtonStyle?: Record<string, unknown>;
+    }
+    export type Position = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "top-center" | "bottom-center";
+    export interface ToastToDismiss {
+        id: number | string;
+        dismiss: boolean;
+    }
+    export type ExternalToast = Omit<ToastT, "id" | "type" | "title" | "jsx" | "delete" | "promise"> & {
+        id?: number | string;
+        toasterId?: string;
+    };
+    export interface PromiseData<ToastData = any> {
+        loading?: unknown;
+        success?: unknown;
+        error?: unknown;
+        description?: unknown;
+        finally?: () => void | Promise<void>;
+    }
+    enum Events {
+        ToastAdd = 0,
+        ToastDismiss = 1,
+        Subscribe = 2
+    }
+    type TheTypesOfEvents = {
+        [Events.ToastAdd]: ToastT;
+        [Events.ToastDismiss]: ToastToDismiss;
+        [Events.Subscribe]: ToastT | ToastToDismiss;
+    };
+    class ToastObserver {
+        subscribers: Array<(toast: ToastT | ToastToDismiss) => void>;
+        toasts: Array<ToastT | ToastToDismiss>;
+        dismissedToasts: Set<string | number>;
+        constructor();
+        subscribe: (subscriber: (toast: ToastT | ToastToDismiss) => void) => () => void;
+        publish: (data: ToastT) => void;
+        addToast: (data: ToastT) => void;
+        create: (data: ExternalToast & {
+            message?: unknown;
+            type?: ToastTypes;
+            promise?: PromiseT;
+            jsx?: unknown;
+        }) => string | number;
+        private _counter;
+        getNextId(): number;
+        dismiss: (id?: number | string) => string | number;
+        message: (message: unknown, data?: ExternalToast) => string | number;
+        error: (message: unknown, data?: ExternalToast) => string | number;
+        success: (message: unknown, data?: ExternalToast) => string | number;
+        info: (message: unknown, data?: ExternalToast) => string | number;
+        warning: (message: unknown, data?: ExternalToast) => string | number;
+        loading: (message: unknown, data?: ExternalToast) => string | number;
+        promise: <ToastData>(promise: PromiseT<ToastData>, data?: PromiseData<ToastData>) => string | number;
+        custom: (jsx: (id: number | string) => unknown, data?: ExternalToast) => string | number;
+        getActiveToasts: () => (ToastT | ToastToDismiss)[];
+        getHistory: () => (ToastT | ToastToDismiss)[];
+    }
+    export const ToastState: ToastObserver;
+    export class SonnerCore extends BaseDomain<TheTypesOfEvents> {
+        name: string;
+        private static _instance;
+        static getInstance(): SonnerCore;
+        toast: (message: unknown, data?: ExternalToast) => string | number;
+        constructor();
+        success: (message: unknown, data?: ExternalToast) => string | number;
+        error: (message: unknown, data?: ExternalToast) => string | number;
+        info: (message: unknown, data?: ExternalToast) => string | number;
+        warning: (message: unknown, data?: ExternalToast) => string | number;
+        loading: (message: unknown, data?: ExternalToast) => string | number;
+        message: (message: unknown, data?: ExternalToast) => string | number;
+        dismiss: (id?: number | string) => string | number;
+        promise: <ToastData>(promise: PromiseT<ToastData>, data?: PromiseData<ToastData>) => string | number;
+        custom: (jsx: (id: number | string) => unknown, data?: ExternalToast) => string | number;
+        getActiveToasts: () => (ToastT | ToastToDismiss)[];
+        getHistory: () => (ToastT | ToastToDismiss)[];
+        onToastAdd(handler: Handler<ToastT>): () => void;
+        onToastDismiss(handler: Handler<ToastToDismiss>): () => void;
+        onSubscribe(handler: Handler<ToastT | ToastToDismiss>): () => void;
+        get [Symbol.toStringTag](): string;
+    }
+}
 declare module "packages/ui/src/index" {
-    import { Result as _Result, BizError as _BizError, base as _base, BaseDomain as _BaseDomain } from "packages/base/src/index";
+    import { Result as _Result, BizError as _BizError, base as _base } from "packages/timeless/src/index";
     export const Result: {
         Ok: <T>(value: T) => _Result<T>;
-        Err: <T>(message: string | string[] | BizError | Error | _Result<null>, code?: string | number, data?: unknown) => import("@timeless/base").Resp<null>;
+        Err: <T>(message: string | string[] | BizError | Error | _Result<null>, code?: string | number, data?: unknown) => _base.Resp<null>;
     };
     export const BizError: typeof _BizError;
-    export const BaseDomain: typeof _BaseDomain;
+    export const BaseDomain: typeof _base.BaseDomain;
     export const base: {
-        BaseDomain: typeof _BaseDomain;
+        BaseDomain: typeof _base.BaseDomain;
         Result: {
             Ok: <T>(value: T) => _Result<T>;
-            Err: <T>(message: string | string[] | BizError | Error | _Result<null>, code?: string | number, data?: unknown) => import("@timeless/base").Resp<null>;
+            Err: <T>(message: string | string[] | BizError | Error | _Result<null>, code?: string | number, data?: unknown) => _base.Resp<null>;
         };
         BizError: typeof _BizError;
         base: typeof _base;
@@ -7428,6 +8193,7 @@ declare module "packages/ui/src/index" {
     export * from "packages/ui/src/tooltip/index";
     export * from "packages/ui/src/shortcut/index";
     export * from "packages/ui/src/click-outside/index";
+    export * from "packages/ui/src/sonner-core/index";
 }
 declare module "packages/timeless/src/modules/presence" {
     import { PresenceCore } from "packages/ui/src/index";
@@ -7992,8 +8758,8 @@ declare module "packages/icons/src/util/index" {
     };
     export function createIcon(svg: string): (props?: IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8002,8 +8768,8 @@ declare module "packages/icons/src/util/index" {
 declare module "packages/icons/src/icons/arrow-down-to-line" {
     export const ArrowDownloadToLineOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8012,8 +8778,8 @@ declare module "packages/icons/src/icons/arrow-down-to-line" {
 declare module "packages/icons/src/icons/calendar" {
     export const CalendarOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8022,8 +8788,8 @@ declare module "packages/icons/src/icons/calendar" {
 declare module "packages/icons/src/icons/chevron-down" {
     export const ChevronDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8032,8 +8798,8 @@ declare module "packages/icons/src/icons/chevron-down" {
 declare module "packages/icons/src/icons/chevron-left" {
     export const ChevronLeftOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8042,8 +8808,8 @@ declare module "packages/icons/src/icons/chevron-left" {
 declare module "packages/icons/src/icons/chevron-right" {
     export const ChevronRightOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8052,8 +8818,8 @@ declare module "packages/icons/src/icons/chevron-right" {
 declare module "packages/icons/src/icons/circle-arrow-down" {
     export const CircleArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8062,8 +8828,8 @@ declare module "packages/icons/src/icons/circle-arrow-down" {
 declare module "packages/icons/src/icons/circle-x" {
     export const CircleXOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8072,8 +8838,8 @@ declare module "packages/icons/src/icons/circle-x" {
 declare module "packages/icons/src/icons/clock-arrow-down" {
     export const ClockArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8082,8 +8848,8 @@ declare module "packages/icons/src/icons/clock-arrow-down" {
 declare module "packages/icons/src/icons/cloud-download" {
     export const CloudDownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8092,8 +8858,8 @@ declare module "packages/icons/src/icons/cloud-download" {
 declare module "packages/icons/src/icons/download" {
     export const DownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8102,8 +8868,8 @@ declare module "packages/icons/src/icons/download" {
 declare module "packages/icons/src/icons/ellipsis-vertical" {
     export const EllipsisVerticalOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8112,8 +8878,8 @@ declare module "packages/icons/src/icons/ellipsis-vertical" {
 declare module "packages/icons/src/icons/ellipsis" {
     export const EllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8122,8 +8888,8 @@ declare module "packages/icons/src/icons/ellipsis" {
 declare module "packages/icons/src/icons/file-box" {
     export const FileBoxOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8132,8 +8898,8 @@ declare module "packages/icons/src/icons/file-box" {
 declare module "packages/icons/src/icons/file-image" {
     export const FileImageOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8142,8 +8908,8 @@ declare module "packages/icons/src/icons/file-image" {
 declare module "packages/icons/src/icons/file-lock" {
     export const FileLockOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8152,8 +8918,8 @@ declare module "packages/icons/src/icons/file-lock" {
 declare module "packages/icons/src/icons/file-play" {
     export const FilePlayOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8162,8 +8928,8 @@ declare module "packages/icons/src/icons/file-play" {
 declare module "packages/icons/src/icons/file-symlink" {
     export const FileSymlinkOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8172,8 +8938,8 @@ declare module "packages/icons/src/icons/file-symlink" {
 declare module "packages/icons/src/icons/file-video-camera" {
     export const FileVideoCameraOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8182,8 +8948,8 @@ declare module "packages/icons/src/icons/file-video-camera" {
 declare module "packages/icons/src/icons/file-volume" {
     export const FileVolumeOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8192,8 +8958,8 @@ declare module "packages/icons/src/icons/file-volume" {
 declare module "packages/icons/src/icons/file" {
     export const FileOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8202,8 +8968,8 @@ declare module "packages/icons/src/icons/file" {
 declare module "packages/icons/src/icons/folder-closed" {
     export const FolderClosedOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8212,8 +8978,8 @@ declare module "packages/icons/src/icons/folder-closed" {
 declare module "packages/icons/src/icons/folder" {
     export const FolderOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8222,8 +8988,8 @@ declare module "packages/icons/src/icons/folder" {
 declare module "packages/icons/src/icons/pause" {
     export const PauseOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8232,8 +8998,8 @@ declare module "packages/icons/src/icons/pause" {
 declare module "packages/icons/src/icons/play" {
     export const PlayOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8242,8 +9008,8 @@ declare module "packages/icons/src/icons/play" {
 declare module "packages/icons/src/icons/refresh-ccw" {
     export const RefreshCcwOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8252,8 +9018,8 @@ declare module "packages/icons/src/icons/refresh-ccw" {
 declare module "packages/icons/src/icons/rss" {
     export const RSSOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8262,8 +9028,8 @@ declare module "packages/icons/src/icons/rss" {
 declare module "packages/icons/src/icons/square-arrow-down" {
     export const SquareArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8272,8 +9038,8 @@ declare module "packages/icons/src/icons/square-arrow-down" {
 declare module "packages/icons/src/icons/trash-2" {
     export const Trash2Outlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8282,8 +9048,8 @@ declare module "packages/icons/src/icons/trash-2" {
 declare module "packages/icons/src/icons/trash" {
     export const TrashOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8292,8 +9058,8 @@ declare module "packages/icons/src/icons/trash" {
 declare module "packages/icons/src/icons/search" {
     export const SearchOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8302,8 +9068,8 @@ declare module "packages/icons/src/icons/search" {
 declare module "packages/icons/src/icons/undo-2" {
     export const Undo2Outlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8312,8 +9078,8 @@ declare module "packages/icons/src/icons/undo-2" {
 declare module "packages/icons/src/icons/x" {
     export const XOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8322,8 +9088,8 @@ declare module "packages/icons/src/icons/x" {
 declare module "packages/icons/src/icons/bolt" {
     export const BoltOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8332,8 +9098,8 @@ declare module "packages/icons/src/icons/bolt" {
 declare module "packages/icons/src/icons/loader" {
     export const LoaderOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8342,8 +9108,8 @@ declare module "packages/icons/src/icons/loader" {
 declare module "packages/icons/src/icons/loader-circle" {
     export const LoaderCircleOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8352,8 +9118,8 @@ declare module "packages/icons/src/icons/loader-circle" {
 declare module "packages/icons/src/icons/check" {
     export const CheckOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8362,8 +9128,8 @@ declare module "packages/icons/src/icons/check" {
 declare module "packages/icons/src/icons/chevron-up" {
     export const ChevronUpOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8372,8 +9138,8 @@ declare module "packages/icons/src/icons/chevron-up" {
 declare module "packages/icons/src/icons/clock" {
     export const ClockOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8382,8 +9148,8 @@ declare module "packages/icons/src/icons/clock" {
 declare module "packages/icons/src/icons/grid-3x3" {
     export const Grid3x3Outlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8392,8 +9158,8 @@ declare module "packages/icons/src/icons/grid-3x3" {
 declare module "packages/icons/src/icons/menu" {
     export const MenuOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8402,8 +9168,8 @@ declare module "packages/icons/src/icons/menu" {
 declare module "packages/icons/src/icons/circle-ellipsis" {
     export const CircleEllipsisDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8412,8 +9178,8 @@ declare module "packages/icons/src/icons/circle-ellipsis" {
 declare module "packages/icons/src/icons/house" {
     export const HouseOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8422,8 +9188,8 @@ declare module "packages/icons/src/icons/house" {
 declare module "packages/icons/src/icons/moon" {
     export const MoonOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -8432,8 +9198,8 @@ declare module "packages/icons/src/icons/moon" {
 declare module "packages/icons/src/icons/sun" {
     export const SunOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
-        $elm: SVGSVGElement;
-        render(): SVGSVGElement;
+        $elm: any;
+        render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -9213,7 +9979,7 @@ declare module "packages/timeless/src/modules/dialog" {
     }, children?: ViewChildren): any;
 }
 declare module "packages/timeless/src/modules/toast" {
-    import { ToastCore } from "packages/ui/src/index";
+    import { ToastCore, ExternalToast } from "packages/ui/src/index";
     import { ViewProps, ViewChildren } from "@/primitive/view";
     export function Root(props: ViewProps & {
         store: ToastCore;
@@ -9243,6 +10009,13 @@ declare module "packages/timeless/src/modules/toast" {
     export function Close(props: ViewProps & {
         store: ToastCore;
     }, children?: ViewChildren): any;
+    export function toast(message: unknown, data?: ExternalToast): string | number;
+    export function success(message: unknown, data?: ExternalToast): string | number;
+    export function error(message: unknown, data?: ExternalToast): string | number;
+    export function info(message: unknown, data?: ExternalToast): string | number;
+    export function warning(message: unknown, data?: ExternalToast): string | number;
+    export function loading(message: unknown, data?: ExternalToast): string | number;
+    export function dismiss(id?: number | string): string | number;
 }
 declare module "packages/timeless/src/modules/steps" {
     import { StepCore } from "packages/ui/src/index";
@@ -10940,9 +11713,48 @@ declare module "packages/timeless/src/util/render-to-string" {
 declare module "packages/timeless/src/util/lazy" {
     export function lazy(path: string): () => Promise<any>;
 }
-declare module "packages/timeless/src/util/render" {
-    import { TimelessElement } from "@/primitive/view";
-    export function render(elm: TimelessElement, $root: any): void;
+declare module "packages/timeless/src/util/reactive-data" {
+    import { ref, refarr } from "packages/reactive/src/index";
+    /**
+     * Convert plain data object to reactive data for client-side hydration.
+     *
+     * - Primitive values (number, string, boolean) → ref()
+     * - Arrays → refarr()
+     * - Nested objects → recursive conversion with Proxy
+     *
+     * This allows the same component code to work on both server and client:
+     * - Server: uses plain values for SSR
+     * - Client: uses reactive refs for interactivity
+     *
+     * @example
+     * ```js
+     * const data = createReactiveData({
+     *   count: 0,
+     *   fruits: ["Apple", "Banana"],
+     *   user: { name: "John" }
+     * });
+     *
+     * // data.count is ref(0)
+     * // data.fruits is refarr(["Apple", "Banana"])
+     * // data.user.name is ref("John")
+     * ```
+     */
+    export function createReactiveData<T extends Record<string, any>>(data: T): ReactiveData<T>;
+    /**
+     * Check if a value is reactive data created by createReactiveData
+     */
+    export function isReactiveData(value: any): value is ReactiveData<any>;
+    /**
+     * Get the raw reactive store from reactive data
+     */
+    export function getRawReactiveStore(data: ReactiveData<any>): Record<string, any>;
+    type ReactiveValue<T> = T extends any[] ? ReturnType<typeof refarr<T[number]>> : T extends object ? ReactiveData<T> : ReturnType<typeof ref<T>>;
+    export type ReactiveData<T extends Record<string, any>> = {
+        [K in keyof T]: ReactiveValue<T[K]>;
+    } & {
+        __isReactiveData: true;
+        __raw: Record<string, any>;
+    };
 }
 declare module "packages/timeless/src/util/h" {
     import { TimelessElement, ViewChildren } from "@/primitive/view";
@@ -11130,12 +11942,13 @@ declare module "packages/timeless/src/index" {
     export * from "packages/timeless/src/util/env";
     export * from "packages/timeless/src/util/render-to-string";
     export * from "packages/timeless/src/util/lazy";
-    export * from "packages/timeless/src/util/render";
+    export * from "packages/timeless/src/util/reactive-data";
     export * from "packages/timeless/src/util/h";
     export * from "packages/timeless/src/host/index";
     export * as base from "packages/base/src/index";
     export * as reactive from "packages/reactive/src/index";
     export * as utils from "packages/utils/src/index";
+    export * from "packages/base/src/index";
     export * as ui from "packages/ui/src/index";
     export * as kit from "packages/kit/src/index";
     export * as icons from "packages/icons/src/index";
@@ -11184,7 +11997,10 @@ declare module "packages/shadcn/src/modules/label" {
     export function Label(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11216,7 +12032,10 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
     }): {
         t: string;
         $elm: any;
+        _props: import("@timeless/timeless").ViewProps;
+        _children: import("@timeless/timeless").ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11245,7 +12064,10 @@ declare module "packages/shadcn/src/modules/radio" {
     }): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: import("@timeless/timeless").ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11393,7 +12215,7 @@ declare module "packages/shadcn/src/modules/slider" {
     }): any;
 }
 declare module "packages/shadcn/src/modules/progress" {
-    import { Ref } from "packages/reactive/src/index";
+    import { Ref } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
     import { ProgressCore } from "packages/ui/src/index";
     export function Progress(props: ViewProps & {
@@ -11431,7 +12253,10 @@ declare module "packages/shadcn/src/modules/menu" {
     }): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: import("@timeless/timeless").ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11519,7 +12344,7 @@ declare module "packages/shadcn/src/modules/card" {
 }
 declare module "packages/shadcn/src/modules/avatar" {
     import { AvatarPrimitive, ViewProps, ViewChildren } from "packages/timeless/src/index";
-    import { Ref } from "packages/reactive/src/index";
+    import { Ref } from "packages/timeless/src/index";
     export function Avatar(props: ViewProps & {
         src: string | Ref<string>;
         alt?: string;
@@ -11543,7 +12368,10 @@ declare module "packages/shadcn/src/modules/scroll-area" {
     export function ScrollArea(props: any, children: any): {
         t: string;
         $elm: any;
+        _props: import("@timeless/timeless").ViewProps;
+        _children: import("@timeless/timeless").ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11566,7 +12394,10 @@ declare module "packages/shadcn/src/modules/aspect-ratio" {
     export function AspectRatio(props: any, children: any): {
         t: string;
         $elm: any;
+        _props: import("@timeless/timeless").ViewProps;
+        _children: import("@timeless/timeless").ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11588,14 +12419,20 @@ declare module "packages/shadcn/src/modules/kbd" {
     export function Kbd(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
     export function KbdGroup(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11622,28 +12459,40 @@ declare module "packages/shadcn/src/modules/field" {
     export function FieldGroup(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
     export function FieldSet(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
     export function FieldLegend(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
     export function FieldDescription(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11663,14 +12512,20 @@ declare module "packages/shadcn/src/modules/field" {
     export function FieldHelp(props: {}, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
     export function FieldError(props: {}, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11682,7 +12537,10 @@ declare module "packages/shadcn/src/modules/field" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11707,7 +12565,7 @@ declare module "packages/shadcn/src/modules/resizable-panels" {
 }
 declare module "packages/shadcn/src/modules/waterfall" {
     import { type ViewProps, type TimelessElement } from "packages/timeless/src/index";
-    import { WaterfallModel, WaterfallCellModel } from "packages/ui/src/index";
+    import { WaterfallModel, WaterfallCellModel } from "packages/timeless/src/index";
     export function Waterfall<T extends Record<string, unknown>>(props: ViewProps & {
         store: WaterfallModel<T>;
         render: (payload: T, cell: WaterfallCellModel<T>) => TimelessElement;
@@ -11721,7 +12579,10 @@ declare module "packages/shadcn/src/modules/history-panel" {
     }): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: import("@timeless/timeless").ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11780,7 +12641,10 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
     }): {
         t: string;
         $elm: any;
+        _props: ViewProps;
+        _children: import("@timeless/timeless").ViewChildren;
         render(): any;
+        hydrate(existingDom: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11836,9 +12700,10 @@ declare module "packages/shadcn/src/index" {
     import { Waterfall } from "packages/shadcn/src/modules/waterfall";
     import { HistoryPanel } from "packages/shadcn/src/modules/history-panel";
     import { LLMProviderForm } from "packages/shadcn/src/modules/llm-provider-form";
+    import { Toaster, toast, success, error, info, warning, loading, dismiss } from "./modules/sonner";
     import "./index.css";
     import "./styles/globals.css";
-    export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, };
+    export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, toast, success, error, info, warning, loading, dismiss, };
 }
 
 // === Package module aliases ===
@@ -11868,6 +12733,7 @@ declare const AlertPrimitive: typeof import("@timeless/timeless").AlertPrimitive
 declare const ArraySignal: typeof import("@timeless/timeless").ArraySignal;
 declare const AvatarPrimitive: typeof import("@timeless/timeless").AvatarPrimitive;
 declare const BadgePrimitive: typeof import("@timeless/timeless").BadgePrimitive;
+declare const BaseEvents: typeof import("@timeless/timeless").BaseEvents;
 declare const ButtonPrimitive: typeof import("@timeless/timeless").ButtonPrimitive;
 declare const CardPrimitive: typeof import("@timeless/timeless").CardPrimitive;
 declare const CascaderPrimitive: typeof import("@timeless/timeless").CascaderPrimitive;
@@ -11962,13 +12828,16 @@ declare const Use: typeof import("@timeless/timeless").Use;
 declare const VideoPlayerPrimitive: typeof import("@timeless/timeless").VideoPlayerPrimitive;
 declare const View: typeof import("@timeless/timeless").View;
 declare const WaterfallPrimitive: typeof import("@timeless/timeless").WaterfallPrimitive;
+declare const applyMixins: typeof import("@timeless/timeless").applyMixins;
 declare const classNames: typeof import("@timeless/timeless").classNames;
 declare const cn: typeof import("@timeless/timeless").cn;
 declare const combine: typeof import("@timeless/timeless").combine;
 declare const computed: typeof import("@timeless/timeless").computed;
+declare const createReactiveData: typeof import("@timeless/timeless").createReactiveData;
 declare const defineModel: typeof import("@timeless/timeless").defineModel;
 declare const derive: typeof import("@timeless/timeless").derive;
 declare const getHost: typeof import("@timeless/timeless").getHost;
+declare const getRawReactiveStore: typeof import("@timeless/timeless").getRawReactiveStore;
 declare const getarr: typeof import("@timeless/timeless").getarr;
 declare const getobj: typeof import("@timeless/timeless").getobj;
 declare const h: typeof import("@timeless/timeless").h;
@@ -11977,6 +12846,7 @@ declare const isBrowser: typeof import("@timeless/timeless").isBrowser;
 declare const isClassName: typeof import("@timeless/timeless").isClassName;
 declare const isElement: typeof import("@timeless/timeless").isElement;
 declare const isLazyElement: typeof import("@timeless/timeless").isLazyElement;
+declare const isReactiveData: typeof import("@timeless/timeless").isReactiveData;
 declare const isRef: typeof import("@timeless/timeless").isRef;
 declare const isStyleRef: typeof import("@timeless/timeless").isStyleRef;
 declare const kit: typeof import("@timeless/timeless").kit;
@@ -11992,7 +12862,6 @@ declare const registryGetArr: typeof import("@timeless/timeless").registryGetArr
 declare const registryGetObj: typeof import("@timeless/timeless").registryGetObj;
 declare const registrySet: typeof import("@timeless/timeless").registrySet;
 declare const release: typeof import("@timeless/timeless").release;
-declare const render: typeof import("@timeless/timeless").render;
 declare const renderToString: typeof import("@timeless/timeless").renderToString;
 declare const safeCreateDocumentFragment: typeof import("@timeless/timeless").safeCreateDocumentFragment;
 declare const safeCreateElement: typeof import("@timeless/timeless").safeCreateElement;
@@ -12094,10 +12963,18 @@ declare const Tabs: typeof import("@timeless/shadcn").Tabs;
 declare const Textarea: typeof import("@timeless/shadcn").Textarea;
 declare const TimePicker: typeof import("@timeless/shadcn").TimePicker;
 declare const Toast: typeof import("@timeless/shadcn").Toast;
+declare const Toaster: typeof import("@timeless/shadcn").Toaster;
 declare const Toggle: typeof import("@timeless/shadcn").Toggle;
 declare const Tooltip: typeof import("@timeless/shadcn").Tooltip;
 declare const TooltipProvider: typeof import("@timeless/shadcn").TooltipProvider;
 declare const Waterfall: typeof import("@timeless/shadcn").Waterfall;
+declare const dismiss: typeof import("@timeless/shadcn").dismiss;
+declare const error: typeof import("@timeless/shadcn").error;
+declare const info: typeof import("@timeless/shadcn").info;
+declare const loading: typeof import("@timeless/shadcn").loading;
+declare const success: typeof import("@timeless/shadcn").success;
+declare const toast: typeof import("@timeless/shadcn").toast;
+declare const warning: typeof import("@timeless/shadcn").warning;
 
 // @timeless/icons
 declare const ArrowDownloadToLineOutlined: typeof import("@timeless/icons").ArrowDownloadToLineOutlined;
@@ -12216,6 +13093,7 @@ declare const SelectInListCore: typeof import("@timeless/ui").SelectInListCore;
 declare const ShortcutModel: typeof import("@timeless/ui").ShortcutModel;
 declare const SimpleSelectCore: typeof import("@timeless/ui").SimpleSelectCore;
 declare const SingleFieldCore: typeof import("@timeless/ui").SingleFieldCore;
+declare const SonnerCore: typeof import("@timeless/ui").SonnerCore;
 declare const StepCore: typeof import("@timeless/ui").StepCore;
 declare const SwitchCore: typeof import("@timeless/ui").SwitchCore;
 declare const TabHeaderCore: typeof import("@timeless/ui").TabHeaderCore;
@@ -12224,6 +13102,7 @@ declare const TagInputCore: typeof import("@timeless/ui").TagInputCore;
 declare const TagSelectCore: typeof import("@timeless/ui").TagSelectCore;
 declare const TimePickerCore: typeof import("@timeless/ui").TimePickerCore;
 declare const ToastCore: typeof import("@timeless/ui").ToastCore;
+declare const ToastState: typeof import("@timeless/ui").ToastState;
 declare const ToggleCore: typeof import("@timeless/ui").ToggleCore;
 declare const TooltipCore: typeof import("@timeless/ui").TooltipCore;
 declare const TreeCore: typeof import("@timeless/ui").TreeCore;

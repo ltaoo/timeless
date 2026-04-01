@@ -99,7 +99,7 @@ export function View(
         _children[i] = child;
       }
       if (isRef(child)) {
-        _children[i] = Txt(child);
+        _children[i] = Txt(child as any);
       }
     }
   };
@@ -168,14 +168,14 @@ export function View(
         host.setClassName($elm, cls);
       } else if (isRef(cls)) {
         cls._subscribe({
-          onChange(v) {
+          onChange(v: any) {
             host.setClassName($elm, v);
           },
         });
         host.setClassName($elm, cls.value);
       } else if (isClassName(cls)) {
         cls._subscribe({
-          onChange(v: string[]) {
+          onChange(v: any) {
             host.setClassName($elm, v.join(" "));
           },
         });
@@ -195,7 +195,7 @@ export function View(
         });
       } else if (isStyleRef(style)) {
         style._subscribe({
-          onChange(v: string) {
+          onChange(v: any) {
             host.setStyleText($elm, v);
           },
         });

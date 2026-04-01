@@ -1,6 +1,4 @@
-import { Handler } from "mitt";
-
-import { BaseDomain } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/base";
 
 enum Events {
   StateChange,

@@ -1,4 +1,4 @@
-import { computed, ref, refobj, sn } from "@timeless/reactive";
+import { computed, ref, refobj, sn } from "@timeless/primitive";
 import {
   DialogPrimitive,
   View,
@@ -7,7 +7,7 @@ import {
   Show,
   Txt,
   h,
-} from "@timeless/timeless";
+} from "@timeless/primitive";
 import { DialogCore } from "@timeless/ui";
 
 import { Button } from "./button";

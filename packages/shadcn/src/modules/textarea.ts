@@ -1,5 +1,5 @@
-import { combine, computed, refobj } from "@timeless/reactive";
-import { TextareaPrimitive, Show, ViewProps, h } from "@timeless/timeless";
+import { combine, computed, refobj } from "@timeless/primitive";
+import { TextareaPrimitive, Show, ViewProps, h } from "@timeless/primitive";
 import { InputCore } from "@timeless/ui";
 import { CircleXOutlined, LoaderOutlined } from "@timeless/icons";
 

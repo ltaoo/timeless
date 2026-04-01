@@ -1,5 +1,5 @@
-import { SkeletonPrimitive, ViewProps } from "@timeless/timeless";
-import { cn } from "@timeless/reactive";
+import { SkeletonPrimitive, ViewProps } from "@timeless/primitive";
+import { cn } from "@timeless/primitive";
 
 export function Skeleton(props: ViewProps) {
   const { class: cls, ...rest } = props;

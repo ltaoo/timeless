@@ -1,4 +1,4 @@
-import { cn, computed, refobj } from "@timeless/reactive";
+import { cn, computed, refobj } from "@timeless/primitive";
 import {
   For,
   NativeInput,
@@ -6,7 +6,7 @@ import {
   Show,
   View,
   ViewProps,
-} from "@timeless/timeless";
+} from "@timeless/primitive";
 import { SelectCore } from "@timeless/ui";
 import { CheckOutlined, ChevronDownOutlined } from "@timeless/icons";
 

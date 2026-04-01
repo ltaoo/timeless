@@ -1,8 +1,8 @@
 import { base, BaseDomain, Handler } from "@timeless/base";
+import { remove_arr_item } from "@timeless/utils";
 
 import { WaterfallColumnModel } from "./column";
 import { WaterfallCellModel } from "./cell";
-import { remove_arr_item } from "@timeless/utils";
 
 setInterval(() => {}, 100);
 

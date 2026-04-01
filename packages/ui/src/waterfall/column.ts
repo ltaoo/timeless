@@ -1,6 +1,5 @@
 import { base, BaseDomain, Handler } from "@timeless/base";
-import { throttle } from "@timeless/utils";
-import { remove_arr_item, toFixed } from "@timeless/utils";
+import { throttle, remove_arr_item, toFixed } from "@timeless/utils";
 
 import { WaterfallCellModel } from "./cell";
 

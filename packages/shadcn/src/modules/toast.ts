@@ -1,4 +1,4 @@
-import { computed, refobj } from "@timeless/reactive";
+import { computed, refobj } from "@timeless/primitive";
 import {
   ToastPrimitive,
   For,
@@ -6,7 +6,7 @@ import {
   h,
   ViewChildren,
   ViewProps,
-} from "@timeless/timeless";
+} from "@timeless/primitive";
 import { ToastCore } from "@timeless/ui";
 
 export function Toast(

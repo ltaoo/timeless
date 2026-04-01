@@ -5,9 +5,9 @@ import {
   ViewChildren,
   ViewProps,
   h,
-} from "@timeless/timeless";
+} from "@timeless/primitive";
 import { LoaderCircleOutlined } from "@timeless/icons";
-import { computed, ref } from "@timeless/reactive";
+import { computed, ref } from "@timeless/primitive";
 import { ButtonCore } from "@timeless/ui";
 
 const VARIANTS = {

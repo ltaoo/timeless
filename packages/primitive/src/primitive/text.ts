@@ -3,7 +3,7 @@ import { isRef, Ref } from "@timeless/reactive";
 import { getHost } from "@/host";
 import { safeCreateTextNode } from "@/util/env";
 
-export function Txt(value: Ref<any> | string) {
+export function Txt(value: Ref<string> | string) {
   const host = getHost();
   let _local_value = isRef(value) ? value.value : value;
   let $elm: any = safeCreateTextNode(_local_value);

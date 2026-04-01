@@ -635,6 +635,229 @@ export default function FeedbackView() {
           ),
         ]),
       ]),
+      Section("Sonner", [
+        Item("Basic Types", [
+          (() => {
+            const sonner = Timeless.ui.SonnerCore.getInstance();
+            return View({ class: "flex flex-wrap gap-2" }, [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    onClick() {
+                      sonner.toast("This is a default toast.");
+                    },
+                  }),
+                },
+                [Txt("Default")],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    onClick() {
+                      sonner.success("Operation completed successfully!");
+                    },
+                  }),
+                },
+                [Txt("Success")],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
+                    onClick() {
+                      sonner.error("Something went wrong.");
+                    },
+                  }),
+                },
+                [Txt("Error")],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
+                    onClick() {
+                      sonner.info("Here is some useful information.");
+                    },
+                  }),
+                },
+                [Txt("Info")],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
+                    onClick() {
+                      sonner.warning("Please check your input.");
+                    },
+                  }),
+                },
+                [Txt("Warning")],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
+                    onClick() {
+                      sonner.loading("Loading data...");
+                    },
+                  }),
+                },
+                [Txt("Loading")],
+              ),
+            ]);
+          })(),
+        ]),
+        Item("With Description", [
+          (() => {
+            const sonner = Timeless.ui.SonnerCore.getInstance();
+            return View({ class: "flex gap-2" }, [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    onClick() {
+                      sonner.success("Event has been created", {
+                        description: "Monday, January 3rd at 6:00pm",
+                      });
+                    },
+                  }),
+                },
+                [Txt("With description")],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
+                    onClick() {
+                      sonner.error("Failed to save", {
+                        description:
+                          "Your changes could not be saved. Please try again.",
+                      });
+                    },
+                  }),
+                },
+                [Txt("Error + description")],
+              ),
+            ]);
+          })(),
+        ]),
+        Item("Promise", [
+          (() => {
+            const sonner = Timeless.ui.SonnerCore.getInstance();
+            return View({ class: "flex gap-2" }, [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    onClick() {
+                      const fakePromise = new Promise((resolve) => {
+                        setTimeout(resolve, 2000);
+                      });
+                      sonner.promise(fakePromise, {
+                        loading: "Saving your data...",
+                        success: "Data saved successfully!",
+                        error: "Failed to save data.",
+                      });
+                    },
+                  }),
+                },
+                [Txt("Promise toast")],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
+                    onClick() {
+                      const fakePromise = new Promise((resolve, reject) => {
+                        setTimeout(
+                          () => reject(new Error("Network error")),
+                          2000,
+                        );
+                      });
+                      sonner.promise(fakePromise, {
+                        loading: "Uploading file...",
+                        success: "File uploaded!",
+                        error: "Upload failed.",
+                      });
+                    },
+                  }),
+                },
+                [Txt("Promise reject")],
+              ),
+            ]);
+          })(),
+        ]),
+        Item("Dismiss", [
+          (() => {
+            const sonner = Timeless.ui.SonnerCore.getInstance();
+            return View({ class: "flex gap-2" }, [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    onClick() {
+                      sonner.success("I will stay until dismissed.", {
+                        duration: Infinity,
+                      });
+                    },
+                  }),
+                },
+                [Txt("Show persistent")],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
+                    onClick() {
+                      sonner.dismiss();
+                    },
+                  }),
+                },
+                [Txt("Dismiss all")],
+              ),
+            ]);
+          })(),
+        ]),
+        Item("Custom Duration", [
+          (() => {
+            const sonner = Timeless.ui.SonnerCore.getInstance();
+            return View({ class: "flex gap-2" }, [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    onClick() {
+                      sonner.toast("Quick toast (1s)", { duration: 1000 });
+                    },
+                  }),
+                },
+                [Txt("1 second")],
+              ),
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "outline",
+                    onClick() {
+                      sonner.toast("Long toast (5s)", { duration: 5000 });
+                    },
+                  }),
+                },
+                [Txt("5 seconds")],
+              ),
+            ]);
+          })(),
+        ]),
+      ]),
       Section("Alert", [
         Item("Default", [
           Alert({}, [

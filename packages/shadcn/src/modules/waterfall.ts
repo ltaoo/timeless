@@ -4,9 +4,9 @@ import {
   type ViewProps,
   type TimelessElement,
   isElement,
-} from "@timeless/timeless";
-import { cn, refarr } from "@timeless/reactive";
-import { WaterfallModel, WaterfallCellModel } from "@timeless/ui";
+} from "@timeless/primitive";
+import { cn, refarr } from "@timeless/primitive";
+import { WaterfallModel, WaterfallCellModel } from "@timeless/primitive";
 
 export function Waterfall<T extends Record<string, unknown>>(
   props: ViewProps & {

@@ -1,9 +1,9 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
 import { PopperCore } from "@/popper";
+import { Rect } from "@/popper/types";
 import { DismissableLayerCore } from "@/dismissable-layer";
 import { PresenceCore } from "@/presence";
-import { Rect } from "@/popper/types";
 
 export type CascaderOption<T = any> = {
   value: T;
@@ -133,8 +133,7 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         focused:
           (this.focusedPosition[0] === 0 &&
             this.options[this.focusedPosition[1]]?.value === opt.value) ||
-          (this.focusedPosition[0] > 0 &&
-            this.expandedPath[0] === opt.value),
+          (this.focusedPosition[0] > 0 && this.expandedPath[0] === opt.value),
       })),
       selectedValue: this.expandedPath[0] ?? null,
     });
@@ -399,7 +398,10 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     }
 
     // 从原始选项树中查找选项，确保获取正确的 children 属性
-    const actualOption = this.findOptionByPanelAndValue(panelIndex, option.value);
+    const actualOption = this.findOptionByPanelAndValue(
+      panelIndex,
+      option.value,
+    );
     if (!actualOption) {
       return;
     }
@@ -423,7 +425,10 @@ export class CascaderCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     }
 
     // 从原始选项树中查找选项，确保获取正确的 children 属性
-    const actualOption = this.findOptionByPanelAndValue(panelIndex, option.value);
+    const actualOption = this.findOptionByPanelAndValue(
+      panelIndex,
+      option.value,
+    );
     if (!actualOption) {
       return;
     }

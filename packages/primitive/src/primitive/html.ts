@@ -19,7 +19,7 @@ export function DangerouslyInnerHTML(html: string | Ref<string>) {
       })();
       if (isRef(html)) {
         html._subscribe({
-          onChange: (v) => {
+          onChange(v: any) {
             host.setInnerHTML?.($elm, v);
           },
         });

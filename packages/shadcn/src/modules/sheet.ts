@@ -1,10 +1,10 @@
-import { computed, refobj } from "@timeless/reactive";
+import { computed, refobj } from "@timeless/primitive";
 import {
   SheetPrimitive,
   View,
   ViewChildren,
   ViewProps,
-} from "@timeless/timeless";
+} from "@timeless/primitive";
 import { DialogCore } from "@timeless/ui";
 import { XOutlined } from "@timeless/icons";
 

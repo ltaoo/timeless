@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { dayjs } from "@timeless/utils";
 import { base, Handler } from "@timeless/base";
 
 import { RangeCalendarCore } from "@/range-calendar";

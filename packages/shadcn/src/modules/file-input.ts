@@ -1,5 +1,5 @@
-import { cn, combine, computed, refobj } from "@timeless/reactive";
-import { h, FileInputPrimitive, Show, ViewProps } from "@timeless/timeless";
+import { cn, combine, computed, refobj } from "@timeless/primitive";
+import { h, FileInputPrimitive, Show, ViewProps } from "@timeless/primitive";
 import { FileInputCore } from "@timeless/ui";
 import { CircleXOutlined, LoaderOutlined } from "@timeless/icons";
 

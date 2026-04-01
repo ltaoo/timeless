@@ -72,7 +72,17 @@ function serializeNode(node: any): string {
     }
 
     html += ">";
-    html += (node.__children || []).map(serializeNode).join("");
+
+    // Check for innerHTML (used by icons, etc.) - output raw without escaping
+    // Children take precedence if present
+    const children = node.__children || [];
+    if (children.length > 0) {
+      html += children.map(serializeNode).join("");
+    } else if (node.innerHTML) {
+      // innerHTML is raw HTML, don't escape
+      html += node.innerHTML;
+    }
+
     html += `</${tag}>`;
     return html;
   }

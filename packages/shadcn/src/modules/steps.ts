@@ -1,5 +1,5 @@
-import { refobj, computed, classNames } from "@timeless/reactive";
-import { StepsPrimitive, For, Show, Txt, ViewProps, h } from "@timeless/timeless";
+import { refobj, computed, classNames } from "@timeless/primitive";
+import { StepsPrimitive, For, Show, Txt, ViewProps, h } from "@timeless/primitive";
 import { StepCore } from "@timeless/ui";
 
 export type StepItem = {

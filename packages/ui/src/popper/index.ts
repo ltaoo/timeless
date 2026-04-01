@@ -1,14 +1,14 @@
 import { BaseDomain, Handler } from "@timeless/base";
-import { Rect } from "@/popper/types";
+
 import {
-  computePosition as computeDomPosition,
+  computePosition as computeCorePosition,
   flip,
   shift,
   offset,
   arrow,
-} from "@floating-ui/dom";
-
-import type { Placement, Strategy, MiddlewareData } from "./types";
+  getDOMPlatform,
+} from "./floating";
+import type { Rect, Placement, Strategy, MiddlewareData } from "./types";
 
 const SIDE_OPTIONS = ["top", "right", "bottom", "left"] as const;
 const ALIGN_OPTIONS = ["start", "center", "end"] as const;
@@ -340,7 +340,8 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         if (placedAlign === "start") {
           middlewareData.arrow.y = arrowPadding;
         } else if (placedAlign === "end") {
-          middlewareData.arrow.y = floatRect.height - arrowHeight - arrowPadding;
+          middlewareData.arrow.y =
+            floatRect.height - arrowHeight - arrowPadding;
         }
       }
     }
@@ -471,10 +472,12 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       },
     );
 
-    const result = await computeDomPosition(referenceArg, floatingEl, {
+    const platform = getDOMPlatform();
+    const result = await computeCorePosition(referenceArg, floatingEl, {
       placement,
       strategy,
       middleware,
+      platform,
     });
     console.log("[DEBUG-POPPER] computeDomPosition result", this.unique_id, {
       x: result.x,

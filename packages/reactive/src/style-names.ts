@@ -1,4 +1,4 @@
-import { Ref, ClassNameRef, Subscriber, isRef, isClassName } from "./types";
+import { Ref, Subscriber, isRef } from "./types";
 
 export interface StyleRef {
   __style_ref: true;
@@ -19,7 +19,12 @@ export function isStyleRef(v: any): v is StyleRef {
 export function styleNames(
   items: (string | Ref<string | StyleRef | undefined> | StyleRef | undefined)[],
 ): StyleRef {
-  const sources: (string | Ref<string | StyleRef | undefined> | StyleRef | undefined)[] = [];
+  const sources: (
+    | string
+    | Ref<string | StyleRef | undefined>
+    | StyleRef
+    | undefined
+  )[] = [];
   const _deps: Subscriber[] = [];
 
   function notify() {
@@ -79,7 +84,9 @@ export function styleNames(
     return result.join("; ");
   }
 
-  function addSourceFromItem(item: any) {
+  function addSourceFromItem(
+    item: string | Ref<string | StyleRef | undefined> | StyleRef | undefined,
+  ) {
     if (!item && item !== "") {
       return;
     }
@@ -97,7 +104,7 @@ export function styleNames(
       return;
     }
     if (isRef(item)) {
-      sources.push(item);
+      sources.push(item as Ref<string | StyleRef | undefined>);
       item._subscribe({
         onChange() {
           notify();

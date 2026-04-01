@@ -2,6 +2,115 @@ import type { ViteDevServer } from "vite";
 import path from "node:path";
 import fs from "node:fs";
 
+// Setup SSR-safe document mock if not in browser
+if (typeof globalThis.document === "undefined") {
+  const noop = () => {};
+  const createNoopNode = (): any => ({
+    contains: () => false,
+    appendChild: noop,
+    removeChild: noop,
+    insertBefore: noop,
+    replaceChild: noop,
+    addEventListener: noop,
+    removeEventListener: noop,
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    setAttribute: noop,
+    removeAttribute: noop,
+    classList: {
+      add: noop,
+      remove: noop,
+      toggle: noop,
+      contains: () => false,
+    },
+    style: {},
+    childNodes: [],
+    children: [],
+    firstChild: null,
+    lastChild: null,
+    parentNode: null,
+    nextSibling: null,
+    previousSibling: null,
+    innerHTML: "",
+    outerHTML: "",
+    textContent: "",
+    nodeType: 1,
+    nodeName: "DIV",
+    tagName: "DIV",
+    getBoundingClientRect: () => ({
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: 0,
+      height: 0,
+    }),
+    focus: noop,
+    blur: noop,
+    click: noop,
+  });
+
+  (globalThis as any).document = {
+    body: createNoopNode(),
+    head: createNoopNode(),
+    documentElement: createNoopNode(),
+    createElement: () => createNoopNode(),
+    createElementNS: () => createNoopNode(),
+    createTextNode: () => ({ ...createNoopNode(), nodeType: 3 }),
+    createDocumentFragment: () => ({ ...createNoopNode(), childNodes: [] }),
+    addEventListener: noop,
+    removeEventListener: noop,
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    getElementById: () => null,
+    getElementsByClassName: () => [],
+    getElementsByTagName: () => [],
+    createRange: () => ({
+      selectNodeContents: noop,
+      collapse: noop,
+      setStart: noop,
+      setEnd: noop,
+    }),
+    getSelection: () => null,
+  };
+
+  (globalThis as any).window = {
+    document: (globalThis as any).document,
+    addEventListener: noop,
+    removeEventListener: noop,
+    matchMedia: () => ({
+      matches: false,
+      addEventListener: noop,
+      removeEventListener: noop,
+      addListener: noop,
+      removeListener: noop,
+    }),
+    getComputedStyle: () => ({
+      getPropertyValue: () => "",
+    }),
+    requestAnimationFrame: (cb: any) => setTimeout(cb, 0),
+    cancelAnimationFrame: noop,
+    setTimeout: globalThis.setTimeout,
+    clearTimeout: globalThis.clearTimeout,
+    setInterval: globalThis.setInterval,
+    clearInterval: globalThis.clearInterval,
+    innerWidth: 1024,
+    innerHeight: 768,
+    scrollX: 0,
+    scrollY: 0,
+  };
+
+  if (typeof globalThis.Element === "undefined") {
+    (globalThis as any).Element = class Element {};
+  }
+  if (typeof globalThis.HTMLElement === "undefined") {
+    (globalThis as any).HTMLElement = class HTMLElement {};
+  }
+  if (typeof (globalThis as any).Node?.ELEMENT_NODE === "undefined") {
+    (globalThis as any).Node = { ELEMENT_NODE: 1, TEXT_NODE: 3 };
+  }
+}
+
 /**
  * Create SSR request handler
  */
@@ -57,6 +166,7 @@ export function createSSRHandler(vite: ViteDevServer, pagesDir: string) {
     return generateHTML({
       title: headConfig.title || "Timeless App",
       meta: headConfig.meta || [],
+      links: headConfig.links || [],
       content: appHtml,
       data,
       pagePath,
@@ -123,14 +233,19 @@ function parseQuery(url: string): Record<string, string> {
 function generateHTML(options: {
   title: string;
   meta: Array<{ name: string; content: string }>;
+  links?: Array<{ rel: string; href: string }>;
   content: string;
   data: Record<string, any>;
   pagePath: string;
 }): string {
-  const { title, meta, content, data, pagePath } = options;
+  const { title, meta, links = [], content, data, pagePath } = options;
 
   const metaTags = meta
     .map((m) => `<meta name="${m.name}" content="${escapeHtml(m.content)}">`)
+    .join("\n    ");
+
+  const linkTags = links
+    .map((l) => `<link rel="${l.rel}" href="${escapeHtml(l.href)}">`)
     .join("\n    ");
 
   const serializedData = JSON.stringify(data)
@@ -145,6 +260,7 @@ function generateHTML(options: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)}</title>
   ${metaTags}
+  ${linkTags}
 </head>
 <body>
   <div id="root">${content}</div>
