@@ -59,11 +59,11 @@ function generateClientEntry(pagePath: string): string {
   // Use Vite's pre-bundled dependency paths
   // These will be served from node_modules/.vite/deps/
   return `
-// Import DOM host first to set up the rendering environment
-import "/node_modules/.vite/deps/@timeless_timeless-dom.js";
+// Import hydrate from timeless-dom (which also sets up the DOM host)
+import { hydrate } from "/node_modules/.vite/deps/@timeless_timeless-dom.js";
 
-// Then import hydration utilities
-import { hydrate, createReactiveData } from "/node_modules/.vite/deps/@timeless_timeless.js";
+// Import reactive utilities from timeless
+import { createReactiveData } from "/node_modules/.vite/deps/@timeless_timeless.js";
 
 async function main() {
   try {
