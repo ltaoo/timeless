@@ -17,7 +17,7 @@ export function Match(
 ) {
   const { when, fallback, onMounted, beforeUnmounted, onUnmounted } = props;
   const host = getHost();
-  const anchor = safeCreateTextNode("");
+  let anchor: any = null;
 
   let _currentNodes: any[] = [];
   let _currentChildren: any[] = [];
@@ -150,6 +150,11 @@ export function Match(
     render() {
       const when_value = isRef(when) ? when.value : when;
       _prev_value = when_value;
+
+      // Create anchor if not already created
+      if (!anchor) {
+        anchor = safeCreateTextNode("");
+      }
 
       const active_match = get_active_match();
       const target = get_target_children(active_match);

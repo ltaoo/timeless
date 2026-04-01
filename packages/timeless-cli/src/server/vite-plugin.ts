@@ -50,20 +50,17 @@ export function timelessPlugin(): Plugin {
 
 /**
  * Generate client-side hydration code for a specific page
- * Uses Vite's optimized dependency paths to ensure proper module resolution
+ * Uses global Timeless and Timeless.DOM from UMD bundles
  */
 function generateClientEntry(pagePath: string): string {
   // Normalize page path
   const normalizedPath = pagePath === "/" ? "/index" : pagePath;
 
-  // Use Vite's pre-bundled dependency paths
-  // These will be served from node_modules/.vite/deps/
+  // Use global variables from UMD bundles
   return `
-// Import hydrate from timeless-dom (which also sets up the DOM host)
-import { hydrate } from "/node_modules/.vite/deps/@timeless_timeless-dom.js";
-
-// Import reactive utilities from timeless
-import { createReactiveData } from "/node_modules/.vite/deps/@timeless_timeless.js";
+// Use Timeless and Timeless.DOM from global scope (loaded via UMD)
+const { hydrate } = window.Timeless.DOM;
+const { createReactiveData } = window.Timeless;
 
 async function main() {
   try {

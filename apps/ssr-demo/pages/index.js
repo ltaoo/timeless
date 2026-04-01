@@ -1,4 +1,5 @@
-import { View, For, Show } from "@timeless/timeless";
+// Use UMD global to ensure same module instance on client and server
+const { View, For, Show } = window.Timeless;
 
 /**
  * load() - Server-side data fetching

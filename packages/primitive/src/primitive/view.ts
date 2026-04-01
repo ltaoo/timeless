@@ -84,7 +84,7 @@ export function View(
   let onMountedCleanup: (() => void) | undefined;
   const listenerCleanups: (() => void)[] = [];
   let rendered = false;
-  let $elm: any = safeCreateElement(as);
+  let $elm: any = null;
   let _children = children ?? [];
   if (!Array.isArray(_children)) {
     _children = [_children];
@@ -385,6 +385,11 @@ export function View(
       }
       rendered = true;
 
+      // Create element if not already created
+      if (!$elm) {
+        $elm = safeCreateElement(as);
+      }
+
       normalizeChildren();
       setupBindings();
 
@@ -523,7 +528,7 @@ export function isElement(v: unknown): v is TimelessElement {
     return false;
   }
   // @ts-ignore
-  if (v.t && v.$elm) {
+  if (v.t && v.hasOwnProperty('$elm')) {
     return true;
   }
   return false;

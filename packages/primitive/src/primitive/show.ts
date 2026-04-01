@@ -27,7 +27,7 @@ export function Show(
   const onMounted = isObjectProps ? props.onMounted : undefined;
   const beforeUnmounted = isObjectProps ? props.beforeUnmounted : undefined;
   const onUnmounted = isObjectProps ? props.onUnmounted : undefined;
-  const anchor = safeCreateTextNode("");
+  let anchor: any = null;
 
   let _current_nodes: any[] = [];
   let _current_children: any[] = [];
@@ -204,6 +204,11 @@ export function Show(
       const condition = isRef(when) ? !!when.value : !!when;
       _prev_condition = condition;
 
+      // Create anchor if not already created
+      if (!anchor) {
+        anchor = safeCreateTextNode("");
+      }
+
       const target = getTargetChildren(condition);
       const fragment = mount(target);
 
@@ -218,6 +223,11 @@ export function Show(
     hydrate(startDom: any, parentDom?: any) {
       const condition = isRef(when) ? !!when.value : !!when;
       _prev_condition = condition;
+
+      // Create anchor if not already created
+      if (!anchor) {
+        anchor = safeCreateTextNode("");
+      }
 
       const targetChildren = getTargetChildren(condition);
       let currentDom = startDom;

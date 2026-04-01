@@ -7,7 +7,7 @@ import { getHost } from "@/host";
 
 export function Portal(props: ViewProps & {}, children: ViewChildren) {
   const host = getHost();
-  const anchor = safeCreateTextNode("");
+  let anchor: any = null;
   let _mountedNodes: Node[] = [];
   let _mountedChildren: any[] = [];
   let _mounted = false;
@@ -81,6 +81,12 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
       if (_mounted) {
         return null;
       }
+
+      // Create anchor if not already created
+      if (!anchor) {
+        anchor = safeCreateTextNode("");
+      }
+
       const fragment = safeCreateDocumentFragment();
       const nodes: any[] = [];
       const instances: any[] = [];

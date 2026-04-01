@@ -69,6 +69,26 @@ export async function dev(options: DevOptions) {
     const url = req.url || "/";
 
     try {
+      // Handle UMD static files - serve directly without Vite transformation
+      if (url.startsWith("/public/timeless/") && url.endsWith(".js")) {
+        const publicDir = path.join(root, "public");
+        const filePath = path.join(publicDir, url.replace("/public/", ""));
+
+        if (fs.existsSync(filePath)) {
+          const content = fs.readFileSync(filePath, "utf-8");
+          res.writeHead(200, {
+            "Content-Type": "application/javascript; charset=utf-8",
+            "Cache-Control": "public, max-age=31536000"
+          });
+          res.end(content);
+          return;
+        } else {
+          res.writeHead(404, { "Content-Type": "text/plain" });
+          res.end("UMD file not found: " + url);
+          return;
+        }
+      }
+
       // Handle SSR for HTML pages
       if (
         req.method === "GET" &&

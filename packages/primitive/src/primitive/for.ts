@@ -24,8 +24,8 @@ export function For<T>(
   let _elements: (TimelessElement | null)[] = [];
   let _$children: (TimelessElement["$elm"] | null)[] = [];
 
-  const anchor = safeCreateTextNode("");
-  const $elm = anchor as any;
+  let anchor: any = null;
+  let $elm: any = null;
 
   const _existing_map = new Map();
 
@@ -324,6 +324,12 @@ export function For<T>(
       const nodes = (isRef(each) ? each.value : each) || [];
       // console.log("[For] render", nodes);
 
+      // Create anchor if not already created
+      if (!anchor) {
+        anchor = safeCreateTextNode("");
+        $elm = anchor;
+      }
+
       const $fragment = safeCreateDocumentFragment();
       for (let i = 0; i < nodes.length; i += 1) {
         const item = nodes[i];
@@ -366,6 +372,13 @@ export function For<T>(
     },
     hydrate(startDom: any, parentDom?: any) {
       const nodes = (isRef(each) ? each.value : each) || [];
+
+      // Create anchor if not already created
+      if (!anchor) {
+        anchor = safeCreateTextNode("");
+        $elm = anchor;
+      }
+
       let currentDom = startDom;
 
       for (let i = 0; i < nodes.length; i += 1) {

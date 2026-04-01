@@ -1,6 +1,18 @@
 import type { ViteDevServer } from "vite";
 import path from "node:path";
 import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+
+// Get CLI package version
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const packageJsonPath = path.join(__dirname, "../../package.json");
+let TIMELESS_VERSION = "0.8.4"; // fallback version
+try {
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+  TIMELESS_VERSION = packageJson.version;
+} catch (e) {
+  // Use fallback version if package.json not found
+}
 
 // Setup SSR-safe document mock if not in browser
 if (typeof globalThis.document === "undefined") {
@@ -114,8 +126,18 @@ if (typeof globalThis.document === "undefined") {
 /**
  * Create SSR request handler
  */
-export function createSSRHandler(vite: ViteDevServer, pagesDir: string) {
+export function createSSRHandler(vite: ViteDevServer, pagesDir: string, isDev = true) {
   return async function handleSSR(url: string): Promise<string> {
+    // Setup globalThis.Timeless for SSR BEFORE loading page module
+    if (typeof (globalThis as any).Timeless === "undefined") {
+      const timelessModule = await vite.ssrLoadModule("@timeless/timeless");
+      (globalThis as any).Timeless = timelessModule;
+      // Also set window.Timeless for compatibility
+      if (typeof (globalThis as any).window !== "undefined") {
+        (globalThis as any).window.Timeless = timelessModule;
+      }
+    }
+
     // Determine page path from URL
     const pagePath = urlToPagePath(url);
     const pageFile = resolvePageFile(pagesDir, pagePath);
@@ -170,6 +192,7 @@ export function createSSRHandler(vite: ViteDevServer, pagesDir: string) {
       content: appHtml,
       data,
       pagePath,
+      isDev,
     });
   };
 }
@@ -237,8 +260,9 @@ function generateHTML(options: {
   content: string;
   data: Record<string, any>;
   pagePath: string;
+  isDev?: boolean;
 }): string {
-  const { title, meta, links = [], content, data, pagePath } = options;
+  const { title, meta, links = [], content, data, pagePath, isDev = true } = options;
 
   const metaTags = meta
     .map((m) => `<meta name="${m.name}" content="${escapeHtml(m.content)}">`)
@@ -265,6 +289,9 @@ function generateHTML(options: {
 <body>
   <div id="root">${content}</div>
   <script>window.__TIMELESS_DATA__ = ${serializedData};</script>
+  <script src="/public/timeless/${TIMELESS_VERSION}/timeless.umd.min.js"></script>
+  <script src="/public/timeless/${TIMELESS_VERSION}/timeless.dom.umd.min.js"></script>
+  <script src="/public/timeless/${TIMELESS_VERSION}/timeless.web.umd.min.js"></script>
   <script type="module" src="/@timeless/client${pagePath}"></script>
 </body>
 </html>`;

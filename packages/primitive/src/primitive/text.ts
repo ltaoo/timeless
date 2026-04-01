@@ -6,7 +6,7 @@ import { safeCreateTextNode } from "@/util/env";
 export function Txt(value: Ref<string> | string) {
   const host = getHost();
   let _local_value = isRef(value) ? value.value : value;
-  let $elm: any = safeCreateTextNode(_local_value);
+  let $elm: any = null;
   let rendered = false;
 
   const setupSubscription = () => {
@@ -36,6 +36,7 @@ export function Txt(value: Ref<string> | string) {
     render() {
       if (rendered) return $elm;
       rendered = true;
+      $elm = safeCreateTextNode(_local_value);
       setupSubscription();
       return $elm;
     },

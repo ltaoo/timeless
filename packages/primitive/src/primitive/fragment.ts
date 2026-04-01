@@ -5,7 +5,7 @@ import { ViewChildren, ViewProps, isElement } from "./view";
 
 export function Fragment(props: ViewProps, children: ViewChildren = []) {
   const host = getHost();
-  const $fragment = safeCreateDocumentFragment();
+  let $fragment: any = null;
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
   let onMountedCleanup: (() => void) | undefined;
   let rendered = false;
@@ -19,7 +19,12 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
 
   return {
     t: "fragment",
-    $elm: $fragment,
+    get $elm() {
+      return $fragment;
+    },
+    set $elm(v) {
+      $fragment = v;
+    },
     beforeUnmounted() {
       // console.log("[Fragment] beforeUnmounted");
       if (beforeUnmounted) {
@@ -56,6 +61,12 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
         return $fragment;
       }
       rendered = true;
+
+      // Create fragment if not already created
+      if (!$fragment) {
+        $fragment = safeCreateDocumentFragment();
+      }
+
       // console.log("[Fragment] render, children count:", _children.length);
       for (let i = 0; i < _children.length; i += 1) {
         let node = _children[i];

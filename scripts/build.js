@@ -9,6 +9,7 @@ const PACKAGES_DIR = path.join(ROOT, "packages");
 const INCLUDED_PACKAGES = [
   "timeless",
   "timeless-dom",
+  "timeless-cli",
   "provider-web",
   "shadcn",
 ];

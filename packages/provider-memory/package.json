@@ -1,6 +1,6 @@
 {
   "name": "@timeless/provider-memory",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "main": "dist/index.js",
   "module": "dist/timeless.memory.esm.js",
   "types": "dist/index.d.ts",
