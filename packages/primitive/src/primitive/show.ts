@@ -109,7 +109,8 @@ export function Show(
     const newInstances: any[] = [];
 
     for (let node of targetChildren) {
-      if (!node) continue;
+      // 跳过 null/undefined，但不跳过空字符串和 0
+      if (node === null || node === undefined) continue;
       // 处理 h() 返回的延迟执行函数
       if (typeof node === "function") {
         node = node();
@@ -188,7 +189,12 @@ export function Show(
 
   return {
     t: "show",
-    $elm: anchor as any,
+    get $elm() {
+      return anchor;
+    },
+    set $elm(v) {
+      anchor = v;
+    },
     _props: { when, fallback },
     _children,
     _fallback,
@@ -235,7 +241,8 @@ export function Show(
       const newInstances: any[] = [];
 
       for (let node of targetChildren) {
-        if (!node) continue;
+        // 跳过 null/undefined，但不跳过空字符串和 0
+        if (node === null || node === undefined) continue;
         if (typeof node === "function") {
           node = node();
         }
@@ -243,7 +250,7 @@ export function Show(
         if (isElement(node)) {
           newInstances.push(node);
           if (currentDom && typeof (node as any).hydrate === "function") {
-            (node as any).hydrate(currentDom);
+            (node as any).hydrate(currentDom, parentDom);
             newNodes.push(node.$elm);
             currentDom = host.getNextSibling(node.$elm || currentDom);
           } else if (currentDom) {
@@ -264,8 +271,11 @@ export function Show(
       _current_children = newInstances;
 
       // Insert anchor after the content
+      // 优先使用 parentDom，其次从 startDom 获取，最后从已插入的节点获取
       const $parent =
-        parentDom || (startDom ? host.getParentNode(startDom) : null);
+        parentDom ||
+        (startDom ? host.getParentNode(startDom) : null) ||
+        (newNodes.length > 0 ? host.getParentNode(newNodes[0]) : null);
       if ($parent) {
         if (currentDom) {
           host.insertBefore($parent, anchor, currentDom);

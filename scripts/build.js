@@ -9,7 +9,7 @@ const PACKAGES_DIR = path.join(ROOT, "packages");
 const INCLUDED_PACKAGES = [
   "timeless",
   "timeless-dom",
-  "timeless-cli",
+  "cli",
   "provider-web",
   "shadcn",
 ];
@@ -28,12 +28,12 @@ for (const name of packageDirs) {
 
 console.log(
   "Build targets:",
-  buildTargets.map((t) => t.dir)
+  buildTargets.map((t) => t.dir),
 );
 
 // Construct filter args from inclusion list
 const filterArgs = INCLUDED_PACKAGES.map(
-  (name) => `--filter "./packages/${name}"`
+  (name) => `--filter "./packages/${name}"`,
 );
 
 const isProd = process.argv.includes("--prod");
@@ -66,14 +66,20 @@ for (const target of buildTargets) {
     .readdirSync(distPath)
     .filter((f) => f.endsWith(".umd.min.js") || f.endsWith(".css"));
   if (files.length === 0) {
-    console.warn(`Warning: ${target.dir}/dist has no .umd.min.js or .css, skipping`);
+    console.warn(
+      `Warning: ${target.dir}/dist has no .umd.min.js or .css, skipping`,
+    );
     continue;
   }
   for (const file of files) {
     fs.copyFileSync(path.join(distPath, file), path.join(outDir, file));
   }
   copied++;
-  console.log(`Copied: ${target.dir} (${files.join(", ")}) -> dist/timeless/${version}/`);
+  console.log(
+    `Copied: ${target.dir} (${files.join(", ")}) -> dist/timeless/${version}/`,
+  );
 }
 
-console.log(`\nDone! ${copied} packages collected in dist/timeless/${version}/`);
+console.log(
+  `\nDone! ${copied} packages collected in dist/timeless/${version}/`,
+);

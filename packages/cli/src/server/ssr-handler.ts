@@ -1,18 +1,9 @@
 import type { ViteDevServer } from "vite";
 import path from "node:path";
 import fs from "node:fs";
-import { fileURLToPath } from "node:url";
+import { VERSION } from "../version.js";
 
-// Get CLI package version
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const packageJsonPath = path.join(__dirname, "../../package.json");
-let TIMELESS_VERSION = "0.8.4"; // fallback version
-try {
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
-  TIMELESS_VERSION = packageJson.version;
-} catch (e) {
-  // Use fallback version if package.json not found
-}
+const TIMELESS_VERSION = VERSION;
 
 // Setup SSR-safe document mock if not in browser
 if (typeof globalThis.document === "undefined") {
@@ -126,7 +117,11 @@ if (typeof globalThis.document === "undefined") {
 /**
  * Create SSR request handler
  */
-export function createSSRHandler(vite: ViteDevServer, pagesDir: string, isDev = true) {
+export function createSSRHandler(
+  vite: ViteDevServer,
+  pagesDir: string,
+  isDev = true,
+) {
   return async function handleSSR(url: string): Promise<string> {
     // Setup globalThis.Timeless for SSR BEFORE loading page module
     if (typeof (globalThis as any).Timeless === "undefined") {
@@ -262,7 +257,15 @@ function generateHTML(options: {
   pagePath: string;
   isDev?: boolean;
 }): string {
-  const { title, meta, links = [], content, data, pagePath, isDev = true } = options;
+  const {
+    title,
+    meta,
+    links = [],
+    content,
+    data,
+    pagePath,
+    isDev = true,
+  } = options;
 
   const metaTags = meta
     .map((m) => `<meta name="${m.name}" content="${escapeHtml(m.content)}">`)

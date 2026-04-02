@@ -106,7 +106,7 @@ importers:
     dependencies:
       '@timeless/cli':
         specifier: workspace:^
-        version: link:../../packages/timeless-cli
+        version: link:../../packages/cli
       '@timeless/timeless':
         specifier: workspace:^
         version: link:../../packages/timeless
@@ -118,7 +118,7 @@ importers:
     dependencies:
       '@timeless/cli':
         specifier: workspace:^
-        version: link:../../packages/timeless-cli
+        version: link:../../packages/cli
       '@timeless/shadcn':
         specifier: workspace:^
         version: link:../../packages/shadcn
@@ -575,7 +575,7 @@ importers:
         specifier: ^3.0.0 || ^4.0.0
         version: 4.2.1
 
-  packages/timeless-cli:
+  packages/cli:
     dependencies:
       '@timeless/timeless':
         specifier: workspace:^

@@ -441,19 +441,30 @@ export function View(
 
         if (typeof node === "string" || typeof node === "number") {
           // Skip text nodes
-          childDom = host.getNextSibling(childDom);
+          if (childDom) {
+            childDom = host.getNextSibling(childDom);
+          }
           continue;
         }
 
         if (isElement(node)) {
-          if (childDom && typeof (node as any).hydrate === "function") {
-            (node as any).hydrate(childDom);
-            childDom = host.getNextSibling(node.$elm || childDom);
+          if (typeof (node as any).hydrate === "function") {
+            // 传递 $elm 作为 parentDom，即使 childDom 为 null 也要调用 hydrate
+            (node as any).hydrate(childDom, $elm);
+            if (childDom) {
+              childDom = host.getNextSibling(node.$elm || childDom);
+            }
           } else if (childDom) {
             // Fallback: just assign $elm and setup
             node.$elm = childDom;
             node.render();
             childDom = host.getNextSibling(childDom);
+          } else {
+            // childDom 为 null 时，直接 render 并插入
+            const result = node.render();
+            if (result) {
+              host.appendChild($elm, result);
+            }
           }
         }
       }

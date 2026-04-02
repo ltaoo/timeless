@@ -1,5 +1,5 @@
 // Use UMD global to ensure same module instance on client and server
-const { View, For, Show } = window.Timeless;
+const { View, For, Show, h } = window.Timeless;
 
 /**
  * load() - Server-side data fetching
@@ -12,6 +12,7 @@ export async function load({ query }) {
     fruits: ["Apple", "Banana", "Cherry"],
     showList: true,
     message: "Hello from Timeless SSR!",
+    visible: true,
   };
 }
 
@@ -66,6 +67,16 @@ export default function Page({ data }) {
       ]),
     ]),
 
+    View(
+      {
+        as: "button",
+        onClick() {
+          data.visible.as((v) => !v);
+        },
+      },
+      ["Toggle Content"],
+    ),
+
     // List Section
     View({ as: "section", style: sectionStyle }, [
       View({ as: "h2", style: subtitleStyle }, ["Fruit List"]),
@@ -80,15 +91,16 @@ export default function Page({ data }) {
       ),
 
       Show({ when: data.showList }, [
-        View({ as: "ul", style: listStyle }, [
-          For({
+        h(View, { as: "ul", style: listStyle }, [
+          h(For, {
             each: data.fruits,
             render: (item) => View({ as: "li", style: listItemStyle }, [item]),
           }),
         ]),
 
-        View({ as: "div", style: buttonGroupStyle }, [
-          View(
+        h(View, { as: "div", style: buttonGroupStyle }, [
+          h(
+            View,
             {
               as: "button",
               style: buttonStyle,
@@ -100,7 +112,8 @@ export default function Page({ data }) {
             },
             ["Add Fruit"],
           ),
-          View(
+          h(
+            View,
             {
               as: "button",
               style: buttonStyle,
