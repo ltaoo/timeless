@@ -1,9 +1,16 @@
 {
-  "name": "@timeless/timeless-dom",
+  "name": "@timeless/timeless-tui",
   "version": "0.10.0",
   "main": "dist/index.js",
-  "module": "dist/timeless.dom.esm.js",
+  "module": "dist/timeless.tui.esm.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/timeless.tui.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "vite build"
   },

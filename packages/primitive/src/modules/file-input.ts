@@ -190,6 +190,9 @@ export function Input(
       for (const fn of listenerCleanups) fn();
       listenerCleanups.length = 0;
       if (props.onUnmounted) props.onUnmounted();
+
+      // Reset state for potential re-render
+      rendered = false;
     },
   };
 }

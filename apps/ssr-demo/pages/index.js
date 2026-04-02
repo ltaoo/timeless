@@ -69,6 +69,19 @@ export default function Page({ data }) {
       ]),
     ]),
 
+    View(
+      {
+        as: "button",
+        onClick() {
+          data.visible.as((v) => !v);
+        },
+      },
+      ["Toggle Content"],
+    ),
+    // Show({ when: data.visible }, [View({}, [View({}, ["Content"])])]),
+    Show({ when: data.visible }, [View({}, ["Content"])]),
+    // Show({ when: data.visible }, ["Content"]),
+
     // Mouse Events Section
     View({ as: "section", style: sectionStyle }, [
       View({ as: "h2", style: subtitleStyle }, ["Mouse Events Test"]),
@@ -90,7 +103,9 @@ export default function Page({ data }) {
             },
           },
           [
-            Show({ when: data.hoverBox1, fallback: ["Hover me"] }, ["Hovering!"]),
+            Show({ when: data.hoverBox1, fallback: ["Hover me"] }, [
+              "Hovering!",
+            ]),
           ],
         ),
         View(
@@ -107,7 +122,9 @@ export default function Page({ data }) {
             },
           },
           [
-            Show({ when: data.hoverBox2, fallback: ["Hover me"] }, ["Hovering!"]),
+            Show({ when: data.hoverBox2, fallback: ["Hover me"] }, [
+              "Hovering!",
+            ]),
           ],
         ),
       ]),

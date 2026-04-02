@@ -52,6 +52,10 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
           node.onUnmounted();
         }
       }
+
+      // Reset state for potential re-render
+      rendered = false;
+      $fragment = null;
     },
     append(node: any) {
       _children.push(node);

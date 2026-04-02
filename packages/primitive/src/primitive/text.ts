@@ -49,6 +49,10 @@ export function Txt(value: Ref<string> | string) {
     },
     onMounted() {},
     beforeUnmounted() {},
-    onUnmounted() {},
+    onUnmounted() {
+      // Reset state for potential re-render
+      rendered = false;
+      $elm = null;
+    },
   };
 }

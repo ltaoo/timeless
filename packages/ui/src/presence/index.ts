@@ -123,12 +123,6 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     }, 120);
   }
   hide(options: Partial<{ reason: "show_sibling" | "back" | "forward"; destroy: boolean }> = {}) {
-    console.log("[DOMAIN]ui/presence - hide START", options, {
-      exit: this.exit,
-      enter: this.enter,
-      visible: this.visible,
-      mounted: this.mounted,
-    });
     // Cancel any pending show timer to prevent stale state emissions
     if (this.show_timer) {
       clearTimeout(this.show_timer);
@@ -155,10 +149,6 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     }
     this.exit = true;
     this.enter = false;
-    console.log("[DOMAIN]ui/presence - hide AFTER set exit=true", {
-      exit: this.exit,
-      enter: this.enter,
-    });
     this.emit(Events.StateChange, { ...this.state });
     if (this.hide_timer) {
       clearTimeout(this.hide_timer);

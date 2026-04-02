@@ -88,6 +88,9 @@ export function Image(
     onUnmounted() {
       host.removeEventListener($img, "load", handleLoad);
       host.removeEventListener($img, "error", handleError);
+
+      // Reset state for potential re-render
+      rendered = false;
     },
     append(node: any) {
       host.appendChild($img, node);

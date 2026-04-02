@@ -100,7 +100,6 @@ export function Show(
     }
     _current_nodes = [];
     _current_children = [];
-    console.log("[Show] unmount completed");
   };
 
   const mount = (targetChildren: any[], parent?: any, before?: any) => {
@@ -141,7 +140,12 @@ export function Show(
       host.insertBefore(parent, fragment, before || null);
     }
 
-    // Lifecycle
+    // Lifecycle - call Show's own onMounted callback
+    if (onMounted) {
+      onMounted(anchor);
+    }
+
+    // Lifecycle - call children's onMounted
     for (const child of newInstances) {
       if (isElement(child) && child.onMounted) {
         child.onMounted(child.$elm);
@@ -155,23 +159,11 @@ export function Show(
     when._subscribe({
       onChange(value) {
         const condition = !!value;
-        // console.log(
-        //   "[]Show onChange",
-        //   condition,
-        //   "_prev_condition:",
-        //   _prev_condition,
-        //   "_currentNodes.length:",
-        //   _current_nodes.length,
-        //   "anchor.parentNode:",
-        //   !!anchor.parentNode,
-        // );
         if (!anchor) {
-          console.log("[]Show condition not mounted, skip");
           return;
         }
         // 如果条件没有变化，直接返回
         if (condition === _prev_condition) {
-          console.log("[]Show condition not changed, skip");
           return;
         }
 

@@ -138,7 +138,7 @@ export function View(
         if (isRef(vv)) {
           vv._subscribe({
             onChange(v) {
-              applyAttr(k, v);
+              if ($elm) applyAttr(k, v);
             },
           });
           applyAttr(k, vv.value);
@@ -154,7 +154,7 @@ export function View(
       if (isRef(vv)) {
         vv._subscribe({
           onChange(v) {
-            applyAttr(attrName, v);
+            if ($elm) applyAttr(attrName, v);
           },
         });
         applyAttr(attrName, vv.value);
@@ -169,14 +169,14 @@ export function View(
       } else if (isRef(cls)) {
         cls._subscribe({
           onChange(v: any) {
-            host.setClassName($elm, v);
+            if ($elm) host.setClassName($elm, v);
           },
         });
         host.setClassName($elm, cls.value);
       } else if (isClassName(cls)) {
         cls._subscribe({
           onChange(v: any) {
-            host.setClassName($elm, v.join(" "));
+            if ($elm) host.setClassName($elm, v.join(" "));
           },
         });
         host.setClassName($elm, cls.toString());
@@ -190,13 +190,13 @@ export function View(
         host.setStyleText($elm, style.value);
         style._subscribe({
           onChange(v: any) {
-            host.setStyleText($elm, v);
+            if ($elm) host.setStyleText($elm, v);
           },
         });
       } else if (isStyleRef(style)) {
         style._subscribe({
           onChange(v: any) {
-            host.setStyleText($elm, v);
+            if ($elm) host.setStyleText($elm, v);
           },
         });
         host.setStyleText($elm, style.toString());
@@ -530,6 +530,10 @@ export function View(
       // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
       host.clearChildren($elm);
       // console.log("[View] onUnmounted completed");
+
+      // Reset state for potential re-render (e.g., when Show toggles when back to true)
+      rendered = false;
+      $elm = null;
     },
   };
 }

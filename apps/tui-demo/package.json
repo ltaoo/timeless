@@ -1,0 +1,13 @@
+{
+  "name": "@timeless/tui-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@timeless/timeless": "workspace:^",
+    "@timeless/timeless-tui": "workspace:^"
+  }
+}

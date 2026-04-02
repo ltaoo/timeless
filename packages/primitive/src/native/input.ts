@@ -486,6 +486,9 @@ export function NativeInput(props: NativeInputProps = {}) {
       if (onUnmounted) {
         onUnmounted();
       }
+
+      // Reset state for potential re-render
+      rendered = false;
     },
   };
 }

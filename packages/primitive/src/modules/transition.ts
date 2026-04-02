@@ -3,6 +3,8 @@ import { PresenceCore } from "@timeless/ui";
 
 import { Show } from "@/primitive/show";
 import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { Fragment } from "@/primitive/fragment";
+import { h } from "@/util/h";
 
 export function Transition(
   props: ViewProps & {
@@ -14,22 +16,36 @@ export function Transition(
   const { store, animation, ...rest } = props;
   const state = refobj(store.state);
   let _was_exiting = false;
+  let unsubscribe: (() => void) | null = null;
 
   const visible = computed(state, (s) => {
     return s.mounted && (s.visible || s.enter || s.exit);
   });
 
-  const unsubscribe = store.onStateChange(() => {
-    state.as(store.state);
-  });
+  // Setup subscription (called on initial render and re-mount)
+  const setupSubscription = () => {
+    if (unsubscribe) {
+      unsubscribe();
+    }
+    unsubscribe = store.onStateChange(() => {
+      state.as(store.state);
+    });
+  };
+
+  // Initial subscription
+  setupSubscription();
 
   return Show(
     {
       when: visible,
-
+      onMounted() {
+        // Re-subscribe when re-mounted after being unmounted
+        setupSubscription();
+      },
       onUnmounted() {
         if (unsubscribe) {
           unsubscribe();
+          unsubscribe = null;
         }
         if (rest.onUnmounted) {
           rest.onUnmounted();
@@ -37,7 +53,8 @@ export function Transition(
       },
     },
     [
-      View(
+      h(
+        View,
         {
           ...rest,
           class: computed(state, (s) => {
@@ -68,7 +85,7 @@ export function Transition(
             }
           },
         },
-        children,
+        [h(Fragment, {}, children)],
       ),
     ],
   );

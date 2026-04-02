@@ -39,7 +39,16 @@
       "Bash(cat /Users/mayfair/Documents/other/timeless/apps/web-vanilla/public/timeless/0.3.0/timeless.shadcn.css | tr '{' '\\\\n{' | grep -B1 -A1 ':root\\\\b' | head -20)",
       "Bash(cat /Users/mayfair/Documents/other/timeless/apps/web-vanilla/public/timeless/0.3.0/timeless.shadcn.css | tr '{' '\\\\n{' | grep -A1 'data-theme=dark' | head -10)",
       "Bash(lsof:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Skill(browse)",
+      "Bash(for f:*)",
+      "Bash(B=~/.claude/skills/gstack/browse/dist/browse\n$B goto http://localhost:5173\n$B text | head -5)",
+      "Bash(B=~/.claude/skills/gstack/browse/dist/browse\n$B snapshot -i | head -30)",
+      "Bash(B=~/.claude/skills/gstack/browse/dist/browse\n$B links | grep -i feedback)",
+      "Bash(B=~/.claude/skills/gstack/browse/dist/browse\n$B html | grep -i \"feedback\\\\|transition\" | head -10)",
+      "Bash(B=~/.claude/skills/gstack/browse/dist/browse\n$B console\n$B text | head -20)",
+      "Bash(B=~/.claude/skills/gstack/browse/dist/browse\n$B goto http://localhost:5173\n$B snapshot -C | grep -i feedback)",
+      "Bash(B=~/.claude/skills/gstack/browse/dist/browse\n$B click @c17\nsleep 0.5\n$B text | grep -i \"transition\\\\|toggle visibility\" | head -5)"
     ]
   }
 }

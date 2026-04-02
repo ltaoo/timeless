@@ -357,6 +357,9 @@ export function NativeImg(props: ImgProps = {}) {
       if (onUnmounted) {
         onUnmounted();
       }
+
+      // Reset state for potential re-render
+      rendered = false;
     },
   };
 }

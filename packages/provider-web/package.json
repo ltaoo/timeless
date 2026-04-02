@@ -1,6 +1,6 @@
 {
   "name": "@timeless/provider-web",
-  "version": "0.9.3",
+  "version": "0.10.0",
   "main": "dist/index.js",
   "module": "dist/timeless.web.esm.js",
   "types": "dist/index.d.ts",
