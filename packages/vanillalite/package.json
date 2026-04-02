@@ -1,6 +1,6 @@
 {
   "name": "@timeless/vanillalite",
-  "version": "0.10.0",
+  "version": "0.10.2",
   "main": "dist/index.js",
   "module": "dist/timeless.vanillalite.esm.js",
   "types": "dist/index.d.ts",

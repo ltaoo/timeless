@@ -126,10 +126,11 @@
 
 <body>
   <script>!function () { try { var d = document.documentElement, n = 'data-theme', s = 'setAttribute'; var e = localStorage.getItem('theme'); if ('system' === e || (!e && true)) { var t = '(prefers-color-scheme: dark)', m = window.matchMedia(t); if (m.media !== t || m.matches) { d.style.colorScheme = 'dark'; d[s](n, 'dark') } else { d.style.colorScheme = 'light'; d[s](n, 'light') } } else if (e) { d[s](n, e || '') } if (e === 'light' || e === 'dark') d.style.colorScheme = e } catch (e) { } }()</script>
-  <script src="../../packages/vanillalite/dist/timeless.vanillalite.umd.min.js"></script>
+  <script src="./public/timeless/0.10.2/timeless.umd.min.js"></script>
+  <script src="./public/timeless/0.10.2/timeless.dom.umd.min.js"></script>
   <div id="container"></div>
   <script>
-    const { ref, refobj, refarr, computed, cn, sn, For, Show, View, Fragment, Portal, render } = Timeless;
+    const { ref, refobj, refarr, computed, cn, sn, For, Show, View, Fragment, Portal } = Timeless;
 
     function AppView() {
       const state_ = refarr([
@@ -147,31 +148,35 @@
       }, [
         View({
           onClick() {
-            state_.as([
-              {
-                id: 0,
-                content: 'item0',
-              },
-              {
-                id: 1,
-                content: 'item1_updated',
-              },
-              {
-                id: 2,
-                content: 'item2',
-              },
-              {
-                id: 3,
-                content: 'item3',
-              },
-            ])
+            state_.reverse();
+            // console.log(state_.value);
+            // state_.as([
+            //   {
+            //     id: 0,
+            //     content: 'item0',
+            //   },
+            //   {
+            //     id: 1,
+            //     content: 'item1_updated',
+            //   },
+            //   {
+            //     id: 2,
+            //     content: 'item2',
+            //   },
+            //   {
+            //     id: 3,
+            //     content: 'item3',
+            //   },
+            // ])
           },
         }, ["Toggle"]),
         For({
           key: 'id',
           each: state_,
-          render(item) {
-            return View({}, [computed(item, (t) => t.content)])
+          render(item, idx) {
+            // idx is a Ref<number>, auto-updates when position changes
+            // DON'T use state_.indexOf(item) - it won't update on reuse
+            return View({}, [idx, computed(item, (t) => t.content)])
           },
         })
       ]);
@@ -179,7 +184,7 @@
     }
 
     const container = document.getElementById('container');
-    render(AppView(), container)
+    Timeless.DOM.render(AppView(), container)
 
     // --- DOM 复用验证 ---
     // 记录初始 DOM 节点引用

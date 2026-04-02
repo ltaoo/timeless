@@ -7,6 +7,36 @@ export default function DataDisplayView() {
 
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
+      Section("Affix", [
+        Item("Offset Top 20px", [
+          View({ class: cn(["h-[600px] space-y-4"]) }, [
+            View({ class: cn(["text-sm text-zinc-400"]) }, [
+              Txt("Scroll down to see the affix effect"),
+            ]),
+            Affix(
+              {
+                store: new Timeless.ui.AffixCore({ top: 20 }),
+                offsetTop: 20,
+                class:
+                  "inline-block rounded-lg bg-zinc-900 px-4 py-2 text-sm text-white shadow-md",
+              },
+              ["Affix — Fixed at 20px from top"],
+            ),
+            For({
+              each: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+              render(i) {
+                return View(
+                  {
+                    class:
+                      "rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 text-sm",
+                  },
+                  [`Content item ${i} — Keep scrolling...`],
+                );
+              },
+            }),
+          ]),
+        ]),
+      ]),
       Section("Progress", [
         Item("60%", [Progress({ value: progressVal, max: 100 })]),
         Item("Controls", [

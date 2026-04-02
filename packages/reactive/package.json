@@ -1,11 +1,13 @@
 {
   "name": "@timeless/reactive",
-  "version": "0.10.0",
+  "version": "0.10.2",
   "main": "dist/index.js",
   "module": "dist/timeless.reactive.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "type": "module",
   "files": [

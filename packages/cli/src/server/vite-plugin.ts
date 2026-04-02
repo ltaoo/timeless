@@ -60,13 +60,12 @@ function generateClientEntry(pagePath: string): string {
   return `
 // Use Timeless and Timeless.DOM from global scope (loaded via UMD)
 const { hydrate } = window.Timeless.DOM;
-const { createReactiveData } = window.Timeless;
 
 async function main() {
   try {
     console.log("[Timeless] Starting hydration...");
 
-    // Get initial data from SSR
+    // Get initial data from SSR (plain values, not Refs)
     const initialData = window.__TIMELESS_DATA__ || {};
     console.log("[Timeless] Initial data:", initialData);
 
@@ -79,15 +78,14 @@ async function main() {
       return;
     }
 
-    // Convert static data to reactive
-    const reactiveData = createReactiveData(initialData);
-    console.log("[Timeless] Reactive data created");
+    // Pass plain data to Page - components can use ref(data.xxx) for reactivity
+    console.log("[Timeless] Hydrating with plain data");
 
     // Hydrate the app
     const root = document.getElementById("root");
     if (root) {
       const originalFirstChild = root.firstChild;
-      hydrate(Page({ data: reactiveData }), root);
+      hydrate(Page({ data: initialData }), root);
       console.log("[Timeless] Hydration complete");
       console.log("[Timeless] DOM reused:", root.firstChild === originalFirstChild);
     } else {

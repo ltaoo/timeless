@@ -1,5 +1,5 @@
 // Use UMD global to ensure same module instance on client and server
-const { View, For, Show, h } = window.Timeless;
+const { View, For, Show, h, computed, ref, refarr } = window.Timeless;
 
 /**
  * load() - Server-side data fetching
@@ -15,6 +15,7 @@ export async function load({ query }) {
     visible: true,
     hoverBox1: false,
     hoverBox2: false,
+    selectedFruit: "Apple",
   };
 }
 
@@ -37,6 +38,14 @@ export function head({ data }) {
  * On client: data is reactive, enables interactivity
  */
 export default function Page({ data }) {
+  const count = ref(data.count);
+  const visible = ref(data.visible);
+  const hoverBox1 = ref(data.hoverBox1);
+  const hoverBox2 = ref(data.hoverBox2);
+  const showList = ref(data.showList);
+  const fruits = refarr(data.fruits);
+  const selectedFruit = ref(data.selectedFruit);
+
   return View({ as: "div", class: "app", style: appStyle }, [
     // Header
     View({ as: "h1", style: titleStyle }, [data.message]),
@@ -53,16 +62,16 @@ export default function Page({ data }) {
           {
             as: "button",
             style: buttonStyle,
-            onClick: () => data.count.as((v) => v - 1),
+            onClick: () => count.as((v) => v - 1),
           },
           ["-"],
         ),
-        View({ as: "span", style: countStyle }, [data.count]),
+        View({ as: "span", style: countStyle }, [count]),
         View(
           {
             as: "button",
             style: buttonStyle,
-            onClick: () => data.count.as((v) => v + 2),
+            onClick: () => count.as((v) => v + 2),
           },
           ["+"],
         ),
@@ -73,14 +82,12 @@ export default function Page({ data }) {
       {
         as: "button",
         onClick() {
-          data.visible.as((v) => !v);
+          visible.as((v) => !v);
         },
       },
       ["Toggle Content"],
     ),
-    // Show({ when: data.visible }, [View({}, [View({}, ["Content"])])]),
-    Show({ when: data.visible }, [View({}, ["Content"])]),
-    // Show({ when: data.visible }, ["Content"]),
+    Show({ when: visible }, [View({}, ["Content"])]),
 
     // Mouse Events Section
     View({ as: "section", style: sectionStyle }, [
@@ -95,18 +102,14 @@ export default function Page({ data }) {
             style: hoverBoxStyle,
             onMouseEnter: () => {
               console.log("Box 1: mouseenter triggered");
-              data.hoverBox1.as(true);
+              hoverBox1.as(true);
             },
             onMouseLeave: () => {
               console.log("Box 1: mouseleave triggered");
-              data.hoverBox1.as(false);
+              hoverBox1.as(false);
             },
           },
-          [
-            Show({ when: data.hoverBox1, fallback: ["Hover me"] }, [
-              "Hovering!",
-            ]),
-          ],
+          [Show({ when: hoverBox1, fallback: ["Hover me"] }, ["Hovering!"])],
         ),
         View(
           {
@@ -114,18 +117,14 @@ export default function Page({ data }) {
             style: hoverBoxStyle,
             onMouseEnter: () => {
               console.log("Box 2: mouseenter triggered");
-              data.hoverBox2.as(true);
+              hoverBox2.as(true);
             },
             onMouseLeave: () => {
               console.log("Box 2: mouseleave triggered");
-              data.hoverBox2.as(false);
+              hoverBox2.as(false);
             },
           },
-          [
-            Show({ when: data.hoverBox2, fallback: ["Hover me"] }, [
-              "Hovering!",
-            ]),
-          ],
+          [Show({ when: hoverBox2, fallback: ["Hover me"] }, ["Hovering!"])],
         ),
       ]),
     ]),
@@ -138,16 +137,40 @@ export default function Page({ data }) {
         {
           as: "button",
           style: toggleButtonStyle,
-          onClick: () => data.showList.as((v) => !v),
+          onClick: () => showList.as((v) => !v),
         },
         ["Toggle List"],
       ),
 
-      Show({ when: data.showList }, [
+      Show({ when: showList }, [
         h(View, { as: "ul", style: listStyle }, [
           h(For, {
-            each: data.fruits,
-            render: (item) => View({ as: "li", style: listItemStyle }, [item]),
+            each: fruits,
+            render(item, idx) {
+              const itemStyle = computed(selectedFruit, (sel) => {
+                // console.log("compare", sel, item);
+                const selected = sel === item;
+                return `${listItemStyle}; cursor: pointer; ${
+                  selected
+                    ? "background: #e0f2fe; border-color: #38bdf8;"
+                    : "background: white; border-color: #e5e7eb;"
+                }`;
+              });
+              // console.log("[]fruit render");
+              return View(
+                {
+                  as: "li",
+                  style: itemStyle,
+                  onClick() {
+                    selectedFruit.as(item);
+                  },
+                },
+                [
+                  computed(idx, (t) => `${t + 1}、`),
+                  View({ as: "span" }, [item]),
+                ],
+              );
+            },
           }),
         ]),
 
@@ -160,7 +183,7 @@ export default function Page({ data }) {
               onClick: () => {
                 const names = ["Mango", "Grape", "Peach", "Kiwi", "Pear"];
                 const pick = names[Math.floor(Math.random() * names.length)];
-                data.fruits.push(pick);
+                fruits.push(pick);
               },
             },
             ["Add Fruit"],
@@ -171,12 +194,107 @@ export default function Page({ data }) {
               as: "button",
               style: buttonStyle,
               onClick: () => {
-                if (data.fruits.length > 0) {
-                  data.fruits.pop();
+                if (fruits.length > 0) {
+                  fruits.pop();
                 }
               },
             },
             ["Remove Last"],
+          ),
+        ]),
+
+        h(
+          View,
+          {
+            as: "p",
+            style: `margin: 12px 0 8px; color: #666; font-size: 14px;`,
+          },
+          ["Click an item to select, then reorder:"],
+        ),
+        h(View, { as: "div", style: buttonGroupStyle }, [
+          h(
+            View,
+            {
+              as: "button",
+              style: buttonStyle,
+              onClick: () => {
+                const idx = fruits.indexOf(selectedFruit.value);
+                if (idx > 0) {
+                  fruits.move(idx, idx - 1);
+                }
+              },
+            },
+            ["↑ Up"],
+          ),
+          h(
+            View,
+            {
+              as: "button",
+              style: buttonStyle,
+              onClick: () => {
+                const idx = fruits.indexOf(selectedFruit.value);
+                if (idx < fruits.length - 1) fruits.move(idx, idx + 2);
+              },
+            },
+            ["↓ Down"],
+          ),
+          h(
+            View,
+            {
+              as: "button",
+              style: buttonStyle,
+              onClick: () => {
+                const idx = fruits.indexOf(selectedFruit.value);
+                fruits.moveToFirst(idx);
+              },
+            },
+            ["⇤ First"],
+          ),
+          h(
+            View,
+            {
+              as: "button",
+              style: buttonStyle,
+              onClick: () => {
+                const idx = fruits.indexOf(selectedFruit.value);
+                fruits.moveToLast(idx);
+              },
+            },
+            ["Last ⇥"],
+          ),
+        ]),
+        h(View, { as: "div", style: buttonGroupStyle }, [
+          h(
+            View,
+            {
+              as: "button",
+              style: buttonStyle,
+              onClick: () => {
+                const idx = fruits.indexOf(selectedFruit.value);
+                if (idx < fruits.length - 1) {
+                  fruits.swap(idx, idx + 1);
+                }
+              },
+            },
+            ["Swap with Next"],
+          ),
+          h(
+            View,
+            {
+              as: "button",
+              style: buttonStyle,
+              onClick: () => fruits.shuffle(),
+            },
+            ["Shuffle"],
+          ),
+          h(
+            View,
+            {
+              as: "button",
+              style: buttonStyle,
+              onClick: () => fruits.reverse(),
+            },
+            ["Reverse"],
           ),
         ]),
       ]),

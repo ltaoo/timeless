@@ -1,268 +1,119 @@
 import {
-  createTuiElement,
-  createTuiText,
-  createTuiFragment,
-  renderToString,
-  renderToScreen,
-  clearScreen,
-  showCursor,
-  hideCursor,
-  getTerminalSize,
-  ESC,
-  RESET,
-  fgColor,
-  bgColor,
-  moveTo,
+  render,
+  ref,
+  GridLayout,
+  GridItem,
+  View,
+  BOLD,
+  WHITE,
+  RED,
+  GREEN,
+  BLUE,
+  YELLOW,
+  CYAN,
+  MAGENTA,
+  ORANGE,
+  GRAY,
+  DGRAY,
 } from "@timeless/timeless-tui";
 
-const BOLD = `${ESC}1m`;
-const DIM = `${ESC}2m`;
-const UNDERLINE = `${ESC}4m`;
-const CYAN = fgColor(51);
-const GREEN = fgColor(46);
-const YELLOW = fgColor(226);
-const MAGENTA = fgColor(201);
-const WHITE = fgColor(255);
-const GRAY = fgColor(245);
+// ─── Data ───────────────────────────────────────────────────────
+const APPS = [
+  GridItem({ width: 16 }, [
+    View({ color: RED, style: BOLD }, ["\u{1F3AC}"]),
+    View({ color: WHITE }, ["Movies"]),
+    View({ color: DGRAY }, ["Movies & Shows"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: MAGENTA, style: BOLD }, ["\u{1F3B5}"]),
+    View({ color: WHITE }, ["Music"]),
+    View({ color: DGRAY }, ["Your Favorites"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: GREEN, style: BOLD }, ["\u{1F4F7}"]),
+    View({ color: WHITE }, ["Photos"]),
+    View({ color: DGRAY }, ["Photo Library"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: ORANGE, style: BOLD }, ["\u{1F4E1}"]),
+    View({ color: WHITE }, ["Live TV"]),
+    View({ color: DGRAY }, ["200+ Channels"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: BLUE, style: BOLD }, ["\u{1F3AE}"]),
+    View({ color: WHITE }, ["Games"]),
+    View({ color: DGRAY }, ["Play & Compete"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: GRAY, style: BOLD }, ["\u2699\uFE0F"]),
+    View({ color: WHITE }, ["Settings"]),
+    View({ color: DGRAY }, ["Preferences"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: CYAN, style: BOLD }, ["\u26C5"]),
+    View({ color: WHITE }, ["Weather"]),
+    View({ color: DGRAY }, ["5-Day Forecast"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: YELLOW, style: BOLD }, ["\u{1F6D2}"]),
+    View({ color: WHITE }, ["Store"]),
+    View({ color: DGRAY }, ["Discover Apps"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: GREEN, style: BOLD }, ["\u{1F4AA}"]),
+    View({ color: WHITE }, ["Fitness"]),
+    View({ color: DGRAY }, ["Track Workouts"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: WHITE, style: BOLD }, ["\u{1F4F0}"]),
+    View({ color: WHITE }, ["News"]),
+    View({ color: DGRAY }, ["Headlines"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: MAGENTA, style: BOLD }, ["\u{1F9F8}"]),
+    View({ color: WHITE }, ["Kids"]),
+    View({ color: DGRAY }, ["Family Friendly"]),
+  ]),
+  GridItem({ width: 16 }, [
+    View({ color: BLUE, style: BOLD }, ["\u{1F310}"]),
+    View({ color: WHITE }, ["Browser"]),
+    View({ color: DGRAY }, ["Surf the Web"]),
+  ]),
+];
 
-function hr(width) {
-  return GRAY + "─".repeat(width) + RESET;
-}
+const COLS = 4;
 
-function heading(text) {
-  return CYAN + BOLD + " " + text + RESET;
-}
+// ─── State ──────────────────────────────────────────────────────
+const focR = ref(0);
+const focC = ref(0);
 
-function label(key, value) {
-  return "  " + GRAY + key + ": " + RESET + WHITE + value + RESET;
-}
+// ─── App ────────────────────────────────────────────────────────
+const app = render((reactive) => {
+  reactive(focR, focC);
+  const focIdx = focR.value * COLS + focC.value;
+  return GridLayout({ x: COLS, focus: focIdx }, APPS);
+});
 
-function tag(text, color) {
-  return color + BOLD + " " + text + " " + RESET;
-}
+// ─── Keys ───────────────────────────────────────────────────────
+const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
+const maxR = () => Math.ceil(APPS.length / COLS) - 1;
 
-function buildSidebar(width) {
-  const lines = [];
-  lines.push(BOLD + UNDERLINE + " Timeless TUI" + RESET);
-  lines.push("");
-  lines.push(GREEN + "● Online" + RESET + GRAY + "  v0.1.0" + RESET);
-  lines.push("");
-  lines.push(hr(width));
-  lines.push("");
-  lines.push(heading("Navigation"));
-  lines.push("");
-  lines.push(CYAN + " ▸ " + RESET + "Dashboard");
-  lines.push(GRAY + "   Components" + RESET);
-  lines.push(GRAY + "   Settings" + RESET);
-  lines.push(GRAY + "   About" + RESET);
-  lines.push("");
-  lines.push(hr(width));
-  lines.push("");
-  lines.push(heading("Status"));
-  lines.push("");
-  lines.push(label("Host", "tui"));
-  lines.push(label("Size", `${width}x${getTerminalSize().height}`));
-  lines.push("");
-  return lines;
-}
-
-function buildContent(width) {
-  const lines = [];
-  lines.push(BOLD + " TUI Demo" + RESET);
-  lines.push("");
-  lines.push(" Welcome to " + CYAN + BOLD + "Timeless TUI" + RESET + "!");
-  lines.push(" A terminal UI library powered by the");
-  lines.push(" Timeless headless host system.");
-  lines.push("");
-  lines.push(hr(width));
-  lines.push("");
-  lines.push(heading("Features"));
-  lines.push("");
-  lines.push(" " + tag("Tree", CYAN) + "  Virtual node tree");
-  lines.push(" " + tag("ANSI", GREEN) + "  Terminal rendering");
-  lines.push(" " + tag("Host", YELLOW) + "  HeadlessHost impl");
-  lines.push(" " + tag("Node", MAGENTA) + "  Element / Text / Fragment");
-  lines.push("");
-  lines.push(hr(width));
-  lines.push("");
-  lines.push(heading("Rendering Modes"));
-  lines.push("");
-  lines.push(
-    " " +
-      GRAY +
-      "1." +
-      RESET +
-      " renderToString()  " +
-      DIM +
-      "→ string output" +
-      RESET,
-  );
-  lines.push(
-    " " +
-      GRAY +
-      "2." +
-      RESET +
-      " renderToScreen()  " +
-      DIM +
-      "→ direct write" +
-      RESET,
-  );
-  lines.push(
-    " " +
-      GRAY +
-      "3." +
-      RESET +
-      " Buffer API        " +
-      DIM +
-      "→ cell buffer" +
-      RESET,
-  );
-  lines.push("");
-  lines.push(hr(width));
-  lines.push("");
-  lines.push(heading("ANSI Escape Codes"));
-  lines.push("");
-  lines.push(
-    " " +
-      fgColor(196) +
-      "■ red" +
-      RESET +
-      " " +
-      fgColor(46) +
-      "■ green" +
-      RESET +
-      " " +
-      fgColor(21) +
-      "■ blue" +
-      RESET +
-      " " +
-      fgColor(226) +
-      "■ yellow" +
-      RESET,
-  );
-  lines.push(
-    " " +
-      fgColor(201) +
-      "■ magenta" +
-      RESET +
-      " " +
-      CYAN +
-      "■ cyan" +
-      RESET +
-      " " +
-      WHITE +
-      "■ white" +
-      RESET +
-      " " +
-      GRAY +
-      "■ gray" +
-      RESET,
-  );
-  lines.push("");
-  lines.push(hr(width));
-  lines.push("");
-  lines.push(heading("Node Tree (renderToString)"));
-  lines.push("");
-  lines.push(DIM + " fragment" + RESET);
-  lines.push(DIM + " ├─ element(box)" + RESET);
-  lines.push(DIM + ' │  ├─ text("hello")' + RESET);
-  lines.push(DIM + " │  └─ element(span)" + RESET);
-  lines.push(DIM + ' │     └─ text("world")' + RESET);
-  lines.push(DIM + " └─ element(box)" + RESET);
-  lines.push(DIM + '    └─ text("!")' + RESET);
-  lines.push("");
-
-  const frag = buildDemoTree();
-  lines.push(heading("renderToString Output"));
-  lines.push("");
-  lines.push("  " + renderToString(frag));
-  lines.push("");
-
-  lines.push(hr(width));
-  lines.push("");
-  lines.push(GRAY + " Press Ctrl+C to exit" + RESET);
-  return lines;
-}
-
-function buildDemoTree() {
-  const frag = createTuiFragment();
-
-  const box1 = createTuiElement("box");
-  box1.setAttribute("prefix", CYAN + "┌─ ");
-  box1.setAttribute("suffix", RESET + " ─┐");
-
-  const hello = createTuiText(BOLD + "Hello" + RESET);
-  const world = createTuiElement("span");
-  world.setAttribute("prefix", GREEN);
-  world.setAttribute("suffix", RESET);
-  const worldText = createTuiText("World");
-  world.appendChild(worldText);
-
-  box1.appendChild(hello);
-  box1.appendChild(world);
-  frag.appendChild(box1);
-
-  const box2 = createTuiElement("box");
-  box2.setAttribute("prefix", YELLOW + "╰─ ");
-  box2.setAttribute("suffix", RESET + " ─╯");
-  const excl = createTuiText("!");
-  box2.appendChild(excl);
-  frag.appendChild(box2);
-
-  return frag;
-}
-
-function renderApp() {
-  const { width } = getTerminalSize();
-  const sidebarWidth = 22;
-  const contentWidth = width - sidebarWidth - 3;
-  const minWidth = 40;
-
-  if (width < minWidth) {
-    const lines = buildContent(width);
-    process.stdout.write(lines.join("\n") + "\n");
-    return;
+app.onKey((key) => {
+  switch (key) {
+    case "left":
+      focC.value = clamp(focC.value - 1, 0, COLS - 1);
+      break;
+    case "right":
+      focC.value = clamp(focC.value + 1, 0, COLS - 1);
+      break;
+    case "up":
+      focR.value = clamp(focR.value - 1, 0, maxR());
+      break;
+    case "down":
+      focR.value = clamp(focR.value + 1, 0, maxR());
+      break;
   }
+});
 
-  const sidebarLines = buildSidebar(sidebarWidth);
-  const contentLines = buildContent(contentWidth);
-
-  const maxLines = Math.max(sidebarLines.length, contentLines.length);
-  const output = [];
-
-  for (let i = 0; i < maxLines; i++) {
-    const left = sidebarLines[i] ?? "";
-    const right = contentLines[i] ?? "";
-    output.push(
-      moveTo(i, 0) +
-        left +
-        moveTo(i, sidebarWidth) +
-        GRAY +
-        "│" +
-        RESET +
-        " " +
-        right,
-    );
-  }
-
-  hideCursor(process.stdout);
-  clearScreen(process.stdout);
-  process.stdout.write(output.join(""));
-  process.stdout.write(moveTo(maxLines, 0));
-}
-
-function main() {
-  renderApp();
-
-  process.on("SIGINT", () => {
-    showCursor(process.stdout);
-    clearScreen(process.stdout);
-    process.exit(0);
-  });
-
-  process.stdout.on("resize", () => {
-    renderApp();
-  });
-}
-
-main();
+// ─── Start ──────────────────────────────────────────────────────
+app.start();

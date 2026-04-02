@@ -1,4 +1,4 @@
-import { isRef, Ref, registryGet, registrySet } from "@timeless/reactive";
+import { isRef, Ref, registryGet, registrySet, computed as createComputed, ref as createRef } from "@timeless/reactive";
 
 import { getHost } from "@/host";
 import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
@@ -10,7 +10,7 @@ export function For<T>(
     each: T[] | Ref<T[]>;
     render: (
       item: T,
-      idx: number,
+      idx: Ref<number>,
     ) => TimelessElement | (() => TimelessElement) | null;
     key?: string;
   },
@@ -23,6 +23,21 @@ export function For<T>(
   let _values: T[] = [];
   let _elements: (TimelessElement | null)[] = [];
   let _$children: (TimelessElement["$elm"] | null)[] = [];
+  let _original_items: T[] = []; // Store original item references for indexOf lookup
+  let _index_computed: Ref<number>[] = []; // Computed indexes that depend on `each`
+
+  // Helper to create a computed index that depends on `each`
+  const createIndexComputed = (originalItem: T): Ref<number> => {
+    return createComputed(each, () => {
+      // Use refarr's indexOf if available (supports registry lookup)
+      if (isRef(each) && typeof (each as any).indexOf === "function") {
+        return (each as any).indexOf(originalItem);
+      }
+      // Fallback for plain arrays
+      const arr = isRef(each) ? each.value : each;
+      return arr ? arr.indexOf(originalItem) : -1;
+    });
+  };
 
   let anchor: any = null;
   let $elm: any = null;
@@ -30,7 +45,7 @@ export function For<T>(
   const _existing_map = new Map();
 
   const methods = {
-    _render_item(item: T, index: number) {
+    _render_item(item: T, idxComputed: Ref<number>) {
       const rr: {
         node: null | TimelessElement;
         elm: null | TimelessElement["$elm"];
@@ -38,7 +53,7 @@ export function For<T>(
         empty?: boolean;
         delete?: boolean;
       } = (() => {
-        let view$ = render(item, index);
+        let view$ = render(item, idxComputed);
         // 处理 h() 返回的延迟执行函数
         if (typeof view$ === "function") {
           view$ = view$();
@@ -52,8 +67,6 @@ export function For<T>(
       return rr;
     },
     _insert(index: number, items: T[]) {
-      // const new_children: (TimelessElement | null)[] = new Array(items.length);
-      // const new_elms: (HTMLElement | Text | null)[] = new Array(items.length);
       const $base = _$children[index] || anchor;
       const $parent = host.getParentNode(anchor);
 
@@ -62,9 +75,12 @@ export function For<T>(
       const $fragment = safeCreateDocumentFragment();
       for (let i = 0; i < items.length; i++) {
         const item_prepare_insert = items[i];
+        // Create computed index that depends on `each`
+        const idxComputed = createIndexComputed(item_prepare_insert);
         _values.splice(index + i, 0, item_prepare_insert);
-        // @todo index + i 改为是 Ref 类型
-        let res = render(item_prepare_insert, index + i);
+        _original_items.splice(index + i, 0, item_prepare_insert);
+        _index_computed.splice(index + i, 0, idxComputed);
+        let res = render(item_prepare_insert, idxComputed);
         // 处理 h() 返回的延迟执行函数
         if (typeof res === "function") {
           res = res();
@@ -83,16 +99,15 @@ export function For<T>(
           }
         })();
       }
+      // No need to manually update computed indexes - they auto-recompute
       host.insertBefore($parent, $fragment, $base);
-      // console.log("[headless]For - insert items", index, items, _$children);
     },
     _remove(index: number, count: number) {
       const $parent = host.getParentNode(anchor);
       if (!$parent) return;
 
       for (let i = 0; i < count; i += 1) {
-        const elm = _$children[index + i];
-        // console.log(i, index + i, elm, _$children);
+        const elm = _$children[index];
         if (elm && host.getParentNode(elm) === $parent) {
           try {
             host.removeChild($parent, elm);
@@ -100,20 +115,31 @@ export function For<T>(
             // ignore
           }
         }
-        const item = _values[index + i];
+        const item = _values[index];
         if (_existing_map.has(item)) {
           _existing_map.delete(item);
         }
-        _values.splice(index + i, 1);
-        _elements.splice(index + i, 1);
-        _$children.splice(index + i, 1);
+        _values.splice(index, 1);
+        _elements.splice(index, 1);
+        _$children.splice(index, 1);
+        _original_items.splice(index, 1);
+        _index_computed.splice(index, 1);
       }
+      // No need to manually update computed indexes - they auto-recompute
     },
     _update(index: number, item: any) {
       const $parent = host.getParentNode(anchor);
       if (!$parent) return;
 
-      const res = methods._render_item(item, index);
+      // Reuse existing computed index or create new one
+      let idxComputed = _index_computed[index];
+      if (!idxComputed) {
+        idxComputed = createIndexComputed(item);
+        _index_computed[index] = idxComputed;
+        _original_items[index] = item;
+      }
+
+      const res = methods._render_item(item, idxComputed);
       if (!res) {
         return;
       }
@@ -125,9 +151,6 @@ export function For<T>(
         host.replaceChild($parent, res.elm, old);
       } else if (res.elm) {
         host.insertBefore($parent, res.elm, anchor);
-        // if (res.onMounted) {
-        //   res.onMounted();
-        // }
       }
 
       const oldItem = _values[index];
@@ -150,6 +173,8 @@ export function For<T>(
       const prev_items = _values;
       const prev_elements = _elements;
       const prev_children = _$children;
+      const prev_original_items = _original_items;
+      const prev_index_computed = _index_computed;
 
       const $parent = host.getParentNode(anchor);
       if (!$parent) return;
@@ -161,6 +186,8 @@ export function For<T>(
       const new_children: (TimelessElement["$elm"] | null)[] = new Array(
         new_items.length,
       );
+      const new_original_items: T[] = new Array(new_items.length);
+      const new_index_computed: Ref<number>[] = new Array(new_items.length);
 
       // 2. Index old items for O(1) lookup
       const old_map = new Map<any, number[]>();
@@ -195,9 +222,13 @@ export function For<T>(
           const oldIndex = prev_indices.shift()!;
           const oldItem = prev_items[oldIndex];
 
-          // Always reuse existing DOM element when key matches
+          // Reuse existing DOM element and computed index
           new_elements[i] = prev_elements[oldIndex];
           new_children[i] = prev_children[oldIndex];
+          new_original_items[i] = prev_original_items[oldIndex];
+          new_index_computed[i] = prev_index_computed[oldIndex];
+
+          // No need to manually update index - computed auto-recomputes based on `each`
 
           // If item data changed, update the reactive proxy so computed values re-evaluate
           if (item !== oldItem && oldItem && typeof oldItem === "object") {
@@ -209,10 +240,13 @@ export function For<T>(
             }
           }
         } else {
-          // Added (New)
-          const res = methods._render_item(item, i);
+          // Added (New) - create new computed index and render
+          const idxComputed = createIndexComputed(item);
+          new_original_items[i] = item;
+          new_index_computed[i] = idxComputed;
+          const res = methods._render_item(item, idxComputed);
           new_elements[i] = res.node;
-          new_children[i] = res.trackElm || res.elm; // Use trackElm
+          new_children[i] = res.trackElm || res.elm;
           if (res.node && res.elm && isElement(res.node)) {
             added_nodes.push({ node: res.node, elm: res.elm });
           }
@@ -235,9 +269,7 @@ export function For<T>(
         "added:",
         added_nodes.length,
       );
-      // console.log("1. removed_nodes", removed_nodes);
-      // console.log("2. added_nodes", added_nodes);
-      // console.log("3. updated_nodes", updated_nodes);
+
       // 4. Patch Phase: Apply to DOM
 
       // 4.1 Remove nodes
@@ -281,9 +313,13 @@ export function For<T>(
       }
 
       // 5. Update State
-      _values = new_items;
+      // Use slice() to create a copy, preventing _values from referencing _local_value directly
+      // This ensures prev_items reflects the state before reverse/sort operations
+      _values = new_items.slice();
       _elements = new_elements;
       _$children = new_children;
+      _original_items = new_original_items;
+      _index_computed = new_index_computed;
     },
   };
 
@@ -322,7 +358,6 @@ export function For<T>(
     _$children,
     render() {
       const nodes = (isRef(each) ? each.value : each) || [];
-      // console.log("[For] render", nodes);
 
       // Create anchor if not already created
       if (!anchor) {
@@ -333,9 +368,12 @@ export function For<T>(
       const $fragment = safeCreateDocumentFragment();
       for (let i = 0; i < nodes.length; i += 1) {
         const item = nodes[i];
-        // console.log("before mounted", i, item);
         _values[i] = item;
-        let res = render(item, i);
+        // Create computed index that depends on `each`
+        _original_items[i] = item;
+        const idxComputed = createIndexComputed(item);
+        _index_computed[i] = idxComputed;
+        let res = render(item, idxComputed);
         // 处理 h() 返回的延迟执行函数
         if (typeof res === "function") {
           res = res();
@@ -357,18 +395,13 @@ export function For<T>(
           }
         })();
       }
-      host.appendChild($fragment, anchor); // Add anchor to fragment
+      host.appendChild($fragment, anchor);
       _mounted = true;
 
       if (onMounted) {
-        // onMounted($elm); // $elm is anchor.
-        // We can pass anchor, but user might expect the container.
-        // Since there is no container, we pass anchor.
         onMounted(anchor);
       }
-      // onMounted will be called by parent with the result of render(), which is the fragment.
-      // But props.onMounted expects an element?
-      return $fragment; // Return fragment with items + anchor
+      return $fragment;
     },
     hydrate(startDom: any, parentDom?: any) {
       const nodes = (isRef(each) ? each.value : each) || [];
@@ -384,8 +417,12 @@ export function For<T>(
       for (let i = 0; i < nodes.length; i += 1) {
         const item = nodes[i];
         _values[i] = item;
+        // Create computed index that depends on `each`
+        _original_items[i] = item;
+        const idxComputed = createIndexComputed(item);
+        _index_computed[i] = idxComputed;
 
-        let res = render(item, i);
+        let res = render(item, idxComputed);
         if (typeof res === "function") {
           res = res();
         }
@@ -410,13 +447,8 @@ export function For<T>(
         }
       }
 
-      // The anchor is after the last list item (or a text node marker)
-      // For SSR, we need to handle this specially - anchor might be a comment or text node
-      // In most cases, anchor should be placed after the list items
-      // For now, we'll create a new anchor if needed or use the currentDom
       const $parent = parentDom || (startDom ? host.getParentNode(startDom) : null);
       if ($parent) {
-        // Insert anchor after the last child element
         if (currentDom) {
           host.insertBefore($parent, anchor, currentDom);
         } else {
@@ -471,7 +503,8 @@ export function For<T>(
       _values = [];
       _elements = [];
       _$children = [];
-      // $elm.innerHTML = ""; // This was valid when $elm was a wrapper. Now $elm is anchor.
+      _original_items = [];
+      _index_computed = [];
     },
   };
 }

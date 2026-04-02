@@ -19,13 +19,14 @@ import {
   showCursor,
   hideCursor,
 } from "./renderer";
+import { setTuiHost } from "./host-accessor";
+import { createTuiSingleton, type TuiGlobal } from "./tui";
 
 export function createTuiHost(
   options: { out?: NodeJS.WritableStream } = {},
 ): HeadlessHost {
   const out = options.out ?? process.stdout;
   const body = createTuiElement("body");
-  let _root: TuiNode | null = null;
 
   return {
     kind: "tui",
@@ -180,17 +181,57 @@ export function createTuiHost(
 export function installTuiHost(options?: Parameters<typeof createTuiHost>[0]) {
   const host = createTuiHost(options);
   setHost(host);
+  setTuiHost(host);
   return host;
 }
 
-export function render(elm: TimelessElement, out?: NodeJS.WritableStream) {
-  if (!elm) {
+// ─── Global TUI singleton ───────────────────────────────────────
+
+let _tui: (TuiGlobal & { _setAppFn: Function; _start: Function }) | null = null;
+
+export function getTuiSingleton(): TuiGlobal {
+  if (!_tui) _tui = createTuiSingleton();
+  return _tui;
+}
+
+// ─── render ─────────────────────────────────────────────────────
+
+export function render(
+  appFn: (() => TuiNode | TuiNode[]) | TimelessElement,
+  out?: NodeJS.WritableStream,
+) {
+  if (typeof appFn === "function") {
+    const tui = getTuiSingleton() as any;
+
+    // Install TUI host so View/Txt from @timeless/primitive work
+    installTuiHost({ out: out ?? process.stdout });
+
+    // Wrap appFn to handle TuiNode[] return
+    tui._setAppFn(() => {
+      const result = appFn();
+      if (Array.isArray(result)) {
+        const root = createTuiFragment();
+        for (const child of result) root.appendChild(child);
+        return root;
+      }
+      return result;
+    });
+
+    return {
+      start() {
+        tui._start(out);
+      },
+    };
+  }
+
+  // Static TimelessElement render
+  if (!appFn) {
     console.error("[TUI Render] Element is null");
     return;
   }
-  if (isElement(elm)) {
+  if (isElement(appFn)) {
     const host = createTuiHost({ out });
-    const content = elm.render();
+    const content = appFn.render();
     if (!content) {
       console.error("[TUI Render] Element render returned null");
       return;

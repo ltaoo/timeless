@@ -16,12 +16,12 @@ type DropdownMenuProps = {
   side?: Side;
   align?: Align;
   items?: MenuItemCore[];
-  onHidden?: () => void;
   offsetX?: number;
   offsetY?: number;
   submenuOffsetX?: number;
   submenuOffsetY?: number;
   trigger?: "click" | "hover" | "manual";
+  onHidden?: () => void;
 };
 type DropdownMenuState = {
   items: MenuItemCore[];

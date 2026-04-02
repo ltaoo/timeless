@@ -87,11 +87,12 @@ import {
   // loading,
   // dismiss,
 } from "./modules/sonner";
+import { Affix } from "./modules/affix";
 
 import "./index.css";
 import "./styles/globals.css";
 
-export * as icons from '@timeless/icons';
+export * as icons from "@timeless/icons";
 
 // export const Result = kit.Result;
 export {
@@ -172,6 +173,7 @@ export {
   HistoryPanel,
   LLMProviderForm,
   Toaster,
+  Affix,
   // toast,
   // success,
   // error,

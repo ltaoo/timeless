@@ -111,6 +111,29 @@ export function renderTree(root: TuiNode): string[] {
   return collectRenderLines(root);
 }
 
+function ansiSlice(s: string, maxCols: number): string {
+  let cols = 0;
+  let i = 0;
+  let lastSafe = 0;
+
+  while (i < s.length && cols < maxCols) {
+    if (s.charCodeAt(i) === 0x1b && s[i + 1] === "[") {
+      // ANSI escape sequence — skip entirely, doesn't consume columns
+      let j = i + 2;
+      while (j < s.length && s.charCodeAt(j) < 0x40) j++;
+      i = j + 1;
+      lastSafe = i;
+    } else {
+      const cp = s.codePointAt(i)!;
+      i += cp > 0xffff ? 2 : 1;
+      // CJK / emoji = 2 cols, ASCII = 1, others heuristic = 1
+      cols += cp > 0x10000 ? 2 : cp > 0x7f ? 1 : 1;
+      lastSafe = i;
+    }
+  }
+  return s.slice(0, lastSafe) + RESET;
+}
+
 export function renderToScreen(root: TuiNode, out: NodeJS.WritableStream) {
   const size = getTerminalSize();
   const lines = renderTree(root);
@@ -122,8 +145,7 @@ export function renderToScreen(root: TuiNode, out: NodeJS.WritableStream) {
 
   for (let i = 0; i < Math.min(lines.length, size.height); i++) {
     output += moveTo(i, 0);
-    const line = lines[i].slice(0, size.width);
-    output += line;
+    output += ansiSlice(lines[i], size.width);
   }
 
   out.write(output);
