@@ -1,4 +1,4 @@
-import { View, For, ref, combine } from "@timeless/timeless";
+import { View, ref } from "@timeless/timeless";
 import { render, TUI, GridLayout, GridItem } from "@timeless/timeless-tui";
 
 // ─── Data ───────────────────────────────────────────────────────
@@ -58,7 +58,6 @@ const APPS = [
     View({ style: "color: white" }, ["Kids"]),
     View({ style: "color: gray" }, ["Family Friendly"]),
   ]),
-  ,
 ];
 
 const apps = [
@@ -88,37 +87,21 @@ const app = render(() => {
     if (key === "q") {
       TUI.exit();
     }
-    if (key === "left") {
-      focus.as((prev) => {
-        return Math.max(0, prev - 1);
-      });
-    }
-    if (key === "right") {
-      focus.as((prev) => {
-        return Math.min(apps.length - 1, prev + 1);
-      });
-    }
   });
-  return GridLayout({ x: 4 }, [
-    For({
-      each: apps,
-      render(app, idx) {
-        return GridItem(
-          {
-            width: 16,
-            style: combine({ focus, idx }, (t) => {
-              return t.idx === t.focus ? "color: red" : "";
-            }),
-          },
-          [
-            View({ style: "color: blue; font-weight: bold" }, [app.icon]),
-            View({ style: "color: white" }, [app.title]),
-            View({ style: "color: gray" }, [app.subtitle]),
-          ],
-        );
+  // Use pre-built GridItem array instead of For
+  const gridItems = apps.map((app, idx) =>
+    GridItem(
+      {
+        width: 16,
       },
-    }),
-  ]);
+      [
+        View({ style: "color: blue; font-weight: bold" }, [app.icon]),
+        View({ style: "color: white" }, [app.title]),
+        View({ style: "color: gray" }, [app.subtitle]),
+      ],
+    )
+  );
+  return GridLayout({ x: 4, focus }, gridItems);
 });
 
 app.start();

@@ -63,7 +63,6 @@ export const TUI: TuiGlobal = {
   },
 
   reload() {
-    dirty = true;
     if (running) scheduleRender();
   },
 
@@ -80,6 +79,7 @@ export const TUI: TuiGlobal = {
     process.off("SIGINT", handleSIGINT);
     showCursor(target);
     clearScreen(target);
+    process.exit(0);
   },
 
   get cols() {

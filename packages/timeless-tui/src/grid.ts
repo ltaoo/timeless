@@ -6,6 +6,7 @@ import { TUI } from "./tui";
 
 export interface Ref<T> {
   value: T;
+  as(valOrFn: T | ((prev: T) => T)): void;
   _subscribe(sub: { onChange: (v: T) => void }): void;
   _unsubscribe(sub: { onChange: (v: T) => void }): void;
 }
@@ -239,23 +240,22 @@ export function GridLayout(
 
     // Register arrow key handler
     TUI.onKeydown((key) => {
-      const cur = focusRef.value;
-      const r = Math.floor(cur / cols);
-      const c = cur % cols;
-      switch (key) {
-        case "left":
-          if (c > 0) focusRef.value = cur - 1;
-          break;
-        case "right":
-          if (c < cols - 1 && cur + 1 < total) focusRef.value = cur + 1;
-          break;
-        case "up":
-          if (r > 0) focusRef.value = cur - cols;
-          break;
-        case "down":
-          if (r < maxR && cur + cols < total) focusRef.value = cur + cols;
-          break;
-      }
+      focusRef.as((cur: number) => {
+        const r = Math.floor(cur / cols);
+        const c = cur % cols;
+        switch (key) {
+          case "left":
+            return c > 0 ? cur - 1 : cur;
+          case "right":
+            return c < cols - 1 && cur + 1 < total ? cur + 1 : cur;
+          case "up":
+            return r > 0 ? cur - cols : cur;
+          case "down":
+            return r < maxR && cur + cols < total ? cur + cols : cur;
+          default:
+            return cur;
+        }
+      });
     });
   }
 

@@ -2,6 +2,7 @@ import type { TuiNode, TuiElement } from "./nodes";
 
 const ESC = "\x1b[";
 const RESET = `${ESC}0m`;
+const BOLD = `${ESC}1m`;
 const CLEAR_SCREEN = `${ESC}2J`;
 const CURSOR_HOME = `${ESC}H`;
 const HIDE_CURSOR = `${ESC}?25l`;
@@ -79,6 +80,70 @@ function getAttr(el: TuiElement, name: string): string | null {
   return el.attrs.get(name);
 }
 
+// ─── CSS → ANSI color parsing ───────────────────────────────────
+
+function parseCssProps(cssText: string): Record<string, string> {
+  const props: Record<string, string> = {};
+  for (const part of cssText.split(";")) {
+    const [k, ...v] = part.split(":");
+    if (k && v.length) props[k.trim().toLowerCase()] = v.join(":").trim();
+  }
+  return props;
+}
+
+const FG_COLORS: Record<string, string> = {
+  red: "\x1b[38;5;196m",
+  green: "\x1b[38;5;46m",
+  blue: "\x1b[38;5;21m",
+  yellow: "\x1b[38;5;226m",
+  cyan: "\x1b[38;5;51m",
+  magenta: "\x1b[38;5;201m",
+  white: "\x1b[38;5;255m",
+  black: "\x1b[38;5;0m",
+  gray: "\x1b[38;5;245m",
+  grey: "\x1b[38;5;245m",
+  orange: "\x1b[38;5;208m",
+};
+
+const BG_COLORS: Record<string, string> = {
+  red: "\x1b[48;5;196m",
+  green: "\x1b[48;5;46m",
+  blue: "\x1b[48;5;21m",
+  yellow: "\x1b[48;5;226m",
+  cyan: "\x1b[48;5;51m",
+  magenta: "\x1b[48;5;201m",
+  white: "\x1b[48;5;255m",
+  black: "\x1b[48;5;0m",
+  gray: "\x1b[48;5;245m",
+  grey: "\x1b[48;5;245m",
+  orange: "\x1b[48;5;208m",
+};
+
+function hexToAnsi(hex: string, isBg: boolean): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `\x1b[${isBg ? 48 : 38};2;${r};${g};${b}m`;
+}
+
+function cssColorToAnsi(color: string, isBg: boolean): string {
+  if (!color) return "";
+  if (color.startsWith("#") && color.length === 7) {
+    return hexToAnsi(color, isBg);
+  }
+  const table = isBg ? BG_COLORS : FG_COLORS;
+  return table[color.toLowerCase()] ?? "";
+}
+
+function styleFromCss(cssText: string): string {
+  const p = parseCssProps(cssText);
+  let s = "";
+  if (p.color) s += cssColorToAnsi(p.color, false);
+  if (p["background-color"]) s += cssColorToAnsi(p["background-color"], true);
+  if (p["font-weight"] === "bold") s += BOLD;
+  return s;
+}
+
 function collectRenderLines(node: TuiNode): string[] {
   if (node.kind === "text") {
     const t = node.textContent;
@@ -88,17 +153,26 @@ function collectRenderLines(node: TuiNode): string[] {
     const el = node as TuiElement;
     const prefix = getAttr(el, "prefix") ?? "";
     const suffix = getAttr(el, "suffix") ?? "";
+
+    // Convert CSS style to ANSI escape sequences
+    let stylePrefix = "";
+    const cssText = (el.style as any)?.cssText;
+    if (cssText) {
+      stylePrefix = styleFromCss(cssText);
+    }
+
     const childLines: string[] = [];
     for (const child of node.childNodes) {
       childLines.push(...collectRenderLines(child));
     }
-    if (childLines.length === 0) return [prefix + suffix];
-    return childLines.map(
-      (line, i) =>
-        (i === 0 ? prefix : "") +
-        line +
-        (i === childLines.length - 1 ? suffix : ""),
-    );
+    if (childLines.length === 0) return [prefix + stylePrefix + suffix + (stylePrefix ? RESET : "")];
+
+    // Apply style prefix and RESET suffix to each line
+    return childLines.map((line, i) => {
+      const linePrefix = (i === 0 ? prefix : "") + stylePrefix;
+      const lineSuffix = (stylePrefix ? RESET : "") + (i === childLines.length - 1 ? suffix : "");
+      return linePrefix + line + lineSuffix;
+    });
   }
   const lines: string[] = [];
   for (const child of node.childNodes) {

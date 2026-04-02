@@ -32,6 +32,7 @@ export function createTuiInput(inStream?: any): TuiInput {
       active = false;
       raw.off("data", onData);
       if (typeof raw.setRawMode === "function") raw.setRawMode(false);
+      raw.pause();
     },
 
     onKey(handler: KeyHandler) {
