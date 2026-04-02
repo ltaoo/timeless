@@ -211,6 +211,13 @@ export function createDomHost(options: {
       el[key] = value;
     },
     addEventListener(target: any, type: string, handler: any, options?: any) {
+      // Non-bubbling events must be bound directly to the target element
+      const nonBubblingEvents = ['mouseenter', 'mouseleave', 'focus', 'blur', 'load', 'unload', 'scroll'];
+      if (nonBubblingEvents.includes(type)) {
+        target.addEventListener(type, handler, options);
+        return;
+      }
+
       const capture = normalizeCapture(options);
       const bucket = getHandlerBucket(target, type);
       const state = ensureDispatcher(type);
@@ -231,6 +238,13 @@ export function createDomHost(options: {
       }
     },
     removeEventListener(target: any, type: string, handler: any, options?: any) {
+      // Non-bubbling events are bound directly to the target element
+      const nonBubblingEvents = ['mouseenter', 'mouseleave', 'focus', 'blur', 'load', 'unload', 'scroll'];
+      if (nonBubblingEvents.includes(type)) {
+        target.removeEventListener(type, handler, options);
+        return;
+      }
+
       const capture = normalizeCapture(options);
       const perTarget = handlerStore.get(target);
       const bucket = perTarget?.get(type);

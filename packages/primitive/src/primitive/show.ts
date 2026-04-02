@@ -165,7 +165,10 @@ export function Show(
         //   "anchor.parentNode:",
         //   !!anchor.parentNode,
         // );
-
+        if (!anchor) {
+          console.log("[]Show condition not mounted, skip");
+          return;
+        }
         // 如果条件没有变化，直接返回
         if (condition === _prev_condition) {
           console.log("[]Show condition not changed, skip");

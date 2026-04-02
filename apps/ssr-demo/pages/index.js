@@ -13,6 +13,8 @@ export async function load({ query }) {
     showList: true,
     message: "Hello from Timeless SSR!",
     visible: true,
+    hoverBox1: false,
+    hoverBox2: false,
   };
 }
 
@@ -67,15 +69,49 @@ export default function Page({ data }) {
       ]),
     ]),
 
-    View(
-      {
-        as: "button",
-        onClick() {
-          data.visible.as((v) => !v);
-        },
-      },
-      ["Toggle Content"],
-    ),
+    // Mouse Events Section
+    View({ as: "section", style: sectionStyle }, [
+      View({ as: "h2", style: subtitleStyle }, ["Mouse Events Test"]),
+      View({ as: "p", style: infoStyle }, [
+        "Hover over the boxes to test mouseenter/mouseleave events:",
+      ]),
+      View({ as: "div", style: hoverBoxContainerStyle }, [
+        View(
+          {
+            as: "div",
+            style: hoverBoxStyle,
+            onMouseEnter: () => {
+              console.log("Box 1: mouseenter triggered");
+              data.hoverBox1.as(true);
+            },
+            onMouseLeave: () => {
+              console.log("Box 1: mouseleave triggered");
+              data.hoverBox1.as(false);
+            },
+          },
+          [
+            Show({ when: data.hoverBox1, fallback: ["Hover me"] }, ["Hovering!"]),
+          ],
+        ),
+        View(
+          {
+            as: "div",
+            style: hoverBoxStyle,
+            onMouseEnter: () => {
+              console.log("Box 2: mouseenter triggered");
+              data.hoverBox2.as(true);
+            },
+            onMouseLeave: () => {
+              console.log("Box 2: mouseleave triggered");
+              data.hoverBox2.as(false);
+            },
+          },
+          [
+            Show({ when: data.hoverBox2, fallback: ["Hover me"] }, ["Hovering!"]),
+          ],
+        ),
+      ]),
+    ]),
 
     // List Section
     View({ as: "section", style: sectionStyle }, [
@@ -215,4 +251,23 @@ const listItemStyle = `
 const buttonGroupStyle = `
   display: flex;
   gap: 8px;
+`;
+
+const hoverBoxContainerStyle = `
+  display: flex;
+  gap: 16px;
+`;
+
+const hoverBoxStyle = `
+  width: 120px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
 `;

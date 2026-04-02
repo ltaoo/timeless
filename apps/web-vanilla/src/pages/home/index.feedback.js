@@ -98,11 +98,11 @@ export default function FeedbackView() {
                 },
               }),
             },
-            [Txt("Open Dialog")],
+            ["Open Dialog"],
           ),
           Dialog({ store: dialog$ }, [
             View({ class: "text-sm text-zinc-500" }, [
-              Txt("This is a dialog content area. You can put anything here."),
+              "This is a dialog content area. You can put anything here.",
             ]),
           ]),
         ]),
@@ -122,7 +122,7 @@ export default function FeedbackView() {
             },
             [
               View({ class: "text-xs text-zinc-500 mb-3" }, [
-                Txt("Dialog will be centered relative to this box."),
+                "Dialog will be centered relative to this box.",
               ]),
               Button(
                 {
@@ -132,15 +132,13 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Open Viewport Dialog")],
+                ["Open Viewport Dialog"],
               ),
             ],
           ),
           Dialog({ store: viewportDialog$ }, [
             View({ class: "text-sm text-zinc-500" }, [
-              Txt(
-                "Centered relative to the dashed box via setViewport({ getRect }).",
-              ),
+              "Centered relative to the dashed box via setViewport({ getRect }).",
             ]),
           ]),
         ]),
@@ -167,7 +165,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Right")],
+                ["Right"],
               ),
               Button(
                 {
@@ -179,7 +177,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Left")],
+                ["Left"],
               ),
               Button(
                 {
@@ -191,21 +189,21 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Bottom")],
+                ["Bottom"],
               ),
               Sheet({ store: sheetR$, side: "right" }, [
                 View({ class: cn(["text-sm text-zinc-500"]) }, [
-                  Txt("This is a right sheet."),
+                  "This is a right sheet.",
                 ]),
               ]),
               Sheet({ store: sheetL$, side: "left" }, [
                 View({ class: cn(["text-sm text-zinc-500"]) }, [
-                  Txt("This is a left sheet."),
+                  "This is a left sheet.",
                 ]),
               ]),
               Sheet({ store: sheetB$, side: "bottom" }, [
                 View({ class: cn(["text-sm text-zinc-500"]) }, [
-                  Txt("This is a bottom sheet."),
+                  "This is a bottom sheet.",
                 ]),
               ]),
             ]);
@@ -227,7 +225,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Show")],
+                ["Show"],
               ),
               Button(
                 {
@@ -239,14 +237,14 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Hide")],
+                ["Hide"],
               ),
               Transition(
                 {
                   store: p$,
                   class: "p-3 rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm",
                 },
-                [Txt("I am visible!")],
+                ["I am visible!"],
               ),
             ]);
           })(),
@@ -266,7 +264,7 @@ export default function FeedbackView() {
                       },
                     }),
                   },
-                  [Txt("Show")],
+                  ["Show"],
                 ),
                 Button(
                   {
@@ -278,7 +276,7 @@ export default function FeedbackView() {
                       },
                     }),
                   },
-                  [Txt("Hide")],
+                  ["Hide"],
                 ),
               ]),
               Transition(
@@ -291,7 +289,7 @@ export default function FeedbackView() {
                   class:
                     "p-4 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 text-sm",
                 },
-                [Txt("✨ Fade in/out animation")],
+                ["✨ Fade in/out animation"],
               ),
             ]);
           })(),
@@ -311,7 +309,7 @@ export default function FeedbackView() {
                       },
                     }),
                   },
-                  [Txt("Show")],
+                  ["Show"],
                 ),
                 Button(
                   {
@@ -323,7 +321,7 @@ export default function FeedbackView() {
                       },
                     }),
                   },
-                  [Txt("Hide")],
+                  ["Hide"],
                 ),
               ]),
               Transition(
@@ -336,7 +334,7 @@ export default function FeedbackView() {
                   class:
                     "p-4 rounded-lg bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 text-sm",
                 },
-                [Txt("📤 Slide from bottom animation")],
+                ["📤 Slide from bottom animation"],
               ),
             ]);
           })(),
@@ -356,7 +354,7 @@ export default function FeedbackView() {
                       },
                     }),
                   },
-                  [Txt("Show")],
+                  ["Show"],
                 ),
                 Button(
                   {
@@ -368,7 +366,7 @@ export default function FeedbackView() {
                       },
                     }),
                   },
-                  [Txt("Hide")],
+                  ["Hide"],
                 ),
               ]),
               Transition(
@@ -381,7 +379,7 @@ export default function FeedbackView() {
                   class:
                     "p-4 rounded-lg bg-purple-100 dark:bg-purple-900 text-purple-900 dark:text-purple-100 text-sm",
                 },
-                [Txt("🎯 Zoom with fade animation")],
+                ["🎯 Zoom with fade animation"],
               ),
             ]);
           })(),
@@ -401,7 +399,7 @@ export default function FeedbackView() {
                       },
                     }),
                   },
-                  [Txt("Show")],
+                  ["Show"],
                 ),
                 Button(
                   {
@@ -413,7 +411,7 @@ export default function FeedbackView() {
                       },
                     }),
                   },
-                  [Txt("Hide")],
+                  ["Hide"],
                 ),
               ]),
               Transition(
@@ -426,7 +424,7 @@ export default function FeedbackView() {
                   class:
                     "p-4 rounded-lg bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 text-sm",
                 },
-                [Txt("➡️ Slide from right animation")],
+                ["➡️ Slide from right animation"],
               ),
             ]);
           })(),
@@ -446,7 +444,7 @@ export default function FeedbackView() {
                       },
                     }),
                   },
-                  [Txt("Show in Portal")],
+                  ["Show in Portal"],
                 ),
                 Button(
                   {
@@ -458,7 +456,7 @@ export default function FeedbackView() {
                       },
                     }),
                   },
-                  [Txt("Hide")],
+                  ["Hide"],
                 ),
               ]),
               Transition(
@@ -485,7 +483,7 @@ export default function FeedbackView() {
                           View(
                             { class: "flex items-center justify-between mb-4" },
                             [
-                              Txt("🎭 Presence inside Portal"),
+                              "🎭 Presence inside Portal",
                               Button(
                                 {
                                   store: new Timeless.ui.ButtonCore({
@@ -496,7 +494,7 @@ export default function FeedbackView() {
                                     },
                                   }),
                                 },
-                                [Txt("✕")],
+                                ["✕"],
                               ),
                             ],
                           ),
@@ -505,9 +503,7 @@ export default function FeedbackView() {
                               class: "text-sm text-zinc-600 dark:text-zinc-400",
                             },
                             [
-                              Txt(
-                                "Click the X button or click outside to close. It should be properly destroyed.",
-                              ),
+                              "Click the X button or click outside to close. It should be properly destroyed.",
                             ],
                           ),
                         ],
@@ -534,7 +530,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Success")],
+                ["Success"],
               ),
               Button(
                 {
@@ -551,7 +547,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Loading")],
+                ["Loading"],
               ),
               Toast({ store: toast$ }),
             ]);
@@ -649,7 +645,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Default")],
+                ["Default"],
               ),
               Button(
                 {
@@ -660,7 +656,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Success")],
+                ["Success"],
               ),
               Button(
                 {
@@ -672,7 +668,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Error")],
+                ["Error"],
               ),
               Button(
                 {
@@ -684,7 +680,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Info")],
+                ["Info"],
               ),
               Button(
                 {
@@ -696,7 +692,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Warning")],
+                ["Warning"],
               ),
               Button(
                 {
@@ -708,7 +704,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Loading")],
+                ["Loading"],
               ),
             ]);
           })(),
@@ -728,7 +724,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("With description")],
+                ["With description"],
               ),
               Button(
                 {
@@ -743,7 +739,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Error + description")],
+                ["Error + description"],
               ),
             ]);
           })(),
@@ -768,7 +764,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Promise toast")],
+                ["Promise toast"],
               ),
               Button(
                 {
@@ -790,7 +786,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Promise reject")],
+                ["Promise reject"],
               ),
             ]);
           })(),
@@ -810,7 +806,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Show persistent")],
+                ["Show persistent"],
               ),
               Button(
                 {
@@ -822,7 +818,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("Dismiss all")],
+                ["Dismiss all"],
               ),
             ]);
           })(),
@@ -840,7 +836,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("1 second")],
+                ["1 second"],
               ),
               Button(
                 {
@@ -852,7 +848,7 @@ export default function FeedbackView() {
                     },
                   }),
                 },
-                [Txt("5 seconds")],
+                ["5 seconds"],
               ),
             ]);
           })(),
@@ -861,18 +857,16 @@ export default function FeedbackView() {
       Section("Alert", [
         Item("Default", [
           Alert({}, [
-            AlertTitle({}, [Txt("Heads up!")]),
+            AlertTitle({}, ["Heads up!"]),
             AlertDescription({}, [
-              Txt("You can add components to your app using the CLI."),
+              "You can add components to your app using the CLI.",
             ]),
           ]),
         ]),
         Item("Destructive", [
           Alert({ variant: "destructive" }, [
-            AlertTitle({}, [Txt("Error")]),
-            AlertDescription({}, [
-              Txt("Something went wrong. Please try again."),
-            ]),
+            AlertTitle({}, ["Error"]),
+            AlertDescription({}, ["Something went wrong. Please try again."]),
           ]),
         ]),
       ]),

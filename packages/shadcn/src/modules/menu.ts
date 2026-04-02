@@ -35,6 +35,10 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
   let $element: HTMLElement | null = null;
   let layerId: string | null = null;
 
+  props.store.onStateChange((v) => {
+    state_.as(v);
+  });
+
   initGlobalPointerListener();
 
   return View(
@@ -121,6 +125,10 @@ function MenuGroup(props: ViewProps & { store: MenuGroupCore }) {
   const state_ = refobj(props.store.state);
   const has_label_ = computed(state_, (t) => !!t.label);
 
+  props.store.onStateChange((v) => {
+    state_.as(v);
+  });
+
   return MenuPrimitive.Group({ store: props.store }, [
     Show({ when: has_label_ }, [
       h(
@@ -158,6 +166,12 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
   props.store.onStateChange((v) => {
     state_.as(v);
   });
+
+  if (props.store.menu) {
+    props.store.menu.onStateChange((v) => {
+      menu_state_.as(v);
+    });
+  }
 
   return View({ class: "t-menu-item-wrap" }, [
     MenuPrimitive.Item(

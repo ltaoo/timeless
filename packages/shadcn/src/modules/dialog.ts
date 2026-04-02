@@ -5,10 +5,10 @@ import {
   ViewChildren,
   ViewProps,
   Show,
-  Txt,
   h,
 } from "@timeless/primitive";
 import { DialogCore } from "@timeless/ui";
+import { CircleXOutlined } from "@timeless/icons";
 
 import { Button } from "./button";
 
@@ -16,8 +16,7 @@ export function Dialog(
   props: ViewProps & { store: DialogCore },
   children?: ViewChildren,
 ) {
-  const { store, ...rest } = props;
-  const { class: cls, style: sty, ...contentRest } = rest as any;
+  const { store, class: cls, style: sty, ...rest } = props;
   const state_ = refobj(store.state);
   const presence_state_ = refobj(store.presence.state);
   const was_exiting_ = ref(false);
@@ -66,7 +65,7 @@ export function Dialog(
       View(
         {
           class: "fixed inset-0 z-50 flex items-center justify-center p-4",
-          onClick: (e: Event) => {
+          onClick(e: Event) {
             if (e.target === e.currentTarget && store.closeable) {
               store.hide();
             }
@@ -86,8 +85,8 @@ export function Dialog(
             [
               DialogPrimitive.Content(
                 {
+                  ...rest,
                   store,
-                  ...contentRest,
                   class: computed(presence_state_, (d) => {
                     const baseClass =
                       "relative w-full max-w-sm grid gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none transform-gpu";
@@ -109,7 +108,6 @@ export function Dialog(
                       .filter(Boolean)
                       .join(" ");
                   }),
-                  style: sn([sty]),
                 },
                 [
                   Show({ when: computed(state_, (d) => !!d.title) }, [
@@ -126,7 +124,7 @@ export function Dialog(
                             store,
                             class: "text-base leading-none font-medium",
                           },
-                          [Txt(computed(state_, (d) => d.title || ""))],
+                          [computed(state_, (d) => d.title || "")],
                         ),
                       ],
                     ),
@@ -138,7 +136,7 @@ export function Dialog(
                       class:
                         "absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     },
-                    [Txt("✕")],
+                    [CircleXOutlined({})],
                   ),
                   Show({ when: computed(state_, (d) => !!d.footer) }, [
                     h(
