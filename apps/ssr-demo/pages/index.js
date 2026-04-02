@@ -40,6 +40,7 @@ export function head({ data }) {
 export default function Page({ data }) {
   const count = ref(data.count);
   const visible = ref(data.visible);
+  const content = ref("content");
   const hoverBox1 = ref(data.hoverBox1);
   const hoverBox2 = ref(data.hoverBox2);
   const showList = ref(data.showList);
@@ -87,7 +88,16 @@ export default function Page({ data }) {
       },
       ["Toggle Content"],
     ),
-    Show({ when: visible }, [View({}, ["Content"])]),
+    View(
+      {
+        as: "button",
+        onClick() {
+          content.as((prev) => prev + "_new");
+        },
+      },
+      ["update Content"],
+    ),
+    Show({ when: visible }, [View({}, [content])]),
 
     // Mouse Events Section
     View({ as: "section", style: sectionStyle }, [
@@ -219,8 +229,9 @@ export default function Page({ data }) {
               style: buttonStyle,
               onClick: () => {
                 const idx = fruits.indexOf(selectedFruit.value);
+                console.log("up", idx);
                 if (idx > 0) {
-                  fruits.move(idx, idx - 1);
+                  fruits.up(idx);
                 }
               },
             },
@@ -233,7 +244,8 @@ export default function Page({ data }) {
               style: buttonStyle,
               onClick: () => {
                 const idx = fruits.indexOf(selectedFruit.value);
-                if (idx < fruits.length - 1) fruits.move(idx, idx + 2);
+                console.log("down", idx);
+                if (idx < fruits.length - 1) fruits.down(idx);
               },
             },
             ["↓ Down"],

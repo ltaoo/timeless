@@ -22,7 +22,7 @@ let target: NodeJS.WritableStream = process.stdout;
 let running = false;
 let rafId: ReturnType<typeof setTimeout> | null = null;
 let dirty = false;
-let keydownHandler: ((key: KeyName) => void) | null = null;
+const keydownHandlers: ((key: KeyName) => void)[] = [];
 
 function doRender() {
   if (!dirty || !appFn) return;
@@ -44,7 +44,7 @@ function scheduleRender() {
 
 function handleRawKey(raw: string) {
   const key = parseKey(raw);
-  if (keydownHandler) keydownHandler(key);
+  for (const h of keydownHandlers) h(key);
 }
 
 function handleResize() {
@@ -59,7 +59,7 @@ function handleSIGINT() {
 
 export const TUI: TuiGlobal = {
   onKeydown(handler: (key: KeyName) => void) {
-    keydownHandler = handler;
+    keydownHandlers.push(handler);
   },
 
   reload() {
@@ -92,7 +92,10 @@ export const TUI: TuiGlobal = {
 };
 
 export function _setAppFn(fn: () => TuiNode) {
-  appFn = fn;
+  appFn = () => {
+    keydownHandlers.length = 0;
+    return fn();
+  };
 }
 
 export function _startTui(out?: NodeJS.WritableStream) {

@@ -102,6 +102,8 @@ export interface RefArray<T> extends Ref<T[]> {
   [Symbol.iterator](): Iterator<T>;
 
   move(fromIndex: number, toIndex: number): RefArray<T>;
+  up(index: number): RefArray<T>;
+  down(index: number): RefArray<T>;
   swap(indexA: number, indexB: number): RefArray<T>;
   moveToFirst(index: number): RefArray<T>;
   moveToLast(index: number): RefArray<T>;
@@ -450,6 +452,14 @@ export function refArray<T>(
       Array.prototype.splice.call(_vanilla_value, toIndex, 0, item);
       notify({ type: "refresh" });
       return r;
+    },
+    up(index: number) {
+      if (index <= 0 || index >= _vanilla_value.length) return r;
+      return r.move(index, index - 1);
+    },
+    down(index: number) {
+      if (index < 0 || index >= _vanilla_value.length - 1) return r;
+      return r.move(index, index + 1);
     },
     swap(indexA: number, indexB: number) {
       if (indexA === indexB) return r;

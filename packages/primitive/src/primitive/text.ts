@@ -17,8 +17,12 @@ export function Txt(value: Ref<string> | string) {
           if (v === _local_value) {
             return;
           }
+          // Always update local value to stay in sync with ref
           _local_value = v;
-          host.setTextContent($elm, _local_value);
+          // Only update DOM if element exists (component is mounted)
+          if ($elm) {
+            host.setTextContent($elm, _local_value);
+          }
         },
       });
     }

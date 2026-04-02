@@ -2,6 +2,22 @@ import { createTuiText, type TuiNode } from "./nodes";
 import { getTerminalSize, RESET } from "./renderer";
 import { WHITE, DGRAY, BOLD } from "./style";
 import { getTuiHost } from "./host-accessor";
+import { TUI } from "./tui";
+
+export interface Ref<T> {
+  value: T;
+  _subscribe(sub: { onChange: (v: T) => void }): void;
+  _unsubscribe(sub: { onChange: (v: T) => void }): void;
+}
+
+function isRef(v: any): v is Ref<any> {
+  return (
+    !!v &&
+    typeof v === "object" &&
+    "value" in v &&
+    typeof v._subscribe === "function"
+  );
+}
 
 // ─── GridItem ───────────────────────────────────────────────────
 
@@ -31,8 +47,8 @@ export interface GridLayoutProps {
   y?: number;
   /** Gap between tiles in columns, default 1 */
   gap?: number;
-  /** Index of the focused item, -1 for none */
-  focus?: number;
+  /** Focus index — number or Ref<number>. When Ref, auto arrow-key navigation is enabled. */
+  focus?: number | Ref<number>;
   /** ANSI color for focused item border, default WHITE */
   focusColor?: string;
   /** ANSI color for unfocused item border, default DGRAY */
@@ -200,10 +216,48 @@ export function GridLayout(
 ): TuiNode[] {
   const cols = props.x ?? 4;
   const gap = props.gap ?? 1;
-  const focusIdx = props.focus ?? -1;
   const focusColor = props.focusColor ?? WHITE;
   const borderColor = props.borderColor ?? DGRAY;
   const tw = items[0]?.props.width ?? 16;
+
+  // Resolve focus value
+  let focusIdx: number;
+  if (isRef(props.focus)) {
+    focusIdx = (props.focus as Ref<number>).value;
+  } else {
+    focusIdx = (props.focus as number) ?? -1;
+  }
+
+  // Auto navigation: if focus is a Ref, subscribe + register arrow keys
+  if (isRef(props.focus)) {
+    const focusRef = props.focus as Ref<number>;
+    const total = items.length;
+    const maxR = Math.max(0, Math.ceil(total / cols) - 1);
+
+    // Subscribe to focus changes → reload terminal
+    focusRef._subscribe({ onChange: () => TUI.reload() });
+
+    // Register arrow key handler
+    TUI.onKeydown((key) => {
+      const cur = focusRef.value;
+      const r = Math.floor(cur / cols);
+      const c = cur % cols;
+      switch (key) {
+        case "left":
+          if (c > 0) focusRef.value = cur - 1;
+          break;
+        case "right":
+          if (c < cols - 1 && cur + 1 < total) focusRef.value = cur + 1;
+          break;
+        case "up":
+          if (r > 0) focusRef.value = cur - cols;
+          break;
+        case "down":
+          if (r < maxR && cur + cols < total) focusRef.value = cur + cols;
+          break;
+      }
+    });
+  }
 
   const { width } = getTerminalSize();
   const rows = Math.ceil(items.length / cols);

@@ -20,7 +20,7 @@ import {
   hideCursor,
 } from "./renderer";
 import { setTuiHost } from "./host-accessor";
-import { createTuiSingleton, type TuiGlobal } from "./tui";
+import { _setAppFn, _startTui } from "./tui";
 
 export function createTuiHost(
   options: { out?: NodeJS.WritableStream } = {},
@@ -185,15 +185,6 @@ export function installTuiHost(options?: Parameters<typeof createTuiHost>[0]) {
   return host;
 }
 
-// ─── Global TUI singleton ───────────────────────────────────────
-
-let _tui: (TuiGlobal & { _setAppFn: Function; _start: Function }) | null = null;
-
-export function getTuiSingleton(): TuiGlobal {
-  if (!_tui) _tui = createTuiSingleton();
-  return _tui;
-}
-
 // ─── render ─────────────────────────────────────────────────────
 
 export function render(
@@ -201,13 +192,11 @@ export function render(
   out?: NodeJS.WritableStream,
 ) {
   if (typeof appFn === "function") {
-    const tui = getTuiSingleton() as any;
-
     // Install TUI host so View/Txt from @timeless/primitive work
     installTuiHost({ out: out ?? process.stdout });
 
     // Wrap appFn to handle TuiNode[] return
-    tui._setAppFn(() => {
+    _setAppFn(() => {
       const result = appFn();
       if (Array.isArray(result)) {
         const root = createTuiFragment();
@@ -219,7 +208,7 @@ export function render(
 
     return {
       start() {
-        tui._start(out);
+        _startTui(out);
       },
     };
   }

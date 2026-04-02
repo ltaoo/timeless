@@ -520,6 +520,46 @@ describe("RefArray", () => {
     });
   });
 
+  describe("up", () => {
+    it("should move item one position forward", () => {
+      const arr = refArray([1, 2, 3, 4]);
+      arr.up(2);
+      expect(arr.value).toEqual([1, 3, 2, 4]);
+    });
+
+    it("should return self without change if index is 0", () => {
+      const arr = refArray([1, 2, 3]);
+      expect(arr.up(0)).toBe(arr);
+      expect(arr.value).toEqual([1, 2, 3]);
+    });
+
+    it("should return self if index is out of bounds", () => {
+      const arr = refArray([1, 2, 3]);
+      expect(arr.up(-1)).toBe(arr);
+      expect(arr.up(5)).toBe(arr);
+    });
+  });
+
+  describe("down", () => {
+    it("should move item one position backward", () => {
+      const arr = refArray([1, 2, 3, 4]);
+      arr.down(1);
+      expect(arr.value).toEqual([1, 3, 2, 4]);
+    });
+
+    it("should return self without change if index is last", () => {
+      const arr = refArray([1, 2, 3]);
+      expect(arr.down(2)).toBe(arr);
+      expect(arr.value).toEqual([1, 2, 3]);
+    });
+
+    it("should return self if index is out of bounds", () => {
+      const arr = refArray([1, 2, 3]);
+      expect(arr.down(-1)).toBe(arr);
+      expect(arr.down(5)).toBe(arr);
+    });
+  });
+
   describe("swap", () => {
     it("should swap two items", () => {
       const arr = refArray([1, 2, 3]);

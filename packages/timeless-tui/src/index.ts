@@ -78,9 +78,10 @@ export {
   createTuiHost,
   installTuiHost,
   render,
-  runTuiApp,
   renderToStringTree,
 } from "./host";
+
+export { TUI, type TuiGlobal } from "./tui";
 
 export {
   createTuiApp,
@@ -92,11 +93,8 @@ export {
 } from "./app";
 
 export {
-  View,
   GridItem,
   GridLayout,
-  type ViewProps,
-  type ViewNode,
   type GridItemProps,
   type GridItemNode,
   type GridLayoutProps,

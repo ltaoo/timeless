@@ -258,6 +258,8 @@ declare module "packages/reactive/src/reactive-array" {
         flatMap(callback: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown): any[];
         [Symbol.iterator](): Iterator<T>;
         move(fromIndex: number, toIndex: number): RefArray<T>;
+        up(index: number): RefArray<T>;
+        down(index: number): RefArray<T>;
         swap(indexA: number, indexB: number): RefArray<T>;
         moveToFirst(index: number): RefArray<T>;
         moveToLast(index: number): RefArray<T>;
@@ -546,14 +548,14 @@ declare module "packages/primitive/src/primitive/for" {
     import { ViewProps, TimelessElement } from "packages/primitive/src/primitive/view";
     export function For<T>(props: ViewProps & {
         each: T[] | Ref<T[]>;
-        render: (item: T, idx: number) => TimelessElement | (() => TimelessElement) | null;
+        render: (item: T, idx: Ref<number>) => TimelessElement | (() => TimelessElement) | null;
         key?: string;
     }): {
         t: string;
         $elm: any;
         _props: {
             each: T[] | Ref<T[]>;
-            render: (item: T, idx: number) => TimelessElement | (() => TimelessElement) | null;
+            render: (item: T, idx: Ref<number>) => TimelessElement | (() => TimelessElement) | null;
             key: string;
         };
         _values: T[];
