@@ -1,7 +1,8 @@
 import { cn, ref, refobj, isRef } from "@timeless/reactive";
 import { InputCore } from "@timeless/ui";
 
-import { ViewProps } from "@/primitive/view";
+import { ViewProps, viewStyleToCssText } from "@/primitive/view";
+import { isStyleRef } from "@timeless/reactive";
 import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";
 
@@ -94,8 +95,28 @@ export function NativeTextarea(
       host.setClassName($elm, class$.toString());
 
       // Apply style
-      if (st && typeof st === "string") {
-        host.setStyleText($elm, st);
+      if (st) {
+        if (isStyleRef(st as any)) {
+          const s = st as any;
+          s._subscribe({ onChange(v: any) { host.setStyleText($elm, String(v ?? "")); } });
+          host.setStyleText($elm, s.toString());
+        } else if (isRef(st as any)) {
+          const s = st as any;
+          const apply = () => host.setStyleText($elm, viewStyleToCssText(s.value || {}));
+          s._subscribe({ onChange() { apply(); } });
+          apply();
+        } else {
+          const applyStyle = () => {
+            host.setStyleText($elm, viewStyleToCssText(st as any));
+          };
+          Object.keys(st as any).forEach((k) => {
+            const vv = (st as any)[k];
+            if (isRef(vv)) {
+              (vv as any)._subscribe({ onChange() { applyStyle(); } });
+            }
+          });
+          applyStyle();
+        }
       }
 
       // Subscribe to reactive state changes
@@ -143,7 +164,7 @@ export function NativeTextarea(
       return $elm;
     },
     onMounted() {
-      if (props.onMounted) props.onMounted(this.$elm);
+      if (props.onMounted) props.onMounted({ target: this.$elm });
       store.setMounted();
       if (store.autoFocus) {
         host.focus?.(this.$elm);

@@ -50,7 +50,8 @@ export function Affix(
       .join("; ");
   });
 
-  const handleMounted = ($elm: HTMLElement) => {
+  const handleMounted = (event: any) => {
+    const $elm = event.target as HTMLElement;
     const rect = $elm.getBoundingClientRect();
     store.handleMounted({
       top: rect.top + window.scrollY,
@@ -69,7 +70,7 @@ export function Affix(
     scrollTarget.addEventListener("scroll", handleScroll);
 
     if (props.onMounted) {
-      props.onMounted($elm);
+      props.onMounted(event);
     }
   };
 

@@ -34,7 +34,8 @@ export function Trigger(
   const host = getHost();
   return View(
     {
-      onMounted($e: HTMLDivElement) {
+      onMounted(event) {
+        const $e = (event as any).target as HTMLDivElement;
         const nodes = host.getChildNodes($e);
         const $ref = nodes.find((n: any) => n?.nodeType === 1) || $e;
         props.store.popper.setReference(

@@ -24,11 +24,12 @@ export function Image(
   return View(
     {
       ...rest,
-      onMounted($elm) {
+      onMounted(event) {
+        const $elm = (event as any).target;
         const $img = $elm as HTMLDivElement;
         const provide = global_provider?.provide_ui_image;
         if (typeof provide === "function") provide(store, $img);
-        if (props.onMounted) props.onMounted($elm);
+        if (props.onMounted) props.onMounted(event);
       },
     },
     children,

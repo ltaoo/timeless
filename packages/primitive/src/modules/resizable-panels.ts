@@ -1,4 +1,4 @@
-import { refobj, computed, ref, sn } from "@timeless/reactive";
+import { refobj, computed, ref } from "@timeless/reactive";
 import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "@/primitive/view";
@@ -18,10 +18,17 @@ export function Group(
   return View(
     {
       ...rest,
-      style: sn(["display: flex; width: 100%; height: 100%;", props.style]),
-      onMounted($el: HTMLDivElement) {
+      style: {
+        ...(props.style || {}),
+        display: "flex",
+        width: "100%",
+        height: "100%",
+        "flex-direction": direction === "horizontal" ? "row" : "column",
+      },
+      onMounted(event) {
+        const $el = (event as any).target as HTMLDivElement;
         store.mount($el);
-        rest.onMounted?.($el);
+        rest.onMounted?.(event);
       },
       onUnmounted() {
         store.unmount();
@@ -52,28 +59,19 @@ export function Panel(
   return View(
     {
       ...rest,
-      style: sn([
-        computed(size_, (size) => {
-          const flexBasis = size ? `${size}%` : "auto";
-          const flexGrow = size ? 0 : 1;
-          const flexShrink = 1;
-          return [
-            `flex-basis: ${flexBasis}`,
-            `flex-grow: ${flexGrow}`,
-            `flex-shrink: ${flexShrink}`,
-            // "overflow: hidden",
-          ]
-            .filter(Boolean)
-            .join("; ");
-        }),
-        props.style,
-      ]),
-      onMounted($el: HTMLDivElement) {
+      style: {
+        ...(props.style || {}),
+        "flex-basis": computed(size_, (size) => (size ? `${size}%` : "auto")),
+        "flex-grow": computed(size_, (size) => (size ? 0 : 1)),
+        "flex-shrink": 1,
+      },
+      onMounted(event) {
+        const $el = (event as any).target as HTMLDivElement;
         store.mount($el);
         if (group) {
           group.registerPanel(store);
         }
-        rest.onMounted?.($el);
+        rest.onMounted?.(event);
       },
       onUnmounted() {
         store.unmount();
@@ -101,13 +99,14 @@ export function Handle(
   return View(
     {
       ...rest,
-      style: computed(state_, (state) => {
-        const cursor =
-          state.direction === "horizontal" ? "col-resize" : "row-resize";
-        return [`cursor: ${cursor}`, "flex-shrink: 0", "user-select: none"]
-          .filter(Boolean)
-          .join("; ");
-      }),
+      style: {
+        ...(rest.style || {}),
+        cursor: computed(state_, (state) =>
+          state.direction === "horizontal" ? "col-resize" : "row-resize",
+        ),
+        "flex-shrink": 0,
+        "user-select": "none",
+      },
       onMouseEnter(e: MouseEvent) {
         rest.onMouseEnter?.(e);
       },
@@ -129,7 +128,8 @@ export function Handle(
 
         rest.onPointerDown?.(e);
       },
-      onMounted($el: HTMLDivElement) {
+      onMounted(event) {
+        const $el = (event as any).target as HTMLDivElement;
         // console.log("[ResizableHandle] mounted", el);
         const state = store.state;
         const cursorClass =
@@ -163,7 +163,7 @@ export function Handle(
         };
         ($el as any)._resizeCleanup = cleanup;
 
-        rest.onMounted?.($el);
+        rest.onMounted?.(event);
       },
       beforeUnmounted() {
         rest.beforeUnmounted?.();

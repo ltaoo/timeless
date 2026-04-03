@@ -64,7 +64,8 @@ export function Trigger(
 
   return View(
     {
-      onMounted($elm: HTMLDivElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLDivElement;
         // Don't set reference here - it will be set dynamically on contextmenu event
         // Handle context menu (right-click)
         const handleContextMenu = (e: any) => {

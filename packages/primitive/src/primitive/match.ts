@@ -117,7 +117,7 @@ export function Match(
 
     for (const child of newInstances) {
       if (isElement(child) && child.onMounted) {
-        child.onMounted(child.$elm);
+        child.onMounted({ target: child.$elm });
       }
     }
 

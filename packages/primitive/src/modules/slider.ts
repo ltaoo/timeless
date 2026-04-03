@@ -73,11 +73,12 @@ export function Root(
     {
       ...rest,
       // "data-percentage": pct,
-      onMounted(elm: any) {
+      onMounted(event) {
+        const elm = (event as any).target as any;
         containerRef.current = elm;
         host.addEventListener(elm, "pointerdown", onPointerDown);
         if (rest.onMounted) {
-          rest.onMounted(elm);
+          rest.onMounted(event);
         }
         return () => {
           host.removeEventListener(elm, "pointerdown", onPointerDown);
@@ -104,10 +105,7 @@ export function Range(
   return View(
     {
       ...rest,
-      style: computed(percentage, (d) => {
-        const baseStyle = rest.style || "";
-        return `${baseStyle}width:${d}%`;
-      }),
+      style: { ...(rest.style || {}), width: computed(percentage, (d) => `${d}%`) },
     },
     children,
   );
@@ -121,10 +119,12 @@ export function Thumb(
   return View(
     {
       ...rest,
-      style: computed(percentage, (d) => {
-        const baseStyle = rest.style || "";
-        return `${baseStyle}left:${d}%;top:50%;transform:translate(-50%,-50%);`;
-      }),
+      style: {
+        ...(rest.style || {}),
+        left: computed(percentage, (d) => `${d}%`),
+        top: "50%",
+        transform: "translate(-50%,-50%)",
+      },
     },
     children,
   );

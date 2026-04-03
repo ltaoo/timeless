@@ -1,7 +1,7 @@
-import { cn, ref } from "@timeless/reactive";
+import { cn, ref, isRef, isStyleRef } from "@timeless/reactive";
 import { FileInputCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "@/primitive/view";
+import { View, ViewProps, ViewChildren, viewStyleToCssText } from "@/primitive/view";
 import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";
 
@@ -112,8 +112,28 @@ export function Input(
       });
       host.setClassName($elm, class$.toString());
 
-      if (typeof st === "string") {
-        host.setStyleText($elm, st);
+      if (st) {
+        if (isStyleRef(st as any)) {
+          const s = st as any;
+          s._subscribe({ onChange(v: any) { host.setStyleText($elm, String(v ?? "")); } });
+          host.setStyleText($elm, s.toString());
+        } else if (isRef(st as any)) {
+          const s = st as any;
+          const apply = () => host.setStyleText($elm, viewStyleToCssText(s.value || {}));
+          s._subscribe({ onChange() { apply(); } });
+          apply();
+        } else {
+          const applyStyle = () => {
+            host.setStyleText($elm, viewStyleToCssText(st as any));
+          };
+          Object.keys(st as any).forEach((k) => {
+            const vv = (st as any)[k];
+            if (isRef(vv)) {
+              (vv as any)._subscribe({ onChange() { applyStyle(); } });
+            }
+          });
+          applyStyle();
+        }
       }
 
       // Subscribe to reactive state changes
@@ -176,7 +196,7 @@ export function Input(
       return $elm;
     },
     onMounted() {
-      if (props.onMounted) props.onMounted(this.$elm);
+      if (props.onMounted) props.onMounted({ target: this.$elm });
       store.setMounted();
       if (store.autoFocus) {
         host.focus?.(this.$elm);
@@ -207,7 +227,8 @@ export function Clear(
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted(event) {
+        const $e = (event as any).target;
         const handleClick = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
@@ -217,7 +238,7 @@ export function Clear(
           }, 0);
         };
         host.addEventListener($e, "click", handleClick);
-        if (rest.onMounted) rest.onMounted($e);
+        if (rest.onMounted) rest.onMounted(event);
         return () => {
           host.removeEventListener($e, "click", handleClick);
         };
@@ -244,13 +265,14 @@ export function Loading(
   return View(
     {
       ...rest,
-      onMounted($elm: any) {
+      onMounted(event) {
+        const $elm = (event as any).target as any;
         const updateDisplay = () => {
           host.patchStyle?.($elm, { display: loading$.value ? "" : "none" });
         };
         loading$._subscribe({ onChange: updateDisplay });
         updateDisplay();
-        if (rest.onMounted) rest.onMounted($elm);
+        if (rest.onMounted) rest.onMounted(event);
       },
     },
     children,
@@ -274,7 +296,8 @@ export function Disabled(
   return View(
     {
       ...rest,
-      onMounted($elm: any) {
+      onMounted(event) {
+        const $elm = (event as any).target as any;
         const updateState = () => {
           if (disabled$.value) {
             host.setAttribute($elm, "data-disabled", "true");
@@ -284,7 +307,7 @@ export function Disabled(
         };
         disabled$._subscribe({ onChange: updateState });
         updateState();
-        if (rest.onMounted) rest.onMounted($elm);
+        if (rest.onMounted) rest.onMounted(event);
       },
     },
     children,

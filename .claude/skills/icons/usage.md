@@ -22,7 +22,7 @@ export function createIcon(svg: string) {
     style?: string;
     id?: string;
     onClick?: (e: MouseEvent) => void;
-    onMounted?: (el: HTMLSpanElement) => void;
+    onMounted?: (event: { target: HTMLSpanElement }) => void;
     beforeUnmounted?: () => void;
     onUnmounted?: () => void;
   }) => ViewLike;
@@ -39,7 +39,7 @@ export function createIcon(svg: string) {
 | `style` | `string` | 追加的内联样式 |
 | `id` | `string` | 设置元素 id |
 | `onClick` | `(e) => void` | 点击事件 |
-| `onMounted` | `(el) => void` | 挂载后回调，参数为外层 span |
+| `onMounted` | `(event) => void` | 挂载后回调，`event.target` 为外层 span |
 | `beforeUnmounted` | `() => void` | 卸载前回调 |
 | `onUnmounted` | `() => void` | 卸载后回调 |
 

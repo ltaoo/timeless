@@ -52,8 +52,8 @@ export function Popconfirm(
           },
           [
             View({
-              onMounted($el: HTMLDivElement) {
-                props.store.popper.setArrowElement($el);
+              onMounted(event) {
+                props.store.popper.setArrowElement((event as any).target);
               },
               class: computed(popper_state_, (t) => {
                 const side = t.placedSide;

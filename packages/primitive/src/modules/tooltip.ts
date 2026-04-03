@@ -68,11 +68,12 @@ export function Trigger(
   return View(
     {
       ...rest,
-      onMounted($e: HTMLDivElement) {
+      onMounted(event) {
+        const $e = (event as any).target as HTMLDivElement;
         const nodes = host.getChildNodes($e);
         $ref = nodes.find((n: any) => n?.nodeType === 1) || $e;
 
-        const cleanup = userOnMounted ? userOnMounted($e) : undefined;
+        const cleanup = userOnMounted ? userOnMounted(event) : undefined;
         return () => {
           if (typeof cleanup === "function") cleanup();
         };
@@ -144,13 +145,10 @@ export function Portal(
             store.hide();
           },
           class: className,
-          style: computed(state, (t) => {
-            const display = t.visible ? "" : "display:none";
-            if (typeof styleProps === "string" && styleProps) {
-              return `${display};${styleProps}`;
-            }
-            return display;
-          }),
+          style: {
+            ...(styleProps || {}),
+            display: computed(state, (t) => (t.visible ? undefined : "none")),
+          },
         },
         contentRef.value?.length ? (contentRef.value as any) : (children ?? []),
       ),

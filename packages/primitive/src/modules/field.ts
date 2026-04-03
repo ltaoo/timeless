@@ -112,8 +112,9 @@ export namespace ArrayField {
       ...rest,
       each: computed(state_, (s) => s.fields),
       key: typeof key === "string" ? key : undefined,
-      render(item: any, index: number) {
-        const children = renderChildren(item, index);
+      render(item: any, index: any) {
+        const idx = typeof index === "number" ? index : (index?.value ?? 0);
+        const children = renderChildren(item, idx);
         if (!children) return null;
         return Fragment({}, children);
       },

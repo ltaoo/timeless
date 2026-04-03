@@ -39,8 +39,17 @@ export function Trigger(
         ...(rest.attributes || {}),
         id: props.id || rest.attributes?.id,
       },
-      style:
-        "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
+      style: {
+        position: "absolute",
+        width: "1px",
+        height: "1px",
+        padding: 0,
+        margin: "-1px",
+        overflow: "hidden",
+        clip: "rect(0, 0, 0, 0)",
+        "white-space": "nowrap",
+        "border-width": 0,
+      },
       onFocus() {
         if (store.$presence.state.visible) {
           return;
@@ -55,7 +64,8 @@ export function Trigger(
   return View(
     {
       ...rest,
-      onMounted($elm: HTMLDivElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLDivElement;
         store.$popper.setReference(
           {
             $el: $elm,
@@ -82,7 +92,7 @@ export function Trigger(
         host.addEventListener($elm, "pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
-          rest.onMounted($elm);
+          rest.onMounted(event);
         }
         return () => {
           host.removeEventListener($elm, "pointerdown", handlePointerDown);

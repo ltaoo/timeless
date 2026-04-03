@@ -68,7 +68,7 @@ export function Waterfall<T extends Record<string, unknown>>(
                       cellDiv.appendChild(rendered);
                     }
                     if (typeof user_content.onMounted === "function") {
-                      user_content.onMounted(user_content.$elm);
+                      user_content.onMounted({ target: user_content.$elm });
                     }
                   }
                 });

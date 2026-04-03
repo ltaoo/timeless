@@ -1,8 +1,8 @@
-import { createTuiText, type TuiNode } from "./nodes";
-import { getTerminalSize, RESET } from "./renderer";
-import { WHITE, DGRAY, BOLD } from "./style";
+import { createTuiText, type TuiNode, WHITE, DGRAY, BOLD, RESET } from "@timeless/primitive";
+import { getTerminalSize } from "./renderer";
 import { getTuiHost } from "./host-accessor";
 import { TUI } from "./tui";
+import { isElement } from "@timeless/timeless";
 
 export interface Ref<T> {
   value: T;
@@ -149,10 +149,6 @@ function collectHostNodeLines(node: any): string[] {
   return lines.length ? lines : [""];
 }
 
-function isTimelessElement(v: any): boolean {
-  return !!v && typeof v === "object" && typeof v.t === "string" && "$elm" in v;
-}
-
 function renderElementToLines(elm: any): string[] {
   const host = getTuiHost();
   if (!host) return [];
@@ -176,7 +172,7 @@ function renderChildToLines(child: any, width: number): string[] {
   if (typeof child === "number") {
     return renderChildToLines(String(child), width);
   }
-  if (isTimelessElement(child)) {
+  if (isElement(child)) {
     return renderElementToLines(child);
   }
   if (typeof child === "function") {

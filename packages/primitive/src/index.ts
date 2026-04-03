@@ -33,7 +33,9 @@ export * from "./modules/transition";
 export * as PopperPrimitive from "./modules/popper";
 
 // content
-export * from "./modules/flex";
+export * from "./layout/flex";
+export * from "./layout/grid";
+export * from "./layout/column";
 export * as HeadPrimitive from "./modules/head";
 export * as ParagraphPrimitive from "./modules/paragraph";
 export * as ImagePrimitive from "./modules/image";
@@ -97,3 +99,7 @@ export * from "./util/reactive-data";
 export * from "./util/h";
 
 export * from "./host";
+
+// TUI nodes & style
+export * from "./tui/nodes";
+export * from "./tui/style";

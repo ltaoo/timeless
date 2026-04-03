@@ -88,19 +88,27 @@ export function Input(
     ...rest,
     type: "radio",
     id,
-    style:
-      "position: absolute; pointer-events: none; opacity: 0; margin: 0px; transform: translateX(-100%); width: 16px; height: 16px;",
+    style: {
+      position: "absolute",
+      "pointer-events": "none",
+      opacity: 0,
+      margin: "0px",
+      transform: "translateX(-100%)",
+      width: "16px",
+      height: "16px",
+    },
     onChange() {
       store.check();
     },
-    onMounted($elm: HTMLInputElement) {
+    onMounted(event) {
+      const $elm = (event as any).target as HTMLInputElement;
       $elm.checked = !!store.state.checked;
       events.push(
         store.onStateChange(() => {
           $elm.checked = !!store.state.checked;
         }),
       );
-      if (rest.onMounted) rest.onMounted($elm);
+      if (rest.onMounted) rest.onMounted(event);
     },
     onUnmounted() {
       for (const fn of events) if (typeof fn === "function") fn();

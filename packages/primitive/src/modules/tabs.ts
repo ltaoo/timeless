@@ -34,14 +34,15 @@ export function Tab(
     {
       as: "button",
       ...rest,
-      onMounted($el: HTMLDivElement) {
+      onMounted(event) {
+        const $el = (event as any).target as HTMLDivElement;
         store.updateTabClient(index, {
           rect() {
             return host.getBoundingClientRect?.($el) as any;
           },
         });
         if (rest.onMounted) {
-          rest.onMounted($el);
+          rest.onMounted(event);
         }
       },
       onClick() {

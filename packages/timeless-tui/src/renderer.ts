@@ -1,4 +1,4 @@
-import type { TuiNode, TuiElement } from "./nodes";
+import type { TuiNode, TuiElement } from "@timeless/primitive";
 
 const ESC = "\x1b[";
 const RESET = `${ESC}0m`;

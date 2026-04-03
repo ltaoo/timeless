@@ -308,7 +308,7 @@ export function For<T>(
       // 4.3 Trigger Lifecycle (Mounted)
       for (const { node, elm } of added_nodes) {
         if (typeof node.onMounted === "function") {
-          node.onMounted(elm);
+          node.onMounted({ target: elm });
         }
       }
 
@@ -459,14 +459,14 @@ export function For<T>(
       _mounted = true;
 
       if (onMounted) {
-        onMounted(anchor);
+        onMounted({ target: anchor });
       }
 
       // Call onMounted for children
       for (let i = 0; i < _elements.length; i += 1) {
         const el = _elements[i];
         if (isElement(el) && el.onMounted) {
-          el.onMounted(el.$elm);
+          el.onMounted({ target: el.$elm });
         }
       }
 

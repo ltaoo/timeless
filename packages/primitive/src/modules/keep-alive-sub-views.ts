@@ -19,6 +19,11 @@ import { LazyView } from "@/primitive/lazy-view";
 import { ErrorFallbackFn, withErrorBoundary } from "@/primitive/error-boundary";
 import { h } from "@/util/h";
 
+type SubView = { id?: unknown; name: string; pathname?: string } & Record<
+  string,
+  any
+>;
+
 export function KeepAliveSubViews(
   props: ViewProps & {
     view: RouteViewCore;
@@ -32,16 +37,16 @@ export function KeepAliveSubViews(
     placeholder?: ViewChildren;
   },
 ) {
-  const subviews = refarr(props.view.subViews);
-  const cur_subview = refobj(props.view.curView);
+  const subviews = refarr(props.view.subViews as SubView[]);
+  const cur_subview = refobj(props.view.curView as SubView);
 
-  props.view.onCurViewChange((view) => {
+  props.view.onCurViewChange((view: SubView) => {
     cur_subview.as(view);
   });
-  props.view.onSubViewAppended((v) => {
+  props.view.onSubViewAppended((v: SubView) => {
     subviews.push(v);
   });
-  props.view.onSubViewRemoved((v) => {
+  props.view.onSubViewRemoved((v: SubView) => {
     subviews.remove(v);
   });
 
@@ -54,7 +59,7 @@ export function KeepAliveSubViews(
 
   return For({
     each: subviews,
-    render(subview) {
+    render(subview: SubView) {
       const PageView = props.views[subview.name];
       const idx = subviews.indexOf(subview);
       if (!PageView) {
@@ -63,12 +68,15 @@ export function KeepAliveSubViews(
       return h(
         View,
         {
-          style: computed(cur_subview, (d) => {
-            return [
-              `z-index: ${idx + 1}; position: relative; width: 100%; height: 100%;`,
-              d && d.id === subview.id ? "display: block;" : "display: none;",
-            ].join("");
-          }),
+          style: {
+            "z-index": idx + 1,
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            display: computed(cur_subview, (d) =>
+              d && d.id === subview.id ? "block" : "none",
+            ),
+          },
           dataset: {
             name: subview.name,
             pathname: subview.pathname,

@@ -42,9 +42,10 @@ export function Image(
     ($img as any)[key] = value;
   };
 
-  const updateSrc = (v: string) => {
-    if (v) {
-      setProp("src", v);
+  const updateSrc = (v: unknown) => {
+    const srcText = String(v ?? "");
+    if (srcText) {
+      setProp("src", srcText);
       host.patchStyle?.($img, { display: "" });
       onLoadingStatusChange?.("loading");
     } else {
@@ -137,9 +138,11 @@ export function Avatar(
     }),
     Fallback(
       {
-        style: computed(imgError, (d) => {
-          return d || !srcRef.value ? "" : "display:none;";
-        }),
+        style: {
+          display: computed(imgError, (d) =>
+            d || !srcRef.value ? undefined : "none",
+          ),
+        },
       },
       children ?? [fallback || (alt ? alt.charAt(0).toUpperCase() : "?")],
     ),

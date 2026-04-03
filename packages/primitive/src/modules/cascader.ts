@@ -45,8 +45,17 @@ export function Trigger(
     {
       as: "input",
       attributes: mergedInputAttributes,
-      style:
-        "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
+      style: {
+        position: "absolute",
+        width: "1px",
+        height: "1px",
+        padding: 0,
+        margin: "-1px",
+        overflow: "hidden",
+        clip: "rect(0, 0, 0, 0)",
+        "white-space": "nowrap",
+        "border-width": 0,
+      },
       onFocus() {
         if (props.store.presence.state.visible) {
           return;
@@ -56,7 +65,8 @@ export function Trigger(
       onClick(e: Event) {
         e.stopPropagation();
       },
-      onMounted($elm: HTMLInputElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLInputElement;
         const value = store.state.value;
         host.setProperty?.($elm, "value", value ? value.join(",") : "");
         events.push(
@@ -73,7 +83,8 @@ export function Trigger(
   return View(
     {
       ...rest,
-      onMounted($elm: HTMLDivElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLDivElement;
         store.popper.setReference(
           {
             $el: $elm,
@@ -102,7 +113,7 @@ export function Trigger(
         host.addEventListener($elm, "pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
-          rest.onMounted($elm);
+          rest.onMounted(event);
         }
         return () => {
           host.removeEventListener($elm, "pointerdown", handlePointerDown);
@@ -276,12 +287,13 @@ export function Content(
                   }
                 },
                 onKeyDown: handleKeyDown,
-                onMounted($elm: HTMLElement) {
+                onMounted(event) {
+                  const $elm = (event as any).target as HTMLElement;
                   host.setTimeout(() => {
                     host.focus?.($elm);
                   }, 0);
                   if (rest.onMounted) {
-                    rest.onMounted($elm);
+                    rest.onMounted(event);
                   }
                 },
               },
@@ -380,7 +392,8 @@ export function Search(
         {
           ...rest,
           as: "input",
-          onMounted($elm: HTMLInputElement) {
+          onMounted(event) {
+            const $elm = (event as any).target as HTMLInputElement;
             host.setProperty?.(
               $elm,
               "placeholder",
@@ -404,7 +417,7 @@ export function Search(
             }, 0);
 
             if (rest.onMounted) {
-              rest.onMounted($elm);
+              rest.onMounted(event);
             }
             return () => {
               host.removeEventListener($elm, "input", handleInput);

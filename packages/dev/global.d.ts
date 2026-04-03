@@ -483,6 +483,9 @@ declare module "packages/primitive/src/primitive/view" {
     export type AttributeValue = string | number | boolean | undefined | null;
     export type MaybeSignal<T = AttributeValue> = T | Signal<T>;
     export type ViewAttributes = Record<string, MaybeSignal>;
+    export interface MountedEvent<T = any> {
+        target: T;
+    }
     export interface ViewProps {
         as?: string;
         key?: string | number;
@@ -491,7 +494,7 @@ declare module "packages/primitive/src/primitive/view" {
         draggable?: boolean;
         attributes?: ViewAttributes;
         dataset?: Record<string, MaybeSignal<AttributeValue>>;
-        onMounted?(el: any): void | (() => void);
+        onMounted?(event: MountedEvent): void | (() => void);
         beforeUnmounted?(): void;
         onUnmounted?(): void;
         onClick?(e: MouseEvent): void;
@@ -537,7 +540,7 @@ declare module "packages/primitive/src/primitive/view" {
         render(): any;
         hydrate?(existingDom: any): any;
         cleanup?: () => void;
-        onMounted?(el: any): void;
+        onMounted?(event: MountedEvent): void;
         beforeUnmounted?(): void;
         onUnmounted?(): void;
     }
@@ -568,11 +571,11 @@ declare module "packages/primitive/src/primitive/for" {
 }
 declare module "packages/primitive/src/primitive/show" {
     import { Ref } from "packages/reactive/src/index";
-    import { ViewChildren } from "packages/primitive/src/primitive/view";
+    import { ViewChildren, MountedEvent } from "packages/primitive/src/primitive/view";
     export function Show(props: {
         when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
         fallback?: ViewChildren;
-        onMounted?: ($fg: any) => void;
+        onMounted?: (event: MountedEvent) => void;
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
     }, children?: ViewChildren): {
@@ -582,7 +585,7 @@ declare module "packages/primitive/src/primitive/show" {
             when: boolean | Ref<boolean> | {
                 when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
                 fallback?: ViewChildren;
-                onMounted?: ($fg: any) => void;
+                onMounted?: (event: MountedEvent) => void;
                 beforeUnmounted?: () => void;
                 onUnmounted?: () => void;
             };
@@ -824,6 +827,7 @@ declare module "packages/primitive/src/native/file-input" {
 }
 declare module "packages/primitive/src/native/svg" {
     import { Ref, ClassNameRef } from "packages/reactive/src/index";
+    import { MountedEvent } from "packages/primitive/src/primitive/view";
     type AttrValue = string | number | Ref<string> | Ref<number>;
     /** Props shared by all SVG elements (lifecycle, events, style, class) */
     interface SVGBaseProps {
@@ -837,7 +841,7 @@ declare module "packages/primitive/src/native/svg" {
         "aria-hidden"?: "true" | "false";
         "aria-describedby"?: string;
         "aria-labelledby"?: string;
-        onMounted?(el: SVGElement): void;
+        onMounted?(event: MountedEvent<SVGElement>): void;
         beforeUnmounted?(): void;
         onUnmounted?(): void;
         onClick?(e: MouseEvent): void;

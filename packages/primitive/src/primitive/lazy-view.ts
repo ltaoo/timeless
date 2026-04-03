@@ -58,7 +58,7 @@ export function LazyView(
                   return;
                 }
                 if (props.onMounted) {
-                  props.onMounted(elm_.$elm);
+                  props.onMounted({ target: elm_.$elm });
                 }
               }
             } catch (err) {

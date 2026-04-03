@@ -1,7 +1,8 @@
 import { cn, ref, refobj, isRef } from "@timeless/reactive";
 import { NumberInputCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "@/primitive/view";
+import { View, ViewProps, ViewChildren, viewStyleToCssText } from "@/primitive/view";
+import { isStyleRef } from "@timeless/reactive";
 import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";
 
@@ -101,15 +102,28 @@ export function Input(
       });
       host.setClassName($elm, class$.toString());
 
-      if (typeof st === "string") {
-        host.setStyleText($elm, st);
-      } else if (isRef(st)) {
-        host.setStyleText($elm, st.value);
-        st._subscribe({
-          onChange(v: any) {
-            host.setStyleText($elm, v);
-          },
-        });
+      if (st) {
+        if (isStyleRef(st as any)) {
+          const s = st as any;
+          s._subscribe({ onChange(v: any) { host.setStyleText($elm, String(v ?? "")); } });
+          host.setStyleText($elm, s.toString());
+        } else if (isRef(st as any)) {
+          const s = st as any;
+          const apply = () => host.setStyleText($elm, viewStyleToCssText(s.value || {}));
+          s._subscribe({ onChange() { apply(); } });
+          apply();
+        } else {
+          const applyStyle = () => {
+            host.setStyleText($elm, viewStyleToCssText(st as any));
+          };
+          Object.keys(st as any).forEach((k) => {
+            const vv = (st as any)[k];
+            if (isRef(vv)) {
+              (vv as any)._subscribe({ onChange() { applyStyle(); } });
+            }
+          });
+          applyStyle();
+        }
       }
 
       displayValue$._subscribe({
@@ -166,7 +180,7 @@ export function Input(
       return $elm;
     },
     onMounted() {
-      if (props.onMounted) props.onMounted(this.$elm);
+      if (props.onMounted) props.onMounted({ target: this.$elm });
       store.setMounted();
       if (store.autoFocus) {
         host.focus?.(this.$elm);
@@ -205,7 +219,8 @@ export function IncreaseButton(
   return View(
     {
       ...rest,
-      onMounted($e: any) {
+      onMounted(event) {
+        const $e = (event as any).target as any;
         const updateState = () => {
           const canIncrease = canIncrease$.value;
           const disabled = disabled$.value;
@@ -232,7 +247,7 @@ export function IncreaseButton(
         host.addEventListener($e, "mousedown", handleMouseDown);
         host.addEventListener($e, "click", handleClick);
 
-        if (rest.onMounted) rest.onMounted($e);
+        if (rest.onMounted) rest.onMounted(event);
         return () => {
           host.removeEventListener($e, "mousedown", handleMouseDown);
           host.removeEventListener($e, "click", handleClick);
@@ -261,7 +276,8 @@ export function DecreaseButton(
   return View(
     {
       ...rest,
-      onMounted($e: any) {
+      onMounted(event) {
+        const $e = (event as any).target as any;
         const updateState = () => {
           const canDecrease = canDecrease$.value;
           const disabled = disabled$.value;
@@ -288,7 +304,7 @@ export function DecreaseButton(
         host.addEventListener($e, "mousedown", handleMouseDown);
         host.addEventListener($e, "click", handleClick);
 
-        if (rest.onMounted) rest.onMounted($e);
+        if (rest.onMounted) rest.onMounted(event);
         return () => {
           host.removeEventListener($e, "mousedown", handleMouseDown);
           host.removeEventListener($e, "click", handleClick);
@@ -314,7 +330,8 @@ export function Value(
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted(event) {
+        const $e = (event as any).target as any;
         const updateText = () => {
           host.setTextContent(
             $e,
@@ -323,7 +340,7 @@ export function Value(
         };
         value$._subscribe({ onChange: updateText });
         updateText();
-        if (rest.onMounted) rest.onMounted($e);
+        if (rest.onMounted) rest.onMounted(event);
       },
     },
     children,
@@ -347,7 +364,8 @@ export function Disabled(
   return View(
     {
       ...rest,
-      onMounted($elm: any) {
+      onMounted(event) {
+        const $elm = (event as any).target as any;
         const updateState = () => {
           if (disabled$.value) {
             host.setAttribute($elm, "data-disabled", "true");
@@ -357,7 +375,7 @@ export function Disabled(
         };
         disabled$._subscribe({ onChange: updateState });
         updateState();
-        if (rest.onMounted) rest.onMounted($elm);
+        if (rest.onMounted) rest.onMounted(event);
       },
     },
     children,

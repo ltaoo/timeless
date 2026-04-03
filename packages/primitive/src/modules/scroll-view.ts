@@ -34,7 +34,8 @@ export function Root(
   return View(
     {
       ...rest,
-      onMounted($elm: HTMLElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLElement;
         store.setRect({
           width: $elm.clientWidth,
           height: $elm.clientHeight,
@@ -42,7 +43,7 @@ export function Root(
         const provide = global_provider?.provide_ui_scroll_view_scroll;
         if (typeof provide === "function") provide(store, $elm);
         if (props.onMounted) {
-          props.onMounted($elm);
+          props.onMounted(event);
         }
       },
     },
@@ -83,7 +84,7 @@ export function Indicator(
       const provide = global_provider?.provide_ui_scroll_view_indicator;
       if (typeof provide === "function") provide(store, indicator$.$elm);
       if (props.onMounted) {
-        props.onMounted($elm);
+        props.onMounted({ target: $elm });
       }
       return $elm;
     },
@@ -112,14 +113,12 @@ export function Progress(
     {
       ...rest,
       // "data-scroll-view-progress": "",
-      style: computed(visible, (v) =>
-        v ? "display: block;" : "display: none;",
-      ),
+      style: { display: computed(visible, (v) => (v ? "block" : "none")) },
     },
     children ??
       View({
         class: "inline-flex justify-center items-center w-full h-full",
-        style: "transition: all 300ms;",
+        style: { transition: "all 300ms" },
       }),
   );
 
@@ -140,7 +139,7 @@ export function Progress(
     render() {
       const $elm = progress$.render();
       if (props.onMounted) {
-        props.onMounted($elm);
+        props.onMounted({ target: $elm });
       }
       return $elm;
     },

@@ -12,7 +12,7 @@ interface TimelessElement {
   $elm: HTMLElement | SVGElement | Text | DocumentFragment;
   render(): HTMLElement | ... | null;   // 创建并返回 DOM 元素
   cleanup?: () => void;
-  onMounted?(el): void;                // 挂载后回调
+  onMounted?(event): void;             // 挂载后回调，event.target 为 DOM 元素
   beforeUnmounted?(): void;
   onUnmounted?(): void;                // 卸载时回调，必须清理订阅
 }
@@ -45,7 +45,9 @@ View({
   onDragStart/onDragOver/onDrop/onDragEnd(event) {},
 
   // 生命周期
-  onMounted($elm) {},       // 返回值作为 cleanup 函数
+  onMounted(event) {        // event.target 为 DOM 元素；返回值作为 cleanup 函数
+    const $elm = event.target;
+  },
   beforeUnmounted() {},
   onUnmounted() {},         // 必须在此清理事件订阅
 }, children)

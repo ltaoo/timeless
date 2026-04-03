@@ -44,7 +44,8 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
   return View(
     {
       class: MENU_CONTENT_CLASS,
-      onMounted($el: HTMLDivElement) {
+      onMounted(event) {
+        const $el = (event as any).target as HTMLDivElement;
         $element = $el;
 
         // Register to LayerManager
@@ -78,7 +79,7 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
         layerManager.register(layer);
 
         if (props.onMounted) {
-          props.onMounted($el);
+          props.onMounted(event);
         }
       },
       onUnmounted() {

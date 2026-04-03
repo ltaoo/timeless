@@ -46,8 +46,17 @@ export function Trigger(
         ...(rest.attributes || {}),
         id: props.store.id || props.id || rest.attributes?.id,
       },
-      style:
-        "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
+      style: {
+        position: "absolute",
+        width: "1px",
+        height: "1px",
+        padding: 0,
+        margin: "-1px",
+        overflow: "hidden",
+        clip: "rect(0, 0, 0, 0)",
+        "white-space": "nowrap",
+        "border-width": 0,
+      },
       onFocus() {
         if (props.store.presence.state.visible) {
           return;
@@ -58,7 +67,8 @@ export function Trigger(
       onClick(e) {
         e.stopPropagation();
       },
-      onMounted($elm: HTMLInputElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLInputElement;
         host.setProperty?.($elm, "value", store.state.values.join(",") || "");
         events.push(
           store.onStateChange(() => {
@@ -77,7 +87,8 @@ export function Trigger(
   return View(
     {
       ...rest,
-      onMounted($elm: HTMLDivElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLDivElement;
         store.popper.setReference(
           {
             $el: $elm,
@@ -107,7 +118,7 @@ export function Trigger(
         host.addEventListener($elm, "pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
-          rest.onMounted($elm);
+          rest.onMounted(event);
         }
         return () => {
           host.removeEventListener($elm, "pointerdown", handlePointerDown);
@@ -310,7 +321,8 @@ export function FilteredList(
         return d.filteredOptions;
       }),
       render(item, index) {
-        return Fragment({}, each(item, index));
+        const i = (index as any)?.value ?? index;
+        return Fragment({}, each(item, i));
       },
     }),
   ]);
@@ -379,12 +391,10 @@ export function ItemIndicator(
   return View(
     {
       ...rest,
-      style: sn([
-        rest.style,
-        combine({ ss: rest.style, selected }, ({ ss, selected }) => {
-          return selected ? ss || "" : "display:none;";
-        }),
-      ]),
+      style: {
+        ...(rest.style || {}),
+        display: computed(selected, (d) => (d ? undefined : "none")),
+      },
     },
     children,
   );
@@ -428,7 +438,8 @@ export function Search(
     onClick(e: Event) {
       e.stopPropagation();
     },
-    onMounted($elm: HTMLInputElement) {
+    onMounted(event) {
+      const $elm = (event as any).target as HTMLInputElement;
       $elm.value = store.state.keyword;
       store.onStateChange((state) => {
         if ($elm.value !== state.keyword) {
@@ -436,7 +447,7 @@ export function Search(
         }
       });
       if (rest.onMounted) {
-        rest.onMounted($elm);
+        rest.onMounted(event);
       }
     },
   });

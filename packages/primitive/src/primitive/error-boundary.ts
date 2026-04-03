@@ -5,19 +5,37 @@ export type ErrorFallbackFn = (error: Error, viewName: string) => TimelessElemen
 export function defaultErrorView(error: Error, viewName: string): TimelessElement {
   return View(
     {
-      style:
-        "padding: 16px; margin: 8px; border: 1px solid #ef4444; border-radius: 8px; background: #fef2f2; color: #991b1b; font-family: monospace;",
+      style: {
+        padding: "16px",
+        margin: "8px",
+        border: "1px solid #ef4444",
+        "border-radius": "8px",
+        background: "#fef2f2",
+        color: "#991b1b",
+        "font-family": "monospace",
+      },
     },
     [
       View(
-        { as: "div", style: "margin: 0 0 8px 0; font-size: 14px; font-weight: bold;" },
+        {
+          as: "div",
+          style: {
+            margin: "0 0 8px 0",
+            "font-size": "14px",
+            "font-weight": "bold",
+          },
+        },
         [`Error in "${viewName}"`],
       ),
       View(
         {
           as: "pre",
-          style:
-            "margin: 0; font-size: 12px; white-space: pre-wrap; word-break: break-word;",
+          style: {
+            margin: "0",
+            "font-size": "12px",
+            "white-space": "pre-wrap",
+            "word-break": "break-word",
+          },
         },
         [error.message],
       ),

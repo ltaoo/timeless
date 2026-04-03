@@ -4,6 +4,7 @@ import { SelectCore } from "@timeless/ui";
 import { View, ViewChildren, ViewProps } from "@/primitive/view";
 import { Show } from "@/primitive/show";
 import { NativeInput } from "@/native/input";
+import { h } from "@/util/h";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
@@ -44,8 +45,17 @@ export function Trigger(
         ...(rest.attributes || {}),
         id: props.id || rest.attributes?.id || props.store.id,
       },
-      style:
-        "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
+      style: {
+        position: "absolute",
+        width: "1px",
+        height: "1px",
+        padding: 0,
+        margin: "-1px",
+        overflow: "hidden",
+        clip: "rect(0, 0, 0, 0)",
+        "white-space": "nowrap",
+        "border-width": 0,
+      },
       onFocus() {
         if (props.store.presence.state.visible) {
           return;
@@ -65,7 +75,8 @@ export function Trigger(
         //   store.show();
         // }
       },
-      onMounted($elm: HTMLInputElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLInputElement;
         host.setProperty?.($elm, "value", store.state.value || "");
         events.push(
           store.onStateChange(() => {
@@ -80,7 +91,8 @@ export function Trigger(
   return View(
     {
       ...rest,
-      onMounted($elm: HTMLDivElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLDivElement;
         // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
         store.popper.setReference(
           {
@@ -132,7 +144,7 @@ export function Trigger(
         host.addEventListener($elm, "pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
-          rest.onMounted($elm);
+          rest.onMounted(event);
         }
         return () => {
           host.removeEventListener($elm, "pointerdown", handlePointerDown);
@@ -315,7 +327,8 @@ export function Content(
                     rest.onAnimationEnd(e);
                   }
                 },
-                onMounted($elm: HTMLElement) {
+                onMounted(event) {
+                  const $elm = (event as any).target as HTMLElement;
                   host.setTimeout(() => {
                     if (store.state.search) {
                       const input = host.querySelector?.($elm, "input");
@@ -327,7 +340,7 @@ export function Content(
                     host.focus?.($elm);
                   }, 0);
                   if (rest.onMounted) {
-                    rest.onMounted($elm);
+                    rest.onMounted(event);
                   }
                 },
               },
@@ -374,13 +387,14 @@ export function Search(
           const target = e.target as HTMLInputElement;
           store.setSearchKeyword(target.value);
         },
-        onMounted($elm: HTMLInputElement) {
+        onMounted(event) {
+          const $elm = (event as any).target as HTMLInputElement;
           // 自动聚焦搜索框
           host.setTimeout(() => {
             host.focus?.($elm);
           }, 0);
           if (rest.onMounted) {
-            rest.onMounted($elm);
+            rest.onMounted(event);
           }
         },
         onClick(e: Event) {
@@ -450,12 +464,10 @@ export function ItemIndicator(
   return View(
     {
       ...rest,
-      style: sn([
-        rest.style,
-        combine({ ss: rest.style, selected }, ({ ss, selected }) => {
-          return selected ? ss || "" : "display:none;";
-        }),
-      ]),
+      style: {
+        ...(rest.style || {}),
+        display: computed(selected, (d) => (d ? undefined : "none")),
+      },
     },
     children,
   );

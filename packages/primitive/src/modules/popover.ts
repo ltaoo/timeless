@@ -39,7 +39,8 @@ export function Trigger(
   const host = getHost();
   return Fragment(
     {
-      onMounted($f: any) {
+      onMounted(event) {
+        const $f = (event as any).target as any;
         const nodes = host.getChildNodes($f);
         const $ref = nodes.find((n: any) => n?.nodeType === 1) || nodes[0];
         if (!$ref) return;
@@ -99,13 +100,12 @@ export function Portal(
             store: props.store.popper,
             style:
               props.store.destroyOnClose === false
-                ? computed(state, (t) => {
-                    if (!t.visible && !t.enter && !t.exit) {
-                      return "display: none;";
-                    }
-                    return "";
-                  })
-                : "",
+                ? {
+                    display: computed(state, (t) =>
+                      !t.visible && !t.enter && !t.exit ? "none" : undefined,
+                    ),
+                  }
+                : undefined,
             onDismiss() {
               props.store.hide();
             },

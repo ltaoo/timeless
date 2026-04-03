@@ -11,7 +11,7 @@ import {
   isTuiNode,
   type TuiNode,
   type TuiElement,
-} from "./nodes";
+} from "@timeless/primitive";
 import {
   renderToString,
   renderToScreen,

@@ -12,7 +12,9 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@timeless/primitive": ["../primitive/src/index.ts"],
+      "@timeless/timeless": ["../timeless/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

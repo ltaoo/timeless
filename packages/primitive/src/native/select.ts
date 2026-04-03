@@ -100,8 +100,8 @@ export function NativeSelect(
       ...rest,
       as: "select",
       attributes: mergedAttributes,
-      onMounted(el) {
-        const $select = el as any;
+      onMounted(event) {
+        const $select = (event as any).target as any;
 
         const applyValue = (v: NativeSelectValue | undefined) => {
           if (v === undefined) return;
@@ -111,7 +111,7 @@ export function NativeSelect(
         if (value !== undefined) {
           if (isRef(value)) {
             value._subscribe({
-              onChange(v) {
+              onChange(v: any) {
                 applyValue(v);
               },
             });
@@ -149,7 +149,7 @@ export function NativeSelect(
           host.addEventListener($select, "input", handleInput);
         }
 
-        const cleanup = onMounted ? onMounted($select) : undefined;
+        const cleanup = onMounted ? onMounted(event) : undefined;
 
         return () => {
           host.removeEventListener($select, "change", handleChange);

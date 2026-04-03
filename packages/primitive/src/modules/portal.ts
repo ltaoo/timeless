@@ -129,12 +129,12 @@ export function Portal(props: ViewProps & {}, children: ViewChildren) {
       // Lifecycle
       for (const child of instances) {
         if (isElement(child) && child.onMounted) {
-          child.onMounted(child.$elm);
+          child.onMounted({ target: child.$elm });
         }
       }
 
       if (props.onMounted) {
-        props.onMounted(anchor);
+        props.onMounted({ target: anchor });
       }
 
       return null;

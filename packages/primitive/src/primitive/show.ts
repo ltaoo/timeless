@@ -142,13 +142,13 @@ export function Show(
 
     // Lifecycle - call Show's own onMounted callback
     if (onMounted) {
-      onMounted(anchor);
+      onMounted({ target: anchor });
     }
 
     // Lifecycle - call children's onMounted
     for (const child of newInstances) {
       if (isElement(child) && child.onMounted) {
-        child.onMounted(child.$elm);
+        child.onMounted({ target: child.$elm });
       }
     }
 
@@ -280,13 +280,13 @@ export function Show(
       }
 
       if (onMounted) {
-        onMounted(anchor);
+        onMounted({ target: anchor });
       }
 
       // Call onMounted for children
       for (const child of newInstances) {
         if (isElement(child) && child.onMounted) {
-          child.onMounted(child.$elm);
+          child.onMounted({ target: child.$elm });
         }
       }
 

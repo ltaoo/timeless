@@ -82,7 +82,8 @@ export function Trigger(
 
   return View(
     {
-      onMounted($elm: HTMLDivElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLDivElement;
         const nodes = host.getChildNodes($elm);
         const $ref = nodes.find((n: any) => n?.nodeType === 1) || $elm;
         props.store.menu.popper.setReference(

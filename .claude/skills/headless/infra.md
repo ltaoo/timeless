@@ -34,7 +34,7 @@ Presence({ store: presenceCore }, [
 
 ```js
 PopperPrimitive.Root({ store: popperCore }, [
-  // reference 元素（trigger）通过 onMounted 注册
+  // reference 元素（trigger）通过 onMounted(event) 注册（event.target）
   PopperPrimitive.Content({ store: popperCore, class: "floating" }, [
     // 浮动内容，自动计算 transform: translate3d(x, y, 0)
   ]),

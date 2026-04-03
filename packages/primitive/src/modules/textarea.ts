@@ -33,13 +33,14 @@ export function Value(
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted(event) {
+        const $e = (event as any).target as any;
         const updateText = () => {
           host.setTextContent($e, value$.value);
         };
         value$._subscribe({ onChange: updateText });
         updateText();
-        if (rest.onMounted) rest.onMounted($e);
+        if (rest.onMounted) rest.onMounted(event);
       },
     },
     children,
@@ -56,14 +57,15 @@ export function Clear(
   return View(
     {
       ...rest,
-      onMounted($e) {
+      onMounted(event) {
+        const $e = (event as any).target as any;
         const handleClick = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           store.clear();
         };
         host.addEventListener($e, "click", handleClick);
-        if (rest.onMounted) rest.onMounted($e);
+        if (rest.onMounted) rest.onMounted(event);
         return () => {
           host.removeEventListener($e, "click", handleClick);
         };
@@ -90,13 +92,14 @@ export function Loading(
   return View(
     {
       ...rest,
-      onMounted($elm: HTMLDivElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLDivElement;
         const updateDisplay = () => {
           host.patchStyle?.($elm, { display: loading$.value ? "" : "none" });
         };
         loading$._subscribe({ onChange: updateDisplay });
         updateDisplay();
-        if (rest.onMounted) rest.onMounted($elm);
+        if (rest.onMounted) rest.onMounted(event);
       },
     },
     children,
@@ -139,7 +142,8 @@ export function Disabled(
   return View(
     {
       ...rest,
-      onMounted($elm: HTMLDivElement) {
+      onMounted(event) {
+        const $elm = (event as any).target as HTMLDivElement;
         const updateState = () => {
           if (disabled$.value) {
             host.setAttribute($elm, "data-disabled", "true");
@@ -149,7 +153,7 @@ export function Disabled(
         };
         disabled$._subscribe({ onChange: updateState });
         updateState();
-        if (rest.onMounted) rest.onMounted($elm);
+        if (rest.onMounted) rest.onMounted(event);
       },
     },
     children,

@@ -7,7 +7,7 @@ import {
   getTerminalSize,
 } from "./renderer";
 import { createTuiInput, parseKey, type KeyName } from "./input";
-import type { TuiNode } from "./nodes";
+import type { TuiNode } from "@timeless/primitive";
 
 export type TuiRenderFn = () => TuiNode;
 

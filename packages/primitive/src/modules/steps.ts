@@ -47,12 +47,13 @@ export function List(
       For({
         each: items,
         render: (item, index) => {
+          const idx = (index as any)?.value ?? index;
           return Item(
-            { store, index, item },
+            { store, index: idx, item },
             [
-              Indicator({ store, index }),
+              Indicator({ store, index: idx }),
               Title({}, [Txt(item.title)]),
-              index < items.length - 1 ? Connector({ store, index }) : null,
+              idx < items.length - 1 ? Connector({ store, index: idx }) : null,
             ].filter(Boolean) as ViewChildren,
           );
         },

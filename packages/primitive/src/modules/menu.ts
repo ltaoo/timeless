@@ -217,7 +217,8 @@ export function ItemImpl(
           return t.disabled ? undefined : -1;
         }),
       },
-      onMounted($el: HTMLDivElement) {
+      onMounted(event) {
+        const $el = (event as any).target as HTMLDivElement;
         // console.log("[ItemImpl] mounted", props.store.label);
         if (props.store.menu) {
           props.store.menu.popper.setReference({
@@ -292,7 +293,8 @@ export function SubMenuTrigger(
     {
       class: "menu-item-with-sub-menu",
       store: props.store.menu!,
-      onMounted($el: HTMLDivElement) {
+      onMounted(event) {
+        const $el = (event as any).target as HTMLDivElement;
         if (!props.store.menu) {
           return;
         }
@@ -342,9 +344,9 @@ export function SubMenuContent(
           props.store.parent_menu.hide_sub_timer = null;
         }
       },
-      onMounted($el) {
+      onMounted(event) {
         if (props.onMounted) {
-          props.onMounted($el);
+          props.onMounted(event);
         }
       },
     },

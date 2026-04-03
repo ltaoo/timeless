@@ -19,46 +19,40 @@ export function Arrow(
   return View(
     {
       ...rest,
-      style: computed(state, (s) => {
-        const { arrow } = s.middlewareData || {};
-        const { x, y } = arrow || {};
-
-        const placement = s.placement || "bottom";
-        const staticSide = {
-          top: "bottom",
-          right: "left",
-          bottom: "top",
-          left: "right",
-        }[placement.split("-")[0] as string];
-
-        const style: any = {
-          position: "absolute",
-          left: x != null ? `${x}px` : "",
-          top: y != null ? `${y}px` : "",
-        };
-        if (staticSide) {
-          // style[staticSide] = "calc(-1 * var(--t1-popper-arrow-offset, 4px))";
-          style[staticSide] = "calc(-1 * var(--t1-popper-arrow-offset, 6px))";
-        }
-
-        // Merge with user provided style
-        if (typeof rest.style === "string") {
-          return (
-            Object.entries(style)
-              .map(([k, v]) => `${k}:${v}`)
-              .join(";") +
-            ";" +
-            rest.style
-          );
-        } else if (typeof rest.style === "object") {
-          return { ...style, ...rest.style };
-        }
-
-        return Object.entries(style)
-          .map(([k, v]) => `${k}:${v}`)
-          .join(";");
-      }),
-      onMounted($el: HTMLDivElement) {
+      style: {
+        position: "absolute",
+        left: computed(state, (s) => {
+          const placementSide = (s.placement || "bottom").split("-")[0];
+          if (placementSide === "right") {
+            return "calc(-1 * var(--t1-popper-arrow-offset, 6px))";
+          }
+          const x = s.middlewareData?.arrow?.x;
+          return x != null ? `${x}px` : undefined;
+        }),
+        top: computed(state, (s) => {
+          const placementSide = (s.placement || "bottom").split("-")[0];
+          if (placementSide === "bottom") {
+            return "calc(-1 * var(--t1-popper-arrow-offset, 6px))";
+          }
+          const y = s.middlewareData?.arrow?.y;
+          return y != null ? `${y}px` : undefined;
+        }),
+        right: computed(state, (s) => {
+          const placementSide = (s.placement || "bottom").split("-")[0];
+          return placementSide === "left"
+            ? "calc(-1 * var(--t1-popper-arrow-offset, 6px))"
+            : undefined;
+        }),
+        bottom: computed(state, (s) => {
+          const placementSide = (s.placement || "bottom").split("-")[0];
+          return placementSide === "top"
+            ? "calc(-1 * var(--t1-popper-arrow-offset, 6px))"
+            : undefined;
+        }),
+        ...(rest.style || {}),
+      },
+      onMounted(event) {
+        const $el = (event as any).target as HTMLDivElement;
         const rect = host.getBoundingClientRect?.($el) as any;
         const width = rect?.width ?? 0;
         const height = rect?.height ?? 0;

@@ -16,12 +16,21 @@ export function isStyleRef(v: any): v is StyleRef {
   return false;
 }
 
+type StyleObject = Record<string, any>;
+
 export function styleNames(
-  items: (string | Ref<string | StyleRef | undefined> | StyleRef | undefined)[],
+  items: (
+    | string
+    | StyleObject
+    | Ref<string | StyleRef | StyleObject | undefined>
+    | StyleRef
+    | undefined
+  )[],
 ): StyleRef {
   const sources: (
     | string
-    | Ref<string | StyleRef | undefined>
+    | StyleObject
+    | Ref<string | StyleRef | StyleObject | undefined>
     | StyleRef
     | undefined
   )[] = [];
@@ -55,9 +64,28 @@ export function styleNames(
           styleText = val;
         } else if (isStyleRef(val)) {
           styleText = val.toString();
+        } else if (val && typeof val === "object") {
+          for (const k of Object.keys(val)) {
+            const vv = (val as any)[k];
+            const v = isRef(vv) ? (vv as any).value : vv;
+            if (v !== undefined && v !== null && v !== false) {
+              styleMap.set(k, String(v));
+            }
+          }
+          continue;
         }
       } else if (isStyleRef(source)) {
         styleText = source.toString();
+      } else if (typeof source === "object") {
+        const obj = source as StyleObject;
+        for (const k of Object.keys(obj)) {
+          const vv = (obj as any)[k];
+          const v = isRef(vv) ? (vv as any).value : vv;
+          if (v !== undefined && v !== null && v !== false) {
+            styleMap.set(k, String(v));
+          }
+        }
+        continue;
       }
 
       // Parse CSS declarations
@@ -85,13 +113,34 @@ export function styleNames(
   }
 
   function addSourceFromItem(
-    item: string | Ref<string | StyleRef | undefined> | StyleRef | undefined,
+    item:
+      | string
+      | StyleObject
+      | Ref<string | StyleRef | StyleObject | undefined>
+      | StyleRef
+      | undefined,
   ) {
     if (!item && item !== "") {
       return;
     }
     if (typeof item === "string") {
       sources.push(item);
+      return;
+    }
+    if (item && typeof item === "object" && !isRef(item) && !isStyleRef(item)) {
+      const obj = item as StyleObject;
+      // subscribe to nested refs within object
+      Object.keys(obj).forEach((k) => {
+        const vv = (obj as any)[k];
+        if (isRef(vv)) {
+          (vv as any)._subscribe({
+            onChange() {
+              notify();
+            },
+          });
+        }
+      });
+      sources.push(obj);
       return;
     }
     if (isStyleRef(item)) {
@@ -104,7 +153,7 @@ export function styleNames(
       return;
     }
     if (isRef(item)) {
-      sources.push(item as Ref<string | StyleRef | undefined>);
+      sources.push(item as Ref<string | StyleRef | StyleObject | undefined>);
       item._subscribe({
         onChange() {
           notify();

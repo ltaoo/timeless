@@ -617,6 +617,9 @@ importers:
 
   packages/timeless-tui:
     dependencies:
+      '@timeless/primitive':
+        specifier: workspace:*
+        version: link:../primitive
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless

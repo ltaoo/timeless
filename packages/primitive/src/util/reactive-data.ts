@@ -63,10 +63,11 @@ export function createReactiveData<T extends Record<string, any>>(
 
       if (isRef(current)) {
         // Update existing ref
-        if (typeof current.as === "function") {
-          current.as(newValue);
-        } else if ("value" in current) {
-          current.value = newValue;
+        const c = current as any;
+        if (typeof c.as === "function") {
+          c.as(newValue);
+        } else if ("value" in c) {
+          c.value = newValue;
         }
       } else {
         // Create new reactive value

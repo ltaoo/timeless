@@ -9,7 +9,7 @@ Primitive 是一组**可组合的工厂函数命名空间**（如 `SelectPrimiti
 **职责**：
 - 接收 `store`（Core 实例），订阅 `store.onStateChange`
 - 将 DOM 事件委托给 Core 方法（click → store.click()）
-- 通过 `onMounted` 注册 DOM 元素到 Core
+- 通过 `onMounted(event)` 注册 DOM 元素到 Core（`event.target` 即 DOM 元素）
 - **不持有任何样式** — class 由 shadcn 层通过 props 注入
 
 ## Primitive 列表

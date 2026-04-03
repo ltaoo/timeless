@@ -1,6 +1,6 @@
-import { isClassName, isRef, isStyleRef, Ref } from "@timeless/reactive";
+import { isClassName, isRef, Ref, isStyleRef } from "@timeless/reactive";
 
-import { ViewProps } from "@/primitive/view";
+import { MountedEvent, ViewProps, viewStyleToCssText } from "@/primitive/view";
 import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";
 
@@ -20,7 +20,7 @@ export interface ImgProps extends Omit<ViewProps, "type" | "as"> {
   isMap?: boolean;
   onLoad?(e: Event): void;
   onError?(e: Event): void;
-  onMounted?: ($elm: HTMLImageElement) => void;
+  onMounted?(event: MountedEvent<HTMLImageElement>): void | (() => void);
 }
 
 export function NativeImg(props: ImgProps = {}) {
@@ -130,14 +130,17 @@ export function NativeImg(props: ImgProps = {}) {
         } else if (isRef(cls)) {
           cls._subscribe({
             onChange(v) {
-              host.setClassName($elm, v);
+              host.setClassName($elm, String(v));
             },
           });
-          host.setClassName($elm, cls.value);
+          host.setClassName($elm, String(cls.value));
         } else if (isClassName(cls)) {
           cls._subscribe({
-            onChange(v: string[]) {
-              host.setClassName($elm, v.join(" "));
+            onChange(v: any) {
+              host.setClassName(
+                $elm,
+                Array.isArray(v) ? v.join(" ") : String(v ?? ""),
+              );
             },
           });
           host.setClassName($elm, cls.toString());
@@ -145,22 +148,30 @@ export function NativeImg(props: ImgProps = {}) {
       }
 
       if (style) {
-        if (typeof style === "string") {
-          host.setStyleText($elm, style);
-        } else if (isRef(style)) {
-          host.setStyleText($elm, style.value);
-          style._subscribe({
+        if (isStyleRef(style as any)) {
+          const st = style as any;
+          st._subscribe({
             onChange(v: any) {
-              host.setStyleText($elm, v);
+              host.setStyleText($elm, String(v ?? ""));
             },
           });
-        } else if (isStyleRef(style)) {
-          style._subscribe({
-            onChange(v: string) {
-              host.setStyleText($elm, v);
-            },
+          host.setStyleText($elm, st.toString());
+        } else if (isRef(style)) {
+          const st = style as any;
+          const apply = () => host.setStyleText($elm, viewStyleToCssText(st.value || {}));
+          st._subscribe({ onChange() { apply(); } });
+          apply();
+        } else {
+          const applyStyle = () => {
+            host.setStyleText($elm, viewStyleToCssText(style as any));
+          };
+          Object.keys(style as any).forEach((k) => {
+            const vv = (style as any)[k];
+            if (isRef(vv)) {
+              (vv as any)._subscribe({ onChange() { applyStyle(); } });
+            }
           });
-          host.setStyleText($elm, style.toString());
+          applyStyle();
         }
       }
 
@@ -333,7 +344,7 @@ export function NativeImg(props: ImgProps = {}) {
       }
 
       if (onMounted) {
-        const cleanup = onMounted($elm);
+        const cleanup = onMounted({ target: $elm });
         if (typeof cleanup === "function") {
           onMountedCleanup = cleanup;
         }

@@ -1,4 +1,4 @@
-import { refobj, computed, cn, sn } from "@timeless/reactive";
+import { refobj, computed, cn } from "@timeless/reactive";
 import {
   PopperCore,
   getGlobalLayerManager,
@@ -28,7 +28,8 @@ export function Anchor(
   return View(
     {
       ...rest,
-      onMounted($el: HTMLDivElement) {
+      onMounted(event) {
+        const $el = (event as any).target as HTMLDivElement;
         store.setReference({
           $el,
           getRect() {
@@ -36,7 +37,7 @@ export function Anchor(
           },
         });
         if (rest.onMounted) {
-          rest.onMounted($el);
+          rest.onMounted(event);
         }
       },
       onUnmounted() {
@@ -78,31 +79,22 @@ export function Content(
     {
       ...rest,
       class: cn(["t1-popper", rest.class]),
-      style: sn([
-        rest.style,
-        computed(state_, (t) => {
-          // console.log("[Popper Content] computed style", {
-          //   placed: t.isPlaced,
-          //   x: t.x,
-          //   y: t.y,
-          // });
-          const ss: Record<string, any> = {
-            "z-index": zIndex,
-            position: "fixed",
-            left: 0,
-            top: 0,
-            opacity: t.isPlaced ? 1 : 0,
-            "pointer-event": t.isPlaced ? "initial" : "none",
-            transform: t.isPlaced
-              ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
-              : "translate3d(0, 0, 0)",
-          };
-          return Object.keys(ss)
-            .map((k) => `${k}: ${ss[k]}`)
-            .join("; ");
-        }),
-      ]),
-      onMounted($e: HTMLDivElement) {
+      style: {
+        ...(rest.style || {}),
+        "z-index": zIndex,
+        position: "fixed",
+        left: 0,
+        top: 0,
+        opacity: computed(state_, (t) => (t.isPlaced ? 1 : 0)),
+        "pointer-event": computed(state_, (t) => (t.isPlaced ? "initial" : "none")),
+        transform: computed(state_, (t) =>
+          t.isPlaced
+            ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
+            : "translate3d(0, 0, 0)",
+        ),
+      },
+      onMounted(event) {
+        const $e = (event as any).target as HTMLDivElement;
         const $element = $e;
         const layer_id = `popper-${++layer_id_counter}`;
         store.setFloating({
@@ -178,7 +170,7 @@ export function Content(
           layer_manager.register(layer);
         }
         if (rest.onMounted) {
-          rest.onMounted($e);
+          rest.onMounted(event);
         }
         const unlisten = store.onStateChange((v) => {
           state_.as(v);

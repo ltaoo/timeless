@@ -15,16 +15,36 @@ import { Txt } from "./text";
 export type AttributeValue = string | number | boolean | undefined | null;
 export type MaybeSignal<T = AttributeValue> = T | Signal<T>;
 export type ViewAttributes = Record<string, MaybeSignal>;
+export type ViewStyle = Record<string, MaybeSignal>;
+
+export function viewStyleToCssText(style: ViewStyle) {
+  const parts: string[] = [];
+  const keys = Object.keys(style);
+  for (let i = 0; i < keys.length; i += 1) {
+    const k = keys[i];
+    const vv = (style as any)[k] as any;
+    const v = isRef(vv) ? vv.value : vv;
+    if (v === undefined || v === null || v === false) {
+      continue;
+    }
+    parts.push(`${k}: ${String(v)}`);
+  }
+  return parts.join("; ");
+}
+
+export interface MountedEvent<T = any> {
+  target: T;
+}
 
 export interface ViewProps {
   as?: string;
   key?: string | number;
-  style?: MaybeSignal<string> | StyleRef;
+  style?: ViewStyle | StyleRef | Signal<ViewStyle>;
   class?: MaybeSignal<string> | ClassNameRef;
   draggable?: boolean;
   attributes?: ViewAttributes;
   dataset?: Record<string, MaybeSignal<AttributeValue>>;
-  onMounted?(el: any): void | (() => void);
+  onMounted?(event: MountedEvent): void | (() => void);
   beforeUnmounted?(): void;
   onUnmounted?(): void;
   onClick?(e: MouseEvent): void;
@@ -184,22 +204,43 @@ export function View(
     }
 
     if (style) {
-      if (typeof style === "string") {
-        host.setStyleText($elm, style);
+      if (isStyleRef(style as any)) {
+        const st = style as StyleRef;
+        st._subscribe({
+          onChange(v: any) {
+            if ($elm) host.setStyleText($elm, String(v ?? ""));
+          },
+        });
+        host.setStyleText($elm, st.toString());
       } else if (isRef(style)) {
-        host.setStyleText($elm, style.value);
-        style._subscribe({
-          onChange(v: any) {
-            if ($elm) host.setStyleText($elm, v);
+        const st = style as any;
+        const apply = () => {
+          if ($elm) host.setStyleText($elm, viewStyleToCssText(st.value || {}));
+        };
+        st._subscribe({
+          onChange() {
+            apply();
           },
         });
-      } else if (isStyleRef(style)) {
-        style._subscribe({
-          onChange(v: any) {
-            if ($elm) host.setStyleText($elm, v);
-          },
-        });
-        host.setStyleText($elm, style.toString());
+        apply();
+      } else {
+        const obj = style as ViewStyle;
+        const applyStyle = () => {
+          if ($elm) host.setStyleText($elm, viewStyleToCssText(obj));
+        };
+        const keys = Object.keys(obj);
+        for (let i = 0; i < keys.length; i += 1) {
+          const k = keys[i];
+          const vv = (obj as any)[k];
+          if (isRef(vv)) {
+            vv._subscribe({
+              onChange() {
+                applyStyle();
+              },
+            });
+          }
+        }
+        applyStyle();
       }
     }
 
@@ -408,7 +449,7 @@ export function View(
         }
       }
       if (onMounted) {
-        const cleanup = onMounted($elm);
+        const cleanup = onMounted({ target: $elm });
         if (typeof cleanup === "function") {
           onMountedCleanup = cleanup;
         }
@@ -417,7 +458,7 @@ export function View(
         const node = _children[i];
         if (isElement(node)) {
           if (node.onMounted) {
-            node.onMounted(node.$elm);
+            node.onMounted({ target: node.$elm });
           }
         }
       }
@@ -470,7 +511,7 @@ export function View(
       }
 
       if (onMounted) {
-        const cleanup = onMounted($elm);
+        const cleanup = onMounted({ target: $elm });
         if (typeof cleanup === "function") {
           onMountedCleanup = cleanup;
         }
@@ -479,7 +520,7 @@ export function View(
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
         if (isElement(node) && node.onMounted) {
-          node.onMounted(node.$elm);
+          node.onMounted({ target: node.$elm });
         }
       }
 
@@ -574,7 +615,7 @@ export interface TimelessElement {
   render(): any;
   hydrate?(existingDom: any): any;
   cleanup?: () => void;
-  onMounted?(el: any): void;
+  onMounted?(event: MountedEvent): void;
   beforeUnmounted?(): void;
   onUnmounted?(): void;
 }

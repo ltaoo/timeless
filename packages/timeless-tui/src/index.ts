@@ -10,32 +10,6 @@ export {
   type TuiFragment,
   type TuiNodeKind,
   type TuiAttributes,
-} from "./nodes";
-
-export {
-  createBuffer,
-  clearBuffer,
-  writeToBuffer,
-  renderTree,
-  renderToScreen,
-  renderToString,
-  clearScreen,
-  showCursor,
-  hideCursor,
-  getTerminalSize,
-  ESC,
-  RESET,
-  CLEAR_SCREEN,
-  CURSOR_HOME,
-  HIDE_CURSOR,
-  SHOW_CURSOR,
-  fgColor,
-  bgColor,
-  moveTo,
-  type Buffer,
-} from "./renderer";
-
-export {
   BOLD,
   DIM,
   UNDERLINE,
@@ -63,7 +37,30 @@ export {
   vpad,
   vcenter,
   vright,
-} from "./style";
+  ESC,
+  RESET,
+  fgColor,
+  bgColor,
+} from "@timeless/primitive";
+
+export {
+  createBuffer,
+  clearBuffer,
+  writeToBuffer,
+  renderTree,
+  renderToScreen,
+  renderToString,
+  clearScreen,
+  showCursor,
+  hideCursor,
+  getTerminalSize,
+  CLEAR_SCREEN,
+  CURSOR_HOME,
+  HIDE_CURSOR,
+  SHOW_CURSOR,
+  moveTo,
+  type Buffer,
+} from "./renderer";
 
 export {
   createTuiInput,

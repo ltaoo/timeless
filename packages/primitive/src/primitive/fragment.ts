@@ -93,7 +93,7 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       }
 
       if (onMounted) {
-        const cleanup = onMounted($fragment as any);
+        const cleanup = onMounted({ target: $fragment as any });
         if (typeof cleanup === "function") {
           onMountedCleanup = cleanup;
         }
@@ -102,7 +102,7 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
         const node = _children[i];
         if (isElement(node)) {
           if (node.onMounted) {
-            node.onMounted(node.$elm);
+            node.onMounted({ target: node.$elm });
           }
         }
       }

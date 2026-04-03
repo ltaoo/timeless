@@ -25,10 +25,10 @@ export function Root(
 
   const inner$ = View(
     {
-      style: computed(
-        innerHeight,
-        (h) => `height: ${h}px; position: relative;`,
-      ),
+      style: {
+        height: computed(innerHeight, (h) => `${h}px`),
+        position: "relative",
+      },
     },
     children,
   );
@@ -36,7 +36,7 @@ export function Root(
   const view$ = View(
     {
       ...rest,
-      style: "position: relative; overflow-y: auto; height: 100%;",
+      style: { position: "relative", "overflow-y": "auto", height: "100%" },
     },
     [inner$],
   );
@@ -58,7 +58,7 @@ export function Root(
     render() {
       const $elm = view$.render();
       if (props.onMounted) {
-        props.onMounted($elm);
+        props.onMounted({ target: $elm });
       }
       return $elm;
     },
@@ -79,10 +79,10 @@ export function Column(
   const view$ = View(
     {
       ...rest,
-      style: computed(
-        columnHeight,
-        (h) => `position: relative; height: ${h}px;`,
-      ),
+      style: {
+        position: "relative",
+        height: computed(columnHeight, (h) => `${h}px`),
+      },
     },
     children,
   );
@@ -104,7 +104,7 @@ export function Column(
     render() {
       const $elm = view$.render();
       if (props.onMounted) {
-        props.onMounted($elm);
+        props.onMounted({ target: $elm });
       }
       return $elm;
     },
@@ -130,15 +130,16 @@ export function Cell(
     });
   });
 
-  const style = computed(cellStyle, (s) => {
-    if (!s.bound) return "display: none;";
-    return `position: absolute; top: ${s.top}px; height: ${s.height}px; width: 100%;`;
-  });
-
   const view$ = View(
     {
       ...rest,
-      style,
+      style: {
+        display: computed(cellStyle, (s) => (s.bound ? undefined : "none")),
+        position: "absolute",
+        top: computed(cellStyle, (s) => `${s.top}px`),
+        height: computed(cellStyle, (s) => `${s.height}px`),
+        width: "100%",
+      },
     },
     children,
   );
@@ -160,7 +161,7 @@ export function Cell(
     render() {
       const $elm = view$.render();
       if (props.onMounted) {
-        props.onMounted($elm);
+        props.onMounted({ target: $elm });
       }
       return $elm;
     },

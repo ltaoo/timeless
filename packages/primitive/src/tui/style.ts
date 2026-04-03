@@ -1,4 +1,12 @@
-import { ESC, RESET, fgColor, bgColor } from "./renderer";
+// ─── ANSI primitives (inlined from renderer) ───────────────────
+export const ESC = "\x1b[";
+export const RESET = `${ESC}0m`;
+export function fgColor(code: number): string {
+  return `${ESC}38;5;${code}m`;
+}
+export function bgColor(code: number): string {
+  return `${ESC}48;5;${code}m`;
+}
 
 // ─── Text attributes ────────────────────────────────────────────
 export const BOLD = `${ESC}1m`;

@@ -1,6 +1,6 @@
 import { Ref, isRef, isClassName, ClassNameRef } from "@timeless/reactive";
 
-import { isElement } from "@/primitive/view";
+import { isElement, MountedEvent, ViewStyle, viewStyleToCssText } from "@/primitive/view";
 import { getHost } from "@/host";
 import { safeCreateElementNS, safeCreateTextNode } from "@/util/env";
 
@@ -8,7 +8,7 @@ type AttrValue = string | number | Ref<string> | Ref<number>;
 
 /** Props shared by all SVG elements (lifecycle, events, style, class) */
 interface SVGBaseProps {
-  style?: string | Ref<string>;
+  style?: ViewStyle;
   class?: string | Ref<string> | ClassNameRef;
   dataset?: Record<string, string>;
   id?: AttrValue;
@@ -18,7 +18,7 @@ interface SVGBaseProps {
   "aria-hidden"?: "true" | "false";
   "aria-describedby"?: string;
   "aria-labelledby"?: string;
-  onMounted?(el: SVGElement): void;
+  onMounted?(event: MountedEvent<SVGElement>): void;
   beforeUnmounted?(): void;
   onUnmounted?(): void;
   onClick?(e: MouseEvent): void;
@@ -274,14 +274,18 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
         } else if (isRef(cls)) {
           cls._subscribe({
             onChange(v) {
-              host.setAttribute($elm, "class", v);
+              host.setAttribute($elm, "class", String(v));
             },
           });
-          host.setAttribute($elm, "class", cls.value);
+          host.setAttribute($elm, "class", String(cls.value));
         } else if (isClassName(cls)) {
           cls._subscribe({
-            onChange(v: string[]) {
-              host.setAttribute($elm, "class", v.join(" "));
+            onChange(v: any) {
+              host.setAttribute(
+                $elm,
+                "class",
+                Array.isArray(v) ? v.join(" ") : String(v ?? ""),
+              );
             },
           });
           host.setAttribute($elm, "class", cls.toString());
@@ -289,16 +293,21 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
       }
 
       if (style) {
-        if (typeof style === "string") {
-          host.setStyleText($elm, style);
-        }
-        if (isRef(style)) {
-          host.setStyleText($elm, style.value);
-          style._subscribe({
-            onChange(v: any) {
-              host.setStyleText($elm, v);
-            },
+        const s: any = style;
+        const applyStyle = () => {
+          host.setStyleText($elm, viewStyleToCssText((isRef(s) ? s.value : s) || {}));
+        };
+        if (isRef(s)) {
+          s._subscribe({ onChange() { applyStyle(); } });
+          applyStyle();
+        } else {
+          Object.keys(s).forEach((k: string) => {
+            const vv = s[k];
+            if (isRef(vv)) {
+              (vv as any)._subscribe({ onChange() { applyStyle(); } });
+            }
           });
+          applyStyle();
         }
       }
       if (onClick) {
@@ -359,13 +368,13 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
         }
       }
       if (onMounted) {
-        onMounted($elm);
+        onMounted({ target: $elm });
       }
       for (let i = 0; i < _children.length; i += 1) {
         const node = _children[i];
         if (isElement(node)) {
           if (node.onMounted) {
-            node.onMounted(node.$elm);
+            node.onMounted({ target: node.$elm });
           }
         }
       }

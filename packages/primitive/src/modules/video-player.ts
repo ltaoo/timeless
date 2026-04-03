@@ -25,12 +25,13 @@ export function Video(
     {
       ...rest,
       as: "video",
-      onMounted($elm) {
+      onMounted(event) {
+        const $elm = (event as any).target;
         const $video = $elm as HTMLVideoElement;
         store.setMounted();
         const provide = global_provider?.provide_ui_video_player;
         if (typeof provide === "function") provide($video, store);
-        if (props.onMounted) props.onMounted($elm);
+        if (props.onMounted) props.onMounted(event);
       },
     },
     children,

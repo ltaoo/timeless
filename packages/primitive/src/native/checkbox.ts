@@ -13,7 +13,8 @@ export function NativeCheckbox(props: NativeCheckboxProps = {}) {
   return NativeInput({
     ...rest,
     type: "checkbox",
-    onMounted($elm) {
+    onMounted(event) {
+      const $elm = (event as any).target;
       const $input = $elm as HTMLInputElement;
 
       if (checked !== undefined) {
@@ -42,7 +43,7 @@ export function NativeCheckbox(props: NativeCheckboxProps = {}) {
         }
       }
 
-      if (onMounted) onMounted($elm);
+      if (onMounted) onMounted(event);
     },
     onChange(e) {
       const $input = e.target as HTMLInputElement | null;

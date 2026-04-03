@@ -66,12 +66,14 @@ export function Indicator(
     return View(
       {
         ...rest,
-        style: computed(state, (d) => {
-          const v = d.value ?? 0;
-          const m = d.max ?? 100;
-          const baseStyle = rest.style || "";
-          return `${baseStyle}width:${Math.min(Math.max((v / m) * 100, 0), 100)}%`;
-        }),
+        style: {
+          ...(rest.style || {}),
+          width: computed(state, (d) => {
+            const v = d.value ?? 0;
+            const m = d.max ?? 100;
+            return `${Math.min(Math.max((v / m) * 100, 0), 100)}%`;
+          }),
+        },
       },
       children,
     );
@@ -80,11 +82,13 @@ export function Indicator(
   return View(
     {
       ...rest,
-      style: computed(value, (d) => {
-        const v = d;
-        const baseStyle = rest.style || "";
-        return `${baseStyle}width:${Math.min(Math.max((v / max) * 100, 0), 100)}%`;
-      }),
+      style: {
+        ...(rest.style || {}),
+        width: computed(value, (d) => {
+          const v = d;
+          return `${Math.min(Math.max((v / max) * 100, 0), 100)}%`;
+        }),
+      },
     },
     children,
   );
