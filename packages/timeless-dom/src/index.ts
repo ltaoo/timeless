@@ -8,10 +8,19 @@ import {
   Grid,
   View,
   Txt,
+  NativeInput,
+  InputPrimitive,
+  ButtonPrimitive,
+  CheckboxPrimitive,
+  RadioPrimitive,
   VNode,
 } from "@timeless/timeless";
 
 import { DomGrid } from "./modules/grid";
+import { DomButtonRoot } from "./modules/button";
+import { DomCheckboxBox, DomCheckboxGroup, DomCheckboxGroupItem, DomCheckboxIndicator, DomCheckboxInput, DomCheckboxLabel, DomCheckboxRoot } from "./modules/checkbox";
+import { DomInput, DomInputField, DomInputRoot } from "./modules/input";
+import { DomRadioBox, DomRadioGroup, DomRadioGroupItem, DomRadioIndicator, DomRadioInput, DomRadioLabel, DomRadioRoot } from "./modules/radio";
 import { DomTxt } from "./modules/text";
 import { DomView } from "./modules/view";
 
@@ -404,6 +413,28 @@ function registerDomComponents() {
   registerComponent(Grid, DomGrid);
   registerComponent(View, DomView);
   registerComponent(Txt, DomTxt);
+
+  registerComponent(NativeInput, DomInput);
+  registerComponent(InputPrimitive.Root, DomInputRoot);
+  registerComponent(InputPrimitive.Input, DomInputField);
+
+  registerComponent(ButtonPrimitive.Root, DomButtonRoot);
+
+  registerComponent(CheckboxPrimitive.Root, DomCheckboxRoot);
+  registerComponent(CheckboxPrimitive.Box, DomCheckboxBox);
+  registerComponent(CheckboxPrimitive.Indicator, DomCheckboxIndicator);
+  registerComponent(CheckboxPrimitive.Input, DomCheckboxInput);
+  registerComponent(CheckboxPrimitive.Label, DomCheckboxLabel);
+  registerComponent(CheckboxPrimitive.Group, DomCheckboxGroup);
+  registerComponent(CheckboxPrimitive.GroupItem, DomCheckboxGroupItem);
+
+  registerComponent(RadioPrimitive.Root, DomRadioRoot);
+  registerComponent(RadioPrimitive.Box, DomRadioBox);
+  registerComponent(RadioPrimitive.Indicator, DomRadioIndicator);
+  registerComponent(RadioPrimitive.Input, DomRadioInput);
+  registerComponent(RadioPrimitive.Label, DomRadioLabel);
+  registerComponent(RadioPrimitive.Group, DomRadioGroup);
+  registerComponent(RadioPrimitive.GroupItem, DomRadioGroupItem);
 }
 
 /**
