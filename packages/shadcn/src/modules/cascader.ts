@@ -50,7 +50,8 @@ export function Cascader(
         onMouseLeave() {
           hovering.as(false);
         },
-        onMounted(el: HTMLElement) {
+        onMounted(event) {
+          const el = (event as any).target as HTMLElement;
           el.addEventListener("mousedown", (e) => {
             e.stopPropagation();
           });
@@ -157,8 +158,9 @@ export function Cascader(
                   })[];
                   selectedValue: any;
                 },
-                panelIndex: number,
+                panelIndex,
               ) {
+                const panelIdx = panelIndex.value;
                 return View(
                   {
                     class:
@@ -166,7 +168,7 @@ export function Cascader(
                   },
                   [
                     For({
-                      each: computed(state_, (d) => d.panels[panelIndex]?.options || []),
+                      each: computed(state_, (d) => d.panels[panelIdx]?.options || []),
                       key: "value",
                       render(
                         option: CascaderOption<any> & {
@@ -177,10 +179,10 @@ export function Cascader(
                         return CascaderPrimitive.Item(
                           {
                             store,
-                            panelIndex,
+                            panelIndex: panelIdx,
                             option,
                             class: computed(state_, (d) => {
-                              const currentPanel = d.panels[panelIndex];
+                              const currentPanel = d.panels[panelIdx];
                               const opt = currentPanel?.options.find(
                                 (o: any) => o.value === option.value,
                               );

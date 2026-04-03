@@ -1,4 +1,4 @@
-import { refobj, ref, computed } from "@timeless/reactive";
+import { refobj, ref, computed, isRef, isStyleRef } from "@timeless/reactive";
 import { TooltipCore, Align, Side } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "@/primitive/view";
@@ -126,6 +126,13 @@ export function Portal(
   );
 
   const { class: className, style: styleProps, ...restProps } = props;
+  const extraStyle =
+    styleProps &&
+    typeof styleProps === "object" &&
+    !isRef(styleProps) &&
+    !isStyleRef(styleProps)
+      ? styleProps
+      : {};
 
   return NativePortal(
     {
@@ -146,7 +153,7 @@ export function Portal(
           },
           class: className,
           style: {
-            ...(styleProps || {}),
+            ...extraStyle,
             display: computed(state, (t) => (t.visible ? undefined : "none")),
           },
         },

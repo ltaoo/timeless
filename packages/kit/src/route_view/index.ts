@@ -564,6 +564,28 @@ function emitViewCreated(view: RouteViewCore) {
   handler(view);
 }
 
+export type RouteMenusModelState<TMenu> = {
+  menus: TMenu[];
+  cur: any;
+};
+
+export type RouteMenusModelInstance<TMenu> = {
+  methods: {
+    refresh(): void;
+  };
+  state: RouteMenusModelState<TMenu>;
+  menus: TMenu[];
+  cur: any;
+  isSubRoute(name: string): boolean;
+  isActive(name: string): boolean;
+  isSelected(t: RouteViewCore | null, menu: TMenu): boolean;
+  handleClick(menu: TMenu, query?: Record<string, string>): void;
+  ready(): void;
+  destroy(): void;
+  onStateChange(handler: (state: RouteMenusModelState<TMenu>) => void): () => void;
+  onError(handler: (err: BizError) => void): () => void;
+};
+
 export function RouteMenusModel<
   T extends {
     title: string;
@@ -573,7 +595,9 @@ export function RouteMenusModel<
     children?: T["name"][];
     onClick?: (m: T) => void;
   },
->(props: { view: RouteViewCore; history: HistoryCore<any, any>; menus: T[] }) {
+>(
+  props: { view: RouteViewCore; history: HistoryCore<any, any>; menus: T[] },
+): RouteMenusModelInstance<T> {
   const methods = {
     refresh() {
       bus.emit(Events.StateChange, { ..._state });
@@ -582,7 +606,7 @@ export function RouteMenusModel<
 
   let _cur = refobj(props.view.curView);
   let _menus = props.menus || [];
-  let _state = {
+  let _state: RouteMenusModelState<T> = {
     get menus() {
       return _menus;
     },
@@ -638,11 +662,11 @@ export function RouteMenusModel<
       unlisten();
       bus.destroy();
     },
-    onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {
-      return bus.on(Events.StateChange, handler);
+    onStateChange(handler: (state: typeof _state) => void) {
+      return bus.on(Events.StateChange, handler as any);
     },
-    onError(handler: Handler<TheTypesOfEvents[Events.Error]>) {
-      return bus.on(Events.Error, handler);
+    onError(handler: (err: BizError) => void) {
+      return bus.on(Events.Error, handler as any);
     },
   };
 }

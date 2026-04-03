@@ -1,4 +1,4 @@
-import { ref, computed, Ref } from "@timeless/reactive";
+import { ref, computed, Ref, isRef, isStyleRef } from "@timeless/reactive";
 import { ProgressCore } from "@timeless/ui";
 
 import { View, ViewProps, ViewChildren } from "@/primitive/view";
@@ -61,13 +61,18 @@ export function Indicator(
 ) {
   const { store, value, max = 100, ...rest } = props;
 
+  const extraStyle =
+    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+      ? rest.style
+      : {};
+
   if (store) {
     const state = ref(store.state);
     return View(
       {
         ...rest,
         style: {
-          ...(rest.style || {}),
+          ...extraStyle,
           width: computed(state, (d) => {
             const v = d.value ?? 0;
             const m = d.max ?? 100;
@@ -83,7 +88,7 @@ export function Indicator(
     {
       ...rest,
       style: {
-        ...(rest.style || {}),
+        ...extraStyle,
         width: computed(value, (d) => {
           const v = d;
           return `${Math.min(Math.max((v / max) * 100, 0), 100)}%`;

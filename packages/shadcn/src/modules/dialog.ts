@@ -1,4 +1,4 @@
-import { computed, ref, refobj, sn } from "@timeless/primitive";
+import { computed, ref, refobj } from "@timeless/primitive";
 import {
   DialogPrimitive,
   View,

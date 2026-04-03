@@ -1,4 +1,4 @@
-import { computed, isRef, ref } from "@timeless/reactive";
+import { computed, isRef, isStyleRef, ref } from "@timeless/reactive";
 
 import { View, ViewProps, ViewChildren } from "@/primitive/view";
 import { getHost } from "@/host";
@@ -102,10 +102,14 @@ export function Range(
   children?: ViewChildren,
 ) {
   const { percentage, ...rest } = props;
+  const extraStyle =
+    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+      ? rest.style
+      : {};
   return View(
     {
       ...rest,
-      style: { ...(rest.style || {}), width: computed(percentage, (d) => `${d}%`) },
+      style: { ...extraStyle, width: computed(percentage, (d) => `${d}%`) },
     },
     children,
   );
@@ -116,11 +120,15 @@ export function Thumb(
   children?: ViewChildren,
 ) {
   const { percentage, ...rest } = props;
+  const extraStyle =
+    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+      ? rest.style
+      : {};
   return View(
     {
       ...rest,
       style: {
-        ...(rest.style || {}),
+        ...extraStyle,
         left: computed(percentage, (d) => `${d}%`),
         top: "50%",
         transform: "translate(-50%,-50%)",

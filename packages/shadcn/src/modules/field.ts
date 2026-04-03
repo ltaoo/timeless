@@ -225,11 +225,12 @@ export function Field(
           : "flex w-full flex-col gap-2",
         cls,
       ]),
-      onMounted(el: HTMLElement) {
+      onMounted(event) {
+        const el = (event as any).target as HTMLElement;
         $root = el;
         applyInvalidToControls(invalid_.value);
         if (onMounted) {
-          return onMounted(el);
+          return onMounted(event);
         }
       },
       onUnmounted() {

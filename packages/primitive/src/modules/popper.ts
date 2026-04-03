@@ -1,4 +1,4 @@
-import { refobj, computed, cn } from "@timeless/reactive";
+import { refobj, computed, cn, isRef, isStyleRef } from "@timeless/reactive";
 import {
   PopperCore,
   getGlobalLayerManager,
@@ -75,12 +75,17 @@ export function Content(
   // 初始化全局监听器
   initGlobalPointerListener();
 
+  const extraStyle =
+    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+      ? rest.style
+      : {};
+
   return View(
     {
       ...rest,
       class: cn(["t1-popper", rest.class]),
       style: {
-        ...(rest.style || {}),
+        ...extraStyle,
         "z-index": zIndex,
         position: "fixed",
         left: 0,

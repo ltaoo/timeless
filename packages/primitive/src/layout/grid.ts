@@ -1,6 +1,11 @@
-import { ClassNameRef, Ref } from "@timeless/reactive";
+import { ClassNameRef, Ref, isRef, isStyleRef } from "@timeless/reactive";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import {
+  View,
+  ViewChildren,
+  ViewProps,
+  viewStyleToCssText,
+} from "@/primitive/view";
 
 export type GridAlign = "start" | "end" | "center" | "stretch" | "baseline";
 export type GridJustify = GridAlign | "between" | "around" | "evenly";
@@ -137,8 +142,17 @@ export function Grid(
     }
   }
 
-  return View(
-    { ...rest, class: cls, style: { ...baseStyle, ...(stl || {}) } },
-    children,
-  );
+  if (typeof stl === "string") {
+    return View(
+      { ...rest, class: cls, style: `${viewStyleToCssText(baseStyle)}; ${stl}` },
+      children,
+    );
+  }
+
+  const extraStyle =
+    stl && typeof stl === "object" && !isRef(stl) && !isStyleRef(stl)
+      ? stl
+      : {};
+
+  return View({ ...rest, class: cls, style: { ...baseStyle, ...extraStyle } }, children);
 }

@@ -35,18 +35,19 @@ export function Accordion(
     [
       For({
         each: items,
-        render(item: AccordionItem, index: number) {
+        render(item: AccordionItem, index) {
+          const i = index.value;
           return AccordionPrimitive.Item(
             {
               store,
-              index,
+              index: i,
               class: "border-b border-zinc-200 dark:border-zinc-800",
             },
             [
               AccordionPrimitive.Trigger(
                 {
                   store,
-                  index,
+                  index: i,
                   class:
                     "flex w-full items-center justify-between py-4 font-medium transition-all cursor-pointer hover:underline",
                 },
@@ -57,9 +58,9 @@ export function Accordion(
                   AccordionPrimitive.Chevron(
                     {
                       store,
-                      index,
+                      index: i,
                       class: computed(state_, (d) => {
-                        const isOpen = d.openItems.includes(index);
+                        const isOpen = d.openItems.includes(i);
                         return [
                           "text-sm transition-transform duration-200",
                           isOpen ? "rotate-180" : "",
@@ -75,9 +76,9 @@ export function Accordion(
               AccordionPrimitive.Content(
                 {
                   store,
-                  index,
+                  index: i,
                   class: computed(state_, (d) => {
-                    const isOpen = d.openItems.includes(index);
+                    const isOpen = d.openItems.includes(i);
                     return isOpen
                       ? "overflow-hidden pb-4 pt-0 text-sm"
                       : "hidden";

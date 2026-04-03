@@ -46,12 +46,13 @@ export function Tabs(
         [
           For({
             each: items || computed(state_, (d) => d.tabs),
-            render(item: TabItem, index: number) {
+            render(item: TabItem, index) {
+              const i = index.value;
               return TabsPrimitive.Tab(
                 {
                   store,
                   value: item.value,
-                  index,
+                  index: i,
                   class: computed(state_, (d) => {
                     const isActive = d.curId === item.value;
                     const baseClass =

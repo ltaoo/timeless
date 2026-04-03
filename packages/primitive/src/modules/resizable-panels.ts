@@ -1,4 +1,4 @@
-import { refobj, computed, ref } from "@timeless/reactive";
+import { refobj, computed, ref, isRef, isStyleRef } from "@timeless/reactive";
 import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "@/primitive/view";
@@ -14,12 +14,16 @@ export function Group(
 ) {
   const { store, direction = "horizontal", ...rest } = props;
   const state_ = refobj(store.state);
+  const extraStyle =
+    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+      ? rest.style
+      : {};
 
   return View(
     {
       ...rest,
       style: {
-        ...(props.style || {}),
+        ...extraStyle,
         display: "flex",
         width: "100%",
         height: "100%",
@@ -49,6 +53,10 @@ export function Panel(
 ) {
   const { store, group, ...rest } = props;
   const size_ = ref(store.state.size);
+  const extraStyle =
+    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+      ? rest.style
+      : {};
 
   // 监听 state 变化
   store.onStateChange((state) => {
@@ -60,7 +68,7 @@ export function Panel(
     {
       ...rest,
       style: {
-        ...(props.style || {}),
+        ...extraStyle,
         "flex-basis": computed(size_, (size) => (size ? `${size}%` : "auto")),
         "flex-grow": computed(size_, (size) => (size ? 0 : 1)),
         "flex-shrink": 1,
@@ -95,12 +103,16 @@ export function Handle(
   const { store, panelBefore, panelAfter, ...rest } = props;
   const state_ = refobj(store.state);
   const isDragging_ = ref(false);
+  const extraStyle =
+    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+      ? rest.style
+      : {};
 
   return View(
     {
       ...rest,
       style: {
-        ...(rest.style || {}),
+        ...extraStyle,
         cursor: computed(state_, (state) =>
           state.direction === "horizontal" ? "col-resize" : "row-resize",
         ),

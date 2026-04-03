@@ -1073,8 +1073,9 @@ export function render(elm: TimelessElement | any, canvas: HTMLCanvasElement | n
     return;
   }
 
-  host.clearChildren(host.getBody());
-  host.appendChild(host.getBody(), content as any);
+  const body = host.getBody ? host.getBody() : host.body;
+  host.clearChildren(body);
+  host.appendChild(body, content as any);
   host.draw();
   return host;
 }

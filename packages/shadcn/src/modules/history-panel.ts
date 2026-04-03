@@ -1,5 +1,5 @@
 import { HistoryCore } from "@timeless/kit";
-import { computed, refarr, refobj, ref } from "@timeless/primitive";
+import { computed, combine, refarr, refobj, ref } from "@timeless/primitive";
 import { View, ViewProps, For, Show, Txt, h } from "@timeless/primitive";
 import { ChevronDownOutlined, ChevronUpOutlined } from "@timeless/icons";
 
@@ -96,7 +96,7 @@ export function HistoryPanel(
                     [
                       For({
                         each: stacks,
-                        render: (stack, index) => {
+                        render(stack, index) {
                           const { key, title, query } = stack;
                           return View(
                             {
@@ -138,7 +138,10 @@ export function HistoryPanel(
                               h(
                                 Show,
                                 {
-                                  when: computed(cursor, (c) => index === c),
+                                  when: combine(
+                                    { cursor, index },
+                                    (t) => t.index === t.cursor,
+                                  ),
                                 },
                                 [
                                   View(
@@ -178,7 +181,7 @@ export function HistoryPanel(
                       [
                         For({
                           each: histories,
-                          render: (history) => {
+                          render(history) {
                             const { pathname } = history;
                             return View(
                               {

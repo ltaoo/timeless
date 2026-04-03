@@ -1,4 +1,4 @@
-import { refobj, computed } from "@timeless/reactive";
+import { refobj, computed, isRef, isStyleRef } from "@timeless/reactive";
 import { PopperCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "@/primitive/view";
@@ -15,6 +15,11 @@ export function Arrow(
   store.onStateChange(() => {
     state.as(store.state);
   });
+
+  const extraStyle =
+    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+      ? rest.style
+      : {};
 
   return View(
     {
@@ -49,7 +54,7 @@ export function Arrow(
             ? "calc(-1 * var(--t1-popper-arrow-offset, 6px))"
             : undefined;
         }),
-        ...(rest.style || {}),
+        ...extraStyle,
       },
       onMounted(event) {
         const $el = (event as any).target as HTMLDivElement;

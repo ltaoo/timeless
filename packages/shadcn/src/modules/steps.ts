@@ -34,10 +34,11 @@ export function Steps(props: ViewProps & { store: StepCore; items: StepItem[] })
           For({
             each: items,
             render: (item, index) => {
+              const i = index.value;
               return StepsPrimitive.Item(
                 {
                   store,
-                  index,
+                  index: i,
                   item,
                   class: "flex flex-1 items-center",
                 },
@@ -45,13 +46,13 @@ export function Steps(props: ViewProps & { store: StepCore; items: StepItem[] })
                   StepsPrimitive.Indicator(
                     {
                       store,
-                      index,
+                      index: i,
                       class: classNames([
                         "flex flex-col items-center relative z-10",
                       ]),
                     },
                     [
-                      StepIndicatorCircle({ store, index }),
+                      StepIndicatorCircle({ store, index: i }),
                       StepsPrimitive.Title(
                         {
                           class:
@@ -61,16 +62,16 @@ export function Steps(props: ViewProps & { store: StepCore; items: StepItem[] })
                       ),
                     ],
                   ),
-                  Show({ when: index < items.length - 1 }, [
+                  Show({ when: i < items.length - 1 }, [
                     h(
                       StepsPrimitive.Connector,
                       {
                         store,
-                        index,
+                        index: i,
                         class: classNames([
                           "h-[2px] w-full flex-1 mx-2 transition-colors",
                           computed(state_, (s) =>
-                            index < s.value
+                            i < s.value
                               ? "bg-zinc-900 dark:bg-zinc-50"
                               : "bg-zinc-200 dark:bg-zinc-700",
                           ),

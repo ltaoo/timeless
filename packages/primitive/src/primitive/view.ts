@@ -17,8 +17,12 @@ export type AttributeValue = string | number | boolean | undefined | null;
 export type MaybeSignal<T = AttributeValue> = T | Signal<T>;
 export type ViewAttributes = Record<string, MaybeSignal>;
 export type ViewStyle = Record<string, MaybeSignal>;
+export type ViewStyleInput = ViewStyle | string;
 
-export function viewStyleToCssText(style: ViewStyle) {
+export function viewStyleToCssText(style: ViewStyleInput) {
+  if (typeof style === "string") {
+    return style;
+  }
   const parts: string[] = [];
   const keys = Object.keys(style);
   for (let i = 0; i < keys.length; i += 1) {
@@ -40,7 +44,7 @@ export interface MountedEvent<T = any> {
 export interface ViewProps {
   as?: string;
   key?: string | number;
-  style?: ViewStyle | StyleRef | Signal<ViewStyle> | Ref<ViewStyle>;
+  style?: ViewStyleInput | StyleRef | Signal<ViewStyleInput> | Ref<ViewStyleInput>;
   class?: MaybeSignal<string> | ClassNameRef;
   draggable?: boolean;
   attributes?: ViewAttributes;
@@ -205,6 +209,10 @@ export function View(
     }
 
     if (style) {
+      if (typeof style === "string") {
+        host.setStyleText($elm, style);
+        return;
+      }
       if (isStyleRef(style as any)) {
         const st = style as StyleRef;
         st._subscribe({

@@ -558,6 +558,9 @@ importers:
       '@timeless/icons':
         specifier: workspace:*
         version: link:../icons
+      '@timeless/kit':
+        specifier: workspace:*
+        version: link:../kit
       '@timeless/primitive':
         specifier: workspace:*
         version: link:../primitive

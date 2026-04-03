@@ -1,4 +1,4 @@
-import { refobj, computed, combine, sn, cn } from "@timeless/reactive";
+import { refobj, computed, combine, sn, cn, isRef, isStyleRef } from "@timeless/reactive";
 import { SelectCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "@/primitive/view";
@@ -454,6 +454,10 @@ export function ItemIndicator(
 ) {
   const { store, value, ...rest } = props;
   const state = refobj(store.state);
+  const extraStyle =
+    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+      ? rest.style
+      : {};
 
   store.onStateChange((v) => {
     state.as(v);
@@ -465,7 +469,7 @@ export function ItemIndicator(
     {
       ...rest,
       style: {
-        ...(rest.style || {}),
+        ...extraStyle,
         display: computed(selected, (d) => (d ? undefined : "none")),
       },
     },

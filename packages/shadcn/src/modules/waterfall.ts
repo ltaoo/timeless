@@ -6,7 +6,7 @@ import {
   isElement,
 } from "@timeless/primitive";
 import { cn, refarr } from "@timeless/primitive";
-import { WaterfallModel, WaterfallCellModel } from "@timeless/primitive";
+import type { WaterfallCellModel, WaterfallModel } from "@timeless/ui";
 
 export function Waterfall<T extends Record<string, unknown>>(
   props: ViewProps & {

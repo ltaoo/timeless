@@ -1,8 +1,6 @@
 "use client";
 
 import { View } from "@timeless/primitive";
-import type { ExternalToast } from "@timeless/ui";
-import { SonnerCore } from "@timeless/ui";
 // import { useEffect, useState } from "react"
 // import {
 //   CircleCheckIcon,
