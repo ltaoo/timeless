@@ -33,10 +33,6 @@ export function Txt(value: Ref<string> | string) {
     get $elm() {
       return $elm;
     },
-    set $elm(v) {
-      $elm = v;
-    },
-    _value: value,
     render() {
       if (rendered) return $elm;
       rendered = true;

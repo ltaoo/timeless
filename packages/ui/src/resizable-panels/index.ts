@@ -26,9 +26,15 @@ export class ResizablePanelsCore extends BaseDomain<TheTypesOfEvents> {
   isResizing = false;
 
   private element: HTMLElement | null = null;
-  private resizingPanels: { before: ResizablePanelCore; after: ResizablePanelCore } | null = null;
+  private resizingPanels: {
+    before: ResizablePanelCore;
+    after: ResizablePanelCore;
+  } | null = null;
   private startPosition = 0;
-  private startSizes: { before: number; after: number } = { before: 0, after: 0 };
+  private startSizes: { before: number; after: number } = {
+    before: 0,
+    after: 0,
+  };
 
   get state(): ResizablePanelsState {
     return {
@@ -45,7 +51,7 @@ export class ResizablePanelsCore extends BaseDomain<TheTypesOfEvents> {
 
     if (onResize) {
       this.onPanelResize(() => {
-        const sizes = this.panels.map(p => p.state.size);
+        const sizes = this.panels.map((p) => p.state.size);
         onResize(sizes);
       });
     }
@@ -73,13 +79,18 @@ export class ResizablePanelsCore extends BaseDomain<TheTypesOfEvents> {
     }
   }
 
-  startResize(panelBefore: ResizablePanelCore, panelAfter: ResizablePanelCore, e: PointerEvent) {
+  startResize(
+    panelBefore: ResizablePanelCore,
+    panelAfter: ResizablePanelCore,
+    e: PointerEvent,
+  ) {
     if (!this.element) return;
 
     this.isResizing = true;
     this.resizingPanels = { before: panelBefore, after: panelAfter };
 
-    this.startPosition = this.direction === "horizontal" ? e.clientX : e.clientY;
+    this.startPosition =
+      this.direction === "horizontal" ? e.clientX : e.clientY;
     this.startSizes = {
       before: panelBefore.state.size,
       after: panelAfter.state.size,
@@ -91,26 +102,34 @@ export class ResizablePanelsCore extends BaseDomain<TheTypesOfEvents> {
   resize(e: PointerEvent) {
     if (!this.element || !this.resizingPanels) return;
 
-    const currentPosition = this.direction === "horizontal" ? e.clientX : e.clientY;
+    const currentPosition =
+      this.direction === "horizontal" ? e.clientX : e.clientY;
     const delta = currentPosition - this.startPosition;
 
     const rect = this.element.getBoundingClientRect();
-    const totalSize = this.direction === "horizontal" ? rect.width : rect.height;
+    const totalSize =
+      this.direction === "horizontal" ? rect.width : rect.height;
 
     console.log("[ResizablePanelsCore] resize", {
       currentPosition,
       startPosition: this.startPosition,
       delta,
       totalSize,
-      direction: this.direction
+      direction: this.direction,
     });
 
     if (totalSize === 0) return;
 
     const deltaPercent = (delta / totalSize) * 100;
 
-    const newBeforeSize = Math.max(0, Math.min(100, this.startSizes.before + deltaPercent));
-    const newAfterSize = Math.max(0, Math.min(100, this.startSizes.after - deltaPercent));
+    const newBeforeSize = Math.max(
+      0,
+      Math.min(100, this.startSizes.before + deltaPercent),
+    );
+    const newAfterSize = Math.max(
+      0,
+      Math.min(100, this.startSizes.after - deltaPercent),
+    );
 
     // 确保总和不超过原始总和
     const originalTotal = this.startSizes.before + this.startSizes.after;
@@ -123,12 +142,12 @@ export class ResizablePanelsCore extends BaseDomain<TheTypesOfEvents> {
       newAfterSize,
       originalTotal,
       newTotal,
-      diff: Math.abs(newTotal - originalTotal)
+      diff: Math.abs(newTotal - originalTotal),
     });
 
     console.log("[ResizablePanelsCore] checking condition", {
       condition: Math.abs(newTotal - originalTotal) < 0.1,
-      willUpdate: Math.abs(newTotal - originalTotal) < 0.1
+      willUpdate: Math.abs(newTotal - originalTotal) < 0.1,
     });
 
     if (Math.abs(newTotal - originalTotal) < 0.1) {
@@ -237,7 +256,7 @@ export class ResizablePanelCore extends BaseDomain<PanelTypesOfEvents> {
       requestedSize: size,
       clampedSize,
       minSize: this.minSize,
-      maxSize: this.maxSize
+      maxSize: this.maxSize,
     });
 
     if (this.collapsible && clampedSize <= this.minSize) {

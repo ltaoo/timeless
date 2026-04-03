@@ -1,7 +1,7 @@
-import { base, Handler, BizError  } from "@timeless/base";
+import { base, Handler, BizError } from "@timeless/base";
 
-import { PopoverCore } from "@/popover";
-import { InputCore } from "@/input";
+import { PopoverCore } from "@/popover/index";
+import { InputCore } from "@/input/index";
 
 export function TreeSelectModel<
   T extends { id: number | string; label: string; children?: T[] },

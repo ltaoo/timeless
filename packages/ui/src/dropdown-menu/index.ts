@@ -1,10 +1,10 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
-import { MenuCore, MenuEntry } from "@/menu";
+import { MenuCore, MenuEntry } from "@/menu/index";
 import { MenuItemCore } from "@/menu/item";
 import { MenuGroupCore } from "@/menu/group";
 import { Side } from "@/popper/types";
-import { Align } from "@/popper";
+import { Align } from "@/popper/index";
 
 enum Events {
   StateChange,

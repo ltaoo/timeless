@@ -1,5 +1,6 @@
 import { BaseDomain, Handler } from "@timeless/base";
-import { PresenceCore } from "@/presence";
+
+import { PresenceCore } from "@/presence/index";
 
 enum Events {
   StateChange,

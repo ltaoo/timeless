@@ -1,18 +1,35 @@
 import { base, Handler } from "@timeless/base";
-import { refarr } from "@timeless/reactive";
-import type { RefArray } from "@timeless/reactive";
+import { refarr, RefArray } from "@timeless/reactive";
 
 type AccordionCoreProps = {
   type?: "single" | "multiple";
   defaultOpenItems?: number[];
 };
 
-export function AccordionCore(props: AccordionCoreProps = {}) {
-  const { type = "single", defaultOpenItems = [] } = props;
+export type AccordionCoreState = {
+  openItems: number[];
+  type: "single" | "multiple";
+};
 
-  const openItems: RefArray<number> = refarr(defaultOpenItems);
+export type AccordionCoreStore = {
+  shape: "accordion";
+  type: "single" | "multiple";
+  openItems: RefArray<number>;
+  state: AccordionCoreState;
+  toggle(index: number): void;
+  open(index: number): void;
+  close(index: number): void;
+  isOpen(index: number): boolean;
+  onStateChange(handler: Handler<AccordionCoreState>): () => void;
+  onOpenItemsChange(handler: Handler<number[]>): () => void;
+};
 
-  const _state = {
+export function AccordionCore(props: AccordionCoreProps = {}): AccordionCoreStore {
+  const { type = "single" } = props;
+
+  const openItems: RefArray<number> = refarr(props.defaultOpenItems || []);
+
+  const _state: AccordionCoreState = {
     get openItems() {
       return openItems.value;
     },
@@ -22,13 +39,13 @@ export function AccordionCore(props: AccordionCoreProps = {}) {
   };
 
   enum Events {
-    StateChange,
     OpenItemsChange,
+    StateChange,
   }
 
   type TheTypesOfEvents = {
-    [Events.StateChange]: typeof _state;
     [Events.OpenItemsChange]: number[];
+    [Events.StateChange]: typeof _state;
   };
 
   const bus = base<TheTypesOfEvents>();
@@ -38,7 +55,6 @@ export function AccordionCore(props: AccordionCoreProps = {}) {
     type,
     openItems,
     state: _state,
-
     toggle(index: number) {
       if (type === "single") {
         openItems.as(openItems.value.includes(index) ? [] : [index]);
@@ -78,7 +94,9 @@ export function AccordionCore(props: AccordionCoreProps = {}) {
       return bus.on(Events.StateChange, handler);
     },
 
-    onOpenItemsChange(handler: Handler<TheTypesOfEvents[Events.OpenItemsChange]>) {
+    onOpenItemsChange(
+      handler: Handler<TheTypesOfEvents[Events.OpenItemsChange]>,
+    ) {
       return bus.on(Events.OpenItemsChange, handler);
     },
   };

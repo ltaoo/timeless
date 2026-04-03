@@ -1,5 +1,5 @@
-import { base, BaseDomain, Handler } from "@timeless/base";
-import { throttle, remove_arr_item, toFixed } from "@timeless/utils";
+import { base, Handler } from "@timeless/base";
+import { throttle, remove_arr_item } from "@timeless/utils";
 
 import { WaterfallCellModel } from "./cell";
 
@@ -101,7 +101,9 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       for (let i = from; i < _$total_items.length; i++) {
         const $item = _$total_items[i];
         const $prev = _$total_items[i - 1];
-        const newTop = $prev ? $prev.state.top + $prev.state.height + _gutter : 0;
+        const newTop = $prev
+          ? $prev.state.top + $prev.state.height + _gutter
+          : 0;
         $item.methods.setTop(newTop);
       }
       _dirty_from = Infinity;
@@ -193,7 +195,10 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       _dirty_from = Math.min(_dirty_from, 1);
       methods.recomputeTops();
       // 重新计算可见范围并 rebind
-      methods.update({ start: _start, end: Math.min(_start + _size + _buffer_size, _$total_items.length) });
+      methods.update({
+        start: _start,
+        end: Math.min(_start + _size + _buffer_size, _$total_items.length),
+      });
       bus.emit(Events.HeightChange, _height);
       methods.refresh();
     },
@@ -213,7 +218,8 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
         _slotBindings.delete(_dataIdStr(dataId));
         _freeSlots.push(boundSlot);
       }
-      const height_difference = $item.height + (_$total_items.length > 1 ? _gutter : 0);
+      const height_difference =
+        $item.height + (_$total_items.length > 1 ? _gutter : 0);
       _height -= height_difference;
       _$total_items = remove_arr_item(_$total_items, idx);
       // 删除后，从该位置开始所有后续 item 的 top 需要重算
@@ -242,7 +248,10 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       _start = 0;
       _end = _size + _buffer_size;
       // 重新计算范围并 rebind 所有槽位
-      const range = { start: _start, end: Math.min(_end, _$total_items.length) };
+      const range = {
+        start: _start,
+        end: Math.min(_end, _$total_items.length),
+      };
       methods.update(range);
       methods.refresh();
     },
@@ -415,11 +424,13 @@ export function WaterfallColumnModel<T extends Record<string, unknown>>(props: {
       return _size;
     },
     get items() {
-      return _slots.filter((v) => v.state.bound).map((v) => {
-        return {
-          ...v.state,
-        };
-      });
+      return _slots
+        .filter((v) => v.state.bound)
+        .map((v) => {
+          return {
+            ...v.state,
+          };
+        });
     },
     get item_count() {
       return _slotBindings.size;

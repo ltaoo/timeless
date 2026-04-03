@@ -2,8 +2,9 @@
  * @file 弹窗核心类
  */
 import { BaseDomain, Handler } from "@timeless/base";
-import { PresenceCore } from "@/presence";
-import { ButtonCore } from "@/button";
+
+import { PresenceCore } from "@/presence/index";
+import { ButtonCore } from "@/button/index";
 
 enum Events {
   BeforeShow,
@@ -212,7 +213,12 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
     }
     const rect = getRect();
     this.viewportRect = rect
-      ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
+      ? {
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height,
+        }
       : null;
   }
 

@@ -1,6 +1,10 @@
 import { getRendererScheduler, resolveComponent } from "@/host";
 
-import type { ChildDescriptor, ComponentFn, ElementDescriptor } from "./descriptor";
+import type {
+  ChildDescriptor,
+  ComponentFn,
+  ElementDescriptor,
+} from "./descriptor";
 import { isDescriptor } from "./descriptor";
 import { appendChild, createElement, createText } from "./create";
 import type { RendererScheduler } from "./reactive";
@@ -18,7 +22,10 @@ function extractEvents(props: Record<string, any>): VNodeEvents {
   return events;
 }
 
-export function mountChild(child: ChildDescriptor, scheduler: RendererScheduler | null): VNode | null {
+export function mountChild(
+  child: ChildDescriptor,
+  scheduler: RendererScheduler | null,
+): VNode | null {
   if (child === null) return null;
   if (typeof child === "string" || typeof child === "number") {
     return createText(String(child));
@@ -29,7 +36,10 @@ export function mountChild(child: ChildDescriptor, scheduler: RendererScheduler 
   return null;
 }
 
-export function mount(descriptor: ElementDescriptor, scheduler?: RendererScheduler | null): VNode {
+export function mount(
+  descriptor: ElementDescriptor,
+  scheduler?: RendererScheduler | null,
+): VNode {
   const s = scheduler === undefined ? getRendererScheduler() : scheduler;
   const { type, props, children } = descriptor;
 

@@ -1,6 +1,12 @@
 // console.log("reactive.version 1.4.0");
 
-import type { Subscriber, Ref, ClassNameRef, StyleRef } from "./types";
+import type {
+  Subscriber,
+  Ref,
+  ClassNameRef,
+  StyleRef,
+  TimelessRefArray,
+} from "./types";
 import type { RefObject } from "./reactive-object";
 import type { RefArray } from "./reactive-array";
 import type {
@@ -32,6 +38,7 @@ export {
   Ref,
   RefObject,
   RefArray,
+  TimelessRefArray,
   Signal,
   PrimitiveSignal,
   ObjectSignal,

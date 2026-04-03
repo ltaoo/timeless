@@ -463,12 +463,7 @@ export class MenuRadioGroupItem extends MenuItemCore {
 
   constructor(options: Partial<{ _name: string }> & MenuRadioGroupItemProps) {
     super(options);
-    const {
-      group,
-      checked,
-      defaultChecked = false,
-      onCheckedChange,
-    } = options;
+    const { group, checked, defaultChecked = false, onCheckedChange } = options;
     this.group = group;
     this.onCheckedChange = onCheckedChange;
     this._checked = checked ?? defaultChecked;

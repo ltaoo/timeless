@@ -1,4 +1,4 @@
-import { base, BaseDomain, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/base";
 import { toFixed } from "@timeless/utils";
 
 export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
@@ -11,7 +11,13 @@ export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
     refresh() {
       bus.emit(Events.StateChange, { ..._state });
     },
-    rebind(p: { payload: T; uid: number; dataId: number | string; top: number; height: number }) {
+    rebind(p: {
+      payload: T;
+      uid: number;
+      dataId: number | string;
+      top: number;
+      height: number;
+    }) {
       _payload = p.payload;
       _uid = p.uid;
       _dataId = p.dataId;
@@ -79,7 +85,10 @@ export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
       const original_height = _height;
       _height == height;
       console.log("[DOMAIN]ui/waterfall/cell - setHeight", _height, height);
-      bus.emit(Events.HeightChange, [original_height, original_height - height]);
+      bus.emit(Events.HeightChange, [
+        original_height,
+        original_height - height,
+      ]);
       methods.refresh();
     },
     setPosition(position: { x: number; y: number }) {
@@ -231,4 +240,6 @@ export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
   };
 }
 
-export type WaterfallCellModel<T extends Record<string, unknown>> = ReturnType<typeof WaterfallCellModel<T>>;
+export type WaterfallCellModel<T extends Record<string, unknown>> = ReturnType<
+  typeof WaterfallCellModel<T>
+>;

@@ -1,10 +1,10 @@
-import { dayjs } from "@timeless/utils";
 import { base, Handler } from "@timeless/base";
+import { dayjs } from "@timeless/utils";
 
-import { CalendarCore } from "@/calendar";
-import { ButtonCore } from "@/button";
-import { PopperCore } from "@/popper";
-import { PresenceCore } from "@/presence";
+import { CalendarCore } from "@/calendar/index";
+import { ButtonCore } from "@/button/index";
+import { PopperCore } from "@/popper/index";
+import { PresenceCore } from "@/presence/index";
 
 export function DatePickerCore(props: { today: Date; allowClear?: boolean }) {
   const { today, allowClear = false } = props;

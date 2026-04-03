@@ -217,6 +217,8 @@ export type TimelessRefArray<T> = {
   [Symbol.iterator]: () => Iterator<T>;
 
   move: (fromIndex: number, toIndex: number) => TimelessRefArray<T>;
+  up: (index: number) => TimelessRefArray<T>;
+  down: (index: number) => TimelessRefArray<T>;
   swap: (indexA: number, indexB: number) => TimelessRefArray<T>;
   moveToFirst: (index: number) => TimelessRefArray<T>;
   moveToLast: (index: number) => TimelessRefArray<T>;

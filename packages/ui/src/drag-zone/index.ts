@@ -87,7 +87,9 @@ export class DragZoneCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, { ...this.state });
   }
   getFileByName(name: string) {
-    return this._files.find((f) => (typeof f === "string" ? f === name : f.name === name));
+    return this._files.find((f) =>
+      typeof f === "string" ? f === name : f.name === name,
+    );
   }
 
   clear() {

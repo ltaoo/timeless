@@ -1,9 +1,5 @@
 import { BaseDomain, Handler } from "@timeless/base";
-import { InputCore } from "@/input";
-import { DatePickerCore } from "@/date-picker";
 
-import { ListContainerCore } from "./list";
-import { FormCore } from "./index";
 import { ValueInputInterface } from "./types";
 
 enum Events {
@@ -30,7 +26,12 @@ type FormFieldCoreState = {
 // };
 
 export class FormFieldCore<
-  T extends { label: string; name: string; required?: boolean; input: ValueInputInterface<any> }
+  T extends {
+    label: string;
+    name: string;
+    required?: boolean;
+    input: ValueInputInterface<any>;
+  },
 > extends BaseDomain<TheTypesOfEvents> {
   _label: string;
   _name: string;

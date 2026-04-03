@@ -10,19 +10,19 @@ import {
   View,
   Txt,
   VNode,
+} from "@timeless/primitive";
+import {
   createTuiElement,
   createTuiText,
   createTuiFragment,
   isTuiNode,
   type TuiNode,
   type TuiElement,
-} from "@timeless/timeless";
+} from "./nodes";
 import {
   renderToString,
   renderToScreen as renderTuiNodeToScreen,
-  clearScreen,
   showCursor,
-  hideCursor,
 } from "./renderer";
 import { setTuiHost } from "./host-accessor";
 import { _setAppFn, _startTui } from "./tui";
@@ -33,9 +33,14 @@ import { createTuiInput, parseKey, type KeyName } from "./modules/input";
 
 const { isDescriptor, mount, commitTree } = VNode;
 
+type TuiHost = HeadlessHost & {
+  getBody: NonNullable<HeadlessHost["getBody"]>;
+  appendChild: NonNullable<HeadlessHost["appendChild"]>;
+};
+
 export function createTuiHost(
   options: { out?: NodeJS.WritableStream } = {},
-): HeadlessHost {
+): TuiHost {
   const out = options.out ?? process.stdout;
   const body = createTuiElement("body");
 
@@ -156,12 +161,20 @@ export function createTuiHost(
       if (!isTuiNode(el) || el.kind !== "element") {
         return { top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0 };
       }
-      return (el as TuiElement).getBoundingClientRect();
+      const rect = (el as TuiElement).getBoundingClientRect() as any;
+      const top = rect.top ?? 0;
+      const left = rect.left ?? 0;
+      const width = rect.width ?? 0;
+      const height = rect.height ?? 0;
+      const right = rect.right ?? left + width;
+      const bottom = rect.bottom ?? top + height;
+      return { top, left, right, bottom, width, height };
     },
     getViewportSize() {
+      const ttyOut = out as any;
       return {
-        width: process.stdout.columns || 80,
-        height: process.stdout.rows || 24,
+        width: ttyOut.columns || 80,
+        height: ttyOut.rows || 24,
       };
     },
     getBody() {
@@ -350,13 +363,21 @@ function ensureInput() {
 }
 
 export const platform = {
-  addEventListener(type: string, handler: PlatformEventHandler, _options?: any) {
+  addEventListener(
+    type: string,
+    handler: PlatformEventHandler,
+    _options?: any,
+  ) {
     if (type === "keydown") {
       _platformState.keydownHandlers.add(handler);
       ensureInput();
     }
   },
-  removeEventListener(type: string, handler: PlatformEventHandler, _options?: any) {
+  removeEventListener(
+    type: string,
+    handler: PlatformEventHandler,
+    _options?: any,
+  ) {
     if (type === "keydown") {
       _platformState.keydownHandlers.delete(handler);
       if (_platformState.keydownHandlers.size === 0 && _platformState.input) {

@@ -122,7 +122,12 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
       // 150 是动画时间
     }, 120);
   }
-  hide(options: Partial<{ reason: "show_sibling" | "back" | "forward"; destroy: boolean }> = {}) {
+  hide(
+    options: Partial<{
+      reason: "show_sibling" | "back" | "forward";
+      destroy: boolean;
+    }> = {},
+  ) {
     // Cancel any pending show timer to prevent stale state emissions
     if (this.show_timer) {
       clearTimeout(this.show_timer);

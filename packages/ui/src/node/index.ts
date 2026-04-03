@@ -1,3 +1,6 @@
+/**
+ * @deprecated
+ */
 import { BaseDomain, Handler } from "@timeless/base";
 
 enum Events {

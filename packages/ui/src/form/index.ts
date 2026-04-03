@@ -1,11 +1,10 @@
 /**
  * @file 多字段 Input
  */
-import { base, Handler } from "@timeless/base";
+import { base, Handler, Result } from "@timeless/base";
 
 import { FormFieldCore } from "./field";
 import { ValueInputInterface } from "./types";
-import { Result } from "@timeless/base";
 
 type FormProps<F extends Record<string, FormFieldCore<any>>> = {
   fields: F;
@@ -16,12 +15,26 @@ type FormProps<F extends Record<string, FormFieldCore<any>>> = {
 // };
 
 export function FormCore<
-  F extends Record<string, FormFieldCore<{ label: string; name: string; input: ValueInputInterface<any> }>> = {}
+  F extends Record<
+    string,
+    FormFieldCore<{
+      label: string;
+      name: string;
+      input: ValueInputInterface<any>;
+    }>
+  > = {},
 >(props: FormProps<F>) {
   const { fields } = props;
 
   type Value<
-    O extends Record<string, FormFieldCore<{ label: string; name: string; input: ValueInputInterface<any> }>>
+    O extends Record<
+      string,
+      FormFieldCore<{
+        label: string;
+        name: string;
+        input: ValueInputInterface<any>;
+      }>
+    >,
   > = {
     [K in keyof O]: O[K]["$input"]["value"];
   };
@@ -56,7 +69,10 @@ export function FormCore<
   };
   const bus = base<TheTypesOfEvents<Value<F>>>();
 
-  function updateValuesSilence<K extends keyof Value<F>>(name: K, value: Value<F>[K]) {
+  function updateValuesSilence<K extends keyof Value<F>>(
+    name: K,
+    value: Value<F>[K],
+  ) {
     // console.log("[DOMAIN]ui/form/index - updateValues", name, value);
     _values[name] = value;
   }
@@ -128,12 +144,21 @@ export function FormCore<
     onChange(handler: Handler<TheTypesOfEvents<Value<F>>[Events.Change]>) {
       return bus.on(Events.Change, handler);
     },
-    onStateChange(handler: Handler<TheTypesOfEvents<Value<F>>[Events.StateChange]>) {
+    onStateChange(
+      handler: Handler<TheTypesOfEvents<Value<F>>[Events.StateChange]>,
+    ) {
       return bus.on(Events.StateChange, handler);
     },
   };
 }
 
 export type FormCore<
-  F extends Record<string, FormFieldCore<{ label: string; name: string; input: ValueInputInterface<any> }>> = {}
+  F extends Record<
+    string,
+    FormFieldCore<{
+      label: string;
+      name: string;
+      input: ValueInputInterface<any>;
+    }>
+  > = {},
 > = ReturnType<typeof FormCore<F>>;

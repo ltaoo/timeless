@@ -3,10 +3,10 @@
  */
 import { BaseDomain, Handler } from "@timeless/base";
 
-import { PopperCore, Side, Align } from "@/popper";
-import { DismissableLayerCore } from "@/dismissable-layer";
-import { PresenceCore } from "@/presence";
-import { Direction } from "@/direction";
+import { PopperCore, Side, Align } from "@/popper/index";
+import { DismissableLayerCore } from "@/dismissable-layer/index";
+import { PresenceCore } from "@/presence/index";
+import { Direction } from "@/direction/index";
 
 import { MenuItemCore } from "./item";
 import { MenuSeparatorCore } from "./separator";

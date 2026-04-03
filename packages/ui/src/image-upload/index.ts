@@ -1,8 +1,9 @@
 import { base, Handler, BizError } from "@timeless/base";
 import { readFileAsURL } from "@timeless/utils";
 
-import { ImageCore } from "@/image";
-import { DragZoneCore } from "@/drag-zone";
+import { ImageCore } from "@/image/index";
+import { DragZoneCore } from "@/drag-zone/index";
+
 import { Uploader } from "./types";
 
 export function ImageUploadCore(props: {

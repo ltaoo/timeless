@@ -17,6 +17,23 @@ const components = fs.readdirSync(resolve(__dirname, "src")).filter((name) => {
   );
 });
 
+// function resolveAtAliasDirectoryIndex() {
+//   return {
+//     name: "timeless:resolve-at-alias-directory-index",
+//     enforce: "pre",
+//     resolveId(source: string) {
+//       if (!source.startsWith("@/")) return null;
+//       const rest = source.slice(2);
+//       if (!rest || rest.includes("/")) return null;
+//       const componentIndex = resolve(__dirname, "src", rest, "index.ts");
+//       if (fs.existsSync(componentIndex)) {
+//         return componentIndex;
+//       }
+//       return null;
+//     },
+//   };
+// }
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -79,6 +96,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    // resolveAtAliasDirectoryIndex(),
     dts({
       insertTypesEntry: true,
       rollupTypes: true,

@@ -4,7 +4,7 @@ export type StyleObject = Record<string, any>;
 
 export interface StyleRef {
   __style_ref: true;
-  readonly value: StyleObject;
+  value: StyleObject;
   _subscribe(ctx: Subscriber): void;
   toString(): string;
 }

@@ -1,4 +1,4 @@
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain } from "@timeless/base";
 
 enum Events {}
 type TheTypesOfEvents = {};
@@ -9,7 +9,7 @@ export class SelectWrapCore extends BaseDomain<TheTypesOfEvents> {
       $node: () => HTMLElement;
       getStyles: () => CSSStyleDeclaration;
       getRect: () => DOMRect;
-    }> = {}
+    }> = {},
   ) {
     super(options);
     const { $node, getStyles, getRect } = options;

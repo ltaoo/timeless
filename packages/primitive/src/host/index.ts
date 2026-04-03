@@ -1,8 +1,11 @@
+import type { HostRenderer } from "@/vnode/host-renderer";
+import {
+  createRendererScheduler,
+  type RendererScheduler,
+} from "@/vnode/reactive";
+
 import { createStubHost } from "./stub";
 import { createLegacyHostAdapter } from "./legacy-adapter";
-
-import type { HostRenderer } from "@/vnode/host-renderer";
-import { createRendererScheduler, type RendererScheduler } from "@/vnode/reactive";
 
 export type HostNode = any;
 
@@ -33,7 +36,11 @@ export interface HeadlessHost {
 
   appendChild(parent: HostNode, child: HostNode): void;
   removeChild(parent: HostNode, child: HostNode): void;
-  insertBefore(parent: HostNode, child: HostNode, before: HostNode | null): void;
+  insertBefore(
+    parent: HostNode,
+    child: HostNode,
+    before: HostNode | null,
+  ): void;
   replaceChild(parent: HostNode, newChild: HostNode, oldChild: HostNode): void;
   clearChildren(parent: HostNode): void;
 

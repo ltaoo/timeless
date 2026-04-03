@@ -1,7 +1,11 @@
 /**
  * 根据点击滑动事件获取第一个手指的坐标
  */
-export function getPoint(e: { touches?: { pageX: number; pageY: number }[]; clientX?: number; clientY?: number }) {
+export function getPoint(e: {
+  touches?: { pageX: number; pageY: number }[];
+  clientX?: number;
+  clientY?: number;
+}) {
   if (e.touches) {
     return {
       x: e.touches[0].pageX,
@@ -23,7 +27,11 @@ export function getPoint(e: { touches?: { pageX: number; pageY: number }[]; clie
 /**
  * 阻止浏览器默认事件
  */
-export function preventDefault(e: { cancelable?: boolean; defaultPrevented?: boolean; preventDefault?: () => void }) {
+export function preventDefault(e: {
+  cancelable?: boolean;
+  defaultPrevented?: boolean;
+  preventDefault?: () => void;
+}) {
   // cancelable:是否可以被禁用; defaultPrevented:是否已经被禁用
   if (e && e.cancelable && !e.defaultPrevented && e.preventDefault) {
     e.preventDefault();
@@ -40,7 +48,10 @@ export function damping(x: number, max: number) {
   return Math.round(x < 0 ? -y : y);
 }
 
-export function getAngleByPoints(lastPoint: { x: number; y: number }, curPoint: { x: number; y: number }) {
+export function getAngleByPoints(
+  lastPoint: { x: number; y: number },
+  curPoint: { x: number; y: number },
+) {
   const x = Math.abs(lastPoint.x - curPoint.x);
   const y = Math.abs(lastPoint.y - curPoint.y);
   const z = Math.sqrt(x * x + y * y);

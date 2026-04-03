@@ -6,7 +6,7 @@ import {
   hideCursor,
   getTerminalSize,
 } from "./renderer";
-import type { TuiNode } from "@timeless/timeless";
+import type { TuiNode } from "./nodes";
 
 export interface TuiGlobal {
   onKeydown(handler: (key: KeyName) => void): void;

@@ -3,16 +3,15 @@
  */
 import { base, Handler } from "@timeless/base";
 
-import { FormFieldCore } from "./field";
-import { FormCore } from "./index";
-import { ValueInputInterface } from "./types";
 // import { ValueInputInterface } from "./types";
 
 // type ListInputCoreProps<T extends { defaultValue: any; value: ValueInputInterface<any> }> = {
 //   defaultValue: T["defaultValue"];
 //   value: FormCore<T>;
 // };
-export function ListContainerCore<T extends { defaultValue: any; factory: () => any }>(props: T) {
+export function ListContainerCore<
+  T extends { defaultValue: any; factory: () => any },
+>(props: T) {
   const { defaultValue, factory } = props;
 
   const $input = factory();
@@ -24,7 +23,9 @@ export function ListContainerCore<T extends { defaultValue: any; factory: () => 
     }
   }
   let _factory = factory;
-  let _list: { index: number; $input: ReturnType<T["factory"]> }[] = [{ index: 0, $input }];
+  let _list: { index: number; $input: ReturnType<T["factory"]> }[] = [
+    { index: 0, $input },
+  ];
   let _values = [...defaultValue] as ReturnType<T["factory"]>["value"][];
 
   const _state = {
@@ -49,7 +50,10 @@ export function ListContainerCore<T extends { defaultValue: any; factory: () => 
   };
   const bus = base<TheTypesOfEvents>();
 
-  function handle(item: { index: number; $input: ReturnType<T["factory"]> }, extra: { silence?: boolean } = {}) {
+  function handle(
+    item: { index: number; $input: ReturnType<T["factory"]> },
+    extra: { silence?: boolean } = {},
+  ) {
     //     console.log("[DOMAIN]ui/form/list - $input onChange", _values);
     if (item.$input.defaultValue) {
       _values[item.index] = item.$input.defaultValue;
@@ -79,7 +83,10 @@ export function ListContainerCore<T extends { defaultValue: any; factory: () => 
       return _list;
     },
     append() {
-      const ins: { index: number; $input: ReturnType<T["factory"]> } = { index: bus.uid(), $input: _factory() };
+      const ins: { index: number; $input: ReturnType<T["factory"]> } = {
+        index: bus.uid(),
+        $input: _factory(),
+      };
       //       console.log("[DOMAIN]ui/form/list - append", ins.index);
       handle(ins);
       _list.push(ins);
@@ -112,7 +119,10 @@ export function ListContainerCore<T extends { defaultValue: any; factory: () => 
             existing.$input.setValue(v[i], { silence: true });
             return;
           }
-          const ins: { index: number; $input: ReturnType<T["factory"]> } = { index: _list.length, $input: _factory() };
+          const ins: { index: number; $input: ReturnType<T["factory"]> } = {
+            index: _list.length,
+            $input: _factory(),
+          };
           handle(ins, { silence: true });
           ins.$input.setValue(v[i], { silence: true });
           _list.push(ins);
@@ -130,6 +140,6 @@ export function ListContainerCore<T extends { defaultValue: any; factory: () => 
   };
 }
 
-export type ListContainerCore<T extends { defaultValue: any; factory: () => any }> = ReturnType<
-  typeof ListContainerCore<T>
->;
+export type ListContainerCore<
+  T extends { defaultValue: any; factory: () => any },
+> = ReturnType<typeof ListContainerCore<T>>;

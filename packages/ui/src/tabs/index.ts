@@ -1,7 +1,8 @@
 import { BaseDomain, Handler } from "@timeless/base";
-import { RovingFocusCore } from "@/roving-focus";
-import { Direction, Orientation } from "@/direction";
-import { PresenceCore } from "@/presence";
+
+import { RovingFocusCore } from "@/roving-focus/index";
+import { Direction, Orientation } from "@/direction/index";
+import { PresenceCore } from "@/presence/index";
 
 enum Events {
   StateChange,
@@ -53,7 +54,11 @@ export class TabsCore extends BaseDomain<TheTypesOfEvents> {
     this.prevContent = matchedContent;
     this.emit(Events.ValueChange, value);
   }
-  appendContent(content: { id: number; value: string; presence: PresenceCore }) {
+  appendContent(content: {
+    id: number;
+    value: string;
+    presence: PresenceCore;
+  }) {
     if (this.contents.includes(content)) {
       return;
     }

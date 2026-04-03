@@ -1,9 +1,9 @@
 import { dayjs } from "@timeless/utils";
 import { base, Handler } from "@timeless/base";
 
-import { RangeCalendarCore } from "@/range-calendar";
-import { PopperCore } from "@/popper";
-import { PresenceCore } from "@/presence";
+import { RangeCalendarCore } from "@/range-calendar/index";
+import { PopperCore } from "@/popper/index";
+import { PresenceCore } from "@/presence/index";
 
 export function DateRangePickerCore(props: { today: Date }) {
   const { today } = props;

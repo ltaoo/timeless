@@ -1,5 +1,11 @@
 import { cn, combine, computed, ref, refobj } from "@timeless/primitive";
-import { SelectPrimitive, For, ViewProps, Show, View } from "@timeless/primitive";
+import {
+  SelectPrimitive,
+  For,
+  ViewProps,
+  Show,
+  View,
+} from "@timeless/primitive";
 import { SelectCore } from "@timeless/ui";
 import {
   CheckOutlined,
@@ -25,7 +31,8 @@ export function Select(
   const hovering = ref(false);
   const showClear = combine(
     { allowClear, hasValue, isLoading, isDisabled, hovering },
-    (t) => t.hovering && t.allowClear && t.hasValue && !t.isLoading && !t.isDisabled,
+    (t) =>
+      t.hovering && t.allowClear && t.hasValue && !t.isLoading && !t.isDisabled,
   );
 
   const ITEM_CLASS =
@@ -71,13 +78,17 @@ export function Select(
         class: cn([
           ITEM_CLASS,
           computed(state_, (d: any) => {
-            const opt = (d.options || []).find((o: any) => o.value === option.value);
+            const opt = (d.options || []).find(
+              (o: any) => o.value === option.value,
+            );
             const isFocused = Boolean(opt?.focused);
             const isSelected = Boolean(opt?.selected);
             const isDisabled = Boolean(opt?.disabled);
             return [
               isSelected ? "font-medium" : "",
-              !isDisabled && isFocused ? "bg-accent text-accent-foreground" : "",
+              !isDisabled && isFocused
+                ? "bg-accent text-accent-foreground"
+                : "",
               isDisabled ? "text-muted-foreground" : "",
             ]
               .filter(Boolean)
@@ -135,8 +146,8 @@ export function Select(
         onMouseLeave() {
           hovering.as(false);
         },
-        onMounted(el) {
-          el.addEventListener("mousedown", (e) => {
+        onMounted(event) {
+          event.target.addEventListener("mousedown", (e) => {
             e.stopPropagation();
           });
         },
@@ -196,7 +207,11 @@ export function Select(
           "cn-menu-target cn-menu-translucent select__content relative z-50 max-h-96 min-w-36 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
         style: computed(state_, () => {
           const width = store.reference?.width || 0;
-          return width > 0 ? `min-width: ${width}px;` : "";
+          return width > 0
+            ? {
+                "min-width": `${width}px`,
+              }
+            : {};
         }),
       },
       [
@@ -225,7 +240,11 @@ export function Select(
                     class:
                       "py-6 text-center text-sm text-muted-foreground select-none",
                   },
-                  [computed(state_, (t) => (t.loading ? "加载中..." : "暂无数据"))],
+                  [
+                    computed(state_, (t) =>
+                      t.loading ? "加载中..." : "暂无数据",
+                    ),
+                  ],
                 ),
               ],
             },

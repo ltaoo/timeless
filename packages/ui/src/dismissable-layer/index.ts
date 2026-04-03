@@ -1,5 +1,6 @@
 import { BaseDomain, Handler } from "@timeless/base";
-import { LayerManager, Layer, getGlobalLayerManager } from "../layer";
+
+import { LayerManager, Layer, getGlobalLayerManager } from "@/layer/index";
 
 enum Events {
   Dismiss,
@@ -27,7 +28,9 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
 
   readonly id: string;
   private layerManager: LayerManager;
-  private getRect: (() => { x: number; y: number; width: number; height: number }) | null = null;
+  private getRect:
+    | (() => { x: number; y: number; width: number; height: number })
+    | null = null;
   private registered = false;
 
   constructor(
@@ -45,7 +48,9 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
    * 设置层的位置信息（用于 containsPoint 检测）
    * 在层挂载时调用
    */
-  setRect(getRect: () => { x: number; y: number; width: number; height: number }) {
+  setRect(
+    getRect: () => { x: number; y: number; width: number; height: number },
+  ) {
     this.getRect = getRect;
   }
 
@@ -104,7 +109,9 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
     return this.on(Events.Dismiss, handler);
   }
 
-  onPointerDownOutside(handler: Handler<TheTypesOfEvents[Events.PointerDownOutside]>) {
+  onPointerDownOutside(
+    handler: Handler<TheTypesOfEvents[Events.PointerDownOutside]>,
+  ) {
     return this.on(Events.PointerDownOutside, handler);
   }
 
@@ -112,7 +119,9 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
     return this.on(Events.FocusOutside, handler);
   }
 
-  onInteractOutside(handler: Handler<TheTypesOfEvents[Events.InteractOutside]>) {
+  onInteractOutside(
+    handler: Handler<TheTypesOfEvents[Events.InteractOutside]>,
+  ) {
     return this.on(Events.InteractOutside, handler);
   }
 }

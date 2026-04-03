@@ -51,7 +51,12 @@ export class LayerManager extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     this.stack.push(layer);
-    console.log("[LayerManager] register", layer.id, "stack size:", this.stack.length);
+    console.log(
+      "[LayerManager] register",
+      layer.id,
+      "stack size:",
+      this.stack.length,
+    );
     this.emit(Events.LayerAdded, layer);
   }
 
@@ -60,7 +65,12 @@ export class LayerManager extends BaseDomain<TheTypesOfEvents> {
     const index = this.stack.findIndex((l) => l.id === id);
     if (index !== -1) {
       this.stack.splice(index, 1);
-      console.log("[LayerManager] unregister", id, "stack size:", this.stack.length);
+      console.log(
+        "[LayerManager] unregister",
+        id,
+        "stack size:",
+        this.stack.length,
+      );
       this.emit(Events.LayerRemoved, id);
     } else {
       console.log("[LayerManager] unregister skipped (not found)", id);
@@ -87,7 +97,11 @@ export class LayerManager extends BaseDomain<TheTypesOfEvents> {
    * 从栈顶向下检查，关闭不包含点击点的层
    */
   handlePointerDown(x: number, y: number) {
-    console.log("[LayerManager] handlePointerDown", { x, y, stackSize: this.stack.length });
+    console.log("[LayerManager] handlePointerDown", {
+      x,
+      y,
+      stackSize: this.stack.length,
+    });
 
     if (this.stack.length === 0) {
       return;
@@ -112,7 +126,10 @@ export class LayerManager extends BaseDomain<TheTypesOfEvents> {
       }
     }
 
-    console.log("[LayerManager] layers to dismiss:", layersToDismiss.map(l => l.id));
+    console.log(
+      "[LayerManager] layers to dismiss:",
+      layersToDismiss.map((l) => l.id),
+    );
 
     // 统一关闭（从栈顶到栈底的顺序）
     for (const layer of layersToDismiss) {
@@ -172,7 +189,7 @@ export function getGlobalLayerManager(): LayerManager {
  * 初始化全局 pointerdown 监听器（Web 端）
  * 确保只注册一次
  */
-const isBrowser = typeof document !== 'undefined';
+const isBrowser = typeof document !== "undefined";
 
 export function initGlobalPointerListener() {
   if (globalListenerInitialized) {

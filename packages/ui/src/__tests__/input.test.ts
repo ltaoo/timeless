@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-import { InputCore } from "@/form/input";
+import { InputCore } from "@/input/index";
 
 describe("InputCore", () => {
   describe("构造函数", () => {

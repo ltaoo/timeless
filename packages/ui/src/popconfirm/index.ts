@@ -2,9 +2,10 @@
  * @file 确认气泡
  */
 import { BaseDomain, Handler } from "@timeless/base";
-import { PresenceCore } from "@/presence";
-import { PopperCore, Align, Side } from "@/popper";
-import { DismissableLayerCore } from "@/dismissable-layer";
+
+import { PresenceCore } from "@/presence/index";
+import { PopperCore, Align, Side } from "@/popper/index";
+import { DismissableLayerCore } from "@/dismissable-layer/index";
 
 enum Events {
   Show,

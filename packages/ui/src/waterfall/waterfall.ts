@@ -1,4 +1,4 @@
-import { base, BaseDomain, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/base";
 import { remove_arr_item } from "@timeless/utils";
 
 import { WaterfallColumnModel } from "./column";
@@ -28,7 +28,12 @@ export function WaterfallModel<T extends Record<string, unknown>>(props: {
       }
       for (let i = 0; i < columns; i += 1) {
         // console.log("[]before new ListColumnViewCore", size);
-        const $column = WaterfallColumnModel<T>({ size, buffer, gutter, index: i });
+        const $column = WaterfallColumnModel<T>({
+          size,
+          buffer,
+          gutter,
+          index: i,
+        });
         $column.onHeightChange((height) => {
           if (_height >= height) {
             return;
@@ -125,7 +130,7 @@ export function WaterfallModel<T extends Record<string, unknown>>(props: {
       const columns = _$columns;
       const minHeight = Math.min.apply(
         null,
-        columns.map((c) => c.state.height)
+        columns.map((c) => c.state.height),
       );
       const lowestColumn = columns.find((c) => c.state.height === minHeight);
       if (!lowestColumn) {
@@ -135,7 +140,10 @@ export function WaterfallModel<T extends Record<string, unknown>>(props: {
       lowestColumn.methods.appendItem(item);
     },
     /** 往前面插入 cell */
-    unshiftItemToColumn(item: WaterfallCellModel<T>, opt: Partial<{ skipUpdateHeight: boolean }> = {}) {
+    unshiftItemToColumn(
+      item: WaterfallCellModel<T>,
+      opt: Partial<{ skipUpdateHeight: boolean }> = {},
+    ) {
       if (_$columns.length === 1) {
         // console.log("[BIZ]Waterfall/waterfall - placeItemToColumn", _$items.length, item.state.payload);
         _$items.unshift(item);
@@ -145,7 +153,7 @@ export function WaterfallModel<T extends Record<string, unknown>>(props: {
       const columns = _$columns;
       const minHeight = Math.min.apply(
         null,
-        columns.map((c) => c.state.height)
+        columns.map((c) => c.state.height),
       );
       const lowestColumn = columns.find((c) => c.state.height === minHeight);
       if (!lowestColumn) {
@@ -218,7 +226,10 @@ export function WaterfallModel<T extends Record<string, unknown>>(props: {
       _last_scroll_position = cur;
       _ticking = false;
     },
-    handleScroll(values: { scrollTop: number; clientHeight?: number }, opt: Partial<{ force: boolean }> = {}) {
+    handleScroll(
+      values: { scrollTop: number; clientHeight?: number },
+      opt: Partial<{ force: boolean }> = {},
+    ) {
       if (values.scrollTop !== undefined) {
         _scrollValues.scrollTop = values.scrollTop;
       }
@@ -317,4 +328,6 @@ export function WaterfallModel<T extends Record<string, unknown>>(props: {
   };
 }
 
-export type WaterfallModel<T extends Record<string, unknown>> = ReturnType<typeof WaterfallModel<T>>;
+export type WaterfallModel<T extends Record<string, unknown>> = ReturnType<
+  typeof WaterfallModel<T>
+>;

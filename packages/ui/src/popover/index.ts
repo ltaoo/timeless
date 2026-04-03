@@ -3,9 +3,9 @@
  */
 import { BaseDomain, Handler } from "@timeless/base";
 
-import { PresenceCore } from "@/presence";
-import { PopperCore, Align, Side } from "@/popper";
-import { DismissableLayerCore } from "@/dismissable-layer";
+import { PresenceCore } from "@/presence/index";
+import { PopperCore, Align, Side } from "@/popper/index";
+import { DismissableLayerCore } from "@/dismissable-layer/index";
 
 // const SIDE_OPTIONS = ["top", "right", "bottom", "left"] as const;
 // const ALIGN_OPTIONS = ["start", "center", "end"] as const;

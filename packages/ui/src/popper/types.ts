@@ -43,7 +43,7 @@ export interface MiddlewareData {
 }
 
 export interface ComputePositionConfig {
-//   platform: Platform;
+  //   platform: Platform;
   placement?: Placement;
   strategy?: Strategy;
   middleware?: Array<Middleware | null | undefined | false>;
@@ -58,7 +58,7 @@ export interface ComputePositionReturn extends Coords {
 export type ComputePosition = (
   reference: unknown,
   floating: unknown,
-  config: ComputePositionConfig
+  config: ComputePositionConfig,
 ) => Promise<ComputePositionReturn>;
 
 export interface MiddlewareReturn extends Partial<Coords> {
@@ -111,7 +111,7 @@ export interface MiddlewareState extends Coords {
   middlewareData: MiddlewareData;
   elements: Elements;
   rects: ElementRects;
-//   platform: Platform;
+  //   platform: Platform;
 }
 /**
  * @deprecated use `MiddlewareState` instead.

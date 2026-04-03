@@ -1,4 +1,5 @@
-import type { TuiNode, TuiElement } from "@timeless/timeless";
+// import type { TuiNode, TuiElement } from "@timeless/timeless";
+import { TUI_NODE, TuiNode, TuiElement } from "./nodes";
 
 const ESC = "\x1b[";
 const RESET = `${ESC}0m`;
@@ -165,12 +166,15 @@ function collectRenderLines(node: TuiNode): string[] {
     for (const child of node.childNodes) {
       childLines.push(...collectRenderLines(child));
     }
-    if (childLines.length === 0) return [prefix + stylePrefix + suffix + (stylePrefix ? RESET : "")];
+    if (childLines.length === 0)
+      return [prefix + stylePrefix + suffix + (stylePrefix ? RESET : "")];
 
     // Apply style prefix and RESET suffix to each line
     return childLines.map((line, i) => {
       const linePrefix = (i === 0 ? prefix : "") + stylePrefix;
-      const lineSuffix = (stylePrefix ? RESET : "") + (i === childLines.length - 1 ? suffix : "");
+      const lineSuffix =
+        (stylePrefix ? RESET : "") +
+        (i === childLines.length - 1 ? suffix : "");
       return linePrefix + line + lineSuffix;
     });
   }

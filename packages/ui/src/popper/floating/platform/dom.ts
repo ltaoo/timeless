@@ -148,13 +148,9 @@ function getScale(element: any): { x: number; y: number } {
 
   const rect = element.getBoundingClientRect();
   const scaleX =
-    rect.width > 0
-      ? Math.round(rect.width) / element.offsetWidth || 1
-      : 1;
+    rect.width > 0 ? Math.round(rect.width) / element.offsetWidth || 1 : 1;
   const scaleY =
-    rect.height > 0
-      ? Math.round(rect.height) / element.offsetHeight || 1
-      : 1;
+    rect.height > 0 ? Math.round(rect.height) / element.offsetHeight || 1 : 1;
 
   return { x: scaleX, y: scaleY };
 }

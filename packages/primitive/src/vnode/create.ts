@@ -1,10 +1,10 @@
 import type {
   VNode,
+  VNodeText,
   VNodeElement,
   VNodeFragment,
   VNodeKey,
   VNodeStyle,
-  VNodeText,
   VNodeEvents,
 } from "./types";
 
@@ -75,7 +75,10 @@ export function createFragment(children: VNode[] = []): VNodeFragment {
   return vnode;
 }
 
-export function appendChild(parent: VNodeElement | VNodeFragment, child: VNode) {
+export function appendChild(
+  parent: VNodeElement | VNodeFragment,
+  child: VNode,
+) {
   if (child.parent) {
     removeChild(child.parent, child);
   }
@@ -84,7 +87,10 @@ export function appendChild(parent: VNodeElement | VNodeFragment, child: VNode) 
   updateNextSiblings(parent.children);
 }
 
-export function removeChild(parent: VNodeElement | VNodeFragment, child: VNode) {
+export function removeChild(
+  parent: VNodeElement | VNodeFragment,
+  child: VNode,
+) {
   const idx = parent.children.indexOf(child);
   if (idx === -1) return;
   parent.children.splice(idx, 1);

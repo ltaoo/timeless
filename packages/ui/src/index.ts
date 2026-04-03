@@ -80,4 +80,4 @@ export * from "./resizable-panels";
 export * from "./tooltip";
 export * from "./shortcut";
 export * from "./click-outside";
-export * from "./sonner-core";
+export * from "./sonner";

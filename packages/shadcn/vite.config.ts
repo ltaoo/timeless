@@ -64,11 +64,6 @@ function rewriteDtsImports() {
 }
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      "@timeless/icons": resolve(__dirname, "../icons/src"),
-    },
-  },
   css: {
     postcss: "./postcss.config.js",
     modules: false,

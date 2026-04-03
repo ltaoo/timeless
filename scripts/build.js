@@ -7,8 +7,16 @@ const PACKAGES_DIR = path.join(ROOT, "packages");
 
 // Explicitly configure which packages to build
 const INCLUDED_PACKAGES = [
+  "base",
+  "reactive",
+  "utils",
+  "ui",
+  "kit",
+  "primitive",
   "timeless",
   "timeless-dom",
+  "timeless-canvas",
+  "timeless-tui",
   "cli",
   "provider-web",
   "shadcn",
@@ -40,7 +48,7 @@ const isProd = process.argv.includes("--prod");
 const env = isProd ? "TIMELESS_PROD=1 " : "";
 
 // Run pnpm build with same filters
-const cmd = `${env}pnpm ${filterArgs.join(" ")} -r run build`;
+const cmd = `${env}pnpm ${filterArgs.join(" ")} -r --sort --workspace-concurrency=1 run build`;
 console.log(`\nRunning: ${cmd}\n`);
 execSync(cmd, { cwd: ROOT, stdio: "inherit", shell: true });
 

@@ -1,5 +1,6 @@
 import {
   Signal,
+  Ref,
   isRef,
   isClassName,
   ClassNameRef,
@@ -39,7 +40,7 @@ export interface MountedEvent<T = any> {
 export interface ViewProps {
   as?: string;
   key?: string | number;
-  style?: ViewStyle | StyleRef | Signal<ViewStyle>;
+  style?: ViewStyle | StyleRef | Signal<ViewStyle> | Ref<ViewStyle>;
   class?: MaybeSignal<string> | ClassNameRef;
   draggable?: boolean;
   attributes?: ViewAttributes;
@@ -584,7 +585,7 @@ export function isElement(v: unknown): v is TimelessElement {
     return false;
   }
   // @ts-ignore
-  if (v.t && v.hasOwnProperty('$elm')) {
+  if (v.t && v.hasOwnProperty("$elm")) {
     return true;
   }
   return false;

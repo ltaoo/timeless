@@ -1,103 +1,16 @@
 import { resolve } from "path";
 import { defineConfig } from "vite";
-import fs from "fs";
 import dtsPlugin from "vite-plugin-dts";
+import pkg from "./package.json";
 
 import { buildLibName, isProd } from "../../vite.config.base";
 
 const name = "timeless";
 
-function multiWorkspaceAtAlias() {
-  const primitiveSrc = resolve(__dirname, "../primitive/src");
-  const uiSrc = resolve(__dirname, "../ui/src");
-  const kitSrc = resolve(__dirname, "../kit/src");
-  const baseSrc = resolve(__dirname, "../base/src");
-
-  function resolveFile(root: string, subpath: string) {
-    const base = resolve(root, subpath);
-    if (fs.existsSync(base) && fs.statSync(base).isFile()) return base;
-
-    const exts = [".ts", ".tsx", ".js", ".mjs"];
-    if (base.endsWith(".js") || base.endsWith(".mjs")) {
-      const withoutJsExt = base.replace(/\.m?js$/, "");
-      for (const ext of [".ts", ".tsx"]) {
-        const mapped = `${withoutJsExt}${ext}`;
-        if (fs.existsSync(mapped) && fs.statSync(mapped).isFile()) {
-          return mapped;
-        }
-      }
-      if (fs.existsSync(withoutJsExt) && fs.statSync(withoutJsExt).isFile()) {
-        return withoutJsExt;
-      }
-      if (fs.existsSync(withoutJsExt) && fs.statSync(withoutJsExt).isDirectory()) {
-        for (const ext of [".ts", ".tsx", ".js", ".mjs"]) {
-          const indexFile = resolve(withoutJsExt, `index${ext}`);
-          if (fs.existsSync(indexFile) && fs.statSync(indexFile).isFile()) {
-            return indexFile;
-          }
-        }
-      }
-    }
-    for (const ext of exts) {
-      const withExt = `${base}${ext}`;
-      if (fs.existsSync(withExt) && fs.statSync(withExt).isFile()) {
-        return withExt;
-      }
-    }
-
-    if (fs.existsSync(base) && fs.statSync(base).isDirectory()) {
-      for (const ext of exts) {
-        const indexFile = resolve(base, `index${ext}`);
-        if (fs.existsSync(indexFile) && fs.statSync(indexFile).isFile()) {
-          return indexFile;
-        }
-      }
-    }
-
-    return base;
-  }
-
-  function normalizeImporter(importer?: string) {
-    if (!importer) return "";
-    return importer.split("?")[0];
-  }
-
-  return {
-    name: "timeless-multi-workspace-at-alias",
-    enforce: "pre",
-    resolveId(source: string, importer?: string) {
-      if (!source.startsWith("@/")) return null;
-      const subpath = source.slice(2);
-      const normalizedImporter = normalizeImporter(importer);
-
-      if (normalizedImporter.includes("/packages/primitive/src/")) {
-        return resolveFile(primitiveSrc, subpath);
-      }
-      if (normalizedImporter.includes("/packages/ui/src/")) {
-        return resolveFile(uiSrc, subpath);
-      }
-      if (normalizedImporter.includes("/packages/kit/src/")) {
-        return resolveFile(kitSrc, subpath);
-      }
-      if (normalizedImporter.includes("/packages/base/src/")) {
-        return resolveFile(baseSrc, subpath);
-      }
-      return resolveFile(primitiveSrc, subpath);
-    },
-  };
-}
-
 export default defineConfig({
   resolve: {
     alias: {
-      "@timeless/base": resolve(__dirname, "../base/src"),
-      "@timeless/icons": resolve(__dirname, "../icons/src"),
-      "@timeless/reactive": resolve(__dirname, "../reactive/src"),
-      "@timeless/utils": resolve(__dirname, "../utils/src"),
-      "@timeless/ui": resolve(__dirname, "../ui/src"),
-      "@timeless/kit": resolve(__dirname, "../kit/src"),
-      "@timeless/types": resolve(__dirname, "../types/src"),
-      "@timeless/primitive": resolve(__dirname, "../primitive/src"),
+      "@": resolve(__dirname, "src"),
     },
   },
   build: {
@@ -122,14 +35,24 @@ export default defineConfig({
     }),
     sourcemap: false,
     rollupOptions: {
-      external: [],
+      external: [
+        ...Object.keys(pkg.dependencies || {}),
+        ...Object.keys(pkg.peerDependencies || {}),
+      ],
       output: {
-        globals: {},
+        globals: {
+          "@timeless/base": "Timeless.base",
+          "@timeless/icons": "Timeless.icons",
+          "@timeless/reactive": "Timeless.reactive",
+          "@timeless/utils": "Timeless.utils",
+          "@timeless/ui": "Timeless.ui",
+          "@timeless/kit": "Timeless.kit",
+          "@timeless/primitive": "Timeless.primitive",
+        },
       },
     },
   },
   plugins: [
-    multiWorkspaceAtAlias(),
     dtsPlugin({
       insertTypesEntry: true,
       rollupTypes: false,

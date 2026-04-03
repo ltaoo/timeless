@@ -63,9 +63,7 @@ type InputState<T> = {
 export function InputModel(props: {
   defaultValue?: string;
   placeholder?: string;
-}) {
-
-}
+}) {}
 
 export class InputCore<T>
   extends BaseDomain<TheTypesOfEvents<T>>

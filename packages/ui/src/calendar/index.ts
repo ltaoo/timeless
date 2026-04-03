@@ -1,4 +1,4 @@
-import { base, BaseDomain, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/base";
 import { dayjs, padding_zero } from "@timeless/utils";
 
 type CalendarWeek = {

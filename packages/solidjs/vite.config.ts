@@ -9,8 +9,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@/kit': resolve(__dirname, '../../packages/kit/src'),
-      '@/biz': resolve(__dirname, '../../packages/biz/src'),
+      '@/kit': '@timeless/kit',
+      '@/biz': '@timeless/biz',
       '@': resolve(__dirname, 'src')
     }
   },

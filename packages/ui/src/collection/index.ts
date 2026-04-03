@@ -1,4 +1,4 @@
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain } from "@timeless/base";
 
 enum Events {}
 type TheTypesOfEvents = {};

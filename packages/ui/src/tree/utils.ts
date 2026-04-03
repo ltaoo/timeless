@@ -24,7 +24,11 @@ export function noop() {}
  * @param {string} [level='0'] - level at tree
  * @return {Array<FormattedSourceNode>}
  */
-export const formatSourceNodes = (sourceNodes: SourceNode[], level = 1, parentPos?: string) =>
+export const formatSourceNodes = (
+  sourceNodes: SourceNode[],
+  level = 1,
+  parentPos?: string,
+) =>
   sourceNodes.map((sourceNode, i) => {
     const { key, title, ...restProps } = sourceNode;
     const formattedSourceNode = {
@@ -35,7 +39,11 @@ export const formatSourceNodes = (sourceNodes: SourceNode[], level = 1, parentPo
     };
     if (sourceNode.children && sourceNode.children.length) {
       const nextLevel = level + 1;
-      formattedSourceNode.children = formatSourceNodes(sourceNode.children, nextLevel, formattedSourceNode.pos);
+      formattedSourceNode.children = formatSourceNodes(
+        sourceNode.children,
+        nextLevel,
+        formattedSourceNode.pos,
+      );
     }
     return formattedSourceNode;
   });
@@ -70,7 +78,14 @@ export function traverseTreeNodes(treeNodes = [], callback) {
       if (treeNode.$children) {
         traverse(treeNode.$children, pos, childrenPos, pos);
       }
-      callback(treeNode, index, pos, treeNode.rckey || pos, childrenPos, parentPos);
+      callback(
+        treeNode,
+        index,
+        pos,
+        treeNode.rckey || pos,
+        childrenPos,
+        parentPos,
+      );
     });
   }
   traverse(treeNodes, 0, []);
@@ -178,7 +193,11 @@ interface FindSourceCallback {
  * @param {string} key
  * @param {FindSourceCallback} callback
  */
-export const findSourceNodeByKey = (sourceNodes: SourceNode[], key: string, callback: FindSourceCallback) => {
+export const findSourceNodeByKey = (
+  sourceNodes: SourceNode[],
+  key: string,
+  callback: FindSourceCallback,
+) => {
   sourceNodes.forEach((sourceNode, index, arr) => {
     if (sourceNode.key === key) {
       return callback(sourceNode, index, arr);
@@ -207,18 +226,22 @@ export function computeMoveNeededParams(
   sourceNodes: SourceNode[],
   draggingNodeKey: string,
   targetNodeKey: string,
-  targetPosition: TARGET_POSITION_TYPE
+  targetPosition: TARGET_POSITION_TYPE,
 ) {
   const isDropToGap = targetPosition !== TARGET_POSITION_TYPE.CONTENT;
   let draggingSourceNode;
   let hasSameLevelNodesAsDraggingNode;
   let draggingNodeIndexAtSameLevelNodes;
   // first we find the dragging sourceNode
-  findSourceNodeByKey(sourceNodes, draggingNodeKey, (sourceNode, index, arr) => {
-    hasSameLevelNodesAsDraggingNode = arr;
-    draggingNodeIndexAtSameLevelNodes = index;
-    draggingSourceNode = sourceNode;
-  });
+  findSourceNodeByKey(
+    sourceNodes,
+    draggingNodeKey,
+    (sourceNode, index, arr) => {
+      hasSameLevelNodesAsDraggingNode = arr;
+      draggingNodeIndexAtSameLevelNodes = index;
+      draggingSourceNode = sourceNode;
+    },
+  );
   let hasSameLevelNodesAsTargetNode = null;
   let targetNodeIndexAtSameLevelNodes;
   if (!isDropToGap) {
@@ -264,9 +287,12 @@ export function insertToTop(
   targetSourceNodes: SourceNode[],
   originSourceNode: SourceNode,
   originSourceNodeIndex: number,
-  originSourceNodes: SourceNode[]
+  originSourceNodes: SourceNode[],
 ) {
-  if (originSourceNodes !== targetSourceNodes || originSourceNodeIndex > targetSourceNodeIndex) {
+  if (
+    originSourceNodes !== targetSourceNodes ||
+    originSourceNodeIndex > targetSourceNodeIndex
+  ) {
     originSourceNodes.splice(originSourceNodeIndex, 1);
     targetSourceNodes.splice(targetSourceNodeIndex, 0, originSourceNode);
     return {
@@ -295,7 +321,7 @@ export function insertToBottom(
   targetSourceNodes: SourceNode[],
   originSourceNode: SourceNode,
   originSourceNodeIndex: number,
-  originSourceNodes: SourceNode[]
+  originSourceNodes: SourceNode[],
 ) {
   let newTargetSourceNodeIndex = targetSourceNodeIndex + 1;
   if (originSourceNodes === targetSourceNodes) {

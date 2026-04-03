@@ -1,6 +1,7 @@
 import { BaseDomain, Handler } from "@timeless/base";
-import { Direction, Orientation } from "@/direction";
-import { CollectionCore } from "@/collection";
+
+import { Direction, Orientation } from "@/direction/index";
+import { CollectionCore } from "@/collection/index";
 
 enum Events {
   ItemFocus,
@@ -60,10 +61,14 @@ export class RovingFocusCore extends BaseDomain<TheTypesOfEvents> {
   onItemShiftTab(handler: Handler<TheTypesOfEvents[Events.ItemShiftTab]>) {
     this.on(Events.ItemShiftTab, handler);
   }
-  onFocusableItemAdd(handler: Handler<TheTypesOfEvents[Events.FocusableItemAdd]>) {
+  onFocusableItemAdd(
+    handler: Handler<TheTypesOfEvents[Events.FocusableItemAdd]>,
+  ) {
     this.on(Events.FocusableItemAdd, handler);
   }
-  onFocusableItemRemove(handler: Handler<TheTypesOfEvents[Events.FocusableItemRemove]>) {
+  onFocusableItemRemove(
+    handler: Handler<TheTypesOfEvents[Events.FocusableItemRemove]>,
+  ) {
     this.on(Events.FocusableItemRemove, handler);
   }
 }

@@ -2,7 +2,8 @@
  * @file 单选框
  */
 import { BaseDomain, Handler } from "@timeless/base";
-import { PresenceCore } from "@/presence";
+
+import { PresenceCore } from "@/presence/index";
 
 // RadioCore Events
 enum RadioEvents {
@@ -50,7 +51,13 @@ export class RadioCore extends BaseDomain<RadioTypesOfEvents> {
   constructor(props: { _name?: string } & RadioProps = {}) {
     super(props);
 
-    const { label = "", disabled = false, checked = false, value = "", onChange } = props;
+    const {
+      label = "",
+      disabled = false,
+      checked = false,
+      value = "",
+      onChange,
+    } = props;
     this.label = label;
     this.disabled = disabled;
     this.checked = checked;
@@ -136,7 +143,9 @@ type RadioGroupState<T> = {
   disabled?: boolean;
 };
 
-export class RadioGroupCore<T extends any> extends BaseDomain<RadioGroupTypesOfEvents<T>> {
+export class RadioGroupCore<T extends any> extends BaseDomain<
+  RadioGroupTypesOfEvents<T>
+> {
   shape = "radio-group" as const;
 
   options: {
@@ -230,7 +239,8 @@ export class RadioGroupCore<T extends any> extends BaseDomain<RadioGroupTypesOfE
 
     this.options = options.map((opt) => {
       const { label, value: optValue, checked, disabled: optDisabled } = opt;
-      const isChecked = checked || (this.value !== null && this.value === optValue);
+      const isChecked =
+        checked || (this.value !== null && this.value === optValue);
       const store = new RadioCore({
         label,
         value: String(optValue),
@@ -252,11 +262,15 @@ export class RadioGroupCore<T extends any> extends BaseDomain<RadioGroupTypesOfE
     this.emit(RadioGroupEvents.StateChange, { ...this.state });
   }
 
-  onChange(handler: Handler<RadioGroupTypesOfEvents<T>[RadioGroupEvents.Change]>) {
+  onChange(
+    handler: Handler<RadioGroupTypesOfEvents<T>[RadioGroupEvents.Change]>,
+  ) {
     return this.on(RadioGroupEvents.Change, handler);
   }
 
-  onStateChange(handler: Handler<RadioGroupTypesOfEvents<T>[RadioGroupEvents.StateChange]>) {
+  onStateChange(
+    handler: Handler<RadioGroupTypesOfEvents<T>[RadioGroupEvents.StateChange]>,
+  ) {
     return this.on(RadioGroupEvents.StateChange, handler);
   }
 }

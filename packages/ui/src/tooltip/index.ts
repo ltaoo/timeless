@@ -3,8 +3,8 @@
  */
 import { BaseDomain, Handler } from "@timeless/base";
 
-import { PresenceCore } from "@/presence";
-import { PopperCore, Align, Side } from "@/popper";
+import { PresenceCore } from "@/presence/index";
+import { PopperCore, Align, Side } from "@/popper/index";
 
 enum Events {
   Show,

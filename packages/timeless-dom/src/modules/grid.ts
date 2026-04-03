@@ -1,13 +1,6 @@
-import {
-  VNode,
-  sn,
-  isStyleRef,
-  isRef,
-  getRendererScheduler,
-} from "@timeless/timeless";
+import { VNode, sn, getRendererScheduler } from "@timeless/timeless";
 
-const { createElement, createText, appendChild, mountChild, isDescriptor } =
-  VNode;
+const { createElement, appendChild, mountChild, isDescriptor } = VNode;
 
 // ─── DOM ComponentFns ────────────────────────────────────────────
 

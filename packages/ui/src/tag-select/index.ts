@@ -1,10 +1,10 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
-import { PopperCore } from "@/popper";
+import { PopperCore } from "@/popper/index";
 import { Rect } from "@/popper/types";
-import { DismissableLayerCore } from "@/dismissable-layer";
-import { PresenceCore } from "@/presence";
-import { Direction } from "@/direction";
+import { DismissableLayerCore } from "@/dismissable-layer/index";
+import { PresenceCore } from "@/presence/index";
+import { Direction } from "@/direction/index";
 
 enum Events {
   StateChange,
@@ -36,7 +36,10 @@ type TagSelectProps<T> = {
 
 type TagSelectState<T> = {
   options: (TagSelectOption<T> & { selected: boolean; focused: boolean })[];
-  filteredOptions: (TagSelectOption<T> & { selected: boolean; focused: boolean })[];
+  filteredOptions: (TagSelectOption<T> & {
+    selected: boolean;
+    focused: boolean;
+  })[];
   values: T[];
   selectedOptions: TagSelectOption<T>[];
   open: boolean;
@@ -58,14 +61,16 @@ export class TagSelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
   id: string | null = null;
   placeholder: string;
-  options: (TagSelectOption<T> & { selected: boolean; focused: boolean })[] = [];
+  options: (TagSelectOption<T> & { selected: boolean; focused: boolean })[] =
+    [];
   defaultValue: T[] = [];
   values: T[] = [];
   disabled: boolean = false;
   open: boolean = false;
   max: number = Infinity;
   keyword: string = "";
-  searchFn: ((keyword: string, option: TagSelectOption<T>) => boolean) | null = null;
+  searchFn: ((keyword: string, option: TagSelectOption<T>) => boolean) | null =
+    null;
 
   popper: PopperCore;
   presence = new PresenceCore();

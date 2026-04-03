@@ -1,4 +1,5 @@
-import { VNode, sn, isRef, getRendererScheduler } from "@timeless/timeless";
+import { VNode, sn, isRef, getRendererScheduler } from "@timeless/primitive";
+
 import type { CanvasHost } from "../index";
 
 const { createElement, createText, appendChild, mountChild, isDescriptor } =
@@ -6,11 +7,7 @@ const { createElement, createText, appendChild, mountChild, isDescriptor } =
 
 // ─── Canvas ComponentFns ─────────────────────────────────────────
 
-export function CanvasGrid(
-  props: any,
-  children: any[],
-  host?: CanvasHost,
-) {
+export function CanvasGrid(props: any, children: any[], host?: CanvasHost) {
   const cols = props.columns ?? 4;
   const gap = props.gap ?? 16;
   const padding = 24;

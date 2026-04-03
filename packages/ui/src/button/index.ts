@@ -1,4 +1,5 @@
 import { BaseDomain, Handler } from "@timeless/base";
+
 import { RefCore } from "@/cur";
 
 enum Events {
@@ -180,7 +181,9 @@ export class ButtonInListCore<T> extends BaseDomain<TheTypesInListOfEvents<T>> {
   onClick(handler: Handler<TheTypesInListOfEvents<T>[Events.Click]>) {
     this.on(Events.Click, handler);
   }
-  onStateChange(handler: Handler<TheTypesInListOfEvents<T>[Events.StateChange]>) {
+  onStateChange(
+    handler: Handler<TheTypesInListOfEvents<T>[Events.StateChange]>,
+  ) {
     this.on(Events.StateChange, handler);
   }
 }

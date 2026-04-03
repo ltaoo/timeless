@@ -2,8 +2,9 @@
  * @file 弹窗核心类
  */
 import { BaseDomain, Handler } from "@timeless/base";
-import { PresenceCore } from "@/presence";
-import { SonnerCore, ToastT, ExternalToast, ToastTypes } from "@/sonner-core";
+
+import { PresenceCore } from "@/presence/index";
+import { SonnerCore, ExternalToast } from "@/sonner/index";
 
 enum Events {
   BeforeShow,
@@ -171,4 +172,4 @@ export type {
   ExternalToast,
   ToastTypes,
   ToastToDismiss,
-} from "@/sonner-core";
+} from "@/sonner";

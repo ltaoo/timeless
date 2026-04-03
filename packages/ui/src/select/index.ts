@@ -1,11 +1,11 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
-import { InputCore } from "@/input";
-import { PopperCore } from "@/popper";
+import { InputCore } from "@/input/index";
+import { PopperCore } from "@/popper/index";
 import { Rect } from "@/popper/types";
-import { DismissableLayerCore } from "@/dismissable-layer";
-import { Direction } from "@/direction";
-import { PresenceCore } from "@/presence";
+import { DismissableLayerCore } from "@/dismissable-layer/index";
+import { Direction } from "@/direction/index";
+import { PresenceCore } from "@/presence/index";
 
 import { SelectContentCore } from "./content";
 import { SelectViewportCore } from "./viewport";

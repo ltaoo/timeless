@@ -1,9 +1,7 @@
 /**
  * @file 播放器
  */
-import { BaseDomain, Handler } from "@timeless/base";
-// import type { ApplicationModel } from "@timeless/kit";
-import { Result } from "@timeless/base";
+import { BaseDomain, Handler, Result } from "@timeless/base";
 
 /** 影片分辨率 */
 enum MediaResolutionTypes {

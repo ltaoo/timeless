@@ -1,7 +1,7 @@
 import { base, Handler } from "@timeless/base";
 
-import { PopperCore } from "@/popper";
-import { PresenceCore } from "@/presence";
+import { PopperCore } from "@/popper/index";
+import { PresenceCore } from "@/presence/index";
 
 export type TimeValue = {
   hour: number;
@@ -93,7 +93,11 @@ export function TimePickerCore(props: {
   function generateHours() {
     const hours: number[] = [];
     const max = use12Hours ? 12 : 24;
-    for (let i = use12Hours ? 1 : 0; i < (use12Hours ? 13 : max); i += hourStep) {
+    for (
+      let i = use12Hours ? 1 : 0;
+      i < (use12Hours ? 13 : max);
+      i += hourStep
+    ) {
       hours.push(i);
     }
     return hours;
@@ -150,7 +154,9 @@ export function TimePickerCore(props: {
         _value = {
           hour: _tempHour,
           minute: _tempMinute,
-          ...(showSeconds && _tempSecond !== null ? { second: _tempSecond } : {}),
+          ...(showSeconds && _tempSecond !== null
+            ? { second: _tempSecond }
+            : {}),
         };
         bus.emit(Events.Change, _value);
         emitStateChange();

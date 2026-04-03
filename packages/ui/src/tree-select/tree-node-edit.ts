@@ -1,8 +1,8 @@
 import { base, Handler, BizError } from "@timeless/base";
 
-import { PopoverCore } from "@/popover";
-import { InputCore } from "@/input";
-import { ButtonCore } from "@/button";
+import { PopoverCore } from "@/popover/index";
+import { InputCore } from "@/input/index";
+import { ButtonCore } from "@/button/index";
 
 export function TreeNodeEditModel<
   T extends { id: number | string; label: string; children?: T[] },

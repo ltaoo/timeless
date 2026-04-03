@@ -1,9 +1,9 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
-import { PopperCore } from "@/popper";
+import { PopperCore } from "@/popper/index";
 import { Rect } from "@/popper/types";
-import { DismissableLayerCore } from "@/dismissable-layer";
-import { PresenceCore } from "@/presence";
+import { DismissableLayerCore } from "@/dismissable-layer/index";
+import { PresenceCore } from "@/presence/index";
 
 export type CascaderOption<T = any> = {
   value: T;
