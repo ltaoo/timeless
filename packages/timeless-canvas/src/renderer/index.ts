@@ -1074,7 +1074,9 @@ export function render(
 
     const vnode = mount(elm);
     commitTree(vnode, getRenderer());
-    // host.appendChild(host.body, vnode._hostNode);
+    const body = host.getBody ? host.getBody() : host.body;
+    host.clearChildren(body);
+    host.appendChild(body, vnode._hostNode);
     host.draw();
     return host;
   }
