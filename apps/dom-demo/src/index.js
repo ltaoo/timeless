@@ -32,10 +32,10 @@ function ApplicationView() {
       focused_idx.as((prev) => Math.min(apps.length - 1, prev + 1));
     }
     if (key === "ArrowUp") {
-      focused_idx.as((prev) => Math.max(0, prev - 1));
+      focused_idx.as((prev) => Math.max(0, prev - 4));
     }
     if (key === "ArrowDown") {
-      focused_idx.as((prev) => Math.min(apps.length - 1, prev + 1));
+      focused_idx.as((prev) => Math.min(apps.length - 1, prev + 4));
     }
     if (key === "Enter") {
       console.log("Enter pressed");
@@ -54,7 +54,6 @@ function ApplicationView() {
         {
           style: {
             border: combine({ focused_idx, idx }, (t) => {
-              console.log("focused indx update", t.focused_idx, idx);
               if (t.focused_idx === t.idx) {
                 return "2px solid #007bff";
               }
@@ -63,7 +62,6 @@ function ApplicationView() {
           },
         },
         [
-          h(Txt, { style: {} }, [idx]),
           h(Txt, { style: { fontSize: 22 } }, [app.icon]),
           h(Txt, { style: { fontWeight: "bold", fontSize: 14 } }, [app.title]),
           h(Txt, { style: { fontSize: 12, color: "gray" } }, [app.subtitle]),

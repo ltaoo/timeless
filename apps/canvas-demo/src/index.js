@@ -63,4 +63,4 @@ function ApplicationView() {
   );
 }
 
-const host = render(h(ApplicationView, {}), document.getElementById("c"));
+render(h(ApplicationView, {}), document.getElementById("c"));

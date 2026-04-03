@@ -1,6 +1,7 @@
 import { resolve } from "path";
 import { defineConfig } from "vite";
 import dtsPlugin from "vite-plugin-dts";
+
 import pkg from "./package.json";
 
 import { buildLibName, isProd } from "../../vite.config.base";

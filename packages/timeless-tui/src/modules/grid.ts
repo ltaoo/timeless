@@ -1,4 +1,4 @@
-import { VNode, isRef, getRendererScheduler } from "@timeless/primitive";
+import { VNode, isRef, getRendererScheduler } from "@timeless/timeless";
 
 import { getTerminalSize } from "../renderer";
 

@@ -11,40 +11,6 @@ export {
   type TuiNodeKind,
   type TuiAttributes,
 } from "./nodes";
-import {
-  BOLD,
-  DIM,
-  UNDERLINE,
-  BLINK,
-  REVERSE,
-  WHITE,
-  BLACK,
-  RED,
-  GREEN,
-  BLUE,
-  YELLOW,
-  CYAN,
-  MAGENTA,
-  ORANGE,
-  GRAY,
-  DGRAY,
-  BG_DARK,
-  BG_TILE,
-  BG_FOCUS,
-  BG_HEADER,
-  BG_FOOTER,
-  BG_POPUP,
-  stripAnsi,
-  vlen,
-  vpad,
-  vcenter,
-  vright,
-  ESC,
-  RESET,
-  fgColor,
-  bgColor,
-} from "./style";
-
 export {
   createBuffer,
   clearBuffer,
@@ -63,7 +29,6 @@ export {
   moveTo,
   type Buffer,
 } from "./renderer";
-
 export {
   createTuiInput,
   parseKey,

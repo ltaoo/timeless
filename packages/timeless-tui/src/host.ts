@@ -10,7 +10,8 @@ import {
   View,
   Txt,
   VNode,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
+
 import {
   createTuiElement,
   createTuiText,

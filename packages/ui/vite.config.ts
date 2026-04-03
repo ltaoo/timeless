@@ -2,11 +2,11 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 import fs from "fs";
 import dts from "vite-plugin-dts";
-import pkg from "./package.json";
 import { buildLibName, isProd } from "../../vite.config.base";
 
-const isWhole = process.argv.includes("--whole");
 const name = "timeless.ui";
+const isWhole = process.argv.includes("--whole");
+const isUmdOnly = process.argv.includes("--umd");
 
 // 获取所有组件目录
 const components = fs.readdirSync(resolve(__dirname, "src")).filter((name) => {
@@ -41,18 +41,22 @@ export default defineConfig({
     },
   },
   build: {
+    emptyOutDir: !isUmdOnly,
     lib: {
-      entry: isWhole
-        ? components.reduce(
-            (entries, name) => {
-              // @ts-ignore
-              entries[name] = resolve(__dirname, `src/${name}/index.ts`);
-              return entries;
-            },
-            { index: resolve(__dirname, "src/index.ts") },
-          )
-        : resolve(__dirname, "src/index.ts"),
-      formats: ["es", "cjs", "umd"],
+      entry: isUmdOnly
+        ? resolve(__dirname, "src/index.ts")
+        : isWhole
+          ? components.reduce(
+              (entries, name) => {
+                entries[name] = resolve(__dirname, `src/${name}/index.ts`);
+                return entries;
+              },
+              {
+                index: resolve(__dirname, "src/index.ts"),
+              } as Record<string, string>,
+            )
+          : resolve(__dirname, "src/index.ts"),
+      formats: isUmdOnly ? ["umd"] : isWhole ? ["es", "cjs"] : ["es", "cjs", "umd"],
       fileName: (format, entryName) => {
         if (entryName === "index") {
           if (format === "es") {
@@ -97,9 +101,13 @@ export default defineConfig({
   },
   plugins: [
     // resolveAtAliasDirectoryIndex(),
-    dts({
-      insertTypesEntry: true,
-      rollupTypes: true,
-    }),
+    ...(isUmdOnly
+      ? []
+      : [
+          dts({
+            insertTypesEntry: true,
+            rollupTypes: true,
+          }),
+        ]),
   ],
 });

@@ -1,4 +1,4 @@
-import { VNode } from "@timeless/primitive";
+import { VNode } from "@timeless/timeless";
 
 const { createElement, createText, appendChild, isDescriptor } = VNode;
 

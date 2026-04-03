@@ -41,12 +41,33 @@ importers:
 
   apps/canvas-demo:
     dependencies:
+      '@timeless/base':
+        specifier: workspace:^
+        version: link:../../packages/base
+      '@timeless/icons':
+        specifier: workspace:^
+        version: link:../../packages/icons
+      '@timeless/kit':
+        specifier: workspace:^
+        version: link:../../packages/kit
+      '@timeless/primitive':
+        specifier: workspace:^
+        version: link:../../packages/primitive
+      '@timeless/reactive':
+        specifier: workspace:^
+        version: link:../../packages/reactive
       '@timeless/timeless':
         specifier: workspace:^
         version: link:../../packages/timeless
       '@timeless/timeless-canvas':
         specifier: workspace:^
         version: link:../../packages/timeless-canvas
+      '@timeless/ui':
+        specifier: workspace:^
+        version: link:../../packages/ui
+      '@timeless/utils':
+        specifier: workspace:^
+        version: link:../../packages/utils
     devDependencies:
       vite:
         specifier: ^8.0.0-beta.16
@@ -126,8 +147,6 @@ importers:
         specifier: ^8.0.0-beta.16
         version: 8.0.0-beta.16(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.0)
 
-  apps/node-vanilla: {}
-
   apps/ssr-demo:
     dependencies:
       '@timeless/cli':
@@ -177,7 +196,7 @@ importers:
         specifier: workspace:^
         version: link:../../packages/timeless-tui
 
-  apps/weapp:
+  apps/weapp-vanilla:
     dependencies:
       '@timeless/biz':
         specifier: workspace:*
@@ -640,9 +659,6 @@ importers:
 
   packages/timeless-canvas:
     dependencies:
-      '@timeless/primitive':
-        specifier: workspace:*
-        version: link:../primitive
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless
@@ -655,9 +671,6 @@ importers:
 
   packages/timeless-tui:
     dependencies:
-      '@timeless/primitive':
-        specifier: workspace:*
-        version: link:../primitive
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless
