@@ -4,10 +4,9 @@ import {
   clearScreen,
   showCursor,
   hideCursor,
-  getTerminalSize,
 } from "./renderer";
-import { createTuiInput, parseKey, type KeyName } from "./input";
-import type { TuiNode } from "@timeless/primitive";
+import type { TuiNode } from "./nodes";
+import { createTuiInput, parseKey, type KeyName } from "./modules/input";
 
 export type TuiRenderFn = () => TuiNode;
 

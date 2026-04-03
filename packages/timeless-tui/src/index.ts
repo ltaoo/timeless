@@ -10,6 +10,8 @@ export {
   type TuiFragment,
   type TuiNodeKind,
   type TuiAttributes,
+} from "./nodes";
+import {
   BOLD,
   DIM,
   UNDERLINE,
@@ -41,7 +43,7 @@ export {
   RESET,
   fgColor,
   bgColor,
-} from "@timeless/primitive";
+} from "./style";
 
 export {
   createBuffer,
@@ -69,13 +71,14 @@ export {
   type TuiInput,
   type KeyHandler,
   type KeyName,
-} from "./input";
+} from "./modules/input";
 
 export {
   createTuiHost,
   installTuiHost,
   render,
   renderToStringTree,
+  platform,
 } from "./host";
 
 export { TUI, type TuiGlobal } from "./tui";
@@ -89,10 +92,4 @@ export {
   type Ref,
 } from "./app";
 
-export {
-  GridItem,
-  GridLayout,
-  type GridItemProps,
-  type GridItemNode,
-  type GridLayoutProps,
-} from "./grid";
+// export { TuiGrid, TuiView, TuiTxt } from "./modules/grid";

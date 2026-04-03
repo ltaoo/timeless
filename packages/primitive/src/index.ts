@@ -99,7 +99,4 @@ export * from "./util/reactive-data";
 export * from "./util/h";
 
 export * from "./host";
-
-// TUI nodes & style
-export * from "./tui/nodes";
-export * from "./tui/style";
+export * as VNode from "./vnode";

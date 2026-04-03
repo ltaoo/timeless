@@ -1,4 +1,4 @@
-import { createTuiInput, parseKey, type KeyName } from "./input";
+import { createTuiInput, parseKey, type KeyName } from "./modules/input";
 import {
   renderToScreen,
   clearScreen,
@@ -6,7 +6,7 @@ import {
   hideCursor,
   getTerminalSize,
 } from "./renderer";
-import type { TuiNode } from "@timeless/primitive";
+import type { TuiNode } from "@timeless/timeless";
 
 export interface TuiGlobal {
   onKeydown(handler: (key: KeyName) => void): void;

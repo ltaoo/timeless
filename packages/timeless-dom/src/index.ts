@@ -3,15 +3,29 @@ import {
   type HeadlessHost,
   isElement,
   type TimelessElement,
+  registerComponent,
+  getRenderer,
+  Grid,
+  View,
+  Txt,
+  VNode,
 } from "@timeless/timeless";
+
+import { DomGrid } from "./modules/grid";
+import { DomTxt } from "./modules/text";
+import { DomView } from "./modules/view";
+
+const { isDescriptor, mount, commitTree } = VNode;
 
 type AnyEventHandler = (event: any) => void;
 
-export function createDomHost(options: {
-  document?: Document;
-  window?: Window;
-  body?: HTMLElement | null;
-} = {}): HeadlessHost {
+export function createDomHost(
+  options: {
+    document?: Document;
+    window?: Window;
+    body?: HTMLElement | null;
+  } = {},
+): HeadlessHost {
   const doc = options.document ?? globalThis.document;
   const win = options.window ?? globalThis.window;
   const getBody = () => options.body ?? doc?.body ?? null;
@@ -87,8 +101,12 @@ export function createDomHost(options: {
     return (event: Event) => {
       let stopped = false;
       let immediateStopped = false;
-      const originalStopPropagation = (event as any).stopPropagation?.bind(event);
-      const originalStopImmediatePropagation = (event as any).stopImmediatePropagation?.bind(event);
+      const originalStopPropagation = (event as any).stopPropagation?.bind(
+        event,
+      );
+      const originalStopImmediatePropagation = (
+        event as any
+      ).stopImmediatePropagation?.bind(event);
 
       if (originalStopPropagation) {
         (event as any).stopPropagation = () => {
@@ -133,7 +151,8 @@ export function createDomHost(options: {
           (event as any).stopPropagation = originalStopPropagation;
         }
         if (originalStopImmediatePropagation) {
-          (event as any).stopImmediatePropagation = originalStopImmediatePropagation;
+          (event as any).stopImmediatePropagation =
+            originalStopImmediatePropagation;
         }
       }
     };
@@ -212,7 +231,15 @@ export function createDomHost(options: {
     },
     addEventListener(target: any, type: string, handler: any, options?: any) {
       // Non-bubbling events must be bound directly to the target element
-      const nonBubblingEvents = ['mouseenter', 'mouseleave', 'focus', 'blur', 'load', 'unload', 'scroll'];
+      const nonBubblingEvents = [
+        "mouseenter",
+        "mouseleave",
+        "focus",
+        "blur",
+        "load",
+        "unload",
+        "scroll",
+      ];
       if (nonBubblingEvents.includes(type)) {
         target.addEventListener(type, handler, options);
         return;
@@ -237,9 +264,22 @@ export function createDomHost(options: {
         state.bubbleCount += 1;
       }
     },
-    removeEventListener(target: any, type: string, handler: any, options?: any) {
+    removeEventListener(
+      target: any,
+      type: string,
+      handler: any,
+      options?: any,
+    ) {
       // Non-bubbling events are bound directly to the target element
-      const nonBubblingEvents = ['mouseenter', 'mouseleave', 'focus', 'blur', 'load', 'unload', 'scroll'];
+      const nonBubblingEvents = [
+        "mouseenter",
+        "mouseleave",
+        "focus",
+        "blur",
+        "load",
+        "unload",
+        "scroll",
+      ];
       if (nonBubblingEvents.includes(type)) {
         target.removeEventListener(type, handler, options);
         return;
@@ -277,7 +317,8 @@ export function createDomHost(options: {
       const body = getBody();
       if (!body) return;
       if (patch.cursor !== undefined) body.style.cursor = patch.cursor;
-      if (patch.userSelect !== undefined) body.style.userSelect = patch.userSelect;
+      if (patch.userSelect !== undefined)
+        body.style.userSelect = patch.userSelect;
     },
     setTimeout(handler: () => void, ms: number) {
       return win.setTimeout(handler, ms);
@@ -333,16 +374,44 @@ export function installDomHost(options?: Parameters<typeof createDomHost>[0]) {
   return host;
 }
 
+// ─── Platform ────────────────────────────────────────────────────
+
+export const platform = {
+  addEventListener(type: string, handler: (event: any) => void, options?: any) {
+    if (typeof window !== "undefined") {
+      window.addEventListener(type, handler, options);
+    }
+  },
+  removeEventListener(
+    type: string,
+    handler: (event: any) => void,
+    options?: any,
+  ) {
+    if (typeof window !== "undefined") {
+      window.removeEventListener(type, handler, options);
+    }
+  },
+};
+
 if (typeof document !== "undefined" && typeof window !== "undefined") {
   installDomHost();
 }
 
 /**
- * Render a TimelessElement into a DOM container.
- * @param elm - The element to render
+ * Register DOM-specific component implementations.
+ */
+function registerDomComponents() {
+  registerComponent(Grid, DomGrid);
+  registerComponent(View, DomView);
+  registerComponent(Txt, DomTxt);
+}
+
+/**
+ * Render a TimelessElement or ElementDescriptor into a DOM container.
+ * @param elm - The element or descriptor to render
  * @param $root - The DOM container element
  */
-export function render(elm: TimelessElement, $root: HTMLElement | null) {
+export function render(elm: TimelessElement | any, $root: HTMLElement | null) {
   if (!$root) {
     console.error("[Render] Root element not found");
     return;
@@ -351,6 +420,19 @@ export function render(elm: TimelessElement, $root: HTMLElement | null) {
     console.error("[Render] Element is null");
     return;
   }
+
+  // Descriptor path (VNode pipeline)
+  if (isDescriptor(elm)) {
+    const host = createDomHost();
+    setHost(host);
+    registerDomComponents();
+    const vnode = mount(elm);
+    commitTree(vnode, getRenderer());
+    host.appendChild($root, vnode._hostNode);
+    return;
+  }
+
+  // TimelessElement path (primitive pipeline)
   if (isElement(elm)) {
     const host = createDomHost();
     const $content = elm.render();
@@ -371,7 +453,10 @@ export function render(elm: TimelessElement, $root: HTMLElement | null) {
  * @param vnode - The virtual node tree to hydrate
  * @param container - The DOM container element with server-rendered content
  */
-export function hydrate(vnode: TimelessElement, container: HTMLElement | null): void {
+export function hydrate(
+  vnode: TimelessElement,
+  container: HTMLElement | null,
+): void {
   if (!vnode) {
     console.error("[Hydrate] Invalid vnode");
     return;

@@ -272,6 +272,7 @@ export type ClassNameRef = {
 
 export type StyleRef = {
   __style_ref: true;
+  readonly value: Record<string, any>;
   _subscribe(ctx: Subscriber): void;
   toString(): string;
 };

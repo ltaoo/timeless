@@ -1,10 +1,21 @@
 import {
   setHost,
+  setRenderer,
   type HeadlessHost,
   type BoundingRect,
   isElement,
   type TimelessElement,
+  registerComponent,
+  getRenderer,
+  Grid,
+  View,
+  Txt,
+  VNode,
 } from "@timeless/timeless";
+
+import { CanvasGrid, CanvasView, CanvasTxt } from "./modules/grid";
+
+const { isDescriptor, mount, commitTree } = VNode;
 
 export const CANVAS_NODE = Symbol("canvas-node");
 
@@ -552,13 +563,17 @@ function renderTreeToCanvas(
           const padLeft = parseLength(styleGet(node, "paddingLeft"), null) ?? 0;
           const padTop = parseLength(styleGet(node, "paddingTop"), null) ?? 0;
 
+          let tx = rect.left + padLeft;
+          if (textAlign === "center") tx = rect.left + rect.width / 2;
+          else if (textAlign === "right") tx = rect.left + rect.width - padLeft;
+
           ctx.save();
           ctx.globalAlpha *= opacity;
           ctx.fillStyle = color;
           ctx.font = font;
           ctx.textAlign = textAlign;
           ctx.textBaseline = textBaseline;
-          ctx.fillText(text, rect.left + padLeft, rect.top + padTop);
+          ctx.fillText(text, tx, rect.top + padTop);
           ctx.restore();
         }
       }
@@ -581,12 +596,16 @@ function renderTreeToCanvas(
       const padLeft = parseLength(styleGet(parent as CanvasElement, "paddingLeft"), null) ?? 0;
       const padTop = parseLength(styleGet(parent as CanvasElement, "paddingTop"), null) ?? 0;
 
+      let tx = rect.left + padLeft;
+      if (textAlign === "center") tx = rect.left + rect.width / 2;
+      else if (textAlign === "right") tx = rect.left + rect.width - padLeft;
+
       ctx.save();
       ctx.fillStyle = color;
       ctx.font = font;
       ctx.textAlign = textAlign;
       ctx.textBaseline = textBaseline;
-      ctx.fillText(node.textContent, rect.left + padLeft, rect.top + padTop);
+      ctx.fillText(node.textContent, tx, rect.top + padTop);
       ctx.restore();
     }
   });
@@ -976,7 +995,28 @@ export function installCanvasHost(options?: CreateCanvasHostOptions) {
   return host;
 }
 
-export function render(elm: TimelessElement, canvas: HTMLCanvasElement | null, options: Omit<CreateCanvasHostOptions, "canvas"> = {}) {
+// ─── Platform ────────────────────────────────────────────────────
+
+export const platform = {
+  addEventListener(type: string, handler: (event: any) => void, options?: any) {
+    if (typeof window !== "undefined") {
+      window.addEventListener(type, handler, options);
+    }
+  },
+  removeEventListener(type: string, handler: (event: any) => void, options?: any) {
+    if (typeof window !== "undefined") {
+      window.removeEventListener(type, handler, options);
+    }
+  },
+};
+
+function registerCanvasComponents() {
+  registerComponent(Grid, CanvasGrid);
+  registerComponent(View, CanvasView);
+  registerComponent(Txt, CanvasTxt);
+}
+
+export function render(elm: TimelessElement | any, canvas: HTMLCanvasElement | null, options: Omit<CreateCanvasHostOptions, "canvas"> = {}) {
   if (!canvas) {
     console.error("[Canvas Render] Canvas element not found");
     return;
@@ -985,6 +1025,40 @@ export function render(elm: TimelessElement, canvas: HTMLCanvasElement | null, o
     console.error("[Canvas Render] Element is null");
     return;
   }
+
+  // Descriptor path (VNode pipeline)
+  if (isDescriptor(elm)) {
+    const host = createCanvasHost({ ...options, canvas });
+    setHost(host);
+    registerCanvasComponents();
+
+    // Wrap the renderer so patchNode triggers a canvas re-draw
+    const baseRenderer = getRenderer();
+    let drawScheduled = false;
+
+    const wrappedRenderer = {
+      ...baseRenderer,
+      patchNode(vnode: any, changes: any) {
+        baseRenderer.patchNode(vnode, changes);
+        if (!drawScheduled) {
+          drawScheduled = true;
+          queueMicrotask(() => {
+            drawScheduled = false;
+            host.draw();
+          });
+        }
+      },
+    };
+    setRenderer(wrappedRenderer);
+
+    const vnode = mount(elm);
+    commitTree(vnode, getRenderer());
+    host.appendChild(host.body, vnode._hostNode);
+    host.draw();
+    return host;
+  }
+
+  // TimelessElement path (primitive pipeline)
   if (!isElement(elm)) {
     console.error("[Canvas Render] Invalid element");
     return;

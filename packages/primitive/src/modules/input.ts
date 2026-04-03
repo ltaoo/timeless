@@ -121,8 +121,8 @@ export function Input(
       if (st) {
         if (isStyleRef(st as any)) {
           const s = st as any;
-          s._subscribe({ onChange(v: any) { host.setStyleText($elm, String(v ?? "")); } });
-          host.setStyleText($elm, s.toString());
+          s._subscribe({ onChange(v: any) { host.setStyleText($elm, viewStyleToCssText(v ?? {})); } });
+          host.setStyleText($elm, viewStyleToCssText(s.value));
         } else if (isRef(st as any)) {
           const s = st as any;
           const apply = () => host.setStyleText($elm, viewStyleToCssText(s.value || {}));

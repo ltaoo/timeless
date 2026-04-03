@@ -1,41 +1,69 @@
-import { View, ref } from "@timeless/timeless";
-import { render, TUI, GridLayout, GridItem } from "@timeless/timeless-tui";
+import { Grid, View, Txt, VNode, ref, combine } from "@timeless/timeless";
+import { render, platform } from "@timeless/timeless-tui";
 
-// ─── Data ───────────────────────────────────────────────────────
+const { h } = VNode;
+
 const apps = [
-  { icon: "\u{1F3AC}", title: "Movies", subtitle: "Movies & Shows" },
-  { icon: "\u{1F3B5}", title: "Music", subtitle: "Your Favorites" },
-  { icon: "\u{1F4F7}", title: "Photos", subtitle: "Photo Library" },
-  { icon: "\u{1F4E1}", title: "Live TV", subtitle: "200+ Channels" },
-  { icon: "\u{1F3AE}", title: "Games", subtitle: "Play & Compete" },
-  { icon: "\u2699\uFE0F", title: "Settings", subtitle: "Preferences" },
-  { icon: "\u26C5", title: "Weather", subtitle: "5-Day Forecast" },
-  { icon: "\u{1F6D2}", title: "Store", subtitle: "Discover Apps" },
-  { icon: "\u{1F4AA}", title: "Fitness", subtitle: "Track Workouts" },
-  { icon: "\u{1F4F0}", title: "News", subtitle: "Headlines" },
-  { icon: "\u{1F9F8}", title: "Kids", subtitle: "Family Friendly" },
-  { icon: "\u{1F310}", title: "Browser", subtitle: "Surf the Web" },
+  { icon: "🎬", title: "Movies", subtitle: "Movies & Shows" },
+  { icon: "🎵", title: "Music", subtitle: "Your Favorites" },
+  { icon: "📷", title: "Photos", subtitle: "Photo Library" },
+  { icon: "📡", title: "Live TV", subtitle: "200+ Channels" },
+  { icon: "🎮", title: "Games", subtitle: "Play & Compete" },
+  { icon: "⚙️", title: "Settings", subtitle: "Preferences" },
+  { icon: "⛅", title: "Weather", subtitle: "5-Day Forecast" },
+  { icon: "🛒", title: "Store", subtitle: "Discover Apps" },
+  { icon: "💪", title: "Fitness", subtitle: "Track Workouts" },
+  { icon: "📰", title: "News", subtitle: "Headlines" },
+  { icon: "🧸", title: "Kids", subtitle: "Family Friendly" },
+  { icon: "🌐", title: "Browser", subtitle: "Surf the Web" },
 ];
 
-// ─── State ──────────────────────────────────────────────────────
-const focus = ref(0);
+function ApplicationView() {
+  const focused_idx = ref(0);
 
-// ─── App ────────────────────────────────────────────────────────
-const app = render(() => {
-  TUI.onKeydown((key) => {
+  platform.addEventListener("keydown", handleKeydown);
+
+  function handleKeydown(event) {
+    const { key } = event;
+    // console.log("handleKeydown", key);
     if (key === "q") {
-      TUI.exit();
+      platform.quit();
     }
-  });
-  // Use pre-built GridItem array instead of For
-  const gridItems = apps.map((app, idx) =>
-    GridItem({ width: 16 }, [
-      View({ style: "color: blue; font-weight: bold" }, [app.icon]),
-      View({ style: "color: white" }, [app.title]),
-      View({ style: "color: gray" }, [app.subtitle]),
-    ]),
-  );
-  return GridLayout({ x: 4, focus }, gridItems);
-});
+    if (key === "ArrowLeft") {
+      focused_idx.as((prev) => Math.max(0, prev - 1));
+    }
+    if (key === "ArrowRight") {
+      focused_idx.as((prev) => Math.min(apps.length - 1, prev + 1));
+    }
+    if (key === "ArrowUp") {
+      focused_idx.as((prev) => Math.max(0, prev - 4));
+    }
+    if (key === "ArrowDown") {
+      focused_idx.as((prev) => Math.min(apps.length - 1, prev + 4));
+    }
+  }
 
-app.start();
+  return h(
+    Grid,
+    { columns: 4, gap: 16 },
+    apps.map((app, idx) =>
+      h(
+        View,
+        {
+          style: {
+            borderColor: combine({ focused_idx, idx }, (t) => {
+              return t.focused_idx === t.idx ? "blue" : "gray";
+            }),
+          },
+        },
+        [
+          h(Txt, { style: { fontSize: 22 } }, [app.icon]),
+          h(Txt, { style: { fontWeight: "bold", fontSize: 14 } }, [app.title]),
+          h(Txt, { style: { fontSize: 12, color: "gray" } }, [app.subtitle]),
+        ],
+      ),
+    ),
+  );
+}
+
+render(h(ApplicationView, {}));

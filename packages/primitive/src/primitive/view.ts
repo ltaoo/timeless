@@ -208,10 +208,10 @@ export function View(
         const st = style as StyleRef;
         st._subscribe({
           onChange(v: any) {
-            if ($elm) host.setStyleText($elm, String(v ?? ""));
+            if ($elm) host.setStyleText($elm, viewStyleToCssText(v ?? {}));
           },
         });
-        host.setStyleText($elm, st.toString());
+        host.setStyleText($elm, viewStyleToCssText(st.value));
       } else if (isRef(style)) {
         const st = style as any;
         const apply = () => {

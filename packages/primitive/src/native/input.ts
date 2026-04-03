@@ -338,10 +338,10 @@ export function NativeInput(props: NativeInputProps = {}) {
           const st = style as any;
           st._subscribe({
             onChange(v: any) {
-              host.setStyleText($elm, String(v ?? ""));
+              host.setStyleText($elm, viewStyleToCssText(v ?? {}));
             },
           });
-          host.setStyleText($elm, st.toString());
+          host.setStyleText($elm, viewStyleToCssText(st.value));
         } else if (isRef(style)) {
           const st = style as any;
           const apply = () => host.setStyleText($elm, viewStyleToCssText(st.value || {}));

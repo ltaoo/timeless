@@ -1,4 +1,8 @@
 import { createStubHost } from "./stub";
+import { createLegacyHostAdapter } from "./legacy-adapter";
+
+import type { HostRenderer } from "@/vnode/host-renderer";
+import { createRendererScheduler, type RendererScheduler } from "@/vnode/reactive";
 
 export type HostNode = any;
 
@@ -90,11 +94,44 @@ export interface HeadlessHost {
 let _host: HeadlessHost = createStubHost();
 export let isBrowser = _host.kind === "dom";
 
+let _renderer: HostRenderer = createLegacyHostAdapter(_host);
+let _scheduler: RendererScheduler = createRendererScheduler(_renderer);
+let _rendererIsLegacy = true;
+
+// ─── Component Registry ──────────────────────────────────────────
+const _componentMap = new Map<Function, Function>();
+
+export function registerComponent(original: Function, replacement: Function) {
+  _componentMap.set(original, replacement);
+}
+
+export function resolveComponent(fn: Function): Function {
+  return _componentMap.get(fn) ?? fn;
+}
+
 export function setHost(host: HeadlessHost) {
   _host = host;
   isBrowser = _host.kind === "dom";
+  if (_rendererIsLegacy) {
+    _renderer = createLegacyHostAdapter(_host);
+    _scheduler = createRendererScheduler(_renderer);
+  }
 }
 
 export function getHost() {
   return _host;
+}
+
+export function setRenderer(renderer: HostRenderer) {
+  _renderer = renderer;
+  _scheduler = createRendererScheduler(_renderer);
+  _rendererIsLegacy = false;
+}
+
+export function getRenderer() {
+  return _renderer;
+}
+
+export function getRendererScheduler() {
+  return _scheduler;
 }

@@ -1,26 +1,37 @@
 import {
   setHost,
+  setRenderer,
   type HeadlessHost,
   isElement,
   type TimelessElement,
-} from "@timeless/timeless";
-import {
+  registerComponent,
+  getRenderer,
+  Grid,
+  View,
+  Txt,
+  VNode,
   createTuiElement,
   createTuiText,
   createTuiFragment,
   isTuiNode,
   type TuiNode,
   type TuiElement,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import {
   renderToString,
-  renderToScreen,
+  renderToScreen as renderTuiNodeToScreen,
   clearScreen,
   showCursor,
   hideCursor,
 } from "./renderer";
 import { setTuiHost } from "./host-accessor";
 import { _setAppFn, _startTui } from "./tui";
+import { TuiGrid } from "./modules/grid";
+import { TuiView } from "./modules/view";
+import { TuiTxt } from "./modules/text";
+import { createTuiInput, parseKey, type KeyName } from "./modules/input";
+
+const { isDescriptor, mount, commitTree } = VNode;
 
 export function createTuiHost(
   options: { out?: NodeJS.WritableStream } = {},
@@ -187,10 +198,53 @@ export function installTuiHost(options?: Parameters<typeof createTuiHost>[0]) {
 
 // ─── render ─────────────────────────────────────────────────────
 
+function registerTuiComponents() {
+  registerComponent(Grid, TuiGrid);
+  registerComponent(View, TuiView);
+  registerComponent(Txt, TuiTxt);
+}
+
 export function render(
-  appFn: (() => TuiNode | TuiNode[]) | TimelessElement,
+  appFn: (() => TuiNode | TuiNode[]) | TimelessElement | any,
   out?: NodeJS.WritableStream,
 ) {
+  // Descriptor path (VNode pipeline)
+  if (isDescriptor(appFn)) {
+    const target = out ?? process.stdout;
+    const host = installTuiHost({ out: target });
+    registerTuiComponents();
+
+    // Wrap the renderer so patchNode triggers a screen re-render
+    const baseRenderer = getRenderer();
+    let renderScheduled = false;
+    const body = host.getBody() as TuiNode;
+
+    const wrappedRenderer = {
+      ...baseRenderer,
+      patchNode(vnode: any, changes: any) {
+        baseRenderer.patchNode(vnode, changes);
+        if (!renderScheduled) {
+          renderScheduled = true;
+          queueMicrotask(() => {
+            renderScheduled = false;
+            renderTuiNodeToScreen(body, target);
+          });
+        }
+      },
+    };
+    setRenderer(wrappedRenderer);
+
+    const vnode = mount(appFn);
+    commitTree(vnode, getRenderer());
+    host.appendChild(body, vnode._hostNode);
+    renderTuiNodeToScreen(body, target);
+
+    // Setup input handling
+    ensureInput();
+
+    return;
+  }
+
   if (typeof appFn === "function") {
     // Install TUI host so View/Txt from @timeless/primitive work
     installTuiHost({ out: out ?? process.stdout });
@@ -227,7 +281,7 @@ export function render(
     }
     host.appendChild(host.getBody(), content);
     const target = out ?? process.stdout;
-    renderToScreen(host.getBody() as TuiNode, target);
+    renderTuiNodeToScreen(host.getBody() as TuiNode, target);
     return;
   }
   console.error("[TUI Render] Invalid element");
@@ -241,3 +295,78 @@ export function renderToStringTree(elm: TimelessElement): string {
   host.appendChild(host.getBody(), content);
   return renderToString(host.getBody() as TuiNode);
 }
+
+// ─── Platform ────────────────────────────────────────────────────
+
+const keyNameToKeyboardKey: Record<string, string> = {
+  up: "ArrowUp",
+  down: "ArrowDown",
+  left: "ArrowLeft",
+  right: "ArrowRight",
+  return: "Enter",
+  escape: "Escape",
+  backspace: "Backspace",
+  tab: "Tab",
+  space: " ",
+};
+
+function toKeyboardKey(name: KeyName): string {
+  return keyNameToKeyboardKey[name] ?? name;
+}
+
+type PlatformEventHandler = (event: any) => void;
+
+const _platformState = {
+  input: null as ReturnType<typeof createTuiInput> | null,
+  keydownHandlers: new Set<PlatformEventHandler>(),
+};
+
+function cleanup() {
+  if (_platformState.input) {
+    _platformState.input.stop();
+    _platformState.input = null;
+  }
+  showCursor(process.stdout);
+}
+
+function ensureInput() {
+  if (_platformState.input) return _platformState.input;
+  _platformState.input = createTuiInput();
+  _platformState.input.onKey((raw: string) => {
+    const name = parseKey(raw);
+    const key = toKeyboardKey(name);
+    // ctrl+c 默认退出
+    if (name === "ctrl+c") {
+      cleanup();
+      process.exit(0);
+    }
+    const event = { type: "keydown", key, raw };
+    for (const handler of _platformState.keydownHandlers) {
+      handler(event);
+    }
+  });
+  _platformState.input.start();
+  return _platformState.input;
+}
+
+export const platform = {
+  addEventListener(type: string, handler: PlatformEventHandler, _options?: any) {
+    if (type === "keydown") {
+      _platformState.keydownHandlers.add(handler);
+      ensureInput();
+    }
+  },
+  removeEventListener(type: string, handler: PlatformEventHandler, _options?: any) {
+    if (type === "keydown") {
+      _platformState.keydownHandlers.delete(handler);
+      if (_platformState.keydownHandlers.size === 0 && _platformState.input) {
+        _platformState.input.stop();
+        _platformState.input = null;
+      }
+    }
+  },
+  quit() {
+    cleanup();
+    process.exit(0);
+  },
+};
