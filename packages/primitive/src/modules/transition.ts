@@ -1,9 +1,9 @@
 import { refobj, computed } from "@timeless/reactive";
 import { PresenceCore } from "@timeless/ui";
 
-import { Show } from "@/primitive/show";
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { Fragment } from "@/primitive/fragment";
+import { Show } from "@/reactive/show";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { Fragment } from "@/content/fragment";
 import { h } from "@/util/h";
 
 export function Transition(

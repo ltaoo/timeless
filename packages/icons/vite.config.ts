@@ -19,8 +19,23 @@ const icons = fs
   .map((name) => name.replace(".ts", ""));
 
 const name = "timeless.icons";
+const externals = [
+  "@timeless/base",
+  "@timeless/kit",
+  "@timeless/primitive",
+  "@timeless/reactive",
+  "@timeless/ui",
+  "@timeless/utils",
+] as const;
+
+function isExternal(id: string) {
+  return externals.some((pkgName) => id === pkgName || id.startsWith(`${pkgName}/`));
+}
 
 export default defineConfig({
+  define: {
+    __Version: JSON.stringify(pkg.version),
+  },
   build: {
     lib: {
       entry: isWhole
@@ -66,10 +81,15 @@ export default defineConfig({
     }),
     sourcemap: isProd ? false : true,
     rollupOptions: {
-      external: ["@timeless/reactive"],
+      external: isExternal,
       output: {
         globals: {
+          "@timeless/base": "Timeless.base",
+          "@timeless/kit": "Timeless.kit",
+          "@timeless/primitive": "Timeless",
           "@timeless/reactive": "Timeless.reactive",
+          "@timeless/ui": "Timeless.ui",
+          "@timeless/utils": "Timeless.utils",
         },
       },
     },

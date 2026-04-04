@@ -1,4 +1,4 @@
-import { ViewChildren, ViewProps, isElement } from "@/primitive/view";
+import { ViewChildren, ViewProps, isElement } from "@/content/view";
 import {
   safeCreateTextNode,
   safeCreateDocumentFragment,

@@ -108,11 +108,6 @@
       "import": "./dist/file-input/index.esm.js",
       "require": "./dist/file-input/index.js"
     },
-    "./flex": {
-      "types": "./dist/flex/index.d.ts",
-      "import": "./dist/flex/index.esm.js",
-      "require": "./dist/flex/index.js"
-    },
     "./head": {
       "types": "./dist/head/index.d.ts",
       "import": "./dist/head/index.esm.js",

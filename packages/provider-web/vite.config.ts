@@ -5,6 +5,9 @@ import pkg from "./package.json";
 export default createLibConfig({
   entry: resolve(__dirname, "src/index.ts"),
   name: "timeless.web",
+  define: {
+    __Version: JSON.stringify(pkg.version),
+  },
   external: [
     "@timeless/utils",
     "@timeless/base",

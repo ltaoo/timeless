@@ -1,30 +1,30 @@
-// console.log("primitive v0.1.0");
+console.log("primitive.version" + __Version);
 
 // Re-export reactive for convenience
 export * from "@timeless/reactive";
 
 // Primitive
-export * from "./primitive/for";
-export * from "./primitive/show";
-export * from "./primitive/match";
-export * from "./primitive/view";
-export * from "./primitive/fragment";
-export * from "./primitive/html";
-export * from "./primitive/text";
-export * from "./primitive/lazy-view";
+export * from "./reactive/for";
+export * from "./reactive/show";
+export * from "./reactive/match";
+export * from "./content/view";
+export * from "./content/fragment";
+export * from "./content/html";
+export * from "./content/text";
+export * from "./content/lazy-view";
 
 // Native
-export * from "./native/img";
-export * from "./native/input";
-export * from "./native/password";
-export * from "./native/label";
-export * from "./native/link";
-export * from "./native/checkbox";
-export * from "./native/select";
-export * from "./native/slider";
-export * from "./native/file-input";
-export * from "./native/svg";
-export * from "./native/style";
+export * from "./input/input";
+export * from "./input/password";
+export * from "./input/checkbox";
+export * from "./input/select";
+export * from "./input/slider";
+export * from "./input/file-input";
+export * as SVG from "./content/svg";
+export * from "./content/style";
+export * from "./content/img";
+export * from "./content/label";
+export * from "./interaction/link";
 
 // base component
 export * from "./modules/portal";

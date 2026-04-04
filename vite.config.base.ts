@@ -10,6 +10,7 @@ export interface BuildOptions {
   globalName?: string;
   external?: string[];
   globals?: Record<string, string>;
+  define?: Record<string, string>;
   formats?: ("es" | "cjs" | "umd")[];
   fileName?: (format: string) => string;
   minify?: boolean;
@@ -32,6 +33,7 @@ export function createLibConfig(options: BuildOptions): UserConfig {
     globalName,
     external = [],
     globals = {},
+    define = {},
     formats = ["es", "cjs"],
     fileName,
     minify = false,
@@ -53,6 +55,7 @@ export function createLibConfig(options: BuildOptions): UserConfig {
   }
 
   return defineConfig({
+    define,
     resolve: {
       alias: Object.entries(alias).map(([find, replacement]) => ({
         find,

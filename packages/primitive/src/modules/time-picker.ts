@@ -1,9 +1,9 @@
 import { refobj, computed, classNames } from "@timeless/reactive";
 import { TimePickerCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { For } from "@/primitive/for";
-import { Fragment } from "@/primitive/fragment";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { For } from "@/reactive/for";
+import { Fragment } from "@/content/fragment";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
@@ -268,6 +268,7 @@ export function HourColumn(
   return View(rest, [
     For({
       each: hours,
+      // @ts-ignore
       render(hour) {
         return HourItem(
           {
@@ -324,6 +325,7 @@ export function MinuteColumn(
   return View(rest, [
     For({
       each: minutes,
+      // @ts-ignore
       render(minute) {
         return MinuteItem(
           {
@@ -380,6 +382,7 @@ export function SecondColumn(
   return View(rest, [
     For({
       each: seconds,
+      // @ts-ignore
       render(second) {
         return SecondItem(
           {

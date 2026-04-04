@@ -1,7 +1,7 @@
 import { cn, computed, refobj } from "@timeless/primitive";
 import {
   For,
-  NativeInput,
+  Input,
   SelectPrimitive,
   Show,
   View,
@@ -171,7 +171,7 @@ export function SearchSelect<T>(
         },
       },
       [
-        NativeInput({
+        Input({
           class:
             "w-full bg-transparent outline-none placeholder:text-muted-foreground",
           placeholder: computed(
@@ -261,7 +261,11 @@ export function SearchSelect<T>(
                     class:
                       "py-6 text-center text-sm text-muted-foreground select-none",
                   },
-                  [computed(state_, (t) => (t.loading ? loadingText : emptyText))],
+                  [
+                    computed(state_, (t) =>
+                      t.loading ? loadingText : emptyText,
+                    ),
+                  ],
                 ),
               ],
             },

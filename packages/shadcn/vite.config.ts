@@ -3,9 +3,23 @@ import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 import fs from "fs";
 
+import pkg from "./package.json";
 import { isProd } from "../../vite.config.base";
 
 const name = "timeless.shadcn";
+const externals = [
+  "@timeless/base",
+  "@timeless/kit",
+  "@timeless/primitive",
+  "@timeless/reactive",
+  "@timeless/timeless",
+  "@timeless/ui",
+  "@timeless/utils",
+] as const;
+
+function isExternal(id: string) {
+  return externals.some((pkgName) => id === pkgName || id.startsWith(`${pkgName}/`));
+}
 
 function redirectToPrimitive() {
   const redirects = new Map<string, string>([
@@ -64,6 +78,9 @@ function rewriteDtsImports() {
 }
 
 export default defineConfig({
+  define: {
+    __Version: JSON.stringify(pkg.version),
+  },
   css: {
     postcss: "./postcss.config.js",
     modules: false,
@@ -93,15 +110,17 @@ export default defineConfig({
     }),
     sourcemap: isProd ? false : true,
     rollupOptions: {
-      external: [
-        "@timeless/primitive",
-        "@timeless/ui",
-      ],
+      external: isExternal,
       output: {
         extend: true,
         globals: {
+          "@timeless/base": "Timeless.base",
+          "@timeless/kit": "Timeless.kit",
+          "@timeless/timeless": "Timeless",
           "@timeless/primitive": "Timeless",
+          "@timeless/reactive": "Timeless.reactive",
           "@timeless/ui": "Timeless.ui",
+          "@timeless/utils": "Timeless.utils",
         },
         footer: `(function(){try{var g=typeof globalThis!=="undefined"?globalThis:typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var t=g.Timeless;if(!t)return;if(t.kit)Object.assign(t,t.kit);Object.assign(g,t)}catch(e){}})();`,
         assetFileNames: (assetInfo) => {
@@ -114,7 +133,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    redirectToPrimitive(),
+    // redirectToPrimitive(),
     dts({
       insertTypesEntry: true,
       rollupTypes: false,

@@ -1,8 +1,8 @@
 import { refobj, computed, classNames } from "@timeless/reactive";
 import { DateRangePickerCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { For } from "@/primitive/for";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { For } from "@/reactive/for";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
@@ -398,10 +398,12 @@ export function LeftCalendarGridBody(
   return View(rest, [
     For({
       each: computed(state, (s) => s.left.weeks),
+      // @ts-ignore
       render(week) {
         return View({}, [
           For({
             each: computed(week, (t) => t.dates),
+            // @ts-ignore
             render(day) {
               return CalendarCell(
                 {
@@ -442,10 +444,12 @@ export function RightCalendarGridBody(
   return View(rest, [
     For({
       each: computed(state, (s) => s.right.weeks),
+      // @ts-ignore
       render(week) {
         return View({}, [
           For({
             each: computed(week, (t) => t.dates),
+            // @ts-ignore
             render(day) {
               return CalendarCell(
                 {

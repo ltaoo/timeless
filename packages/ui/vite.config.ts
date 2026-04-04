@@ -2,7 +2,10 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 import fs from "fs";
 import dts from "vite-plugin-dts";
+
 import { buildLibName, isProd } from "../../vite.config.base";
+
+import pkg from "./package.json";
 
 const name = "timeless.ui";
 const isWhole = process.argv.includes("--whole");
@@ -35,6 +38,9 @@ const components = fs.readdirSync(resolve(__dirname, "src")).filter((name) => {
 // }
 
 export default defineConfig({
+  define: {
+    __Version: JSON.stringify(pkg.version),
+  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
@@ -56,7 +62,11 @@ export default defineConfig({
               } as Record<string, string>,
             )
           : resolve(__dirname, "src/index.ts"),
-      formats: isUmdOnly ? ["umd"] : isWhole ? ["es", "cjs"] : ["es", "cjs", "umd"],
+      formats: isUmdOnly
+        ? ["umd"]
+        : isWhole
+          ? ["es", "cjs"]
+          : ["es", "cjs", "umd"],
       fileName: (format, entryName) => {
         if (entryName === "index") {
           if (format === "es") {

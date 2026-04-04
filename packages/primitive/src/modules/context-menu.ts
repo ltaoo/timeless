@@ -6,7 +6,7 @@ import {
   MenuGroupCore,
 } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { View, ViewChildren, ViewProps } from "@/content/view";
 import { getHost } from "@/host";
 
 import * as MenuPrimitive from "./menu";

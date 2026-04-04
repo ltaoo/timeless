@@ -18,10 +18,18 @@ export function derive(deps: any, fn: any): Ref<any> {
   const _deps: Subscriber[] = [];
   let _local_value: any;
 
-  const isArray = Array.isArray(deps);
-  const depRefs: any[] = isArray ? deps : Object.values(deps);
+  const isSingleRef = isRef(deps);
+  const isArray = isSingleRef || Array.isArray(deps);
+  const depRefs: any[] = isSingleRef
+    ? [deps]
+    : Array.isArray(deps)
+      ? (deps as any[])
+      : Object.values(deps);
 
   const getValues = () => {
+    if (isSingleRef) {
+      return [(deps as Ref<any>).value];
+    }
     if (isArray) {
       return (deps as any[]).map((r) => (isRef(r) ? r.value : r));
     }

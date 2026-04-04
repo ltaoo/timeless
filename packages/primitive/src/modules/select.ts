@@ -1,9 +1,9 @@
 import { refobj, computed, combine, sn, cn, isRef, isStyleRef } from "@timeless/reactive";
 import { SelectCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { Show } from "@/primitive/show";
-import { NativeInput } from "@/native/input";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { Show } from "@/reactive/show";
+import { Input } from "@/input/input";
 import { h } from "@/util/h";
 import { getHost } from "@/host";
 
@@ -378,7 +378,7 @@ export function Search(
       when: computed(state_, (s) => s.search),
     },
     [
-      NativeInput({
+      Input({
         ...rest,
         type: "text",
         placeholder: computed(state_, (s) => s.searchPlaceholder),

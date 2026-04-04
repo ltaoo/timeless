@@ -1,4 +1,4 @@
-import { View, ViewProps, ViewChildren } from "@/primitive/view";
+import { View, ViewProps, ViewChildren } from "@/content/view";
 
 export function Badge(
   props: ViewProps & { variant?: "default" | "secondary" | "outline" | "destructive" },

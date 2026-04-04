@@ -1,7 +1,7 @@
 import { ref, computed, Ref, isRef, isStyleRef } from "@timeless/reactive";
 import { ProgressCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "@/primitive/view";
+import { View, ViewProps, ViewChildren } from "@/content/view";
 
 export function Root(
   props: ViewProps & {

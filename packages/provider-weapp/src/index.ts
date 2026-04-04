@@ -4,4 +4,3 @@ export { connect as provide_input } from "./input";
 export { connect as provide_video_player } from "./video_player";
 
 export * from "./weapp_utils";
-

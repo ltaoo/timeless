@@ -1,11 +1,11 @@
-import type { HeadlessHost } from "@timeless/timeless";
+import type { TimelessHost } from "@timeless/timeless";
 
-let _host: HeadlessHost | null = null;
+let _host: TimelessHost | null = null;
 
-export function setTuiHost(host: HeadlessHost) {
+export function setTuiHost(host: TimelessHost) {
   _host = host;
 }
 
-export function getTuiHost(): HeadlessHost | null {
+export function getTuiHost(): TimelessHost | null {
   return _host;
 }

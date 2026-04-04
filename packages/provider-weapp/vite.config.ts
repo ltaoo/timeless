@@ -6,6 +6,9 @@ export default createLibConfig({
   dts: true,
   entry: resolve(__dirname, 'src/index.ts'),
   name: 'timeless.weapp',
+  define: {
+    __Version: JSON.stringify(pkg.version),
+  },
   external: [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {})

@@ -1,4 +1,4 @@
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { View, ViewChildren, ViewProps } from "@/content/view";
 
 export function Alert(
   props: ViewProps & { variant?: "default" | "destructive" },

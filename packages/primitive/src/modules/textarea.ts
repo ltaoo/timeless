@@ -1,8 +1,8 @@
 import { computed, ref, refobj } from "@timeless/reactive";
 import { InputCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "@/primitive/view";
-import { NativeTextarea } from "@/native/textarea";
+import { View, ViewProps, ViewChildren } from "@/content/view";
+import { Textarea as NativeTextarea } from "@/input/textarea";
 import { getHost } from "@/host";
 
 export function Root(

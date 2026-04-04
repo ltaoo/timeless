@@ -9,6 +9,9 @@ import { buildLibName, isProd } from "../../vite.config.base";
 const name = "timeless";
 
 export default defineConfig({
+  define: {
+    __Version: JSON.stringify(pkg.version),
+  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
@@ -37,18 +40,18 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       external: [
-        ...Object.keys(pkg.dependencies || {}),
-        ...Object.keys(pkg.peerDependencies || {}),
+        // ...Object.keys(pkg.dependencies || {}),
+        // ...Object.keys(pkg.peerDependencies || {}),
       ],
       output: {
         globals: {
-          "@timeless/base": "Timeless.base",
-          "@timeless/icons": "Timeless.icons",
-          "@timeless/reactive": "Timeless.reactive",
-          "@timeless/utils": "Timeless.utils",
-          "@timeless/ui": "Timeless.ui",
-          "@timeless/kit": "Timeless.kit",
-          "@timeless/primitive": "Timeless.primitive",
+          // "@timeless/base": "Timeless.base",
+          // "@timeless/icons": "Timeless.icons",
+          // "@timeless/reactive": "Timeless.reactive",
+          // "@timeless/utils": "Timeless.utils",
+          // "@timeless/ui": "Timeless.ui",
+          // "@timeless/kit": "Timeless.kit",
+          // "@timeless/primitive": "Timeless.primitive",
         },
       },
     },

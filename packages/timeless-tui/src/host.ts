@@ -1,7 +1,7 @@
 import {
   setHost,
   setRenderer,
-  type HeadlessHost,
+  type TimelessHost,
   isElement,
   type TimelessElement,
   registerComponent,
@@ -34,9 +34,9 @@ import { createTuiInput, parseKey, type KeyName } from "./modules/input";
 
 const { isDescriptor, mount, commitTree } = VNode;
 
-type TuiHost = HeadlessHost & {
-  getBody: NonNullable<HeadlessHost["getBody"]>;
-  appendChild: NonNullable<HeadlessHost["appendChild"]>;
+type TuiHost = TimelessHost & {
+  getBody: NonNullable<TimelessHost["getBody"]>;
+  appendChild: NonNullable<TimelessHost["appendChild"]>;
 };
 
 export function createTuiHost(

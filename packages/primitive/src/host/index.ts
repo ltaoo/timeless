@@ -27,7 +27,7 @@ export type GlobalStylePatch = Partial<{
 
 export type StylePatch = Record<string, string>;
 
-export interface HeadlessHost {
+export interface TimelessHost {
   kind: string;
   createElement(tag: string): HostNode;
   createElementNS?(namespace: string, tag: string): HostNode;
@@ -98,7 +98,7 @@ export interface HeadlessHost {
   getFirstChild(node: HostNode): HostNode | null;
 }
 
-let _host: HeadlessHost = createStubHost();
+let _host: TimelessHost = createStubHost();
 export let isBrowser = _host.kind === "dom";
 
 let _renderer: HostRenderer = createLegacyHostAdapter(_host);
@@ -116,7 +116,7 @@ export function resolveComponent(fn: Function): Function {
   return _componentMap.get(fn) ?? fn;
 }
 
-export function setHost(host: HeadlessHost) {
+export function setHost(host: TimelessHost) {
   _host = host;
   isBrowser = _host.kind === "dom";
   if (_rendererIsLegacy) {

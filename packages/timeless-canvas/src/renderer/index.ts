@@ -1,7 +1,7 @@
 import {
   setHost,
   setRenderer,
-  type HeadlessHost,
+  type TimelessHost,
   type BoundingRect,
   isElement,
   type TimelessElement,
@@ -70,12 +70,17 @@ export type CreateCanvasHostOptions = {
   clearColor?: string | null;
 };
 
-export type CanvasHost = HeadlessHost & {
+export type CanvasHost = TimelessHost & {
   canvas: HTMLCanvasElement | null;
   ctx: CanvasRenderingContext2D | null;
   body: CanvasElement;
   draw(): void;
   destroy(): void;
+  enableDebug(enabled: boolean): void;
+};
+
+export type RenderOptions = Omit<CreateCanvasHostOptions, "canvas"> & {
+  onVNodeTreeCreated?: (vnode: any, host: CanvasHost) => void;
 };
 
 export function isCanvasNode(node: any): node is CanvasNode {
@@ -126,8 +131,7 @@ export function createCanvasElement(tag: string): CanvasElement {
     },
     appendChild(child: CanvasNode) {
       if (child.parentNode && child.parentNode !== node) {
-        const idx = child.parentNode.childNodes.indexOf(child);
-        if (idx !== -1) child.parentNode.childNodes.splice(idx, 1);
+        child.parentNode.removeChild(child);
       }
       child.parentNode = node;
       children.push(child);
@@ -148,8 +152,7 @@ export function createCanvasElement(tag: string): CanvasElement {
       const idx = children.indexOf(refNode);
       if (idx === -1) return node.appendChild(newNode);
       if (newNode.parentNode && newNode.parentNode !== node) {
-        const oidx = newNode.parentNode.childNodes.indexOf(newNode);
-        if (oidx !== -1) newNode.parentNode.childNodes.splice(oidx, 1);
+        newNode.parentNode.removeChild(newNode);
       }
       newNode.parentNode = node;
       children.splice(idx, 0, newNode);
@@ -221,8 +224,7 @@ export function createCanvasFragment(): CanvasFragment {
     },
     appendChild(child: CanvasNode) {
       if (child.parentNode && child.parentNode !== node) {
-        const idx = child.parentNode.childNodes.indexOf(child);
-        if (idx !== -1) child.parentNode.childNodes.splice(idx, 1);
+        child.parentNode.removeChild(child);
       }
       child.parentNode = node;
       children.push(child);
@@ -243,8 +245,7 @@ export function createCanvasFragment(): CanvasFragment {
       const idx = children.indexOf(refNode);
       if (idx === -1) return node.appendChild(newNode);
       if (newNode.parentNode && newNode.parentNode !== node) {
-        const oidx = newNode.parentNode.childNodes.indexOf(newNode);
-        if (oidx !== -1) newNode.parentNode.childNodes.splice(oidx, 1);
+        newNode.parentNode.removeChild(newNode);
       }
       newNode.parentNode = node;
       children.splice(idx, 0, newNode);
@@ -376,13 +377,6 @@ function containsPoint(rect: BoundingRect, p: Point) {
   );
 }
 
-function walkDrawables(root: CanvasNode, fn: (node: CanvasNode) => void) {
-  fn(root);
-  for (const child of root.childNodes) {
-    walkDrawables(child, fn);
-  }
-}
-
 function pickNodeAtPoint(
   root: CanvasNode,
   point: Point,
@@ -459,13 +453,19 @@ function applyCanvasSizing(
   canvas: HTMLCanvasElement,
   dpr: number,
 ): { width: number; height: number } {
+  const rect =
+    typeof canvas.getBoundingClientRect === "function"
+      ? canvas.getBoundingClientRect()
+      : null;
   const cssWidth =
     canvas.clientWidth ||
+    rect?.width ||
     parseNumber(canvas.getAttribute("width")) ||
     canvas.width / dpr ||
     0;
   const cssHeight =
     canvas.clientHeight ||
+    rect?.height ||
     parseNumber(canvas.getAttribute("height")) ||
     canvas.height / dpr ||
     0;
@@ -487,6 +487,7 @@ function renderTreeToCanvas(
   rectCache: WeakMap<CanvasNode, BoundingRect>,
   clearColor: string | null | undefined,
   dpr: number,
+  debugOptions?: { enabled: boolean; hoveredNode: CanvasNode | null },
 ) {
   const { width, height } = applyCanvasSizing(ctx.canvas, dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -506,18 +507,44 @@ function renderTreeToCanvas(
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
 
-  walkDrawables(root, (node) => {
-    if (!isCanvasNode(node)) return;
-
+  const computeRects = (node: CanvasNode, parentRect: BoundingRect | null) => {
     if (node.kind === "element") {
-      const rect = resolveRect(
-        node,
-        node.parentNode ? (rectCache.get(node.parentNode) ?? null) : null,
-      );
+      const rect = resolveRect(node, parentRect);
       rectCache.set(node, rect);
+      for (const child of node.childNodes) computeRects(child, rect);
+      return;
+    }
+    if (node.kind === "fragment") {
+      for (const child of node.childNodes) computeRects(child, parentRect);
+    }
+  };
+
+  type DrawCommand =
+    | { op: "save" }
+    | { op: "restore" }
+    | { op: "setGlobalAlpha"; alpha: number }
+    | { op: "setFillStyle"; value: string }
+    | { op: "setStrokeStyle"; value: string }
+    | { op: "setLineWidth"; value: number }
+    | { op: "fillRect"; x: number; y: number; w: number; h: number }
+    | { op: "strokeRect"; x: number; y: number; w: number; h: number }
+    | { op: "setFont"; value: string }
+    | { op: "setTextAlign"; value: CanvasTextAlign }
+    | { op: "setTextBaseline"; value: CanvasTextBaseline }
+    | { op: "fillText"; text: string; x: number; y: number };
+
+  const recordNode = (
+    node: CanvasNode,
+    parentAlpha: number,
+    out: DrawCommand[],
+  ) => {
+    if (node.kind === "element") {
+      const rect = rectCache.get(node);
+      if (!rect) return;
 
       const opacity = parseNumber(styleGet(node, "opacity")) ?? 1;
-      if (opacity <= 0) return;
+      const alpha = parentAlpha * opacity;
+      if (alpha <= 0) return;
 
       const background =
         styleGetFirst(node, ["backgroundColor", "background"]) ??
@@ -530,19 +557,30 @@ function renderTreeToCanvas(
         parseLength(node.getAttribute("strokeWidth"), null) ??
         0;
 
-      if (rect.width > 0 && rect.height > 0) {
-        ctx.save();
-        ctx.globalAlpha *= opacity;
+      if (rect.width > 0 && rect.height > 0 && (background || borderColor)) {
+        out.push({ op: "save" }, { op: "setGlobalAlpha", alpha });
         if (background) {
-          ctx.fillStyle = background;
-          ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+          out.push({ op: "setFillStyle", value: background });
+          out.push({
+            op: "fillRect",
+            x: rect.left,
+            y: rect.top,
+            w: rect.width,
+            h: rect.height,
+          });
         }
         if (borderColor && borderWidth > 0) {
-          ctx.strokeStyle = borderColor;
-          ctx.lineWidth = borderWidth;
-          ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
+          out.push({ op: "setStrokeStyle", value: borderColor });
+          out.push({ op: "setLineWidth", value: borderWidth });
+          out.push({
+            op: "strokeRect",
+            x: rect.left,
+            y: rect.top,
+            w: rect.width,
+            h: rect.height,
+          });
         }
-        ctx.restore();
+        out.push({ op: "restore" });
       }
 
       if (node.tag === "text") {
@@ -557,10 +595,12 @@ function renderTreeToCanvas(
           const color =
             styleGetFirst(node, ["color", "fillStyle"]) ??
             node.getAttribute("color") ??
-            "#000";
+            "rgba(255,255,255,0.92)";
           const font = styleGet(node, "font") ?? "16px sans-serif";
-          const textAlign = styleGet(node, "textAlign") ?? "left";
-          const textBaseline = styleGet(node, "textBaseline") ?? "top";
+          const textAlign = (styleGet(node, "textAlign") ??
+            "left") as CanvasTextAlign;
+          const textBaseline = (styleGet(node, "textBaseline") ??
+            "top") as CanvasTextBaseline;
           const padLeft = parseLength(styleGet(node, "paddingLeft"), null) ?? 0;
           const padTop = parseLength(styleGet(node, "paddingTop"), null) ?? 0;
 
@@ -568,17 +608,17 @@ function renderTreeToCanvas(
           if (textAlign === "center") tx = rect.left + rect.width / 2;
           else if (textAlign === "right") tx = rect.left + rect.width - padLeft;
 
-          ctx.save();
-          ctx.globalAlpha *= opacity;
-          ctx.fillStyle = color;
-          ctx.font = font;
-          ctx.textAlign = textAlign;
-          ctx.textBaseline = textBaseline;
-          ctx.fillText(text, tx, rect.top + padTop);
-          ctx.restore();
+          out.push({ op: "save" }, { op: "setGlobalAlpha", alpha });
+          out.push({ op: "setFillStyle", value: color });
+          out.push({ op: "setFont", value: font });
+          out.push({ op: "setTextAlign", value: textAlign });
+          out.push({ op: "setTextBaseline", value: textBaseline });
+          out.push({ op: "fillText", text, x: tx, y: rect.top + padTop });
+          out.push({ op: "restore" });
         }
       }
 
+      for (const child of node.childNodes) recordNode(child, alpha, out);
       return;
     }
 
@@ -587,16 +627,17 @@ function renderTreeToCanvas(
       if (!parent || parent.kind !== "element") return;
       const rect = rectCache.get(parent);
       if (!rect) return;
+
       const color =
         styleGetFirst(parent, ["color", "fillStyle"]) ??
         (parent as CanvasElement).getAttribute("color") ??
-        "#000";
+        "rgba(255,255,255,0.92)";
       const font =
         styleGet(parent as CanvasElement, "font") ?? "16px sans-serif";
-      const textAlign =
-        styleGet(parent as CanvasElement, "textAlign") ?? "left";
-      const textBaseline =
-        styleGet(parent as CanvasElement, "textBaseline") ?? "top";
+      const textAlign = (styleGet(parent as CanvasElement, "textAlign") ??
+        "left") as CanvasTextAlign;
+      const textBaseline = (styleGet(parent as CanvasElement, "textBaseline") ??
+        "top") as CanvasTextBaseline;
       const padLeft =
         parseLength(styleGet(parent as CanvasElement, "paddingLeft"), null) ??
         0;
@@ -607,15 +648,129 @@ function renderTreeToCanvas(
       if (textAlign === "center") tx = rect.left + rect.width / 2;
       else if (textAlign === "right") tx = rect.left + rect.width - padLeft;
 
+      out.push({ op: "save" }, { op: "setGlobalAlpha", alpha: parentAlpha });
+      out.push({ op: "setFillStyle", value: color });
+      out.push({ op: "setFont", value: font });
+      out.push({ op: "setTextAlign", value: textAlign });
+      out.push({ op: "setTextBaseline", value: textBaseline });
+      out.push({
+        op: "fillText",
+        text: node.textContent,
+        x: tx,
+        y: rect.top + padTop,
+      });
+      out.push({ op: "restore" });
+      return;
+    }
+
+    for (const child of node.childNodes) recordNode(child, parentAlpha, out);
+  };
+
+  const executeDisplayList = (list: DrawCommand[]) => {
+    for (const cmd of list) {
+      switch (cmd.op) {
+        case "save":
+          ctx.save();
+          break;
+        case "restore":
+          ctx.restore();
+          break;
+        case "setGlobalAlpha":
+          ctx.globalAlpha = cmd.alpha;
+          break;
+        case "setFillStyle":
+          ctx.fillStyle = cmd.value;
+          break;
+        case "setStrokeStyle":
+          ctx.strokeStyle = cmd.value;
+          break;
+        case "setLineWidth":
+          ctx.lineWidth = cmd.value;
+          break;
+        case "fillRect":
+          ctx.fillRect(cmd.x, cmd.y, cmd.w, cmd.h);
+          break;
+        case "strokeRect":
+          ctx.strokeRect(cmd.x, cmd.y, cmd.w, cmd.h);
+          break;
+        case "setFont":
+          ctx.font = cmd.value;
+          break;
+        case "setTextAlign":
+          ctx.textAlign = cmd.value;
+          break;
+        case "setTextBaseline":
+          ctx.textBaseline = cmd.value;
+          break;
+        case "fillText":
+          ctx.fillText(cmd.text, cmd.x, cmd.y);
+          break;
+        default:
+          break;
+      }
+    }
+  };
+
+  const rootRect = rectCache.get(root) ?? null;
+  for (const child of root.childNodes) computeRects(child, rootRect);
+  const displayList: DrawCommand[] = [];
+  recordNode(root, 1, displayList);
+  executeDisplayList(displayList);
+
+  // Draw debug overlay
+  if (debugOptions?.enabled && debugOptions.hoveredNode) {
+    const hoveredRect = rectCache.get(debugOptions.hoveredNode);
+    if (hoveredRect && hoveredRect.width > 0 && hoveredRect.height > 0) {
       ctx.save();
-      ctx.fillStyle = color;
-      ctx.font = font;
-      ctx.textAlign = textAlign;
-      ctx.textBaseline = textBaseline;
-      ctx.fillText(node.textContent, tx, rect.top + padTop);
+
+      // Draw highlight border
+      ctx.strokeStyle = "rgba(255, 100, 0, 0.8)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(
+        hoveredRect.left,
+        hoveredRect.top,
+        hoveredRect.width,
+        hoveredRect.height,
+      );
+
+      // Draw semi-transparent overlay
+      ctx.fillStyle = "rgba(255, 100, 0, 0.1)";
+      ctx.fillRect(
+        hoveredRect.left,
+        hoveredRect.top,
+        hoveredRect.width,
+        hoveredRect.height,
+      );
+
+      // Draw size label
+      const label = `${Math.round(hoveredRect.width)} × ${Math.round(hoveredRect.height)}`;
+      ctx.font = "12px monospace";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+
+      const metrics = ctx.measureText(label);
+      const labelWidth = metrics.width + 8;
+      const labelHeight = 18;
+
+      let labelX = hoveredRect.left;
+      let labelY = hoveredRect.top - labelHeight - 4;
+
+      // Adjust label position if it goes off-screen
+      if (labelY < 0) {
+        labelY = hoveredRect.top + 4;
+      }
+
+      // Draw label background
+      ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+      ctx.fillRect(labelX, labelY, labelWidth, labelHeight);
+
+      // Draw label text
+      ctx.fillStyle = "rgba(255, 255, 255, 1)";
+      ctx.fillText(label, labelX + 4, labelY + 3);
+
       ctx.restore();
     }
-  });
+  }
 }
 
 export function createCanvasHost(
@@ -652,6 +807,8 @@ export function createCanvasHost(
   const clearColor = options.clearColor;
   let destroyed = false;
   let hovered: CanvasNode | null = null;
+  let debugEnabled = false;
+  let debugHoveredNode: CanvasNode | null = null;
 
   const getHandlerBucket = (target: any, type: string) => {
     let perTarget = handlerStore.get(target);
@@ -792,7 +949,33 @@ export function createCanvasHost(
     draw() {
       if (destroyed) return;
       if (!ctx) return;
-      renderTreeToCanvas(body, ctx, rectCache, clearColor, dpr);
+      renderTreeToCanvas(body, ctx, rectCache, clearColor, dpr, {
+        enabled: debugEnabled,
+        hoveredNode: debugHoveredNode,
+      });
+    },
+    enableDebug(enabled: boolean) {
+      debugEnabled = enabled;
+      if (enabled && canvas) {
+        const debugMouseMoveHandler = (event: MouseEvent) => {
+          if (!debugEnabled) return;
+          const point = computeEventPoint(canvas, event);
+          const hit = pickNodeAtPoint(body, point, rectCache);
+          if (hit !== debugHoveredNode) {
+            debugHoveredNode = hit;
+            host.draw();
+          }
+        };
+        canvas.addEventListener("mousemove", debugMouseMoveHandler);
+        (host as any)._debugMouseMoveHandler = debugMouseMoveHandler;
+      } else if (!enabled && canvas && (host as any)._debugMouseMoveHandler) {
+        canvas.removeEventListener(
+          "mousemove",
+          (host as any)._debugMouseMoveHandler,
+        );
+        debugHoveredNode = null;
+        host.draw();
+      }
     },
     destroy() {
       if (destroyed) return;
@@ -823,6 +1006,14 @@ export function createCanvasHost(
     },
     appendChild(parent: any, child: any) {
       if (!isCanvasNode(parent) || !isCanvasNode(child)) return;
+      if (child.kind === "fragment") {
+        const nodes = [...child.childNodes];
+        for (const n of nodes) {
+          child.removeChild(n);
+          parent.appendChild(n);
+        }
+        return;
+      }
       parent.appendChild(child);
     },
     removeChild(parent: any, child: any) {
@@ -831,7 +1022,16 @@ export function createCanvasHost(
     },
     insertBefore(parent: any, child: any, before: any) {
       if (!isCanvasNode(parent) || !isCanvasNode(child)) return;
-      parent.insertBefore(child, isCanvasNode(before) ? before : null);
+      const ref = isCanvasNode(before) ? before : null;
+      if (child.kind === "fragment") {
+        const nodes = [...child.childNodes];
+        for (const n of nodes) {
+          child.removeChild(n);
+          parent.insertBefore(n, ref);
+        }
+        return;
+      }
+      parent.insertBefore(child, ref);
     },
     replaceChild(parent: any, newChild: any, oldChild: any) {
       if (
@@ -840,6 +1040,15 @@ export function createCanvasHost(
         !isCanvasNode(oldChild)
       )
         return;
+      if (newChild.kind === "fragment") {
+        const nodes = [...newChild.childNodes];
+        for (const n of nodes) {
+          newChild.removeChild(n);
+          parent.insertBefore(n, oldChild);
+        }
+        parent.removeChild(oldChild);
+        return;
+      }
       parent.replaceChild(newChild, oldChild);
     },
     clearChildren(parent: any) {
@@ -1023,8 +1232,15 @@ export function createCanvasHost(
   return host;
 }
 
+let currentHost: CanvasHost | null = null;
+
+export function getCurrentHost(): CanvasHost | null {
+  return currentHost;
+}
+
 export function installCanvasHost(options?: CreateCanvasHostOptions) {
   const host = createCanvasHost(options);
+  currentHost = host;
   setHost(host);
   return host;
 }
@@ -1038,7 +1254,7 @@ function registerCanvasComponents() {
 export function render(
   elm: TimelessElement,
   canvas: HTMLCanvasElement,
-  options: Omit<CreateCanvasHostOptions, "canvas"> = {},
+  options: RenderOptions = {},
 ) {
   if (!canvas) {
     console.error("[Canvas Render] Canvas element not found");
@@ -1049,8 +1265,11 @@ export function render(
     return;
   }
 
+  const { onVNodeTreeCreated, ...hostOptions } = options;
+
   if (isDescriptor(elm)) {
-    const host = createCanvasHost({ ...options, canvas });
+    const host = createCanvasHost({ ...hostOptions, canvas });
+    currentHost = host;
     setHost(host);
     registerCanvasComponents();
 
@@ -1077,6 +1296,7 @@ export function render(
     const body = host.getBody ? host.getBody() : host.body;
     host.clearChildren(body);
     host.appendChild(body, vnode._hostNode);
+    onVNodeTreeCreated?.(vnode, host);
     host.draw();
     return host;
   }
@@ -1086,7 +1306,8 @@ export function render(
     return;
   }
 
-  const host = createCanvasHost({ ...options, canvas });
+  const host = createCanvasHost({ ...hostOptions, canvas });
+  currentHost = host;
   setHost(host);
 
   const content = elm.render();
@@ -1098,6 +1319,9 @@ export function render(
   const body = host.getBody ? host.getBody() : host.body;
   host.clearChildren(body);
   host.appendChild(body, content as any);
+  if (content && typeof content === "object") {
+    onVNodeTreeCreated?.(content as any, host);
+  }
   host.draw();
   return host;
 }

@@ -10,7 +10,7 @@ import {
 } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-canvas";
 
-const { h } = VNode;
+const h = VNode.h;
 
 const apps = [
   { icon: "🎬", title: "Movies", subtitle: "Movies & Shows" },
@@ -121,7 +121,7 @@ function ApplicationView() {
             page.set("todo");
           },
         },
-        ["Todo List Page"],
+        ["Goto Todo List"],
       ),
       h(
         View,
@@ -130,7 +130,7 @@ function ApplicationView() {
             page.set("app");
           },
         },
-        ["Application List Page"],
+        ["Goto Application List"],
       ),
     ]),
     h(
@@ -142,7 +142,7 @@ function ApplicationView() {
       },
       [
         h(View, {}, ["Todo List Page"]),
-        For({
+        h(For, {
           each: todos,
           render(todo) {
             return h(View, {}, [todo.title]);
@@ -191,4 +191,8 @@ function ApplicationView() {
   ]);
 }
 
-render(h(ApplicationView, {}), document.getElementById("c"));
+render(h(ApplicationView, {}), document.getElementById("c"), {
+  onVNodeTreeCreated(data) {
+    console.log(data);
+  },
+});

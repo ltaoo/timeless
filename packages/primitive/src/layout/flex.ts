@@ -1,11 +1,7 @@
 import { ClassNameRef, Ref, isRef, isStyleRef } from "@timeless/reactive";
 
-import {
-  View,
-  ViewChildren,
-  ViewProps,
-  viewStyleToCssText,
-} from "@/primitive/view";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { viewStyleToCssText } from "@/style/index";
 
 export type FlexJustify =
   | "start"
@@ -91,7 +87,11 @@ export function Flex(
 
   if (typeof stl === "string") {
     return View(
-      { ...rest, class: cls, style: `${viewStyleToCssText(baseStyle)}; ${stl}` },
+      {
+        ...rest,
+        class: cls,
+        style: `${viewStyleToCssText(baseStyle)}; ${stl}`,
+      },
       children,
     );
   }
@@ -101,5 +101,8 @@ export function Flex(
       ? stl
       : {};
 
-  return View({ ...rest, class: cls, style: { ...baseStyle, ...extraStyle } }, children);
+  return View(
+    { ...rest, class: cls, style: { ...baseStyle, ...extraStyle } },
+    children,
+  );
 }

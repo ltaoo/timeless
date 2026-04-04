@@ -5,6 +5,9 @@ import pkg from "./package.json";
 export default createLibConfig({
   entry: resolve(__dirname, "src/index.ts"),
   name: "timeless.utils",
+  define: {
+    __Version: JSON.stringify(pkg.version),
+  },
   formats: ["es", "cjs", "umd"],
   external: ["@timeless/base", "@timeless/types"],
   globals: {

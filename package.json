@@ -25,5 +25,10 @@
   "workspaces": [
     "packages/*",
     "apps/*"
-  ]
+  ],
+  "pnpm": {
+    "overrides": {
+      "@microsoft/api-extractor": "7.58.1"
+    }
+  }
 }

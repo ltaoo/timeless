@@ -13,11 +13,11 @@ import {
   View,
   ViewChildren,
   ViewProps,
-} from "@/primitive/view";
-import { For } from "@/primitive/for";
-import { Show } from "@/primitive/show";
-import { LazyView } from "@/primitive/lazy-view";
-import { ErrorFallbackFn, withErrorBoundary } from "@/primitive/error-boundary";
+} from "@/content/view";
+import { For } from "@/reactive/for";
+import { Show } from "@/reactive/show";
+import { LazyView } from "@/content/lazy-view";
+import { ErrorFallbackFn, withErrorBoundary } from "@/content/error-boundary";
 import { h } from "@/util/h";
 
 type SubView = { id?: unknown; name: string; pathname?: string } & Record<

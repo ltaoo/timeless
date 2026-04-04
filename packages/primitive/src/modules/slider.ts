@@ -1,6 +1,6 @@
 import { computed, isRef, isStyleRef, ref } from "@timeless/reactive";
 
-import { View, ViewProps, ViewChildren } from "@/primitive/view";
+import { View, ViewProps, ViewChildren } from "@/content/view";
 import { getHost } from "@/host";
 
 export function Root(

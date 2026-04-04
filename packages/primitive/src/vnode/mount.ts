@@ -1,4 +1,7 @@
 import { getRendererScheduler, resolveComponent } from "@/host";
+import { isRef } from "@timeless/reactive";
+
+import { isElement } from "@/content/view";
 
 import type {
   ChildDescriptor,
@@ -8,8 +11,9 @@ import type {
 import { isDescriptor } from "./descriptor";
 import { appendChild, createElement, createText } from "./create";
 import type { RendererScheduler } from "./reactive";
-import { setupReactiveBindings } from "./reactive";
+import { setupReactiveBindings, bindText } from "./reactive";
 import type { VNode, VNodeEvents } from "./types";
+import { createFragment } from "./create";
 
 function extractEvents(props: Record<string, any>): VNodeEvents {
   const events: VNodeEvents = {};
@@ -27,11 +31,22 @@ export function mountChild(
   scheduler: RendererScheduler | null,
 ): VNode | null {
   if (child === null) return null;
+  if (isRef(child)) {
+    const vnode = createText(String((child as any).value ?? ""));
+    if (scheduler) bindText(vnode as any, child as any, scheduler);
+    return vnode;
+  }
   if (typeof child === "string" || typeof child === "number") {
     return createText(String(child));
   }
   if (isDescriptor(child)) {
     return mount(child, scheduler);
+  }
+  if (isElement(child as any)) {
+    const hostNode = (child as any).render?.();
+    const vnode = createFragment([]);
+    (vnode as any)._hostNode = hostNode;
+    return vnode;
   }
   return null;
 }

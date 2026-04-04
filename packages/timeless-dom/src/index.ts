@@ -1,14 +1,14 @@
 import {
-  setHost,
-  type HeadlessHost,
-  isElement,
+  type TimelessHost,
   type TimelessElement,
+  setHost,
+  isElement,
   registerComponent,
   getRenderer,
   Grid,
   View,
   Txt,
-  NativeInput,
+  Input,
   InputPrimitive,
   ButtonPrimitive,
   CheckboxPrimitive,
@@ -18,13 +18,31 @@ import {
 
 import { DomGrid } from "./modules/grid";
 import { DomButtonRoot } from "./modules/button";
-import { DomCheckboxBox, DomCheckboxGroup, DomCheckboxGroupItem, DomCheckboxIndicator, DomCheckboxInput, DomCheckboxLabel, DomCheckboxRoot } from "./modules/checkbox";
+import {
+  DomCheckboxBox,
+  DomCheckboxGroup,
+  DomCheckboxGroupItem,
+  DomCheckboxIndicator,
+  DomCheckboxInput,
+  DomCheckboxLabel,
+  DomCheckboxRoot,
+} from "./modules/checkbox";
 import { DomInput, DomInputField, DomInputRoot } from "./modules/input";
-import { DomRadioBox, DomRadioGroup, DomRadioGroupItem, DomRadioIndicator, DomRadioInput, DomRadioLabel, DomRadioRoot } from "./modules/radio";
+import {
+  DomRadioBox,
+  DomRadioGroup,
+  DomRadioGroupItem,
+  DomRadioIndicator,
+  DomRadioInput,
+  DomRadioLabel,
+  DomRadioRoot,
+} from "./modules/radio";
 import { DomTxt } from "./modules/text";
 import { DomView } from "./modules/view";
 
 const { isDescriptor, mount, commitTree } = VNode;
+
+console.log("dom.version" + __Version);
 
 type AnyEventHandler = (event: any) => void;
 
@@ -34,7 +52,7 @@ export function createDomHost(
     window?: Window;
     body?: HTMLElement | null;
   } = {},
-): HeadlessHost {
+): TimelessHost {
   const doc = options.document ?? globalThis.document;
   const win = options.window ?? globalThis.window;
   const getBody = () => options.body ?? doc?.body ?? null;
@@ -414,7 +432,7 @@ function registerDomComponents() {
   registerComponent(View, DomView);
   registerComponent(Txt, DomTxt);
 
-  registerComponent(NativeInput, DomInput);
+  registerComponent(Input, DomInput);
   registerComponent(InputPrimitive.Root, DomInputRoot);
   registerComponent(InputPrimitive.Input, DomInputField);
 
@@ -516,7 +534,7 @@ export function hydrate(
 function hydrateNode(
   vnode: TimelessElement,
   domNode: any,
-  host: HeadlessHost,
+  host: TimelessHost,
 ): any {
   if (!vnode || !domNode) {
     return domNode;
@@ -549,7 +567,7 @@ function hydrateNode(
 function hydrateView(
   vnode: TimelessElement,
   domNode: any,
-  host: HeadlessHost,
+  host: TimelessHost,
 ): any {
   const props = (vnode as any)._props || {};
   const expectedTag = (props.as || "div").toUpperCase();
@@ -579,7 +597,7 @@ function hydrateView(
 function hydrateText(
   vnode: TimelessElement,
   domNode: any,
-  host: HeadlessHost,
+  host: TimelessHost,
 ): any {
   if (typeof (vnode as any).hydrate === "function") {
     return (vnode as any).hydrate(domNode);
@@ -595,7 +613,7 @@ function hydrateText(
 function hydrateFor(
   vnode: TimelessElement,
   domNode: any,
-  host: HeadlessHost,
+  host: TimelessHost,
 ): any {
   if (typeof (vnode as any).hydrate === "function") {
     const parent = host.getParentNode(domNode);
@@ -611,7 +629,7 @@ function hydrateFor(
 function hydrateShow(
   vnode: TimelessElement,
   domNode: any,
-  host: HeadlessHost,
+  host: TimelessHost,
 ): any {
   if (typeof (vnode as any).hydrate === "function") {
     const parent = host.getParentNode(domNode);

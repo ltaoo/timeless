@@ -1,7 +1,7 @@
 import { refobj, computed, ref, isRef, isStyleRef } from "@timeless/reactive";
 import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { View, ViewChildren, ViewProps } from "@/content/view";
 import { getHost } from "@/host";
 
 // ResizablePanels Group - 容器组件

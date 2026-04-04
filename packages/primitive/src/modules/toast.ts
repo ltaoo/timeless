@@ -1,7 +1,7 @@
 import { ToastCore, ExternalToast, SonnerCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "@/primitive/view";
-import { Txt } from "@/primitive/text";
+import { View, ViewProps, ViewChildren } from "@/content/view";
+import { Txt } from "@/content/text";
 
 import { Portal } from "./portal";
 import { Presence } from "./presence";

@@ -1,11 +1,19 @@
-import { refobj, computed, classNames, sn, combine, isRef, isStyleRef } from "@timeless/reactive";
+import {
+  refobj,
+  computed,
+  classNames,
+  sn,
+  combine,
+  isRef,
+  isStyleRef,
+} from "@timeless/reactive";
 import { TagSelectCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { Show } from "@/primitive/show";
-import { For } from "@/primitive/for";
-import { Fragment } from "@/primitive/fragment";
-import { NativeInput } from "@/native/input";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { Show } from "@/reactive/show";
+import { For } from "@/reactive/for";
+import { Fragment } from "@/content/fragment";
+import { Input } from "@/input/input";
 import { h } from "@/util/h";
 import { getHost } from "@/host";
 
@@ -320,6 +328,7 @@ export function FilteredList(
       each: computed(state, (d) => {
         return d.filteredOptions;
       }),
+      // @ts-ignore
       render(item, index) {
         const i = (index as any)?.value ?? index;
         return Fragment({}, each(item, i));
@@ -382,7 +391,10 @@ export function ItemIndicator(
   const { store, value, ...rest } = props;
   const state = refobj(store.state);
   const extraStyle =
-    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+    rest.style &&
+    typeof rest.style === "object" &&
+    !isRef(rest.style) &&
+    !isStyleRef(rest.style)
       ? rest.style
       : {};
 
@@ -431,7 +443,7 @@ export function Search(
 ) {
   const { store, placeholder = "Search...", ...rest } = props;
 
-  return NativeInput({
+  return Input({
     ...rest,
     type: "text",
     placeholder,

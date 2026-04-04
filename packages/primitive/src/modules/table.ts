@@ -1,4 +1,4 @@
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { View, ViewChildren, ViewProps } from "@/content/view";
 
 export function Table(props: ViewProps, children?: ViewChildren) {
   return View(

@@ -1,5 +1,3 @@
-console.log("shadcn.version 0.3.0");
-
 import { Input } from "./modules/input";
 import { FileInput } from "./modules/file-input";
 import { NumberInput } from "./modules/number-input";
@@ -91,6 +89,8 @@ import { Affix } from "./modules/affix";
 
 import "./index.css";
 import "./styles/globals.css";
+
+console.log("shadcn.version" + __Version);
 
 export * as icons from "@timeless/icons";
 

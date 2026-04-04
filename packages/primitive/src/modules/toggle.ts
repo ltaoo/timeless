@@ -1,7 +1,7 @@
 import { SwitchCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "@/primitive/view.js";
-import { NativeCheckbox } from "@/native/checkbox.js";
+import { View, ViewProps, ViewChildren } from "@/content/view";
+import { Checkbox } from "@/input/checkbox";
 
 export function Root(
   props: ViewProps & {
@@ -30,7 +30,7 @@ export function Root(
       },
     },
     [
-      NativeCheckbox({
+      Checkbox({
         attributes: {
           id,
         },

@@ -1,10 +1,11 @@
-console.log("ui.version 0.1.3");
 import {
   Result as _Result,
   BizError as _BizError,
   base as _base,
   BaseDomain as _BaseDomain,
 } from "@timeless/base";
+
+console.log("ui.version" + __Version);
 
 export const Result = _Result;
 export const BizError = _BizError;

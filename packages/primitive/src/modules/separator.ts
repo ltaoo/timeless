@@ -1,4 +1,4 @@
-import { View, ViewProps } from "@/primitive/view";
+import { View, ViewProps } from "@/content/view";
 
 export function Separator(
   props: ViewProps & { orientation?: "horizontal" | "vertical" },

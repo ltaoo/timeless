@@ -1,10 +1,10 @@
 import { ref, computed } from "@timeless/reactive";
 import { RadioCore, RadioGroupCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { Show } from "@/primitive/show";
-import { NativeInput, NativeInputProps } from "@/native/input";
-import { Fragment } from "@/primitive/fragment";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { Show } from "@/reactive/show";
+import { Input as NativeInput, InputProps } from "@/input/input";
+import { Fragment } from "@/content/fragment";
 
 export function Root(
   props: ViewProps & { store: RadioCore },
@@ -78,9 +78,7 @@ export function Indicator(
   );
 }
 
-export function Input(
-  props: NativeInputProps & { store: RadioCore; id?: string },
-) {
+export function Input(props: InputProps & { store: RadioCore; id?: string }) {
   const { store, id, ...rest } = props;
   const events: any[] = [];
 

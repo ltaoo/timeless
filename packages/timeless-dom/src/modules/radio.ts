@@ -1,6 +1,17 @@
-import { VNode, ref, computed, sn, getRendererScheduler, RadioPrimitive } from "@timeless/timeless";
+import {
+  h,
+  VNode,
+  ref,
+  computed,
+  sn,
+  getRendererScheduler,
+  RadioPrimitive,
+} from "@timeless/timeless";
 
-function buildAttrs(attributes?: Record<string, any>, dataset?: Record<string, any>) {
+function buildAttrs(
+  attributes?: Record<string, any>,
+  dataset?: Record<string, any>,
+) {
   const attrs: Record<string, any> = { ...(attributes ?? {}) };
   if (dataset) {
     for (const k of Object.keys(dataset)) {
@@ -137,13 +148,12 @@ export function DomRadioGroupItem(props: any, children: any[]) {
   const radioContent =
     typeof renderRadio === "function"
       ? renderRadio(item?.core)
-      : VNode.h(RadioPrimitive.Box, { store: item?.core }, [
-          VNode.h(RadioPrimitive.Indicator, { store: item?.core }, children),
+      : h(RadioPrimitive.Box, { store: item?.core }, [
+          h(RadioPrimitive.Indicator, { store: item?.core }, children),
         ]);
 
   const labelContent =
     typeof renderLabel === "function" ? renderLabel(labelText) : labelText;
 
-  return VNode.h(tag, p, [radioContent, labelContent]);
+  return h(tag, p, [radioContent, labelContent]);
 }
-

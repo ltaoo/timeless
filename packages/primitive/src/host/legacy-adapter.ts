@@ -1,4 +1,4 @@
-import type { HeadlessHost } from "./index";
+import type { TimelessHost } from "./index";
 
 import type { AnimationConfig } from "@/vnode/animation";
 import type { HostRenderer, VNodePatch, BoundingRect } from "@/vnode/host-renderer";
@@ -42,7 +42,7 @@ function ensureNode(vnode: VNode) {
   return vnode._hostNode;
 }
 
-export function createLegacyHostAdapter(host: HeadlessHost): HostRenderer {
+export function createLegacyHostAdapter(host: TimelessHost): HostRenderer {
   const adapter: HostRenderer = {
     kind: `legacy:${host.kind}`,
     platform: host.kind === "dom" ? "web" : "tui",
@@ -54,7 +54,9 @@ export function createLegacyHostAdapter(host: HeadlessHost): HostRenderer {
       }
 
       if (vnode.kind === "fragment") {
-        vnode._hostNode = host.createDocumentFragment();
+        if (!vnode._hostNode) {
+          vnode._hostNode = host.createDocumentFragment();
+        }
         return;
       }
 
@@ -229,4 +231,3 @@ export function buildInitialPatch(vnode: VNode): VNodePatch {
     a11y: vnode.a11y,
   };
 }
-

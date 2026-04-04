@@ -5,9 +5,13 @@ import {
   sn,
   getRendererScheduler,
   CheckboxPrimitive,
+  h,
 } from "@timeless/timeless";
 
-function buildAttrs(attributes?: Record<string, any>, dataset?: Record<string, any>) {
+function buildAttrs(
+  attributes?: Record<string, any>,
+  dataset?: Record<string, any>,
+) {
   const attrs: Record<string, any> = { ...(attributes ?? {}) };
   if (dataset) {
     for (const k of Object.keys(dataset)) {
@@ -150,12 +154,12 @@ export function DomCheckboxGroupItem(props: any, children: any[]) {
   const checkboxContent =
     typeof renderCheckbox === "function"
       ? renderCheckbox(item?.core)
-      : VNode.h(CheckboxPrimitive.Box, { store: item?.core }, [
-          VNode.h(CheckboxPrimitive.Indicator, { store: item?.core }, children),
+      : h(CheckboxPrimitive.Box, { store: item?.core }, [
+          h(CheckboxPrimitive.Indicator, { store: item?.core }, children),
         ]);
 
   const labelContent =
     typeof renderLabel === "function" ? renderLabel(labelText) : labelText;
 
-  return VNode.h(tag, p, [checkboxContent, labelContent]);
+  return h(tag, p, [checkboxContent, labelContent]);
 }

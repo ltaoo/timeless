@@ -20,6 +20,9 @@ const components = fs.readdirSync(resolve(__dirname, "src")).filter((name) => {
 const name = "timeless.primitive";
 
 export default defineConfig({
+  define: {
+    __Version: JSON.stringify(pkg.version),
+  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),

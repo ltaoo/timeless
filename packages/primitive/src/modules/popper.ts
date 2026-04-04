@@ -6,8 +6,8 @@ import {
   Layer,
 } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { Fragment } from "@/primitive/fragment";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { Fragment } from "@/content/fragment";
 import { getHost } from "@/host";
 
 let layer_id_counter = 0;
@@ -76,7 +76,10 @@ export function Content(
   initGlobalPointerListener();
 
   const extraStyle =
-    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+    rest.style &&
+    typeof rest.style === "object" &&
+    !isRef(rest.style) &&
+    !isStyleRef(rest.style)
       ? rest.style
       : {};
 
@@ -91,7 +94,9 @@ export function Content(
         left: 0,
         top: 0,
         opacity: computed(state_, (t) => (t.isPlaced ? 1 : 0)),
-        "pointer-event": computed(state_, (t) => (t.isPlaced ? "initial" : "none")),
+        "pointer-event": computed(state_, (t) =>
+          t.isPlaced ? "initial" : "none",
+        ),
         transform: computed(state_, (t) =>
           t.isPlaced
             ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
@@ -115,14 +120,18 @@ export function Content(
             const ref_rect = store.reference.getRect();
             const $ref_el = (store.reference as any).$el;
             const is_virtual_element =
-              !$ref_el || typeof ($ref_el as any).getBoundingClientRect !== "function";
+              !$ref_el ||
+              typeof ($ref_el as any).getBoundingClientRect !== "function";
             // 虚拟元素（如右键菜单），滚动时关闭
             if (is_virtual_element && onReferenceOutOfView) {
               onReferenceOutOfView();
               return;
             }
             // 检查参考元素是否在视口内
-            const viewport = host.getViewportSize?.() ?? { width: 0, height: 0 };
+            const viewport = host.getViewportSize?.() ?? {
+              width: 0,
+              height: 0,
+            };
             const is_in_viewport =
               ref_rect.top < viewport.height &&
               ref_rect.bottom > 0 &&
@@ -151,7 +160,9 @@ export function Content(
                 | HTMLElement
                 | undefined;
               if ($anchor_el) {
-                const anchor_rect = host.getBoundingClientRect?.($anchor_el) as any;
+                const anchor_rect = host.getBoundingClientRect?.(
+                  $anchor_el,
+                ) as any;
                 const in_anchor =
                   x >= anchor_rect.left &&
                   x <= anchor_rect.right &&

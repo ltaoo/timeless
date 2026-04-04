@@ -1,12 +1,9 @@
 import { ref, computed } from "@timeless/reactive";
 import { ScrollViewCore } from "@timeless/ui";
 
-import {
-  View,
-  ViewChildren,
-  ViewProps,
-  TimelessElement,
-} from "@/primitive/view";
+import { View, ViewChildren, ViewProps, TimelessElement } from "@/content/view";
+import { Show } from "@/reactive/show";
+import { h } from "@/util/h";
 
 type Provider = Partial<{
   provide_ui_scroll_view_indicator: (
@@ -115,11 +112,19 @@ export function Progress(
       // "data-scroll-view-progress": "",
       style: { display: computed(visible, (v) => (v ? "block" : "none")) },
     },
-    children ??
-      View({
-        class: "inline-flex justify-center items-center w-full h-full",
-        style: { transition: "all 300ms" },
-      }),
+    [
+      Show(
+        {
+          when: !!children,
+        },
+        [
+          h(View, {
+            class: "inline-flex justify-center items-center w-full h-full",
+            style: { transition: "all 300ms" },
+          }),
+        ],
+      ),
+    ],
   );
 
   return {

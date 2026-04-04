@@ -1,8 +1,8 @@
 import { refobj, ref, computed, isRef, isStyleRef } from "@timeless/reactive";
 import { TooltipCore, Align, Side } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { Fragment } from "@/primitive/fragment";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { Fragment } from "@/content/fragment";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";

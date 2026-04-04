@@ -1,4 +1,4 @@
-import { TimelessElement, ViewChildren } from "@/primitive/view";
+import { TimelessElement, ViewChildren } from "@/content/view";
 
 // 创建延迟执行的组件包装器
 export function h<P, R extends TimelessElement>(

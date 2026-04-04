@@ -1,7 +1,7 @@
 import { refobj, computed, isRef, isStyleRef } from "@timeless/reactive";
 import { PopperCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
+import { View, ViewChildren, ViewProps } from "@/content/view";
 import { getHost } from "@/host";
 
 export function Arrow(

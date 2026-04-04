@@ -1,0 +1,17 @@
+<Window x:Class="TodoApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        Title="Todo" Width="400" Height="500">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+            <TextBox x:Name="InputTextBox" Width="280" VerticalContentAlignment="Center"/>
+            <Button x:Name="AddButton" Content="Add" Width="80" Margin="8,0,0,0"/>
+        </StackPanel>
+        
+        <ListBox x:Name="TodoListBox" Grid.Row="1"/>
+    </Grid>
+</Window>

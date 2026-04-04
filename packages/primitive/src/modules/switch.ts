@@ -1,8 +1,8 @@
 import { computed, refobj } from "@timeless/reactive";
 import { SwitchCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { NativeCheckbox } from "@/native/checkbox";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { Checkbox } from "@/input/checkbox";
 
 export function Root(
   props: ViewProps & {
@@ -62,7 +62,7 @@ export function Root(
       },
     },
     [
-      NativeCheckbox({
+      Checkbox({
         id,
         checked: computed(state_, (d) => d.checked),
         disabled: computed(state_, (d) => d.disabled),

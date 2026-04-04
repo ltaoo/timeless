@@ -1,4 +1,4 @@
-console.log("base.version 0.3.0");
+console.log("base.version" + __Version);
 
 export * from "./base";
 export * from "./result";

@@ -1,10 +1,11 @@
 import { cn, ref, refobj, isRef } from "@timeless/reactive";
 import { NumberInputCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren, viewStyleToCssText } from "@/primitive/view";
+import { View, ViewProps, ViewChildren } from "@/content/view";
 import { isStyleRef } from "@timeless/reactive";
 import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";
+import { viewStyleToCssText } from "@/style/index";
 
 export function Root(
   props: ViewProps & { store?: NumberInputCore },
@@ -105,12 +106,21 @@ export function Input(
       if (st) {
         if (isStyleRef(st as any)) {
           const s = st as any;
-          s._subscribe({ onChange(v: any) { host.setStyleText($elm, viewStyleToCssText(v ?? {})); } });
+          s._subscribe({
+            onChange(v: any) {
+              host.setStyleText($elm, viewStyleToCssText(v ?? {}));
+            },
+          });
           host.setStyleText($elm, viewStyleToCssText(s.value));
         } else if (isRef(st as any)) {
           const s = st as any;
-          const apply = () => host.setStyleText($elm, viewStyleToCssText(s.value || {}));
-          s._subscribe({ onChange() { apply(); } });
+          const apply = () =>
+            host.setStyleText($elm, viewStyleToCssText(s.value || {}));
+          s._subscribe({
+            onChange() {
+              apply();
+            },
+          });
           apply();
         } else {
           const applyStyle = () => {
@@ -119,7 +129,11 @@ export function Input(
           Object.keys(st as any).forEach((k) => {
             const vv = (st as any)[k];
             if (isRef(vv)) {
-              (vv as any)._subscribe({ onChange() { applyStyle(); } });
+              (vv as any)._subscribe({
+                onChange() {
+                  applyStyle();
+                },
+              });
             }
           });
           applyStyle();
@@ -166,12 +180,18 @@ export function Input(
       host.addEventListener($elm, "focus", handleFocus);
       host.addEventListener($elm, "blur", handleBlur);
 
-      listenerCleanups.push(() => host.removeEventListener($elm, "input", handleInput));
+      listenerCleanups.push(() =>
+        host.removeEventListener($elm, "input", handleInput),
+      );
       listenerCleanups.push(() =>
         host.removeEventListener($elm, "keydown", handleKeyDown),
       );
-      listenerCleanups.push(() => host.removeEventListener($elm, "focus", handleFocus));
-      listenerCleanups.push(() => host.removeEventListener($elm, "blur", handleBlur));
+      listenerCleanups.push(() =>
+        host.removeEventListener($elm, "focus", handleFocus),
+      );
+      listenerCleanups.push(() =>
+        host.removeEventListener($elm, "blur", handleBlur),
+      );
 
       store.focus = () => {
         host.focus?.($elm);

@@ -1,8 +1,8 @@
 import { refobj, computed, combine } from "@timeless/reactive";
 import { MenuCore, MenuItemCore, MenuGroupCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { Show } from "@/primitive/show";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { Show } from "@/reactive/show";
 import { h } from "@/util/h";
 import { getHost } from "@/host";
 

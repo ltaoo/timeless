@@ -10,7 +10,7 @@ import {
   ViewChildren,
   ViewProps,
   TimelessElement,
-} from "@/primitive/view";
+} from "@/content/view";
 
 export function Root(
   props: ViewProps & { store: WaterfallModel<any> },

@@ -1,10 +1,11 @@
-import { NativeLink, NativeLinkProps, ViewChildren } from "@timeless/primitive";
+import {
+  ViewChildren,
+  Link as NativeLink,
+  LinkProps as NativeLinkProps,
+} from "@timeless/primitive";
 import { cn } from "@timeless/primitive";
 
-export function Link(
-  props: NativeLinkProps = {},
-  children?: ViewChildren | ViewChildren[number],
-) {
+export function Link(props: NativeLinkProps = {}, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
 
   return NativeLink(

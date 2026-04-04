@@ -1,6 +1,6 @@
 import { VideoPlayerCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps, TimelessElement } from "@/primitive/view";
+import { View, ViewChildren, ViewProps, TimelessElement } from "@/content/view";
 
 type Provider = Partial<{
   provide_ui_video_player: ($video: HTMLVideoElement, store: VideoPlayerCore) => void;

@@ -1,9 +1,10 @@
 import { refobj, computed } from "@timeless/reactive";
 import { StepCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/primitive/view";
-import { For } from "@/primitive/for";
-import { Txt } from "@/primitive/text";
+import { View, ViewChildren, ViewProps } from "@/content/view";
+import { For } from "@/reactive/for";
+import { Show } from "@/reactive/show";
+import { Txt } from "@/content/text";
 import { h } from "@/util/h";
 
 export type StepItem = {
@@ -43,10 +44,11 @@ export function List(
       ...rest,
       // "data-steps-list": "",
     },
-    children ??
+    [
       For({
         each: items,
-        render: (item, index) => {
+        // @ts-ignore
+        render(item, index) {
           const idx = (index as any)?.value ?? index;
           return Item(
             { store, index: idx, item },
@@ -58,6 +60,7 @@ export function List(
           );
         },
       }),
+    ],
   );
 }
 
@@ -111,11 +114,21 @@ export function Indicator(
       // "data-steps-indicator": "",
       // "data-state": stepState,
     },
-    children ??
-      h(
-        Txt,
-        computed(state_, (s) => (index < s.value ? "✓" : String(index + 1))),
+    [
+      Show(
+        {
+          when: !!children,
+        },
+        [
+          h(
+            Txt,
+            computed(state_, (s) =>
+              index < s.value ? "✓" : String(index + 1),
+            ),
+          ),
+        ],
       ),
+    ],
   );
 }
 
