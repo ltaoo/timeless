@@ -1,5 +1,7 @@
-import { Ref, isRef, isClassName, isStyleRef } from "@timeless/reactive";
+import { Ref, isRef } from "@timeless/reactive";
 
+import { isClassName } from "@/vnode/class-names";
+import { isStyleRef } from "@/vnode/style-names";
 import { ViewProps } from "@/content/view";
 import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";

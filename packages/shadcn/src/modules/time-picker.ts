@@ -1,4 +1,10 @@
-import { cn, combine, computed, ref, refobj } from "@timeless/primitive";
+import {
+  classNames,
+  combine,
+  computed,
+  ref,
+  refobj,
+} from "@timeless/primitive";
 import {
   TimePickerPrimitive,
   For,
@@ -157,11 +163,11 @@ export function TimePicker(
             [
               View(
                 {
-                  class: cn([
+                  class: classNames([
                     "h-[28px] text-center",
                     store.showSeconds ? "w-30" : "w-18",
                   ]),
-                  style: "line-height: 28px;",
+                  style: { "line-height": "28px" },
                 },
                 [
                   combine({ time: state_ }, (t) => {
@@ -177,7 +183,7 @@ export function TimePicker(
           ),
           View(
             {
-              class: cn([
+              class: classNames([
                 "grid h-48",
                 store.showSeconds ? "grid-cols-3 w-36" : "grid-cols-2 w-24",
               ]),
@@ -208,7 +214,7 @@ export function TimePicker(
                         {
                           store,
                           value: hour,
-                          class: cn([
+                          class: classNames([
                             "w-full h-8 text-sm rounded-md transition-colors outline-hidden",
                             computed(state_, (s) => {
                               const isSelected = s.tempHour === hour;
@@ -228,7 +234,7 @@ export function TimePicker(
               ScrollViewPrimitive.Root(
                 {
                   store: minuteview$,
-                  class: cn([
+                  class: classNames([
                     "min-w-12 w-full h-full overflow-y-auto overlay-scrollbar p-2",
                     store.showSeconds ? "border-border border-r" : "",
                   ]),

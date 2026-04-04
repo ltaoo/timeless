@@ -1,6 +1,6 @@
 import {
   VNode,
-  sn,
+  styleNames,
   getRendererScheduler,
   getRenderer,
   isElement,
@@ -62,7 +62,7 @@ export function CanvasView(props: any, children: any[]) {
   };
   const width = layout.width ?? viewport.width;
   const height = layout.height ?? computedHeight;
-  const merged = sn([
+  const merged = styleNames([
     {
       left: layout.left ?? 0,
       top: layout.top ?? 0,

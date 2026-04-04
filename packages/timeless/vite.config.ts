@@ -15,6 +15,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
+      "@timeless/base": resolve(__dirname, "../base"),
+      "@timeless/icons": resolve(__dirname, "../icons"),
+      "@timeless/kit": resolve(__dirname, "../kit"),
+      "@timeless/primitive": resolve(__dirname, "../primitive"),
+      "@timeless/reactive": resolve(__dirname, "../reactive"),
+      "@timeless/ui": resolve(__dirname, "../ui"),
+      "@timeless/utils": resolve(__dirname, "../utils"),
     },
   },
   build: {
@@ -39,19 +46,10 @@ export default defineConfig({
     }),
     sourcemap: false,
     rollupOptions: {
-      external: [
-        // ...Object.keys(pkg.dependencies || {}),
-        // ...Object.keys(pkg.peerDependencies || {}),
-      ],
+      external: ["tailwindcss"],
       output: {
         globals: {
-          // "@timeless/base": "Timeless.base",
-          // "@timeless/icons": "Timeless.icons",
-          // "@timeless/reactive": "Timeless.reactive",
-          // "@timeless/utils": "Timeless.utils",
-          // "@timeless/ui": "Timeless.ui",
-          // "@timeless/kit": "Timeless.kit",
-          // "@timeless/primitive": "Timeless.primitive",
+          tailwindcss: "tailwindcss",
         },
       },
     },

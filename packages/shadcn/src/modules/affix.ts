@@ -4,7 +4,9 @@ import {
   ViewProps,
   computed,
   ref,
-  cn,
+  classNames,
+  ViewStyleProperties,
+  styleNames,
 } from "@timeless/primitive";
 import { AffixCore } from "@timeless/ui";
 
@@ -26,28 +28,19 @@ export function Affix(
     height_.as(state.height);
   });
 
-  const affixClass_ = cn([
+  const affixClass_ = classNames([
     computed(fixed_, (fixed) => (fixed ? "transition-all duration-200" : "")),
     cls,
   ]);
 
   const affixStyle_ = computed(fixed_, (fixed) => {
-    const baseStyle: Record<string, string> = {};
+    const baseStyle: ViewStyleProperties = {};
     if (fixed) {
       baseStyle.position = "fixed";
       baseStyle.top = `${offsetTop}px`;
       baseStyle.zIndex = "10";
     }
-    if (typeof style === "string") {
-      return (
-        Object.entries(baseStyle)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join("; ") + (style ? `; ${style}` : "")
-      );
-    }
-    return Object.entries({ ...baseStyle, ...(style as object) })
-      .map(([k, v]) => `${k}: ${v}`)
-      .join("; ");
+    return baseStyle;
   });
 
   const handleMounted = (event: any) => {
@@ -78,7 +71,7 @@ export function Affix(
     {
       ...rest,
       class: affixClass_,
-      style: affixStyle_,
+      style: styleNames([affixStyle_, props.style]),
       onMounted: handleMounted,
     },
     children,

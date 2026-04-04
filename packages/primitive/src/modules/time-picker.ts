@@ -1,6 +1,8 @@
-import { refobj, computed, classNames } from "@timeless/reactive";
+import { refobj, computed } from "@timeless/reactive";
 import { TimePickerCore } from "@timeless/ui";
 
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewChildren, ViewProps } from "@/content/view";
 import { For } from "@/reactive/for";
 import { Fragment } from "@/content/fragment";

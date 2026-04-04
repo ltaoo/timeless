@@ -1,4 +1,4 @@
-import { VNode, sn, getRendererScheduler } from "@timeless/timeless";
+import { VNode, styleNames, getRendererScheduler } from "@timeless/timeless";
 
 const { createElement, appendChild, mountChild, isDescriptor } = VNode;
 
@@ -7,7 +7,7 @@ const { createElement, appendChild, mountChild, isDescriptor } = VNode;
 export function Grid(props: any, children: any[]) {
   const cols = props.columns ?? 4;
   const gap = props.gap ?? 16;
-  const merged = sn([
+  const merged = styleNames([
     {
       display: "grid",
       gridTemplateColumns: `repeat(${cols}, 1fr)`,

@@ -1,5 +1,5 @@
 import { BadgePrimitive, ViewProps, ViewChildren } from "@timeless/primitive";
-import { cn } from "@timeless/primitive";
+import { classNames } from "@timeless/primitive";
 
 const VARIANTS = {
   default:
@@ -21,7 +21,7 @@ export function Badge(
     {
       ...rest,
       variant,
-      class: cn([
+      class: classNames([
         "inline-flex items-center rounded-full border border-zinc-200 px-2.5 py-0.5 text-xs font-semibold transition-colors dark:border-zinc-800",
         VARIANTS[variant] || VARIANTS.default,
         cls,

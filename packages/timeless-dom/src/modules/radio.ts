@@ -3,7 +3,7 @@ import {
   VNode,
   ref,
   computed,
-  sn,
+  styleNames,
   getRendererScheduler,
   RadioPrimitive,
 } from "@timeless/timeless";
@@ -67,7 +67,7 @@ export function DomRadioIndicator(props: any, children: any[]) {
   const state$ = ref(store?.state ?? {});
   store?.onStateChange?.(() => state$.as(store.state));
 
-  const mergedStyle = sn([
+  const mergedStyle = styleNames([
     style,
     {
       display: computed(state$, (d: any) => (d?.checked ? undefined : "none")),
@@ -83,7 +83,7 @@ export function DomRadioInput(props: any) {
   const state$ = ref(store?.state ?? {});
   store?.onStateChange?.(() => state$.as(store.state));
 
-  const mergedStyle = sn([
+  const mergedStyle = styleNames([
     {
       position: "absolute",
       "pointer-events": "none",

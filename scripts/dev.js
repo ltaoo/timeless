@@ -53,6 +53,13 @@ const artifacts = [
 
 // Explicit build dependencies
 const buildRelations = {
+  base: ["timeless"],
+  reactive: ["timeless"],
+  utils: ["timeless"],
+  kit: ["timeless"],
+  ui: ["timeless"],
+  icons: ["timeless"],
+  primitive: ["timeless"],
   timeless: ["shadcn", "timeless-dom"],
 };
 

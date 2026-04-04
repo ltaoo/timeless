@@ -5,7 +5,7 @@ import {
   type TimelessElement,
   isElement,
 } from "@timeless/primitive";
-import { cn, refarr } from "@timeless/primitive";
+import { classNames, refarr } from "@timeless/primitive";
 import type { WaterfallCellModel, WaterfallModel } from "@timeless/ui";
 
 export function Waterfall<T extends Record<string, unknown>>(
@@ -20,7 +20,10 @@ export function Waterfall<T extends Record<string, unknown>>(
     {
       ...rest,
       store,
-      class: cn(["w-full h-full overflow-y-auto", "!overflow-visible !h-auto"]),
+      class: classNames([
+        "w-full h-full overflow-y-auto",
+        "!overflow-visible !h-auto",
+      ]),
     },
     [
       For({

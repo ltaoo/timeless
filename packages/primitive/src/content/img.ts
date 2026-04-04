@@ -1,9 +1,11 @@
-import { isClassName, isRef, Ref, isStyleRef } from "@timeless/reactive";
+import { isRef, Ref } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
 import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";
 import { viewStyleToCssText } from "@/style";
+import { isClassName } from "@/vnode/class-names";
+import { isStyleRef } from "@/vnode/style-names";
 import { MountedEvent } from "@/event/index";
 
 export interface ImgProps extends Omit<ViewProps, "type" | "as"> {

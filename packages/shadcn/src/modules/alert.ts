@@ -1,5 +1,5 @@
 import { AlertPrimitive, ViewProps, ViewChildren } from "@timeless/primitive";
-import { cn } from "@timeless/primitive";
+import { classNames } from "@timeless/primitive";
 
 const VARIANTS = {
   default:
@@ -17,7 +17,7 @@ export function Alert(
     {
       ...rest,
       variant,
-      class: cn([
+      class: classNames([
         "relative w-full rounded-lg border border-zinc-200 p-4 dark:border-zinc-800 [&>div.alert-icon+div]:translate-y-[-3px] [&>div.alert-icon]:absolute [&>div.alert-icon]:left-4 [&>div.alert-icon]:top-4 [&>div.alert-icon~*]:pl-7",
         VARIANTS[variant] || VARIANTS.default,
         cls,
@@ -32,7 +32,7 @@ export function AlertTitle(props: ViewProps, children?: ViewChildren) {
   return AlertPrimitive.AlertTitle(
     {
       ...rest,
-      class: cn(["mb-1 font-medium leading-none tracking-tight", cls]),
+      class: classNames(["mb-1 font-medium leading-none tracking-tight", cls]),
     },
     children,
   );
@@ -43,7 +43,7 @@ export function AlertDescription(props: ViewProps, children?: ViewChildren) {
   return AlertPrimitive.AlertDescription(
     {
       ...rest,
-      class: cn(["text-sm [&_p]:leading-relaxed", cls]),
+      class: classNames(["text-sm [&_p]:leading-relaxed", cls]),
     },
     children,
   );

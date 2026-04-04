@@ -1,4 +1,4 @@
-import { ref, refobj, computed, classNames } from "@timeless/reactive";
+import { ref, refobj, computed } from "@timeless/reactive";
 import { PresenceCore } from "@timeless/ui";
 
 import { View, ViewChildren, ViewProps } from "@/content/view";

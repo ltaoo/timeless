@@ -1,4 +1,9 @@
-import { VNode, sn, isRef, getRendererScheduler } from "@timeless/timeless";
+import {
+  VNode,
+  styleNames,
+  isRef,
+  getRendererScheduler,
+} from "@timeless/timeless";
 
 import type { CanvasHost } from "../index";
 
@@ -25,7 +30,7 @@ export function CanvasGrid(props: any, children: any[], host?: CanvasHost) {
   const rows = Math.ceil(children.length / cols);
   const cellH = (vh - padding * 2 - gap * (rows - 1)) / rows;
 
-  const merged = sn([
+  const merged = styleNames([
     {
       left: 0,
       top: 0,

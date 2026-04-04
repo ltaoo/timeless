@@ -1,6 +1,8 @@
-import { refobj, computed, ref, isRef, isStyleRef } from "@timeless/reactive";
+import { refobj, computed, ref, isRef } from "@timeless/reactive";
 import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
 
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewChildren, ViewProps } from "@/content/view";
 import { getHost } from "@/host";
 
@@ -15,7 +17,10 @@ export function Group(
   const { store, direction = "horizontal", ...rest } = props;
   const state_ = refobj(store.state);
   const extraStyle =
-    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+    rest.style &&
+    typeof rest.style === "object" &&
+    !isRef(rest.style) &&
+    !isStyleRef(rest.style)
       ? rest.style
       : {};
 
@@ -54,7 +59,10 @@ export function Panel(
   const { store, group, ...rest } = props;
   const size_ = ref(store.state.size);
   const extraStyle =
-    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+    rest.style &&
+    typeof rest.style === "object" &&
+    !isRef(rest.style) &&
+    !isStyleRef(rest.style)
       ? rest.style
       : {};
 
@@ -104,7 +112,10 @@ export function Handle(
   const state_ = refobj(store.state);
   const isDragging_ = ref(false);
   const extraStyle =
-    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+    rest.style &&
+    typeof rest.style === "object" &&
+    !isRef(rest.style) &&
+    !isStyleRef(rest.style)
       ? rest.style
       : {};
 

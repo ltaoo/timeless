@@ -3,7 +3,7 @@ import {
   ViewChildren,
   type ViewProps,
 } from "@timeless/primitive";
-import { cn } from "@timeless/primitive";
+import { classNames } from "@timeless/primitive";
 import { ScrollViewCore } from "@timeless/ui";
 
 export function ScrollView(
@@ -16,7 +16,7 @@ export function ScrollView(
     {
       ...rest,
       store,
-      class: cn(["scroll-view overflow-y-auto w-full h-full", cls]),
+      class: classNames(["scroll-view overflow-y-auto w-full h-full", cls]),
     },
     children,
   );

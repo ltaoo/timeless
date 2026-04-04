@@ -1,4 +1,4 @@
-import { refobj, computed, cn, isRef, isStyleRef } from "@timeless/reactive";
+import { refobj, computed, isRef } from "@timeless/reactive";
 import {
   PopperCore,
   getGlobalLayerManager,
@@ -6,6 +6,8 @@ import {
   Layer,
 } from "@timeless/ui";
 
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewChildren, ViewProps } from "@/content/view";
 import { Fragment } from "@/content/fragment";
 import { getHost } from "@/host";
@@ -86,7 +88,7 @@ export function Content(
   return View(
     {
       ...rest,
-      class: cn(["t1-popper", rest.class]),
+      class: classNames(["t1-popper", rest.class]),
       style: {
         ...extraStyle,
         "z-index": zIndex,

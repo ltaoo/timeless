@@ -1,4 +1,10 @@
-import { cn, combine, computed, ref, refobj } from "@timeless/primitive";
+import {
+  classNames,
+  combine,
+  computed,
+  ref,
+  refobj,
+} from "@timeless/primitive";
 import {
   SelectPrimitive,
   For,
@@ -75,7 +81,7 @@ export function Select(
         store,
         value: option.value,
         disabled: !!option.disabled,
-        class: cn([
+        class: classNames([
           ITEM_CLASS,
           computed(state_, (d: any) => {
             const opt = (d.options || []).find(
@@ -132,7 +138,7 @@ export function Select(
       {
         id,
         store,
-        class: cn([
+        class: classNames([
           "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
           computed(state_, (t) => {
             return t.open

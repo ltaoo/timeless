@@ -1,4 +1,4 @@
-import { Ref, Subscriber, isRef } from "./types";
+import { Ref, Subscriber, isRef } from "@timeless/reactive";
 
 export type StyleObject = Record<string, any>;
 
@@ -45,24 +45,22 @@ function parseCssDeclarations(cssText: string, target: StyleObject) {
 
 export function styleNames(
   items: (
-    | string
     | StyleObject
-    | Ref<string | StyleRef | StyleObject | undefined>
+    | Ref<StyleRef | StyleObject | undefined>
     | StyleRef
     | undefined
   )[],
-): StyleRef {
+): Ref<StyleObject> {
   const sources: (
-    | string
     | StyleObject
-    | Ref<string | StyleRef | StyleObject | undefined>
+    | Ref<StyleRef | StyleObject | undefined>
     | StyleRef
     | undefined
   )[] = [];
   const _deps: Subscriber[] = [];
 
   function notify() {
-    const styleObj = computeStyle();
+    const styleObj = compute_style();
     for (let i = 0; i < _deps.length; i += 1) {
       const ctx = _deps[i];
       if (ctx.onChange) {
@@ -71,7 +69,7 @@ export function styleNames(
     }
   }
 
-  function computeStyle(): StyleObject {
+  function compute_style(): StyleObject {
     const result: StyleObject = {};
 
     for (let i = 0; i < sources.length; i += 1) {
@@ -116,17 +114,12 @@ export function styleNames(
 
   function addSourceFromItem(
     item:
-      | string
       | StyleObject
-      | Ref<string | StyleRef | StyleObject | undefined>
+      | Ref<StyleRef | StyleObject | undefined>
       | StyleRef
       | undefined,
   ) {
-    if (!item && item !== "") {
-      return;
-    }
-    if (typeof item === "string") {
-      sources.push(item);
+    if (!item) {
       return;
     }
     if (item && typeof item === "object" && !isRef(item) && !isStyleRef(item)) {
@@ -171,15 +164,27 @@ export function styleNames(
   }
 
   return {
-    __style_ref: true as const,
+    // __style_ref: true as const,
+    __is_ref: true as const,
     get value() {
-      return computeStyle();
+      return compute_style();
+    },
+    isSame(v: any) {
+      // return v === this.value;
+      return false;
+    },
+    isStrictEqual(v: any) {
+      // return v === this.value;
+      return false;
+    },
+    _destroy() {
+      notify();
     },
     _subscribe(ctx: Subscriber) {
       _deps.push(ctx);
     },
-    toString() {
-      return styleObjectToCssText(computeStyle());
-    },
+    // toString() {
+    //   return styleObjectToCssText(computeStyle());
+    // },
   };
 }

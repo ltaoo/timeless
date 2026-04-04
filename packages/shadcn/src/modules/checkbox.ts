@@ -1,6 +1,6 @@
 import { CheckboxPrimitive, ViewProps } from "@timeless/primitive";
 import { CheckOutlined } from "@timeless/icons";
-import { ref, computed, cn } from "@timeless/primitive";
+import { ref, computed, classNames } from "@timeless/primitive";
 import { CheckboxCore } from "@timeless/ui";
 
 export function Checkbox(
@@ -17,7 +17,7 @@ export function Checkbox(
     CheckboxPrimitive.Box(
       {
         store,
-        class: cn([
+        class: classNames([
           "peer relative flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors outline-none cursor-pointer focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
           computed(state, (s) =>
             s.checked

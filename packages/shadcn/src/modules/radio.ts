@@ -1,4 +1,4 @@
-import { ref, computed, cn } from "@timeless/primitive";
+import { ref, computed, classNames } from "@timeless/primitive";
 import { RadioPrimitive, View, For, ViewProps } from "@timeless/primitive";
 import { RadioGroupCore, RadioCore } from "@timeless/ui";
 
@@ -14,7 +14,7 @@ export function Radio(props: { store: RadioCore; id?: string }) {
     RadioPrimitive.Box(
       {
         store,
-        class: cn([
+        class: classNames([
           "peer relative flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border outline-none cursor-pointer after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
           computed(state, (s) =>
             s.checked
@@ -99,7 +99,7 @@ export function RadioGroupItem(props: {
 
   return View(
     {
-      class: cn(["flex items-center gap-3", props.class]),
+      class: classNames(["flex items-center gap-3", props.class]),
       onClick() {
         item.core.check();
       },

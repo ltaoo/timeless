@@ -101,77 +101,101 @@ function ApplicationView() {
     }
   }
 
-  return View({}, [
-    View({}, [
+  return View(
+    {
+      class: "page",
+    },
+    [
       View(
         {
-          onClick() {
-            page.set("todo");
-          },
+          class: "navigation",
         },
-        ["Goto Todo List"],
-      ),
-      View(
-        {
-          onClick() {
-            page.set("app");
-          },
-        },
-        ["Goto Application List"],
-      ),
-    ]),
-    View(
-      {
-        style: {
-          opacity: combine(page, (p) => (p === "todo" ? 1 : 0)),
-        },
-      },
-      [
-        View({}, ["Todo List Page"]),
-        For({
-          each: todos,
-          render(todo) {
-            return View({}, [todo.title]);
-          },
-        }),
-      ],
-    ),
-    View(
-      {
-        style: {
-          opacity: combine(page, (p) => (p === "app" ? 1 : 0)),
-        },
-      },
-      [
-        View({}, ["Application List Page"]),
-        Grid(
-          { columns, gap: 16 },
-          apps.map((app, idx) => {
-            return View(
-              {
-                style: {
-                  borderColor: combine({ focused, idx }, (t) => {
-                    return isFocusedCell(t.focused, t.idx)
-                      ? "#007bff"
-                      : "rgba(255,255,255,0.18)";
-                  }),
-                },
+        [
+          View(
+            {
+              class: "navigate-to",
+              onClick() {
+                page.set("todo");
               },
-              [
-                View({ style: { fontSize: 22 } }, [app.icon]),
-                View({ style: { fontWeight: "bold", fontSize: 14 } }, [
-                  app.title,
-                ]),
-                View({ style: { fontSize: 12, color: "gray" } }, [
-                  app.subtitle,
-                ]),
-              ],
-            );
+            },
+            ["Goto Todo List"],
+          ),
+          View(
+            {
+              class: "navigate-to",
+              onClick() {
+                page.set("app");
+              },
+            },
+            ["Goto Application List"],
+          ),
+        ],
+      ),
+      View(
+        {
+          class: "subpage",
+          style: {
+            opacity: combine(page, (p) => (p === "todo" ? 1 : 0)),
+          },
+        },
+        [
+          View(
+            {
+              class: "subpage-title",
+            },
+            ["Todo List Page"],
+          ),
+          For({
+            each: todos,
+            render(todo) {
+              return View({}, [todo.title]);
+            },
           }),
-        ),
-      ],
-    ),
-  ]);
+        ],
+      ),
+      View(
+        {
+          style: {
+            class: "subpage",
+            opacity: combine(page, (p) => (p === "app" ? 1 : 0)),
+          },
+        },
+        [
+          View(
+            {
+              class: "subpage-title",
+            },
+            ["Application List Page"],
+          ),
+          Grid(
+            { columns, gap: 16 },
+            apps.map((app, idx) => {
+              return View(
+                {
+                  style: {
+                    borderColor: combine({ focused, idx }, (t) => {
+                      return isFocusedCell(t.focused, t.idx)
+                        ? "#007bff"
+                        : "rgba(255,255,255,0.18)";
+                    }),
+                  },
+                },
+                [
+                  View({ style: { fontSize: 22 } }, [app.icon]),
+                  View({ style: { fontWeight: "bold", fontSize: 14 } }, [
+                    app.title,
+                  ]),
+                  View({ style: { fontSize: 12, color: "gray" } }, [
+                    app.subtitle,
+                  ]),
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
+    ],
+  );
 }
 
 const elm = ApplicationView({});

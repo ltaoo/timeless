@@ -1,11 +1,7 @@
-import {
-  ClassNameRef,
-  Ref,
-  isRef,
-  isStyleRef,
-  styleNames,
-} from "@timeless/reactive";
+import { Ref, isRef } from "@timeless/reactive";
 
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewChildren, ViewProps } from "@/content/view";
 
 export function Column(
@@ -69,7 +65,11 @@ export function Column(
       : {};
 
   return View(
-    { ...rest, class: cls, style: styleNames([baseStyle, extraStyle]) },
+    {
+      ...rest,
+      class: cls,
+      // style: styleNames([baseStyle, extraStyle])
+    },
     children,
   );
 }

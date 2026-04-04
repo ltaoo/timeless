@@ -1,4 +1,4 @@
-import { cn, combine, computed, refobj } from "@timeless/primitive";
+import { classNames, combine, computed, refobj } from "@timeless/primitive";
 import {
   DatePickerPrimitive,
   TimePickerPrimitive,
@@ -143,7 +143,7 @@ export function DateTimePicker(
       {
         store: date$,
         id,
-        class: cn([
+        class: classNames([
           "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
           computed(presence_, (d) => {
             return d.visible
@@ -316,7 +316,7 @@ export function DateTimePicker(
                 [
                   View(
                     {
-                      class: cn([
+                      class: classNames([
                         "h-[28px] text-center",
                         time$.showSeconds ? "w-30" : "w-18",
                       ]),
@@ -336,7 +336,7 @@ export function DateTimePicker(
               ),
               View(
                 {
-                  class: cn(["relative flex flex-1 h-0"]),
+                  class: classNames(["relative flex flex-1 h-0"]),
                 },
                 [
                   ScrollViewPrimitive.Root(
@@ -367,7 +367,7 @@ export function DateTimePicker(
                             {
                               store: time$,
                               value: hour,
-                              class: cn([
+                              class: classNames([
                                 "w-full h-8 text-sm rounded-md transition-colors outline-hidden",
                                 computed(time_state_, (s) => {
                                   const isSelected = s.tempHour === hour;
@@ -387,7 +387,7 @@ export function DateTimePicker(
                   ScrollViewPrimitive.Root(
                     {
                       store: minuteview$,
-                      class: cn([
+                      class: classNames([
                         "absolute top-0 left-12 w-12 h-full overflow-y-auto overlay-scrollbar p-2",
                         time$.showSeconds ? "border-border border-r" : "",
                       ]),

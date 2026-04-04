@@ -1,5 +1,7 @@
-import { computed, isRef, isStyleRef, ref } from "@timeless/reactive";
+import { computed, isRef, ref } from "@timeless/reactive";
 
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewProps, ViewChildren } from "@/content/view";
 import { getHost } from "@/host";
 
@@ -103,7 +105,10 @@ export function Range(
 ) {
   const { percentage, ...rest } = props;
   const extraStyle =
-    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+    rest.style &&
+    typeof rest.style === "object" &&
+    !isRef(rest.style) &&
+    !isStyleRef(rest.style)
       ? rest.style
       : {};
   return View(
@@ -121,7 +126,10 @@ export function Thumb(
 ) {
   const { percentage, ...rest } = props;
   const extraStyle =
-    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+    rest.style &&
+    typeof rest.style === "object" &&
+    !isRef(rest.style) &&
+    !isStyleRef(rest.style)
       ? rest.style
       : {};
   return View(

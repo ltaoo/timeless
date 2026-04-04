@@ -1,6 +1,8 @@
-import { refobj, ref, computed, isRef, isStyleRef } from "@timeless/reactive";
+import { refobj, ref, computed, isRef } from "@timeless/reactive";
 import { TooltipCore, Align, Side } from "@timeless/ui";
 
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewChildren, ViewProps } from "@/content/view";
 import { Fragment } from "@/content/fragment";
 import { getHost } from "@/host";

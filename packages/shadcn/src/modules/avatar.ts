@@ -1,5 +1,5 @@
 import { AvatarPrimitive, ViewProps, ViewChildren } from "@timeless/primitive";
-import { cn, Ref } from "@timeless/primitive";
+import { classNames, Ref } from "@timeless/primitive";
 
 const SIZES = {
   sm: "h-8 w-8 text-xs",
@@ -23,7 +23,7 @@ export function Avatar(
     {
       ...rest,
       size,
-      class: cn([
+      class: classNames([
         "relative flex shrink-0 overflow-hidden rounded-full",
         SIZES[size] || SIZES.default,
         cls,

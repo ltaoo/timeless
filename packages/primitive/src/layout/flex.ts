@@ -1,7 +1,9 @@
-import { ClassNameRef, Ref, isRef, isStyleRef } from "@timeless/reactive";
+import { Ref, isRef } from "@timeless/reactive";
 
 import { View, ViewChildren, ViewProps } from "@/content/view";
 import { viewStyleToCssText } from "@/style/index";
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 
 export type FlexJustify =
   | "start"

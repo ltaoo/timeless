@@ -263,22 +263,6 @@ export type Ref<T> = {
   isStrictEqual: (v: unknown) => boolean;
 };
 
-export type ClassNameRef = {
-  __cn_ref: true;
-  _subscribe(ctx: Subscriber): void;
-  del(v: string): void;
-  add(v: string): void;
-  append(c: string): void;
-  toString(): string;
-};
-
-export type StyleRef = {
-  __style_ref: true;
-  readonly value: Record<string, any>;
-  _subscribe(ctx: Subscriber): void;
-  toString(): string;
-};
-
 export function isRef(v: unknown): v is Ref<unknown> {
   if (v === null) {
     return false;
@@ -287,26 +271,6 @@ export function isRef(v: unknown): v is Ref<unknown> {
     return false;
   }
   if ((v as Record<string, unknown>).__is_ref) {
-    return true;
-  }
-  return false;
-}
-
-export function isClassName(v: unknown): v is ClassNameRef {
-  if (v === null || v === undefined) {
-    return false;
-  }
-  if ((v as Record<string, unknown>).__cn_ref) {
-    return true;
-  }
-  return false;
-}
-
-export function isStyleRef(v: unknown): v is StyleRef {
-  if (v === null || v === undefined) {
-    return false;
-  }
-  if ((v as Record<string, unknown>).__style_ref) {
     return true;
   }
   return false;

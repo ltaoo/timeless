@@ -1,14 +1,8 @@
-import {
-  refobj,
-  computed,
-  classNames,
-  sn,
-  combine,
-  isRef,
-  isStyleRef,
-} from "@timeless/reactive";
+import { refobj, computed, combine, isRef } from "@timeless/reactive";
 import { TagSelectCore } from "@timeless/ui";
 
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewChildren, ViewProps } from "@/content/view";
 import { Show } from "@/reactive/show";
 import { For } from "@/reactive/for";

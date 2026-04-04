@@ -1,4 +1,4 @@
-import { VNode, sn, getRendererScheduler } from "@timeless/timeless";
+import { VNode, styleNames, getRendererScheduler } from "@timeless/timeless";
 
 const { createElement, createText, appendChild } = VNode;
 
@@ -8,7 +8,7 @@ export function CanvasTxt(props: any, children: any[]) {
   const fontWeight = props.style?.fontWeight === "bold" ? "bold " : "";
   const color = props.style?.color ?? "rgba(255,255,255,0.92)";
 
-  const merged = sn([
+  const merged = styleNames([
     {
       left: layout.left,
       top: layout.top,

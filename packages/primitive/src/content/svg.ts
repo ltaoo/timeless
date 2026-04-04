@@ -1,9 +1,10 @@
-import { Ref, isRef, isClassName, ClassNameRef } from "@timeless/reactive";
+import { Ref, isRef } from "@timeless/reactive";
 
 import { isElement } from "@/content/view";
 import { getHost } from "@/host";
 import { safeCreateElementNS, safeCreateTextNode } from "@/util/env";
 import { ViewStyle, viewStyleToCssText } from "@/style/index";
+import { isClassName, ClassNameRef } from "@/vnode/class-names";
 import { MountedEvent } from "@/event/index";
 
 type AttrValue = string | number | Ref<string> | Ref<number>;

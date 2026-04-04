@@ -1,5 +1,10 @@
 import { PopconfirmCore } from "@timeless/ui";
-import { computed, ref, refobj } from "@timeless/primitive";
+import {
+  computed,
+  ref,
+  refobj,
+  ViewStyleProperties,
+} from "@timeless/primitive";
 import { View, Show, ViewChildren, ViewProps, h } from "@timeless/primitive";
 import { PopconfirmPrimitive } from "@timeless/primitive";
 
@@ -69,12 +74,11 @@ export function Popconfirm(
               style: computed(popper_state_, (s) => {
                 const side = s.placedSide;
                 const align = s.placedAlign;
-                const styles: any = {};
+                const styles: ViewStyleProperties = {};
                 if (side === "bottom") styles.top = "-6px";
                 if (side === "top") styles.bottom = "-6px";
                 if (side === "right") styles.left = "-6px";
                 if (side === "left") styles.right = "-6px";
-
                 let transform = "rotate(45deg)";
                 if (s.arrow && s.arrow.x != null) {
                   styles.left = `${s.arrow.x}px`;

@@ -1,6 +1,6 @@
 import {
   VNode,
-  sn,
+  styleNames,
   isStyleRef,
   isRef,
   getRendererScheduler,
@@ -10,7 +10,7 @@ const { createElement, createText, appendChild, mountChild, isDescriptor } =
   VNode;
 
 export function Txt(props: any, children: any[]) {
-  const merged = sn([
+  const merged = styleNames([
     props.style,
     {
       color:

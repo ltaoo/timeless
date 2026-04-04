@@ -1,6 +1,8 @@
-import { cn, ref, isRef, isStyleRef } from "@timeless/reactive";
+import { ref, isRef } from "@timeless/reactive";
 import { FileInputCore } from "@timeless/ui";
 
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewProps, ViewChildren } from "@/content/view";
 import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";
@@ -45,7 +47,7 @@ export function Input(
     : null;
   if (unsub) events.push(unsub);
 
-  const class$ = cn([props.class]);
+  const class$ = classNames([props.class]);
 
   return {
     t: "view",

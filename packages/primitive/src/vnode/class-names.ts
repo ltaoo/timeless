@@ -1,4 +1,31 @@
-import { Ref, ClassNameRef, Subscriber, isRef, isClassName } from "./types";
+import {
+  Signal,
+  ref,
+  Ref,
+  Subscriber,
+  isRef,
+  // isClassName,
+} from "@timeless/reactive";
+// import { ClassNameRef, } from './clas'
+
+export type ClassNameRef = {
+  __cn_ref: true;
+  _subscribe(ctx: Subscriber): void;
+  del(v: string): void;
+  add(v: string): void;
+  append(c: string): void;
+  toString(): string;
+};
+
+export function isClassName(v: unknown): v is ClassNameRef {
+  if (v === null || v === undefined) {
+    return false;
+  }
+  if ((v as Record<string, unknown>).__cn_ref) {
+    return true;
+  }
+  return false;
+}
 
 export function classNames(
   items: (string | Ref<string> | ClassNameRef | undefined)[],
@@ -133,4 +160,46 @@ export function classNames(
       return _names.filter(Boolean).join(" ");
     },
   };
+}
+
+export function join(v: (string | Signal<string>)[]): Signal<string> {
+  const sources = Array.isArray(v) ? v : [];
+  function recompute() {
+    let next = "";
+    for (let i = 0; i < sources.length; i += 1) {
+      const item = sources[i];
+      if (typeof item === "string") {
+        next += item;
+      } else if (isRef(item)) {
+        next += item.value ?? "";
+      }
+    }
+    return next;
+  }
+
+  const r = ref(recompute());
+  let destroyed = false;
+
+  for (let i = 0; i < sources.length; i += 1) {
+    const item = sources[i];
+    if (isRef(item)) {
+      item._subscribe({
+        onChange() {
+          if (destroyed) return;
+          const next = recompute();
+          if (!r.isStrictEqual(next)) {
+            r.set(next);
+          }
+        },
+      });
+    }
+  }
+
+  const origin_destroy = r._destroy;
+  r._destroy = () => {
+    destroyed = true;
+    origin_destroy();
+  };
+
+  return r;
 }

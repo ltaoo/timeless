@@ -1,8 +1,21 @@
-import { isRef } from "@timeless/reactive";
+import { isRef, Ref, RefObject, Signal } from "@timeless/reactive";
 
-import { MaybeSignal } from "@/content/view";
+type ViewStylePropValue =
+  | Signal<string | number | boolean | null | undefined>
+  | string
+  | number
+  | boolean
+  | undefined
+  | null;
 
-export type ViewStyle = Record<string, MaybeSignal>;
+export type ViewStyleProperties = {
+  [k: string]: ViewStylePropValue;
+};
+
+export type ViewStyle =
+  | Ref<ViewStyleProperties>
+  | RefObject<ViewStyleProperties>
+  | ViewStyleProperties;
 
 export type ViewStyleInput = ViewStyle;
 

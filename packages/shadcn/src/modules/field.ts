@@ -1,4 +1,10 @@
-import { computed, ref, refobj, cn, combine } from "@timeless/primitive";
+import {
+  computed,
+  ref,
+  refobj,
+  classNames,
+  combine,
+} from "@timeless/primitive";
 import {
   View,
   Show,
@@ -19,7 +25,7 @@ export function FieldGroup(props: ViewProps, children: ViewChildren = []) {
   return View(
     {
       ...rest,
-      class: cn(["flex flex-col gap-6", cls]),
+      class: classNames(["flex flex-col gap-6", cls]),
     },
     children,
   );
@@ -31,7 +37,7 @@ export function FieldSet(props: ViewProps, children: ViewChildren = []) {
     {
       ...rest,
       as: "fieldset",
-      class: cn(["space-y-4", cls]),
+      class: classNames(["space-y-4", cls]),
     },
     children,
   );
@@ -43,7 +49,10 @@ export function FieldLegend(props: ViewProps, children: ViewChildren = []) {
     {
       ...rest,
       as: "legend",
-      class: cn(["text-base font-semibold leading-none tracking-tight", cls]),
+      class: classNames([
+        "text-base font-semibold leading-none tracking-tight",
+        cls,
+      ]),
     },
     children,
   );
@@ -57,7 +66,7 @@ export function FieldDescription(
   return View(
     {
       ...rest,
-      class: cn(["text-sm text-muted-foreground", cls]),
+      class: classNames(["text-sm text-muted-foreground", cls]),
     },
     children,
   );
@@ -70,7 +79,7 @@ export function FieldSeparator(
   return BaseSeparator({
     ...rest,
     orientation,
-    class: cn([orientation === "horizontal" ? "my-6" : "mx-6", cls]),
+    class: classNames([orientation === "horizontal" ? "my-6" : "mx-6", cls]),
   });
 }
 
@@ -100,7 +109,7 @@ export function FieldLabel(
   return NativeLabel(
     {
       ...rest,
-      class: cn([
+      class: classNames([
         "select-none",
         weight === "normal" ? "font-normal" : "font-medium",
         "group-data-[invalid]:text-destructive",
@@ -129,7 +138,7 @@ export function FieldInlineLabel(
   return NativeLabel(
     {
       ...rest,
-      class: cn([
+      class: classNames([
         "text-sm font-normal select-none cursor-pointer",
         "group-data-[invalid]:text-destructive",
         combine({ error: error_ }, (t) => (t.error ? "text-destructive" : "")),
@@ -217,7 +226,7 @@ export function Field(
         ...(dataset || {}),
         invalid: invalid_,
       },
-      class: cn([
+      class: classNames([
         "group",
         "text-neutral-800 dark:text-neutral-300",
         orientation === "horizontal"

@@ -1,5 +1,5 @@
 import { ViewProps, ViewChildren, View } from "@timeless/primitive";
-import { cn } from "@timeless/primitive";
+import { classNames } from "@timeless/primitive";
 
 export function Label(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
@@ -7,7 +7,7 @@ export function Label(props: ViewProps, children?: ViewChildren) {
     {
       ...rest,
       as: "label",
-      class: cn([
+      class: classNames([
         "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
         cls,
       ]),

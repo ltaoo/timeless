@@ -1,5 +1,5 @@
 import { SeparatorPrimitive, ViewProps } from "@timeless/primitive";
-import { cn } from "@timeless/primitive";
+import { classNames } from "@timeless/primitive";
 
 export function Separator(
   props: ViewProps & { orientation?: "horizontal" | "vertical" },
@@ -8,7 +8,7 @@ export function Separator(
   return SeparatorPrimitive.Separator({
     ...rest,
     orientation,
-    class: cn([
+    class: classNames([
       "shrink-0 bg-zinc-200 dark:bg-zinc-800",
       orientation === "vertical" ? "w-[1px] h-full" : "h-[1px] w-full",
       cls,

@@ -1,4 +1,4 @@
-import { cn, computed, refobj } from "@timeless/primitive";
+import { computed, refobj, classNames } from "@timeless/primitive";
 import { For, NativeImg, Show, View, ViewProps } from "@timeless/primitive";
 import { ButtonCore, CheckboxCore, InputCore } from "@timeless/ui";
 
@@ -76,7 +76,7 @@ export function LLMProviderForm(
   return View(
     {
       ...rest,
-      class: cn(["space-y-6", cls]),
+      class: classNames(["space-y-6", cls]),
     },
     [
       For({

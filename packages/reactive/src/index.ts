@@ -3,8 +3,8 @@
 import type {
   Subscriber,
   Ref,
-  ClassNameRef,
-  StyleRef,
+  // ClassNameRef,
+  // StyleRef,
   TimelessRefArray,
 } from "./types";
 import type { RefObject } from "./reactive-object";
@@ -15,7 +15,7 @@ import type {
   PrimitiveSignal,
   Signal,
 } from "./signal";
-import { isRef, isClassName, isStyleRef } from "./types";
+import { isRef } from "./types";
 import { ref } from "./ref";
 import { refArray } from "./reactive-array";
 import { refObject } from "./reactive-object";
@@ -30,8 +30,8 @@ import {
   getobj as registryGetObj,
   getarr as registryGetArr,
 } from "./registry";
-import { classNames } from "./class-names";
-import { styleNames } from "./style-names";
+// import { classNames } from "./class-names";
+// import { styleNames } from "./style-names";
 
 export {
   Subscriber,
@@ -44,10 +44,6 @@ export {
   ObjectSignal,
   ArraySignal,
   isRef,
-  ClassNameRef,
-  isClassName,
-  StyleRef,
-  isStyleRef,
   ref,
   signal,
   refArray as reactiveArray,
@@ -62,11 +58,6 @@ export {
   registryGetArr,
   registryGetObj as getobj,
   registryGetArr as getarr,
-  classNames,
-  styleNames,
-  // Legacy aliases
-  classNames as cn,
-  styleNames as sn,
   derive as combine,
   refArray as refarr,
   refObject as refobj,

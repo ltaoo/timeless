@@ -1,6 +1,9 @@
-import { VNode, ref, refobj, sn } from "@timeless/timeless";
+import { VNode, ref, refobj, styleNames } from "@timeless/timeless";
 
-function buildAttrs(attributes?: Record<string, any>, dataset?: Record<string, any>) {
+function buildAttrs(
+  attributes?: Record<string, any>,
+  dataset?: Record<string, any>,
+) {
   const attrs: Record<string, any> = { ...(attributes ?? {}) };
   if (dataset) {
     for (const k of Object.keys(dataset)) {
@@ -122,7 +125,7 @@ export function DomInputField(props: any) {
     store?.handleBlur?.();
   };
 
-  const elementStyle = sn([rest.style]);
+  const elementStyle = styleNames([rest.style]);
   const elementProps = {
     ...buildElementProps(base.props, base.class),
     id,

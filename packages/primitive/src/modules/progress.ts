@@ -1,6 +1,8 @@
-import { ref, computed, Ref, isRef, isStyleRef } from "@timeless/reactive";
+import { ref, computed, Ref, isRef } from "@timeless/reactive";
 import { ProgressCore } from "@timeless/ui";
 
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewProps, ViewChildren } from "@/content/view";
 
 export function Root(
@@ -62,7 +64,10 @@ export function Indicator(
   const { store, value, max = 100, ...rest } = props;
 
   const extraStyle =
-    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+    rest.style &&
+    typeof rest.style === "object" &&
+    !isRef(rest.style) &&
+    !isStyleRef(rest.style)
       ? rest.style
       : {};
 

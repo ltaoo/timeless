@@ -1,6 +1,8 @@
-import { refobj, computed, isRef, isStyleRef } from "@timeless/reactive";
+import { refobj, computed, isRef } from "@timeless/reactive";
 import { PopperCore } from "@timeless/ui";
 
+import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
+import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewChildren, ViewProps } from "@/content/view";
 import { getHost } from "@/host";
 
@@ -17,7 +19,10 @@ export function Arrow(
   });
 
   const extraStyle =
-    rest.style && typeof rest.style === "object" && !isRef(rest.style) && !isStyleRef(rest.style)
+    rest.style &&
+    typeof rest.style === "object" &&
+    !isRef(rest.style) &&
+    !isStyleRef(rest.style)
       ? rest.style
       : {};
 
