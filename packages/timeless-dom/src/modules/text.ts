@@ -9,7 +9,7 @@ import {
 const { createElement, createText, appendChild, mountChild, isDescriptor } =
   VNode;
 
-export function DomTxt(props: any, children: any[]) {
+export function Txt(props: any, children: any[]) {
   const merged = sn([
     props.style,
     {

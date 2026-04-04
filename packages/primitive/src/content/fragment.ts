@@ -1,37 +1,41 @@
-import { safeCreateDocumentFragment, safeCreateTextNode } from "@/util/env";
-import { getHost } from "@/host";
+import { safeCreateDocumentFragment } from "@/util/env";
 
 import { ViewChildren, ViewProps, isElement } from "./view";
+import { Txt } from "./text";
 
 export function Fragment(props: ViewProps, children: ViewChildren = []) {
-  const host = getHost();
-  let $fragment: any = null;
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
   let onMountedCleanup: (() => void) | undefined;
-  let rendered = false;
 
-  let _children = children;
-  if (!Array.isArray(_children)) {
-    _children = [_children];
-  }
+  // 关联一个 宿主平台 节点
+  let $fragment: any = null;
+
+  const state = {
+    rendered: false,
+    children,
+    get host() {
+      return $fragment;
+    },
+  };
 
   // console.log("[Fragment] created with", _children.length, "children");
 
   return {
     t: "fragment",
+    state,
     get $elm() {
       return $fragment;
     },
-    set $elm(v) {
-      $fragment = v;
-    },
+    // set $elm(v) {
+    //   $fragment = v;
+    // },
     beforeUnmounted() {
       // console.log("[Fragment] beforeUnmounted");
       if (beforeUnmounted) {
         beforeUnmounted();
       }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (isElement(node) && node.beforeUnmounted) {
           node.beforeUnmounted();
         }
@@ -46,25 +50,25 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       if (onUnmounted) {
         onUnmounted();
       }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (isElement(node) && node.onUnmounted) {
           node.onUnmounted();
         }
       }
 
       // Reset state for potential re-render
-      rendered = false;
-      $fragment = null;
+      state.rendered = false;
+      // $fragment = null;
     },
     append(node: any) {
-      _children.push(node);
+      state.children.push(node);
     },
     render() {
-      if (rendered) {
+      if (state.rendered) {
         return $fragment;
       }
-      rendered = true;
+      state.rendered = true;
 
       // Create fragment if not already created
       if (!$fragment) {
@@ -72,22 +76,22 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       }
 
       // console.log("[Fragment] render, children count:", _children.length);
-      for (let i = 0; i < _children.length; i += 1) {
-        let node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        let node = state.children[i];
         if (!node) continue;
         // 处理 h() 返回的延迟执行函数
         if (typeof node === "function") {
           node = node();
-          _children[i] = node;
+          state.children[i] = node;
         }
         if (typeof node === "string" || typeof node === "number") {
-          host.appendChild($fragment, safeCreateTextNode(String(node)));
+          $fragment.appendChild(Txt(String(node)));
           continue;
         }
         if (isElement(node)) {
           const result = node.render();
           if (result) {
-            host.appendChild($fragment, result);
+            $fragment.appendChild(result);
           }
         }
       }
@@ -98,8 +102,8 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
           onMountedCleanup = cleanup;
         }
       }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (isElement(node)) {
           if (node.onMounted) {
             node.onMounted({ target: node.$elm });

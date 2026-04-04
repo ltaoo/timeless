@@ -68,7 +68,9 @@ export function Tabs(
                   TabsPrimitive.Indicator({
                     store,
                     value: item.value,
-                    style: "display:none;",
+                    style: {
+                      display: "none",
+                    },
                   }),
                 ],
               );

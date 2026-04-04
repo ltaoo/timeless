@@ -574,7 +574,7 @@ function DownloaderPanelView(props, children) {
               },
               [
                 Timeless.icons.EllipsisVerticalOutlined({
-                  style: "font-size: 18px;",
+                  size: 18,
                 }),
               ],
             ),
@@ -594,7 +594,10 @@ function DownloaderPanelView(props, children) {
           //   }),
           ScrollView(
             {
-              style: "background-color: transparent; margin-top: 0;",
+              style: {
+                backgroundColor: "transparent",
+                marginTop: "0",
+              },
               store: vm$.ui.view$,
             },
             [
@@ -621,7 +624,10 @@ function DownloaderPanelView(props, children) {
                   Waterfall({
                     store: vm$.ui.waterfall$,
                     class: "scroll-view-waterfall !overflow-visible !h-auto",
-                    style: "overflow: visible; height: auto;",
+                    style: {
+                      overflow: "visible",
+                      height: "auto",
+                    },
                     render(task) {
                       console.log("task in waterfall", task);
                       const iconSize = "50px";
@@ -710,7 +716,16 @@ function DownloaderPanelView(props, children) {
                         View(
                           {
                             class: "weui-cell__hd",
-                            style: `position: relative; margin-right: 16px; width: ${iconSize}; height: ${iconSize}; display: flex; align-items: center; justify-content: center; color: var(--weui-FG-0);`,
+                            style: {
+                              position: "relative",
+                              marginRight: "16px",
+                              width: iconSize,
+                              height: iconSize,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "var(--weui-FG-0)",
+                            },
                           },
                           [
                             Show(
@@ -725,8 +740,14 @@ function DownloaderPanelView(props, children) {
                               [
                                 View(
                                   {
-                                    style:
-                                      "position: relative; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;",
+                                    style: {
+                                      position: "relative",
+                                      width: "50px",
+                                      height: "50px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    },
                                   },
                                   [
                                     SVG(
@@ -761,8 +782,11 @@ function DownloaderPanelView(props, children) {
                                     ),
                                     View(
                                       {
-                                        style:
-                                          "position: relative; z-index: 1; display: flex;",
+                                        style: {
+                                          position: "relative",
+                                          zIndex: 1,
+                                          display: "flex",
+                                        },
                                       },
                                       [DangerouslyInnerHTML(PrefixIcon.value)],
                                     ),
@@ -775,14 +799,20 @@ function DownloaderPanelView(props, children) {
                         View(
                           {
                             class: "weui-cell__bd",
-                            style: "min-width:0;",
+                            style: { minWidth: "0" },
                           },
                           [
                             View(
                               {
                                 class: "weui-ellipsis",
-                                style:
-                                  "color: var(--weui-FG-0); font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
+                                style: {
+                                  color: "var(--weui-FG-0)",
+                                  fontWeight: 500,
+                                  fontSize: "14px",
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                },
                               },
                               [computed(task, (t) => t.name)],
                             ),
@@ -790,7 +820,11 @@ function DownloaderPanelView(props, children) {
                               {
                                 class: "weui-cell__desc",
                                 style: computed(state_, (d) => {
-                                  return `margin-top: 4px; color: ${d.statusColor}; font-size: 12px;`;
+                                  return {
+                                    marginTop: "4px",
+                                    color: d.statusColor,
+                                    fontSize: "12px",
+                                  };
                                 }),
                               },
                               [
@@ -804,11 +838,18 @@ function DownloaderPanelView(props, children) {
                         View(
                           {
                             class: "weui-cell__ft",
-                            style: "display: flex; align-items: center;",
+                            style: { display: "flex", alignItems: "center" },
                           },
                           (() => {
-                            const btnStyle =
-                              "color: var(--weui-FG-0); opacity: 0.8; margin-left: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;";
+                            const btnStyle = {
+                              color: "var(--weui-FG-0)",
+                              opacity: 0.8,
+                              marginLeft: "12px",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            };
                             return [
                               Match(
                                 {

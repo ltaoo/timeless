@@ -8,9 +8,8 @@ import {
   StyleRef,
 } from "@timeless/reactive";
 
-import { getHost } from "@/host";
-import { safeCreateElement, safeCreateTextNode } from "@/util/env";
-import { ViewStyleInput, ViewStyle, viewStyleToCssText } from "@/style/index";
+import { safeCreateElement } from "@/util/env";
+import { ViewStyleInput, ViewStyle } from "@/style/index";
 import { MountedEvent } from "@/event/index";
 
 import { Txt } from "./text";
@@ -55,7 +54,7 @@ export interface ViewProps {
 }
 
 export function View(props: ViewProps = {}, children?: ViewChildren) {
-  const host = getHost();
+  // const host = getHost();
   const {
     as = "div",
     style,
@@ -87,55 +86,64 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
   } = props;
   let onMountedCleanup: (() => void) | undefined;
   const listenerCleanups: (() => void)[] = [];
-  let rendered = false;
-  let $elm: any = null;
-  let _children = children ?? [];
-  if (!Array.isArray(_children)) {
-    _children = [_children];
-  }
 
-  // Helper: normalize children (convert functions, wrap refs)
-  const normalizeChildren = () => {
-    for (let i = 0; i < _children.length; i++) {
-      let child = _children[i];
-      if (typeof child === "function") {
-        child = child();
-        _children[i] = child;
-      }
-      if (isRef(child)) {
-        _children[i] = Txt(child as any);
-      }
-    }
+  let $elm: any = null;
+
+  const state = {
+    rendered: false,
+    children: children ?? [],
+    get host() {
+      return $elm;
+    },
   };
 
+  // Helper: normalize children (convert functions, wrap refs)
+  function normalize_children() {
+    for (let i = 0; i < state.children.length; i++) {
+      let child = state.children[i];
+      if (typeof child === "function") {
+        child = child();
+        state.children[i] = child;
+      }
+      if (isRef(child)) {
+        state.children[i] = Txt(child as any);
+      }
+    }
+  }
+
   // Helper: apply attribute
-  const applyAttr = (k: string, v: any) => {
+  function applyAttr(k: string, v: any) {
     if (v === undefined || v === null || v === false) {
-      host.removeAttribute($elm, k);
+      // host.removeAttribute($elm, k);
+      $elm.removeAttribute(k);
       return;
     }
     if (v === true) {
-      host.setAttribute($elm, k, "");
+      // host.setAttribute($elm, k, "");
+      $elm.setAttribute(k, "");
       return;
     }
-    host.setAttribute($elm, k, String(v));
-  };
+    // host.setAttribute($elm, k, String(v));
+    $elm.setAttribute(k, String(v));
+  }
 
   // Helper: create event listener
-  const listen = (
+  function listen(
     target: any,
     type: string,
     handler: (event: any) => void,
     options?: any,
-  ) => {
-    host.addEventListener(target, type, handler, options);
+  ) {
+    // host.addEventListener(target, type, handler, options);
+    target.addEventListener(type, handler, options);
     listenerCleanups.push(() => {
-      host.removeEventListener(target, type, handler, options);
+      // host.removeEventListener(target, type, handler, options);
+      target.removeEventListener(type, handler, options);
     });
-  };
+  }
 
   // Helper: setup bindings (attributes, class, style, events)
-  const setupBindings = () => {
+  function setup_bindings() {
     if (attributes) {
       Object.keys(attributes).forEach((k) => {
         const vv = attributes[k];
@@ -169,41 +177,53 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
     if (cls) {
       if (typeof cls === "string") {
-        host.setClassName($elm, cls);
+        // host.setClassName($elm, cls);
+        $elm.setStylePreset(cls);
       } else if (isRef(cls)) {
         cls._subscribe({
           onChange(v: any) {
-            if ($elm) host.setClassName($elm, v);
+            if ($elm) {
+              // host.setClassName($elm, v);
+              $elm.setStylePreset(v);
+            }
           },
         });
-        host.setClassName($elm, cls.value);
+        // host.setClassName($elm, cls.value);
+        $elm.setStylePreset(cls.value);
       } else if (isClassName(cls)) {
         cls._subscribe({
           onChange(v: any) {
-            if ($elm) host.setClassName($elm, v.join(" "));
+            if ($elm) {
+              // host.setClassName($elm, v.join(" "));
+              $elm.setStylePreset(v.join(" "));
+            }
           },
         });
-        host.setClassName($elm, cls.toString());
+        // host.setClassName($elm, cls.toString());
+        $elm.setStylePreset(cls.toString());
       }
     }
 
     if (style) {
-      if (typeof style === "string") {
-        host.setStyleText($elm, style);
-        return;
-      }
       if (isStyleRef(style as any)) {
         const st = style as StyleRef;
         st._subscribe({
           onChange(v: any) {
-            if ($elm) host.setStyleText($elm, viewStyleToCssText(v ?? {}));
+            if ($elm) {
+              // host.setStyleText($elm, viewStyleToCssText(v ?? {}));
+              $elm.setStylePreset(v ?? {});
+            }
           },
         });
-        host.setStyleText($elm, viewStyleToCssText(st.value));
+        // host.setStyleText($elm, viewStyleToCssText(st.value));
+        $elm.setStylePreset(st.value);
       } else if (isRef(style)) {
         const st = style as any;
         const apply = () => {
-          if ($elm) host.setStyleText($elm, viewStyleToCssText(st.value || {}));
+          if ($elm) {
+            // host.setStyleText($elm, viewStyleToCssText(st.value || {}));
+            $elm.setStylePreset(st.value || {});
+          }
         };
         st._subscribe({
           onChange() {
@@ -214,7 +234,10 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       } else {
         const obj = style as ViewStyle;
         const applyStyle = () => {
-          if ($elm) host.setStyleText($elm, viewStyleToCssText(obj));
+          if ($elm) {
+            // host.setStyleText($elm, viewStyleToCssText(obj));
+            $elm.setStylePreset(obj);
+          }
         };
         const keys = Object.keys(obj);
         for (let i = 0; i < keys.length; i += 1) {
@@ -260,7 +283,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       const handleStart = (event: PointerEvent) => {
         startX = event.clientX;
         startY = event.clientY;
-        longPressTimer = host.setTimeout(() => {
+        longPressTimer = setTimeout(() => {
           if (onLongPress) {
             onLongPress(event);
           }
@@ -273,7 +296,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           const deltaX = Math.abs(event.clientX - startX);
           const deltaY = Math.abs(event.clientY - startY);
           if (deltaX > moveThreshold || deltaY > moveThreshold) {
-            host.clearTimeout(longPressTimer);
+            clearTimeout(longPressTimer);
             longPressTimer = null;
           }
         }
@@ -281,7 +304,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
       const handleEnd = () => {
         if (longPressTimer) {
-          host.clearTimeout(longPressTimer);
+          clearTimeout(longPressTimer);
           longPressTimer = null;
         }
       };
@@ -336,7 +359,8 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     }
 
     if (draggable !== undefined) {
-      host.setAttribute($elm, "draggable", String(draggable));
+      // host.setAttribute($elm, "draggable", String(draggable));
+      $elm.setAttribute("draggable", String(draggable));
     }
 
     if (onDragStart) {
@@ -396,7 +420,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       };
       listen($elm, "animationend", handler);
     }
-  };
+  }
 
   return {
     t: "view",
@@ -406,33 +430,34 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     set $elm(v) {
       $elm = v;
     },
-    _props: props,
-    _children,
+    // _props: props,
+    // _children,
     render() {
-      if (rendered) {
+      if (state.rendered) {
         return $elm;
       }
-      rendered = true;
+      state.rendered = true;
 
       // Create element if not already created
       if (!$elm) {
         $elm = safeCreateElement(as);
       }
 
-      normalizeChildren();
-      setupBindings();
+      normalize_children();
+      setup_bindings();
 
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (node === null || node === undefined) continue;
         if (typeof node === "string" || typeof node === "number") {
-          host.appendChild($elm, safeCreateTextNode(String(node)));
+          $elm.appendChild(Txt(String(node)));
           continue;
         }
         if (isElement(node)) {
           const result = node.render();
           if (result) {
-            host.appendChild($elm, result);
+            // host.appendChild($elm, result);
+            $elm.appendChild(result);
           }
         }
       }
@@ -442,8 +467,8 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           onMountedCleanup = cleanup;
         }
       }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (isElement(node)) {
           if (node.onMounted) {
             node.onMounted({ target: node.$elm });
@@ -453,25 +478,27 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       return $elm;
     },
     hydrate(existingDom: any) {
-      if (rendered) {
+      if (state.rendered) {
         return $elm;
       }
-      rendered = true;
+      state.rendered = true;
 
       $elm = existingDom;
-      normalizeChildren();
-      setupBindings();
+      normalize_children();
+      setup_bindings();
 
       // Hydrate children recursively
-      let childDom = host.getFirstChild($elm);
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      // let childDom = host.getFirstChild($elm);
+      let childDom = $elm.getFirstChild();
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (!node) continue;
 
         if (typeof node === "string" || typeof node === "number") {
           // Skip text nodes
           if (childDom) {
-            childDom = host.getNextSibling(childDom);
+            // childDom = host.getNextSibling(childDom);
+            childDom = childDom.getNextSibling();
           }
           continue;
         }
@@ -481,18 +508,25 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
             // 传递 $elm 作为 parentDom，即使 childDom 为 null 也要调用 hydrate
             (node as any).hydrate(childDom, $elm);
             if (childDom) {
-              childDom = host.getNextSibling(node.$elm || childDom);
+              // childDom = host.getNextSibling(node.$elm || childDom);
+              if (node.$elm) {
+                childDom = node.$elm.getNextSibling();
+              } else if (childDom) {
+                childDom = childDom.getNextSibling();
+              }
             }
           } else if (childDom) {
             // Fallback: just assign $elm and setup
             node.$elm = childDom;
             node.render();
-            childDom = host.getNextSibling(childDom);
+            // childDom = host.getNextSibling(childDom);
+            childDom = childDom.getNextSibling();
           } else {
             // childDom 为 null 时，直接 render 并插入
             const result = node.render();
             if (result) {
-              host.appendChild($elm, result);
+              // host.appendChild($elm, result);
+              $elm.appendChild(result);
             }
           }
         }
@@ -505,8 +539,8 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         }
       }
 
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (isElement(node) && node.onMounted) {
           node.onMounted({ target: node.$elm });
         }
@@ -518,8 +552,8 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
       }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (isElement(node) && node.beforeUnmounted) {
           node.beforeUnmounted();
         }
@@ -542,8 +576,8 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         fn();
       }
       listenerCleanups.length = 0;
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (isElement(node)) {
           // 如果是 Portal 组件，调用其 cleanup 方法
           if (node.t === "portal" && typeof node.cleanup === "function") {
@@ -557,11 +591,12 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         }
       }
       // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
-      host.clearChildren($elm);
+      // host.clearChildren($elm);
+      $elm.clearChildren();
       // console.log("[View] onUnmounted completed");
 
       // Reset state for potential re-render (e.g., when Show toggles when back to true)
-      rendered = false;
+      state.rendered = false;
       $elm = null;
     },
   };

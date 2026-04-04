@@ -138,7 +138,7 @@ function ApplicationRootView() {
     h(
       View,
       {
-        style: "padding: 12px;",
+        style: { padding: "12px" },
       },
       [
         (() => {

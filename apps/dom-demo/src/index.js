@@ -1,7 +1,5 @@
-import { VNode, Grid, View, Txt, ref, combine } from "@timeless/timeless";
+import { Grid, View, For, ref, combine, refarr } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
-
-const { h } = VNode;
 
 const apps = [
   { icon: "🎬", title: "Movies", subtitle: "Movies & Shows" },
@@ -19,56 +17,167 @@ const apps = [
 ];
 
 function ApplicationView() {
-  const focused_idx = ref(0);
+  const page = ref("todo");
+  const columns = 4;
+  const focused = ref({ x: 0, y: 0 });
+  const todos = refarr([
+    {
+      id: 1,
+      title: "Buy groceries",
+    },
+  ]);
+
+  function xyFromIdx(idx) {
+    return { x: idx % columns, y: Math.floor(idx / columns) };
+  }
+
+  function maxXAtRow(y) {
+    const maxY = Math.floor((apps.length - 1) / columns);
+    if (y === maxY) return (apps.length - 1) % columns;
+    return columns - 1;
+  }
+
+  function moveFocus(direction) {
+    focused.as((prev) => {
+      const maxY = Math.floor((apps.length - 1) / columns);
+      let { x, y } = prev;
+
+      if (direction === "left") {
+        if (x > 0) x -= 1;
+        else if (y > 0) {
+          y -= 1;
+          x = maxXAtRow(y);
+        }
+      }
+
+      if (direction === "right") {
+        const maxX = maxXAtRow(y);
+        if (x < maxX) x += 1;
+        else if (y < maxY) {
+          y += 1;
+          x = 0;
+        }
+      }
+
+      if (direction === "up") {
+        if (y > 0) {
+          y -= 1;
+          x = Math.min(x, maxXAtRow(y));
+        }
+      }
+
+      if (direction === "down") {
+        if (y < maxY) {
+          y += 1;
+          x = Math.min(x, maxXAtRow(y));
+        }
+      }
+
+      return { x, y };
+    });
+  }
+
+  function isFocusedCell(focusedXY, idx) {
+    const { x, y } = xyFromIdx(idx);
+    return focusedXY.x === x && focusedXY.y === y;
+  }
 
   platform.addEventListener("keydown", handleKeydown);
 
   function handleKeydown(event) {
     const { key } = event;
+    console.log("handleKeydown", key);
     if (key === "ArrowLeft") {
-      focused_idx.as((prev) => Math.max(0, prev - 1));
+      moveFocus("left");
     }
     if (key === "ArrowRight") {
-      focused_idx.as((prev) => Math.min(apps.length - 1, prev + 1));
+      moveFocus("right");
     }
     if (key === "ArrowUp") {
-      focused_idx.as((prev) => Math.max(0, prev - 4));
+      moveFocus("up");
     }
     if (key === "ArrowDown") {
-      focused_idx.as((prev) => Math.min(apps.length - 1, prev + 4));
-    }
-    if (key === "Enter") {
-      console.log("Enter pressed");
-    }
-    if (key === "Escape") {
-      console.log("Escape pressed");
+      moveFocus("down");
     }
   }
 
-  return h(
-    Grid,
-    { columns: 4, gap: 16 },
-    apps.map((app, idx) =>
-      h(
-        View,
+  return View({}, [
+    View({}, [
+      View(
         {
-          style: {
-            border: combine({ focused_idx, idx }, (t) => {
-              if (t.focused_idx === t.idx) {
-                return "2px solid #007bff";
-              }
-              return "2px solid #ccc";
-            }),
+          onClick() {
+            page.set("todo");
           },
         },
-        [
-          h(Txt, { style: { fontSize: 22 } }, [app.icon]),
-          h(Txt, { style: { fontWeight: "bold", fontSize: 14 } }, [app.title]),
-          h(Txt, { style: { fontSize: 12, color: "gray" } }, [app.subtitle]),
-        ],
+        ["Goto Todo List"],
       ),
+      View(
+        {
+          onClick() {
+            page.set("app");
+          },
+        },
+        ["Goto Application List"],
+      ),
+    ]),
+    View(
+      {
+        style: {
+          opacity: combine(page, (p) => (p === "todo" ? 1 : 0)),
+        },
+      },
+      [
+        View({}, ["Todo List Page"]),
+        For({
+          each: todos,
+          render(todo) {
+            return View({}, [todo.title]);
+          },
+        }),
+      ],
     ),
-  );
+    View(
+      {
+        style: {
+          opacity: combine(page, (p) => (p === "app" ? 1 : 0)),
+        },
+      },
+      [
+        View({}, ["Application List Page"]),
+        Grid(
+          { columns, gap: 16 },
+          apps.map((app, idx) => {
+            return View(
+              {
+                style: {
+                  borderColor: combine({ focused, idx }, (t) => {
+                    return isFocusedCell(t.focused, t.idx)
+                      ? "#007bff"
+                      : "rgba(255,255,255,0.18)";
+                  }),
+                },
+              },
+              [
+                View({ style: { fontSize: 22 } }, [app.icon]),
+                View({ style: { fontWeight: "bold", fontSize: 14 } }, [
+                  app.title,
+                ]),
+                View({ style: { fontSize: 12, color: "gray" } }, [
+                  app.subtitle,
+                ]),
+              ],
+            );
+          }),
+        ),
+      ],
+    ),
+  ]);
 }
 
-render(h(ApplicationView, {}), document.getElementById("root"));
+const elm = ApplicationView({});
+console.log(elm);
+// render(elm, document.getElementById("root"), {
+//   onVNodeTreeCreated(data) {
+//     console.log(data);
+//   },
+// });

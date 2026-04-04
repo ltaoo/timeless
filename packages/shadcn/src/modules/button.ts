@@ -92,7 +92,7 @@ export function Button(
         View(
           {
             class: "inline-block animate-spin",
-            style: "transform-origin: center",
+            style: { "transform-origin": "center" },
           },
           [LoaderCircleOutlined()],
         ),

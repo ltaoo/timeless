@@ -124,7 +124,7 @@ export default function GeneralView() {
                       View(
                         {
                           class: "inline-block h-4 w-4 animate-spin",
-                          style: "transform-origin: center",
+                          style: { "transform-origin": "center" },
                         },
                         [Timeless.icons.LoaderCircleOutlined()],
                       ),

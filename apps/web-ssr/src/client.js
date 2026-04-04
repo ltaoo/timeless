@@ -21,20 +21,18 @@
       View({ as: "div", class: "counter-section" }, [
         View({ as: "h2" }, ["Counter"]),
         View({ as: "div", class: "counter" }, [
-          View(
+          Button(
             {
-              as: "button",
-              onClick: function () {
+              onClick() {
                 count_.as((prev) => prev - 1);
               },
             },
             ["-"],
           ),
           View({ as: "span" }, [count_]),
-          View(
+          Button(
             {
-              as: "button",
-              onClick: function () {
+              onClick() {
                 count_.as((prev) => prev + 1);
               },
             },
@@ -52,42 +50,40 @@
             },
           }),
         ]),
-        View(
-          { as: "div", style: "margin-top: 12px; display: flex; gap: 8px;" },
-          [
-            View(
-              {
-                as: "button",
-                style:
-                  "padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;",
-                onClick() {
-                  var names = [
-                    "Mango",
-                    "Grape",
-                    "Peach",
-                    "Kiwi",
-                    "Pear",
-                    "Plum",
-                  ];
-                  var pick = names[Math.floor(Math.random() * names.length)];
-                  fruits$.push(pick);
-                },
+        View({ style: { marginTop: "12px", display: "flex", gap: "8px" } }, [
+          Button(
+            {
+              as: "button",
+              style: {
+                padding: "6px 12px",
+                border: "1px solid #ccc",
+                "border-radius": "6px",
+                background: "#fff",
               },
-              ["Add Fruit"],
-            ),
-            View(
-              {
-                as: "button",
-                style:
-                  "padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;",
-                onClick() {
-                  fruits$.pop();
-                },
+              onClick() {
+                var names = ["Mango", "Grape", "Peach", "Kiwi", "Pear", "Plum"];
+                var pick = names[Math.floor(Math.random() * names.length)];
+                fruits$.push(pick);
               },
-              ["Remove Last"],
-            ),
-          ],
-        ),
+            },
+            ["Add Fruit"],
+          ),
+          Button(
+            {
+              as: "button",
+              style: {
+                padding: "6px 12px",
+                border: "1px solid #ccc",
+                "border-radius": "6px",
+                background: "#fff",
+              },
+              onClick() {
+                fruits$.pop();
+              },
+            },
+            ["Remove Last"],
+          ),
+        ]),
       ]),
     ]);
   }

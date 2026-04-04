@@ -92,6 +92,7 @@ export * as WaterfallPrimitive from "./modules/waterfall";
 export * from "./modules/keep-alive-sub-views";
 export * from "./modules/standard-sub-views";
 
+export * from "./style";
 export * from "./util/env";
 export * from "./util/render-to-string";
 export * from "./util/lazy";

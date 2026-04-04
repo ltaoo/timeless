@@ -90,7 +90,7 @@ export function Flex(
       {
         ...rest,
         class: cls,
-        style: `${viewStyleToCssText(baseStyle)}; ${stl}`,
+        // style: `${viewStyleToCssText(baseStyle)}; ${stl}`,
       },
       children,
     );

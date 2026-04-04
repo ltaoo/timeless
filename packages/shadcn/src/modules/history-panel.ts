@@ -122,7 +122,7 @@ export function HistoryPanel(
                                 {
                                   class:
                                     "my-2 p-2 max-h-[120px] rounded-md bg-zinc-100 overflow-auto dark:bg-zinc-800",
-                                  style: "font-size: 11px;",
+                                  style: { "font-size": "11px" },
                                 },
                                 [
                                   View(

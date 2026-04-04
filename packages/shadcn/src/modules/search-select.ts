@@ -247,7 +247,11 @@ export function SearchSelect<T>(
           "cn-menu-target cn-menu-translucent select__content relative z-50 max-h-96 min-w-36 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
         style: computed(state_, () => {
           const width = store.reference?.width || 0;
-          return width > 0 ? `min-width: ${width}px;` : "";
+          return width > 0
+            ? {
+                "min-width": `${width}px;`,
+              }
+            : {};
         }),
       },
       [

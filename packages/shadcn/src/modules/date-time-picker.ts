@@ -320,7 +320,7 @@ export function DateTimePicker(
                         "h-[28px] text-center",
                         time$.showSeconds ? "w-30" : "w-18",
                       ]),
-                      style: "line-height: 28px;",
+                      style: { "line-height": "28px" },
                     },
                     [
                       combine({ time: time_state_ }, (t) => {

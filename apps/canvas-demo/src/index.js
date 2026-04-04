@@ -3,14 +3,12 @@ import {
   View,
   Txt,
   For,
-  VNode,
   ref,
   combine,
   refarr,
+  h,
 } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-canvas";
-
-const h = VNode.h;
 
 const apps = [
   { icon: "🎬", title: "Movies", subtitle: "Movies & Shows" },
@@ -112,10 +110,9 @@ function ApplicationView() {
     }
   }
 
-  return h(View, {}, [
-    h(View, {}, [
-      h(
-        View,
+  return View({}, [
+    View({}, [
+      View(
         {
           onClick() {
             page.set("todo");
@@ -123,8 +120,7 @@ function ApplicationView() {
         },
         ["Goto Todo List"],
       ),
-      h(
-        View,
+      View(
         {
           onClick() {
             page.set("app");
@@ -133,16 +129,15 @@ function ApplicationView() {
         ["Goto Application List"],
       ),
     ]),
-    h(
-      View,
+    View(
       {
         style: {
           opacity: combine(page, (p) => (p === "todo" ? 1 : 0)),
         },
       },
       [
-        h(View, {}, ["Todo List Page"]),
-        h(For, {
+        View({}, ["Todo List Page"]),
+        For({
           each: todos,
           render(todo) {
             return h(View, {}, [todo.title]);
@@ -150,21 +145,18 @@ function ApplicationView() {
         }),
       ],
     ),
-    h(
-      View,
+    View(
       {
         style: {
           opacity: combine(page, (p) => (p === "app" ? 1 : 0)),
         },
       },
       [
-        h(View, {}, ["Application List Page"]),
-        h(
-          Grid,
+        View({}, ["Application List Page"]),
+        Grid(
           { columns, gap: 16 },
           apps.map((app, idx) =>
-            h(
-              View,
+            View(
               {
                 style: {
                   borderColor: combine({ focused, idx }, (t) =>
@@ -175,13 +167,11 @@ function ApplicationView() {
                 },
               },
               [
-                h(Txt, { style: { fontSize: 22 } }, [app.icon]),
-                h(Txt, { style: { fontWeight: "bold", fontSize: 14 } }, [
+                Txt({ style: { fontSize: 22 } }, [app.icon]),
+                Txt({ style: { fontWeight: "bold", fontSize: 14 } }, [
                   app.title,
                 ]),
-                h(Txt, { style: { fontSize: 12, color: "gray" } }, [
-                  app.subtitle,
-                ]),
+                Txt({ style: { fontSize: 12, color: "gray" } }, [app.subtitle]),
               ],
             ),
           ),

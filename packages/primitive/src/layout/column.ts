@@ -1,7 +1,12 @@
-import { ClassNameRef, Ref, isRef, isStyleRef } from "@timeless/reactive";
+import {
+  ClassNameRef,
+  Ref,
+  isRef,
+  isStyleRef,
+  styleNames,
+} from "@timeless/reactive";
 
 import { View, ViewChildren, ViewProps } from "@/content/view";
-import { viewStyleToCssText } from "@/style/index";
 
 export function Column(
   props: {
@@ -58,24 +63,13 @@ export function Column(
     if (rowEnd !== undefined) baseStyle["grid-row-end"] = rowEnd;
   }
 
-  if (typeof stl === "string") {
-    return View(
-      {
-        ...rest,
-        class: cls,
-        style: `${viewStyleToCssText(baseStyle)}; ${stl}`,
-      },
-      children,
-    );
-  }
-
   const extraStyle =
     stl && typeof stl === "object" && !isRef(stl) && !isStyleRef(stl)
       ? stl
       : {};
 
   return View(
-    { ...rest, class: cls, style: { ...baseStyle, ...extraStyle } },
+    { ...rest, class: cls, style: styleNames([baseStyle, extraStyle]) },
     children,
   );
 }

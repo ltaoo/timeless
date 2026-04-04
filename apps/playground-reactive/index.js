@@ -24,7 +24,7 @@ function render($container) {
   ]);
 
   const view$ = View({ class: ref(["space-y-4 w-full"]) }, [
-    View({ style: "display: flex; flex-wrap: wrap; gap: 8px;" }, [
+    View({ style: { display: "flex", flexWrap: "wrap", gap: "8px" } }, [
       View(
         {
           onClick() {
@@ -194,7 +194,7 @@ function render($container) {
                   render(author) {
                     return View(
                       {
-                        style: "margin-left: 10px;",
+                        style: { marginLeft: "10px" },
                         onUnmounted() {
                           console.log("before remove author ");
                           uncomputed(author);

@@ -1,35 +1,24 @@
-import { VNode, sn, getRendererScheduler } from "@timeless/timeless";
+import { ViewProps, ViewChildren, isStyleRef } from "@timeless/timeless";
+import { viewStyleToCssText } from "./style";
 
-const { createElement, createText, appendChild, mountChild, isDescriptor } =
-  VNode;
+export function View(props: ViewProps, children: ViewChildren) {
+  const $elm = document.createElement("div");
 
-export function DomView(props: any, children: any[]) {
-  const merged = sn([
-    {
-      backgroundColor: "rgba(255,255,255,0.08)",
-      borderRadius: 12,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: 16,
-    },
-    props.style,
-  ]);
-  const root = createElement("div", { style: merged.value });
-
-  const scheduler = getRendererScheduler();
-  merged._subscribe({
-    onChange(v: any) {
-      root.style = v ?? {};
-      scheduler.patch(root, { style: root.style });
-    },
-  });
-
-  for (const child of children) {
-    const vnode = mountChild(child, null);
-    if (vnode) appendChild(root, vnode);
+  if (props.style) {
+    $elm.style = viewStyleToCssText(props.style);
+    if (isStyleRef(props.style)) {
+      props.style._subscribe({
+        onChange(v: any) {
+          $elm.style = viewStyleToCssText(v);
+        },
+      });
+    }
   }
 
-  return root;
+  for (const child of children) {
+    // const vnode = mountChild(child, null);
+    // if (vnode) appendChild($elm, vnode);
+  }
+
+  return $elm;
 }

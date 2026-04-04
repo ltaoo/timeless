@@ -1,12 +1,23 @@
-import { isRef } from "@timeless/reactive";
+import {
+  isRef,
+  ObjectSignal,
+  Ref,
+  StyleRef,
+  ViewStyle,
+  ViewStyleInput,
+} from "@timeless/timeless";
 
-import { MaybeSignal } from "@/content/view";
-
-export type ViewStyle = Record<string, MaybeSignal>;
-
-export type ViewStyleInput = ViewStyle;
-
-export function viewStyleToCssText(style: ViewStyleInput) {
+export function viewStyleToCssText(
+  style:
+    | ViewStyle
+    | StyleRef
+    | ObjectSignal<ViewStyle>
+    | Ref<ViewStyle>
+    | undefined,
+) {
+  if (!style) {
+    return "";
+  }
   if (typeof style === "string") {
     return style;
   }

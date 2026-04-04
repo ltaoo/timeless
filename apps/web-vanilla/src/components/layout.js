@@ -63,7 +63,7 @@ export function SplitLayout(options) {
       store: group$,
       direction,
       class: "w-full",
-      style: "height: 100vh",
+      style: { height: "100vh" },
     },
     elements,
   );

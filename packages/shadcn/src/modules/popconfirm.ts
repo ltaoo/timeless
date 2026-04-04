@@ -97,10 +97,7 @@ export function Popconfirm(
                   else styles.bottom = "16px";
                 }
                 styles.transform = transform;
-
-                return Object.keys(styles)
-                  .map((k) => `${k}:${styles[k]}`)
-                  .join(";");
+                return styles;
               }),
             }),
             Show({ when: ref(!!props.title) }, [

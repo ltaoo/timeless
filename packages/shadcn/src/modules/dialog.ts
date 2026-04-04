@@ -76,10 +76,15 @@ export function Dialog(
             {
               style: computed(state_, (s) => {
                 const rect = s.viewportRect;
-                if (!rect) return "";
+                if (!rect) return {};
                 const x = rect.left + rect.width / 2;
                 const y = rect.top + rect.height / 2;
-                return `position: fixed; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%);`;
+                return {
+                  position: "fixed",
+                  left: `${x}px`,
+                  top: `${y}px`,
+                  transform: "translate(-50%, -50%)",
+                };
               }),
             },
             [

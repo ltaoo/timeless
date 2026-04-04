@@ -21,8 +21,6 @@ export type ChildDescriptor = ElementDescriptor | string | number | null;
 
 export function isDescriptor(v: unknown): v is ElementDescriptor {
   return (
-    v !== null &&
-    typeof v === "object" &&
-    (v as any).$$typeof === ELEMENT_TYPE
+    v !== null && typeof v === "object" && (v as any).$$typeof === ELEMENT_TYPE
   );
 }

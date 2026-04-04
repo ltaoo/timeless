@@ -24,7 +24,10 @@ export function Cascader(
   });
 
   const allowClear = computed(state_, (d) => d.allowClear);
-  const hasValue = computed(state_, (d) => d.value != null && d.value.length > 0);
+  const hasValue = computed(
+    state_,
+    (d) => d.value != null && d.value.length > 0,
+  );
   const hovering = ref(false);
   const showClear = combine(
     { hovering, allowClear, hasValue },
@@ -101,7 +104,11 @@ export function Cascader(
           "cn-menu-target cn-menu-translucent cascader__content relative z-50 flex flex-col overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
         style: computed(state_, () => {
           const width = store.reference?.width || 0;
-          return width > 0 ? `min-width: ${width}px;` : "";
+          return width > 0
+            ? {
+                "min-width": `${width}px;`,
+              }
+            : {};
         }),
       },
       [
@@ -168,7 +175,10 @@ export function Cascader(
                   },
                   [
                     For({
-                      each: computed(state_, (d) => d.panels[panelIdx]?.options || []),
+                      each: computed(
+                        state_,
+                        (d) => d.panels[panelIdx]?.options || [],
+                      ),
                       key: "value",
                       render(
                         option: CascaderOption<any> & {
@@ -193,9 +203,7 @@ export function Cascader(
                                 option.disabled
                                   ? "opacity-50 cursor-not-allowed"
                                   : "",
-                                isSelected
-                                  ? "font-medium"
-                                  : "",
+                                isSelected ? "font-medium" : "",
                                 isFocused
                                   ? "bg-accent text-accent-foreground"
                                   : "",

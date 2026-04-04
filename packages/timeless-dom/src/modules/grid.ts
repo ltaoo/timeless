@@ -4,7 +4,7 @@ const { createElement, appendChild, mountChild, isDescriptor } = VNode;
 
 // ─── DOM ComponentFns ────────────────────────────────────────────
 
-export function DomGrid(props: any, children: any[]) {
+export function Grid(props: any, children: any[]) {
   const cols = props.columns ?? 4;
   const gap = props.gap ?? 16;
   const merged = sn([

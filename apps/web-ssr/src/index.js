@@ -37,10 +37,38 @@ function App() {
           render: (item) => View({ as: "li" }, [item]),
         }),
       ]),
-      View({ as: "div", style: "margin-top: 12px; display: flex; gap: 8px;" }, [
-        View({ as: "button", style: "padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;" }, ["Add Fruit"]),
-        View({ as: "button", style: "padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;" }, ["Remove Last"]),
-      ]),
+      View(
+        {
+          as: "div",
+          style: { marginTop: "12px", display: "flex", gap: "8px" },
+        },
+        [
+          View(
+            {
+              as: "button",
+              style: {
+                padding: "6px 12px",
+                border: "1px solid #ccc",
+                "border-radius": "6px",
+                background: "#fff",
+              },
+            },
+            ["Add Fruit"],
+          ),
+          View(
+            {
+              as: "button",
+              style: {
+                padding: "6px 12px",
+                border: "1px solid #ccc",
+                "border-radius": "6px",
+                background: "#fff",
+              },
+            },
+            ["Remove Last"],
+          ),
+        ],
+      ),
     ]),
   ]);
 }

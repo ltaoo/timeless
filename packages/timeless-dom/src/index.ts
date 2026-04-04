@@ -8,39 +8,12 @@ import {
   Grid,
   View,
   Txt,
-  Input,
-  InputPrimitive,
-  ButtonPrimitive,
-  CheckboxPrimitive,
-  RadioPrimitive,
   VNode,
 } from "@timeless/timeless";
 
-import { DomGrid } from "./modules/grid";
-import { DomButtonRoot } from "./modules/button";
-import {
-  DomCheckboxBox,
-  DomCheckboxGroup,
-  DomCheckboxGroupItem,
-  DomCheckboxIndicator,
-  DomCheckboxInput,
-  DomCheckboxLabel,
-  DomCheckboxRoot,
-} from "./modules/checkbox";
-import { DomInput, DomInputField, DomInputRoot } from "./modules/input";
-import {
-  DomRadioBox,
-  DomRadioGroup,
-  DomRadioGroupItem,
-  DomRadioIndicator,
-  DomRadioInput,
-  DomRadioLabel,
-  DomRadioRoot,
-} from "./modules/radio";
-import { DomTxt } from "./modules/text";
-import { DomView } from "./modules/view";
+import * as modules from "./modules/index";
 
-const { isDescriptor, mount, commitTree } = VNode;
+// const { isDescriptor, mount, commitTree } = VNode;
 
 console.log("dom.version" + __Version);
 
@@ -428,31 +401,31 @@ if (typeof document !== "undefined" && typeof window !== "undefined") {
  * Register DOM-specific component implementations.
  */
 function registerDomComponents() {
-  registerComponent(Grid, DomGrid);
-  registerComponent(View, DomView);
-  registerComponent(Txt, DomTxt);
+  registerComponent(Grid, modules.Grid);
+  registerComponent(View, modules.View);
+  registerComponent(Txt, modules.Txt);
 
-  registerComponent(Input, DomInput);
-  registerComponent(InputPrimitive.Root, DomInputRoot);
-  registerComponent(InputPrimitive.Input, DomInputField);
+  // registerComponent(Input, DomInput);
+  // registerComponent(InputPrimitive.Root, DomInputRoot);
+  // registerComponent(InputPrimitive.Input, DomInputField);
 
-  registerComponent(ButtonPrimitive.Root, DomButtonRoot);
+  // registerComponent(ButtonPrimitive.Root, DomButtonRoot);
 
-  registerComponent(CheckboxPrimitive.Root, DomCheckboxRoot);
-  registerComponent(CheckboxPrimitive.Box, DomCheckboxBox);
-  registerComponent(CheckboxPrimitive.Indicator, DomCheckboxIndicator);
-  registerComponent(CheckboxPrimitive.Input, DomCheckboxInput);
-  registerComponent(CheckboxPrimitive.Label, DomCheckboxLabel);
-  registerComponent(CheckboxPrimitive.Group, DomCheckboxGroup);
-  registerComponent(CheckboxPrimitive.GroupItem, DomCheckboxGroupItem);
+  // registerComponent(CheckboxPrimitive.Root, DomCheckboxRoot);
+  // registerComponent(CheckboxPrimitive.Box, DomCheckboxBox);
+  // registerComponent(CheckboxPrimitive.Indicator, DomCheckboxIndicator);
+  // registerComponent(CheckboxPrimitive.Input, DomCheckboxInput);
+  // registerComponent(CheckboxPrimitive.Label, DomCheckboxLabel);
+  // registerComponent(CheckboxPrimitive.Group, DomCheckboxGroup);
+  // registerComponent(CheckboxPrimitive.GroupItem, DomCheckboxGroupItem);
 
-  registerComponent(RadioPrimitive.Root, DomRadioRoot);
-  registerComponent(RadioPrimitive.Box, DomRadioBox);
-  registerComponent(RadioPrimitive.Indicator, DomRadioIndicator);
-  registerComponent(RadioPrimitive.Input, DomRadioInput);
-  registerComponent(RadioPrimitive.Label, DomRadioLabel);
-  registerComponent(RadioPrimitive.Group, DomRadioGroup);
-  registerComponent(RadioPrimitive.GroupItem, DomRadioGroupItem);
+  // registerComponent(RadioPrimitive.Root, DomRadioRoot);
+  // registerComponent(RadioPrimitive.Box, DomRadioBox);
+  // registerComponent(RadioPrimitive.Indicator, DomRadioIndicator);
+  // registerComponent(RadioPrimitive.Input, DomRadioInput);
+  // registerComponent(RadioPrimitive.Label, DomRadioLabel);
+  // registerComponent(RadioPrimitive.Group, DomRadioGroup);
+  // registerComponent(RadioPrimitive.GroupItem, DomRadioGroupItem);
 }
 
 /**
@@ -460,7 +433,13 @@ function registerDomComponents() {
  * @param elm - The element or descriptor to render
  * @param $root - The DOM container element
  */
-export function render(elm: TimelessElement | any, $root: HTMLElement | null) {
+export function render(
+  elm: TimelessElement,
+  $root: HTMLElement | null,
+  extra: Partial<{
+    onVNodeCreated: (data: any) => void;
+  }> = {},
+) {
   if (!$root) {
     console.error("[Render] Root element not found");
     return;
@@ -471,25 +450,26 @@ export function render(elm: TimelessElement | any, $root: HTMLElement | null) {
   }
 
   // Descriptor path (VNode pipeline)
-  if (isDescriptor(elm)) {
-    const host = createDomHost();
-    setHost(host);
-    registerDomComponents();
-    const vnode = mount(elm);
-    commitTree(vnode, getRenderer());
-    host.appendChild($root, vnode._hostNode);
-    return;
-  }
+  // if (isDescriptor(elm)) {
+  //   const host = createDomHost();
+  //   setHost(host);
+  //   registerDomComponents();
+  //   const vnode = mount(elm);
+  //   commitTree(vnode, getRenderer());
+  //   host.appendChild($root, vnode._hostNode);
+  //   return;
+  // }
 
   // TimelessElement path (primitive pipeline)
   if (isElement(elm)) {
-    const host = createDomHost();
+    // const host = createDomHost();
     const $content = elm.render();
     if (!$content) {
       console.error("[Render] Element render return null");
       return;
     }
-    host.appendChild($root, $content);
+    // host.appendChild($root, $content);
+    $root.appendChild($content);
     return;
   }
   console.error("[Render] Root Element can't be lazy element");

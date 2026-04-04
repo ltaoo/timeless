@@ -694,7 +694,7 @@ function DropdownMenuItem(props) {
           View({ class: "p-2" }, [
             Timeless.icons.ChevronRightOutlined({
               class: "custom-menu-item-arrow",
-              style: "font-size: 18px;",
+              style: { fontSize: "18px" },
             }),
           ]),
         ]),
@@ -807,7 +807,11 @@ function ScrollView(props, children) {
     {
       store,
       class: cn(["scroll-view h-full overflow-y-auto", cls]),
-      style: "height: 100%; overflow-y: auto; padding: 0 12px;",
+      style: {
+        height: "100%",
+        overflowY: "auto",
+        padding: "0 12px",
+      },
       ...rest,
     },
     [

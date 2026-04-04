@@ -143,7 +143,7 @@ export function Grid(
       {
         ...rest,
         class: cls,
-        style: `${viewStyleToCssText(baseStyle)}; ${stl}`,
+        // style: `${viewStyleToCssText(baseStyle)}; ${stl}`,
       },
       children,
     );
