@@ -2,6 +2,42 @@ export const TUI_NODE = Symbol("tui-node");
 
 export type TuiNodeKind = "element" | "text" | "fragment";
 
+function cssKeyToKebab(key: string) {
+  const trimmed = key.trim();
+  if (!trimmed) return trimmed;
+  if (trimmed.includes("-")) return trimmed.toLowerCase();
+  return trimmed
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/_/g, "-")
+    .toLowerCase();
+}
+
+function styleObjectToCssText(style: Record<string, any>) {
+  const parts: string[] = [];
+  for (const k of Object.keys(style)) {
+    const v = (style as any)[k];
+    if (v === undefined || v === null || v === false) continue;
+    parts.push(`${cssKeyToKebab(k)}: ${String(v)}`);
+  }
+  return parts.join("; ");
+}
+
+let _invalidator: null | (() => void) = null;
+let _invalidationPaused = false;
+
+export function setTuiInvalidator(fn: null | (() => void)) {
+  _invalidator = fn;
+}
+
+export function setTuiInvalidationPaused(paused: boolean) {
+  _invalidationPaused = paused;
+}
+
+function invalidate() {
+  if (_invalidationPaused) return;
+  _invalidator?.();
+}
+
 export interface TuiNode {
   [TUI_NODE]: true;
   kind: TuiNodeKind;
@@ -40,6 +76,14 @@ export interface TuiElement extends TuiNode {
   setAttribute(name: string, value: string): void;
   getAttribute(name: string): string | null;
   removeAttribute(name: string): void;
+  setStyleValue?(value: Record<string, any>): void;
+  setStyleSet?(value: string): void;
+  clearChildren?(): void;
+  setTextContent?(text: string): void;
+  getFirstChild?(): TuiNode | null;
+  getNextSibling?(): TuiNode | null;
+  hasEventListener?(type: string): boolean;
+  dispatchEvent?(type: string, event?: any): void;
   querySelector(selector: string): TuiElement | null;
   getBoundingClientRect(): {
     top: number;
@@ -62,10 +106,16 @@ export interface TuiElement extends TuiNode {
 
 export interface TuiText extends TuiNode {
   kind: "text";
+  setTextContent?(text: string): void;
+  getFirstChild?(): TuiNode | null;
+  getNextSibling?(): TuiNode | null;
 }
 
 export interface TuiFragment extends TuiNode {
   kind: "fragment";
+  clearChildren?(): void;
+  getFirstChild?(): TuiNode | null;
+  getNextSibling?(): TuiNode | null;
 }
 
 function createAttributes(): TuiAttributes {
@@ -109,6 +159,7 @@ export function createTuiElement(tag: string): TuiElement {
       child.parentNode = node;
       children.push(child);
       updateSiblings(children);
+      invalidate();
       return child;
     },
     removeChild(child: TuiNode) {
@@ -118,6 +169,7 @@ export function createTuiElement(tag: string): TuiElement {
         child.parentNode = null;
         updateSiblings(children);
       }
+      invalidate();
       return child;
     },
     insertBefore(newNode: TuiNode, refNode: TuiNode | null) {
@@ -135,6 +187,7 @@ export function createTuiElement(tag: string): TuiElement {
       newNode.parentNode = node;
       children.splice(idx, 0, newNode);
       updateSiblings(children);
+      invalidate();
       return newNode;
     },
     replaceChild(newChild: TuiNode, oldChild: TuiNode) {
@@ -145,15 +198,56 @@ export function createTuiElement(tag: string): TuiElement {
         children[idx] = newChild;
         updateSiblings(children);
       }
+      invalidate();
     },
     setAttribute(name: string, value: string) {
       attrs.set(name, value);
+      invalidate();
     },
     getAttribute(name: string) {
       return attrs.get(name);
     },
     removeAttribute(name: string) {
       attrs.delete(name);
+      invalidate();
+    },
+    setStyleValue(value: Record<string, any>) {
+      const cssText = styleObjectToCssText(value || {});
+      node.style = { cssText } as any;
+      invalidate();
+    },
+    setStyleSet(value: string) {
+      node.className = value || "";
+      invalidate();
+    },
+    clearChildren() {
+      while (children.length > 0) {
+        const child = children.pop()!;
+        child.parentNode = null;
+      }
+      updateSiblings(children);
+      invalidate();
+    },
+    setTextContent(text: string) {
+      node.textContent = text;
+      invalidate();
+    },
+    hasEventListener(type: string) {
+      const set = listeners.get(type);
+      return !!set && set.size > 0;
+    },
+    dispatchEvent(type: string, event?: any) {
+      const set = listeners.get(type);
+      if (!set || set.size === 0) return;
+      for (const handler of Array.from(set)) {
+        handler(event);
+      }
+    },
+    getFirstChild() {
+      return node.firstChild;
+    },
+    getNextSibling() {
+      return node.nextSibling;
     },
     querySelector(_selector: string) {
       return null;
@@ -193,6 +287,16 @@ export function createTuiText(text: string): TuiText {
     nextSibling: null,
     childNodes: [],
     textContent: text,
+    setTextContent(v: string) {
+      node.textContent = v;
+      invalidate();
+    },
+    getFirstChild() {
+      return null;
+    },
+    getNextSibling() {
+      return node.nextSibling;
+    },
     get firstChild() {
       return null;
     },
@@ -233,6 +337,7 @@ export function createTuiFragment(): TuiFragment {
       child.parentNode = node;
       children.push(child);
       updateSiblings(children);
+      invalidate();
       return child;
     },
     removeChild(child: TuiNode) {
@@ -242,6 +347,7 @@ export function createTuiFragment(): TuiFragment {
         child.parentNode = null;
         updateSiblings(children);
       }
+      invalidate();
       return child;
     },
     insertBefore(newNode: TuiNode, refNode: TuiNode | null) {
@@ -259,6 +365,7 @@ export function createTuiFragment(): TuiFragment {
       newNode.parentNode = node;
       children.splice(idx, 0, newNode);
       updateSiblings(children);
+      invalidate();
       return newNode;
     },
     replaceChild(newChild: TuiNode, oldChild: TuiNode) {
@@ -269,6 +376,21 @@ export function createTuiFragment(): TuiFragment {
         children[idx] = newChild;
         updateSiblings(children);
       }
+      invalidate();
+    },
+    clearChildren() {
+      while (children.length > 0) {
+        const child = children.pop()!;
+        child.parentNode = null;
+      }
+      updateSiblings(children);
+      invalidate();
+    },
+    getFirstChild() {
+      return node.firstChild;
+    },
+    getNextSibling() {
+      return node.nextSibling;
     },
   };
   return node;

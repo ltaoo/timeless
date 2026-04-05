@@ -1,7 +1,5 @@
-import { Grid, View, Txt, VNode, ref, combine } from "@timeless/timeless";
-import { render, platform } from "@timeless/timeless-tui";
-
-const { h } = VNode;
+import { Grid, View, For, ref, combine, refarr } from "@timeless/timeless";
+import { render } from "@timeless/timeless-tui";
 
 const apps = [
   { icon: "🎬", title: "Movies", subtitle: "Movies & Shows" },
@@ -19,51 +17,108 @@ const apps = [
 ];
 
 function ApplicationView() {
-  const focused_idx = ref(0);
+  const page = ref("todo");
+  const columns = 4;
+  const todoPageStyle = combine(page, (p) => ({
+    opacity: p === "todo" ? 1 : 0,
+  }));
+  const appPageStyle = combine(page, (p) => ({
+    opacity: p === "app" ? 1 : 0,
+  }));
+  const todos = refarr([
+    {
+      id: 1,
+      title: "Buy groceries",
+    },
+    {
+      id: 2,
+      title: "Study for exam exam exam",
+    },
+  ]);
 
-  platform.addEventListener("keydown", handleKeydown);
-
-  function handleKeydown(event) {
-    const { key } = event;
-    // console.log("handleKeydown", key);
-    if (key === "q") {
-      platform.quit();
-    }
-    if (key === "ArrowLeft") {
-      focused_idx.as((prev) => Math.max(0, prev - 1));
-    }
-    if (key === "ArrowRight") {
-      focused_idx.as((prev) => Math.min(apps.length - 1, prev + 1));
-    }
-    if (key === "ArrowUp") {
-      focused_idx.as((prev) => Math.max(0, prev - 4));
-    }
-    if (key === "ArrowDown") {
-      focused_idx.as((prev) => Math.min(apps.length - 1, prev + 4));
-    }
-  }
-
-  return h(
-    Grid,
-    { columns: 4, gap: 16 },
-    apps.map((app, idx) =>
-      h(
-        View,
+  return View({}, [
+    View({}, [
+      View(
         {
-          style: {
-            borderColor: combine({ focused_idx, idx }, (t) => {
-              return t.focused_idx === t.idx ? "blue" : "gray";
-            }),
+          onClick() {
+            console.log("click todo");
+            page.set("todo");
           },
         },
-        [
-          h(Txt, { style: { fontSize: 22 } }, [app.icon]),
-          h(Txt, { style: { fontWeight: "bold", fontSize: 14 } }, [app.title]),
-          h(Txt, { style: { fontSize: 12, color: "gray" } }, [app.subtitle]),
-        ],
+        ["Goto Todo List"],
       ),
+      View(
+        {
+          onClick() {
+            console.log("click app");
+            page.set("app");
+          },
+        },
+        ["Goto Application List"],
+      ),
+    ]),
+    View(
+      {
+        style: todoPageStyle,
+      },
+      [
+        View({}, ["Todo List Page"]),
+        For({
+          each: todos,
+          render(todo) {
+            return View({}, [todo.title]);
+          },
+        }),
+      ],
     ),
-  );
+    View(
+      {
+        style: appPageStyle,
+      },
+      [
+        View({}, ["Application List Page"]),
+        Grid(
+          { columns, gap: 16 },
+          apps.map((app, idx) => {
+            return View(
+              {
+                style: {
+                  borderWidth: 2,
+                  borderColor: "rgba(255,255,255,0.18)",
+                },
+              },
+              [
+                View({ style: { textAlign: "center", fontSize: 22 } }, [
+                  app.icon,
+                ]),
+                View(
+                  {
+                    style: {
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      fontSize: 14,
+                    },
+                  },
+                  [app.title],
+                ),
+                View(
+                  {
+                    style: { textAlign: "center", fontSize: 12, color: "gray" },
+                  },
+                  [app.subtitle],
+                ),
+              ],
+            );
+          }),
+        ),
+      ],
+    ),
+  ]);
 }
 
-render(h(ApplicationView, {}));
+const elm = ApplicationView({});
+render(elm, {
+  // onVNodeTreeCreated(data) {
+  //   console.log(data);
+  // },
+});

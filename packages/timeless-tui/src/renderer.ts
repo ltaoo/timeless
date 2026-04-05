@@ -4,6 +4,8 @@ import { TUI_NODE, TuiNode, TuiElement } from "./nodes";
 const ESC = "\x1b[";
 const RESET = `${ESC}0m`;
 const BOLD = `${ESC}1m`;
+const UNDERLINE = `${ESC}4m`;
+const REVERSE = `${ESC}7m`;
 const CLEAR_SCREEN = `${ESC}2J`;
 const CURSOR_HOME = `${ESC}H`;
 const HIDE_CURSOR = `${ESC}?25l`;
@@ -87,9 +89,23 @@ function parseCssProps(cssText: string): Record<string, string> {
   const props: Record<string, string> = {};
   for (const part of cssText.split(";")) {
     const [k, ...v] = part.split(":");
-    if (k && v.length) props[k.trim().toLowerCase()] = v.join(":").trim();
+    if (!k || !v.length) continue;
+    const rawKey = k.trim();
+    if (!rawKey) continue;
+    const key = normalizeCssKey(rawKey);
+    props[key] = v.join(":").trim();
   }
   return props;
+}
+
+function normalizeCssKey(key: string) {
+  const trimmed = key.trim();
+  if (!trimmed) return trimmed;
+  if (trimmed.includes("-")) return trimmed.toLowerCase();
+  return trimmed
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/_/g, "-")
+    .toLowerCase();
 }
 
 const FG_COLORS: Record<string, string> = {
@@ -145,7 +161,46 @@ function styleFromCss(cssText: string): string {
   return s;
 }
 
-function collectRenderLines(node: TuiNode): string[] {
+function ansiVisibleWidth(s: string): number {
+  let cols = 0;
+  let i = 0;
+  while (i < s.length) {
+    if (s.charCodeAt(i) === 0x1b && s[i + 1] === "[") {
+      let j = i + 2;
+      while (j < s.length && s.charCodeAt(j) < 0x40) j++;
+      i = j + 1;
+      continue;
+    }
+    const cp = s.codePointAt(i)!;
+    i += cp > 0xffff ? 2 : 1;
+    cols += cp > 0x10000 ? 2 : 1;
+  }
+  return cols;
+}
+
+function padRight(line: string, width: number) {
+  const w = ansiVisibleWidth(line);
+  if (w >= width) return line;
+  return line + " ".repeat(width - w);
+}
+
+function alignLine(line: string, width: number, align: string) {
+  if (!width || width <= 0) return line;
+  if (align !== "center" && align !== "right") return line;
+  const w = ansiVisibleWidth(line);
+  if (w >= width) return line;
+  const pad = width - w;
+  if (align === "right") return " ".repeat(pad) + line;
+  const l = Math.floor(pad / 2);
+  const r = pad - l;
+  return " ".repeat(l) + line + " ".repeat(r);
+}
+
+type RenderContext = {
+  width: number;
+};
+
+function collectRenderLines(node: TuiNode, ctx: RenderContext): string[] {
   if (node.kind === "text") {
     const t = node.textContent;
     return t ? t.split("\n") : [];
@@ -154,39 +209,164 @@ function collectRenderLines(node: TuiNode): string[] {
     const el = node as TuiElement;
     const prefix = getAttr(el, "prefix") ?? "";
     const suffix = getAttr(el, "suffix") ?? "";
+    const focused = getAttr(el, "data-focused") === "true";
 
     // Convert CSS style to ANSI escape sequences
     let stylePrefix = "";
     const cssText = (el.style as any)?.cssText;
+    let cssProps: Record<string, string> | null = null;
     if (cssText) {
       stylePrefix = styleFromCss(cssText);
+      cssProps = parseCssProps(cssText);
+      const opacity = cssProps.opacity;
+      if (opacity !== undefined) {
+        const n = Number.parseFloat(opacity);
+        if (Number.isFinite(n) && n <= 0) return [];
+      }
+      if (cssProps.display === "grid") {
+        return renderGridElement(el, ctx);
+      }
+      if (
+        cssProps["grid-template-columns"] ||
+        cssProps["grid-columns"] ||
+        cssProps.columns
+      ) {
+        return renderGridElement(el, ctx);
+      }
     }
 
     const childLines: string[] = [];
     for (const child of node.childNodes) {
-      childLines.push(...collectRenderLines(child));
+      childLines.push(...collectRenderLines(child, ctx));
     }
     if (childLines.length === 0)
       return [prefix + stylePrefix + suffix + (stylePrefix ? RESET : "")];
 
     // Apply style prefix and RESET suffix to each line
-    return childLines.map((line, i) => {
-      const linePrefix = (i === 0 ? prefix : "") + stylePrefix;
+    const aligned = childLines.map((line, i) => {
+      const focusPrefix = focused ? UNDERLINE : "";
+      const focusMark = focused && i === 0 ? "> " : "";
+      const linePrefix =
+        (i === 0 ? prefix : "") + focusMark + focusPrefix + stylePrefix;
       const lineSuffix =
-        (stylePrefix ? RESET : "") +
+        ((focused || stylePrefix) ? RESET : "") +
         (i === childLines.length - 1 ? suffix : "");
-      return linePrefix + line + lineSuffix;
+      const combined = linePrefix + line + lineSuffix;
+      const align = cssProps?.["text-align"] ?? cssProps?.textAlign;
+      if (align) {
+        return alignLine(combined, ctx.width, String(align).trim());
+      }
+      return combined;
     });
+    return aligned;
   }
   const lines: string[] = [];
   for (const child of node.childNodes) {
-    lines.push(...collectRenderLines(child));
+    lines.push(...collectRenderLines(child, ctx));
   }
   return lines;
 }
 
 export function renderTree(root: TuiNode): string[] {
-  return collectRenderLines(root);
+  const size = getTerminalSize();
+  return collectRenderLines(root, { width: size.width });
+}
+
+function resolveGridColumnsFromCss(cssText: string): number {
+  const p = parseCssProps(cssText);
+  const raw =
+    p["grid-columns"] ?? p.columns ?? p["grid-template-columns"] ?? undefined;
+  if (!raw) return 4;
+  const m1 = /repeat\(\s*(\d+)/i.exec(raw);
+  if (m1) {
+    const n = Number.parseInt(m1[1], 10);
+    if (Number.isFinite(n)) return n;
+  }
+  const m2 = /(\d+)/.exec(raw);
+  if (m2) {
+    const n = Number.parseInt(m2[1], 10);
+    if (Number.isFinite(n)) return n;
+  }
+  return 4;
+}
+
+function borderColorFromCss(cssText: string): string {
+  const p = parseCssProps(cssText);
+  return p["border-color"] ?? p.borderColor ?? "";
+}
+
+function renderGridElement(el: TuiElement, ctx: RenderContext): string[] {
+  const gap = 1;
+  const cssText = (el.style as any)?.cssText ?? "";
+  const cols = Math.max(1, resolveGridColumnsFromCss(cssText));
+  const cellW = Math.max(6, Math.floor((ctx.width - (cols - 1) * gap) / cols));
+  const innerW = Math.max(1, cellW - 2);
+  const gridW = cols * cellW + (cols - 1) * gap;
+  const ox = Math.max(0, Math.floor((ctx.width - gridW) / 2));
+  const indent = " ".repeat(ox);
+
+  const cells: string[][] = [];
+  for (const child of el.childNodes) {
+    if (child.kind !== "element") {
+      cells.push([" ".repeat(cellW)]);
+      continue;
+    }
+
+    const cellEl = child as TuiElement;
+    const cellCssText = (cellEl.style as any)?.cssText ?? "";
+    const focused = cellEl.getAttribute("data-focused") === "true";
+    const borderColor = focused ? "#007bff" : borderColorFromCss(cellCssText);
+    const borderAnsi = borderColor
+      ? cssColorToAnsi(borderColor, false)
+      : "\x1b[38;5;245m";
+
+    const contentLines: string[] = [];
+    for (const sub of cellEl.childNodes) {
+      contentLines.push(...collectRenderLines(sub, { width: innerW }));
+    }
+
+    const normalized =
+      contentLines.length > 0
+        ? contentLines
+        : [alignLine("", innerW, "center")];
+
+    const box: string[] = [];
+    box.push(borderAnsi + "+" + "-".repeat(innerW) + "+" + RESET);
+    for (const line of normalized) {
+      const sliced = ansiSlice(line, innerW);
+      const fixed = padRight(sliced, innerW);
+      box.push(borderAnsi + "|" + RESET + fixed + borderAnsi + "|" + RESET);
+    }
+    box.push(borderAnsi + "+" + "-".repeat(innerW) + "+" + RESET);
+
+    cells.push(box);
+  }
+
+  const rows = Math.ceil(cells.length / cols);
+  const out: string[] = [];
+
+  for (let r = 0; r < rows; r++) {
+    const start = r * cols;
+    const rowCells = cells.slice(start, start + cols);
+    while (rowCells.length < cols) {
+      rowCells.push([" ".repeat(cellW)]);
+    }
+    let maxH = 0;
+    for (const cell of rowCells) maxH = Math.max(maxH, cell.length);
+
+    for (let lh = 0; lh < maxH; lh++) {
+      let rowStr = "";
+      for (let c = 0; c < cols; c++) {
+        if (c > 0) rowStr += " ".repeat(gap);
+        rowStr += rowCells[c][lh] ?? " ".repeat(cellW);
+      }
+      out.push(indent + rowStr);
+    }
+
+    if (r < rows - 1) out.push("");
+  }
+
+  return out;
 }
 
 function ansiSlice(s: string, maxCols: number): string {

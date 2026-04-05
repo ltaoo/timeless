@@ -17,6 +17,8 @@ import {
   createTuiText,
   createTuiFragment,
   isTuiNode,
+  setTuiInvalidator,
+  setTuiInvalidationPaused,
   type TuiNode,
   type TuiElement,
 } from "./nodes";
@@ -25,6 +27,7 @@ import {
   renderToScreen as renderTuiNodeToScreen,
   showCursor,
 } from "./renderer";
+import { buildTuiTreeFromTimelessElement } from "./renderer/index";
 import { setTuiHost } from "./host-accessor";
 import { _setAppFn, _startTui } from "./tui";
 import { TuiGrid } from "./modules/grid";
@@ -39,11 +42,378 @@ type TuiHost = TimelessHost & {
   appendChild: NonNullable<TimelessHost["appendChild"]>;
 };
 
+type RenderOptions = Partial<{
+  out: NodeJS.WritableStream;
+}>;
+
+function normalizeOut(outOrOptions: unknown): NodeJS.WritableStream | undefined {
+  if (!outOrOptions) return undefined;
+  if (typeof outOrOptions === "object") {
+    const direct = outOrOptions as any;
+    if (typeof direct.write === "function") return direct as NodeJS.WritableStream;
+    const nested = direct.out;
+    if (nested && typeof nested.write === "function")
+      return nested as NodeJS.WritableStream;
+  }
+  return undefined;
+}
+
+function normalizeCssKey(key: string) {
+  const trimmed = key.trim();
+  if (!trimmed) return trimmed;
+  if (trimmed.includes("-")) return trimmed.toLowerCase();
+  return trimmed
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/_/g, "-")
+    .toLowerCase();
+}
+
+function parseCssProps(cssText: string): Record<string, string> {
+  const props: Record<string, string> = {};
+  for (const part of String(cssText || "").split(";")) {
+    const idx = part.indexOf(":");
+    if (idx === -1) continue;
+    const k = normalizeCssKey(part.slice(0, idx));
+    const v = part.slice(idx + 1).trim();
+    if (!k || !v) continue;
+    props[k] = v;
+  }
+  return props;
+}
+
+function isGridElement(el: TuiElement) {
+  const cssText = (el.style as any)?.cssText ?? "";
+  const p = parseCssProps(cssText);
+  if (p.display === "grid") return true;
+  if (p["grid-template-columns"] || p.columns || p["grid-columns"]) return true;
+  return false;
+}
+
+function isHiddenElement(el: TuiElement) {
+  const cssText = (el.style as any)?.cssText ?? "";
+  const p = parseCssProps(cssText);
+  const opacity = p.opacity;
+  if (opacity !== undefined) {
+    const n = Number.parseFloat(opacity);
+    if (Number.isFinite(n) && n <= 0) return true;
+  }
+  return false;
+}
+
+function resolveGridColumnsFromEl(el: TuiElement): number {
+  const cssText = (el.style as any)?.cssText ?? "";
+  const p = parseCssProps(cssText);
+  const raw = p["grid-template-columns"] ?? p.columns ?? p["grid-columns"] ?? "";
+  if (!raw) return 4;
+  const m1 = /repeat\(\s*(\d+)/i.exec(raw);
+  if (m1) {
+    const n = Number.parseInt(m1[1], 10);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  const m2 = /(\d+)/.exec(raw);
+  if (m2) {
+    const n = Number.parseInt(m2[1], 10);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return 4;
+}
+
+type GridFocusContext = {
+  grid: TuiElement;
+  cols: number;
+  cells: TuiElement[];
+};
+
+function collectGridFocusContexts(root: TuiNode): GridFocusContext[] {
+  const out: GridFocusContext[] = [];
+  const stack: TuiNode[] = [root];
+  while (stack.length > 0) {
+    const cur = stack.pop()!;
+    if (cur.kind === "element") {
+      const el = cur as TuiElement;
+      if (isHiddenElement(el)) {
+        continue;
+      }
+      if (isGridElement(el)) {
+        const cells = el.childNodes.filter(
+          (n): n is TuiElement => n.kind === "element",
+        );
+        if (cells.length > 0) {
+          out.push({ grid: el, cols: resolveGridColumnsFromEl(el), cells });
+        }
+      }
+    }
+    for (let i = cur.childNodes.length - 1; i >= 0; i--) {
+      stack.push(cur.childNodes[i]);
+    }
+  }
+  return out;
+}
+
+type FocusState =
+  | { kind: "node"; node: TuiElement }
+  | { kind: "grid"; grid: TuiElement; index: number };
+
+let _focused: FocusState | null = null;
+let _activeBody: TuiNode | null = null;
+
+function clearFocusedAttr(el: TuiElement | null) {
+  if (!el) return;
+  if (el.getAttribute("data-focused") === "true") {
+    el.removeAttribute("data-focused");
+  }
+}
+
+function applyNodeFocus(node: TuiElement) {
+  if (_focused?.kind === "node") {
+    clearFocusedAttr(_focused.node);
+  } else if (_focused?.kind === "grid") {
+    const prevCells = _focused.grid.childNodes.filter(
+      (n): n is TuiElement => n.kind === "element",
+    );
+    clearFocusedAttr(prevCells[_focused.index] ?? null);
+  }
+  node.setAttribute("data-focused", "true");
+  _focused = { kind: "node", node };
+}
+
+function applyGridFocus(ctx: GridFocusContext, index: number) {
+  const nextIndex = Math.max(0, Math.min(index, ctx.cells.length - 1));
+  const nextCell = ctx.cells[nextIndex];
+
+  if (_focused?.kind === "node") {
+    clearFocusedAttr(_focused.node);
+  } else if (_focused?.kind === "grid") {
+    const prevGrid = _focused.grid;
+    const prevIndex = _focused.index;
+    if (prevGrid === ctx.grid) {
+      const prevCell = ctx.cells[prevIndex];
+      clearFocusedAttr(prevCell ?? null);
+    } else {
+      const prevCells = prevGrid.childNodes.filter(
+        (n): n is TuiElement => n.kind === "element",
+      );
+      clearFocusedAttr(prevCells[prevIndex] ?? null);
+    }
+  }
+
+  nextCell.setAttribute("data-focused", "true");
+  _focused = { kind: "grid", grid: ctx.grid, index: nextIndex };
+}
+
+function collectFocusableNodes(body: TuiNode): TuiElement[] {
+  const out: TuiElement[] = [];
+  const stack: TuiNode[] = [body];
+  while (stack.length > 0) {
+    const cur = stack.pop()!;
+    if (cur.kind === "element") {
+      const el = cur as TuiElement;
+      if (isHiddenElement(el)) continue;
+      if (isGridElement(el)) {
+        continue;
+      }
+      if (el.hasEventListener?.("click")) {
+        out.push(el);
+      }
+    }
+    for (let i = cur.childNodes.length - 1; i >= 0; i--) {
+      stack.push(cur.childNodes[i]);
+    }
+  }
+  return out;
+}
+
+function findFocusedElement(body: TuiNode): TuiElement | null {
+  const stack: TuiNode[] = [body];
+  while (stack.length > 0) {
+    const cur = stack.pop()!;
+    if (cur.kind === "element") {
+      const el = cur as TuiElement;
+      if (el.getAttribute("data-focused") === "true") return el;
+    }
+    for (let i = cur.childNodes.length - 1; i >= 0; i--) {
+      stack.push(cur.childNodes[i]);
+    }
+  }
+  return null;
+}
+
+function ensureDefaultFocus(body: TuiNode) {
+  const existing = findFocusedElement(body);
+  if (existing) {
+    if (!_focused) {
+      _focused = { kind: "node", node: existing };
+    }
+    return;
+  }
+
+  const focusables = collectFocusableNodes(body);
+  if (focusables.length > 0) {
+    applyNodeFocus(focusables[0]);
+    return;
+  }
+
+  const ctxs = collectGridFocusContexts(body);
+  if (ctxs.length > 0) {
+    applyGridFocus(ctxs[0], 0);
+  }
+}
+
+function focusedInGridContext(
+  ctxs: GridFocusContext[],
+  focusedEl: TuiElement,
+) {
+  for (const ctx of ctxs) {
+    const idx = ctx.cells.indexOf(focusedEl);
+    if (idx !== -1) return { ctx, index: idx };
+  }
+  return null;
+}
+
+function handleDefaultNavigation(body: TuiNode, event: any): boolean {
+  const key = event?.key;
+  const isArrow =
+    key === "ArrowLeft" ||
+    key === "ArrowRight" ||
+    key === "ArrowUp" ||
+    key === "ArrowDown";
+  const isEnter = key === "Enter";
+  const isBack = key === "Escape" || key === "Backspace";
+
+  if (!isArrow && !isEnter && !isBack) return false;
+
+  ensureDefaultFocus(body);
+
+  const focusables = collectFocusableNodes(body);
+  const ctxs = collectGridFocusContexts(body);
+  const focusedEl = findFocusedElement(body);
+  if (!focusedEl) return false;
+
+  if (isEnter) {
+    if (focusedEl.hasEventListener?.("click")) {
+      focusedEl.dispatchEvent?.("click", { type: "click", key: "Enter" });
+      return true;
+    }
+    return false;
+  }
+
+  const gridHit = focusedInGridContext(ctxs, focusedEl);
+
+  if (isBack) {
+    if (gridHit && focusables.length > 0) {
+      applyNodeFocus(focusables[focusables.length - 1]);
+      return true;
+    }
+    return false;
+  }
+
+  if (!gridHit) {
+    const idx = focusables.indexOf(focusedEl);
+    if (idx === -1) {
+      if (focusables.length > 0) {
+        applyNodeFocus(focusables[0]);
+        return true;
+      }
+      if (ctxs.length > 0) {
+        applyGridFocus(ctxs[0], 0);
+        return true;
+      }
+      return false;
+    }
+
+    if (key === "ArrowUp") {
+      if (idx > 0) {
+        applyNodeFocus(focusables[idx - 1]);
+        return true;
+      }
+      return true;
+    }
+
+    if (key === "ArrowDown") {
+      if (idx < focusables.length - 1) {
+        applyNodeFocus(focusables[idx + 1]);
+        return true;
+      }
+      if (ctxs.length > 0) {
+        applyGridFocus(ctxs[0], 0);
+        return true;
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  const ctx = gridHit.ctx;
+  const index = gridHit.index;
+
+  const cols = Math.max(1, ctx.cols);
+  const maxY = Math.floor((ctx.cells.length - 1) / cols);
+  let x = index % cols;
+  let y = Math.floor(index / cols);
+
+  const maxXAtRow = (row: number) => {
+    if (row === maxY) return (ctx.cells.length - 1) % cols;
+    return cols - 1;
+  };
+
+  if (key === "ArrowLeft") {
+    if (x > 0) x -= 1;
+    else if (y > 0) {
+      y -= 1;
+      x = maxXAtRow(y);
+    }
+  }
+
+  if (key === "ArrowRight") {
+    const maxX = maxXAtRow(y);
+    if (x < maxX) x += 1;
+    else if (y < maxY) {
+      y += 1;
+      x = 0;
+    }
+  }
+
+  if (key === "ArrowUp") {
+    if (y > 0) {
+      y -= 1;
+      x = Math.min(x, maxXAtRow(y));
+    } else if (focusables.length > 0) {
+      applyNodeFocus(focusables[focusables.length - 1]);
+      return true;
+    }
+  }
+
+  if (key === "ArrowDown") {
+    if (y < maxY) {
+      y += 1;
+      x = Math.min(x, maxXAtRow(y));
+    }
+  }
+
+  const nextIndex = y * cols + x;
+  applyGridFocus(ctx, nextIndex);
+  return true;
+}
+
 export function createTuiHost(
   options: { out?: NodeJS.WritableStream } = {},
 ): TuiHost {
   const out = options.out ?? process.stdout;
   const body = createTuiElement("body");
+  _activeBody = body;
+
+  let scheduled = false;
+  const scheduleRender = () => {
+    if (scheduled) return;
+    scheduled = true;
+    queueMicrotask(() => {
+      ensureDefaultFocus(body);
+      renderTuiNodeToScreen(body, out);
+      scheduled = false;
+    });
+  };
+  setTuiInvalidator(scheduleRender);
 
   return {
     kind: "tui",
@@ -220,8 +590,9 @@ function registerTuiComponents() {
 
 export function render(
   appFn: (() => TuiNode | TuiNode[]) | TimelessElement | any,
-  out?: NodeJS.WritableStream,
+  outOrOptions?: NodeJS.WritableStream | RenderOptions,
 ) {
+  const out = normalizeOut(outOrOptions);
   // Descriptor path (VNode pipeline)
   if (isDescriptor(appFn)) {
     const target = out ?? process.stdout;
@@ -248,9 +619,11 @@ export function render(
     };
     setRenderer(wrappedRenderer);
 
+    setTuiInvalidationPaused(true);
     const vnode = mount(appFn);
     commitTree(vnode, getRenderer());
     host.appendChild(body, vnode._hostNode);
+    setTuiInvalidationPaused(false);
     renderTuiNodeToScreen(body, target);
 
     // Setup input handling
@@ -287,15 +660,20 @@ export function render(
     return;
   }
   if (isElement(appFn)) {
-    const host = createTuiHost({ out });
-    const content = appFn.render();
+    const target = out ?? process.stdout;
+    const host = installTuiHost({ out: target });
+    setTuiInvalidationPaused(true);
+    const content = buildTuiTreeFromTimelessElement(appFn);
     if (!content) {
+      setTuiInvalidationPaused(false);
       console.error("[TUI Render] Element render returned null");
       return;
     }
     host.appendChild(host.getBody(), content);
-    const target = out ?? process.stdout;
+    ensureDefaultFocus(host.getBody() as TuiNode);
+    setTuiInvalidationPaused(false);
     renderTuiNodeToScreen(host.getBody() as TuiNode, target);
+    ensureInput();
     return;
   }
   console.error("[TUI Render] Invalid element");
@@ -303,11 +681,13 @@ export function render(
 
 export function renderToStringTree(elm: TimelessElement): string {
   if (!elm || !isElement(elm)) return "";
-  const host = createTuiHost();
-  const content = elm.render();
+  setTuiInvalidationPaused(true);
+  const body = createTuiElement("body");
+  const content = buildTuiTreeFromTimelessElement(elm);
+  setTuiInvalidationPaused(false);
   if (!content) return "";
-  host.appendChild(host.getBody(), content);
-  return renderToString(host.getBody() as TuiNode);
+  body.appendChild(content);
+  return renderToString(body as TuiNode);
 }
 
 // ─── Platform ────────────────────────────────────────────────────
@@ -355,6 +735,15 @@ function ensureInput() {
       process.exit(0);
     }
     const event = { type: "keydown", key, raw };
+    if (
+      _activeBody &&
+      handleDefaultNavigation(_activeBody, event)
+    ) {
+      for (const handler of _platformState.keydownHandlers) {
+        handler(event);
+      }
+      return;
+    }
     for (const handler of _platformState.keydownHandlers) {
       handler(event);
     }
