@@ -414,7 +414,6 @@ export function For<T>(
     const v = _c[i];
     const idx = _c.indexOf(v);
     const r = render(v, ref(idx));
-    console.log('after render(v', r);
     if (r) {
       state.children.push(r);
     }
@@ -422,7 +421,12 @@ export function For<T>(
 
   return {
     t: "for",
-    $elm,
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      $elm = $elm;
+    },
     // _props: { each, render, key },
     // _values,
     // _elements,

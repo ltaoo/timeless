@@ -79,15 +79,57 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
   const state: {
     rendered: boolean;
-    props: Partial<{
-      styleSets: string[] | Signal<string[]>;
+    props: {
+      styleSets?: string[] | Signal<string[]>;
       style: ViewStyleProperties;
+    };
+    events: Partial<{
+      onClick?: (e: MouseEvent) => void;
+      onDoubleClick?: (e: MouseEvent) => void;
+      onLongPress?: (e: PointerEvent) => void;
+      onPointerDown?: (e: PointerEvent) => void;
+      onFocus?: (e: FocusEvent) => void;
+      onBlur?: (e: FocusEvent) => void;
+      onKeyDown?: (e: KeyboardEvent) => void;
+      onContextMenu?: (e: MouseEvent) => void;
+      onMouseEnter?: (e: MouseEvent) => void;
+      onMouseLeave?: (e: MouseEvent) => void;
+      onDragStart?: (e: DragEvent) => void;
+      onDrag?: (e: DragEvent) => void;
+      onDragEnd?: (e: DragEvent) => void;
+      onDragEnter?: (e: DragEvent) => void;
+      onDragOver?: (e: DragEvent) => void;
+      onDragLeave?: (e: DragEvent) => void;
+      onDrop?: (e: DragEvent) => void;
+      onAnimationEnd?: (e: AnimationEvent) => void;
     }>;
     children: TimelessElement[];
     host: any;
   } = {
     rendered: false,
-    props: {},
+    props: {
+      style: {},
+    },
+    events: {
+      onClick,
+      onDoubleClick,
+      onLongPress,
+      onPointerDown,
+      onFocus,
+      onBlur,
+      onKeyDown,
+      onContextMenu,
+      onMouseEnter,
+      onMouseLeave,
+      onDragStart,
+      onDrag,
+      onDragEnd,
+      onDragEnter,
+      onDragOver,
+      onDragLeave,
+      onDrop,
+      onAnimationEnd,
+    },
     children: [],
     get host() {
       return $elm;
@@ -227,51 +269,48 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           state.props.styleSets = [];
         }
       }
-
-      if (style) {
-        const style_object = ((): ViewStyleProperties => {
-          if (isRef(style)) {
-            return style.value || {};
+      const apply = (v: ViewStyleProperties) => {
+        // console.log("[]primitive style value changed", $elm, v);
+        if ($elm) {
+          if (typeof $elm.setStyleValue === "function") {
+            $elm.setStyleValue(v);
           }
-          return style;
-        })();
-        state.props.style = style_object;
-        if (isRef(style)) {
-          const st = style as any;
-          const apply = () => {
-            if ($elm) {
-              // host.setStyleText($elm, viewStyleToCssText(st.value || {}));
-              $elm.setStyleSet(st.value || {});
-            }
-          };
-          st.subscribe({
-            onChange() {
-              apply();
-            },
-          });
-          // apply();
-        } else {
-          // const obj = style as ViewStyle;
-          // const applyStyle = () => {
-          //   if ($elm) {
-          //     // host.setStyleText($elm, viewStyleToCssText(obj));
-          //     $elm.setStyleSet(obj);
-          //   }
-          // };
-          // const keys = Object.keys(obj);
-          // for (let i = 0; i < keys.length; i += 1) {
-          //   const k = keys[i];
-          //   const vv = (obj as any)[k];
-          //   if (isRef(vv)) {
-          //     vv.subscribe({
-          //       onChange() {
-          //         applyStyle();
-          //       },
-          //     });
-          //   }
-          // }
-          // applyStyle();
         }
+      };
+      if (style) {
+        (() => {
+          if (isRef(style)) {
+            state.props.style = style.value || {};
+            style.subscribe({
+              onChange() {
+                state.props.style = {
+                  ...state.props.style,
+                  ...(style.value || {}),
+                };
+                apply(state.props.style);
+              },
+            });
+            return;
+          }
+          Object.keys(style).forEach((k) => {
+            const v = style[k];
+            if (isRef(v)) {
+              state.props.style[k] = v.value;
+              v.subscribe({
+                onChange(v) {
+                  state.props.style = {
+                    ...state.props.style,
+                    [k]: v,
+                  } as ViewStyleProperties;
+                  apply(state.props.style);
+                },
+              });
+            } else {
+              state.props.style[k] = v;
+            }
+          });
+          return;
+        })();
       }
 
       if (!$elm) {
@@ -483,6 +522,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     value: "",
     children: state.children,
     props: state.props,
+    events: state.events,
     render() {
       if (state.rendered) {
         return $elm;
@@ -672,6 +712,26 @@ export interface TimelessElement {
   props?: {
     styleSets?: MaybeSignal<string[]>;
     style?: ViewStyleProperties;
+  };
+  events?: {
+    onClick?: (e: MouseEvent) => void;
+    onDoubleClick?: (e: MouseEvent) => void;
+    onLongPress?: (e: PointerEvent) => void;
+    onPointerDown?: (e: PointerEvent) => void;
+    onFocus?: (e: FocusEvent) => void;
+    onBlur?: (e: FocusEvent) => void;
+    onKeyDown?: (e: KeyboardEvent) => void;
+    onContextMenu?: (e: MouseEvent) => void;
+    onMouseEnter?: (e: MouseEvent) => void;
+    onMouseLeave?: (e: MouseEvent) => void;
+    onDragStart?: (e: DragEvent) => void;
+    onDrag?: (e: DragEvent) => void;
+    onDragEnd?: (e: DragEvent) => void;
+    onDragEnter?: (e: DragEvent) => void;
+    onDragOver?: (e: DragEvent) => void;
+    onDragLeave?: (e: DragEvent) => void;
+    onDrop?: (e: DragEvent) => void;
+    onAnimationEnd?: (e: AnimationEvent) => void;
   };
   value?: string;
   render(): any;

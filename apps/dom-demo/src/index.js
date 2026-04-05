@@ -128,6 +128,7 @@ function ApplicationView() {
             {
               class: "navigate-to",
               onClick() {
+                console.log("click app");
                 page.set("app");
               },
             },

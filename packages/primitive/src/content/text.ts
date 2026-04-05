@@ -14,7 +14,7 @@ export function Txt(value: Ref<string> | string): TimelessElement {
     value: isRef(value) ? value.value : value,
   };
 
-  function setupSubscription() {
+  function setup_value_subscription() {
     if (isRef(value)) {
       value.subscribe({
         onPatch(action) {},
@@ -39,6 +39,9 @@ export function Txt(value: Ref<string> | string): TimelessElement {
     get $elm() {
       return $elm;
     },
+    set $elm(v) {
+      $elm = v;
+    },
     value: state.value,
     props: {
       // styleSets: [],
@@ -51,7 +54,7 @@ export function Txt(value: Ref<string> | string): TimelessElement {
       }
       state.rendered = true;
       $elm = safeCreateTextNode(state.value);
-      setupSubscription();
+      setup_value_subscription();
       return $elm;
     },
     hydrate(existingDom: any) {
@@ -60,7 +63,7 @@ export function Txt(value: Ref<string> | string): TimelessElement {
       }
       state.rendered = true;
       $elm = existingDom;
-      setupSubscription();
+      setup_value_subscription();
       return $elm;
     },
     onMounted() {},

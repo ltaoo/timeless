@@ -158,6 +158,7 @@ function ApplicationView() {
             return View(
               {
                 style: {
+                  borderWidth: 2,
                   borderColor: combine({ focused, idx }, (t) =>
                     isFocusedCell(t.focused, t.idx)
                       ? "#007bff"
@@ -166,11 +167,25 @@ function ApplicationView() {
                 },
               },
               [
-                Txt({ style: { fontSize: 22 } }, [app.icon]),
-                Txt({ style: { fontWeight: "bold", fontSize: 14 } }, [
-                  app.title,
+                View({ style: { textAlign: "center", fontSize: 22 } }, [
+                  app.icon,
                 ]),
-                Txt({ style: { fontSize: 12, color: "gray" } }, [app.subtitle]),
+                View(
+                  {
+                    style: {
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      fontSize: 14,
+                    },
+                  },
+                  [app.title],
+                ),
+                View(
+                  {
+                    style: { textAlign: "center", fontSize: 12, color: "gray" },
+                  },
+                  [app.subtitle],
+                ),
               ],
             );
           }),

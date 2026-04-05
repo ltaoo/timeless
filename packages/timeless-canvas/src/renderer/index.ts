@@ -30,7 +30,12 @@ export type TimelessHost = {
   setTextContent(node: any, text: string): void;
   setInnerHTML?(el: any, html: string): void;
   setProperty?(el: any, key: string, value: any): void;
-  addEventListener(target: any, type: string, handler: any, options?: any): void;
+  addEventListener(
+    target: any,
+    type: string,
+    handler: any,
+    options?: any,
+  ): void;
   removeEventListener(
     target: any,
     type: string,
@@ -120,6 +125,7 @@ export interface CanvasElement extends BaseCanvasNode<"element"> {
   ): void;
   clearChildren(): void;
   setStyleSet(value: any): void;
+  setStyleValue(styleObj: Record<string, any>): void;
   setTextContent(text: string): void;
   getFirstChild(): CanvasNode | null;
   getNextSibling(): CanvasNode | null;
@@ -292,6 +298,11 @@ export function createCanvasElement(tag: string): CanvasElement {
       } else {
         node.style = {};
       }
+    },
+    setStyleValue(styleObj: Record<string, any>) {
+      Object.keys(styleObj).forEach((key) => {
+        (node.style as any)[key] = styleObj[key];
+      });
     },
     setTextContent(text: string) {
       node.textContent = text;
@@ -560,6 +571,31 @@ function styleGetFirst(el: CanvasElement, keys: string[]): any {
 function isHiddenByOpacity(el: CanvasElement): boolean {
   const opacity = parseNumber(styleGet(el, "opacity")) ?? 1;
   return opacity <= 0;
+}
+
+function resolveGridColumns(el: CanvasElement): number {
+  const raw =
+    styleGetFirst(el, ["gridColumns", "columns"]) ??
+    styleGet(el, "gridTemplateColumns");
+  if (typeof raw === "number") return raw;
+  if (typeof raw === "string") {
+    const m1 = /repeat\(\s*(\d+)/i.exec(raw);
+    if (m1) {
+      const n = Number.parseInt(m1[1], 10);
+      if (Number.isFinite(n)) return n;
+    }
+    const m2 = /(\d+)/.exec(raw);
+    if (m2) {
+      const n = Number.parseInt(m2[1], 10);
+      if (Number.isFinite(n)) return n;
+    }
+  }
+  return 4;
+}
+
+function resolveGridGap(el: CanvasElement): number {
+  const raw = styleGetFirst(el, ["gap", "gridGap", "rowGap", "columnGap"]);
+  return parseLength(raw, null) ?? 0;
 }
 
 function resolveFont(el: CanvasElement): string {
@@ -1126,10 +1162,13 @@ function computeRectsForTree(
         typeof position === "string" &&
         (position === "absolute" || position === "fixed");
 
-      const layoutChildren = (children: CanvasNode[]) => {
+      const display = styleGet(node, "display");
+      const isGrid = display === "grid" && !isParentAbsoluteContainer;
+
+      const layoutFlowChildren = (children: CanvasNode[]) => {
         for (const child of children) {
           if (child.kind === "fragment") {
-            layoutChildren(child.childNodes);
+            layoutFlowChildren(child.childNodes);
             continue;
           }
 
@@ -1215,7 +1254,145 @@ function computeRectsForTree(
         }
       };
 
-      layoutChildren(node.childNodes);
+      const layoutGridChildren = (children: CanvasNode[]) => {
+        const colsRaw = resolveGridColumns(node);
+        const cols = Math.max(1, Math.floor(colsRaw));
+        const gap = resolveGridGap(node);
+
+        const colWidth =
+          cols > 0
+            ? Math.max(0, (contentWidth - gap * (cols - 1)) / cols)
+            : 0;
+
+        const flow: CanvasNode[] = [];
+        const abs: CanvasElement[] = [];
+
+        const collect = (nodes: CanvasNode[]) => {
+          for (const child of nodes) {
+            if (child.kind === "fragment") {
+              collect(child.childNodes);
+              continue;
+            }
+            if (child.kind === "text") {
+              if (child.textContent) flow.push(child);
+              continue;
+            }
+            if (child.kind === "element") {
+              const childEl = child as CanvasElement;
+              if (isHiddenByOpacity(childEl)) continue;
+
+              const childPosition = styleGet(childEl, "position");
+              const isAbs =
+                typeof childPosition === "string" &&
+                (childPosition === "absolute" || childPosition === "fixed");
+              const hasTop = hasExplicitLengthStyle(
+                childEl,
+                ["top", "y"],
+                ["top", "y"],
+              );
+              const hasLeft = hasExplicitLengthStyle(
+                childEl,
+                ["left", "x"],
+                ["left", "x"],
+              );
+
+              if (isAbs || hasTop || hasLeft) abs.push(childEl);
+              else flow.push(childEl);
+            }
+          }
+        };
+
+        collect(children);
+
+        for (const childEl of abs) {
+          computeRects(childEl, rect);
+          const cr = rectCache.get(childEl) ?? childEl.rect;
+          if (cr) maxChildRight = Math.max(maxChildRight, cr.right);
+        }
+
+        let i = 0;
+        let didRow = false;
+        while (i < flow.length) {
+          const rowY = cursorY;
+          let rowHeight = 0;
+          for (let col = 0; col < cols && i < flow.length; col++) {
+            const item = flow[i++];
+            const cellLeft = contentLeft + col * (colWidth + gap);
+
+            if (item.kind === "text") {
+              const text = item.textContent ?? "";
+              if (!text) continue;
+
+              const font = resolveFont(node);
+              const fontSize = resolveFontSize(node, font);
+              const lineHeightPx = resolveLineHeightPx(node, fontSize);
+
+              ctx.save();
+              ctx.font = font;
+              const metrics = ctx.measureText(text);
+              ctx.restore();
+
+              rectCache.set(item, {
+                top: rowY,
+                left: cellLeft,
+                right: cellLeft + colWidth,
+                bottom: rowY + lineHeightPx,
+                width: colWidth,
+                height: lineHeightPx,
+                x: cellLeft,
+                y: rowY,
+              });
+
+              rowHeight = Math.max(rowHeight, lineHeightPx);
+              maxChildRight = Math.max(
+                maxChildRight,
+                cellLeft + Math.min(colWidth, metrics.width),
+              );
+              continue;
+            }
+
+            if (item.kind === "element") {
+              const childEl = item as CanvasElement;
+              const ml =
+                parseLength(styleGet(childEl, "marginLeft"), null) ?? 0;
+              const mr =
+                parseLength(styleGet(childEl, "marginRight"), null) ?? 0;
+              const mt =
+                parseLength(styleGet(childEl, "marginTop"), null) ?? 0;
+              const mb =
+                parseLength(styleGet(childEl, "marginBottom"), null) ?? 0;
+
+              const innerLeft = cellLeft + ml;
+              const availableW = Math.max(0, colWidth - ml - mr);
+              const pseudoParent: BoundingRect = {
+                top: rowY + mt,
+                left: innerLeft,
+                right: innerLeft + availableW,
+                bottom: rect.bottom,
+                width: availableW,
+                height: Math.max(0, rect.height - padTop - padBottom),
+                x: innerLeft,
+                y: rowY + mt,
+              };
+              computeRects(childEl, pseudoParent);
+              const cr = rectCache.get(childEl) ?? childEl.rect;
+              if (cr) {
+                rowHeight = Math.max(rowHeight, cr.bottom - rowY + mb);
+                maxChildRight = Math.max(maxChildRight, cr.right + mr);
+              }
+            }
+          }
+
+          if (rowHeight <= 0) break;
+          cursorY = rowY + rowHeight + gap;
+          didRow = true;
+        }
+
+        if (didRow) cursorY = Math.max(contentTop, cursorY - gap);
+      };
+
+      if (isGrid) layoutGridChildren(node.childNodes);
+      else layoutFlowChildren(node.childNodes);
 
       if (!hasHeight) {
         const nextHeight = Math.max(0, cursorY - rect.top + padBottom);
@@ -1604,6 +1781,13 @@ export function createCanvasHost(
     };
     el.setTextContent = (text: string) => {
       el.textContent = text;
+      markDirty(el);
+    };
+    el.setStyleValue = (styleObj: Record<string, any>) => {
+      // 更新样式对象并标记为脏，触发重绘
+      Object.keys(styleObj).forEach((key) => {
+        (el.style as any)[key] = styleObj[key];
+      });
       markDirty(el);
     };
     return node;
@@ -2042,36 +2226,155 @@ function buildCanvasTreeFromTimelessElement(
   host: CanvasHost,
 ): CanvasNode | null {
   if (!elm || !isElement(elm)) return null;
-  const root = elm.render();
-  if (!isCanvasNode(root)) return null;
 
-  if (elm.t === "view" && root.kind === "element") {
-    const props = elm.props ?? {};
+  const applyContainerProps = (
+    node: CanvasElement,
+    props: any,
+    events: any,
+  ) => {
+    if (!props) return;
 
-    if ((props as any).style) {
-      (root as CanvasElement).style = toPlainStyle((props as any).style);
+    if (props.style) {
+      node.style = toPlainStyle(props.style);
     }
 
-    const styleSets = (props as any).styleSets;
+    const styleSets = props.styleSets;
     if (styleSets) {
       const v = isRef(styleSets) ? (styleSets as any).value : styleSets;
-      if (Array.isArray(v)) {
-        (root as CanvasElement).className = v.join(" ");
-      } else if (typeof v === "string") {
-        (root as CanvasElement).className = v;
+      if (Array.isArray(v)) node.className = v.join(" ");
+      else if (typeof v === "string") node.className = v;
+    }
+
+    // Register event listeners
+    if (events) {
+      if (events.onClick) {
+        node.addEventListener("click", events.onClick);
+      }
+      if (events.onDoubleClick) {
+        node.addEventListener("dblclick", events.onDoubleClick);
+      }
+      if (events.onPointerDown) {
+        node.addEventListener("pointerdown", events.onPointerDown);
+      }
+      if (events.onFocus) {
+        node.addEventListener("focus", events.onFocus);
+      }
+      if (events.onBlur) {
+        node.addEventListener("blur", events.onBlur);
+      }
+      if (events.onKeyDown) {
+        node.addEventListener("keydown", events.onKeyDown);
+      }
+      if (events.onContextMenu) {
+        node.addEventListener("contextmenu", events.onContextMenu);
+      }
+      if (events.onMouseEnter) {
+        node.addEventListener("mouseenter", events.onMouseEnter);
+      }
+      if (events.onMouseLeave) {
+        node.addEventListener("mouseleave", events.onMouseLeave);
+      }
+      if (events.onDragStart) {
+        node.addEventListener("dragstart", events.onDragStart);
+      }
+      if (events.onDrag) {
+        node.addEventListener("drag", events.onDrag);
+      }
+      if (events.onDragEnd) {
+        node.addEventListener("dragend", events.onDragEnd);
+      }
+      if (events.onDragEnter) {
+        node.addEventListener("dragenter", events.onDragEnter);
+      }
+      if (events.onDragOver) {
+        node.addEventListener("dragover", events.onDragOver);
+      }
+      if (events.onDragLeave) {
+        node.addEventListener("dragleave", events.onDragLeave);
+      }
+      if (events.onDrop) {
+        node.addEventListener("drop", events.onDrop);
+      }
+      if (events.onAnimationEnd) {
+        node.addEventListener("animationend", events.onAnimationEnd);
       }
     }
+  };
+
+  if (elm.t === "view") {
+    const $elm = host.createElement("div") as CanvasElement;
+    elm.$elm = $elm;
+
+    applyContainerProps($elm, elm.props, elm.events);
 
     const children = elm.children;
     if (Array.isArray(children)) {
       for (const child of children) {
         const sub = buildCanvasTreeFromTimelessElement(child, host);
-        if (sub) host.appendChild(root, sub);
+        if (sub) $elm.appendChild(sub);
       }
     }
+    return $elm;
   }
 
-  return root;
+  if (elm.t === "grid") {
+    const $elm = host.createElement("div") as CanvasElement;
+    elm.$elm = $elm;
+
+    applyContainerProps($elm, elm.props, elm.events);
+
+    const cols = (elm.props as any)?.columns ?? 4;
+    const gap = (elm.props as any)?.gap ?? 16;
+    $elm.style = {
+      display: "grid",
+      gridColumns: cols,
+      gridTemplateColumns: `repeat(${cols}, 1fr)`,
+      gap,
+      ...($elm.style ?? {}),
+    };
+
+    const children = elm.children;
+    if (Array.isArray(children)) {
+      for (const child of children) {
+        const sub = buildCanvasTreeFromTimelessElement(child, host);
+        if (sub) $elm.appendChild(sub);
+      }
+    }
+    return $elm;
+  }
+
+  if (elm.t === "text") {
+    const $elm = host.createTextNode(String(elm.value ?? "")) as any;
+    elm.$elm = $elm;
+    return $elm;
+  }
+
+  if (elm.t === "for") {
+    const $elm = host.createDocumentFragment() as any;
+    elm.$elm = $elm;
+    const children = elm.children;
+    if (Array.isArray(children)) {
+      for (const child of children) {
+        const sub = buildCanvasTreeFromTimelessElement(child, host);
+        if (sub) $elm.appendChild(sub);
+      }
+    }
+    return $elm;
+  }
+  if (elm.t === "fragment") {
+    const $elm = host.createDocumentFragment() as any;
+    elm.$elm = $elm;
+    const children = elm.children;
+    if (Array.isArray(children)) {
+      for (const child of children) {
+        const sub = buildCanvasTreeFromTimelessElement(child, host);
+        if (sub) $elm.appendChild(sub);
+      }
+    }
+    return $elm;
+  }
+
+  return null;
 }
 
 export function render(
@@ -2090,69 +2393,29 @@ export function render(
 
   const { onVNodeTreeCreated, ...hostOptions } = options;
 
-  // if (isDescriptor(elm)) {
-  //   const host = createCanvasHost({ ...hostOptions, canvas });
-  //   currentHost = host;
-  //   setHost(host);
-  //   registerCanvasComponents();
-
-  //   const baseRenderer = getRenderer();
-  //   let drawScheduled = false;
-
-  //   const wrappedRenderer = {
-  //     ...baseRenderer,
-  //     patchNode(vnode: any, changes: any) {
-  //       baseRenderer.patchNode(vnode, changes);
-  //       if (!drawScheduled) {
-  //         drawScheduled = true;
-  //         queueMicrotask(() => {
-  //           drawScheduled = false;
-  //           host.draw();
-  //         });
-  //       }
-  //     },
-  //   };
-  //   setRenderer(wrappedRenderer);
-
-  //   const vnode = mount(elm);
-  //   commitTree(vnode, getRenderer());
-  //   const body = host.getBody ? host.getBody() : host.body;
-  //   host.clearChildren(body);
-  //   host.appendChild(body, vnode._hostNode);
-  //   onVNodeTreeCreated?.(vnode, host);
-  //   host.draw();
-  //   return host;
-  // }
-
   if (!isElement(elm)) {
     console.error("[Canvas Render] Invalid element");
     return;
   }
-
-  const host = createCanvasHost({ ...hostOptions, canvas });
-  // currentHost = host;
-  // setHost(host);
-  // registerCanvasComponents();
-
-  // const body = host.getBody ? host.getBody() : host.body;
-  // host.clearChildren(body);
-  const ctx = canvas.getContext('2d');
+  const ctx = hostOptions.context ?? canvas.getContext("2d");
   if (!ctx) {
     return;
   }
 
+  const host =
+    currentHost && currentHost.canvas === canvas
+      ? currentHost
+      : installCanvasHost({ ...hostOptions, canvas, context: ctx });
+  setHost(host);
+
   const content = buildCanvasTreeFromTimelessElement(elm, host);
   if (!content) {
-    console.error("[Canvas Render] Element render return null");
-    return host;
+    console.error("[Canvas Render] Build tree return null");
+    return;
   }
 
-  draw(ctx, content, {
-
-  });
-
-  // host.appendChild(body, content);
-  // onVNodeTreeCreated?.(elm as any, host);
-  // host.draw();
+  host.clearChildren(host.body);
+  host.appendChild(host.body, content);
+  host.draw();
   return;
 }
