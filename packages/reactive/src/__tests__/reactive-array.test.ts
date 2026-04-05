@@ -181,7 +181,7 @@ describe("RefArray", () => {
     it("should trigger onChange notification", () => {
       const arr = refArray([1, 2, 3]);
       const handler = vi.fn();
-      arr._subscribe({ onChange: handler });
+      arr.subscribe({ onChange: handler });
       arr.refresh();
       expect(handler).toHaveBeenCalledWith([1, 2, 3]);
     });
@@ -950,7 +950,7 @@ describe("RefArray", () => {
     it("should notify on insert", () => {
       const arr = refArray([1, 2, 3]);
       const handler = vi.fn();
-      arr._subscribe({ onChange: vi.fn(), onPatch: handler });
+      arr.subscribe({ onChange: vi.fn(), onPatch: handler });
       arr.push(4);
       expect(handler).toHaveBeenCalledWith({
         type: "insert",
@@ -963,7 +963,7 @@ describe("RefArray", () => {
     it("should notify on update", () => {
       const arr = refArray([1, 2, 3]);
       const handler = vi.fn();
-      arr._subscribe({ onChange: vi.fn(), onPatch: handler });
+      arr.subscribe({ onChange: vi.fn(), onPatch: handler });
       arr.set(1, 10);
       expect(handler).toHaveBeenCalledWith({
         type: "update",
@@ -975,7 +975,7 @@ describe("RefArray", () => {
     it("should notify on delete", () => {
       const arr = refArray([1, 2, 3]);
       const handler = vi.fn();
-      arr._subscribe({ onChange: vi.fn(), onPatch: handler });
+      arr.subscribe({ onChange: vi.fn(), onPatch: handler });
       arr.delete(1);
       expect(handler).toHaveBeenCalledWith({
         type: "delete",
@@ -987,7 +987,7 @@ describe("RefArray", () => {
     it("should notify on refresh", () => {
       const arr = refArray([1, 2, 3]);
       const handler = vi.fn();
-      arr._subscribe({ onChange: handler, onPatch: vi.fn() });
+      arr.subscribe({ onChange: handler, onPatch: vi.fn() });
       arr.refresh();
       expect(handler).toHaveBeenCalledWith([1, 2, 3]);
     });
@@ -1016,12 +1016,12 @@ describe("RefArray", () => {
     });
   });
 
-  describe("_destroy", () => {
+  describe("destroy", () => {
     it("should clear subscribers", () => {
       const arr = refArray([1, 2, 3]);
       const handler = vi.fn();
-      arr._subscribe({ onChange: handler });
-      arr._destroy();
+      arr.subscribe({ onChange: handler });
+      arr.destroy();
       arr.push(4);
       expect(handler).not.toHaveBeenCalled();
     });

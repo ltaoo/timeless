@@ -632,7 +632,7 @@ function bindText(vnode: VNodeText, ref: Signal<string>, scheduler: RendererSche
 
 ```
 Signal 变化
-  → _subscribe 回调
+  → subscribe 回调
   → 直接修改 vnode.style.color = newValue
   → scheduler.markDirty(vnode)
   → renderer.patchNode(vnode, { style: { color: newValue } })
@@ -820,7 +820,7 @@ function isDescriptor(v: unknown): v is ElementDescriptor {
  * 展开过程中：
  *   1. 原生标签 → 直接创建 VNodeElement
  *   2. 组件函数 → 调用函数得到 VNode
- *   3. Signal props → 建立 _subscribe 绑定
+ *   3. Signal props → 建立 subscribe 绑定
  */
 function mount(descriptor: ElementDescriptor): VNode {
   const { type, props, children } = descriptor;
@@ -862,7 +862,7 @@ function mount(descriptor: ElementDescriptor): VNode {
 初始渲染:  h() → 描述符 → mount() → VNode 树 → commitTree() → 平台节点
 
 更新:  Signal 变化
-         → _subscribe 回调
+         → subscribe 回调
          → 直接修改 vnode.style.color = newValue
          → scheduler.markDirty(vnode)
          → renderer.patchNode(vnode, { style: { color: newValue } })

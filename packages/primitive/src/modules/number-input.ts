@@ -86,7 +86,7 @@ export function Input(
         const vv = dataset[k];
         const attrName = `data-${k}`;
         if (isRef(vv)) {
-          vv._subscribe({
+          vv.subscribe({
             onChange(v: any) {
               applyAttr(attrName, v);
             },
@@ -97,7 +97,7 @@ export function Input(
         applyAttr(attrName, vv);
       });
 
-      class$._subscribe({
+      class$.subscribe({
         onChange(v: any) {
           host.setClassName($elm, v.join(" "));
         },
@@ -107,7 +107,7 @@ export function Input(
       if (st) {
         if (isStyleRef(st as any)) {
           const s = st as any;
-          s._subscribe({
+          s.subscribe({
             onChange(v: any) {
               host.setStyleText($elm, viewStyleToCssText(v ?? {}));
             },
@@ -117,7 +117,7 @@ export function Input(
           const s = st as any;
           const apply = () =>
             host.setStyleText($elm, viewStyleToCssText(s.value || {}));
-          s._subscribe({
+          s.subscribe({
             onChange() {
               apply();
             },
@@ -130,7 +130,7 @@ export function Input(
           Object.keys(st as any).forEach((k) => {
             const vv = (st as any)[k];
             if (isRef(vv)) {
-              (vv as any)._subscribe({
+              (vv as any).subscribe({
                 onChange() {
                   applyStyle();
                 },
@@ -141,17 +141,17 @@ export function Input(
         }
       }
 
-      displayValue$._subscribe({
+      displayValue$.subscribe({
         onChange(v: any) {
           setProp("value", v);
         },
       });
-      placeholder$._subscribe({
+      placeholder$.subscribe({
         onChange(v: any) {
           setProp("placeholder", v);
         },
       });
-      disabled$._subscribe({
+      disabled$.subscribe({
         onChange(v: any) {
           setProp("disabled", v);
         },
@@ -253,8 +253,8 @@ export function IncreaseButton(
             host.removeAttribute($e, "aria-disabled");
           }
         };
-        canIncrease$._subscribe({ onChange: updateState });
-        disabled$._subscribe({ onChange: updateState });
+        canIncrease$.subscribe({ onChange: updateState });
+        disabled$.subscribe({ onChange: updateState });
         updateState();
 
         const handleMouseDown = (e: any) => {
@@ -310,8 +310,8 @@ export function DecreaseButton(
             host.removeAttribute($e, "aria-disabled");
           }
         };
-        canDecrease$._subscribe({ onChange: updateState });
-        disabled$._subscribe({ onChange: updateState });
+        canDecrease$.subscribe({ onChange: updateState });
+        disabled$.subscribe({ onChange: updateState });
         updateState();
 
         const handleMouseDown = (e: any) => {
@@ -359,7 +359,7 @@ export function Value(
             value$.value !== null ? String(value$.value) : "",
           );
         };
-        value$._subscribe({ onChange: updateText });
+        value$.subscribe({ onChange: updateText });
         updateText();
         if (rest.onMounted) rest.onMounted(event);
       },
@@ -394,7 +394,7 @@ export function Disabled(
             host.removeAttribute($elm, "data-disabled");
           }
         };
-        disabled$._subscribe({ onChange: updateState });
+        disabled$.subscribe({ onChange: updateState });
         updateState();
         if (rest.onMounted) rest.onMounted(event);
       },

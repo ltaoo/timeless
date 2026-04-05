@@ -39,7 +39,7 @@ View({
 ### computed 返回 Ref（只读）
 
 ```ts
-computed(dep, fn) → Ref<R>   // 有 .value, ._subscribe, 无 .as
+computed(dep, fn) → Ref<R>   // 有 .value, .subscribe, 无 .as
 ```
 
 ### 销毁

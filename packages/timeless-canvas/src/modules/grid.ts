@@ -43,7 +43,7 @@ export function CanvasGrid(props: any, children: any[], host?: CanvasHost) {
   const root = createElement("div", { style: merged.value });
 
   const scheduler = getRendererScheduler();
-  merged._subscribe({
+  merged.subscribe({
     onChange(v: any) {
       root.style = v ?? {};
       scheduler.patch(root, { style: root.style });

@@ -77,7 +77,7 @@ export function Textarea(
         const vv = dataset[k];
         const attrName = `data-${k}`;
         if (isRef(vv)) {
-          vv._subscribe({
+          vv.subscribe({
             onChange(v: any) {
               applyAttr(attrName, v);
             },
@@ -89,7 +89,7 @@ export function Textarea(
       });
 
       // Apply classes
-      class$._subscribe({
+      class$.subscribe({
         onChange(v: any) {
           host.setClassName($elm, v.join(" "));
         },
@@ -100,7 +100,7 @@ export function Textarea(
       if (st) {
         if (isStyleRef(st as any)) {
           const s = st as any;
-          s._subscribe({
+          s.subscribe({
             onChange(v: any) {
               host.setStyleText($elm, viewStyleToCssText(v ?? {}));
             },
@@ -110,7 +110,7 @@ export function Textarea(
           const s = st as any;
           const apply = () =>
             host.setStyleText($elm, viewStyleToCssText(s.value || {}));
-          s._subscribe({
+          s.subscribe({
             onChange() {
               apply();
             },
@@ -123,7 +123,7 @@ export function Textarea(
           Object.keys(st as any).forEach((k) => {
             const vv = (st as any)[k];
             if (isRef(vv)) {
-              (vv as any)._subscribe({
+              (vv as any).subscribe({
                 onChange() {
                   applyStyle();
                 },
@@ -135,17 +135,17 @@ export function Textarea(
       }
 
       // Subscribe to reactive state changes
-      value$._subscribe({
+      value$.subscribe({
         onChange(v: any) {
           setProp("value", v);
         },
       });
-      placeholder$._subscribe({
+      placeholder$.subscribe({
         onChange(v: any) {
           setProp("placeholder", v);
         },
       });
-      disabled$._subscribe({
+      disabled$.subscribe({
         onChange(v: any) {
           setProp("disabled", v);
         },

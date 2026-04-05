@@ -60,16 +60,16 @@ export function derive(deps: any, fn: any): Ref<any> {
 
   depRefs.forEach((ref) => {
     if (isRef(ref)) {
-      ref._subscribe({ onChange });
+      ref.subscribe({ onChange });
     }
   });
 
   return {
     __is_ref: true as const,
-    _subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber) {
       _deps.push(ctx);
     },
-    _destroy() {
+    destroy() {
       _deps.length = 0;
     },
     get value() {

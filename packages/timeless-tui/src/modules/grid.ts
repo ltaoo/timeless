@@ -152,7 +152,7 @@ export function TuiGrid(props: any, children: any[]) {
     for (const k of Object.keys(style)) {
       const v = style[k];
       if (isRef(v)) {
-        v._subscribe({
+        v.subscribe({
           onChange() {
             const newLines = buildGridText(children, cols);
             textNode.text = newLines.join("\n");

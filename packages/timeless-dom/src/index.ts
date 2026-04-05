@@ -2,18 +2,22 @@ import {
   type TimelessHost,
   type TimelessElement,
   setHost,
+  getHost,
   isElement,
   registerComponent,
-  getRenderer,
   Grid,
   View,
   Txt,
   VNode,
+  isRef,
 } from "@timeless/timeless";
 
-import * as modules from "./modules/index";
+import type { VNode as VNodeNS } from "@timeless/timeless";
 
-// const { isDescriptor, mount, commitTree } = VNode;
+import * as modules from "./modules/index";
+import { viewStyleToCssText } from "./modules/style";
+
+const { isDescriptor, mount, commitTree } = VNode;
 
 console.log("dom.version" + __Version);
 
@@ -374,6 +378,56 @@ export function installDomHost(options?: Parameters<typeof createDomHost>[0]) {
   return host;
 }
 
+export type HostOperation = {
+  method: string;
+  args: any[];
+};
+
+type RecordingState = {
+  enabled: boolean;
+  ops: HostOperation[];
+};
+
+let _recording: null | {
+  host: TimelessHost;
+  baseHost: TimelessHost;
+  state: RecordingState;
+} = null;
+
+function ensureRecordingDomHost(): {
+  host: TimelessHost;
+  state: RecordingState;
+} {
+  const currentHost = getHost();
+  if (_recording) {
+    if (_recording.host === currentHost) {
+      return { host: _recording.host, state: _recording.state };
+    }
+    if (_recording.baseHost === currentHost) {
+      return { host: _recording.host, state: _recording.state };
+    }
+  }
+
+  const baseHost = currentHost;
+
+  const state: RecordingState = { enabled: false, ops: [] };
+  const proxy = new Proxy(baseHost as any, {
+    get(target, prop, receiver) {
+      const v = Reflect.get(target, prop, receiver);
+      if (typeof prop === "string" && typeof v === "function") {
+        return (...args: any[]) => {
+          if (state.enabled) state.ops.push({ method: prop, args });
+          return v.apply(target, args);
+        };
+      }
+      return v;
+    },
+  }) as TimelessHost;
+
+  _recording = { host: proxy, baseHost, state };
+  return { host: proxy, state };
+}
+
 // ─── Platform ────────────────────────────────────────────────────
 
 export const platform = {
@@ -434,7 +488,7 @@ function registerDomComponents() {
  * @param $root - The DOM container element
  */
 export function render(
-  elm: TimelessElement,
+  elm: TimelessElement | VNodeNS.ElementDescriptor,
   $root: HTMLElement | null,
   extra: Partial<{
     onVNodeCreated: (data: any) => void;
@@ -449,30 +503,94 @@ export function render(
     return;
   }
 
-  // Descriptor path (VNode pipeline)
-  // if (isDescriptor(elm)) {
-  //   const host = createDomHost();
-  //   setHost(host);
-  //   registerDomComponents();
-  //   const vnode = mount(elm);
-  //   commitTree(vnode, getRenderer());
-  //   host.appendChild($root, vnode._hostNode);
-  //   return;
-  // }
+  const { host, state } = ensureRecordingDomHost();
 
-  // TimelessElement path (primitive pipeline)
-  if (isElement(elm)) {
-    // const host = createDomHost();
-    const $content = elm.render();
-    if (!$content) {
-      console.error("[Render] Element render return null");
-      return;
+  setHost(host);
+  registerDomComponents();
+
+  const ops: HostOperation[] = [];
+  state.ops = ops;
+  state.enabled = true;
+
+  try {
+    // if (isDescriptor(elm as any)) {
+    //   const vnode = mount(elm as any);
+    //   commitTree(vnode, getRenderer());
+    //   if (!vnode._hostNode) {
+    //     console.error("[Render] VNode commit missing host node");
+    //     return;
+    //   }
+    //   host.appendChild($root, vnode._hostNode);
+    //   extra.onVNodeCreated?.({ vnode, ops });
+    //   return { vnode, ops };
+    // }
+
+    function build(elm: TimelessElement) {
+      // console.log("build elm", elm.t, elm.value);
+      if (elm.t === "view") {
+        const $elm = document.createElement("div");
+        if (elm.props?.style) {
+          $elm.style = viewStyleToCssText(elm.props.style);
+        }
+        // console.log("build elm before style sets", elm.props?.styleSets);
+        if (elm.props?.styleSets) {
+          if (isRef(elm.props.styleSets)) {
+            $elm.className = elm.props.styleSets.value.join(" ");
+          } else {
+            $elm.className = elm.props.styleSets.join(" ");
+          }
+        }
+        if (elm.children) {
+          for (const child of elm.children) {
+            const $sub = build(child);
+            if ($sub) {
+              $elm.appendChild($sub);
+            }
+          }
+        }
+        return $elm;
+      }
+      if (elm.t === "text" && elm.value) {
+        const $elm = document.createTextNode(elm.value);
+        return $elm;
+      }
+      if (elm.t === "grid") {
+        const $elm = document.createElement("div");
+        $elm.style = "display: grid;";
+        return $elm;
+      }
+      if (elm.t === "for") {
+        const $elm = document.createDocumentFragment();
+        if (elm.children) {
+          for (const child of elm.children) {
+            const $sub = build(child);
+            if ($sub) {
+              $elm.appendChild($sub);
+            }
+          }
+        }
+        return $elm;
+      }
+      return null;
     }
-    // host.appendChild($root, $content);
-    $root.appendChild($content);
+
+    if (isElement(elm)) {
+      // const $content = elm.render();
+      const $content = build(elm);
+      if (!$content) {
+        console.error("[Render] Element render return null");
+        return;
+      }
+      $root.appendChild($content);
+      return { $content, ops };
+    }
+
+    console.error("[Render] Root Element can't be lazy element");
     return;
+  } finally {
+    state.enabled = false;
+    state.ops = [];
   }
-  console.error("[Render] Root Element can't be lazy element");
 }
 
 /**

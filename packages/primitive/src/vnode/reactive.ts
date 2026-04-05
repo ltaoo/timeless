@@ -83,7 +83,7 @@ export function bindStyle(
 ) {
   vnode.style[key] = ref.value;
   scheduler.patch(vnode, { style: { [key]: ref.value } });
-  ref._subscribe({
+  ref.subscribe({
     onChange(v) {
       vnode.style[key] = v as any;
       scheduler.patch(vnode, { style: { [key]: v as any } });
@@ -98,7 +98,7 @@ export function bindStylePresets(
 ) {
   vnode.stylePresets = ref.value ?? [];
   scheduler.patch(vnode, { stylePresets: vnode.stylePresets });
-  ref._subscribe({
+  ref.subscribe({
     onChange(v) {
       vnode.stylePresets = (v ?? []) as any;
       scheduler.patch(vnode, { stylePresets: vnode.stylePresets });
@@ -122,7 +122,7 @@ export function bindAttr(
     scheduler.patch(vnode, { attrs: { [name]: v } });
   };
   apply(ref.value);
-  ref._subscribe({
+  ref.subscribe({
     onChange(v) {
       apply(v);
     },
@@ -140,7 +140,7 @@ export function bindProp(
     scheduler.patch(vnode, { props: { [name]: v } });
   };
   apply(ref.value);
-  ref._subscribe({
+  ref.subscribe({
     onChange(v) {
       apply(v);
     },
@@ -150,7 +150,7 @@ export function bindProp(
 export function bindText(vnode: VNodeText, ref: Signal<string>, scheduler: RendererScheduler) {
   vnode.text = String((ref as any).value ?? "");
   scheduler.patch(vnode, { text: vnode.text });
-  ref._subscribe({
+  ref.subscribe({
     onChange(v) {
       vnode.text = String(v ?? "");
       scheduler.patch(vnode, { text: vnode.text });
@@ -186,7 +186,7 @@ export function setupReactiveBindings(
       scheduler.patch(vnode, { style: vnode.style });
     };
     apply(st.value);
-    st._subscribe({
+    st.subscribe({
       onChange(v) {
         apply(v);
       },
@@ -210,7 +210,7 @@ export function setupReactiveBindings(
       scheduler.patch(vnode, { attrs: vnode.attrs as any });
     };
     apply(a.value);
-    a._subscribe({
+    a.subscribe({
       onChange(v) {
         apply(v);
       },
@@ -230,7 +230,7 @@ export function setupReactiveBindings(
       scheduler.patch(vnode, { props: vnode.props });
     };
     apply(p.value);
-    p._subscribe({
+    p.subscribe({
       onChange(v) {
         apply(v);
       },

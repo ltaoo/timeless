@@ -38,7 +38,7 @@ export function Value(
         const updateText = () => {
           host.setTextContent($e, value$.value);
         };
-        value$._subscribe({ onChange: updateText });
+        value$.subscribe({ onChange: updateText });
         updateText();
         if (rest.onMounted) rest.onMounted(event);
       },
@@ -97,7 +97,7 @@ export function Loading(
         const updateDisplay = () => {
           host.patchStyle?.($elm, { display: loading$.value ? "" : "none" });
         };
-        loading$._subscribe({ onChange: updateDisplay });
+        loading$.subscribe({ onChange: updateDisplay });
         updateDisplay();
         if (rest.onMounted) rest.onMounted(event);
       },
@@ -151,7 +151,7 @@ export function Disabled(
             host.removeAttribute($elm, "data-disabled");
           }
         };
-        disabled$._subscribe({ onChange: updateState });
+        disabled$.subscribe({ onChange: updateState });
         updateState();
         if (rest.onMounted) rest.onMounted(event);
       },

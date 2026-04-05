@@ -34,10 +34,10 @@ export function ref<T = any>(v: T): TimelessRef<T> {
   }
   const r = {
     __is_ref: true as const,
-    _subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber) {
       deps.push(ctx);
     },
-    _destroy() {
+    destroy() {
       deps.length = 0;
     },
     get value() {

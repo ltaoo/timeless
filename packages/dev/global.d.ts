@@ -9,8 +9,8 @@ declare module "packages/reactive/src/types" {
     };
     export type TimelessRef<T> = {
         __is_ref: true;
-        _subscribe: (ctx: Subscriber) => void;
-        _destroy: () => void;
+        subscribe: (ctx: Subscriber) => void;
+        destroy: () => void;
         value: T;
         eq: (v: T) => boolean;
         isSame: (v: unknown) => boolean;
@@ -30,8 +30,8 @@ declare module "packages/reactive/src/types" {
     };
     export type TimelessRefObject<T> = {
         __is_ref: true;
-        _subscribe: (ctx: Subscriber) => void;
-        _destroy: () => void;
+        subscribe: (ctx: Subscriber) => void;
+        destroy: () => void;
         value: T;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
@@ -65,8 +65,8 @@ declare module "packages/reactive/src/types" {
     };
     export type TimelessRefObjectNullable<T> = {
         __is_ref: true;
-        _subscribe: (ctx: Subscriber) => void;
-        _destroy: () => void;
+        subscribe: (ctx: Subscriber) => void;
+        destroy: () => void;
         value: T | null;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
@@ -99,8 +99,8 @@ declare module "packages/reactive/src/types" {
     };
     export type TimelessRefArray<T> = {
         __is_ref: true;
-        _subscribe: (ctx: Subscriber) => void;
-        _destroy: () => void;
+        subscribe: (ctx: Subscriber) => void;
+        destroy: () => void;
         value: T[];
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
@@ -151,6 +151,8 @@ declare module "packages/reactive/src/types" {
         flatMap: (callback: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown) => any[];
         [Symbol.iterator]: () => Iterator<T>;
         move: (fromIndex: number, toIndex: number) => TimelessRefArray<T>;
+        up: (index: number) => TimelessRefArray<T>;
+        down: (index: number) => TimelessRefArray<T>;
         swap: (indexA: number, indexB: number) => TimelessRefArray<T>;
         moveToFirst: (index: number) => TimelessRefArray<T>;
         moveToLast: (index: number) => TimelessRefArray<T>;
@@ -185,28 +187,13 @@ declare module "packages/reactive/src/types" {
     };
     export type Ref<T> = {
         __is_ref: true;
-        _subscribe: (ctx: Subscriber) => void;
-        _destroy: () => void;
+        subscribe: (ctx: Subscriber) => void;
+        destroy: () => void;
         value: T;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
     };
-    export type ClassNameRef = {
-        __cn_ref: true;
-        _subscribe(ctx: Subscriber): void;
-        del(v: string): void;
-        add(v: string): void;
-        append(c: string): void;
-        toString(): string;
-    };
-    export type StyleRef = {
-        __style_ref: true;
-        _subscribe(ctx: Subscriber): void;
-        toString(): string;
-    };
     export function isRef(v: unknown): v is Ref<unknown>;
-    export function isClassName(v: unknown): v is ClassNameRef;
-    export function isStyleRef(v: unknown): v is StyleRef;
 }
 declare module "packages/reactive/src/reactive-array" {
     import { Ref, TimelessRefArray } from "packages/reactive/src/types";
@@ -433,26 +420,12 @@ declare module "packages/reactive/src/derive" {
         [K in keyof T]: UnwrapRef<T[K]>;
     }) => R): Ref<R>;
 }
-declare module "packages/reactive/src/class-names" {
-    import { Ref, ClassNameRef } from "packages/reactive/src/types";
-    export function classNames(items: (string | Ref<string> | ClassNameRef | undefined)[]): ClassNameRef;
-}
-declare module "packages/reactive/src/style-names" {
-    import { Ref, Subscriber } from "packages/reactive/src/types";
-    export interface StyleRef {
-        __style_ref: true;
-        _subscribe(ctx: Subscriber): void;
-        toString(): string;
-    }
-    export function isStyleRef(v: any): v is StyleRef;
-    export function styleNames(items: (string | Ref<string | StyleRef | undefined> | StyleRef | undefined)[]): StyleRef;
-}
 declare module "packages/reactive/src/index" {
-    import type { Subscriber, Ref, ClassNameRef, StyleRef } from "packages/reactive/src/types";
+    import type { Subscriber, Ref, TimelessRefArray } from "packages/reactive/src/types";
     import type { RefObject } from "packages/reactive/src/reactive-object";
     import type { RefArray } from "packages/reactive/src/reactive-array";
     import type { ArraySignal, ObjectSignal, PrimitiveSignal, Signal } from "packages/reactive/src/signal";
-    import { isRef, isClassName, isStyleRef } from "packages/reactive/src/types";
+    import { isRef } from "packages/reactive/src/types";
     import { ref } from "packages/reactive/src/ref";
     import { refArray } from "packages/reactive/src/reactive-array";
     import { refObject } from "packages/reactive/src/reactive-object";
@@ -461,39 +434,101 @@ declare module "packages/reactive/src/index" {
     import { computed } from "packages/reactive/src/computed";
     import { derive } from "packages/reactive/src/derive";
     import { release, get as registryGet, set as registrySet, getobj as registryGetObj, getarr as registryGetArr } from "packages/reactive/src/registry";
-    import { classNames } from "packages/reactive/src/class-names";
-    import { styleNames } from "packages/reactive/src/style-names";
-    export { Subscriber, Ref, RefObject, RefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, ClassNameRef, isClassName, StyleRef, isStyleRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, classNames, styleNames, classNames as cn, styleNames as sn, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
+    export { Subscriber, Ref, RefObject, RefArray, TimelessRefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
 }
-declare module "packages/primitive/src/primitive/text" {
+declare module "packages/primitive/src/reactive/for" {
     import { Ref } from "packages/reactive/src/index";
-    export function Txt(value: Ref<string> | string): {
+    import { ViewProps, TimelessElement } from "@/content/view";
+    export function For<T>(props: ViewProps & {
+        key?: string;
+        each: T[] | Ref<T[]>;
+        render: (item: T, idx: Ref<number>) => TimelessElement | null;
+    }): {
         t: string;
         $elm: any;
-        _value: string | Ref<string>;
+        value: string;
+        children: TimelessElement[];
         render(): any;
-        hydrate(existingDom: any): any;
-        onMounted(): void;
+        hydrate(startDom: any, parentDom?: any): any;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/reactive/show" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewChildren } from "@/content/view";
+    export function Show(props: {
+        when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
+        fallback?: ViewChildren;
+        onMounted?: ($fg: any) => void;
+        beforeUnmounted?: () => void;
+        onUnmounted?: () => void;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        _props: {
+            when: boolean | Ref<boolean> | {
+                when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
+                fallback?: ViewChildren;
+                onMounted?: ($fg: any) => void;
+                beforeUnmounted?: () => void;
+                onUnmounted?: () => void;
+            };
+            fallback: any;
+        };
+        _children: any[];
+        _fallback: any[];
+        cleanup(): void;
+        render(): any;
+        hydrate(startDom: any, parentDom?: any): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
 }
-declare module "packages/primitive/src/primitive/view" {
-    import { Signal, ClassNameRef, StyleRef } from "packages/reactive/src/index";
-    export type AttributeValue = string | number | boolean | undefined | null;
-    export type MaybeSignal<T = AttributeValue> = T | Signal<T>;
+declare module "packages/primitive/src/reactive/match" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewChildren, TimelessElement } from "@/content/view";
+    export function Match(props: {
+        when: Ref<any> | any;
+        fallback?: ViewChildren;
+        onMounted?: ($fg: any) => void;
+        beforeUnmounted?: () => void;
+        onUnmounted?: () => void;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        render(): any;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Case<T = any>(value: any, children: ViewChildren | (() => TimelessElement)[]): {
+        t: string;
+        value: any;
+        children: any;
+        $elm: any;
+        render(): any;
+    };
+}
+declare module "packages/primitive/src/content/text" {
+    import { Ref } from "packages/reactive/src/index";
+    import { TimelessElement } from "packages/primitive/src/content/view";
+    export function Txt(value: Ref<string> | string): TimelessElement;
+}
+declare module "packages/primitive/src/content/view" {
+    import { Signal } from "packages/reactive/src/index";
+    import { ViewStyleProperties, ViewStyle } from "@/style/index";
+    import { MountedEvent } from "@/event/index";
+    import { ClassNameRef } from "@/vnode/class-names";
+    export type ViewPropValue = string | number | boolean | undefined | null;
+    export type MaybeSignal<T = ViewPropValue> = T | Signal<T>;
     export type ViewAttributes = Record<string, MaybeSignal>;
-    export interface MountedEvent<T = any> {
-        target: T;
-    }
     export interface ViewProps {
-        as?: string;
         key?: string | number;
-        style?: MaybeSignal<string> | StyleRef;
+        as?: string;
+        style?: ViewStyle;
         class?: MaybeSignal<string> | ClassNameRef;
         draggable?: boolean;
         attributes?: ViewAttributes;
-        dataset?: Record<string, MaybeSignal<AttributeValue>>;
+        dataset?: Record<string, MaybeSignal<ViewPropValue>>;
         onMounted?(event: MountedEvent): void | (() => void);
         beforeUnmounted?(): void;
         onUnmounted?(): void;
@@ -516,11 +551,15 @@ declare module "packages/primitive/src/primitive/view" {
         onDrop?: (e: DragEvent) => void;
         onAnimationEnd?: (e: AnimationEvent) => void;
     }
-    export function View(props?: ViewProps, children?: ViewChildren | ViewChildren[number]): {
+    export function View(props?: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -536,7 +575,12 @@ declare module "packages/primitive/src/primitive/view" {
     export interface TimelessElement {
         t: string;
         $elm: any;
-        value?: unknown;
+        children?: TimelessElement[];
+        props?: {
+            styleSets?: MaybeSignal<string[]>;
+            style?: ViewStyleProperties;
+        };
+        value?: string;
         render(): any;
         hydrate?(existingDom: any): any;
         cleanup?: () => void;
@@ -546,96 +590,23 @@ declare module "packages/primitive/src/primitive/view" {
     }
     export type ViewChildren = (TimelessElement | (() => TimelessElement) | string | number | MaybeSignal<string | number> | null)[];
 }
-declare module "packages/primitive/src/primitive/for" {
-    import { Ref } from "packages/reactive/src/index";
-    import { ViewProps, TimelessElement } from "packages/primitive/src/primitive/view";
-    export function For<T>(props: ViewProps & {
-        each: T[] | Ref<T[]>;
-        render: (item: T, idx: Ref<number>) => TimelessElement | (() => TimelessElement) | null;
-        key?: string;
-    }): {
-        t: string;
-        $elm: any;
-        _props: {
-            each: T[] | Ref<T[]>;
-            render: (item: T, idx: Ref<number>) => TimelessElement | (() => TimelessElement) | null;
-            key: string;
-        };
-        _values: T[];
-        _elements: TimelessElement[];
-        _$children: any[];
-        render(): any;
-        hydrate(startDom: any, parentDom?: any): any;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/primitive/src/primitive/show" {
-    import { Ref } from "packages/reactive/src/index";
-    import { ViewChildren, MountedEvent } from "packages/primitive/src/primitive/view";
-    export function Show(props: {
-        when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
-        fallback?: ViewChildren;
-        onMounted?: (event: MountedEvent) => void;
-        beforeUnmounted?: () => void;
-        onUnmounted?: () => void;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        _props: {
-            when: boolean | Ref<boolean> | {
-                when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
-                fallback?: ViewChildren;
-                onMounted?: (event: MountedEvent) => void;
-                beforeUnmounted?: () => void;
-                onUnmounted?: () => void;
-            };
-            fallback: ViewChildren;
-        };
-        _children: any[];
-        _fallback: any[];
-        cleanup(): void;
-        render(): any;
-        hydrate(startDom: any, parentDom?: any): any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/primitive/src/primitive/match" {
-    import { Ref } from "packages/reactive/src/index";
-    import { ViewChildren, TimelessElement } from "packages/primitive/src/primitive/view";
-    export function Match(props: {
-        when: Ref<any> | any;
-        fallback?: ViewChildren;
-        onMounted?: ($fg: any) => void;
-        beforeUnmounted?: () => void;
-        onUnmounted?: () => void;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        render(): any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Case<T = any>(value: any, children: ViewChildren | (() => TimelessElement)[]): {
-        t: string;
-        value: any;
-        children: ViewChildren | (() => TimelessElement)[];
-        $elm: any;
-        render(): any;
-    };
-}
-declare module "packages/primitive/src/primitive/fragment" {
-    import { ViewChildren, ViewProps } from "packages/primitive/src/primitive/view";
+declare module "packages/primitive/src/content/fragment" {
+    import { ViewChildren, ViewProps } from "packages/primitive/src/content/view";
     export function Fragment(props: ViewProps, children?: ViewChildren): {
         t: string;
-        $elm: any;
+        state: {
+            rendered: boolean;
+            children: ViewChildren;
+            readonly host: any;
+        };
+        readonly $elm: any;
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
         render(): any;
     };
 }
-declare module "packages/primitive/src/primitive/html" {
+declare module "packages/primitive/src/content/html" {
     import { Ref } from "packages/reactive/src/index";
     export function DangerouslyInnerHTML(html: string | Ref<string>): {
         t: string;
@@ -649,51 +620,22 @@ declare module "packages/primitive/src/primitive/html" {
         class$: any;
     };
 }
-declare module "packages/primitive/src/primitive/error-boundary" {
-    import { TimelessElement } from "packages/primitive/src/primitive/view";
+declare module "packages/primitive/src/content/error-boundary" {
+    import { TimelessElement } from "packages/primitive/src/content/view";
     export type ErrorFallbackFn = (error: Error, viewName: string) => TimelessElement;
     export function defaultErrorView(error: Error, viewName: string): TimelessElement;
     export function withErrorBoundary(createView: () => TimelessElement, viewName: string, ErrorFallback?: ErrorFallbackFn): TimelessElement;
 }
-declare module "packages/primitive/src/primitive/lazy-view" {
-    import { TimelessElement, ViewProps, ViewChildren, TimelessComponent } from "packages/primitive/src/primitive/view";
+declare module "packages/primitive/src/content/lazy-view" {
+    import { TimelessElement, ViewProps, ViewChildren, TimelessComponent } from "packages/primitive/src/content/view";
     export function LazyView(props: ViewProps & {
         placeholder?: ViewChildren;
     } & Record<string, any>, children: [TimelessComponent]): TimelessElement;
 }
-declare module "packages/primitive/src/native/img" {
+declare module "packages/primitive/src/input/input" {
     import { Ref } from "packages/reactive/src/index";
-    import { ViewProps } from "@/primitive/view";
-    export interface ImgProps extends Omit<ViewProps, "type" | "as"> {
-        src?: string | Ref<string>;
-        alt?: string | Ref<string>;
-        width?: number | string | Ref<number | string>;
-        height?: number | string | Ref<number | string>;
-        loading?: "lazy" | "eager" | Ref<string>;
-        decoding?: "async" | "sync" | "auto" | Ref<string>;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | Ref<string>;
-        srcset?: string | Ref<string>;
-        sizes?: string | Ref<string>;
-        referrerPolicy?: ReferrerPolicy | Ref<string>;
-        fetchPriority?: "high" | "low" | "auto" | Ref<string>;
-        useMap?: string | Ref<string>;
-        isMap?: boolean;
-        onLoad?(e: Event): void;
-        onError?(e: Event): void;
-        onMounted?: ($elm: HTMLImageElement) => void;
-    }
-    export function NativeImg(props?: ImgProps): {
-        t: string;
-        $elm: HTMLImageElement;
-        render(): HTMLImageElement;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/primitive/src/native/input" {
-    import { Ref } from "packages/reactive/src/index";
-    import { ViewProps } from "@/primitive/view";
-    export interface NativeInputProps extends Omit<ViewProps, "as" | "type"> {
+    import { ViewProps } from "@/content/view";
+    export interface InputProps extends Omit<ViewProps, "as" | "type"> {
         id?: string | Ref<string>;
         type?: string | Ref<string>;
         value?: string | Ref<string>;
@@ -711,7 +653,7 @@ declare module "packages/primitive/src/native/input" {
         onInput?: (e: Event) => void;
         onChange?: (e: Event) => void;
     }
-    export function NativeInput(props?: NativeInputProps): {
+    export function Input(props?: InputProps): {
         t: string;
         $elm: any;
         render(): any;
@@ -719,11 +661,11 @@ declare module "packages/primitive/src/native/input" {
         onUnmounted(): void;
     };
 }
-declare module "packages/primitive/src/native/password" {
-    import { NativeInputProps } from "packages/primitive/src/native/input";
-    export interface NativePasswordProps extends Omit<NativeInputProps, "type"> {
+declare module "packages/primitive/src/input/password" {
+    import { InputProps } from "packages/primitive/src/input/input";
+    export interface PasswordInputProps extends Omit<InputProps, "type"> {
     }
-    export function NativePassword(props?: NativePasswordProps): {
+    export function PasswordInput(props?: PasswordInputProps): {
         t: string;
         $elm: any;
         render(): any;
@@ -731,41 +673,14 @@ declare module "packages/primitive/src/native/password" {
         onUnmounted(): void;
     };
 }
-declare module "packages/primitive/src/native/label" {
+declare module "packages/primitive/src/input/checkbox" {
     import { Ref } from "packages/reactive/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
-    export interface NativeLabelProps extends Omit<ViewProps, "as"> {
-        for?: string | Ref<string>;
-        htmlFor?: string | Ref<string>;
-    }
-    export function NativeLabel(props?: NativeLabelProps, children?: ViewChildren | ViewChildren[number]): any;
-}
-declare module "packages/primitive/src/native/link" {
-    import { Ref } from "packages/reactive/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
-    export interface NativeLinkProps extends Omit<ViewProps, "as"> {
-        href?: string | Ref<string>;
-        target?: NativeLinkTarget | Ref<NativeLinkTarget>;
-        rel?: string | Ref<string>;
-        disabled?: boolean | Ref<boolean>;
-        download?: boolean | string | Ref<boolean | string>;
-        referrerPolicy?: ReferrerPolicy | Ref<string>;
-        hreflang?: string | Ref<string>;
-        hrefLang?: string | Ref<string>;
-        type?: string | Ref<string>;
-        ping?: string | Ref<string>;
-    }
-    export type NativeLinkTarget = "_self" | "_blank" | "_parent" | "_top" | (string & {});
-    export function NativeLink(props?: NativeLinkProps, children?: ViewChildren | ViewChildren[number]): any;
-}
-declare module "packages/primitive/src/native/checkbox" {
-    import { Ref } from "packages/reactive/src/index";
-    import { NativeInputProps } from "packages/primitive/src/native/input";
-    export interface NativeCheckboxProps extends Omit<NativeInputProps, "type"> {
+    import { InputProps } from "packages/primitive/src/input/input";
+    export interface NativeCheckboxProps extends Omit<InputProps, "type"> {
         checked?: boolean | Ref<boolean>;
         indeterminate?: boolean | Ref<boolean>;
     }
-    export function NativeCheckbox(props?: NativeCheckboxProps): {
+    export function Checkbox(props?: NativeCheckboxProps): {
         t: string;
         $elm: any;
         render(): any;
@@ -773,11 +688,11 @@ declare module "packages/primitive/src/native/checkbox" {
         onUnmounted(): void;
     };
 }
-declare module "packages/primitive/src/native/select" {
+declare module "packages/primitive/src/input/select" {
     import { Ref } from "packages/reactive/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     type NativeSelectValue = string | string[];
-    export interface NativeSelectProps extends Omit<ViewProps, "as"> {
+    export interface SelectProps extends Omit<ViewProps, "as"> {
         id?: string | Ref<string>;
         name?: string | Ref<string>;
         disabled?: boolean | Ref<boolean>;
@@ -788,19 +703,19 @@ declare module "packages/primitive/src/native/select" {
         onChange?: (e: Event) => void;
         onInput?: (e: Event) => void;
     }
-    export function NativeSelect(props?: NativeSelectProps, children?: ViewChildren | ViewChildren[number]): any;
+    export function Select(props?: SelectProps, children?: ViewChildren): any;
 }
-declare module "packages/primitive/src/native/slider" {
+declare module "packages/primitive/src/input/slider" {
     import { Ref } from "packages/reactive/src/index";
-    import { NativeInputProps } from "packages/primitive/src/native/input";
+    import { InputProps } from "packages/primitive/src/input/input";
     type SliderNum = number | string;
-    export interface NativeSliderProps extends Omit<NativeInputProps, "type" | "value" | "minLength" | "maxLength"> {
+    export interface SliderProps extends Omit<InputProps, "type" | "value" | "minLength" | "maxLength"> {
         value?: SliderNum | Ref<SliderNum>;
         min?: SliderNum | Ref<SliderNum>;
         max?: SliderNum | Ref<SliderNum>;
         step?: SliderNum | Ref<SliderNum>;
     }
-    export function NativeSlider(props?: NativeSliderProps): {
+    export function Slider(props?: SliderProps): {
         t: string;
         $elm: any;
         render(): any;
@@ -808,16 +723,16 @@ declare module "packages/primitive/src/native/slider" {
         onUnmounted(): void;
     };
 }
-declare module "packages/primitive/src/native/file-input" {
+declare module "packages/primitive/src/input/file-input" {
     import { Ref } from "packages/reactive/src/index";
-    import { NativeInputProps } from "packages/primitive/src/native/input";
-    export interface NativeFileInputProps extends Omit<NativeInputProps, "type" | "value" | "maxLength" | "minLength" | "pattern" | "inputMode"> {
+    import { InputProps } from "packages/primitive/src/input/input";
+    export interface FileSelectProps extends Omit<InputProps, "type" | "value" | "maxLength" | "minLength" | "pattern" | "inputMode"> {
         accept?: string | Ref<string>;
         multiple?: boolean | Ref<boolean>;
         capture?: string | Ref<string>;
         files?: Ref<FileList | null>;
     }
-    export function NativeFileInput(props?: NativeFileInputProps): {
+    export function FileSelect(props?: FileSelectProps): {
         t: string;
         $elm: any;
         render(): any;
@@ -825,13 +740,15 @@ declare module "packages/primitive/src/native/file-input" {
         onUnmounted(): void;
     };
 }
-declare module "packages/primitive/src/native/svg" {
-    import { Ref, ClassNameRef } from "packages/reactive/src/index";
-    import { MountedEvent } from "packages/primitive/src/primitive/view";
+declare module "packages/primitive/src/content/svg" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewStyle } from "@/style/index";
+    import { ClassNameRef } from "@/vnode/class-names";
+    import { MountedEvent } from "@/event/index";
     type AttrValue = string | number | Ref<string> | Ref<number>;
     /** Props shared by all SVG elements (lifecycle, events, style, class) */
     interface SVGBaseProps {
-        style?: string | Ref<string>;
+        style?: ViewStyle;
         class?: string | Ref<string> | ClassNameRef;
         dataset?: Record<string, string>;
         id?: AttrValue;
@@ -1079,6 +996,15 @@ declare module "packages/primitive/src/native/svg" {
         setContent(html: string): void;
         render(): any;
     };
+    export function Symbol(props?: SymbolProps, children?: any): {
+        t: string;
+        $elm: any;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
+    };
     export function Use(props?: UseProps, children?: any): {
         t: string;
         $elm: any;
@@ -1143,14 +1069,71 @@ declare module "packages/primitive/src/native/svg" {
         render(): any;
     };
 }
-declare module "packages/primitive/src/native/style" {
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+declare module "packages/primitive/src/content/style" {
+    import { ViewChildren, ViewProps } from "@/content/view";
     export interface NativeStyleProps extends Omit<ViewProps, "as"> {
     }
-    export function NativeStyle(props?: NativeStyleProps, children?: ViewChildren | ViewChildren[number]): any;
+    export function NativeStyle(props?: NativeStyleProps, children?: ViewChildren): any;
+}
+declare module "packages/primitive/src/content/img" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewProps } from "@/content/view";
+    import { MountedEvent } from "@/event/index";
+    export interface ImgProps extends Omit<ViewProps, "type" | "as"> {
+        src?: string | Ref<string>;
+        alt?: string | Ref<string>;
+        width?: number | string | Ref<number | string>;
+        height?: number | string | Ref<number | string>;
+        loading?: "lazy" | "eager" | Ref<string>;
+        decoding?: "async" | "sync" | "auto" | Ref<string>;
+        crossOrigin?: "anonymous" | "use-credentials" | "" | Ref<string>;
+        srcset?: string | Ref<string>;
+        sizes?: string | Ref<string>;
+        referrerPolicy?: ReferrerPolicy | Ref<string>;
+        fetchPriority?: "high" | "low" | "auto" | Ref<string>;
+        useMap?: string | Ref<string>;
+        isMap?: boolean;
+        onLoad?(e: Event): void;
+        onError?(e: Event): void;
+        onMounted?(event: MountedEvent<HTMLImageElement>): void | (() => void);
+    }
+    export function NativeImg(props?: ImgProps): {
+        t: string;
+        $elm: HTMLImageElement;
+        render(): HTMLImageElement;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/content/label" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewChildren, ViewProps } from "@/content/view";
+    export interface NativeLabelProps extends Omit<ViewProps, "as"> {
+        for?: string | Ref<string>;
+        htmlFor?: string | Ref<string>;
+    }
+    export function NativeLabel(props?: NativeLabelProps, children?: ViewChildren): any;
+}
+declare module "packages/primitive/src/interaction/link" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewChildren, ViewProps } from "@/content/view";
+    export interface LinkProps extends Omit<ViewProps, "as"> {
+        href?: string | Ref<string>;
+        target?: NativeLinkTarget | Ref<NativeLinkTarget>;
+        rel?: string | Ref<string>;
+        disabled?: boolean | Ref<boolean>;
+        download?: boolean | string | Ref<boolean | string>;
+        referrerPolicy?: ReferrerPolicy | Ref<string>;
+        hreflang?: string | Ref<string>;
+        hrefLang?: string | Ref<string>;
+        type?: string | Ref<string>;
+        ping?: string | Ref<string>;
+    }
+    export type NativeLinkTarget = "_self" | "_blank" | "_parent" | "_top" | (string & {});
+    export function Link(props?: LinkProps, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/modules/portal" {
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Portal(props: ViewProps & {}, children: ViewChildren): {
         t: string;
         $elm: any;
@@ -1232,29 +1215,28 @@ declare module "packages/base/src/index" {
 }
 declare module "packages/ui/src/accordion/index" {
     import { Handler } from "packages/base/src/index";
-    import type { RefArray } from "packages/reactive/src/index";
+    import { RefArray } from "packages/reactive/src/index";
     type AccordionCoreProps = {
         type?: "single" | "multiple";
         defaultOpenItems?: number[];
     };
-    export function AccordionCore(props?: AccordionCoreProps): {
+    export type AccordionCoreState = {
+        openItems: number[];
+        type: "single" | "multiple";
+    };
+    export type AccordionCoreStore = {
         shape: "accordion";
-        type: "multiple" | "single";
+        type: "single" | "multiple";
         openItems: RefArray<number>;
-        state: {
-            readonly openItems: number[];
-            readonly type: "multiple" | "single";
-        };
+        state: AccordionCoreState;
         toggle(index: number): void;
         open(index: number): void;
         close(index: number): void;
         isOpen(index: number): boolean;
-        onStateChange(handler: Handler<{
-            readonly openItems: number[];
-            readonly type: "multiple" | "single";
-        }>): () => void;
+        onStateChange(handler: Handler<AccordionCoreState>): () => void;
         onOpenItemsChange(handler: Handler<number[]>): () => void;
     };
+    export function AccordionCore(props?: AccordionCoreProps): AccordionCoreStore;
     export type AccordionCore = ReturnType<typeof AccordionCore>;
 }
 declare module "packages/ui/src/menu/item" {
@@ -1545,9 +1527,9 @@ declare module "packages/ui/src/menu/index" {
      * @file 菜单 组件
      */
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { PopperCore, Side, Align } from "@/popper";
-    import { DismissableLayerCore } from "@/dismissable-layer";
-    import { PresenceCore } from "@/presence";
+    import { PopperCore, Side, Align } from "@/popper/index";
+    import { DismissableLayerCore } from "@/dismissable-layer/index";
+    import { PresenceCore } from "@/presence/index";
     import { MenuItemCore } from "packages/ui/src/menu/item";
     import { MenuSeparatorCore } from "packages/ui/src/menu/separator";
     import { MenuGroupCore } from "packages/ui/src/menu/group";
@@ -1720,7 +1702,7 @@ declare module "packages/ui/src/button/index" {
 }
 declare module "packages/ui/src/checkbox/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { PresenceCore } from "@/presence";
+    import { PresenceCore } from "@/presence/index";
     enum Events {
         StateChange = 0,
         Change = 1
@@ -1766,7 +1748,7 @@ declare module "packages/ui/src/checkbox/index" {
 }
 declare module "packages/ui/src/context-menu/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { MenuCore } from "@/menu";
+    import { MenuCore } from "@/menu/index";
     import { MenuItemCore } from "@/menu/item";
     import { Rect, Side, Align } from "@/popper/types";
     enum Events {
@@ -1935,6 +1917,64 @@ declare module "packages/ui/src/direction/index" {
     export type Direction = "ltr" | "rtl";
     export type Orientation = "horizontal" | "vertical";
 }
+declare module "packages/ui/src/dismissable-layer/index" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { LayerManager } from "@/layer/index";
+    enum Events {
+        Dismiss = 0,
+        FocusOutside = 1,
+        PointerDownOutside = 2,
+        InteractOutside = 3
+    }
+    type TheTypesOfEvents = {
+        [Events.Dismiss]: void;
+        [Events.PointerDownOutside]: void;
+        [Events.FocusOutside]: void;
+        [Events.InteractOutside]: void;
+    };
+    /**
+     * DismissableLayerCore - 可关闭的浮动层
+     *
+     * 基于 LayerManager 实现，自动处理嵌套层的点击外部关闭逻辑
+     */
+    export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
+        name: string;
+        readonly id: string;
+        private layerManager;
+        private getRect;
+        private registered;
+        constructor(options?: Partial<{
+            _name: string;
+            layerManager: LayerManager;
+        }>);
+        /**
+         * 设置层的位置信息（用于 containsPoint 检测）
+         * 在层挂载时调用
+         */
+        setRect(getRect: () => {
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+        }): void;
+        /**
+         * 注册到 LayerManager
+         * 在层显示/挂载时调用
+         */
+        register(): void;
+        /**
+         * 从 LayerManager 注销
+         * 在层隐藏/卸载时调用
+         */
+        unregister(): void;
+        /** 手动触发关闭 */
+        dismiss(): void;
+        onDismiss(handler: Handler<TheTypesOfEvents[Events.Dismiss]>): () => void;
+        onPointerDownOutside(handler: Handler<TheTypesOfEvents[Events.PointerDownOutside]>): () => void;
+        onFocusOutside(handler: Handler<TheTypesOfEvents[Events.FocusOutside]>): () => void;
+        onInteractOutside(handler: Handler<TheTypesOfEvents[Events.InteractOutside]>): () => void;
+    }
+}
 declare module "packages/ui/src/layer/index" {
     /**
      * LayerManager - 平台无关的浮动层管理器
@@ -2005,70 +2045,12 @@ declare module "packages/ui/src/layer/index" {
     /** 用于测试：重置全局实例 */
     export function resetGlobalLayerManager(): void;
 }
-declare module "packages/ui/src/dismissable-layer/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
-    import { LayerManager } from "packages/ui/src/layer/index";
-    enum Events {
-        Dismiss = 0,
-        FocusOutside = 1,
-        PointerDownOutside = 2,
-        InteractOutside = 3
-    }
-    type TheTypesOfEvents = {
-        [Events.Dismiss]: void;
-        [Events.PointerDownOutside]: void;
-        [Events.FocusOutside]: void;
-        [Events.InteractOutside]: void;
-    };
-    /**
-     * DismissableLayerCore - 可关闭的浮动层
-     *
-     * 基于 LayerManager 实现，自动处理嵌套层的点击外部关闭逻辑
-     */
-    export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
-        name: string;
-        readonly id: string;
-        private layerManager;
-        private getRect;
-        private registered;
-        constructor(options?: Partial<{
-            _name: string;
-            layerManager: LayerManager;
-        }>);
-        /**
-         * 设置层的位置信息（用于 containsPoint 检测）
-         * 在层挂载时调用
-         */
-        setRect(getRect: () => {
-            x: number;
-            y: number;
-            width: number;
-            height: number;
-        }): void;
-        /**
-         * 注册到 LayerManager
-         * 在层显示/挂载时调用
-         */
-        register(): void;
-        /**
-         * 从 LayerManager 注销
-         * 在层隐藏/卸载时调用
-         */
-        unregister(): void;
-        /** 手动触发关闭 */
-        dismiss(): void;
-        onDismiss(handler: Handler<TheTypesOfEvents[Events.Dismiss]>): () => void;
-        onPointerDownOutside(handler: Handler<TheTypesOfEvents[Events.PointerDownOutside]>): () => void;
-        onFocusOutside(handler: Handler<TheTypesOfEvents[Events.FocusOutside]>): () => void;
-        onInteractOutside(handler: Handler<TheTypesOfEvents[Events.InteractOutside]>): () => void;
-    }
-}
 declare module "packages/ui/src/dropdown-menu/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { MenuCore } from "@/menu";
+    import { MenuCore } from "@/menu/index";
     import { MenuItemCore } from "@/menu/item";
     import { Side } from "@/popper/types";
-    import { Align } from "@/popper";
+    import { Align } from "@/popper/index";
     enum Events {
         StateChange = 0
     }
@@ -2170,52 +2152,6 @@ declare module "packages/ui/src/form/types" {
         onChange: (fn: (v: T) => void) => void;
     };
 }
-declare module "packages/ui/src/form/list" {
-    /**
-     * @file 一个用于表单中的动态列表组件
-     */
-    import { Handler } from "packages/base/src/index";
-    export function ListContainerCore<T extends {
-        defaultValue: any;
-        factory: () => any;
-    }>(props: T): {
-        symbol: "ListContainerCore";
-        shape: "list";
-        value: ReturnType<T["factory"]>["value"][];
-        $value: () => any;
-        state: {
-            readonly list: {
-                index: number;
-                $input: ReturnType<T["factory"]>;
-            }[];
-            readonly value: ReturnType<T["factory"]>["value"][];
-            readonly canRemove: boolean;
-        };
-        readonly list: {
-            index: number;
-            $input: ReturnType<T["factory"]>;
-        }[];
-        append(): {
-            index: number;
-            $input: ReturnType<T["factory"]>;
-        };
-        removeFieldByIndex(index: number): void;
-        setValue(v: ReturnType<T["factory"]>["value"][]): void;
-        onChange(handler: Handler<ReturnType<T["factory"]>["value"][]>): () => void;
-        onStateChange(handler: Handler<{
-            readonly list: {
-                index: number;
-                $input: ReturnType<T["factory"]>;
-            }[];
-            readonly value: ReturnType<T["factory"]>["value"][];
-            readonly canRemove: boolean;
-        }>): () => void;
-    };
-    export type ListContainerCore<T extends {
-        defaultValue: any;
-        factory: () => any;
-    }> = ReturnType<typeof ListContainerCore<T>>;
-}
 declare module "packages/ui/src/form/field" {
     import { BaseDomain, Handler } from "packages/base/src/index";
     import { ValueInputInterface } from "packages/ui/src/form/types";
@@ -2265,10 +2201,9 @@ declare module "packages/ui/src/form/index" {
     /**
      * @file 多字段 Input
      */
-    import { Handler } from "packages/base/src/index";
+    import { Handler, Result } from "packages/base/src/index";
     import { FormFieldCore } from "packages/ui/src/form/field";
     import { ValueInputInterface } from "packages/ui/src/form/types";
-    import { Result } from "packages/base/src/index";
     type FormProps<F extends Record<string, FormFieldCore<any>>> = {
         fields: F;
     };
@@ -3257,6 +3192,9 @@ declare module "packages/ui/src/number-input/index" {
     }
 }
 declare module "packages/ui/src/node/index" {
+    /**
+     * @deprecated
+     */
     import { BaseDomain, Handler } from "packages/base/src/index";
     enum Events {
         Click = 0,
@@ -3287,9 +3225,9 @@ declare module "packages/ui/src/popover/index" {
      * @file 气泡
      */
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { PresenceCore } from "@/presence";
-    import { PopperCore, Align, Side } from "@/popper";
-    import { DismissableLayerCore } from "@/dismissable-layer";
+    import { PresenceCore } from "@/presence/index";
+    import { PopperCore, Align, Side } from "@/popper/index";
+    import { DismissableLayerCore } from "@/dismissable-layer/index";
     enum Events {
         Show = 0,
         Hidden = 1,
@@ -3364,9 +3302,9 @@ declare module "packages/ui/src/popconfirm/index" {
      * @file 确认气泡
      */
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { PresenceCore } from "@/presence";
-    import { PopperCore, Align, Side } from "@/popper";
-    import { DismissableLayerCore } from "@/dismissable-layer";
+    import { PresenceCore } from "@/presence/index";
+    import { PopperCore, Align, Side } from "@/popper/index";
+    import { DismissableLayerCore } from "@/dismissable-layer/index";
     enum Events {
         Show = 0,
         Hidden = 1,
@@ -4266,8 +4204,8 @@ declare module "packages/ui/src/progress/index" {
 }
 declare module "packages/ui/src/roving-focus/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { Direction, Orientation } from "@/direction";
-    import { CollectionCore } from "@/collection";
+    import { Direction, Orientation } from "@/direction/index";
+    import { CollectionCore } from "@/collection/index";
     enum Events {
         ItemFocus = 0,
         ItemShiftTab = 1,
@@ -4741,10 +4679,10 @@ declare module "packages/ui/src/select/utils" {
 }
 declare module "packages/ui/src/select/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { PopperCore } from "@/popper";
+    import { PopperCore } from "@/popper/index";
     import { Rect } from "@/popper/types";
-    import { DismissableLayerCore } from "@/dismissable-layer";
-    import { Direction } from "@/direction";
+    import { DismissableLayerCore } from "@/dismissable-layer/index";
+    import { Direction } from "@/direction/index";
     import { SelectContentCore } from "packages/ui/src/select/content";
     import { SelectViewportCore } from "packages/ui/src/select/viewport";
     import { SelectTriggerCore } from "packages/ui/src/select/trigger";
@@ -4950,9 +4888,9 @@ declare module "packages/ui/src/select/index" {
 }
 declare module "packages/ui/src/cascader/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { PopperCore } from "@/popper";
+    import { PopperCore } from "@/popper/index";
     import { Rect } from "@/popper/types";
-    import { DismissableLayerCore } from "@/dismissable-layer";
+    import { DismissableLayerCore } from "@/dismissable-layer/index";
     export type CascaderOption<T = any> = {
         value: T;
         label: string;
@@ -5109,9 +5047,9 @@ declare module "packages/ui/src/cascader/index" {
 }
 declare module "packages/ui/src/tabs/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { RovingFocusCore } from "@/roving-focus";
-    import { Direction, Orientation } from "@/direction";
-    import { PresenceCore } from "@/presence";
+    import { RovingFocusCore } from "@/roving-focus/index";
+    import { Direction, Orientation } from "@/direction/index";
+    import { PresenceCore } from "@/presence/index";
     enum Events {
         StateChange = 0,
         ValueChange = 1
@@ -5156,7 +5094,7 @@ declare module "packages/ui/src/toast/index" {
      * @file 弹窗核心类
      */
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { ExternalToast } from "@/sonner-core";
+    import { ExternalToast } from "@/sonner/index";
     enum Events {
         BeforeShow = 0,
         Show = 1,
@@ -5224,7 +5162,7 @@ declare module "packages/ui/src/toast/index" {
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
         get [Symbol.toStringTag](): string;
     }
-    export type { ToastT, ExternalToast, ToastTypes, ToastToDismiss, } from "@/sonner-core";
+    export type { ToastT, ExternalToast, ToastTypes, ToastToDismiss, } from "@/sonner";
 }
 declare module "packages/ui/src/tree/constants" {
     export enum TARGET_POSITION_TYPE {
@@ -5399,8 +5337,7 @@ declare module "packages/ui/src/video-player/index" {
     /**
      * @file 播放器
      */
-    import { BaseDomain, Handler } from "packages/base/src/index";
-    import { Result } from "packages/base/src/index";
+    import { BaseDomain, Handler, Result } from "packages/base/src/index";
     /** 影片分辨率 */
     enum MediaResolutionTypes {
         /** 标清 */
@@ -5780,7 +5717,7 @@ declare module "packages/ui/src/radio/index" {
      * @file 单选框
      */
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { PresenceCore } from "@/presence";
+    import { PresenceCore } from "@/presence/index";
     enum RadioEvents {
         StateChange = 0,
         Change = 1
@@ -6812,8 +6749,7 @@ declare module "packages/ui/src/affix/index" {
     }
 }
 declare module "packages/ui/src/back-to-top/index" {
-    import { Handler } from "packages/base/src/index";
-    import { BizError } from "packages/base/src/index";
+    import { Handler, BizError } from "packages/base/src/index";
     export function BackToTopModel(props: {
         clientHeight?: number;
     }): {
@@ -7121,8 +7057,8 @@ declare module "packages/ui/src/toggle/index" {
 }
 declare module "packages/ui/src/tree-select/tree-select" {
     import { Handler, BizError } from "packages/base/src/index";
-    import { PopoverCore } from "@/popover";
-    import { InputCore } from "@/input";
+    import { PopoverCore } from "@/popover/index";
+    import { InputCore } from "@/input/index";
     export function TreeSelectModel<T extends {
         id: number | string;
         label: string;
@@ -7497,10 +7433,10 @@ declare module "packages/ui/src/tree-select/index" {
 }
 declare module "packages/ui/src/tag-select/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { PopperCore } from "@/popper";
+    import { PopperCore } from "@/popper/index";
     import { Rect } from "@/popper/types";
-    import { DismissableLayerCore } from "@/dismissable-layer";
-    import { Direction } from "@/direction";
+    import { DismissableLayerCore } from "@/dismissable-layer/index";
+    import { Direction } from "@/direction/index";
     enum Events {
         StateChange = 0,
         Change = 1,
@@ -7881,8 +7817,8 @@ declare module "packages/ui/src/tooltip/index" {
      * @file 提示框
      */
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import { PresenceCore } from "@/presence";
-    import { PopperCore, Align, Side } from "@/popper";
+    import { PresenceCore } from "@/presence/index";
+    import { PopperCore, Align, Side } from "@/popper/index";
     enum Events {
         Show = 0,
         Hidden = 1,
@@ -8034,7 +7970,7 @@ declare module "packages/ui/src/click-outside/index" {
         onError(handler: Handler<TheTypesOfEvents[Events.Error]>): () => void;
     };
 }
-declare module "packages/ui/src/sonner-core/index" {
+declare module "packages/ui/src/sonner/index" {
     /**
      * @file SonnerCore - Toast 通知系统核心类
      * 基于 sonner 的设计，抽象 toast 管理逻辑
@@ -8234,11 +8170,11 @@ declare module "packages/ui/src/index" {
     export * from "packages/ui/src/tooltip/index";
     export * from "packages/ui/src/shortcut/index";
     export * from "packages/ui/src/click-outside/index";
-    export * from "packages/ui/src/sonner-core/index";
+    export * from "packages/ui/src/sonner/index";
 }
 declare module "packages/primitive/src/modules/presence" {
     import { PresenceCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Presence(props: ViewProps & {
         store: PresenceCore;
         animation?: {
@@ -8249,7 +8185,7 @@ declare module "packages/primitive/src/modules/presence" {
 }
 declare module "packages/primitive/src/modules/transition" {
     import { PresenceCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Transition(props: ViewProps & {
         store: PresenceCore;
         animation?: {
@@ -8260,7 +8196,7 @@ declare module "packages/primitive/src/modules/transition" {
 }
 declare module "packages/primitive/src/modules/popper" {
     import { PopperCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: PopperCore;
     }, children?: ViewChildren): any;
@@ -8276,9 +8212,10 @@ declare module "packages/primitive/src/modules/popper" {
         onReferenceOutOfView?: () => void;
     }, children?: ViewChildren): any;
 }
-declare module "packages/primitive/src/modules/flex" {
-    import { ClassNameRef, Ref } from "packages/reactive/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+declare module "packages/primitive/src/layout/flex" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewChildren, ViewProps } from "@/content/view";
+    import { ClassNameRef } from "@/vnode/class-names";
     export type FlexJustify = "start" | "end" | "center" | "between" | "around" | "evenly";
     export type FlexItems = "start" | "end" | "center" | "baseline" | "stretch";
     export type FlexDirection = "col" | "col-reverse" | "reverse";
@@ -8290,14 +8227,54 @@ declare module "packages/primitive/src/modules/flex" {
         class?: string | Ref<string> | ClassNameRef;
     } & ViewProps, children?: ViewChildren): any;
 }
+declare module "packages/primitive/src/layout/grid" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewChildren, ViewProps } from "@/content/view";
+    import { ClassNameRef } from "@/vnode/class-names";
+    export type GridAlign = "start" | "end" | "center" | "stretch" | "baseline";
+    export type GridJustify = GridAlign | "between" | "around" | "evenly";
+    export type GridAutoFlow = "row" | "col" | "dense" | "row-dense" | "col-dense";
+    export function Grid(props: {
+        columns?: number | string;
+        rows?: number | string;
+        autoRows?: string;
+        autoCols?: string;
+        flow?: GridAutoFlow;
+        gap?: string;
+        gapX?: string;
+        gapY?: string;
+        alignItems?: GridAlign;
+        justifyItems?: GridAlign;
+        alignContent?: GridJustify;
+        justifyContent?: GridJustify;
+        placeItems?: string;
+        placeContent?: string;
+        class?: string | Ref<string> | ClassNameRef;
+    } & ViewProps, children?: ViewChildren): any;
+}
+declare module "packages/primitive/src/layout/column" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ClassNameRef } from "@/vnode/class-names";
+    import { ViewChildren, ViewProps } from "@/content/view";
+    export function Column(props: {
+        span?: number;
+        start?: number;
+        end?: number;
+        offset?: number;
+        rowSpan?: number;
+        rowStart?: number;
+        rowEnd?: number;
+        class?: string | Ref<string> | ClassNameRef;
+    } & ViewProps, children?: ViewChildren): any;
+}
 declare module "packages/primitive/src/modules/head" {
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Head1(props: ViewProps, children?: ViewChildren): any;
     export function Head2(props: ViewProps, children?: ViewChildren): any;
     export function Head3(props: ViewProps, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/modules/paragraph" {
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Paragraph(props: ViewProps & {}, children?: ViewChildren): {
         t: string;
         render(): any;
@@ -8307,7 +8284,7 @@ declare module "packages/primitive/src/modules/paragraph" {
 }
 declare module "packages/primitive/src/modules/image" {
     import { ImageCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps, TimelessElement } from "@/primitive/view";
+    import { ViewChildren, ViewProps, TimelessElement } from "@/content/view";
     type Provider = Partial<{
         provide_ui_image: (store: ImageCore, $img: HTMLDivElement) => void;
     }>;
@@ -8318,7 +8295,7 @@ declare module "packages/primitive/src/modules/image" {
     }, children?: ViewChildren): TimelessElement;
 }
 declare module "packages/primitive/src/modules/table" {
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Table(props: ViewProps, children?: ViewChildren): any;
     export function TableHeader(props: ViewProps, children?: ViewChildren): any;
     export function TableBody(props: ViewProps, children?: ViewChildren): any;
@@ -8327,7 +8304,7 @@ declare module "packages/primitive/src/modules/table" {
     export function TableCell(props: ViewProps, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/modules/card" {
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Card(props: ViewProps, children?: ViewChildren): any;
     export function CardHeader(props: ViewProps, children?: ViewChildren): any;
     export function CardTitle(props: ViewProps, children?: ViewChildren): any;
@@ -8336,27 +8313,27 @@ declare module "packages/primitive/src/modules/card" {
     export function CardFooter(props: ViewProps, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/modules/label" {
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Label(props: ViewProps, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/modules/badge" {
-    import { ViewProps, ViewChildren } from "@/primitive/view";
+    import { ViewProps, ViewChildren } from "@/content/view";
     export function Badge(props: ViewProps & {
         variant?: "default" | "secondary" | "outline" | "destructive";
     }, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/modules/separator" {
-    import { ViewProps } from "@/primitive/view";
+    import { ViewProps } from "@/content/view";
     export function Separator(props: ViewProps & {
         orientation?: "horizontal" | "vertical";
     }): any;
 }
 declare module "packages/primitive/src/modules/skeleton" {
-    import { ViewProps } from "@/primitive/view";
+    import { ViewProps } from "@/content/view";
     export function Skeleton(props: ViewProps): any;
 }
 declare module "packages/primitive/src/modules/alert" {
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Alert(props: ViewProps & {
         variant?: "default" | "destructive";
     }, children?: ViewChildren): any;
@@ -8365,7 +8342,7 @@ declare module "packages/primitive/src/modules/alert" {
 }
 declare module "packages/primitive/src/modules/avatar" {
     import { Ref } from "packages/reactive/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         size?: "default" | "large";
     }, children?: ViewChildren): any;
@@ -8395,7 +8372,7 @@ declare module "packages/primitive/src/modules/avatar" {
 declare module "packages/primitive/src/modules/progress" {
     import { Ref } from "packages/reactive/src/index";
     import { ProgressCore } from "packages/ui/src/index";
-    import { ViewProps, ViewChildren } from "@/primitive/view";
+    import { ViewProps, ViewChildren } from "@/content/view";
     export function Root(props: ViewProps & {
         store?: ProgressCore;
         value?: Ref<number> | number;
@@ -8409,7 +8386,7 @@ declare module "packages/primitive/src/modules/progress" {
 }
 declare module "packages/primitive/src/modules/button" {
     import { ButtonCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: ButtonCore;
     }, children?: ViewChildren): any;
@@ -8421,14 +8398,14 @@ declare module "packages/primitive/src/modules/button" {
 }
 declare module "packages/primitive/src/modules/arrow" {
     import { PopperCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Arrow(props: ViewProps & {
         store: PopperCore;
     }, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/modules/menu" {
     import { MenuCore, MenuItemCore, MenuGroupCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: MenuCore;
     }, children?: ViewChildren): any;
@@ -8500,7 +8477,7 @@ declare module "packages/primitive/src/modules/menu" {
 }
 declare module "packages/primitive/src/modules/dropdown-menu" {
     import { DropdownMenuCore, MenuCore, MenuItemCore, MenuGroupCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: MenuCore;
     }, children?: ViewChildren): any;
@@ -8554,7 +8531,7 @@ declare module "packages/primitive/src/modules/dropdown-menu" {
 }
 declare module "packages/primitive/src/modules/context-menu" {
     import { ContextMenuCore, MenuCore, MenuItemCore, MenuGroupCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: MenuCore;
     }, children?: ViewChildren): any;
@@ -8604,7 +8581,7 @@ declare module "packages/primitive/src/modules/context-menu" {
 }
 declare module "packages/primitive/src/modules/resizable-panels" {
     import { ResizablePanelsCore, ResizablePanelCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Group(props: ViewProps & {
         store: ResizablePanelsCore;
         direction?: "horizontal" | "vertical";
@@ -8621,7 +8598,7 @@ declare module "packages/primitive/src/modules/resizable-panels" {
 }
 declare module "packages/primitive/src/modules/tabs" {
     import { TabHeaderCore } from "packages/ui/src/index";
-    import { ViewProps, ViewChildren } from "@/primitive/view";
+    import { ViewProps, ViewChildren } from "@/content/view";
     export function Root(props: ViewProps & {
         store: TabHeaderCore<any>;
     }, children?: ViewChildren): any;
@@ -8644,7 +8621,7 @@ declare module "packages/primitive/src/modules/tabs" {
 }
 declare module "packages/primitive/src/modules/accordion" {
     import { AccordionCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: AccordionCore;
     }, children?: ViewChildren): any;
@@ -8667,7 +8644,7 @@ declare module "packages/primitive/src/modules/accordion" {
 }
 declare module "packages/primitive/src/modules/input" {
     import { InputCore } from "packages/ui/src/index";
-    import { ViewProps, ViewChildren } from "@/primitive/view";
+    import { ViewProps, ViewChildren } from "@/content/view";
     type Provider = Partial<{
         provide_ui_input: (store: InputCore<any>, $input: any) => void;
     }>;
@@ -8701,7 +8678,7 @@ declare module "packages/primitive/src/modules/input" {
 }
 declare module "packages/primitive/src/modules/file-input" {
     import { FileInputCore } from "packages/ui/src/index";
-    import { ViewProps, ViewChildren } from "@/primitive/view";
+    import { ViewProps, ViewChildren } from "@/content/view";
     export function Root(props: ViewProps & {
         store?: FileInputCore;
     }, children?: ViewChildren): any;
@@ -8728,7 +8705,7 @@ declare module "packages/primitive/src/modules/file-input" {
 }
 declare module "packages/primitive/src/modules/number-input" {
     import { NumberInputCore } from "packages/ui/src/index";
-    import { ViewProps, ViewChildren } from "@/primitive/view";
+    import { ViewProps, ViewChildren } from "@/content/view";
     export function Root(props: ViewProps & {
         store?: NumberInputCore;
     }, children?: ViewChildren): any;
@@ -8758,7 +8735,7 @@ declare module "packages/primitive/src/modules/number-input" {
 }
 declare module "packages/primitive/src/modules/textarea" {
     import { InputCore } from "packages/ui/src/index";
-    import { ViewProps, ViewChildren } from "@/primitive/view";
+    import { ViewProps, ViewChildren } from "@/content/view";
     export function Root(props: ViewProps & {
         store?: InputCore<any>;
     }, children?: ViewChildren): any;
@@ -8784,7 +8761,7 @@ declare module "packages/primitive/src/modules/textarea" {
 }
 declare module "packages/primitive/src/modules/select" {
     import { SelectCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: SelectCore<any>;
     }, children?: ViewChildren): any;
@@ -8840,7 +8817,7 @@ declare module "packages/primitive/src/modules/select" {
 }
 declare module "packages/primitive/src/modules/cascader" {
     import { CascaderCore, CascaderOption } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: CascaderCore<any>;
     }, children?: ViewChildren): any;
@@ -8899,7 +8876,7 @@ declare module "packages/primitive/src/modules/cascader" {
 }
 declare module "packages/primitive/src/modules/tag-select" {
     import { TagSelectCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: TagSelectCore<any>;
     }, children?: ViewChildren): any;
@@ -8976,7 +8953,7 @@ declare module "packages/primitive/src/modules/tag-select" {
 }
 declare module "packages/primitive/src/modules/date-picker" {
     import { DatePickerCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps, TimelessElement } from "@/primitive/view";
+    import { ViewChildren, ViewProps, TimelessElement } from "@/content/view";
     export function Root(props: ViewProps & {
         store: DatePickerCore;
     }, children?: ViewChildren): any;
@@ -9046,7 +9023,7 @@ declare module "packages/primitive/src/modules/date-picker" {
 }
 declare module "packages/primitive/src/modules/date-range-picker" {
     import { DateRangePickerCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: DateRangePickerCore;
     }, children?: ViewChildren): any;
@@ -9124,7 +9101,7 @@ declare module "packages/primitive/src/modules/date-range-picker" {
 }
 declare module "packages/primitive/src/modules/time-picker" {
     import { TimePickerCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: TimePickerCore;
     }, children?: ViewChildren): any;
@@ -9188,9 +9165,9 @@ declare module "packages/primitive/src/modules/time-picker" {
     }, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/modules/checkbox" {
-    import { CheckboxCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
-    import { NativeInputProps } from "@/native/input";
+    import { CheckboxCore, CheckboxGroupCore } from "packages/ui/src/index";
+    import { ViewChildren, ViewProps } from "@/content/view";
+    import { InputProps } from "@/input/input";
     export function Root(props: ViewProps & {
         store: CheckboxCore;
     }, children?: ViewChildren): any;
@@ -9201,7 +9178,7 @@ declare module "packages/primitive/src/modules/checkbox" {
     export function Indicator(props: ViewProps & {
         store: CheckboxCore;
     }, children?: ViewChildren): any;
-    export function Input(props: NativeInputProps & {
+    export function Input(props: InputProps & {
         store: CheckboxCore;
         id?: string;
     }): any;
@@ -9209,7 +9186,6 @@ declare module "packages/primitive/src/modules/checkbox" {
         for?: string;
         store?: CheckboxCore;
     }, children?: ViewChildren): any;
-    import { CheckboxGroupCore } from "packages/ui/src/index";
     export function Group(props: ViewProps & {
         store: CheckboxGroupCore<any>;
     }, children?: ViewChildren): any;
@@ -9226,8 +9202,8 @@ declare module "packages/primitive/src/modules/checkbox" {
 }
 declare module "packages/primitive/src/modules/radio" {
     import { RadioCore, RadioGroupCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
-    import { NativeInputProps } from "@/native/input";
+    import { ViewChildren, ViewProps } from "@/content/view";
+    import { InputProps } from "@/input/input";
     export function Root(props: ViewProps & {
         store: RadioCore;
     }, children?: ViewChildren): any;
@@ -9238,7 +9214,7 @@ declare module "packages/primitive/src/modules/radio" {
     export function Indicator(props: ViewProps & {
         store: RadioCore;
     }, children?: ViewChildren): any;
-    export function Input(props: NativeInputProps & {
+    export function Input(props: InputProps & {
         store: RadioCore;
         id?: string;
     }): any;
@@ -9261,7 +9237,7 @@ declare module "packages/primitive/src/modules/radio" {
     }, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/modules/slider" {
-    import { ViewProps, ViewChildren } from "@/primitive/view";
+    import { ViewProps, ViewChildren } from "@/content/view";
     export function Root(props: ViewProps & {
         value?: number;
         min?: number;
@@ -9280,7 +9256,7 @@ declare module "packages/primitive/src/modules/slider" {
 }
 declare module "packages/primitive/src/modules/toggle" {
     import { SwitchCore } from "packages/ui/src/index";
-    import { ViewProps, ViewChildren } from "@/primitive/view.js";
+    import { ViewProps, ViewChildren } from "@/content/view";
     export function Root(props: ViewProps & {
         store: SwitchCore;
         id?: string;
@@ -9291,7 +9267,7 @@ declare module "packages/primitive/src/modules/toggle" {
 }
 declare module "packages/primitive/src/modules/switch" {
     import { SwitchCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: SwitchCore;
         id?: string;
@@ -9302,7 +9278,7 @@ declare module "packages/primitive/src/modules/switch" {
 }
 declare module "packages/primitive/src/modules/field" {
     import { SingleFieldCore, ObjectFieldCore, ArrayFieldCore } from "packages/ui/src/index";
-    import { ViewProps, ViewChildren } from "@/primitive/view";
+    import { ViewProps, ViewChildren } from "@/content/view";
     export function Field(props: ViewProps & {
         store: SingleFieldCore<any>;
     }, children?: ViewChildren): any;
@@ -9356,7 +9332,7 @@ declare module "packages/primitive/src/modules/field" {
 }
 declare module "packages/primitive/src/modules/popover" {
     import { PopoverCore, Align, Side } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export type PopoverProps = Partial<{
         align: Align;
         side: Side;
@@ -9383,7 +9359,7 @@ declare module "packages/primitive/src/modules/popover" {
 }
 declare module "packages/primitive/src/modules/popconfirm" {
     import { PopconfirmCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps, children?: ViewChildren): any;
     export function Content(props: ViewProps & {
         store: PopconfirmCore;
@@ -9412,7 +9388,7 @@ declare module "packages/primitive/src/modules/popconfirm" {
 }
 declare module "packages/primitive/src/modules/tooltip" {
     import { TooltipCore, Align, Side } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export type TooltipProps = Partial<{
         align: Align;
         side: Side;
@@ -9438,7 +9414,7 @@ declare module "packages/primitive/src/modules/tooltip" {
 }
 declare module "packages/primitive/src/modules/sheet" {
     import { DialogCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: DialogCore;
     }, children?: ViewChildren): {
@@ -9470,7 +9446,7 @@ declare module "packages/primitive/src/modules/sheet" {
 }
 declare module "packages/primitive/src/modules/dialog" {
     import { DialogCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export function Root(props: ViewProps & {
         store: DialogCore;
     }, children?: ViewChildren): {
@@ -9510,7 +9486,7 @@ declare module "packages/primitive/src/modules/dialog" {
 }
 declare module "packages/primitive/src/modules/toast" {
     import { ToastCore, ExternalToast } from "packages/ui/src/index";
-    import { ViewProps, ViewChildren } from "@/primitive/view";
+    import { ViewProps, ViewChildren } from "@/content/view";
     export function Root(props: ViewProps & {
         store: ToastCore;
     }, children?: ViewChildren): {
@@ -9549,7 +9525,7 @@ declare module "packages/primitive/src/modules/toast" {
 }
 declare module "packages/primitive/src/modules/steps" {
     import { StepCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps } from "@/primitive/view";
+    import { ViewChildren, ViewProps } from "@/content/view";
     export type StepItem = {
         title: string;
         description?: string;
@@ -9580,7 +9556,7 @@ declare module "packages/primitive/src/modules/steps" {
 }
 declare module "packages/primitive/src/modules/scroll-view" {
     import { ScrollViewCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps, TimelessElement } from "@/primitive/view";
+    import { ViewChildren, ViewProps, TimelessElement } from "@/content/view";
     type Provider = Partial<{
         provide_ui_scroll_view_indicator: (store: ScrollViewCore, $elm: HTMLElement) => void;
         provide_ui_scroll_view_scroll: (store: ScrollViewCore, $elm: HTMLElement) => void;
@@ -9598,7 +9574,7 @@ declare module "packages/primitive/src/modules/scroll-view" {
 }
 declare module "packages/primitive/src/modules/video-player" {
     import { VideoPlayerCore } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps, TimelessElement } from "@/primitive/view";
+    import { ViewChildren, ViewProps, TimelessElement } from "@/content/view";
     type Provider = Partial<{
         provide_ui_video_player: ($video: HTMLVideoElement, store: VideoPlayerCore) => void;
     }>;
@@ -9610,7 +9586,7 @@ declare module "packages/primitive/src/modules/video-player" {
 }
 declare module "packages/primitive/src/modules/waterfall" {
     import { WaterfallModel, WaterfallColumnModel, WaterfallCellModel } from "packages/ui/src/index";
-    import { ViewChildren, ViewProps, TimelessElement } from "@/primitive/view";
+    import { ViewChildren, ViewProps, TimelessElement } from "@/content/view";
     export function Root(props: ViewProps & {
         store: WaterfallModel<any>;
     }, children: ViewChildren): TimelessElement;
@@ -10514,6 +10490,26 @@ declare module "packages/kit/src/route_view/index" {
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
     }
     export function onViewCreated(fn: (views: RouteViewCore) => void): void;
+    export type RouteMenusModelState<TMenu> = {
+        menus: TMenu[];
+        cur: any;
+    };
+    export type RouteMenusModelInstance<TMenu> = {
+        methods: {
+            refresh(): void;
+        };
+        state: RouteMenusModelState<TMenu>;
+        menus: TMenu[];
+        cur: any;
+        isSubRoute(name: string): boolean;
+        isActive(name: string): boolean;
+        isSelected(t: RouteViewCore | null, menu: TMenu): boolean;
+        handleClick(menu: TMenu, query?: Record<string, string>): void;
+        ready(): void;
+        destroy(): void;
+        onStateChange(handler: (state: RouteMenusModelState<TMenu>) => void): () => void;
+        onError(handler: (err: BizError) => void): () => void;
+    };
     export function RouteMenusModel<T extends {
         title: string;
         name?: unknown;
@@ -10525,28 +10521,7 @@ declare module "packages/kit/src/route_view/index" {
         view: RouteViewCore;
         history: HistoryCore<any, any>;
         menus: T[];
-    }): {
-        methods: {
-            refresh(): void;
-        };
-        state: {
-            readonly menus: T[];
-            cur: import("packages/reactive/src/types").TimelessRefObject<RouteViewCore>;
-        };
-        readonly menus: T[];
-        cur: import("packages/reactive/src/types").TimelessRefObject<RouteViewCore>;
-        isSubRoute(name: string): boolean;
-        isActive(name: string): boolean;
-        isSelected(t: RouteViewCore | null, menu: T): boolean;
-        handleClick(menu: T, query?: Record<string, string>): void;
-        ready(): void;
-        destroy(): void;
-        onStateChange(handler: Handler<{
-            readonly menus: T[];
-            cur: import("packages/reactive/src/types").TimelessRefObject<RouteViewCore>;
-        }>): () => void;
-        onError(handler: Handler<BizError>): () => void;
-    };
+    }): RouteMenusModelInstance<T>;
     export { build, buildUrl };
     export type { OriginalRouteConfigure, PageKeysType, PathnameKey, RouteConfig };
 }
@@ -11193,8 +11168,8 @@ declare module "packages/kit/src/index" {
 }
 declare module "packages/primitive/src/modules/keep-alive-sub-views" {
     import { RouteViewCore, HistoryCore, StorageCore, HttpClientCore, ApplicationModel } from "packages/kit/src/index";
-    import { TimelessComponent, TimelessElement, ViewChildren, ViewProps } from "@/primitive/view";
-    import { ErrorFallbackFn } from "@/primitive/error-boundary";
+    import { TimelessComponent, TimelessElement, ViewChildren, ViewProps } from "@/content/view";
+    import { ErrorFallbackFn } from "@/content/error-boundary";
     export function KeepAliveSubViews(props: ViewProps & {
         view: RouteViewCore;
         views: Record<string, TimelessComponent>;
@@ -11209,8 +11184,8 @@ declare module "packages/primitive/src/modules/keep-alive-sub-views" {
 }
 declare module "packages/primitive/src/modules/standard-sub-views" {
     import { RouteViewCore, HistoryCore, StorageCore, HttpClientCore, ApplicationModel } from "packages/kit/src/index";
-    import { TimelessComponent, TimelessElement, ViewChildren, ViewProps } from "@/primitive/view";
-    import { ErrorFallbackFn } from "@/primitive/error-boundary";
+    import { TimelessComponent, TimelessElement, ViewChildren, ViewProps } from "@/content/view";
+    import { ErrorFallbackFn } from "@/content/error-boundary";
     export function StandardSubViews(props: ViewProps & {
         view: RouteViewCore;
         views: Record<string, TimelessComponent>;
@@ -11223,6 +11198,16 @@ declare module "packages/primitive/src/modules/standard-sub-views" {
         ErrorFallback?: ErrorFallbackFn;
     }): any;
 }
+declare module "packages/primitive/src/style/index" {
+    import { Ref, RefObject, Signal } from "packages/reactive/src/index";
+    type ViewStylePropValue = Signal<string | number | boolean | null | undefined> | string | number | boolean | undefined | null;
+    export type ViewStyleProperties = {
+        [k: string]: ViewStylePropValue;
+    };
+    export type ViewStyle = Ref<ViewStyleProperties> | RefObject<ViewStyleProperties> | ViewStyleProperties;
+    export type ViewStyleInput = ViewStyle;
+    export function viewStyleToCssText(style: ViewStyleInput): string;
+}
 declare module "packages/primitive/src/util/env" {
     import { isBrowser } from "@/host";
     export { STUB_MARKER } from "@/host/stub";
@@ -11233,7 +11218,7 @@ declare module "packages/primitive/src/util/env" {
     export function safeCreateDocumentFragment(): any;
 }
 declare module "packages/primitive/src/util/render-to-string" {
-    import { TimelessElement } from "@/primitive/view";
+    import { TimelessElement } from "@/content/view";
     /**
      * Render a TimelessElement tree to an HTML string (for SSR).
      * Only works on the server where stub nodes track structure.
@@ -11287,7 +11272,7 @@ declare module "packages/primitive/src/util/reactive-data" {
     };
 }
 declare module "packages/primitive/src/util/h" {
-    import { TimelessElement, ViewChildren } from "@/primitive/view";
+    import { TimelessElement, ViewChildren } from "@/content/view";
     export function h<P, R extends TimelessElement>(component: (props: P, children?: any) => R, props: P, children?: ViewChildren): () => R;
 }
 declare module "packages/primitive/src/host/stub" {
@@ -11333,7 +11318,15 @@ declare module "packages/primitive/src/host/stub" {
         getFirstChild(node: any): any;
     };
 }
+declare module "packages/primitive/src/host/legacy-adapter" {
+    import type { TimelessHost } from "packages/primitive/src/host/index";
+    import type { HostRenderer, VNodePatch } from "@/vnode/host-renderer";
+    import type { VNode } from "@/vnode/types";
+    export function createLegacyHostAdapter(host: TimelessHost): HostRenderer;
+    export function buildInitialPatch(vnode: VNode): VNodePatch;
+}
 declare module "packages/primitive/src/host/index" {
+    import type { HostRenderer } from "@/vnode/host-renderer";
     export type HostNode = any;
     export type BoundingRect = {
         top: number;
@@ -11350,7 +11343,7 @@ declare module "packages/primitive/src/host/index" {
         userSelect: string;
     }>;
     export type StylePatch = Record<string, string>;
-    export interface HeadlessHost {
+    export interface TimelessHost {
         kind: string;
         createElement(tag: string): HostNode;
         createElementNS?(namespace: string, tag: string): HostNode;
@@ -11394,35 +11387,373 @@ declare module "packages/primitive/src/host/index" {
         getFirstChild(node: HostNode): HostNode | null;
     }
     export let isBrowser: boolean;
-    export function setHost(host: HeadlessHost): void;
-    export function getHost(): HeadlessHost;
+    export function registerComponent(original: Function, replacement: Function): void;
+    export function resolveComponent(fn: Function): Function;
+    export function setHost(host: TimelessHost): void;
+    export function getHost(): TimelessHost;
+    export function setRenderer(renderer: HostRenderer): void;
+    export function getRenderer(): HostRenderer;
+    export function getRendererScheduler(): RendererScheduler;
+}
+declare module "packages/primitive/src/vnode/types" {
+    export type VNodeKind = "element" | "text" | "fragment";
+    export type VNodeKey = string | number;
+    export type VNodePlatform = "web" | "tui" | "canvas" | "ios" | "android" | "macos" | "windows";
+    export interface VNodeStyle {
+        width?: number | string;
+        height?: number | string;
+        minWidth?: number | string;
+        minHeight?: number | string;
+        maxWidth?: number | string;
+        maxHeight?: number | string;
+        margin?: number | string;
+        marginTop?: number | string;
+        marginRight?: number | string;
+        marginBottom?: number | string;
+        marginLeft?: number | string;
+        padding?: number | string;
+        paddingTop?: number | string;
+        paddingRight?: number | string;
+        paddingBottom?: number | string;
+        paddingLeft?: number | string;
+        position?: "static" | "relative" | "absolute" | "fixed" | "sticky";
+        top?: number | string;
+        right?: number | string;
+        bottom?: number | string;
+        left?: number | string;
+        zIndex?: number;
+        color?: string;
+        backgroundColor?: string;
+        opacity?: number;
+        borderWidth?: number;
+        borderStyle?: "none" | "solid" | "dashed" | "dotted";
+        borderColor?: string;
+        borderRadius?: number;
+        borderTopWidth?: number;
+        borderRightWidth?: number;
+        borderBottomWidth?: number;
+        borderLeftWidth?: number;
+        borderTopLeftRadius?: number;
+        borderTopRightRadius?: number;
+        borderBottomLeftRadius?: number;
+        borderBottomRightRadius?: number;
+        fontSize?: number;
+        fontWeight?: number | "bold" | "normal";
+        fontFamily?: string;
+        fontStyle?: "normal" | "italic";
+        lineHeight?: number;
+        letterSpacing?: number;
+        textAlign?: "left" | "center" | "right" | "justify";
+        textDecoration?: "none" | "underline" | "line-through";
+        textTransform?: "none" | "capitalize" | "uppercase" | "lowercase";
+        maxLines?: number;
+        overflow?: "visible" | "hidden";
+        pointerEvents?: "auto" | "none";
+        transforms?: VNodeTransform[];
+        shadows?: VNodeShadow[];
+        [key: string]: any;
+    }
+    export interface VNodeTransform {
+        translate?: {
+            x?: number;
+            y?: number;
+            z?: number;
+        };
+        rotate?: number;
+        rotateX?: number;
+        rotateY?: number;
+        rotateZ?: number;
+        scale?: number | {
+            x?: number;
+            y?: number;
+        };
+        skew?: {
+            x?: number;
+            y?: number;
+        };
+    }
+    export interface VNodeShadow {
+        color: string;
+        offsetX: number;
+        offsetY: number;
+        blurRadius: number;
+        spreadRadius?: number;
+    }
+    export interface VNodeA11y {
+        label?: string;
+        hint?: string;
+        role?: string;
+        hidden?: boolean;
+        value?: string;
+        live?: "polite" | "assertive";
+    }
+    export type VNodeEventHandler = (event: any) => void;
+    export type VNodeEvents = Partial<Record<string, VNodeEventHandler>>;
+    export interface VNodeBase {
+        kind: VNodeKind;
+        key?: VNodeKey;
+        parent: VNodeElement | VNodeFragment | null;
+        nextSibling: VNode | null;
+        _hostNode?: any;
+    }
+    export interface VNodeElement extends VNodeBase {
+        kind: "element";
+        tag: string;
+        style: VNodeStyle;
+        stylePresets: string[];
+        attrs: Record<string, string | boolean | number>;
+        props: Record<string, any>;
+        events: VNodeEvents;
+        children: VNode[];
+        focusable?: boolean;
+        draggable?: boolean;
+        a11y?: VNodeA11y;
+        platform?: {
+            web?: Record<string, any>;
+            ios?: Record<string, any>;
+            android?: Record<string, any>;
+            macos?: Record<string, any>;
+            windows?: Record<string, any>;
+        };
+    }
+    export interface VNodeText extends VNodeBase {
+        kind: "text";
+        text: string;
+    }
+    export interface VNodeFragment extends VNodeBase {
+        kind: "fragment";
+        children: VNode[];
+    }
+    export type VNode = VNodeElement | VNodeText | VNodeFragment;
+}
+declare module "packages/primitive/src/vnode/descriptor" {
+    import type { VNode, VNodeKey } from "packages/primitive/src/vnode/types";
+    export const ELEMENT_TYPE: unique symbol;
+    export type ComponentFn<P extends Record<string, any> = Record<string, any>> = (props: P, children: ChildDescriptor[]) => VNode;
+    export type ComponentType = ComponentFn | string;
+    export interface ElementDescriptor {
+        $$typeof: typeof ELEMENT_TYPE;
+        type: ComponentType;
+        props: Record<string, any>;
+        children: ChildDescriptor[];
+        key?: VNodeKey;
+    }
+    export type ChildDescriptor = ElementDescriptor | string | number | null;
+    export function isDescriptor(v: unknown): v is ElementDescriptor;
+}
+declare module "packages/primitive/src/vnode/h" {
+    import type { ChildDescriptor, ComponentType, ElementDescriptor } from "packages/primitive/src/vnode/descriptor";
+    export function h(type: ComponentType, props?: Record<string, any> | null, children?: ChildDescriptor[]): ElementDescriptor;
+}
+declare module "packages/primitive/src/vnode/create" {
+    import type { VNode, VNodeText, VNodeElement, VNodeFragment, VNodeKey, VNodeStyle, VNodeEvents } from "packages/primitive/src/vnode/types";
+    export function createElement(tag: string, config?: {
+        key?: VNodeKey;
+        style?: VNodeStyle;
+        stylePresets?: string[];
+        attrs?: Record<string, string | boolean | number>;
+        props?: Record<string, any>;
+        events?: VNodeEvents;
+        draggable?: boolean;
+        focusable?: boolean;
+    }, children?: VNode[]): VNodeElement;
+    export function createText(text: string): VNodeText;
+    export function createFragment(children?: VNode[]): VNodeFragment;
+    export function appendChild(parent: VNodeElement | VNodeFragment, child: VNode): void;
+    export function removeChild(parent: VNodeElement | VNodeFragment, child: VNode): void;
+    export function insertBefore(parent: VNodeElement | VNodeFragment, child: VNode, before: VNode | null): void;
+    export function replaceChild(parent: VNodeElement | VNodeFragment, newChild: VNode, oldChild: VNode): void;
+    export function clearChildren(parent: VNodeElement | VNodeFragment): void;
+    export function replaceChildren(parent: VNodeElement, newChildren: VNode[]): void;
+}
+declare module "packages/primitive/src/vnode/animation" {
+    import type { VNodeStyle } from "packages/primitive/src/vnode/types";
+    export interface AnimationConfig {
+        property: keyof VNodeStyle;
+        from?: any;
+        to: any;
+        duration: number;
+        easing?: "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out";
+        delay?: number;
+    }
+}
+declare module "packages/primitive/src/vnode/host-renderer" {
+    import type { AnimationConfig } from "packages/primitive/src/vnode/animation";
+    import type { VNode, VNodeA11y, VNodePlatform, VNodeStyle } from "packages/primitive/src/vnode/types";
+    export type BoundingRect = {
+        top: number;
+        left: number;
+        right: number;
+        bottom: number;
+        width: number;
+        height: number;
+        x?: number;
+        y?: number;
+    };
+    export interface VNodePatch {
+        style?: Partial<VNodeStyle>;
+        stylePresets?: string[];
+        attrs?: Record<string, string | boolean | number | null>;
+        props?: Record<string, any>;
+        text?: string;
+        a11y?: Partial<VNodeA11y>;
+    }
+    export interface HostRenderer {
+        kind: string;
+        platform: VNodePlatform;
+        createNode(vnode: VNode): void;
+        removeNode(vnode: VNode): void;
+        patchNode(vnode: VNode, changes: VNodePatch): void;
+        insertChild(parent: VNode, child: VNode, before: VNode | null): void;
+        removeChild(parent: VNode, child: VNode): void;
+        getBoundingRect(vnode: VNode): BoundingRect;
+        getViewportSize(): {
+            width: number;
+            height: number;
+        };
+        focus(vnode: VNode): void;
+        blur(vnode: VNode): void;
+        getBody(): any;
+        animate(vnode: VNode, animations: AnimationConfig[]): Promise<void>;
+        cancelAnimation(vnode: VNode): void;
+        setTimeout(handler: () => void, ms: number): any;
+        clearTimeout(id: any): void;
+        addGlobalEventListener(type: string, handler: (e: any) => void, options?: any): void;
+        removeGlobalEventListener(type: string, handler: (e: any) => void, options?: any): void;
+        getSafeAreaInsets?(): {
+            top: number;
+            right: number;
+            bottom: number;
+            left: number;
+        };
+    }
+}
+declare module "packages/primitive/src/vnode/commit" {
+    import type { HostRenderer, VNodePatch } from "packages/primitive/src/vnode/host-renderer";
+    import type { VNode } from "packages/primitive/src/vnode/types";
+    export function commitTree(root: VNode, renderer: HostRenderer): void;
+    export function commitPatches(dirty: Set<VNode>, patches: Map<VNode, VNodePatch>, renderer: HostRenderer): void;
+}
+declare module "packages/primitive/src/vnode/reactive" {
+    import { type Signal } from "packages/reactive/src/index";
+    import type { HostRenderer, VNodePatch } from "packages/primitive/src/vnode/host-renderer";
+    import type { VNode, VNodeElement, VNodeStyle, VNodeText } from "packages/primitive/src/vnode/types";
+    export interface RendererScheduler {
+        markDirty(vnode: VNode): void;
+        scheduleFlush(): void;
+        flush(): void;
+        patch(vnode: VNode, patch: VNodePatch): void;
+    }
+    export function createRendererScheduler(renderer: HostRenderer): RendererScheduler;
+    export function bindStyle(vnode: VNodeElement, key: keyof VNodeStyle, ref: Signal<any>, scheduler: RendererScheduler): void;
+    export function bindStylePresets(vnode: VNodeElement, ref: Signal<string[]>, scheduler: RendererScheduler): void;
+    export function bindAttr(vnode: VNodeElement, name: string, ref: Signal<any>, scheduler: RendererScheduler): void;
+    export function bindProp(vnode: VNodeElement, name: string, ref: Signal<any>, scheduler: RendererScheduler): void;
+    export function bindText(vnode: VNodeText, ref: Signal<string>, scheduler: RendererScheduler): void;
+    export function setupReactiveBindings(vnode: VNodeElement, props: Record<string, any>, scheduler: RendererScheduler | null): void;
+}
+declare module "packages/primitive/src/vnode/style-preset" {
+    import type { VNodeStyle } from "packages/primitive/src/vnode/types";
+    export type StylePreset = VNodeStyle;
+    export interface StylePresetRegistry {
+        define(name: string, style: StylePreset): void;
+        defineMany(presets: Record<string, StylePreset>): void;
+        get(name: string): StylePreset | undefined;
+        has(name: string): boolean;
+    }
+    export function createStylePresetRegistry(): StylePresetRegistry;
+    export function getStylePresets(): StylePresetRegistry;
+    export function resolveComputedStyle(vnode: {
+        style: VNodeStyle;
+        stylePresets: string[];
+    }): VNodeStyle;
+}
+declare module "packages/primitive/src/vnode/events" {
+    export type PointerEventData = any;
+    export type KeyEventData = any;
+    export type GestureEventData = any;
+}
+declare module "packages/primitive/src/vnode/mount" {
+    import type { ChildDescriptor, ElementDescriptor } from "packages/primitive/src/vnode/descriptor";
+    import type { RendererScheduler } from "packages/primitive/src/vnode/reactive";
+    import type { VNode } from "packages/primitive/src/vnode/types";
+    export function mountChild(child: ChildDescriptor, scheduler: RendererScheduler | null): VNode | null;
+    export function mount(descriptor: ElementDescriptor, scheduler?: RendererScheduler | null): VNode;
+}
+declare module "packages/primitive/src/vnode/serialize" {
+    import type { ElementDescriptor } from "packages/primitive/src/vnode/descriptor";
+    import type { VNode } from "packages/primitive/src/vnode/types";
+    export function renderToString(descriptor: ElementDescriptor): string;
+    export function vnodeToJSON(vnode: VNode): object;
+}
+declare module "packages/primitive/src/vnode/index" {
+    export * from "packages/primitive/src/vnode/types";
+    export * from "packages/primitive/src/vnode/descriptor";
+    export * from "packages/primitive/src/vnode/h";
+    export * from "packages/primitive/src/vnode/create";
+    export * from "packages/primitive/src/vnode/host-renderer";
+    export * from "packages/primitive/src/vnode/commit";
+    export * from "packages/primitive/src/vnode/reactive";
+    export * from "packages/primitive/src/vnode/style-preset";
+    export * from "packages/primitive/src/vnode/animation";
+    export * from "packages/primitive/src/vnode/events";
+    export * from "packages/primitive/src/vnode/mount";
+    export * from "packages/primitive/src/vnode/serialize";
+}
+declare module "packages/primitive/src/vnode/style-names" {
+    import { Ref, Subscriber } from "packages/reactive/src/index";
+    export type StyleObject = Record<string, any>;
+    export interface StyleRef {
+        __style_ref: true;
+        value: StyleObject;
+        subscribe(ctx: Subscriber): void;
+        toString(): string;
+    }
+    export function isStyleRef(v: any): v is StyleRef;
+    export function styleNames(items: (StyleObject | Ref<StyleRef | StyleObject | undefined> | StyleRef | undefined)[]): Ref<StyleObject>;
+}
+declare module "packages/primitive/src/vnode/class-names" {
+    import { Signal, Ref, Subscriber } from "packages/reactive/src/index";
+    export type ClassNameRef = {
+        __cn_ref: true;
+        subscribe(ctx: Subscriber): void;
+        del(v: string): void;
+        add(v: string): void;
+        append(c: string): void;
+        toString(): string;
+    };
+    export function isClassName(v: unknown): v is ClassNameRef;
+    export function classNames(items: (string | Ref<string> | ClassNameRef | undefined)[]): ClassNameRef;
+    export function join(v: (string | Signal<string>)[]): Signal<string>;
 }
 declare module "packages/primitive/src/index" {
     export * from "packages/reactive/src/index";
-    export * from "packages/primitive/src/primitive/for";
-    export * from "packages/primitive/src/primitive/show";
-    export * from "packages/primitive/src/primitive/match";
-    export * from "packages/primitive/src/primitive/view";
-    export * from "packages/primitive/src/primitive/fragment";
-    export * from "packages/primitive/src/primitive/html";
-    export * from "packages/primitive/src/primitive/text";
-    export * from "packages/primitive/src/primitive/lazy-view";
-    export * from "packages/primitive/src/native/img";
-    export * from "packages/primitive/src/native/input";
-    export * from "packages/primitive/src/native/password";
-    export * from "packages/primitive/src/native/label";
-    export * from "packages/primitive/src/native/link";
-    export * from "packages/primitive/src/native/checkbox";
-    export * from "packages/primitive/src/native/select";
-    export * from "packages/primitive/src/native/slider";
-    export * from "packages/primitive/src/native/file-input";
-    export * from "packages/primitive/src/native/svg";
-    export * from "packages/primitive/src/native/style";
+    export * from "packages/primitive/src/reactive/for";
+    export * from "packages/primitive/src/reactive/show";
+    export * from "packages/primitive/src/reactive/match";
+    export * from "packages/primitive/src/content/view";
+    export * from "packages/primitive/src/content/fragment";
+    export * from "packages/primitive/src/content/html";
+    export * from "packages/primitive/src/content/text";
+    export * from "packages/primitive/src/content/lazy-view";
+    export * from "packages/primitive/src/input/input";
+    export * from "packages/primitive/src/input/password";
+    export * from "packages/primitive/src/input/checkbox";
+    export * from "packages/primitive/src/input/select";
+    export * from "packages/primitive/src/input/slider";
+    export * from "packages/primitive/src/input/file-input";
+    export * as SVG from "packages/primitive/src/content/svg";
+    export * from "packages/primitive/src/content/style";
+    export * from "packages/primitive/src/content/img";
+    export * from "packages/primitive/src/content/label";
+    export * from "packages/primitive/src/interaction/link";
     export * from "packages/primitive/src/modules/portal";
     export * from "packages/primitive/src/modules/presence";
     export * from "packages/primitive/src/modules/transition";
     export * as PopperPrimitive from "packages/primitive/src/modules/popper";
-    export * from "packages/primitive/src/modules/flex";
+    export * from "packages/primitive/src/layout/flex";
+    export * from "packages/primitive/src/layout/grid";
+    export * from "packages/primitive/src/layout/column";
     export * as HeadPrimitive from "packages/primitive/src/modules/head";
     export * as ParagraphPrimitive from "packages/primitive/src/modules/paragraph";
     export * as ImagePrimitive from "packages/primitive/src/modules/image";
@@ -11470,12 +11801,16 @@ declare module "packages/primitive/src/index" {
     export * as WaterfallPrimitive from "packages/primitive/src/modules/waterfall";
     export * from "packages/primitive/src/modules/keep-alive-sub-views";
     export * from "packages/primitive/src/modules/standard-sub-views";
+    export * from "packages/primitive/src/style/index";
     export * from "packages/primitive/src/util/env";
     export * from "packages/primitive/src/util/render-to-string";
     export * from "packages/primitive/src/util/lazy";
     export * from "packages/primitive/src/util/reactive-data";
     export * from "packages/primitive/src/util/h";
     export * from "packages/primitive/src/host/index";
+    export * as VNode from "packages/primitive/src/vnode/index";
+    export * from "packages/primitive/src/vnode/style-names";
+    export * from "packages/primitive/src/vnode/class-names";
 }
 declare module "packages/timeless/src/index" {
     export * from "packages/primitive/src/index";
@@ -12038,8 +12373,12 @@ declare module "packages/shadcn/src/modules/label" {
     export function Label(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12073,8 +12412,12 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
     }): {
         t: string;
         $elm: any;
-        _props: import("@timeless/primitive").ViewProps;
-        _children: import("@timeless/primitive").ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12105,8 +12448,12 @@ declare module "packages/shadcn/src/modules/radio" {
     }): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: import("@timeless/primitive").ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12137,8 +12484,8 @@ declare module "packages/shadcn/src/modules/search-select" {
     }): any;
 }
 declare module "packages/shadcn/src/modules/link" {
-    import { NativeLinkProps, ViewChildren } from "packages/primitive/src/index";
-    export function Link(props?: NativeLinkProps, children?: ViewChildren | ViewChildren[number]): any;
+    import { ViewChildren, LinkProps as NativeLinkProps } from "packages/primitive/src/index";
+    export function Link(props?: NativeLinkProps, children?: ViewChildren): any;
 }
 declare module "packages/shadcn/src/modules/cascader" {
     import { ViewProps } from "packages/primitive/src/index";
@@ -12287,15 +12634,19 @@ declare module "packages/shadcn/src/modules/dialog" {
     };
 }
 declare module "packages/shadcn/src/modules/menu" {
-    import { ViewProps } from "packages/primitive/src/index";
+    import { ViewProps, TimelessElement } from "packages/primitive/src/index";
     import { MenuCore } from "packages/ui/src/index";
     export function Menu(props: ViewProps & {
         store: MenuCore;
     }): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: import("@timeless/primitive").ViewChildren;
+        value: string;
+        children: TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12309,7 +12660,12 @@ declare module "packages/shadcn/src/modules/dropdown-menu" {
         store: DropdownMenuCore;
     }, children?: ViewChildren): {
         t: string;
-        $elm: any;
+        state: {
+            rendered: boolean;
+            children: ViewChildren;
+            readonly host: any;
+        };
+        readonly $elm: any;
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
@@ -12323,7 +12679,12 @@ declare module "packages/shadcn/src/modules/context-menu" {
         store: ContextMenuCore;
     }, children?: ViewChildren): {
         t: string;
-        $elm: any;
+        state: {
+            rendered: boolean;
+            children: ViewChildren;
+            readonly host: any;
+        };
+        readonly $elm: any;
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
@@ -12409,8 +12770,12 @@ declare module "packages/shadcn/src/modules/scroll-area" {
     export function ScrollArea(props: any, children: any): {
         t: string;
         $elm: any;
-        _props: import("@timeless/primitive").ViewProps;
-        _children: import("@timeless/primitive").ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12435,8 +12800,12 @@ declare module "packages/shadcn/src/modules/aspect-ratio" {
     export function AspectRatio(props: any, children: any): {
         t: string;
         $elm: any;
-        _props: import("@timeless/primitive").ViewProps;
-        _children: import("@timeless/primitive").ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12460,8 +12829,12 @@ declare module "packages/shadcn/src/modules/kbd" {
     export function Kbd(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12470,8 +12843,12 @@ declare module "packages/shadcn/src/modules/kbd" {
     export function KbdGroup(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12500,8 +12877,12 @@ declare module "packages/shadcn/src/modules/field" {
     export function FieldGroup(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12510,8 +12891,12 @@ declare module "packages/shadcn/src/modules/field" {
     export function FieldSet(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12520,8 +12905,12 @@ declare module "packages/shadcn/src/modules/field" {
     export function FieldLegend(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12530,8 +12919,12 @@ declare module "packages/shadcn/src/modules/field" {
     export function FieldDescription(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12553,8 +12946,12 @@ declare module "packages/shadcn/src/modules/field" {
     export function FieldHelp(props: {}, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12563,8 +12960,12 @@ declare module "packages/shadcn/src/modules/field" {
     export function FieldError(props: {}, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12578,8 +12979,12 @@ declare module "packages/shadcn/src/modules/field" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12606,7 +13011,7 @@ declare module "packages/shadcn/src/modules/resizable-panels" {
 }
 declare module "packages/shadcn/src/modules/waterfall" {
     import { type ViewProps, type TimelessElement } from "packages/primitive/src/index";
-    import { WaterfallModel, WaterfallCellModel } from "packages/primitive/src/index";
+    import type { WaterfallCellModel, WaterfallModel } from "packages/ui/src/index";
     export function Waterfall<T extends Record<string, unknown>>(props: ViewProps & {
         store: WaterfallModel<T>;
         render: (payload: T, cell: WaterfallCellModel<T>) => TimelessElement;
@@ -12620,8 +13025,12 @@ declare module "packages/shadcn/src/modules/history-panel" {
     }): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: import("@timeless/primitive").ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12682,8 +13091,12 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
     }): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: import("@timeless/primitive").ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12694,8 +13107,12 @@ declare module "packages/shadcn/src/modules/sonner" {
     export function Toaster(): {
         t: string;
         $elm: any;
-        _props: import("@timeless/primitive").ViewProps;
-        _children: import("@timeless/primitive").ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12712,8 +13129,12 @@ declare module "packages/shadcn/src/modules/affix" {
     }, children: ViewChildren): {
         t: string;
         $elm: any;
-        _props: ViewProps;
-        _children: ViewChildren;
+        value: string;
+        children: import("@timeless/primitive").TimelessElement[];
+        props: Partial<{
+            styleSets: string[] | import("@timeless/primitive").Signal<string[]>;
+            style: ViewStyleProperties;
+        }>;
         render(): any;
         hydrate(existingDom: any): any;
         beforeUnmounted(): void;
@@ -12812,50 +13233,35 @@ declare const CardPrimitive: typeof import("@timeless/timeless").CardPrimitive;
 declare const CascaderPrimitive: typeof import("@timeless/timeless").CascaderPrimitive;
 declare const Case: typeof import("@timeless/timeless").Case;
 declare const CheckboxPrimitive: typeof import("@timeless/timeless").CheckboxPrimitive;
-declare const Circle: typeof import("@timeless/timeless").Circle;
-declare const ClassNameRef: typeof import("@timeless/timeless").ClassNameRef;
-declare const ClipPath: typeof import("@timeless/timeless").ClipPath;
+declare const Column: typeof import("@timeless/timeless").Column;
 declare const ContextMenuPrimitive: typeof import("@timeless/timeless").ContextMenuPrimitive;
 declare const DangerouslyInnerHTML: typeof import("@timeless/timeless").DangerouslyInnerHTML;
 declare const DatePickerPrimitive: typeof import("@timeless/timeless").DatePickerPrimitive;
 declare const DateRangePickerPrimitive: typeof import("@timeless/timeless").DateRangePickerPrimitive;
-declare const Defs: typeof import("@timeless/timeless").Defs;
 declare const DialogPrimitive: typeof import("@timeless/timeless").DialogPrimitive;
 declare const DropdownMenuPrimitive: typeof import("@timeless/timeless").DropdownMenuPrimitive;
-declare const Ellipse: typeof import("@timeless/timeless").Ellipse;
 declare const FieldPrimitive: typeof import("@timeless/timeless").FieldPrimitive;
 declare const FileInputPrimitive: typeof import("@timeless/timeless").FileInputPrimitive;
+declare const FileSelect: typeof import("@timeless/timeless").FileSelect;
 declare const Flex: typeof import("@timeless/timeless").Flex;
 declare const For: typeof import("@timeless/timeless").For;
 declare const Fragment: typeof import("@timeless/timeless").Fragment;
-declare const G: typeof import("@timeless/timeless").G;
+declare const Grid: typeof import("@timeless/timeless").Grid;
 declare const HeadPrimitive: typeof import("@timeless/timeless").HeadPrimitive;
 declare const ImagePrimitive: typeof import("@timeless/timeless").ImagePrimitive;
 declare const InputPrimitive: typeof import("@timeless/timeless").InputPrimitive;
 declare const KeepAliveSubViews: typeof import("@timeless/timeless").KeepAliveSubViews;
 declare const LabelPrimitive: typeof import("@timeless/timeless").LabelPrimitive;
 declare const LazyView: typeof import("@timeless/timeless").LazyView;
-declare const Line: typeof import("@timeless/timeless").Line;
-declare const LinearGradient: typeof import("@timeless/timeless").LinearGradient;
-declare const Mask: typeof import("@timeless/timeless").Mask;
 declare const Match: typeof import("@timeless/timeless").Match;
 declare const MenuPrimitive: typeof import("@timeless/timeless").MenuPrimitive;
-declare const NativeCheckbox: typeof import("@timeless/timeless").NativeCheckbox;
-declare const NativeFileInput: typeof import("@timeless/timeless").NativeFileInput;
 declare const NativeImg: typeof import("@timeless/timeless").NativeImg;
-declare const NativeInput: typeof import("@timeless/timeless").NativeInput;
 declare const NativeLabel: typeof import("@timeless/timeless").NativeLabel;
-declare const NativeLink: typeof import("@timeless/timeless").NativeLink;
-declare const NativePassword: typeof import("@timeless/timeless").NativePassword;
-declare const NativeSelect: typeof import("@timeless/timeless").NativeSelect;
-declare const NativeSlider: typeof import("@timeless/timeless").NativeSlider;
 declare const NativeStyle: typeof import("@timeless/timeless").NativeStyle;
 declare const NumberInputPrimitive: typeof import("@timeless/timeless").NumberInputPrimitive;
 declare const ObjectSignal: typeof import("@timeless/timeless").ObjectSignal;
 declare const ParagraphPrimitive: typeof import("@timeless/timeless").ParagraphPrimitive;
-declare const Path: typeof import("@timeless/timeless").Path;
-declare const Polygon: typeof import("@timeless/timeless").Polygon;
-declare const Polyline: typeof import("@timeless/timeless").Polyline;
+declare const PasswordInput: typeof import("@timeless/timeless").PasswordInput;
 declare const PopconfirmPrimitive: typeof import("@timeless/timeless").PopconfirmPrimitive;
 declare const PopoverPrimitive: typeof import("@timeless/timeless").PopoverPrimitive;
 declare const PopperPrimitive: typeof import("@timeless/timeless").PopperPrimitive;
@@ -12863,9 +13269,7 @@ declare const Portal: typeof import("@timeless/timeless").Portal;
 declare const Presence: typeof import("@timeless/timeless").Presence;
 declare const PrimitiveSignal: typeof import("@timeless/timeless").PrimitiveSignal;
 declare const ProgressPrimitive: typeof import("@timeless/timeless").ProgressPrimitive;
-declare const RadialGradient: typeof import("@timeless/timeless").RadialGradient;
 declare const RadioPrimitive: typeof import("@timeless/timeless").RadioPrimitive;
-declare const Rect: typeof import("@timeless/timeless").Rect;
 declare const Ref: typeof import("@timeless/timeless").Ref;
 declare const RefArray: typeof import("@timeless/timeless").RefArray;
 declare const RefObject: typeof import("@timeless/timeless").RefObject;
@@ -12882,28 +13286,25 @@ declare const SkeletonPrimitive: typeof import("@timeless/timeless").SkeletonPri
 declare const SliderPrimitive: typeof import("@timeless/timeless").SliderPrimitive;
 declare const StandardSubViews: typeof import("@timeless/timeless").StandardSubViews;
 declare const StepsPrimitive: typeof import("@timeless/timeless").StepsPrimitive;
-declare const Stop: typeof import("@timeless/timeless").Stop;
-declare const StyleRef: typeof import("@timeless/timeless").StyleRef;
 declare const Subscriber: typeof import("@timeless/timeless").Subscriber;
 declare const SwitchPrimitive: typeof import("@timeless/timeless").SwitchPrimitive;
 declare const TablePrimitive: typeof import("@timeless/timeless").TablePrimitive;
 declare const TabsPrimitive: typeof import("@timeless/timeless").TabsPrimitive;
 declare const TagSelectPrimitive: typeof import("@timeless/timeless").TagSelectPrimitive;
-declare const Text: typeof import("@timeless/timeless").Text;
 declare const TextareaPrimitive: typeof import("@timeless/timeless").TextareaPrimitive;
 declare const TimePickerPrimitive: typeof import("@timeless/timeless").TimePickerPrimitive;
+declare const TimelessRefArray: typeof import("@timeless/timeless").TimelessRefArray;
 declare const ToastPrimitive: typeof import("@timeless/timeless").ToastPrimitive;
 declare const TogglePrimitive: typeof import("@timeless/timeless").TogglePrimitive;
 declare const TooltipPrimitive: typeof import("@timeless/timeless").TooltipPrimitive;
 declare const Transition: typeof import("@timeless/timeless").Transition;
 declare const Txt: typeof import("@timeless/timeless").Txt;
-declare const Use: typeof import("@timeless/timeless").Use;
+declare const VNode: typeof import("@timeless/timeless").VNode;
 declare const VideoPlayerPrimitive: typeof import("@timeless/timeless").VideoPlayerPrimitive;
 declare const View: typeof import("@timeless/timeless").View;
 declare const WaterfallPrimitive: typeof import("@timeless/timeless").WaterfallPrimitive;
 declare const applyMixins: typeof import("@timeless/timeless").applyMixins;
 declare const classNames: typeof import("@timeless/timeless").classNames;
-declare const cn: typeof import("@timeless/timeless").cn;
 declare const combine: typeof import("@timeless/timeless").combine;
 declare const computed: typeof import("@timeless/timeless").computed;
 declare const createReactiveData: typeof import("@timeless/timeless").createReactiveData;
@@ -12911,6 +13312,8 @@ declare const defineModel: typeof import("@timeless/timeless").defineModel;
 declare const derive: typeof import("@timeless/timeless").derive;
 declare const getHost: typeof import("@timeless/timeless").getHost;
 declare const getRawReactiveStore: typeof import("@timeless/timeless").getRawReactiveStore;
+declare const getRenderer: typeof import("@timeless/timeless").getRenderer;
+declare const getRendererScheduler: typeof import("@timeless/timeless").getRendererScheduler;
 declare const getarr: typeof import("@timeless/timeless").getarr;
 declare const getobj: typeof import("@timeless/timeless").getobj;
 declare const h: typeof import("@timeless/timeless").h;
@@ -12921,6 +13324,7 @@ declare const isLazyElement: typeof import("@timeless/timeless").isLazyElement;
 declare const isReactiveData: typeof import("@timeless/timeless").isReactiveData;
 declare const isRef: typeof import("@timeless/timeless").isRef;
 declare const isStyleRef: typeof import("@timeless/timeless").isStyleRef;
+declare const join: typeof import("@timeless/timeless").join;
 declare const kit: typeof import("@timeless/timeless").kit;
 declare const lazy: typeof import("@timeless/timeless").lazy;
 declare const reactive: typeof import("@timeless/timeless").reactive;
@@ -12929,23 +13333,26 @@ declare const reactiveObject: typeof import("@timeless/timeless").reactiveObject
 declare const ref: typeof import("@timeless/timeless").ref;
 declare const refarr: typeof import("@timeless/timeless").refarr;
 declare const refobj: typeof import("@timeless/timeless").refobj;
+declare const registerComponent: typeof import("@timeless/timeless").registerComponent;
 declare const registryGet: typeof import("@timeless/timeless").registryGet;
 declare const registryGetArr: typeof import("@timeless/timeless").registryGetArr;
 declare const registryGetObj: typeof import("@timeless/timeless").registryGetObj;
 declare const registrySet: typeof import("@timeless/timeless").registrySet;
 declare const release: typeof import("@timeless/timeless").release;
 declare const renderToString: typeof import("@timeless/timeless").renderToString;
+declare const resolveComponent: typeof import("@timeless/timeless").resolveComponent;
 declare const safeCreateDocumentFragment: typeof import("@timeless/timeless").safeCreateDocumentFragment;
 declare const safeCreateElement: typeof import("@timeless/timeless").safeCreateElement;
 declare const safeCreateElementNS: typeof import("@timeless/timeless").safeCreateElementNS;
 declare const safeCreateTextNode: typeof import("@timeless/timeless").safeCreateTextNode;
 declare const setHost: typeof import("@timeless/timeless").setHost;
+declare const setRenderer: typeof import("@timeless/timeless").setRenderer;
 declare const signal: typeof import("@timeless/timeless").signal;
-declare const sn: typeof import("@timeless/timeless").sn;
 declare const styleNames: typeof import("@timeless/timeless").styleNames;
 declare const ui: typeof import("@timeless/timeless").ui;
 declare const uncomputed: typeof import("@timeless/timeless").uncomputed;
 declare const utils: typeof import("@timeless/timeless").utils;
+declare const viewStyleToCssText: typeof import("@timeless/timeless").viewStyleToCssText;
 
 // @timeless/kit
 declare const ApplicationModel: typeof import("@timeless/kit").ApplicationModel;

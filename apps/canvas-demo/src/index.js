@@ -1,13 +1,4 @@
-import {
-  Grid,
-  View,
-  Txt,
-  For,
-  ref,
-  combine,
-  refarr,
-  h,
-} from "@timeless/timeless";
+import { Grid, View, Txt, For, ref, combine, refarr } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-canvas";
 
 const apps = [
@@ -29,10 +20,20 @@ function ApplicationView() {
   const page = ref("todo");
   const columns = 4;
   const focused = ref({ x: 0, y: 0 });
+  const todoPageStyle = combine(page, (p) => ({
+    opacity: p === "todo" ? 1 : 0,
+  }));
+  const appPageStyle = combine(page, (p) => ({
+    opacity: p === "app" ? 1 : 0,
+  }));
   const todos = refarr([
     {
       id: 1,
       title: "Buy groceries",
+    },
+    {
+      id: 2,
+      title: "Study for exam exam exam",
     },
   ]);
 
@@ -115,6 +116,7 @@ function ApplicationView() {
       View(
         {
           onClick() {
+            console.log("click todo");
             page.set("todo");
           },
         },
@@ -123,6 +125,7 @@ function ApplicationView() {
       View(
         {
           onClick() {
+            console.log("click app");
             page.set("app");
           },
         },
@@ -131,32 +134,28 @@ function ApplicationView() {
     ]),
     View(
       {
-        style: {
-          opacity: combine(page, (p) => (p === "todo" ? 1 : 0)),
-        },
+        style: todoPageStyle,
       },
       [
         View({}, ["Todo List Page"]),
         For({
           each: todos,
           render(todo) {
-            return h(View, {}, [todo.title]);
+            return View({}, [todo.title]);
           },
         }),
       ],
     ),
     View(
       {
-        style: {
-          opacity: combine(page, (p) => (p === "app" ? 1 : 0)),
-        },
+        style: appPageStyle,
       },
       [
         View({}, ["Application List Page"]),
         Grid(
           { columns, gap: 16 },
-          apps.map((app, idx) =>
-            View(
+          apps.map((app, idx) => {
+            return View(
               {
                 style: {
                   borderColor: combine({ focused, idx }, (t) =>
@@ -173,16 +172,18 @@ function ApplicationView() {
                 ]),
                 Txt({ style: { fontSize: 12, color: "gray" } }, [app.subtitle]),
               ],
-            ),
-          ),
+            );
+          }),
         ),
       ],
     ),
   ]);
 }
 
-render(h(ApplicationView, {}), document.getElementById("c"), {
-  onVNodeTreeCreated(data) {
-    console.log(data);
-  },
+const elm = ApplicationView({});
+console.log("[]", elm);
+render(elm, document.getElementById("c"), {
+  // onVNodeTreeCreated(data) {
+  //   console.log(data);
+  // },
 });

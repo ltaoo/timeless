@@ -138,7 +138,7 @@ export function Match(
   }
 
   if (isRef(when)) {
-    when._subscribe({
+    when.subscribe({
       onChange: update,
     });
   }

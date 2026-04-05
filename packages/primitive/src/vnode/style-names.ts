@@ -5,7 +5,7 @@ export type StyleObject = Record<string, any>;
 export interface StyleRef {
   __style_ref: true;
   value: StyleObject;
-  _subscribe(ctx: Subscriber): void;
+  subscribe(ctx: Subscriber): void;
   toString(): string;
 }
 
@@ -128,7 +128,7 @@ export function styleNames(
       Object.keys(obj).forEach((k) => {
         const vv = (obj as any)[k];
         if (isRef(vv)) {
-          (vv as any)._subscribe({
+          (vv as any).subscribe({
             onChange() {
               notify();
             },
@@ -140,7 +140,7 @@ export function styleNames(
     }
     if (isStyleRef(item)) {
       sources.push(item);
-      item._subscribe({
+      item.subscribe({
         onChange() {
           notify();
         },
@@ -149,7 +149,7 @@ export function styleNames(
     }
     if (isRef(item)) {
       sources.push(item as Ref<string | StyleRef | StyleObject | undefined>);
-      item._subscribe({
+      item.subscribe({
         onChange() {
           notify();
         },
@@ -177,10 +177,10 @@ export function styleNames(
       // return v === this.value;
       return false;
     },
-    _destroy() {
+    destroy() {
       notify();
     },
-    _subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber) {
       _deps.push(ctx);
     },
     // toString() {

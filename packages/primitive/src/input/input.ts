@@ -109,7 +109,7 @@ export function Input(props: InputProps = {}) {
 
       if (id !== undefined) {
         if (isRef(id)) {
-          id._subscribe({
+          id.subscribe({
             onChange(v) {
               setProp("id", String(v));
             },
@@ -122,7 +122,7 @@ export function Input(props: InputProps = {}) {
 
       // Handle type attribute
       if (isRef(type)) {
-        type._subscribe({
+        type.subscribe({
           onChange(v) {
             setProp("type", v);
           },
@@ -135,7 +135,7 @@ export function Input(props: InputProps = {}) {
       // Handle value attribute
       if (value !== undefined) {
         if (isRef(value)) {
-          value._subscribe({
+          value.subscribe({
             onChange(v) {
               setProp("value", v);
             },
@@ -149,7 +149,7 @@ export function Input(props: InputProps = {}) {
       // Handle placeholder attribute
       if (placeholder !== undefined) {
         if (isRef(placeholder)) {
-          placeholder._subscribe({
+          placeholder.subscribe({
             onChange(v) {
               setProp("placeholder", v);
             },
@@ -163,7 +163,7 @@ export function Input(props: InputProps = {}) {
       // Handle disabled attribute
       if (disabled !== undefined) {
         if (isRef(disabled)) {
-          disabled._subscribe({
+          disabled.subscribe({
             onChange(v) {
               setProp("disabled", v);
             },
@@ -177,7 +177,7 @@ export function Input(props: InputProps = {}) {
       // Handle readonly attribute
       if (readonly !== undefined) {
         if (isRef(readonly)) {
-          readonly._subscribe({
+          readonly.subscribe({
             onChange(v) {
               setProp("readOnly", v);
             },
@@ -191,7 +191,7 @@ export function Input(props: InputProps = {}) {
       // Handle maxLength attribute
       if (maxLength !== undefined) {
         if (isRef(maxLength)) {
-          maxLength._subscribe({
+          maxLength.subscribe({
             onChange(v) {
               setProp("maxLength", v);
             },
@@ -205,7 +205,7 @@ export function Input(props: InputProps = {}) {
       // Handle minLength attribute
       if (minLength !== undefined) {
         if (isRef(minLength)) {
-          minLength._subscribe({
+          minLength.subscribe({
             onChange(v) {
               setProp("minLength", v);
             },
@@ -219,7 +219,7 @@ export function Input(props: InputProps = {}) {
       // Handle pattern attribute
       if (pattern !== undefined) {
         if (isRef(pattern)) {
-          pattern._subscribe({
+          pattern.subscribe({
             onChange(v) {
               setProp("pattern", v);
             },
@@ -233,7 +233,7 @@ export function Input(props: InputProps = {}) {
       // Handle required attribute
       if (required !== undefined) {
         if (isRef(required)) {
-          required._subscribe({
+          required.subscribe({
             onChange(v) {
               setProp("required", v);
             },
@@ -247,7 +247,7 @@ export function Input(props: InputProps = {}) {
       // Handle autocomplete attribute
       if (autocomplete !== undefined) {
         if (isRef(autocomplete)) {
-          autocomplete._subscribe({
+          autocomplete.subscribe({
             onChange(v) {
               setProp("autocomplete", v);
             },
@@ -261,7 +261,7 @@ export function Input(props: InputProps = {}) {
       // Handle name attribute
       if (name !== undefined) {
         if (isRef(name)) {
-          name._subscribe({
+          name.subscribe({
             onChange(v) {
               setProp("name", v);
             },
@@ -282,7 +282,7 @@ export function Input(props: InputProps = {}) {
         Object.keys(attributes).forEach((k) => {
           const vv = attributes[k];
           if (isRef(vv)) {
-            vv._subscribe({
+            vv.subscribe({
               onChange(v: any) {
                 applyAttr(k, v);
               },
@@ -300,7 +300,7 @@ export function Input(props: InputProps = {}) {
         const vv = dataset[k];
         const attrName = `data-${k}`;
         if (isRef(vv)) {
-          vv._subscribe({
+          vv.subscribe({
             onChange(v: any) {
               applyAttr(attrName, v);
             },
@@ -316,14 +316,14 @@ export function Input(props: InputProps = {}) {
         if (typeof cls === "string") {
           host.setClassName($elm, cls);
         } else if (isRef(cls)) {
-          cls._subscribe({
+          cls.subscribe({
             onChange(v) {
               host.setClassName($elm, String(v));
             },
           });
           host.setClassName($elm, String(cls.value));
         } else if (isClassName(cls)) {
-          cls._subscribe({
+          cls.subscribe({
             onChange(v: any) {
               host.setClassName(
                 $elm,
@@ -339,7 +339,7 @@ export function Input(props: InputProps = {}) {
       if (style) {
         if (isStyleRef(style as any)) {
           const st = style as any;
-          st._subscribe({
+          st.subscribe({
             onChange(v: any) {
               host.setStyleText($elm, viewStyleToCssText(v ?? {}));
             },
@@ -349,7 +349,7 @@ export function Input(props: InputProps = {}) {
           const st = style as any;
           const apply = () =>
             host.setStyleText($elm, viewStyleToCssText(st.value || {}));
-          st._subscribe({
+          st.subscribe({
             onChange() {
               apply();
             },
@@ -362,7 +362,7 @@ export function Input(props: InputProps = {}) {
           Object.keys(style as any).forEach((k) => {
             const vv = (style as any)[k];
             if (isRef(vv)) {
-              (vv as any)._subscribe({
+              (vv as any).subscribe({
                 onChange() {
                   applyStyle();
                 },

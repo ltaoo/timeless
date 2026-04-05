@@ -56,7 +56,7 @@ export function Image(
 
   updateSrc(srcRef.value);
   if (isRef(src)) {
-    src._subscribe({ onChange: updateSrc });
+    src.subscribe({ onChange: updateSrc });
   }
 
   const handleLoad = () => {

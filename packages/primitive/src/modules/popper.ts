@@ -77,34 +77,36 @@ export function Content(
   // 初始化全局监听器
   initGlobalPointerListener();
 
-  const extraStyle =
-    rest.style &&
-    typeof rest.style === "object" &&
-    !isRef(rest.style) &&
-    !isStyleRef(rest.style)
-      ? rest.style
-      : {};
+  // const extraStyle =
+  //   rest.style &&
+  //   typeof rest.style === "object" &&
+  //   !isRef(rest.style) &&
+  //   !isStyleRef(rest.style)
+  //     ? rest.style
+  //     : {};
 
   return View(
     {
       ...rest,
       class: classNames(["t1-popper", rest.class]),
-      style: {
-        ...extraStyle,
-        "z-index": zIndex,
-        position: "fixed",
-        left: 0,
-        top: 0,
-        opacity: computed(state_, (t) => (t.isPlaced ? 1 : 0)),
-        "pointer-event": computed(state_, (t) =>
-          t.isPlaced ? "initial" : "none",
-        ),
-        transform: computed(state_, (t) =>
-          t.isPlaced
-            ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
-            : "translate3d(0, 0, 0)",
-        ),
-      },
+      style: styleNames([
+        props.style,
+        {
+          "z-index": zIndex,
+          position: "fixed",
+          left: 0,
+          top: 0,
+          opacity: computed(state_, (t) => (t.isPlaced ? 1 : 0)),
+          "pointer-event": computed(state_, (t) =>
+            t.isPlaced ? "initial" : "none",
+          ),
+          transform: computed(state_, (t) =>
+            t.isPlaced
+              ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
+              : "translate3d(0, 0, 0)",
+          ),
+        },
+      ]),
       onMounted(event) {
         const $e = (event as any).target as HTMLDivElement;
         const $element = $e;

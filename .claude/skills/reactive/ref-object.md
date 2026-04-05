@@ -42,7 +42,7 @@ state.refresh();
 ## 订阅
 
 ```js
-state._subscribe({
+state.subscribe({
   onChange(newObj) { console.log(newObj); },
 });
 ```

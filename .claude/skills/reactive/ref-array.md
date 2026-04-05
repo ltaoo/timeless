@@ -64,7 +64,7 @@ for (const item of list) { ... }  // 支持 for...of
 ## 订阅
 
 ```js
-list._subscribe({
+list.subscribe({
   onChange(newArray) { /* 全量更新 */ },
   onPatch(action) {
     // action.type: "insert" | "update" | "delete"

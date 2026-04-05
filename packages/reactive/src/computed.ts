@@ -36,7 +36,7 @@ export function computed<T = any>(
 
   // const computedRef = {
   //   __is_ref: true as const,
-  //   _subscribe(ctx: Subscriber) {
+  //   subscribe(ctx: Subscriber) {
   //     ctx.ignore = true;
   //   },
   //   get value() {
@@ -64,7 +64,7 @@ export function computed<T = any>(
     return r;
   })();
 
-  _computed_ref._subscribe({
+  _computed_ref.subscribe({
     onChange() {
       // console.log("computed ref is changed");
       _local_value = fn(_computed_ref.value);
@@ -73,11 +73,11 @@ export function computed<T = any>(
   });
   const res = {
     __is_ref: true as const,
-    _subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber) {
       _deps.push(ctx);
     },
-    _destroy() {
-      _computed_ref._destroy();
+    destroy() {
+      _computed_ref.destroy();
       _deps.length = 0;
     },
     get value() {

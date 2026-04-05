@@ -7,7 +7,7 @@ import { View, ViewChildren, ViewProps } from "@/content/view";
 import { Show } from "@/reactive/show";
 import { For } from "@/reactive/for";
 import { Fragment } from "@/content/fragment";
-import { Input } from "@/input/input";
+import { Input as NativeInput } from "@/input/input";
 import { h } from "@/util/h";
 import { getHost } from "@/host";
 
@@ -41,50 +41,42 @@ export function Trigger(
 
   const events: any[] = [];
 
-  const _input$ = View(
-    {
-      as: "input",
-      attributes: {
-        ...(rest.attributes || {}),
-        id: props.store.id || props.id || rest.attributes?.id,
-      },
-      style: {
-        position: "absolute",
-        width: "1px",
-        height: "1px",
-        padding: 0,
-        margin: "-1px",
-        overflow: "hidden",
-        clip: "rect(0, 0, 0, 0)",
-        "white-space": "nowrap",
-        "border-width": 0,
-      },
-      onFocus() {
-        if (props.store.presence.state.visible) {
-          return;
-        }
-        props.store.presence.show();
-        props.store.popper.place();
-      },
-      onClick(e) {
-        e.stopPropagation();
-      },
-      onMounted(event) {
-        const $elm = (event as any).target as HTMLInputElement;
-        host.setProperty?.($elm, "value", store.state.values.join(",") || "");
-        events.push(
-          store.onStateChange(() => {
-            host.setProperty?.(
-              $elm,
-              "value",
-              store.state.values.join(",") || "",
-            );
-          }),
-        );
-      },
+  const _input$ = NativeInput({
+    attributes: {
+      ...(rest.attributes || {}),
+      id: props.store.id || props.id || rest.attributes?.id,
     },
-    [],
-  );
+    style: {
+      position: "absolute",
+      width: "1px",
+      height: "1px",
+      padding: 0,
+      margin: "-1px",
+      overflow: "hidden",
+      clip: "rect(0, 0, 0, 0)",
+      "white-space": "nowrap",
+      "border-width": 0,
+    },
+    onFocus() {
+      if (props.store.presence.state.visible) {
+        return;
+      }
+      props.store.presence.show();
+      props.store.popper.place();
+    },
+    onClick(e) {
+      e.stopPropagation();
+    },
+    onMounted(event) {
+      const $elm = (event as any).target as HTMLInputElement;
+      host.setProperty?.($elm, "value", store.state.values.join(",") || "");
+      events.push(
+        store.onStateChange(() => {
+          host.setProperty?.($elm, "value", store.state.values.join(",") || "");
+        }),
+      );
+    },
+  });
 
   return View(
     {
@@ -135,7 +127,7 @@ export function Trigger(
         }
       },
     },
-    [_input$, ...children],
+    [_input$, Fragment({}, children)],
   );
 }
 
@@ -437,7 +429,7 @@ export function Search(
 ) {
   const { store, placeholder = "Search...", ...rest } = props;
 
-  return Input({
+  return NativeInput({
     ...rest,
     type: "text",
     placeholder,

@@ -1,9 +1,8 @@
 import { Ref, isRef } from "@timeless/reactive";
 
 import { View, ViewChildren, ViewProps } from "@/content/view";
-import { viewStyleToCssText } from "@/style/index";
-import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
-import { isStyleRef, styleNames } from "@/vnode/style-names";
+import { ClassNameRef } from "@/vnode/class-names";
+import { isStyleRef } from "@/vnode/style-names";
 
 export type GridAlign = "start" | "end" | "center" | "stretch" | "baseline";
 export type GridJustify = GridAlign | "between" | "around" | "evenly";
@@ -156,8 +155,10 @@ export function Grid(
       ? stl
       : {};
 
-  return View(
+  const grid$ = View(
     { ...rest, class: cls, style: { ...baseStyle, ...extraStyle } },
     children,
   );
+  grid$.t = "grid";
+  return grid$;
 }

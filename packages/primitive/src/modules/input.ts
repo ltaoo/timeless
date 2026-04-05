@@ -104,7 +104,7 @@ export function Input(
         const vv = dataset[k];
         const attrName = `data-${k}`;
         if (isRef(vv)) {
-          vv._subscribe({
+          vv.subscribe({
             onChange(v: any) {
               applyAttr(attrName, v);
             },
@@ -116,7 +116,7 @@ export function Input(
       });
 
       // Apply classes
-      class$._subscribe({
+      class$.subscribe({
         onChange(v: any) {
           host.setClassName($elm, v.join(" "));
         },
@@ -127,7 +127,7 @@ export function Input(
       if (st) {
         if (isStyleRef(st as any)) {
           const s = st as any;
-          s._subscribe({
+          s.subscribe({
             onChange(v: any) {
               host.setStyleText($elm, viewStyleToCssText(v ?? {}));
             },
@@ -137,7 +137,7 @@ export function Input(
           const s = st as any;
           const apply = () =>
             host.setStyleText($elm, viewStyleToCssText(s.value || {}));
-          s._subscribe({
+          s.subscribe({
             onChange() {
               apply();
             },
@@ -150,7 +150,7 @@ export function Input(
           Object.keys(st as any).forEach((k) => {
             const vv = (st as any)[k];
             if (isRef(vv)) {
-              (vv as any)._subscribe({
+              (vv as any).subscribe({
                 onChange() {
                   applyStyle();
                 },
@@ -162,22 +162,22 @@ export function Input(
       }
 
       // Subscribe to reactive state changes
-      value$._subscribe({
+      value$.subscribe({
         onChange(v: any) {
           setProp("value", v);
         },
       });
-      placeholder$._subscribe({
+      placeholder$.subscribe({
         onChange(v: any) {
           setProp("placeholder", v);
         },
       });
-      disabled$._subscribe({
+      disabled$.subscribe({
         onChange(v: any) {
           setProp("disabled", v);
         },
       });
-      type$._subscribe({
+      type$.subscribe({
         onChange(v: any) {
           setProp("type", v);
         },
@@ -270,7 +270,7 @@ export function Value(
         const updateText = () => {
           host.setTextContent($e, value$.value);
         };
-        value$._subscribe({ onChange: updateText });
+        value$.subscribe({ onChange: updateText });
         updateText();
         if (rest.onMounted) rest.onMounted(event);
       },
@@ -332,7 +332,7 @@ export function Loading(
         const updateDisplay = () => {
           host.patchStyle?.($elm, { display: loading$.value ? "" : "none" });
         };
-        loading$._subscribe({ onChange: updateDisplay });
+        loading$.subscribe({ onChange: updateDisplay });
         updateDisplay();
         if (rest.onMounted) rest.onMounted(event);
       },
@@ -367,7 +367,7 @@ export function Disabled(
             host.removeAttribute($elm, "data-disabled");
           }
         };
-        disabled$._subscribe({ onChange: updateState });
+        disabled$.subscribe({ onChange: updateState });
         updateState();
         if (rest.onMounted) rest.onMounted(event);
       },

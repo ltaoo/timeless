@@ -5,12 +5,7 @@ import {
   WaterfallCellModel,
 } from "@timeless/ui";
 
-import {
-  View,
-  ViewChildren,
-  ViewProps,
-  TimelessElement,
-} from "@/content/view";
+import { View, ViewChildren, ViewProps, TimelessElement } from "@/content/view";
 
 export function Root(
   props: ViewProps & { store: WaterfallModel<any> },
@@ -38,12 +33,16 @@ export function Root(
       ...rest,
       style: { position: "relative", "overflow-y": "auto", height: "100%" },
     },
+    // @ts-ignore
     [inner$],
   );
 
   return {
     t: "view",
     $elm: view$.$elm,
+    value: "",
+    children: [],
+    props: { style: {} },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -90,6 +89,9 @@ export function Column(
   return {
     t: "view",
     $elm: view$.$elm,
+    value: "",
+    children: [],
+    props: { style: {} },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -147,6 +149,9 @@ export function Cell(
   return {
     t: "view",
     $elm: view$.$elm,
+    value: "",
+    children: [],
+    props: { style: {} },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();

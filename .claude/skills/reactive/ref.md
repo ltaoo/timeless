@@ -35,7 +35,7 @@ count.isStrictEqual(5)   // ===
 ## 订阅
 
 ```js
-count._subscribe({
+count.subscribe({
   onChange(newValue) { console.log(newValue); },
   onPatch(action) { /* { type: "insert"|"update"|"delete"|"refresh", ... } */ },
 });
@@ -53,7 +53,7 @@ count._destroy();   // 清除所有订阅者
 type Ref<T> = {
   __is_ref: true;
   value: T;
-  _subscribe(ctx: Subscriber): void;
+  subscribe(ctx: Subscriber): void;
   _destroy(): void;
   isSame(v: T): boolean;
   isStrictEqual(v: T): boolean;

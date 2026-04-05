@@ -30,7 +30,7 @@ cls.toString();             // "base-class bg-blue-500 new-class"
 ```ts
 type ClassNameRef = {
   __cn_ref: true;
-  _subscribe(ctx: Subscriber): void;
+  subscribe(ctx: Subscriber): void;
   add(v: string): void;
   del(v: string): void;
   append(c: string): void;
@@ -59,7 +59,7 @@ View({ style }, children);
 ```ts
 type StyleRef = {
   __style_ref: true;
-  _subscribe(ctx: Subscriber): void;
+  subscribe(ctx: Subscriber): void;
   toString(): string;
 };
 ```

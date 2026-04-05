@@ -3,7 +3,9 @@ import { isRef, Ref } from "@timeless/reactive";
 // import { getHost } from "@/host";
 import { safeCreateTextNode } from "@/util/env";
 
-export function Txt(value: Ref<string> | string) {
+import { TimelessElement } from "./view";
+
+export function Txt(value: Ref<string> | string): TimelessElement {
   // const host = getHost();
   let $elm: any = null;
 
@@ -14,7 +16,7 @@ export function Txt(value: Ref<string> | string) {
 
   function setupSubscription() {
     if (isRef(value)) {
-      value._subscribe({
+      value.subscribe({
         onPatch(action) {},
         onChange(v: any) {
           if (v === state.value) {
@@ -37,6 +39,12 @@ export function Txt(value: Ref<string> | string) {
     get $elm() {
       return $elm;
     },
+    value: state.value,
+    props: {
+      // styleSets: [],
+      style: {},
+    },
+    children: [],
     render() {
       if (state.rendered) {
         return $elm;

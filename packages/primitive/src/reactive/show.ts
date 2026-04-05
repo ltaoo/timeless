@@ -155,7 +155,7 @@ export function Show(
   };
 
   if (isRef(when)) {
-    when._subscribe({
+    when.subscribe({
       onChange(value) {
         const condition = !!value;
         if (!anchor) {

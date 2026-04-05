@@ -1,4 +1,4 @@
-import { Signal, Ref, isRef } from "@timeless/reactive";
+import { Signal, isRef } from "@timeless/reactive";
 
 import { safeCreateElement } from "@/util/env";
 import { ViewStyleProperties, ViewStyle } from "@/style/index";
@@ -101,17 +101,28 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         return;
       }
       for (let i = 0; i < children.length; i++) {
-        let child = children[i];
-        if (typeof child === "function") {
-          child = child();
-          state.children[i] = child;
-        }
-        if (isRef(child)) {
-          state.children[i] = Txt(child as any);
-        }
-        if (isElement(child)) {
-          state.children[i] = child;
-        }
+        const child = children[i];
+        // console.log("for children", child);
+        (() => {
+          if (typeof child === "function") {
+            const r = child();
+            state.children[i] = r;
+            return;
+          }
+          if (isRef(child)) {
+            state.children[i] = Txt(String(child.value));
+            return;
+          }
+          if (typeof child === "string") {
+            state.children[i] = Txt(String(child));
+            return;
+          }
+          if (isElement(child)) {
+            state.children[i] = child;
+            return;
+          }
+          // state.children[i] = null;
+        })();
       }
     },
 
@@ -152,7 +163,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         Object.keys(attributes).forEach((k) => {
           const vv = attributes[k];
           if (isRef(vv)) {
-            vv._subscribe({
+            vv.subscribe({
               onChange(v) {
                 if ($elm) {
                   methods.apply_attr(k, v);
@@ -170,7 +181,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         const vv = dataset[k];
         const attrName = `data-${k}`;
         if (isRef(vv)) {
-          vv._subscribe({
+          vv.subscribe({
             onChange(v) {
               if ($elm) {
                 methods.apply_attr(attrName, v);
@@ -186,31 +197,31 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       if (cls) {
         if (typeof cls === "string") {
           // host.setClassName($elm, cls);
-          // $elm.setStylePreset(cls);
+          // $elm.setStyleSet(cls);
           state.props.styleSets = [cls];
         } else if (isRef(cls)) {
-          cls._subscribe({
+          cls.subscribe({
             onChange(v: any) {
               if ($elm) {
                 // host.setClassName($elm, v);
-                $elm.setStylePreset(v);
+                $elm.setStyleSet(v);
               }
             },
           });
           // host.setClassName($elm, cls.value);
-          // $elm.setStylePreset(cls.value);
+          // $elm.setStyleSet(cls.value);
           state.props.styleSets = [cls.value];
         } else if (isClassName(cls)) {
-          cls._subscribe({
+          cls.subscribe({
             onChange(v: any) {
               if ($elm) {
                 // host.setClassName($elm, v.join(" "));
-                $elm.setStylePreset(v.join(" "));
+                $elm.setStyleSet(v.join(" "));
               }
             },
           });
           // host.setClassName($elm, cls.toString());
-          // $elm.setStylePreset(cls.toString());
+          // $elm.setStyleSet(cls.toString());
           state.props.styleSets = cls.toString().split(" ");
         } else {
           state.props.styleSets = [];
@@ -230,10 +241,10 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           const apply = () => {
             if ($elm) {
               // host.setStyleText($elm, viewStyleToCssText(st.value || {}));
-              $elm.setStylePreset(st.value || {});
+              $elm.setStyleSet(st.value || {});
             }
           };
-          st._subscribe({
+          st.subscribe({
             onChange() {
               apply();
             },
@@ -244,7 +255,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           // const applyStyle = () => {
           //   if ($elm) {
           //     // host.setStyleText($elm, viewStyleToCssText(obj));
-          //     $elm.setStylePreset(obj);
+          //     $elm.setStyleSet(obj);
           //   }
           // };
           // const keys = Object.keys(obj);
@@ -252,7 +263,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           //   const k = keys[i];
           //   const vv = (obj as any)[k];
           //   if (isRef(vv)) {
-          //     vv._subscribe({
+          //     vv.subscribe({
           //       onChange() {
           //         applyStyle();
           //       },
@@ -434,6 +445,11 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       }
     },
   };
+  const lifecycle = {
+    handleMounted() {},
+    handleBeforeUnmount() {},
+    handleUnmounted() {},
+  };
 
   // for (let i = 0; i < state.children.length; i += 1) {
   //   const node = state.children[i];
@@ -464,6 +480,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     set $elm(v) {
       $elm = v;
     },
+    value: "",
     children: state.children,
     props: state.props,
     render() {
@@ -471,12 +488,10 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         return $elm;
       }
       state.rendered = true;
-
       // Create element if not already created
       if (!$elm) {
         $elm = safeCreateElement(as);
       }
-
       methods.normalize_children(children);
       methods.setup_reactive_props_bindings();
 
@@ -653,7 +668,12 @@ export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 export interface TimelessElement {
   t: string;
   $elm: any;
-  value?: unknown;
+  children?: TimelessElement[];
+  props?: {
+    styleSets?: MaybeSignal<string[]>;
+    style?: ViewStyleProperties;
+  };
+  value?: string;
   render(): any;
   hydrate?(existingDom: any): any;
   cleanup?: () => void;

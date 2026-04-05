@@ -100,7 +100,7 @@ export function NativeImg(props: ImgProps = {}) {
         const vv = rest[k];
         if (vv !== undefined && vv !== null) {
           if (isRef(vv)) {
-            vv._subscribe({
+            vv.subscribe({
               onChange(v) {
                 applyAttr(k, v);
               },
@@ -117,7 +117,7 @@ export function NativeImg(props: ImgProps = {}) {
         const vv = dataset[k];
         const attrName = `data-${k}`;
         if (isRef(vv)) {
-          vv._subscribe({
+          vv.subscribe({
             onChange(v) {
               applyAttr(attrName, v);
             },
@@ -132,14 +132,14 @@ export function NativeImg(props: ImgProps = {}) {
         if (typeof cls === "string") {
           host.setClassName($elm, cls);
         } else if (isRef(cls)) {
-          cls._subscribe({
+          cls.subscribe({
             onChange(v) {
               host.setClassName($elm, String(v));
             },
           });
           host.setClassName($elm, String(cls.value));
         } else if (isClassName(cls)) {
-          cls._subscribe({
+          cls.subscribe({
             onChange(v: any) {
               host.setClassName(
                 $elm,
@@ -154,7 +154,7 @@ export function NativeImg(props: ImgProps = {}) {
       if (style) {
         if (isStyleRef(style as any)) {
           const st = style as any;
-          st._subscribe({
+          st.subscribe({
             onChange(v: any) {
               host.setStyleText($elm, viewStyleToCssText(v ?? {}));
             },
@@ -164,7 +164,7 @@ export function NativeImg(props: ImgProps = {}) {
           const st = style as any;
           const apply = () =>
             host.setStyleText($elm, viewStyleToCssText(st.value || {}));
-          st._subscribe({
+          st.subscribe({
             onChange() {
               apply();
             },
@@ -177,7 +177,7 @@ export function NativeImg(props: ImgProps = {}) {
           Object.keys(style as any).forEach((k) => {
             const vv = (style as any)[k];
             if (isRef(vv)) {
-              (vv as any)._subscribe({
+              (vv as any).subscribe({
                 onChange() {
                   applyStyle();
                 },

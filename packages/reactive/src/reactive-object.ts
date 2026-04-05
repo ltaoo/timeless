@@ -115,10 +115,10 @@ export function refObject<T extends Record<string, any>>(
   const _inner: Partial<Record<keyof T, Ref<unknown>>> = {};
   const r = {
     __is_ref: true as const,
-    _subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber) {
       deps.push(ctx);
     },
-    _destroy() {
+    destroy() {
       deps.length = 0;
     },
     get value() {

@@ -6,8 +6,8 @@ export type Subscriber = {
 
 export type TimelessRef<T> = {
   __is_ref: true;
-  _subscribe: (ctx: Subscriber) => void;
-  _destroy: () => void;
+  subscribe: (ctx: Subscriber) => void;
+  destroy: () => void;
   value: T;
   eq: (v: T) => boolean;
   isSame: (v: unknown) => boolean;
@@ -28,8 +28,8 @@ export type TimelessRef<T> = {
 
 export type TimelessRefObject<T> = {
   __is_ref: true;
-  _subscribe: (ctx: Subscriber) => void;
-  _destroy: () => void;
+  subscribe: (ctx: Subscriber) => void;
+  destroy: () => void;
   value: T;
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;
@@ -69,8 +69,8 @@ export type TimelessRefObject<T> = {
 
 export type TimelessRefObjectNullable<T> = {
   __is_ref: true;
-  _subscribe: (ctx: Subscriber) => void;
-  _destroy: () => void;
+  subscribe: (ctx: Subscriber) => void;
+  destroy: () => void;
   value: T | null;
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;
@@ -109,8 +109,8 @@ export type TimelessRefObjectNullable<T> = {
 
 export type TimelessRefArray<T> = {
   __is_ref: true;
-  _subscribe: (ctx: Subscriber) => void;
-  _destroy: () => void;
+  subscribe: (ctx: Subscriber) => void;
+  destroy: () => void;
   value: T[];
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;
@@ -256,8 +256,8 @@ export type TimelessRefArray<T> = {
 
 export type Ref<T> = {
   __is_ref: true;
-  _subscribe: (ctx: Subscriber) => void;
-  _destroy: () => void;
+  subscribe: (ctx: Subscriber) => void;
+  destroy: () => void;
   value: T;
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;

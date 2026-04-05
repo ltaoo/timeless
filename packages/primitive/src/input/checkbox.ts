@@ -19,7 +19,7 @@ export function Checkbox(props: NativeCheckboxProps = {}) {
 
       if (checked !== undefined) {
         if (isRef(checked)) {
-          checked._subscribe({
+          checked.subscribe({
             onChange(v) {
               $input.checked = !!v;
             },
@@ -32,7 +32,7 @@ export function Checkbox(props: NativeCheckboxProps = {}) {
 
       if (indeterminate !== undefined) {
         if (isRef(indeterminate)) {
-          indeterminate._subscribe({
+          indeterminate.subscribe({
             onChange(v) {
               $input.indeterminate = !!v;
             },

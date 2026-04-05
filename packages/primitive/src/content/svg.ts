@@ -254,7 +254,7 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
         const vv = rest[k];
         if (vv) {
           if (isRef(vv)) {
-            vv._subscribe({
+            vv.subscribe({
               onChange(v) {
                 host.setAttribute($elm, k, String(v));
               },
@@ -275,14 +275,14 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
         if (typeof cls === "string") {
           host.setAttribute($elm, "class", cls);
         } else if (isRef(cls)) {
-          cls._subscribe({
+          cls.subscribe({
             onChange(v) {
               host.setAttribute($elm, "class", String(v));
             },
           });
           host.setAttribute($elm, "class", String(cls.value));
         } else if (isClassName(cls)) {
-          cls._subscribe({
+          cls.subscribe({
             onChange(v: any) {
               host.setAttribute(
                 $elm,
@@ -304,7 +304,7 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
           );
         };
         if (isRef(s)) {
-          s._subscribe({
+          s.subscribe({
             onChange() {
               applyStyle();
             },
@@ -314,7 +314,7 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
           Object.keys(s).forEach((k: string) => {
             const vv = s[k];
             if (isRef(vv)) {
-              (vv as any)._subscribe({
+              (vv as any).subscribe({
                 onChange() {
                   applyStyle();
                 },

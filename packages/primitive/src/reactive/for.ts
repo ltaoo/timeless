@@ -1,41 +1,42 @@
 import {
   isRef,
   Ref,
+  ref,
   registryGet,
   registrySet,
-  computed as createComputed,
+  computed,
 } from "@timeless/reactive";
 
 import { ViewProps, TimelessElement, isElement } from "@/content/view";
-import { getHost, getRenderer, getRendererScheduler } from "@/host";
+import { getHost } from "@/host";
 import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
-import { commitTree, isDescriptor as isVNodeDescriptor, mount } from "@/vnode";
-import type { VNode } from "@/vnode/types";
+// import { commitTree, isDescriptor as isVNodeDescriptor, mount } from "@/vnode";
+// import type { VNode } from "@/vnode/types";
 
 export function For<T>(
   props: ViewProps & {
-    each: T[] | Ref<T[]>;
-    render: (item: T, idx: Ref<number>) => any;
     key?: string;
+    each: T[] | Ref<T[]>;
+    render: (item: T, idx: Ref<number>) => TimelessElement | null;
   },
 ) {
   const host = getHost();
-  const scheduler = getRendererScheduler();
-  const renderer = getRenderer();
-  const { each, key, render, onMounted, onUnmounted, ...restProps } = props;
-  const lineH = 24;
+  // const scheduler = getRendererScheduler();
+  // const renderer = getRenderer();
+  const { key, each, render, onMounted, onUnmounted } = props;
+  // const lineH = 24;
 
   const _key = key;
   let _mounted = false;
   let _values: T[] = [];
-  let _elements: (TimelessElement | VNode | null)[] = [];
+  let _elements: (TimelessElement | null)[] = [];
   let _$children: (any | null)[] = [];
   let _original_items: T[] = []; // Store original item references for indexOf lookup
   let _index_computed: Ref<number>[] = []; // Computed indexes that depend on `each`
 
   // Helper to create a computed index that depends on `each`
   const createIndexComputed = (originalItem: T): Ref<number> => {
-    return createComputed(each, () => {
+    return computed(each, () => {
       // Use refarr's indexOf if available (supports registry lookup)
       if (isRef(each) && typeof (each as any).indexOf === "function") {
         return (each as any).indexOf(originalItem);
@@ -51,29 +52,29 @@ export function For<T>(
 
   const _existing_map = new Map();
 
-  const isVNode = (v: any): v is VNode => {
-    const k = v?.kind;
-    return k === "element" || k === "text" || k === "fragment";
-  };
+  // const isVNode = (v: any): v is VNode => {
+  //   const k = v?.kind;
+  //   return k === "element" || k === "text" || k === "fragment";
+  // };
 
-  const destroyVNode = (node: VNode) => {
-    if (node.kind === "element" || node.kind === "fragment") {
-      for (const child of node.children) destroyVNode(child);
-    }
-    renderer.removeNode(node);
-  };
+  // const destroyVNode = (node: VNode) => {
+  //   if (node.kind === "element" || node.kind === "fragment") {
+  //     for (const child of node.children) destroyVNode(child);
+  //   }
+  //   renderer.removeNode(node);
+  // };
 
   const renderResult = (input: any) => {
     let res = input;
     if (typeof res === "function") res = res();
     if (!res) return { node: null, elm: null, trackElm: null, empty: true };
 
-    if (isVNodeDescriptor(res)) {
-      const vnode = mount(res as any, scheduler);
-      commitTree(vnode, renderer);
-      const elm = (vnode as any)._hostNode ?? null;
-      return { node: vnode, elm, trackElm: elm };
-    }
+    // if (isVNodeDescriptor(res)) {
+    //   const vnode = mount(res as any, scheduler);
+    //   commitTree(vnode, renderer);
+    //   const elm = (vnode as any)._hostNode ?? null;
+    //   return { node: vnode, elm, trackElm: elm };
+    // }
 
     if (isElement(res)) {
       const elm = res.render();
@@ -86,7 +87,7 @@ export function For<T>(
   const methods = {
     _render_item(item: T, idxComputed: Ref<number>) {
       const rr: {
-        node: null | TimelessElement | VNode;
+        node: null | TimelessElement;
         elm: null | any;
         trackElm?: null | any;
         empty?: boolean;
@@ -95,30 +96,30 @@ export function For<T>(
         const base = renderResult(() => render(item, idxComputed));
         if (!base.elm) return base;
         // Canvas：为子节点添加定位容器，并填充宽高
-        if (host.kind === "canvas") {
-          const wrap = host.createElement("div");
-          const y = Math.max(0, Number(idxComputed.value || 0)) * lineH;
-          host.setStyleText(
-            wrap,
-            `left: 0; top: ${y}px; width: 100%; height: ${lineH}px;`,
-          );
-          // 子节点填满容器
-          if (host.patchStyle) {
-            host.patchStyle(base.elm, {
-              left: "0",
-              top: "0",
-              width: "100%",
-              height: `${lineH}px`,
-            });
-          } else {
-            host.setStyleText(
-              base.elm,
-              "left: 0; top: 0; width: 100%; height: 24px;",
-            );
-          }
-          host.appendChild(wrap, base.elm);
-          return { node: base.node, elm: wrap, trackElm: wrap };
-        }
+        // if (host.kind === "canvas") {
+        //   const wrap = host.createElement("div");
+        //   const y = Math.max(0, Number(idxComputed.value || 0)) * lineH;
+        //   host.setStyleText(
+        //     wrap,
+        //     `left: 0; top: ${y}px; width: 100%; height: ${lineH}px;`,
+        //   );
+        //   // 子节点填满容器
+        //   if (host.patchStyle) {
+        //     host.patchStyle(base.elm, {
+        //       left: "0",
+        //       top: "0",
+        //       width: "100%",
+        //       height: `${lineH}px`,
+        //     });
+        //   } else {
+        //     host.setStyleText(
+        //       base.elm,
+        //       "left: 0; top: 0; width: 100%; height: 24px;",
+        //     );
+        //   }
+        //   host.appendChild(wrap, base.elm);
+        //   return { node: base.node, elm: wrap, trackElm: wrap };
+        // }
         return base;
       })();
       return rr;
@@ -141,7 +142,7 @@ export function For<T>(
           render(item_prepare_insert, idxComputed),
         );
         _elements.splice(index + i, 0, res.node);
-        _$children.splice(index + i, 0, res.trackElm || res.elm);
+        // _$children.splice(index + i, 0, res.trackElm || res.elm);
         if (res.elm) {
           host.appendChild($fragment, res.elm);
         }
@@ -227,7 +228,7 @@ export function For<T>(
       if (!$parent) return;
 
       // 1. Prepare target state
-      const new_elements: (TimelessElement | VNode | null)[] = new Array(
+      const new_elements: (TimelessElement | null)[] = new Array(
         new_items.length,
       );
       const new_children: (any | null)[] = new Array(new_items.length);
@@ -327,8 +328,6 @@ export function For<T>(
             if (typeof component.onUnmounted === "function") {
               component.onUnmounted();
             }
-          } else if (isVNode(component)) {
-            destroyVNode(component);
           }
         }
       }
@@ -396,15 +395,41 @@ export function For<T>(
 
   if (isRef(each)) {
     // @ts-ignore
-    each._subscribe(ctx);
+    each.subscribe(ctx);
   }
+
+  const state: {
+    children: TimelessElement[];
+  } = {
+    children: [],
+  };
+
+  const _c = (() => {
+    if (isRef(each)) {
+      return each.value;
+    }
+    return each;
+  })();
+  for (let i = 0; i < _c.length; i += 1) {
+    const v = _c[i];
+    const idx = _c.indexOf(v);
+    const r = render(v, ref(idx));
+    console.log('after render(v', r);
+    if (r) {
+      state.children.push(r);
+    }
+  }
+
   return {
     t: "for",
     $elm,
-    _props: { each, render, key },
-    _values,
-    _elements,
-    _$children,
+    // _props: { each, render, key },
+    // _values,
+    // _elements,
+    // _$children,
+    value: "",
+    children: state.children,
+
     render() {
       const nodes = (isRef(each) ? each.value : each) || [];
 
@@ -457,9 +482,9 @@ export function For<T>(
         _index_computed[i] = idxComputed;
 
         let res = render(item, idxComputed);
-        if (typeof res === "function") {
-          res = res();
-        }
+        // if (typeof res === "function") {
+        //   res = res();
+        // }
 
         if (!res) {
           _elements[i] = null;
@@ -518,8 +543,6 @@ export function For<T>(
           if (typeof component.onUnmounted === "function") {
             component.onUnmounted();
           }
-        } else if (isVNode(component)) {
-          destroyVNode(component);
         }
       }
 

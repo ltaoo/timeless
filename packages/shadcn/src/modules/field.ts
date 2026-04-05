@@ -12,7 +12,7 @@ import {
   ViewChildren,
   h,
   Match,
-  Case,
+  // Case,
   Fragment,
   NativeLabel,
 } from "@timeless/primitive";
@@ -293,14 +293,14 @@ export function Field(
           }),
         },
         [
-          Case("error", [
-            h(FieldError, { store: props.store }, [
-              computed(error_, (e) => e?.message || ""),
-            ]),
-          ]),
-          Case("help", [
-            h(FieldHelp, { store: props.store }, [props.store.help]),
-          ]),
+          // Case("error", [
+          //   h(FieldError, { store: props.store }, [
+          //     computed(error_, (e) => e?.message || ""),
+          //   ]),
+          // ]),
+          // Case("help", [
+          //   h(FieldHelp, { store: props.store }, [props.store.help]),
+          // ]),
         ],
       ),
     ],

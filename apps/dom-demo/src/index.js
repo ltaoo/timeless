@@ -25,6 +25,10 @@ function ApplicationView() {
       id: 1,
       title: "Buy groceries",
     },
+    {
+      id: 2,
+      title: "Study for exam exam exam",
+    },
   ]);
 
   function xyFromIdx(idx) {
@@ -200,8 +204,8 @@ function ApplicationView() {
 
 const elm = ApplicationView({});
 console.log(elm);
-// render(elm, document.getElementById("root"), {
-//   onVNodeTreeCreated(data) {
-//     console.log(data);
-//   },
-// });
+render(elm, document.getElementById("root"), {
+  onVNodeTreeCreated(data) {
+    console.log(data);
+  },
+});

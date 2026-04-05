@@ -24,7 +24,7 @@ export function Txt(props: any, children: any[]) {
   const root = createElement("div", { style: merged.value });
 
   const scheduler = getRendererScheduler();
-  merged._subscribe({
+  merged.subscribe({
     onChange(v: any) {
       root.style = v ?? {};
       scheduler.patch(root, { style: root.style });

@@ -10,7 +10,7 @@ import {
 
 export type ClassNameRef = {
   __cn_ref: true;
-  _subscribe(ctx: Subscriber): void;
+  subscribe(ctx: Subscriber): void;
   del(v: string): void;
   add(v: string): void;
   append(c: string): void;
@@ -109,7 +109,7 @@ export function classNames(
     }
     if (isClassName(item)) {
       sources.push(item);
-      item._subscribe({
+      item.subscribe({
         onChange() {
           recompute();
         },
@@ -118,7 +118,7 @@ export function classNames(
     }
     if (isRef(item)) {
       sources.push(item as Ref<string>);
-      item._subscribe({
+      item.subscribe({
         onChange() {
           recompute();
         },
@@ -133,7 +133,7 @@ export function classNames(
   recompute();
   return {
     __cn_ref: true as const,
-    _subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber) {
       _deps.push(ctx);
     },
     del(v: string) {
@@ -183,7 +183,7 @@ export function join(v: (string | Signal<string>)[]): Signal<string> {
   for (let i = 0; i < sources.length; i += 1) {
     const item = sources[i];
     if (isRef(item)) {
-      item._subscribe({
+      item.subscribe({
         onChange() {
           if (destroyed) return;
           const next = recompute();
@@ -195,8 +195,8 @@ export function join(v: (string | Signal<string>)[]): Signal<string> {
     }
   }
 
-  const origin_destroy = r._destroy;
-  r._destroy = () => {
+  const origin_destroy = r.destroy;
+  r.destroy = () => {
     destroyed = true;
     origin_destroy();
   };

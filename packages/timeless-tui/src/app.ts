@@ -130,14 +130,14 @@ export function createTuiApp(
 
 export type Ref<T> = {
   value: T;
-  _subscribe(sub: { onChange: (v: T) => void }): void;
+  subscribe(sub: { onChange: (v: T) => void }): void;
   _unsubscribe(sub: { onChange: (v: T) => void }): void;
 };
 
 export function useReactive<T>(refs: Ref<T>[], app: TuiApp) {
   const sub = { onChange: () => app.render() };
   for (const r of refs) {
-    r._subscribe(sub);
+    r.subscribe(sub);
   }
   return () => {
     for (const r of refs) {
@@ -159,7 +159,7 @@ export function ref<T>(initial: T): Ref<T> {
       _value = v;
       for (const s of subs) s.onChange(_value);
     },
-    _subscribe(sub) {
+    subscribe(sub) {
       subs.add(sub);
     },
     _unsubscribe(sub) {

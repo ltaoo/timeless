@@ -104,7 +104,7 @@ export function defineModel<
   for (const key of Object.keys(state)) {
     const v = state[key];
     if (isRef(v)) {
-      v._subscribe({ onChange: notify_state_listeners });
+      v.subscribe({ onChange: notify_state_listeners });
     }
   }
 

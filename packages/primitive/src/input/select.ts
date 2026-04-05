@@ -102,7 +102,7 @@ export function Select(props: SelectProps = {}, children?: ViewChildren) {
 
         if (value !== undefined) {
           if (isRef(value)) {
-            value._subscribe({
+            value.subscribe({
               onChange(v: any) {
                 applyValue(v);
               },
