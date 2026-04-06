@@ -222,63 +222,62 @@ export function Content(
     presence_.as(v);
   });
 
-  return h(
-    Show,
-    {
-      when: computed(presence_, (t) => {
-        return t.mounted;
-      }),
-    },
-    [
-      NativePortal({}, [
-        PopperPrimitive.Content(
-          {
-            store: store.popper,
-            onDismiss() {
-              store.hide();
-            },
-          },
-          [
-            View(
-              {
-                ...rest,
-                class: classNames([
-                  rest.class,
-                  computed(presence_, (t) => {
-                    if (t.exit) {
-                      _was_exiting = true;
-                    }
-                    if (!t.mounted && _was_exiting) {
-                      _was_exiting = false;
-                      return animation?.out || "";
-                    }
-                    if (t.mounted) {
-                      _was_exiting = false;
-                    }
-                    return [
-                      t.enter && animation?.in ? animation.in : "",
-                      t.exit && animation?.out ? animation.out : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ");
-                  }),
-                ]),
-                onAnimationEnd(e: AnimationEvent) {
-                  if (e.target === e.currentTarget) {
-                    store.presence.handleAnimationEnd();
-                  }
-                  if (rest.onAnimationEnd) {
-                    rest.onAnimationEnd(e);
-                  }
-                },
+  return Show({
+    when: computed(presence_, (t) => {
+      return t.mounted;
+    }),
+    ok() {
+      return [
+        NativePortal({}, [
+          PopperPrimitive.Content(
+            {
+              store: store.popper,
+              onDismiss() {
+                store.hide();
               },
-              children,
-            ),
-          ],
-        ),
-      ]),
-    ],
-  );
+            },
+            [
+              View(
+                {
+                  ...rest,
+                  class: classNames([
+                    rest.class,
+                    computed(presence_, (t) => {
+                      if (t.exit) {
+                        _was_exiting = true;
+                      }
+                      if (!t.mounted && _was_exiting) {
+                        _was_exiting = false;
+                        return animation?.out || "";
+                      }
+                      if (t.mounted) {
+                        _was_exiting = false;
+                      }
+                      return [
+                        t.enter && animation?.in ? animation.in : "",
+                        t.exit && animation?.out ? animation.out : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ");
+                    }),
+                  ]),
+                  onAnimationEnd(e: AnimationEvent) {
+                    if (e.target === e.currentTarget) {
+                      store.presence.handleAnimationEnd();
+                    }
+                    if (rest.onAnimationEnd) {
+                      rest.onAnimationEnd(e);
+                    }
+                  },
+                },
+                children,
+              ),
+            ],
+          ),
+        ]),
+      ];
+    },
+  });
 }
 
 export function Viewport(
@@ -334,13 +333,12 @@ export function Empty(
     state.as(v);
   });
 
-  return h(
-    Show,
-    {
-      when: computed(state, (d) => d.filteredOptions.length === 0),
+  return Show({
+    when: computed(state, (d) => d.filteredOptions.length === 0),
+    ok() {
+      return [View(rest, children)];
     },
-    [View(rest, children)],
-  );
+  });
 }
 
 export function Item(

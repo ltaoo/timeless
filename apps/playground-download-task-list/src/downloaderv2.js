@@ -601,62 +601,46 @@ function DownloaderPanelView(props, children) {
               store: vm$.ui.view$,
             },
             [
-              Show(
-                {
-                  when: computed(task_count_, (d) => d > 0),
-                  fallback: [
-                    View(
-                      {
-                        class: "weui-loadmore weui-loadmore_line",
+              Show({
+                when: computed(task_count_, (d) => d > 0),
+                ok() {
+                  return [
+                    Waterfall({
+                      store: vm$.ui.waterfall$,
+                      class: "scroll-view-waterfall !overflow-visible !h-auto",
+                      style: {
+                        overflow: "visible",
+                        height: "auto",
                       },
-                      [
-                        View(
-                          {
-                            class: "weui-loadmore__tips",
-                          },
-                          ["暂无下载任务"],
-                        ),
-                      ],
-                    ),
-                  ],
-                },
-                [
-                  Waterfall({
-                    store: vm$.ui.waterfall$,
-                    class: "scroll-view-waterfall !overflow-visible !h-auto",
-                    style: {
-                      overflow: "visible",
-                      height: "auto",
-                    },
-                    render(task) {
-                      console.log("task in waterfall", task);
-                      const iconSize = "50px";
-                      const state_ = computed(task, (t) => {
-                        // console.log("the task is changed", t.status);
-                        const pr = format_download_percent(t);
-                        const isCompleted =
-                          t.status === "done" ||
-                          t.status === "completed" ||
-                          t.status === "success" ||
-                          t.status === "finished" ||
-                          (pr === 100 && t.status !== "running");
+                      render(task) {
+                        console.log("task in waterfall", task);
+                        const iconSize = "50px";
+                        const state_ = computed(task, (t) => {
+                          // console.log("the task is changed", t.status);
+                          const pr = format_download_percent(t);
+                          const isCompleted =
+                            t.status === "done" ||
+                            t.status === "completed" ||
+                            t.status === "success" ||
+                            t.status === "finished" ||
+                            (pr === 100 && t.status !== "running");
 
-                        const isPaused =
-                          t.status === "paused" || t.status === "pause";
-                        const isRunning = t.status === "running";
+                          const isPaused =
+                            t.status === "paused" || t.status === "pause";
+                          const isRunning = t.status === "running";
 
-                        let statusText = t.status;
-                        let statusColor = "var(--weui-FG-1)";
-                        var isFailed =
-                          t.status === "failed" || t.status === "error";
-                        var isPending = t.status === "pending";
-                        if (isRunning) {
-                          const speed = format_download_speed(
-                            t.progress ? t.progress.speed : 0,
-                          );
-                          statusText = `${speed} • ${pr}%`;
-                        } else if (isCompleted) {
-                          statusText = "已完成";
+                          let statusText = t.status;
+                          let statusColor = "var(--weui-FG-1)";
+                          var isFailed =
+                            t.status === "failed" || t.status === "error";
+                          var isPending = t.status === "pending";
+                          if (isRunning) {
+                            const speed = format_download_speed(
+                              t.progress ? t.progress.speed : 0,
+                            );
+                            statusText = `${speed} • ${pr}%`;
+                          } else if (isCompleted) {
+                            statusText = "已完成";
                           // Calculate size
                           const total =
                             t.meta && t.meta.res ? t.meta.res.size : 0;
@@ -728,72 +712,72 @@ function DownloaderPanelView(props, children) {
                             },
                           },
                           [
-                            Show(
-                              {
-                                when: computed(state_, (t) => {
-                                  return t.isRunning || t.isPaused;
-                                }),
-                                fallback: [
-                                  DangerouslyInnerHTML(PrefixIcon.value),
-                                ],
-                              },
-                              [
-                                View(
-                                  {
-                                    style: {
-                                      position: "relative",
-                                      width: "50px",
-                                      height: "50px",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
+                            Show({
+                              when: computed(state_, (t) => {
+                                return t.isRunning || t.isPaused;
+                              }),
+                              ok() {
+                                return [
+                                  View(
+                                    {
+                                      style: {
+                                        position: "relative",
+                                        width: "50px",
+                                        height: "50px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                      },
                                     },
-                                  },
-                                  [
-                                    SVG(
-                                      {
-                                        style:
-                                          "position: absolute; top: 0; left: 0; transform: rotate(-90deg);",
-                                        width: "50",
-                                        height: "50",
-                                        viewBox: "0 0 50 50",
-                                      },
-                                      [
-                                        Circle({
-                                          cx: "25",
-                                          cy: "25",
-                                          r: radius,
-                                          stroke: "var(--weui-FG-3)",
-                                          "stroke-width": "3",
-                                          fill: "none",
-                                        }),
-                                        Circle({
-                                          cx: "25",
-                                          cy: "25",
-                                          r: radius,
-                                          stroke: strokeColor,
-                                          "stroke-width": "3",
-                                          fill: "none",
-                                          "stroke-dasharray": circumference,
-                                          "stroke-dashoffset": offset,
-                                          "stroke-linecap": "round",
-                                        }),
-                                      ],
-                                    ),
-                                    View(
-                                      {
-                                        style: {
-                                          position: "relative",
-                                          zIndex: 1,
-                                          display: "flex",
+                                    [
+                                      SVG(
+                                        {
+                                          style:
+                                            "position: absolute; top: 0; left: 0; transform: rotate(-90deg);",
+                                          width: "50",
+                                          height: "50",
+                                          viewBox: "0 0 50 50",
                                         },
-                                      },
-                                      [DangerouslyInnerHTML(PrefixIcon.value)],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                        [
+                                          Circle({
+                                            cx: "25",
+                                            cy: "25",
+                                            r: radius,
+                                            stroke: "var(--weui-FG-3)",
+                                            "stroke-width": "3",
+                                            fill: "none",
+                                          }),
+                                          Circle({
+                                            cx: "25",
+                                            cy: "25",
+                                            r: radius,
+                                            stroke: strokeColor,
+                                            "stroke-width": "3",
+                                            fill: "none",
+                                            "stroke-dasharray": circumference,
+                                            "stroke-dashoffset": offset,
+                                            "stroke-linecap": "round",
+                                          }),
+                                        ],
+                                      ),
+                                      View(
+                                        {
+                                          style: {
+                                            position: "relative",
+                                            zIndex: 1,
+                                            display: "flex",
+                                          },
+                                        },
+                                        [DangerouslyInnerHTML(PrefixIcon.value)],
+                                      ),
+                                    ],
+                                  ),
+                                ];
+                              },
+                              else() {
+                                return [DangerouslyInnerHTML(PrefixIcon.value)];
+                              },
+                            }),
                           ],
                         ),
                         View(
@@ -889,19 +873,21 @@ function DownloaderPanelView(props, children) {
                                         },
                                       },
                                       [
-                                        Show(
-                                          {
-                                            when: !!isOpenExternal,
-                                            fallback: [
-                                              DangerouslyInnerHTML(FolderIcon),
-                                            ],
+                                        Show({
+                                          when: !!isOpenExternal,
+                                          ok() {
+                                            return [
+                                              DangerouslyInnerHTML(
+                                                ExternalLinkIcon,
+                                              ),
+                                            ];
                                           },
-                                          [
-                                            DangerouslyInnerHTML(
-                                              ExternalLinkIcon,
-                                            ),
-                                          ],
-                                        ),
+                                          else() {
+                                            return [
+                                              DangerouslyInnerHTML(FolderIcon),
+                                            ];
+                                          },
+                                        }),
                                       ],
                                     ),
                                   ]),
@@ -980,10 +966,28 @@ function DownloaderPanelView(props, children) {
                           })(),
                         ),
                       ]);
-                    },
-                  }),
-                ],
-              ),
+                      },
+                    }),
+                  ];
+                },
+                else() {
+                  return [
+                    View(
+                      {
+                        class: "weui-loadmore weui-loadmore_line",
+                      },
+                      [
+                        View(
+                          {
+                            class: "weui-loadmore__tips",
+                          },
+                          ["暂无下载任务"],
+                        ),
+                      ],
+                    ),
+                  ];
+                },
+              }),
             ],
           ),
         ],

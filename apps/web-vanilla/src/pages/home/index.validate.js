@@ -7,7 +7,7 @@ function FormRender(props, children) {
     }
     return Object.keys(t.fields);
   });
-  return View({ class: cn([props.class, "space-y-6"]) }, [
+  return View({ class: Timeless.cn([props.class, "space-y-6"]) }, [
     For({
       each: field_names,
       render(name) {
@@ -22,19 +22,24 @@ function FormRender(props, children) {
         const inline = ["checkbox"].includes(field$.input.shape);
         return View(
           {
-            class: cn([
+            class: Timeless.cn([
               "t-form-item gap-2",
               inline ? "flex items-center" : "flex flex-col",
             ]),
             // inline: ["checkbox"].includes(field$.input.shape)
           },
           [
-            Show({ when: !inline }, [
-              h(FieldLabel, {
-                for: fid,
-                store: field$,
-              }),
-            ]),
+            Show({
+              when: !inline,
+              ok() {
+                return [
+                  h(FieldLabel, {
+                    for: fid,
+                    store: field$,
+                  }),
+                ];
+              },
+            }),
             Match(
               {
                 when: computed(field$, (t) => {
@@ -62,12 +67,17 @@ function FormRender(props, children) {
                 ]),
               ],
             ),
-            Show({ when: inline }, [
-              h(FieldInlineLabel, {
-                for: fid,
-                store: field$,
-              }),
-            ]),
+            Show({
+              when: inline,
+              ok() {
+                return [
+                  h(FieldInlineLabel, {
+                    for: fid,
+                    store: field$,
+                  }),
+                ];
+              },
+            }),
           ],
         );
       },

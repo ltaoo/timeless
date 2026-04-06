@@ -298,11 +298,15 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
               state.props.style[k] = v.value;
               v.subscribe({
                 onChange(v) {
-                  state.props.style = {
-                    ...state.props.style,
-                    [k]: v,
-                  } as ViewStyleProperties;
-                  apply(state.props.style);
+                  // console.log('style value changed', k, v);
+                  // state.props.style = {
+                  //   ...state.props.style,
+                  //   [k]: v,
+                  // } as ViewStyleProperties;
+                  // apply(state.props.style);
+                  if ($elm) {
+                    $elm.setStyleValue(k, v);
+                  }
                 },
               });
             } else {
@@ -490,24 +494,6 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     handleUnmounted() {},
   };
 
-  // for (let i = 0; i < state.children.length; i += 1) {
-  //   const node = state.children[i];
-  //   if (node === null || node === undefined) {
-  //     continue;
-  //   }
-  //   if (typeof node === "string" || typeof node === "number") {
-  //     _children.push(Txt(String(node)));
-  //     continue;
-  //   }
-  //   if (isElement(node)) {
-  //     const result = node.render();
-  //     if (result) {
-  //       _children.push(result);
-  //     }
-  //   }
-  // }
-
-  // console.log("before normalize_children", children);
   methods.normalize_children(children);
   methods.setup_reactive_props_bindings();
 
@@ -733,7 +719,7 @@ export interface TimelessElement {
     onDrop?: (e: DragEvent) => void;
     onAnimationEnd?: (e: AnimationEvent) => void;
   };
-  value?: string;
+  value?: unknown;
   render(): any;
   hydrate?(existingDom: any): any;
   cleanup?: () => void;

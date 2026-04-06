@@ -144,9 +144,12 @@
         }, [
           "Click it"
         ]),
-        h(Show, { when: visible_ }, [
-          View({}, ["Hello"]),
-        ])
+        Show({
+          when: visible_,
+          ok() {
+            return [View({}, ["Hello"])];
+          },
+        })
       ]);
     }
 

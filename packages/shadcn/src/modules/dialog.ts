@@ -115,25 +115,30 @@ export function Dialog(
                   }),
                 },
                 [
-                  Show({ when: computed(state_, (d) => !!d.title) }, [
-                    h(
-                      DialogPrimitive.Header,
-                      {
-                        store,
-                        class: "flex flex-col gap-2",
-                      },
-                      [
+                  Show({
+                    when: computed(state_, (d) => !!d.title),
+                    ok() {
+                      return [
                         h(
-                          DialogPrimitive.Title,
+                          DialogPrimitive.Header,
                           {
                             store,
-                            class: "text-base leading-none font-medium",
+                            class: "flex flex-col gap-2",
                           },
-                          [computed(state_, (d) => d.title || "")],
+                          [
+                            h(
+                              DialogPrimitive.Title,
+                              {
+                                store,
+                                class: "text-base leading-none font-medium",
+                              },
+                              [computed(state_, (d) => d.title || "")],
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ]),
+                      ];
+                    },
+                  }),
                   DialogPrimitive.Body({ store }, children || []),
                   DialogPrimitive.Close(
                     {
@@ -143,20 +148,25 @@ export function Dialog(
                     },
                     [CircleXOutlined({})],
                   ),
-                  Show({ when: computed(state_, (d) => !!d.footer) }, [
-                    h(
-                      DialogPrimitive.Footer,
-                      {
-                        store,
-                        class:
-                          "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
-                      },
-                      [
-                        h(Button, { store: store.cancelBtn }, ["取消"]),
-                        h(Button, { store: store.okBtn }, ["确认"]),
-                      ],
-                    ),
-                  ]),
+                  Show({
+                    when: computed(state_, (d) => !!d.footer),
+                    ok() {
+                      return [
+                        h(
+                          DialogPrimitive.Footer,
+                          {
+                            store,
+                            class:
+                              "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
+                          },
+                          [
+                            h(Button, { store: store.cancelBtn }, ["取消"]),
+                            h(Button, { store: store.okBtn }, ["确认"]),
+                          ],
+                        ),
+                      ];
+                    },
+                  }),
                 ],
               ),
             ],

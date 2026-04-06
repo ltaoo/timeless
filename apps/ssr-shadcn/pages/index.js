@@ -198,15 +198,23 @@ export default function Page({ data }) {
             View({ class: "flex items-center gap-3" }, [
               Checkbox({ store: checkbox }),
               Label({}, ["Accept terms"]),
-              Show({ when: data.isChecked }, [Badge({}, ["Checked"])]),
+              Show({
+                when: data.isChecked,
+                ok() {
+                  return [Badge({}, ["Checked"])];
+                },
+              }),
             ]),
             Separator({}),
             View({ class: "flex items-center gap-3" }, [
               Switch({ store: switchCore }),
               Label({}, ["Enable notifications"]),
-              Show({ when: data.isSwitchOn }, [
-                Badge({ variant: "outline" }, ["ON"]),
-              ]),
+              Show({
+                when: data.isSwitchOn,
+                ok() {
+                  return [Badge({ variant: "outline" }, ["ON"])];
+                },
+              }),
             ]),
           ]),
         ]),

@@ -1,18 +1,18 @@
 import {
   type TimelessHost,
   type TimelessElement,
-  setHost,
   getHost,
   isElement,
-  registerComponent,
-  Grid,
-  View,
-  Txt,
   isRef,
 } from "@timeless/timeless";
 
-import * as modules from "../modules/index";
 import { viewStyleToCssText } from "../modules/style";
+import { DOMShow } from "@/host/show";
+import { DOMView, isDOMView } from "@/host/view";
+import { DOMFor } from "@/host/for";
+import { DOMGrid } from "@/host/grid";
+import { DOMText } from "@/host/text";
+import { DOMHost } from "@/host";
 
 export type HostOperation = {
   method: string;
@@ -64,148 +64,52 @@ function ensureRecordingDomHost(): {
   return { host: proxy, state };
 }
 
-function build(elm: TimelessElement, host: TimelessHost): any {
+function build(elm: TimelessElement, host: TimelessHost): DOMHost {
   if (elm.t === "view") {
-    const $elm = host.createElement("div");
-    elm.$elm = $elm;
-    // Apply styles
-    if (elm.props?.style) {
-      const cssText = viewStyleToCssText(elm.props.style);
-      $elm.style.cssText = cssText;
-    }
-
-    // Apply class names
-    if (elm.props?.styleSets) {
-      if (isRef(elm.props.styleSets)) {
-        $elm.className = elm.props.styleSets.value.join(" ");
-      } else {
-        $elm.className = elm.props.styleSets.join(" ");
-      }
-    }
-
-    // Register event listeners
-    if (elm.events) {
-      if (elm.events.onClick) {
-        $elm.addEventListener("click", elm.events.onClick);
-      }
-      if (elm.events.onDoubleClick) {
-        $elm.addEventListener("dblclick", elm.events.onDoubleClick);
-      }
-      if (elm.events.onPointerDown) {
-        $elm.addEventListener("pointerdown", elm.events.onPointerDown);
-      }
-      if (elm.events.onFocus) {
-        $elm.addEventListener("focus", elm.events.onFocus);
-      }
-      if (elm.events.onBlur) {
-        $elm.addEventListener("blur", elm.events.onBlur);
-      }
-      if (elm.events.onKeyDown) {
-        $elm.addEventListener("keydown", elm.events.onKeyDown);
-      }
-      if (elm.events.onContextMenu) {
-        $elm.addEventListener("contextmenu", elm.events.onContextMenu);
-      }
-      if (elm.events.onMouseEnter) {
-        $elm.addEventListener("mouseenter", elm.events.onMouseEnter);
-      }
-      if (elm.events.onMouseLeave) {
-        $elm.addEventListener("mouseleave", elm.events.onMouseLeave);
-      }
-      if (elm.events.onDragStart) {
-        $elm.addEventListener("dragstart", elm.events.onDragStart);
-      }
-      if (elm.events.onDrag) {
-        $elm.addEventListener("drag", elm.events.onDrag);
-      }
-      if (elm.events.onDragEnd) {
-        $elm.addEventListener("dragend", elm.events.onDragEnd);
-      }
-      if (elm.events.onDragEnter) {
-        $elm.addEventListener("dragenter", elm.events.onDragEnter);
-      }
-      if (elm.events.onDragOver) {
-        $elm.addEventListener("dragover", elm.events.onDragOver);
-      }
-      if (elm.events.onDragLeave) {
-        $elm.addEventListener("dragleave", elm.events.onDragLeave);
-      }
-      if (elm.events.onDrop) {
-        $elm.addEventListener("drop", elm.events.onDrop);
-      }
-      if (elm.events.onAnimationEnd) {
-        $elm.addEventListener("animationend", elm.events.onAnimationEnd);
-      }
-    }
-
-    // Build and append children
-    if (elm.children) {
-      for (const child of elm.children) {
-        if (isElement(child)) {
-          const $sub = build(child, host);
-          if ($sub) {
-            $elm.appendChild($sub);
-          }
-        }
-      }
-    }
-
-    return $elm;
+    const view$ = DOMView({
+      build(elm: TimelessElement) {
+        return build(elm, host);
+      },
+    });
+    elm.$elm = view$;
+    view$.render(elm);
+    return view$;
   }
-
-  if (elm.t === "text" && elm.value) {
-    const $elm = host.createTextNode(elm.value);
-    elm.$elm = $elm;
-    return $elm;
+  if (elm.t === "text") {
+    // console.log("[]in build elm.t is text", elm.value);
+    const text$ = DOMText(elm.value as any);
+    elm.$elm = text$;
+    return text$;
   }
-
   if (elm.t === "grid") {
-    const $elm = host.createElement("div");
-    elm.$elm = $elm;
-    $elm.style.cssText = "display: grid;";
-
-    // Apply grid-specific styles
-    if (elm.props) {
-      const cols = (elm.props as any).columns ?? 4;
-      const gap = (elm.props as any).gap ?? 16;
-      $elm.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-      $elm.style.gap = `${gap}px`;
-
-      if (elm.props.style) {
-        const cssText = viewStyleToCssText(elm.props.style);
-        $elm.style.cssText += cssText;
-      }
-    }
-
-    // Build and append children
-    if (elm.children) {
-      for (const child of elm.children) {
-        if (isElement(child)) {
-          const $sub = build(child, host);
-          if ($sub) {
-            $elm.appendChild($sub);
-          }
-        }
-      }
-    }
-
-    return $elm;
+    const grid$ = DOMGrid({
+      build(elm) {
+        return build(elm, host);
+      },
+    });
+    elm.$elm = grid$;
+    grid$.render(elm);
+    return grid$;
   }
-
+  if (elm.t === "show") {
+    const show$ = DOMShow({
+      build(elm: TimelessElement) {
+        return build(elm, host);
+      },
+    });
+    elm.$elm = show$;
+    show$.render(elm);
+    return show$;
+  }
   if (elm.t === "for") {
-    const $elm = host.createDocumentFragment();
-    elm.$elm = $elm;
-    if (elm.children) {
-      for (const child of elm.children) {
-        if (isElement(child)) {
-          const $sub = build(child, host);
-          if ($sub) {
-            $elm.appendChild($sub);
-          }
-        }
-      }
-    }
-    return $elm;
+    const for$ = DOMFor({
+      build(elm: TimelessElement) {
+        return build(elm, host);
+      },
+    });
+    elm.$elm = for$;
+    for$.render(elm);
+    return for$;
   }
   return null;
 }
@@ -242,13 +146,17 @@ export function render(
 
   if (isElement(elm)) {
     // const $content = elm.render();
-    const $content = build(elm, host);
-    if (!$content) {
+    const host$ = build(elm, host);
+    if (!host$) {
       console.error("[Render] Element render return null");
       return;
     }
-    $root.appendChild($content);
-    return { $content, ops };
+    if (!isDOMView(host$)) {
+      console.error("[Render] Element render return non DOMView");
+      return;
+    }
+    $root.appendChild(host$.$elm);
+    return;
   }
 
   console.error("[Render] Root Element can't be lazy element");

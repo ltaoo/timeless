@@ -162,48 +162,46 @@
           class: "flex-shrink-0",
         },
         [
-          Show(
-            {
-              when: computed(status_, (t) => t === "running"),
-              fallback: [
-                h(
-                  Show,
-                  {
-                    when: computed(
-                      status_,
-                      (t) => t === "paused" || t === "failed",
-                    ),
+          Show({
+            when: computed(status_, (t) => t === "running"),
+            ok() {
+              return [
+                View({
+                  class: "pause",
+                  size: "sm",
+                  variant: "ghost",
+                  onClick() {
+                    status_.as('paused')
                   },
-                  [
-                    View({
-                      class: "retry_or_resume",
-                      size: "sm",
-                      variant: "ghost",
-                      onClick() {
-                        status_.as('running');
-                      },
-                    },
-                      [
-                        computed(status_, (t) =>
-                          t === "failed" ? "Retry" : "Resume",
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+                }, ["Pause"]),
+              ];
             },
-            [
-              View({
-                class: "pause",
-                size: "sm",
-                variant: "ghost",
-                onClick() {
-                  status_.as('paused')
-                },
-              }, ["Pause"]),
-            ],
-          ),
+            else() {
+              return [
+                Show({
+                  when: computed(status_, (t) => t === "paused" || t === "failed"),
+                  ok() {
+                    return [
+                      View({
+                        class: "retry_or_resume",
+                        size: "sm",
+                        variant: "ghost",
+                        onClick() {
+                          status_.as('running');
+                        },
+                      },
+                        [
+                          computed(status_, (t) =>
+                            t === "failed" ? "Retry" : "Resume",
+                          ),
+                        ],
+                      ),
+                    ];
+                  },
+                }),
+              ];
+            },
+          }),
         ],
       );
 

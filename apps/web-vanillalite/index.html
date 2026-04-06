@@ -136,40 +136,48 @@
 
       return View({}, [
         props.label,
-        Show({ when: computed(props, (t) => t.type !== "simple"), }, [
-          View({
-            class: 'menu-btn',
-            onClick() {
-              visible_.as((prev) => !prev);
-            },
-          }, ["Click it"]),
-          Portal({
-            onUnmounted() {
-              console.log('[]the sub menu portal is unmounted');
-            },
-          }, [
-            Show({
-              when: visible_,
-              onUnmounted() {
-                console.log('the sub menu show is unmounted');
-              }
-            }, [
+        Show({
+          when: computed(props, (t) => t.type !== "simple"),
+          ok() {
+            return [
               View({
-                class: "",
-                style: { "position": "fixed", left: "120px", top: "120px" },
+                class: 'menu-btn',
+                onClick() {
+                  visible_.as((prev) => !prev);
+                },
+              }, ["Click it"]),
+              Portal({
                 onUnmounted() {
-                  console.log('hello wrap is unmounted');
-                }
+                  console.log('[]the sub menu portal is unmounted');
+                },
               }, [
-                View({
+                Show({
+                  when: visible_,
+                  ok() {
+                    return [
+                      View({
+                        class: "",
+                        style: { "position": "fixed", left: "120px", top: "120px" },
+                        onUnmounted() {
+                          console.log('hello wrap is unmounted');
+                        }
+                      }, [
+                        View({
+                          onUnmounted() {
+                            console.log('hello is unmounted');
+                          }
+                        }, ["Hello"])
+                      ]),
+                    ];
+                  },
                   onUnmounted() {
-                    console.log('hello is unmounted');
+                    console.log('the sub menu show is unmounted');
                   }
-                }, ["Hello"])
-              ]),
-            ]),
-          ])
-        ])
+                }),
+              ])
+            ];
+          },
+        })
       ]);
     }
 
@@ -211,17 +219,22 @@
             }, 150);
           },
         }, ["Click it"]),
-        Show({ when: computed(state_, (t) => t.mounted) }, [
-          View({
-            class: computed(state_, (t) => {
-              const classes = [];
-              if (t.enter) classes.push('animate-in', 'fade-in-0', 'slide-in-from-top');
-              if (t.exit) classes.push('animate-out', 'fade-out-0', 'slide-out-to-top');
-              return classes.join(' ');
-            }),
-            style: 'width: 120px; height: 120px; background: #e3f2fd; border: 1px solid #2196f3;'
-          })
-        ]),
+        Show({
+          when: computed(state_, (t) => t.mounted),
+          ok() {
+            return [
+              View({
+                class: computed(state_, (t) => {
+                  const classes = [];
+                  if (t.enter) classes.push('animate-in', 'fade-in-0', 'slide-in-from-top');
+                  if (t.exit) classes.push('animate-out', 'fade-out-0', 'slide-out-to-top');
+                  return classes.join(' ');
+                }),
+                style: 'width: 120px; height: 120px; background: #e3f2fd; border: 1px solid #2196f3;'
+              })
+            ];
+          },
+        }),
       ]);
 
     }

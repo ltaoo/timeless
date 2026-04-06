@@ -21,16 +21,21 @@ export function Toast(
   });
 
   return ToastPrimitive.Root({ store }, [
-    Show({ when: computed(state_, (d) => !!d.mask) }, [
-      h(
-        ToastPrimitive.Mask,
-        {
-          store,
-          class: "fixed inset-0 z-[998] bg-black/20",
-        },
-        [],
-      ),
-    ]),
+    Show({
+      when: computed(state_, (d) => !!d.mask),
+      ok() {
+        return [
+          h(
+            ToastPrimitive.Mask,
+            {
+              store,
+              class: "fixed inset-0 z-[998] bg-black/20",
+            },
+            [],
+          ),
+        ];
+      },
+    }),
     ToastPrimitive.Viewport(
       {
         store,
@@ -53,22 +58,22 @@ export function Toast(
             }),
           },
           [
-            Show(
-              {
-                when: computed(state_, (d) => d.icon === "loading"),
+            Show({
+              when: computed(state_, (d) => d.icon === "loading"),
+              ok() {
+                return [
+                  h(
+                    ToastPrimitive.Icon,
+                    {
+                      store,
+                      class:
+                        "h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent",
+                    },
+                    [],
+                  ),
+                ];
               },
-              [
-                h(
-                  ToastPrimitive.Icon,
-                  {
-                    store,
-                    class:
-                      "h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent",
-                  },
-                  [],
-                ),
-              ],
-            ),
+            }),
             For({
               each: computed(state_, (d) => d.texts || []),
               render(text: string) {

@@ -1,14 +1,13 @@
 import { Subscriber, Ref, isRef } from "./types";
 
-type UnwrapRef<T> = T extends Ref<infer V>
-  ? V extends Ref<any>
-    ? UnwrapRef<V>
-    : V
-  : T;
+type UnwrapRef<T> =
+  T extends Ref<infer V> ? (V extends Ref<any> ? UnwrapRef<V> : V) : T;
 
 export function derive<T extends readonly any[], R>(
   deps: readonly [...T],
-  fn: (...args: { [K in keyof T]: UnwrapRef<T[K]> } & { length: T["length"] }) => R,
+  fn: (
+    ...args: { [K in keyof T]: UnwrapRef<T[K]> } & { length: T["length"] }
+  ) => R,
 ): Ref<R>;
 export function derive<T extends Record<string, any>, R>(
   deps: T,
@@ -18,19 +17,19 @@ export function derive(deps: any, fn: any): Ref<any> {
   const _deps: Subscriber[] = [];
   let _local_value: any;
 
-  const isSingleRef = isRef(deps);
-  const isArray = isSingleRef || Array.isArray(deps);
-  const depRefs: any[] = isSingleRef
+  const is_single_ref = isRef(deps);
+  const is_array = is_single_ref || Array.isArray(deps);
+  const dep_refs: any[] = is_single_ref
     ? [deps]
     : Array.isArray(deps)
       ? (deps as any[])
       : Object.values(deps);
 
-  const getValues = () => {
-    if (isSingleRef) {
+  const get_values = () => {
+    if (is_single_ref) {
       return [(deps as Ref<any>).value];
     }
-    if (isArray) {
+    if (is_array) {
       return (deps as any[]).map((r) => (isRef(r) ? r.value : r));
     }
     const res: any = {};
@@ -41,7 +40,7 @@ export function derive(deps: any, fn: any): Ref<any> {
     return res;
   };
 
-  _local_value = isArray ? fn(...getValues()) : fn(getValues());
+  _local_value = is_array ? fn(...get_values()) : fn(get_values());
 
   function notify() {
     for (let i = 0; i < _deps.length; i += 1) {
@@ -53,12 +52,16 @@ export function derive(deps: any, fn: any): Ref<any> {
   }
 
   const onChange = () => {
-    const args = getValues();
-    _local_value = isArray ? fn(...args) : fn(args);
+    const args = get_values();
+    const next_value = is_array ? fn(...args) : fn(args);
+    if (_local_value === next_value) {
+      return;
+    }
+    _local_value = next_value;
     notify();
   };
 
-  depRefs.forEach((ref) => {
+  dep_refs.forEach((ref) => {
     if (isRef(ref)) {
       ref.subscribe({ onChange });
     }

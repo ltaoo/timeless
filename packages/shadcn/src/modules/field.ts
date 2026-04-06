@@ -147,15 +147,17 @@ export function FieldInlineLabel(
     },
     [
       computed(state_, (t) => t.label),
-      Show(
-        {
-          when: computed(children, (t) => {
-            return !!(t && t.length);
-          }),
-          fallback: [h(Fragment, {}, [computed(state_, (t) => t.label)])],
+      Show({
+        when: computed(children, (t) => {
+          return !!(t && t.length);
+        }),
+        ok() {
+          return [h(Fragment, {}, children)];
         },
-        [h(Fragment, {}, children)],
-      ),
+        else() {
+          return [h(Fragment, {}, [computed(state_, (t) => t.label)])];
+        },
+      }),
     ],
   );
 }
@@ -251,10 +253,23 @@ export function Field(
       },
     },
     [
-      Show(
-        {
-          when: !props.inline,
-          fallback: [
+      Show({
+        when: !props.inline,
+        ok() {
+          return [
+            h(
+              FieldLabel,
+              {
+                store: props.store,
+                for: fid,
+              },
+              [],
+            ),
+            h(Fragment, {}, children),
+          ];
+        },
+        else() {
+          return [
             h(Fragment, {}, children),
             h(
               FieldLabel,
@@ -265,20 +280,9 @@ export function Field(
               },
               [],
             ),
-          ],
+          ];
         },
-        [
-          h(
-            FieldLabel,
-            {
-              store: props.store,
-              for: fid,
-            },
-            [],
-          ),
-          h(Fragment, {}, children),
-        ],
-      ),
+      }),
       Match(
         {
           when: combine({ state: state_, error: error_ }, (t) => {

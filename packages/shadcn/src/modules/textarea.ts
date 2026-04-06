@@ -43,44 +43,59 @@ export function Textarea(
         }),
         ...rest,
       }),
-      Show({ when: computed(hasValue, (t) => t && showClear) }, [
-        h(
-          TextareaPrimitive.Clear,
-          {
-            store,
-            class: computed(hasValue, (has) =>
-              has
-                ? "absolute right-2 top-2 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                : "hidden",
+      Show({
+        when: computed(hasValue, (t) => t && showClear),
+        ok() {
+          return [
+            h(
+              TextareaPrimitive.Clear,
+              {
+                store,
+                class: computed(hasValue, (has) =>
+                  has
+                    ? "absolute right-2 top-2 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                    : "hidden",
+                ),
+              },
+              [h(CircleXOutlined, { class: "size-4" }, [])],
             ),
-          },
-          [h(CircleXOutlined, { class: "size-4" }, [])],
-        ),
-      ]),
-      Show({ when: computed(isLoading, (t) => t && showLoading) }, [
-        h(
-          TextareaPrimitive.Loading,
-          {
-            store,
-            class: computed(isLoading, (loading) =>
-              loading
-                ? "absolute right-2 top-2 text-muted-foreground"
-                : "hidden",
-            ),
-          },
-          [h(LoaderOutlined, { class: "size-4 animate-spin" }, [])],
-        ),
-      ]),
-    ]),
-    Show({ when: showCount }, [
-      h(
-        TextareaPrimitive.Count,
-        {
-          store,
-          class: "self-end text-xs text-muted-foreground",
+          ];
         },
-        [],
-      ),
+      }),
+      Show({
+        when: computed(isLoading, (t) => t && showLoading),
+        ok() {
+          return [
+            h(
+              TextareaPrimitive.Loading,
+              {
+                store,
+                class: computed(isLoading, (loading) =>
+                  loading
+                    ? "absolute right-2 top-2 text-muted-foreground"
+                    : "hidden",
+                ),
+              },
+              [h(LoaderOutlined, { class: "size-4 animate-spin" }, [])],
+            ),
+          ];
+        },
+      }),
     ]),
+    Show({
+      when: showCount,
+      ok() {
+        return [
+          h(
+            TextareaPrimitive.Count,
+            {
+              store,
+              class: "self-end text-xs text-muted-foreground",
+            },
+            [],
+          ),
+        ];
+      },
+    }),
   ]);
 }

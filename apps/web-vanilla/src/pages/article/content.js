@@ -16,31 +16,31 @@ export default function ArticleContentPageView(props) {
   article.as(matched);
 
   return View({ class: "h-full" }, [
-    Show(
-      {
-        when: computed(loading, (l) => l),
-      },
-      [
-        View({ class: "flex items-center justify-center h-full" }, [
-          View({ class: "flex flex-col items-center gap-3" }, [
-            View({
-              class:
-                "w-6 h-6 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin dark:border-zinc-600 dark:border-t-zinc-300",
-            }),
-            View(
-              { class: "text-sm text-zinc-400 dark:text-zinc-500" },
-              "Loading...",
-            ),
+    Show({
+      when: computed(loading, (l) => l),
+      ok() {
+        return [
+          View({ class: "flex items-center justify-center h-full" }, [
+            View({ class: "flex flex-col items-center gap-3" }, [
+              View({
+                class:
+                  "w-6 h-6 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin dark:border-zinc-600 dark:border-t-zinc-300",
+              }),
+              View(
+                { class: "text-sm text-zinc-400 dark:text-zinc-500" },
+                ["Loading..."],
+              ),
+            ]),
           ]),
-        ]),
-      ],
-    ),
-    Show(
-      {
-        when: computed(article, (t) => !!t),
+        ];
       },
-      [h(ArticleContent, { data: article.value })],
-    ),
+    }),
+    Show({
+      when: computed(article, (t) => !!t),
+      ok() {
+        return [h(ArticleContent, { data: article.value })];
+      },
+    }),
   ]);
 }
 

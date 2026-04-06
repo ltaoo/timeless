@@ -66,6 +66,40 @@ export function buildTuiTreeFromTimelessElement(
 ): TuiNode | null {
   if (!elm || !isElement(elm)) return null;
 
+  const normalizeChildren = (c: any) => {
+    if (c === null || c === undefined) return [];
+    return Array.isArray(c) ? c : [c];
+  };
+
+  if (elm.t === "show") {
+    const $elm = createTuiFragment();
+    elm.$elm = $elm;
+
+    const props = (elm as any).props ?? (elm as any)._props ?? {};
+    const when = props.when;
+    const okFn = (elm as any)._ok ?? props.ok;
+    const elseFn = (elm as any)._else ?? props.else;
+
+    const condition = isRef(when) ? !!when.value : !!when;
+    const chosen = condition ? (okFn ? okFn() : []) : elseFn ? elseFn() : [];
+    const children = normalizeChildren(chosen);
+
+    for (let node of children) {
+      if (node === null || node === undefined) continue;
+      if (typeof node === "function") node = node();
+
+      if (isElement(node)) {
+        const sub = buildTuiTreeFromTimelessElement(node);
+        if (sub) $elm.appendChild(sub);
+        continue;
+      }
+      if (typeof node === "string" || typeof node === "number") {
+        $elm.appendChild(createTuiText(String(node)));
+      }
+    }
+    return $elm;
+  }
+
   if (elm.t === "view") {
     const $elm = createTuiElement("div");
     elm.$elm = $elm;

@@ -145,16 +145,30 @@ export function LLMProviderForm(
             CardContent({ class: "p-6" }, [
               View({ class: "flex items-center justify-between gap-4" }, [
                 View({ class: "flex items-center gap-3 min-w-0" }, [
-                  Show(
-                    {
-                      when: computed(
-                        state_,
-                        (s) =>
-                          !!(s.providers || []).find(
-                            (x) => x.id === provider.id,
-                          )?.logo_uri,
-                      ),
-                      fallback: [
+                  Show({
+                    when: computed(
+                      state_,
+                      (s) =>
+                        !!(s.providers || []).find((x) => x.id === provider.id)
+                          ?.logo_uri,
+                    ),
+                    ok() {
+                      return [
+                        NativeImg({
+                          class:
+                            "h-10 w-10 shrink-0 rounded-lg object-contain p-1 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950",
+                          src: computed(state_, (s) => {
+                            const p = (s.providers || []).find(
+                              (x) => x.id === provider.id,
+                            );
+                            return p?.logo_uri || "";
+                          }),
+                          alt: `${provider.name} logo`,
+                        }),
+                      ];
+                    },
+                    else() {
+                      return [
                         View(
                           {
                             class:
@@ -162,22 +176,9 @@ export function LLMProviderForm(
                           },
                           [provider.name.slice(0, 1).toUpperCase()],
                         ),
-                      ],
+                      ];
                     },
-                    [
-                      NativeImg({
-                        class:
-                          "h-10 w-10 shrink-0 rounded-lg object-contain p-1 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950",
-                        src: computed(state_, (s) => {
-                          const p = (s.providers || []).find(
-                            (x) => x.id === provider.id,
-                          );
-                          return p?.logo_uri || "";
-                        }),
-                        alt: `${provider.name} logo`,
-                      }),
-                    ],
-                  ),
+                  }),
                   View({ class: "min-w-0" }, [
                     View(
                       {
@@ -201,11 +202,10 @@ export function LLMProviderForm(
                   class: "h-5 w-5",
                 }),
               ]),
-              Show(
-                {
-                  when: enabled_,
-                },
-                [
+            Show({
+              when: enabled_,
+              ok() {
+                return [
                   View({ class: "mt-6 space-y-6" }, [
                     View({ class: "grid grid-cols-1 md:grid-cols-2 gap-4" }, [
                       View({ class: "space-y-2" }, [
@@ -280,21 +280,21 @@ export function LLMProviderForm(
                                   },
                                   [model.name],
                                 ),
-                                Show(
-                                  {
-                                    when: !model.builtin,
+                                Show({
+                                  when: !model.builtin,
+                                  ok() {
+                                    return [
+                                      Button(
+                                        {
+                                          store: delete_btn$,
+                                          class:
+                                            "text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-0 h-auto",
+                                        },
+                                        ["删除"],
+                                      ),
+                                    ];
                                   },
-                                  [
-                                    Button(
-                                      {
-                                        store: delete_btn$,
-                                        class:
-                                          "text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-0 h-auto",
-                                      },
-                                      ["删除"],
-                                    ),
-                                  ],
-                                ),
+                                }),
                                 Checkbox({
                                   id: `${provider.id}-${model.id}`,
                                   store: model_checkbox$,
@@ -328,8 +328,9 @@ export function LLMProviderForm(
                       ),
                     ]),
                   ]),
-                ],
-              ),
+                ];
+              },
+            }),
             ]),
           ]);
         },

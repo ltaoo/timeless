@@ -24,7 +24,26 @@ export * from "./input/select";
 export * from "./input/slider";
 export * from "./input/file-input";
 
-export * as SVG from "./content/svg";
+export {
+  SVG,
+  G,
+  Circle,
+  Rect,
+  Path,
+  Line,
+  Polyline,
+  Polygon,
+  Text,
+  Defs,
+  Symbol,
+  Use,
+  LinearGradient,
+  RadialGradient,
+  Stop,
+  Mask,
+  ClipPath,
+  Ellipse,
+} from "./content/svg";
 export * from "./content/style";
 export * from "./content/img";
 export * from "./content/label";

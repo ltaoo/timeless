@@ -113,17 +113,17 @@ export function Progress(
       style: { display: computed(visible, (v) => (v ? "block" : "none")) },
     },
     [
-      Show(
-        {
-          when: !!children,
+      Show({
+        when: !!children,
+        ok() {
+          return [
+            h(View, {
+              class: "inline-flex justify-center items-center w-full h-full",
+              style: { transition: "all 300ms" },
+            }),
+          ];
         },
-        [
-          h(View, {
-            class: "inline-flex justify-center items-center w-full h-full",
-            style: { transition: "all 300ms" },
-          }),
-        ],
-      ),
+      }),
     ],
   );
 

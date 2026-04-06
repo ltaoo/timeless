@@ -85,92 +85,89 @@ export function ContentImpl(
     }),
   ];
 
-  return h(
-    Show,
-    {
-      when: computed(presence_, (t) => {
-        return t.mounted;
-      }),
-      onMounted() {
-        return () => {
-          for (let i = 0; i < listeners.length; i += 1) {
-            listeners[i]();
-          }
-        };
-      },
-    },
-    [
-      NativePortal({}, [
-        PopperPrimitive.Content(
-          {
-            store: props.store.popper,
-            onDismiss() {
-              props.store.hide();
-            },
-            onReferenceOutOfView() {
-              props.store.hide();
-            },
-            onMouseEnter(event) {
-              // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
-              if (
-                props.store.parent_menu &&
-                props.store.parent_menu.hide_sub_timer !== null
-              ) {
-                getHost().clearTimeout(props.store.parent_menu.hide_sub_timer);
-                props.store.parent_menu.hide_sub_timer = null;
-              }
-              if (rest.onMouseEnter) {
-                rest.onMouseEnter(event);
-              }
-            },
-            onMouseLeave(event) {
-              props.store.handleLeave();
-              if (rest.onMouseLeave) {
-                rest.onMouseLeave(event);
-              }
-            },
-          },
-          [
-            View(
-              {
-                class: computed(presence_, (t) => {
-                  if (t.exit) {
-                    _was_exiting = true;
-                  }
-                  // Keep exit animation class during unmount to prevent flash
-                  // When exit=false but mounted=false, the animation class would become ""
-                  // causing the element to snap to full opacity before DOM removal
-                  if (!t.mounted && _was_exiting) {
-                    _was_exiting = false;
-                    return animation?.out || "";
-                  }
-                  if (t.mounted) {
-                    _was_exiting = false;
-                  }
-                  return [
-                    t.enter && animation?.in ? animation.in : "",
-                    t.exit && animation?.out ? animation.out : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ");
-                }),
-                onAnimationEnd(e: AnimationEvent) {
-                  if (e.target === e.currentTarget) {
-                    props.store.presence.handleAnimationEnd();
-                  }
-                  if (rest.onAnimationEnd) {
-                    // @ts-ignore
-                    rest.onAnimationEnd(e);
-                  }
-                },
+  return Show({
+    when: computed(presence_, (t) => {
+      return t.mounted;
+    }),
+    ok() {
+      return [
+        NativePortal({}, [
+          PopperPrimitive.Content(
+            {
+              store: props.store.popper,
+              onDismiss() {
+                props.store.hide();
               },
-              children,
-            ),
-          ],
-        ),
-      ]),
-    ],
-  );
+              onReferenceOutOfView() {
+                props.store.hide();
+              },
+              onMouseEnter(event) {
+                // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
+                if (
+                  props.store.parent_menu &&
+                  props.store.parent_menu.hide_sub_timer !== null
+                ) {
+                  getHost().clearTimeout(props.store.parent_menu.hide_sub_timer);
+                  props.store.parent_menu.hide_sub_timer = null;
+                }
+                if (rest.onMouseEnter) {
+                  rest.onMouseEnter(event);
+                }
+              },
+              onMouseLeave(event) {
+                props.store.handleLeave();
+                if (rest.onMouseLeave) {
+                  rest.onMouseLeave(event);
+                }
+              },
+            },
+            [
+              View(
+                {
+                  class: computed(presence_, (t) => {
+                    if (t.exit) {
+                      _was_exiting = true;
+                    }
+                    // Keep exit animation class during unmount to prevent flash
+                    // When exit=false but mounted=false, the animation class would become ""
+                    // causing the element to snap to full opacity before DOM removal
+                    if (!t.mounted && _was_exiting) {
+                      _was_exiting = false;
+                      return animation?.out || "";
+                    }
+                    if (t.mounted) {
+                      _was_exiting = false;
+                    }
+                    return [
+                      t.enter && animation?.in ? animation.in : "",
+                      t.exit && animation?.out ? animation.out : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ");
+                  }),
+                  onAnimationEnd(e: AnimationEvent) {
+                    if (e.target === e.currentTarget) {
+                      props.store.presence.handleAnimationEnd();
+                    }
+                    if (rest.onAnimationEnd) {
+                      // @ts-ignore
+                      rest.onAnimationEnd(e);
+                    }
+                  },
+                },
+                children,
+              ),
+            ],
+          ),
+        ]),
+      ];
+    },
+    onUnmounted() {
+      for (let i = 0; i < listeners.length; i += 1) {
+        listeners[i]();
+      }
+    },
+  });
 }
 
 export function Group(

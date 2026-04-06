@@ -310,6 +310,151 @@ export function createTuiText(text: string): TuiText {
       return node;
     },
     replaceChild() {},
+    addContent(
+      newTargetChildren: any[],
+      onMounted: any,
+      updateState: (newNodes: any[], newInstances: any[]) => void
+    ) {
+      const parent = node.parentNode;
+      if (!parent) return;
+
+      // 1. 准备新内容
+      const newNodes: any[] = [];
+      const newInstances: any[] = [];
+
+      for (let item of newTargetChildren) {
+        if (item === null || item === undefined) continue;
+        if (typeof item === "function") {
+          item = item();
+        }
+
+        if (item && typeof item.render === "function") {
+          const result = item.render();
+          newInstances.push(item);
+          if (result) {
+            if (result.kind === "fragment") {
+              newNodes.push(...result.childNodes);
+            } else {
+              newNodes.push(result);
+            }
+          }
+        } else if (typeof item === "string" || typeof item === "number") {
+          const textNode = createTuiText(String(item));
+          newNodes.push(textNode);
+        }
+      }
+
+      // 2. 插入新内容到 anchor 之前
+      for (let i = newNodes.length - 1; i >= 0; i--) {
+        parent.insertBefore(newNodes[i], node);
+      }
+
+      // 3. 更新状态
+      updateState(newNodes, newInstances);
+
+      // 4. 调用新内容的 onMounted
+      if (onMounted) {
+        onMounted({ target: node });
+      }
+      for (const child of newInstances) {
+        if (child && typeof child.onMounted === "function") {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+
+      invalidate();
+    },
+    buildInitialContent(
+      targetChildren: any[],
+      onMounted: any,
+      updateState: (newNodes: any[], newInstances: any[]) => void
+    ) {
+      // 1. 准备新内容
+      const fragment = createTuiFragment();
+      const newNodes: any[] = [];
+      const newInstances: any[] = [];
+
+      for (let item of targetChildren) {
+        if (item === null || item === undefined) continue;
+        if (typeof item === "function") {
+          item = item();
+        }
+
+        if (item && typeof item.render === "function") {
+          const result = item.render();
+          newInstances.push(item);
+          if (result) {
+            if (result.kind === "fragment") {
+              newNodes.push(...result.childNodes);
+              for (const child of result.childNodes) {
+                fragment.appendChild(child);
+              }
+            } else {
+              newNodes.push(result);
+              fragment.appendChild(result);
+            }
+          }
+        } else if (typeof item === "string" || typeof item === "number") {
+          const textNode = createTuiText(String(item));
+          fragment.appendChild(textNode);
+          newNodes.push(textNode);
+        }
+      }
+
+      // 2. 将 anchor 添加到 fragment
+      fragment.appendChild(node);
+
+      // 3. 更新状态
+      updateState(newNodes, newInstances);
+
+      // 4. 调用新内容的 onMounted
+      if (onMounted) {
+        onMounted({ target: node });
+      }
+      for (const child of newInstances) {
+        if (child && typeof child.onMounted === "function") {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+
+      invalidate();
+      return fragment;
+    },
+    removeContent(
+      oldChildren: any[],
+      oldNodes: any[],
+      updateState: () => void
+    ) {
+      // 1. 调用旧内容的 beforeUnmounted
+      for (const child of oldChildren) {
+        if (child && typeof child.beforeUnmounted === "function") {
+          child.beforeUnmounted();
+        }
+      }
+
+      // 2. 移除旧内容的 DOM
+      for (const oldNode of oldNodes) {
+        if (oldNode && oldNode.parentNode) {
+          oldNode.parentNode.removeChild(oldNode);
+        }
+      }
+
+      // 3. 调用旧内容的 onUnmounted
+      for (const child of oldChildren) {
+        if (child) {
+          if (child.t === "portal" && typeof child.cleanup === "function") {
+            child.cleanup();
+          } else if (typeof child.onUnmounted === "function") {
+            child.onUnmounted();
+          }
+        }
+      }
+
+      // 4. 更新状态
+      updateState();
+
+      invalidate();
+    },
   };
   return node;
 }
@@ -391,6 +536,151 @@ export function createTuiFragment(): TuiFragment {
     },
     getNextSibling() {
       return node.nextSibling;
+    },
+    addContent(
+      newTargetChildren: any[],
+      onMounted: any,
+      updateState: (newNodes: any[], newInstances: any[]) => void
+    ) {
+      const parent = node.parentNode;
+      if (!parent) return;
+
+      // 1. 准备新内容
+      const newNodes: any[] = [];
+      const newInstances: any[] = [];
+
+      for (let item of newTargetChildren) {
+        if (item === null || item === undefined) continue;
+        if (typeof item === "function") {
+          item = item();
+        }
+
+        if (item && typeof item.render === "function") {
+          const result = item.render();
+          newInstances.push(item);
+          if (result) {
+            if (result.kind === "fragment") {
+              newNodes.push(...result.childNodes);
+            } else {
+              newNodes.push(result);
+            }
+          }
+        } else if (typeof item === "string" || typeof item === "number") {
+          const textNode = createTuiText(String(item));
+          newNodes.push(textNode);
+        }
+      }
+
+      // 2. 插入新内容到 fragment 之前
+      for (let i = newNodes.length - 1; i >= 0; i--) {
+        parent.insertBefore(newNodes[i], node);
+      }
+
+      // 3. 更新状态
+      updateState(newNodes, newInstances);
+
+      // 4. 调用新内容的 onMounted
+      if (onMounted) {
+        onMounted({ target: node });
+      }
+      for (const child of newInstances) {
+        if (child && typeof child.onMounted === "function") {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+
+      invalidate();
+    },
+    buildInitialContent(
+      targetChildren: any[],
+      onMounted: any,
+      updateState: (newNodes: any[], newInstances: any[]) => void
+    ) {
+      // 1. 准备新内容
+      const resultFragment = createTuiFragment();
+      const newNodes: any[] = [];
+      const newInstances: any[] = [];
+
+      for (let item of targetChildren) {
+        if (item === null || item === undefined) continue;
+        if (typeof item === "function") {
+          item = item();
+        }
+
+        if (item && typeof item.render === "function") {
+          const result = item.render();
+          newInstances.push(item);
+          if (result) {
+            if (result.kind === "fragment") {
+              newNodes.push(...result.childNodes);
+              for (const child of result.childNodes) {
+                resultFragment.appendChild(child);
+              }
+            } else {
+              newNodes.push(result);
+              resultFragment.appendChild(result);
+            }
+          }
+        } else if (typeof item === "string" || typeof item === "number") {
+          const textNode = createTuiText(String(item));
+          resultFragment.appendChild(textNode);
+          newNodes.push(textNode);
+        }
+      }
+
+      // 2. 将 anchor (fragment) 添加到结果
+      resultFragment.appendChild(node);
+
+      // 3. 更新状态
+      updateState(newNodes, newInstances);
+
+      // 4. 调用新内容的 onMounted
+      if (onMounted) {
+        onMounted({ target: node });
+      }
+      for (const child of newInstances) {
+        if (child && typeof child.onMounted === "function") {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+
+      invalidate();
+      return resultFragment;
+    },
+    removeContent(
+      oldChildren: any[],
+      oldNodes: any[],
+      updateState: () => void
+    ) {
+      // 1. 调用旧内容的 beforeUnmounted
+      for (const child of oldChildren) {
+        if (child && typeof child.beforeUnmounted === "function") {
+          child.beforeUnmounted();
+        }
+      }
+
+      // 2. 移除旧内容的 DOM
+      for (const oldNode of oldNodes) {
+        if (oldNode && oldNode.parentNode) {
+          oldNode.parentNode.removeChild(oldNode);
+        }
+      }
+
+      // 3. 调用旧内容的 onUnmounted
+      for (const child of oldChildren) {
+        if (child) {
+          if (child.t === "portal" && typeof child.cleanup === "function") {
+            child.cleanup();
+          } else if (typeof child.onUnmounted === "function") {
+            child.onUnmounted();
+          }
+        }
+      }
+
+      // 4. 更新状态
+      updateState();
+
+      invalidate();
     },
   };
   return node;

@@ -67,53 +67,52 @@ export function StandardSubViews(
       if (!PageView) {
         return NotFoundPageView;
       }
-      return h(
-        Show,
-        {
-          when: computed(cur_subview, (d) => {
-            if (d && d.id === subview.id) {
-              return true;
-            }
-            return false;
-          }),
-        },
-        [
-          h(
-            View,
-            {
-              style: {
-                "z-index": computed(idx, (i) => i + 1),
-                position: "absolute",
-                left: 0,
-                top: 0,
-                right: 0,
-                bottom: 0,
+      return Show({
+        when: computed(cur_subview, (d) => {
+          if (d && d.id === subview.id) {
+            return true;
+          }
+          return false;
+        }),
+        ok() {
+          return [
+            h(
+              View,
+              {
+                style: {
+                  "z-index": computed(idx, (i) => i + 1),
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                },
+                dataset: {
+                  name: subview.name,
+                  pathname: subview.pathname,
+                },
               },
-              dataset: {
-                name: subview.name,
-                pathname: subview.pathname,
-              },
-            },
-            [
-              withErrorBoundary(
-                () =>
-                  LazyView(
-                    {
-                      ...props,
-                      view: subview,
-                      onMounted() {
-                        nodes.push(this);
+              [
+                withErrorBoundary(
+                  () =>
+                    LazyView(
+                      {
+                        ...props,
+                        view: subview,
+                        onMounted() {
+                          nodes.push(this);
+                        },
                       },
-                    },
-                    [PageView],
-                  ),
-                subview.name,
-                props.ErrorFallback,
-              ),
-            ],
-          ),
-        ],
-      );
+                      [PageView],
+                    ),
+                  subview.name,
+                  props.ErrorFallback,
+                ),
+              ],
+            ),
+          ];
+        },
+      });
     },
   });
 }

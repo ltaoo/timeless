@@ -17,7 +17,10 @@ export function For<T>(
   props: ViewProps & {
     key?: string;
     each: T[] | Ref<T[]>;
-    render: (item: T, idx: Ref<number>) => TimelessElement | null;
+    render: (
+      item: T,
+      idx: Ref<number>,
+    ) => TimelessElement | (() => TimelessElement) | null;
   },
 ) {
   const host = getHost();
@@ -399,7 +402,7 @@ export function For<T>(
   }
 
   const state: {
-    children: TimelessElement[];
+    children: any[];
   } = {
     children: [],
   };

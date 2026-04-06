@@ -1,5 +1,7 @@
 import { Section, Item } from "@/components/index.js";
 
+const cn = Timeless.cn;
+
 function createMockTasks() {
   return [
     {
@@ -197,31 +199,31 @@ function DownloadTaskItem(props) {
           [computed(task, (t) => t.name)],
         ),
         // Progress bar (for non-completed, non-pending)
-        Show(
-          {
-            when: computed(
-              task,
-              (t) => t.status === "running" || t.status === "paused",
-            ),
+        Show({
+          when: computed(
+            task,
+            (t) => t.status === "running" || t.status === "paused",
+          ),
+          ok() {
+            return [
+              View(
+                {
+                  class:
+                    "mt-1 h-1 w-full rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden",
+                },
+                [
+                  View({
+                    class: cn([
+                      "h-full rounded-full transition-all",
+                      progressBg_,
+                    ]),
+                    style: progressWidth_,
+                  }),
+                ],
+              ),
+            ];
           },
-          [
-            View(
-              {
-                class:
-                  "mt-1 h-1 w-full rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden",
-              },
-              [
-                View({
-                  class: cn([
-                    "h-full rounded-full transition-all",
-                    progressBg_,
-                  ]),
-                  style: progressWidth_,
-                }),
-              ],
-            ),
-          ],
-        ),
+        }),
         View({ class: cn(["mt-0.5 text-xs", statusColor_]) }, [statusText_]),
       ]),
       // Action button
@@ -230,78 +232,80 @@ function DownloadTaskItem(props) {
           class: "flex-shrink-0",
         },
         [
-          Show(
-            {
-              when: computed(task, (t) => t.status === "running"),
-              fallback: [
+          Show({
+            when: computed(task, (t) => t.status === "running"),
+            ok() {
+              return [
                 h(
-                  Show,
+                  Button,
                   {
-                    when: computed(
-                      task,
-                      (t) => t.status === "paused" || t.status === "failed",
-                    ),
-                    fallback: [
+                    class: "pause",
+                    store: new Timeless.ui.ButtonCore({
+                      size: "sm",
+                      variant: "ghost",
+                      onClick() {
+                        getobj(task).assign({ status: "paused", speed: 0 });
+                      },
+                    }),
+                  },
+                  ["Pause"],
+                ),
+              ];
+            },
+            else() {
+              return [
+                Show({
+                  when: computed(
+                    task,
+                    (t) => t.status === "paused" || t.status === "failed",
+                  ),
+                  ok() {
+                    return [
                       h(
-                        Show,
+                        Button,
                         {
-                          when: computed(task, (t) => t.status === "completed"),
+                          class: "retry_or_resume",
+                          store: new Timeless.ui.ButtonCore({
+                            size: "sm",
+                            variant: "ghost",
+                            onClick() {
+                              getobj(task).assign({
+                                status: "running",
+                                speed: 1500000,
+                              });
+                            },
+                          }),
                         },
                         [
-                          View(
-                            {
-                              class:
-                                "done_text text-xs text-emerald-500 font-medium",
-                            },
-                            ["Done"],
+                          computed(task, (t) =>
+                            t.status === "failed" ? "Retry" : "Resume",
                           ),
                         ],
                       ),
-                    ],
+                    ];
                   },
-                  [
-                    h(
-                      Button,
-                      {
-                        class: "retry_or_resume",
-                        store: new Timeless.ui.ButtonCore({
-                          size: "sm",
-                          variant: "ghost",
-                          onClick() {
-                            getobj(task).assign({
-                              status: "running",
-                              speed: 1500000,
-                            });
-                          },
-                        }),
-                      },
-                      [
-                        computed(task, (t) =>
-                          t.status === "failed" ? "Retry" : "Resume",
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+                  else() {
+                    return [
+                      Show({
+                        when: computed(task, (t) => t.status === "completed"),
+                        ok() {
+                          return [
+                            View(
+                              {
+                                class:
+                                  "done_text text-xs text-emerald-500 font-medium",
+                              },
+                              ["Done"],
+                            ),
+                          ];
+                        },
+                      }),
+                    ];
+                  },
+                }),
+              ];
             },
-            [
-              h(
-                Button,
-                {
-                  class: "pause",
-                  store: new Timeless.ui.ButtonCore({
-                    size: "sm",
-                    variant: "ghost",
-                    onClick() {
-                      getobj(task).assign({ status: "paused", speed: 0 });
-                    },
-                  }),
-                },
-                ["Pause"],
-              ),
-            ],
-          ),
+          }),
         ],
       ),
     ],
@@ -1739,10 +1743,23 @@ export default function HomeIndexScrollViewExampleView() {
                 // Scrollable task list
                 View({ class: "max-h-[400px] min-h-[120px] overflow-hidden" }, [
                   ScrollView({ store: scrollStore }, [
-                    Show(
-                      {
-                        when: computed(taskCount_, (d) => d > 0),
-                        fallback: [
+                    Show({
+                      when: computed(taskCount_, (d) => d > 0),
+                      ok() {
+                        return [
+                          For({
+                            key: "id",
+                            each: tasks_,
+                            render(task) {
+                              return DownloadTaskItem({
+                                task,
+                              });
+                            },
+                          }),
+                        ];
+                      },
+                      else() {
+                        return [
                           View(
                             {
                               class:
@@ -1750,20 +1767,9 @@ export default function HomeIndexScrollViewExampleView() {
                             },
                             ["No download tasks"],
                           ),
-                        ],
+                        ];
                       },
-                      [
-                        For({
-                          key: "id",
-                          each: tasks_,
-                          render(task) {
-                            return DownloadTaskItem({
-                              task,
-                            });
-                          },
-                        }),
-                      ],
-                    ),
+                    }),
                   ]),
                 ]),
               ],

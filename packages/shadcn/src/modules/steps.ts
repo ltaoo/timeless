@@ -62,24 +62,29 @@ export function Steps(props: ViewProps & { store: StepCore; items: StepItem[] })
                       ),
                     ],
                   ),
-                  Show({ when: i < items.length - 1 }, [
-                    h(
-                      StepsPrimitive.Connector,
-                      {
-                        store,
-                        index: i,
-                        class: classNames([
-                          "h-[2px] w-full flex-1 mx-2 transition-colors",
-                          computed(state_, (s) =>
-                            i < s.value
-                              ? "bg-zinc-900 dark:bg-zinc-50"
-                              : "bg-zinc-200 dark:bg-zinc-700",
-                          ),
-                        ]),
-                      },
-                      [],
-                    ),
-                  ]),
+                  Show({
+                    when: i < items.length - 1,
+                    ok() {
+                      return [
+                        h(
+                          StepsPrimitive.Connector,
+                          {
+                            store,
+                            index: i,
+                            class: classNames([
+                              "h-[2px] w-full flex-1 mx-2 transition-colors",
+                              computed(state_, (s) =>
+                                i < s.value
+                                  ? "bg-zinc-900 dark:bg-zinc-50"
+                                  : "bg-zinc-200 dark:bg-zinc-700",
+                              ),
+                            ]),
+                          },
+                          [],
+                        ),
+                      ];
+                    },
+                  }),
                 ],
               );
             },

@@ -41,19 +41,19 @@ export default function HomeLayoutView(props) {
               },
               [
                 "T",
-                Show(
-                  {
-                    when: computed(sidemenu$.cur, (t) => {
-                      return sidemenu$.isSelected(t, sidemenu$.menus[0]);
-                    }),
+                Show({
+                  when: computed(sidemenu$.cur, (t) => {
+                    return sidemenu$.isSelected(t, sidemenu$.menus[0]);
+                  }),
+                  ok() {
+                    return [
+                      h(View, {
+                        class:
+                          "absolute top-[-4px] right-[-4px] w-2 h-2 rounded-full bg-zinc-500",
+                      }),
+                    ];
                   },
-                  [
-                    h(View, {
-                      class:
-                        "absolute top-[-4px] right-[-4px] w-2 h-2 rounded-full bg-zinc-500",
-                    }),
-                  ],
-                ),
+                }),
               ],
             ),
 

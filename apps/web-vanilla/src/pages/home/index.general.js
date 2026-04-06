@@ -107,32 +107,44 @@ export default function GeneralView() {
               },
             });
             return View({}, [
-              Show({ when: computed(playing, (v) => !v) }, [
-                Button(
-                  {
-                    store: playStore,
-                    prefix: [Timeless.icons.PlayOutlined({ class: "w-4 h-4" })],
-                  },
-                  ["Play"],
-                ),
-              ]),
-              Show({ when: computed(playing, (v) => v) }, [
-                Button(
-                  {
-                    store: cancelStore,
-                    prefix: [
-                      View(
-                        {
-                          class: "inline-block h-4 w-4 animate-spin",
-                          style: { "transform-origin": "center" },
-                        },
-                        [Timeless.icons.LoaderCircleOutlined()],
-                      ),
-                    ],
-                  },
-                  ["取消"],
-                ),
-              ]),
+              Show({
+                when: computed(playing, (v) => !v),
+                ok() {
+                  return [
+                    Button(
+                      {
+                        store: playStore,
+                        prefix: [
+                          Timeless.icons.PlayOutlined({ class: "w-4 h-4" }),
+                        ],
+                      },
+                      ["Play"],
+                    ),
+                  ];
+                },
+              }),
+              Show({
+                when: computed(playing, (v) => v),
+                ok() {
+                  return [
+                    Button(
+                      {
+                        store: cancelStore,
+                        prefix: [
+                          View(
+                            {
+                              class: "inline-block h-4 w-4 animate-spin",
+                              style: { "transform-origin": "center" },
+                            },
+                            [Timeless.icons.LoaderCircleOutlined()],
+                          ),
+                        ],
+                      },
+                      ["取消"],
+                    ),
+                  ];
+                },
+              }),
             ]);
           })(),
           Button(
@@ -178,7 +190,7 @@ export default function GeneralView() {
       Section("Separator", [
         Item("Horizontal", [View({ class: "w-full" }, [Separator({})])]),
         Item("Vertical", [
-          View({ class: cn(["flex items-center h-6 gap-3"]) }, [
+          View({ class: Timeless.cn(["flex items-center h-6 gap-3"]) }, [
             "Left",
             Separator({ orientation: "vertical" }),
             "Right",

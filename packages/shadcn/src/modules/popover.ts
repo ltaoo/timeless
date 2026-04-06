@@ -52,15 +52,20 @@ export function Popover(
             }),
           },
           [
-            Show({ when: ref(!!props.title) }, [
-              h(
-                View,
-                {
-                  class: "flex flex-col gap-0.5 text-sm font-medium",
-                },
-                props.title,
-              ),
-            ]),
+            Show({
+              when: ref(!!props.title),
+              ok() {
+                return [
+                  h(
+                    View,
+                    {
+                      class: "flex flex-col gap-0.5 text-sm font-medium",
+                    },
+                    props.title,
+                  ),
+                ];
+              },
+            }),
             ...props.content,
           ],
         ),

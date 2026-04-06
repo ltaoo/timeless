@@ -1,4 +1,14 @@
-import { Grid, View, For, ref, combine, refarr } from "@timeless/timeless";
+import {
+  Show,
+  Grid,
+  View,
+  For,
+  Fragment,
+  ref,
+  combine,
+  computed,
+  refarr,
+} from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
 
 const apps = [
@@ -81,9 +91,15 @@ function ApplicationView() {
     });
   }
 
-  function isFocusedCell(focusedXY, idx) {
+  /**
+   * @param {{ x: number, y: number }} pos
+   * @param {number} idx
+   * @returns
+   */
+  function isFocusedCell(pos, idx) {
     const { x, y } = xyFromIdx(idx);
-    return focusedXY.x === x && focusedXY.y === y;
+    // console.log(`[${pos.x},${pos.y}] is ${idx}, ${x},${y}`);
+    return pos.x === x && pos.y === y;
   }
 
   platform.addEventListener("keydown", handleKeydown);
@@ -118,6 +134,9 @@ function ApplicationView() {
           View(
             {
               class: "navigate-to",
+              style: {
+                color: "white",
+              },
               onClick() {
                 page.set("todo");
               },
@@ -127,6 +146,9 @@ function ApplicationView() {
           View(
             {
               class: "navigate-to",
+              style: {
+                color: "white",
+              },
               onClick() {
                 console.log("click app");
                 page.set("app");
@@ -136,69 +158,82 @@ function ApplicationView() {
           ),
         ],
       ),
-      View(
-        {
-          class: "subpage",
-          style: {
-            opacity: combine(page, (p) => (p === "todo" ? 1 : 0)),
-          },
-        },
-        [
-          View(
-            {
-              class: "subpage-title",
-            },
-            ["Todo List Page"],
-          ),
-          For({
-            each: todos,
-            render(todo) {
-              return View({}, [todo.title]);
-            },
-          }),
-        ],
-      ),
-      View(
-        {
-          style: {
-            class: "subpage",
-            opacity: combine(page, (p) => (p === "app" ? 1 : 0)),
-          },
-        },
-        [
-          View(
-            {
-              class: "subpage-title",
-            },
-            ["Application List Page"],
-          ),
-          Grid(
-            { columns, gap: 16 },
-            apps.map((app, idx) => {
-              return View(
-                {
-                  style: {
-                    borderColor: combine({ focused, idx }, (t) => {
-                      return isFocusedCell(t.focused, t.idx)
-                        ? "#007bff"
-                        : "rgba(255,255,255,0.18)";
-                    }),
-                  },
-                },
-                [
-                  View({ style: { fontSize: 22 } }, [app.icon]),
-                  View({ style: { fontWeight: "bold", fontSize: 14 } }, [
-                    app.title,
-                  ]),
-                  View({ style: { fontSize: 12, color: "gray" } }, [
-                    app.subtitle,
-                  ]),
-                ],
-              );
+      Show({
+        when: computed(page, (t) => t === "todo"),
+        ok() {
+          return [
+            View(
+              {
+                class: "subpage-title",
+              },
+              ["Todo List Page"],
+            ),
+            For({
+              each: todos,
+              render(todo) {
+                return View({}, [todo.title]);
+              },
             }),
-          ),
-        ],
-      ),
+          ];
+        },
+      }),
+      Show({
+        when: computed(page, (t) => t === "app"),
+        ok() {
+          return [
+            View(
+              {
+                class: "subpage-title",
+              },
+              ["Application List Page"],
+            ),
+            Grid(
+              { columns, gap: 16 },
+              apps.map((app, idx) => {
+                return View(
+                  {
+                    style: {
+                      "border-style": "solid",
+                      "border-width": "2px",
+                      "border-color": combine({ focused, idx }, (t) => {
+                        return isFocusedCell(t.focused, t.idx)
+                          ? "#007bff"
+                          : "rgba(255,255,255,0.18)";
+                      }),
+                    },
+                  },
+                  [
+                    View(
+                      { style: { "text-align": "center", "font-size": 22 } },
+                      [app.icon],
+                    ),
+                    View(
+                      {
+                        style: {
+                          "text-align": "center",
+                          "font-weight": "bold",
+                          fontSize: 14,
+                        },
+                      },
+                      [app.title],
+                    ),
+                    View(
+                      {
+                        style: {
+                          "text-align": "center",
+                          "font-size": 12,
+                          color: "gray",
+                        },
+                      },
+                      [app.subtitle],
+                    ),
+                  ],
+                );
+              }),
+            ),
+          ];
+        },
+      }),
     ],
   );
 }

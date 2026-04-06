@@ -120,9 +120,14 @@ export function Select(
   function renderEntry(entry: any) {
     if (entry && entry.type === "group") {
       return View({ class: GROUP_CLASS }, [
-        Show({ when: !!entry.label }, [
-          View({ class: GROUP_LABEL_CLASS }, [() => entry.label ?? null]),
-        ]),
+        Show({
+          when: !!entry.label,
+          ok() {
+            return [
+              View({ class: GROUP_LABEL_CLASS }, [() => entry.label ?? null]),
+            ];
+          },
+        }),
         For({
           key: "key",
           each: entry.items || [],
@@ -169,35 +174,39 @@ export function Select(
           }),
         }),
         View({ class: "flex items-center gap-1.5" }, [
-          Show(
-            {
-              when: showClear,
-              fallback: [
+          Show({
+            when: showClear,
+            ok() {
+              return [
+                SelectPrimitive.Clear(
+                  {
+                    store,
+                    class:
+                      "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
+                  },
+                  [CircleXOutlined({ class: "size-4" })],
+                ),
+              ];
+            },
+            else() {
+              return [
                 SelectPrimitive.Icon(
                   { store, class: "size-4 text-muted-foreground" },
                   [
-                    Show(
-                      {
-                        when: computed(state_, (t) => t.open),
-                        fallback: [ChevronDownOutlined({})],
+                    Show({
+                      when: computed(state_, (t) => t.open),
+                      ok() {
+                        return [ChevronUpOutlined({})];
                       },
-                      [ChevronUpOutlined({})],
-                    ),
+                      else() {
+                        return [ChevronDownOutlined({})];
+                      },
+                    }),
                   ],
                 ),
-              ],
+              ];
             },
-            [
-              SelectPrimitive.Clear(
-                {
-                  store,
-                  class:
-                    "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
-                },
-                [CircleXOutlined({ class: "size-4" })],
-              ),
-            ],
-          ),
+          }),
         ]),
       ],
     ),
@@ -222,25 +231,39 @@ export function Select(
       },
       [
         SelectPrimitive.Viewport({ store, class: "p-1" }, [
-          Show({ when: computed(state_, (t) => t.search) }, [
-            View(
-              {
-                class:
-                  "sticky top-0 z-10 -mx-1 mb-1 bg-popover px-1 pb-1 pt-0.5",
-              },
-              [
-                SelectPrimitive.Search({
-                  store,
-                  class:
-                    "h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30",
+          Show({
+            when: computed(state_, (t) => t.search),
+            ok() {
+              return [
+                View(
+                  {
+                    class:
+                      "sticky top-0 z-10 -mx-1 mb-1 bg-popover px-1 pb-1 pt-0.5",
+                  },
+                  [
+                    SelectPrimitive.Search({
+                      store,
+                      class:
+                        "h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30",
+                    }),
+                  ],
+                ),
+              ];
+            },
+          }),
+          Show({
+            when: computed(filteredEntries_, (list) => list.length > 0),
+            ok() {
+              return [
+                For({
+                  key: "key",
+                  each: filteredEntries_,
+                  render: renderEntry,
                 }),
-              ],
-            ),
-          ]),
-          Show(
-            {
-              when: computed(filteredEntries_, (list) => list.length > 0),
-              fallback: [
+              ];
+            },
+            else() {
+              return [
                 View(
                   {
                     class:
@@ -252,16 +275,9 @@ export function Select(
                     ),
                   ],
                 ),
-              ],
+              ];
             },
-            [
-              For({
-                key: "key",
-                each: filteredEntries_,
-                render: renderEntry,
-              }),
-            ],
-          ),
+          }),
         ]),
       ],
     ),

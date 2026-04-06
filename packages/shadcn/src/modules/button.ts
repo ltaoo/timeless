@@ -97,7 +97,12 @@ export function Button(
           [LoaderCircleOutlined()],
         ),
       ]),
-      Show({ when: !!prefix }, [h(ButtonPrimitive.Prefix, {}, prefix)]),
+      Show({
+        when: !!prefix,
+        ok() {
+          return [h(ButtonPrimitive.Prefix, {}, prefix)];
+        },
+      }),
       ButtonPrimitive.Content({}, children),
     ],
   );

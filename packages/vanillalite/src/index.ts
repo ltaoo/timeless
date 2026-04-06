@@ -11,9 +11,10 @@ import {
   DangerouslyInnerHTML,
   Portal,
   lazy,
-  render,
   h,
 } from "@timeless/timeless";
+
+import { render } from "@timeless/timeless-dom";
 
 export * from "@timeless/reactive";
 

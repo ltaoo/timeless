@@ -458,25 +458,20 @@ declare module "packages/primitive/src/reactive/show" {
     import { ViewChildren } from "@/content/view";
     export function Show(props: {
         when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
-        fallback?: ViewChildren;
+        ok: () => ViewChildren;
+        else?: () => ViewChildren;
         onMounted?: ($fg: any) => void;
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
-    }, children?: ViewChildren): {
+    }): {
         t: string;
         $elm: any;
-        _props: {
-            when: boolean | Ref<boolean> | {
-                when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
-                fallback?: ViewChildren;
-                onMounted?: ($fg: any) => void;
-                beforeUnmounted?: () => void;
-                onUnmounted?: () => void;
-            };
-            fallback: any;
-        };
-        _children: any[];
-        _fallback: any[];
+        value: boolean;
+        children: any[];
+        props: any;
+        _props: any;
+        _ok: () => ViewChildren;
+        _else?: () => ViewChildren;
         cleanup(): void;
         render(): any;
         hydrate(startDom: any, parentDom?: any): any;
@@ -580,7 +575,7 @@ declare module "packages/primitive/src/content/view" {
             styleSets?: MaybeSignal<string[]>;
             style?: ViewStyleProperties;
         };
-        value?: string;
+        value?: unknown;
         render(): any;
         hydrate?(existingDom: any): any;
         cleanup?: () => void;
@@ -13011,10 +13006,9 @@ declare module "packages/shadcn/src/modules/resizable-panels" {
 }
 declare module "packages/shadcn/src/modules/waterfall" {
     import { type ViewProps, type TimelessElement } from "packages/primitive/src/index";
-    import type { WaterfallCellModel, WaterfallModel } from "packages/ui/src/index";
     export function Waterfall<T extends Record<string, unknown>>(props: ViewProps & {
-        store: WaterfallModel<T>;
-        render: (payload: T, cell: WaterfallCellModel<T>) => TimelessElement;
+        store: any;
+        render: (payload: T, cell: any) => TimelessElement;
     }): TimelessElement;
 }
 declare module "packages/shadcn/src/modules/history-panel" {

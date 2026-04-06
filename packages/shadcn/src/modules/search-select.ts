@@ -256,10 +256,56 @@ export function SearchSelect<T>(
       },
       [
         SelectPrimitive.Viewport({ store, class: "p-1" }, [
-          Show(
-            {
-              when: computed(state_, (t) => (t.options || []).length > 0),
-              fallback: [
+          Show({
+            when: computed(state_, (t) => (t.options || []).length > 0),
+            ok() {
+              return [
+                For({
+                  key: "value",
+                  each: computed(state_, (t) => t.options),
+                  render(option: any) {
+                    return SelectPrimitive.Item(
+                      {
+                        store,
+                        value: option.value,
+                        class: classNames([
+                          "relative flex w-full cursor-default select-none items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+                          computed(state_, (d) => {
+                            const opt = d.options.find(
+                              (o: any) => o.value === option.value,
+                            );
+                            const isFocused = Boolean(opt?.focused);
+                            const isSelected = Boolean(opt?.selected);
+                            return [
+                              isSelected ? "font-medium" : "",
+                              isFocused
+                                ? "bg-accent text-accent-foreground"
+                                : "",
+                            ]
+                              .filter(Boolean)
+                              .join(" ");
+                          }),
+                        ]),
+                      },
+                      [
+                        SelectPrimitive.ItemIndicator(
+                          {
+                            store,
+                            value: option.value,
+                            class:
+                              "pointer-events-none absolute right-2 flex size-4 items-center justify-center",
+                          },
+                          [CheckOutlined({})],
+                        ),
+                        SelectPrimitive.ItemText({}, [option.label]),
+                      ],
+                    );
+                  },
+                }),
+              ];
+            },
+            else() {
+              return [
                 View(
                   {
                     class:
@@ -271,51 +317,9 @@ export function SearchSelect<T>(
                     ),
                   ],
                 ),
-              ],
+              ];
             },
-            [
-              For({
-                key: "value",
-                each: computed(state_, (t) => t.options),
-                render(option: any) {
-                  return SelectPrimitive.Item(
-                    {
-                      store,
-                      value: option.value,
-                      class: classNames([
-                        "relative flex w-full cursor-default select-none items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
-                        computed(state_, (d) => {
-                          const opt = d.options.find(
-                            (o: any) => o.value === option.value,
-                          );
-                          const isFocused = Boolean(opt?.focused);
-                          const isSelected = Boolean(opt?.selected);
-                          return [
-                            isSelected ? "font-medium" : "",
-                            isFocused ? "bg-accent text-accent-foreground" : "",
-                          ]
-                            .filter(Boolean)
-                            .join(" ");
-                        }),
-                      ]),
-                    },
-                    [
-                      SelectPrimitive.ItemIndicator(
-                        {
-                          store,
-                          value: option.value,
-                          class:
-                            "pointer-events-none absolute right-2 flex size-4 items-center justify-center",
-                        },
-                        [CheckOutlined({})],
-                      ),
-                      SelectPrimitive.ItemText({}, [option.label]),
-                    ],
-                  );
-                },
-              }),
-            ],
-          ),
+          }),
         ]),
       ],
     ),

@@ -107,27 +107,29 @@ export function TimePicker(
               : "text-muted-foreground";
           }),
         }),
-        Show(
-          {
-            when: showClear,
-            fallback: [
+        Show({
+          when: showClear,
+          ok() {
+            return [
+              TimePickerPrimitive.Clear(
+                {
+                  store,
+                  class:
+                    "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
+                },
+                [CircleXOutlined({ class: "size-4" })],
+              ),
+            ];
+          },
+          else() {
+            return [
               TimePickerPrimitive.Icon(
                 { class: "size-4 text-muted-foreground" },
                 [ClockOutlined({})],
               ),
-            ],
+            ];
           },
-          [
-            TimePickerPrimitive.Clear(
-              {
-                store,
-                class:
-                  "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
-              },
-              [CircleXOutlined({ class: "size-4" })],
-            ),
-          ],
-        ),
+        }),
       ],
     ),
     TimePickerPrimitive.Content(
@@ -274,52 +276,57 @@ export function TimePicker(
                   }),
                 ],
               ),
-              Show({ when: store.showSeconds }, [
-                h(
-                  ScrollViewPrimitive.Root,
-                  {
-                    store: secondview$,
-                    class:
-                      "min-w-12 w-full h-full overflow-y-auto overlay-scrollbar p-2",
-                    onMounted() {
-                      const seconds = store.generateSeconds();
-                      const target = store.state.tempSecond;
-                      const index =
-                        typeof target === "number"
-                          ? seconds.indexOf(target)
-                          : -1;
-                      setTimeout(() => {
-                        if (index !== -1) {
-                          scroll_to_index(secondview$, index);
-                        }
-                      }, 0);
-                    },
-                  },
-                  [
-                    For({
-                      each: store.generateSeconds(),
-                      render(second) {
-                        return TimePickerPrimitive.SecondItem(
-                          {
-                            store,
-                            value: second,
-                            class: computed(state_, (s) => {
-                              const isSelected = s.tempSecond === second;
-                              const baseClass =
-                                "w-full h-8 text-sm rounded-md transition-colors outline-hidden";
-                              if (isSelected) {
-                                return `${baseClass} bg-primary text-primary-foreground`;
-                              }
-                              return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
-                            }),
-                          },
-                          [String(second).padStart(2, "0")],
-                        );
+              Show({
+                when: store.showSeconds,
+                ok() {
+                  return [
+                    h(
+                      ScrollViewPrimitive.Root,
+                      {
+                        store: secondview$,
+                        class:
+                          "min-w-12 w-full h-full overflow-y-auto overlay-scrollbar p-2",
+                        onMounted() {
+                          const seconds = store.generateSeconds();
+                          const target = store.state.tempSecond;
+                          const index =
+                            typeof target === "number"
+                              ? seconds.indexOf(target)
+                              : -1;
+                          setTimeout(() => {
+                            if (index !== -1) {
+                              scroll_to_index(secondview$, index);
+                            }
+                          }, 0);
+                        },
                       },
-                    }),
-                  ],
-                ),
-              ]),
+                      [
+                        For({
+                          each: store.generateSeconds(),
+                          render(second) {
+                            return TimePickerPrimitive.SecondItem(
+                              {
+                                store,
+                                value: second,
+                                class: computed(state_, (s) => {
+                                  const isSelected = s.tempSecond === second;
+                                  const baseClass =
+                                    "w-full h-8 text-sm rounded-md transition-colors outline-hidden";
+                                  if (isSelected) {
+                                    return `${baseClass} bg-primary text-primary-foreground`;
+                                  }
+                                  return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
+                                }),
+                              },
+                              [String(second).padStart(2, "0")],
+                            );
+                          },
+                        }),
+                      ],
+                    ),
+                  ];
+                },
+              }),
             ],
           ),
           View(

@@ -187,35 +187,37 @@ function render($container) {
                 // onUnmounted() {
                 //   console.log("the show can trigger onUnmounted？");
                 // },
-              },
-              [
-                For({
-                  each: computed(commit, (s) => s.authors),
-                  render(author) {
-                    return View(
-                      {
-                        style: { marginLeft: "10px" },
-                        onUnmounted() {
-                          console.log("before remove author ");
-                          uncomputed(author);
-                        },
+                ok() {
+                  return [
+                    For({
+                      each: computed(commit, (s) => s.authors),
+                      render(author) {
+                        return View(
+                          {
+                            style: { marginLeft: "10px" },
+                            onUnmounted() {
+                              console.log("before remove author ");
+                              uncomputed(author);
+                            },
+                          },
+                          [
+                            Txt(
+                              computed(author, (s) => {
+                                return `${s.name} (${s.latest})`;
+                              }),
+                            ),
+                            View({
+                              style: computed(author, (s) => {
+                                return `width: ${s.percent * 100}%; height: 5px; background-color: white;`;
+                              }),
+                            }),
+                          ],
+                        );
                       },
-                      [
-                        Txt(
-                          computed(author, (s) => {
-                            return `${s.name} (${s.latest})`;
-                          }),
-                        ),
-                        View({
-                          style: computed(author, (s) => {
-                            return `width: ${s.percent * 100}%; height: 5px; background-color: white;`;
-                          }),
-                        }),
-                      ],
-                    );
-                  },
-                }),
-              ],
+                    }),
+                  ];
+                },
+              },
             ),
           ],
         );

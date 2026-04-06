@@ -63,6 +63,9 @@ export function Indicator(
   return Show(
     {
       when: computed(state_, (d) => d.checked),
+      ok() {
+        return children || [];
+      },
       onMounted() {
         events.push(
           store.onStateChange(() => {
@@ -74,7 +77,6 @@ export function Indicator(
         for (const fn of events) if (typeof fn === "function") fn();
       },
     },
-    children,
   );
 }
 

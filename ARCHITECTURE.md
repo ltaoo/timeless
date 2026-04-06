@@ -135,25 +135,30 @@ export function DropdownMenu(
   props: ViewProps & { store: DropdownMenuCore },
   children?: ViewChildren,
 ) {
-  return Show({ when: !!children }, [
-    DropdownMenuPrimitive.Trigger({ store: props.store }, children),
-    DropdownMenuPrimitive.Portal({ store: props.store.menu }, [
-      DropdownMenuPrimitive.Content(
-        {
-          store: props.store,
-          class: "min-w-[8rem] rounded-md border bg-white p-1 shadow-md",
-        },
-        [
-          For({
-            each: computed(state_, (t) => t.items),
-            render(item: MenuItemCore) {
-              return DropdownMenuItem({ store: item });
+  return Show({
+    when: !!children,
+    ok() {
+      return [
+        DropdownMenuPrimitive.Trigger({ store: props.store }, children),
+        DropdownMenuPrimitive.Portal({ store: props.store.menu }, [
+          DropdownMenuPrimitive.Content(
+            {
+              store: props.store,
+              class: "min-w-[8rem] rounded-md border bg-white p-1 shadow-md",
             },
-          }),
-        ],
-      ),
-    ]),
-  ]);
+            [
+              For({
+                each: computed(state_, (t) => t.items),
+                render(item: MenuItemCore) {
+                  return DropdownMenuItem({ store: item });
+                },
+              }),
+            ],
+          ),
+        ]),
+      ];
+    },
+  });
 }
 ```
 

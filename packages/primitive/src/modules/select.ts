@@ -274,85 +274,84 @@ export function Content(
     }
   };
 
-  return h(
-    Show,
-    {
-      when: computed(presence_, (t) => {
-        return t.mounted;
-      }),
-    },
-    [
-      NativePortal({}, [
-        PopperPrimitive.Content(
-          {
-            store: store.popper,
-            onDismiss() {
-              store.hide();
-            },
-          },
-          [
-            View(
-              {
-                ...rest,
-                attributes: {
-                  ...(rest.attributes || {}),
-                  tabindex: 0,
-                },
-                class: classNames([
-                  rest.class,
-                  computed(presence_, (t) => {
-                    if (t.exit) {
-                      _was_exiting = true;
-                    }
-                    if (!t.mounted && _was_exiting) {
-                      _was_exiting = false;
-                      return animation?.out || "";
-                    }
-                    if (t.mounted) {
-                      _was_exiting = false;
-                    }
-                    return [
-                      t.enter && animation?.in ? animation.in : "",
-                      t.exit && animation?.out ? animation.out : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ");
-                  }),
-                ]),
-                onKeyDown: handleKeyDown,
-                onAnimationEnd(e: AnimationEvent) {
-                  if (e.target === e.currentTarget) {
-                    store.presence.handleAnimationEnd();
-                  }
-                  if (rest.onAnimationEnd) {
-                    // @ts-ignore
-                    rest.onAnimationEnd(e);
-                  }
-                },
-                onMounted(event) {
-                  const $elm = (event as any).target as HTMLElement;
-                  host.setTimeout(() => {
-                    if (store.state.search) {
-                      const input = host.querySelector?.($elm, "input");
-                      if (input instanceof HTMLInputElement) {
-                        host.focus?.(input);
-                        return;
-                      }
-                    }
-                    host.focus?.($elm);
-                  }, 0);
-                  if (rest.onMounted) {
-                    rest.onMounted(event);
-                  }
-                },
+  return Show({
+    when: computed(presence_, (t) => {
+      return t.mounted;
+    }),
+    ok() {
+      return [
+        NativePortal({}, [
+          PopperPrimitive.Content(
+            {
+              store: store.popper,
+              onDismiss() {
+                store.hide();
               },
-              children,
-            ),
-          ],
-        ),
-      ]),
-    ],
-  );
+            },
+            [
+              View(
+                {
+                  ...rest,
+                  attributes: {
+                    ...(rest.attributes || {}),
+                    tabindex: 0,
+                  },
+                  class: classNames([
+                    rest.class,
+                    computed(presence_, (t) => {
+                      if (t.exit) {
+                        _was_exiting = true;
+                      }
+                      if (!t.mounted && _was_exiting) {
+                        _was_exiting = false;
+                        return animation?.out || "";
+                      }
+                      if (t.mounted) {
+                        _was_exiting = false;
+                      }
+                      return [
+                        t.enter && animation?.in ? animation.in : "",
+                        t.exit && animation?.out ? animation.out : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ");
+                    }),
+                  ]),
+                  onKeyDown: handleKeyDown,
+                  onAnimationEnd(e: AnimationEvent) {
+                    if (e.target === e.currentTarget) {
+                      store.presence.handleAnimationEnd();
+                    }
+                    if (rest.onAnimationEnd) {
+                      // @ts-ignore
+                      rest.onAnimationEnd(e);
+                    }
+                  },
+                  onMounted(event) {
+                    const $elm = (event as any).target as HTMLElement;
+                    host.setTimeout(() => {
+                      if (store.state.search) {
+                        const input = host.querySelector?.($elm, "input");
+                        if (input instanceof HTMLInputElement) {
+                          host.focus?.(input);
+                          return;
+                        }
+                      }
+                      host.focus?.($elm);
+                    }, 0);
+                    if (rest.onMounted) {
+                      rest.onMounted(event);
+                    }
+                  },
+                },
+                children,
+              ),
+            ],
+          ),
+        ]),
+      ];
+    },
+  });
 }
 
 export function Viewport(
@@ -374,42 +373,41 @@ export function Search(
     state_.as(v);
   });
 
-  return h(
-    Show,
-    {
-      when: computed(state_, (s) => s.search),
+  return Show({
+    when: computed(state_, (s) => s.search),
+    ok() {
+      return [
+        Input({
+          ...rest,
+          type: "text",
+          placeholder: computed(state_, (s) => s.searchPlaceholder),
+          value: computed(state_, (s) => s.searchKeyword),
+          onInput(e: Event) {
+            const target = e.target as HTMLInputElement;
+            store.setSearchKeyword(target.value);
+          },
+          onMounted(event) {
+            const $elm = (event as any).target as HTMLInputElement;
+            // 自动聚焦搜索框
+            host.setTimeout(() => {
+              host.focus?.($elm);
+            }, 0);
+            if (rest.onMounted) {
+              rest.onMounted(event);
+            }
+          },
+          onClick(e: Event) {
+            // 阻止点击搜索框时关闭下拉菜单
+            e.stopPropagation();
+          },
+          onKeyDown(e: KeyboardEvent) {
+            // 阻止按键事件冒泡，避免影响 Select 的键盘导航
+            e.stopPropagation();
+          },
+        }),
+      ];
     },
-    [
-      Input({
-        ...rest,
-        type: "text",
-        placeholder: computed(state_, (s) => s.searchPlaceholder),
-        value: computed(state_, (s) => s.searchKeyword),
-        onInput(e: Event) {
-          const target = e.target as HTMLInputElement;
-          store.setSearchKeyword(target.value);
-        },
-        onMounted(event) {
-          const $elm = (event as any).target as HTMLInputElement;
-          // 自动聚焦搜索框
-          host.setTimeout(() => {
-            host.focus?.($elm);
-          }, 0);
-          if (rest.onMounted) {
-            rest.onMounted(event);
-          }
-        },
-        onClick(e: Event) {
-          // 阻止点击搜索框时关闭下拉菜单
-          e.stopPropagation();
-        },
-        onKeyDown(e: KeyboardEvent) {
-          // 阻止按键事件冒泡，避免影响 Select 的键盘导航
-          e.stopPropagation();
-        },
-      }),
-    ],
-  );
+  });
 }
 
 export function Item(

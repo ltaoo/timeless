@@ -173,7 +173,7 @@ export default function CommandView() {
     render(cmd, index) {
       return View(
         {
-          class: cn([
+          class: Timeless.cn([
             "flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg cursor-pointer transition-colors",
             computed([selectedIndex, filteredCommands], () => {
               return selectedIndex.value === index
@@ -235,160 +235,163 @@ export default function CommandView() {
       },
     },
     [
-    Section("Command Palette", [
-      Item("Press Ctrl+P to open", [
-        Button(
-          {
-            store: new Timeless.ui.ButtonCore({
-              variant: "outline",
-              onClick() {
-                open();
-              },
-            }),
-            prefix: [Timeless.icons.SearchOutlined({ class: "w-4 h-4" })],
-          },
-          ["Open Command Palette"],
-        ),
+      Section("Command Palette", [
+        Item("Press Ctrl+P to open", [
+          Button(
+            {
+              store: new Timeless.ui.ButtonCore({
+                variant: "outline",
+                onClick() {
+                  open();
+                },
+              }),
+              prefix: [Timeless.icons.SearchOutlined({ class: "w-4 h-4" })],
+            },
+            ["Open Command Palette"],
+          ),
+        ]),
       ]),
-    ]),
 
-    // Command Palette Panel (Portal to body)
-    Show({ when: isOpen }, [
-      Portal({}, [
-        // Command Palette Content
-        View(
-          {
-            class:
-              "fixed z-50 w-full max-w-[560px] pointer-events-auto rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-white dark:bg-zinc-900",
-            /** @param {HTMLDivElement} $el */
-            onMounted($el) {
-              syncPaletteAnchor();
-              $clickOutside.methods.setTargetRect(() =>
-                $el.getBoundingClientRect(),
-              );
-              $clickOutside.methods.activate();
-            },
-            style: sn([
-              computed(contentTop, (t) => {
-                return `top: ${t}px`;
-              }),
-              computed(contentCenterX, (x) => {
-                return `left: ${x}px`;
-              }),
-              "transform: translateX(-50%)",
-            ]),
-            onClick(event) {
-              event.stopPropagation();
-            },
-            onKeyDown(event) {
-              handleKeyDown(event);
-            },
-          },
-          [
-            // Search Input
-            View(
-              {
-                class:
-                  "flex items-center gap-3 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700",
-              },
-              [
-                Timeless.icons.SearchOutlined({
-                  class: "w-5 h-5 text-zinc-400 flex-shrink-0",
-                }),
-                Input({
-                  store: searchInput,
+      Show({
+        when: isOpen,
+        ok() {
+          return [
+            Portal({}, [
+              View(
+                {
                   class:
-                    "flex-1 bg-transparent border-none outline-none text-sm placeholder:text-zinc-400 focus:ring-0",
+                    "fixed z-50 w-full max-w-[560px] pointer-events-auto rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-white dark:bg-zinc-900",
+                  /** @param {HTMLDivElement} $el */
                   onMounted($el) {
-                    $el.addEventListener("input", () => {
-                      searchQuery.as(searchInput.value);
-                      selectedIndex.as(0);
-                    });
-                    if ($el instanceof HTMLElement && $el.focus) {
-                      setTimeout(() => $el.focus(), 50);
-                    }
+                    syncPaletteAnchor();
+                    $clickOutside.methods.setTargetRect(() =>
+                      $el.getBoundingClientRect(),
+                    );
+                    $clickOutside.methods.activate();
+                  },
+                  style: Timeless.sn([
+                    computed(contentTop, (t) => {
+                      return `top: ${t}px`;
+                    }),
+                    computed(contentCenterX, (x) => {
+                      return `left: ${x}px`;
+                    }),
+                    "transform: translateX(-50%)",
+                  ]),
+                  onClick(event) {
+                    event.stopPropagation();
                   },
                   onKeyDown(event) {
                     handleKeyDown(event);
                   },
-                }),
-                View(
-                  {
-                    class:
-                      "flex items-center gap-1 text-xs text-zinc-400 flex-shrink-0",
-                  },
-                  [
-                    View(
-                      {
-                        class:
-                          "px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-mono",
-                      },
-                      ["ESC"],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-
-            // Command List
-            View({ class: "max-h-[320px] overflow-y-auto py-2" }, [
-              commandListItems,
-              Show(
-                {
-                  when: computed(filteredCommands, (cmds) => cmds.length === 0),
                 },
                 [
                   View(
-                    { class: "px-4 py-8 text-center text-sm text-zinc-400" },
-                    [Txt("No commands found")],
+                    {
+                      class:
+                        "flex items-center gap-3 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700",
+                    },
+                    [
+                      Timeless.icons.SearchOutlined({
+                        class: "w-5 h-5 text-zinc-400 flex-shrink-0",
+                      }),
+                      Input({
+                        store: searchInput,
+                        class:
+                          "flex-1 bg-transparent border-none outline-none text-sm placeholder:text-zinc-400 focus:ring-0",
+                        onMounted($el) {
+                          $el.addEventListener("input", () => {
+                            searchQuery.as(searchInput.value);
+                            selectedIndex.as(0);
+                          });
+                          if ($el instanceof HTMLElement && $el.focus) {
+                            setTimeout(() => $el.focus(), 50);
+                          }
+                        },
+                        onKeyDown(event) {
+                          handleKeyDown(event);
+                        },
+                      }),
+                      View(
+                        {
+                          class:
+                            "flex items-center gap-1 text-xs text-zinc-400 flex-shrink-0",
+                        },
+                        [
+                          View(
+                            {
+                              class:
+                                "px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-mono",
+                            },
+                            ["ESC"],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  View({ class: "max-h-[320px] overflow-y-auto py-2" }, [
+                    commandListItems,
+                    Show({
+                      when: computed(filteredCommands, (cmds) => cmds.length === 0),
+                      ok() {
+                        return [
+                          View(
+                            {
+                              class:
+                                "px-4 py-8 text-center text-sm text-zinc-400",
+                            },
+                            [Txt("No commands found")],
+                          ),
+                        ];
+                      },
+                    }),
+                  ]),
+
+                  View(
+                    {
+                      class:
+                        "flex items-center justify-between px-4 py-2 border-t border-zinc-200 dark:border-zinc-700 text-xs text-zinc-400",
+                    },
+                    [
+                      View({ class: "flex items-center gap-3" }, [
+                        View({ class: "flex items-center gap-1" }, [
+                          View(
+                            {
+                              class:
+                                "px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 font-mono",
+                            },
+                            ["↑"],
+                          ),
+                          View(
+                            {
+                              class:
+                                "px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 font-mono",
+                            },
+                            ["↓"],
+                          ),
+                          Txt(" Navigate"),
+                        ]),
+                        View({ class: "flex items-center gap-1" }, [
+                          View(
+                            {
+                              class:
+                                "px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 font-mono",
+                            },
+                            ["↵"],
+                          ),
+                          Txt(" Select"),
+                        ]),
+                      ]),
+                      Txt("Command Palette"),
+                    ],
                   ),
                 ],
               ),
             ]),
-
-            // Footer
-            View(
-              {
-                class:
-                  "flex items-center justify-between px-4 py-2 border-t border-zinc-200 dark:border-zinc-700 text-xs text-zinc-400",
-              },
-              [
-                View({ class: "flex items-center gap-3" }, [
-                  View({ class: "flex items-center gap-1" }, [
-                    View(
-                      {
-                        class:
-                          "px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 font-mono",
-                      },
-                      ["↑"],
-                    ),
-                    View(
-                      {
-                        class:
-                          "px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 font-mono",
-                      },
-                      ["↓"],
-                    ),
-                    Txt(" Navigate"),
-                  ]),
-                  View({ class: "flex items-center gap-1" }, [
-                    View(
-                      {
-                        class:
-                          "px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 font-mono",
-                      },
-                      ["↵"],
-                    ),
-                    Txt(" Select"),
-                  ]),
-                ]),
-                Txt("Command Palette"),
-              ],
-            ),
-          ],
-        ),
-      ]),
-    ]),
-  ],
+          ];
+        },
+      }),
+    ],
   );
 }

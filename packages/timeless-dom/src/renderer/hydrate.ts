@@ -203,10 +203,304 @@ export function createDomHost(
       return doc.createElementNS(namespace, tag);
     },
     createTextNode(text: string) {
-      return doc.createTextNode(text);
+      const textNode = doc.createTextNode(text);
+      // 为 Show 组件的 anchor 添加内容管理方法
+      (textNode as any).addContent = function (
+        newTargetChildren: any[],
+        onMounted: any,
+        updateState: (newNodes: any[], newInstances: any[]) => void
+      ) {
+        const parent = textNode.parentNode;
+        if (!parent) return;
+
+        // 1. 准备新内容
+        const fragment = doc.createDocumentFragment();
+        const newNodes: any[] = [];
+        const newInstances: any[] = [];
+
+        for (let node of newTargetChildren) {
+          if (node === null || node === undefined) continue;
+          if (typeof node === "function") {
+            node = node();
+          }
+
+          if (node && typeof node.render === "function") {
+            const result = node.render();
+            newInstances.push(node);
+            if (result) {
+              if (result instanceof DocumentFragment) {
+                const children = Array.from(result.childNodes);
+                newNodes.push(...children);
+              } else {
+                newNodes.push(result);
+              }
+              fragment.appendChild(result);
+            }
+          } else if (typeof node === "string" || typeof node === "number") {
+            const tn = doc.createTextNode(String(node));
+            fragment.appendChild(tn);
+            newNodes.push(tn);
+          }
+        }
+
+        // 2. 插入新内容到 anchor 之前
+        if (newNodes.length > 0) {
+          parent.insertBefore(fragment, textNode);
+        }
+
+        // 3. 更新状态
+        updateState(newNodes, newInstances);
+
+        // 4. 调用新内容的 onMounted
+        if (onMounted) {
+          onMounted({ target: textNode });
+        }
+        for (const child of newInstances) {
+          if (child && typeof child.onMounted === "function") {
+            child.onMounted({ target: child.$elm });
+          }
+        }
+      };
+
+      (textNode as any).buildInitialContent = function (
+        targetChildren: any[],
+        onMounted: any,
+        updateState: (newNodes: any[], newInstances: any[]) => void
+      ) {
+        // 1. 准备新内容
+        const fragment = doc.createDocumentFragment();
+        const newNodes: any[] = [];
+        const newInstances: any[] = [];
+
+        for (let node of targetChildren) {
+          if (node === null || node === undefined) continue;
+          if (typeof node === "function") {
+            node = node();
+          }
+
+          if (node && typeof node.render === "function") {
+            const result = node.render();
+            newInstances.push(node);
+            if (result) {
+              if (result instanceof DocumentFragment) {
+                const children = Array.from(result.childNodes);
+                newNodes.push(...children);
+              } else {
+                newNodes.push(result);
+              }
+              fragment.appendChild(result);
+            }
+          } else if (typeof node === "string" || typeof node === "number") {
+            const tn = doc.createTextNode(String(node));
+            fragment.appendChild(tn);
+            newNodes.push(tn);
+          }
+        }
+
+        // 2. 将 anchor 添加到 fragment
+        fragment.appendChild(textNode);
+
+        // 3. 更新状态
+        updateState(newNodes, newInstances);
+
+        // 4. 调用新内容的 onMounted
+        if (onMounted) {
+          onMounted({ target: textNode });
+        }
+        for (const child of newInstances) {
+          if (child && typeof child.onMounted === "function") {
+            child.onMounted({ target: child.$elm });
+          }
+        }
+
+        return fragment;
+      };
+
+      (textNode as any).removeContent = function (
+        oldChildren: any[],
+        oldNodes: any[],
+        updateState: () => void
+      ) {
+        // 1. 调用旧内容的 beforeUnmounted
+        for (const child of oldChildren) {
+          if (child && typeof child.beforeUnmounted === "function") {
+            child.beforeUnmounted();
+          }
+        }
+
+        // 2. 移除旧内容的 DOM
+        for (const node of oldNodes) {
+          if (node && node.parentNode) {
+            node.parentNode.removeChild(node);
+          }
+        }
+
+        // 3. 调用旧内容的 onUnmounted
+        for (const child of oldChildren) {
+          if (child) {
+            if (child.t === "portal" && typeof child.cleanup === "function") {
+              child.cleanup();
+            } else if (typeof child.onUnmounted === "function") {
+              child.onUnmounted();
+            }
+          }
+        }
+
+        // 4. 更新状态
+        updateState();
+      };
+
+      return textNode;
     },
     createDocumentFragment() {
-      return doc.createDocumentFragment();
+      const fragment = doc.createDocumentFragment();
+      // 为 Show 组件的 fragment 添加内容管理方法
+      (fragment as any).addContent = function (
+        newTargetChildren: any[],
+        onMounted: any,
+        updateState: (newNodes: any[], newInstances: any[]) => void
+      ) {
+        const parent = fragment.parentNode;
+        if (!parent) return;
+
+        // 1. 准备新内容
+        const newFragment = doc.createDocumentFragment();
+        const newNodes: any[] = [];
+        const newInstances: any[] = [];
+
+        for (let node of newTargetChildren) {
+          if (node === null || node === undefined) continue;
+          if (typeof node === "function") {
+            node = node();
+          }
+
+          if (node && typeof node.render === "function") {
+            const result = node.render();
+            newInstances.push(node);
+            if (result) {
+              if (result instanceof DocumentFragment) {
+                const children = Array.from(result.childNodes);
+                newNodes.push(...children);
+              } else {
+                newNodes.push(result);
+              }
+              newFragment.appendChild(result);
+            }
+          } else if (typeof node === "string" || typeof node === "number") {
+            const tn = doc.createTextNode(String(node));
+            newFragment.appendChild(tn);
+            newNodes.push(tn);
+          }
+        }
+
+        // 2. 插入新内容到 fragment 之前
+        if (newNodes.length > 0) {
+          parent.insertBefore(newFragment, fragment);
+        }
+
+        // 3. 更新状态
+        updateState(newNodes, newInstances);
+
+        // 4. 调用新内容的 onMounted
+        if (onMounted) {
+          onMounted({ target: fragment });
+        }
+        for (const child of newInstances) {
+          if (child && typeof child.onMounted === "function") {
+            child.onMounted({ target: child.$elm });
+          }
+        }
+      };
+
+      (fragment as any).buildInitialContent = function (
+        targetChildren: any[],
+        onMounted: any,
+        updateState: (newNodes: any[], newInstances: any[]) => void
+      ) {
+        // 1. 准备新内容
+        const resultFragment = doc.createDocumentFragment();
+        const newNodes: any[] = [];
+        const newInstances: any[] = [];
+
+        for (let node of targetChildren) {
+          if (node === null || node === undefined) continue;
+          if (typeof node === "function") {
+            node = node();
+          }
+
+          if (node && typeof node.render === "function") {
+            const result = node.render();
+            newInstances.push(node);
+            if (result) {
+              if (result instanceof DocumentFragment) {
+                const children = Array.from(result.childNodes);
+                newNodes.push(...children);
+              } else {
+                newNodes.push(result);
+              }
+              resultFragment.appendChild(result);
+            }
+          } else if (typeof node === "string" || typeof node === "number") {
+            const tn = doc.createTextNode(String(node));
+            resultFragment.appendChild(tn);
+            newNodes.push(tn);
+          }
+        }
+
+        // 2. 将 anchor (fragment) 添加到结果
+        resultFragment.appendChild(fragment);
+
+        // 3. 更新状态
+        updateState(newNodes, newInstances);
+
+        // 4. 调用新内容的 onMounted
+        if (onMounted) {
+          onMounted({ target: fragment });
+        }
+        for (const child of newInstances) {
+          if (child && typeof child.onMounted === "function") {
+            child.onMounted({ target: child.$elm });
+          }
+        }
+
+        return resultFragment;
+      };
+
+      (fragment as any).removeContent = function (
+        oldChildren: any[],
+        oldNodes: any[],
+        updateState: () => void
+      ) {
+        // 1. 调用旧内容的 beforeUnmounted
+        for (const child of oldChildren) {
+          if (child && typeof child.beforeUnmounted === "function") {
+            child.beforeUnmounted();
+          }
+        }
+
+        // 2. 移除旧内容的 DOM
+        for (const node of oldNodes) {
+          if (node && node.parentNode) {
+            node.parentNode.removeChild(node);
+          }
+        }
+
+        // 3. 调用旧内容的 onUnmounted
+        for (const child of oldChildren) {
+          if (child) {
+            if (child.t === "portal" && typeof child.cleanup === "function") {
+              child.cleanup();
+            } else if (typeof child.onUnmounted === "function") {
+              child.onUnmounted();
+            }
+          }
+        }
+
+        // 4. 更新状态
+        updateState();
+      };
+
+      return fragment;
     },
     appendChild(parent: any, child: any) {
       parent.appendChild(child);

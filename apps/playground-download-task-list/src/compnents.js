@@ -628,9 +628,12 @@ function DropdownMenu(props, children) {
   const state_ = refobj(props.store.state);
 
   return Fragment({}, [
-    h(Show, { when: !!children }, [
-      DropdownMenuPrimitive.Trigger({ store: props.store }, children),
-    ]),
+    Show({
+      when: !!children,
+      ok() {
+        return [DropdownMenuPrimitive.Trigger({ store: props.store }, children)];
+      },
+    }),
     DropdownMenuPrimitive.Content(
       {
         ...props,
@@ -690,14 +693,19 @@ function DropdownMenuItem(props) {
       },
       [
         props.store.label,
-        Show({ when: has_submenu_ }, [
-          View({ class: "p-2" }, [
-            Timeless.icons.ChevronRightOutlined({
-              class: "custom-menu-item-arrow",
-              style: { fontSize: "18px" },
-            }),
-          ]),
-        ]),
+        Show({
+          when: has_submenu_,
+          ok() {
+            return [
+              View({ class: "p-2" }, [
+                Timeless.icons.ChevronRightOutlined({
+                  class: "custom-menu-item-arrow",
+                  style: { fontSize: "18px" },
+                }),
+              ]),
+            ];
+          },
+        }),
       ],
     ),
     (() => {

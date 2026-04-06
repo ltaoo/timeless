@@ -97,7 +97,12 @@ export default function Page({ data }) {
       },
       ["update Content"],
     ),
-    Show({ when: visible }, [View({}, [content])]),
+    Show({
+      when: visible,
+      ok() {
+        return [View({}, [content])];
+      },
+    }),
 
     // Mouse Events Section
     View({ as: "section", style: sectionStyle }, [
@@ -119,7 +124,17 @@ export default function Page({ data }) {
               hoverBox1.as(false);
             },
           },
-          [Show({ when: hoverBox1, fallback: ["Hover me"] }, ["Hovering!"])],
+          [
+            Show({
+              when: hoverBox1,
+              ok() {
+                return ["Hovering!"];
+              },
+              else() {
+                return ["Hover me"];
+              },
+            }),
+          ],
         ),
         View(
           {
@@ -134,7 +149,17 @@ export default function Page({ data }) {
               hoverBox2.as(false);
             },
           },
-          [Show({ when: hoverBox2, fallback: ["Hover me"] }, ["Hovering!"])],
+          [
+            Show({
+              when: hoverBox2,
+              ok() {
+                return ["Hovering!"];
+              },
+              else() {
+                return ["Hover me"];
+              },
+            }),
+          ],
         ),
       ]),
     ]),
@@ -152,7 +177,10 @@ export default function Page({ data }) {
         ["Toggle List"],
       ),
 
-      Show({ when: showList }, [
+      Show({
+        when: showList,
+        ok() {
+          return [
         h(View, { as: "ul", style: listStyle }, [
           h(For, {
             each: fruits,
@@ -309,7 +337,9 @@ export default function Page({ data }) {
             ["Reverse"],
           ),
         ]),
-      ]),
+          ];
+        },
+      }),
     ]),
   ]);
 }

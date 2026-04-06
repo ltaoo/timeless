@@ -241,70 +241,73 @@ export function Content(
       when: computed(presence_, (t) => {
         return t.mounted;
       }),
-    },
-    [
-      NativePortal({}, [
-        PopperPrimitive.Content(
-          {
-            store: store.popper,
-            onDismiss() {
-              store.hide();
-            },
-          },
-          [
-            View(
+      ok() {
+        return [
+          NativePortal({}, [
+            PopperPrimitive.Content(
               {
-                ...rest,
-                attributes: {
-                  ...(rest.attributes || {}),
-                  "tab-index": 0,
-                },
-                class: classNames([
-                  rest.class,
-                  computed(presence_, (t) => {
-                    if (t.exit) {
-                      _was_exiting = true;
-                    }
-                    if (!t.mounted && _was_exiting) {
-                      _was_exiting = false;
-                      return animation?.out || "";
-                    }
-                    if (t.mounted) {
-                      _was_exiting = false;
-                    }
-                    return [
-                      t.enter && animation?.in ? animation.in : "",
-                      t.exit && animation?.out ? animation.out : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ");
-                  }),
-                ]),
-                onAnimationEnd(e: AnimationEvent) {
-                  if (e.target === e.currentTarget) {
-                    store.presence.handleAnimationEnd();
-                  }
-                  if (rest.onAnimationEnd) {
-                    rest.onAnimationEnd(e);
-                  }
-                },
-                onKeyDown: handleKeyDown,
-                onMounted(event) {
-                  const $elm = (event as any).target as HTMLElement;
-                  host.setTimeout(() => {
-                    host.focus?.($elm);
-                  }, 0);
-                  if (rest.onMounted) {
-                    rest.onMounted(event);
-                  }
+                store: store.popper,
+                onDismiss() {
+                  store.hide();
                 },
               },
-              children,
+              [
+                View(
+                  {
+                    ...rest,
+                    attributes: {
+                      ...(rest.attributes || {}),
+                      "tab-index": 0,
+                    },
+                    class: classNames([
+                      rest.class,
+                      computed(presence_, (t) => {
+                        if (t.exit) {
+                          _was_exiting = true;
+                        }
+                        if (!t.mounted && _was_exiting) {
+                          _was_exiting = false;
+                          return animation?.out || "";
+                        }
+                        if (t.mounted) {
+                          _was_exiting = false;
+                        }
+                        return [
+                          t.enter && animation?.in ? animation.in : "",
+                          t.exit && animation?.out ? animation.out : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ");
+                      }),
+                    ]),
+                    onAnimationEnd(e: AnimationEvent) {
+                      if (e.target === e.currentTarget) {
+                        store.presence.handleAnimationEnd();
+                      }
+                      if (rest.onAnimationEnd) {
+                        rest.onAnimationEnd(e);
+                      }
+                    },
+                    onKeyDown: handleKeyDown,
+                    onMounted(event) {
+                      const $elm = (event as any).target as HTMLElement;
+                      host.setTimeout(() => {
+                        host.focus?.($elm);
+                      }, 0);
+                      if (rest.onMounted) {
+                        rest.onMounted(event);
+                      }
+                    },
+                  },
+                  children,
+                ),
+              ],
             ),
-          ],
-        ),
-      ]),
-    ],
+          ]),
+        ];
+      },
+    },
+    [],
   );
 }
 
@@ -367,8 +370,11 @@ export function ItemIndicator(
     Show,
     {
       when: hasChildren,
+      ok() {
+        return [View(rest, children)];
+      },
     },
-    [View(rest, children)],
+    [],
   );
 }
 
@@ -388,53 +394,56 @@ export function Search(
     Show,
     {
       when: computed(state_, (s) => Boolean(s.search)),
+      ok() {
+        return [
+          View(
+            {
+              ...rest,
+              as: "input",
+              onMounted(event) {
+                const $elm = (event as any).target as HTMLInputElement;
+                host.setProperty?.(
+                  $elm,
+                  "placeholder",
+                  store.state.searchPlaceholder,
+                );
+                host.setProperty?.($elm, "value", store.state.searchKeyword);
+
+                const handleInput = (e: any) => {
+                  const target = e.target as HTMLInputElement;
+                  store.setSearchKeyword(target.value);
+                };
+                host.addEventListener($elm, "input", handleInput);
+
+                store.onStateChange((s) => {
+                  host.setProperty?.($elm, "placeholder", s.searchPlaceholder);
+                  host.setProperty?.($elm, "value", s.searchKeyword);
+                });
+
+                host.setTimeout(() => {
+                  host.focus?.($elm);
+                }, 0);
+
+                if (rest.onMounted) {
+                  rest.onMounted(event);
+                }
+                return () => {
+                  host.removeEventListener($elm, "input", handleInput);
+                };
+              },
+              onClick(e: Event) {
+                e.stopPropagation();
+              },
+              onKeyDown(e: KeyboardEvent) {
+                e.stopPropagation();
+              },
+            },
+            children,
+          ),
+        ];
+      },
     },
-    [
-      View(
-        {
-          ...rest,
-          as: "input",
-          onMounted(event) {
-            const $elm = (event as any).target as HTMLInputElement;
-            host.setProperty?.(
-              $elm,
-              "placeholder",
-              store.state.searchPlaceholder,
-            );
-            host.setProperty?.($elm, "value", store.state.searchKeyword);
-
-            const handleInput = (e: any) => {
-              const target = e.target as HTMLInputElement;
-              store.setSearchKeyword(target.value);
-            };
-            host.addEventListener($elm, "input", handleInput);
-
-            store.onStateChange((s) => {
-              host.setProperty?.($elm, "placeholder", s.searchPlaceholder);
-              host.setProperty?.($elm, "value", s.searchKeyword);
-            });
-
-            host.setTimeout(() => {
-              host.focus?.($elm);
-            }, 0);
-
-            if (rest.onMounted) {
-              rest.onMounted(event);
-            }
-            return () => {
-              host.removeEventListener($elm, "input", handleInput);
-            };
-          },
-          onClick(e: Event) {
-            e.stopPropagation();
-          },
-          onKeyDown(e: KeyboardEvent) {
-            e.stopPropagation();
-          },
-        },
-        children,
-      ),
-    ],
+    [],
   );
 }
 
@@ -455,8 +464,11 @@ export function SearchResults(
       when: computed(state_, (s) =>
         Boolean(s.search && s.searchKeyword && s.searchResults.length > 0),
       ),
+      ok() {
+        return [View(rest, children)];
+      },
     },
-    [View(rest, children)],
+    [],
   );
 }
 

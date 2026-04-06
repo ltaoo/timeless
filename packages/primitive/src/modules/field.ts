@@ -39,15 +39,17 @@ export namespace Field {
 
     props.store.onStateChange((v) => state_.as(v));
 
-    return Show(
-      {
-        when: computed(state_, (t) => {
-          return !!t.error;
-        }),
-        fallback: props.fallback,
+    return Show({
+      when: computed(state_, (t) => {
+        return !!t.error;
+      }),
+      ok() {
+        return children || [];
       },
-      children,
-    );
+      else() {
+        return props.fallback || [];
+      },
+    });
   }
 
   export function Help(

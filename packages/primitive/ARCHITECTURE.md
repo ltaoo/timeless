@@ -875,9 +875,12 @@ function mount(descriptor: ElementDescriptor): VNode {
 // 原生元素用字符串 tag
 h("div", { style: { color: "red" } }, [
   "hello",
-  h(Show, { when: visible }, [
-    h("div", { style: { padding: 8 } }, ["content"]),  // visible=false 时不执行
-  ]),
+  h(Show, {
+    when: visible,
+    ok() {
+      return [h("div", { style: { padding: 8 } }, ["content"])]; // visible=false 时不执行
+    },
+  }),
 ])
 
 // 布局组件

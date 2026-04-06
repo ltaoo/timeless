@@ -166,7 +166,12 @@
             })
           },
         }, ["Toggle"]),
-        h(Show, { when: visible_ }, ["Visible3"]),
+        Show({
+          when: visible_,
+          ok() {
+            return ["Visible3"];
+          },
+        }),
       ]);
 
     }

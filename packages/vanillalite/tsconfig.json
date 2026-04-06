@@ -13,7 +13,9 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@timeless/timeless": ["../timeless/dist/index.d.ts"],
+      "@timeless/timeless-dom": ["../timeless-dom/dist/index.d.ts"]
     }
   },
   "include": ["src/**/*"],

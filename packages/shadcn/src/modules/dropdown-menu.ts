@@ -36,9 +36,14 @@ export function DropdownMenu(
   const state_ = refobj(props.store.state);
 
   return Fragment({}, [
-    h(Show, { when: !!children }, [
-      h(DropdownMenuPrimitive.Trigger, { store: props.store }, children),
-    ]),
+    Show({
+      when: !!children,
+      ok() {
+        return [
+          h(DropdownMenuPrimitive.Trigger, { store: props.store }, children),
+        ];
+      },
+    }),
     DropdownMenuPrimitive.Content(
       {
         ...props,
@@ -83,15 +88,20 @@ function DropdownMenuGroup(props: ViewProps & { store: MenuGroupCore }) {
   const has_label_ = computed(state_, (t) => !!t.label);
 
   return DropdownMenuPrimitive.Group({ store: props.store }, [
-    Show({ when: has_label_ }, [
-      h(
-        DropdownMenuPrimitive.Label,
-        {
-          class: "px-1.5 py-1.5 text-xs font-medium text-muted-foreground data-inset:pl-7",
-        },
-        [computed(state_, (t) => t.label)],
-      ),
-    ]),
+    Show({
+      when: has_label_,
+      ok() {
+        return [
+          h(
+            DropdownMenuPrimitive.Label,
+            {
+              class: "px-1.5 py-1.5 text-xs font-medium text-muted-foreground data-inset:pl-7",
+            },
+            [computed(state_, (t) => t.label)],
+          ),
+        ];
+      },
+    }),
     For({
       each: computed(state_, (t) => t.items),
       render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
@@ -161,42 +171,69 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
         ]),
       },
       [
-        Show({ when: is_checkable_ }, [
-          h(
-            View,
-            {
-              class: "flex size-4 shrink-0 items-center justify-center",
-            },
-            [
-              Show({ when: is_checked_ }, [
-                h(CheckOutlined, { class: "size-4" }, []),
-              ]),
-            ],
-          ),
-        ]),
-        Show({ when: has_icon_ }, [
-          h(
-            View,
-            {
-              class: "flex size-4 shrink-0 items-center justify-center",
-            },
-            [props.store.icon as TimelessElement],
-          ),
-        ]),
+        Show({
+          when: is_checkable_,
+          ok() {
+            return [
+              h(
+                View,
+                {
+                  class: "flex size-4 shrink-0 items-center justify-center",
+                },
+                [
+                  Show({
+                    when: is_checked_,
+                    ok() {
+                      return [h(CheckOutlined, { class: "size-4" }, [])];
+                    },
+                  }),
+                ],
+              ),
+            ];
+          },
+        }),
+        Show({
+          when: has_icon_,
+          ok() {
+            return [
+              h(
+                View,
+                {
+                  class: "flex size-4 shrink-0 items-center justify-center",
+                },
+                [props.store.icon as TimelessElement],
+              ),
+            ];
+          },
+        }),
         props.store.label,
-        Show({ when: has_shortcut_ }, [
-          h(
-            View,
-            {
-              class:
-                "ml-auto text-xs tracking-widest text-muted-foreground group-focus/menubar-item:text-accent-foreground",
-            },
-            [computed(state_, (t) => t.shortcut)],
-          ),
-        ]),
-        Show({ when: show_chevron_ }, [
-          h(ChevronRightOutlined, { class: "cn-rtl-flip ml-auto size-4" }, []),
-        ]),
+        Show({
+          when: has_shortcut_,
+          ok() {
+            return [
+              h(
+                View,
+                {
+                  class:
+                    "ml-auto text-xs tracking-widest text-muted-foreground group-focus/menubar-item:text-accent-foreground",
+                },
+                [computed(state_, (t) => t.shortcut)],
+              ),
+            ];
+          },
+        }),
+        Show({
+          when: show_chevron_,
+          ok() {
+            return [
+              h(
+                ChevronRightOutlined,
+                { class: "cn-rtl-flip ml-auto size-4" },
+                [],
+              ),
+            ];
+          },
+        }),
       ],
     ),
     (() => {

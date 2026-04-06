@@ -38,6 +38,9 @@ export function Loading(
   return Show(
     {
       when: computed(state, (d) => d.loading),
+      ok() {
+        return children || [];
+      },
       onMounted() {
         events.push(
           store.onStateChange(() => {
@@ -49,7 +52,6 @@ export function Loading(
         for (const fn of events) if (typeof fn === "function") fn();
       },
     },
-    children,
   );
 }
 

@@ -68,27 +68,29 @@ export function DatePicker(
               : "text-muted-foreground";
           }),
         }),
-        Show(
-          {
-            when: showClear,
-            fallback: [
+        Show({
+          when: showClear,
+          ok() {
+            return [
+              DatePickerPrimitive.Clear(
+                {
+                  store,
+                  class:
+                    "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
+                },
+                [CircleXOutlined({ class: "size-4" })],
+              ),
+            ];
+          },
+          else() {
+            return [
               DatePickerPrimitive.Icon(
                 { class: "size-4 text-muted-foreground" },
                 [CalendarOutlined({})],
               ),
-            ],
+            ];
           },
-          [
-            DatePickerPrimitive.Clear(
-              {
-                store,
-                class:
-                  "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
-              },
-              [CircleXOutlined({ class: "size-4" })],
-            ),
-          ],
-        ),
+        }),
       ],
     ),
     DatePickerPrimitive.Content(

@@ -115,19 +115,19 @@ export function Indicator(
       // "data-state": stepState,
     },
     [
-      Show(
-        {
-          when: !!children,
-        },
-        [
-          h(
-            Txt,
-            computed(state_, (s) =>
-              index < s.value ? "✓" : String(index + 1),
+      Show({
+        when: !!children,
+        ok() {
+          return [
+            h(
+              Txt,
+              computed(state_, (s) =>
+                index < s.value ? "✓" : String(index + 1),
+              ),
             ),
-          ),
-        ],
-      ),
+          ];
+        },
+      }),
     ],
   );
 }

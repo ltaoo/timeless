@@ -51,50 +51,55 @@ export function NumberInput(
         ].join(" "),
         ...rest,
       }),
-      Show({ when: showControls }, [
-        h(
-          View,
-          {
-            class:
-              "absolute right-0 top-0 bottom-0 flex flex-col border-l border-input",
-          },
-          [
+      Show({
+        when: showControls,
+        ok() {
+          return [
             h(
-              NumberInputPrimitive.IncreaseButton,
+              View,
               {
-                store,
-                class: combine({ canIncrease, isDisabled }, (t) => {
-                  return [
-                    "flex-1 flex items-center justify-center px-1.5 rounded-tr-lg",
-                    "hover:bg-accent hover:text-accent-foreground transition-colors",
-                    "border-b border-input",
-                    !t.canIncrease || t.isDisabled
-                      ? "opacity-30 cursor-not-allowed"
-                      : "cursor-pointer",
-                  ].join(" ");
-                }),
+                class:
+                  "absolute right-0 top-0 bottom-0 flex flex-col border-l border-input",
               },
-              [h(ChevronUpOutlined, { class: "size-3" }, [])],
+              [
+                h(
+                  NumberInputPrimitive.IncreaseButton,
+                  {
+                    store,
+                    class: combine({ canIncrease, isDisabled }, (t) => {
+                      return [
+                        "flex-1 flex items-center justify-center px-1.5 rounded-tr-lg",
+                        "hover:bg-accent hover:text-accent-foreground transition-colors",
+                        "border-b border-input",
+                        !t.canIncrease || t.isDisabled
+                          ? "opacity-30 cursor-not-allowed"
+                          : "cursor-pointer",
+                      ].join(" ");
+                    }),
+                  },
+                  [h(ChevronUpOutlined, { class: "size-3" }, [])],
+                ),
+                h(
+                  NumberInputPrimitive.DecreaseButton,
+                  {
+                    store,
+                    class: combine({ canDecrease, isDisabled }, (t) => {
+                      return [
+                        "flex-1 flex items-center justify-center px-1.5 rounded-br-lg",
+                        "hover:bg-accent hover:text-accent-foreground transition-colors",
+                        !t.canDecrease || t.isDisabled
+                          ? "opacity-30 cursor-not-allowed"
+                          : "cursor-pointer",
+                      ].join(" ");
+                    }),
+                  },
+                  [h(ChevronDownOutlined, { class: "size-3" }, [])],
+                ),
+              ],
             ),
-            h(
-              NumberInputPrimitive.DecreaseButton,
-              {
-                store,
-                class: combine({ canDecrease, isDisabled }, (t) => {
-                  return [
-                    "flex-1 flex items-center justify-center px-1.5 rounded-br-lg",
-                    "hover:bg-accent hover:text-accent-foreground transition-colors",
-                    !t.canDecrease || t.isDisabled
-                      ? "opacity-30 cursor-not-allowed"
-                      : "cursor-pointer",
-                  ].join(" ");
-                }),
-              },
-              [h(ChevronDownOutlined, { class: "size-3" }, [])],
-            ),
-          ],
-        ),
-      ]),
+          ];
+        },
+      }),
     ],
   );
 }

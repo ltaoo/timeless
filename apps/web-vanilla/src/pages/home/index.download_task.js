@@ -107,7 +107,7 @@ function DownloadTaskCard(props) {
     [
       View(
         {
-          class: cn([
+          class: Timeless.cn([
             "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
             iconClass,
           ]),
@@ -124,23 +124,31 @@ function DownloadTaskCard(props) {
           },
           [computed(task, (t) => t.name || "unknown")],
         ),
-        Show({ when: computed(state_, (s) => s.isRunning || s.isPaused) }, [
-          View(
-            {
-              class:
-                "mt-1 h-1 w-full rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden",
-            },
-            [
-              View({
-                class: cn(["h-full rounded-full transition-all", progressBg_]),
-                style: progressWidth_,
-              }),
-            ],
-          ),
-        ]),
+        Show({
+          when: computed(state_, (s) => s.isRunning || s.isPaused),
+          ok() {
+            return [
+              View(
+                {
+                  class:
+                    "mt-1 h-1 w-full rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden",
+                },
+                [
+                  View({
+                    class: Timeless.cn([
+                      "h-full rounded-full transition-all",
+                      progressBg_,
+                    ]),
+                    style: progressWidth_,
+                  }),
+                ],
+              ),
+            ];
+          },
+        }),
         View(
           {
-            class: cn([
+            class: Timeless.cn([
               "mt-0.5 text-xs",
               computed(state_, (s) => s.statusClass),
             ]),
@@ -149,39 +157,54 @@ function DownloadTaskCard(props) {
         ),
       ]),
       View({ class: "flex-shrink-0 flex items-center gap-1" }, [
-        Show({ when: computed(state_, (s) => s.isRunning) }, [
-          Button(
-            {
-              store: new Timeless.ui.ButtonCore({
-                size: "sm",
-                variant: "ghost",
-                onClick() {
-                  vm$.methods.pauseTask(task);
+        Show({
+          when: computed(state_, (s) => s.isRunning),
+          ok() {
+            return [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "ghost",
+                    onClick() {
+                      vm$.methods.pauseTask(task);
+                    },
+                  }),
                 },
-              }),
-            },
-            ["Pause"],
-          ),
-        ]),
-        Show({ when: computed(state_, (s) => s.canResume) }, [
-          Button(
-            {
-              store: new Timeless.ui.ButtonCore({
-                size: "sm",
-                variant: "ghost",
-                onClick() {
-                  vm$.methods.resumeTask(task);
+                ["Pause"],
+              ),
+            ];
+          },
+        }),
+        Show({
+          when: computed(state_, (s) => s.canResume),
+          ok() {
+            return [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    size: "sm",
+                    variant: "ghost",
+                    onClick() {
+                      vm$.methods.resumeTask(task);
+                    },
+                  }),
                 },
-              }),
-            },
-            [computed(state_, (s) => (s.isFailed ? "Retry" : "Resume"))],
-          ),
-        ]),
-        Show({ when: computed(state_, (s) => s.isCompleted) }, [
-          View({ class: "text-xs text-emerald-500 font-medium px-2" }, [
-            "Done",
-          ]),
-        ]),
+                [computed(state_, (s) => (s.isFailed ? "Retry" : "Resume"))],
+              ),
+            ];
+          },
+        }),
+        Show({
+          when: computed(state_, (s) => s.isCompleted),
+          ok() {
+            return [
+              View({ class: "text-xs text-emerald-500 font-medium px-2" }, [
+                "Done",
+              ]),
+            ];
+          },
+        }),
         Button(
           {
             class: "text-zinc-400 hover:text-red-500",
@@ -264,10 +287,23 @@ export default function DownloadTaskPageView(props) {
           ),
           View({ class: "flex-1 h-0" }, [
             ScrollView({ store: vm$.ui.view_downloadtask$ }, [
-              Show(
-                {
-                  when: computed(vm$.state.taskCount, (d) => d > 0),
-                  fallback: [
+              Show({
+                when: computed(vm$.state.taskCount, (d) => d > 0),
+                ok() {
+                  return [
+                    h(Waterfall, {
+                      store: vm$.ui.waterfall$,
+                      render(task) {
+                        return DownloadTaskCard({
+                          task,
+                          vm$: props.model,
+                        });
+                      },
+                    }),
+                  ];
+                },
+                else() {
+                  return [
                     h(
                       View,
                       {
@@ -276,20 +312,9 @@ export default function DownloadTaskPageView(props) {
                       },
                       ["No download tasks"],
                     ),
-                  ],
+                  ];
                 },
-                [
-                  h(Waterfall, {
-                    store: vm$.ui.waterfall$,
-                    render(task) {
-                      return DownloadTaskCard({
-                        task,
-                        vm$: props.model,
-                      });
-                    },
-                  }),
-                ],
-              ),
+              }),
             ]),
           ]),
         ],

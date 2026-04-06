@@ -35,58 +35,57 @@ export function Transition(
   // Initial subscription
   setupSubscription();
 
-  return Show(
-    {
-      when: visible,
-      onMounted() {
-        // Re-subscribe when re-mounted after being unmounted
-        setupSubscription();
-      },
-      onUnmounted() {
-        if (unsubscribe) {
-          unsubscribe();
-          unsubscribe = null;
-        }
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
-        }
-      },
-    },
-    [
-      h(
-        View,
-        {
-          ...rest,
-          class: computed(state, (s) => {
-            if (s.exit) {
-              _was_exiting = true;
-            }
-            if (!s.mounted && _was_exiting) {
-              _was_exiting = false;
-              return animation?.out ?? "fade-out";
-            }
-            if (s.mounted) {
-              _was_exiting = false;
-            }
-            return [
-              rest.class,
-              s.enter ? (animation?.in ?? "fade-in") : "",
-              s.exit ? (animation?.out ?? "fade-out") : "",
-            ]
-              .filter(Boolean)
-              .join(" ");
-          }),
-          onAnimationEnd(e: AnimationEvent) {
-            if (e.target === e.currentTarget) {
-              store.handleAnimationEnd();
-            }
-            if (rest.onAnimationEnd) {
-              rest.onAnimationEnd(e);
-            }
+  return Show({
+    when: visible,
+    ok() {
+      return [
+        h(
+          View,
+          {
+            ...rest,
+            class: computed(state, (s) => {
+              if (s.exit) {
+                _was_exiting = true;
+              }
+              if (!s.mounted && _was_exiting) {
+                _was_exiting = false;
+                return animation?.out ?? "fade-out";
+              }
+              if (s.mounted) {
+                _was_exiting = false;
+              }
+              return [
+                rest.class,
+                s.enter ? (animation?.in ?? "fade-in") : "",
+                s.exit ? (animation?.out ?? "fade-out") : "",
+              ]
+                .filter(Boolean)
+                .join(" ");
+            }),
+            onAnimationEnd(e: AnimationEvent) {
+              if (e.target === e.currentTarget) {
+                store.handleAnimationEnd();
+              }
+              if (rest.onAnimationEnd) {
+                rest.onAnimationEnd(e);
+              }
+            },
           },
-        },
-        [h(Fragment, {}, children)],
-      ),
-    ],
-  );
+          [h(Fragment, {}, children)],
+        ),
+      ];
+    },
+    onMounted() {
+      setupSubscription();
+    },
+    onUnmounted() {
+      if (unsubscribe) {
+        unsubscribe();
+        unsubscribe = null;
+      }
+      if (rest.onUnmounted) {
+        rest.onUnmounted();
+      }
+    },
+  });
 }

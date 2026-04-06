@@ -43,54 +43,54 @@ function NavButton(props: {
   if (type === "leftNext") {
     const tooltip$ = new TooltipCore({ side: "top" });
     return View({}, [
-      Show(
-        {
-          when: computed(calendar_state_, (s) => !s.canLeftNext),
+      Show({
+        when: computed(calendar_state_, (s) => !s.canLeftNext),
+        ok() {
+          return [
+            h(
+              Tooltip,
+              {
+                store: tooltip$,
+                content: ["不能超过右侧面板"],
+              },
+              [h(View, { class: NAV_BTN_DISABLED_CLASS }, children)],
+            ),
+          ];
         },
-        [
-          h(
-            Tooltip,
-            {
-              store: tooltip$,
-              content: ["不能超过右侧面板"],
-            },
-            [h(View, { class: NAV_BTN_DISABLED_CLASS }, children)],
-          ),
-        ],
-      ),
-      Show(
-        {
-          when: computed(calendar_state_, (s) => s.canLeftNext),
+      }),
+      Show({
+        when: computed(calendar_state_, (s) => s.canLeftNext),
+        ok() {
+          return [h(ButtonComponent, { store, class: NAV_BTN_CLASS }, children)];
         },
-        [h(ButtonComponent, { store, class: NAV_BTN_CLASS }, children)],
-      ),
+      }),
     ]);
   }
 
   if (type === "rightPrev") {
     const tooltip$ = new TooltipCore({ side: "top" });
     return View({}, [
-      Show(
-        {
-          when: computed(calendar_state_, (s) => !s.canRightPrev),
+      Show({
+        when: computed(calendar_state_, (s) => !s.canRightPrev),
+        ok() {
+          return [
+            h(
+              Tooltip,
+              {
+                store: tooltip$,
+                content: ["不能早于左侧面板"],
+              },
+              [h(View, { class: NAV_BTN_DISABLED_CLASS }, children)],
+            ),
+          ];
         },
-        [
-          h(
-            Tooltip,
-            {
-              store: tooltip$,
-              content: ["不能早于左侧面板"],
-            },
-            [h(View, { class: NAV_BTN_DISABLED_CLASS }, children)],
-          ),
-        ],
-      ),
-      Show(
-        {
-          when: computed(calendar_state_, (s) => s.canRightPrev),
+      }),
+      Show({
+        when: computed(calendar_state_, (s) => s.canRightPrev),
+        ok() {
+          return [h(ButtonComponent, { store, class: NAV_BTN_CLASS }, children)];
         },
-        [h(ButtonComponent, { store, class: NAV_BTN_CLASS }, children)],
-      ),
+      }),
     ]);
   }
 

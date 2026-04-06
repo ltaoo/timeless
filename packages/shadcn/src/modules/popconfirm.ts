@@ -104,25 +104,35 @@ export function Popconfirm(
                 return styles;
               }),
             }),
-            Show({ when: ref(!!props.title) }, [
-              h(
-                View,
-                {
-                  class:
-                    "mb-1 text-sm font-medium text-zinc-950 dark:text-zinc-50",
-                },
-                props.title,
-              ),
-            ]),
-            Show({ when: ref(!!props.description) }, [
-              h(
-                View,
-                {
-                  class: "mb-4 text-sm text-zinc-500 dark:text-zinc-400",
-                },
-                props.description,
-              ),
-            ]),
+            Show({
+              when: ref(!!props.title),
+              ok() {
+                return [
+                  h(
+                    View,
+                    {
+                      class:
+                        "mb-1 text-sm font-medium text-zinc-950 dark:text-zinc-50",
+                    },
+                    props.title,
+                  ),
+                ];
+              },
+            }),
+            Show({
+              when: ref(!!props.description),
+              ok() {
+                return [
+                  h(
+                    View,
+                    {
+                      class: "mb-4 text-sm text-zinc-500 dark:text-zinc-400",
+                    },
+                    props.description,
+                  ),
+                ];
+              },
+            }),
             View(
               {
                 class: "flex justify-end gap-2",

@@ -25,12 +25,14 @@ export function Presence(
         // Keep mounted during enter, visible, or exit animation
         return t.mounted || t.visible || t.exit;
       }),
+      ok() {
+        return children || [];
+      },
       onUnmounted() {
         // if (unsubscribe) {
         //   unsubscribe();
         // }
       },
     },
-    children,
   );
 }

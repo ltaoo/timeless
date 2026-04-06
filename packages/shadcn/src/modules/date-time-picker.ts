@@ -430,53 +430,58 @@ export function DateTimePicker(
                       }),
                     ],
                   ),
-                  Show({ when: time$.showSeconds }, [
-                    h(
-                      ScrollViewPrimitive.Root,
-                      {
-                        store: secondview$,
-                        class:
-                          "absolute top-0 left-24 w-12 h-full overflow-y-auto overlay-scrollbar p-2",
-                        onMounted() {
-                          ensure_default_temp_time();
-                          const seconds = time$.generateSeconds();
-                          const target = time$.state.tempSecond;
-                          const index =
-                            typeof target === "number"
-                              ? seconds.indexOf(target)
-                              : -1;
-                          setTimeout(() => {
-                            if (index !== -1) {
-                              scroll_to_index(secondview$, index);
-                            }
-                          }, 0);
-                        },
-                      },
-                      [
-                        For({
-                          each: time$.generateSeconds(),
-                          render(second) {
-                            return TimePickerPrimitive.SecondItem(
-                              {
-                                store: time$,
-                                value: second,
-                                class: computed(time_state_, (s) => {
-                                  const isSelected = s.tempSecond === second;
-                                  const baseClass =
-                                    "w-full h-8 text-sm rounded-md transition-colors outline-hidden";
-                                  if (isSelected) {
-                                    return `${baseClass} bg-primary text-primary-foreground`;
-                                  }
-                                  return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
-                                }),
-                              },
-                              [String(second).padStart(2, "0")],
-                            );
+                  Show({
+                    when: time$.showSeconds,
+                    ok() {
+                      return [
+                        h(
+                          ScrollViewPrimitive.Root,
+                          {
+                            store: secondview$,
+                            class:
+                              "absolute top-0 left-24 w-12 h-full overflow-y-auto overlay-scrollbar p-2",
+                            onMounted() {
+                              ensure_default_temp_time();
+                              const seconds = time$.generateSeconds();
+                              const target = time$.state.tempSecond;
+                              const index =
+                                typeof target === "number"
+                                  ? seconds.indexOf(target)
+                                  : -1;
+                              setTimeout(() => {
+                                if (index !== -1) {
+                                  scroll_to_index(secondview$, index);
+                                }
+                              }, 0);
+                            },
                           },
-                        }),
-                      ],
-                    ),
-                  ]),
+                          [
+                            For({
+                              each: time$.generateSeconds(),
+                              render(second) {
+                                return TimePickerPrimitive.SecondItem(
+                                  {
+                                    store: time$,
+                                    value: second,
+                                    class: computed(time_state_, (s) => {
+                                      const isSelected = s.tempSecond === second;
+                                      const baseClass =
+                                        "w-full h-8 text-sm rounded-md transition-colors outline-hidden";
+                                      if (isSelected) {
+                                        return `${baseClass} bg-primary text-primary-foreground`;
+                                      }
+                                      return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
+                                    }),
+                                  },
+                                  [String(second).padStart(2, "0")],
+                                );
+                              },
+                            }),
+                          ],
+                        ),
+                      ];
+                    },
+                  }),
                 ],
               ),
             ]),

@@ -141,15 +141,11 @@ export function UIExampleWeUIPageView() {
         },
         [
           // === General ===
-          Show(
-            {
-              when: computed(
-                { activeCategory },
-                (d) => d.activeCategory === "general",
-              ),
-            },
-            [
-              View({}, [
+          Show({
+            when: computed({ activeCategory }, (d) => d.activeCategory === "general"),
+            ok() {
+              return [
+                View({}, [
                 Section("Button", [
                   Item("Variants", [
                     Button({ variant: "primary", size: "sm" }, [Txt("主要")]),
@@ -218,18 +214,15 @@ export function UIExampleWeUIPageView() {
                   ]),
                 ]),
               ]),
-            ],
-          ),
-          // === Form ===
-          Show(
-            {
-              when: computed(
-                { activeCategory },
-                (d) => d.activeCategory === "form",
-              ),
+              ];
             },
-            [
-              View({}, [
+          }),
+          // === Form ===
+          Show({
+            when: computed({ activeCategory }, (d) => d.activeCategory === "form"),
+            ok() {
+              return [
+                View({}, [
                 // Input cells
                 View({ class: "weui-cells__title" }, [Txt("输入框")]),
                 View({ class: "weui-cells" }, [
@@ -327,18 +320,15 @@ export function UIExampleWeUIPageView() {
                   ]),
                 ]),
               ]),
-            ],
-          ),
-          // === Data Display ===
-          Show(
-            {
-              when: computed(
-                { activeCategory },
-                (d) => d.activeCategory === "data",
-              ),
+              ];
             },
-            [
-              View({}, [
+          }),
+          // === Data Display ===
+          Show({
+            when: computed({ activeCategory }, (d) => d.activeCategory === "data"),
+            ok() {
+              return [
+                View({}, [
                 Section("Progress", [
                   Item("60%", [Progress({ value: progressVal, max: 100 })]),
                   Item("Controls", [
@@ -426,18 +416,18 @@ export function UIExampleWeUIPageView() {
                   ]),
                 ]),
               ]),
-            ],
-          ),
-          // === Feedback ===
-          Show(
-            {
-              when: computed(
-                { activeCategory },
-                (d) => d.activeCategory === "feedback",
-              ),
+              ];
             },
-            [
-              View({}, [
+          }),
+          // === Feedback ===
+          Show({
+            when: computed(
+              { activeCategory },
+              (d) => d.activeCategory === "feedback",
+            ),
+            ok() {
+              return [
+                View({}, [
                 Section("Dialog", [
                   Item("Default", [
                     Button(
@@ -510,18 +500,15 @@ export function UIExampleWeUIPageView() {
                   ]),
                 ]),
               ]),
-            ],
-          ),
-          // === Navigation ===
-          Show(
-            {
-              when: computed(
-                { activeCategory },
-                (d) => d.activeCategory === "nav",
-              ),
+              ];
             },
-            [
-              View({}, [
+          }),
+          // === Navigation ===
+          Show({
+            when: computed({ activeCategory }, (d) => d.activeCategory === "nav"),
+            ok() {
+              return [
+                View({}, [
                 Section("Tabs", [
                   Item("Default", [
                     Tabs({
@@ -576,18 +563,15 @@ export function UIExampleWeUIPageView() {
                   ]),
                 ]),
               ]),
-            ],
-          ),
-          // === Overlay ===
-          Show(
-            {
-              when: computed(
-                { activeCategory },
-                (d) => d.activeCategory === "overlay",
-              ),
+              ];
             },
-            [
-              View({}, [
+          }),
+          // === Overlay ===
+          Show({
+            when: computed({ activeCategory }, (d) => d.activeCategory === "overlay"),
+            ok() {
+              return [
+                View({}, [
                 Section("Dropdown Menu", [
                   Item("Default", [
                     DropdownMenu(
@@ -1192,8 +1176,9 @@ export function UIExampleWeUIPageView() {
                   ]),
                 ]),
               ]),
-            ],
-          ),
+              ];
+            },
+          }),
         ],
       ),
     ],
