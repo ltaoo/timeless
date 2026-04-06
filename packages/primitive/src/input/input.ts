@@ -1,11 +1,9 @@
 import { Ref, isRef } from "@timeless/reactive";
 
-import { getHost } from "@/host";
-import { isClassName } from "@/vnode/class-names";
-import { isStyleRef } from "@/vnode/style-names";
 import { ViewProps } from "@/content/view";
+import { viewStyleToCssText, isStyleRef, isClassName } from "@/style/index";
 import { safeCreateElement } from "@/util/env";
-import { viewStyleToCssText } from "@/style/index";
+import { getHost } from "@/host";
 
 export interface InputProps extends Omit<ViewProps, "as" | "type"> {
   id?: string | Ref<string>;

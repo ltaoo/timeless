@@ -1,8 +1,6 @@
-import { ViewChildren, ViewProps, isElement } from "@/content/view";
-import {
-  safeCreateTextNode,
-  safeCreateDocumentFragment,
-} from "@/util/env";
+import { ViewProps } from "@/content/view";
+import { ViewChildren, isElement } from "@/content/type";
+import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
 import { getHost } from "@/host";
 
 export function Portal(props: ViewProps & {}, children: ViewChildren) {

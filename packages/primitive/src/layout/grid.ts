@@ -1,8 +1,8 @@
 import { Ref, isRef } from "@timeless/reactive";
 
-import { View, ViewChildren, ViewProps } from "@/content/view";
-import { ClassNameRef } from "@/vnode/class-names";
-import { isStyleRef } from "@/vnode/style-names";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
+import { ClassNameRef, isStyleRef } from "@/style";
 
 export type GridAlign = "start" | "end" | "center" | "stretch" | "baseline";
 export type GridJustify = GridAlign | "between" | "around" | "evenly";

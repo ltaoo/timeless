@@ -6,10 +6,14 @@ import { MountedEvent } from "@/event/index";
 import { isClassName, ClassNameRef } from "@/vnode/class-names";
 
 import { Txt } from "./text";
-
-export type ViewPropValue = string | number | boolean | undefined | null;
-export type MaybeSignal<T = ViewPropValue> = T | Signal<T>;
-export type ViewAttributes = Record<string, MaybeSignal>;
+import {
+  isElement,
+  MaybeSignal,
+  TimelessElement,
+  ViewAttributes,
+  ViewChildren,
+  ViewPropValue,
+} from "./type";
 
 export interface ViewProps {
   key?: string | number;
@@ -104,7 +108,6 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       onAnimationEnd?: (e: AnimationEvent) => void;
     }>;
     children: TimelessElement[];
-    host: any;
   } = {
     rendered: false,
     props: {
@@ -131,9 +134,6 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       onAnimationEnd,
     },
     children: [],
-    get host() {
-      return $elm;
-    },
   };
 
   const methods = {
@@ -656,79 +656,3 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     },
   };
 }
-
-export function isElement(v: unknown): v is TimelessElement {
-  if (v === null || v === undefined) {
-    return false;
-  }
-  // @ts-ignore
-  if (v.t && v.hasOwnProperty("$elm")) {
-    return true;
-  }
-  return false;
-}
-export function isLazyElement(v: unknown): v is TimelessLazyComponent {
-  if (v === null || v === undefined) {
-    return false;
-  }
-  if (
-    v instanceof Promise ||
-    (v && typeof (v as Promise<unknown>).then === "function")
-  ) {
-    return true;
-  }
-  return false;
-}
-
-export type TimelessNormalComponent = (...args: unknown[]) => TimelessElement;
-export type TimelessLazyComponent = () => Promise<{
-  default: TimelessNormalComponent;
-}>;
-export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
-
-export interface TimelessElement {
-  t: string;
-  $elm: any;
-  children?: TimelessElement[];
-  props?: {
-    styleSets?: MaybeSignal<string[]>;
-    style?: ViewStyleProperties;
-  };
-  events?: {
-    onClick?: (e: MouseEvent) => void;
-    onDoubleClick?: (e: MouseEvent) => void;
-    onLongPress?: (e: PointerEvent) => void;
-    onPointerDown?: (e: PointerEvent) => void;
-    onFocus?: (e: FocusEvent) => void;
-    onBlur?: (e: FocusEvent) => void;
-    onKeyDown?: (e: KeyboardEvent) => void;
-    onContextMenu?: (e: MouseEvent) => void;
-    onMouseEnter?: (e: MouseEvent) => void;
-    onMouseLeave?: (e: MouseEvent) => void;
-    onDragStart?: (e: DragEvent) => void;
-    onDrag?: (e: DragEvent) => void;
-    onDragEnd?: (e: DragEvent) => void;
-    onDragEnter?: (e: DragEvent) => void;
-    onDragOver?: (e: DragEvent) => void;
-    onDragLeave?: (e: DragEvent) => void;
-    onDrop?: (e: DragEvent) => void;
-    onAnimationEnd?: (e: AnimationEvent) => void;
-  };
-  value?: unknown;
-  render(): any;
-  hydrate?(existingDom: any): any;
-  cleanup?: () => void;
-  onMounted?(event: MountedEvent): void;
-  beforeUnmounted?(): void;
-  onUnmounted?(): void;
-}
-
-export type ViewChildren = (
-  | TimelessElement
-  | TimelessElement[]
-  | (() => TimelessElement)
-  | string
-  | number
-  | MaybeSignal<string | number>
-  | null
-)[];

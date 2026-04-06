@@ -7,9 +7,10 @@ import {
   computed,
 } from "@timeless/reactive";
 
-import { ViewProps, TimelessElement, isElement } from "@/content/view";
-import { getHost } from "@/host";
+import { ViewProps } from "@/content/view";
+import { ViewChildren, TimelessElement, isElement } from "@/content/type";
 import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
+import { getHost } from "@/host";
 // import { commitTree, isDescriptor as isVNodeDescriptor, mount } from "@/vnode";
 // import type { VNode } from "@/vnode/types";
 
@@ -23,7 +24,7 @@ export function For<T>(
     ) => TimelessElement | (() => TimelessElement) | null;
   },
 ) {
-  const host = getHost();
+  // const host = getHost();
   // const scheduler = getRendererScheduler();
   // const renderer = getRenderer();
   const { key, each, render, onMounted, onUnmounted } = props;
@@ -129,7 +130,8 @@ export function For<T>(
     },
     _insert(index: number, items: T[]) {
       const $base = _$children[index] || anchor;
-      const $parent = host.getParentNode(anchor);
+      // const $parent = host.getParentNode(anchor);
+      const $parent = anchor.getParentNode();
 
       if (!$parent) return;
 
@@ -147,21 +149,26 @@ export function For<T>(
         _elements.splice(index + i, 0, res.node);
         // _$children.splice(index + i, 0, res.trackElm || res.elm);
         if (res.elm) {
-          host.appendChild($fragment, res.elm);
+          // host.appendChild($fragment, res.elm);
+          $fragment.appendChild(res.elm);
         }
       }
       // No need to manually update computed indexes - they auto-recompute
-      host.insertBefore($parent, $fragment, $base);
+      // host.insertBefore($parent, $fragment, $base);
+      $parent.insertBefore($fragment, $base);
     },
     _remove(index: number, count: number) {
-      const $parent = host.getParentNode(anchor);
+      // const $parent = host.getParentNode(anchor);
+      const $parent = anchor.getParentNode();
       if (!$parent) return;
 
       for (let i = 0; i < count; i += 1) {
         const elm = _$children[index];
-        if (elm && host.getParentNode(elm) === $parent) {
+        const $pa = elm.getParentNode();
+        if (elm && $pa === $parent) {
           try {
-            host.removeChild($parent, elm);
+            // host.removeChild($parent, elm);
+            $parent.removeChild(elm);
           } catch (e) {
             // ignore
           }
@@ -179,7 +186,8 @@ export function For<T>(
       // No need to manually update computed indexes - they auto-recompute
     },
     _update(index: number, item: any) {
-      const $parent = host.getParentNode(anchor);
+      // const $parent = host.getParentNode(anchor);
+      const $parent = anchor.getParentNode();
       if (!$parent) return;
 
       // Reuse existing computed index or create new one
@@ -198,10 +206,13 @@ export function For<T>(
         return;
       }
       const old = _$children[index];
-      if (old && host.getParentNode(old) === $parent && res.elm) {
-        host.replaceChild($parent, res.elm, old);
+      const $pa = old.getParentNode();
+      if (old && $pa === $parent && res.elm) {
+        // host.replaceChild($parent, res.elm, old);
+        $parent.replaceChild(res.elm, old);
       } else if (res.elm) {
-        host.insertBefore($parent, res.elm, anchor);
+        // host.insertBefore($parent, res.elm, anchor);
+        $parent.insertBefore(res.elm, anchor);
       }
 
       const oldItem = _values[index];
@@ -227,7 +238,8 @@ export function For<T>(
       const prev_original_items = _original_items;
       const prev_index_computed = _index_computed;
 
-      const $parent = host.getParentNode(anchor);
+      // const $parent = host.getParentNode(anchor);
+      const $parent = anchor.getParentNode();
       if (!$parent) return;
 
       // 1. Prepare target state
@@ -323,8 +335,10 @@ export function For<T>(
 
       // 4.1 Remove nodes
       for (const { elm, component } of removed_nodes) {
-        if (elm && host.getParentNode(elm) === $parent) {
-          host.removeChild($parent, elm);
+        const $pa = elm.getParentNode();
+        if (elm && $pa === $parent) {
+          // host.removeChild($parent, elm);
+          $parent.removeChild(elm);
         }
         if (component) {
           if (isElement(component)) {
@@ -343,14 +357,16 @@ export function For<T>(
         if (!node) continue;
 
         // If node is already in correct position (immediately before nextSibling), skip.
-        if (host.getNextSibling(node) === next_sibling) {
+        const $sibling = node.getNextSibling();
+        if ($sibling === next_sibling) {
           next_sibling = node;
           continue;
         }
 
         if ($parent) {
           // If node is already in DOM elsewhere, insertBefore moves it.
-          host.insertBefore($parent, node, next_sibling);
+          // host.insertBefore($parent, node, next_sibling);
+          $parent.insertBefore(node, next_sibling);
         }
 
         next_sibling = node;
@@ -458,10 +474,12 @@ export function For<T>(
         _elements[i] = res.node;
         _$children[i] = res.trackElm || res.elm;
         if (res.elm) {
-          host.appendChild($fragment, res.elm);
+          // host.appendChild($fragment, res.elm);
+          $fragment.appendChild(res.elm);
         }
       }
-      host.appendChild($fragment, anchor);
+      // host.appendChild($fragment, anchor);
+      $fragment.appendChild(anchor);
       _mounted = true;
 
       if (onMounted) {
@@ -503,23 +521,38 @@ export function For<T>(
           if (currentDom && typeof (res as any).hydrate === "function") {
             (res as any).hydrate(currentDom);
             _$children[i] = res.$elm;
-            currentDom = host.getNextSibling(res.$elm || currentDom);
+            const $sibling = (() => {
+              if (res.$elm) {
+                return res.$elm.getNextSibling();
+              }
+              return currentDom.getNextSibling();
+            })();
+            currentDom = $sibling;
           } else if (currentDom) {
             res.$elm = currentDom;
             res.render();
             _$children[i] = res.$elm;
-            currentDom = host.getNextSibling(currentDom);
+            currentDom = currentDom.getNextSibling();
           }
         }
       }
 
-      const $parent =
-        parentDom || (startDom ? host.getParentNode(startDom) : null);
+      const $parent = (() => {
+        if (parentDom) {
+          return parentDom;
+        }
+        if (startDom) {
+          return startDom.getParentNode();
+        }
+        return null;
+      })();
       if ($parent) {
         if (currentDom) {
-          host.insertBefore($parent, anchor, currentDom);
+          // host.insertBefore($parent, anchor, currentDom);
+          $parent.insertBefore(currentDom, anchor);
         } else {
-          host.appendChild($parent, anchor);
+          // host.appendChild($parent, anchor);
+          $parent.appendChild(anchor);
         }
       }
 
@@ -554,12 +587,15 @@ export function For<T>(
       }
 
       // Remove DOM nodes
-      const $parent = host.getParentNode(anchor);
+      // const $parent = host.getParentNode(anchor);
+      const $parent = anchor.getParentNode();
       if ($parent) {
         for (const elm of _$children) {
-          if (elm && host.getParentNode(elm) === $parent) {
+          const $pa = elm.getParentNode();
+          if (elm && $pa === $parent) {
             try {
-              host.removeChild($parent, elm);
+              // host.removeChild($parent, elm);
+              $parent.removeChild(elm);
             } catch (e) {
               // ignore
             }

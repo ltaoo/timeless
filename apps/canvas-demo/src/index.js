@@ -1,4 +1,4 @@
-import { Grid, View, For, ref, combine, refarr } from "@timeless/timeless";
+import { Grid, View, For, Img, ref, combine, refarr } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-canvas";
 
 const apps = [
@@ -127,6 +127,13 @@ function ApplicationView() {
       },
     },
     [
+      Img({
+        src: "/public/avatar.jpeg",
+        style: {
+          width: 60,
+          height: 60,
+        },
+      }),
       View({}, [
         View({}, [count_]),
         View(

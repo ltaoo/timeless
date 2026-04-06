@@ -1,6 +1,7 @@
 import { computed, ref, isRef, Ref } from "@timeless/reactive";
 
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";
 

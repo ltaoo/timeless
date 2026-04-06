@@ -1,7 +1,6 @@
-import { safeCreateDocumentFragment } from "@/util/env";
-
-import { ViewChildren, ViewProps, isElement } from "./view";
+import { ViewProps } from "./view";
 import { Txt } from "./text";
+import { TimelessElement, ViewChildren, isElement } from "./type";
 
 export function Fragment(props: ViewProps, children: ViewChildren = []) {
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
@@ -10,12 +9,12 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
   // 关联一个 宿主平台 节点
   let $fragment: any = null;
 
-  const state = {
+  const state: {
+    rendered: boolean;
+    children: TimelessElement[];
+  } = {
     rendered: false,
-    children,
-    get host() {
-      return $fragment;
-    },
+    children: [],
   };
 
   // console.log("[Fragment] created with", _children.length, "children");
@@ -118,4 +117,13 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       return $fragment;
     },
   };
+}
+
+type Fragment = ReturnType<typeof Fragment>;
+
+export function isFragment(v: any): v is Fragment {
+  if (v.t === "fragment") {
+    return true;
+  }
+  return false;
 }

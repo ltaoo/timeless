@@ -3,7 +3,8 @@ import { TooltipCore, Align, Side } from "@timeless/ui";
 
 import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
 import { isStyleRef, styleNames } from "@/vnode/style-names";
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
 import { getHost } from "@/host";
 

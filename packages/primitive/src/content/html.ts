@@ -1,7 +1,7 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";
+import { getHost } from "@/host";
 
 export function DangerouslyInnerHTML(html: string | Ref<string>) {
   const host = getHost();

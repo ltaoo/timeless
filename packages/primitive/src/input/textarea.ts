@@ -2,11 +2,9 @@ import { ref, refobj, isRef } from "@timeless/reactive";
 import { InputCore } from "@timeless/ui";
 
 import { ViewProps } from "@/content/view";
-import { getHost } from "@/host";
 import { safeCreateElement } from "@/util/env";
-import { viewStyleToCssText } from "@/style/index";
-import { classNames, isClassName } from "@/vnode/class-names";
-import { isStyleRef, styleNames } from "@/vnode/style-names";
+import { viewStyleToCssText, classNames, isStyleRef } from "@/style/index";
+import { getHost } from "@/host";
 
 export function Textarea(
   props: ViewProps & { store: InputCore<any>; id?: string },

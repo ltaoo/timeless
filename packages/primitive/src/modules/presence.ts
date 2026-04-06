@@ -1,7 +1,8 @@
 import { ref, refobj, computed } from "@timeless/reactive";
 import { PresenceCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";
 
 export function Presence(
@@ -19,20 +20,18 @@ export function Presence(
     state.as(v);
   });
 
-  return Show(
-    {
-      when: computed(state, (t) => {
-        // Keep mounted during enter, visible, or exit animation
-        return t.mounted || t.visible || t.exit;
-      }),
-      ok() {
-        return children || [];
-      },
-      onUnmounted() {
-        // if (unsubscribe) {
-        //   unsubscribe();
-        // }
-      },
+  return Show({
+    when: computed(state, (t) => {
+      // Keep mounted during enter, visible, or exit animation
+      return t.mounted || t.visible || t.exit;
+    }),
+    ok() {
+      return children || [];
     },
-  );
+    onUnmounted() {
+      // if (unsubscribe) {
+      //   unsubscribe();
+      // }
+    },
+  });
 }

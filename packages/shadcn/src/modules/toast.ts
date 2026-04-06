@@ -1,4 +1,4 @@
-import { computed, refobj } from "@timeless/primitive";
+import { computed, Fragment, refobj } from "@timeless/primitive";
 import {
   ToastPrimitive,
   For,
@@ -84,7 +84,7 @@ export function Toast(
                 });
               },
             }),
-            ...children,
+            Fragment({}, children),
           ],
         ),
       ],

@@ -1,6 +1,6 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { ViewChildren, isElement, TimelessElement } from "@/content/view";
+import { ViewChildren, isElement, TimelessElement } from "@/content/type";
 import { safeCreateTextNode } from "@/util/env";
 
 export function Match(
@@ -193,10 +193,7 @@ export function Match(
   };
 }
 
-export function Case<T = any>(
-  value: any,
-  children: () => ViewChildren,
-) {
+export function Case<T = any>(value: any, children: () => ViewChildren) {
   return {
     t: "case",
     value,

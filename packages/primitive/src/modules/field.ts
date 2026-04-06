@@ -1,7 +1,8 @@
 import { computed, refobj } from "@timeless/reactive";
 import { SingleFieldCore, ObjectFieldCore, ArrayFieldCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
 import { For } from "@/reactive/for";
 import { Show } from "@/reactive/show";
@@ -86,7 +87,7 @@ export namespace ObjectField {
         const field = store.fields[fieldName];
         const children = renderChildren(fieldName, field);
         if (!children) return null;
-        return Fragment({}, children);
+        return View({}, children);
       },
     });
   }
@@ -118,7 +119,7 @@ export namespace ArrayField {
         const idx = typeof index === "number" ? index : (index?.value ?? 0);
         const children = renderChildren(item, idx);
         if (!children) return null;
-        return Fragment({}, children);
+        return View({}, children);
       },
     });
   }

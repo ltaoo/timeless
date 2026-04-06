@@ -1,6 +1,6 @@
 {
   "name": "@timeless/provider-wails3",
-  "version": "0.12.0",
+  "version": "0.12.2",
   "main": "dist/index.js",
   "module": "dist/timeless.wails3.esm.js",
   "types": "dist/index.d.ts",

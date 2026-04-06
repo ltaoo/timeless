@@ -7,6 +7,7 @@ import { DOMShow } from "@/host/show";
 import { DOMFor } from "@/host/for";
 import { DOMHostNode } from "@/host/type";
 import { DOMFragment, isDocumentFragment } from "@/host/fragment";
+import { DOMImg } from "@/host/img";
 
 function build(elm: TimelessElement): DOMHostNode {
   if (elm.t === "view") {
@@ -26,6 +27,12 @@ function build(elm: TimelessElement): DOMHostNode {
     elm.$elm = fragment$;
     fragment$.render(elm);
     return fragment$;
+  }
+  if (elm.t === "img") {
+    const img$ = DOMImg({ build });
+    elm.$elm = img$;
+    img$.render(elm);
+    return img$;
   }
   if (elm.t === "grid") {
     const grid$ = DOMGrid({ build });

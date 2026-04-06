@@ -3,7 +3,8 @@ import { ProgressCore } from "@timeless/ui";
 
 import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
 import { isStyleRef, styleNames } from "@/vnode/style-names";
-import { View, ViewProps, ViewChildren } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 
 export function Root(
   props: ViewProps & {

@@ -1,8 +1,8 @@
 import { Ref, isRef } from "@timeless/reactive";
 
-import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
-import { isStyleRef, styleNames } from "@/vnode/style-names";
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
+import { isStyleRef, ClassNameRef } from "@/style";
 
 export function Column(
   props: {

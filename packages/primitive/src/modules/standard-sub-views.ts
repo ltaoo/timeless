@@ -7,13 +7,12 @@ import {
   ApplicationModel,
 } from "@timeless/kit";
 
+import { View, ViewProps } from "@/content/view";
 import {
+  ViewChildren,
   TimelessComponent,
   TimelessElement,
-  View,
-  ViewChildren,
-  ViewProps,
-} from "@/content/view";
+} from "@/content/type";
 import { For } from "@/reactive/for";
 import { Show } from "@/reactive/show";
 import { LazyView } from "@/content/lazy-view";

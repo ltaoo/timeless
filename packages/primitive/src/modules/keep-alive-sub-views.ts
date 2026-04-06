@@ -7,17 +7,15 @@ import {
   ApplicationModel,
 } from "@timeless/kit";
 
+import { View, ViewProps } from "@/content/view";
 import {
+  ViewChildren,
   TimelessComponent,
   TimelessElement,
-  View,
-  ViewChildren,
-  ViewProps,
-} from "@/content/view";
+} from "@/content/type";
 import { For } from "@/reactive/for";
 import { LazyView } from "@/content/lazy-view";
 import { ErrorFallbackFn, withErrorBoundary } from "@/content/error-boundary";
-import { h } from "@/util/h";
 
 type SubView = { id?: unknown; name: string; pathname?: string } & Record<
   string,

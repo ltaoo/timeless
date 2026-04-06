@@ -15,6 +15,9 @@ export * from "./content/fragment";
 export * from "./content/html";
 export * from "./content/text";
 export * from "./content/lazy-view";
+export * from "./content/type";
+
+export * from "./event";
 
 // Input
 export * from "./input/input";
@@ -124,5 +127,5 @@ export * from "./util/h";
 
 export * from "./host";
 export * as VNode from "./vnode";
-export * from "./vnode/style-names";
-export * from "./vnode/class-names";
+// export * from "./vnode/style-names";
+// export * from "./vnode/class-names";

@@ -1,8 +1,15 @@
-import { View, TimelessElement } from "./view";
+import { View } from "./view";
+import { TimelessElement } from "./type";
 
-export type ErrorFallbackFn = (error: Error, viewName: string) => TimelessElement;
+export type ErrorFallbackFn = (
+  error: Error,
+  viewName: string,
+) => TimelessElement;
 
-export function defaultErrorView(error: Error, viewName: string): TimelessElement {
+export function defaultErrorView(
+  error: Error,
+  viewName: string,
+): TimelessElement {
   return View(
     {
       style: {

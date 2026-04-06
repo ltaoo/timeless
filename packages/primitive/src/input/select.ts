@@ -1,6 +1,7 @@
 import { Ref, isRef } from "@timeless/reactive";
 
-import { View, ViewAttributes, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewAttributes, ViewChildren } from "@/content/type";
 import { getHost } from "@/host";
 
 type NativeSelectValue = string | string[];

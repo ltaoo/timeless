@@ -5,7 +5,8 @@ import {
   WaterfallCellModel,
 } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps, TimelessElement } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren, TimelessElement } from "@/content/type";
 
 export function Root(
   props: ViewProps & { store: WaterfallModel<any> },

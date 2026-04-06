@@ -1,7 +1,7 @@
 import { getRendererScheduler, resolveComponent } from "@/host";
 import { isRef } from "@timeless/reactive";
 
-import { isElement } from "@/content/view";
+import { isElement } from "@/content/type";
 
 import type {
   ChildDescriptor,

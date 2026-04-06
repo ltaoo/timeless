@@ -1,4 +1,5 @@
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 
 export function Paragraph(props: ViewProps & {}, children?: ViewChildren) {
   const node$ = View({ ...props, as: "p" }, children);

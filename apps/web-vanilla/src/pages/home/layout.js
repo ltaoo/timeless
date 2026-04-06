@@ -240,7 +240,7 @@ export default function HomeLayoutView(props) {
                         },
                       },
                       [
-                        NativeImg({
+                        Img({
                           class: "w-full h-full object-cover",
                           src: "public/avatar.jpeg",
                           alt: "User Avatar",

@@ -1,7 +1,8 @@
 import { refobj } from "@timeless/reactive";
 import { PopconfirmCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
 import { getHost } from "@/host";
 

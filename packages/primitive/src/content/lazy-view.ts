@@ -1,12 +1,12 @@
+import { View, ViewProps } from "./view";
+import { defaultErrorView } from "./error-boundary";
 import {
-  View,
-  TimelessElement,
+  TimelessNormalComponent,
   isElement,
-  ViewProps,
+  TimelessElement,
   ViewChildren,
   TimelessComponent,
-} from "./view";
-import { defaultErrorView } from "./error-boundary";
+} from "./type";
 
 export function LazyView(
   props: ViewProps & { placeholder?: ViewChildren } & Record<string, any>,
@@ -83,4 +83,21 @@ export function LazyView(
     },
   };
   return self;
+}
+
+export type TimelessLazyComponent = () => Promise<{
+  default: TimelessNormalComponent;
+}>;
+
+export function isLazyElement(v: unknown): v is TimelessLazyComponent {
+  if (v === null || v === undefined) {
+    return false;
+  }
+  if (
+    v instanceof Promise ||
+    (v && typeof (v as Promise<unknown>).then === "function")
+  ) {
+    return true;
+  }
+  return false;
 }

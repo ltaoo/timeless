@@ -1177,7 +1177,8 @@ type DrawCommand =
   | { op: "setFont"; value: string }
   | { op: "setTextAlign"; value: CanvasTextAlign }
   | { op: "setTextBaseline"; value: CanvasTextBaseline }
-  | { op: "fillText"; text: string; x: number; y: number };
+  | { op: "fillText"; text: string; x: number; y: number }
+  | { op: "drawImage"; image: HTMLImageElement; x: number; y: number; w: number; h: number };
 
 function recordNodeToDisplayList(
   node: CanvasNode,
@@ -1262,6 +1263,26 @@ function recordNodeToDisplayList(
         out.push({ op: "setTextBaseline", value: textBaseline });
         out.push({ op: "fillText", text, x: tx, y: rect.top + padTop });
         out.push({ op: "restore" });
+      }
+    }
+
+    if (node.tag === "img") {
+      const src = node.getAttribute("src");
+      if (src && rect.width > 0 && rect.height > 0) {
+        // Get the image element from the global image cache
+        const imageElement = (node as any)._imageElement;
+        if (imageElement && imageElement.complete && imageElement.naturalWidth > 0) {
+          out.push({ op: "save" }, { op: "setGlobalAlpha", alpha });
+          out.push({
+            op: "drawImage",
+            image: imageElement,
+            x: rect.left,
+            y: rect.top,
+            w: rect.width,
+            h: rect.height,
+          });
+          out.push({ op: "restore" });
+        }
       }
     }
 
@@ -1352,6 +1373,13 @@ function executeDisplayList(
         break;
       case "fillText":
         ctx.fillText(cmd.text, cmd.x, cmd.y);
+        break;
+      case "drawImage":
+        try {
+          ctx.drawImage(cmd.image, cmd.x, cmd.y, cmd.w, cmd.h);
+        } catch (e) {
+          // Silently ignore image drawing errors
+        }
         break;
       default:
         break;

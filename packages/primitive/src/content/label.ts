@@ -1,6 +1,7 @@
 import { Ref } from "@timeless/reactive";
 
-import { View, ViewAttributes, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewAttributes, ViewChildren } from "@/content/type";
 
 export interface NativeLabelProps extends Omit<ViewProps, "as"> {
   for?: string | Ref<string>;

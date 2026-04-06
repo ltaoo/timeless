@@ -1,9 +1,9 @@
 import { refobj, computed, combine } from "@timeless/reactive";
 import { MenuCore, MenuItemCore, MenuGroupCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";
-import { h } from "@/util/h";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
@@ -107,7 +107,9 @@ export function ContentImpl(
                   props.store.parent_menu &&
                   props.store.parent_menu.hide_sub_timer !== null
                 ) {
-                  getHost().clearTimeout(props.store.parent_menu.hide_sub_timer);
+                  getHost().clearTimeout(
+                    props.store.parent_menu.hide_sub_timer,
+                  );
                   props.store.parent_menu.hide_sub_timer = null;
                 }
                 if (rest.onMouseEnter) {

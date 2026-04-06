@@ -8,22 +8,26 @@ import {
 
 import { DOMHostNode } from "./type";
 
-export interface DOMView {
-  $elm: HTMLDivElement;
+export interface DOMImg {
+  t: "img";
+  $elm: HTMLImageElement;
   isDocumentFragment(): boolean;
   getChildNodes(): NodeListOf<ChildNode>;
+  setSrc(v: string): void;
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
-  setStyleSet(key: string): void;
   render(elm: TimelessElement): HTMLDivElement;
 }
 
-export function DOMView(props: {
+export function DOMImg(props: {
   build: (elm: TimelessElement) => DOMHostNode;
-}): DOMView {
-  const $elm = document.createElement("div");
+}): DOMImg {
+  const $elm = document.createElement("img");
 
   const methods = {
+    setSrc(v: string) {
+      $elm.src = v;
+    },
     setStyle(style: ViewStyleProperties) {
       const cssText = viewStyleToCssText(style);
       $elm.style.cssText = cssText;
@@ -87,6 +91,7 @@ export function DOMView(props: {
   };
 
   return {
+    t: "img",
     get $elm() {
       return $elm;
     },
@@ -96,16 +101,20 @@ export function DOMView(props: {
     getChildNodes() {
       return $elm.childNodes;
     },
+    setSrc(v: string) {
+      methods.setSrc(v);
+    },
     setStyle(style: ViewStyleProperties) {
       methods.setStyle(style);
     },
     setStyleValue(key: any, value: string) {
       $elm.style[key] = value;
     },
-    setStyleSet(name: string) {
-      $elm.className = name;
-    },
     render(elm: TimelessElement) {
+      // console.log(elm);
+      if (elm.value) {
+        methods.setSrc(elm.value as string);
+      }
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }
@@ -119,27 +128,11 @@ export function DOMView(props: {
       if (elm.events) {
         methods.setupEventListener(elm.events);
       }
-      if (elm.children) {
-        for (const child of elm.children) {
-          if (isElement(child)) {
-            const $sub = props.build(child);
-            if ($sub && $sub.$elm) {
-              $elm.appendChild($sub.$elm);
-            }
-          }
-        }
-      }
       return $elm;
     },
   };
 }
 
-export function isDOMView(value: any): value is DOMView {
-  return (
-    value &&
-    typeof value === "object" &&
-    value.$elm instanceof HTMLDivElement &&
-    typeof value.isDocumentFragment === "function" &&
-    typeof value.render === "function"
-  );
+export function isDOMImg(value: any): value is DOMImg {
+  return value.t === "img";
 }

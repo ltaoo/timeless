@@ -1,15 +1,16 @@
 import { refobj, computed } from "@timeless/reactive";
 import { DatePickerCore } from "@timeless/ui";
 
-import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
-import { isStyleRef, styleNames } from "@/vnode/style-names";
-import { View, ViewChildren, ViewProps, TimelessElement } from "@/content/view";
+import { classNames } from "@/vnode/class-names";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren, TimelessElement } from "@/content/type";
 import { For } from "@/reactive/for";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
+import { Fragment } from "@/content/fragment";
 
 export function Root(
   props: ViewProps & { store: DatePickerCore },
@@ -108,7 +109,7 @@ export function Trigger(
         }
       },
     },
-    [_input$, ...children],
+    [_input$, Fragment({}, children)],
   );
 }
 

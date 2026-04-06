@@ -1,4 +1,5 @@
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 
 export function Head1(props: ViewProps, children?: ViewChildren) {
   return View({ ...props, as: "h1" }, children);

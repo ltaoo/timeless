@@ -1,16 +1,17 @@
-import { refobj, computed, combine, isRef } from "@timeless/reactive";
+import { refobj, computed, isRef } from "@timeless/reactive";
 import { SelectCore } from "@timeless/ui";
 
-import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
-import { isStyleRef, styleNames } from "@/vnode/style-names";
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { classNames } from "@/vnode/class-names";
+import { isStyleRef } from "@/vnode/style-names";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";
 import { Input } from "@/input/input";
-import { h } from "@/util/h";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
+import { Fragment } from "@/content/fragment";
 
 export function Root(
   props: ViewProps & { store: SelectCore<any> },
@@ -161,7 +162,7 @@ export function Trigger(
         }
       },
     },
-    [_input$, ...children],
+    [_input$, Fragment({}, children)],
   );
 }
 

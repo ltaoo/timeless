@@ -1,4 +1,4 @@
-import { ViewChildren } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { MouseEvent } from "@/event";
 
 type ButtonProps = {
@@ -7,7 +7,5 @@ type ButtonProps = {
 
 export function Button(props: ButtonProps = {}, children?: ViewChildren) {
   //   return createButtonElement(props, children);
-  return {
-
-  };
+  return {};
 }

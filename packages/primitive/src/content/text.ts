@@ -1,6 +1,6 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { TimelessElement } from "./view";
+import { TimelessElement } from "./type";
 
 export function Txt(
   value: Ref<string | number> | string | number,

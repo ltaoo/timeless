@@ -2,9 +2,8 @@ import { refobj, computed } from "@timeless/reactive";
 import { PresenceCore } from "@timeless/ui";
 
 import { Show } from "@/reactive/show";
-import { View, ViewChildren, ViewProps } from "@/content/view";
-import { Fragment } from "@/content/fragment";
-import { h } from "@/util/h";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 
 export function Transition(
   props: ViewProps & {
@@ -39,8 +38,7 @@ export function Transition(
     when: visible,
     ok() {
       return [
-        h(
-          View,
+        View(
           {
             ...rest,
             class: computed(state, (s) => {
@@ -71,7 +69,7 @@ export function Transition(
               }
             },
           },
-          [h(Fragment, {}, children)],
+          children,
         ),
       ];
     },

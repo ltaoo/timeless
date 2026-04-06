@@ -3,7 +3,8 @@ import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
 
 import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
 import { isStyleRef, styleNames } from "@/vnode/style-names";
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { getHost } from "@/host";
 
 // ResizablePanels Group - 容器组件

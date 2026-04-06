@@ -2,7 +2,8 @@ import { computed, isRef, ref } from "@timeless/reactive";
 
 import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
 import { isStyleRef, styleNames } from "@/vnode/style-names";
-import { View, ViewProps, ViewChildren } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { getHost } from "@/host";
 
 export function Root(

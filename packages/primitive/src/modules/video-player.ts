@@ -1,9 +1,13 @@
 import { VideoPlayerCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps, TimelessElement } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren, TimelessElement } from "@/content/type";
 
 type Provider = Partial<{
-  provide_ui_video_player: ($video: HTMLVideoElement, store: VideoPlayerCore) => void;
+  provide_ui_video_player: (
+    $video: HTMLVideoElement,
+    store: VideoPlayerCore,
+  ) => void;
 }>;
 
 let global_provider: Provider | undefined;
@@ -12,7 +16,10 @@ export function setVideoPlayerProvider(provider?: Provider) {
   global_provider = provider;
 }
 
-export function Root(props: ViewProps, children?: ViewChildren): TimelessElement {
+export function Root(
+  props: ViewProps,
+  children?: ViewChildren,
+): TimelessElement {
   return View(props, children);
 }
 

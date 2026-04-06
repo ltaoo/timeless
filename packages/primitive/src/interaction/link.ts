@@ -1,6 +1,7 @@
 import { Ref, combine, isRef } from "@timeless/reactive";
 
-import { View, ViewAttributes, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewAttributes, ViewChildren } from "@/content/type";
 
 export interface LinkProps extends Omit<ViewProps, "as"> {
   href?: string | Ref<string>;

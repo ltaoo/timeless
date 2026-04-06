@@ -1,6 +1,6 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { ViewChildren, isElement } from "@/content/view";
+import { ViewChildren, isElement } from "@/content/type";
 import { safeCreateTextNode } from "@/util/env";
 
 export function Show(props: {

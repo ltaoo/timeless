@@ -1,6 +1,7 @@
 import { TabHeaderCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { getHost } from "@/host";
 
 export function Root(

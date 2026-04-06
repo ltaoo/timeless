@@ -1,5 +1,5 @@
 import { computed, refobj, classNames } from "@timeless/primitive";
-import { For, NativeImg, Show, View, ViewProps } from "@timeless/primitive";
+import { For, Img, Show, View, ViewProps } from "@timeless/primitive";
 import { ButtonCore, CheckboxCore, InputCore } from "@timeless/ui";
 
 import { Button } from "./button";
@@ -154,7 +154,7 @@ export function LLMProviderForm(
                     ),
                     ok() {
                       return [
-                        NativeImg({
+                        Img({
                           class:
                             "h-10 w-10 shrink-0 rounded-lg object-contain p-1 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950",
                           src: computed(state_, (s) => {
@@ -202,135 +202,135 @@ export function LLMProviderForm(
                   class: "h-5 w-5",
                 }),
               ]),
-            Show({
-              when: enabled_,
-              ok() {
-                return [
-                  View({ class: "mt-6 space-y-6" }, [
-                    View({ class: "grid grid-cols-1 md:grid-cols-2 gap-4" }, [
-                      View({ class: "space-y-2" }, [
-                        View(
-                          {
-                            class:
-                              "text-sm font-medium text-zinc-700 dark:text-zinc-300",
-                          },
-                          ["API 代理地址"],
-                        ),
-                        Input({ store: api_proxy_input$ }),
-                      ]),
-                      View({ class: "space-y-2" }, [
-                        View(
-                          {
-                            class:
-                              "text-sm font-medium text-zinc-700 dark:text-zinc-300",
-                          },
-                          ["API Key"],
-                        ),
-                        Input({ store: api_key_input$ }),
-                      ]),
-                    ]),
-                    View({ class: "space-y-3" }, [
-                      View(
-                        {
-                          class:
-                            "text-sm font-medium text-zinc-700 dark:text-zinc-300",
-                        },
-                        ["模型选择"],
-                      ),
-                      View({ class: "flex flex-wrap gap-2" }, [
-                        For({
-                          each: computed(state_, (s) => {
-                            const p = (s.providers || []).find(
-                              (x) => x.id === provider.id,
-                            );
-                            return p?.models || [];
-                          }),
-                          key: "id",
-                          render(model) {
-                            const model_checkbox$ = new CheckboxCore({
-                              checked: model.enabled,
-                              onChange: (checked) => {
-                                store.toggleModelEnabled?.({
-                                  provider_id: provider.id,
-                                  model_id: model.id,
-                                  enabled: checked,
-                                });
-                              },
-                            });
-                            const delete_btn$ = new ButtonCore({
-                              variant: "link",
-                              size: "xs",
-                              onClick: () => {
-                                store.deleteProviderModel?.({
-                                  provider_id: provider.id,
-                                  model_id: model.id,
-                                });
-                              },
-                            });
-                            return View(
-                              {
-                                class:
-                                  "flex items-center gap-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2",
-                              },
-                              [
-                                View(
-                                  {
-                                    class:
-                                      "text-sm text-zinc-700 dark:text-zinc-300",
-                                  },
-                                  [model.name],
-                                ),
-                                Show({
-                                  when: !model.builtin,
-                                  ok() {
-                                    return [
-                                      Button(
-                                        {
-                                          store: delete_btn$,
-                                          class:
-                                            "text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-0 h-auto",
-                                        },
-                                        ["删除"],
-                                      ),
-                                    ];
-                                  },
-                                }),
-                                Checkbox({
-                                  id: `${provider.id}-${model.id}`,
-                                  store: model_checkbox$,
-                                  class: "h-4 w-4",
-                                }),
-                              ],
-                            );
-                          },
-                        }),
-                      ]),
-                      View(
-                        {
-                          class:
-                            "pt-3 border-t border-zinc-200 dark:border-zinc-800 space-y-2",
-                        },
-                        [
+              Show({
+                when: enabled_,
+                ok() {
+                  return [
+                    View({ class: "mt-6 space-y-6" }, [
+                      View({ class: "grid grid-cols-1 md:grid-cols-2 gap-4" }, [
+                        View({ class: "space-y-2" }, [
                           View(
                             {
                               class:
                                 "text-sm font-medium text-zinc-700 dark:text-zinc-300",
                             },
-                            ["添加新模型"],
+                            ["API 代理地址"],
                           ),
-                          View({ class: "flex items-center gap-2" }, [
-                            View({ class: "flex-1" }, [
-                              Input({ store: pending_model_input$ }),
+                          Input({ store: api_proxy_input$ }),
+                        ]),
+                        View({ class: "space-y-2" }, [
+                          View(
+                            {
+                              class:
+                                "text-sm font-medium text-zinc-700 dark:text-zinc-300",
+                            },
+                            ["API Key"],
+                          ),
+                          Input({ store: api_key_input$ }),
+                        ]),
+                      ]),
+                      View({ class: "space-y-3" }, [
+                        View(
+                          {
+                            class:
+                              "text-sm font-medium text-zinc-700 dark:text-zinc-300",
+                          },
+                          ["模型选择"],
+                        ),
+                        View({ class: "flex flex-wrap gap-2" }, [
+                          For({
+                            each: computed(state_, (s) => {
+                              const p = (s.providers || []).find(
+                                (x) => x.id === provider.id,
+                              );
+                              return p?.models || [];
+                            }),
+                            key: "id",
+                            render(model) {
+                              const model_checkbox$ = new CheckboxCore({
+                                checked: model.enabled,
+                                onChange: (checked) => {
+                                  store.toggleModelEnabled?.({
+                                    provider_id: provider.id,
+                                    model_id: model.id,
+                                    enabled: checked,
+                                  });
+                                },
+                              });
+                              const delete_btn$ = new ButtonCore({
+                                variant: "link",
+                                size: "xs",
+                                onClick: () => {
+                                  store.deleteProviderModel?.({
+                                    provider_id: provider.id,
+                                    model_id: model.id,
+                                  });
+                                },
+                              });
+                              return View(
+                                {
+                                  class:
+                                    "flex items-center gap-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2",
+                                },
+                                [
+                                  View(
+                                    {
+                                      class:
+                                        "text-sm text-zinc-700 dark:text-zinc-300",
+                                    },
+                                    [model.name],
+                                  ),
+                                  Show({
+                                    when: !model.builtin,
+                                    ok() {
+                                      return [
+                                        Button(
+                                          {
+                                            store: delete_btn$,
+                                            class:
+                                              "text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-0 h-auto",
+                                          },
+                                          ["删除"],
+                                        ),
+                                      ];
+                                    },
+                                  }),
+                                  Checkbox({
+                                    id: `${provider.id}-${model.id}`,
+                                    store: model_checkbox$,
+                                    class: "h-4 w-4",
+                                  }),
+                                ],
+                              );
+                            },
+                          }),
+                        ]),
+                        View(
+                          {
+                            class:
+                              "pt-3 border-t border-zinc-200 dark:border-zinc-800 space-y-2",
+                          },
+                          [
+                            View(
+                              {
+                                class:
+                                  "text-sm font-medium text-zinc-700 dark:text-zinc-300",
+                              },
+                              ["添加新模型"],
+                            ),
+                            View({ class: "flex items-center gap-2" }, [
+                              View({ class: "flex-1" }, [
+                                Input({ store: pending_model_input$ }),
+                              ]),
+                              Button({ store: add_model_btn$ }, ["添加"]),
                             ]),
-                            Button({ store: add_model_btn$ }, ["添加"]),
-                          ]),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ]),
                     ]),
-                  ]),
-                ];
-              },
-            }),
+                  ];
+                },
+              }),
             ]),
           ]);
         },

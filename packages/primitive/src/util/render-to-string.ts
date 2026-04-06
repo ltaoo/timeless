@@ -1,4 +1,4 @@
-import { TimelessElement } from "@/content/view";
+import { TimelessElement } from "@/content/type";
 
 import { STUB_MARKER } from "./env";
 

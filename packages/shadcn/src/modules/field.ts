@@ -152,10 +152,10 @@ export function FieldInlineLabel(
           return !!(t && t.length);
         }),
         ok() {
-          return [h(Fragment, {}, children)];
+          return [Fragment({}, children)];
         },
         else() {
-          return [h(Fragment, {}, [computed(state_, (t) => t.label)])];
+          return [Fragment({}, [computed(state_, (t) => t.label)])];
         },
       }),
     ],
@@ -265,14 +265,13 @@ export function Field(
               },
               [],
             ),
-            h(Fragment, {}, children),
+            Fragment({}, children),
           ];
         },
         else() {
           return [
-            h(Fragment, {}, children),
-            h(
-              FieldLabel,
+            Fragment({}, children),
+            FieldLabel(
               {
                 class: "inline",
                 store: props.store,

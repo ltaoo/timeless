@@ -4,6 +4,7 @@ import {
   View,
   For,
   Fragment,
+  Img,
   ref,
   combine,
   computed,
@@ -141,6 +142,13 @@ function ApplicationView() {
       },
     },
     [
+      Img({
+        src: "/public/avatar.jpeg",
+        style: {
+          width: "60px",
+          height: "60px",
+        },
+      }),
       View(
         {
           style: {

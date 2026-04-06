@@ -7,6 +7,7 @@ import { CanvasGrid } from "@/host/grid";
 import { CanvasText } from "@/host/text";
 import { CanvasHostNode } from "@/host/type";
 import { CanvasDocument, createCanvasDocument } from "@/host/draw";
+import { CanvasImg } from "@/host/img";
 
 function build(
   elm: TimelessElement,
@@ -23,6 +24,12 @@ function build(
     const text$ = CanvasText(elm.value as any, canvas);
     elm.$elm = text$;
     return text$;
+  }
+  if (elm.t === "img") {
+    const img$ = CanvasImg({ canvas, build });
+    elm.$elm = img$;
+    img$.render(elm);
+    return img$;
   }
   if (elm.t === "grid") {
     const grid$ = CanvasGrid({ canvas, build });

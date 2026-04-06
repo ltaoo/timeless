@@ -2,7 +2,8 @@ import { ref, computed } from "@timeless/reactive";
 import { CheckboxCore, CheckboxGroupCore } from "@timeless/ui";
 
 import { Fragment } from "@/content/fragment";
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";
 import { Input as NativeInput, InputProps } from "@/input/input";
 
@@ -66,31 +67,29 @@ export function Indicator(
   const state_ = ref(store.state);
   const events: any[] = [];
 
-  return Show(
-    {
-      when: computed(state_, (d) => !!d.checked),
-      ok() {
-        return children || [];
-      },
-      onMounted() {
+  return Show({
+    when: computed(state_, (d) => !!d.checked),
+    ok() {
+      return children || [];
+    },
+    onMounted() {
+      events.push(
+        store.onStateChange(() => {
+          state_.as(store.state);
+        }),
+      );
+      if (store.onChange) {
         events.push(
-          store.onStateChange(() => {
+          store.onChange(() => {
             state_.as(store.state);
           }),
         );
-        if (store.onChange) {
-          events.push(
-            store.onChange(() => {
-              state_.as(store.state);
-            }),
-          );
-        }
-      },
-      onUnmounted() {
-        for (const fn of events) if (typeof fn === "function") fn();
-      },
+      }
     },
-  );
+    onUnmounted() {
+      for (const fn of events) if (typeof fn === "function") fn();
+    },
+  });
 }
 
 export function Input(

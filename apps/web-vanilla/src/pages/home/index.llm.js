@@ -19,7 +19,7 @@ export default function LLMPageView() {
       const logoUri = String(provider?.logo_uri || "");
       const disabled = !provider?.enabled;
       if (logoUri) {
-        return NativeImg({
+        return Img({
           class: classNames([
             "size-4 rounded-sm object-cover shrink-0",
             disabled ? "opacity-50" : "",

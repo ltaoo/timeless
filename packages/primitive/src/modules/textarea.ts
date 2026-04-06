@@ -1,7 +1,8 @@
 import { computed, ref, refobj } from "@timeless/reactive";
 import { InputCore } from "@timeless/ui";
 
-import { View, ViewProps, ViewChildren } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { Textarea as NativeTextarea } from "@/input/textarea";
 import { getHost } from "@/host";
 

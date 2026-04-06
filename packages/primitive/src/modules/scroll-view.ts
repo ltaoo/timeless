@@ -1,7 +1,8 @@
 import { ref, computed } from "@timeless/reactive";
 import { ScrollViewCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps, TimelessElement } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren, TimelessElement } from "@/content/type";
 import { Show } from "@/reactive/show";
 import { h } from "@/util/h";
 

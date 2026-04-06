@@ -1,11 +1,11 @@
 import { refobj, computed } from "@timeless/reactive";
 import { StepCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { For } from "@/reactive/for";
 import { Show } from "@/reactive/show";
 import { Txt } from "@/content/text";
-import { h } from "@/util/h";
 
 export type StepItem = {
   title: string;
@@ -119,8 +119,7 @@ export function Indicator(
         when: !!children,
         ok() {
           return [
-            h(
-              Txt,
+            Txt(
               computed(state_, (s) =>
                 index < s.value ? "✓" : String(index + 1),
               ),

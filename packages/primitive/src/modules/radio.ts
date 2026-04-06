@@ -1,7 +1,8 @@
 import { ref, computed } from "@timeless/reactive";
 import { RadioCore, RadioGroupCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";
 import { Input as NativeInput, InputProps } from "@/input/input";
 import { Fragment } from "@/content/fragment";
@@ -60,24 +61,22 @@ export function Indicator(
   const state_ = ref(store.state);
   const events: any[] = [];
 
-  return Show(
-    {
-      when: computed(state_, (d) => d.checked),
-      ok() {
-        return children || [];
-      },
-      onMounted() {
-        events.push(
-          store.onStateChange(() => {
-            state_.as(store.state);
-          }),
-        );
-      },
-      onUnmounted() {
-        for (const fn of events) if (typeof fn === "function") fn();
-      },
+  return Show({
+    when: computed(state_, (d) => d.checked),
+    ok() {
+      return children || [];
     },
-  );
+    onMounted() {
+      events.push(
+        store.onStateChange(() => {
+          state_.as(store.state);
+        }),
+      );
+    },
+    onUnmounted() {
+      for (const fn of events) if (typeof fn === "function") fn();
+    },
+  });
 }
 
 export function Input(props: InputProps & { store: RadioCore; id?: string }) {

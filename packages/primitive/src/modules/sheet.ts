@@ -1,6 +1,7 @@
 import { DialogCore } from "@timeless/ui";
 
-import { View, ViewChildren, ViewProps } from "@/content/view";
+import { View, ViewProps } from "@/content/view";
+import { ViewChildren } from "@/content/type";
 
 import { Portal } from "./portal";
 import { Presence } from "./presence";
