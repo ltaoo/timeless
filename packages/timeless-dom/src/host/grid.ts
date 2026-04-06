@@ -1,6 +1,6 @@
 import { isElement, TimelessElement } from "@timeless/timeless";
 
-import { DOMHost } from "./index";
+import { DOMHostNode } from "./type";
 import { DOMView } from "./view";
 
 export interface DOMGrid {
@@ -11,7 +11,7 @@ export interface DOMGrid {
 }
 
 export function DOMGrid(props: {
-  build: (elm: TimelessElement) => DOMHost;
+  build: (elm: TimelessElement) => DOMHostNode;
 }): DOMGrid {
   const view$ = DOMView(props);
 

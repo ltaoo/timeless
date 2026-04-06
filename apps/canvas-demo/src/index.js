@@ -1,4 +1,4 @@
-import { Grid, View, Txt, For, ref, combine, refarr } from "@timeless/timeless";
+import { Grid, View, For, ref, combine, refarr } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-canvas";
 
 const apps = [
@@ -182,7 +182,11 @@ function ApplicationView() {
                 ),
                 View(
                   {
-                    style: { textAlign: "center", fontSize: 12, color: "gray" },
+                    style: {
+                      textAlign: "center",
+                      fontSize: 12,
+                      color: "gray",
+                    },
                   },
                   [app.subtitle],
                 ),
@@ -197,7 +201,7 @@ function ApplicationView() {
 
 const elm = ApplicationView({});
 console.log("[]", elm);
-render(elm, document.getElementById("c"), {
+render(elm, document.getElementById("root"), {
   // onVNodeTreeCreated(data) {
   //   console.log(data);
   // },

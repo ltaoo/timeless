@@ -1,76 +1,15 @@
-import {
-  type TimelessHost,
-  type TimelessElement,
-  getHost,
-  isElement,
-  isRef,
-} from "@timeless/timeless";
+import { type TimelessElement, isElement } from "@timeless/timeless";
 
-import { viewStyleToCssText } from "../modules/style";
-import { DOMShow } from "@/host/show";
 import { DOMView, isDOMView } from "@/host/view";
-import { DOMFor } from "@/host/for";
 import { DOMGrid } from "@/host/grid";
 import { DOMText } from "@/host/text";
-import { DOMHost } from "@/host";
+import { DOMShow } from "@/host/show";
+import { DOMFor } from "@/host/for";
+import { DOMHostNode } from "@/host/type";
 
-export type HostOperation = {
-  method: string;
-  args: any[];
-};
-
-type RecordingState = {
-  enabled: boolean;
-  ops: HostOperation[];
-};
-
-let _recording: null | {
-  host: TimelessHost;
-  baseHost: TimelessHost;
-  state: RecordingState;
-} = null;
-
-function ensureRecordingDomHost(): {
-  host: TimelessHost;
-  state: RecordingState;
-} {
-  const currentHost = getHost();
-  if (_recording) {
-    if (_recording.host === currentHost) {
-      return { host: _recording.host, state: _recording.state };
-    }
-    if (_recording.baseHost === currentHost) {
-      return { host: _recording.host, state: _recording.state };
-    }
-  }
-
-  const baseHost = currentHost;
-
-  const state: RecordingState = { enabled: false, ops: [] };
-  const proxy = new Proxy(baseHost as any, {
-    get(target, prop, receiver) {
-      const v = Reflect.get(target, prop, receiver);
-      if (typeof prop === "string" && typeof v === "function") {
-        return (...args: any[]) => {
-          if (state.enabled) state.ops.push({ method: prop, args });
-          return v.apply(target, args);
-        };
-      }
-      return v;
-    },
-  }) as TimelessHost;
-
-  _recording = { host: proxy, baseHost, state };
-  return { host: proxy, state };
-}
-
-function build(elm: TimelessElement, host: TimelessHost): DOMHost {
+function build(elm: TimelessElement): DOMHostNode {
   if (elm.t === "view") {
-    const view$ = DOMView({
-      build(elm: TimelessElement) {
-        return build(elm, host);
-      },
-    });
+    const view$ = DOMView({ build });
     elm.$elm = view$;
     view$.render(elm);
     return view$;
@@ -82,31 +21,19 @@ function build(elm: TimelessElement, host: TimelessHost): DOMHost {
     return text$;
   }
   if (elm.t === "grid") {
-    const grid$ = DOMGrid({
-      build(elm) {
-        return build(elm, host);
-      },
-    });
+    const grid$ = DOMGrid({ build });
     elm.$elm = grid$;
     grid$.render(elm);
     return grid$;
   }
   if (elm.t === "show") {
-    const show$ = DOMShow({
-      build(elm: TimelessElement) {
-        return build(elm, host);
-      },
-    });
+    const show$ = DOMShow({ build });
     elm.$elm = show$;
     show$.render(elm);
     return show$;
   }
   if (elm.t === "for") {
-    const for$ = DOMFor({
-      build(elm: TimelessElement) {
-        return build(elm, host);
-      },
-    });
+    const for$ = DOMFor({ build });
     elm.$elm = for$;
     for$.render(elm);
     return for$;
@@ -135,18 +62,18 @@ export function render(
     return;
   }
 
-  const { host, state } = ensureRecordingDomHost();
+  // const { host, state } = ensureRecordingDomHost();
 
   // setHost(host);
   // registerDomComponents();
 
-  const ops: HostOperation[] = [];
-  state.ops = ops;
-  state.enabled = true;
+  // const ops: HostOperation[] = [];
+  // state.ops = ops;
+  // state.enabled = true;
 
   if (isElement(elm)) {
     // const $content = elm.render();
-    const host$ = build(elm, host);
+    const host$ = build(elm);
     if (!host$) {
       console.error("[Render] Element render return null");
       return;

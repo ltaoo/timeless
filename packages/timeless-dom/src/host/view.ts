@@ -5,18 +5,20 @@ import {
   TimelessElement,
   ViewStyleProperties,
 } from "@timeless/timeless";
-import { DOMHost } from ".";
+
+import { DOMHostNode } from "./type";
 
 export interface DOMView {
   $elm: HTMLDivElement;
   isDocumentFragment(): boolean;
   getChildNodes(): NodeListOf<ChildNode>;
+  setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   render(elm: TimelessElement): HTMLDivElement;
 }
 
 export function DOMView(props: {
-  build: (elm: TimelessElement) => DOMHost;
+  build: (elm: TimelessElement) => DOMHostNode;
 }): DOMView {
   const $elm = document.createElement("div");
 
@@ -92,6 +94,9 @@ export function DOMView(props: {
     },
     getChildNodes() {
       return $elm.childNodes;
+    },
+    setStyle(style: ViewStyleProperties) {
+      methods.setStyle(style);
     },
     setStyleValue(key: any, value: string) {
       $elm.style[key] = value;

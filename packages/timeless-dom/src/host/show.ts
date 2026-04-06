@@ -1,6 +1,6 @@
 import { isElement, TimelessElement } from "@timeless/timeless";
 
-import { DOMHost } from "./index";
+import { DOMHostNode } from "./type";
 
 export interface DOMShow {
   $elm: DocumentFragment;
@@ -24,7 +24,7 @@ export interface DOMShow {
 }
 
 export function DOMShow(props: {
-  build: (elm: TimelessElement) => DOMHost;
+  build: (elm: TimelessElement) => DOMHostNode;
 }): DOMShow {
   const methods = {
     unmount(event: {

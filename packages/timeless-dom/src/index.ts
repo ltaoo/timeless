@@ -1,11 +1,11 @@
 import { render } from "./renderer";
-import { hydrate, installDomHost } from "./renderer/hydrate";
+import { hydrate } from "./renderer/hydrate";
 
 console.log("dom.version" + __Version);
 
-if (typeof document !== "undefined" && typeof window !== "undefined") {
-  installDomHost();
-}
+// if (typeof document !== "undefined" && typeof window !== "undefined") {
+//   installDomHost();
+// }
 
 export { render };
 export { hydrate };

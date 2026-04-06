@@ -269,14 +269,6 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           state.props.styleSets = [];
         }
       }
-      const apply = (v: ViewStyleProperties) => {
-        // console.log("[]primitive style value changed", $elm, v);
-        if ($elm) {
-          if (typeof $elm.setStyleValue === "function") {
-            $elm.setStyleValue(v);
-          }
-        }
-      };
       if (style) {
         (() => {
           if (isRef(style)) {
@@ -287,7 +279,9 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
                   ...state.props.style,
                   ...(style.value || {}),
                 };
-                apply(state.props.style);
+                if ($elm && typeof $elm.setStyle === "function") {
+                  $elm.setStyle(state.props.style);
+                }
               },
             });
             return;
@@ -298,12 +292,6 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
               state.props.style[k] = v.value;
               v.subscribe({
                 onChange(v) {
-                  // console.log('style value changed', k, v);
-                  // state.props.style = {
-                  //   ...state.props.style,
-                  //   [k]: v,
-                  // } as ViewStyleProperties;
-                  // apply(state.props.style);
                   if ($elm) {
                     $elm.setStyleValue(k, v);
                   }

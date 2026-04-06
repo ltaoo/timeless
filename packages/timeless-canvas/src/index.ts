@@ -1,5 +1,7 @@
 export * from "./renderer";
-import { getCurrentHost } from "./renderer";
+import { getCurrentHost } from "./host";
+
+export { render } from "./renderer/index";
 
 export const platform = {
   addEventListener(type: string, handler: (event: any) => void, options?: any) {

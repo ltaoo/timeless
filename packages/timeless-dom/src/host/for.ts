@@ -1,6 +1,6 @@
 import { isElement, TimelessElement } from "@timeless/timeless";
 
-import { DOMHost } from "./index";
+import { DOMHostNode } from "./type";
 
 export interface DOMFor {
   $elm: DocumentFragment;
@@ -10,7 +10,7 @@ export interface DOMFor {
 }
 
 export function DOMFor(props: {
-  build: (elm: TimelessElement) => DOMHost;
+  build: (elm: TimelessElement) => DOMHostNode;
 }): DOMFor {
   const $elm = document.createDocumentFragment();
 

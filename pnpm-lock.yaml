@@ -641,6 +641,9 @@ importers:
 
   packages/timeless-canvas:
     dependencies:
+      '@timeless/primitive':
+        specifier: workspace:*
+        version: link:../primitive
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless
@@ -718,6 +721,9 @@ importers:
       '@timeless/timeless':
         specifier: workspace:^
         version: link:../timeless
+      '@timeless/timeless-dom':
+        specifier: workspace:^
+        version: link:../timeless-dom
 
   packages/vue:
     dependencies:

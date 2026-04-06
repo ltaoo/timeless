@@ -1,19 +1,20 @@
-import { TimelessElement } from "@timeless/timeless";
-
 export interface DOMText {
   $elm: null | Text;
   isDocumentFragment(): boolean;
   getChildNodes(): NodeListOf<ChildNode>;
+  setContent(value: string | number | null): void;
   render(): Text | null;
 }
 
 export function DOMText(value?: string | null): DOMText {
-  const $text = (() => {
-    if (value !== null && value !== undefined) {
-      return document.createTextNode(String(value));
-    }
-    return null;
-  })();
+  const $text = document.createTextNode(
+    (() => {
+      if (value !== null && value !== undefined) {
+        return String(value);
+      }
+      return "";
+    })(),
+  );
   return {
     get $elm() {
       return $text;
@@ -23,6 +24,11 @@ export function DOMText(value?: string | null): DOMText {
     },
     isDocumentFragment() {
       return true;
+    },
+    setContent(v: string | number | null) {
+      if (v) {
+        $text.textContent = String(v);
+      }
     },
     render() {
       return $text;

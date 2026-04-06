@@ -41,6 +41,9 @@ function ApplicationView() {
     },
   ]);
 
+  function handleSelectCard(idx) {
+    focused.set(xyFromIdx(idx));
+  }
   function xyFromIdx(idx) {
     return { x: idx % columns, y: Math.floor(idx / columns) };
   }
@@ -200,6 +203,9 @@ function ApplicationView() {
                           ? "#007bff"
                           : "rgba(255,255,255,0.18)";
                       }),
+                    },
+                    onClick() {
+                      handleSelectCard(idx.value);
                     },
                   },
                   [
