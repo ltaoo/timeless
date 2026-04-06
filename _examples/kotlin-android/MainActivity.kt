@@ -1,9 +1,11 @@
 package com.example.todo
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,7 +32,9 @@ class MainActivity : AppCompatActivity() {
         container.addView(editText)
 
         addButton = Button(this).apply {
-            text = "Add"
+            text = ""
+            val icon: Drawable? = ContextCompat.getDrawable(context, android.R.drawable.ic_input_add)
+            setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
             setOnClickListener { addTodo() }
         }
         container.addView(addButton)

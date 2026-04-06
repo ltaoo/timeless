@@ -2,6 +2,7 @@
  * @file canvas 模拟 DOM 实现
  */
 import { isRef } from "@timeless/timeless";
+import * as ASN from "@timeless/svg/asn";
 
 export type BoundingRect = {
   top: number;
@@ -170,6 +171,14 @@ export type CanvasDocument = _CanvasHostElement & {
   draw(): void;
   destroy(): void;
   enableDebug(enabled: boolean): void;
+  createIcon(
+    iconName: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    color?: string,
+  ): void;
 };
 
 export type RenderOptions = Omit<CreateCanvasHostOptions, "canvas"> & {
@@ -1178,7 +1187,23 @@ type DrawCommand =
   | { op: "setTextAlign"; value: CanvasTextAlign }
   | { op: "setTextBaseline"; value: CanvasTextBaseline }
   | { op: "fillText"; text: string; x: number; y: number }
-  | { op: "drawImage"; image: HTMLImageElement; x: number; y: number; w: number; h: number };
+  | {
+      op: "drawImage";
+      image: HTMLImageElement;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+    }
+  | {
+      op: "drawIcon";
+      iconName: string;
+      color?: string;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+    };
 
 function recordNodeToDisplayList(
   node: CanvasNode,
@@ -1271,7 +1296,11 @@ function recordNodeToDisplayList(
       if (src && rect.width > 0 && rect.height > 0) {
         // Get the image element from the global image cache
         const imageElement = (node as any)._imageElement;
-        if (imageElement && imageElement.complete && imageElement.naturalWidth > 0) {
+        if (
+          imageElement &&
+          imageElement.complete &&
+          imageElement.naturalWidth > 0
+        ) {
           out.push({ op: "save" }, { op: "setGlobalAlpha", alpha });
           out.push({
             op: "drawImage",
@@ -1283,6 +1312,25 @@ function recordNodeToDisplayList(
           });
           out.push({ op: "restore" });
         }
+      }
+    }
+    if (node.tag === "div" && (node as any)._iconName) {
+      const iconName = (node as any)._iconName;
+      const iconColor = (node as any)._iconColor;
+      console.log("[recordNodeToDisplayList] Icon detected:", { iconName, iconColor, rect });
+      if (iconName && rect.width > 0 && rect.height > 0) {
+        out.push({ op: "save" }, { op: "setGlobalAlpha", alpha });
+        out.push({
+          op: "drawIcon",
+          iconName,
+          color: iconColor,
+          x: rect.left,
+          y: rect.top,
+          w: rect.width,
+          h: rect.height,
+        });
+        out.push({ op: "restore" });
+        console.log("[recordNodeToDisplayList] Icon command added to display list");
       }
     }
 
@@ -1381,10 +1429,407 @@ function executeDisplayList(
           // Silently ignore image drawing errors
         }
         break;
+      case "drawIcon":
+        try {
+          console.log("[executeDisplayList] Drawing icon:", cmd);
+          // Convert kebab-case to PascalCase
+          const pascalName = cmd.iconName
+            .split("-")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join("");
+
+          console.log("[executeDisplayList] Looking for ASN:", pascalName);
+          const asnNode = (ASN as any)[pascalName];
+          if (asnNode) {
+            console.log("[executeDisplayList] ASN found, rendering:", asnNode);
+            renderIconToCanvas(
+              ctx,
+              asnNode,
+              { color: cmd.color },
+              cmd.x,
+              cmd.y,
+              cmd.w,
+              cmd.h,
+            );
+          } else {
+            console.warn("[executeDisplayList] ASN not found:", pascalName);
+          }
+        } catch (e) {
+          console.error("[executeDisplayList] Icon drawing error:", e);
+        }
+        break;
       default:
         break;
     }
   }
+}
+
+// Helper function to render icon ASN to canvas
+function renderIconToCanvas(
+  ctx: CanvasRenderingContext2D,
+  asn: any,
+  props: any,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
+  console.log("[renderIconToCanvas] Start:", { asn, props, x, y, w, h });
+
+  if (!asn || asn.tag !== "svg") {
+    console.warn("[renderIconToCanvas] Invalid ASN:", asn);
+    return;
+  }
+
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Parse viewBox to get original SVG dimensions
+  const viewBox = asn.attrs?.viewBox || "0 0 24 24";
+  const [, , vbWidth, vbHeight] = viewBox.split(/\s+/).map(parseFloat);
+
+  // Calculate scale to fit the icon into the target dimensions
+  const scaleX = w / vbWidth;
+  const scaleY = h / vbHeight;
+  console.log("[renderIconToCanvas] ViewBox:", viewBox, "Scale:", { scaleX, scaleY });
+  ctx.scale(scaleX, scaleY);
+
+  // Render children (path elements)
+  if (asn.children && asn.children.length > 0) {
+    console.log("[renderIconToCanvas] Rendering", asn.children.length, "children");
+    for (const child of asn.children) {
+      if (child.tag === "path" && child.attrs && child.attrs.d) {
+        console.log("[renderIconToCanvas] Rendering path:", child.attrs);
+        // Merge parent SVG attrs with child attrs (child attrs take precedence)
+        const mergedAttrs = { ...asn.attrs, ...child.attrs };
+        renderSVGPath(ctx, child.attrs.d, mergedAttrs, props?.color);
+      } else if (child.tag === "circle" && child.attrs) {
+        console.log("[renderIconToCanvas] Rendering circle:", child.attrs);
+        // Merge parent SVG attrs with child attrs
+        const mergedAttrs = { ...asn.attrs, ...child.attrs };
+        renderSVGCircle(ctx, child.attrs, mergedAttrs, props?.color);
+      }
+    }
+  } else {
+    console.warn("[renderIconToCanvas] No children to render");
+  }
+
+  ctx.restore();
+  console.log("[renderIconToCanvas] Complete");
+}
+
+// Parse and render SVG path
+function renderSVGPath(
+  ctx: CanvasRenderingContext2D,
+  pathData: string,
+  attrs: Record<string, string>,
+  color?: string,
+) {
+  console.log("[renderSVGPath] Start:", { pathData, attrs, color });
+  const commands = parseSVGPathData(pathData);
+  let currentX = 0;
+  let currentY = 0;
+  let startX = 0;
+  let startY = 0;
+
+  ctx.beginPath();
+  console.log("[renderSVGPath] Processing", commands.length, "commands");
+
+  for (const { cmd, values } of commands) {
+    console.log("commands", cmd, values);
+    switch (cmd) {
+      case "M":
+        currentX = values[0];
+        currentY = values[1];
+        startX = currentX;
+        startY = currentY;
+        ctx.moveTo(currentX, currentY);
+        break;
+      case "m":
+        currentX += values[0];
+        currentY += values[1];
+        startX = currentX;
+        startY = currentY;
+        ctx.moveTo(currentX, currentY);
+        break;
+      case "L":
+        for (let i = 0; i < values.length; i += 2) {
+          currentX = values[i];
+          currentY = values[i + 1];
+          ctx.lineTo(currentX, currentY);
+        }
+        break;
+      case "l":
+        for (let i = 0; i < values.length; i += 2) {
+          currentX += values[i];
+          currentY += values[i + 1];
+          ctx.lineTo(currentX, currentY);
+        }
+        break;
+      case "H":
+        currentX = values[0];
+        ctx.lineTo(currentX, currentY);
+        break;
+      case "h":
+        currentX += values[0];
+        ctx.lineTo(currentX, currentY);
+        break;
+      case "V":
+        currentY = values[0];
+        ctx.lineTo(currentX, currentY);
+        break;
+      case "v":
+        currentY += values[0];
+        ctx.lineTo(currentX, currentY);
+        break;
+      case "C":
+        for (let i = 0; i < values.length; i += 6) {
+          ctx.bezierCurveTo(
+            values[i],
+            values[i + 1],
+            values[i + 2],
+            values[i + 3],
+            values[i + 4],
+            values[i + 5],
+          );
+          currentX = values[i + 4];
+          currentY = values[i + 5];
+        }
+        break;
+      case "c":
+        for (let i = 0; i < values.length; i += 6) {
+          ctx.bezierCurveTo(
+            currentX + values[i],
+            currentY + values[i + 1],
+            currentX + values[i + 2],
+            currentY + values[i + 3],
+            currentX + values[i + 4],
+            currentY + values[i + 5],
+          );
+          currentX += values[i + 4];
+          currentY += values[i + 5];
+        }
+        break;
+      case "Q":
+        for (let i = 0; i < values.length; i += 4) {
+          ctx.quadraticCurveTo(
+            values[i],
+            values[i + 1],
+            values[i + 2],
+            values[i + 3],
+          );
+          currentX = values[i + 2];
+          currentY = values[i + 3];
+        }
+        break;
+      case "q":
+        for (let i = 0; i < values.length; i += 4) {
+          ctx.quadraticCurveTo(
+            currentX + values[i],
+            currentY + values[i + 1],
+            currentX + values[i + 2],
+            currentY + values[i + 3],
+          );
+          currentX += values[i + 2];
+          currentY += values[i + 3];
+        }
+        break;
+      case "A":
+        for (let i = 0; i < values.length; i += 7) {
+          const rx = values[i];
+          const ry = values[i + 1];
+          const xAxisRotation = values[i + 2];
+          const largeArcFlag = values[i + 3];
+          const sweepFlag = values[i + 4];
+          const x = values[i + 5];
+          const y = values[i + 6];
+          drawEllipticalArc(ctx, currentX, currentY, rx, ry, xAxisRotation, largeArcFlag, sweepFlag, x, y);
+          currentX = x;
+          currentY = y;
+        }
+        break;
+      case "a":
+        for (let i = 0; i < values.length; i += 7) {
+          const rx = values[i];
+          const ry = values[i + 1];
+          const xAxisRotation = values[i + 2];
+          const largeArcFlag = values[i + 3];
+          const sweepFlag = values[i + 4];
+          const dx = values[i + 5];
+          const dy = values[i + 6];
+          const x = currentX + dx;
+          const y = currentY + dy;
+          drawEllipticalArc(ctx, currentX, currentY, rx, ry, xAxisRotation, largeArcFlag, sweepFlag, x, y);
+          currentX = x;
+          currentY = y;
+        }
+        break;
+      case "Z":
+      case "z":
+        ctx.closePath();
+        currentX = startX;
+        currentY = startY;
+        break;
+    }
+  }
+
+  const stroke = attrs["stroke"];
+  const fill = attrs["fill"];
+  const strokeWidth = attrs["stroke-width"] || "2";
+
+  console.log("[renderSVGPath] Styling:", { stroke, fill, strokeWidth, color });
+
+  if (stroke && stroke !== "none") {
+    ctx.strokeStyle = stroke === "currentColor" ? color || "white" : stroke;
+    ctx.lineWidth = parseFloat(strokeWidth);
+    ctx.lineCap = (attrs["stroke-linecap"] as any) || "round";
+    ctx.lineJoin = (attrs["stroke-linejoin"] as any) || "round";
+    console.log("[renderSVGPath] Stroking with:", ctx.strokeStyle, ctx.lineWidth);
+    ctx.stroke();
+  }
+
+  if (fill && fill !== "none") {
+    ctx.fillStyle = fill === "currentColor" ? color || "white" : fill;
+    console.log("[renderSVGPath] Filling with:", ctx.fillStyle);
+    ctx.fill();
+  }
+
+  console.log("[renderSVGPath] Complete");
+}
+
+// Render SVG circle element
+function renderSVGCircle(
+  ctx: CanvasRenderingContext2D,
+  circleAttrs: Record<string, string>,
+  attrs: Record<string, string>,
+  color?: string,
+) {
+  console.log("[renderSVGCircle] Start:", { circleAttrs, attrs, color });
+
+  const cx = parseFloat(circleAttrs.cx || "0");
+  const cy = parseFloat(circleAttrs.cy || "0");
+  const r = parseFloat(circleAttrs.r || "0");
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+
+  const stroke = attrs["stroke"];
+  const fill = attrs["fill"];
+  const strokeWidth = attrs["stroke-width"] || "2";
+
+  console.log("[renderSVGCircle] Styling:", { stroke, fill, strokeWidth, color });
+
+  if (stroke && stroke !== "none") {
+    ctx.strokeStyle = stroke === "currentColor" ? color || "white" : stroke;
+    ctx.lineWidth = parseFloat(strokeWidth);
+    ctx.lineCap = (attrs["stroke-linecap"] as any) || "round";
+    ctx.lineJoin = (attrs["stroke-linejoin"] as any) || "round";
+    console.log("[renderSVGCircle] Stroking with:", ctx.strokeStyle, ctx.lineWidth);
+    ctx.stroke();
+  }
+
+  if (fill && fill !== "none") {
+    ctx.fillStyle = fill === "currentColor" ? color || "white" : fill;
+    console.log("[renderSVGCircle] Filling with:", ctx.fillStyle);
+    ctx.fill();
+  }
+
+  console.log("[renderSVGCircle] Complete");
+}
+
+function parseSVGPathData(
+  pathData: string,
+): Array<{ cmd: string; values: number[] }> {
+  const commands: Array<{ cmd: string; values: number[] }> = [];
+  const regex = /([MLHVZCSQTAmlhvzcsqta])([^MLHVZCSQTAmlhvzcsqta]*)/g;
+  let match;
+
+  while ((match = regex.exec(pathData)) !== null) {
+    const cmd = match[1];
+    const valueStr = match[2].trim();
+    const values = valueStr
+      ? valueStr
+          .split(/[\s,]+/)
+          .filter((v) => v)
+          .map((v) => parseFloat(v))
+      : [];
+    commands.push({ cmd, values });
+  }
+
+  return commands;
+}
+
+// Helper function to draw elliptical arc (SVG A/a command)
+function drawEllipticalArc(
+  ctx: CanvasRenderingContext2D,
+  x1: number,
+  y1: number,
+  rx: number,
+  ry: number,
+  xAxisRotation: number,
+  largeArcFlag: number,
+  sweepFlag: number,
+  x2: number,
+  y2: number,
+) {
+  // Handle degenerate cases
+  if (rx === 0 || ry === 0) {
+    ctx.lineTo(x2, y2);
+    return;
+  }
+
+  // Convert rotation angle to radians
+  const phi = (xAxisRotation * Math.PI) / 180;
+  const cosPhi = Math.cos(phi);
+  const sinPhi = Math.sin(phi);
+
+  // Compute center point
+  const dx = (x1 - x2) / 2;
+  const dy = (y1 - y2) / 2;
+  const x1p = cosPhi * dx + sinPhi * dy;
+  const y1p = -sinPhi * dx + cosPhi * dy;
+
+  // Correct radii if needed
+  rx = Math.abs(rx);
+  ry = Math.abs(ry);
+  const lambda = (x1p * x1p) / (rx * rx) + (y1p * y1p) / (ry * ry);
+  if (lambda > 1) {
+    rx *= Math.sqrt(lambda);
+    ry *= Math.sqrt(lambda);
+  }
+
+  // Compute center
+  const sign = largeArcFlag !== sweepFlag ? 1 : -1;
+  const sq = Math.max(
+    0,
+    (rx * rx * ry * ry - rx * rx * y1p * y1p - ry * ry * x1p * x1p) /
+      (rx * rx * y1p * y1p + ry * ry * x1p * x1p),
+  );
+  const coef = sign * Math.sqrt(sq);
+  const cxp = coef * ((rx * y1p) / ry);
+  const cyp = coef * (-(ry * x1p) / rx);
+
+  const cx = cosPhi * cxp - sinPhi * cyp + (x1 + x2) / 2;
+  const cy = sinPhi * cxp + cosPhi * cyp + (y1 + y2) / 2;
+
+  // Compute angles
+  const theta1 = Math.atan2((y1p - cyp) / ry, (x1p - cxp) / rx);
+  const theta2 = Math.atan2((-y1p - cyp) / ry, (-x1p - cxp) / rx);
+  let dTheta = theta2 - theta1;
+
+  if (sweepFlag && dTheta < 0) {
+    dTheta += 2 * Math.PI;
+  } else if (!sweepFlag && dTheta > 0) {
+    dTheta -= 2 * Math.PI;
+  }
+
+  // Draw the arc using ellipse
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(phi);
+  ctx.scale(1, ry / rx);
+  ctx.arc(0, 0, rx, theta1, theta1 + dTheta, !sweepFlag);
+  ctx.restore();
 }
 
 function unionRects(
@@ -2518,6 +2963,32 @@ export function createCanvasDocument(
     getFirstChild(node: any) {
       if (!isCanvasNode(node)) return null;
       return node.firstChild;
+    },
+    createIcon(
+      iconName: string,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+      color?: string,
+    ) {
+      if (!ctx) return;
+
+      // Convert kebab-case to PascalCase (e.g., "check" -> "Check", "chevron-down" -> "ChevronDown")
+      const pascalName = iconName
+        .split("-")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join("");
+
+      // Get ASN node from @timeless/svg/asn
+      const asnNode = (ASN as any)[pascalName];
+      if (!asnNode) {
+        console.warn(`Icon "${iconName}" not found in @timeless/svg/asn`);
+        return;
+      }
+
+      // Render the icon directly to the canvas context
+      renderIconToCanvas(ctx, asnNode, { color }, x, y, width, height);
     },
   };
 

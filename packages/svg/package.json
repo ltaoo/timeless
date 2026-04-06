@@ -1,0 +1,36 @@
+{
+  "name": "@timeless/svg",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./asn": {
+      "import": "./src/asn/index.ts",
+      "types": "./src/asn/index.ts"
+    },
+    "./asn/*": {
+      "import": "./src/asn/*.ts",
+      "types": "./src/asn/*.ts"
+    },
+    "./*.svg": {
+      "import": "./src/*.svg"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "svgo": "^3.2.0",
+    "typescript": "^5.3.0"
+  }
+}

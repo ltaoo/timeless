@@ -54,9 +54,14 @@ public class MainWindow : Window
 
         _addButton = new Button
         {
-            Content = "Add",
-            Width = 80,
-            Margin = new Thickness(8, 0, 0, 0)
+            Width = 44,
+            Margin = new Thickness(8, 0, 0, 0),
+            Content = new PathIcon
+            {
+                Data = StreamGeometry.Parse("M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z"),
+                Width = 24,
+                Height = 24
+            }
         };
         _addButton.Click += (s, e) => AddTodo();
         inputPanel.Children.Add(_addButton);

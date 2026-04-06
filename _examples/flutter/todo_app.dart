@@ -76,7 +76,7 @@ class _TodoScreenState extends State<TodoScreen> {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _addTodo,
-                  child: const Text('Add'),
+                  child: const Icon(Icons.add_circle),
                 ),
               ],
             ),

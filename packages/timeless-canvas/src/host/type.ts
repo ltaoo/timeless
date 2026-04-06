@@ -2,6 +2,7 @@ import { CanvasGrid } from "./grid";
 import { CanvasView } from "./view";
 import { CanvasText } from "./text";
 import { CanvasImg } from "./img";
+import { CanvasIcon } from "./icon";
 import { CanvasShow } from "./show";
 import { CanvasFor } from "./for";
 
@@ -11,5 +12,6 @@ export type CanvasHostNode =
   | CanvasView
   | CanvasText
   | CanvasImg
+  | CanvasIcon
   | CanvasShow
   | CanvasFor;

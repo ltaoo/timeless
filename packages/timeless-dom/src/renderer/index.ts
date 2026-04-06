@@ -8,6 +8,7 @@ import { DOMFor } from "@/host/for";
 import { DOMHostNode } from "@/host/type";
 import { DOMFragment, isDocumentFragment } from "@/host/fragment";
 import { DOMImg } from "@/host/img";
+import { DOMIcon } from "@/host/icon";
 
 function build(elm: TimelessElement): DOMHostNode {
   if (elm.t === "view") {
@@ -27,6 +28,12 @@ function build(elm: TimelessElement): DOMHostNode {
     elm.$elm = fragment$;
     fragment$.render(elm);
     return fragment$;
+  }
+  if (elm.t === "icon") {
+    const icon$ = DOMIcon({ build });
+    elm.$elm = icon$;
+    icon$.render(elm);
+    return icon$;
   }
   if (elm.t === "img") {
     const img$ = DOMImg({ build });

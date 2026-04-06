@@ -14,6 +14,7 @@ export * from "./content/view";
 export * from "./content/fragment";
 export * from "./content/html";
 export * from "./content/text";
+export * from "./content/icon";
 export * from "./content/lazy-view";
 export * from "./content/type";
 

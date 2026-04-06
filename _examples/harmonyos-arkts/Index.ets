@@ -62,9 +62,13 @@ struct Index {
             this.addTodo()
           })
 
-        Button('Add')
-          .margin({ left: 8 })
-          .onClick(() => this.addTodo())
+        Button() {
+          Image($r('app.media.start_icon'))
+            .width(24)
+            .height(24)
+        }
+        .margin({ left: 8 })
+        .onClick(() => this.addTodo())
       }
       .margin({ bottom: 12 })
 

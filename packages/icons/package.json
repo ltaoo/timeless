@@ -13,7 +13,8 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/primitive": "workspace:*"
+    "@timeless/primitive": "workspace:*",
+    "@timeless/svg": "workspace:*"
   },
   "peerDependencies": {},
   "exports": {

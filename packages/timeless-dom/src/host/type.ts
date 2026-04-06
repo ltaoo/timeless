@@ -3,6 +3,7 @@ import { DOMView } from "./view";
 import { DOMText } from "./text";
 import { DOMFragment } from "./fragment";
 import { DOMImg } from "./img";
+import { DOMIcon } from "./icon";
 
 import { DOMShow } from "./show";
 import { DOMFor } from "./for";
@@ -14,5 +15,6 @@ export type DOMHostNode =
   | DOMView
   | DOMText
   | DOMImg
+  | DOMIcon
   | DOMShow
   | DOMFor;

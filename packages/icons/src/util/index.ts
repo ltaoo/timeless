@@ -1,4 +1,14 @@
-import { DangerouslyInnerHTML, getHost } from "@timeless/primitive";
+import {
+  SVG,
+  Path,
+  Circle,
+  Rect,
+  Line,
+  Polyline,
+  Polygon,
+  G,
+  Text,
+} from "@timeless/primitive";
 
 export const defaultWidth = "24";
 export const defaultHeight = "24";
@@ -17,102 +27,114 @@ export type IconProps = {
   onUnmounted?: () => void;
 };
 
-// Simple SVG attribute parser
-function parseSvgAttributes(svg: string): Record<string, string> {
-  const attrs: Record<string, string> = {};
-  const match = svg.match(/<svg([^>]*)>/);
-  if (!match) return attrs;
+type ASNNode = {
+  tag: string;
+  attrs?: Record<string, string>;
+  children?: readonly ASNNode[];
+};
 
-  const attrStr = match[1];
-  const attrRegex = /(\w+(?:-\w+)*)=["']([^"']*)["']/g;
-  let m;
-  while ((m = attrRegex.exec(attrStr)) !== null) {
-    attrs[m[1]] = m[2];
+function renderASN(asn: ASNNode): any {
+  const { tag, attrs = {}, children } = asn;
+  const props: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key === "class") {
+      props.class = value;
+    } else if (key.startsWith("data-")) {
+      props.dataset = { ...props.dataset, [key.slice(5)]: value };
+    } else {
+      props[key] = value;
+    }
   }
-  return attrs;
+
+  if (!children || children.length === 0) {
+    switch (tag) {
+      case "svg":
+        return SVG(props);
+      case "path":
+        return Path(props);
+      case "circle":
+        return Circle(props);
+      case "rect":
+        return Rect(props);
+      case "line":
+        return Line(props);
+      case "polyline":
+        return Polyline(props);
+      case "polygon":
+        return Polygon(props);
+      case "g":
+        return G(props);
+      case "text":
+        return Text(props);
+      default:
+        return SVG(props);
+    }
+  }
+
+  const childElements = children.map((child) => renderASN(child));
+
+  switch (tag) {
+    case "svg":
+      return SVG(props, childElements);
+    case "g":
+      return G(props, childElements);
+    default:
+      return SVG(props, childElements);
+  }
 }
 
-// Extract inner content of SVG
-function extractSvgContent(svg: string): string {
-  const match = svg.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
-  return match ? match[1] : "";
-}
-
-// Build SVG string with merged attributes
-function buildSvgString(
-  svgAttrs: Record<string, string>,
-  innerContent: string,
-  props: IconProps,
-): string {
-  const attrs = { ...svgAttrs };
-
-  // Merge classes
-  const prevClass = attrs.class || "";
-  const incomingClass =
-    typeof props.class === "string"
-      ? props.class
-      : typeof props.className === "string"
-        ? props.className
-        : "";
-  const sizeClass =
-    props.size === undefined || props.size === null || `${props.size}` === ""
-      ? ""
-      : `size-${props.size}`;
-  const mergedClass = [prevClass, incomingClass, sizeClass]
-    .filter(Boolean)
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (mergedClass) {
-    attrs.class = mergedClass;
-  }
-
-  // Merge style
-  if (props.style && typeof props.style === "string") {
-    const prev = attrs.style || "";
-    attrs.style = prev ? prev + ";" + props.style : props.style;
-  }
-
-  // Set id
-  if (props.id && typeof props.id === "string") {
-    attrs.id = props.id;
-  }
-
-  // Build attribute string
-  const attrStr = Object.entries(attrs)
-    .map(([k, v]) => `${k}="${v}"`)
-    .join(" ");
-
-  return `<svg ${attrStr}>${innerContent}</svg>`;
-}
-
-export function createIcon(svg: string) {
-  // Parse SVG attributes and content once
-  const svgAttrs = parseSvgAttributes(svg);
-  const innerContent = extractSvgContent(svg);
-
+export function createIcon(asn: ASNNode) {
   return function (props: IconProps = {}) {
-    const finalSvg = buildSvgString(svgAttrs, innerContent, props);
-    const htmlNode = DangerouslyInnerHTML(finalSvg);
+    const mergedProps: Record<string, any> = { ...asn.attrs };
 
-    return {
-      t: "view",
-      $elm: htmlNode.$elm,
-      render() {
-        const host = getHost();
-        const $container = htmlNode.render();
-        // Return the SVG element directly, not the wrapper div
-        return host.getFirstChild($container) || $container;
-      },
-      onMounted() {
-        htmlNode.onMounted?.();
-      },
-      beforeUnmounted() {
-        htmlNode.beforeUnmounted?.();
-      },
-      onUnmounted() {
-        htmlNode.onUnmounted?.();
-      },
-    };
+    if (props.class) {
+      mergedProps.class = asn.attrs?.class
+        ? `${asn.attrs.class} ${props.class}`
+        : props.class;
+    } else if (props.className) {
+      mergedProps.class = asn.attrs?.class
+        ? `${asn.attrs.class} ${props.className}`
+        : props.className;
+    }
+
+    if (props.id) {
+      mergedProps.id = props.id;
+    }
+
+    if (props.size) {
+      mergedProps.width = String(props.size);
+      mergedProps.height = String(props.size);
+    }
+
+    if (props.onClick) {
+      mergedProps.onClick = props.onClick;
+    }
+
+    if (props.onMounted) {
+      mergedProps.onMounted = props.onMounted;
+    }
+
+    if (props.onUnmounted) {
+      mergedProps.onUnmounted = props.onUnmounted;
+    }
+
+    if (props.beforeUnmounted) {
+      mergedProps.beforeUnmounted = props.beforeUnmounted;
+    }
+
+    const svgProps: Record<string, any> = {};
+    for (const [key, value] of Object.entries(mergedProps)) {
+      if (key === "class") {
+        svgProps.class = value;
+      } else if (key.startsWith("data-")) {
+        svgProps.dataset = { ...svgProps.dataset, [key.slice(5)]: value };
+      } else {
+        svgProps[key] = value;
+      }
+    }
+
+    const children = (asn.children || []).map((child) => renderASN(child));
+    return SVG(svgProps, children);
   };
 }

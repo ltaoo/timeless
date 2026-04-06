@@ -26,7 +26,12 @@
     [self.view addSubview:_textField];
     
     _addButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [_addButton setTitle:@"Add" forState:UIControlStateNormal];
+    if (@available(iOS 13.0, *)) {
+        UIImage *addIcon = [UIImage systemImageNamed:@"plus.circle.fill"];
+        [_addButton setImage:addIcon forState:UIControlStateNormal];
+    } else {
+        [_addButton setTitle:@"Add" forState:UIControlStateNormal];
+    }
     _addButton.translatesAutoresizingMaskIntoConstraints = NO;
     [_addButton addTarget:self action:@selector(addTodo) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_addButton];

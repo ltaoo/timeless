@@ -16,10 +16,12 @@ struct ContentView: View {
                 TextField("Enter todo", text: $inputText)
                     .textFieldStyle(.roundedBorder)
                 
-                Button("Add") {
+                Button {
                     addTodo()
+                } label: {
+                    Image(systemName: "plus.circle.fill")
                 }
-                .frame(width: 60)
+                .frame(width: 44)
             }
             .padding(.horizontal)
             

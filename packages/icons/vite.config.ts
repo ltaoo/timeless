@@ -24,12 +24,15 @@ const externals = [
   "@timeless/kit",
   "@timeless/primitive",
   "@timeless/reactive",
+  "@timeless/svg",
   "@timeless/ui",
   "@timeless/utils",
 ] as const;
 
 function isExternal(id: string) {
-  return externals.some((pkgName) => id === pkgName || id.startsWith(`${pkgName}/`));
+  return externals.some(
+    (pkgName) => id === pkgName || id.startsWith(`${pkgName}/`),
+  );
 }
 
 export default defineConfig({
@@ -88,6 +91,7 @@ export default defineConfig({
           "@timeless/kit": "Timeless.kit",
           "@timeless/primitive": "Timeless",
           "@timeless/reactive": "Timeless.reactive",
+          "@timeless/svg": "Timeless.svg",
           "@timeless/ui": "Timeless.ui",
           "@timeless/utils": "Timeless.utils",
         },

@@ -21,7 +21,7 @@ class TodoViewController: UIViewController {
         textField.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(textField)
         
-        addButton.setTitle("Add", for: .normal)
+        addButton.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
         addButton.translatesAutoresizingMaskIntoConstraints = false
         addButton.addTarget(self, action: #selector(addTodo), for: .touchUpInside)
         view.addSubview(addButton)
@@ -38,7 +38,7 @@ class TodoViewController: UIViewController {
             
             addButton.centerYAnchor.constraint(equalTo: textField.centerYAnchor),
             addButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            addButton.widthAnchor.constraint(equalToConstant: 60),
+            addButton.widthAnchor.constraint(equalToConstant: 44),
             
             tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 16),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),

@@ -8,6 +8,7 @@ import { CanvasText } from "@/host/text";
 import { CanvasHostNode } from "@/host/type";
 import { CanvasDocument, createCanvasDocument } from "@/host/draw";
 import { CanvasImg } from "@/host/img";
+import { CanvasIcon } from "@/host/icon";
 
 function build(
   elm: TimelessElement,
@@ -30,6 +31,12 @@ function build(
     elm.$elm = img$;
     img$.render(elm);
     return img$;
+  }
+  if (elm.t === "icon") {
+    const icon$ = CanvasIcon({ canvas, build });
+    elm.$elm = icon$;
+    icon$.render(elm);
+    return icon$;
   }
   if (elm.t === "grid") {
     const grid$ = CanvasGrid({ canvas, build });

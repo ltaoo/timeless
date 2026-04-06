@@ -3,6 +3,7 @@ import {
   Grid,
   View,
   For,
+  Icon,
   Fragment,
   Img,
   ref,
@@ -149,6 +150,7 @@ function ApplicationView() {
           height: "60px",
         },
       }),
+      Icon({ name: "bolt", color: "#fff" }),
       View(
         {
           style: {
