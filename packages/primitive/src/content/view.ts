@@ -725,6 +725,7 @@ export interface TimelessElement {
 
 export type ViewChildren = (
   | TimelessElement
+  | TimelessElement[]
   | (() => TimelessElement)
   | string
   | number

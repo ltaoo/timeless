@@ -65,8 +65,7 @@ export function KeepAliveSubViews(
       if (!PageView) {
         return NotFoundPageView;
       }
-      return h(
-        View,
+      return View(
         {
           style: {
             "z-index": idx + 1,

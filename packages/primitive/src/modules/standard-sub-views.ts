@@ -76,8 +76,7 @@ export function StandardSubViews(
         }),
         ok() {
           return [
-            h(
-              View,
+            View(
               {
                 style: {
                   "z-index": computed(idx, (i) => i + 1),
