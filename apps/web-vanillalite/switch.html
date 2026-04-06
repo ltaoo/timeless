@@ -135,10 +135,10 @@
       const visible_ = ref(false);
 
       return View({
-        class: cn(['sub-view', props.class, computed(visible_, (t) => {
+        class: classNames(['sub-view', props.class, computed(visible_, (t) => {
           return t ? 'visible' : 'hidden';
         })]),
-        style: sn(['z-index: 99; position: fixed; left: 0; top: 0; opacity: 100; transform: translate3d(480px, 90px, 0);', props.style, computed(visible_, (t) => {
+        style: styleNames(['z-index: 99; position: fixed; left: 0; top: 0; opacity: 100; transform: translate3d(480px, 90px, 0);', props.style, computed(visible_, (t) => {
           return t ? 'color:red;' : 'color:green;';
         })])
       }, [

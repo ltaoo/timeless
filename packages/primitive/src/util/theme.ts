@@ -23,9 +23,9 @@ export function tp(part: ThemePart, ctx?: any) {
 //   const baseClass = tr.class;
 //   let classValue: any;
 //   if (isClassName(userClass)) {
-//     classValue = baseClass ? cn([baseClass, userClass]) : userClass;
+//     classValue = baseClass ? classNames([baseClass, userClass]) : userClass;
 //   } else if (isRef(userClass)) {
-//     classValue = baseClass ? cn([baseClass, userClass]) : cn([userClass]);
+//     classValue = baseClass ? classNames([baseClass, userClass]) : classNames([userClass]);
 //   } else {
 //     const c = [baseClass, userClass].filter(Boolean).join(" ") || undefined;
 //     if (c !== undefined) {

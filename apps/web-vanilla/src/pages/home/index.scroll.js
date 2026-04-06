@@ -157,7 +157,7 @@ function DownloadTaskItem(props) {
 
   return View(
     {
-      class: cn([
+      class: classNames([
         "flex items-center gap-3 px-3 py-2.5",
         "border-b border-zinc-100 dark:border-zinc-800 last:border-b-0",
       ]),
@@ -166,7 +166,7 @@ function DownloadTaskItem(props) {
       // File icon
       View(
         {
-          class: cn([
+          class: classNames([
             "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
             computed(task, (t) => {
               if (t.status === "completed") {
@@ -213,7 +213,7 @@ function DownloadTaskItem(props) {
                 },
                 [
                   View({
-                    class: cn([
+                    class: classNames([
                       "h-full rounded-full transition-all",
                       progressBg_,
                     ]),
@@ -224,7 +224,7 @@ function DownloadTaskItem(props) {
             ];
           },
         }),
-        View({ class: cn(["mt-0.5 text-xs", statusColor_]) }, [statusText_]),
+        View({ class: classNames(["mt-0.5 text-xs", statusColor_]) }, [statusText_]),
       ]),
       // Action button
       View(
@@ -318,20 +318,20 @@ export default function HomeIndexScrollViewExampleView() {
     View({ class: "space-y-8" }, [
       Section("ScrollView", [
         Item("Basic", [
-          View({ class: cn(["w-[300px] h-[200px]"]) }, [
+          View({ class: classNames(["w-[300px] h-[200px]"]) }, [
             ScrollView(
               {
                 store: new Timeless.ui.ScrollViewCore(),
-                class: cn([
+                class: classNames([
                   "rounded-md border border-zinc-200 dark:border-zinc-800",
                 ]).toString(),
               },
               [
-                View({ class: cn(["p-4 space-y-4"]) }, [
+                View({ class: classNames(["p-4 space-y-4"]) }, [
                   ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) =>
                     View(
                       {
-                        class: cn([
+                        class: classNames([
                           "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
                         ]),
                       },
@@ -352,20 +352,20 @@ export default function HomeIndexScrollViewExampleView() {
                 }, 1500);
               },
             });
-            return View({ class: cn(["w-[300px] h-[200px]"]) }, [
+            return View({ class: classNames(["w-[300px] h-[200px]"]) }, [
               ScrollView(
                 {
                   store,
-                  class: cn([
+                  class: classNames([
                     "rounded-md border border-zinc-200 dark:border-zinc-800",
                   ]).toString(),
                 },
                 [
-                  View({ class: cn(["p-4 space-y-4"]) }, [
+                  View({ class: classNames(["p-4 space-y-4"]) }, [
                     ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) =>
                       View(
                         {
-                          class: cn([
+                          class: classNames([
                             "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
                           ]),
                         },
@@ -394,22 +394,22 @@ export default function HomeIndexScrollViewExampleView() {
                 store.finishLoadingMore();
               },
             });
-            return View({ class: cn(["w-[300px] h-[200px]"]) }, [
+            return View({ class: classNames(["w-[300px] h-[200px]"]) }, [
               ScrollView(
                 {
                   store,
-                  class: cn([
+                  class: classNames([
                     "rounded-md border border-zinc-200 dark:border-zinc-800",
                   ]).toString(),
                 },
                 [
-                  View({ class: cn(["p-4"]) }, [
+                  View({ class: classNames(["p-4"]) }, [
                     For({
                       each: items,
                       render(item) {
                         return View(
                           {
-                            class: cn([
+                            class: classNames([
                               "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
                             ]),
                           },
@@ -419,7 +419,7 @@ export default function HomeIndexScrollViewExampleView() {
                     }),
                     View(
                       {
-                        class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                        class: classNames(["py-3 text-center text-xs text-zinc-400"]),
                       },
                       [Txt("Scroll to bottom to load more")],
                     ),
@@ -437,26 +437,26 @@ export default function HomeIndexScrollViewExampleView() {
                 scrollTop.as(Math.round(pos.scrollTop));
               },
             });
-            return View({ class: cn(["space-y-2"]) }, [
-              View({ class: cn(["text-xs text-zinc-400"]) }, [
+            return View({ class: classNames(["space-y-2"]) }, [
+              View({ class: classNames(["text-xs text-zinc-400"]) }, [
                 Txt(computed(scrollTop, (v) => `scrollTop: ${v}px`)),
               ]),
-              View({ class: cn(["w-[300px] h-[200px]"]) }, [
+              View({ class: classNames(["w-[300px] h-[200px]"]) }, [
                 ScrollView(
                   {
                     store,
-                    class: cn([
+                    class: classNames([
                       "rounded-md border border-zinc-200 dark:border-zinc-800",
                     ]).toString(),
                   },
                   [
-                    View({ class: cn(["p-4 space-y-4"]) }, [
+                    View({ class: classNames(["p-4 space-y-4"]) }, [
                       ...[
                         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                       ].map((i) =>
                         View(
                           {
-                            class: cn([
+                            class: classNames([
                               "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
                             ]),
                           },
@@ -537,7 +537,7 @@ export default function HomeIndexScrollViewExampleView() {
 
             return View(
               {
-                class: cn([
+                class: classNames([
                   "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
                 ]),
               },
@@ -545,7 +545,7 @@ export default function HomeIndexScrollViewExampleView() {
                 // Header
                 View(
                   {
-                    class: cn([
+                    class: classNames([
                       "flex items-center justify-between px-3 py-2.5",
                       "border-b border-zinc-200 dark:border-zinc-800",
                       "bg-zinc-50 dark:bg-zinc-900",
@@ -554,7 +554,7 @@ export default function HomeIndexScrollViewExampleView() {
                   [
                     View(
                       {
-                        class: cn([
+                        class: classNames([
                           "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
                         ]),
                       },
@@ -575,7 +575,7 @@ export default function HomeIndexScrollViewExampleView() {
                       render(task) {
                         return View(
                           {
-                            class: cn([
+                            class: classNames([
                               "flex items-center gap-3 px-3 py-2.5",
                               "border-b border-zinc-100 dark:border-zinc-800",
                             ]),
@@ -583,7 +583,7 @@ export default function HomeIndexScrollViewExampleView() {
                           [
                             View(
                               {
-                                class: cn([
+                                class: classNames([
                                   "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
                                   "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
                                 ]),
@@ -629,7 +629,7 @@ export default function HomeIndexScrollViewExampleView() {
                     }),
                     View(
                       {
-                        class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                        class: classNames(["py-3 text-center text-xs text-zinc-400"]),
                       },
                       [Txt("Scroll to bottom to load more")],
                     ),
@@ -707,7 +707,7 @@ export default function HomeIndexScrollViewExampleView() {
 
             return View(
               {
-                class: cn([
+                class: classNames([
                   "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
                 ]),
               },
@@ -715,7 +715,7 @@ export default function HomeIndexScrollViewExampleView() {
                 // Header
                 View(
                   {
-                    class: cn([
+                    class: classNames([
                       "flex items-center justify-between px-3 py-2.5",
                       "border-b border-zinc-200 dark:border-zinc-800",
                       "bg-zinc-50 dark:bg-zinc-900",
@@ -724,7 +724,7 @@ export default function HomeIndexScrollViewExampleView() {
                   [
                     View(
                       {
-                        class: cn([
+                        class: classNames([
                           "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
                         ]),
                       },
@@ -757,7 +757,7 @@ export default function HomeIndexScrollViewExampleView() {
                       render(task) {
                         return View(
                           {
-                            class: cn([
+                            class: classNames([
                               "flex items-center gap-3 px-3 py-2.5",
                               "border-b border-zinc-100 dark:border-zinc-800",
                             ]),
@@ -765,7 +765,7 @@ export default function HomeIndexScrollViewExampleView() {
                           [
                             View(
                               {
-                                class: cn([
+                                class: classNames([
                                   "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
                                   "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
                                 ]),
@@ -811,7 +811,7 @@ export default function HomeIndexScrollViewExampleView() {
                     }),
                     View(
                       {
-                        class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                        class: classNames(["py-3 text-center text-xs text-zinc-400"]),
                       },
                       [Txt("Scroll to bottom to load more")],
                     ),
@@ -897,7 +897,7 @@ export default function HomeIndexScrollViewExampleView() {
 
             return View(
               {
-                class: cn([
+                class: classNames([
                   "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
                 ]),
               },
@@ -905,7 +905,7 @@ export default function HomeIndexScrollViewExampleView() {
                 // Header
                 View(
                   {
-                    class: cn([
+                    class: classNames([
                       "flex items-center justify-between px-3 py-2.5",
                       "border-b border-zinc-200 dark:border-zinc-800",
                       "bg-zinc-50 dark:bg-zinc-900",
@@ -914,7 +914,7 @@ export default function HomeIndexScrollViewExampleView() {
                   [
                     View(
                       {
-                        class: cn([
+                        class: classNames([
                           "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
                         ]),
                       },
@@ -953,7 +953,7 @@ export default function HomeIndexScrollViewExampleView() {
                         render(task) {
                           return View(
                             {
-                              class: cn([
+                              class: classNames([
                                 "flex items-center gap-3 px-3 py-2.5",
                                 "rounded-lg",
                                 "shadow-sm",
@@ -962,7 +962,7 @@ export default function HomeIndexScrollViewExampleView() {
                             [
                               View(
                                 {
-                                  class: cn([
+                                  class: classNames([
                                     "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
                                     "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
                                   ]),
@@ -1111,7 +1111,7 @@ export default function HomeIndexScrollViewExampleView() {
 
             return View(
               {
-                class: cn([
+                class: classNames([
                   "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
                 ]),
               },
@@ -1119,7 +1119,7 @@ export default function HomeIndexScrollViewExampleView() {
                 // Header
                 View(
                   {
-                    class: cn([
+                    class: classNames([
                       "flex items-center justify-between px-3 py-2.5",
                       "border-b border-zinc-200 dark:border-zinc-800",
                       "bg-zinc-50 dark:bg-zinc-900",
@@ -1128,7 +1128,7 @@ export default function HomeIndexScrollViewExampleView() {
                   [
                     View(
                       {
-                        class: cn([
+                        class: classNames([
                           "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
                         ]),
                       },
@@ -1175,7 +1175,7 @@ export default function HomeIndexScrollViewExampleView() {
                       render(task) {
                         return View(
                           {
-                            class: cn([
+                            class: classNames([
                               "flex items-center gap-3 px-3 py-2.5",
                               "border-b border-zinc-100 dark:border-zinc-800",
                             ]),
@@ -1183,7 +1183,7 @@ export default function HomeIndexScrollViewExampleView() {
                           [
                             View(
                               {
-                                class: cn([
+                                class: classNames([
                                   "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
                                   "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
                                 ]),
@@ -1229,7 +1229,7 @@ export default function HomeIndexScrollViewExampleView() {
                     }),
                     View(
                       {
-                        class: cn(["py-3 text-center text-xs text-zinc-400"]),
+                        class: classNames(["py-3 text-center text-xs text-zinc-400"]),
                       },
                       [Txt("Scroll to bottom to load more")],
                     ),
@@ -1310,13 +1310,13 @@ export default function HomeIndexScrollViewExampleView() {
                 content: [
                   View(
                     {
-                      class: cn(["w-[340px] rounded-lg overflow-hidden"]),
+                      class: classNames(["w-[340px] rounded-lg overflow-hidden"]),
                     },
                     [
                       // Header
                       View(
                         {
-                          class: cn([
+                          class: classNames([
                             "flex items-center justify-between px-3 py-2.5",
                             "border-b border-zinc-200 dark:border-zinc-800",
                             "bg-zinc-50 dark:bg-zinc-900",
@@ -1325,7 +1325,7 @@ export default function HomeIndexScrollViewExampleView() {
                         [
                           View(
                             {
-                              class: cn([
+                              class: classNames([
                                 "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
                               ]),
                             },
@@ -1346,7 +1346,7 @@ export default function HomeIndexScrollViewExampleView() {
                             render(task) {
                               return View(
                                 {
-                                  class: cn([
+                                  class: classNames([
                                     "flex items-center gap-3 px-3 py-2.5",
                                     "border-b border-zinc-100 dark:border-zinc-800",
                                   ]),
@@ -1354,7 +1354,7 @@ export default function HomeIndexScrollViewExampleView() {
                                 [
                                   View(
                                     {
-                                      class: cn([
+                                      class: classNames([
                                         "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
                                         "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
                                       ]),
@@ -1401,7 +1401,7 @@ export default function HomeIndexScrollViewExampleView() {
                           }),
                           View(
                             {
-                              class: cn([
+                              class: classNames([
                                 "py-3 text-center text-xs text-zinc-400",
                               ]),
                             },
@@ -1504,13 +1504,13 @@ export default function HomeIndexScrollViewExampleView() {
                 content: [
                   View(
                     {
-                      class: cn(["w-[340px] rounded-lg overflow-hidden"]),
+                      class: classNames(["w-[340px] rounded-lg overflow-hidden"]),
                     },
                     [
                       // Header
                       View(
                         {
-                          class: cn([
+                          class: classNames([
                             "flex items-center justify-between px-3 py-2.5",
                             "border-b border-zinc-200 dark:border-zinc-800",
                             "bg-zinc-50 dark:bg-zinc-900",
@@ -1519,7 +1519,7 @@ export default function HomeIndexScrollViewExampleView() {
                         [
                           View(
                             {
-                              class: cn([
+                              class: classNames([
                                 "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
                               ]),
                             },
@@ -1540,7 +1540,7 @@ export default function HomeIndexScrollViewExampleView() {
                             render(task) {
                               return View(
                                 {
-                                  class: cn([
+                                  class: classNames([
                                     "flex items-center gap-3 px-3 py-2.5",
                                     "border-b border-zinc-100 dark:border-zinc-800",
                                   ]),
@@ -1548,7 +1548,7 @@ export default function HomeIndexScrollViewExampleView() {
                                 [
                                   View(
                                     {
-                                      class: cn([
+                                      class: classNames([
                                         "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
                                         "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
                                       ]),
@@ -1595,7 +1595,7 @@ export default function HomeIndexScrollViewExampleView() {
                           }),
                           View(
                             {
-                              class: cn([
+                              class: classNames([
                                 "py-3 text-center text-xs text-zinc-400",
                               ]),
                             },
@@ -1692,7 +1692,7 @@ export default function HomeIndexScrollViewExampleView() {
 
             return View(
               {
-                class: cn([
+                class: classNames([
                   "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
                 ]),
               },
@@ -1700,17 +1700,17 @@ export default function HomeIndexScrollViewExampleView() {
                 // Header
                 View(
                   {
-                    class: cn([
+                    class: classNames([
                       "flex items-center justify-between px-3 py-2.5",
                       "border-b border-zinc-200 dark:border-zinc-800",
                       "bg-zinc-50 dark:bg-zinc-900",
                     ]),
                   },
                   [
-                    View({ class: cn(["flex items-center gap-2"]) }, [
+                    View({ class: classNames(["flex items-center gap-2"]) }, [
                       View(
                         {
-                          class: cn([
+                          class: classNames([
                             "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
                           ]),
                         },

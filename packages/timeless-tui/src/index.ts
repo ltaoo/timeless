@@ -1,17 +1,4 @@
 export {
-  createTuiElement,
-  createTuiText,
-  createTuiFragment,
-  isTuiNode,
-  TUI_NODE,
-  type TuiNode,
-  type TuiElement,
-  type TuiText,
-  type TuiFragment,
-  type TuiNodeKind,
-  type TuiAttributes,
-} from "./nodes";
-export {
   createBuffer,
   clearBuffer,
   writeToBuffer,
@@ -28,7 +15,8 @@ export {
   SHOW_CURSOR,
   moveTo,
   type Buffer,
-} from "./renderer";
+} from "./host/draw";
+
 export {
   createTuiInput,
   parseKey,
@@ -46,7 +34,7 @@ export {
   platform,
 } from "./host";
 
-export { TUI, type TuiGlobal } from "./tui";
+export { TUI, type TuiGlobal } from "./host/draw";
 
 export {
   createTuiApp,

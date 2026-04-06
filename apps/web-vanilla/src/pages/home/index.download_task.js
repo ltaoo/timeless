@@ -107,7 +107,7 @@ function DownloadTaskCard(props) {
     [
       View(
         {
-          class: Timeless.cn([
+          class: Timeless.classNames([
             "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
             iconClass,
           ]),
@@ -135,7 +135,7 @@ function DownloadTaskCard(props) {
                 },
                 [
                   View({
-                    class: Timeless.cn([
+                    class: Timeless.classNames([
                       "h-full rounded-full transition-all",
                       progressBg_,
                     ]),
@@ -148,7 +148,7 @@ function DownloadTaskCard(props) {
         }),
         View(
           {
-            class: Timeless.cn([
+            class: Timeless.classNames([
               "mt-0.5 text-xs",
               computed(state_, (s) => s.statusClass),
             ]),

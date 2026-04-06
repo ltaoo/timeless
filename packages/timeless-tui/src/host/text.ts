@@ -1,8 +1,8 @@
-import { TimelessElement } from "@timeless/primitive";
+import { TimelessElement } from "@timeless/timeless";
 
-import { CanvasDocument } from "./draw";
+import { createTuiText } from "./nodes";
 
-export interface CanvasText {
+export interface TuiText {
   $elm: any;
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
@@ -10,11 +10,8 @@ export interface CanvasText {
   render(elm: TimelessElement): any;
 }
 
-export function CanvasText(
-  value: string | null,
-  canvas: CanvasDocument,
-): CanvasText {
-  const $text = canvas.createTextNode(String(value ?? ""));
+export function TuiText(value: string | null): TuiText {
+  const $text = createTuiText(String(value ?? ""));
 
   return {
     get $elm() {
@@ -27,8 +24,8 @@ export function CanvasText(
       return false;
     },
     setContent(v) {
-      if ($text && typeof $text.setTextContent === "function") {
-        $text.setTextContent(String(v ?? ""));
+      if (v) {
+        // $text
       }
     },
     render(elm: TimelessElement) {
@@ -40,7 +37,7 @@ export function CanvasText(
   };
 }
 
-export function isCanvasText(value: any): value is CanvasText {
+export function isTuiText(value: any): value is TuiText {
   return (
     value &&
     typeof value === "object" &&

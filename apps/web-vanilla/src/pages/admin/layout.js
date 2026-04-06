@@ -34,7 +34,7 @@ function AdminTabBar({ tabs, activeKey, navigateToTab, getTabTitle }) {
         render(tab) {
           return View(
             {
-              class: cn([
+              class: classNames([
                 "shrink-0 max-w-[220px] px-3 py-1.5 rounded-md text-sm cursor-pointer transition-colors flex items-center gap-2",
                 computed(activeKey, (k) =>
                   k === tab.key
@@ -169,7 +169,7 @@ export default function AdminLayoutView(props) {
                   render(menu) {
                     return View(
                       {
-                        class: cn([
+                        class: classNames([
                           "px-3 py-2 text-sm cursor-pointer transition-colors",
                           computed(sidemenu$.cur, (t) => {
                             return sidemenu$.isSelected(t, menu)

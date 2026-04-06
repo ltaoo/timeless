@@ -190,7 +190,7 @@ export default function GeneralView() {
       Section("Separator", [
         Item("Horizontal", [View({ class: "w-full" }, [Separator({})])]),
         Item("Vertical", [
-          View({ class: Timeless.cn(["flex items-center h-6 gap-3"]) }, [
+          View({ class: Timeless.classNames(["flex items-center h-6 gap-3"]) }, [
             "Left",
             Separator({ orientation: "vertical" }),
             "Right",

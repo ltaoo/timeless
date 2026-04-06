@@ -51,7 +51,7 @@ export default function ProjectLayoutView(props) {
 function TabItem(label, tabName, curTab, history, curProjectId) {
   return View(
     {
-      class: cn([
+      class: classNames([
         "px-4 py-1.5 rounded-md text-sm cursor-pointer transition-colors",
         computed(curTab, (t) =>
           t === tabName

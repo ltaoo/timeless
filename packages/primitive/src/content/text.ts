@@ -1,12 +1,10 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-// import { getHost } from "@/host";
-import { safeCreateTextNode } from "@/util/env";
-
 import { TimelessElement } from "./view";
 
-export function Txt(value: Ref<string> | string): TimelessElement {
-  // const host = getHost();
+export function Txt(
+  value: Ref<string | number> | string | number,
+): TimelessElement {
   let $elm: any = null;
 
   const state = {
@@ -15,24 +13,27 @@ export function Txt(value: Ref<string> | string): TimelessElement {
   };
 
   function setup_value_subscription() {
-    if (isRef(value)) {
-      value.subscribe({
-        onPatch(action) {},
-        onChange(v: any) {
-          if (v === state.value) {
-            return;
-          }
-          // Always update local value to stay in sync with ref
-          state.value = v;
-          // Only update DOM if element exists (component is mounted)
-          if ($elm) {
-            // host.setTextContent($elm, _local_value);
-            $elm.setTextContent(state.value);
-          }
-        },
-      });
+    if (!isRef(value)) {
+      return;
     }
+    value.subscribe({
+      onPatch(action) {},
+      onChange(v: any) {
+        if (v === state.value) {
+          return;
+        }
+        // Always update local value to stay in sync with ref
+        state.value = v;
+        // Only update DOM if element exists (component is mounted)
+        if ($elm && typeof $elm.setContent === "function") {
+          // host.setTextContent($elm, _local_value);
+          $elm.setContent(state.value);
+        }
+      },
+    });
   }
+
+  setup_value_subscription();
 
   return {
     t: "text",
@@ -53,7 +54,7 @@ export function Txt(value: Ref<string> | string): TimelessElement {
         return $elm;
       }
       state.rendered = true;
-      $elm = safeCreateTextNode(state.value);
+      // $elm = safeCreateTextNode(state.value);
       setup_value_subscription();
       return $elm;
     },

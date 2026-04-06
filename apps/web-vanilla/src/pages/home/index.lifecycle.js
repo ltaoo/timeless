@@ -3,7 +3,7 @@ import { Section, Item } from "@/components/index.js";
 function LifecyclePageA(props) {
   return View(
     {
-      class: cn(["space-y-4"]),
+      class: classNames(["space-y-4"]),
       onMounted() {
         props.addLog?.("Page A: onMounted");
       },
@@ -34,7 +34,7 @@ function LifecyclePageA(props) {
 function LifecyclePageB(props) {
   return View(
     {
-      class: cn(["space-y-4"]),
+      class: classNames(["space-y-4"]),
       onMounted() {
         props.addLog?.("Page B: onMounted");
       },
@@ -65,7 +65,7 @@ function LifecyclePageB(props) {
 function LifecyclePageC(props) {
   return View(
     {
-      class: cn(["space-y-4"]),
+      class: classNames(["space-y-4"]),
       onMounted() {
         props.addLog?.("Page C: onMounted");
       },
@@ -98,7 +98,7 @@ function LifecyclePageC(props) {
 function LifecyclePageD(props) {
   return View(
     {
-      class: cn(["space-y-4"]),
+      class: classNames(["space-y-4"]),
       onMounted() {
         props.addLog?.("Page D: onMounted");
       },
@@ -131,7 +131,7 @@ function LifecyclePageD(props) {
 function LifecyclePageE(props) {
   return View(
     {
-      class: cn(["space-y-4"]),
+      class: classNames(["space-y-4"]),
       onMounted() {
         props.addLog?.("Page E: onMounted");
       },
@@ -278,7 +278,7 @@ export default function LifecycleView(props) {
   updateNavState();
 
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
-    View({ class: cn(["space-y-8"]) }, [
+    View({ class: classNames(["space-y-8"]) }, [
       Section("Page Lifecycle", [
         Item("onMounted / onUnmounted", [
           View({ class: "flex gap-4" }, [
@@ -293,7 +293,7 @@ export default function LifecycleView(props) {
                   render(item) {
                     return View(
                       {
-                        class: cn([
+                        class: classNames([
                           "px-4 py-2 rounded-md text-sm cursor-pointer transition-colors",
                           computed(curRoute, (r) =>
                             r === item.key

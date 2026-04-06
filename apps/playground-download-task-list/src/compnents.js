@@ -680,7 +680,7 @@ function DropdownMenuItem(props) {
     DropdownMenuPrimitive.Item(
       {
         store: props.store,
-        class: cn([
+        class: classNames([
           computed(state_, (t) => {
             return t.focused
               ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50"
@@ -745,7 +745,7 @@ function Waterfall(props) {
     {
       ...rest,
       store,
-      class: cn(["w-full h-full overflow-y-auto", cls]),
+      class: classNames(["w-full h-full overflow-y-auto", cls]),
     },
     [
       For({
@@ -814,7 +814,7 @@ function ScrollView(props, children) {
   return ScrollViewPrimitive.Root(
     {
       store,
-      class: cn(["scroll-view h-full overflow-y-auto", cls]),
+      class: classNames(["scroll-view h-full overflow-y-auto", cls]),
       style: {
         height: "100%",
         overflowY: "auto",

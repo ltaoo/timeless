@@ -20,12 +20,38 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
 
   // console.log("[Fragment] created with", _children.length, "children");
 
+  // console.log("[Fragment] render, children count:", _children.length);
+  for (let i = 0; i < children.length; i += 1) {
+    let node = children[i];
+    if (!node) {
+      continue;
+    }
+    // 处理 h() 返回的延迟执行函数
+    if (typeof node === "function") {
+      node = node();
+      state.children[i] = node;
+    }
+    if (typeof node === "string" || typeof node === "number") {
+      // $fragment.appendChild(Txt(String(node)));
+      state.children[i] = Txt(String(node));
+      continue;
+    }
+    if (isElement(node)) {
+      state.children[i] = node;
+      // const result = node.render();
+      // if (result) {
+      //   $fragment.appendChild(result);
+      // }
+    }
+  }
+
   return {
     t: "fragment",
     state,
     get $elm() {
       return $fragment;
     },
+    children: state.children,
     // set $elm(v) {
     //   $fragment = v;
     // },
@@ -71,30 +97,9 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       state.rendered = true;
 
       // Create fragment if not already created
-      if (!$fragment) {
-        $fragment = safeCreateDocumentFragment();
-      }
-
-      // console.log("[Fragment] render, children count:", _children.length);
-      for (let i = 0; i < state.children.length; i += 1) {
-        let node = state.children[i];
-        if (!node) continue;
-        // 处理 h() 返回的延迟执行函数
-        if (typeof node === "function") {
-          node = node();
-          state.children[i] = node;
-        }
-        if (typeof node === "string" || typeof node === "number") {
-          $fragment.appendChild(Txt(String(node)));
-          continue;
-        }
-        if (isElement(node)) {
-          const result = node.render();
-          if (result) {
-            $fragment.appendChild(result);
-          }
-        }
-      }
+      // if (!$fragment) {
+      //   $fragment = safeCreateDocumentFragment();
+      // }
 
       if (onMounted) {
         const cleanup = onMounted({ target: $fragment as any });

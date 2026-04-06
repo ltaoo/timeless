@@ -28,6 +28,7 @@ const apps = [
 
 function ApplicationView() {
   const page = ref("todo");
+  const count_ = ref(0);
   const columns = 4;
   const focused = ref({ x: 0, y: 0 });
   const todos = refarr([
@@ -127,8 +128,27 @@ function ApplicationView() {
   return View(
     {
       class: "page",
+      onMounted() {
+        console.log("[ApplicationView] onMounted");
+        const timer = setInterval(() => {
+          count_.as((prev) => {
+            return prev + 1;
+          });
+        }, 1000);
+        return function () {
+          clearInterval(timer);
+        };
+      },
     },
     [
+      View(
+        {
+          style: {
+            color: "#fff",
+          },
+        },
+        [count_],
+      ),
       View(
         {
           class: "navigation",

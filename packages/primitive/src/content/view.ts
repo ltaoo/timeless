@@ -152,7 +152,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
             return;
           }
           if (isRef(child)) {
-            state.children[i] = Txt(String(child.value));
+            state.children[i] = Txt(child);
             return;
           }
           if (typeof child === "string") {
@@ -172,16 +172,22 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     apply_attr(k: string, v: any) {
       if (v === undefined || v === null || v === false) {
         // host.removeAttribute($elm, k);
-        $elm.removeAttribute(k);
+        if ($elm && typeof $elm.removeAttribute === "function") {
+          $elm.removeAttribute(k);
+        }
         return;
       }
       if (v === true) {
         // host.setAttribute($elm, k, "");
-        $elm.setAttribute(k, "");
+        if ($elm && typeof $elm.setAttribute === "function") {
+          $elm.setAttribute(k, "");
+        }
         return;
       }
       // host.setAttribute($elm, k, String(v));
-      $elm.setAttribute(k, String(v));
+      if ($elm && typeof $elm.setAttribute === "function") {
+        $elm.setAttribute(k, String(v));
+      }
     },
 
     // Helper: create event listener
@@ -596,6 +602,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
       return $elm;
     },
+    onMounted: props.onMounted,
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();

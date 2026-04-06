@@ -155,7 +155,7 @@ export default function FeedbackView() {
             const sheetB$ = new Timeless.ui.DialogCore({
               title: "Sheet Bottom",
             });
-            return View({ class: cn(["flex gap-2"]) }, [
+            return View({ class: classNames(["flex gap-2"]) }, [
               Button(
                 {
                   store: new Timeless.ui.ButtonCore({
@@ -192,17 +192,17 @@ export default function FeedbackView() {
                 ["Bottom"],
               ),
               Sheet({ store: sheetR$, side: "right" }, [
-                View({ class: cn(["text-sm text-zinc-500"]) }, [
+                View({ class: classNames(["text-sm text-zinc-500"]) }, [
                   "This is a right sheet.",
                 ]),
               ]),
               Sheet({ store: sheetL$, side: "left" }, [
-                View({ class: cn(["text-sm text-zinc-500"]) }, [
+                View({ class: classNames(["text-sm text-zinc-500"]) }, [
                   "This is a left sheet.",
                 ]),
               ]),
               Sheet({ store: sheetB$, side: "bottom" }, [
-                View({ class: cn(["text-sm text-zinc-500"]) }, [
+                View({ class: classNames(["text-sm text-zinc-500"]) }, [
                   "This is a bottom sheet.",
                 ]),
               ]),

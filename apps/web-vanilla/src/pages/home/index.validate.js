@@ -7,7 +7,7 @@ function FormRender(props, children) {
     }
     return Object.keys(t.fields);
   });
-  return View({ class: Timeless.cn([props.class, "space-y-6"]) }, [
+  return View({ class: Timeless.classNames([props.class, "space-y-6"]) }, [
     For({
       each: field_names,
       render(name) {
@@ -22,7 +22,7 @@ function FormRender(props, children) {
         const inline = ["checkbox"].includes(field$.input.shape);
         return View(
           {
-            class: Timeless.cn([
+            class: Timeless.classNames([
               "t-form-item gap-2",
               inline ? "flex items-center" : "flex flex-col",
             ]),

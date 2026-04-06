@@ -39,8 +39,10 @@ function ErrorFallbackView(error, viewName) {
             },
             [error.message],
           ),
-          error.stack
-            ? View(
+          Show({
+            when: !!error.stack,
+            ok() {
+              return View(
                 {
                   as: "details",
                   class: "mt-3",
@@ -63,8 +65,9 @@ function ErrorFallbackView(error, viewName) {
                     [error.stack],
                   ),
                 ],
-              )
-            : null,
+              );
+            },
+          }),
         ],
       ),
     ],

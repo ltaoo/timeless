@@ -168,4 +168,4 @@ export default function MyPageView() {
 ## 样式
 
 - Tailwind CSS，支持 `dark:` 前缀
-- `cn(["flex", "gap-2", condition && "hidden"])` 合并 class
+- `classNames(["flex", "gap-2", condition && "hidden"])` 合并 class

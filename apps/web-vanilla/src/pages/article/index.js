@@ -78,7 +78,7 @@ export default function ArticleListPageView(props) {
             render(article) {
               return View(
                 {
-                  class: cn([
+                  class: classNames([
                     "mx-2 px-3 py-2.5 rounded-md cursor-pointer transition-colors",
                     computed(curId, (id) =>
                       id === article.id
@@ -97,7 +97,7 @@ export default function ArticleListPageView(props) {
                 [
                   View(
                     {
-                      class: cn([
+                      class: classNames([
                         "text-sm leading-relaxed line-clamp-1",
                         computed(curId, (id) =>
                           id === article.id

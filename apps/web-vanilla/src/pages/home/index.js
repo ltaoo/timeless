@@ -55,7 +55,7 @@ export default function HomePageView(props) {
                   render(menu) {
                     return View(
                       {
-                        class: cn([
+                        class: classNames([
                           "px-3 py-2 text-sm cursor-pointer transition-colors",
                           computed(sidemenu$.cur, (t) => {
                             return sidemenu$.isSelected(t, menu)

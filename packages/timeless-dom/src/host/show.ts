@@ -3,6 +3,7 @@ import { isElement, TimelessElement } from "@timeless/timeless";
 import { DOMHostNode } from "./type";
 
 export interface DOMShow {
+  t: "show";
   $elm: DocumentFragment;
   methods: {
     unmount(event: {
@@ -109,6 +110,7 @@ export function DOMShow(props: {
   const $anchor = document.createTextNode("");
 
   return {
+    t: "show",
     get $elm() {
       return $fragment;
     },
@@ -210,14 +212,5 @@ export function DOMShow(props: {
 }
 
 export function isDOMShow(value: any): value is DOMShow {
-  return (
-    value &&
-    typeof value === "object" &&
-    value.$elm instanceof Text &&
-    typeof value.methods === "object" &&
-    typeof value.isDocumentFragment === "function" &&
-    typeof value.render === "function" &&
-    typeof value.addContent === "function" &&
-    typeof value.removeContent === "function"
-  );
+  return value.t === "show";
 }

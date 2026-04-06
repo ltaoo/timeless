@@ -4,8 +4,8 @@ import {
   clearScreen,
   showCursor,
   hideCursor,
-} from "./renderer";
-import type { TuiNode } from "./nodes";
+} from "./host/draw";
+import type { TuiNode } from "./host/nodes";
 import { createTuiInput, parseKey, type KeyName } from "./modules/input";
 
 export type TuiRenderFn = () => TuiNode;

@@ -81,6 +81,9 @@ export function render(
     canvas.appendChild(canvas.body, host$.$elm);
     // 调用 canvas.draw() 渲染整个文档树
     canvas.draw();
+    if (typeof elm.onMounted === "function") {
+      elm.onMounted({ target: host$.$elm });
+    }
     return;
   }
 

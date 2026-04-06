@@ -18,6 +18,7 @@ const apps = [
 
 function ApplicationView() {
   const page = ref("todo");
+  const count_ = ref(0);
   const columns = 4;
   const focused = ref({ x: 0, y: 0 });
   const todoPageStyle = combine(page, (p) => ({
@@ -111,92 +112,108 @@ function ApplicationView() {
     }
   }
 
-  return View({}, [
-    View({}, [
-      View(
-        {
-          onClick() {
-            console.log("click todo");
-            page.set("todo");
-          },
-        },
-        ["Goto Todo List"],
-      ),
-      View(
-        {
-          onClick() {
-            console.log("click app");
-            page.set("app");
-          },
-        },
-        ["Goto Application List"],
-      ),
-    ]),
-    View(
-      {
-        style: todoPageStyle,
+  return View(
+    {
+      onMounted() {
+        console.log("[ApplicationView] onMounted");
+        const timer = setInterval(() => {
+          count_.as((prev) => {
+            return prev + 1;
+          });
+        }, 1000);
+        return function () {
+          clearInterval(timer);
+        };
       },
-      [
-        View({}, ["Todo List Page"]),
-        For({
-          each: todos,
-          render(todo) {
-            return View({}, [todo.title]);
+    },
+    [
+      View({}, [
+        View({}, [count_]),
+        View(
+          {
+            onClick() {
+              console.log("click todo");
+              page.set("todo");
+            },
           },
-        }),
-      ],
-    ),
-    View(
-      {
-        style: appPageStyle,
-      },
-      [
-        View({}, ["Application List Page"]),
-        Grid(
-          { columns, gap: 16 },
-          apps.map((app, idx) => {
-            return View(
-              {
-                style: {
-                  borderWidth: 2,
-                  borderColor: combine({ focused, idx }, (t) =>
-                    isFocusedCell(t.focused, t.idx)
-                      ? "#007bff"
-                      : "rgba(255,255,255,0.18)",
-                  ),
-                },
-              },
-              [
-                View({ style: { textAlign: "center", fontSize: 22 } }, [
-                  app.icon,
-                ]),
-                View(
-                  {
-                    style: {
-                      textAlign: "center",
-                      fontWeight: "bold",
-                      fontSize: 14,
-                    },
-                  },
-                  [app.title],
-                ),
-                View(
-                  {
-                    style: {
-                      textAlign: "center",
-                      fontSize: 12,
-                      color: "gray",
-                    },
-                  },
-                  [app.subtitle],
-                ),
-              ],
-            );
-          }),
+          ["Goto Todo List"],
         ),
-      ],
-    ),
-  ]);
+        View(
+          {
+            onClick() {
+              console.log("click app");
+              page.set("app");
+            },
+          },
+          ["Goto Application List"],
+        ),
+      ]),
+      View(
+        {
+          style: todoPageStyle,
+        },
+        [
+          View({}, ["Todo List Page"]),
+          For({
+            each: todos,
+            render(todo) {
+              return View({}, [todo.title]);
+            },
+          }),
+        ],
+      ),
+      View(
+        {
+          style: appPageStyle,
+        },
+        [
+          View({}, ["Application List Page"]),
+          Grid(
+            { columns, gap: 16 },
+            apps.map((app, idx) => {
+              return View(
+                {
+                  style: {
+                    borderWidth: 2,
+                    borderColor: combine({ focused, idx }, (t) =>
+                      isFocusedCell(t.focused, t.idx)
+                        ? "#007bff"
+                        : "rgba(255,255,255,0.18)",
+                    ),
+                  },
+                },
+                [
+                  View({ style: { textAlign: "center", fontSize: 22 } }, [
+                    app.icon,
+                  ]),
+                  View(
+                    {
+                      style: {
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: 14,
+                      },
+                    },
+                    [app.title],
+                  ),
+                  View(
+                    {
+                      style: {
+                        textAlign: "center",
+                        fontSize: 12,
+                        color: "gray",
+                      },
+                    },
+                    [app.subtitle],
+                  ),
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
+    ],
+  );
 }
 
 const elm = ApplicationView({});

@@ -173,7 +173,7 @@ export default function CommandView() {
     render(cmd, index) {
       return View(
         {
-          class: Timeless.cn([
+          class: Timeless.classNames([
             "flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg cursor-pointer transition-colors",
             computed([selectedIndex, filteredCommands], () => {
               return selectedIndex.value === index
@@ -269,7 +269,7 @@ export default function CommandView() {
                     );
                     $clickOutside.methods.activate();
                   },
-                  style: Timeless.sn([
+                  style: Timeless.styleNames([
                     computed(contentTop, (t) => {
                       return `top: ${t}px`;
                     }),

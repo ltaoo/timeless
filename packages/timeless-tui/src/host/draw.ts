@@ -1,5 +1,66 @@
-// import type { TuiNode, TuiElement } from "@timeless/timeless";
-import { TUI_NODE, TuiNode, TuiElement } from "./nodes";
+import { KeyName, parseKey, createTuiInput } from "@/modules/input";
+import {
+  createTuiElement,
+  createTuiText,
+  createTuiFragment,
+  isTuiNode,
+  TUI_NODE,
+  type TuiNode,
+  type TuiElement,
+  type TuiText,
+  type TuiFragment,
+  type TuiNodeKind,
+  type TuiAttributes,
+} from "./nodes";
+
+export interface TuiGlobal {
+  onKeydown(handler: (key: KeyName) => void): void;
+  reload(): void;
+  exit(): void;
+  readonly cols: number;
+  readonly rows: number;
+}
+
+const input = createTuiInput();
+let appFn: (() => TuiNode) | null = null;
+let target: NodeJS.WritableStream = process.stdout;
+let running = false;
+let rafId: ReturnType<typeof setTimeout> | null = null;
+let dirty = false;
+const keydownHandlers: ((key: KeyName) => void)[] = [];
+
+function doRender() {
+  if (!dirty || !appFn) return;
+  dirty = false;
+  const tree = appFn();
+  renderToScreen(tree, target);
+}
+
+function scheduleRender() {
+  if (dirty) return;
+  dirty = true;
+  if (!running) return;
+  if (rafId !== null) return;
+  rafId = setTimeout(() => {
+    rafId = null;
+    doRender();
+  }, 0);
+}
+
+function handleRawKey(raw: string) {
+  const key = parseKey(raw);
+  for (const h of keydownHandlers) h(key);
+}
+
+function handleResize() {
+  dirty = true;
+  doRender();
+}
+
+function handleSIGINT() {
+  TUI.exit();
+  process.exit(0);
+}
 
 const ESC = "\x1b[";
 const RESET = `${ESC}0m`;
@@ -249,7 +310,7 @@ function collectRenderLines(node: TuiNode, ctx: RenderContext): string[] {
       const linePrefix =
         (i === 0 ? prefix : "") + focusMark + focusPrefix + stylePrefix;
       const lineSuffix =
-        ((focused || stylePrefix) ? RESET : "") +
+        (focused || stylePrefix ? RESET : "") +
         (i === childLines.length - 1 ? suffix : "");
       const combined = linePrefix + line + lineSuffix;
       const align = cssProps?.["text-align"] ?? cssProps?.textAlign;
@@ -444,3 +505,57 @@ export {
   bgColor,
   moveTo,
 };
+
+export const TUI: TuiGlobal = {
+  onKeydown(handler: (key: KeyName) => void) {
+    keydownHandlers.push(handler);
+  },
+
+  reload() {
+    if (running) scheduleRender();
+  },
+
+  exit() {
+    if (!running) return;
+    running = false;
+    if (rafId !== null) {
+      clearTimeout(rafId);
+      rafId = null;
+    }
+    input.offKey(handleRawKey);
+    input.stop();
+    process.stdout.off("resize", handleResize);
+    process.off("SIGINT", handleSIGINT);
+    showCursor(target);
+    clearScreen(target);
+    process.exit(0);
+  },
+
+  get cols() {
+    return getTerminalSize().width;
+  },
+
+  get rows() {
+    return getTerminalSize().height;
+  },
+};
+
+export function _setAppFn(fn: () => TuiNode) {
+  appFn = () => {
+    keydownHandlers.length = 0;
+    return fn();
+  };
+}
+
+export function _startTui(out?: NodeJS.WritableStream) {
+  if (running) return;
+  running = true;
+  target = out ?? process.stdout;
+  hideCursor(target);
+  dirty = true;
+  doRender();
+  input.onKey(handleRawKey);
+  input.start();
+  process.stdout.on("resize", handleResize);
+  process.on("SIGINT", handleSIGINT);
+}

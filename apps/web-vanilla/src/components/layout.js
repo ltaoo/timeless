@@ -41,7 +41,7 @@ export function SplitLayout(options) {
         {
           store: p.panel$,
           group: group$,
-          class: cn([panelSizeClass, "overflow-clip"]),
+          class: classNames([panelSizeClass, "overflow-clip"]),
         },
         content,
       ),
@@ -81,11 +81,11 @@ export function SplitLayout(options) {
  */
 export function SidebarLayout(options, children) {
   const { sidebar, sidebarWidth = "240px", sidebarClass } = options;
-  return View({ class: cn(["w-full h-full", options.class]) }, [
+  return View({ class: classNames(["w-full h-full", options.class]) }, [
     Flex({ class: "h-full" }, [
       View(
         {
-          class: cn([`w-[${sidebarWidth}]`, "h-full shrink-0", sidebarClass]),
+          class: classNames([`w-[${sidebarWidth}]`, "h-full shrink-0", sidebarClass]),
         },
         sidebar,
       ),
@@ -109,14 +109,14 @@ export function StackLayout(options, children) {
   const { header, headerClass, footer, footerClass } = options;
   const elements = [];
   if (header) {
-    elements.push(View({ class: cn(["shrink-0", headerClass]) }, header));
+    elements.push(View({ class: classNames(["shrink-0", headerClass]) }, header));
   }
   elements.push(View({ class: "relative flex-1 min-h-0" }, children));
   if (footer) {
-    elements.push(View({ class: cn(["shrink-0", footerClass]) }, footer));
+    elements.push(View({ class: classNames(["shrink-0", footerClass]) }, footer));
   }
   return View(
-    { class: cn(["w-full h-full flex flex-col", options.class]) },
+    { class: classNames(["w-full h-full flex flex-col", options.class]) },
     elements,
   );
 }
@@ -131,7 +131,7 @@ export function StackLayout(options, children) {
 export function PageContent(props, children) {
   return ScrollView(
     {
-      class: cn(["h-full", props.class]),
+      class: classNames(["h-full", props.class]),
       store: new Timeless.ui.ScrollViewCore({}),
     },
     children,

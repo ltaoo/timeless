@@ -49,17 +49,17 @@ export default function LoginPage(props) {
 
   return View(
     {
-      class: cn([
+      class: classNames([
         "flex min-h-screen flex-col items-center justify-center bg-gray-100 py-12 sm:px-6 lg:px-8",
         "dark:bg-zinc-900", // Dark mode background
       ]),
     },
     [
-      View({ class: cn(["sm:mx-auto sm:w-full sm:max-w-md"]) }, [
+      View({ class: classNames(["sm:mx-auto sm:w-full sm:max-w-md"]) }, [
         // Logo (Text for now)
         View(
           {
-            class: cn([
+            class: classNames([
               "mx-auto text-center text-3xl font-bold tracking-tight text-gray-900",
               "dark:text-white", // Dark mode text
             ]),
@@ -68,7 +68,7 @@ export default function LoginPage(props) {
         ),
         View(
           {
-            class: cn([
+            class: classNames([
               "mt-2 text-center text-sm text-gray-600",
               "dark:text-zinc-400", // Dark mode secondary text
             ]),
@@ -77,17 +77,17 @@ export default function LoginPage(props) {
         ),
       ]),
 
-      View({ class: cn(["mt-8 sm:mx-auto sm:w-full sm:max-w-md"]) }, [
+      View({ class: classNames(["mt-8 sm:mx-auto sm:w-full sm:max-w-md"]) }, [
         View(
           {
-            class: cn(["py-8 px-4 shadow sm:rounded-lg sm:px-10 space-y-6"]),
+            class: classNames(["py-8 px-4 shadow sm:rounded-lg sm:px-10 space-y-6"]),
           },
           [
             // Username Input
-            View({ class: cn(["space-y-1"]) }, [
+            View({ class: classNames(["space-y-1"]) }, [
               Label(
                 {
-                  class: cn([
+                  class: classNames([
                     "block text-sm font-medium text-gray-700",
                     "dark:text-zinc-300", // Dark mode label text
                   ]),
@@ -97,7 +97,7 @@ export default function LoginPage(props) {
               View({ class: "mt-1" }, [
                 Input({
                   store: ui.input_username,
-                  class: cn([
+                  class: classNames([
                     "block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm",
                     "dark:bg-zinc-900 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500", // Dark mode input styles
                   ]),
@@ -109,7 +109,7 @@ export default function LoginPage(props) {
             View({ class: "space-y-1" }, [
               Label(
                 {
-                  class: cn([
+                  class: classNames([
                     "block text-sm font-medium text-gray-700",
                     "dark:text-zinc-300", // Dark mode label text
                   ]),
@@ -119,7 +119,7 @@ export default function LoginPage(props) {
               View({ class: "mt-1" }, [
                 Input({
                   store: ui.input_pwd,
-                  class: cn([
+                  class: classNames([
                     "block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm",
                     "dark:bg-zinc-900 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500", // Dark mode input styles
                   ]),
@@ -132,7 +132,7 @@ export default function LoginPage(props) {
               Button(
                 {
                   store: ui.btn_login,
-                  class: cn([
+                  class: classNames([
                     "flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
                     "dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-400", // Dark mode button styles
                   ]),
@@ -144,7 +144,7 @@ export default function LoginPage(props) {
             // Hint
             View(
               {
-                class: cn([
+                class: classNames([
                   "mt-6 text-center text-xs text-gray-500",
                   "dark:text-zinc-500", // Dark mode hint text
                 ]),
@@ -154,7 +154,7 @@ export default function LoginPage(props) {
                 View(
                   {
                     as: "span",
-                    class: cn([
+                    class: classNames([
                       "font-mono font-medium text-gray-700",
                       "dark:text-zinc-300", // Dark mode code text
                     ]),
@@ -165,7 +165,7 @@ export default function LoginPage(props) {
                 View(
                   {
                     as: "span",
-                    class: cn([
+                    class: classNames([
                       "font-mono font-medium text-gray-700",
                       "dark:text-zinc-300", // Dark mode code text
                     ]),

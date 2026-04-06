@@ -20,7 +20,7 @@ export default function LLMPageView() {
       const disabled = !provider?.enabled;
       if (logoUri) {
         return NativeImg({
-          class: cn([
+          class: classNames([
             "size-4 rounded-sm object-cover shrink-0",
             disabled ? "opacity-50" : "",
           ]),
@@ -30,7 +30,7 @@ export default function LLMPageView() {
       }
       return View(
         {
-          class: cn([
+          class: classNames([
             "size-4 rounded-sm bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200",
             "flex items-center justify-center text-[10px] font-semibold shrink-0",
             disabled ? "opacity-50" : "",
@@ -45,7 +45,7 @@ export default function LLMPageView() {
       const groups = providers.map((p) => {
         const label = View({ class: "flex items-center gap-2" }, [
           ProviderIcon(p),
-          View({ class: cn(["truncate", !p.enabled ? "opacity-50" : ""]) }, [
+          View({ class: classNames(["truncate", !p.enabled ? "opacity-50" : ""]) }, [
             p.name,
           ]),
         ]);

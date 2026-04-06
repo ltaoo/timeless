@@ -913,7 +913,7 @@ function DownloaderPanelView(props, children) {
                                       {
                                         type: "a",
                                         class: "wx-download-item-resume",
-                                        style: Timeless.sn([
+                                        style: Timeless.styleNames([
                                           btnStyle,
                                           computed(running_count_, (t) => {
                                             return t > WXU.config.MaxRunning
@@ -934,7 +934,7 @@ function DownloaderPanelView(props, children) {
                                       {
                                         type: "a",
                                         class: "wx-download-item-resume",
-                                        style: Timeless.sn([
+                                        style: Timeless.styleNames([
                                           btnStyle,
                                           computed(running_count_, (t) => {
                                             return t > WXU.config.MaxRunning

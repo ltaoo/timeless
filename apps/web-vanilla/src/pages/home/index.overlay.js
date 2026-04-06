@@ -892,7 +892,7 @@ export default function OverlayView() {
         ),
       ]),
       Item("Tooltip", [
-        View({ class: cn(["flex gap-2"]) }, [
+        View({ class: classNames(["flex gap-2"]) }, [
           Tooltip({ content: ["Top tooltip"] }, [
             Button(
               {

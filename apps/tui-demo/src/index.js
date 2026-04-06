@@ -41,7 +41,7 @@ function ApplicationView() {
       View(
         {
           onClick() {
-            console.log("click todo");
+            // console.log("click todo");
             page.set("todo");
           },
         },
@@ -50,7 +50,7 @@ function ApplicationView() {
       View(
         {
           onClick() {
-            console.log("click app");
+            // console.log("click app");
             page.set("app");
           },
         },

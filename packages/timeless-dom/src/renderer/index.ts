@@ -6,6 +6,7 @@ import { DOMText } from "@/host/text";
 import { DOMShow } from "@/host/show";
 import { DOMFor } from "@/host/for";
 import { DOMHostNode } from "@/host/type";
+import { DOMFragment, isDocumentFragment } from "@/host/fragment";
 
 function build(elm: TimelessElement): DOMHostNode {
   if (elm.t === "view") {
@@ -19,6 +20,12 @@ function build(elm: TimelessElement): DOMHostNode {
     const text$ = DOMText(elm.value as any);
     elm.$elm = text$;
     return text$;
+  }
+  if (elm.t === "fragment") {
+    const fragment$ = DOMFragment({ build });
+    elm.$elm = fragment$;
+    fragment$.render(elm);
+    return fragment$;
   }
   if (elm.t === "grid") {
     const grid$ = DOMGrid({ build });
@@ -62,27 +69,22 @@ export function render(
     return;
   }
 
-  // const { host, state } = ensureRecordingDomHost();
-
-  // setHost(host);
-  // registerDomComponents();
-
-  // const ops: HostOperation[] = [];
-  // state.ops = ops;
-  // state.enabled = true;
-
   if (isElement(elm)) {
-    // const $content = elm.render();
     const host$ = build(elm);
     if (!host$) {
       console.error("[Render] Element render return null");
       return;
     }
-    if (!isDOMView(host$)) {
-      console.error("[Render] Element render return non DOMView");
+    if (!isDOMView(host$) && !isDocumentFragment(host$)) {
+      console.error(
+        "[Render] Element render return non DOMView or DOMFragment",
+      );
       return;
     }
     $root.appendChild(host$.$elm);
+    if (typeof elm.onMounted === "function") {
+      elm.onMounted({ target: host$.$elm });
+    }
     return;
   }
 

@@ -9,8 +9,8 @@ export default function DataDisplayView() {
     View({ class: "space-y-8" }, [
       Section("Affix", [
         Item("Offset Top 20px", [
-          View({ class: cn(["h-[600px] space-y-4"]) }, [
-            View({ class: cn(["text-sm text-zinc-400"]) }, [
+          View({ class: classNames(["h-[600px] space-y-4"]) }, [
+            View({ class: classNames(["text-sm text-zinc-400"]) }, [
               Txt("Scroll down to see the affix effect"),
             ]),
             Affix(
@@ -104,13 +104,13 @@ export default function DataDisplayView() {
       ]),
       Section("Skeleton", [
         Item("Default", [
-          View({ class: cn(["space-y-3 w-[250px]"]) }, [
+          View({ class: classNames(["space-y-3 w-[250px]"]) }, [
             Skeleton({
-              class: cn(["h-[125px] w-full rounded-xl"]),
+              class: classNames(["h-[125px] w-full rounded-xl"]),
             }),
-            View({ class: cn(["space-y-2"]) }, [
-              Skeleton({ class: cn(["h-4 w-full"]) }),
-              Skeleton({ class: cn(["h-4 w-[200px]"]) }),
+            View({ class: classNames(["space-y-2"]) }, [
+              Skeleton({ class: classNames(["h-4 w-full"]) }),
+              Skeleton({ class: classNames(["h-4 w-[200px]"]) }),
             ]),
           ]),
         ]),
@@ -119,14 +119,14 @@ export default function DataDisplayView() {
         Item("Default", [
           ScrollArea(
             {
-              class: cn([
+              class: classNames([
                 "h-[200px] w-[250px] rounded-md border border-zinc-200 p-4 dark:border-zinc-800",
               ]).toString(),
             },
             [
-              View({ class: cn(["space-y-4"]) }, [
+              View({ class: classNames(["space-y-4"]) }, [
                 ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) =>
-                  View({ class: cn(["text-sm"]) }, [
+                  View({ class: classNames(["text-sm"]) }, [
                     Txt(`Item ${i} — Scrollable content area`),
                   ]),
                 ),
@@ -137,11 +137,11 @@ export default function DataDisplayView() {
       ]),
       Section("AspectRatio", [
         Item("16:9", [
-          View({ class: cn(["w-[300px]"]) }, [
+          View({ class: classNames(["w-[300px]"]) }, [
             AspectRatio({ ratio: 16 / 9 }, [
               View(
                 {
-                  class: cn([
+                  class: classNames([
                     "flex items-center justify-center w-full h-full rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500",
                   ]),
                 },

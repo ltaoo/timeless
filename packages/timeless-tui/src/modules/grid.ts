@@ -1,6 +1,6 @@
 import { VNode, isRef, getRendererScheduler } from "@timeless/timeless";
 
-import { getTerminalSize } from "../renderer";
+import { getTerminalSize } from "../host/draw";
 
 const { createElement, createText, appendChild, isDescriptor } = VNode;
 

@@ -109,6 +109,21 @@ export interface TuiText extends TuiNode {
   setTextContent?(text: string): void;
   getFirstChild?(): TuiNode | null;
   getNextSibling?(): TuiNode | null;
+  addContent?(
+    newTargetChildren: any[],
+    onMounted: any,
+    updateState: (newNodes: any[], newInstances: any[]) => void,
+  ): void;
+  buildInitialContent?(
+    targetChildren: any[],
+    onMounted: any,
+    updateState: (newNodes: any[], newInstances: any[]) => void,
+  ): any;
+  removeContent?(
+    oldChildren: any[],
+    oldNodes: any[],
+    updateState: () => void,
+  ): void;
 }
 
 export interface TuiFragment extends TuiNode {
@@ -116,6 +131,21 @@ export interface TuiFragment extends TuiNode {
   clearChildren?(): void;
   getFirstChild?(): TuiNode | null;
   getNextSibling?(): TuiNode | null;
+  addContent?(
+    newTargetChildren: any[],
+    onMounted: any,
+    updateState: (newNodes: any[], newInstances: any[]) => void,
+  ): void;
+  buildInitialContent?(
+    targetChildren: any[],
+    onMounted: any,
+    updateState: (newNodes: any[], newInstances: any[]) => void,
+  ): any;
+  removeContent?(
+    oldChildren: any[],
+    oldNodes: any[],
+    updateState: () => void,
+  ): void;
 }
 
 function createAttributes(): TuiAttributes {
@@ -313,7 +343,7 @@ export function createTuiText(text: string): TuiText {
     addContent(
       newTargetChildren: any[],
       onMounted: any,
-      updateState: (newNodes: any[], newInstances: any[]) => void
+      updateState: (newNodes: any[], newInstances: any[]) => void,
     ) {
       const parent = node.parentNode;
       if (!parent) return;
@@ -367,7 +397,7 @@ export function createTuiText(text: string): TuiText {
     buildInitialContent(
       targetChildren: any[],
       onMounted: any,
-      updateState: (newNodes: any[], newInstances: any[]) => void
+      updateState: (newNodes: any[], newInstances: any[]) => void,
     ) {
       // 1. 准备新内容
       const fragment = createTuiFragment();
@@ -423,7 +453,7 @@ export function createTuiText(text: string): TuiText {
     removeContent(
       oldChildren: any[],
       oldNodes: any[],
-      updateState: () => void
+      updateState: () => void,
     ) {
       // 1. 调用旧内容的 beforeUnmounted
       for (const child of oldChildren) {
@@ -540,7 +570,7 @@ export function createTuiFragment(): TuiFragment {
     addContent(
       newTargetChildren: any[],
       onMounted: any,
-      updateState: (newNodes: any[], newInstances: any[]) => void
+      updateState: (newNodes: any[], newInstances: any[]) => void,
     ) {
       const parent = node.parentNode;
       if (!parent) return;
@@ -594,7 +624,7 @@ export function createTuiFragment(): TuiFragment {
     buildInitialContent(
       targetChildren: any[],
       onMounted: any,
-      updateState: (newNodes: any[], newInstances: any[]) => void
+      updateState: (newNodes: any[], newInstances: any[]) => void,
     ) {
       // 1. 准备新内容
       const resultFragment = createTuiFragment();
@@ -650,7 +680,7 @@ export function createTuiFragment(): TuiFragment {
     removeContent(
       oldChildren: any[],
       oldNodes: any[],
-      updateState: () => void
+      updateState: () => void,
     ) {
       // 1. 调用旧内容的 beforeUnmounted
       for (const child of oldChildren) {

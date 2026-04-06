@@ -21,21 +21,19 @@ import {
   setTuiInvalidationPaused,
   type TuiNode,
   type TuiElement,
-} from "./nodes";
+} from "./host/nodes";
 import {
   renderToString,
   renderToScreen as renderTuiNodeToScreen,
   showCursor,
-} from "./renderer";
-import { buildTuiTreeFromTimelessElement } from "./renderer/index";
+} from "./host/draw";
+import { build } from "./renderer/index";
 import { setTuiHost } from "./host-accessor";
-import { _setAppFn, _startTui } from "./tui";
-import { TuiGrid } from "./modules/grid";
-import { TuiView } from "./modules/view";
-import { TuiTxt } from "./modules/text";
 import { createTuiInput, parseKey, type KeyName } from "./modules/input";
 
-const { isDescriptor, mount, commitTree } = VNode;
+// import { _setAppFn, _startTui } from "./tui";
+
+// const { isDescriptor, mount, commitTree } = VNode;
 
 type TuiHost = TimelessHost & {
   getBody: NonNullable<TimelessHost["getBody"]>;
@@ -46,11 +44,14 @@ type RenderOptions = Partial<{
   out: NodeJS.WritableStream;
 }>;
 
-function normalizeOut(outOrOptions: unknown): NodeJS.WritableStream | undefined {
+function normalizeOut(
+  outOrOptions: unknown,
+): NodeJS.WritableStream | undefined {
   if (!outOrOptions) return undefined;
   if (typeof outOrOptions === "object") {
     const direct = outOrOptions as any;
-    if (typeof direct.write === "function") return direct as NodeJS.WritableStream;
+    if (typeof direct.write === "function")
+      return direct as NodeJS.WritableStream;
     const nested = direct.out;
     if (nested && typeof nested.write === "function")
       return nested as NodeJS.WritableStream;
@@ -103,7 +104,8 @@ function isHiddenElement(el: TuiElement) {
 function resolveGridColumnsFromEl(el: TuiElement): number {
   const cssText = (el.style as any)?.cssText ?? "";
   const p = parseCssProps(cssText);
-  const raw = p["grid-template-columns"] ?? p.columns ?? p["grid-columns"] ?? "";
+  const raw =
+    p["grid-template-columns"] ?? p.columns ?? p["grid-columns"] ?? "";
   if (!raw) return 4;
   const m1 = /repeat\(\s*(\d+)/i.exec(raw);
   if (m1) {
@@ -259,10 +261,7 @@ function ensureDefaultFocus(body: TuiNode) {
   }
 }
 
-function focusedInGridContext(
-  ctxs: GridFocusContext[],
-  focusedEl: TuiElement,
-) {
+function focusedInGridContext(ctxs: GridFocusContext[], focusedEl: TuiElement) {
   for (const ctx of ctxs) {
     const idx = ctx.cells.indexOf(focusedEl);
     if (idx !== -1) return { ctx, index: idx };
@@ -580,96 +579,28 @@ export function installTuiHost(options?: Parameters<typeof createTuiHost>[0]) {
   return host;
 }
 
-// ─── render ─────────────────────────────────────────────────────
-
-function registerTuiComponents() {
-  registerComponent(Grid, TuiGrid);
-  registerComponent(View, TuiView);
-  registerComponent(Txt, TuiTxt);
-}
-
 export function render(
-  appFn: (() => TuiNode | TuiNode[]) | TimelessElement | any,
+  elm: TimelessElement,
   outOrOptions?: NodeJS.WritableStream | RenderOptions,
 ) {
-  const out = normalizeOut(outOrOptions);
-  // Descriptor path (VNode pipeline)
-  if (isDescriptor(appFn)) {
-    const target = out ?? process.stdout;
+  if (isElement(elm)) {
+    const target = process.stdout;
     const host = installTuiHost({ out: target });
-    registerTuiComponents();
-
-    // Wrap the renderer so patchNode triggers a screen re-render
-    const baseRenderer = getRenderer();
-    let renderScheduled = false;
-    const body = host.getBody() as TuiNode;
-
-    const wrappedRenderer = {
-      ...baseRenderer,
-      patchNode(vnode: any, changes: any) {
-        baseRenderer.patchNode(vnode, changes);
-        if (!renderScheduled) {
-          renderScheduled = true;
-          queueMicrotask(() => {
-            renderScheduled = false;
-            renderTuiNodeToScreen(body, target);
-          });
-        }
-      },
-    };
-    setRenderer(wrappedRenderer);
 
     setTuiInvalidationPaused(true);
-    const vnode = mount(appFn);
-    commitTree(vnode, getRenderer());
-    host.appendChild(body, vnode._hostNode);
-    setTuiInvalidationPaused(false);
-    renderTuiNodeToScreen(body, target);
-
-    // Setup input handling
-    ensureInput();
-
-    return;
-  }
-
-  if (typeof appFn === "function") {
-    // Install TUI host so View/Txt from @timeless/primitive work
-    installTuiHost({ out: out ?? process.stdout });
-
-    // Wrap appFn to handle TuiNode[] return
-    _setAppFn(() => {
-      const result = appFn();
-      if (Array.isArray(result)) {
-        const root = createTuiFragment();
-        for (const child of result) root.appendChild(child);
-        return root;
-      }
-      return result;
-    });
-
-    return {
-      start() {
-        _startTui(out);
-      },
-    };
-  }
-
-  // Static TimelessElement render
-  if (!appFn) {
-    console.error("[TUI Render] Element is null");
-    return;
-  }
-  if (isElement(appFn)) {
-    const target = out ?? process.stdout;
-    const host = installTuiHost({ out: target });
-    setTuiInvalidationPaused(true);
-    const content = buildTuiTreeFromTimelessElement(appFn);
+    const content = build(elm);
     if (!content) {
       setTuiInvalidationPaused(false);
       console.error("[TUI Render] Element render returned null");
       return;
     }
-    host.appendChild(host.getBody(), content);
+    const contentNode = content.$elm;
+    if (!contentNode) {
+      setTuiInvalidationPaused(false);
+      console.error("[TUI Render] Element render returned null node");
+      return;
+    }
+    host.appendChild(host.getBody(), contentNode);
     ensureDefaultFocus(host.getBody() as TuiNode);
     setTuiInvalidationPaused(false);
     renderTuiNodeToScreen(host.getBody() as TuiNode, target);
@@ -683,10 +614,12 @@ export function renderToStringTree(elm: TimelessElement): string {
   if (!elm || !isElement(elm)) return "";
   setTuiInvalidationPaused(true);
   const body = createTuiElement("body");
-  const content = buildTuiTreeFromTimelessElement(elm);
+  const content = build(elm);
   setTuiInvalidationPaused(false);
   if (!content) return "";
-  body.appendChild(content);
+  const contentNode = content.$elm;
+  if (!contentNode) return "";
+  body.appendChild(contentNode);
   return renderToString(body as TuiNode);
 }
 
@@ -735,10 +668,7 @@ function ensureInput() {
       process.exit(0);
     }
     const event = { type: "keydown", key, raw };
-    if (
-      _activeBody &&
-      handleDefaultNavigation(_activeBody, event)
-    ) {
+    if (_activeBody && handleDefaultNavigation(_activeBody, event)) {
       for (const handler of _platformState.keydownHandlers) {
         handler(event);
       }
