@@ -3,6 +3,9 @@
  */
 import { isRef } from "@timeless/timeless";
 import * as ASN from "@timeless/svg/asn";
+import { Canvas } from "@/biz/canvas";
+import { CanvasLayer } from "@/biz/canvas/layer";
+import { connectLayer } from "@/biz/canvas/connect.web";
 
 export type BoundingRect = {
   top: number;
@@ -1317,7 +1320,6 @@ function recordNodeToDisplayList(
     if (node.tag === "div" && (node as any)._iconName) {
       const iconName = (node as any)._iconName;
       const iconColor = (node as any)._iconColor;
-      console.log("[recordNodeToDisplayList] Icon detected:", { iconName, iconColor, rect });
       if (iconName && rect.width > 0 && rect.height > 0) {
         out.push({ op: "save" }, { op: "setGlobalAlpha", alpha });
         out.push({
@@ -1330,7 +1332,6 @@ function recordNodeToDisplayList(
           h: rect.height,
         });
         out.push({ op: "restore" });
-        console.log("[recordNodeToDisplayList] Icon command added to display list");
       }
     }
 
@@ -1431,17 +1432,13 @@ function executeDisplayList(
         break;
       case "drawIcon":
         try {
-          console.log("[executeDisplayList] Drawing icon:", cmd);
-          // Convert kebab-case to PascalCase
           const pascalName = cmd.iconName
             .split("-")
             .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
             .join("");
 
-          console.log("[executeDisplayList] Looking for ASN:", pascalName);
           const asnNode = (ASN as any)[pascalName];
           if (asnNode) {
-            console.log("[executeDisplayList] ASN found, rendering:", asnNode);
             renderIconToCanvas(
               ctx,
               asnNode,
@@ -1451,11 +1448,9 @@ function executeDisplayList(
               cmd.w,
               cmd.h,
             );
-          } else {
-            console.warn("[executeDisplayList] ASN not found:", pascalName);
           }
         } catch (e) {
-          console.error("[executeDisplayList] Icon drawing error:", e);
+          // Silently ignore icon drawing errors
         }
         break;
       default:
@@ -1474,48 +1469,150 @@ function renderIconToCanvas(
   w: number,
   h: number,
 ) {
-  console.log("[renderIconToCanvas] Start:", { asn, props, x, y, w, h });
-
   if (!asn || asn.tag !== "svg") {
-    console.warn("[renderIconToCanvas] Invalid ASN:", asn);
     return;
   }
 
   ctx.save();
   ctx.translate(x, y);
 
-  // Parse viewBox to get original SVG dimensions
   const viewBox = asn.attrs?.viewBox || "0 0 24 24";
   const [, , vbWidth, vbHeight] = viewBox.split(/\s+/).map(parseFloat);
 
-  // Calculate scale to fit the icon into the target dimensions
-  const scaleX = w / vbWidth;
-  const scaleY = h / vbHeight;
-  console.log("[renderIconToCanvas] ViewBox:", viewBox, "Scale:", { scaleX, scaleY });
-  ctx.scale(scaleX, scaleY);
+  const scale = Math.min(w / vbWidth, h / vbHeight);
+  const offsetX = (w - vbWidth * scale) / 2;
+  const offsetY = (h - vbHeight * scale) / 2;
+  ctx.translate(offsetX, offsetY);
+  ctx.scale(scale, scale);
 
-  // Render children (path elements)
   if (asn.children && asn.children.length > 0) {
-    console.log("[renderIconToCanvas] Rendering", asn.children.length, "children");
     for (const child of asn.children) {
       if (child.tag === "path" && child.attrs && child.attrs.d) {
-        console.log("[renderIconToCanvas] Rendering path:", child.attrs);
-        // Merge parent SVG attrs with child attrs (child attrs take precedence)
         const mergedAttrs = { ...asn.attrs, ...child.attrs };
         renderSVGPath(ctx, child.attrs.d, mergedAttrs, props?.color);
       } else if (child.tag === "circle" && child.attrs) {
-        console.log("[renderIconToCanvas] Rendering circle:", child.attrs);
-        // Merge parent SVG attrs with child attrs
         const mergedAttrs = { ...asn.attrs, ...child.attrs };
         renderSVGCircle(ctx, child.attrs, mergedAttrs, props?.color);
       }
     }
-  } else {
-    console.warn("[renderIconToCanvas] No children to render");
   }
 
   ctx.restore();
-  console.log("[renderIconToCanvas] Complete");
+}
+
+// Convert SVG elliptical arc to cubic bezier curves
+function svgArcToBezierCurves(
+  x1: number,
+  y1: number,
+  rx: number,
+  ry: number,
+  xAxisRotation: number,
+  largeArcFlag: number,
+  sweepFlag: number,
+  x2: number,
+  y2: number,
+): Array<[number, number, number, number, number, number]> {
+  if (rx === 0 || ry === 0) {
+    return [[x2, y2, x2, y2, x2, y2]];
+  }
+
+  const phi = (xAxisRotation * Math.PI) / 180;
+  const cosPhi = Math.cos(phi);
+  const sinPhi = Math.sin(phi);
+
+  const dx = (x1 - x2) / 2;
+  const dy = (y1 - y2) / 2;
+  const x1p = cosPhi * dx + sinPhi * dy;
+  const y1p = -sinPhi * dx + cosPhi * dy;
+
+  rx = Math.abs(rx);
+  ry = Math.abs(ry);
+  const lambda = (x1p * x1p) / (rx * rx) + (y1p * y1p) / (ry * ry);
+  if (lambda > 1) {
+    rx *= Math.sqrt(lambda);
+    ry *= Math.sqrt(lambda);
+  }
+
+  const sign = largeArcFlag !== sweepFlag ? 1 : -1;
+  const sq = Math.max(
+    0,
+    (rx * rx * ry * ry - rx * rx * y1p * y1p - ry * ry * x1p * x1p) /
+      (rx * rx * y1p * y1p + ry * ry * x1p * x1p),
+  );
+  const coef = sign * Math.sqrt(sq);
+  const cxp = coef * ((rx * y1p) / ry);
+  const cyp = coef * (-(ry * x1p) / rx);
+
+  const cx = cosPhi * cxp - sinPhi * cyp + (x1 + x2) / 2;
+  const cy = sinPhi * cxp + cosPhi * cyp + (y1 + y2) / 2;
+
+  const theta1 = Math.atan2((y1p - cyp) / ry, (x1p - cxp) / rx);
+  const theta2 = Math.atan2((-y1p - cyp) / ry, (-x1p - cxp) / rx);
+  let dTheta = theta2 - theta1;
+
+  if (sweepFlag && dTheta < 0) {
+    dTheta += 2 * Math.PI;
+  } else if (!sweepFlag && dTheta > 0) {
+    dTheta -= 2 * Math.PI;
+  }
+
+  const segments = Math.max(1, Math.ceil(Math.abs(dTheta) / (Math.PI / 2)));
+  const anglePerSegment = dTheta / segments;
+  const curves: Array<[number, number, number, number, number, number]> = [];
+
+  let currentAngle = theta1;
+  let prevX = x1;
+  let prevY = y1;
+
+  for (let i = 0; i < segments; i++) {
+    const nextAngle = currentAngle + anglePerSegment;
+    const alpha =
+      (Math.sin(anglePerSegment) *
+        (Math.sqrt(
+          4 + 3 * Math.tan(anglePerSegment / 2) * Math.tan(anglePerSegment / 2),
+        ) -
+          1)) /
+      3;
+
+    const cp1x =
+      prevX +
+      alpha *
+        (-rx * Math.cos(phi) * Math.sin(currentAngle) -
+          ry * Math.sin(phi) * Math.cos(currentAngle));
+    const cp1y =
+      prevY +
+      alpha *
+        (-rx * Math.sin(phi) * Math.sin(currentAngle) +
+          ry * Math.cos(phi) * Math.cos(currentAngle));
+
+    const endX =
+      cx +
+      rx * Math.cos(phi) * Math.cos(nextAngle) -
+      ry * Math.sin(phi) * Math.sin(nextAngle);
+    const endY =
+      cy +
+      rx * Math.sin(phi) * Math.cos(nextAngle) +
+      ry * Math.cos(phi) * Math.sin(nextAngle);
+
+    const cp2x =
+      endX -
+      alpha *
+        (-rx * Math.cos(phi) * Math.sin(nextAngle) -
+          ry * Math.sin(phi) * Math.cos(nextAngle));
+    const cp2y =
+      endY -
+      alpha *
+        (-rx * Math.sin(phi) * Math.sin(nextAngle) +
+          ry * Math.cos(phi) * Math.cos(nextAngle));
+
+    curves.push([cp1x, cp1y, cp2x, cp2y, endX, endY]);
+
+    currentAngle = nextAngle;
+    prevX = endX;
+    prevY = endY;
+  }
+
+  return curves;
 }
 
 // Parse and render SVG path
@@ -1525,18 +1622,20 @@ function renderSVGPath(
   attrs: Record<string, string>,
   color?: string,
 ) {
-  console.log("[renderSVGPath] Start:", { pathData, attrs, color });
   const commands = parseSVGPathData(pathData);
   let currentX = 0;
   let currentY = 0;
   let startX = 0;
   let startY = 0;
 
+  // Track previous curve's control point for S/T commands
+  let prevCpX = 0;
+  let prevCpY = 0;
+  let prevCmd = "";
+
   ctx.beginPath();
-  console.log("[renderSVGPath] Processing", commands.length, "commands");
 
   for (const { cmd, values } of commands) {
-    console.log("commands", cmd, values);
     switch (cmd) {
       case "M":
         currentX = values[0];
@@ -1584,30 +1683,84 @@ function renderSVGPath(
         break;
       case "C":
         for (let i = 0; i < values.length; i += 6) {
-          ctx.bezierCurveTo(
-            values[i],
-            values[i + 1],
-            values[i + 2],
-            values[i + 3],
-            values[i + 4],
-            values[i + 5],
-          );
-          currentX = values[i + 4];
-          currentY = values[i + 5];
+          const cp1x = values[i];
+          const cp1y = values[i + 1];
+          const cp2x = values[i + 2];
+          const cp2y = values[i + 3];
+          const ex = values[i + 4];
+          const ey = values[i + 5];
+          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, ex, ey);
+          prevCpX = cp2x;
+          prevCpY = cp2y;
+          currentX = ex;
+          currentY = ey;
         }
         break;
       case "c":
         for (let i = 0; i < values.length; i += 6) {
-          ctx.bezierCurveTo(
-            currentX + values[i],
-            currentY + values[i + 1],
-            currentX + values[i + 2],
-            currentY + values[i + 3],
-            currentX + values[i + 4],
-            currentY + values[i + 5],
-          );
-          currentX += values[i + 4];
-          currentY += values[i + 5];
+          const cp1x = currentX + values[i];
+          const cp1y = currentY + values[i + 1];
+          const cp2x = currentX + values[i + 2];
+          const cp2y = currentY + values[i + 3];
+          const ex = currentX + values[i + 4];
+          const ey = currentY + values[i + 5];
+          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, ex, ey);
+          prevCpX = cp2x;
+          prevCpY = cp2y;
+          currentX = ex;
+          currentY = ey;
+        }
+        break;
+      case "S":
+        for (let i = 0; i < values.length; i += 4) {
+          let cp1x: number, cp1y: number;
+          if (
+            prevCmd === "C" ||
+            prevCmd === "c" ||
+            prevCmd === "S" ||
+            prevCmd === "s"
+          ) {
+            cp1x = currentX + (currentX - prevCpX);
+            cp1y = currentY + (currentY - prevCpY);
+          } else {
+            cp1x = currentX;
+            cp1y = currentY;
+          }
+          const cp2x = values[i];
+          const cp2y = values[i + 1];
+          const ex = values[i + 2];
+          const ey = values[i + 3];
+          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, ex, ey);
+          prevCpX = cp2x;
+          prevCpY = cp2y;
+          currentX = ex;
+          currentY = ey;
+        }
+        break;
+      case "s":
+        for (let i = 0; i < values.length; i += 4) {
+          let cp1x: number, cp1y: number;
+          if (
+            prevCmd === "C" ||
+            prevCmd === "c" ||
+            prevCmd === "S" ||
+            prevCmd === "s"
+          ) {
+            cp1x = currentX + (currentX - prevCpX);
+            cp1y = currentY + (currentY - prevCpY);
+          } else {
+            cp1x = currentX;
+            cp1y = currentY;
+          }
+          const cp2x = currentX + values[i];
+          const cp2y = currentY + values[i + 1];
+          const ex = currentX + values[i + 2];
+          const ey = currentY + values[i + 3];
+          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, ex, ey);
+          prevCpX = cp2x;
+          prevCpY = cp2y;
+          currentX = ex;
+          currentY = ey;
         }
         break;
       case "Q":
@@ -1618,6 +1771,8 @@ function renderSVGPath(
             values[i + 2],
             values[i + 3],
           );
+          prevCpX = values[i];
+          prevCpY = values[i + 1];
           currentX = values[i + 2];
           currentY = values[i + 3];
         }
@@ -1630,8 +1785,58 @@ function renderSVGPath(
             currentX + values[i + 2],
             currentY + values[i + 3],
           );
+          prevCpX = currentX + values[i];
+          prevCpY = currentY + values[i + 1];
           currentX += values[i + 2];
           currentY += values[i + 3];
+        }
+        break;
+      case "T":
+        for (let i = 0; i < values.length; i += 2) {
+          let cpX: number, cpY: number;
+          if (
+            prevCmd === "Q" ||
+            prevCmd === "q" ||
+            prevCmd === "T" ||
+            prevCmd === "t"
+          ) {
+            cpX = currentX + (currentX - prevCpX);
+            cpY = currentY + (currentY - prevCpY);
+          } else {
+            cpX = currentX;
+            cpY = currentY;
+          }
+          const ex = values[i];
+          const ey = values[i + 1];
+          ctx.quadraticCurveTo(cpX, cpY, ex, ey);
+          prevCpX = cpX;
+          prevCpY = cpY;
+          currentX = ex;
+          currentY = ey;
+        }
+        break;
+      case "t":
+        for (let i = 0; i < values.length; i += 2) {
+          let cpX: number, cpY: number;
+          if (
+            prevCmd === "Q" ||
+            prevCmd === "q" ||
+            prevCmd === "T" ||
+            prevCmd === "t"
+          ) {
+            cpX = currentX + (currentX - prevCpX);
+            cpY = currentY + (currentY - prevCpY);
+          } else {
+            cpX = currentX;
+            cpY = currentY;
+          }
+          const ex = currentX + values[i];
+          const ey = currentY + values[i + 1];
+          ctx.quadraticCurveTo(cpX, cpY, ex, ey);
+          prevCpX = cpX;
+          prevCpY = cpY;
+          currentX = ex;
+          currentY = ey;
         }
         break;
       case "A":
@@ -1643,7 +1848,22 @@ function renderSVGPath(
           const sweepFlag = values[i + 4];
           const x = values[i + 5];
           const y = values[i + 6];
-          drawEllipticalArc(ctx, currentX, currentY, rx, ry, xAxisRotation, largeArcFlag, sweepFlag, x, y);
+          const curves = svgArcToBezierCurves(
+            currentX,
+            currentY,
+            rx,
+            ry,
+            xAxisRotation,
+            largeArcFlag,
+            sweepFlag,
+            x,
+            y,
+          );
+          for (const [cp1x, cp1y, cp2x, cp2y, ex, ey] of curves) {
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, ex, ey);
+          }
+          prevCpX = curves[curves.length - 1][2];
+          prevCpY = curves[curves.length - 1][3];
           currentX = x;
           currentY = y;
         }
@@ -1659,7 +1879,22 @@ function renderSVGPath(
           const dy = values[i + 6];
           const x = currentX + dx;
           const y = currentY + dy;
-          drawEllipticalArc(ctx, currentX, currentY, rx, ry, xAxisRotation, largeArcFlag, sweepFlag, x, y);
+          const curves = svgArcToBezierCurves(
+            currentX,
+            currentY,
+            rx,
+            ry,
+            xAxisRotation,
+            largeArcFlag,
+            sweepFlag,
+            x,
+            y,
+          );
+          for (const [cp1x, cp1y, cp2x, cp2y, ex, ey] of curves) {
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, ex, ey);
+          }
+          prevCpX = curves[curves.length - 1][2];
+          prevCpY = curves[curves.length - 1][3];
           currentX = x;
           currentY = y;
         }
@@ -1671,70 +1906,93 @@ function renderSVGPath(
         currentY = startY;
         break;
     }
+    prevCmd = cmd;
   }
 
   const stroke = attrs["stroke"];
   const fill = attrs["fill"];
   const strokeWidth = attrs["stroke-width"] || "2";
 
-  console.log("[renderSVGPath] Styling:", { stroke, fill, strokeWidth, color });
-
   if (stroke && stroke !== "none") {
     ctx.strokeStyle = stroke === "currentColor" ? color || "white" : stroke;
     ctx.lineWidth = parseFloat(strokeWidth);
     ctx.lineCap = (attrs["stroke-linecap"] as any) || "round";
     ctx.lineJoin = (attrs["stroke-linejoin"] as any) || "round";
-    console.log("[renderSVGPath] Stroking with:", ctx.strokeStyle, ctx.lineWidth);
     ctx.stroke();
   }
 
   if (fill && fill !== "none") {
     ctx.fillStyle = fill === "currentColor" ? color || "white" : fill;
-    console.log("[renderSVGPath] Filling with:", ctx.fillStyle);
     ctx.fill();
   }
-
-  console.log("[renderSVGPath] Complete");
 }
 
-// Render SVG circle element
+const CURVE_LIKE_CIRCLE_RATIO = 0.551915024494;
+
+// Render SVG circle element using cubic bezier curves
 function renderSVGCircle(
   ctx: CanvasRenderingContext2D,
   circleAttrs: Record<string, string>,
   attrs: Record<string, string>,
   color?: string,
 ) {
-  console.log("[renderSVGCircle] Start:", { circleAttrs, attrs, color });
-
   const cx = parseFloat(circleAttrs.cx || "0");
   const cy = parseFloat(circleAttrs.cy || "0");
   const r = parseFloat(circleAttrs.r || "0");
+  const controllerLength = r * CURVE_LIKE_CIRCLE_RATIO;
 
   ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  ctx.moveTo(cx, cy - r);
+  ctx.bezierCurveTo(
+    cx + controllerLength,
+    cy - r,
+    cx + r,
+    cy - controllerLength,
+    cx + r,
+    cy,
+  );
+  ctx.bezierCurveTo(
+    cx + r,
+    cy + controllerLength,
+    cx + controllerLength,
+    cy + r,
+    cx,
+    cy + r,
+  );
+  ctx.bezierCurveTo(
+    cx - controllerLength,
+    cy + r,
+    cx - r,
+    cy + controllerLength,
+    cx - r,
+    cy,
+  );
+  ctx.bezierCurveTo(
+    cx - r,
+    cy - controllerLength,
+    cx - controllerLength,
+    cy - r,
+    cx,
+    cy - r,
+  );
+  ctx.closePath();
 
   const stroke = attrs["stroke"];
   const fill = attrs["fill"];
   const strokeWidth = attrs["stroke-width"] || "2";
-
-  console.log("[renderSVGCircle] Styling:", { stroke, fill, strokeWidth, color });
 
   if (stroke && stroke !== "none") {
     ctx.strokeStyle = stroke === "currentColor" ? color || "white" : stroke;
     ctx.lineWidth = parseFloat(strokeWidth);
     ctx.lineCap = (attrs["stroke-linecap"] as any) || "round";
     ctx.lineJoin = (attrs["stroke-linejoin"] as any) || "round";
-    console.log("[renderSVGCircle] Stroking with:", ctx.strokeStyle, ctx.lineWidth);
     ctx.stroke();
   }
 
   if (fill && fill !== "none") {
     ctx.fillStyle = fill === "currentColor" ? color || "white" : fill;
-    console.log("[renderSVGCircle] Filling with:", ctx.fillStyle);
     ctx.fill();
   }
-
-  console.log("[renderSVGCircle] Complete");
 }
 
 function parseSVGPathData(
@@ -1757,79 +2015,6 @@ function parseSVGPathData(
   }
 
   return commands;
-}
-
-// Helper function to draw elliptical arc (SVG A/a command)
-function drawEllipticalArc(
-  ctx: CanvasRenderingContext2D,
-  x1: number,
-  y1: number,
-  rx: number,
-  ry: number,
-  xAxisRotation: number,
-  largeArcFlag: number,
-  sweepFlag: number,
-  x2: number,
-  y2: number,
-) {
-  // Handle degenerate cases
-  if (rx === 0 || ry === 0) {
-    ctx.lineTo(x2, y2);
-    return;
-  }
-
-  // Convert rotation angle to radians
-  const phi = (xAxisRotation * Math.PI) / 180;
-  const cosPhi = Math.cos(phi);
-  const sinPhi = Math.sin(phi);
-
-  // Compute center point
-  const dx = (x1 - x2) / 2;
-  const dy = (y1 - y2) / 2;
-  const x1p = cosPhi * dx + sinPhi * dy;
-  const y1p = -sinPhi * dx + cosPhi * dy;
-
-  // Correct radii if needed
-  rx = Math.abs(rx);
-  ry = Math.abs(ry);
-  const lambda = (x1p * x1p) / (rx * rx) + (y1p * y1p) / (ry * ry);
-  if (lambda > 1) {
-    rx *= Math.sqrt(lambda);
-    ry *= Math.sqrt(lambda);
-  }
-
-  // Compute center
-  const sign = largeArcFlag !== sweepFlag ? 1 : -1;
-  const sq = Math.max(
-    0,
-    (rx * rx * ry * ry - rx * rx * y1p * y1p - ry * ry * x1p * x1p) /
-      (rx * rx * y1p * y1p + ry * ry * x1p * x1p),
-  );
-  const coef = sign * Math.sqrt(sq);
-  const cxp = coef * ((rx * y1p) / ry);
-  const cyp = coef * (-(ry * x1p) / rx);
-
-  const cx = cosPhi * cxp - sinPhi * cyp + (x1 + x2) / 2;
-  const cy = sinPhi * cxp + cosPhi * cyp + (y1 + y2) / 2;
-
-  // Compute angles
-  const theta1 = Math.atan2((y1p - cyp) / ry, (x1p - cxp) / rx);
-  const theta2 = Math.atan2((-y1p - cyp) / ry, (-x1p - cxp) / rx);
-  let dTheta = theta2 - theta1;
-
-  if (sweepFlag && dTheta < 0) {
-    dTheta += 2 * Math.PI;
-  } else if (!sweepFlag && dTheta > 0) {
-    dTheta -= 2 * Math.PI;
-  }
-
-  // Draw the arc using ellipse
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(phi);
-  ctx.scale(1, ry / rx);
-  ctx.arc(0, 0, rx, theta1, theta1 + dTheta, !sweepFlag);
-  ctx.restore();
 }
 
 function unionRects(
@@ -2693,10 +2878,28 @@ export function createCanvasDocument(
     return state;
   };
 
+  const canvas$ = Canvas({});
+  const layer$ = CanvasLayer({});
+
+  connectLayer(layer$, canvas$, $canvas, ctx!);
+
+  function loadSVGContent(content: string) {
+    console.log("[PAGE]home/index - loadSVGContent", content);
+    const result = canvas$.buildBezierPathsFromPathString(content);
+    if (result === null) {
+      return;
+    }
+    const { dimensions, gradients, paths } = result;
+    // $$canvas.saveGradients(gradients);
+    canvas$.appendObjects(paths, { transform: true, dimensions });
+    canvas$.draw();
+  }
+
   const host: CanvasDocument = {
     kind: "canvas",
     canvas,
     ctx,
+    // canvas$,
     body,
     draw() {
       if (destroyed) return;

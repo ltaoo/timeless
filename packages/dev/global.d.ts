@@ -801,6 +801,21 @@ declare module "packages/primitive/src/content/html" {
         class$: any;
     };
 }
+declare module "packages/primitive/src/content/icon" {
+    export function Icon(props: {
+        name: string;
+        size: number;
+    }): {
+        t: string;
+        $elm: any;
+        value: string;
+        props: {
+            name: string;
+            size: number;
+        };
+    };
+    export function isIcon(v: any): boolean;
+}
 declare module "packages/primitive/src/event/index" {
     export type MouseEvent<T = any> = {
         target: T;
@@ -1257,6 +1272,7 @@ declare module "packages/primitive/src/content/style" {
 declare module "packages/primitive/src/content/img" {
     import { Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
+    import { ViewStyleProperties } from "@/style";
     import { MountedEvent } from "@/event/index";
     export interface ImgProps extends Omit<ViewProps, "type" | "as"> {
         src?: string | Ref<string>;
@@ -1282,7 +1298,8 @@ declare module "packages/primitive/src/content/img" {
         value: string;
         props: {
             src: string | null;
-            style: ViewProps["style"];
+            style: ViewStyleProperties;
+            styleSets: string[];
         };
         render(): any;
         beforeUnmounted(): void;
@@ -11851,6 +11868,7 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/content/fragment";
     export * from "packages/primitive/src/content/html";
     export * from "packages/primitive/src/content/text";
+    export * from "packages/primitive/src/content/icon";
     export * from "packages/primitive/src/content/lazy-view";
     export * from "packages/primitive/src/content/type";
     export * from "packages/primitive/src/event/index";
@@ -11931,7 +11949,6 @@ declare module "packages/primitive/src/index" {
 declare module "packages/timeless/src/index" {
     export * from "packages/primitive/src/index";
     export * from "packages/base/src/index";
-    export * as base from "packages/base/src/index";
     export * as reactive from "packages/reactive/src/index";
     export * as utils from "packages/utils/src/index";
     export * as kit from "packages/kit/src/index";
@@ -11952,453 +11969,503 @@ declare module "packages/icons/src/util/index" {
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
     };
-    export function createIcon(svg: string): (props?: IconProps) => {
+    type ASNNode = {
+        tag: string;
+        attrs?: Record<string, string>;
+        children?: readonly ASNNode[];
+    };
+    export function createIcon(asn: ASNNode): (props?: IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/arrow-down-to-line" {
-    export const ArrowDownloadToLineOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+    export const ArrowDownToLineOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/calendar" {
     export const CalendarOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/chevron-down" {
     export const ChevronDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/chevron-left" {
     export const ChevronLeftOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/chevron-right" {
     export const ChevronRightOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/circle-arrow-down" {
     export const CircleArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/circle-x" {
     export const CircleXOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/clock-arrow-down" {
     export const ClockArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/cloud-download" {
     export const CloudDownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/download" {
     export const DownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/ellipsis-vertical" {
     export const EllipsisVerticalOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/ellipsis" {
     export const EllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-box" {
     export const FileBoxOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-image" {
     export const FileImageOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-lock" {
     export const FileLockOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-play" {
     export const FilePlayOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-symlink" {
     export const FileSymlinkOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-video-camera" {
     export const FileVideoCameraOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-volume" {
     export const FileVolumeOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file" {
     export const FileOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/folder-closed" {
     export const FolderClosedOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/folder" {
     export const FolderOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/pause" {
     export const PauseOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/play" {
     export const PlayOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/refresh-ccw" {
     export const RefreshCcwOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/rss" {
-    export const RSSOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+    export const RssOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/square-arrow-down" {
     export const SquareArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/trash-2" {
     export const Trash2Outlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/trash" {
     export const TrashOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/search" {
     export const SearchOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/undo-2" {
     export const Undo2Outlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/x" {
     export const XOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/bolt" {
     export const BoltOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/loader" {
     export const LoaderOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/loader-circle" {
     export const LoaderCircleOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/check" {
     export const CheckOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/chevron-up" {
     export const ChevronUpOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/clock" {
     export const ClockOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/grid-3x3" {
     export const Grid3x3Outlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/menu" {
     export const MenuOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/circle-ellipsis" {
-    export const CircleEllipsisDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
+    export const CircleEllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/house" {
     export const HouseOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/moon" {
     export const MoonOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/icons/sun" {
     export const SunOutlined: (props?: import("packages/icons/src/util").IconProps) => {
         t: string;
         $elm: any;
-        render(): any;
-        onMounted(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        append(node: any): void;
+        setContent(html: string): void;
+        render(): any;
     };
 }
 declare module "packages/icons/src/index" {
@@ -13768,6 +13835,7 @@ declare const Fragment: typeof import("@timeless/timeless").Fragment;
 declare const G: typeof import("@timeless/timeless").G;
 declare const Grid: typeof import("@timeless/timeless").Grid;
 declare const HeadPrimitive: typeof import("@timeless/timeless").HeadPrimitive;
+declare const Icon: typeof import("@timeless/timeless").Icon;
 declare const ImagePrimitive: typeof import("@timeless/timeless").ImagePrimitive;
 declare const Img: typeof import("@timeless/timeless").Img;
 declare const InputPrimitive: typeof import("@timeless/timeless").InputPrimitive;
@@ -13853,6 +13921,7 @@ declare const isBrowser: typeof import("@timeless/timeless").isBrowser;
 declare const isClassName: typeof import("@timeless/timeless").isClassName;
 declare const isElement: typeof import("@timeless/timeless").isElement;
 declare const isFragment: typeof import("@timeless/timeless").isFragment;
+declare const isIcon: typeof import("@timeless/timeless").isIcon;
 declare const isImg: typeof import("@timeless/timeless").isImg;
 declare const isLazyElement: typeof import("@timeless/timeless").isLazyElement;
 declare const isReactiveData: typeof import("@timeless/timeless").isReactiveData;
@@ -13985,7 +14054,7 @@ declare const Waterfall: typeof import("@timeless/shadcn").Waterfall;
 declare const icons: typeof import("@timeless/shadcn").icons;
 
 // @timeless/icons
-declare const ArrowDownloadToLineOutlined: typeof import("@timeless/icons").ArrowDownloadToLineOutlined;
+declare const ArrowDownToLineOutlined: typeof import("@timeless/icons").ArrowDownToLineOutlined;
 declare const BoltOutlined: typeof import("@timeless/icons").BoltOutlined;
 declare const CalendarOutlined: typeof import("@timeless/icons").CalendarOutlined;
 declare const CheckOutlined: typeof import("@timeless/icons").CheckOutlined;
@@ -13994,7 +14063,7 @@ declare const ChevronLeftOutlined: typeof import("@timeless/icons").ChevronLeftO
 declare const ChevronRightOutlined: typeof import("@timeless/icons").ChevronRightOutlined;
 declare const ChevronUpOutlined: typeof import("@timeless/icons").ChevronUpOutlined;
 declare const CircleArrowDownOutlined: typeof import("@timeless/icons").CircleArrowDownOutlined;
-declare const CircleEllipsisDownOutlined: typeof import("@timeless/icons").CircleEllipsisDownOutlined;
+declare const CircleEllipsisOutlined: typeof import("@timeless/icons").CircleEllipsisOutlined;
 declare const CircleXOutlined: typeof import("@timeless/icons").CircleXOutlined;
 declare const ClockArrowDownOutlined: typeof import("@timeless/icons").ClockArrowDownOutlined;
 declare const ClockOutlined: typeof import("@timeless/icons").ClockOutlined;
@@ -14020,8 +14089,8 @@ declare const MenuOutlined: typeof import("@timeless/icons").MenuOutlined;
 declare const MoonOutlined: typeof import("@timeless/icons").MoonOutlined;
 declare const PauseOutlined: typeof import("@timeless/icons").PauseOutlined;
 declare const PlayOutlined: typeof import("@timeless/icons").PlayOutlined;
-declare const RSSOutlined: typeof import("@timeless/icons").RSSOutlined;
 declare const RefreshCcwOutlined: typeof import("@timeless/icons").RefreshCcwOutlined;
+declare const RssOutlined: typeof import("@timeless/icons").RssOutlined;
 declare const SearchOutlined: typeof import("@timeless/icons").SearchOutlined;
 declare const SquareArrowDownOutlined: typeof import("@timeless/icons").SquareArrowDownOutlined;
 declare const SunOutlined: typeof import("@timeless/icons").SunOutlined;
