@@ -1,144 +1,172 @@
-import { ViewProps } from "@/content/view";
-import { ViewChildren, isElement } from "@/content/type";
-import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
-import { getHost } from "@/host";
+import { isRef } from "@timeless/reactive";
 
-export function Portal(props: ViewProps & {}, children: ViewChildren) {
-  const host = getHost();
-  let anchor: any = null;
-  let _mountedNodes: Node[] = [];
-  let _mountedChildren: any[] = [];
-  let _mounted = false;
+import { ViewProps } from "@/content/view";
+import { TimelessElement, ViewChildren, isElement } from "@/content/type";
+import { Txt } from "@/content/text";
+import { MountedEvent } from "@/event";
+// import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
+// import { getHost } from "@/host";
+
+export function Portal(props: ViewProps & {}, children?: ViewChildren) {
+  // const host = getHost();
+  let $elm: any = null;
 
   const normalize = (c: any) => {
     if (Array.isArray(c)) return c;
     return [c];
   };
 
-  const _children = normalize(children);
+  // const _children = normalize(children);
 
-  const cleanup = () => {
-    console.log(
-      "[Portal] cleanup called, _mountedNodes:",
-      _mountedNodes.length,
-      "_mountedChildren:",
-      _mountedChildren.length,
-    );
-    // Lifecycle - 先调用 beforeUnmounted
-    for (const child of _mountedChildren) {
-      if (isElement(child) && child.beforeUnmounted) {
-        console.log("[Portal] calling beforeUnmounted on child:", child.t);
-        child.beforeUnmounted();
+  const methods = {
+    setup_children(children?: ViewChildren) {
+      if (!children) {
+        return;
       }
-    }
-    // Lifecycle - 再调用 cleanup 或 onUnmounted
-    for (const child of _mountedChildren) {
-      if (isElement(child)) {
-        // 如果子组件有 cleanup 方法，优先调用
-        if (typeof child.cleanup === "function") {
-          console.log("[Portal] calling cleanup on child:", child.t);
-          child.cleanup();
-        } else if (child.onUnmounted) {
-          console.log("[Portal] calling onUnmounted on child:", child.t);
-          child.onUnmounted();
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        // console.log("for children", child);
+        (() => {
+          if (typeof child === "function") {
+            const r = child();
+            state.children[i] = r;
+            return;
+          }
+          if (isRef(child)) {
+            // @ts-ignore
+            state.children[i] = Txt(child);
+            return;
+          }
+          if (typeof child === "string") {
+            state.children[i] = Txt(String(child));
+            return;
+          }
+          if (isElement(child)) {
+            state.children[i] = child;
+            return;
+          }
+          // state.children[i] = null;
+        })();
+      }
+    },
+    cleanup() {
+      console.log(
+        "[Portal] cleanup called, _mountedNodes:",
+        // _mounted_children.length,
+        "_mountedChildren:",
+        // _mountedChildren.length,
+      );
+      // Lifecycle - 先调用 beforeUnmounted
+      for (const child of _mountedChildren) {
+        if (isElement(child) && child.beforeUnmounted) {
+          console.log("[Portal] calling beforeUnmounted on child:", child.t);
+          child.beforeUnmounted();
         }
       }
-    }
-
-    // Remove DOM nodes
-    console.log("[Portal] removing DOM nodes, count:", _mountedNodes.length);
-    for (const node of _mountedNodes) {
-      console.log(
-        "[Portal] checking node:",
-        node.nodeName,
-        "parentNode:",
-        !!node.parentNode,
-      );
-      const parent = host.getParentNode(node);
-      if (parent) {
-        host.removeChild(parent, node);
+      // Lifecycle - 再调用 cleanup 或 onUnmounted
+      for (const child of _mountedChildren) {
+        if (isElement(child)) {
+          // 如果子组件有 cleanup 方法，优先调用
+          if (typeof child.cleanup === "function") {
+            console.log("[Portal] calling cleanup on child:", child.t);
+            child.cleanup();
+          } else if (child.onUnmounted) {
+            console.log("[Portal] calling onUnmounted on child:", child.t);
+            child.onUnmounted();
+          }
+        }
       }
-    }
 
-    _mountedNodes = [];
-    _mountedChildren = [];
-    _mounted = false;
+      // Remove DOM nodes
+      console.log(
+        "[Portal] removing DOM nodes, count:",
+        _mounted_children.length,
+      );
 
-    if (props.onUnmounted) {
-      console.log("[Portal] calling props.onUnmounted");
-      props.onUnmounted();
-    }
-    console.log("[Portal] cleanup completed");
+      $elm.removeContent();
+      // for (const child of _mounted_children) {
+      //   console.log(
+      //     "[Portal] checking node:",
+      //     child.nodeName,
+      //     "parentNode:",
+      //     !!child.parentNode,
+      //   );
+      //   // const parent = host.getParentNode(child);
+      //   const $parent = child.getParentNode();
+      //   if ($parent) {
+      //     $parent.removeChild($child);
+      //   }
+      // }
+
+      _mounted_children = [];
+      _mountedChildren = [];
+      _mounted = false;
+
+      if (props.onUnmounted) {
+        console.log("[Portal] calling props.onUnmounted");
+        props.onUnmounted();
+      }
+      console.log("[Portal] cleanup completed");
+    },
   };
+
+  let _mounted_children: Node[] = [];
+  let _mountedChildren: any[] = [];
+  let _mounted = false;
+  const state: {
+    children: TimelessElement[];
+  } = {
+    children: [],
+  };
+  methods.setup_children(children);
 
   return {
     t: "portal",
-    $elm: anchor as any,
-    cleanup,
+    get $elm() {
+      return $elm;
+    },
+    set $elm(value: any) {
+      $elm = value;
+    },
+    children: state.children,
     render() {
       if (_mounted) {
         return null;
       }
 
       // Create anchor if not already created
-      if (!anchor) {
-        anchor = safeCreateTextNode("");
-      }
+      // if (!anchor) {
+      //   anchor = safeCreateTextNode("");
+      // }
 
-      const fragment = safeCreateDocumentFragment();
+      // const fragment = safeCreateDocumentFragment();
       const nodes: any[] = [];
       const instances: any[] = [];
 
       // console.log("[Portal] render, children count:", _children.length);
 
-      for (let child of _children) {
-        if (!child) continue;
-        // Handle lazy functions from h()
-        if (typeof child === "function") {
-          child = child();
-        }
-        if (!child) continue;
-        if (isElement(child)) {
-          const result = child.render();
-          if (result) {
-            if (host.isDocumentFragment(result)) {
-              nodes.push(...host.getChildNodes(result));
-            } else {
-              nodes.push(result);
-            }
-            host.appendChild(fragment, result);
-            instances.push(child);
-          }
-        } else if (typeof child === "string" || typeof child === "number") {
-          const textNode = safeCreateTextNode(String(child));
-          host.appendChild(fragment, textNode);
-          nodes.push(textNode);
-        }
-      }
-
-      _mountedNodes = nodes;
-      _mountedChildren = instances;
       _mounted = true;
 
       // console.log("[Portal] appending to body, nodes count:", nodes.length);
-      const body = host.getBody?.();
-      if (body) host.appendChild(body, fragment);
+      // const body = host.getBody?.();
+      // if (body) host.appendChild(body, fragment);
 
       // Lifecycle
-      for (const child of instances) {
+
+      return null;
+    },
+    onMounted(event: MountedEvent) {
+      if (props.onMounted) {
+        props.onMounted({ target: event.target });
+      }
+      for (const child of state.children) {
         if (isElement(child) && child.onMounted) {
           child.onMounted({ target: child.$elm });
         }
       }
-
-      if (props.onMounted) {
-        props.onMounted({ target: anchor });
-      }
-
-      return null;
     },
     onUnmounted() {
-      cleanup();
+      methods.cleanup();
     },
   };
 }

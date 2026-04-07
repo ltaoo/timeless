@@ -7,17 +7,25 @@
     UITextField *_textField;
     UIButton *_addButton;
     UITableView *_tableView;
+    UISegmentedControl *_categorySegment;
     NSMutableArray<NSDictionary *> *_todos;
+    NSArray<NSString *> *_categories;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     _todos = [NSMutableArray array];
+    _categories = @[@"work", @"daily"];
     [self setupUI];
 }
 
 - (void)setupUI {
     self.view.backgroundColor = [UIColor whiteColor];
+    
+    _categorySegment = [[UISegmentedControl alloc] initWithItems:_categories];
+    _categorySegment.selectedSegmentIndex = 0;
+    _categorySegment.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:_categorySegment];
     
     _textField = [[UITextField alloc] init];
     _textField.placeholder = @"Enter todo";
@@ -43,7 +51,11 @@
     [self.view addSubview:_tableView];
     
     [NSLayoutConstraint activateConstraints:@[
-        [_textField.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:16],
+        [_categorySegment.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:16],
+        [_categorySegment.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
+        [_categorySegment.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+        
+        [_textField.topAnchor constraintEqualToAnchor:_categorySegment.bottomAnchor constant:16],
         [_textField.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
         [_textField.trailingAnchor constraintEqualToAnchor:_addButton.leadingAnchor constant:-8],
         
@@ -61,7 +73,8 @@
 - (void)addTodo {
     NSString *title = _textField.text;
     if (title.length == 0) return;
-    [_todos addObject:@{@"title": title, @"isCompleted": @NO}];
+    NSString *category = _categories[_categorySegment.selectedSegmentIndex];
+    [_todos addObject:@{@"title": title, @"category": category, @"isCompleted": @NO}];
     _textField.text = @"";
     [_tableView reloadData];
 }
@@ -75,7 +88,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     TodoCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TodoCell" forIndexPath:indexPath];
     NSDictionary *todo = _todos[indexPath.row];
-    [cell configureWithTitle:todo[@"title"] isCompleted:[todo[@"isCompleted"] boolValue]];
+    [cell configureWithTitle:todo[@"title"] category:todo[@"category"] isCompleted:[todo[@"isCompleted"] boolValue]];
     __weak typeof(self) weakSelf = self;
     cell.onCheckChanged = ^(BOOL isCompleted) {
         NSMutableDictionary *mutableTodo = [weakSelf.todos[indexPath.row] mutableCopy];
@@ -101,6 +114,7 @@
 @implementation TodoCell {
     UISwitch *_checkBox;
     UILabel *_titleLabel;
+    UILabel *_categoryLabel;
     UIButton *_archiveButton;
 }
 
@@ -122,6 +136,11 @@
     _titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [self.contentView addSubview:_titleLabel];
     
+    _categoryLabel = [[UILabel alloc] init];
+    _categoryLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    _categoryLabel.textColor = [UIColor grayColor];
+    [self.contentView addSubview:_categoryLabel];
+    
     _archiveButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [_archiveButton setTitle:@"Archive" forState:UIControlStateNormal];
     _archiveButton.translatesAutoresizingMaskIntoConstraints = NO;
@@ -136,15 +155,19 @@
         [_titleLabel.leadingAnchor constraintEqualToAnchor:_checkBox.trailingAnchor constant:12],
         [_titleLabel.centerYAnchor constraintEqualToAnchor:self.contentView.centerYAnchor],
         
-        [_archiveButton.leadingAnchor constraintEqualToAnchor:_titleLabel.trailingAnchor constant:8],
+        [_categoryLabel.leadingAnchor constraintEqualToAnchor:_titleLabel.trailingAnchor constant:8],
+        [_categoryLabel.centerYAnchor constraintEqualToAnchor:self.contentView.centerYAnchor],
+        
+        [_archiveButton.leadingAnchor constraintEqualToAnchor:_categoryLabel.trailingAnchor constant:8],
         [_archiveButton.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-16],
         [_archiveButton.centerYAnchor constraintEqualToAnchor:self.contentView.centerYAnchor]
     ]];
 }
 
-- (void)configureWithTitle:(NSString *)title isCompleted:(BOOL)isCompleted {
+- (void)configureWithTitle:(NSString *)title category:(NSString *)category isCompleted:(BOOL)isCompleted {
     _checkBox.on = isCompleted;
     _titleLabel.textColor = isCompleted ? [UIColor grayColor] : [UIColor blackColor];
+    _categoryLabel.text = [NSString stringWithFormat:@"(%@)", category];
     _archiveButton.hidden = !isCompleted;
     
     if (isCompleted) {

@@ -14,6 +14,13 @@ public class TodoItem : ObservableObject
         set => SetAndRaise(ref _title, value);
     }
 
+    private string _category = "work";
+    public string Category
+    {
+        get => _category;
+        set => SetAndRaise(ref _category, value);
+    }
+
     private bool _isCompleted;
     public bool IsCompleted
     {
@@ -27,7 +34,9 @@ public class MainWindow : Window
     private TextBox _inputTextBox;
     private Button _addButton;
     private ListBox _todoListBox;
+    private ComboBox _categoryComboBox;
     private ObservableCollection<TodoItem> _todos = new();
+    private ObservableCollection<string> _categories = new() { "work", "daily" };
 
     public MainWindow()
     {
@@ -45,10 +54,19 @@ public class MainWindow : Window
             Margin = new Thickness(0, 0, 0, 16)
         };
 
+        _categoryComboBox = new ComboBox
+        {
+            Width = 100,
+            ItemsSource = _categories,
+            SelectedIndex = 0
+        };
+        inputPanel.Children.Add(_categoryComboBox);
+
         _inputTextBox = new TextBox
         {
             Watermark = "Enter todo",
-            Width = 280
+            Width = 200,
+            Margin = new Thickness(8, 0, 0, 0)
         };
         inputPanel.Children.Add(_inputTextBox);
 
@@ -91,7 +109,8 @@ public class MainWindow : Window
         if (string.IsNullOrWhiteSpace(title))
             return;
 
-        var item = new TodoItem { Title = title, IsCompleted = false };
+        var category = _categoryComboBox.SelectedItem as string ?? "work";
+        var item = new TodoItem { Title = title, Category = category, IsCompleted = false };
         _todos.Add(item);
 
         UpdateItemView(item);
@@ -145,6 +164,15 @@ public class MainWindow : Window
             Margin = new Thickness(8, 0, 0, 0)
         };
         panel.Children.Add(titleLabel);
+
+        var categoryLabel = new TextBlock
+        {
+            Text = $"({item.Category})",
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Margin = new Thickness(8, 0, 0, 0),
+            Foreground = Brushes.Gray
+        };
+        panel.Children.Add(categoryLabel);
 
         var archiveButton = new Button
         {

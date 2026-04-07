@@ -11,6 +11,7 @@ import { DOMImg } from "@/host/img";
 import { DOMIcon } from "@/host/icon";
 import { DOMInput } from "@/host/input";
 import { DOMButton } from "@/host/button";
+import { DOMPortal } from "@/host/portal";
 
 function build(elm: TimelessElement): DOMHostNode {
   if (elm.t === "view") {
@@ -60,6 +61,12 @@ function build(elm: TimelessElement): DOMHostNode {
     elm.$elm = button$;
     button$.render(elm);
     return button$;
+  }
+  if (elm.t === "portal") {
+    const portal$ = DOMPortal({ build });
+    elm.$elm = portal$;
+    portal$.render(elm);
+    return portal$;
   }
   if (elm.t === "show") {
     const show$ = DOMShow({ build });

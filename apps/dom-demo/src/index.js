@@ -12,6 +12,7 @@ import {
   combine,
   computed,
   refarr,
+  Portal,
 } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
 
@@ -146,6 +147,10 @@ function ApplicationView() {
       },
     },
     [
+      Portal({}, [
+        View({}, ["first content in body"]),
+        View({}, ["second content in body"]),
+      ]),
       Img({
         src: "/public/avatar.jpeg",
         style: {

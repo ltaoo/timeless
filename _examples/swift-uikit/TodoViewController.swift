@@ -5,8 +5,9 @@ class TodoViewController: UIViewController {
     private let textField = UITextField()
     private let addButton = UIButton(type: .system)
     private let tableView = UITableView()
+    private let categorySegment = UISegmentedControl(items: ["work", "daily"])
     
-    private var todos: [(title: String, isCompleted: Bool)] = []
+    private var todos: [(title: String, category: String, isCompleted: Bool)] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -15,6 +16,10 @@ class TodoViewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = .white
+        
+        categorySegment.selectedSegmentIndex = 0
+        categorySegment.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(categorySegment)
         
         textField.placeholder = "Enter todo"
         textField.borderStyle = .roundedRect
@@ -32,7 +37,11 @@ class TodoViewController: UIViewController {
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
-            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            categorySegment.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            categorySegment.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            categorySegment.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
+            textField.topAnchor.constraint(equalTo: categorySegment.bottomAnchor, constant: 16),
             textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             textField.trailingAnchor.constraint(equalTo: addButton.leadingAnchor, constant: -8),
             
@@ -49,7 +58,8 @@ class TodoViewController: UIViewController {
     
     @objc private func addTodo() {
         guard let title = textField.text, !title.isEmpty else { return }
-        todos.append((title: title, isCompleted: false))
+        let category = categorySegment.selectedSegmentIndex == 0 ? "work" : "daily"
+        todos.append((title: title, category: category, isCompleted: false))
         textField.text = ""
         tableView.reloadData()
     }
@@ -62,7 +72,8 @@ extension TodoViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TodoCell", for: indexPath) as! TodoCell
-        cell.configure(title: todos[indexPath.row].title, isCompleted: todos[indexPath.row].isCompleted)
+        let todo = todos[indexPath.row]
+        cell.configure(title: todo.title, category: todo.category, isCompleted: todo.isCompleted)
         cell.onCheckChanged = { [weak self] isCompleted in
             self?.todos[indexPath.row].isCompleted = isCompleted
         }
@@ -77,6 +88,7 @@ extension TodoViewController: UITableViewDataSource {
 class TodoCell: UITableViewCell {
     private let checkBox = UISwitch()
     private let titleLabel = UILabel()
+    private let categoryLabel = UILabel()
     private let archiveButton = UIButton(type: .system)
     var onCheckChanged: ((Bool) -> Void)?
     var onArchive: (() -> Void)?
@@ -98,6 +110,10 @@ class TodoCell: UITableViewCell {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(titleLabel)
         
+        categoryLabel.translatesAutoresizingMaskIntoConstraints = false
+        categoryLabel.textColor = .gray
+        contentView.addSubview(categoryLabel)
+        
         archiveButton.translatesAutoresizingMaskIntoConstraints = false
         archiveButton.setTitle("Archive", for: .normal)
         archiveButton.addTarget(self, action: #selector(archiveTapped), for: .touchUpInside)
@@ -111,14 +127,18 @@ class TodoCell: UITableViewCell {
             titleLabel.leadingAnchor.constraint(equalTo: checkBox.trailingAnchor, constant: 12),
             titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             
-            archiveButton.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 8),
+            categoryLabel.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 8),
+            categoryLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            
+            archiveButton.leadingAnchor.constraint(equalTo: categoryLabel.trailingAnchor, constant: 8),
             archiveButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             archiveButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
     
-    func configure(title: String, isCompleted: Bool) {
+    func configure(title: String, category: String, isCompleted: Bool) {
         titleLabel.text = title
+        categoryLabel.text = "(\(category))"
         checkBox.isOn = isCompleted
         titleLabel.textColor = isCompleted ? .gray : .black
         

@@ -16,6 +16,13 @@ public class TodoItem : INotifyPropertyChanged
         set { _title = value; OnPropertyChanged(); }
     }
 
+    private string _category = "work";
+    public string Category
+    {
+        get => _category;
+        set { _category = value; OnPropertyChanged(); }
+    }
+
     private bool _isCompleted;
     public bool IsCompleted
     {
@@ -45,7 +52,8 @@ public partial class MainWindow : Window
         var title = InputTextBox.Text;
         if (string.IsNullOrWhiteSpace(title)) return;
 
-        var item = new TodoItem { Title = title, IsCompleted = false };
+        var category = (CategoryComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "work";
+        var item = new TodoItem { Title = title, Category = category, IsCompleted = false };
         item.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(TodoItem.IsCompleted))
@@ -83,6 +91,15 @@ public partial class MainWindow : Window
             Margin = new Thickness(8, 0, 0, 0)
         };
         panel.Children.Add(titleLabel);
+
+        var categoryLabel = new TextBlock
+        {
+            Text = $"({item.Category})",
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(8, 0, 0, 0),
+            Foreground = Brushes.Gray
+        };
+        panel.Children.Add(categoryLabel);
 
         var archiveButton = new Button
         {

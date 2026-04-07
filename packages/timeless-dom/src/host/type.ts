@@ -8,6 +8,7 @@ import { DOMIcon } from "./icon";
 import { DOMInput } from "./input";
 
 import { DOMButton } from "./button";
+import { DOMPortal } from "./portal";
 
 import { DOMShow } from "./show";
 import { DOMFor } from "./for";
@@ -22,5 +23,6 @@ export type DOMHostNode =
   | DOMIcon
   | DOMInput
   | DOMButton
+  | DOMPortal
   | DOMShow
   | DOMFor;

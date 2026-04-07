@@ -12,8 +12,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editText: EditText
     private lateinit var addButton: Button
     private lateinit var listView: ListView
+    private lateinit var categorySpinner: Spinner
 
     private val todos = mutableListOf<TodoItem>()
+    private val categories = listOf("work", "daily")
+    private var selectedCategory = "work"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +28,19 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             setPadding(32, 32, 32, 32)
         }
+
+        categorySpinner = Spinner(this).apply {
+            val adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, categories)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            this.adapter = adapter
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    selectedCategory = categories[position]
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        }
+        container.addView(categorySpinner)
 
         editText = EditText(this).apply {
             hint = "Enter todo"
@@ -55,7 +71,7 @@ class MainActivity : AppCompatActivity() {
     private fun addTodo() {
         val title = editText.text.toString()
         if (title.isEmpty()) return
-        todos.add(TodoItem(title, false))
+        todos.add(TodoItem(title, selectedCategory, false))
         editText.text.clear()
         (listView.adapter as TodoAdapter).notifyDataSetChanged()
     }
@@ -66,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-data class TodoItem(val title: String, val isCompleted: Boolean)
+data class TodoItem(val title: String, val category: String, val isCompleted: Boolean)
 
 class TodoAdapter(
     private val todos: List<TodoItem>,
@@ -99,11 +115,17 @@ class TodoAdapter(
             (view as LinearLayout).getChildAt(1) as TextView
         }
 
+        val categoryLabel = if (convertView == null) {
+            TextView(context).also { (view as LinearLayout).addView(it) }
+        } else {
+            (view as LinearLayout).getChildAt(2) as TextView
+        }
+
         val archiveButton = if (convertView == null) {
             Button(context).apply { text = "Archive" }
                 .also { (view as LinearLayout).addView(it) }
         } else {
-            (view as LinearLayout).getChildAt(2) as Button
+            (view as LinearLayout).getChildAt(3) as Button
         }
 
         val todo = todos[position]
@@ -111,6 +133,10 @@ class TodoAdapter(
         checkBox.setOnCheckedChangeListener { _, isChecked ->
             onCheckChanged(position, isChecked)
         }
+
+        titleLabel.text = todo.title
+        categoryLabel.text = "(${todo.category})"
+        categoryLabel.setTextColor(android.graphics.Color.GRAY)
 
         if (todo.isCompleted) {
             titleLabel.paintFlags = titleLabel.paintFlags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG

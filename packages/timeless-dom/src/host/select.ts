@@ -9,8 +9,8 @@ import { viewStyleToCssText } from "@/modules/style";
 
 import { DOMHostNode } from "./type";
 
-export interface DOMInput {
-  t: "input";
+export interface DOMSelect {
+  t: "select";
   $elm: any;
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
@@ -31,13 +31,13 @@ export interface DOMInput {
   render(elm: TimelessElement): any;
 }
 
-export function DOMInput(props: {
+export function DOMSelect(props: {
   // canvas: Document;
   build: (elm: TimelessElement) => DOMHostNode;
-}): DOMInput {
+}): DOMSelect {
   // const canvas = props.canvas;
   // const $elm = canvas.createElement("div");
-  const $elm = document.createElement("input");
+  const $elm = document.createElement("div");
 
   const methods = {
     setStyle(style: ViewStyleProperties) {
@@ -114,7 +114,7 @@ export function DOMInput(props: {
   };
 
   return {
-    t: "input",
+    t: "select",
     get $elm() {
       return $elm;
     },
@@ -156,8 +156,6 @@ export function DOMInput(props: {
       $elm.style.backgroundColor = "transparent";
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
-      $elm.value = "";
-      $elm.type = "text";
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }
@@ -168,6 +166,16 @@ export function DOMInput(props: {
       //     methods.setStyleSets(elm.props.styleSets);
       //   }
       // }
+      if (elm.children) {
+        for (const child of elm.children) {
+          if (isElement(child)) {
+            const $sub = props.build(child);
+            if ($sub && $sub.$elm) {
+              $elm.appendChild($sub.$elm);
+            }
+          }
+        }
+      }
       if (elm.events) {
         methods.setupEventListener(elm.events);
       }
@@ -176,6 +184,6 @@ export function DOMInput(props: {
   };
 }
 
-export function isDOMInput(value: any): value is DOMInput {
-  return value.t === "input";
+export function isDOMSelect(value: any): value is DOMSelect {
+  return value.t === "select";
 }

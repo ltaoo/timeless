@@ -25,6 +25,9 @@ class TodoScreen extends StatefulWidget {
 class _TodoScreenState extends State<TodoScreen> {
   final TextEditingController _controller = TextEditingController();
   final List<TodoItem> _todos = [];
+  String _selectedCategory = 'work';
+
+  static const List<String> _categories = ['work', 'daily'];
 
   @override
   void dispose() {
@@ -36,7 +39,7 @@ class _TodoScreenState extends State<TodoScreen> {
     final title = _controller.text;
     if (title.isEmpty) return;
     setState(() {
-      _todos.add(TodoItem(title: title, isCompleted: false));
+      _todos.add(TodoItem(title: title, category: _selectedCategory, isCompleted: false));
     });
     _controller.clear();
   }
@@ -64,6 +67,21 @@ class _TodoScreenState extends State<TodoScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
+                DropdownButton<String>(
+                  value: _selectedCategory,
+                  items: _categories.map((category) {
+                    return DropdownMenuItem(
+                      value: category,
+                      child: Text(category),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCategory = value!;
+                    });
+                  },
+                ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     controller: _controller,
@@ -117,13 +135,15 @@ class _TodoScreenState extends State<TodoScreen> {
 
 class TodoItem {
   final String title;
+  final String category;
   final bool isCompleted;
 
-  TodoItem({required this.title, required this.isCompleted});
+  TodoItem({required this.title, required this.category, required this.isCompleted});
 
-  TodoItem copyWith({String? title, bool? isCompleted}) {
+  TodoItem copyWith({String? title, String? category, bool? isCompleted}) {
     return TodoItem(
       title: title ?? this.title,
+      category: category ?? this.category,
       isCompleted: isCompleted ?? this.isCompleted,
     );
   }

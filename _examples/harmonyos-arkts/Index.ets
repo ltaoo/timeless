@@ -1,6 +1,7 @@
 export interface TodoItem {
   id: number
   title: string
+  category: string
   completed: boolean
 }
 
@@ -8,11 +9,13 @@ export interface TodoItem {
 @Component
 struct Index {
   @State private todos: TodoItem[] = [
-    { id: 1, title: 'Buy milk', completed: false },
-    { id: 2, title: 'Read docs', completed: true }
+    { id: 1, title: 'Buy milk', category: 'work', completed: false },
+    { id: 2, title: 'Read docs', category: 'daily', completed: true }
   ]
   @State private draftTitle: string = ''
+  @State private selectedCategory: string = 'work'
   @State private nextId: number = 3
+  private categories: string[] = ['work', 'daily']
 
   private addTodo(): void {
     const title = this.draftTitle.trim()
@@ -20,7 +23,7 @@ struct Index {
       return
     }
 
-    this.todos = [{ id: this.nextId, title, completed: false }, ...this.todos]
+    this.todos = [{ id: this.nextId, title, category: this.selectedCategory, completed: false }, ...this.todos]
     this.nextId = this.nextId + 1
     this.draftTitle = ''
   }
@@ -53,8 +56,16 @@ struct Index {
         .margin({ bottom: 12 })
 
       Row() {
+        Select(this.categories)
+          .value(this.selectedCategory)
+          .onSelect((index: number) => {
+            this.selectedCategory = this.categories[index]
+          })
+          .width(100)
+        
         TextInput({ placeholder: 'Add a todo', text: this.draftTitle })
           .layoutWeight(1)
+          .margin({ left: 8 })
           .onChange((value) => {
             this.draftTitle = value
           })
@@ -103,6 +114,11 @@ struct Index {
                 .decoration({ type: todo.completed ? TextDecorationType.LineThrough : TextDecorationType.None })
                 .layoutWeight(1)
 
+              Text(`(${todo.category})`)
+                .fontSize(14)
+                .fontColor('#999999')
+                .margin({ left: 8 })
+                
               Button('Delete')
                 .type(ButtonType.Normal)
                 .onClick(() => this.removeTodo(todo.id))

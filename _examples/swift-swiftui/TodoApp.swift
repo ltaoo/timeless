@@ -3,16 +3,31 @@ import SwiftUI
 struct TodoItem: Identifiable {
     let id = UUID()
     var title: String
+    var category: String
     var isCompleted: Bool
+}
+
+enum TodoCategory: String, CaseIterable {
+    case work = "work"
+    case daily = "daily"
 }
 
 struct ContentView: View {
     @State private var inputText = ""
+    @State private var selectedCategory: TodoCategory = .work
     @State private var todos: [TodoItem] = []
     
     var body: some View {
         VStack(spacing: 16) {
             HStack {
+                Picker("Category", selection: $selectedCategory) {
+                    ForEach(TodoCategory.allCases, id: \.self) { category in
+                        Text(category.rawValue).tag(category)
+                    }
+                }
+                .pickerStyle(.menu)
+                .frame(width: 100)
+                
                 TextField("Enter todo", text: $inputText)
                     .textFieldStyle(.roundedBorder)
                 
@@ -55,7 +70,7 @@ struct ContentView: View {
     
     private func addTodo() {
         guard !inputText.isEmpty else { return }
-        todos.append(TodoItem(title: inputText, isCompleted: false))
+        todos.append(TodoItem(title: inputText, category: selectedCategory.rawValue, isCompleted: false))
         inputText = ""
     }
     

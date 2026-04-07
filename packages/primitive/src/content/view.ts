@@ -141,7 +141,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
   const methods = {
     // Helper: normalize children (convert functions, wrap refs)
-    normalize_children(children?: ViewChildren) {
+    setup_children(children?: ViewChildren) {
       if (!children) {
         return;
       }
@@ -495,7 +495,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     handleUnmounted() {},
   };
 
-  methods.normalize_children(children);
+  methods.setup_children(children);
   methods.setup_reactive_props_bindings();
 
   return {
@@ -516,7 +516,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       }
       state.rendered = true;
       // Create element if not already created
-      methods.normalize_children(children);
+      methods.setup_children(children);
       methods.setup_reactive_props_bindings();
 
       if (onMounted) {
@@ -542,7 +542,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       state.rendered = true;
 
       $elm = existingDom;
-      methods.normalize_children();
+      methods.setup_children();
       methods.setup_reactive_props_bindings();
 
       // Hydrate children recursively
