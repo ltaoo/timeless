@@ -1,15 +1,7 @@
 import {
-  setHost,
-  setRenderer,
-  type TimelessHost,
   isElement,
+  type TimelessHost,
   type TimelessElement,
-  registerComponent,
-  getRenderer,
-  Grid,
-  View,
-  Txt,
-  VNode,
 } from "@timeless/timeless";
 
 import {
@@ -574,8 +566,8 @@ export function createTuiHost(
 
 export function installTuiHost(options?: Parameters<typeof createTuiHost>[0]) {
   const host = createTuiHost(options);
-  setHost(host);
-  setTuiHost(host);
+  // setHost(host);
+  // setTuiHost(host);
   return host;
 }
 

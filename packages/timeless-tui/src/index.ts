@@ -16,7 +16,7 @@ export {
   moveTo,
   type Buffer,
 } from "./host/draw";
-
+export { TUI, type TuiGlobal } from "./host/draw";
 export {
   createTuiInput,
   parseKey,
@@ -25,17 +25,6 @@ export {
   type KeyHandler,
   type KeyName,
 } from "./modules/input";
-
-export {
-  createTuiHost,
-  installTuiHost,
-  render,
-  renderToStringTree,
-  platform,
-} from "./host";
-
-export { TUI, type TuiGlobal } from "./host/draw";
-
 export {
   createTuiApp,
   useReactive,
@@ -44,5 +33,3 @@ export {
   type TuiRenderFn,
   type Ref,
 } from "./app";
-
-// export { TuiGrid, TuiView, TuiTxt } from "./modules/grid";

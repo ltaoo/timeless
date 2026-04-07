@@ -5,8 +5,7 @@ import {
   ViewStyleProperties,
 } from "@timeless/primitive";
 
-import { viewStyleToCssText } from "@/modules/style";
-
+import { viewStyleToCssText } from "./style";
 import { CanvasHostNode } from "./type";
 import { CanvasDocument } from "./draw";
 // import { canvas } from "./draw";

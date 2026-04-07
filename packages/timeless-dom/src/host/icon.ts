@@ -1,4 +1,3 @@
-import { viewStyleToCssText } from "@/modules/style";
 import {
   isElement,
   isRef,
@@ -7,6 +6,7 @@ import {
 } from "@timeless/timeless";
 import * as ASN from "@timeless/svg/asn";
 
+import { viewStyleToCssText } from "./style";
 import { DOMHostNode } from "./type";
 
 type ASNNode = {

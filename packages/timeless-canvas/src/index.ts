@@ -1,5 +1,5 @@
 export * from "./renderer";
-import { getCurrentHost } from "./host";
+// import { getCurrentHost } from "./host";
 
 export { render } from "./renderer/index";
 
@@ -19,11 +19,11 @@ export const platform = {
     }
   },
   enableDebug(enabled: boolean) {
-    const host = getCurrentHost();
-    if (host && host.enableDebug) {
-      host.enableDebug(enabled);
-    } else {
-      console.warn("No canvas host available for debug mode");
-    }
+    // const host = getCurrentHost();
+    // if (host && host.enableDebug) {
+    //   host.enableDebug(enabled);
+    // } else {
+    //   console.warn("No canvas host available for debug mode");
+    // }
   },
 };

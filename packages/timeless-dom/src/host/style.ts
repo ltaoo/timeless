@@ -4,7 +4,6 @@ import {
   Ref,
   StyleRef,
   ViewStyle,
-  ViewStyleInput,
 } from "@timeless/timeless";
 
 export function viewStyleToCssText(

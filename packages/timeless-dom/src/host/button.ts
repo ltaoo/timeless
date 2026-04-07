@@ -1,4 +1,3 @@
-import { viewStyleToCssText } from "@/modules/style";
 import {
   isElement,
   isRef,
@@ -6,6 +5,7 @@ import {
   ViewStyleProperties,
 } from "@timeless/timeless";
 
+import { viewStyleToCssText } from "./style";
 import { DOMHostNode } from "./type";
 
 export interface DOMButton {

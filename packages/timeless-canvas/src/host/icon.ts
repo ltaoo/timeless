@@ -1,12 +1,6 @@
-import {
-  isElement,
-  isRef,
-  TimelessElement,
-  ViewStyleProperties,
-} from "@timeless/primitive";
+import { TimelessElement, ViewStyleProperties } from "@timeless/primitive";
 
-import { viewStyleToCssText } from "@/modules/style";
-
+import { viewStyleToCssText } from "./style";
 import { CanvasHostNode } from "./type";
 import { CanvasDocument } from "./draw";
 

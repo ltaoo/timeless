@@ -1,4 +1,3 @@
-import { viewStyleToCssText } from "@/modules/style";
 import {
   isElement,
   isRef,
@@ -7,6 +6,7 @@ import {
 } from "@timeless/timeless";
 
 import { DOMHostNode } from "./type";
+import { viewStyleToCssText } from "./style";
 
 export interface DOMImg {
   t: "img";

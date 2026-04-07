@@ -5,8 +5,7 @@ import {
   ViewStyleProperties,
 } from "@timeless/timeless";
 
-import { viewStyleToCssText } from "@/modules/style";
-
+import { viewStyleToCssText } from "./style";
 import { DOMHostNode } from "./type";
 
 export interface DOMSelect {
