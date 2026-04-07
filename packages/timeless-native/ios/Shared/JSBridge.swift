@@ -5,6 +5,9 @@ import JavaScriptCore
 enum NativeNode {
     case view(style: [String: String], children: [NativeNode])
     case text(value: String)
+    case img(src: String, style: [String: String])
+    case button(style: [String: String], children: [NativeNode], listeners: [String: Any])
+    case input(value: String, placeholder: String, style: [String: String], attrs: [String: String])
 }
 
 /// Bridge between JavaScriptCore and native rendering.
@@ -124,6 +127,35 @@ class JSBridge {
                 }
             }
             return .view(style: style, children: children)
+        }
+
+        if type == "img" {
+            let src = dict["src"] as? String ?? ""
+            let style = dict["style"] as? [String: String] ?? [:]
+            return .img(src: src, style: style)
+        }
+
+        if type == "button" {
+            let style = dict["style"] as? [String: String] ?? [:]
+            let listeners = dict["listeners"] as? [String: Any] ?? [:]
+            var children: [NativeNode] = []
+            if let jsChildren = dict["children"] as? [[String: Any]] {
+                for child in jsChildren {
+                    let childValue = JSValue(object: child, in: value.context)!
+                    if let node = parseNode(childValue) {
+                        children.append(node)
+                    }
+                }
+            }
+            return .button(style: style, children: children, listeners: listeners)
+        }
+
+        if type == "input" {
+            let inputValue = dict["value"] as? String ?? ""
+            let placeholder = dict["placeholder"] as? String ?? ""
+            let style = dict["style"] as? [String: String] ?? [:]
+            let attrs = dict["attrs"] as? [String: String] ?? [:]
+            return .input(value: inputValue, placeholder: placeholder, style: style, attrs: attrs)
         }
 
         return nil

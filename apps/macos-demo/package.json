@@ -1,0 +1,18 @@
+{
+  "name": "@timeless/macos-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "build:app": "vite build && ./scripts/build-macos.sh"
+  },
+  "dependencies": {
+    "@timeless/timeless": "workspace:^",
+    "@timeless/timeless-native": "workspace:^"
+  },
+  "devDependencies": {
+    "vite": "^8.0.0-beta.16"
+  }
+}

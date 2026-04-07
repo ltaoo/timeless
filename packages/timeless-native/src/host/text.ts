@@ -1,13 +1,23 @@
+export interface NativeTextElm {
+  type: "text";
+  value: string;
+  style: Record<string, string>;
+  /** Called by the native bridge when it creates the platform label,
+   *  so that future setContent() calls can push updates. */
+  _onContentChange?: (value: string) => void;
+}
+
 export interface NativeText {
-  $elm: { type: "text"; value: string };
+  $elm: NativeTextElm;
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
   setContent(value: string | number | null): void;
+  setStyle(style: Record<string, string>): void;
   render(): any;
 }
 
 export function NativeText(value?: string | null): NativeText {
-  const $text: { type: "text"; value: string } = {
+  const $text: NativeTextElm = {
     type: "text" as const,
     value: (() => {
       if (value !== null && value !== undefined) {
@@ -15,6 +25,7 @@ export function NativeText(value?: string | null): NativeText {
       }
       return "";
     })(),
+    style: {},
   };
 
   return {
@@ -29,8 +40,15 @@ export function NativeText(value?: string | null): NativeText {
     },
     setContent(v: string | number | null) {
       if (v !== null && v !== undefined) {
-        $text.value = String(v);
+        const str = String(v);
+        $text.value = str;
+        if (typeof $text._onContentChange === "function") {
+          $text._onContentChange(str);
+        }
       }
+    },
+    setStyle(style: Record<string, string>) {
+      Object.assign($text.style, style);
     },
     render() {
       return $text;

@@ -4,13 +4,24 @@ import {
   ViewStyleProperties,
 } from "@timeless/primitive";
 
-import { NativeView } from "./type";
+export interface NativeButton {
+  t: "button";
+  $elm: any;
+  isDocumentFragment(): boolean;
+  getChildNodes(): any[];
+  setStyle(style: ViewStyleProperties): void;
+  setStyleValue(key: string, value: string): void;
+  setStyleSet(key: string): void;
+  setAttribute(key: string, value: string): void;
+  removeAttribute(key: string): void;
+  render(elm: TimelessElement): any;
+}
 
-export function NativeView(props: {
-  build: (elm: TimelessElement) => NativeView;
-}): NativeView {
+export function NativeButton(props: {
+  build: (elm: TimelessElement) => any;
+}): NativeButton {
   const $elm = {
-    type: "view",
+    type: "button",
     children: [] as any[],
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
@@ -45,9 +56,6 @@ export function NativeView(props: {
       if (events.onKeyDown) {
         $elm.listeners.keydown = events.onKeyDown;
       }
-      if (events.onContextMenu) {
-        $elm.listeners.contextmenu = events.onContextMenu;
-      }
       if (events.onMouseEnter) {
         $elm.listeners.mouseenter = events.onMouseEnter;
       }
@@ -58,7 +66,7 @@ export function NativeView(props: {
   };
 
   return {
-    t: "view",
+    t: "button",
     get $elm() {
       return $elm;
     },
@@ -84,20 +92,6 @@ export function NativeView(props: {
     removeAttribute(key: string) {
       delete $elm.attrs[key];
     },
-    addEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      $elm.listeners[type] = handler;
-    },
-    removeEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      delete $elm.listeners[type];
-    },
     render(elm: TimelessElement) {
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
@@ -106,36 +100,10 @@ export function NativeView(props: {
         methods.setupEventListener(elm.events);
       }
       if (elm.children) {
-        // Extract inheritable text styles from parent view
-        const inheritableKeys = [
-          "font-size",
-          "font-weight",
-          "font-style",
-          "font-family",
-          "color",
-          "text-align",
-          "text-decoration",
-          "line-height",
-          "letter-spacing",
-        ];
-        const inheritedStyle: Record<string, string> = {};
-        for (const key of inheritableKeys) {
-          if ($elm.style[key]) {
-            inheritedStyle[key] = $elm.style[key];
-          }
-        }
-
         for (const child of elm.children) {
           if (isElement(child)) {
             const $sub = props.build(child);
             if ($sub && $sub.$elm) {
-              // Propagate inherited text styles to text children
-              if (
-                $sub.$elm.type === "text" &&
-                Object.keys(inheritedStyle).length > 0
-              ) {
-                $sub.$elm.style = { ...inheritedStyle, ...$sub.$elm.style };
-              }
               $elm.children.push($sub.$elm);
             }
           }
@@ -146,6 +114,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view";
+export function isNativeButton(value: any): value is NativeButton {
+  return value.t === "button";
 }
