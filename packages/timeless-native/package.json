@@ -1,0 +1,19 @@
+{
+  "name": "@timeless/timeless-native",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "module": "dist/timeless.native.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "vite build"
+  },
+  "type": "module",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@timeless/timeless": "workspace:*",
+    "@timeless/primitive": "workspace:*"
+  }
+}

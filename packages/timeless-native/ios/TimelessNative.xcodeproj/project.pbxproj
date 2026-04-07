@@ -1,0 +1,427 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		/* iOS target */
+		A1000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* AppDelegate.swift */; };
+		A1000002 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* RootViewController.swift */; };
+		A1000003 /* JSBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003 /* JSBridge.swift */; };
+		A1000004 /* NativeViewRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000004 /* NativeViewRenderer.swift */; };
+		A1000005 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2000005 /* JavaScriptCore.framework */; };
+		A1000006 /* timeless.umd.min.js in Resources */ = {isa = PBXBuildFile; fileRef = A2000007 /* timeless.umd.min.js */; };
+		A1000007 /* timeless.native.umd.min.js in Resources */ = {isa = PBXBuildFile; fileRef = A2000008 /* timeless.native.umd.min.js */; };
+		A1000008 /* app.js in Resources */ = {isa = PBXBuildFile; fileRef = A2000009 /* app.js */; };
+		/* macOS target */
+		B1000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000001 /* AppDelegate.swift */; };
+		B1000002 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000002 /* RootViewController.swift */; };
+		B1000003 /* JSBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003 /* JSBridge.swift */; };
+		B1000004 /* NativeViewRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000004 /* NativeViewRenderer.swift */; };
+		B1000009 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000009 /* main.swift */; };
+		B1000005 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2000005 /* JavaScriptCore.framework */; };
+		B1000006 /* timeless.umd.min.js in Resources */ = {isa = PBXBuildFile; fileRef = A2000007 /* timeless.umd.min.js */; };
+		B1000007 /* timeless.native.umd.min.js in Resources */ = {isa = PBXBuildFile; fileRef = A2000008 /* timeless.native.umd.min.js */; };
+		B1000008 /* app.js in Resources */ = {isa = PBXBuildFile; fileRef = A2000009 /* app.js */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		/* Shared */
+		A2000003 /* JSBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSBridge.swift; sourceTree = "<group>"; };
+		/* iOS */
+		A2000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A2000002 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
+		A2000004 /* NativeViewRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeViewRenderer.swift; sourceTree = "<group>"; };
+		A2000005 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		A2000006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A2000010 /* TimelessNative.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimelessNative.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		/* macOS */
+		B2000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B2000002 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
+		B2000004 /* NativeViewRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeViewRenderer.swift; sourceTree = "<group>"; };
+		B2000005 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		B2000006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B2000009 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		B2000010 /* TimelessNativeMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimelessNativeMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		/* Resources (shared) */
+		A2000007 /* timeless.umd.min.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "timeless.umd.min.js"; sourceTree = "<group>"; };
+		A2000008 /* timeless.native.umd.min.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "timeless.native.umd.min.js"; sourceTree = "<group>"; };
+		A2000009 /* app.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "app.js"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A3000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000005 /* JavaScriptCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B3000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1000005 /* JavaScriptCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A4000001 = {
+			isa = PBXGroup;
+			children = (
+				A4000006 /* Shared */,
+				A4000002 /* TimelessNative */,
+				A4000007 /* TimelessNativeMac */,
+				A4000003 /* Frameworks */,
+				A4000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A4000006 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				A2000003 /* JSBridge.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		A4000002 /* TimelessNative */ = {
+			isa = PBXGroup;
+			children = (
+				A2000001 /* AppDelegate.swift */,
+				A2000002 /* RootViewController.swift */,
+				A2000004 /* NativeViewRenderer.swift */,
+				A2000006 /* Info.plist */,
+				A4000005 /* Resources */,
+			);
+			path = TimelessNative;
+			sourceTree = "<group>";
+		};
+		A4000007 /* TimelessNativeMac */ = {
+			isa = PBXGroup;
+			children = (
+				B2000009 /* main.swift */,
+				B2000001 /* AppDelegate.swift */,
+				B2000002 /* RootViewController.swift */,
+				B2000004 /* NativeViewRenderer.swift */,
+				B2000006 /* Info.plist */,
+			);
+			path = TimelessNativeMac;
+			sourceTree = "<group>";
+		};
+		A4000003 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A2000005 /* JavaScriptCore.framework */,
+				B2000005 /* JavaScriptCore.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A4000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A2000010 /* TimelessNative.app */,
+				B2000010 /* TimelessNativeMac.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A4000005 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A2000007 /* timeless.umd.min.js */,
+				A2000008 /* timeless.native.umd.min.js */,
+				A2000009 /* app.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A5000001 /* TimelessNative */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A7000003 /* Build configuration list for PBXNativeTarget "TimelessNative" */;
+			buildPhases = (
+				A3000002 /* Sources */,
+				A3000001 /* Frameworks */,
+				A3000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TimelessNative;
+			productName = TimelessNative;
+			productReference = A2000010 /* TimelessNative.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B5000001 /* TimelessNativeMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B7000003 /* Build configuration list for PBXNativeTarget "TimelessNativeMac" */;
+			buildPhases = (
+				B3000002 /* Sources */,
+				B3000001 /* Frameworks */,
+				B3000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TimelessNativeMac;
+			productName = TimelessNativeMac;
+			productReference = B2000010 /* TimelessNativeMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A6000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = A7000001 /* Build configuration list for PBXProject "TimelessNative" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A4000001;
+			productRefGroup = A4000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A5000001 /* TimelessNative */,
+				B5000001 /* TimelessNativeMac */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A3000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000006 /* timeless.umd.min.js in Resources */,
+				A1000007 /* timeless.native.umd.min.js in Resources */,
+				A1000008 /* app.js in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B3000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1000006 /* timeless.umd.min.js in Resources */,
+				B1000007 /* timeless.native.umd.min.js in Resources */,
+				B1000008 /* app.js in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A3000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000001 /* AppDelegate.swift in Sources */,
+				A1000002 /* RootViewController.swift in Sources */,
+				A1000003 /* JSBridge.swift in Sources */,
+				A1000004 /* NativeViewRenderer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B3000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1000009 /* main.swift in Sources */,
+				B1000001 /* AppDelegate.swift in Sources */,
+				B1000002 /* RootViewController.swift in Sources */,
+				B1000003 /* JSBridge.swift in Sources */,
+				B1000004 /* NativeViewRenderer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		/* Project-level */
+		A8000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A8000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		/* iOS target */
+		A8000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = TimelessNative/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.timeless.native;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A8000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = TimelessNative/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.timeless.native;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		/* macOS target */
+		B8000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = TimelessNativeMac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.timeless.native.mac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		B8000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = TimelessNativeMac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.timeless.native.mac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A7000001 /* Build configuration list for PBXProject "TimelessNative" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A8000001 /* Debug */,
+				A8000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A7000003 /* Build configuration list for PBXNativeTarget "TimelessNative" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A8000003 /* Debug */,
+				A8000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B7000003 /* Build configuration list for PBXNativeTarget "TimelessNativeMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B8000003 /* Debug */,
+				B8000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = A6000001 /* Project object */;
+}

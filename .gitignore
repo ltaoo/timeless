@@ -4,5 +4,6 @@ dist
 .virtual-build
 
 .DS_Store
+**/ios/build
 
 .gstack/

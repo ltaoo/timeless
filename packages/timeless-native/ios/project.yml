@@ -1,0 +1,20 @@
+name: TimelessNative
+options:
+  bundleIdPrefix: com.timeless
+  deploymentTarget:
+    iOS: "15.0"
+  xcodeVersion: "15.0"
+targets:
+  TimelessNative:
+    type: application
+    platform: iOS
+    sources:
+      - path: TimelessNative
+    settings:
+      base:
+        INFOPLIST_FILE: TimelessNative/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.timeless.native
+        SWIFT_VERSION: "5.9"
+        GENERATE_INFOPLIST_FILE: false
+    info:
+      path: TimelessNative/Info.plist
