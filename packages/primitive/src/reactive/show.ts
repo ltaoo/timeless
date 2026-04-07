@@ -43,28 +43,29 @@ export function Show(props: {
       state.children = next;
       return next;
     },
-    setup() {
+    setup_value_subscribe() {
       if (isRef(when)) {
         when.subscribe({
           onChange(value) {
             const condition = !!value;
-            if (!$elm) {
-              return;
-            }
             // 如果条件没有变化，直接返回
             if (condition === state.value) {
               return;
             }
             state.value = condition;
             if (!condition) {
-              if (typeof $elm.removeContent === "function") {
+              if ($elm && typeof $elm.removeContent === "function") {
                 $elm.removeContent();
                 // _current_nodes = [];
                 state.children = [];
               }
             } else {
               const target = methods.get_children_with_condition(condition);
-              if (target.length > 0 && typeof $elm.addContent === "function") {
+              if (
+                $elm &&
+                target.length > 0 &&
+                typeof $elm.addContent === "function"
+              ) {
                 $elm.addContent(target);
                 state.children = target;
               }
@@ -83,6 +84,7 @@ export function Show(props: {
 
   const condition = isRef(when) ? !!when.value : !!when;
   methods.get_children_with_condition(condition);
+  methods.setup_value_subscribe();
 
   return {
     t: "show",

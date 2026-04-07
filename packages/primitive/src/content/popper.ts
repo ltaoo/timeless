@@ -5,28 +5,28 @@ import { MountedEvent } from "@/event";
 import { isElement, MaybeSignal, TimelessElement, ViewChildren } from "./type";
 import { Txt } from "./text";
 
-export function Popper(
+type DOMPopperProps = {
+  x: MaybeSignal<number>;
+  y: MaybeSignal<number>;
+  placed: MaybeSignal<boolean>;
+  onMounted?: (event: MountedEvent) => void;
+};
+type DOMPopperState = {
+  children: TimelessElement[];
+  width: number;
+  height: number;
+  placed: boolean;
+  x: number;
+  y: number;
   props: {
-    x: MaybeSignal<number>;
-    y: MaybeSignal<number>;
-    placed: MaybeSignal<boolean>;
-    onMounted?: (event: MountedEvent) => void;
-  },
-  children?: ViewChildren,
-) {
-  const state: {
-    children: TimelessElement[];
-    width: number;
-    height: number;
-    placed: boolean;
-    x: number;
-    y: number;
-    props: {
-      side: "top" | "bottom" | "left" | "right";
-      placement: "start" | "end" | "middle";
-      strategy: "absolute" | "fixed";
-    };
-  } = {
+    side: "top" | "bottom" | "left" | "right";
+    placement: "start" | "end" | "middle";
+    strategy: "absolute" | "fixed";
+  };
+};
+
+export function Popper(props: DOMPopperProps, children?: ViewChildren) {
+  const state: DOMPopperState = {
     children: [],
     width: 0,
     height: 0,
@@ -146,6 +146,12 @@ export function Popper(
 
       if (props.onMounted) {
         props.onMounted(event);
+      }
+
+      for (const child of state.children) {
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
       }
     },
   };

@@ -15,6 +15,7 @@ import {
   computed,
   refarr,
   refobj,
+  DismissableLayer,
 } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
 
@@ -36,7 +37,7 @@ const apps = [
 function ApplicationView() {
   const page = ref("todo");
   const count_ = ref(0);
-  const visible_ = ref(true);
+  const visible_ = ref(false);
   const popper_ = refobj({
     x: 0,
     y: 0,
@@ -55,6 +56,7 @@ function ApplicationView() {
       title: "Study for exam exam exam",
     },
   ]);
+  const dissmissable$ = DismissableLayer();
 
   function handleSelectCard(idx) {
     focused.set(xyFromIdx(idx));
@@ -120,7 +122,27 @@ function ApplicationView() {
     return pos.x === x && pos.y === y;
   }
 
+  function handleClick(event) {
+    const { x, y } = event;
+    if (!popper_.value.placed) {
+      return;
+    }
+    const bingo = dissmissable$.isBingo({
+      x,
+      y,
+    });
+    console.log(x, y, popper_.value.placed, bingo);
+    if (!bingo) {
+      return;
+    }
+    visible_.as(false);
+    popper_.assign({
+      placed: false,
+    });
+  }
+
   platform.addEventListener("keydown", handleKeydown);
+  platform.addEventListener("click", handleClick);
 
   function handleKeydown(event) {
     const { key } = event;
@@ -155,12 +177,6 @@ function ApplicationView() {
       },
     },
     [
-      // Show({
-      //   when: visible_,
-      //   ok() {
-      //     return ;
-      //   },
-      // }),
       Img({
         src: "/public/avatar.jpeg",
         style: {
@@ -173,14 +189,25 @@ function ApplicationView() {
           {
             onMounted(event) {
               // console.log(event.target);
-              const { x, y, height } = event.target.getBoundingClientRect();
+              const { x, y, width, height } =
+                event.target.getBoundingClientRect();
+              dissmissable$.addIgnore({
+                x,
+                y,
+                width,
+                height,
+              });
               popper_.as({
                 x: x,
                 y: y + height + 2,
                 placed: false,
               });
             },
-            onClick() {
+            onClick(event) {
+              // event.stopPropagation();
+              visible_.as((prev) => {
+                return !prev;
+              });
               popper_.assign({
                 placed: true,
               });
@@ -189,30 +216,47 @@ function ApplicationView() {
           ["Click it"],
         ),
       ]),
-      Portal({}, [
-        Popper(
-          {
-            placement: "top",
-            strategy: "absolute",
-            x: computed(popper_, (t) => t.x),
-            y: computed(popper_, (t) => t.y),
-            placed: computed(popper_, (t) => t.placed),
-          },
-          [
-            View(
+      Show({
+        when: visible_,
+        ok() {
+          return Portal({}, [
+            Popper(
               {
-                style: {
-                  "background-color": "#fff",
-                },
+                placement: "top",
+                strategy: "absolute",
+                x: computed(popper_, (t) => t.x),
+                y: computed(popper_, (t) => t.y),
+                placed: computed(popper_, (t) => t.placed),
               },
               [
-                View({}, ["first content in body"]),
-                View({}, ["second content in body"]),
+                View(
+                  {
+                    style: {
+                      "background-color": "#fff",
+                    },
+                    onMounted(event) {
+                      console.log("[Popper] onMounted", event.target);
+                      const { x, y, width, height } =
+                        event.target.getBoundingClientRect();
+                      dissmissable$.addIgnore({
+                        x,
+                        y,
+                        width,
+                        height,
+                      });
+                    },
+                  },
+                  [
+                    View({}, ["first content in body"]),
+                    View({}, ["second content in body"]),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
-      ]),
+          ]);
+        },
+      }),
+
       Icon({ name: "bolt", color: "#fff" }),
       View(
         {

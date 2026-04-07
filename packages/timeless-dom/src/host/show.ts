@@ -161,43 +161,43 @@ export function DOMShow(props: {
       const new_nodes: any[] = [];
       const new_instances: any[] = [];
       const $parent = $anchor.parentElement;
-      if (!$parent) {
+      if (!$parent || !children) {
         return;
       }
-      if (children) {
-        // console.log("[]show - in render", elm.children);
-        for (let child of children) {
-          if (!child) {
+      // console.log("[]show - in render", elm.children);
+      for (let child of children) {
+        console.log("[]show addContent", child);
+        if (!child) {
+          continue;
+        }
+        if (isElement(child)) {
+          // 即使 render 返回 null（如 Portal），也要保存实例以便调用生命周期
+          new_instances.push(child);
+          const $sub = props.build(child);
+          if (!$sub) {
             continue;
           }
-          console.log("[]show addContent", child.t);
-          if (isElement(child)) {
-            // 即使 render 返回 null（如 Portal），也要保存实例以便调用生命周期
-            new_instances.push(child);
-            const $sub = props.build(child);
-            if (!$sub) {
-              continue;
-            }
-            if ($sub.isDocumentFragment()) {
-              const child_nodes = Array.from($sub.getChildNodes());
-              new_nodes.push(...child_nodes);
-              children$.push(...child_nodes);
-            } else {
-              new_nodes.push($sub);
-              if ($sub.$elm) {
-                children$.push($sub.$elm as ChildNode);
-              }
-            }
-            console.log("[]show addContent before $sub.$elm", $sub.$elm);
+          if ($sub.isDocumentFragment()) {
+            const child_nodes = Array.from($sub.getChildNodes());
+            new_nodes.push(...child_nodes);
+            children$.push(...child_nodes);
+          } else {
+            new_nodes.push($sub);
             if ($sub.$elm) {
-              $fragment.appendChild($sub.$elm);
+              children$.push($sub.$elm as ChildNode);
             }
           }
+          console.log("[]show addContent before $sub.$elm", $sub.$elm);
+          if ($sub.$elm) {
+            $fragment.appendChild($sub.$elm);
+          }
         }
-        $parent.appendChild($fragment);
       }
+      $parent.appendChild($fragment);
+      // console.log("[]show - the end of addContent", children$);
     },
     removeContent() {
+      console.log("[]Show - removeContent", children$);
       for (const node of children$) {
         const $parent = node.parentElement;
         // console.log("[]show remove content", node, $parent);

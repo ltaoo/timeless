@@ -128,6 +128,7 @@ export * from "./util/render-to-string";
 export * from "./util/lazy";
 export * from "./util/reactive-data";
 export * from "./util/h";
+export * from "./interaction/dismissable";
 
 export * from "./host";
 export * as VNode from "./vnode";
