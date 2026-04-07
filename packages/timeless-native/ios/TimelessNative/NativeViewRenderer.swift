@@ -14,36 +14,26 @@ enum NativeViewRenderer {
             return label
 
         case .view(let style, let children):
-            let container = UIView()
-            applyStyle(style, to: container)
+            let stack = UIStackView()
+            stack.axis = .vertical
+            stack.alignment = .leading
+            stack.distribution = .equalSpacing
+            stack.spacing = 0
+            applyStyle(style, to: stack)
 
-            // Default to vertical stack layout
-            var offsetY: CGFloat = 0
             for child in children {
                 if let childView = render(child) {
-                    childView.translatesAutoresizingMaskIntoConstraints = false
-                    container.addSubview(childView)
-
-                    // Simple top-down layout
-                    NSLayoutConstraint.activate([
-                        childView.topAnchor.constraint(equalTo: container.topAnchor, constant: offsetY),
-                        childView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-                    ])
-                    childView.layoutIfNeeded()
-                    offsetY += childView.intrinsicContentSize.height
+                    stack.addArrangedSubview(childView)
                 }
             }
 
-            // Set intrinsic size based on children
-            if offsetY > 0 {
-                container.heightAnchor.constraint(greaterThanOrEqualToConstant: offsetY).isActive = true
-            }
-
-            return container
+            return stack
 
         case .img(let src, let style):
             let imageView = UIImageView()
             imageView.contentMode = .scaleAspectFit
+            imageView.clipsToBounds = true
+            imageView.isUserInteractionEnabled = false
             applyStyle(style, to: imageView)
             if let url = URL(string: src) {
                 DispatchQueue.global().async {
@@ -51,6 +41,9 @@ enum NativeViewRenderer {
                        let image = UIImage(data: data) {
                         DispatchQueue.main.async {
                             imageView.image = image
+                            imageView.invalidateIntrinsicContentSize()
+                            imageView.superview?.setNeedsLayout()
+                            imageView.superview?.layoutIfNeeded()
                         }
                     }
                 }
@@ -60,9 +53,7 @@ enum NativeViewRenderer {
             if w > 0 {
                 imageView.widthAnchor.constraint(equalToConstant: w).isActive = true
             }
-            if h > 0 {
-                imageView.heightAnchor.constraint(equalToConstant: h).isActive = true
-            }
+            imageView.heightAnchor.constraint(equalToConstant: h > 0 ? h : 300).isActive = true
             return imageView
 
         case .button(let style, let children, _):

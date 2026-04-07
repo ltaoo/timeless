@@ -388,7 +388,16 @@ export function Input(props: InputProps = {}) {
   let $elm: any = null;
   const state = {
     value: "",
-    props: {},
+    props: {
+      style: style || {},
+    } as Record<string, any>,
+    events: {
+      onInput,
+      onChange,
+      onFocus,
+      onBlur,
+      onKeyDown,
+    },
   };
 
   methods.setup_value_subscribe();
@@ -402,6 +411,7 @@ export function Input(props: InputProps = {}) {
       $elm = value;
     },
     props: state.props,
+    events: state.events,
     get value() {
       return state.value;
     },

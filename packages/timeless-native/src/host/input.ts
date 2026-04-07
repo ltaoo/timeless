@@ -116,8 +116,18 @@ export function NativeInput(props: {
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }
-      if (elm.events) {
-        methods.setupEventListener(elm.events);
+      if ((elm as any).events) {
+        methods.setupEventListener((elm as any).events);
+      }
+      // Apply input-specific attributes from element props
+      const elProps = (elm as any).props;
+      if (elProps) {
+        if (elProps.value !== undefined) {
+          $elm.value = String(elProps.value);
+        }
+        if (elProps.placeholder !== undefined) {
+          $elm.placeholder = String(elProps.placeholder);
+        }
       }
       return $elm;
     },
