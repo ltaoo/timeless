@@ -6,12 +6,12 @@ import {
   Layer,
 } from "@timeless/ui";
 
-import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
-import { isStyleRef, styleNames } from "@/vnode/style-names";
+import { styleNames, classNames } from "@/style";
 import { View, ViewProps } from "@/content/view";
-import { ViewChildren } from "@/content/type";
+import { isElement, TimelessElement, ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
-import { getHost } from "@/host";
+import { MountedEvent } from "@/event";
+import { Txt } from "@/content/text";
 
 let layer_id_counter = 0;
 
@@ -26,7 +26,6 @@ export function Anchor(
   props: ViewProps & { store: PopperCore },
   children: ViewChildren,
 ) {
-  const host = getHost();
   const { store, ...rest } = props;
   return View(
     {
@@ -36,7 +35,8 @@ export function Anchor(
         store.setReference({
           $el,
           getRect() {
-            return host.getBoundingClientRect?.($el) as any;
+            return $el.getBoundingClientRect();
+            // return host.getBoundingClientRect?.($el) as any;
           },
         });
         if (rest.onMounted) {
@@ -64,7 +64,7 @@ export function Content(
   },
   children: ViewChildren = [],
 ) {
-  const host = getHost();
+  // const host = getHost();
   const {
     store,
     zIndex = 99,
@@ -91,21 +91,26 @@ export function Content(
       ...rest,
       class: classNames(["t1-popper", rest.class]),
       style: styleNames([
+        // @ts-ignore
         props.style,
         {
           "z-index": zIndex,
           position: "fixed",
           left: 0,
           top: 0,
-          opacity: computed(state_, (t) => (t.isPlaced ? 1 : 0)),
-          "pointer-event": computed(state_, (t) =>
-            t.isPlaced ? "initial" : "none",
-          ),
-          transform: computed(state_, (t) =>
-            t.isPlaced
+          // @ts-ignore
+          opacity: computed(state_, (t) => {
+            return t.isPlaced ? 1 : 0;
+          }),
+          // @ts-ignore
+          "pointer-event": computed(state_, (t) => {
+            return t.isPlaced ? "initial" : "none";
+          }),
+          transform: computed(state_, (t) => {
+            return t.isPlaced
               ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
-              : "translate3d(0, 0, 0)",
-          ),
+              : "translate3d(0, 0, 0)";
+          }),
         },
       ]),
       onMounted(event) {
@@ -115,7 +120,8 @@ export function Content(
         store.setFloating({
           $el: $e,
           getRect() {
-            return host.getBoundingClientRect?.($e) as any;
+            // return host.getBoundingClientRect?.($e) as any;
+            return $e.getBoundingClientRect();
           },
         });
 
@@ -133,10 +139,11 @@ export function Content(
               return;
             }
             // 检查参考元素是否在视口内
-            const viewport = host.getViewportSize?.() ?? {
-              width: 0,
-              height: 0,
-            };
+            // const viewport = host.getViewportSize?.() ?? {
+            //   width: 0,
+            //   height: 0,
+            // };
+            const viewport = { width: 0, height: 0 };
             const is_in_viewport =
               ref_rect.top < viewport.height &&
               ref_rect.bottom > 0 &&
@@ -149,7 +156,7 @@ export function Content(
           }
           store.place();
         }
-        host.addDocumentEventListener?.("scroll", handleScroll, true);
+        // host.addDocumentEventListener?.("scroll", handleScroll, true);
         // 注册到 LayerManager
         if (onDismiss) {
           const layer_manager = getGlobalLayerManager();
@@ -159,15 +166,17 @@ export function Content(
               if (!$element) {
                 return false;
               }
-              const rect = host.getBoundingClientRect?.($element) as any;
+              // const rect = host.getBoundingClientRect?.($element) as any;
+              const rect = $element.getBoundingClientRect();
               // 同时检查 anchor 元素
               const $anchor_el = (store.reference as any)?.$el as
                 | HTMLElement
                 | undefined;
               if ($anchor_el) {
-                const anchor_rect = host.getBoundingClientRect?.(
-                  $anchor_el,
-                ) as any;
+                // const anchor_rect = host.getBoundingClientRect?.(
+                //   $anchor_el,
+                // ) as any;
+                const anchor_rect = $anchor_el.getBoundingClientRect();
                 const in_anchor =
                   x >= anchor_rect.left &&
                   x <= anchor_rect.right &&
@@ -199,7 +208,7 @@ export function Content(
         return () => {
           unlisten();
           store.setFloating(null);
-          host.removeDocumentEventListener?.("scroll", handleScroll, true);
+          // host.removeDocumentEventListener?.("scroll", handleScroll, true);
           // 从 LayerManager 注销
           if (layer_id) {
             const layerManager = getGlobalLayerManager();

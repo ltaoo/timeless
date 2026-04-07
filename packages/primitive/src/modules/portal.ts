@@ -4,11 +4,8 @@ import { ViewProps } from "@/content/view";
 import { TimelessElement, ViewChildren, isElement } from "@/content/type";
 import { Txt } from "@/content/text";
 import { MountedEvent } from "@/event";
-// import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
-// import { getHost } from "@/host";
 
 export function Portal(props: ViewProps & {}, children?: ViewChildren) {
-  // const host = getHost();
   let $elm: any = null;
 
   const normalize = (c: any) => {

@@ -8,22 +8,34 @@ import {
 import { viewStyleToCssText } from "./style";
 import { DOMHostNode } from "./type";
 
-export interface DOMButton {
-  t: "button";
-  $elm: HTMLButtonElement;
+export interface DOMPopper {
+  t: "popper";
+  $elm: HTMLDivElement;
   isDocumentFragment(): boolean;
   getChildNodes(): NodeListOf<ChildNode>;
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
+  setAttribute(key: string, value: string): void;
+  removeAttribute(key: string): void;
   getBoundingClientRect(): DOMRect;
-  render(elm: TimelessElement): HTMLButtonElement;
+  addEventListener(
+    type: string,
+    handler: (event: any) => void,
+    options?: any,
+  ): void;
+  removeEventListener(
+    type: string,
+    handler: (event: any) => void,
+    options?: any,
+  ): void;
+  render(elm: TimelessElement): HTMLDivElement;
 }
 
-export function DOMButton(props: {
+export function DOMPopper(props: {
   build: (elm: TimelessElement) => DOMHostNode;
-}): DOMButton {
-  const $elm = document.createElement("button");
+}): DOMPopper {
+  const $elm = document.createElement("div");
 
   const methods = {
     setStyle(style: ViewStyleProperties) {
@@ -89,7 +101,7 @@ export function DOMButton(props: {
   };
 
   return {
-    t: "button",
+    t: "popper",
     get $elm() {
       return $elm;
     },
@@ -108,20 +120,46 @@ export function DOMButton(props: {
     setStyleSet(name: string) {
       $elm.className = name;
     },
+    setAttribute(key: string, value: string) {
+      $elm.setAttribute(key, value);
+    },
+    removeAttribute(key: string) {
+      $elm.removeAttribute(key);
+    },
     getBoundingClientRect() {
       return $elm.getBoundingClientRect();
     },
+    addEventListener(
+      type: string,
+      handler: (event: any) => void,
+      options?: any,
+    ) {
+      $elm.addEventListener(type, handler, options);
+    },
+    removeEventListener(
+      type: string,
+      handler: (event: any) => void,
+      options?: any,
+    ) {
+      $elm.removeEventListener(type, handler, options);
+    },
     render(elm: TimelessElement) {
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      //       if (elm.props?.style) {
+      //         methods.setStyle(elm.props.style);
+      //       }
+      if (elm.value) {
+        methods.setStyle({
+          "z-index": elm.value.zIndex,
+          position: "fixed",
+          left: 0,
+          top: 0,
+          opacity: elm.value.placed ? 1 : 0,
+          "pointer-event": elm.value.placed ? "initial" : "none",
+          transform: elm.value.placed
+            ? `translate3d(${Math.round(elm.value.x)}px, ${Math.round(elm.value.y)}px, 0)`
+            : "translate3d(0, 0, 0)",
+        });
       }
-      // if (elm.props?.styleSets) {
-      //   if (isRef(elm.props.styleSets)) {
-      //     methods.setStyleSets(elm.props.styleSets.value);
-      //   } else {
-      //     methods.setStyleSets(elm.props.styleSets);
-      //   }
-      // }
       if (elm.events) {
         methods.setupEventListener(elm.events);
       }
@@ -140,6 +178,6 @@ export function DOMButton(props: {
   };
 }
 
-export function isDOMButton(value: any): value is DOMButton {
-  return value.t === "button";
+export function isDOMPopper(value: any): value is DOMPopper {
+  return value.t === "popper";
 }

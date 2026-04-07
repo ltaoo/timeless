@@ -9,6 +9,7 @@ import { DOMInput } from "./input";
 
 import { DOMButton } from "./button";
 import { DOMPortal } from "./portal";
+import { DOMPopper } from "./popper";
 
 import { DOMShow } from "./show";
 import { DOMFor } from "./for";

@@ -15,6 +15,8 @@ export * from "./content/fragment";
 export * from "./content/html";
 export * from "./content/text";
 export * from "./content/icon";
+export * from "./content/popper";
+export * from "./modules/portal";
 export * from "./content/lazy-view";
 export * from "./content/type";
 
@@ -56,7 +58,6 @@ export * from "./interaction/link";
 export * from "./interaction/button";
 
 // base component
-export * from "./modules/portal";
 export * from "./modules/presence";
 export * from "./modules/transition";
 export * as PopperPrimitive from "./modules/popper";

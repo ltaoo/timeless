@@ -6,13 +6,13 @@ import { MountedEvent } from "@/event";
 import { TimelessLazyComponent } from "./lazy-view";
 
 export type ViewPropValue = string | number | boolean | undefined | null;
-export type MaybeSignal<T = ViewPropValue> = T | Signal<T>;
+export type MaybeSignal<T = any> = T | Signal<T>;
 export type ViewAttributes = Record<string, MaybeSignal>;
 
 export type TimelessNormalComponent = (...args: unknown[]) => TimelessElement;
 export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 
-export interface TimelessElement {
+export interface TimelessElement<T = any> {
   t: string;
   $elm: any;
   children?: TimelessElement[];
@@ -20,6 +20,7 @@ export interface TimelessElement {
     styleSets?: MaybeSignal<string[]>;
     style?: ViewStyleProperties;
   };
+  value?: T;
   events?: {
     onClick?: (e: MouseEvent) => void;
     onDoubleClick?: (e: MouseEvent) => void;
@@ -40,7 +41,6 @@ export interface TimelessElement {
     onDrop?: (e: DragEvent) => void;
     onAnimationEnd?: (e: AnimationEvent) => void;
   };
-  value?: unknown;
   render(): any;
   hydrate?(existingDom: any): any;
   cleanup?: () => void;

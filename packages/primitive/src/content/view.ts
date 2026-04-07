@@ -607,7 +607,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       return $elm;
     },
     onMounted(event: MountedEvent) {
-      console.log("the view mounted", event.target);
+      // console.log("the view mounted", event.target);
       if (props.onMounted) {
         props.onMounted(event);
       }

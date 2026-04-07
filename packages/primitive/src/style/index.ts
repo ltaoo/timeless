@@ -287,14 +287,14 @@ function parseCssDeclarations(cssText: string, target: StyleObject) {
 export function styleNames(
   items: (
     | ViewStyleProperties
-    | Ref<StyleRef | ViewStyleProperties | undefined>
+    | Ref<StyleRef | ViewStyleProperties>
     | StyleRef
     | undefined
   )[],
 ): Ref<ViewStyleProperties> {
   const sources: (
     | ViewStyleProperties
-    | Ref<StyleRef | ViewStyleProperties | undefined>
+    | Ref<StyleRef | ViewStyleProperties>
     | StyleRef
     | undefined
   )[] = [];
@@ -390,6 +390,7 @@ export function styleNames(
       return;
     }
     if (isRef(item)) {
+      // @ts-ignore
       sources.push(item);
       item.subscribe({
         onChange() {
@@ -401,7 +402,11 @@ export function styleNames(
 
   if (Array.isArray(items)) {
     for (let i = 0; i < items.length; i += 1) {
-      addSourceFromItem(items[i]);
+      const item = items[i];
+      if (item) {
+        // @ts-ignore
+        addSourceFromItem(item);
+      }
     }
   }
 

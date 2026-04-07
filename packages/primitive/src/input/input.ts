@@ -416,7 +416,7 @@ export function Input(props: InputProps = {}) {
       return state.value;
     },
     onMounted(event: MountedEvent) {
-      console.log("[]input onMounted", $elm);
+      // console.log("[]input onMounted", $elm);
       // $elm = event.target;
       const handler = function (event: Event) {
         // @ts-ignore

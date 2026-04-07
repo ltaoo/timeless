@@ -17,6 +17,7 @@ export interface DOMView {
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
   setAttribute(key: string, value: string): void;
+  getBoundingClientRect(): DOMRect;
   removeAttribute(key: string): void;
   addEventListener(
     type: string,
@@ -124,6 +125,9 @@ export function DOMView(props: {
     },
     removeAttribute(key: string) {
       $elm.removeAttribute(key);
+    },
+    getBoundingClientRect() {
+      return $elm.getBoundingClientRect();
     },
     addEventListener(
       type: string,

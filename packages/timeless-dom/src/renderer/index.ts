@@ -12,6 +12,7 @@ import { DOMIcon } from "@/host/icon";
 import { DOMInput } from "@/host/input";
 import { DOMButton } from "@/host/button";
 import { DOMPortal } from "@/host/portal";
+import { DOMPopper } from "@/host/popper";
 
 function build(elm: TimelessElement): DOMHostNode {
   if (elm.t === "view") {
@@ -31,6 +32,12 @@ function build(elm: TimelessElement): DOMHostNode {
     elm.$elm = fragment$;
     fragment$.render(elm);
     return fragment$;
+  }
+  if (elm.t === "popper") {
+    const popper$ = DOMPopper({ build });
+    elm.$elm = popper$;
+    popper$.render(elm);
+    return popper$;
   }
   if (elm.t === "icon") {
     const icon$ = DOMIcon({ build });
