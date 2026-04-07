@@ -129,7 +129,7 @@ export function CanvasIcon(props: {
       ($elm as any)._iconSize = sizeNum;
       ($elm as any)._iconColor = props?.color || "white";
 
-      console.log("[Icon.render]", { name, size, color: props?.color, $elm });
+      // console.log("[Icon.render]", { name, size, color: props?.color, $elm });
 
       return $elm;
     },

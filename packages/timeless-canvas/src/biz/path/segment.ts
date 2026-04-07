@@ -85,8 +85,11 @@ export function PathSegment(props: PathSegmentProps) {
           },
         };
       }
+      _bezier.points[0] = _start.pos;
+      if (_c1) _bezier.points[1] = _c1.pos;
+      if (_c2) _bezier.points[2] = _c2.pos;
+      _bezier.points[_bezier.points.length - 1] = _end.pos;
       _bezier.update();
-      // console.log("[BIZ]path/segment - box", _bezier.points);
       return _bezier.bbox();
     },
     /** 一条线段的终点确定下来了 */

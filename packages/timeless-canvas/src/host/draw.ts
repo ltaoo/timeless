@@ -141,6 +141,7 @@ export interface CanvasElement extends BaseCanvasNode<"element"> {
   ): void;
   draw(
     ctx: CanvasRenderingContext2D,
+    canvas$: Canvas,
     options?: {
       dpr?: number;
       rectCache?: WeakMap<CanvasNode, BoundingRect>;
@@ -166,6 +167,67 @@ export type CreateCanvasHostOptions = {
   dpr?: number;
   clearColor?: string | null;
 };
+
+function loadSVGContent(
+  content: any,
+  options: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    color?: string;
+  },
+  canvas$: Canvas,
+) {
+  const result = canvas$.buildBezierPathsFromASN(content, options);
+  // const result = canvas$.buildBezierPathsFromPathString(
+  //   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bolt-icon lucide-bolt"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="4"/></svg>`,
+  // );
+  if (result === null) {
+    return;
+  }
+  const { dimensions, paths } = result;
+  canvas$.appendObjects(paths, { transform: true, dimensions });
+
+  // 缩放和移动 paths 到目标位置和大小
+  // buildBezierPathsFromPathString 内部已将 SVG 坐标按 (gridSize - padding*2) / viewBoxSize 缩放
+  // 所以实际路径尺寸是 gridSize - padding*2，而非原始 viewBox 尺寸
+  const grid = canvas$.grid;
+  const scaledWidth = grid.width - grid.padding * 2;
+  const scaledHeight = grid.height - grid.padding * 2;
+  const scaleX = scaledWidth > 0 ? options.width / scaledWidth : 1;
+  const scaleY = scaledHeight > 0 ? options.height / scaledHeight : 1;
+  const scale = Math.min(scaleX, scaleY);
+
+  // 记录缩放前各 line 的 bounding box
+  const boxesBefore = paths.map((line) => ({ ...line.box }));
+  let overallX = Infinity;
+  let overallY = Infinity;
+  for (let i = 0; i < boxesBefore.length; i += 1) {
+    if (boxesBefore[i].x < overallX) overallX = boxesBefore[i].x;
+    if (boxesBefore[i].y < overallY) overallY = boxesBefore[i].y;
+  }
+
+  for (let i = 0; i < paths.length; i += 1) {
+    const line = paths[i];
+    line.startScale();
+    line.scale(scale);
+    line.finishScale();
+  }
+
+  // line.scale() 会把每条 line 固定在原来的左上角位置
+  // 但多条 line 之间的相对距离也需要按 scale 缩小，然后整体移动到目标位置
+  for (let i = 0; i < paths.length; i += 1) {
+    const line = paths[i];
+    const orig = boxesBefore[i];
+    const dx = options.x + (orig.x - overallX) * scale - orig.x;
+    const dy = options.y + (orig.y - overallY) * scale - orig.y;
+    line.translate(dx, dy);
+    line.refreshBox();
+  }
+
+  canvas$.draw();
+}
 
 export type CanvasDocument = _CanvasHostElement & {
   canvas: HTMLCanvasElement | null;
@@ -340,6 +402,7 @@ export function createCanvasElement(tag: string): CanvasElement {
     },
     draw(
       ctx: CanvasRenderingContext2D,
+      canvas$: Canvas,
       options?: {
         dpr?: number;
         rectCache?: WeakMap<CanvasNode, BoundingRect>;
@@ -370,7 +433,7 @@ export function createCanvasElement(tag: string): CanvasElement {
         ctx.clip();
         const displayList: DrawCommand[] = [];
         recordNodeToDisplayList(node, rectCache, 1, displayList);
-        executeDisplayList(ctx, displayList);
+        executeDisplayList(ctx, displayList, canvas$);
         ctx.restore();
       } finally {
         node.style = prevStyle;
@@ -1384,6 +1447,7 @@ function recordNodeToDisplayList(
 function executeDisplayList(
   ctx: CanvasRenderingContext2D,
   list: DrawCommand[],
+  canvas$: Canvas,
 ) {
   for (const cmd of list) {
     switch (cmd.op) {
@@ -1427,29 +1491,37 @@ function executeDisplayList(
         try {
           ctx.drawImage(cmd.image, cmd.x, cmd.y, cmd.w, cmd.h);
         } catch (e) {
+          console.log("Error drawing image:", e);
           // Silently ignore image drawing errors
         }
         break;
       case "drawIcon":
         try {
+          // console.log("[drawIcon]", cmd.iconName, cmd.color, cmd.x, cmd.y, cmd.w, cmd.h);
           const pascalName = cmd.iconName
             .split("-")
             .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
             .join("");
 
+          // console.log("[drawIcon.pascalName]", pascalName, "found:", !!(ASN as any)[pascalName]);
           const asnNode = (ASN as any)[pascalName];
           if (asnNode) {
-            renderIconToCanvas(
-              ctx,
-              asnNode,
-              { color: cmd.color },
-              cmd.x,
-              cmd.y,
-              cmd.w,
-              cmd.h,
-            );
+            const iconImg = getIconImage(cmd.iconName, asnNode, cmd.color);
+            // console.log("[drawIcon.iconImg]", iconImg, "complete:", iconImg?.complete, "naturalWidth:", iconImg?.naturalWidth);
+            if (iconImg && iconImg.complete && iconImg.naturalWidth > 0) {
+              ctx.drawImage(iconImg, cmd.x, cmd.y, cmd.w, cmd.h);
+            } else if (iconImg) {
+              iconImg.onload = () => {
+                // console.log("[drawIcon.onload]", iconImg.naturalWidth, iconImg.naturalHeight);
+                ctx.drawImage(iconImg, cmd.x, cmd.y, cmd.w, cmd.h);
+              };
+              iconImg.onerror = (e) => {
+                console.log("[drawIcon.onerror]", e);
+              };
+            }
           }
         } catch (e) {
+          console.log("Error drawing icon:", e);
           // Silently ignore icon drawing errors
         }
         break;
@@ -1459,45 +1531,51 @@ function executeDisplayList(
   }
 }
 
-// Helper function to render icon ASN to canvas
-function renderIconToCanvas(
-  ctx: CanvasRenderingContext2D,
+const iconImageCache = new Map<string, HTMLImageElement>();
+
+function asnToSvgString(
+  node: any,
+  color?: string,
+  isRoot?: boolean,
+): string {
+  if (!node || !node.tag) return "";
+  const tag = node.tag;
+  const attrs = node.attrs ?? {};
+  let attrStr = "";
+  const hasXmlns = "xmlns" in attrs;
+  if (isRoot && tag === "svg" && !hasXmlns) {
+    attrStr += ' xmlns="http://www.w3.org/2000/svg"';
+  }
+  for (const [k, v] of Object.entries(attrs)) {
+    const val = v === "currentColor" && color ? color : v;
+    attrStr += ` ${k}="${String(val).replace(/"/g, "&quot;")}"`;
+  }
+  if (!node.children || node.children.length === 0) {
+    return `<${tag}${attrStr}/>`;
+  }
+  const inner = node.children
+    .map((c: any) => asnToSvgString(c, color, false))
+    .join("");
+  return `<${tag}${attrStr}>${inner}</${tag}>`;
+}
+
+function getIconImage(
+  iconName: string,
   asn: any,
-  props: any,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-) {
-  if (!asn || asn.tag !== "svg") {
-    return;
-  }
+  color?: string,
+): HTMLImageElement | null {
+  const cacheKey = `${iconName}:${color ?? ""}`;
+  const cached = iconImageCache.get(cacheKey);
+  if (cached) return cached;
 
-  ctx.save();
-  ctx.translate(x, y);
+  const svgStr = asnToSvgString(asn, color, true);
+  if (!svgStr) return null;
 
-  const viewBox = asn.attrs?.viewBox || "0 0 24 24";
-  const [, , vbWidth, vbHeight] = viewBox.split(/\s+/).map(parseFloat);
-
-  const scale = Math.min(w / vbWidth, h / vbHeight);
-  const offsetX = (w - vbWidth * scale) / 2;
-  const offsetY = (h - vbHeight * scale) / 2;
-  ctx.translate(offsetX, offsetY);
-  ctx.scale(scale, scale);
-
-  if (asn.children && asn.children.length > 0) {
-    for (const child of asn.children) {
-      if (child.tag === "path" && child.attrs && child.attrs.d) {
-        const mergedAttrs = { ...asn.attrs, ...child.attrs };
-        renderSVGPath(ctx, child.attrs.d, mergedAttrs, props?.color);
-      } else if (child.tag === "circle" && child.attrs) {
-        const mergedAttrs = { ...asn.attrs, ...child.attrs };
-        renderSVGCircle(ctx, child.attrs, mergedAttrs, props?.color);
-      }
-    }
-  }
-
-  ctx.restore();
+  const dataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgStr)}`;
+  const img = new Image();
+  img.src = dataUri;
+  iconImageCache.set(cacheKey, img);
+  return img;
 }
 
 // Convert SVG elliptical arc to cubic bezier curves
@@ -2396,6 +2474,7 @@ function renderTreeToCanvas(
   rectCache: WeakMap<CanvasNode, BoundingRect>,
   clearColor: string | null | undefined,
   dpr: number,
+  canvas$: Canvas,
   debugOptions?: { enabled: boolean; hoveredNode: CanvasNode | null },
   dirty?: {
     nodes: Set<CanvasNode>;
@@ -2445,7 +2524,7 @@ function renderTreeToCanvas(
     }
     const displayList: DrawCommand[] = [];
     recordNodeToDisplayList(root, rectCache, 1, displayList);
-    executeDisplayList(ctx, displayList);
+    executeDisplayList(ctx, displayList, canvas$);
   } else {
     clearRectRegion(ctx, dirtyRect, clearColor, dpr);
     ctx.save();
@@ -2455,7 +2534,7 @@ function renderTreeToCanvas(
     ctx.clip();
     const displayList: DrawCommand[] = [];
     recordNodeToDisplayList(root, rectCache, 1, displayList);
-    executeDisplayList(ctx, displayList);
+    executeDisplayList(ctx, displayList, canvas$);
     ctx.restore();
   }
 
@@ -2526,6 +2605,7 @@ export function draw(
   ctx: CanvasRenderingContext2D,
   content: CanvasNode,
   options: DrawOptions = {},
+  canvas$: Canvas,
 ) {
   if (!ctx || !content) return;
   const rectCache =
@@ -2538,7 +2618,7 @@ export function draw(
       ? win.devicePixelRatio
       : inferCanvasDpr(ctx));
 
-  renderTreeToCanvas(content, ctx, rectCache, options.clearColor, dpr);
+  renderTreeToCanvas(content, ctx, rectCache, options.clearColor, dpr, canvas$);
 }
 
 export function createCanvasDocument(
@@ -2879,20 +2959,17 @@ export function createCanvasDocument(
   };
 
   const canvas$ = Canvas({});
-  const layer$ = CanvasLayer({});
+  // const layer$ = CanvasLayer({});
 
-  connectLayer(layer$, canvas$, $canvas, ctx!);
+  connectLayer(canvas$.layer, $canvas);
+  connectLayer(canvas$.layers.path, $canvas);
 
-  function loadSVGContent(content: string) {
-    console.log("[PAGE]home/index - loadSVGContent", content);
-    const result = canvas$.buildBezierPathsFromPathString(content);
-    if (result === null) {
-      return;
-    }
-    const { dimensions, gradients, paths } = result;
-    // $$canvas.saveGradients(gradients);
-    canvas$.appendObjects(paths, { transform: true, dimensions });
-    canvas$.draw();
+  // Set canvas size on the canvas$ instance
+  if (canvas) {
+    canvas$.setSize({
+      width: canvas.width / dpr,
+      height: canvas.height / dpr,
+    });
   }
 
   const host: CanvasDocument = {
@@ -2910,6 +2987,7 @@ export function createCanvasDocument(
         rectCache,
         clearColor,
         dpr,
+        canvas$,
         {
           enabled: debugEnabled,
           hoveredNode: debugHoveredNode,
@@ -3177,21 +3255,25 @@ export function createCanvasDocument(
     ) {
       if (!ctx) return;
 
-      // Convert kebab-case to PascalCase (e.g., "check" -> "Check", "chevron-down" -> "ChevronDown")
       const pascalName = iconName
         .split("-")
         .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
         .join("");
 
-      // Get ASN node from @timeless/svg/asn
       const asnNode = (ASN as any)[pascalName];
       if (!asnNode) {
         console.warn(`Icon "${iconName}" not found in @timeless/svg/asn`);
         return;
       }
 
-      // Render the icon directly to the canvas context
-      renderIconToCanvas(ctx, asnNode, { color }, x, y, width, height);
+      const iconImg = getIconImage(iconName, asnNode, color);
+      if (iconImg && iconImg.complete && iconImg.naturalWidth > 0) {
+        ctx.drawImage(iconImg, x, y, width, height);
+      } else if (iconImg) {
+        iconImg.onload = () => {
+          ctx.drawImage(iconImg!, x, y, width, height);
+        };
+      }
     },
   };
 

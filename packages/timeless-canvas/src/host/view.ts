@@ -104,7 +104,7 @@ export function CanvasView(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: any, value: string) {
-      console.log("[View] setStyleValue", key, value);
+      // console.log("[View] setStyleValue", key, value);
       canvas.patchStyle?.($elm, { [key]: value });
     },
     render(elm: TimelessElement) {

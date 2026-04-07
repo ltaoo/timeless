@@ -78,7 +78,7 @@ class Bezier {
 
     const points = args;
     this.points = points;
-    console.log('after this.ponits i ', coords, points)
+    // console.log('after this.ponits i ', coords, points)
     // for (let idx = 0, step = _3d ? 3 : 2; idx < len; idx += step) {
     //   var point = {
     //     x: args[idx],

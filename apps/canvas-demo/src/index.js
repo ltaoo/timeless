@@ -136,99 +136,99 @@ function ApplicationView() {
       },
     },
     [
-      // Img({
-      //   src: "/public/avatar.jpeg",
-      //   style: {
-      //     width: 60,
-      //     height: 60,
-      //   },
-      // }),
+      Img({
+        src: "/avatar.jpeg",
+        style: {
+          width: 60,
+          height: 60,
+        },
+      }),
       Icon({ name: "bolt", color: "#fff" }),
-      // View({}, [
-      //   View({}, [count_]),
-      //   View(
-      //     {
-      //       onClick() {
-      //         console.log("click todo");
-      //         page.set("todo");
-      //       },
-      //     },
-      //     ["Goto Todo List"],
-      //   ),
-      //   View(
-      //     {
-      //       onClick() {
-      //         console.log("click app");
-      //         page.set("app");
-      //       },
-      //     },
-      //     ["Goto Application List"],
-      //   ),
-      // ]),
-      // View(
-      //   {
-      //     style: todoPageStyle,
-      //   },
-      //   [
-      //     View({}, ["Todo List Page"]),
-      //     For({
-      //       each: todos,
-      //       render(todo) {
-      //         return View({}, [todo.title]);
-      //       },
-      //     }),
-      //   ],
-      // ),
-      // View(
-      //   {
-      //     style: appPageStyle,
-      //   },
-      //   [
-      //     View({}, ["Application List Page"]),
-      //     Grid(
-      //       { columns, gap: 16 },
-      //       apps.map((app, idx) => {
-      //         return View(
-      //           {
-      //             style: {
-      //               borderWidth: 2,
-      //               borderColor: combine({ focused, idx }, (t) =>
-      //                 isFocusedCell(t.focused, t.idx)
-      //                   ? "#007bff"
-      //                   : "rgba(255,255,255,0.18)",
-      //               ),
-      //             },
-      //           },
-      //           [
-      //             View({ style: { textAlign: "center", fontSize: 22 } }, [
-      //               app.icon,
-      //             ]),
-      //             View(
-      //               {
-      //                 style: {
-      //                   textAlign: "center",
-      //                   fontWeight: "bold",
-      //                   fontSize: 14,
-      //                 },
-      //               },
-      //               [app.title],
-      //             ),
-      //             View(
-      //               {
-      //                 style: {
-      //                   textAlign: "center",
-      //                   fontSize: 12,
-      //                   color: "gray",
-      //                 },
-      //               },
-      //               [app.subtitle],
-      //             ),
-      //           ],
-      //         );
-      //       }),
-      //     ),
-      //   ],
-      // ),
+      View({}, [
+        View({}, [count_]),
+        View(
+          {
+            onClick() {
+              console.log("click todo");
+              page.set("todo");
+            },
+          },
+          ["Goto Todo List"],
+        ),
+        View(
+          {
+            onClick() {
+              console.log("click app");
+              page.set("app");
+            },
+          },
+          ["Goto Application List"],
+        ),
+      ]),
+      View(
+        {
+          style: todoPageStyle,
+        },
+        [
+          View({}, ["Todo List Page"]),
+          For({
+            each: todos,
+            render(todo) {
+              return View({}, [todo.title]);
+            },
+          }),
+        ],
+      ),
+      View(
+        {
+          style: appPageStyle,
+        },
+        [
+          View({}, ["Application List Page"]),
+          Grid(
+            { columns, gap: 16 },
+            apps.map((app, idx) => {
+              return View(
+                {
+                  style: {
+                    borderWidth: 2,
+                    borderColor: combine({ focused, idx }, (t) =>
+                      isFocusedCell(t.focused, t.idx)
+                        ? "#007bff"
+                        : "rgba(255,255,255,0.18)",
+                    ),
+                  },
+                },
+                [
+                  View({ style: { textAlign: "center", fontSize: 22 } }, [
+                    app.icon,
+                  ]),
+                  View(
+                    {
+                      style: {
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: 14,
+                      },
+                    },
+                    [app.title],
+                  ),
+                  View(
+                    {
+                      style: {
+                        textAlign: "center",
+                        fontSize: 12,
+                        color: "gray",
+                      },
+                    },
+                    [app.subtitle],
+                  ),
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
     ],
   );
 }

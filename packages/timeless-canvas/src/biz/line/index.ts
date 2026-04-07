@@ -73,6 +73,7 @@ export function Line(props: PathProps) {
   let _box = { x: 0, y: 0, x1: 0, y1: 0 };
   // let _tmp_box: null | typeof _box = null;
   let _scale = 1;
+  let _stroke_width_before_scale = _stroke.width;
   let _editing = false;
 
   const _$obj = CanvasObject({ rect: createEmptyRectShape(), options: {} });
@@ -224,15 +225,17 @@ export function Line(props: PathProps) {
       _box = { x: 0, y: 0, x1: 0, y1: 0 };
     },
     startScale() {
+      _stroke_width_before_scale = _stroke.width;
       for (let i = 0; i < _paths.length; i += 1) {
         const p = _paths[i];
         p.startScale();
       }
     },
     scale(v: number, opt: Partial<{ directly: boolean }> = {}) {
-      console.log("[BIZ]line/index - scale", v);
+      // console.log("[BIZ]line/index - scale", v);
       const box1 = this.box;
       _scale = v;
+      _stroke.width = _stroke_width_before_scale * v;
       for (let i = 0; i < _paths.length; i += 1) {
         const p = _paths[i];
         p.scale(v, opt);
@@ -247,6 +250,7 @@ export function Line(props: PathProps) {
       bus.emit(Events.Refresh);
     },
     finishScale() {
+      _stroke_width_before_scale = _stroke.width;
       for (let i = 0; i < _paths.length; i += 1) {
         const p = _paths[i];
         p.finishScale();

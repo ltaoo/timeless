@@ -42,6 +42,20 @@ export function CanvasLayer(props: CanvasLayerProps) {
   }
   const _self = {
     SymbolTag: "CanvasLayer" as const,
+    get size() {
+      return _size;
+    },
+    get grid() {
+      return {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        lineWidth: 0,
+        unit: 0,
+        color: "#fff",
+      };
+    },
     drawLine(p1: { x: number; y: number }, p2: { x: number; y: number }) {
       console.log("请实现 drawLine 方法");
     },

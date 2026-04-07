@@ -1370,16 +1370,16 @@ export function buildPath(
       const new_path = LinePath({
         points: [point],
       });
-      console.log(
-        "[BIZ]canvas/util - before check is clockwise",
-        p,
-        nextp,
-        cur,
-        next,
-      );
+      // console.log(
+      //   "[BIZ]canvas/util - before check is clockwise",
+      //   p,
+      //   nextp,
+      //   cur,
+      //   next,
+      // );
       if (nextp && nextp.x > p.x) {
         // 这里判断，如果下一个点在右侧，就必然是逆时针
-        console.log("[BIZ]canvas/util - path is not clockwise", p, nextp);
+        // console.log("[BIZ]canvas/util - path is not clockwise", p, nextp);
         new_path.setClockWise(false);
       }
       path.append(new_path);
@@ -1464,14 +1464,14 @@ export function buildPath(
           t2,
           end: p2,
         };
-        console.log(
-          "[BIZ]canvas / before arc_to_curve",
-          start,
-          arc,
-          next_values,
-        );
+        // console.log(
+        //   "[BIZ]canvas / before arc_to_curve",
+        //   start,
+        //   arc,
+        //   next_values,
+        // );
         const pointsArr = arc_to_curve(start, arc).slice(0, 2); // 如果半圆有一点点偏差，出现三个元素，就不对了，只需要前两个元素即可组成半圆
-        console.log("[BIZ]canvas / after arc_to_curve", pointsArr);
+        // console.log("[BIZ]canvas / after arc_to_curve", pointsArr);
         let inner_cur_path_point: BezierPoint | null = null;
         for (let k = 0; k < pointsArr.length; k += 1) {
           const inner_cur = pointsArr[k];

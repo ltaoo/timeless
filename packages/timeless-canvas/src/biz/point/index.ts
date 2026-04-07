@@ -92,7 +92,6 @@ export function Point(props: PointProps) {
       v: number,
       options: Partial<{ directly: boolean; silence: boolean }> = {},
     ) {
-      // console.log("[BIZ]point/index - before scale", _x, _y);
       if (!options.directly && _start) {
         _x = _start.x * v;
         _y = _start.y * v;
@@ -100,8 +99,6 @@ export function Point(props: PointProps) {
         _x = _x * v;
         _y = _y * v;
       }
-      // console.log("[BIZ]point/index - after scale", _x, _y);
-      // bus.emit(Events.Change, { x: _x, y: _y });
     },
     finishScale() {
       _start = null;
@@ -188,24 +185,24 @@ export function Point(props: PointProps) {
     ) {
       // console.log("[BIZ]point - move", _x, _y, distance, opt.normal);
       const { x, y } = distance;
-      if (!_start) {
-        return;
-      }
       if (opt.directly) {
         _x += x;
         _y += y;
-      } else {
-        if (opt.normal) {
-          const dotProduct = x * opt.normal.x + y * opt.normal.y;
-          _x = _start.x + dotProduct * opt.normal.x;
-          _y = _start.y + dotProduct * opt.normal.y;
-          // console.log("[BIZ]point - point", dotProduct, _x, _y);
-          // _x = _start.x + x * opt.normal.x;
-          // _y = _start.y + y * opt.normal.y;
-        } else {
-          _x = _start.x + x;
-          _y = _start.y + y;
+        if (!opt.silence) {
+          bus.emit(Events.Move, { x: _x, y: _y, dx: x, dy: y });
         }
+        return;
+      }
+      if (!_start) {
+        return;
+      }
+      if (opt.normal) {
+        const dotProduct = x * opt.normal.x + y * opt.normal.y;
+        _x = _start.x + dotProduct * opt.normal.x;
+        _y = _start.y + dotProduct * opt.normal.y;
+      } else {
+        _x = _start.x + x;
+        _y = _start.y + y;
       }
       if (opt.min) {
         if (_x < opt.min.x) {

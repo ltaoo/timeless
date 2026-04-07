@@ -615,6 +615,11 @@ export function Canvas(props: CanvasProps) {
     ) {
       return _$converter.buildBezierPathsFromPathString(...args);
     },
+    buildBezierPathsFromASN(
+      ...args: Parameters<typeof _$converter.buildBezierPathsFromASN>
+    ) {
+      return _$converter.buildBezierPathsFromASN(...args);
+    },
     buildWeappCode() {
       return _$converter.buildWeappCode(_lines);
     },
@@ -626,6 +631,45 @@ export function Canvas(props: CanvasProps) {
         gradients: _gradients,
         background: _layers.background,
       });
+    },
+    /** 选中指定位置的对象，返回是否选中成功 */
+    selectAt(pos: { x: number; y: number }): boolean {
+      for (let i = 0; i < _lines.length; i += 1) {
+        if (_lines[i].inBox(pos)) {
+          if (_cur_object && _cur_object !== _lines[i]) {
+            _cur_object.unselect();
+          }
+          _cur_object = _lines[i];
+          _cur_object.select();
+          return true;
+        }
+      }
+      return false;
+    },
+    /** 移动当前选中的对象 */
+    moveSelected(dx: number, dy: number): void {
+      if (!_cur_object) return;
+      _cur_object.translate(dx, dy);
+      _cur_object.refreshBox();
+      bus.emit(Events.Refresh);
+    },
+    /** 缩放当前选中的对象 */
+    scaleSelected(factor: number): void {
+      if (!_cur_object) return;
+      _cur_object.startScale();
+      _cur_object.scale(factor);
+      _cur_object.finishScale();
+    },
+    /** 取消选中 */
+    deselectAll(): void {
+      if (_cur_object) {
+        _cur_object.unselect();
+        _cur_object = null;
+      }
+    },
+    /** 当前选中的对象 */
+    get selected(): Line | null {
+      return _cur_object;
     },
     update() {
       bus.emit(Events.Refresh);

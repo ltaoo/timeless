@@ -3,7 +3,7 @@ import {
   BezierPoint,
   BezierPointMirrorTypes,
 } from "@/biz/bezier_point";
-import { toBase64 } from "@/biz/bezier_point/utils";
+import { toBase64, CurveLikeCircleRatio } from "@/biz/bezier_point/utils";
 import { LinePath } from "@/biz/path";
 import { LineCapType, LineJoinType, PathCompositeOperation } from "@/biz/line";
 import { Point } from "@/biz/point";
@@ -22,6 +22,12 @@ let debug = false;
  * 比如 SVG 路径标签转 Path 对象
  * Path 对象转 SVG 等等
  */
+export type SVGNode = {
+  tag: string;
+  attrs?: Record<string, string>;
+  children?: SVGNode[];
+};
+
 export function CanvasConverter(props: {
   grid: {
     x: number;
@@ -402,7 +408,10 @@ export function CanvasConverter(props: {
         paths: lines,
       };
     },
-    buildBezierPathsFromPathString(svg: string) {
+    buildBezierPathsFromPathString(
+      svg: string,
+      options: { color?: string } = {},
+    ) {
       if (!svg.startsWith("<svg")) {
         return null;
       }
@@ -428,7 +437,7 @@ export function CanvasConverter(props: {
             : null,
           stroke: payload.stroke
             ? {
-                color: payload.stroke,
+                color: options.color || payload.stroke || "black",
                 width: payload.strokeWidth || 1,
                 cap: payload.lineCap,
                 join: payload.lineJoin,
@@ -442,6 +451,112 @@ export function CanvasConverter(props: {
         paths: lines,
         dimensions: data.dimensions,
         gradients: data.linearGradients,
+      };
+    },
+    buildBezierPathsFromASN(asn: SVGNode, options: { color?: string } = {}) {
+      // console.log('buildBezierPathsFromASN', options)
+      const { tag, attrs = {}, children = [] } = asn;
+      if (tag !== "svg") {
+        return null;
+      }
+      const viewBox = attrs.viewBox?.split(" ").map(Number) || [0, 0, 24, 24];
+      const dimensions = {
+        width: Number(attrs.width) || viewBox[2],
+        height: Number(attrs.height) || viewBox[3],
+      };
+      const extra = {
+        exp: false,
+        scale: dimensions.width
+          ? (_grid.width - _grid.padding * 2) / dimensions.width
+          : 1,
+      };
+      const globalFill =
+        attrs.fill && attrs.fill !== "none" ? attrs.fill : undefined;
+      const globalStroke =
+        attrs.stroke && attrs.stroke !== "none" ? attrs.stroke : undefined;
+      const globalStrokeWidth = attrs["stroke-width"]
+        ? Number(attrs["stroke-width"])
+        : undefined;
+      const globalLineCap = attrs["stroke-linecap"] || undefined;
+      const globalLineJoin = attrs["stroke-linejoin"] || undefined;
+
+      const lines: Line[] = [];
+      for (let j = 0; j < children.length; j += 1) {
+        const child = children[j];
+        const childAttrs = child.attrs || {};
+        let d: string | undefined;
+        if (child.tag === "path") {
+          d = childAttrs.d;
+        } else if (child.tag === "circle") {
+          const cx = Number(childAttrs.cx || 0);
+          const cy = Number(childAttrs.cy || 0);
+          const r = Number(childAttrs.r || 0);
+          if (r > 0) {
+            const cl = r * CurveLikeCircleRatio;
+            const buildC = (
+              c1x: number,
+              c1y: number,
+              c2x: number,
+              c2y: number,
+              ex: number,
+              ey: number,
+            ) => `C${[c1x, c1y, c2x, c2y, ex, ey].join(" ")}`;
+            d =
+              `M${cx} ${cy - r}` +
+              buildC(cx + cl, cy - r, cx + r, cy - cl, cx + r, cy) +
+              buildC(cx + r, cy + cl, cx + cl, cy + r, cx, cy + r) +
+              buildC(cx - cl, cy + r, cx - r, cy + cl, cx - r, cy) +
+              buildC(cx - r, cy - cl, cx - cl, cy - r, cx, cy - r) +
+              "Z";
+          }
+        } else {
+          continue;
+        }
+        if (!d) {
+          continue;
+        }
+        const tokens = PathParser.parse(d);
+        const line = Line({
+          fill: (() => {
+            if (childAttrs.fill || globalFill) {
+              return {
+                color: (() => {
+                  if (childAttrs.fill === "currentColor") {
+                    return options.color || "black";
+                  }
+                  return childAttrs.fill || globalFill!;
+                })(),
+              };
+            }
+            return null;
+          })(),
+          stroke: (() => {
+            if (childAttrs.stroke || globalStroke) {
+              return {
+                color: (() => {
+                  // if (childAttrs.stroke === "currentColor") {
+                  //   return options.color || "black";
+                  // }
+                  return options.color || childAttrs.stroke || globalStroke!;
+                })(),
+                width: childAttrs["stroke-width"]
+                  ? Number(childAttrs["stroke-width"])
+                  : globalStrokeWidth || 1,
+                cap: childAttrs["stroke-linecap"] || globalLineCap || "round",
+                join:
+                  childAttrs["stroke-linejoin"] || globalLineJoin || "round",
+              };
+            }
+            return null;
+          })(),
+        });
+        this.buildPath(line, tokens, extra);
+        lines.push(line);
+      }
+      return {
+        paths: lines,
+        dimensions,
+        gradients: [],
       };
     },
     buildPath(path: Line, tokens: string[][], extra: {}) {

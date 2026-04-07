@@ -23,7 +23,7 @@ export function connect(store: Canvas, $canvas: HTMLDivElement) {
   $canvas.addEventListener("mousemove", (evt) => {
     store.handleMouseMove({ x: evt.offsetX, y: evt.offsetY });
   });
-  console.log('before $canvas.addEventListener("mouseup');
+  // console.log('before $canvas.addEventListener("mouseup');
   $canvas.addEventListener("mouseup", (evt) => {
     store.handleMouseUp({ x: evt.offsetX, y: evt.offsetY });
   });
@@ -31,14 +31,13 @@ export function connect(store: Canvas, $canvas: HTMLDivElement) {
   store.setMounted();
 }
 
-export function connectLayer(
-  layer: CanvasLayer,
-  canvas: Canvas,
-  $canvas: HTMLCanvasElement,
-  ctx: CanvasRenderingContext2D,
-) {
+export function connectLayer(layer: CanvasLayer, $canvas: HTMLCanvasElement) {
   const log = layer.log;
   if (layer.mounted) {
+    return;
+  }
+  const ctx = $canvas.getContext("2d");
+  if (!ctx) {
     return;
   }
   layer.drawLine = (
@@ -225,7 +224,7 @@ export function connectLayer(
     ctx.font = "10px Arial";
     const x = point.x;
     const y = point.y;
-    ctx.fillText(`${x - canvas.grid.x},${y - canvas.grid.y}`, x + 2, y - 2);
+    ctx.fillText(`${x - layer.grid.x},${y - layer.grid.y}`, x + 2, y - 2);
   };
   layer.drawPoints = (points: Point[]) => {
     console.log("layer.drawPoints", points.length);
@@ -276,8 +275,8 @@ export function connectLayer(
     layer.restore();
   };
   layer.drawGrid = (finish: Function) => {
-    const { width, height } = canvas.size;
-    const grid = canvas.grid;
+    const { width, height } = layer.size;
+    const grid = layer.grid;
     const start = {
       x: width / 2 - grid.width / 2,
       y: height / 2 - grid.height / 2,
@@ -361,8 +360,8 @@ export function connectLayer(
     const linearGradient = ctx.createLinearGradient(
       0,
       0,
-      canvas.size.width,
-      canvas.size.height,
+      layer.size.width,
+      layer.size.height,
     );
     for (let i = 0; i < colors.length; i += 1) {
       const { step, color } = colors[i];
@@ -534,9 +533,9 @@ export function connectLayer(
     if (existingGradients[unique]) {
       return existingGradients[unique];
     }
-    const {
-      size: { width, height },
-    } = canvas;
+    // const {
+    //   size: { width, height },
+    // } = canvas;
     // @todo SVG 转过来的，似乎 x1 y1 都是百分比，而不是绝对值
     // const gradient = ctx.createLinearGradient(x1 * width, y1 * height, x2 * width, y2 * height);
     const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
@@ -568,8 +567,8 @@ export function connectLayer(
     });
   };
 
-  $canvas.width = canvas.size.width;
-  $canvas.height = canvas.size.height;
+  // $canvas.width = layer.size.width;
+  // $canvas.height = layer.size.height;
 
   layer.setMounted();
 }
