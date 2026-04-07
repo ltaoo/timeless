@@ -8,33 +8,21 @@ import {
 
 import { DOMHostNode } from "./type";
 
-export interface DOMView {
-  t: "view";
-  $elm: HTMLDivElement;
+export interface DOMButton {
+  t: "button";
+  $elm: HTMLButtonElement;
   isDocumentFragment(): boolean;
   getChildNodes(): NodeListOf<ChildNode>;
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
-  setAttribute(key: string, value: string): void;
-  removeAttribute(key: string): void;
-  addEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ): void;
-  removeEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ): void;
-  render(elm: TimelessElement): HTMLDivElement;
+  render(elm: TimelessElement): HTMLButtonElement;
 }
 
-export function DOMView(props: {
+export function DOMButton(props: {
   build: (elm: TimelessElement) => DOMHostNode;
-}): DOMView {
-  const $elm = document.createElement("div");
+}): DOMButton {
+  const $elm = document.createElement("button");
 
   const methods = {
     setStyle(style: ViewStyleProperties) {
@@ -100,7 +88,7 @@ export function DOMView(props: {
   };
 
   return {
-    t: "view",
+    t: "button",
     get $elm() {
       return $elm;
     },
@@ -118,26 +106,6 @@ export function DOMView(props: {
     },
     setStyleSet(name: string) {
       $elm.className = name;
-    },
-    setAttribute(key: string, value: string) {
-      $elm.setAttribute(key, value);
-    },
-    removeAttribute(key: string) {
-      $elm.removeAttribute(key);
-    },
-    addEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      $elm.addEventListener(type, handler, options);
-    },
-    removeEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      $elm.removeEventListener(type, handler, options);
     },
     render(elm: TimelessElement) {
       if (elm.props?.style) {
@@ -168,6 +136,6 @@ export function DOMView(props: {
   };
 }
 
-export function isDOMView(value: any): value is DOMView {
-  return value.t === "view";
+export function isDOMButton(value: any): value is DOMButton {
+  return value.t === "button";
 }

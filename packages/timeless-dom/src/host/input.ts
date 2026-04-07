@@ -1,4 +1,3 @@
-import { viewStyleToCssText } from "@/modules/style";
 import {
   isElement,
   isRef,
@@ -6,16 +5,16 @@ import {
   ViewStyleProperties,
 } from "@timeless/timeless";
 
+import { viewStyleToCssText } from "@/modules/style";
+
 import { DOMHostNode } from "./type";
 
-export interface DOMView {
-  t: "view";
-  $elm: HTMLDivElement;
+export interface DOMInput {
+  $elm: any;
   isDocumentFragment(): boolean;
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): any[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
-  setStyleSet(key: string): void;
   setAttribute(key: string, value: string): void;
   removeAttribute(key: string): void;
   addEventListener(
@@ -28,96 +27,108 @@ export interface DOMView {
     handler: (event: any) => void,
     options?: any,
   ): void;
-  render(elm: TimelessElement): HTMLDivElement;
+  render(elm: TimelessElement): any;
 }
 
-export function DOMView(props: {
+export function DOMInput(props: {
+  // canvas: Document;
   build: (elm: TimelessElement) => DOMHostNode;
-}): DOMView {
-  const $elm = document.createElement("div");
+}): DOMInput {
+  // const canvas = props.canvas;
+  // const $elm = canvas.createElement("div");
+  const $elm = document.createElement("input");
 
   const methods = {
     setStyle(style: ViewStyleProperties) {
       const cssText = viewStyleToCssText(style);
       $elm.style.cssText = cssText;
+      // canvas.setStyleText($elm, cssText);
     },
     setStyleSets(styleSets: string[]) {
+      // canvas.setClassName($elm, styleSets.join(" "));
       $elm.className = styleSets.join(" ");
     },
     setupEventListener(events: any) {
       if (events.onClick) {
-        $elm.addEventListener("click", events.onClick);
+        // canvas.addEventListener($elm, "click", events.onClick);
       }
       if (events.onDoubleClick) {
-        $elm.addEventListener("dblclick", events.onDoubleClick);
+        // canvas.addEventListener($elm, "dblclick", events.onDoubleClick);
       }
       if (events.onPointerDown) {
-        $elm.addEventListener("pointerdown", events.onPointerDown);
+        // canvas.addEventListener($elm, "pointerdown", events.onPointerDown);
+      }
+      if (events.onInput) {
+        $elm.addEventListener("input", events.onInput);
+      }
+      if (events.onChange) {
+        $elm.addEventListener("change", events.onChange);
       }
       if (events.onFocus) {
+        // canvas.addEventListener($elm, "focus", events.onFocus);
         $elm.addEventListener("focus", events.onFocus);
       }
       if (events.onBlur) {
+        // canvas.addEventListener($elm, "blur", events.onBlur);
         $elm.addEventListener("blur", events.onBlur);
       }
       if (events.onKeyDown) {
+        // canvas.addEventListener($elm, "keydown", events.onKeyDown);
         $elm.addEventListener("keydown", events.onKeyDown);
       }
       if (events.onContextMenu) {
-        $elm.addEventListener("contextmenu", events.onContextMenu);
+        // canvas.addEventListener($elm, "contextmenu", events.onContextMenu);
       }
       if (events.onMouseEnter) {
-        $elm.addEventListener("mouseenter", events.onMouseEnter);
+        // canvas.addEventListener($elm, "mouseenter", events.onMouseEnter);
       }
       if (events.onMouseLeave) {
-        $elm.addEventListener("mouseleave", events.onMouseLeave);
+        // canvas.addEventListener($elm, "mouseleave", events.onMouseLeave);
       }
       if (events.onDragStart) {
-        $elm.addEventListener("dragstart", events.onDragStart);
+        // canvas.addEventListener($elm, "dragstart", events.onDragStart);
       }
       if (events.onDrag) {
-        $elm.addEventListener("drag", events.onDrag);
+        // canvas.addEventListener($elm, "drag", events.onDrag);
       }
       if (events.onDragEnd) {
-        $elm.addEventListener("dragend", events.onDragEnd);
+        // canvas.addEventListener($elm, "dragend", events.onDragEnd);
       }
       if (events.onDragEnter) {
-        $elm.addEventListener("dragenter", events.onDragEnter);
+        // canvas.addEventListener($elm, "dragenter", events.onDragEnter);
       }
       if (events.onDragOver) {
-        $elm.addEventListener("dragover", events.onDragOver);
+        // canvas.addEventListener($elm, "dragover", events.onDragOver);
       }
       if (events.onDragLeave) {
-        $elm.addEventListener("dragleave", events.onDragLeave);
+        // canvas.addEventListener($elm, "dragleave", events.onDragLeave);
       }
       if (events.onDrop) {
-        $elm.addEventListener("drop", events.onDrop);
+        // canvas.addEventListener($elm, "drop", events.onDrop);
       }
       if (events.onAnimationEnd) {
-        $elm.addEventListener("animationend", events.onAnimationEnd);
+        // canvas.addEventListener($elm, "animationend", events.onAnimationEnd);
       }
     },
   };
 
   return {
-    t: "view",
     get $elm() {
       return $elm;
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
     getChildNodes() {
-      return $elm.childNodes;
+      return [];
     },
     setStyle(style: ViewStyleProperties) {
       methods.setStyle(style);
     },
     setStyleValue(key: any, value: string) {
+      // console.log("[View] setStyleValue", key, value);
+      // canvas.patchStyle?.($elm, { [key]: value });
       $elm.style[key] = value;
-    },
-    setStyleSet(name: string) {
-      $elm.className = name;
     },
     setAttribute(key: string, value: string) {
       $elm.setAttribute(key, value);
@@ -140,6 +151,11 @@ export function DOMView(props: {
       $elm.removeEventListener(type, handler, options);
     },
     render(elm: TimelessElement) {
+      $elm.style.backgroundColor = "transparent";
+      // $elm.style.outline = "none";
+      // $elm.style.border = "none";
+      $elm.value = "";
+      $elm.type = "text";
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }
@@ -153,21 +169,11 @@ export function DOMView(props: {
       if (elm.events) {
         methods.setupEventListener(elm.events);
       }
-      if (elm.children) {
-        for (const child of elm.children) {
-          if (isElement(child)) {
-            const $sub = props.build(child);
-            if ($sub && $sub.$elm) {
-              $elm.appendChild($sub.$elm);
-            }
-          }
-        }
-      }
       return $elm;
     },
   };
 }
 
-export function isDOMView(value: any): value is DOMView {
-  return value.t === "view";
+export function isDOMInput(value: any): value is DOMInput {
+  return value.t === "input";
 }

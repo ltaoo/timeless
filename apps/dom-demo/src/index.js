@@ -4,6 +4,8 @@ import {
   View,
   For,
   Icon,
+  Input,
+  Button,
   Fragment,
   Img,
   ref,
@@ -33,6 +35,7 @@ function ApplicationView() {
   const count_ = ref(0);
   const columns = 4;
   const focused = ref({ x: 0, y: 0 });
+  const keyword_ = ref("");
   const todos = refarr([
     {
       id: 1,
@@ -158,6 +161,22 @@ function ApplicationView() {
           },
         },
         [count_],
+      ),
+      Input({
+        placeholder: "Search",
+        value: keyword_,
+        onMounted(event) {
+          console.log("the input mounted", event.target);
+        },
+      }),
+      Button(
+        {
+          onClick() {
+            const v = keyword_.value;
+            console.log("click button", v);
+          },
+        },
+        ["Click it"],
       ),
       View(
         {

@@ -1,9 +1,12 @@
 import { Signal, isRef } from "@timeless/reactive";
 
-import { safeCreateElement } from "@/util/env";
-import { ViewStyleProperties, ViewStyle } from "@/style/index";
+import {
+  ViewStyleProperties,
+  ViewStyle,
+  isClassName,
+  ClassNameRef,
+} from "@/style/index";
 import { MountedEvent } from "@/event/index";
-import { isClassName, ClassNameRef } from "@/vnode/class-names";
 
 import { Txt } from "./text";
 import {
@@ -152,6 +155,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
             return;
           }
           if (isRef(child)) {
+            // @ts-ignore
             state.children[i] = Txt(child);
             return;
           }
@@ -258,6 +262,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           });
           // host.setClassName($elm, cls.value);
           // $elm.setStyleSet(cls.value);
+          // @ts-ignore
           state.props.styleSets = [cls.value];
         } else if (isClassName(cls)) {
           cls.subscribe({
@@ -278,7 +283,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       if (style) {
         (() => {
           if (isRef(style)) {
-            state.props.style = style.value || {};
+            state.props.style = (style.value || {}) as ViewStyleProperties;
             style.subscribe({
               onChange() {
                 state.props.style = {
@@ -293,8 +298,10 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
             return;
           }
           Object.keys(style).forEach((k) => {
+            // @ts-ignore
             const v = style[k];
             if (isRef(v)) {
+              // @ts-ignore
               state.props.style[k] = v.value;
               v.subscribe({
                 onChange(v) {
@@ -509,9 +516,6 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       }
       state.rendered = true;
       // Create element if not already created
-      if (!$elm) {
-        $elm = safeCreateElement(as);
-      }
       methods.normalize_children(children);
       methods.setup_reactive_props_bindings();
 
@@ -602,7 +606,18 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
       return $elm;
     },
-    onMounted: props.onMounted,
+    onMounted(event: MountedEvent) {
+      console.log("the view mounted", event.target);
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();

@@ -5,6 +5,10 @@ import { DOMFragment } from "./fragment";
 import { DOMImg } from "./img";
 import { DOMIcon } from "./icon";
 
+import { DOMInput } from "./input";
+
+import { DOMButton } from "./button";
+
 import { DOMShow } from "./show";
 import { DOMFor } from "./for";
 
@@ -16,5 +20,7 @@ export type DOMHostNode =
   | DOMText
   | DOMImg
   | DOMIcon
+  | DOMInput
+  | DOMButton
   | DOMShow
   | DOMFor;

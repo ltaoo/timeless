@@ -259,6 +259,7 @@ export type Ref<T> = {
   subscribe: (ctx: Subscriber) => void;
   destroy: () => void;
   value: T;
+  as: (v: T) => void;
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;
 };

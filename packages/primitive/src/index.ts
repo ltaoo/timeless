@@ -51,7 +51,9 @@ export {
 export * from "./content/style";
 export * from "./content/img";
 export * from "./content/label";
+
 export * from "./interaction/link";
+export * from "./interaction/button";
 
 // base component
 export * from "./modules/portal";

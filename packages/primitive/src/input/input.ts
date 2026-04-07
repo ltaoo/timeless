@@ -2,13 +2,11 @@ import { Ref, isRef } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
 import { viewStyleToCssText, isStyleRef, isClassName } from "@/style/index";
-import { safeCreateElement } from "@/util/env";
-import { getHost } from "@/host";
+import { MountedEvent } from "@/event";
 
 export interface InputProps extends Omit<ViewProps, "as" | "type"> {
-  id?: string | Ref<string>;
-  type?: string | Ref<string>;
-  value?: string | Ref<string>;
+  id?: string;
+  value?: Ref<string>;
   placeholder?: string | Ref<string>;
   disabled?: boolean | Ref<boolean>;
   readonly?: boolean | Ref<boolean>;
@@ -25,10 +23,8 @@ export interface InputProps extends Omit<ViewProps, "as" | "type"> {
 }
 
 export function Input(props: InputProps = {}) {
-  const host = getHost();
   const {
     id,
-    type = "text",
     value,
     placeholder,
     disabled,
@@ -61,86 +57,80 @@ export function Input(props: InputProps = {}) {
     onChange,
   } = props;
 
-  let onMountedCleanup: (() => void) | undefined;
-  const listenerCleanups: (() => void)[] = [];
-  let rendered = false;
-  const $elm = safeCreateElement("input");
-
-  return {
-    t: "view",
-    $elm,
-    render() {
-      if (rendered) {
-        return $elm;
+  const methods = {
+    listen(type: string, handler: (event: any) => void, options?: any) {
+      // console.log("listen", type, $elm, handler, options);
+      // host.addEventListener($elm, type, handler, options);
+      $elm.addEventListener(type, handler, options);
+      listenerCleanups.push(() => {
+        // host.removeEventListener($elm, type, handler, options);
+        $elm.removeEventListener(type, handler, options);
+      });
+    },
+    setProp(key: string, value: any) {
+      if ($elm) {
+        $elm.setAttribute(key, value);
       }
-      rendered = true;
-
-      const listen = (
-        type: string,
-        handler: (event: any) => void,
-        options?: any,
-      ) => {
-        host.addEventListener($elm, type, handler, options);
-        listenerCleanups.push(() => {
-          host.removeEventListener($elm, type, handler, options);
-        });
-      };
-
-      const setProp = (key: string, value: any) => {
-        if (host.setProperty) {
-          host.setProperty($elm, key, value);
-          return;
+      // @ts-ignore
+      state.props[key] = value;
+    },
+    applyAttr(k: string, v: any) {
+      if (v === undefined || v === null || v === false) {
+        // host.removeAttribute($elm, k);
+        if ($elm) {
+          $elm.removeAttribute(k);
         }
-        ($elm as any)[key] = value;
-      };
-      const applyAttr = (k: string, v: any) => {
-        if (v === undefined || v === null || v === false) {
-          host.removeAttribute($elm, k);
-          return;
+        return;
+      }
+      if (v === true) {
+        // host.setAttribute($elm, k, "");
+        if ($elm) {
+          $elm.setAttribute(k, "");
         }
-        if (v === true) {
-          host.setAttribute($elm, k, "");
-          return;
-        }
-        host.setAttribute($elm, k, String(v));
-      };
-
+        return;
+      }
+      // host.setAttribute($elm, k, String(v));
+      if ($elm) {
+        $elm.setAttribute(k, String(v));
+      }
+    },
+    setup_value_subscribe() {
       if (id !== undefined) {
         if (isRef(id)) {
           id.subscribe({
             onChange(v) {
-              setProp("id", String(v));
+              methods.setProp("id", String(v));
             },
           });
-          setProp("id", id.value);
+          methods.setProp("id", id.value);
         } else {
-          setProp("id", id);
+          methods.setProp("id", id);
         }
       }
 
       // Handle type attribute
-      if (isRef(type)) {
-        type.subscribe({
-          onChange(v) {
-            setProp("type", v);
-          },
-        });
-        setProp("type", type.value);
-      } else {
-        setProp("type", type as any);
-      }
+      // if (isRef(type)) {
+      //   type.subscribe({
+      //     onChange(v) {
+      //       methods.setProp("type", v);
+      //     },
+      //   });
+      //   methods.setProp("type", type.value);
+      // } else {
+      //   methods.setProp("type", type as any);
+      // }
 
       // Handle value attribute
       if (value !== undefined) {
         if (isRef(value)) {
           value.subscribe({
             onChange(v) {
-              setProp("value", v);
+              methods.setProp("value", v);
             },
           });
-          setProp("value", value.value);
+          methods.setProp("value", value.value);
         } else {
-          setProp("value", value as string);
+          methods.setProp("value", value);
         }
       }
 
@@ -149,12 +139,12 @@ export function Input(props: InputProps = {}) {
         if (isRef(placeholder)) {
           placeholder.subscribe({
             onChange(v) {
-              setProp("placeholder", v);
+              methods.setProp("placeholder", v);
             },
           });
-          setProp("placeholder", placeholder.value);
+          methods.setProp("placeholder", placeholder.value);
         } else {
-          setProp("placeholder", placeholder as string);
+          methods.setProp("placeholder", placeholder as string);
         }
       }
 
@@ -163,12 +153,12 @@ export function Input(props: InputProps = {}) {
         if (isRef(disabled)) {
           disabled.subscribe({
             onChange(v) {
-              setProp("disabled", v);
+              methods.setProp("disabled", v);
             },
           });
-          setProp("disabled", disabled.value);
+          methods.setProp("disabled", disabled.value);
         } else {
-          setProp("disabled", disabled as boolean);
+          methods.setProp("disabled", disabled as boolean);
         }
       }
 
@@ -177,12 +167,12 @@ export function Input(props: InputProps = {}) {
         if (isRef(readonly)) {
           readonly.subscribe({
             onChange(v) {
-              setProp("readOnly", v);
+              methods.setProp("readOnly", v);
             },
           });
-          setProp("readOnly", readonly.value);
+          methods.setProp("readOnly", readonly.value);
         } else {
-          setProp("readOnly", readonly as boolean);
+          methods.setProp("readOnly", readonly as boolean);
         }
       }
 
@@ -191,12 +181,12 @@ export function Input(props: InputProps = {}) {
         if (isRef(maxLength)) {
           maxLength.subscribe({
             onChange(v) {
-              setProp("maxLength", v);
+              methods.setProp("maxLength", v);
             },
           });
-          setProp("maxLength", maxLength.value);
+          methods.setProp("maxLength", maxLength.value);
         } else {
-          setProp("maxLength", maxLength as number);
+          methods.setProp("maxLength", maxLength as number);
         }
       }
 
@@ -205,12 +195,12 @@ export function Input(props: InputProps = {}) {
         if (isRef(minLength)) {
           minLength.subscribe({
             onChange(v) {
-              setProp("minLength", v);
+              methods.setProp("minLength", v);
             },
           });
-          setProp("minLength", minLength.value);
+          methods.setProp("minLength", minLength.value);
         } else {
-          setProp("minLength", minLength as any);
+          methods.setProp("minLength", minLength as any);
         }
       }
 
@@ -219,12 +209,12 @@ export function Input(props: InputProps = {}) {
         if (isRef(pattern)) {
           pattern.subscribe({
             onChange(v) {
-              setProp("pattern", v);
+              methods.setProp("pattern", v);
             },
           });
-          setProp("pattern", pattern.value);
+          methods.setProp("pattern", pattern.value);
         } else {
-          setProp("pattern", pattern as string);
+          methods.setProp("pattern", pattern as string);
         }
       }
 
@@ -233,12 +223,12 @@ export function Input(props: InputProps = {}) {
         if (isRef(required)) {
           required.subscribe({
             onChange(v) {
-              setProp("required", v);
+              methods.setProp("required", v);
             },
           });
-          setProp("required", required.value);
+          methods.setProp("required", required.value);
         } else {
-          setProp("required", required as boolean);
+          methods.setProp("required", required as boolean);
         }
       }
 
@@ -247,12 +237,12 @@ export function Input(props: InputProps = {}) {
         if (isRef(autocomplete)) {
           autocomplete.subscribe({
             onChange(v) {
-              setProp("autocomplete", v);
+              methods.setProp("autocomplete", v);
             },
           });
-          setProp("autocomplete", autocomplete.value as any);
+          methods.setProp("autocomplete", autocomplete.value as any);
         } else {
-          setProp("autocomplete", autocomplete as any);
+          methods.setProp("autocomplete", autocomplete as any);
         }
       }
 
@@ -261,19 +251,24 @@ export function Input(props: InputProps = {}) {
         if (isRef(name)) {
           name.subscribe({
             onChange(v) {
-              setProp("name", v);
+              methods.setProp("name", v);
             },
           });
-          setProp("name", name.value);
+          methods.setProp("name", name.value);
         } else {
-          setProp("name", name as string);
+          methods.setProp("name", name as string);
         }
       }
 
       // Set static attributes
-      host.setAttribute($elm, "autocorrect", autocorrect);
+      // host.setAttribute($elm, "autocorrect", autocorrect);
+      if ($elm) {
+        $elm.setAttribute("autocorrect", autocorrect);
+      }
+
       if (inputMode) {
-        setProp("inputMode", inputMode);
+        methods.setProp("inputMode", inputMode);
+        // state.props.inputMode = inputMode;
       }
 
       if (attributes) {
@@ -282,13 +277,13 @@ export function Input(props: InputProps = {}) {
           if (isRef(vv)) {
             vv.subscribe({
               onChange(v: any) {
-                applyAttr(k, v);
+                methods.applyAttr(k, v);
               },
             });
-            applyAttr(k, vv.value);
+            methods.applyAttr(k, vv.value);
             return;
           }
-          applyAttr(k, vv);
+          methods.applyAttr(k, vv);
         });
       }
 
@@ -300,186 +295,240 @@ export function Input(props: InputProps = {}) {
         if (isRef(vv)) {
           vv.subscribe({
             onChange(v: any) {
-              applyAttr(attrName, v);
+              methods.applyAttr(attrName, v);
             },
           });
-          applyAttr(attrName, vv.value);
+          methods.applyAttr(attrName, vv.value);
           return;
         }
-        applyAttr(attrName, vv);
+        methods.applyAttr(attrName, vv);
       });
 
       // Handle class
       if (cls) {
         if (typeof cls === "string") {
-          host.setClassName($elm, cls);
+          // host.setClassName($elm, cls);
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v) {
-              host.setClassName($elm, String(v));
+              // host.setClassName($elm, String(v));
+              if ($elm) {
+                $elm.setStyleSet(v);
+              }
             },
           });
-          host.setClassName($elm, String(cls.value));
+          // host.setClassName($elm, String(cls.value));
+          if ($elm) {
+            $elm.setStyleSet(String(cls.value));
+          }
         } else if (isClassName(cls)) {
           cls.subscribe({
             onChange(v: any) {
-              host.setClassName(
-                $elm,
-                Array.isArray(v) ? v.join(" ") : String(v ?? ""),
-              );
+              // host.setClassName(
+              //   $elm,
+              //   Array.isArray(v) ? v.join(" ") : String(v ?? ""),
+              // );
+              if ($elm) {
+                $elm.setStyleSet(
+                  Array.isArray(v) ? v.join(" ") : String(v ?? ""),
+                );
+              }
             },
           });
-          host.setClassName($elm, cls.toString());
+          // host.setClassName($elm, cls.toString());
+          if ($elm) {
+            $elm.setStyleSet(cls.toString());
+          }
         }
       }
 
       // Handle style
-      if (style) {
-        if (isStyleRef(style as any)) {
-          const st = style as any;
-          st.subscribe({
-            onChange(v: any) {
-              host.setStyleText($elm, viewStyleToCssText(v ?? {}));
-            },
-          });
-          host.setStyleText($elm, viewStyleToCssText(st.value));
-        } else if (isRef(style)) {
-          const st = style as any;
-          const apply = () =>
-            host.setStyleText($elm, viewStyleToCssText(st.value || {}));
-          st.subscribe({
-            onChange() {
-              apply();
-            },
-          });
-          apply();
-        } else {
-          const applyStyle = () => {
-            host.setStyleText($elm, viewStyleToCssText(style as any));
-          };
-          Object.keys(style as any).forEach((k) => {
-            const vv = (style as any)[k];
-            if (isRef(vv)) {
-              (vv as any).subscribe({
-                onChange() {
-                  applyStyle();
-                },
-              });
-            }
-          });
-          applyStyle();
-        }
-      }
+      // if (style) {
+      //   if (isStyleRef(style as any)) {
+      //     const st = style as any;
+      //     st.subscribe({
+      //       onChange(v: any) {
+      //         host.setStyleText($elm, viewStyleToCssText(v ?? {}));
+      //       },
+      //     });
+      //     host.setStyleText($elm, viewStyleToCssText(st.value));
+      //   } else if (isRef(style)) {
+      //     const st = style as any;
+      //     const apply = () =>
+      //       host.setStyleText($elm, viewStyleToCssText(st.value || {}));
+      //     st.subscribe({
+      //       onChange() {
+      //         apply();
+      //       },
+      //     });
+      //     apply();
+      //   } else {
+      //     const applyStyle = () => {
+      //       host.setStyleText($elm, viewStyleToCssText(style as any));
+      //     };
+      //     Object.keys(style as any).forEach((k) => {
+      //       const vv = (style as any)[k];
+      //       if (isRef(vv)) {
+      //         (vv as any).subscribe({
+      //           onChange() {
+      //             applyStyle();
+      //           },
+      //         });
+      //       }
+      //     });
+      //     applyStyle();
+      //   }
+      // }
+    },
+  };
 
-      // Event listeners
+  const listenerCleanups: (() => void)[] = [];
+  let onMountedCleanup: (() => void) | undefined;
+  let rendered = false;
+  let $elm: any = null;
+  const state = {
+    value: "",
+    props: {},
+  };
+
+  methods.setup_value_subscribe();
+
+  return {
+    t: "input",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(value: any) {
+      $elm = value;
+    },
+    props: state.props,
+    get value() {
+      return state.value;
+    },
+    onMounted(event: MountedEvent) {
+      console.log("[]input onMounted", $elm);
+      // $elm = event.target;
+      const handler = function (event: Event) {
+        // @ts-ignore
+        const next_value = event.target?.value || "";
+        if (value && !value.isSame(next_value)) {
+          value.as(next_value);
+        }
+        // state.value = value;
+        if (onInput) {
+          onInput(event);
+        }
+      };
+      methods.listen("input", handler);
+    },
+    render() {
+      if (rendered) {
+        return $elm;
+      }
+      rendered = true;
+
+      // Event methods.listeners
       if (onClick) {
         const handler = function (event: MouseEvent) {
           onClick(event);
         };
-        listen("click", handler);
+        methods.listen("click", handler);
       }
 
       if (onDoubleClick) {
         const handler = function (event: MouseEvent) {
           onDoubleClick(event);
         };
-        listen("dblclick", handler);
+        methods.listen("dblclick", handler);
       }
 
       if (onLongPress) {
-        let longPressTimer: any = null;
-        let startX = 0;
-        let startY = 0;
+        let long_press_timer: any = null;
+        let start_x = 0;
+        let start_y = 0;
         const longPressDuration = 500;
         const moveThreshold = 10;
 
         const handleStart = (event: PointerEvent) => {
-          startX = event.clientX;
-          startY = event.clientY;
-          longPressTimer = host.setTimeout(() => {
+          start_x = event.clientX;
+          start_y = event.clientY;
+          long_press_timer = setTimeout(() => {
             onLongPress(event);
-            longPressTimer = null;
+            long_press_timer = null;
           }, longPressDuration);
         };
 
         const handleMove = (event: PointerEvent) => {
-          if (longPressTimer) {
-            const deltaX = Math.abs(event.clientX - startX);
-            const deltaY = Math.abs(event.clientY - startY);
+          if (long_press_timer) {
+            const deltaX = Math.abs(event.clientX - start_x);
+            const deltaY = Math.abs(event.clientY - start_y);
             if (deltaX > moveThreshold || deltaY > moveThreshold) {
-              host.clearTimeout(longPressTimer);
-              longPressTimer = null;
+              clearTimeout(long_press_timer);
+              long_press_timer = null;
             }
           }
         };
 
         const handleEnd = () => {
-          if (longPressTimer) {
-            host.clearTimeout(longPressTimer);
-            longPressTimer = null;
+          if (long_press_timer) {
+            clearTimeout(long_press_timer);
+            long_press_timer = null;
           }
         };
 
-        listen("pointerdown", handleStart);
-        listen("pointermove", handleMove);
-        listen("pointerup", handleEnd);
-        listen("pointercancel", handleEnd);
+        methods.listen("pointerdown", handleStart);
+        methods.listen("pointermove", handleMove);
+        methods.listen("pointerup", handleEnd);
+        methods.listen("pointercancel", handleEnd);
       }
 
       if (onPointerDown) {
         const handler = function (event: PointerEvent) {
           onPointerDown(event);
         };
-        listen("pointerdown", handler);
+        methods.listen("pointerdown", handler);
       }
 
       if (onFocus) {
         const handler = function (event: FocusEvent) {
           onFocus(event);
         };
-        listen("focus", handler);
+        methods.listen("focus", handler);
       }
 
       if (onBlur) {
         const handler = function (event: FocusEvent) {
           onBlur(event);
         };
-        listen("blur", handler);
+        methods.listen("blur", handler);
       }
 
       if (onKeyDown) {
         const handler = function (event: KeyboardEvent) {
           onKeyDown(event);
         };
-        listen("keydown", handler);
+        methods.listen("keydown", handler);
       }
 
       if (onMouseEnter) {
         const handler = function (event: MouseEvent) {
           onMouseEnter(event);
         };
-        listen("mouseenter", handler);
+        methods.listen("mouseenter", handler);
       }
 
       if (onMouseLeave) {
         const handler = function (event: MouseEvent) {
           onMouseLeave(event);
         };
-        listen("mouseleave", handler);
-      }
-
-      if (onInput) {
-        const handler = function (event: Event) {
-          onInput(event);
-        };
-        listen("input", handler);
+        methods.listen("mouseleave", handler);
       }
 
       if (onChange) {
         const handler = function (event: Event) {
           onChange(event);
         };
-        listen("change", handler);
+        methods.listen("change", handler);
       }
 
       if (onMounted) {

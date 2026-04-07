@@ -19,10 +19,7 @@ export type ViewStyleProperties = {
   [k: string]: ViewStylePropValue;
 };
 
-export type ViewStyle =
-  | Ref<ViewStyleProperties>
-  | RefObject<ViewStyleProperties>
-  | ViewStyleProperties;
+export type ViewStyle = ViewStyleProperties | Ref<ViewStyleProperties>;
 
 export type ViewStyleInput = ViewStyle;
 
@@ -47,6 +44,7 @@ export function viewStyleToCssText(style: ViewStyleInput) {
 export type ClassNameRef = {
   __cn_ref: true;
   subscribe(ctx: Subscriber): void;
+  as(v: string): void;
   del(v: string): void;
   add(v: string): void;
   append(c: string): void;
@@ -172,6 +170,9 @@ export function classNames(
     subscribe(ctx: Subscriber) {
       _deps.push(ctx);
     },
+    as(v: string) {
+      return;
+    },
     del(v: string) {
       // manualAdds.delete(v);
       _names = _names.filter((vv) => vv !== v);
@@ -285,15 +286,15 @@ function parseCssDeclarations(cssText: string, target: StyleObject) {
 
 export function styleNames(
   items: (
-    | StyleObject
-    | Ref<StyleRef | StyleObject | undefined>
+    | ViewStyleProperties
+    | Ref<StyleRef | ViewStyleProperties | undefined>
     | StyleRef
     | undefined
   )[],
-): Ref<StyleObject> {
+): Ref<ViewStyleProperties> {
   const sources: (
-    | StyleObject
-    | Ref<StyleRef | StyleObject | undefined>
+    | ViewStyleProperties
+    | Ref<StyleRef | ViewStyleProperties | undefined>
     | StyleRef
     | undefined
   )[] = [];
@@ -309,8 +310,8 @@ export function styleNames(
     }
   }
 
-  function compute_style(): StyleObject {
-    const result: StyleObject = {};
+  function compute_style(): ViewStyleProperties {
+    const result: ViewStyleProperties = {};
 
     for (let i = 0; i < sources.length; i += 1) {
       const source = sources[i];
@@ -354,16 +355,17 @@ export function styleNames(
 
   function addSourceFromItem(
     item:
-      | StyleObject
-      | Ref<StyleRef | StyleObject | undefined>
+      | ViewStyleProperties
+      | Ref<StyleRef | ViewStyleProperties | undefined>
       | StyleRef
-      | undefined,
+      | undefined
+      | null,
   ) {
     if (!item) {
       return;
     }
     if (item && typeof item === "object" && !isRef(item) && !isStyleRef(item)) {
-      const obj = item as StyleObject;
+      const obj = item as ViewStyleProperties;
       // subscribe to nested refs within object
       Object.keys(obj).forEach((k) => {
         const vv = (obj as any)[k];
@@ -388,7 +390,7 @@ export function styleNames(
       return;
     }
     if (isRef(item)) {
-      sources.push(item as Ref<string | StyleRef | StyleObject | undefined>);
+      sources.push(item);
       item.subscribe({
         onChange() {
           notify();
@@ -404,11 +406,11 @@ export function styleNames(
   }
 
   return {
-    // __style_ref: true as const,
     __is_ref: true as const,
     get value() {
       return compute_style();
     },
+    as(v: any) {},
     isSame(v: any) {
       // return v === this.value;
       return false;

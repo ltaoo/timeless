@@ -9,6 +9,8 @@ import { DOMHostNode } from "@/host/type";
 import { DOMFragment, isDocumentFragment } from "@/host/fragment";
 import { DOMImg } from "@/host/img";
 import { DOMIcon } from "@/host/icon";
+import { DOMInput } from "@/host/input";
+import { DOMButton } from "@/host/button";
 
 function build(elm: TimelessElement): DOMHostNode {
   if (elm.t === "view") {
@@ -46,6 +48,18 @@ function build(elm: TimelessElement): DOMHostNode {
     elm.$elm = grid$;
     grid$.render(elm);
     return grid$;
+  }
+  if (elm.t === "input") {
+    const input$ = DOMInput({ build });
+    elm.$elm = input$;
+    input$.render(elm);
+    return input$;
+  }
+  if (elm.t === "button") {
+    const button$ = DOMButton({ build });
+    elm.$elm = button$;
+    button$.render(elm);
+    return button$;
   }
   if (elm.t === "show") {
     const show$ = DOMShow({ build });
