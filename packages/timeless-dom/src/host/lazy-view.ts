@@ -202,7 +202,7 @@ export function DOMLazyView(props: {
       // console.log("[]show - the end of addContent", children$);
     },
     removeContent() {
-      console.log("[]LazyView - removeContent", children$);
+      // console.log("[]LazyView - removeContent", children$);
       for (const node of children$) {
         const $parent = node.parentElement;
         // console.log("[]show remove content", node, $parent);

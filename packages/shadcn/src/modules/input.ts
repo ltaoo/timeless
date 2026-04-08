@@ -16,18 +16,28 @@ export function Input(
   });
 
   const allowClear = computed(state_, (d) => d.allowClear);
+  const value_ = computed(state_, (d) => d.value);
   const hasValue = computed(state_, (d) => d.value && d.value.length > 0);
   const isLoading = computed(state_, (d) => d.loading || false);
 
   return InputPrimitive.Root(
     { store, class: classNames(["t-input relative", props.class]) },
     [
+      value_,
       InputPrimitive.Input({
         ...rest,
         id,
         store,
         class: classNames([
-          "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+          "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+          computed(state_, (d) => {
+            return d.disabled
+              ? "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 "
+              : "";
+          }),
+          // computed(state_, (t) => {
+          // }),
+          // "aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20",
           combine({ allowClear, isLoading }, (t) => {
             return t.isLoading || t.allowClear ? "pr-8" : "";
           }),
@@ -39,6 +49,7 @@ export function Input(
           (t) => t.hasValue && t.allowClear && !t.isLoading,
         ),
         ok() {
+          console.log("invoke");
           return [
             InputPrimitive.Clear(
               {
@@ -46,7 +57,7 @@ export function Input(
                 class:
                   "absolute top-1/2 -translate-y-1/2 right-2 flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
               },
-              [Icon({ name: "circle-x" })],
+              [Icon({ name: "circle-x", size: 16 })],
             ),
           ];
         },

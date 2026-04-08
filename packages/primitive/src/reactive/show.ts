@@ -44,11 +44,12 @@ export function Show(props: ShowProps) {
       return next;
     },
     setup_value_subscribe() {
+      console.log("[show] - setup_value_subscribe", when);
       if (isRef(when)) {
         state.value = when.value as boolean;
         when.subscribe({
           onChange(value) {
-            console.log('the when is changed', value, state.value);
+            console.log("the when is changed", value, state.value);
             const condition = !!value;
             // 如果条件没有变化，直接返回
             if (condition === state.value) {

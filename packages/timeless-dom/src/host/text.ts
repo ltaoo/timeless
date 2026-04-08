@@ -26,8 +26,10 @@ export function DOMText(value?: string | null): DOMText {
       return true;
     },
     setContent(v: string | number | null) {
-      if (v) {
+      if (v !== undefined && v !== null) {
         $text.textContent = String(v);
+      } else {
+        $text.textContent = "";
       }
     },
     render() {

@@ -25,7 +25,7 @@ export interface InputProps extends Omit<ViewProps, "as" | "type"> {
   autocorrect?: boolean;
   // inputMode?: string;
   onInput?: (e: Event) => void;
-  onChange?: (e: Event) => void;
+  onChange?: (e: InputEvent) => void;
 }
 type InputState = {
   rendered: boolean;
@@ -183,7 +183,12 @@ export function Input(props: InputProps = {}) {
           disabled.subscribe({
             onChange(v) {
               state.disabled = v as boolean;
-              methods.setProp("disabled", v);
+              if (v) {
+                $elm.setAttribute("disabled", "");
+              } else {
+                $elm.removeAttribute("disabled");
+              }
+              // methods.setProp("disabled", v);
             },
           });
           // methods.setProp("disabled", disabled.value);

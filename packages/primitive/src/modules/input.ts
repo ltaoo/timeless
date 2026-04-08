@@ -1,9 +1,14 @@
-import { ref, refobj, isRef } from "@timeless/reactive";
+import { ref, refobj, isRef, computed } from "@timeless/reactive";
 import { InputCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { viewStyleToCssText, isStyleRef, classNames } from "@/style/index";
+import {
+  viewStyleToCssText,
+  isStyleRef,
+  classNames,
+  styleNames,
+} from "@/style/index";
 import { InputProps, Input as NativeInput } from "@/input/input";
 import { ListenerManager } from "@/util/listener";
 // import { safeCreateElement } from "@/util/env";
@@ -29,7 +34,7 @@ export function Root(
 export function Input(
   props: InputProps & { store: InputCore<any>; id?: string },
 ) {
-  const { store, style: st, class: cls, dataset = {}, id, ...rest } = props;
+  const { store } = props;
 
   let $elm: any = null;
   let rendered = false;
@@ -37,7 +42,6 @@ export function Input(
   const value$ = refobj(store.value || "");
   const placeholder$ = ref(store.placeholder || "");
   const disabled$ = ref(store.disabled || false);
-  const type$ = ref(store.type || "text");
 
   const listener$ = ListenerManager();
 
@@ -46,11 +50,34 @@ export function Input(
       value$.as(state.value || "");
       placeholder$.as(state.placeholder || "");
       disabled$.as(state.disabled || false);
-      type$.as(state.tmpType || state.type || "text");
     }),
   );
 
-  return NativeInput(props);
+  return NativeInput({
+    ...props,
+    placeholder: placeholder$,
+    disabled: disabled$,
+    value: value$,
+    onMounted(event) {
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+      listener$.clean();
+    },
+    onInput(e) {
+      if (e.target) {
+        // @ts-ignore
+        store.setValue(e.target.value as string);
+      }
+    },
+    onChange(event) {
+      // console.log("input something");
+      if (event.target) {
+        // @ts-ignore
+        store.setValue(event.target.value as string);
+      }
+    },
+  });
 }
 
 export function Value(
@@ -92,22 +119,27 @@ export function Clear(
   return View(
     {
       ...rest,
-      onMounted(event) {
-        const $e = event.target;
-        const handleClick = (e: any) => {
-          e.preventDefault();
-          e.stopPropagation();
-          store.clear();
-          setTimeout(() => {
-            store.focus();
-          }, 0);
-        };
-        // host.addEventListener($e, "click", handleClick);
-        $e.addEventListener("click", handleClick);
-        if (rest.onMounted) rest.onMounted(event);
-        return () => {
-          // host.removeEventListener($e, "click", handleClick);
-        };
+      // onMounted(event) {
+      //   const $e = event.target;
+      //   const handleClick = (e: any) => {
+      //     e.preventDefault();
+      //     e.stopPropagation();
+      //     store.clear();
+      //     setTimeout(() => {
+      //       store.focus();
+      //     }, 0);
+      //   };
+      //   // host.addEventListener($e, "click", handleClick);
+      //   $e.addEventListener("click", handleClick);
+      //   if (rest.onMounted) rest.onMounted(event);
+      // },
+      onClick(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        store.clear();
+        setTimeout(() => {
+          store.focus();
+        }, 0);
       },
     },
     children,
@@ -118,30 +150,33 @@ export function Loading(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
-  // const host = getHost();
   const { store, ...rest } = props;
-  const loading$ = ref(store.loading || false);
+  const loading_ = ref(store.loading || false);
 
-  if (store.onStateChange) {
-    store.onStateChange(() => {
-      loading$.as(store.loading || false);
-    });
-  }
+  store.onStateChange(() => {
+    loading_.as(store.loading || false);
+  });
 
   return View(
     {
       ...rest,
-      onMounted(event) {
-        const $elm = event.target;
-        const updateDisplay = () => {
-          $elm.setStyleValue("display", loading$.value ? "block" : "none");
-        };
-        loading$.subscribe({ onChange: updateDisplay });
-        updateDisplay();
-        if (rest.onMounted) {
-          rest.onMounted(event);
-        }
-      },
+      style: styleNames([
+        props.style,
+        computed(loading_, (t) => {
+          return t ? { display: "block" } : { display: "none" };
+        }),
+      ]),
+      // onMounted(event) {
+      //   const $elm = event.target;
+      //   const updateDisplay = () => {
+      //     $elm.setStyleValue("display", loading$.value ? "block" : "none");
+      //   };
+      //   loading$.subscribe({ onChange: updateDisplay });
+      //   updateDisplay();
+      //   if (rest.onMounted) {
+      //     rest.onMounted(event);
+      //   }
+      // },
     },
     children,
   );
@@ -151,7 +186,6 @@ export function Disabled(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
-  // const host = getHost();
   const { store, ...rest } = props;
   const disabled$ = ref(store.disabled || false);
 

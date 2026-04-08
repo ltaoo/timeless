@@ -10,6 +10,7 @@ export interface DOMInput {
   getChildNodes(): any[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
+  setStyleSet(name: string[]): void;
   setAttribute(key: string, value: string): void;
   removeAttribute(key: string): void;
   addEventListener(
@@ -42,7 +43,8 @@ export function DOMInput(props: {
     },
     setStyleSet(styleSet: string[]) {
       // canvas.setClassName($elm, styleSet.join(" "));
-      $elm.className = styleSet.join(" ");
+      $elm.className =
+        typeof styleSet === "string" ? styleSet : styleSet.join(" ");
     },
     setupEventListener(events: any) {
       if (events.onClick) {
@@ -55,10 +57,16 @@ export function DOMInput(props: {
         // canvas.addEventListener($elm, "pointerdown", events.onPointerDown);
       }
       if (events.onInput) {
-        $elm.addEventListener("input", events.onInput);
+        $elm.addEventListener("input", function (event) {
+          console.log("2");
+          events.onInput(event);
+        });
       }
       if (events.onChange) {
-        $elm.addEventListener("change", events.onChange);
+        $elm.addEventListener("change", function (event) {
+          console.log("1");
+          events.onChange(event);
+        });
       }
       if (events.onFocus) {
         // canvas.addEventListener($elm, "focus", events.onFocus);
@@ -127,6 +135,7 @@ export function DOMInput(props: {
       // canvas.patchStyle?.($elm, { [key]: value });
       $elm.style[key] = value;
     },
+    setStyleSet: methods.setStyleSet,
     setAttribute(key: string, value: string) {
       $elm.setAttribute(key, value);
     },

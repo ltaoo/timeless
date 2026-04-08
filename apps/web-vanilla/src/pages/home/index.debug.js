@@ -1,4 +1,4 @@
-import { Section, Item } from "@/components/index.js";
+import { request } from "@/biz/request.js";
 
 export default function OverlayView() {
   const view$ = new Timeless.ui.ScrollViewCore({});
@@ -40,9 +40,9 @@ export default function OverlayView() {
   }
 
   // Mock HttpClient
-  const mockClient = new Timeless.kit.HttpClientCore({});
+  const client$ = new Timeless.kit.HttpClientCore({});
   // @ts-ignore
-  mockClient.fetch = async (options) => {
+  client$.fetch = async (options) => {
     // @ts-ignore
     const url = new URL(options.url, "http://localhost");
     const page = Number(url.searchParams.get("page")) || 1;
@@ -60,11 +60,11 @@ export default function OverlayView() {
 
   /** @param {Record<string, any>} params */
   function fetchDownloadList(params) {
-    return { url: "/api/mock/downloads", method: "GET", query: params };
+    return request.get("/api/mock/downloads", params);
   }
 
-  const list$ = new Timeless.ListCore(
-    new Timeless.RequestCore(fetchDownloadList, { client: mockClient }),
+  const list$ = new Timeless.kit.ListCore(
+    new Timeless.kit.RequestCore(fetchDownloadList, { client: client$ }),
     { pageSize: 10 },
   );
 
@@ -120,6 +120,12 @@ export default function OverlayView() {
   list$.init();
 
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
+    Input({
+      store: new Timeless.ui.InputCore({
+        placeholder: "Search",
+        defaultValue: "",
+      }),
+    }),
     View({ class: "space-y-8" }, [
       // Section("Popover", [
       //   Item("Default", [
