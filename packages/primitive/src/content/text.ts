@@ -1,9 +1,9 @@
-import { isRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { TimelessElement } from "./type";
 
 export function Txt(
-  value: Ref<string | number> | string | number,
+  value: DerivedRef<string | number> | Ref<string | number> | string | number,
 ): TimelessElement {
   let $elm: any = null;
 
@@ -45,7 +45,7 @@ export function Txt(
     },
     value: state.value,
     props: {
-      // styleSets: [],
+      // styleSet: [],
       style: {},
     },
     children: [],

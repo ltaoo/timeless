@@ -43,8 +43,8 @@ export function DOMPortal(props: {
       const cssText = viewStyleToCssText(style);
       //       $elm.style.cssText = cssText;
     },
-    setStyleSets(styleSets: string[]) {
-      //       $elm.className = styleSets.join(" ");
+    setStyleSet(styleSet: string[]) {
+      //       $elm.className = styleSet.join(" ");
     },
     setupEventListener(events: any) {
       if (events.onClick) {
@@ -147,11 +147,11 @@ export function DOMPortal(props: {
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }
-      // if (elm.props?.styleSets) {
-      //   if (isRef(elm.props.styleSets)) {
-      //     methods.setStyleSets(elm.props.styleSets.value);
+      // if (elm.props?.styleSet) {
+      //   if (isRef(elm.props.styleSet)) {
+      //     methods.setStyleSet(elm.props.styleSet.value);
       //   } else {
-      //     methods.setStyleSets(elm.props.styleSets);
+      //     methods.setStyleSet(elm.props.styleSet);
       //   }
       // }
       if (elm.events) {

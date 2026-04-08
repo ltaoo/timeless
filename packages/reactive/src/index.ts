@@ -3,6 +3,7 @@
 import type {
   Subscriber,
   Ref,
+  DerivedRef,
   // ClassNameRef,
   // StyleRef,
   TimelessRefArray,
@@ -15,7 +16,7 @@ import type {
   PrimitiveSignal,
   Signal,
 } from "./signal";
-import { isRef } from "./types";
+import { isRef, isArrayRef } from "./types";
 import { ref } from "./ref";
 import { refArray } from "./reactive-array";
 import { refObject } from "./reactive-object";
@@ -36,6 +37,7 @@ import {
 export {
   Subscriber,
   Ref,
+  DerivedRef,
   RefObject,
   RefArray,
   TimelessRefArray,
@@ -44,6 +46,7 @@ export {
   ObjectSignal,
   ArraySignal,
   isRef,
+  isArrayRef,
   ref,
   signal,
   refArray as reactiveArray,

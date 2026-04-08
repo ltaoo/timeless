@@ -1,7 +1,7 @@
 import { refobj, computed } from "@timeless/reactive";
 import { CascaderCore, CascaderOption } from "@timeless/ui";
 
-import { classNames } from "@/vnode/class-names";
+import { classNames } from "@/style/index";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";

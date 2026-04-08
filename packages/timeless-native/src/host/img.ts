@@ -1,7 +1,4 @@
-import {
-  TimelessElement,
-  ViewStyleProperties,
-} from "@timeless/primitive";
+import { TimelessElement, ViewStyleProperties } from "@timeless/timeless";
 
 export interface NativeImg {
   t: "img";

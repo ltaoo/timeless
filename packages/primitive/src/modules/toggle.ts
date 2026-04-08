@@ -46,14 +46,14 @@ export function Root(
           "white-space": "nowrap",
           "border-width": 0,
         },
-        onClick(e) {
-          e.stopPropagation();
-        },
-        onMounted(el: any) {
-          el.checked = store.state.checked;
-          store.onStateChange(() => {
-            el.checked = store.state.checked;
-          });
+        // onClick(e) {
+        //   e.stopPropagation();
+        // },
+        onMounted() {
+          // el.checked = store.state.checked;
+          // store.onStateChange(() => {
+          //   el.checked = store.state.checked;
+          // });
         },
       }),
       ...(children || []),

@@ -196,6 +196,7 @@ export function refArray<T>(
   };
   const r = {
     __is_ref: true as const,
+    __is_ref_array: true as const,
     subscribe(ctx: Subscriber) {
       deps.push(ctx);
     },

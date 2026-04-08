@@ -1,12 +1,11 @@
 import { refobj, computed, isRef } from "@timeless/reactive";
 import { SelectCore } from "@timeless/ui";
 
-import { classNames } from "@/vnode/class-names";
-import { isStyleRef } from "@/vnode/style-names";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";
 import { Input } from "@/input/input";
+import { isStyleRef, classNames } from "@/style/index";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
@@ -380,7 +379,6 @@ export function Search(
       return [
         Input({
           ...rest,
-          type: "text",
           placeholder: computed(state_, (s) => s.searchPlaceholder),
           value: computed(state_, (s) => s.searchKeyword),
           onInput(e: Event) {

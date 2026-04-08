@@ -666,9 +666,6 @@ importers:
 
   packages/timeless-canvas:
     dependencies:
-      '@timeless/primitive':
-        specifier: workspace:*
-        version: link:../primitive
       '@timeless/svg':
         specifier: workspace:*
         version: link:../svg

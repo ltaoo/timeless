@@ -44,9 +44,9 @@ export function DOMSelect(props: {
       $elm.style.cssText = cssText;
       // canvas.setStyleText($elm, cssText);
     },
-    setStyleSets(styleSets: string[]) {
-      // canvas.setClassName($elm, styleSets.join(" "));
-      $elm.className = styleSets.join(" ");
+    setStyleSet(styleSet: string[]) {
+      // canvas.setClassName($elm, styleSet.join(" "));
+      $elm.className = styleSet.join(" ");
     },
     setupEventListener(events: any) {
       if (events.onClick) {
@@ -158,11 +158,11 @@ export function DOMSelect(props: {
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }
-      // if (elm.props?.styleSets) {
-      //   if (isRef(elm.props.styleSets)) {
-      //     methods.setStyleSets(elm.props.styleSets.value);
+      // if (elm.props?.styleSet) {
+      //   if (isRef(elm.props.styleSet)) {
+      //     methods.setStyleSet(elm.props.styleSet.value);
       //   } else {
-      //     methods.setStyleSets(elm.props.styleSets);
+      //     methods.setStyleSet(elm.props.styleSet);
       //   }
       // }
       if (elm.children) {

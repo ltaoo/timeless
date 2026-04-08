@@ -61,14 +61,14 @@ export interface RefObject<T> extends Ref<T> {
   update(key: keyof T, fn: (current: T[keyof T]) => T[keyof T]): void;
 }
 
-export interface RefObjectNullable<T> extends Ref<T | null> {
+export interface RefObjectNullable<T> extends Ref<T> {
   set(
     key: keyof T,
     item: T[keyof T] | ((current: T[keyof T]) => T[keyof T]),
   ): void;
   get(key: keyof T): unknown;
   delete(key: keyof T): void;
-  as(nextObj: T | ((cur: T | null) => T)): void;
+  as(v: T | ((cur: T | null) => T) | null): void;
   refresh(): void;
   has(key: keyof T): boolean;
   keys(): (keyof T)[];
@@ -156,6 +156,7 @@ export function refObject<T extends Record<string, any>>(
         if (has(vv)) {
           return get(vv);
         }
+        // @ts-ignore
         _inner[key] = refObject(vv);
         return _inner[key] ?? null;
       }

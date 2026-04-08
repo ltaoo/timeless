@@ -10,7 +10,6 @@
     "declaration": true,
     "declarationDir": "./dist",
     "outDir": "./dist",
-    "preserveSymlinks": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

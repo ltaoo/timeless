@@ -1,10 +1,9 @@
 import { refobj, computed, isRef } from "@timeless/reactive";
 import { PopperCore } from "@timeless/ui";
 
-import { isStyleRef } from "@/vnode/style-names";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-
+import { isStyleRef } from "@/style/index";
 import { getHost } from "@/host";
 
 export function Arrow(

@@ -1,24 +1,22 @@
-import { DerivedRef, Ref, isRef } from "@timeless/reactive";
+import { Ref, isRef } from "@timeless/reactive";
 
 import { MountedEvent } from "@/event";
 import { ViewProps } from "@/content/view";
 
-export interface CheckboxProps {
+export interface RadioProps {
   id?: string;
   style?: ViewProps["style"];
   attributes?: ViewProps["attributes"];
   dataset?: ViewProps["dataset"];
-  checked?: boolean | DerivedRef<boolean> | Ref<boolean>;
-  disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
-  indeterminate?: boolean | DerivedRef<boolean> | Ref<boolean>;
-  onChange?: (event: MouseEvent) => void;
-  onClick?: (event: Event) => void;
+  checked?: boolean | Ref<boolean>;
+  indeterminate?: boolean | Ref<boolean>;
+  onChange?: (event: Event) => void;
   onMounted?: ViewProps["onMounted"];
   beforeUnmounted?: ViewProps["beforeUnmounted"];
   onUnmounted?: ViewProps["onUnmounted"];
 }
 
-export function Checkbox(props: CheckboxProps) {
+export function Radio(props: RadioProps) {
   const { checked, indeterminate, onMounted, onChange, ...rest } = props;
 
   let $elm: any = null;
@@ -71,7 +69,7 @@ export function Checkbox(props: CheckboxProps) {
   //   },
   // });
   return {
-    t: "checkbox",
+    t: "radio",
     get $elm() {
       return $elm;
     },

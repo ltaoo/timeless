@@ -32,8 +32,8 @@ export function DOMImg(props: {
       const cssText = viewStyleToCssText(style);
       $elm.style.cssText = cssText;
     },
-    setStyleSets(styleSets: string[]) {
-      $elm.className = styleSets.join(" ");
+    setStyleSet(styleSet: string[]) {
+      $elm.className = styleSet.join(" ");
     },
     setupEventListener(events: any) {
       if (events.onClick) {
@@ -118,11 +118,12 @@ export function DOMImg(props: {
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }
-      if (elm.props?.styleSets) {
-        if (isRef(elm.props.styleSets)) {
-          methods.setStyleSets(elm.props.styleSets.value);
+      const set = elm.props?.styleSet;
+      if (set) {
+        if (isRef(set)) {
+          methods.setStyleSet(set.value);
         } else {
-          methods.setStyleSets(elm.props.styleSets);
+          methods.setStyleSet(set);
         }
       }
       if (elm.events) {

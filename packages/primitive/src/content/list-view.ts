@@ -1,13 +1,5 @@
-import { Ref, Signal, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, Signal, isRef } from "@timeless/reactive";
 
-import { Txt } from "@/content/text";
-import {
-  isElement,
-  TimelessElement,
-  ViewAttributes,
-  ViewChildren,
-  ViewPropValue,
-} from "@/content/type";
 import {
   ViewStyleProperties,
   ViewStyle,
@@ -15,15 +7,26 @@ import {
   ClassNameRef,
 } from "@/style/index";
 import { MountedEvent } from "@/event/index";
+import { ListenerManager } from "@/util/listener";
 
-export interface ButtonProps {
+import { Txt } from "./text";
+import {
+  isElement,
+  TimelessElement,
+  ViewAttributes,
+  ViewChildren,
+} from "./type";
+
+export interface ListViewProps {
   key?: string | number;
-  as?: string;
   style?: ViewStyle;
-  class?: string | Ref<string> | ClassNameRef;
+  class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
   draggable?: boolean;
   attributes?: ViewAttributes;
-  dataset?: Record<string, ViewPropValue | Ref<ViewPropValue>>;
+  dataset?: Record<
+    string,
+    string | number | DerivedRef<string> | Ref<string | number>
+  >;
   onMounted?(event: MountedEvent): void | (() => void);
   beforeUnmounted?(): void;
   onUnmounted?(): void;
@@ -47,7 +50,7 @@ export interface ButtonProps {
   onAnimationEnd?: (e: AnimationEvent) => void;
 }
 
-export function Button(props: ButtonProps = {}, children?: ViewChildren) {
+export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
   const {
     style,
     class: cls,
@@ -76,8 +79,8 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
     onDrop,
     onAnimationEnd,
   } = props;
-  let onMountedCleanup: (() => void) | undefined;
-  const listenerCleanups: (() => void)[] = [];
+
+  const manager$ = ListenerManager();
 
   let $elm: any = null;
 
@@ -138,7 +141,7 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
 
   const methods = {
     // Helper: normalize children (convert functions, wrap refs)
-    normalize_children(children?: ViewChildren) {
+    setup_children(children?: ViewChildren) {
       if (!children) {
         return;
       }
@@ -151,16 +154,16 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
             state.children[i] = r;
             return;
           }
+          if (isElement(child)) {
+            state.children[i] = child;
+            return;
+          }
           if (isRef(child)) {
             state.children[i] = Txt(child);
             return;
           }
-          if (typeof child === "string") {
+          if (child) {
             state.children[i] = Txt(String(child));
-            return;
-          }
-          if (isElement(child)) {
-            state.children[i] = child;
             return;
           }
           // state.children[i] = null;
@@ -199,7 +202,7 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
     ) {
       // host.addEventListener(target, type, handler, options);
       target.addEventListener(type, handler, options);
-      listenerCleanups.push(() => {
+      manager$.push(() => {
         // host.removeEventListener(target, type, handler, options);
         target.removeEventListener(type, handler, options);
       });
@@ -488,11 +491,11 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
     handleUnmounted() {},
   };
 
-  methods.normalize_children(children);
+  methods.setup_children(children);
   methods.setup_reactive_props_bindings();
 
   return {
-    t: "button",
+    t: "list-view",
     get $elm() {
       return $elm;
     },
@@ -503,75 +506,52 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
     children: state.children,
     props: state.props,
     events: state.events,
+    /** @deprecated */
     render() {
-      if (state.rendered) {
-        return $elm;
-      }
-      state.rendered = true;
-      // Create element if not already created
-      methods.normalize_children(children);
-      methods.setup_reactive_props_bindings();
-
-      if (onMounted) {
-        const cleanup = onMounted({ target: $elm });
-        if (typeof cleanup === "function") {
-          onMountedCleanup = cleanup;
-        }
-      }
-      for (let i = 0; i < state.children.length; i += 1) {
-        const node = state.children[i];
-        if (isElement(node)) {
-          if (node.onMounted) {
-            node.onMounted({ target: node.$elm });
-          }
-        }
-      }
       return $elm;
     },
-    hydrate(existingDom: any) {
+    hydrate(existing_dom: any) {
       if (state.rendered) {
         return $elm;
       }
       state.rendered = true;
 
-      $elm = existingDom;
-      methods.normalize_children();
+      $elm = existing_dom;
+      methods.setup_children();
       methods.setup_reactive_props_bindings();
 
       // Hydrate children recursively
       // let childDom = host.getFirstChild($elm);
-      let childDom = $elm.getFirstChild();
+      let $child = $elm.getFirstChild();
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
         if (!node) continue;
-
         if (typeof node === "string" || typeof node === "number") {
           // Skip text nodes
-          if (childDom) {
+          if ($child) {
             // childDom = host.getNextSibling(childDom);
-            childDom = childDom.getNextSibling();
+            $child = $child.getNextSibling();
           }
           continue;
         }
-
         if (isElement(node)) {
           if (typeof (node as any).hydrate === "function") {
             // 传递 $elm 作为 parentDom，即使 childDom 为 null 也要调用 hydrate
-            (node as any).hydrate(childDom, $elm);
-            if (childDom) {
+            (node as any).hydrate($child, $elm);
+            if ($child) {
               // childDom = host.getNextSibling(node.$elm || childDom);
               if (node.$elm) {
-                childDom = node.$elm.getNextSibling();
-              } else if (childDom) {
-                childDom = childDom.getNextSibling();
+                $child = node.$elm.getNextSibling();
+              } else if ($child) {
+                $child = $child.getNextSibling();
               }
             }
-          } else if (childDom) {
+          } else if ($child) {
             // Fallback: just assign $elm and setup
-            node.$elm = childDom;
+            node.$elm = $child;
             node.render();
             // childDom = host.getNextSibling(childDom);
-            childDom = childDom.getNextSibling();
+            $child = $child.getNextSibling();
           } else {
             // childDom 为 null 时，直接 render 并插入
             const result = node.render();
@@ -582,24 +562,29 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
           }
         }
       }
-
       if (onMounted) {
-        const cleanup = onMounted({ target: $elm });
-        if (typeof cleanup === "function") {
-          onMountedCleanup = cleanup;
-        }
+        manager$.push(onMounted({ target: $elm }));
       }
-
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
         if (isElement(node) && node.onMounted) {
           node.onMounted({ target: node.$elm });
         }
       }
-
       return $elm;
     },
-    onMounted: props.onMounted,
+    onMounted(event: MountedEvent) {
+      // console.log("the view mounted", event.target);
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -616,18 +601,11 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
       //   "[View] onUnmounted called, children count:",
       //   _children.length,
       // );
-      if (onMountedCleanup) {
-        // console.log("[View] calling onMounted cleanup function");
-        onMountedCleanup();
-      }
       if (props.onUnmounted) {
         // console.log("[View] calling props.onUnmounted");
         props.onUnmounted();
       }
-      for (const fn of listenerCleanups) {
-        fn();
-      }
-      listenerCleanups.length = 0;
+      manager$.clean();
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
         if (isElement(node)) {
@@ -646,7 +624,6 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
       // host.clearChildren($elm);
       $elm.clearChildren();
       // console.log("[View] onUnmounted completed");
-
       // Reset state for potential re-render (e.g., when Show toggles when back to true)
       state.rendered = false;
       $elm = null;

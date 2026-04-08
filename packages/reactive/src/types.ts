@@ -80,7 +80,7 @@ export type TimelessRefObjectNullable<T> = {
   ) => void;
   get: (key: keyof T) => unknown;
   delete: (key: keyof T) => void;
-  as: (nextObj: T | ((cur: T | null) => T)) => void;
+  as: (v: T | ((cur: T | null) => T)) => void;
   refresh: () => void;
   has: (key: keyof T) => boolean;
   keys: () => (keyof T)[];
@@ -109,6 +109,7 @@ export type TimelessRefObjectNullable<T> = {
 
 export type TimelessRefArray<T> = {
   __is_ref: true;
+  __is_ref_array: true;
   subscribe: (ctx: Subscriber) => void;
   destroy: () => void;
   value: T[];
@@ -254,17 +255,22 @@ export type TimelessRefArray<T> = {
   toArray: () => T[];
 };
 
-export type Ref<T> = {
+export type DerivedRef<T> = {
   __is_ref: true;
   subscribe: (ctx: Subscriber) => void;
   destroy: () => void;
   value: T;
-  as: (v: T) => void;
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;
 };
 
-export function isRef(v: unknown): v is Ref<unknown> {
+export type Ref<T> = DerivedRef<T> & {
+  as: (value: T | ((cur: T | null) => T)) => void;
+};
+
+export function isRef<T>(v: DerivedRef<T> | Ref<T> | T): v is DerivedRef<T>;
+export function isRef(v: unknown): v is DerivedRef<any>;
+export function isRef(v: unknown): boolean {
   if (v === null) {
     return false;
   }
@@ -275,4 +281,15 @@ export function isRef(v: unknown): v is Ref<unknown> {
     return true;
   }
   return false;
+}
+
+export function isArrayRef<T>(
+  v: T[] | TimelessRefArray<T>,
+): v is TimelessRefArray<T>;
+export function isArrayRef<T>(v: unknown): v is TimelessRefArray<T>;
+export function isArrayRef(v: unknown): boolean {
+  if (v === null || v === undefined) {
+    return false;
+  }
+  return !!(v as Record<string, unknown>).__is_ref_array;
 }

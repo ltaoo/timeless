@@ -1,23 +1,23 @@
-import { Ref, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
-import { viewStyleToCssText, isStyleRef, isClassName } from "@/style/index";
+import { viewStyleToCssText, isStyleRef, isClassNameRef } from "@/style/index";
 import { MountedEvent } from "@/event";
 
 export interface InputProps extends Omit<ViewProps, "as" | "type"> {
   id?: string;
-  value?: Ref<string>;
-  placeholder?: string | Ref<string>;
-  disabled?: boolean | Ref<boolean>;
-  readonly?: boolean | Ref<boolean>;
-  maxLength?: number | Ref<number>;
-  minLength?: number | Ref<number>;
-  pattern?: string | Ref<string>;
-  required?: boolean | Ref<boolean>;
-  autocomplete?: string | Ref<string>;
-  autocorrect?: string;
+  value?: DerivedRef<string> | Ref<string>;
+  placeholder?: string | DerivedRef<string> | Ref<string>;
+  disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
+  readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
+  maxLength?: number | DerivedRef<number> | Ref<number>;
+  minLength?: number | DerivedRef<number> | Ref<number>;
+  pattern?: string | DerivedRef<string> | Ref<string>;
+  required?: boolean | DerivedRef<boolean> | Ref<boolean>;
+  autocomplete?: boolean | DerivedRef<boolean> | Ref<boolean>;
+  autocorrect?: boolean;
   inputMode?: string;
-  name?: string | Ref<string>;
+  name?: string | DerivedRef<string> | Ref<string>;
   onInput?: (e: Event) => void;
   onChange?: (e: Event) => void;
 }
@@ -71,7 +71,6 @@ export function Input(props: InputProps = {}) {
       if ($elm) {
         $elm.setAttribute(key, value);
       }
-      // @ts-ignore
       state.props[key] = value;
     },
     applyAttr(k: string, v: any) {
@@ -186,7 +185,7 @@ export function Input(props: InputProps = {}) {
           });
           methods.setProp("maxLength", maxLength.value);
         } else {
-          methods.setProp("maxLength", maxLength as number);
+          methods.setProp("maxLength", maxLength);
         }
       }
 
@@ -321,7 +320,7 @@ export function Input(props: InputProps = {}) {
           if ($elm) {
             $elm.setStyleSet(String(cls.value));
           }
-        } else if (isClassName(cls)) {
+        } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
               // host.setClassName(
@@ -419,12 +418,6 @@ export function Input(props: InputProps = {}) {
       // console.log("[]input onMounted", $elm);
       // $elm = event.target;
       const handler = function (event: Event) {
-        // @ts-ignore
-        const next_value = event.target?.value || "";
-        if (value && !value.isSame(next_value)) {
-          value.as(next_value);
-        }
-        // state.value = value;
         if (onInput) {
           onInput(event);
         }

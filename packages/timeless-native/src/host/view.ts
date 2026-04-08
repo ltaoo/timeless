@@ -2,7 +2,7 @@ import {
   isElement,
   TimelessElement,
   ViewStyleProperties,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 
 import { NativeView } from "./type";
 

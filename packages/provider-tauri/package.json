@@ -1,6 +1,6 @@
 {
   "name": "@timeless/provider-tauri",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "main": "dist/index.js",
   "module": "dist/timeless.tauri.esm.js",
   "types": "dist/index.d.ts",

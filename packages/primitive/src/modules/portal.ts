@@ -30,7 +30,6 @@ export function Portal(props: ViewProps & {}, children?: ViewChildren) {
             return;
           }
           if (isRef(child)) {
-            // @ts-ignore
             state.children[i] = Txt(child);
             return;
           }

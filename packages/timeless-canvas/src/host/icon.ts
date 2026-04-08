@@ -1,4 +1,4 @@
-import { TimelessElement, ViewStyleProperties } from "@timeless/primitive";
+import { TimelessElement, ViewStyleProperties } from "@timeless/timeless";
 
 import { viewStyleToCssText } from "./style";
 import { CanvasHostNode } from "./type";
@@ -27,8 +27,8 @@ export function CanvasIcon(props: {
       const cssText = viewStyleToCssText(style);
       canvas.setStyleText($elm, cssText);
     },
-    setStyleSets(styleSets: string[]) {
-      canvas.setClassName($elm, styleSets.join(" "));
+    setStyleSet(styleSet: string[]) {
+      canvas.setClassName($elm, styleSet.join(" "));
     },
     setupEventListener(events: any) {
       if (events.onClick) {

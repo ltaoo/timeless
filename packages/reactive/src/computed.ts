@@ -2,14 +2,19 @@ import { get, set } from "./registry";
 import { ref } from "./ref";
 import { refArray } from "./reactive-array";
 import { refObject } from "./reactive-object";
-import { Subscriber, Ref, isRef } from "./types";
+import { Subscriber, Ref, DerivedRef, isRef } from "./types";
 
-export function computed<T, R>(deps: Ref<T>, fn: (val: T) => R): Ref<R>;
-export function computed<T extends object, R>(deps: T, fn: (val: T) => R): Ref<R>;
-export function computed<T = any>(
-  deps: any,
-  fn: (t: any) => T,
-): Ref<T> {
+type RefValue<R> = R extends { __is_ref: true; value: infer T } ? T : R;
+
+export function computed<D extends { __is_ref: true; value: any }, R>(
+  deps: D,
+  fn: (val: RefValue<D>) => R,
+): DerivedRef<R>;
+export function computed<T extends object, R>(
+  deps: T,
+  fn: (val: T) => R,
+): DerivedRef<R>;
+export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
   // const dep = global_refs.get(deps);
   // if (dep) {
   //   return dep;
@@ -43,7 +48,7 @@ export function computed<T = any>(
   //     return _v;
   //   },
   // };
-  const _computed_ref: Ref<any> = (() => {
+  const _computed_ref: DerivedRef<any> = (() => {
     const existing = get(deps);
     if (existing) {
       return existing;

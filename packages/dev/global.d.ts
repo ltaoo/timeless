@@ -190,10 +190,12 @@ declare module "packages/reactive/src/types" {
         subscribe: (ctx: Subscriber) => void;
         destroy: () => void;
         value: T;
+        as: (v: T) => void;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
     };
-    export function isRef(v: unknown): v is Ref<unknown>;
+    export function isRef<T>(v: Ref<T> | T): v is Ref<T>;
+    export function isRef(v: unknown): v is Ref<any>;
 }
 declare module "packages/reactive/src/reactive-array" {
     import { Ref, TimelessRefArray } from "packages/reactive/src/types";
@@ -329,7 +331,7 @@ declare module "packages/reactive/src/reactive-object" {
         set(key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])): void;
         get(key: keyof T): unknown;
         delete(key: keyof T): void;
-        as(nextObj: T | ((cur: T | null) => T)): void;
+        as(v: T | ((cur: T | null) => T) | null): void;
         refresh(): void;
         has(key: keyof T): boolean;
         keys(): (keyof T)[];
@@ -405,7 +407,14 @@ declare module "packages/reactive/src/model" {
 }
 declare module "packages/reactive/src/computed" {
     import { Ref } from "packages/reactive/src/types";
-    export function computed<T, R>(deps: Ref<T>, fn: (val: T) => R): Ref<R>;
+    type RefValue<R> = R extends {
+        __is_ref: true;
+        value: infer T;
+    } ? T : R;
+    export function computed<D extends {
+        __is_ref: true;
+        value: any;
+    }, R>(deps: D, fn: (val: RefValue<D>) => R): Ref<R>;
     export function computed<T extends object, R>(deps: T, fn: (val: T) => R): Ref<R>;
 }
 declare module "packages/reactive/src/derive" {
@@ -643,23 +652,24 @@ declare module "packages/primitive/src/content/lazy-view" {
     export function isLazyElement(v: unknown): v is TimelessLazyComponent;
 }
 declare module "packages/primitive/src/content/type" {
-    import { Signal } from "packages/reactive/src/index";
+    import { Ref, Signal } from "packages/reactive/src/index";
     import { ViewStyleProperties } from "@/style";
     import { MountedEvent } from "@/event";
     import { TimelessLazyComponent } from "packages/primitive/src/content/lazy-view";
     export type ViewPropValue = string | number | boolean | undefined | null;
-    export type MaybeSignal<T = ViewPropValue> = T | Signal<T>;
+    export type MaybeSignal<T = any> = T | Signal<T>;
     export type ViewAttributes = Record<string, MaybeSignal>;
     export type TimelessNormalComponent = (...args: unknown[]) => TimelessElement;
     export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
-    export interface TimelessElement {
+    export interface TimelessElement<T = any> {
         t: string;
         $elm: any;
         children?: TimelessElement[];
         props?: {
-            styleSets?: MaybeSignal<string[]>;
+            styleSet?: MaybeSignal<string[]>;
             style?: ViewStyleProperties;
         };
+        value?: T;
         events?: {
             onClick?: (e: MouseEvent) => void;
             onDoubleClick?: (e: MouseEvent) => void;
@@ -680,7 +690,6 @@ declare module "packages/primitive/src/content/type" {
             onDrop?: (e: DragEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
         };
-        value?: unknown;
         render(): any;
         hydrate?(existingDom: any): any;
         cleanup?: () => void;
@@ -688,8 +697,8 @@ declare module "packages/primitive/src/content/type" {
         beforeUnmounted?(): void;
         onUnmounted?(): void;
     }
-    export function isElement(v: unknown): v is TimelessElement;
-    export type ViewChildren = (TimelessElement | TimelessElement[] | (() => TimelessElement) | string | number | MaybeSignal<string | number> | null)[];
+    export function isElement(v: any): v is TimelessElement;
+    export type ViewChildren = (Ref<string | number> | TimelessElement | string | number | (() => TimelessElement) | null)[];
 }
 declare module "packages/primitive/src/content/text" {
     import { Ref } from "packages/reactive/src/index";
@@ -697,19 +706,18 @@ declare module "packages/primitive/src/content/text" {
     export function Txt(value: Ref<string | number> | string | number): TimelessElement;
 }
 declare module "packages/primitive/src/content/view" {
-    import { Signal } from "packages/reactive/src/index";
-    import { ViewStyleProperties, ViewStyle } from "@/style/index";
+    import { Ref, Signal } from "packages/reactive/src/index";
+    import { ViewStyleProperties, ViewStyle, ClassNameRef } from "@/style/index";
     import { MountedEvent } from "@/event/index";
-    import { ClassNameRef } from "@/vnode/class-names";
-    import { MaybeSignal, TimelessElement, ViewAttributes, ViewChildren, ViewPropValue } from "packages/primitive/src/content/type";
+    import { MaybeSignal, TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
     export interface ViewProps {
         key?: string | number;
         as?: string;
         style?: ViewStyle;
-        class?: MaybeSignal<string> | ClassNameRef;
+        class?: string | Ref<string> | ClassNameRef;
         draggable?: boolean;
         attributes?: ViewAttributes;
-        dataset?: Record<string, MaybeSignal<ViewPropValue>>;
+        dataset?: Record<string, MaybeSignal<string | number>>;
         onMounted?(event: MountedEvent): void | (() => void);
         beforeUnmounted?(): void;
         onUnmounted?(): void;
@@ -736,9 +744,9 @@ declare module "packages/primitive/src/content/view" {
         t: string;
         $elm: any;
         value: string;
-        children: TimelessElement[];
+        children: TimelessElement<any>[];
         props: {
-            styleSets?: string[] | Signal<string[]>;
+            styleSet?: string[] | Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -761,9 +769,10 @@ declare module "packages/primitive/src/content/view" {
             onDrop?: (e: DragEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
         }>;
+        /** @deprecated */
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -778,7 +787,7 @@ declare module "packages/primitive/src/content/fragment" {
             children: TimelessElement[];
         };
         readonly $elm: any;
-        children: TimelessElement[];
+        children: TimelessElement<any>[];
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
@@ -816,6 +825,117 @@ declare module "packages/primitive/src/content/icon" {
     };
     export function isIcon(v: any): boolean;
 }
+declare module "packages/primitive/src/content/popper" {
+    import { MountedEvent } from "@/event";
+    import { MaybeSignal, TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
+    type PopperProps = {
+        x: MaybeSignal<number>;
+        y: MaybeSignal<number>;
+        placed: MaybeSignal<boolean>;
+        onMounted?: (event: MountedEvent) => void;
+    };
+    export function Popper(props: PopperProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        children: TimelessElement<any>[];
+        props: {
+            side: "top" | "bottom" | "left" | "right";
+            placement: "start" | "end" | "middle";
+            strategy: "absolute" | "fixed";
+        };
+        readonly value: {
+            placed: boolean;
+            x: number;
+            y: number;
+            zIndex: number;
+        };
+        onMounted(event: MountedEvent): void;
+    };
+}
+declare module "packages/primitive/src/content/list-view" {
+    import { Signal } from "packages/reactive/src/index";
+    import { ViewStyleProperties, ViewStyle, ClassNameRef } from "@/style/index";
+    import { MountedEvent } from "@/event/index";
+    import { MaybeSignal, TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
+    export interface ListViewProps {
+        key?: string | number;
+        style?: ViewStyle;
+        class?: MaybeSignal<string> | ClassNameRef;
+        draggable?: boolean;
+        attributes?: ViewAttributes;
+        dataset?: Record<string, MaybeSignal<string | number>>;
+        onMounted?(event: MountedEvent): void | (() => void);
+        beforeUnmounted?(): void;
+        onUnmounted?(): void;
+        onClick?(e: MouseEvent): void;
+        onDoubleClick?(e: MouseEvent): void;
+        onLongPress?(e: PointerEvent): void;
+        onPointerDown?: (e: PointerEvent) => void;
+        onFocus?(e: FocusEvent): void;
+        onBlur?(e: FocusEvent): void;
+        onKeyDown?: (e: KeyboardEvent) => void;
+        onContextMenu?: (e: MouseEvent) => void;
+        onMouseEnter?: (e: MouseEvent) => void;
+        onMouseLeave?: (e: MouseEvent) => void;
+        onDragStart?: (e: DragEvent) => void;
+        onDrag?: (e: DragEvent) => void;
+        onDragEnd?: (e: DragEvent) => void;
+        onDragEnter?: (e: DragEvent) => void;
+        onDragOver?: (e: DragEvent) => void;
+        onDragLeave?: (e: DragEvent) => void;
+        onDrop?: (e: DragEvent) => void;
+        onAnimationEnd?: (e: AnimationEvent) => void;
+    }
+    export function ListView(props?: ListViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        value: string;
+        children: TimelessElement<any>[];
+        props: {
+            styleSet?: string[] | Signal<string[]>;
+            style: ViewStyleProperties;
+        };
+        events: Partial<{
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        /** @deprecated */
+        render(): any;
+        hydrate(existing_dom: any): any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/modules/portal" {
+    import { ViewProps } from "@/content/view";
+    import { ViewChildren } from "@/content/type";
+    import { MountedEvent } from "@/event";
+    export function Portal(props: ViewProps & {}, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        children: TimelessElement[];
+        render(): any;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+}
 declare module "packages/primitive/src/event/index" {
     export type MouseEvent<T = any> = {
         target: T;
@@ -827,10 +947,10 @@ declare module "packages/primitive/src/event/index" {
 declare module "packages/primitive/src/input/input" {
     import { Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
+    import { MountedEvent } from "@/event";
     export interface InputProps extends Omit<ViewProps, "as" | "type"> {
-        id?: string | Ref<string>;
-        type?: string | Ref<string>;
-        value?: string | Ref<string>;
+        id?: string;
+        value?: Ref<string>;
         placeholder?: string | Ref<string>;
         disabled?: boolean | Ref<boolean>;
         readonly?: boolean | Ref<boolean>;
@@ -848,6 +968,16 @@ declare module "packages/primitive/src/input/input" {
     export function Input(props?: InputProps): {
         t: string;
         $elm: any;
+        props: Record<string, any>;
+        events: {
+            onInput: (e: Event) => void;
+            onChange: (e: Event) => void;
+            onFocus: ViewProps;
+            onBlur: ViewProps;
+            onKeyDown: ViewProps;
+        };
+        readonly value: string;
+        onMounted(event: MountedEvent): void;
         render(): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -860,6 +990,16 @@ declare module "packages/primitive/src/input/password" {
     export function PasswordInput(props?: PasswordInputProps): {
         t: string;
         $elm: any;
+        props: Record<string, any>;
+        events: {
+            onInput: (e: Event) => void;
+            onChange: (e: Event) => void;
+            onFocus: ViewProps;
+            onBlur: ViewProps;
+            onKeyDown: ViewProps;
+        };
+        readonly value: string;
+        onMounted(event: MountedEvent): void;
         render(): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -875,6 +1015,16 @@ declare module "packages/primitive/src/input/checkbox" {
     export function Checkbox(props?: NativeCheckboxProps): {
         t: string;
         $elm: any;
+        props: Record<string, any>;
+        events: {
+            onInput: (e: Event) => void;
+            onChange: (e: Event) => void;
+            onFocus: ViewProps;
+            onBlur: ViewProps;
+            onKeyDown: ViewProps;
+        };
+        readonly value: string;
+        onMounted(event: MountedEvent): void;
         render(): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -882,21 +1032,37 @@ declare module "packages/primitive/src/input/checkbox" {
 }
 declare module "packages/primitive/src/input/select" {
     import { Ref } from "packages/reactive/src/index";
+    import { TimelessElement } from "@/content/type";
     import { ViewProps } from "@/content/view";
-    import { ViewChildren } from "@/content/type";
-    type NativeSelectValue = string | string[];
-    export interface SelectProps extends Omit<ViewProps, "as"> {
+    import { MountedEvent } from "@/event";
+    type SelectValue = string[];
+    export interface SelectProps<T> extends Omit<ViewProps, "as"> {
         id?: string | Ref<string>;
+        key?: string;
+        each: T[] | Ref<T[]>;
+        render: (item: T, idx: Ref<number>) => TimelessElement | (() => TimelessElement) | null;
         name?: string | Ref<string>;
+        placeholder?: string | Ref<string>;
         disabled?: boolean | Ref<boolean>;
+        readonly?: boolean | Ref<boolean>;
         required?: boolean | Ref<boolean>;
         multiple?: boolean | Ref<boolean>;
         size?: number | Ref<number>;
-        value?: NativeSelectValue | Ref<NativeSelectValue>;
+        value?: Ref<SelectValue>;
         onChange?: (e: Event) => void;
         onInput?: (e: Event) => void;
     }
-    export function Select(props?: SelectProps, children?: ViewChildren): any;
+    export function Select<T>(props: SelectProps<T>): {
+        t: string;
+        $elm: any;
+        props: {};
+        readonly value: string;
+        children: any;
+        onMounted(event: MountedEvent): void;
+        render(): any;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/primitive/src/input/slider" {
     import { Ref } from "packages/reactive/src/index";
@@ -911,6 +1077,16 @@ declare module "packages/primitive/src/input/slider" {
     export function Slider(props?: SliderProps): {
         t: string;
         $elm: any;
+        props: Record<string, any>;
+        events: {
+            onInput: (e: Event) => void;
+            onChange: (e: Event) => void;
+            onFocus: ViewProps;
+            onBlur: ViewProps;
+            onKeyDown: ViewProps;
+        };
+        readonly value: string;
+        onMounted(event: MountedEvent): void;
         render(): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -928,6 +1104,16 @@ declare module "packages/primitive/src/input/file-input" {
     export function FileSelect(props?: FileSelectProps): {
         t: string;
         $elm: any;
+        props: Record<string, any>;
+        events: {
+            onInput: (e: Event) => void;
+            onChange: (e: Event) => void;
+            onFocus: ViewProps;
+            onBlur: ViewProps;
+            onKeyDown: ViewProps;
+        };
+        readonly value: string;
+        onMounted(event: MountedEvent): void;
         render(): any;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -935,8 +1121,7 @@ declare module "packages/primitive/src/input/file-input" {
 }
 declare module "packages/primitive/src/content/svg" {
     import { Ref } from "packages/reactive/src/index";
-    import { ViewStyle } from "@/style/index";
-    import { ClassNameRef } from "@/vnode/class-names";
+    import { ViewStyle, ClassNameRef } from "@/style/index";
     import { MountedEvent } from "@/event/index";
     type AttrValue = string | number | Ref<string> | Ref<number>;
     /** Props shared by all SVG elements (lifecycle, events, style, class) */
@@ -1299,7 +1484,7 @@ declare module "packages/primitive/src/content/img" {
         props: {
             src: string | null;
             style: ViewStyleProperties;
-            styleSets: string[];
+            styleSet: string[];
         };
         render(): any;
         beforeUnmounted(): void;
@@ -1337,14 +1522,74 @@ declare module "packages/primitive/src/interaction/link" {
     export type NativeLinkTarget = "_self" | "_blank" | "_parent" | "_top" | (string & {});
     export function Link(props?: LinkProps, children?: ViewChildren): any;
 }
-declare module "packages/primitive/src/modules/portal" {
-    import { ViewProps } from "@/content/view";
-    import { ViewChildren } from "@/content/type";
-    export function Portal(props: ViewProps & {}, children: ViewChildren): {
+declare module "packages/primitive/src/interaction/button" {
+    import { Signal } from "packages/reactive/src/index";
+    import { ViewStyleProperties, ViewStyle, ClassNameRef } from "@/style/index";
+    import { MountedEvent } from "@/event/index";
+    import { MaybeSignal, ViewAttributes, ViewChildren, ViewPropValue } from "@/content/type";
+    export interface ButtonProps {
+        key?: string | number;
+        as?: string;
+        style?: ViewStyle;
+        class?: MaybeSignal<string> | ClassNameRef;
+        draggable?: boolean;
+        attributes?: ViewAttributes;
+        dataset?: Record<string, MaybeSignal<ViewPropValue>>;
+        onMounted?(event: MountedEvent): void | (() => void);
+        beforeUnmounted?(): void;
+        onUnmounted?(): void;
+        onClick?(e: MouseEvent): void;
+        onDoubleClick?(e: MouseEvent): void;
+        onLongPress?(e: PointerEvent): void;
+        onPointerDown?: (e: PointerEvent) => void;
+        onFocus?(e: FocusEvent): void;
+        onBlur?(e: FocusEvent): void;
+        onKeyDown?: (e: KeyboardEvent) => void;
+        onContextMenu?: (e: MouseEvent) => void;
+        onMouseEnter?: (e: MouseEvent) => void;
+        onMouseLeave?: (e: MouseEvent) => void;
+        onDragStart?: (e: DragEvent) => void;
+        onDrag?: (e: DragEvent) => void;
+        onDragEnd?: (e: DragEvent) => void;
+        onDragEnter?: (e: DragEvent) => void;
+        onDragOver?: (e: DragEvent) => void;
+        onDragLeave?: (e: DragEvent) => void;
+        onDrop?: (e: DragEvent) => void;
+        onAnimationEnd?: (e: AnimationEvent) => void;
+    }
+    export function Button(props?: ButtonProps, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        value: string;
+        children: TimelessElement[];
+        props: {
+            styleSet?: string[] | Signal<string[]>;
+            style: ViewStyleProperties;
+        };
+        events: Partial<{
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
         render(): any;
+        hydrate(existingDom: any): any;
+        onMounted: (event: MountedEvent) => void | (() => void);
+        beforeUnmounted(): void;
         onUnmounted(): void;
     };
 }
@@ -8629,7 +8874,7 @@ declare module "packages/primitive/src/modules/arrow" {
 }
 declare module "packages/primitive/src/modules/menu" {
     import { MenuCore, MenuItemCore, MenuGroupCore } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export function Root(props: ViewProps & {
         store: MenuCore;
@@ -8646,8 +8891,9 @@ declare module "packages/primitive/src/modules/menu" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Content(props: ViewProps & {
@@ -8702,7 +8948,7 @@ declare module "packages/primitive/src/modules/menu" {
 }
 declare module "packages/primitive/src/modules/dropdown-menu" {
     import { DropdownMenuCore, MenuCore, MenuItemCore, MenuGroupCore } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export function Root(props: ViewProps & {
         store: MenuCore;
@@ -8719,8 +8965,9 @@ declare module "packages/primitive/src/modules/dropdown-menu" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Content(props: ViewProps & {
@@ -8757,7 +9004,7 @@ declare module "packages/primitive/src/modules/dropdown-menu" {
 }
 declare module "packages/primitive/src/modules/context-menu" {
     import { ContextMenuCore, MenuCore, MenuItemCore, MenuGroupCore } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export function Root(props: ViewProps & {
         store: MenuCore;
@@ -8770,8 +9017,9 @@ declare module "packages/primitive/src/modules/context-menu" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Content(props: ViewProps & {
@@ -8995,7 +9243,7 @@ declare module "packages/primitive/src/modules/textarea" {
 }
 declare module "packages/primitive/src/modules/select" {
     import { SelectCore } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export function Root(props: ViewProps & {
         store: SelectCore<any>;
@@ -9022,8 +9270,9 @@ declare module "packages/primitive/src/modules/select" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Content(props: ViewProps & {
@@ -9112,7 +9361,7 @@ declare module "packages/primitive/src/modules/cascader" {
 }
 declare module "packages/primitive/src/modules/tag-select" {
     import { TagSelectCore } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export function Root(props: ViewProps & {
         store: TagSelectCore<any>;
@@ -9145,8 +9394,9 @@ declare module "packages/primitive/src/modules/tag-select" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Content(props: ViewProps & {
@@ -9190,7 +9440,7 @@ declare module "packages/primitive/src/modules/tag-select" {
 }
 declare module "packages/primitive/src/modules/date-picker" {
     import { DatePickerCore } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren, TimelessElement } from "@/content/type";
     export function Root(props: ViewProps & {
         store: DatePickerCore;
@@ -9212,8 +9462,9 @@ declare module "packages/primitive/src/modules/date-picker" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Content(props: ViewProps & {
@@ -9261,7 +9512,7 @@ declare module "packages/primitive/src/modules/date-picker" {
 }
 declare module "packages/primitive/src/modules/date-range-picker" {
     import { DateRangePickerCore } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export function Root(props: ViewProps & {
         store: DateRangePickerCore;
@@ -9280,8 +9531,9 @@ declare module "packages/primitive/src/modules/date-range-picker" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Content(props: ViewProps & {
@@ -9340,6 +9592,7 @@ declare module "packages/primitive/src/modules/date-range-picker" {
 }
 declare module "packages/primitive/src/modules/time-picker" {
     import { TimePickerCore } from "packages/ui/src/index";
+    import { classNames } from "@/style/index";
     import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export function Root(props: ViewProps & {
@@ -9362,8 +9615,9 @@ declare module "packages/primitive/src/modules/time-picker" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: classNames): void;
         onUnmounted(): void;
     };
     export function Content(props: ViewProps & {
@@ -9578,7 +9832,7 @@ declare module "packages/primitive/src/modules/field" {
 }
 declare module "packages/primitive/src/modules/popover" {
     import { PopoverCore, Align, Side } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export type PopoverProps = Partial<{
         align: Align;
@@ -9596,8 +9850,9 @@ declare module "packages/primitive/src/modules/popover" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Close(props: ViewProps & {
@@ -9606,7 +9861,7 @@ declare module "packages/primitive/src/modules/popover" {
 }
 declare module "packages/primitive/src/modules/popconfirm" {
     import { PopconfirmCore } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export function Root(props: ViewProps, children?: ViewChildren): any;
     export function Content(props: ViewProps & {
@@ -9620,8 +9875,9 @@ declare module "packages/primitive/src/modules/popconfirm" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Confirm(props: ViewProps & {
@@ -9636,7 +9892,7 @@ declare module "packages/primitive/src/modules/popconfirm" {
 }
 declare module "packages/primitive/src/modules/tooltip" {
     import { TooltipCore, Align, Side } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export type TooltipProps = Partial<{
         align: Align;
@@ -9656,22 +9912,24 @@ declare module "packages/primitive/src/modules/tooltip" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
 }
 declare module "packages/primitive/src/modules/sheet" {
     import { DialogCore } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export function Root(props: ViewProps & {
         store: DialogCore;
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Overlay(props: ViewProps & {
@@ -9696,15 +9954,16 @@ declare module "packages/primitive/src/modules/sheet" {
 }
 declare module "packages/primitive/src/modules/dialog" {
     import { DialogCore } from "packages/ui/src/index";
-    import { ViewProps } from "@/content/view";
+    import { View, ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export function Root(props: ViewProps & {
         store: DialogCore;
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: View): void;
         onUnmounted(): void;
     };
     export function Overlay(props: ViewProps & {
@@ -9744,8 +10003,9 @@ declare module "packages/primitive/src/modules/toast" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: ExternalToast): void;
         onUnmounted(): void;
     };
     export function Mask(props: ViewProps & {
@@ -11457,23 +11717,24 @@ declare module "packages/primitive/src/modules/standard-sub-views" {
     }): any;
 }
 declare module "packages/primitive/src/style/index" {
-    import { Ref, RefObject, Subscriber, Signal } from "packages/reactive/src/index";
+    import { Ref, Subscriber, Signal } from "packages/reactive/src/index";
     type ViewStylePropValue = Signal<string | number | boolean | null | undefined> | string | number | boolean | undefined | null;
     export type ViewStyleProperties = {
         [k: string]: ViewStylePropValue;
     };
-    export type ViewStyle = Ref<ViewStyleProperties> | RefObject<ViewStyleProperties> | ViewStyleProperties;
+    export type ViewStyle = ViewStyleProperties | Ref<ViewStyleProperties>;
     export type ViewStyleInput = ViewStyle;
     export function viewStyleToCssText(style: ViewStyleInput): string;
     export type ClassNameRef = {
         __cn_ref: true;
         subscribe(ctx: Subscriber): void;
+        as(v: string): void;
         del(v: string): void;
         add(v: string): void;
         append(c: string): void;
         toString(): string;
     };
-    export function isClassName(v: unknown): v is ClassNameRef;
+    export function isClassNameRef(v: any): v is ClassNameRef;
     export function classNames(items: (string | Ref<string> | ClassNameRef | undefined)[]): ClassNameRef;
     export function join(v: (string | Signal<string>)[]): Signal<string>;
     export type StyleObject = Record<string, any>;
@@ -11484,7 +11745,7 @@ declare module "packages/primitive/src/style/index" {
         toString(): string;
     }
     export function isStyleRef(v: any): v is StyleRef;
-    export function styleNames(items: (StyleObject | Ref<StyleRef | StyleObject | undefined> | StyleRef | undefined)[]): Ref<StyleObject>;
+    export function styleNames(items: (ViewStyleProperties | Ref<StyleRef | ViewStyleProperties> | StyleRef | undefined)[]): Ref<ViewStyleProperties>;
 }
 declare module "packages/primitive/src/util/env" {
     import { isBrowser } from "@/host";
@@ -11552,6 +11813,23 @@ declare module "packages/primitive/src/util/reactive-data" {
 declare module "packages/primitive/src/util/h" {
     import { TimelessElement, ViewChildren } from "@/content/type";
     export function h<P, R extends TimelessElement>(component: (props: P, children?: any) => R, props: P, children?: ViewChildren): () => R;
+}
+declare module "packages/primitive/src/interaction/dismissable" {
+    type Box = {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
+    export function DismissableLayer(): {
+        addIgnore(box: Box): void;
+        /** 坐标点是否在 boxes 中，即 是否点击了 boxes 内部 */
+        isBingo(pos: {
+            x: number;
+            y: number;
+        }): boolean;
+        clear(): void;
+    };
 }
 declare module "packages/primitive/src/vnode/types" {
     export type VNodeKind = "element" | "text" | "fragment";
@@ -11869,6 +12147,9 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/content/html";
     export * from "packages/primitive/src/content/text";
     export * from "packages/primitive/src/content/icon";
+    export * from "packages/primitive/src/content/popper";
+    export * from "packages/primitive/src/content/list-view";
+    export * from "packages/primitive/src/modules/portal";
     export * from "packages/primitive/src/content/lazy-view";
     export * from "packages/primitive/src/content/type";
     export * from "packages/primitive/src/event/index";
@@ -11883,7 +12164,7 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/content/img";
     export * from "packages/primitive/src/content/label";
     export * from "packages/primitive/src/interaction/link";
-    export * from "packages/primitive/src/modules/portal";
+    export * from "packages/primitive/src/interaction/button";
     export * from "packages/primitive/src/modules/presence";
     export * from "packages/primitive/src/modules/transition";
     export * as PopperPrimitive from "packages/primitive/src/modules/popper";
@@ -11943,11 +12224,14 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/util/lazy";
     export * from "packages/primitive/src/util/reactive-data";
     export * from "packages/primitive/src/util/h";
+    export * from "packages/primitive/src/interaction/dismissable";
     export * from "packages/primitive/src/host/index";
     export * as VNode from "packages/primitive/src/vnode/index";
 }
 declare module "packages/timeless/src/index" {
     export * from "packages/primitive/src/index";
+    export { base, BaseDomain, BaseEvents, Result, BizError, applyMixins, } from "packages/base/src/index";
+    export type { Handler, EventType } from "packages/base/src/index";
     export * from "packages/base/src/index";
     export * as reactive from "packages/reactive/src/index";
     export * as utils from "packages/utils/src/index";
@@ -12557,9 +12841,9 @@ declare module "packages/shadcn/src/modules/label" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -12584,7 +12868,7 @@ declare module "packages/shadcn/src/modules/label" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -12617,9 +12901,9 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -12644,7 +12928,7 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -12674,9 +12958,9 @@ declare module "packages/shadcn/src/modules/radio" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -12701,7 +12985,7 @@ declare module "packages/shadcn/src/modules/radio" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -12816,8 +13100,9 @@ declare module "packages/shadcn/src/modules/toast" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: MountedEvent): void;
         onUnmounted(): void;
     };
 }
@@ -12874,8 +13159,9 @@ declare module "packages/shadcn/src/modules/dialog" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: MountedEvent): void;
         onUnmounted(): void;
     };
 }
@@ -12888,9 +13174,9 @@ declare module "packages/shadcn/src/modules/menu" {
         t: string;
         $elm: any;
         value: string;
-        children: TimelessElement[];
+        children: TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -12915,7 +13201,7 @@ declare module "packages/shadcn/src/modules/menu" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -12932,7 +13218,7 @@ declare module "packages/shadcn/src/modules/dropdown-menu" {
             children: TimelessElement[];
         };
         readonly $elm: any;
-        children: TimelessElement[];
+        children: TimelessElement<any>[];
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
@@ -12951,7 +13237,7 @@ declare module "packages/shadcn/src/modules/context-menu" {
             children: TimelessElement[];
         };
         readonly $elm: any;
-        children: TimelessElement[];
+        children: TimelessElement<any>[];
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
@@ -13038,9 +13324,9 @@ declare module "packages/shadcn/src/modules/scroll-area" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13065,7 +13351,7 @@ declare module "packages/shadcn/src/modules/scroll-area" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13079,8 +13365,9 @@ declare module "packages/shadcn/src/modules/sheet" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        cleanup: () => void;
+        children: TimelessElement[];
         render(): any;
+        onMounted(event: MountedEvent): void;
         onUnmounted(): void;
     };
 }
@@ -13089,9 +13376,9 @@ declare module "packages/shadcn/src/modules/aspect-ratio" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13116,7 +13403,7 @@ declare module "packages/shadcn/src/modules/aspect-ratio" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13139,9 +13426,9 @@ declare module "packages/shadcn/src/modules/kbd" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13166,7 +13453,7 @@ declare module "packages/shadcn/src/modules/kbd" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13174,9 +13461,9 @@ declare module "packages/shadcn/src/modules/kbd" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13201,7 +13488,7 @@ declare module "packages/shadcn/src/modules/kbd" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13229,9 +13516,9 @@ declare module "packages/shadcn/src/modules/field" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13256,7 +13543,7 @@ declare module "packages/shadcn/src/modules/field" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13264,9 +13551,9 @@ declare module "packages/shadcn/src/modules/field" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13291,7 +13578,7 @@ declare module "packages/shadcn/src/modules/field" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13299,9 +13586,9 @@ declare module "packages/shadcn/src/modules/field" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13326,7 +13613,7 @@ declare module "packages/shadcn/src/modules/field" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13334,9 +13621,9 @@ declare module "packages/shadcn/src/modules/field" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13361,7 +13648,7 @@ declare module "packages/shadcn/src/modules/field" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13382,9 +13669,9 @@ declare module "packages/shadcn/src/modules/field" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13409,7 +13696,7 @@ declare module "packages/shadcn/src/modules/field" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13417,9 +13704,9 @@ declare module "packages/shadcn/src/modules/field" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13444,7 +13731,7 @@ declare module "packages/shadcn/src/modules/field" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13457,9 +13744,9 @@ declare module "packages/shadcn/src/modules/field" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13484,7 +13771,7 @@ declare module "packages/shadcn/src/modules/field" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13524,9 +13811,9 @@ declare module "packages/shadcn/src/modules/history-panel" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13551,7 +13838,7 @@ declare module "packages/shadcn/src/modules/history-panel" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13611,9 +13898,9 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13638,7 +13925,7 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13648,9 +13935,9 @@ declare module "packages/shadcn/src/modules/sonner" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13675,7 +13962,7 @@ declare module "packages/shadcn/src/modules/sonner" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13691,9 +13978,9 @@ declare module "packages/shadcn/src/modules/affix" {
         t: string;
         $elm: any;
         value: string;
-        children: import("@timeless/primitive").TimelessElement[];
+        children: import("@timeless/primitive").TimelessElement<any>[];
         props: {
-            styleSets?: string[] | import("@timeless/primitive").Signal<string[]>;
+            styleSet?: string[] | import("@timeless/primitive").Signal<string[]>;
             style: ViewStyleProperties;
         };
         events: Partial<{
@@ -13718,7 +14005,7 @@ declare module "packages/shadcn/src/modules/affix" {
         }>;
         render(): any;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13824,6 +14111,7 @@ declare const DatePickerPrimitive: typeof import("@timeless/timeless").DatePicke
 declare const DateRangePickerPrimitive: typeof import("@timeless/timeless").DateRangePickerPrimitive;
 declare const Defs: typeof import("@timeless/timeless").Defs;
 declare const DialogPrimitive: typeof import("@timeless/timeless").DialogPrimitive;
+declare const DismissableLayer: typeof import("@timeless/timeless").DismissableLayer;
 declare const DropdownMenuPrimitive: typeof import("@timeless/timeless").DropdownMenuPrimitive;
 declare const Ellipse: typeof import("@timeless/timeless").Ellipse;
 declare const FieldPrimitive: typeof import("@timeless/timeless").FieldPrimitive;
@@ -13844,6 +14132,7 @@ declare const LabelPrimitive: typeof import("@timeless/timeless").LabelPrimitive
 declare const LazyView: typeof import("@timeless/timeless").LazyView;
 declare const Line: typeof import("@timeless/timeless").Line;
 declare const LinearGradient: typeof import("@timeless/timeless").LinearGradient;
+declare const ListView: typeof import("@timeless/timeless").ListView;
 declare const Mask: typeof import("@timeless/timeless").Mask;
 declare const Match: typeof import("@timeless/timeless").Match;
 declare const MenuPrimitive: typeof import("@timeless/timeless").MenuPrimitive;
@@ -13858,6 +14147,7 @@ declare const Polygon: typeof import("@timeless/timeless").Polygon;
 declare const Polyline: typeof import("@timeless/timeless").Polyline;
 declare const PopconfirmPrimitive: typeof import("@timeless/timeless").PopconfirmPrimitive;
 declare const PopoverPrimitive: typeof import("@timeless/timeless").PopoverPrimitive;
+declare const Popper: typeof import("@timeless/timeless").Popper;
 declare const PopperPrimitive: typeof import("@timeless/timeless").PopperPrimitive;
 declare const Portal: typeof import("@timeless/timeless").Portal;
 declare const Presence: typeof import("@timeless/timeless").Presence;
@@ -13918,7 +14208,7 @@ declare const getarr: typeof import("@timeless/timeless").getarr;
 declare const getobj: typeof import("@timeless/timeless").getobj;
 declare const h: typeof import("@timeless/timeless").h;
 declare const isBrowser: typeof import("@timeless/timeless").isBrowser;
-declare const isClassName: typeof import("@timeless/timeless").isClassName;
+declare const isClassNameRef: typeof import("@timeless/timeless").isClassNameRef;
 declare const isElement: typeof import("@timeless/timeless").isElement;
 declare const isFragment: typeof import("@timeless/timeless").isFragment;
 declare const isIcon: typeof import("@timeless/timeless").isIcon;

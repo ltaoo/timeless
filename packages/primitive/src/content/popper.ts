@@ -1,14 +1,14 @@
-import { isRef } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { MountedEvent } from "@/event";
 
-import { isElement, MaybeSignal, TimelessElement, ViewChildren } from "./type";
+import { isElement, TimelessElement, ViewChildren } from "./type";
 import { Txt } from "./text";
 
 type PopperProps = {
-  x: MaybeSignal<number>;
-  y: MaybeSignal<number>;
-  placed: MaybeSignal<boolean>;
+  x: number | DerivedRef<number> | Ref<number>;
+  y: number | DerivedRef<number> | Ref<number>;
+  placed: boolean | DerivedRef<boolean> | Ref<boolean>;
   onMounted?: (event: MountedEvent) => void;
 };
 type PopperState = {
@@ -56,7 +56,6 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
             return;
           }
           if (isRef(child)) {
-            // @ts-ignore
             state.children[i] = Txt(child);
             return;
           }

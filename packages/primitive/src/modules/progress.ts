@@ -1,10 +1,9 @@
 import { ref, computed, Ref, isRef } from "@timeless/reactive";
 import { ProgressCore } from "@timeless/ui";
 
-import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
-import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
+import { isStyleRef, styleNames } from "@/style/index";
 
 export function Root(
   props: ViewProps & {

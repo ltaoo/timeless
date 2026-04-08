@@ -5,22 +5,20 @@ import {
   registryGet,
   registrySet,
   computed,
+  DerivedRef,
 } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
-import { ViewChildren, TimelessElement, isElement } from "@/content/type";
+import { TimelessElement, isElement } from "@/content/type";
 import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
-import { getHost } from "@/host";
-// import { commitTree, isDescriptor as isVNodeDescriptor, mount } from "@/vnode";
-// import type { VNode } from "@/vnode/types";
 
 export function For<T>(
   props: ViewProps & {
     key?: string;
-    each: T[] | Ref<T[]>;
+    each: T[] | DerivedRef<T[]> | Ref<T[]>;
     render: (
       item: T,
-      idx: Ref<number>,
+      idx: DerivedRef<number>,
     ) => TimelessElement | (() => TimelessElement) | null;
   },
 ) {
@@ -36,10 +34,10 @@ export function For<T>(
   let _elements: (TimelessElement | null)[] = [];
   let _$children: (any | null)[] = [];
   let _original_items: T[] = []; // Store original item references for indexOf lookup
-  let _index_computed: Ref<number>[] = []; // Computed indexes that depend on `each`
+  let _index_computed: DerivedRef<number>[] = []; // Computed indexes that depend on `each`
 
   // Helper to create a computed index that depends on `each`
-  const createIndexComputed = (originalItem: T): Ref<number> => {
+  const createIndexComputed = (originalItem: T): DerivedRef<number> => {
     return computed(each, () => {
       // Use refarr's indexOf if available (supports registry lookup)
       if (isRef(each) && typeof (each as any).indexOf === "function") {
@@ -89,7 +87,7 @@ export function For<T>(
   };
 
   const methods = {
-    _render_item(item: T, idxComputed: Ref<number>) {
+    _render_item(item: T, idxComputed: DerivedRef<number>) {
       const rr: {
         node: null | TimelessElement;
         elm: null | any;
@@ -248,7 +246,9 @@ export function For<T>(
       );
       const new_children: (any | null)[] = new Array(new_items.length);
       const new_original_items: T[] = new Array(new_items.length);
-      const new_index_computed: Ref<number>[] = new Array(new_items.length);
+      const new_index_computed: DerivedRef<number>[] = new Array(
+        new_items.length,
+      );
 
       // 2. Index old items for O(1) lookup
       const old_map = new Map<any, number[]>();

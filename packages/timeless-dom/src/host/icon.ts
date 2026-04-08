@@ -70,8 +70,8 @@ export function DOMIcon(props: {
       const cssText = viewStyleToCssText(style);
       $elm.style.cssText = cssText;
     },
-    setStyleSets(styleSets: string[]) {
-      $elm.className = styleSets.join(" ");
+    setStyleSet(styleSet: string[]) {
+      $elm.className = styleSet.join(" ");
     },
     setupEventListener(events: any) {
       if (events.onClick) {

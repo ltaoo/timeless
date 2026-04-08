@@ -3,7 +3,7 @@ import {
   isRef,
   TimelessElement,
   ViewStyleProperties,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 
 import { viewStyleToCssText } from "./style";
 import { CanvasHostNode } from "./type";
@@ -31,8 +31,8 @@ export function CanvasView(props: {
       const cssText = viewStyleToCssText(style);
       canvas.setStyleText($elm, cssText);
     },
-    setStyleSets(styleSets: string[]) {
-      canvas.setClassName($elm, styleSets.join(" "));
+    setStyleSet(styleSet: string[]) {
+      canvas.setClassName($elm, styleSet.join(" "));
     },
     setupEventListener(events: any) {
       if (events.onClick) {
@@ -110,11 +110,11 @@ export function CanvasView(props: {
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }
-      if (elm.props?.styleSets) {
-        if (isRef(elm.props.styleSets)) {
-          methods.setStyleSets(elm.props.styleSets.value);
+      if (elm.props?.styleSet) {
+        if (isRef(elm.props.styleSet)) {
+          methods.setStyleSet(elm.props.styleSet.value);
         } else {
-          methods.setStyleSets(elm.props.styleSets);
+          methods.setStyleSet(elm.props.styleSet);
         }
       }
       if (elm.events) {

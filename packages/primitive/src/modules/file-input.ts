@@ -1,8 +1,7 @@
 import { ref, isRef } from "@timeless/reactive";
 import { FileInputCore } from "@timeless/ui";
 
-import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
-import { isStyleRef, styleNames } from "@/vnode/style-names";
+import { isStyleRef, classNames, styleNames } from "@/style/index";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { getHost } from "@/host";

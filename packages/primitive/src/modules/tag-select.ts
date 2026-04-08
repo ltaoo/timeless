@@ -1,14 +1,13 @@
 import { refobj, computed, isRef } from "@timeless/reactive";
 import { TagSelectCore } from "@timeless/ui";
 
-import { classNames } from "@/vnode/class-names";
-import { isStyleRef } from "@/vnode/style-names";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";
 import { For } from "@/reactive/for";
 import { Fragment } from "@/content/fragment";
 import { Input as NativeInput } from "@/input/input";
+import { isStyleRef, classNames } from "@/style/index";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
@@ -429,7 +428,6 @@ export function Search(
 
   return NativeInput({
     ...rest,
-    type: "text",
     placeholder,
     onInput(e: Event) {
       const target = e.target as HTMLInputElement;

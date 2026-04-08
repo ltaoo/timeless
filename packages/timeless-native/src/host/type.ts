@@ -1,5 +1,4 @@
-import { ViewStyleProperties } from "@timeless/primitive";
-import { TimelessElement } from "@timeless/primitive";
+import { TimelessElement, ViewStyleProperties } from "@timeless/timeless";
 
 export interface NativeHostNode {
   $elm: any;

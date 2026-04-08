@@ -1,13 +1,11 @@
 import { ref, refobj, isRef } from "@timeless/reactive";
 import { InputCore } from "@timeless/ui";
 
-import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
-import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { getHost } from "@/host";
+import { viewStyleToCssText, isStyleRef, classNames } from "@/style/index";
 import { safeCreateElement } from "@/util/env";
-import { viewStyleToCssText } from "@/style/index";
+import { getHost } from "@/host";
 
 type Provider = Partial<{
   provide_ui_input: (store: InputCore<any>, $input: any) => void;

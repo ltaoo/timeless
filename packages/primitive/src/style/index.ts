@@ -5,10 +5,12 @@ import {
   RefObject,
   Subscriber,
   Signal,
+  DerivedRef,
 } from "@timeless/reactive";
 
 type ViewStylePropValue =
-  | Signal<string | number | boolean | null | undefined>
+  | DerivedRef<string | number | boolean | null | undefined>
+  | Ref<string | number | boolean | null | undefined>
   | string
   | number
   | boolean
@@ -19,7 +21,10 @@ export type ViewStyleProperties = {
   [k: string]: ViewStylePropValue;
 };
 
-export type ViewStyle = ViewStyleProperties | Ref<ViewStyleProperties>;
+export type ViewStyle =
+  | ViewStyleProperties
+  | DerivedRef<ViewStyleProperties>
+  | Ref<ViewStyleProperties>;
 
 export type ViewStyleInput = ViewStyle;
 
@@ -51,20 +56,26 @@ export type ClassNameRef = {
   toString(): string;
 };
 
-export function isClassName(v: unknown): v is ClassNameRef {
-  if (v === null || v === undefined) {
-    return false;
-  }
-  if ((v as Record<string, unknown>).__cn_ref) {
-    return true;
-  }
-  return false;
+export function isClassNameRef(v: any): v is ClassNameRef {
+  return v.__cn_ref;
 }
 
 export function classNames(
-  items: (string | Ref<string> | ClassNameRef | undefined)[],
+  items: (
+    | string
+    | DerivedRef<string>
+    | Ref<string>
+    | ClassNameRef
+    | undefined
+  )[],
 ): ClassNameRef {
-  const sources: (string | Ref<string> | ClassNameRef | undefined)[] = [];
+  const sources: (
+    | string
+    | DerivedRef<string>
+    | Ref<string>
+    | ClassNameRef
+    | undefined
+  )[] = [];
   // const manualAdds = new Set<string>();
   const _deps: Subscriber[] = [];
   function notify(action: { type: string }) {
@@ -108,7 +119,7 @@ export function classNames(
           }
           return;
         }
-        if (isClassName(source)) {
+        if (isClassNameRef(source)) {
           const v = source.toString();
           if (typeof v === "string") {
             const segments = v.split(" ");
@@ -132,7 +143,7 @@ export function classNames(
     // ctx.onChange(_names);
   }
   function addSourceFromItem(
-    item: string | Ref<string> | ClassNameRef | undefined,
+    item: string | DerivedRef<string> | Ref<string> | ClassNameRef | undefined,
   ) {
     if (!item && item !== "") {
       return;
@@ -141,7 +152,7 @@ export function classNames(
       sources.push(item);
       return;
     }
-    if (isClassName(item)) {
+    if (isClassNameRef(item)) {
       sources.push(item);
       item.subscribe({
         onChange() {
@@ -287,13 +298,15 @@ function parseCssDeclarations(cssText: string, target: StyleObject) {
 export function styleNames(
   items: (
     | ViewStyleProperties
+    | DerivedRef<StyleRef | ViewStyleProperties>
     | Ref<StyleRef | ViewStyleProperties>
     | StyleRef
     | undefined
   )[],
-): Ref<ViewStyleProperties> {
+): DerivedRef<ViewStyleProperties> {
   const sources: (
     | ViewStyleProperties
+    | DerivedRef<StyleRef | ViewStyleProperties>
     | Ref<StyleRef | ViewStyleProperties>
     | StyleRef
     | undefined
@@ -415,7 +428,6 @@ export function styleNames(
     get value() {
       return compute_style();
     },
-    as(v: any) {},
     isSame(v: any) {
       // return v === this.value;
       return false;

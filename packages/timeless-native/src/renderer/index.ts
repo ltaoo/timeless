@@ -1,4 +1,4 @@
-import { type TimelessElement, isElement } from "@timeless/primitive";
+import { type TimelessElement, isElement } from "@timeless/timeless";
 
 import { NativeView, isNativeView } from "@/host/view";
 import { NativeText } from "@/host/text";

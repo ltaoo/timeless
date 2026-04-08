@@ -14,7 +14,7 @@ import {
   Match,
   // Case,
   Fragment,
-  NativeLabel,
+  Label as NativeLabel,
 } from "@timeless/primitive";
 import { SingleFieldCore } from "@timeless/ui";
 

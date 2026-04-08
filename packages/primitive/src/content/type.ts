@@ -1,4 +1,4 @@
-import { Signal } from "@timeless/reactive";
+import { DerivedRef, Ref, Signal } from "@timeless/reactive";
 
 import { ViewStyleProperties } from "@/style";
 import { MountedEvent } from "@/event";
@@ -6,8 +6,7 @@ import { MountedEvent } from "@/event";
 import { TimelessLazyComponent } from "./lazy-view";
 
 export type ViewPropValue = string | number | boolean | undefined | null;
-export type MaybeSignal<T = any> = T | Signal<T>;
-export type ViewAttributes = Record<string, MaybeSignal>;
+export type ViewAttributes = Record<string, any>;
 
 export type TimelessNormalComponent = (...args: unknown[]) => TimelessElement;
 export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
@@ -17,7 +16,7 @@ export interface TimelessElement<T = any> {
   $elm: any;
   children?: TimelessElement[];
   props?: {
-    styleSets?: MaybeSignal<string[]>;
+    styleSet?: string[] | DerivedRef<string[]> | Ref<string[]>;
     style?: ViewStyleProperties;
   };
   value?: T;
@@ -49,11 +48,10 @@ export interface TimelessElement<T = any> {
   onUnmounted?(): void;
 }
 
-export function isElement(v: unknown): v is TimelessElement {
+export function isElement(v: any): v is TimelessElement {
   if (v === null || v === undefined) {
     return false;
   }
-  // @ts-ignore
   if (v.t && v.hasOwnProperty("$elm")) {
     return true;
   }
@@ -61,11 +59,11 @@ export function isElement(v: unknown): v is TimelessElement {
 }
 
 export type ViewChildren = (
+  | DerivedRef<string | number>
+  | Ref<string | number>
   | TimelessElement
-  | TimelessElement[]
-  | (() => TimelessElement)
   | string
   | number
-  | MaybeSignal<string | number>
+  | (() => TimelessElement)
   | null
 )[];

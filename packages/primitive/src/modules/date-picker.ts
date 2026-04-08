@@ -1,16 +1,16 @@
 import { refobj, computed } from "@timeless/reactive";
 import { DatePickerCore } from "@timeless/ui";
 
-import { classNames } from "@/vnode/class-names";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren, TimelessElement } from "@/content/type";
+import { Fragment } from "@/content/fragment";
 import { For } from "@/reactive/for";
+import { classNames } from "@/style/index";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
-import { Fragment } from "@/content/fragment";
 
 export function Root(
   props: ViewProps & { store: DatePickerCore },
@@ -351,12 +351,10 @@ export function CalendarGridBody(
   return View(rest, [
     For({
       each: computed(state, (s) => s.weeks),
-      // @ts-ignore
       render(week) {
         return View({}, [
           For({
             each: computed(week, (t) => t.dates),
-            // @ts-ignore
             render(day) {
               if (renderCell) {
                 return renderCell(day);

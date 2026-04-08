@@ -1,4 +1,4 @@
-import { TimelessElement } from "@timeless/primitive";
+import { TimelessElement } from "@timeless/timeless";
 
 import { CanvasDocument } from "./draw";
 

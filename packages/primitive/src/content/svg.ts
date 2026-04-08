@@ -1,19 +1,27 @@
-import { Ref, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
 import { isElement } from "@/content/type";
 import { safeCreateElementNS, safeCreateTextNode } from "@/util/env";
-import { ViewStyle, viewStyleToCssText } from "@/style/index";
-import { isClassName, ClassNameRef } from "@/vnode/class-names";
+import {
+  ViewStyle,
+  viewStyleToCssText,
+  isClassNameRef,
+  ClassNameRef,
+} from "@/style/index";
 import { MountedEvent } from "@/event/index";
 import { getHost } from "@/host";
 
-type AttrValue = string | number | Ref<string> | Ref<number>;
+type AttrValue =
+  | string
+  | number
+  | DerivedRef<string | number>
+  | Ref<string | number>;
 
 /** Props shared by all SVG elements (lifecycle, events, style, class) */
 interface SVGBaseProps {
   style?: ViewStyle;
-  class?: string | Ref<string> | ClassNameRef;
-  dataset?: Record<string, string>;
+  class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
+  dataset?: Record<string, AttrValue>;
   id?: AttrValue;
   tabindex?: AttrValue;
   role?: string;
@@ -250,7 +258,6 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
     },
     render() {
       Object.keys(rest).forEach((k) => {
-        // @ts-ignore
         const vv = rest[k];
         if (vv) {
           if (isRef(vv)) {
@@ -266,8 +273,11 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
         }
       });
       Object.keys(dataset).forEach((k) => {
-        if (dataset && dataset[k]) {
-          host.setAttribute($elm, `data-${k}`, dataset[k]);
+        const v = dataset[k];
+        if (isRef(v)) {
+          host.setAttribute($elm, `data-${k}`, String(v.value));
+        } else {
+          host.setAttribute($elm, `data-${k}`, String(v));
         }
       });
 
@@ -281,7 +291,7 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
             },
           });
           host.setAttribute($elm, "class", String(cls.value));
-        } else if (isClassName(cls)) {
+        } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
               host.setAttribute(

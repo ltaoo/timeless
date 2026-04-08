@@ -2,7 +2,7 @@ import {
   isElement,
   TimelessElement,
   ViewStyleProperties,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 
 export interface NativeButton {
   t: "button";

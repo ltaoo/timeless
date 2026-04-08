@@ -1,6 +1,6 @@
 {
   "name": "@timeless/timeless-native",
-  "version": "0.1.0",
+  "version": "0.14.0",
   "main": "dist/index.js",
   "module": "dist/timeless.native.esm.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,6 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/timeless": "workspace:*",
-    "@timeless/primitive": "workspace:*"
+    "@timeless/timeless": "workspace:*"
   }
 }

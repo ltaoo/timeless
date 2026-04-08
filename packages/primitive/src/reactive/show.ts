@@ -1,10 +1,13 @@
-import { isRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { ViewChildren, isElement } from "@/content/type";
 import { safeCreateTextNode } from "@/util/env";
 
 export function Show(props: {
-  when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
+  when:
+    | DerivedRef<boolean | undefined | null>
+    | Ref<boolean | undefined | null>
+    | boolean;
   ok: () => ViewChildren;
   else?: () => ViewChildren;
   onMounted?: ($fg: any) => void;

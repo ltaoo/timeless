@@ -5,9 +5,10 @@ import {
   ViewChildren,
   ViewProps,
   h,
+  refobj,
+  computed,
 } from "@timeless/primitive";
 import { LoaderCircleOutlined } from "@timeless/icons";
-import { computed, ref } from "@timeless/primitive";
 import { ButtonCore } from "@timeless/ui";
 
 const VARIANTS = {
@@ -48,7 +49,7 @@ export function Button(
 ) {
   const { store, class: cls, style, prefix, ...rest } = props;
 
-  const state_ = ref(store.state);
+  const state_ = refobj(store.state);
   const events: any[] = [];
   events.push(store.onStateChange(() => state_.as(store.state)));
 

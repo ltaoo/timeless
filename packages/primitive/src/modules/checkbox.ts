@@ -5,7 +5,7 @@ import { Fragment } from "@/content/fragment";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";
-import { Input as NativeInput, InputProps } from "@/input/input";
+import { Checkbox, CheckboxProps } from "@/input/checkbox";
 
 export function Root(
   props: ViewProps & { store: CheckboxCore },
@@ -33,8 +33,8 @@ export function Box(
         store.toggle();
       },
       dataset: {
-        checked: computed(state, (d) => (d.checked ? "" : undefined)),
-        disabled: computed(state, (d) => (d.disabled ? "" : undefined)),
+        // checked: computed(state, (d) => (d.checked ? "" : undefined)),
+        // disabled: computed(state, (d) => (d.disabled ? "" : undefined)),
       },
       onMounted() {
         events.push(
@@ -93,14 +93,13 @@ export function Indicator(
 }
 
 export function Input(
-  props: InputProps & { store: CheckboxCore; id?: string },
+  props: CheckboxProps & { store: CheckboxCore; id?: string },
 ) {
   const { store, id, ...rest } = props;
   const events: any[] = [];
 
-  return NativeInput({
+  return Checkbox({
     ...rest,
-    type: "checkbox",
     id,
     style: {
       position: "absolute",
@@ -115,7 +114,7 @@ export function Input(
       store.toggle();
     },
     onMounted(event) {
-      const $elm = (event as any).target as HTMLInputElement;
+      const $elm = event.target as HTMLInputElement;
       $elm.checked = !!store.state.checked;
       events.push(
         store.onStateChange(() => {

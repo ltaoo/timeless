@@ -1,11 +1,10 @@
 import { refobj, ref, computed, isRef } from "@timeless/reactive";
 import { TooltipCore, Align, Side } from "@timeless/ui";
 
-import { ClassNameRef, classNames, isClassName } from "@/vnode/class-names";
-import { isStyleRef, styleNames } from "@/vnode/style-names";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
+import { isStyleRef } from "@/style/index";
 import { getHost } from "@/host";
 
 import { Portal as NativePortal } from "./portal";
@@ -157,7 +156,7 @@ export function Portal(
           class: className,
           style: {
             ...extraStyle,
-            display: computed(state, (t) => (t.visible ? undefined : "none")),
+            display: computed(state, (t) => (t.visible ? "block" : "none")),
           },
         },
         contentRef.value?.length ? (contentRef.value as any) : (children ?? []),

@@ -1,9 +1,9 @@
-import { Ref, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
 import { TimelessElement } from "@/content/type";
 import { View, ViewProps } from "@/content/view";
 import { MountedEvent } from "@/event";
-import { isClassName } from "@/style";
+import { isClassNameRef } from "@/style";
 import { For } from "@/reactive/for";
 
 type SelectValue = string[];
@@ -14,7 +14,7 @@ export interface SelectProps<T> extends Omit<ViewProps, "as"> {
   each: T[] | Ref<T[]>;
   render: (
     item: T,
-    idx: Ref<number>,
+    idx: DerivedRef<number>,
   ) => TimelessElement | (() => TimelessElement) | null;
   name?: string | Ref<string>;
   placeholder?: string | Ref<string>;
@@ -297,7 +297,7 @@ export function Select<T>(props: SelectProps<T>) {
           if ($elm) {
             $elm.setStyleSet(String(cls.value));
           }
-        } else if (isClassName(cls)) {
+        } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
               // host.setClassName(

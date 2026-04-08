@@ -3,8 +3,8 @@
  */
 import { isRef } from "@timeless/timeless";
 import * as ASN from "@timeless/svg/asn";
+
 import { Canvas } from "@/biz/canvas";
-import { CanvasLayer } from "@/biz/canvas/layer";
 import { connectLayer } from "@/biz/canvas/connect.web";
 
 export type BoundingRect = {
@@ -1533,11 +1533,7 @@ function executeDisplayList(
 
 const iconImageCache = new Map<string, HTMLImageElement>();
 
-function asnToSvgString(
-  node: any,
-  color?: string,
-  isRoot?: boolean,
-): string {
+function asnToSvgString(node: any, color?: string, isRoot?: boolean): string {
   if (!node || !node.tag) return "";
   const tag = node.tag;
   const attrs = node.attrs ?? {};

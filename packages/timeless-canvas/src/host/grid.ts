@@ -1,4 +1,4 @@
-import { isElement, TimelessElement, TimelessHost } from "@timeless/timeless";
+import { isElement, TimelessElement } from "@timeless/timeless";
 
 import { CanvasHostNode } from "./type";
 import { CanvasDocument } from "./draw";

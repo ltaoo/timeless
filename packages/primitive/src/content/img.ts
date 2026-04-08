@@ -1,27 +1,32 @@
-import { isRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
 import {
   viewStyleToCssText,
-  isClassName,
+  isClassNameRef,
   isStyleRef,
   ViewStyleProperties,
 } from "@/style";
 import { MountedEvent } from "@/event/index";
 
 export interface ImgProps extends Omit<ViewProps, "type" | "as"> {
-  src?: string | Ref<string>;
-  alt?: string | Ref<string>;
-  width?: number | string | Ref<number | string>;
-  height?: number | string | Ref<number | string>;
-  loading?: "lazy" | "eager" | Ref<string>;
-  decoding?: "async" | "sync" | "auto" | Ref<string>;
-  crossOrigin?: "anonymous" | "use-credentials" | "" | Ref<string>;
+  src?: string | DerivedRef<string> | Ref<string>;
+  alt?: string | DerivedRef<string> | Ref<string>;
+  width?: number | string | DerivedRef<number | string> | Ref<number | string>;
+  height?: number | string | DerivedRef<number | string> | Ref<number | string>;
+  loading?: "lazy" | "eager" | DerivedRef<string> | Ref<string>;
+  decoding?: "async" | "sync" | "auto" | DerivedRef<string> | Ref<string>;
+  crossOrigin?:
+    | "anonymous"
+    | "use-credentials"
+    | ""
+    | DerivedRef<string>
+    | Ref<string>;
   srcset?: string | Ref<string>;
   sizes?: string | Ref<string>;
   referrerPolicy?: ReferrerPolicy | Ref<string>;
-  fetchPriority?: "high" | "low" | "auto" | Ref<string>;
-  useMap?: string | Ref<string>;
+  fetchPriority?: "high" | "low" | "auto" | DerivedRef<string> | Ref<string>;
+  useMap?: string | DerivedRef<string> | Ref<string>;
   isMap?: boolean;
   onLoad?(e: Event): void;
   onError?(e: Event): void;
@@ -145,7 +150,7 @@ export function Img(props: ImgProps = {}) {
         if (typeof cls === "string") {
           // host.setClassName($elm, cls);
           // $elm.setStyleSet(cls);
-          state.props.styleSets = [cls];
+          state.props.styleSet = [cls];
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
@@ -157,8 +162,8 @@ export function Img(props: ImgProps = {}) {
           });
           // host.setClassName($elm, cls.value);
           // $elm.setStyleSet(cls.value);
-          state.props.styleSets = [cls.value];
-        } else if (isClassName(cls)) {
+          state.props.styleSet = [cls.value];
+        } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
               if ($elm) {
@@ -169,9 +174,9 @@ export function Img(props: ImgProps = {}) {
           });
           // host.setClassName($elm, cls.toString());
           // $elm.setStyleSet(cls.toString());
-          state.props.styleSets = cls.toString().split(" ");
+          state.props.styleSet = cls.toString().split(" ");
         } else {
-          state.props.styleSets = [];
+          state.props.styleSet = [];
         }
       }
       if (style) {
@@ -386,13 +391,13 @@ export function Img(props: ImgProps = {}) {
     props: {
       src: string | null;
       style: ViewStyleProperties;
-      styleSets: string[];
+      styleSet: string[];
     };
   } = {
     props: {
       src: null,
       style: {},
-      styleSets: [],
+      styleSet: [],
     },
   };
 
