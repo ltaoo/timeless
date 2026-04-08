@@ -1,5 +1,5 @@
-import { computed, ref } from "@timeless/primitive";
-import { SliderPrimitive, ViewProps } from "@timeless/primitive";
+import { computed, ref } from "@timeless/timeless";
+import { SliderPrimitive, ViewProps } from "@timeless/timeless";
 
 export function Slider(
   props: ViewProps & {

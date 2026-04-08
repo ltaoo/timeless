@@ -1,5 +1,5 @@
-import { SwitchPrimitive, ViewProps } from "@timeless/primitive";
-import { classNames } from "@timeless/primitive";
+import { SwitchPrimitive, ViewProps } from "@timeless/timeless";
+import { classNames } from "@timeless/timeless";
 import { SwitchCore } from "@timeless/ui";
 
 export function Switch(props: ViewProps & { store: SwitchCore; id?: string }) {

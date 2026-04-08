@@ -10,9 +10,11 @@ export default function FormView() {
     searchPlaceholder: "输入水果名...",
   });
 
-  const mockClient = new Timeless.HttpClientCore({});
+  const mockClient = new Timeless.kit.HttpClientCore({});
+  // @ts-ignore
   mockClient.fetch = async (options) => {
     await new Promise((r) => setTimeout(r, 400));
+    // @ts-ignore
     const url = new URL(options.url, "http://localhost");
     const keyword = (url.searchParams.get("keyword") || "").toLowerCase();
     const all = [
@@ -431,7 +433,7 @@ export default function FormView() {
               id: "checkbox_with_label1",
               store: new Timeless.ui.CheckboxCore({ checked: true }),
             }),
-            NativeLabel({ for: "checkbox_with_label1", class: "text-sm" }, [
+            Label({ for: "checkbox_with_label1", class: "text-sm" }, [
               "Accept terms and conditions",
             ]),
           ]),

@@ -29,9 +29,15 @@ export interface InputProps extends Omit<ViewProps, "as" | "type"> {
 }
 type InputState = {
   rendered: boolean;
+  name?: string;
   value: string;
+  placeholder?: string;
+  disabled?: boolean;
+  required?: boolean;
+  maxLength?: number;
+  minLength?: number;
   props: {
-    styleSet?: string[] | Signal<string[]>;
+    styleSet?: string[];
     style: ViewStyleProperties;
   };
 };
@@ -159,12 +165,15 @@ export function Input(props: InputProps = {}) {
         if (isRef(placeholder)) {
           placeholder.subscribe({
             onChange(v) {
+              state.placeholder = v as string;
               methods.setProp("placeholder", v);
             },
           });
-          methods.setProp("placeholder", placeholder.value);
+          // methods.setProp("placeholder", placeholder.value);
+          state.placeholder = placeholder.value;
         } else {
-          methods.setProp("placeholder", placeholder);
+          // methods.setProp("placeholder", placeholder);
+          state.placeholder = placeholder;
         }
       }
 
@@ -173,12 +182,15 @@ export function Input(props: InputProps = {}) {
         if (isRef(disabled)) {
           disabled.subscribe({
             onChange(v) {
+              state.disabled = v as boolean;
               methods.setProp("disabled", v);
             },
           });
-          methods.setProp("disabled", disabled.value);
+          // methods.setProp("disabled", disabled.value);
+          state.disabled = disabled.value;
         } else {
-          methods.setProp("disabled", disabled);
+          // methods.setProp("disabled", disabled);
+          state.disabled = disabled;
         }
       }
 
@@ -190,9 +202,9 @@ export function Input(props: InputProps = {}) {
               methods.setProp("readOnly", v);
             },
           });
-          methods.setProp("readOnly", readonly.value);
+          // methods.setProp("readOnly", readonly.value);
         } else {
-          methods.setProp("readOnly", readonly);
+          // methods.setProp("readOnly", readonly);
         }
       }
 
@@ -201,12 +213,15 @@ export function Input(props: InputProps = {}) {
         if (isRef(maxLength)) {
           maxLength.subscribe({
             onChange(v) {
+              state.maxLength = v as number;
               methods.setProp("maxLength", v);
             },
           });
-          methods.setProp("maxLength", maxLength.value);
+          // methods.setProp("maxLength", maxLength.value);
+          state.maxLength = maxLength.value;
         } else {
-          methods.setProp("maxLength", maxLength);
+          // methods.setProp("maxLength", maxLength);
+          state.maxLength = maxLength;
         }
       }
 
@@ -215,12 +230,15 @@ export function Input(props: InputProps = {}) {
         if (isRef(minLength)) {
           minLength.subscribe({
             onChange(v) {
+              state.minLength = v as number;
               methods.setProp("minLength", v);
             },
           });
-          methods.setProp("minLength", minLength.value);
+          state.minLength = minLength.value;
+          // methods.setProp("minLength", minLength.value);
         } else {
-          methods.setProp("minLength", minLength);
+          // methods.setProp("minLength", minLength);
+          state.minLength = minLength;
         }
       }
 
@@ -232,9 +250,9 @@ export function Input(props: InputProps = {}) {
               methods.setProp("pattern", v);
             },
           });
-          methods.setProp("pattern", pattern.value);
+          // methods.setProp("pattern", pattern.value);
         } else {
-          methods.setProp("pattern", pattern);
+          // methods.setProp("pattern", pattern);
         }
       }
 
@@ -243,12 +261,15 @@ export function Input(props: InputProps = {}) {
         if (isRef(required)) {
           required.subscribe({
             onChange(v) {
+              state.required = v as boolean;
               methods.setProp("required", v);
             },
           });
-          methods.setProp("required", required.value);
+          // methods.setProp("required", required.value);
+          state.required = required.value;
         } else {
-          methods.setProp("required", required);
+          // methods.setProp("required", required);
+          state.required = required;
         }
       }
 
@@ -260,9 +281,9 @@ export function Input(props: InputProps = {}) {
               methods.setProp("autocomplete", v);
             },
           });
-          methods.setProp("autocomplete", autocomplete.value);
+          // methods.setProp("autocomplete", autocomplete.value);
         } else {
-          methods.setProp("autocomplete", autocomplete);
+          // methods.setProp("autocomplete", autocomplete);
         }
       }
 
@@ -271,24 +292,22 @@ export function Input(props: InputProps = {}) {
         if (isRef(name)) {
           name.subscribe({
             onChange(v) {
+              state.name = v as string;
               methods.setProp("name", v);
             },
           });
-          methods.setProp("name", name.value);
+          // methods.setProp("name", name.value);
+          state.name = name.value;
         } else {
-          methods.setProp("name", name);
+          // methods.setProp("name", name);
+          state.name = name;
         }
       }
 
       // Set static attributes
       // host.setAttribute($elm, "autocorrect", autocorrect);
-      if ($elm) {
-        $elm.setAttribute("autocorrect", autocorrect);
-      }
-
-      // if (inputMode) {
-      // methods.setProp("inputMode", inputMode);
-      // state.props.inputMode = inputMode;
+      // if ($elm) {
+      //   $elm.setAttribute("autocorrect", autocorrect);
       // }
 
       if (attributes) {
@@ -318,36 +337,33 @@ export function Input(props: InputProps = {}) {
               methods.applyAttr(attrName, v);
             },
           });
-          methods.applyAttr(attrName, vv.value);
+          // methods.applyAttr(attrName, vv.value);
           return;
         }
-        methods.applyAttr(attrName, vv);
+        // methods.applyAttr(attrName, vv);
       });
 
       // Handle class
       if (cls) {
         if (typeof cls === "string") {
+          state.props.styleSet = [cls];
           // host.setClassName($elm, cls);
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v) {
               // host.setClassName($elm, String(v));
               if ($elm) {
+                state.props.styleSet = v as string[];
                 $elm.setStyleSet(v);
               }
             },
           });
           // host.setClassName($elm, String(cls.value));
-          if ($elm) {
-            $elm.setStyleSet(String(cls.value));
-          }
+          state.props.styleSet = [cls.value];
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
-              // host.setClassName(
-              //   $elm,
-              //   Array.isArray(v) ? v.join(" ") : String(v ?? ""),
-              // );
+              state.props.styleSet = v as string[];
               if ($elm) {
                 $elm.setStyleSet(
                   Array.isArray(v) ? v.join(" ") : String(v ?? ""),
@@ -355,10 +371,7 @@ export function Input(props: InputProps = {}) {
               }
             },
           });
-          // host.setClassName($elm, cls.toString());
-          if ($elm) {
-            $elm.setStyleSet(cls.toString());
-          }
+          state.props.styleSet = [cls.toString()];
         }
       }
 
@@ -369,47 +382,44 @@ export function Input(props: InputProps = {}) {
           st.subscribe({
             onChange(v) {
               // host.setStyleText($elm, viewStyleToCssText(v ?? {}));
+              state.props.style = v as any;
               if ($elm) {
                 $elm.setStyleSet(v);
               }
             },
           });
           // host.setStyleText($elm, viewStyleToCssText(st.value));
-          if ($elm) {
-            $elm.setStyleSet(st.value);
-          }
+          state.props.style = st.value;
         } else if (isRef(style)) {
           const st = style;
           const apply = () => {
             // host.setStyleText($elm, viewStyleToCssText(st.value || {}));
-            $elm.setStyleSet(st.value || {});
           };
           st.subscribe({
             onChange() {
-              apply();
+              state.props.style = st.value as any;
+              $elm.setStyleSet(st.value || {});
             },
           });
-          apply();
+          state.props.style = st.value;
         } else {
-          const applyStyle = () => {
-            // host.setStyleText($elm, viewStyleToCssText(style as any));
-            $elm.setStyleSet(style);
-          };
           Object.keys(style as any).forEach((k) => {
             const vv = style[k];
             if (isRef(vv)) {
               vv.subscribe({
                 onChange() {
-                  applyStyle();
+                  state.props.style = style as any;
+                  $elm.setStyleSet(style);
                 },
               });
             }
           });
-          applyStyle();
+          state.props.style = style as any;
         }
       }
     },
   };
+
   methods.setup_value_subscribe();
 
   return {
@@ -420,130 +430,130 @@ export function Input(props: InputProps = {}) {
     set $elm(value: any) {
       $elm = value;
     },
+    value: state.value,
+    state,
     props: state.props,
     events: events,
-    get value() {
-      return state.value;
-    },
     render() {
-      if (state.rendered) {
-        return $elm;
-      }
-      state.rendered = true;
+      // if (state.rendered) {
+      //   return $elm;
+      // }
+      // state.rendered = true;
 
-      // Event methods.listeners
-      if (onClick) {
-        const handler = function (event: MouseEvent) {
-          onClick(event);
-        };
-        methods.listen("click", handler);
-      }
+      // // Event methods.listeners
+      // if (onClick) {
+      //   const handler = function (event: MouseEvent) {
+      //     onClick(event);
+      //   };
+      //   methods.listen("click", handler);
+      // }
 
-      if (onDoubleClick) {
-        const handler = function (event: MouseEvent) {
-          onDoubleClick(event);
-        };
-        methods.listen("dblclick", handler);
-      }
+      // if (onDoubleClick) {
+      //   const handler = function (event: MouseEvent) {
+      //     onDoubleClick(event);
+      //   };
+      //   methods.listen("dblclick", handler);
+      // }
 
-      if (onLongPress) {
-        let long_press_timer: any = null;
-        let start_x = 0;
-        let start_y = 0;
-        const longPressDuration = 500;
-        const moveThreshold = 10;
+      // if (onLongPress) {
+      //   let long_press_timer: any = null;
+      //   let start_x = 0;
+      //   let start_y = 0;
+      //   const longPressDuration = 500;
+      //   const moveThreshold = 10;
 
-        const handleStart = (event: PointerEvent) => {
-          start_x = event.clientX;
-          start_y = event.clientY;
-          long_press_timer = setTimeout(() => {
-            onLongPress(event);
-            long_press_timer = null;
-          }, longPressDuration);
-        };
+      //   const handleStart = (event: PointerEvent) => {
+      //     start_x = event.clientX;
+      //     start_y = event.clientY;
+      //     long_press_timer = setTimeout(() => {
+      //       onLongPress(event);
+      //       long_press_timer = null;
+      //     }, longPressDuration);
+      //   };
 
-        const handleMove = (event: PointerEvent) => {
-          if (long_press_timer) {
-            const deltaX = Math.abs(event.clientX - start_x);
-            const deltaY = Math.abs(event.clientY - start_y);
-            if (deltaX > moveThreshold || deltaY > moveThreshold) {
-              clearTimeout(long_press_timer);
-              long_press_timer = null;
-            }
-          }
-        };
+      //   const handleMove = (event: PointerEvent) => {
+      //     if (long_press_timer) {
+      //       const deltaX = Math.abs(event.clientX - start_x);
+      //       const deltaY = Math.abs(event.clientY - start_y);
+      //       if (deltaX > moveThreshold || deltaY > moveThreshold) {
+      //         clearTimeout(long_press_timer);
+      //         long_press_timer = null;
+      //       }
+      //     }
+      //   };
 
-        const handleEnd = () => {
-          if (long_press_timer) {
-            clearTimeout(long_press_timer);
-            long_press_timer = null;
-          }
-        };
+      //   const handleEnd = () => {
+      //     if (long_press_timer) {
+      //       clearTimeout(long_press_timer);
+      //       long_press_timer = null;
+      //     }
+      //   };
 
-        methods.listen("pointerdown", handleStart);
-        methods.listen("pointermove", handleMove);
-        methods.listen("pointerup", handleEnd);
-        methods.listen("pointercancel", handleEnd);
-      }
+      //   methods.listen("pointerdown", handleStart);
+      //   methods.listen("pointermove", handleMove);
+      //   methods.listen("pointerup", handleEnd);
+      //   methods.listen("pointercancel", handleEnd);
+      // }
 
-      if (onPointerDown) {
-        const handler = function (event: PointerEvent) {
-          onPointerDown(event);
-        };
-        methods.listen("pointerdown", handler);
-      }
+      // if (onPointerDown) {
+      //   const handler = function (event: PointerEvent) {
+      //     onPointerDown(event);
+      //   };
+      //   methods.listen("pointerdown", handler);
+      // }
 
-      if (onFocus) {
-        const handler = function (event: FocusEvent) {
-          onFocus(event);
-        };
-        methods.listen("focus", handler);
-      }
+      // if (onFocus) {
+      //   const handler = function (event: FocusEvent) {
+      //     onFocus(event);
+      //   };
+      //   methods.listen("focus", handler);
+      // }
 
-      if (onBlur) {
-        const handler = function (event: FocusEvent) {
-          onBlur(event);
-        };
-        methods.listen("blur", handler);
-      }
+      // if (onBlur) {
+      //   const handler = function (event: FocusEvent) {
+      //     onBlur(event);
+      //   };
+      //   methods.listen("blur", handler);
+      // }
 
-      if (onKeyDown) {
-        const handler = function (event: KeyboardEvent) {
-          onKeyDown(event);
-        };
-        methods.listen("keydown", handler);
-      }
+      // if (onKeyDown) {
+      //   const handler = function (event: KeyboardEvent) {
+      //     onKeyDown(event);
+      //   };
+      //   methods.listen("keydown", handler);
+      // }
 
-      if (onMouseEnter) {
-        const handler = function (event: MouseEvent) {
-          onMouseEnter(event);
-        };
-        methods.listen("mouseenter", handler);
-      }
+      // if (onMouseEnter) {
+      //   const handler = function (event: MouseEvent) {
+      //     onMouseEnter(event);
+      //   };
+      //   methods.listen("mouseenter", handler);
+      // }
 
-      if (onMouseLeave) {
-        const handler = function (event: MouseEvent) {
-          onMouseLeave(event);
-        };
-        methods.listen("mouseleave", handler);
-      }
+      // if (onMouseLeave) {
+      //   const handler = function (event: MouseEvent) {
+      //     onMouseLeave(event);
+      //   };
+      //   methods.listen("mouseleave", handler);
+      // }
 
-      if (onChange) {
-        const handler = function (event: Event) {
-          onChange(event);
-        };
-        methods.listen("change", handler);
-      }
+      // if (onChange) {
+      //   const handler = function (event: Event) {
+      //     onChange(event);
+      //   };
+      //   methods.listen("change", handler);
+      // }
 
-      if (onMounted) {
-        manager$.push(onMounted({ target: $elm }));
-      }
+      // if (onMounted) {
+      //   manager$.push(onMounted({ target: $elm }));
+      // }
 
       return $elm;
     },
     onMounted(event: MountedEvent) {
       // console.log("[]input onMounted", $elm);
       // $elm = event.target;
+      state.rendered = true;
       const handler = function (event: Event) {
         if (onInput) {
           onInput(event);

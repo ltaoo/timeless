@@ -15,8 +15,10 @@ export interface TimelessElement<T = any> {
   t: string;
   $elm: any;
   children?: (TimelessElement | null)[];
+  /** 描述该元素的状态，用来替代 value */
+  state?: any;
   props?: {
-    styleSet?: string[] | DerivedRef<string[]> | Ref<string[]>;
+    styleSet?: string[];
     style?: ViewStyleProperties;
   };
   value?: T;

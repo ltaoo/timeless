@@ -1,10 +1,10 @@
-import { combine, computed, refobj } from "@timeless/primitive";
+import { combine, computed, refobj } from "@timeless/timeless";
 import {
   NumberInputPrimitive,
   Show,
   View,
   ViewProps,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { NumberInputCore } from "@timeless/ui";
 import { ChevronUpOutlined, ChevronDownOutlined } from "@timeless/icons";
 

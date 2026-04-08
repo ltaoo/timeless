@@ -17,7 +17,7 @@ export interface DOMShow {
       before?: any,
     ): DocumentFragment;
   };
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): ChildNode[];
   isDocumentFragment(): boolean;
   render(elm: TimelessElement): Text;
   addContent(children: (TimelessElement | null)[]): void;
@@ -27,6 +27,10 @@ export interface DOMShow {
 export function DOMShow(props: {
   build: (elm: TimelessElement) => DOMHostNode;
 }): DOMShow {
+  const $fragment = document.createDocumentFragment();
+  const $anchor = document.createTextNode("");
+  const children$: ChildNode[] = [];
+
   const methods = {
     unmount(event: {
       data: TimelessElement[];
@@ -53,7 +57,6 @@ export function DOMShow(props: {
       }
       console.log("[Show] unmount completed");
     },
-
     mount(children: (TimelessElement | null)[], parent?: any, before?: any) {
       const $fragment = document.createDocumentFragment();
       const new_nodes: any[] = [];
@@ -105,10 +108,6 @@ export function DOMShow(props: {
     },
   };
 
-  let children$: ChildNode[] = [];
-  const $fragment = document.createDocumentFragment();
-  const $anchor = document.createTextNode("");
-
   return {
     t: "show",
     get $elm() {
@@ -116,7 +115,7 @@ export function DOMShow(props: {
     },
     methods,
     getChildNodes() {
-      return $fragment.childNodes;
+      return children$;
     },
     isDocumentFragment() {
       return false;
@@ -166,7 +165,7 @@ export function DOMShow(props: {
       }
       // console.log("[]show - in render", elm.children);
       for (let child of children) {
-        console.log("[]show addContent", child);
+        // console.log("[]show addContent", child);
         if (!child) {
           continue;
         }
@@ -183,12 +182,13 @@ export function DOMShow(props: {
             children$.push(...child_nodes);
           } else {
             new_nodes.push($sub);
-            if ($sub.$elm) {
-              children$.push($sub.$elm as ChildNode);
-            }
+            // if ($sub.$elm) {
+            //   children$.push($sub.$elm as ChildNode);
+            // }
           }
           console.log("[]show addContent before $sub.$elm", $sub.$elm);
           if ($sub.$elm) {
+            children$.push($sub.$elm as ChildNode);
             $fragment.appendChild($sub.$elm);
           }
         }
@@ -205,7 +205,7 @@ export function DOMShow(props: {
           $parent.removeChild(node);
         }
       }
-      children$ = [];
+      children$.length = 0;
       // @fragment 会在 appendChild 自己清空，无需手动清空
     },
   };

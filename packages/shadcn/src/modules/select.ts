@@ -4,14 +4,14 @@ import {
   computed,
   ref,
   refobj,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import {
   SelectPrimitive,
   For,
   ViewProps,
   Show,
   View,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { SelectCore } from "@timeless/ui";
 import {
   CheckOutlined,

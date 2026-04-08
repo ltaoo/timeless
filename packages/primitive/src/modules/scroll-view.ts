@@ -4,7 +4,6 @@ import { ScrollViewCore } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren, TimelessElement } from "@/content/type";
 import { Show } from "@/reactive/show";
-import { h } from "@/util/h";
 
 type Provider = Partial<{
   provide_ui_scroll_view_indicator: (

@@ -1,6 +1,6 @@
-import { CheckboxPrimitive, ViewProps } from "@timeless/primitive";
+import { CheckboxPrimitive, ViewProps } from "@timeless/timeless";
 import { CheckOutlined } from "@timeless/icons";
-import { ref, computed, classNames } from "@timeless/primitive";
+import { ref, computed, classNames } from "@timeless/timeless";
 import { CheckboxCore } from "@timeless/ui";
 
 export function Checkbox(

@@ -5,6 +5,7 @@ import {
   ViewStyle,
   isClassNameRef,
   ClassNameRef,
+  RawViewStyleProperties,
 } from "@/style/index";
 import { MountedEvent } from "@/event/index";
 import { ListenerManager } from "@/util/listener";
@@ -58,8 +59,8 @@ type ViewState = {
   rendered: boolean;
   attributes: Record<string, string | number | boolean | undefined>;
   props: {
-    styleSet?: string[] | Signal<string[]>;
-    style: ViewStyleProperties;
+    styleSet?: string[];
+    style: RawViewStyleProperties;
   };
   events: Partial<{
     onClick?: (e: MouseEvent) => void;
@@ -282,13 +283,27 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       }
       if (style) {
         if (isRef(style)) {
-          state.props.style = (style.value || {}) as ViewStyleProperties;
+          Object.keys(style.value || {}).forEach((k) => {
+            const sv = style.value[k];
+            if (isRef(sv)) {
+              sv.subscribe({
+                onChange(v) {
+                  if ($elm) {
+                    $elm.setStyleValue(k, v);
+                  }
+                },
+              });
+              state.props.style[k] = sv.value;
+            } else {
+              state.props.style[k] = sv;
+            }
+          });
           style.subscribe({
             onChange() {
-              state.props.style = {
-                ...state.props.style,
-                ...(style.value || {}),
-              };
+              // state.props.style = {
+              //   ...state.props.style,
+              //   ...(style.value || {}),
+              // };
               if ($elm && typeof $elm.setStyle === "function") {
                 $elm.setStyle(state.props.style);
               }

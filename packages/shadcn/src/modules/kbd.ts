@@ -1,4 +1,4 @@
-import { View, ViewChildren, ViewProps, classNames } from "@timeless/primitive";
+import { View, ViewChildren, ViewProps, classNames } from "@timeless/timeless";
 
 export function Kbd(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;

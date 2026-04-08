@@ -125,6 +125,7 @@ export const globals = {
   isLazyElement: "readonly",
   isRef: "readonly",
   isStyleRef: "readonly",
+  isWriteableRef: "readonly",
   join: "readonly",
   kit: "readonly",
   lazy: "readonly",

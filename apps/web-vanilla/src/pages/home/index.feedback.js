@@ -25,9 +25,12 @@ export default function FeedbackView() {
               items: [
                 new Timeless.ui.MenuItemCore({
                   label: "Edit",
-                  icon: Timeless.icons.PlayOutlined({
-                    class: "icon icon--play",
-                  }),
+                  icon: View(
+                    {
+                      class: "icon icon--play",
+                    },
+                    [Icon({ name: "play" })],
+                  ),
                   onClick() {
                     console.log("edit");
                   },

@@ -1,7 +1,7 @@
 import { TooltipCore, Align, Side } from "@timeless/ui";
-import { computed, refobj } from "@timeless/primitive";
-import { Fragment, View, ViewChildren, ViewProps } from "@timeless/primitive";
-import { TooltipPrimitive } from "@timeless/primitive";
+import { computed, refobj } from "@timeless/timeless";
+import { Fragment, View, ViewChildren, ViewProps } from "@timeless/timeless";
+import { TooltipPrimitive } from "@timeless/timeless";
 
 // 全局单例 store
 let globalStore: TooltipCore | null = null;

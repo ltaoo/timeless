@@ -1,11 +1,11 @@
-import { combine, computed, ref, refobj } from "@timeless/primitive";
+import { combine, computed, ref, refobj } from "@timeless/timeless";
 import {
   CascaderPrimitive,
   For,
   Show,
   View,
   ViewProps,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { CascaderCore, CascaderOption } from "@timeless/ui";
 import {
   ChevronDownOutlined,

@@ -40,8 +40,10 @@ export default function OverlayView() {
   }
 
   // Mock HttpClient
-  const mockClient = new Timeless.HttpClientCore({});
+  const mockClient = new Timeless.kit.HttpClientCore({});
+  // @ts-ignore
   mockClient.fetch = async (options) => {
+    // @ts-ignore
     const url = new URL(options.url, "http://localhost");
     const page = Number(url.searchParams.get("page")) || 1;
     const pageSize = Number(url.searchParams.get("pageSize")) || 10;

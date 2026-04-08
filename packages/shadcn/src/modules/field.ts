@@ -1,10 +1,4 @@
-import {
-  computed,
-  ref,
-  refobj,
-  classNames,
-  combine,
-} from "@timeless/primitive";
+import { computed, ref, refobj, classNames, combine } from "@timeless/timeless";
 import {
   View,
   Show,
@@ -13,7 +7,7 @@ import {
   Match,
   Fragment,
   Label as NativeLabel,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { SingleFieldCore } from "@timeless/ui";
 
 import { Separator as BaseSeparator } from "./separator";
@@ -139,7 +133,7 @@ export function FieldInlineLabel(
       class: classNames([
         "text-sm font-normal select-none cursor-pointer",
         "group-data-[invalid]:text-destructive",
-        combine({ error: error_ }, (t) => (t.error ? "text-destructive" : "")),
+        computed(error_, (t) => (t ? "text-destructive" : "")),
         cls,
       ]),
     },

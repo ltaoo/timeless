@@ -60,16 +60,16 @@ export default function CommandView() {
   });
 
   const iconMap = {
-    HomeOutlined: Timeless.icons.FileOutlined,
-    EditOutlined: Timeless.icons.Undo2Outlined,
-    DatabaseOutlined: Timeless.icons.FileBoxOutlined,
-    AppstoreOutlined: Timeless.icons.Grid3x3Outlined,
-    SunOutlined: Timeless.icons.BoltOutlined,
-    MoonOutlined: Timeless.icons.ClockOutlined,
-    RefreshOutlined: Timeless.icons.RefreshCcwOutlined,
-    SettingOutlined: Timeless.icons.BoltOutlined,
-    SearchOutlined: Timeless.icons.SearchOutlined,
-    CopyOutlined: Timeless.icons.FileSymlinkOutlined,
+    HomeOutlined: Icon({ name: "home" }),
+    EditOutlined: Icon({ name: "edit" }),
+    DatabaseOutlined: Icon({ name: "database" }),
+    AppstoreOutlined: Icon({ name: "appstore" }),
+    SunOutlined: Icon({ name: "sun" }),
+    MoonOutlined: Icon({ name: "moon" }),
+    RefreshOutlined: Icon({ name: "refresh" }),
+    SettingOutlined: Icon({ name: "settings" }),
+    SearchOutlined: Icon({ name: "search" }),
+    CopyOutlined: Icon({ name: "copy" }),
   };
 
   let resizeListener;
@@ -175,17 +175,18 @@ export default function CommandView() {
         {
           class: Timeless.classNames([
             "flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg cursor-pointer transition-colors",
-            computed([selectedIndex, filteredCommands], () => {
-              return selectedIndex.value === index
+            combine({ selectedIndex, index, filteredCommands }, (t) => {
+              return t.selectedIndex === t.index
                 ? "bg-zinc-100 dark:bg-zinc-800"
                 : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50";
             }),
+            computed([], () => {}),
           ]),
           onClick() {
             executeCommand(cmd);
           },
           onMouseEnter() {
-            selectedIndex.as(index);
+            selectedIndex.as(index.value);
           },
         },
         [
@@ -333,7 +334,10 @@ export default function CommandView() {
                   View({ class: "max-h-[320px] overflow-y-auto py-2" }, [
                     commandListItems,
                     Show({
-                      when: computed(filteredCommands, (cmds) => cmds.length === 0),
+                      when: computed(
+                        filteredCommands,
+                        (cmds) => cmds.length === 0,
+                      ),
                       ok() {
                         return [
                           View(

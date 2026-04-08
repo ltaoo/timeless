@@ -1,7 +1,6 @@
-import { classNames, combine, computed, refobj } from "@timeless/primitive";
-import { InputPrimitive, Show, ViewProps } from "@timeless/primitive";
+import { classNames, combine, computed, refobj } from "@timeless/timeless";
+import { Icon, InputPrimitive, Show, ViewProps } from "@timeless/timeless";
 import { InputCore } from "@timeless/ui";
-import { CircleXOutlined, LoaderOutlined } from "@timeless/icons";
 
 export function Input(
   props: ViewProps & {
@@ -47,7 +46,7 @@ export function Input(
                 class:
                   "absolute top-1/2 -translate-y-1/2 right-2 flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
               },
-              [CircleXOutlined({ class: "h-4 w-4" })],
+              [Icon({ name: "circle-x" })],
             ),
           ];
         },
@@ -58,7 +57,7 @@ export function Input(
           class:
             "absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500",
         },
-        [LoaderOutlined({ class: "h-4 w-4 animate-spin" })],
+        [Icon({ name: "loader", size: 16 })],
       ),
     ],
   );

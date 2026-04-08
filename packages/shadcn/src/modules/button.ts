@@ -6,7 +6,7 @@ import {
   ViewProps,
   refobj,
   computed,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { LoaderCircleOutlined } from "@timeless/icons";
 import { ButtonCore } from "@timeless/ui";
 

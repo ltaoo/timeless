@@ -1,5 +1,5 @@
-import { SeparatorPrimitive, ViewProps } from "@timeless/primitive";
-import { classNames } from "@timeless/primitive";
+import { SeparatorPrimitive, ViewProps } from "@timeless/timeless";
+import { classNames } from "@timeless/timeless";
 
 export function Separator(
   props: ViewProps & { orientation?: "horizontal" | "vertical" },

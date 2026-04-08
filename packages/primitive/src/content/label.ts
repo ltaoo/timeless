@@ -1,15 +1,32 @@
-import { DerivedRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { View, ViewProps } from "@/content/view";
-import { ViewAttributes, ViewChildren } from "@/content/type";
+import {
+  isElement,
+  TimelessElement,
+  ViewAttributes,
+  ViewChildren,
+} from "@/content/type";
+import { Txt } from "./text";
+import { MountedEvent } from "@/event";
 
-export interface NativeLabelProps extends Omit<ViewProps, "as"> {
+export interface LabelProps {
   for?: string | DerivedRef<string> | Ref<string>;
   htmlFor?: string | Ref<string>;
+  class?: ViewProps["class"];
+  style?: ViewProps["style"];
+  attributes?: ViewProps["attributes"];
+  onMounted?: ViewProps["onMounted"];
 }
 
-export function Label(props: NativeLabelProps = {}, children?: ViewChildren) {
-  const { for: forProp, htmlFor, attributes, ...rest } = props;
+export interface LabelState {
+  children: TimelessElement[];
+}
+
+export function Label(props: LabelProps = {}, children?: ViewChildren) {
+  const { for: forProp, htmlFor, attributes, onMounted, ...rest } = props;
+  let $elm: any = null;
+
   const attrFor = htmlFor ?? forProp;
 
   let mergedAttributes: ViewAttributes | undefined = attributes;
@@ -17,5 +34,47 @@ export function Label(props: NativeLabelProps = {}, children?: ViewChildren) {
     mergedAttributes = { ...(attributes || {}), for: attrFor };
   }
 
-  return View({ ...rest, as: "label", attributes: mergedAttributes }, children);
+  const state: LabelState = {
+    children: [],
+  };
+
+  const methods = {
+    setup_children(children?: ViewChildren) {
+      if (!children) {
+        return;
+      }
+      for (const child of children) {
+        if (isElement(child)) {
+          state.children.push(child);
+        }
+        if (isRef(child)) {
+          state.children.push(Txt(child));
+        }
+        if (typeof child === "string" || typeof child === "number") {
+          state.children.push(Txt(child));
+        }
+      }
+    },
+  };
+
+  methods.setup_children(children);
+
+  return {
+    t: "label",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(value: any) {
+      $elm = value;
+    },
+    children: state.children,
+    render() {
+      return $elm;
+    },
+    onMounted(event: MountedEvent) {
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+    },
+  };
 }

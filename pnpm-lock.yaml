@@ -575,9 +575,9 @@ importers:
       '@timeless/kit':
         specifier: workspace:*
         version: link:../kit
-      '@timeless/primitive':
+      '@timeless/timeless':
         specifier: workspace:*
-        version: link:../primitive
+        version: link:../timeless
       '@timeless/ui':
         specifier: workspace:*
         version: link:../ui

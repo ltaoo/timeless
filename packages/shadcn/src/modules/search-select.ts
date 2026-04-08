@@ -1,6 +1,6 @@
 import {
   For,
-  Input as NativeInput,
+  // Input as NativeInput,
   SelectPrimitive,
   Show,
   View,
@@ -8,7 +8,7 @@ import {
   classNames,
   computed,
   refobj,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { SelectCore } from "@timeless/ui";
 import { CheckOutlined, ChevronDownOutlined } from "@timeless/icons";
 
@@ -173,65 +173,65 @@ export function SearchSelect<T>(
         },
       },
       [
-        NativeInput({
-          class:
-            "w-full bg-transparent outline-none placeholder:text-muted-foreground",
-          placeholder: computed(
-            state_,
-            (t) => t.searchPlaceholder || t.placeholder || "",
-          ),
-          disabled: computed(state_, (t) => t.disabled),
-          value: computed(state_, (t) => {
-            if (t.open) {
-              return t.searchKeyword || "";
-            }
-            return t.value2?.label || "";
-          }),
-          onMounted(el) {
-            inputEl = el as unknown as HTMLInputElement;
-          },
-          onPointerDown(e) {
-            e.stopPropagation();
-          },
-          onFocus() {
-            if (store.disabled) {
-              return;
-            }
-            store.show();
-          },
-          onInput(e) {
-            const target = e.target as any;
-            const value =
-              target && typeof target === "object" && "value" in target
-                ? target.value
-                : "";
-            store.setSearchKeyword(String(value));
-            if (!store.open) {
-              store.show();
-            }
-          },
-          onKeyDown(e) {
-            e.stopPropagation();
-            switch (e.key) {
-              case "ArrowDown":
-                e.preventDefault();
-                store.focusNextOption();
-                break;
-              case "ArrowUp":
-                e.preventDefault();
-                store.focusPrevOption();
-                break;
-              case "Enter":
-                e.preventDefault();
-                store.selectFocusedOption();
-                break;
-              case "Escape":
-                e.preventDefault();
-                store.hide();
-                break;
-            }
-          },
-        }),
+        // NativeInput({
+        //   class:
+        //     "w-full bg-transparent outline-none placeholder:text-muted-foreground",
+        //   placeholder: computed(
+        //     state_,
+        //     (t) => t.searchPlaceholder || t.placeholder || "",
+        //   ),
+        //   disabled: computed(state_, (t) => t.disabled),
+        //   value: computed(state_, (t) => {
+        //     if (t.open) {
+        //       return t.searchKeyword || "";
+        //     }
+        //     return t.value2?.label || "";
+        //   }),
+        //   onMounted(el) {
+        //     inputEl = el as unknown as HTMLInputElement;
+        //   },
+        //   onPointerDown(e) {
+        //     e.stopPropagation();
+        //   },
+        //   onFocus() {
+        //     if (store.disabled) {
+        //       return;
+        //     }
+        //     store.show();
+        //   },
+        //   onInput(e) {
+        //     const target = e.target as any;
+        //     const value =
+        //       target && typeof target === "object" && "value" in target
+        //         ? target.value
+        //         : "";
+        //     store.setSearchKeyword(String(value));
+        //     if (!store.open) {
+        //       store.show();
+        //     }
+        //   },
+        //   onKeyDown(e) {
+        //     e.stopPropagation();
+        //     switch (e.key) {
+        //       case "ArrowDown":
+        //         e.preventDefault();
+        //         store.focusNextOption();
+        //         break;
+        //       case "ArrowUp":
+        //         e.preventDefault();
+        //         store.focusPrevOption();
+        //         break;
+        //       case "Enter":
+        //         e.preventDefault();
+        //         store.selectFocusedOption();
+        //         break;
+        //       case "Escape":
+        //         e.preventDefault();
+        //         store.hide();
+        //         break;
+        //     }
+        //   },
+        // }),
         SelectPrimitive.Icon({ store, class: "size-4 text-muted-foreground" }, [
           ChevronDownOutlined({}),
         ]),

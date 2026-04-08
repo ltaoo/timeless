@@ -75,7 +75,7 @@ export default function LLMPageView() {
   }
 
   const llm_provider_store$ = (() => {
-    const bus = Timeless.base.base();
+    const bus = Timeless.base();
     let providers = [
       {
         id: "openai",

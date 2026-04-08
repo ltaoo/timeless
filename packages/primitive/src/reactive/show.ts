@@ -3,7 +3,7 @@ import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 import { ViewChildren, isElement } from "@/content/type";
 import { safeCreateTextNode } from "@/util/env";
 
-export function Show(props: {
+type ShowProps = {
   when:
     | DerivedRef<boolean | undefined | null>
     | Ref<boolean | undefined | null>
@@ -13,20 +13,18 @@ export function Show(props: {
   onMounted?: ($fg: any) => void;
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
-}) {
-  const {
-    when,
-    ok: okFn,
-    else: elseFn,
-    onMounted,
-    beforeUnmounted,
-    onUnmounted,
-  } = props;
+};
+type ShowState = { value: boolean; children: any[]; props: any };
+
+export function Show(props: ShowProps) {
+  const { when, onMounted, beforeUnmounted, onUnmounted } = props;
   let $elm: any = null;
 
-  // let _current_nodes: any[] = [];
-  // let _current_children: any[] = [];
-  // let _prev_condition: boolean | null = null;
+  const state: ShowState = {
+    value: false,
+    children: [],
+    props,
+  };
 
   const methods = {
     normalize(children: ViewChildren) {
@@ -38,18 +36,19 @@ export function Show(props: {
     },
     get_children_with_condition(condition: boolean) {
       const next = condition
-        ? methods.normalize(okFn())
-        : elseFn
-          ? methods.normalize(elseFn())
+        ? methods.normalize(props.ok())
+        : props.else
+          ? methods.normalize(props.else())
           : [];
-      state.value = condition;
       state.children = next;
       return next;
     },
     setup_value_subscribe() {
       if (isRef(when)) {
+        state.value = when.value as boolean;
         when.subscribe({
           onChange(value) {
+            console.log('the when is changed', value, state.value);
             const condition = !!value;
             // 如果条件没有变化，直接返回
             if (condition === state.value) {
@@ -75,19 +74,13 @@ export function Show(props: {
             }
           },
         });
+      } else {
+        state.value = !!when;
       }
     },
   };
-
-  const state: { value: boolean; children: any[]; props: any } = {
-    value: false,
-    children: [],
-    props,
-  };
-
-  const condition = isRef(when) ? !!when.value : !!when;
-  methods.get_children_with_condition(condition);
   methods.setup_value_subscribe();
+  methods.get_children_with_condition(state.value);
 
   return {
     t: "show",
@@ -97,9 +90,8 @@ export function Show(props: {
     set $elm(v) {
       $elm = v;
     },
-    get value() {
-      return state.value;
-    },
+    value: state.value,
+    state,
     children: state.children,
     props: state.props,
     cleanup() {

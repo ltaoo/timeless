@@ -4,7 +4,7 @@ import {
   computed,
   ref,
   refobj,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import {
   TimePickerPrimitive,
   For,
@@ -12,7 +12,7 @@ import {
   ViewProps,
   Show,
   ScrollViewPrimitive,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { ScrollViewCore, TimePickerCore } from "@timeless/ui";
 import { CircleXOutlined, ClockOutlined } from "@timeless/icons";
 

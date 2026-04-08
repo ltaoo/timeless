@@ -1,4 +1,4 @@
-import { View } from "@timeless/primitive";
+import { View } from "@timeless/timeless";
 
 export function ScrollArea(props: any, children: any) {
   const { class: cn, ...rest } = props || {};

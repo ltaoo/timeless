@@ -41,7 +41,6 @@ export default function GeneralView() {
             Icon({ name: "bolt", size: 16 }),
           ]),
           Button({ store: new Timeless.ui.ButtonCore({ size: "icon" }) }, [
-            Timeless.icons.BoltOutlined(),
             Icon({ name: "bolt", size: 24 }),
           ]),
           Button({ store: new Timeless.ui.ButtonCore({ size: "icon-lg" }) }, [

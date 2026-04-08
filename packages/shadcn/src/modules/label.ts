@@ -1,12 +1,16 @@
-import { ViewProps, ViewChildren, View } from "@timeless/primitive";
-import { classNames } from "@timeless/primitive";
+import {
+  ViewChildren,
+  Label as NativeLabel,
+  LabelProps,
+  View,
+} from "@timeless/timeless";
+import { classNames } from "@timeless/timeless";
 
-export function Label(props: ViewProps, children?: ViewChildren) {
+export function Label(props: LabelProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
   return View(
     {
       ...rest,
-      as: "label",
       class: classNames([
         "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
         cls,

@@ -153,16 +153,12 @@ export function DOMCheckbox(props: {
       // console.log("[DOMCheckbox] render", elm.value);
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state?.style) {
+        methods.setStyle(elm.state.style);
       }
-      // if (elm.props?.styleSet) {
-      //   if (isRef(elm.props.styleSet)) {
-      //     methods.setStyleSet(elm.props.styleSet.value);
-      //   } else {
-      //     methods.setStyleSet(elm.props.styleSet);
-      //   }
-      // }
+      if (elm.state?.styleSet) {
+        methods.setStyleSet(elm.state.styleSet);
+      }
       if (elm.events) {
         methods.setupEventListener(elm.events);
       }

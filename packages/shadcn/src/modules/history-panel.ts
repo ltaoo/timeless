@@ -1,6 +1,6 @@
 import { HistoryCore } from "@timeless/kit";
-import { computed, combine, refarr, refobj, ref } from "@timeless/primitive";
-import { View, ViewProps, For, Show, Txt } from "@timeless/primitive";
+import { computed, combine, refarr, refobj, ref } from "@timeless/timeless";
+import { View, ViewProps, For, Show, Txt } from "@timeless/timeless";
 import { ChevronDownOutlined, ChevronUpOutlined } from "@timeless/icons";
 
 export function HistoryPanel(

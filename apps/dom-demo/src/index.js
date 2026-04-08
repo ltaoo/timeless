@@ -188,6 +188,8 @@ function ApplicationView() {
     },
     [
       Input({
+        class: "w-full",
+        placeholder: "Add a todo todo",
         value: todo_,
         onMounted() {
           console.log("[Input] onMounted");

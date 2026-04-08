@@ -26,6 +26,10 @@ export type ViewStyle =
   | DerivedRef<ViewStyleProperties>
   | Ref<ViewStyleProperties>;
 
+export type RawViewStyleProperties = {
+  [k: string]: string | number | boolean | null | undefined;
+};
+
 export type ViewStyleInput = ViewStyle;
 
 export function viewStyleToCssText(style: ViewStyleInput) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { View } from "@timeless/primitive";
+import { View } from "@timeless/timeless";
 // import { useEffect, useState } from "react"
 // import {
 //   CircleCheckIcon,

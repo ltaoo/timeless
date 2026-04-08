@@ -1,4 +1,4 @@
-import { computed, refobj } from "@timeless/primitive";
+import { computed, refobj } from "@timeless/timeless";
 import {
   TabsPrimitive,
   For,
@@ -6,7 +6,7 @@ import {
   ViewChildren,
   ViewProps,
   Txt,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { TabHeaderCore } from "@timeless/ui";
 
 type TabItem = {

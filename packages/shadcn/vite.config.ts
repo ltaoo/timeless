@@ -10,11 +10,12 @@ const name = "timeless.shadcn";
 const externals = [
   "@timeless/base",
   "@timeless/kit",
-  "@timeless/primitive",
-  "@timeless/reactive",
+  // "@timeless/primitive",
+  // "@timeless/reactive",
   "@timeless/timeless",
+  // "@timeless/icons",
   "@timeless/ui",
-  "@timeless/utils",
+  // "@timeless/utils",
 ] as const;
 
 function isExternal(id: string) {
@@ -98,7 +99,7 @@ export default defineConfig({
         }
         return "index.js";
       },
-      name: "Timeless",
+      name: "Timeless.shadcn",
     },
     minify: isProd ? "terser" : false,
     ...(isProd && {
@@ -117,12 +118,11 @@ export default defineConfig({
           "@timeless/base": "Timeless.base",
           "@timeless/kit": "Timeless.kit",
           "@timeless/timeless": "Timeless",
-          "@timeless/primitive": "Timeless",
-          "@timeless/reactive": "Timeless.reactive",
+          // "@timeless/primitive": "Timeless",
+          // "@timeless/reactive": "Timeless.reactive",
           "@timeless/ui": "Timeless.ui",
-          "@timeless/utils": "Timeless.utils",
+          // "@timeless/utils": "Timeless.utils",
         },
-        footer: `(function(){try{var g=typeof globalThis!=="undefined"?globalThis:typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var t=g.Timeless;if(!t)return;if(t.kit)Object.assign(t,t.kit);Object.assign(g,t)}catch(e){}})();`,
         assetFileNames: (assetInfo) => {
           if (assetInfo.name?.endsWith(".css")) {
             return "timeless.shadcn.css";

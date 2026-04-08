@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { computed, refobj } from "@timeless/primitive";
+import { computed, refobj } from "@timeless/timeless";
 import {
   DateRangePickerPrimitive,
   For,
@@ -7,7 +7,7 @@ import {
   ViewProps,
   Show,
   h,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { DateRangePickerCore, TooltipCore } from "@timeless/ui";
 import {
   CalendarOutlined,

@@ -1,5 +1,5 @@
-import { computed, refobj, classNames } from "@timeless/primitive";
-import { For, Img, Show, View, ViewProps } from "@timeless/primitive";
+import { computed, refobj, classNames } from "@timeless/timeless";
+import { For, Img, Show, View, ViewProps } from "@timeless/timeless";
 import { ButtonCore, CheckboxCore, InputCore } from "@timeless/ui";
 
 import { Button } from "./button";

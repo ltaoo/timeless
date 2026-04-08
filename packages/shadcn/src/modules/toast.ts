@@ -1,11 +1,11 @@
-import { computed, Fragment, refobj } from "@timeless/primitive";
+import { computed, Fragment, refobj } from "@timeless/timeless";
 import {
   ToastPrimitive,
   For,
   Show,
   ViewChildren,
   ViewProps,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { ToastCore } from "@timeless/ui";
 
 export function Toast(

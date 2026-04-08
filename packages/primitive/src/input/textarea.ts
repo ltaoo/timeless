@@ -6,7 +6,9 @@ import { viewStyleToCssText, classNames, isStyleRef } from "@/style/index";
 import { MountedEvent } from "@/event";
 // import { getHost } from "@/host";
 
-export function Textarea(props: ViewProps & { id?: string }) {
+export type TextareaProps = ViewProps & { id?: string };
+
+export function Textarea(props: TextareaProps) {
   // const host = getHost();
   const { style: st, class: cls, dataset = {}, id, ...rest } = props;
 

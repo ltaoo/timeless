@@ -14,9 +14,9 @@
   ],
   "dependencies": {
     "@timeless/icons": "workspace:*",
+    "@timeless/ui": "workspace:*",
     "@timeless/kit": "workspace:*",
-    "@timeless/primitive": "workspace:*",
-    "@timeless/ui": "workspace:*"
+    "@timeless/timeless": "workspace:*"
   },
   "peerDependencies": {
     "tailwindcss": "^3.0.0 || ^4.0.0"

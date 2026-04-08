@@ -1,11 +1,11 @@
-import { computed, refobj } from "@timeless/primitive";
+import { computed, refobj } from "@timeless/timeless";
 import {
   AccordionPrimitive,
   For,
   ViewChildren,
   ViewProps,
   Txt,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { AccordionCore } from "@timeless/ui";
 
 type AccordionItem = {

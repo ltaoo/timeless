@@ -5,14 +5,14 @@ type IconState = {
   size: number;
   color: string;
 };
-type IconProps = { name: string; color: string; size: number };
+type IconProps = { name: string; color?: string; size?: number };
 
 export function Icon(props: IconProps) {
   let $elm: any = null;
   const state: IconState = {
     name: props.name,
-    size: props.size,
-    color: props.color,
+    size: props.size ?? 24,
+    color: props.color ?? "currentColor",
     // props,
   };
 

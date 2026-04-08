@@ -7,7 +7,7 @@ import {
   classNames,
   ViewStyleProperties,
   styleNames,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { AffixCore } from "@timeless/ui";
 
 export function Affix(

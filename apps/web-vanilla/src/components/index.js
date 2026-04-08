@@ -2,22 +2,17 @@ export function Section(title, children) {
   return View({ class: classNames(["space-y-3"]) }, [
     View(
       {
-        class: classNames([
-          "text-sm font-semibold text-zinc-500 uppercase tracking-wider",
-        ]),
+        class: "text-sm font-semibold text-zinc-500 uppercase tracking-wider",
       },
-      [Txt(title)],
+      [title],
     ),
-    View({ class: classNames(["space-y-4 pl-1"]) }, children),
+    View({ class: "space-y-4 pl-1" }, children),
   ]);
 }
 
 export function Item(label, children) {
-  return View({ class: classNames(["space-y-2"]) }, [
-    View({ class: classNames(["text-sm text-zinc-400"]) }, [Txt(label)]),
-    View(
-      { class: classNames(["flex flex-wrap items-center gap-3"]) },
-      children,
-    ),
+  return View({ class: "space-y-2" }, [
+    View({ class: "text-sm text-zinc-400" }, [label]),
+    View({ class: "flex flex-wrap items-center gap-3" }, children),
   ]);
 }

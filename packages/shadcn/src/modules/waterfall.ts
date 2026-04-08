@@ -4,8 +4,8 @@ import {
   type ViewProps,
   type TimelessElement,
   isElement,
-} from "@timeless/primitive";
-import { classNames, refarr } from "@timeless/primitive";
+} from "@timeless/timeless";
+import { classNames, refarr } from "@timeless/timeless";
 import type { WaterfallCellModel, WaterfallModel } from "@timeless/ui";
 
 export function Waterfall<T extends Record<string, unknown>>(

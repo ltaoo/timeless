@@ -1,4 +1,4 @@
-import { ref, computed, refobj, classNames } from "@timeless/primitive";
+import { ref, computed, refobj, classNames, Icon } from "@timeless/timeless";
 import {
   MenuPrimitive,
   For,
@@ -6,7 +6,7 @@ import {
   Show,
   ViewProps,
   TimelessElement,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import {
   MenuCore,
   MenuItemCore,
@@ -16,7 +16,7 @@ import {
   initGlobalPointerListener,
   Layer,
 } from "@timeless/ui";
-import { ChevronRightOutlined } from "@timeless/icons";
+// import { ChevronRightOutlined } from "@timeless/icons";
 
 const MENU_CONTENT_CLASS =
   "cn-menu-target cn-menu-translucent z-50 min-w-36 origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fill-mode-both data-open:fade-in-0 data-open:zoom-in-95";
@@ -227,7 +227,12 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
           when: has_submenu_,
           ok() {
             return [
-              ChevronRightOutlined({ class: "cn-rtl-flip ml-auto size-4" }, []),
+              View(
+                {
+                  class: "cn-rtl-flip ml-auto size-4",
+                },
+                [Icon({ name: "chevron-right" })],
+              ),
             ];
           },
         }),

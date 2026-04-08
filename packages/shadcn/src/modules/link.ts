@@ -2,8 +2,8 @@ import {
   ViewChildren,
   Link as NativeLink,
   LinkProps as NativeLinkProps,
-} from "@timeless/primitive";
-import { classNames } from "@timeless/primitive";
+} from "@timeless/timeless";
+import { classNames } from "@timeless/timeless";
 
 export function Link(props: NativeLinkProps = {}, children?: ViewChildren) {
   const { class: cls, ...rest } = props;

@@ -159,13 +159,23 @@ export function DOMInput(props: {
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }
-      // if (elm.props?.styleSet) {
-      //   if (isRef(elm.props.styleSet)) {
-      //     methods.setStyleSet(elm.props.styleSet.value);
-      //   } else {
-      //     methods.setStyleSet(elm.props.styleSet);
-      //   }
-      // }
+      if (elm.props?.styleSet) {
+        methods.setStyleSet(elm.props.styleSet);
+      }
+      if (elm.state) {
+        if (elm.state.placeholder) {
+          $elm.placeholder = elm.state.placeholder;
+        }
+        if (elm.state.disabled) {
+          $elm.disabled = elm.state.disabled;
+        }
+        if (elm.state.id) {
+          $elm.id = elm.state.id;
+        }
+        if (elm.state.name) {
+          $elm.name = elm.state.name;
+        }
+      }
       if (elm.events) {
         methods.setupEventListener(elm.events);
       }

@@ -101,7 +101,7 @@ export function Input(
   const listener$ = ListenerManager();
 
   return Checkbox({
-    // ...rest,
+    ...rest,
     id,
     style: {
       position: "absolute",

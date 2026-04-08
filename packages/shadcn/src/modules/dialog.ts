@@ -1,11 +1,11 @@
-import { computed, ref, refobj } from "@timeless/primitive";
+import { computed, ref, refobj } from "@timeless/timeless";
 import {
   DialogPrimitive,
   View,
   ViewChildren,
   ViewProps,
   Show,
-} from "@timeless/primitive";
+} from "@timeless/timeless";
 import { DialogCore } from "@timeless/ui";
 import { CircleXOutlined } from "@timeless/icons";
 

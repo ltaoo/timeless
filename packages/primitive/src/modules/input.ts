@@ -4,8 +4,10 @@ import { InputCore } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { viewStyleToCssText, isStyleRef, classNames } from "@/style/index";
-import { safeCreateElement } from "@/util/env";
-import { getHost } from "@/host";
+import { InputProps, Input as NativeInput } from "@/input/input";
+import { ListenerManager } from "@/util/listener";
+// import { safeCreateElement } from "@/util/env";
+// import { getHost } from "@/host";
 
 type Provider = Partial<{
   provide_ui_input: (store: InputCore<any>, $input: any) => void;
@@ -25,236 +27,38 @@ export function Root(
 }
 
 export function Input(
-  props: ViewProps & { store: InputCore<any>; id?: string },
+  props: InputProps & { store: InputCore<any>; id?: string },
 ) {
-  const host = getHost();
   const { store, style: st, class: cls, dataset = {}, id, ...rest } = props;
 
-  const $elm = safeCreateElement("input");
+  let $elm: any = null;
   let rendered = false;
-  const listenerCleanups: (() => void)[] = [];
 
   const value$ = refobj(store.value || "");
   const placeholder$ = ref(store.placeholder || "");
   const disabled$ = ref(store.disabled || false);
   const type$ = ref(store.type || "text");
 
-  const events: any[] = [];
+  const listener$ = ListenerManager();
 
-  // Subscribe to store state changes
-  const unsub = store.onStateChange
-    ? store.onStateChange((state) => {
-        value$.as(state.value || "");
-        placeholder$.as(state.placeholder || "");
-        disabled$.as(state.disabled || false);
-        type$.as(state.tmpType || state.type || "text");
-      })
-    : null;
-  if (unsub) events.push(unsub);
+  listener$.push(
+    store.onStateChange((state) => {
+      value$.as(state.value || "");
+      placeholder$.as(state.placeholder || "");
+      disabled$.as(state.disabled || false);
+      type$.as(state.tmpType || state.type || "text");
+    }),
+  );
 
-  const class$ = classNames([props.class]);
-
-  return {
-    t: "view",
-    $elm,
-    render() {
-      if (rendered) {
-        return $elm;
-      }
-      rendered = true;
-
-      const setProp = (key: string, value: any) => {
-        if (host.setProperty) {
-          host.setProperty($elm, key, value);
-          return;
-        }
-        ($elm as any)[key] = value;
-      };
-      const applyAttr = (k: string, v: any) => {
-        if (v === undefined || v === null || v === false) {
-          host.removeAttribute($elm, k);
-          return;
-        }
-        if (v === true) {
-          host.setAttribute($elm, k, "");
-          return;
-        }
-        host.setAttribute($elm, k, String(v));
-      };
-
-      if (id) {
-        setProp("id", id);
-      }
-
-      // Set initial attributes
-      setProp("value", value$.value);
-      setProp("placeholder", placeholder$.value);
-      setProp("disabled", disabled$.value);
-      setProp("type", type$.value);
-      host.setAttribute(
-        $elm,
-        "autocomplete",
-        store.autoComplete ? "on" : "off",
-      );
-      host.setAttribute($elm, "autocorrect", "off");
-
-      // Apply dataset attributes
-      Object.keys(dataset || {}).forEach((k) => {
-        const vv = dataset[k];
-        const attrName = `data-${k}`;
-        if (isRef(vv)) {
-          vv.subscribe({
-            onChange(v: any) {
-              applyAttr(attrName, v);
-            },
-          });
-          applyAttr(attrName, vv.value);
-          return;
-        }
-        applyAttr(attrName, vv);
-      });
-
-      // Apply classes
-      class$.subscribe({
-        onChange(v: any) {
-          host.setClassName($elm, v.join(" "));
-        },
-      });
-      host.setClassName($elm, class$.toString());
-      // if (m.style) $elm.style.cssText = m.style;
-
-      if (st) {
-        if (isStyleRef(st as any)) {
-          const s = st as any;
-          s.subscribe({
-            onChange(v: any) {
-              host.setStyleText($elm, viewStyleToCssText(v ?? {}));
-            },
-          });
-          host.setStyleText($elm, viewStyleToCssText(s.value));
-        } else if (isRef(st as any)) {
-          const s = st as any;
-          const apply = () =>
-            host.setStyleText($elm, viewStyleToCssText(s.value || {}));
-          s.subscribe({
-            onChange() {
-              apply();
-            },
-          });
-          apply();
-        } else {
-          const applyStyle = () => {
-            host.setStyleText($elm, viewStyleToCssText(st as any));
-          };
-          Object.keys(st as any).forEach((k) => {
-            const vv = (st as any)[k];
-            if (isRef(vv)) {
-              (vv as any).subscribe({
-                onChange() {
-                  applyStyle();
-                },
-              });
-            }
-          });
-          applyStyle();
-        }
-      }
-
-      // Subscribe to reactive state changes
-      value$.subscribe({
-        onChange(v: any) {
-          setProp("value", v);
-        },
-      });
-      placeholder$.subscribe({
-        onChange(v: any) {
-          setProp("placeholder", v);
-        },
-      });
-      disabled$.subscribe({
-        onChange(v: any) {
-          setProp("disabled", v);
-        },
-      });
-      type$.subscribe({
-        onChange(v: any) {
-          setProp("type", v);
-        },
-      });
-
-      // Event handlers
-      const handleInput = (e: any) => {
-        store.handleChange(e);
-      };
-
-      const handleKeyDown = (e: any) => {
-        store.handleKeyDown({
-          key: e.key,
-          preventDefault: () => e.preventDefault(),
-        });
-      };
-
-      const handleFocus = () => {
-        store.handleFocus();
-      };
-
-      const handleBlur = () => {
-        store.handleBlur();
-      };
-
-      host.addEventListener($elm, "input", handleInput);
-      host.addEventListener($elm, "keydown", handleKeyDown);
-      host.addEventListener($elm, "focus", handleFocus);
-      host.addEventListener($elm, "blur", handleBlur);
-
-      listenerCleanups.push(() =>
-        host.removeEventListener($elm, "input", handleInput),
-      );
-      listenerCleanups.push(() =>
-        host.removeEventListener($elm, "keydown", handleKeyDown),
-      );
-      listenerCleanups.push(() =>
-        host.removeEventListener($elm, "focus", handleFocus),
-      );
-      listenerCleanups.push(() =>
-        host.removeEventListener($elm, "blur", handleBlur),
-      );
-
-      // Connect store focus method to element
-      store.focus = () => {
-        host.focus?.($elm);
-      };
-
-      return $elm;
-    },
-    onMounted() {
-      if (props.onMounted) props.onMounted({ target: this.$elm });
-      store.setMounted();
-      if (store.autoFocus) {
-        host.focus?.(this.$elm);
-      }
-    },
-    beforeUnmounted() {
-      if (props.beforeUnmounted) props.beforeUnmounted();
-    },
-    onUnmounted() {
-      for (const fn of events) if (typeof fn === "function") fn();
-      for (const fn of listenerCleanups) fn();
-      listenerCleanups.length = 0;
-      if (props.onUnmounted) props.onUnmounted();
-
-      // Reset state for potential re-render
-      rendered = false;
-    },
-  };
+  return NativeInput(props);
 }
 
 export function Value(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
-  const host = getHost();
   const { store, ...rest } = props;
+
   const value$ = refobj(store.value || "");
 
   store.onStateChange(() => {
@@ -267,7 +71,7 @@ export function Value(
       onMounted(event) {
         const $e = (event as any).target as any;
         const updateText = () => {
-          host.setTextContent($e, value$.value);
+          // host.setTextContent($e, value$.value);
         };
         value$.subscribe({ onChange: updateText });
         updateText();
@@ -282,26 +86,27 @@ export function Clear(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
-  const host = getHost();
+  // const host = getHost();
   const { store, ...rest } = props;
 
   return View(
     {
       ...rest,
       onMounted(event) {
-        const $e = (event as any).target as any;
+        const $e = event.target;
         const handleClick = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           store.clear();
-          host.setTimeout(() => {
+          setTimeout(() => {
             store.focus();
           }, 0);
         };
-        host.addEventListener($e, "click", handleClick);
+        // host.addEventListener($e, "click", handleClick);
+        $e.addEventListener("click", handleClick);
         if (rest.onMounted) rest.onMounted(event);
         return () => {
-          host.removeEventListener($e, "click", handleClick);
+          // host.removeEventListener($e, "click", handleClick);
         };
       },
     },
@@ -313,7 +118,7 @@ export function Loading(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
-  const host = getHost();
+  // const host = getHost();
   const { store, ...rest } = props;
   const loading$ = ref(store.loading || false);
 
@@ -327,13 +132,15 @@ export function Loading(
     {
       ...rest,
       onMounted(event) {
-        const $elm = (event as any).target as HTMLDivElement;
+        const $elm = event.target;
         const updateDisplay = () => {
-          host.patchStyle?.($elm, { display: loading$.value ? "" : "none" });
+          $elm.setStyleValue("display", loading$.value ? "block" : "none");
         };
         loading$.subscribe({ onChange: updateDisplay });
         updateDisplay();
-        if (rest.onMounted) rest.onMounted(event);
+        if (rest.onMounted) {
+          rest.onMounted(event);
+        }
       },
     },
     children,
@@ -344,7 +151,7 @@ export function Disabled(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
-  const host = getHost();
+  // const host = getHost();
   const { store, ...rest } = props;
   const disabled$ = ref(store.disabled || false);
 
@@ -360,11 +167,11 @@ export function Disabled(
       onMounted(event) {
         const $elm = (event as any).target as HTMLDivElement;
         const updateState = () => {
-          if (disabled$.value) {
-            host.setAttribute($elm, "data-disabled", "true");
-          } else {
-            host.removeAttribute($elm, "data-disabled");
-          }
+          // if (disabled$.value) {
+          //   host.setAttribute($elm, "data-disabled", "true");
+          // } else {
+          //   host.removeAttribute($elm, "data-disabled");
+          // }
         };
         disabled$.subscribe({ onChange: updateState });
         updateState();

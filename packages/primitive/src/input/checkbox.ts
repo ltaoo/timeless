@@ -3,10 +3,15 @@ import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 import { MountedEvent } from "@/event";
 import { ViewProps } from "@/content/view";
 import { ListenerManager } from "@/util/listener";
-import { isClassNameRef } from "@/style";
+import { isClassNameRef, isStyleRef, RawViewStyleProperties } from "@/style";
 
 type CheckboxState = {
   checked: boolean;
+  indeterminate: boolean;
+  disabled: boolean;
+  required: boolean;
+  style: RawViewStyleProperties;
+  styleSet: string[];
 };
 export interface CheckboxProps {
   id?: string;
@@ -46,6 +51,11 @@ export function Checkbox(props: CheckboxProps) {
   let $elm: any = null;
   const state: CheckboxState = {
     checked: false,
+    indeterminate: false,
+    disabled: false,
+    required: false,
+    style: {},
+    styleSet: [],
   };
   const events = {
     onChange,
@@ -110,10 +120,8 @@ export function Checkbox(props: CheckboxProps) {
             },
           });
           state.checked = checked.value;
-          methods.setProp("checked", checked.value);
         } else {
           state.checked = checked;
-          methods.setProp("checked", checked);
         }
       }
 
@@ -125,9 +133,11 @@ export function Checkbox(props: CheckboxProps) {
               methods.setProp("disabled", v);
             },
           });
-          methods.setProp("disabled", disabled.value);
+          // methods.setProp("disabled", disabled.value);
+          state.disabled = disabled.value;
         } else {
-          methods.setProp("disabled", disabled as boolean);
+          // methods.setProp("disabled", disabled as boolean);
+          state.disabled = disabled as boolean;
         }
       }
 
@@ -139,9 +149,11 @@ export function Checkbox(props: CheckboxProps) {
               methods.setProp("readOnly", v);
             },
           });
-          methods.setProp("readOnly", readonly.value);
+          // methods.setProp("readOnly", readonly.value);
+          // state.readonly = readonly.value;
         } else {
-          methods.setProp("readOnly", readonly as boolean);
+          // methods.setProp("readOnly", readonly as boolean);
+          // state.readonly = readonly as boolean;
         }
       }
 
@@ -153,9 +165,11 @@ export function Checkbox(props: CheckboxProps) {
               methods.setProp("required", v);
             },
           });
-          methods.setProp("required", required.value);
+          // methods.setProp("required", required.value);
+          state.required = required.value;
         } else {
-          methods.setProp("required", required as boolean);
+          // methods.setProp("required", required as boolean);
+          state.required = required as boolean;
         }
       }
       // Handle name attribute
@@ -166,9 +180,9 @@ export function Checkbox(props: CheckboxProps) {
               methods.setProp("name", v);
             },
           });
-          methods.setProp("name", name.value);
+          // methods.setProp("name", name.value);
         } else {
-          methods.setProp("name", name as string);
+          // methods.setProp("name", name as string);
         }
       }
 
@@ -233,44 +247,48 @@ export function Checkbox(props: CheckboxProps) {
           const st = style;
           st.subscribe({
             onChange(v) {
+              state.style = v as RawViewStyleProperties;
               // host.setStyleText($elm, viewStyleToCssText(v ?? {}));
               if ($elm) {
                 $elm.setStyleSet(v);
               }
             },
           });
+          Object.keys(st.value).forEach((k) => {
+            const vv = st.value[k];
+            if (isRef(vv)) {
+              vv.subscribe({
+                onChange() {
+                  // applyStyle();
+                },
+              });
+            } else {
+              state.style[k] = vv;
+            }
+          });
           // host.setStyleText($elm, viewStyleToCssText(st.value));
-          if ($elm) {
-            $elm.setStyleSet(st.value);
-          }
-        } else if (isRef(style)) {
-          const st = style;
-          const apply = () => {
-            // host.setStyleText($elm, viewStyleToCssText(st.value || {}));
-            $elm.setStyleSet(st.value || {});
-          };
-          st.subscribe({
-            onChange() {
-              apply();
+          // state.style = st.value;
+        } else if (isStyleRef(style)) {
+          style.subscribe({
+            onChange(v) {
+              $elm.setStyleSet(v as RawViewStyleProperties);
             },
           });
-          apply();
+          state.style = style.value;
         } else {
-          const applyStyle = () => {
-            // host.setStyleText($elm, viewStyleToCssText(style as any));
-            $elm.setStyleSet(style);
-          };
           Object.keys(style as any).forEach((k) => {
             const vv = style[k];
             if (isRef(vv)) {
               vv.subscribe({
-                onChange() {
-                  applyStyle();
+                onChange(v) {
+                  $elm.setStyleSet(v as RawViewStyleProperties);
                 },
               });
+              state.style[k] = vv.value;
+            } else {
+              state.style[k] = vv;
             }
           });
-          applyStyle();
         }
       }
     },
@@ -286,9 +304,8 @@ export function Checkbox(props: CheckboxProps) {
     set $elm(value: any) {
       $elm = value;
     },
-    get value() {
-      return state.checked;
-    },
+    value: state.checked,
+    state,
     events,
     render() {
       return $elm;

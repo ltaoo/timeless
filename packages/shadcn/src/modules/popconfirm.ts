@@ -4,9 +4,9 @@ import {
   ref,
   refobj,
   ViewStyleProperties,
-} from "@timeless/primitive";
-import { View, Show, ViewChildren, ViewProps } from "@timeless/primitive";
-import { PopconfirmPrimitive } from "@timeless/primitive";
+} from "@timeless/timeless";
+import { View, Show, ViewChildren, ViewProps } from "@timeless/timeless";
+import { PopconfirmPrimitive } from "@timeless/timeless";
 
 export function Popconfirm(
   props: ViewProps & {
