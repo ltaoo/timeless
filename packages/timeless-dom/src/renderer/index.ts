@@ -5,6 +5,7 @@ import { DOMView, isDOMView } from "@/host/view";
 import { DOMGrid } from "@/host/grid";
 import { DOMText } from "@/host/text";
 import { DOMShow } from "@/host/show";
+import { DOMMatch } from "@/host/match";
 import { DOMFor } from "@/host/for";
 import { DOMFragment, isDOMFragment } from "@/host/fragment";
 import { DOMLazyView } from "@/host/lazy-view";
@@ -108,6 +109,12 @@ function build(elm: TimelessElement): DOMHostNode {
     elm.$elm = show$;
     show$.render(elm);
     return show$;
+  }
+  if (elm.t === "match") {
+    const match$ = DOMMatch({ build });
+    elm.$elm = match$;
+    match$.render(elm);
+    return match$;
   }
   if (elm.t === "for") {
     const for$ = DOMFor({ build });

@@ -10,7 +10,6 @@ export const globals = {
   ButtonPrimitive: "readonly",
   CardPrimitive: "readonly",
   CascaderPrimitive: "readonly",
-  Case: "readonly",
   CheckboxPrimitive: "readonly",
   Circle: "readonly",
   ClipPath: "readonly",

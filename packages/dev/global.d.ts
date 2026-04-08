@@ -633,30 +633,33 @@ declare module "packages/primitive/src/reactive/show" {
 }
 declare module "packages/primitive/src/reactive/match" {
     import { Ref } from "packages/reactive/src/index";
-    import { ViewChildren } from "@/content/type";
-    export function Match(props: {
+    import { TimelessElement } from "@/content/type";
+    import { MountedEvent } from "@/event";
+    type MatchProps = {
         when: Ref<any> | any;
-        fallback?: () => ViewChildren;
-        onMounted?: ($fg: any) => void;
+        cases: Record<string | number, () => TimelessElement[]>;
+        fallback?: () => TimelessElement;
+        onMounted?: (event: MountedEvent) => void;
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
-    }, children?: ViewChildren): {
+    };
+    type MatchState = {
+        rendered: boolean;
+        value: any;
+        children: TimelessElement[];
+    };
+    export function Match(props: MatchProps): {
         t: string;
         $elm: any;
-        readonly value: any;
-        children: any[];
-        props: any;
-        cleanup(): void;
+        value: any;
+        state: MatchState;
+        children: TimelessElement[];
         render(): any;
         hydrate(startDom: any, parentDom?: any): any;
+        cleanup(): void;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
-    };
-    export function Case<T = any>(value: any, children: () => ViewChildren): {
-        t: string;
-        value: any;
-        children: () => ViewChildren;
-        render(): any;
     };
 }
 declare module "packages/primitive/src/content/lazy-view" {
@@ -14244,7 +14247,6 @@ declare const BaseEvents: typeof import("@timeless/timeless").BaseEvents;
 declare const ButtonPrimitive: typeof import("@timeless/timeless").ButtonPrimitive;
 declare const CardPrimitive: typeof import("@timeless/timeless").CardPrimitive;
 declare const CascaderPrimitive: typeof import("@timeless/timeless").CascaderPrimitive;
-declare const Case: typeof import("@timeless/timeless").Case;
 declare const CheckboxPrimitive: typeof import("@timeless/timeless").CheckboxPrimitive;
 declare const Circle: typeof import("@timeless/timeless").Circle;
 declare const ClipPath: typeof import("@timeless/timeless").ClipPath;

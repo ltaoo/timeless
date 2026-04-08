@@ -33,40 +33,38 @@ function FormRender(props, children) {
               when: !inline,
               ok() {
                 return [
-                  h(FieldLabel, {
+                  FieldLabel({
                     for: fid,
                     store: field$,
                   }),
                 ];
               },
             }),
-            Match(
-              {
-                when: computed(field$, (t) => {
-                  return t.input.shape;
-                }),
+            Match({
+              when: computed(field$, (t) => {
+                return t.input.shape;
+              }),
+              cases: {
+                select() {
+                  return Select({
+                    id: fid,
+                    store: field$.input,
+                  });
+                },
+                input() {
+                  return Input({
+                    id: fid,
+                    store: field$.input,
+                  });
+                },
+                checkbox() {
+                  return Checkbox({
+                    id: fid,
+                    store: field$.input,
+                  });
+                },
               },
-              [
-                // Case("select", [
-                //   h(Select, {
-                //     id: fid,
-                //     store: field$.input,
-                //   }),
-                // ]),
-                // Case("input", [
-                //   h(Input, {
-                //     id: fid,
-                //     store: field$.input,
-                //   }),
-                // ]),
-                // Case("checkbox", [
-                //   h(Checkbox, {
-                //     id: fid,
-                //     store: field$.input,
-                //   }),
-                // ]),
-              ],
-            ),
+            }),
             Show({
               when: inline,
               ok() {

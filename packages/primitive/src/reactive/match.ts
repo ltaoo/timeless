@@ -1,110 +1,117 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { ViewChildren, isElement, TimelessElement } from "@/content/type";
+import { TimelessElement, ViewChildren, isElement } from "@/content/type";
 import { safeCreateTextNode } from "@/util/env";
+import { MountedEvent } from "@/event";
 
-export function Match(
-  props: {
-    when: Ref<any> | any;
-    fallback?: () => ViewChildren;
-    onMounted?: ($fg: any) => void;
-    beforeUnmounted?: () => void;
-    onUnmounted?: () => void;
-  },
-  children?: ViewChildren,
-) {
-  const { when, fallback, onMounted, beforeUnmounted, onUnmounted } = props;
+type MatchProps = {
+  when: Ref<any> | any;
+  cases: Record<string | number, () => TimelessElement[]>;
+  fallback?: () => TimelessElement;
+  onMounted?: (event: MountedEvent) => void;
+  beforeUnmounted?: () => void;
+  onUnmounted?: () => void;
+};
+
+type MatchState = {
+  rendered: boolean;
+  value: any;
+  children: TimelessElement[];
+  // props: MatchProps;
+};
+
+export function Match(props: MatchProps) {
+  const { when, cases, fallback, onMounted, beforeUnmounted, onUnmounted } =
+    props;
   let $elm: any = null;
 
-  const normalize = (c: any) => {
-    if (c === null || c === undefined) return [];
-    if (Array.isArray(c)) return c;
-    return [c];
-  };
-
-  const state: { value: any; children: any[]; props: any; cases: any[] } = {
+  const state: MatchState = {
+    rendered: false,
     value: undefined,
     children: [],
-    props,
-    cases: [],
+    // props,
   };
 
-  function get_active_match() {
-    if (!state.cases || state.cases.length === 0) {
-      return null;
-    }
-    const when_value = isRef(when) ? when.value : when;
-    for (const child of state.cases) {
-      if (isElement(child) && child.t === "case") {
-        if (child.value === when_value) {
-          return child;
+  const methods = {
+    normalize(
+      children: TimelessElement[] | TimelessElement,
+    ): TimelessElement[] {
+      if (children === null || children === undefined) return [];
+      if (Array.isArray(children)) {
+        return children;
+      }
+      return [children];
+    },
+
+    get_children_with_value(value: any) {
+      state.value = value;
+
+      // 查找匹配的 case
+      if (cases && cases[value]) {
+        const next = methods.normalize(cases[value]());
+        state.children.push(...next);
+        return next;
+      }
+
+      // 使用 fallback
+      const next = fallback ? methods.normalize(fallback()) : [];
+      state.children = next;
+      return next;
+    },
+
+    cleanup_old_children() {
+      // 清理旧的子节点
+      for (const child of state.children) {
+        if (isElement(child)) {
+          if (child.beforeUnmounted) {
+            child.beforeUnmounted();
+          }
+          if (child.onUnmounted) {
+            child.onUnmounted();
+          }
         }
       }
-    }
-    return null;
-  }
+    },
 
-  function get_target_children(match: any) {
-    if (!match) {
-      return fallback ? normalize(fallback()) : [];
-    }
-    let children = match.children;
+    setup_value_subscribe() {
+      if (isRef(when)) {
+        when.subscribe({
+          onChange(value) {
+            if (!$elm) {
+              return;
+            }
+            // 如果值没有变化，直接返回
+            if (value === state.value) {
+              return;
+            }
 
-    if (typeof children === "function") {
-      return normalize(children());
-    }
+            // 清理旧内容的生命周期
+            methods.cleanup_old_children();
 
-    if (Array.isArray(children)) {
-      children = children.map((child: any) =>
-        typeof child === "function" ? child() : child,
-      );
-      return normalize(children);
-    }
+            // 移除旧内容
+            if (typeof $elm.removeContent === "function") {
+              $elm.removeContent();
+            }
 
-    return normalize(children);
-  }
+            // 获取新内容
+            const target = methods.get_children_with_value(value);
 
-  const get_children_with_value = (value: any) => {
-    state.value = value;
-    const activeMatch = get_active_match();
-    const next = get_target_children(activeMatch);
-    state.children = next;
-    return next;
+            // 添加新内容
+            if (target.length > 0 && typeof $elm.addContent === "function") {
+              $elm.addContent(target);
+            } else {
+              state.children = [];
+            }
+          },
+        });
+      }
+    },
   };
 
-  if (isRef(when)) {
-    when.subscribe({
-      onChange(value) {
-        if (!$elm) {
-          return;
-        }
-        // 如果值没有变化，直接返回
-        if (value === state.value) {
-          return;
-        }
-
-        // 移除旧内容
-        if (typeof $elm.removeContent === "function") {
-          $elm.removeContent();
-        }
-
-        // 添加新内容
-        const target = get_children_with_value(value);
-        if (target.length > 0 && typeof $elm.addContent === "function") {
-          $elm.addContent(target);
-        }
-      },
-    });
-  }
-
-  const initialValue = isRef(when) ? when.value : when;
-
-  // 初始化 cases
-  if (children) {
-    state.cases = normalize(children);
-  }
-
-  get_children_with_value(initialValue);
+  const v = isRef(when) ? when.value : when;
+  state.value = v;
+  methods.get_children_with_value(v);
+  methods.setup_value_subscribe();
 
   return {
     t: "match",
@@ -114,49 +121,34 @@ export function Match(
     set $elm(v) {
       $elm = v;
     },
-    get value() {
-      return state.value;
-    },
+    value: state.value,
+    state,
     children: state.children,
-    props: state.props,
-    cleanup() {
-      if (typeof $elm?.removeContent === "function") {
-        $elm.removeContent();
-        state.children = [];
-      }
-    },
+    // props: state.props,
     render() {
       const value = isRef(when) ? when.value : when;
+      state.value = value;
 
       // Create anchor if not already created
       if (!$elm) {
         $elm = safeCreateTextNode("");
       }
 
-      // 初始化 cases
-      if (children) {
-        state.cases = normalize(children);
-      }
-
-      const target = get_children_with_value(value);
+      const target = methods.get_children_with_value(value);
       state.children = target;
 
       return $elm;
     },
     hydrate(startDom: any, parentDom?: any) {
       const value = isRef(when) ? when.value : when;
+      state.value = value;
 
       // Create anchor if not already created
       if (!$elm) {
         $elm = safeCreateTextNode("");
       }
 
-      // 初始化 cases
-      if (children) {
-        state.cases = normalize(children);
-      }
-
-      const targetChildren = get_children_with_value(value);
+      const targetChildren = methods.get_children_with_value(value);
 
       // 调用宿主层方法进行 hydrate
       if (typeof $elm.hydrateContent === "function") {
@@ -173,13 +165,22 @@ export function Match(
 
       return $elm;
     },
+    cleanup() {
+      methods.cleanup_old_children();
+      if (typeof $elm?.removeContent === "function") {
+        $elm.removeContent();
+        state.children = [];
+      }
+    },
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (onMounted) {
+        onMounted(event);
+      }
+    },
     beforeUnmounted() {
       if (beforeUnmounted) beforeUnmounted();
-      for (const child of state.children) {
-        if (isElement(child) && child.beforeUnmounted) {
-          child.beforeUnmounted();
-        }
-      }
+      methods.cleanup_old_children();
     },
     onUnmounted() {
       if (onUnmounted) {
@@ -189,17 +190,6 @@ export function Match(
         $elm.removeContent();
         state.children = [];
       }
-    },
-  };
-}
-
-export function Case<T = any>(value: any, children: () => ViewChildren) {
-  return {
-    t: "case",
-    value,
-    children,
-    render() {
-      return null;
     },
   };
 }

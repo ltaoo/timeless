@@ -16,6 +16,7 @@ import { DOMPortal } from "./portal";
 import { DOMPopper } from "./popper";
 
 import { DOMShow } from "./show";
+import { DOMMatch } from "./match";
 import { DOMFor } from "./for";
 
 export type DOMHostNode =
@@ -34,4 +35,5 @@ export type DOMHostNode =
   | DOMButton
   | DOMPortal
   | DOMShow
+  | DOMMatch
   | DOMFor;
