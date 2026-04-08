@@ -1,5 +1,5 @@
-import { View } from "./view";
-import { TimelessElement } from "./type";
+import { View } from "@/content/view";
+import { TimelessElement } from "@/content/type";
 
 export type ErrorFallbackFn = (
   error: Error,

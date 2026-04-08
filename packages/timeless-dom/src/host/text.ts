@@ -1,7 +1,7 @@
 export interface DOMText {
   $elm: null | Text;
   isDocumentFragment(): boolean;
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): ChildNode[];
   setContent(value: string | number | null): void;
   render(): Text | null;
 }
@@ -20,7 +20,7 @@ export function DOMText(value?: string | null): DOMText {
       return $text;
     },
     getChildNodes() {
-      return {} as NodeListOf<ChildNode>;
+      return [];
     },
     isDocumentFragment() {
       return true;

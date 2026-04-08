@@ -51,6 +51,9 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
     get $elm() {
       return $fragment;
     },
+    set $elm(v) {
+      $fragment = v;
+    },
     children: state.children,
     // set $elm(v) {
     //   $fragment = v;
@@ -88,6 +91,12 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
     onMounted(event: MountedEvent) {
       if (onMounted) {
         onMounted(event);
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.onMounted) {
+          node.onMounted(event);
+        }
       }
     },
     beforeUnmounted() {

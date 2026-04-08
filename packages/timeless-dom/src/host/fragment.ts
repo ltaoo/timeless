@@ -5,7 +5,7 @@ import { DOMHostNode } from "./type";
 export interface DOMFragment {
   t: "fragment";
   $elm: DocumentFragment;
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): ChildNode[];
   isDocumentFragment(): boolean;
   render(elm: TimelessElement): Text;
 }
@@ -13,9 +13,11 @@ export interface DOMFragment {
 export function DOMFragment(props: {
   build: (elm: TimelessElement) => DOMHostNode;
 }): DOMFragment {
-  let children$: ChildNode[] = [];
   const $fragment = document.createDocumentFragment();
   const $anchor = document.createTextNode("");
+
+  let elements: TimelessElement[] = [];
+  let children$: ChildNode[] = [];
 
   return {
     t: "fragment",
@@ -23,14 +25,15 @@ export function DOMFragment(props: {
       return $fragment;
     },
     getChildNodes() {
-      return $fragment.childNodes;
+      return children$;
     },
     isDocumentFragment() {
-      return false;
+      return true;
     },
     render(elm: TimelessElement) {
-      const new_nodes: any[] = [];
-      const new_instances: any[] = [];
+      // console.log('[]fragment render', elm.children);
+      // const new_nodes: any[] = [];
+      const new_instances: TimelessElement[] = [];
       // console.log('[]fragment - in render', elm.children);
       if (elm.children) {
         // console.log("[]show - in render", elm.children);
@@ -47,10 +50,10 @@ export function DOMFragment(props: {
             }
             if ($sub.isDocumentFragment()) {
               const child_nodes = Array.from($sub.getChildNodes());
-              new_nodes.push(...child_nodes);
+              // new_nodes.push(...child_nodes);
               children$.push(...child_nodes);
             } else {
-              new_nodes.push($sub);
+              // new_nodes.push($sub);
               if ($sub.$elm) {
                 children$.push($sub.$elm as ChildNode);
               }
@@ -61,6 +64,14 @@ export function DOMFragment(props: {
           }
         }
         $fragment.appendChild($anchor);
+        for (let child of elements) {
+          if (child.onMounted) {
+            child.onMounted({
+              target: child.$elm,
+            });
+          }
+        }
+        elements = new_instances;
       }
 
       return $anchor;
@@ -68,6 +79,6 @@ export function DOMFragment(props: {
   };
 }
 
-export function isDocumentFragment(value: any): value is DOMFragment {
+export function isDOMFragment(value: any): value is DOMFragment {
   return value.t === "fragment";
 }

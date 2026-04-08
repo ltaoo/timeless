@@ -1,6 +1,6 @@
 {
   "name": "@timeless/primitive",
-  "version": "0.14.1",
+  "version": "0.14.2",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -100,6 +100,11 @@
       "import": "./dist/dropdown-menu/index.esm.js",
       "require": "./dist/dropdown-menu/index.js"
     },
+    "./error-boundary": {
+      "types": "./dist/error-boundary/index.d.ts",
+      "import": "./dist/error-boundary/index.esm.js",
+      "require": "./dist/error-boundary/index.js"
+    },
     "./field": {
       "types": "./dist/field/index.d.ts",
       "import": "./dist/field/index.esm.js",
@@ -129,11 +134,6 @@
       "types": "./dist/keep-alive-sub-views/index.d.ts",
       "import": "./dist/keep-alive-sub-views/index.esm.js",
       "require": "./dist/keep-alive-sub-views/index.js"
-    },
-    "./label": {
-      "types": "./dist/label/index.d.ts",
-      "import": "./dist/label/index.esm.js",
-      "require": "./dist/label/index.js"
     },
     "./menu": {
       "types": "./dist/menu/index.d.ts",

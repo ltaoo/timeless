@@ -12,7 +12,7 @@ export interface DOMImg {
   t: "img";
   $elm: HTMLImageElement;
   isDocumentFragment(): boolean;
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): ChildNode[];
   setSrc(v: string): void;
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
@@ -99,7 +99,7 @@ export function DOMImg(props: {
       return true;
     },
     getChildNodes() {
-      return $elm.childNodes;
+      return [];
     },
     setSrc(v: string) {
       methods.setSrc(v);

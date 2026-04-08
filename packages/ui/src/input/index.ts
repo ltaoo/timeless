@@ -242,6 +242,9 @@ export class InputCore<T>
   focus() {
     // Override by platform provider
   }
+  blur() {
+    // Override by platform provider
+  }
 
   onChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>) {
     return this.on(Events.Change, handler);

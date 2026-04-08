@@ -1,7 +1,7 @@
+import { defaultErrorView } from "@/modules/error-boundary";
 import { MountedEvent } from "@/event";
 
 import { View, ViewProps } from "./view";
-import { defaultErrorView } from "./error-boundary";
 import {
   TimelessNormalComponent,
   isElement,

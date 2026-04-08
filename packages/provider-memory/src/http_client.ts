@@ -13,7 +13,10 @@ export type MemoryApiMapValue =
   | MemoryFetchResponse
   | ((
       ctx: MemoryHandlerContext,
-    ) => unknown | MemoryFetchResponse | Promise<unknown | MemoryFetchResponse>);
+    ) =>
+      | unknown
+      | MemoryFetchResponse
+      | Promise<unknown | MemoryFetchResponse>);
 export type MemoryApiMap = Record<string, MemoryApiMapValue>;
 
 export type MemoryHandlerContext = {
@@ -73,7 +76,10 @@ function normalizeResponse(v: unknown): MemoryFetchResponse {
 }
 
 function normalizeApiKey(key: string) {
-  return String(key || "").trim().replace(/\s+/g, " ").toUpperCase();
+  return String(key || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toUpperCase();
 }
 
 export function connect(
@@ -94,7 +100,6 @@ export function connect(
   store.fetch = async <T>(
     fetchOptions: Parameters<HttpClientCore["fetch"]>[0],
   ): Promise<{ data: T }> => {
-    alert(1);
     const { url: rawUrl, method, id, data, headers } = fetchOptions;
     const url = parseUrl(rawUrl, baseURL);
     const pathname = url.pathname;
@@ -162,7 +167,10 @@ export function connect(
     try {
       const resp = await Promise.race([handlerPromise, cancelPromise]);
       if (debug) {
-        console.log("[provider-memory]fetch", method, pathname, { query, data });
+        console.log("[provider-memory]fetch", method, pathname, {
+          query,
+          data,
+        });
       }
       return resp as any;
     } finally {

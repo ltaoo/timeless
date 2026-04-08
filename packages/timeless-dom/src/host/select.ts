@@ -12,7 +12,7 @@ export interface DOMSelect {
   t: "select";
   $elm: any;
   isDocumentFragment(): boolean;
-  getChildNodes(): any[];
+  getChildNodes(): ChildNode[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setAttribute(key: string, value: string): void;

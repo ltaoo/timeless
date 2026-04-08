@@ -15,7 +15,7 @@ import {
   TimelessElement,
 } from "@/content/type";
 import { LazyView } from "@/content/lazy-view";
-import { ErrorFallbackFn, withErrorBoundary } from "@/content/error-boundary";
+import { ErrorFallbackFn, withErrorBoundary } from "@/modules/error-boundary";
 import { MountedEvent } from "@/event";
 
 type SubView = { id?: unknown; name: string; pathname?: string } & Record<

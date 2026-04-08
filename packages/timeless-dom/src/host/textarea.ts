@@ -3,13 +3,14 @@ import { TimelessElement, ViewStyleProperties } from "@timeless/timeless";
 import { viewStyleToCssText } from "./style";
 import { DOMHostNode } from "./type";
 
-export interface DOMCheckbox {
-  t: "checkbox";
-  $elm: any;
+export interface DOMTextarea {
+  t: "textarea";
+  $elm: HTMLTextAreaElement;
   isDocumentFragment(): boolean;
   getChildNodes(): ChildNode[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
+  setStyleSet(name: string[]): void;
   setAttribute(key: string, value: string): void;
   removeAttribute(key: string): void;
   addEventListener(
@@ -22,16 +23,17 @@ export interface DOMCheckbox {
     handler: (event: any) => void,
     options?: any,
   ): void;
-  render(elm: TimelessElement): any;
+  setValue(value: string): void;
+  focus(): void;
+  blur(): void;
+  render(elm: TimelessElement): HTMLTextAreaElement;
 }
 
-export function DOMCheckbox(props: {
+export function DOMTextarea(props: {
   // canvas: Document;
   build: (elm: TimelessElement) => DOMHostNode;
-}): DOMCheckbox {
-  // const canvas = props.canvas;
-  // const $elm = canvas.createElement("div");
-  const $elm = document.createElement("input");
+}): DOMTextarea {
+  const $elm = document.createElement("textarea");
 
   const methods = {
     setStyle(style: ViewStyleProperties) {
@@ -41,7 +43,8 @@ export function DOMCheckbox(props: {
     },
     setStyleSet(styleSet: string[]) {
       // canvas.setClassName($elm, styleSet.join(" "));
-      $elm.className = styleSet.join(" ");
+      $elm.className =
+        typeof styleSet === "string" ? styleSet : styleSet.join(" ");
     },
     setupEventListener(events: any) {
       if (events.onClick) {
@@ -54,10 +57,16 @@ export function DOMCheckbox(props: {
         // canvas.addEventListener($elm, "pointerdown", events.onPointerDown);
       }
       if (events.onInput) {
-        $elm.addEventListener("input", events.onInput);
+        $elm.addEventListener("input", function (event) {
+          console.log("2");
+          events.onInput(event);
+        });
       }
       if (events.onChange) {
-        $elm.addEventListener("change", events.onChange);
+        $elm.addEventListener("change", function (event) {
+          console.log("1");
+          events.onChange(event);
+        });
       }
       if (events.onFocus) {
         // canvas.addEventListener($elm, "focus", events.onFocus);
@@ -108,7 +117,7 @@ export function DOMCheckbox(props: {
   };
 
   return {
-    t: "checkbox",
+    t: "textarea",
     get $elm() {
       return $elm;
     },
@@ -126,6 +135,7 @@ export function DOMCheckbox(props: {
       // canvas.patchStyle?.($elm, { [key]: value });
       $elm.style[key] = value;
     },
+    setStyleSet: methods.setStyleSet,
     setAttribute(key: string, value: string) {
       $elm.setAttribute(key, value);
     },
@@ -146,13 +156,20 @@ export function DOMCheckbox(props: {
     ) {
       $elm.removeEventListener(type, handler, options);
     },
+    setValue(value: string) {
+      $elm.value = value;
+    },
+    focus() {
+      $elm.focus();
+    },
+    blur() {
+      $elm.blur();
+    },
     render(elm: TimelessElement) {
-      $elm.type = "checkbox";
-      $elm.checked = !!elm.value;
       // $elm.style.backgroundColor = "transparent";
-      // console.log("[DOMCheckbox] render", elm.value);
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
+      $elm.value = elm.value;
       if (elm.state.id) {
         $elm.id = elm.state.id;
       }
@@ -165,6 +182,13 @@ export function DOMCheckbox(props: {
       if (elm.state.styleSet) {
         methods.setStyleSet(elm.state.styleSet);
       }
+      console.log('[]placeholder', elm.state.placeholder);
+      if (elm.state.placeholder) {
+        $elm.placeholder = elm.state.placeholder;
+      }
+      if (elm.state.disabled) {
+        $elm.disabled = elm.state.disabled;
+      }
       if (elm.events) {
         methods.setupEventListener(elm.events);
       }
@@ -173,6 +197,6 @@ export function DOMCheckbox(props: {
   };
 }
 
-export function isDOMCheckbox(value: any): value is DOMCheckbox {
-  return value.t === "checkbox";
+export function isDOMTextarea(value: any): value is DOMTextarea {
+  return value.t === "textarea";
 }

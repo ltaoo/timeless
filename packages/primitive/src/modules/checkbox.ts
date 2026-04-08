@@ -6,6 +6,7 @@ import { Fragment } from "@/content/fragment";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Checkbox, CheckboxProps } from "@/input/checkbox";
+import { Button, ButtonProps } from "@/interaction/button";
 import { ListenerManager } from "@/util/listener";
 
 export function Root(
@@ -18,17 +19,17 @@ export function Root(
 }
 
 export function Box(
-  props: ViewProps & { store: CheckboxCore; id?: string },
+  props: ButtonProps & { store: CheckboxCore; id?: string },
   children?: ViewChildren,
 ) {
   const { store, id, ...rest } = props;
   const state = ref(store.state);
   const events: any[] = [];
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
+      // id,
       onClick(e) {
         if (rest.onClick) rest.onClick(e);
         store.toggle();
@@ -97,7 +98,6 @@ export function Input(
   props: CheckboxProps & { store: CheckboxCore; id?: string },
 ) {
   const { store, id, ...rest } = props;
-  // const events: any[] = [];
   const listener$ = ListenerManager();
 
   return Checkbox({
@@ -123,12 +123,16 @@ export function Input(
           // $elm.checked = !!store.state.checked;
         }),
       );
-      if (rest.onMounted) rest.onMounted(event);
+      if (rest.onMounted) {
+        rest.onMounted(event);
+      }
     },
     onUnmounted() {
       // for (const fn of events) if (typeof fn === "function") fn();
       listener$.clean();
-      if (rest.onUnmounted) rest.onUnmounted();
+      if (rest.onUnmounted) {
+        rest.onUnmounted();
+      }
     },
   });
 }
@@ -181,7 +185,7 @@ export function GroupItem(
   // const checkboxContent = renderCheckbox
   //   ? renderCheckbox(item.core)
   //   : Box({ store: item.core }, [Indicator({ store: item.core }, children)]);
-  const checkboxContent = Box({ store: item.core }, [
+  const box$ = Box({ store: item.core }, [
     Indicator({ store: item.core }, children),
   ]);
   // const labelContent = renderLabel ? renderLabel(item.label) : item.label;
@@ -191,6 +195,6 @@ export function GroupItem(
     {
       ...rest,
     },
-    [checkboxContent, labelContent],
+    [box$, labelContent],
   );
 }

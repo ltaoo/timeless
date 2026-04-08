@@ -12,7 +12,7 @@ export interface DOMPopper {
   t: "popper";
   $elm: HTMLDivElement;
   isDocumentFragment(): boolean;
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): ChildNode[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
@@ -36,6 +36,7 @@ export function DOMPopper(props: {
   build: (elm: TimelessElement) => DOMHostNode;
 }): DOMPopper {
   const $elm = document.createElement("div");
+  let children$: ChildNode[] = [];
 
   const methods = {
     setStyle(style: ViewStyleProperties) {
@@ -109,7 +110,7 @@ export function DOMPopper(props: {
       return true;
     },
     getChildNodes() {
-      return $elm.childNodes;
+      return children$;
     },
     setStyle(style: ViewStyleProperties) {
       methods.setStyle(style);

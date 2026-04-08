@@ -84,7 +84,7 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
   const state: {
     rendered: boolean;
     props: {
-      styleSet?: string[] | Signal<string[]>;
+      styleSet?: string[];
       style: ViewStyleProperties;
     };
     events: Partial<{
@@ -501,6 +501,7 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
     },
     value: "",
     children: state.children,
+    state,
     props: state.props,
     events: state.events,
     render() {

@@ -14,7 +14,6 @@ type Provider = {
 let global_provider: Provider | undefined;
 
 export function setInputProvider(provider: Provider) {
-  console.log("set setInputProvider", provider);
   global_provider = provider;
 }
 
@@ -58,7 +57,6 @@ export function Input(
       }
       const $elm = event.target;
       if (global_provider) {
-        console.log("inject provider", $elm);
         global_provider.provide_ui_input(store, $elm);
       }
     },
@@ -123,25 +121,13 @@ export function Clear(
   return View(
     {
       ...rest,
-      // onMounted(event) {
-      //   const $e = event.target;
-      //   const handleClick = (e: any) => {
-      //     e.preventDefault();
-      //     e.stopPropagation();
-      //     store.clear();
-      //     setTimeout(() => {
-      //       store.focus();
-      //     }, 0);
-      //   };
-      //   // host.addEventListener($e, "click", handleClick);
-      //   $e.addEventListener("click", handleClick);
-      //   if (rest.onMounted) rest.onMounted(event);
-      // },
-      onClick(event) {
+      onMouseDown(event) {
         event.preventDefault();
+      },
+      onClick(event) {
         event.stopPropagation();
-        store.focus();
         store.clear();
+        store.focus();
       },
     },
     children,
@@ -168,17 +154,6 @@ export function Loading(
           return t ? { display: "block" } : { display: "none" };
         }),
       ]),
-      // onMounted(event) {
-      //   const $elm = event.target;
-      //   const updateDisplay = () => {
-      //     $elm.setStyleValue("display", loading$.value ? "block" : "none");
-      //   };
-      //   loading$.subscribe({ onChange: updateDisplay });
-      //   updateDisplay();
-      //   if (rest.onMounted) {
-      //     rest.onMounted(event);
-      //   }
-      // },
     },
     children,
   );
@@ -200,19 +175,6 @@ export function Disabled(
   return View(
     {
       ...rest,
-      onMounted(event) {
-        const $elm = (event as any).target as HTMLDivElement;
-        const updateState = () => {
-          // if (disabled$.value) {
-          //   host.setAttribute($elm, "data-disabled", "true");
-          // } else {
-          //   host.removeAttribute($elm, "data-disabled");
-          // }
-        };
-        disabled$.subscribe({ onChange: updateState });
-        updateState();
-        if (rest.onMounted) rest.onMounted(event);
-      },
     },
     children,
   );

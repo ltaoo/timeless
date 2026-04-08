@@ -5,19 +5,7 @@ import { DOMHostNode } from "./type";
 export interface DOMLazyView {
   t: "lazy-view";
   $elm: DocumentFragment;
-  methods: {
-    unmount(event: {
-      data: TimelessElement[];
-      reason?: string;
-      destroy?: boolean;
-    }): void;
-    mount(
-      children: (TimelessElement | null)[],
-      parent?: any,
-      before?: any,
-    ): DocumentFragment;
-  };
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): ChildNode[];
   isDocumentFragment(): boolean;
   render(elm: TimelessElement): Text;
   refresh(children: (TimelessElement | null)[]): void;
@@ -34,25 +22,25 @@ export function DOMLazyView(props: {
       reason?: string;
       destroy?: boolean;
     }) {
-      const { destroy = false } = event;
-      // DOM removal
-      if (destroy) {
-        // console.log("[Show] removing DOM nodes, count:", _current_nodes.length);
-        for (const elm of event.data) {
-          // 直接检查节点是否还有父节点，不依赖 anchor.parentNode
-          // console.log(
-          //   "[Show] checking node:",
-          //   node.nodeName,
-          //   "parentNode:",
-          //   !!node.parentNode,
-          // );
-          //   const parent = host.getParentNode(elm);
-          //   if (parent) {
-          //     host.removeChild(parent, elm);
-          //   }
-        }
-      }
-      console.log("[Show] unmount completed");
+      // const { destroy = false } = event;
+      // // DOM removal
+      // if (destroy) {
+      //   // console.log("[Show] removing DOM nodes, count:", _current_nodes.length);
+      //   for (const elm of event.data) {
+      //     // 直接检查节点是否还有父节点，不依赖 anchor.parentNode
+      //     // console.log(
+      //     //   "[Show] checking node:",
+      //     //   node.nodeName,
+      //     //   "parentNode:",
+      //     //   !!node.parentNode,
+      //     // );
+      //     //   const parent = host.getParentNode(elm);
+      //     //   if (parent) {
+      //     //     host.removeChild(parent, elm);
+      //     //   }
+      //   }
+      // }
+      // console.log("[Show] unmount completed");
     },
 
     mount(children: (TimelessElement | null)[], parent?: any, before?: any) {
@@ -116,9 +104,8 @@ export function DOMLazyView(props: {
     get $elm() {
       return $fragment;
     },
-    methods,
     getChildNodes() {
-      return $fragment.childNodes;
+      return children$;
     },
     isDocumentFragment() {
       return false;

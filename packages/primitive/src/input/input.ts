@@ -2,9 +2,9 @@ import { DerivedRef, Ref, Signal, isRef } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
 import {
-  viewStyleToCssText,
-  isStyleRef,
   isClassNameRef,
+  isStyleRef,
+  RawViewStyleProperties,
   ViewStyleProperties,
 } from "@/style/index";
 import { MountedEvent } from "@/event";
@@ -24,11 +24,14 @@ export interface InputProps extends Omit<ViewProps, "as" | "type"> {
   autocomplete?: boolean | DerivedRef<boolean> | Ref<boolean>;
   autocorrect?: boolean;
   // inputMode?: string;
-  onInput?: (e: Event) => void;
+  onInput?: (e: InputEvent) => void;
   onChange?: (e: InputEvent) => void;
 }
 type InputState = {
   rendered: boolean;
+  style: RawViewStyleProperties;
+  styleSet?: string[];
+  id?: string;
   name?: string;
   value: string;
   placeholder?: string;
@@ -36,10 +39,6 @@ type InputState = {
   required?: boolean;
   maxLength?: number;
   minLength?: number;
-  props: {
-    styleSet?: string[];
-    style: ViewStyleProperties;
-  };
 };
 
 export function Input(props: InputProps = {}) {
@@ -80,10 +79,11 @@ export function Input(props: InputProps = {}) {
   const manager$ = ListenerManager();
   const state: InputState = {
     rendered: false,
+    id: "",
+    name: "",
     value: "",
-    props: {
-      style: {},
-    },
+    style: {},
+    styleSet: [],
   };
   const events = {
     onInput,
@@ -131,12 +131,15 @@ export function Input(props: InputProps = {}) {
         if (isRef(id)) {
           id.subscribe({
             onChange(v) {
+              state.id = v as string;
               methods.setProp("id", String(v));
             },
           });
-          methods.setProp("id", id.value);
+          // methods.setProp("id", id.value);
+          state.id = id.value;
         } else {
-          methods.setProp("id", id);
+          // methods.setProp("id", id);
+          state.id = id;
         }
       }
 
@@ -351,24 +354,24 @@ export function Input(props: InputProps = {}) {
       // Handle class
       if (cls) {
         if (typeof cls === "string") {
-          state.props.styleSet = [cls];
+          state.styleSet = [cls];
           // host.setClassName($elm, cls);
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v) {
               // host.setClassName($elm, String(v));
               if ($elm) {
-                state.props.styleSet = v as string[];
+                state.styleSet = v as string[];
                 $elm.setStyleSet(v);
               }
             },
           });
           // host.setClassName($elm, String(cls.value));
-          state.props.styleSet = [cls.value];
+          state.styleSet = [cls.value];
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
-              state.props.styleSet = v as string[];
+              state.styleSet = v as string[];
               if ($elm) {
                 $elm.setStyleSet(
                   Array.isArray(v) ? v.join(" ") : String(v ?? ""),
@@ -376,7 +379,7 @@ export function Input(props: InputProps = {}) {
               }
             },
           });
-          state.props.styleSet = [cls.toString()];
+          state.styleSet = [cls.toString()];
         }
       }
 
@@ -387,39 +390,36 @@ export function Input(props: InputProps = {}) {
           st.subscribe({
             onChange(v) {
               // host.setStyleText($elm, viewStyleToCssText(v ?? {}));
-              state.props.style = v as any;
+              state.style = v as any;
               if ($elm) {
                 $elm.setStyleSet(v);
               }
             },
           });
           // host.setStyleText($elm, viewStyleToCssText(st.value));
-          state.props.style = st.value;
-        } else if (isRef(style)) {
+          state.style = st.value as RawViewStyleProperties;
+        } else if (isStyleRef(style)) {
           const st = style;
-          const apply = () => {
-            // host.setStyleText($elm, viewStyleToCssText(st.value || {}));
-          };
           st.subscribe({
             onChange() {
-              state.props.style = st.value as any;
+              state.style = st.value as RawViewStyleProperties;
               $elm.setStyleSet(st.value || {});
             },
           });
-          state.props.style = st.value;
+          state.style = st.value;
         } else {
           Object.keys(style as any).forEach((k) => {
             const vv = style[k];
             if (isRef(vv)) {
               vv.subscribe({
                 onChange() {
-                  state.props.style = style as any;
+                  state.style = style as any;
                   $elm.setStyleSet(style);
                 },
               });
             }
           });
-          state.props.style = style as any;
+          state.style = style as any;
         }
       }
     },
@@ -437,7 +437,6 @@ export function Input(props: InputProps = {}) {
     },
     value: state.value,
     state,
-    props: state.props,
     events: events,
     render() {
       // if (state.rendered) {
@@ -559,7 +558,7 @@ export function Input(props: InputProps = {}) {
       // console.log("[]input onMounted", $elm);
       // $elm = event.target;
       state.rendered = true;
-      const handler = function (event: Event) {
+      const handler = function (event: InputEvent) {
         if (onInput) {
           onInput(event);
         }

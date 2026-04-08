@@ -11,12 +11,13 @@ import {
   Fragment,
   Img,
   Checkbox,
+  DismissableLayer,
   ref,
+  styleNames,
   combine,
   computed,
   refarr,
   refobj,
-  DismissableLayer,
   getobj,
 } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
@@ -187,6 +188,41 @@ function ApplicationView() {
       },
     },
     [
+      Show({
+        when: visible_,
+        ok() {
+          return Fragment(
+            {
+              onMounted() {
+                console.log("[fragment] hello wrap onMounted");
+              },
+            },
+            [
+              View(
+                {
+                  onMounted() {
+                    console.log("[hello] onMounted");
+                  },
+                },
+                ["Hello"],
+              ),
+            ],
+          );
+        },
+      }),
+      // View(
+      //   {
+      //     style: styleNames([
+      //       {
+      //         color: "red",
+      //       },
+      //       computed(visible_, (t) => {
+      //         return t ? { display: "block" } : { display: "none" };
+      //       }),
+      //     ]),
+      //   },
+      //   ["Hello"],
+      // ),
       Input({
         class: "w-full",
         placeholder: "Add a todo todo",
@@ -204,16 +240,19 @@ function ApplicationView() {
             console.log("[Button] onMounted");
           },
           onClick() {
-            const v = todo_.value;
-            todo_.as("");
-            if (!v) {
-              return;
-            }
-            todos.push({
-              id: todos.length,
-              completed: false,
-              title: v,
+            visible_.as((prev) => {
+              return !prev;
             });
+            // const v = todo_.value;
+            // todo_.as("");
+            // if (!v) {
+            //   return;
+            // }
+            // todos.push({
+            //   id: todos.length,
+            //   completed: false,
+            //   title: v,
+            // });
           },
         },
         ["Add Todo"],

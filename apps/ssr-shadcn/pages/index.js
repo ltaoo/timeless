@@ -178,7 +178,7 @@ export default function Page({ data }) {
           ]),
           CardContent({ class: "space-y-4" }, [
             View({ class: "space-y-2" }, [
-              Label({ htmlFor: "test-input" }, ["Enter text"]),
+              Label({ for: "test-input" }, ["Enter text"]),
               Input({ store: input, id: "test-input" }),
             ]),
             View({ class: "text-sm text-muted-foreground" }, [

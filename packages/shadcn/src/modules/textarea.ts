@@ -32,6 +32,7 @@ export function Textarea(
   return TextareaPrimitive.Root({ store, class: "flex flex-col gap-1" }, [
     TextareaPrimitive.Root({ store, class: "relative inline-flex" }, [
       TextareaPrimitive.Textarea({
+        ...rest,
         store,
         id,
         class: combine({ isLoading, hasValue }, (t) => {
@@ -41,7 +42,6 @@ export function Textarea(
           const prLoading = showLoading && t.isLoading ? "pr-8" : "";
           return [base, pr, prLoading].filter(Boolean).join(" ");
         }),
-        ...rest,
       }),
       Show({
         when: computed(hasValue, (t) => t && showClear),

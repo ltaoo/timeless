@@ -72,7 +72,6 @@ export * as ParagraphPrimitive from "./modules/paragraph";
 export * as ImagePrimitive from "./modules/image";
 export * as TablePrimitive from "./modules/table";
 export * as CardPrimitive from "./modules/card";
-export * as LabelPrimitive from "./modules/label";
 export * as BadgePrimitive from "./modules/badge";
 export * as SeparatorPrimitive from "./modules/separator";
 export * as SkeletonPrimitive from "./modules/skeleton";
@@ -122,12 +121,14 @@ export * as WaterfallPrimitive from "./modules/waterfall";
 // biz
 export * from "./modules/keep-alive-sub-views";
 export * from "./modules/standard-sub-views";
+export * from "./modules/error-boundary";
 
 export * from "./style";
 export * from "./util/env";
 export * from "./util/render-to-string";
 export * from "./util/lazy";
 export * from "./util/h";
+export * from "./util/listener";
 export * from "./interaction/dismissable";
 
 export * from "./host";

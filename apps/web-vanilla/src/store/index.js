@@ -10,6 +10,7 @@ import AdminLayoutView from "@/pages/admin/layout.js";
 console.log("init");
 ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
 InputPrimitive.setInputProvider(Timeless.web);
+TextareaPrimitive.setTextareaProvider(Timeless.web);
 Timeless.kit.NavigatorCore.prefix = "/";
 
 const routes_configure = /** @type {const} */ ({

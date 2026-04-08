@@ -5,7 +5,7 @@ import { DOMView } from "./view";
 
 export interface DOMGrid {
   $elm: HTMLDivElement;
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): ChildNode[];
   isDocumentFragment(): boolean;
   render(elm: TimelessElement): HTMLDivElement;
 }
@@ -20,7 +20,7 @@ export function DOMGrid(props: {
       return view$.$elm;
     },
     getChildNodes() {
-      return view$.getChildNodes();
+      return [];
     },
     isDocumentFragment() {
       return false;

@@ -10,14 +10,16 @@ export function ListenerManager() {
       }
       return clean || noop;
     },
+    clean() {
+      cleanups.forEach((clean) => clean());
+      cleanups.length = 0;
+    },
   };
 
   return {
     add: methods.add,
     push: methods.add,
-    clean() {
-      cleanups.forEach((clean) => clean());
-      cleanups.length = 0;
-    },
+    clean: methods.clean,
+    clear: methods.clean,
   };
 }

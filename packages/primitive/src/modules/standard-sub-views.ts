@@ -16,7 +16,7 @@ import {
 import { For } from "@/reactive/for";
 import { Show } from "@/reactive/show";
 import { LazyView } from "@/content/lazy-view";
-import { ErrorFallbackFn, withErrorBoundary } from "@/content/error-boundary";
+import { ErrorFallbackFn, withErrorBoundary } from "@/modules/error-boundary";
 
 type SubView = { id?: unknown; name: string; pathname?: string } & Record<
   string,

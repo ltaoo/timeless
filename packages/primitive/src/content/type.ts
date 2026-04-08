@@ -23,17 +23,17 @@ export interface TimelessElement<T = any> {
   };
   value?: T;
   events?: {
-    onChange?: (e: Event) => void;
     onClick?: (e: MouseEvent) => void;
     onDoubleClick?: (e: MouseEvent) => void;
     onLongPress?: (e: PointerEvent) => void;
     onPointerDown?: (e: PointerEvent) => void;
+    onMouseEnter?: (e: MouseEvent) => void;
+    onMouseLeave?: (e: MouseEvent) => void;
+    onChange?: (e: InputEvent) => void;
     onFocus?: (e: FocusEvent) => void;
     onBlur?: (e: FocusEvent) => void;
     onKeyDown?: (e: KeyboardEvent) => void;
     onContextMenu?: (e: MouseEvent) => void;
-    onMouseEnter?: (e: MouseEvent) => void;
-    onMouseLeave?: (e: MouseEvent) => void;
     onDragStart?: (e: DragEvent) => void;
     onDrag?: (e: DragEvent) => void;
     onDragEnd?: (e: DragEvent) => void;

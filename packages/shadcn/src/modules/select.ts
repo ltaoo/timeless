@@ -1,24 +1,19 @@
-import {
-  classNames,
-  combine,
-  computed,
-  ref,
-  refobj,
-} from "@timeless/timeless";
+import { classNames, combine, computed, ref, refobj } from "@timeless/timeless";
 import {
   SelectPrimitive,
   For,
   ViewProps,
   Show,
   View,
+  Icon,
 } from "@timeless/timeless";
 import { SelectCore } from "@timeless/ui";
-import {
-  CheckOutlined,
-  ChevronDownOutlined,
-  ChevronUpOutlined,
-  CircleXOutlined,
-} from "@timeless/icons";
+// import {
+//   CheckOutlined,
+//   ChevronDownOutlined,
+//   ChevronUpOutlined,
+//   CircleXOutlined,
+// } from "@timeless/icons";
 
 export function Select(
   props: ViewProps & { store: SelectCore<any>; id?: string },
@@ -110,7 +105,7 @@ export function Select(
             class:
               "pointer-events-none absolute right-2 flex size-4 items-center justify-center",
           },
-          [CheckOutlined({})],
+          [Icon({ name: "check", size: 16 })],
         ),
         SelectPrimitive.ItemText({}, [option.label]),
       ],
@@ -155,10 +150,8 @@ export function Select(
         onMouseLeave() {
           hovering.as(false);
         },
-        onMounted(event) {
-          event.target.addEventListener("mousedown", (e) => {
-            e.stopPropagation();
-          });
+        onMouseDown(e) {
+          e.stopPropagation();
         },
       },
       [
@@ -182,7 +175,7 @@ export function Select(
                     class:
                       "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
                   },
-                  [CircleXOutlined({ class: "size-4" })],
+                  [Icon({ name: "circle-x", size: 16 })],
                 ),
               ];
             },
@@ -194,10 +187,10 @@ export function Select(
                     Show({
                       when: computed(state_, (t) => t.open),
                       ok() {
-                        return [ChevronUpOutlined({})];
+                        return [Icon({ name: "chevron-up" })];
                       },
                       else() {
-                        return [ChevronDownOutlined({})];
+                        return [Icon({ name: "chevron-down" })];
                       },
                     }),
                   ],

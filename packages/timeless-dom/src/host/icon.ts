@@ -62,7 +62,7 @@ export interface DOMIcon {
   t: "icon";
   $elm: SVGSVGElement;
   isDocumentFragment(): boolean;
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): ChildNode[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
@@ -150,7 +150,7 @@ export function DOMIcon(props: {
       return false;
     },
     getChildNodes() {
-      return $elm.childNodes;
+      return [];
     },
     setStyle(style: ViewStyleProperties) {
       methods.setStyle(style);

@@ -1,12 +1,14 @@
 import { DOMGrid } from "./grid";
 import { DOMView } from "./view";
 import { DOMText } from "./text";
+import { DOMLabel } from "./label";
 import { DOMFragment } from "./fragment";
 import { DOMLazyView } from "./lazy-view";
 import { DOMImg } from "./img";
 import { DOMIcon } from "./icon";
 
 import { DOMInput } from "./input";
+import { DOMTextarea } from "./textarea";
 import { DOMCheckbox } from "./checkbox";
 
 import { DOMButton } from "./button";
@@ -23,9 +25,11 @@ export type DOMHostNode =
   | DOMLazyView
   | DOMView
   | DOMText
+  | DOMLabel
   | DOMImg
   | DOMIcon
   | DOMInput
+  | DOMTextarea
   | DOMCheckbox
   | DOMButton
   | DOMPortal

@@ -6,7 +6,7 @@ import { DOMGrid } from "@/host/grid";
 import { DOMText } from "@/host/text";
 import { DOMShow } from "@/host/show";
 import { DOMFor } from "@/host/for";
-import { DOMFragment, isDocumentFragment } from "@/host/fragment";
+import { DOMFragment, isDOMFragment } from "@/host/fragment";
 import { DOMLazyView } from "@/host/lazy-view";
 import { DOMImg } from "@/host/img";
 import { DOMIcon } from "@/host/icon";
@@ -15,6 +15,8 @@ import { DOMButton } from "@/host/button";
 import { DOMPortal } from "@/host/portal";
 import { DOMPopper } from "@/host/popper";
 import { DOMCheckbox } from "@/host/checkbox";
+import { DOMLabel } from "@/host/label";
+import { DOMTextarea } from "@/host/textarea";
 
 function build(elm: TimelessElement): DOMHostNode {
   if (elm.t === "view") {
@@ -28,6 +30,12 @@ function build(elm: TimelessElement): DOMHostNode {
     const text$ = DOMText(elm.value as any);
     elm.$elm = text$;
     return text$;
+  }
+  if (elm.t === "label") {
+    const label$ = DOMLabel({ build });
+    elm.$elm = label$;
+    label$.render(elm);
+    return label$;
   }
   if (elm.t === "fragment") {
     const fragment$ = DOMFragment({ build });
@@ -70,6 +78,12 @@ function build(elm: TimelessElement): DOMHostNode {
     elm.$elm = input$;
     input$.render(elm);
     return input$;
+  }
+  if (elm.t === "textarea") {
+    const textarea$ = DOMTextarea({ build });
+    elm.$elm = textarea$;
+    textarea$.render(elm);
+    return textarea$;
   }
   if (elm.t === "checkbox") {
     const checkbox$ = DOMCheckbox({ build });
@@ -131,7 +145,7 @@ export function render(
       console.error("[Render] Element render return null");
       return;
     }
-    if (!isDOMView(host$) && !isDocumentFragment(host$)) {
+    if (!isDOMView(host$) && !isDOMFragment(host$)) {
       console.error(
         "[Render] Element render return non DOMView or DOMFragment",
       );

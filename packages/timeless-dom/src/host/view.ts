@@ -12,7 +12,7 @@ export interface DOMView {
   t: "view";
   $elm: HTMLDivElement;
   isDocumentFragment(): boolean;
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): ChildNode[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
@@ -36,6 +36,7 @@ export function DOMView(props: {
   build: (elm: TimelessElement) => DOMHostNode;
 }): DOMView {
   const $elm = document.createElement("div");
+  const children$: ChildNode[] = [];
 
   const methods = {
     setStyle(style: ViewStyleProperties) {
@@ -51,6 +52,12 @@ export function DOMView(props: {
       }
       if (events.onDoubleClick) {
         $elm.addEventListener("dblclick", events.onDoubleClick);
+      }
+      if (events.onMouseDown) {
+        $elm.addEventListener("mousedown", events.onMouseDown);
+      }
+      if (events.onMouseUp) {
+        $elm.addEventListener("mouseup", events.onMouseUp);
       }
       if (events.onPointerDown) {
         $elm.addEventListener("pointerdown", events.onPointerDown);
@@ -109,7 +116,7 @@ export function DOMView(props: {
       return true;
     },
     getChildNodes() {
-      return $elm.childNodes;
+      return children$;
     },
     setStyle(style: ViewStyleProperties) {
       methods.setStyle(style);
@@ -168,6 +175,7 @@ export function DOMView(props: {
           if (isElement(child)) {
             const $sub = props.build(child);
             if ($sub && $sub.$elm) {
+              children$.push($sub.$elm);
               $elm.appendChild($sub.$elm);
             }
           }

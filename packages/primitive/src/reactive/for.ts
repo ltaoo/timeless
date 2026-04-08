@@ -523,7 +523,7 @@ export function For<T>(props: ForProps<T>) {
     },
     value: "",
     children: state.children,
-
+    state,
     render() {
       return $elm;
     },

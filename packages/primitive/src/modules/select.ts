@@ -4,7 +4,7 @@ import { SelectCore } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";
-import { Input } from "@/input/input";
+import { Input as NativeInput } from "@/input/input";
 import { isStyleRef, classNames } from "@/style/index";
 import { getHost } from "@/host";
 
@@ -40,55 +40,49 @@ export function Trigger(
   const events: any[] = [];
 
   // 创建隐藏的 input 用于可访问性
-  const _input$ = View(
-    {
-      as: "input",
-      attributes: {
-        ...(rest.attributes || {}),
-        id: props.id || rest.attributes?.id || props.store.id,
-      },
-      style: {
-        position: "absolute",
-        width: "1px",
-        height: "1px",
-        padding: 0,
-        margin: "-1px",
-        overflow: "hidden",
-        clip: "rect(0, 0, 0, 0)",
-        "white-space": "nowrap",
-        "border-width": 0,
-      },
-      onFocus() {
-        if (props.store.presence.state.visible) {
-          return;
-        }
-        props.store.show();
-      },
-      onClick(e) {
-        e.stopPropagation();
-        // if (store.disabled) {
-        //   return;
-        // }
-        // store.layer.pointerDown();
-        // if (store.open) {
-        //   store.hide();
-        // } else {
-        //   store.presence.show();
-        //   store.show();
-        // }
-      },
-      onMounted(event) {
-        const $elm = (event as any).target as HTMLInputElement;
-        host.setProperty?.($elm, "value", store.state.value || "");
-        events.push(
-          store.onStateChange(() => {
-            host.setProperty?.($elm, "value", store.state.value || "");
-          }),
-        );
-      },
+  const _input$ = NativeInput({
+    id: props.id || props.store.id,
+    attributes: rest.attributes,
+    style: {
+      position: "absolute",
+      width: "1px",
+      height: "1px",
+      padding: 0,
+      margin: "-1px",
+      overflow: "hidden",
+      clip: "rect(0, 0, 0, 0)",
+      "white-space": "nowrap",
+      "border-width": 0,
     },
-    [],
-  );
+    onFocus() {
+      if (props.store.presence.state.visible) {
+        return;
+      }
+      props.store.show();
+    },
+    onClick(e) {
+      e.stopPropagation();
+      // if (store.disabled) {
+      //   return;
+      // }
+      // store.layer.pointerDown();
+      // if (store.open) {
+      //   store.hide();
+      // } else {
+      //   store.presence.show();
+      //   store.show();
+      // }
+    },
+    onMounted(event) {
+      const $elm = (event as any).target as HTMLInputElement;
+      host.setProperty?.($elm, "value", store.state.value || "");
+      events.push(
+        store.onStateChange(() => {
+          host.setProperty?.($elm, "value", store.state.value || "");
+        }),
+      );
+    },
+  });
 
   return View(
     {
@@ -377,7 +371,7 @@ export function Search(
     when: computed(state_, (s) => s.search),
     ok() {
       return [
-        Input({
+        NativeInput({
           ...rest,
           placeholder: computed(state_, (s) => s.searchPlaceholder),
           value: computed(state_, (s) => s.searchKeyword),

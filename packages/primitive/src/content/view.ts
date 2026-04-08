@@ -1,7 +1,6 @@
-import { DerivedRef, Ref, Signal, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
 import {
-  ViewStyleProperties,
   ViewStyle,
   isClassNameRef,
   ClassNameRef,
@@ -18,7 +17,7 @@ import {
   ViewChildren,
 } from "./type";
 
-export interface ViewProps {
+export type ViewProps = {
   key?: string | number;
   as?: string;
   style?: ViewStyle;
@@ -33,39 +32,24 @@ export interface ViewProps {
     | DerivedRef<string | number | boolean | undefined>
     | Ref<string | number | boolean | undefined>
   >;
-  onMounted?(event: MountedEvent): void | (() => void);
-  beforeUnmounted?(): void;
-  onUnmounted?(): void;
-  onClick?(e: MouseEvent): void;
-  onDoubleClick?(e: MouseEvent): void;
-  onLongPress?(e: PointerEvent): void;
-  onPointerDown?: (e: PointerEvent) => void;
-  onFocus?(e: FocusEvent): void;
-  onBlur?(e: FocusEvent): void;
-  onKeyDown?: (e: KeyboardEvent) => void;
-  onContextMenu?: (e: MouseEvent) => void;
-  onMouseEnter?: (e: MouseEvent) => void;
-  onMouseLeave?: (e: MouseEvent) => void;
-  onDragStart?: (e: DragEvent) => void;
-  onDrag?: (e: DragEvent) => void;
-  onDragEnd?: (e: DragEvent) => void;
-  onDragEnter?: (e: DragEvent) => void;
-  onDragOver?: (e: DragEvent) => void;
-  onDragLeave?: (e: DragEvent) => void;
-  onDrop?: (e: DragEvent) => void;
-  onAnimationEnd?: (e: AnimationEvent) => void;
-}
+} & ViewEvents;
 type ViewEvents = Partial<{
+  onMounted?: (event: MountedEvent) => void | (() => void);
+  beforeUnmounted?: () => void;
+  onUnmounted?: () => void;
   onClick?: (e: MouseEvent) => void;
   onDoubleClick?: (e: MouseEvent) => void;
+  onMouseDown?: (e: MouseEvent) => void;
+  onMouseUp?: (e: MouseEvent) => void;
+  onMouseEnter?: (e: MouseEvent) => void;
+  onMouseLeave?: (e: MouseEvent) => void;
   onLongPress?: (e: PointerEvent) => void;
   onPointerDown?: (e: PointerEvent) => void;
+  onChange?: (e: InputEvent) => void;
   onFocus?: (e: FocusEvent) => void;
   onBlur?: (e: FocusEvent) => void;
   onKeyDown?: (e: KeyboardEvent) => void;
   onContextMenu?: (e: MouseEvent) => void;
-  onMouseEnter?: (e: MouseEvent) => void;
-  onMouseLeave?: (e: MouseEvent) => void;
   onDragStart?: (e: DragEvent) => void;
   onDrag?: (e: DragEvent) => void;
   onDragEnd?: (e: DragEvent) => void;
@@ -95,14 +79,16 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     beforeUnmounted,
     onClick,
     onDoubleClick,
+    onMouseDown,
+    onMouseUp,
+    onMouseEnter,
+    onMouseLeave,
     onLongPress,
     onFocus,
     onBlur,
     onPointerDown,
     onKeyDown,
     onContextMenu,
-    onMouseEnter,
-    onMouseLeave,
     onDragStart,
     onDrag,
     onDragEnd,
@@ -127,14 +113,16 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
   const events = {
     onClick,
     onDoubleClick,
+    onMouseEnter,
+    onMouseLeave,
+    onMouseDown,
+    onMouseUp,
     onLongPress,
     onPointerDown,
     onFocus,
     onBlur,
     onKeyDown,
     onContextMenu,
-    onMouseEnter,
-    onMouseLeave,
     onDragStart,
     onDrag,
     onDragEnd,
@@ -296,13 +284,14 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
             }
           });
           style.subscribe({
-            onChange() {
+            onChange(v) {
               // state.props.style = {
               //   ...state.props.style,
               //   ...(style.value || {}),
               // };
+              state.style = v as RawViewStyleProperties;
               if ($elm && typeof $elm.setStyle === "function") {
-                $elm.setStyle(state.style);
+                $elm.setStyle(v);
               }
             },
           });
@@ -618,12 +607,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       }
     },
     onUnmounted() {
-      // console.log(
-      //   "[View] onUnmounted called, children count:",
-      //   _children.length,
-      // );
       if (onUnmounted) {
-        // console.log("[View] calling props.onUnmounted");
         onUnmounted();
       }
       manager$.clean();

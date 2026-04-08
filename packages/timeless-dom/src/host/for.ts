@@ -23,6 +23,7 @@ export function DOMFor(props: {
 }): DOMFor {
   const $fragment = document.createDocumentFragment();
   const $anchor = document.createTextNode("");
+  let elements: TimelessElement[] = [];
   const children$: ChildNode[] = [];
 
   const methods = {
@@ -180,6 +181,7 @@ export function DOMFor(props: {
           });
         }
       }
+      elements = new_instances;
       return $fragment;
     },
   };

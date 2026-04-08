@@ -7,6 +7,7 @@ import {
   Match,
   Fragment,
   Label as NativeLabel,
+  ListenerManager,
 } from "@timeless/timeless";
 import { SingleFieldCore } from "@timeless/ui";
 
@@ -82,9 +83,7 @@ export function FieldLabel(
     weight?: "normal" | "medium";
     tone?: "default" | "destructive";
   },
-  children?: ViewChildren,
 ) {
-  void children;
   const {
     class: cls,
     store,
@@ -173,41 +172,44 @@ export function Field(
   },
   children: ViewChildren = [],
 ) {
-  const orientation = (props as any).orientation || "vertical";
+  const orientation = props.orientation || "vertical";
+
+  const listener$ = ListenerManager();
 
   const state_ = refobj(props.store.state);
   const error_ = refobj(props.store.state.error);
   const invalid_ = computed(error_, (e) => !!e);
 
-  let $root: HTMLElement | null = null;
-  const applyInvalidToControls = (invalid: boolean) => {
-    if (!$root) return;
-    const controls = $root.querySelectorAll("input, textarea, select");
-    for (let i = 0; i < controls.length; i += 1) {
-      const el = controls[i] as HTMLElement;
-      if (invalid) {
-        if (!el.hasAttribute("aria-invalid")) {
-          el.setAttribute("data-field-aria-invalid", "");
-          el.setAttribute("aria-invalid", "true");
-        }
-        continue;
-      }
-      if (el.hasAttribute("data-field-aria-invalid")) {
-        el.removeAttribute("data-field-aria-invalid");
-        el.removeAttribute("aria-invalid");
-      }
-    }
-  };
+  // let $root: HTMLElement | null = null;
+  // const applyInvalidToControls = (invalid: boolean) => {
+  //   if (!$root) return;
+  //   const controls = $root.querySelectorAll("input, textarea, select");
+  //   for (let i = 0; i < controls.length; i += 1) {
+  //     const el = controls[i] as HTMLElement;
+  //     if (invalid) {
+  //       if (!el.hasAttribute("aria-invalid")) {
+  //         el.setAttribute("data-field-aria-invalid", "");
+  //         el.setAttribute("aria-invalid", "true");
+  //       }
+  //       continue;
+  //     }
+  //     if (el.hasAttribute("data-field-aria-invalid")) {
+  //       el.removeAttribute("data-field-aria-invalid");
+  //       el.removeAttribute("aria-invalid");
+  //     }
+  //   }
+  // };
 
-  const unlistens = [
+  listener$.push(
     props.store.onStateChange((v) => {
       state_.as(v);
     }),
+  );
+  listener$.push(
     props.store.onError((v) => {
       error_.as(v);
-      applyInvalidToControls(!!v);
     }),
-  ];
+  );
 
   const fid = props.id || props.store.name || props.store.id;
 
@@ -229,16 +231,15 @@ export function Field(
         cls,
       ]),
       onMounted(event) {
-        const el = (event as any).target as HTMLElement;
-        $root = el;
-        applyInvalidToControls(invalid_.value);
+        // const el = (event as any).target as HTMLElement;
+        // $root = el;
+        // applyInvalidToControls(invalid_.value);
         if (onMounted) {
           return onMounted(event);
         }
       },
       onUnmounted() {
-        $root = null;
-        unlistens.forEach((fn) => fn && fn());
+        listener$.clean();
         if (onUnmounted) {
           onUnmounted();
         }
@@ -248,28 +249,23 @@ export function Field(
       Show({
         when: !props.inline,
         ok() {
+          // console.log("render label in ok");
           return [
-            FieldLabel(
-              {
-                store: props.store,
-                for: fid,
-              },
-              [],
-            ),
+            FieldLabel({
+              store: props.store,
+              for: fid,
+            }),
             Fragment({}, children),
           ];
         },
         else() {
           return [
             Fragment({}, children),
-            FieldLabel(
-              {
-                class: "inline",
-                store: props.store,
-                for: fid,
-              },
-              [],
-            ),
+            FieldLabel({
+              class: "inline",
+              store: props.store,
+              for: fid,
+            }),
           ];
         },
       }),

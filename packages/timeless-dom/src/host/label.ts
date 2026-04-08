@@ -8,25 +8,34 @@ import {
 import { viewStyleToCssText } from "./style";
 import { DOMHostNode } from "./type";
 
-export interface DOMButton {
-  t: "button";
-  $elm: HTMLButtonElement;
+export interface DOMLabel {
+  t: "label";
+  $elm: HTMLLabelElement;
   isDocumentFragment(): boolean;
-  getChildNodes(): ChildNode[];
+  getChildNodes(): NodeListOf<ChildNode>;
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
+  setAttribute(key: string, value: string): void;
   getBoundingClientRect(): DOMRect;
-  render(elm: TimelessElement): HTMLButtonElement;
+  removeAttribute(key: string): void;
+  addEventListener(
+    type: string,
+    handler: (event: any) => void,
+    options?: any,
+  ): void;
+  removeEventListener(
+    type: string,
+    handler: (event: any) => void,
+    options?: any,
+  ): void;
+  render(elm: TimelessElement): HTMLLabelElement;
 }
 
-export function DOMButton(props: {
+export function DOMLabel(props: {
   build: (elm: TimelessElement) => DOMHostNode;
-}): DOMButton {
-  const $elm = document.createElement("button");
-
-  const elements: TimelessElement[] = [];
-  const children$: ChildNode[] = [];
+}): DOMLabel {
+  const $elm = document.createElement("label");
 
   const methods = {
     setStyle(style: ViewStyleProperties) {
@@ -42,6 +51,12 @@ export function DOMButton(props: {
       }
       if (events.onDoubleClick) {
         $elm.addEventListener("dblclick", events.onDoubleClick);
+      }
+      if (events.onMouseDown) {
+        $elm.addEventListener("mousedown", events.onMouseDown);
+      }
+      if (events.onMouseUp) {
+        $elm.addEventListener("mouseup", events.onMouseUp);
       }
       if (events.onPointerDown) {
         $elm.addEventListener("pointerdown", events.onPointerDown);
@@ -89,10 +104,13 @@ export function DOMButton(props: {
         $elm.addEventListener("animationend", events.onAnimationEnd);
       }
     },
+    setAttribute(key: string, value: string) {
+      $elm.setAttribute(key, value);
+    },
   };
 
   return {
-    t: "button",
+    t: "label",
     get $elm() {
       return $elm;
     },
@@ -100,7 +118,7 @@ export function DOMButton(props: {
       return true;
     },
     getChildNodes() {
-      return children$;
+      return $elm.childNodes;
     },
     setStyle(style: ViewStyleProperties) {
       methods.setStyle(style);
@@ -111,15 +129,49 @@ export function DOMButton(props: {
     setStyleSet(name: string) {
       $elm.className = name;
     },
+    setAttribute(key: string, value: string) {
+      $elm.setAttribute(key, value);
+    },
+    removeAttribute(key: string) {
+      $elm.removeAttribute(key);
+    },
     getBoundingClientRect() {
       return $elm.getBoundingClientRect();
     },
+    addEventListener(
+      type: string,
+      handler: (event: any) => void,
+      options?: any,
+    ) {
+      $elm.addEventListener(type, handler, options);
+    },
+    removeEventListener(
+      type: string,
+      handler: (event: any) => void,
+      options?: any,
+    ) {
+      $elm.removeEventListener(type, handler, options);
+    },
     render(elm: TimelessElement) {
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state.style) {
+        methods.setStyle(elm.state.style);
       }
-      if (elm.props?.styleSet) {
-        methods.setStyleSet(elm.props.styleSet);
+      if (elm.state.styleSet) {
+        methods.setStyleSet(elm.state.styleSet);
+      }
+      // console.log('render label', elm.state);
+      if (elm.state.for) {
+        methods.setAttribute("for", elm.state.for);
+      }
+      const attrs = elm.state.attributes;
+      if (attrs) {
+        for (const [key, value] of Object.entries(attrs)) {
+          if (value !== undefined) {
+            $elm.setAttribute(key, String(value));
+          } else {
+            $elm.removeAttribute(key);
+          }
+        }
       }
       if (elm.events) {
         methods.setupEventListener(elm.events);
@@ -127,10 +179,8 @@ export function DOMButton(props: {
       if (elm.children) {
         for (const child of elm.children) {
           if (isElement(child)) {
-            elements.push(child);
             const $sub = props.build(child);
             if ($sub && $sub.$elm) {
-              children$.push($sub.$elm as ChildNode);
               $elm.appendChild($sub.$elm);
             }
           }
@@ -141,6 +191,6 @@ export function DOMButton(props: {
   };
 }
 
-export function isDOMButton(value: any): value is DOMButton {
-  return value.t === "button";
+export function isDOMLabel(value: any): value is DOMLabel {
+  return value.t === "label";
 }

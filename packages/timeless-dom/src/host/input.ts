@@ -7,7 +7,7 @@ export interface DOMInput {
   t: "input";
   $elm: any;
   isDocumentFragment(): boolean;
-  getChildNodes(): any[];
+  getChildNodes(): ChildNode[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(name: string[]): void;
@@ -173,25 +173,23 @@ export function DOMInput(props: {
       // $elm.style.border = "none";
       $elm.type = "text";
       $elm.value = elm.value;
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state.id) {
+        $elm.id = elm.state.id;
       }
-      if (elm.props?.styleSet) {
-        methods.setStyleSet(elm.props.styleSet);
+      if (elm.state.name) {
+        $elm.name = elm.state.name;
       }
-      if (elm.state) {
-        if (elm.state.placeholder) {
-          $elm.placeholder = elm.state.placeholder;
-        }
-        if (elm.state.disabled) {
-          $elm.disabled = elm.state.disabled;
-        }
-        if (elm.state.id) {
-          $elm.id = elm.state.id;
-        }
-        if (elm.state.name) {
-          $elm.name = elm.state.name;
-        }
+      if (elm.state.style) {
+        methods.setStyle(elm.state.style);
+      }
+      if (elm.state.styleSet) {
+        methods.setStyleSet(elm.state.styleSet);
+      }
+      if (elm.state.placeholder) {
+        $elm.placeholder = elm.state.placeholder;
+      }
+      if (elm.state.disabled) {
+        $elm.disabled = elm.state.disabled;
       }
       if (elm.events) {
         methods.setupEventListener(elm.events);

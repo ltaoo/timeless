@@ -12,7 +12,7 @@ export interface DOMPortal {
   t: "portal";
   $elm: DocumentFragment;
   isDocumentFragment(): boolean;
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): ChildNode[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
@@ -112,7 +112,7 @@ export function DOMPortal(props: {
       return true;
     },
     getChildNodes() {
-      return $fragment.childNodes;
+      return children$;
     },
     setStyle(style: ViewStyleProperties) {
       methods.setStyle(style);

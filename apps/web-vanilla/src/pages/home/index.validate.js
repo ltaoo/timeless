@@ -47,24 +47,24 @@ function FormRender(props, children) {
                 }),
               },
               [
-                Case("select", [
-                  h(Select, {
-                    id: fid,
-                    store: field$.input,
-                  }),
-                ]),
-                Case("input", [
-                  h(Input, {
-                    id: fid,
-                    store: field$.input,
-                  }),
-                ]),
-                Case("checkbox", [
-                  h(Checkbox, {
-                    id: fid,
-                    store: field$.input,
-                  }),
-                ]),
+                // Case("select", [
+                //   h(Select, {
+                //     id: fid,
+                //     store: field$.input,
+                //   }),
+                // ]),
+                // Case("input", [
+                //   h(Input, {
+                //     id: fid,
+                //     store: field$.input,
+                //   }),
+                // ]),
+                // Case("checkbox", [
+                //   h(Checkbox, {
+                //     id: fid,
+                //     store: field$.input,
+                //   }),
+                // ]),
               ],
             ),
             Show({
@@ -105,105 +105,112 @@ function PaymentFormView(props) {
     cancel_btn$,
   } = store.ui;
 
-  return View({ class: "w-full max-w-md rounded-xl border border-border p-6" }, [
-    View({ class: "space-y-6" }, [
-      // Payment Method fieldset
-      View({ class: "space-y-4" }, [
-        View({ class: "space-y-1" }, [
-          View(
-            { class: "text-base font-semibold leading-none tracking-tight" },
-            ["Payment Method"],
-          ),
-          View({ class: "text-sm text-muted-foreground" }, [
-            "All transactions are secure and encrypted",
+  return View(
+    { class: "w-full max-w-md rounded-xl border border-border p-6" },
+    [
+      View({ class: "space-y-6" }, [
+        // Payment Method fieldset
+        View({ class: "space-y-4" }, [
+          View({ class: "space-y-1" }, [
+            View(
+              {
+                class: "text-base font-semibold leading-none tracking-tight",
+              },
+              ["Payment Method"],
+            ),
+            View({ class: "text-sm text-muted-foreground" }, [
+              "All transactions are secure and encrypted",
+            ]),
+          ]),
+          View({ class: "space-y-4" }, [
+            Field({ store: field_card_name$ }, [
+              Input({
+                id: field_card_name$.name,
+                store: field_card_name$.input,
+              }),
+            ]),
+            View({ class: "grid grid-cols-3 gap-4" }, [
+              View({ class: "col-span-2" }, [
+                Field({ store: field_card_number$ }, [
+                  Input({
+                    id: field_card_number$.name,
+                    store: field_card_number$.input,
+                  }),
+                ]),
+              ]),
+              View({ class: "col-span-1" }, [
+                Field({ store: field_cvv$ }, [
+                  Input({
+                    id: field_cvv$.name,
+                    store: field_cvv$.input,
+                  }),
+                ]),
+              ]),
+            ]),
+            View({ class: "grid grid-cols-2 gap-4" }, [
+              Field({ store: field_exp_month$ }, [
+                Select({
+                  id: field_exp_month$.name,
+                  store: field_exp_month$.input,
+                }),
+              ]),
+              Field({ store: field_exp_year$ }, [
+                Select({
+                  id: field_exp_year$.name,
+                  store: field_exp_year$.input,
+                }),
+              ]),
+            ]),
           ]),
         ]),
+
+        Separator({}),
+
+        // Billing Address fieldset
         View({ class: "space-y-4" }, [
-          Field({ store: field_card_name$ }, [
-            Input({
-              id: field_card_name$.name,
-              store: field_card_name$.input,
+          View({ class: "space-y-1" }, [
+            View(
+              {
+                class: "text-base font-semibold leading-none tracking-tight",
+              },
+              ["Billing Address"],
+            ),
+            View({ class: "text-sm text-muted-foreground" }, [
+              "The billing address associated with your payment method",
+            ]),
+          ]),
+          View({ class: "flex items-center gap-2" }, [
+            Checkbox({
+              id: "same_as_shipping",
+              store: same_as_shipping$,
+            }),
+            FieldInlineLabel({
+              for: "same_as_shipping",
+              store: store.ui.form$.fields.same_as_shipping,
             }),
           ]),
-          View({ class: "grid grid-cols-3 gap-4" }, [
-            View({ class: "col-span-2" }, [
-              Field({ store: field_card_number$ }, [
-                Input({
-                  id: field_card_number$.name,
-                  store: field_card_number$.input,
-                }),
-              ]),
-            ]),
-            View({ class: "col-span-1" }, [
-              Field({ store: field_cvv$ }, [
-                Input({
-                  id: field_cvv$.name,
-                  store: field_cvv$.input,
-                }),
-              ]),
-            ]),
-          ]),
-          View({ class: "grid grid-cols-2 gap-4" }, [
-            Field({ store: field_exp_month$ }, [
-              Select({
-                id: field_exp_month$.name,
-                store: field_exp_month$.input,
-              }),
-            ]),
-            Field({ store: field_exp_year$ }, [
-              Select({
-                id: field_exp_year$.name,
-                store: field_exp_year$.input,
-              }),
-            ]),
+        ]),
+
+        Separator({}),
+
+        // Comments fieldset
+        View({ class: "space-y-4" }, [
+          Field({ store: field_comments$ }, [
+            Textarea({
+              id: field_comments$.name,
+              store: field_comments$.input,
+            }),
           ]),
         ]),
-      ]),
 
-      Separator({}),
-
-      // Billing Address fieldset
-      View({ class: "space-y-4" }, [
-        View({ class: "space-y-1" }, [
-          View(
-            { class: "text-base font-semibold leading-none tracking-tight" },
-            ["Billing Address"],
-          ),
-          View({ class: "text-sm text-muted-foreground" }, [
-            "The billing address associated with your payment method",
-          ]),
-        ]),
+        // Buttons
         View({ class: "flex items-center gap-2" }, [
-          Checkbox({
-            id: "same_as_shipping",
-            store: same_as_shipping$,
-          }),
-          FieldInlineLabel({
-            for: "same_as_shipping",
-            store: store.ui.form$.fields.same_as_shipping,
-          }),
+          Button({ store: submit_payment_btn$ }, ["Submit"]),
+          Button({ store: cancel_btn$ }, ["Reset"]),
         ]),
       ]),
-
-      Separator({}),
-
-      // Comments fieldset
-      View({ class: "space-y-4" }, [
-        Field({ store: field_comments$ }, [
-          Textarea({
-            id: field_comments$.name,
-            store: field_comments$.input,
-          }),
-        ]),
-      ]),
-
-      // Buttons
-      View({ class: "flex items-center gap-2" }, [
-        Button({ store: submit_payment_btn$ }, ["Submit"]),
-        Button({ store: cancel_btn$ }, ["Reset"]),
-      ]),
-    ]),
-  ]);
+    ],
+  );
 }
 
 function PaymentViewModel() {
@@ -530,17 +537,22 @@ export default function FormValidateView() {
               store: payment$,
             }),
             Separator({ class: "my-6" }),
-            View({ class: "w-full max-w-md rounded-xl border border-border p-6" }, [
-              Field({ store: field_provider$ }, [
-                Select({
-                  id: field_provider$.name,
-                  store: field_provider$.input,
-                }),
-              ]),
-              FormRender({ class: "mt-6", store: configure$_ }, [
-                Button({ store: submit_configure_btn$ }, ["Submit"]),
-              ]),
-            ]),
+            View(
+              {
+                class: "w-full max-w-md rounded-xl border border-border p-6",
+              },
+              [
+                Field({ store: field_provider$ }, [
+                  Select({
+                    id: field_provider$.name,
+                    store: field_provider$.input,
+                  }),
+                ]),
+                FormRender({ class: "mt-6", store: configure$_ }, [
+                  Button({ store: submit_configure_btn$ }, ["Submit"]),
+                ]),
+              ],
+            ),
           ],
         },
         {

@@ -6,6 +6,8 @@ import { ListenerManager } from "@/util/listener";
 import { isClassNameRef, isStyleRef, RawViewStyleProperties } from "@/style";
 
 type CheckboxState = {
+  id: string;
+  name: string;
   checked: boolean;
   indeterminate: boolean;
   disabled: boolean;
@@ -50,6 +52,8 @@ export function Checkbox(props: CheckboxProps) {
 
   let $elm: any = null;
   const state: CheckboxState = {
+    id: "",
+    name: "",
     checked: false,
     indeterminate: false,
     disabled: false,
@@ -101,12 +105,15 @@ export function Checkbox(props: CheckboxProps) {
         if (isRef(id)) {
           id.subscribe({
             onChange(v) {
+              state.id = String(v);
               methods.setProp("id", String(v));
             },
           });
-          methods.setProp("id", id.value);
+          // methods.setProp("id", id.value);
+          state.id = id.value;
         } else {
-          methods.setProp("id", id);
+          // methods.setProp("id", id);
+          state.id = id;
         }
       }
 
@@ -177,11 +184,14 @@ export function Checkbox(props: CheckboxProps) {
         if (isRef(name)) {
           name.subscribe({
             onChange(v) {
+              state.name = String(v);
               methods.setProp("name", v);
             },
           });
+          state.name = name.value;
           // methods.setProp("name", name.value);
         } else {
+          state.name = name;
           // methods.setProp("name", name as string);
         }
       }
@@ -204,29 +214,25 @@ export function Checkbox(props: CheckboxProps) {
       // });
 
       // Handle class
-      if (cls) {
+      if (cls !== undefined) {
         if (typeof cls === "string") {
-          // host.setClassName($elm, cls);
+          state.styleSet = [cls];
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v) {
               // host.setClassName($elm, String(v));
+              state.styleSet = [v as string];
               if ($elm) {
                 $elm.setStyleSet(v);
               }
             },
           });
           // host.setClassName($elm, String(cls.value));
-          if ($elm) {
-            $elm.setStyleSet(String(cls.value));
-          }
+          state.styleSet = [cls.value];
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
-            onChange(v: any) {
-              // host.setClassName(
-              //   $elm,
-              //   Array.isArray(v) ? v.join(" ") : String(v ?? ""),
-              // );
+            onChange(v) {
+              state.styleSet = [v as string];
               if ($elm) {
                 $elm.setStyleSet(
                   Array.isArray(v) ? v.join(" ") : String(v ?? ""),
@@ -234,10 +240,12 @@ export function Checkbox(props: CheckboxProps) {
               }
             },
           });
-          // host.setClassName($elm, cls.toString());
           if ($elm) {
             $elm.setStyleSet(cls.toString());
           }
+          state.styleSet = [cls.toString()];
+        } else {
+          state.styleSet = [cls];
         }
       }
 

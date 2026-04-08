@@ -1,4 +1,10 @@
-import { classNames, combine, computed, refobj } from "@timeless/timeless";
+import {
+  classNames,
+  combine,
+  computed,
+  refobj,
+  View,
+} from "@timeless/timeless";
 import { Icon, InputPrimitive, Show, ViewProps } from "@timeless/timeless";
 import { InputCore } from "@timeless/ui";
 
@@ -47,7 +53,6 @@ export function Input(
           (t) => t.hasValue && t.allowClear && !t.isLoading,
         ),
         ok() {
-          console.log("invoke");
           return [
             InputPrimitive.Clear(
               {
@@ -66,7 +71,14 @@ export function Input(
           class:
             "absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500",
         },
-        [Icon({ name: "loader", size: 16 })],
+        [
+          View(
+            {
+              class: "animate-spin",
+            },
+            [Icon({ name: "loader", size: 16 })],
+          ),
+        ],
       ),
     ],
   );

@@ -1,15 +1,17 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { safeCreateElement } from "@/util/env";
-import { getHost } from "@/host";
-
 export function DangerouslyInnerHTML(html: string | Ref<string>) {
-  const host = getHost();
-  const $elm = safeCreateElement("div");
+  // const host = getHost();
+  let $elm: any = null;
 
   return {
     t: "html",
-    $elm: $elm,
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      $elm = v;
+    },
     render() {
       let _local_value = (() => {
         if (isRef(html)) {
@@ -20,24 +22,24 @@ export function DangerouslyInnerHTML(html: string | Ref<string>) {
       if (isRef(html)) {
         html.subscribe({
           onChange(v: any) {
-            host.setInnerHTML?.($elm, v);
+            // host.setInnerHTML?.($elm, v);
           },
         });
         _local_value = html.value;
       }
-      host.setInnerHTML?.($elm, _local_value);
+      // host.setInnerHTML?.($elm, _local_value);
       return $elm;
     },
     onMounted() {},
     beforeUnmounted() {},
     onUnmounted() {
-      host.setInnerHTML?.($elm, "");
+      // host.setInnerHTML?.($elm, "");
     },
     append(node: any) {
-      host.appendChild($elm, node);
+      // host.appendChild($elm, node);
     },
     setContent(html: string) {
-      host.setInnerHTML?.($elm, html);
+      // host.setInnerHTML?.($elm, html);
     },
     class$: null,
   };

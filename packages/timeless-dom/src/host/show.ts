@@ -4,19 +4,8 @@ import { DOMHostNode } from "./type";
 
 export interface DOMShow {
   t: "show";
+  /** 宿主元素，在 build 过程会插入父节点 */
   $elm: DocumentFragment;
-  methods: {
-    unmount(event: {
-      data: TimelessElement[];
-      reason?: string;
-      destroy?: boolean;
-    }): void;
-    mount(
-      children: (TimelessElement | null)[],
-      parent?: any,
-      before?: any,
-    ): DocumentFragment;
-  };
   getChildNodes(): ChildNode[];
   isDocumentFragment(): boolean;
   render(elm: TimelessElement): Text;
@@ -29,6 +18,8 @@ export function DOMShow(props: {
 }): DOMShow {
   const $fragment = document.createDocumentFragment();
   const $anchor = document.createTextNode("");
+
+  let elements: TimelessElement[] = [];
   const children$: ChildNode[] = [];
 
   const methods = {
@@ -113,7 +104,6 @@ export function DOMShow(props: {
     get $elm() {
       return $fragment;
     },
-    methods,
     getChildNodes() {
       return children$;
     },
@@ -137,7 +127,7 @@ export function DOMShow(props: {
               continue;
             }
             if ($sub.isDocumentFragment()) {
-              const child_nodes = Array.from($sub.getChildNodes());
+              const child_nodes = $sub.getChildNodes();
               new_nodes.push(...child_nodes);
               children$.push(...child_nodes);
             } else {
@@ -152,13 +142,21 @@ export function DOMShow(props: {
           }
         }
         $fragment.appendChild($anchor);
+        elements = new_instances;
+        for (let child of elements) {
+          if (child.onMounted) {
+            child.onMounted({
+              target: child.$elm,
+            });
+          }
+        }
       }
 
       return $anchor;
     },
     addContent(children: (TimelessElement | null)[]) {
-      const new_nodes: any[] = [];
-      const new_instances: any[] = [];
+      // const new_nodes: any[] = [];
+      const new_instances: TimelessElement[] = [];
       const $parent = $anchor.parentElement;
       if (!$parent || !children) {
         return;
@@ -177,11 +175,11 @@ export function DOMShow(props: {
             continue;
           }
           if ($sub.isDocumentFragment()) {
-            const child_nodes = Array.from($sub.getChildNodes());
-            new_nodes.push(...child_nodes);
+            const child_nodes = $sub.getChildNodes();
+            // new_nodes.push(...child_nodes);
             children$.push(...child_nodes);
           } else {
-            new_nodes.push($sub);
+            // new_nodes.push($sub);
             // if ($sub.$elm) {
             //   children$.push($sub.$elm as ChildNode);
             // }
@@ -194,6 +192,14 @@ export function DOMShow(props: {
         }
       }
       $parent.appendChild($fragment);
+      elements = new_instances;
+      for (let child of elements) {
+        if (child.onMounted) {
+          child.onMounted({
+            target: child.$elm,
+          });
+        }
+      }
       // console.log("[]show - the end of addContent", children$);
     },
     removeContent() {
@@ -205,6 +211,12 @@ export function DOMShow(props: {
           $parent.removeChild(node);
         }
       }
+      for (let child of elements) {
+        if (child.onUnmounted) {
+          child.onUnmounted();
+        }
+      }
+      elements = [];
       children$.length = 0;
       // @fragment 会在 appendChild 自己清空，无需手动清空
     },
