@@ -144,18 +144,13 @@ export function DOMView(props: {
       $elm.removeEventListener(type, handler, options);
     },
     render(elm: TimelessElement) {
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state?.style) {
+        methods.setStyle(elm.state.style);
       }
-      if (elm.props?.styleSet) {
-        if (isRef(elm.props.styleSet)) {
-          methods.setStyleSet(elm.props.styleSet.value);
-        } else {
-          methods.setStyleSet(elm.props.styleSet);
-        }
+      if (elm.state?.styleSet) {
+        methods.setStyleSet(elm.state.styleSet);
       }
-      // @ts-ignore
-      const attrs = elm.attributes;
+      const attrs = elm.state.attributes;
       if (attrs) {
         for (const [key, value] of Object.entries(attrs)) {
           if (value !== undefined) {

@@ -24,6 +24,8 @@ export interface DOMInput {
     options?: any,
   ): void;
   setValue(value: string): void;
+  focus(): void;
+  blur(): void;
   render(elm: TimelessElement): any;
 }
 
@@ -158,6 +160,12 @@ export function DOMInput(props: {
     },
     setValue(value: string) {
       $elm.value = value;
+    },
+    focus() {
+      $elm.focus();
+    },
+    blur() {
+      $elm.blur();
     },
     render(elm: TimelessElement) {
       // $elm.style.backgroundColor = "transparent";

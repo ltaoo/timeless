@@ -186,7 +186,7 @@ export function DOMShow(props: {
             //   children$.push($sub.$elm as ChildNode);
             // }
           }
-          console.log("[]show addContent before $sub.$elm", $sub.$elm);
+          // console.log("[]show addContent before $sub.$elm", $sub.$elm);
           if ($sub.$elm) {
             children$.push($sub.$elm as ChildNode);
             $fragment.appendChild($sub.$elm);

@@ -106,7 +106,8 @@ export function DOMLazyView(props: {
     },
   };
 
-  let children$: ChildNode[] = [];
+  let elements: TimelessElement[] = [];
+  const children$: ChildNode[] = [];
   const $fragment = document.createDocumentFragment();
   const $anchor = document.createTextNode("");
 
@@ -123,8 +124,7 @@ export function DOMLazyView(props: {
       return false;
     },
     render(elm: TimelessElement) {
-      const new_nodes: any[] = [];
-      const new_instances: any[] = [];
+      const new_elements: TimelessElement[] = [];
       if (elm.children) {
         // console.log("[]show - in render", elm.children);
         for (let child of elm.children) {
@@ -133,17 +133,17 @@ export function DOMLazyView(props: {
           }
           if (isElement(child)) {
             // 即使 render 返回 null（如 Portal），也要保存实例以便调用生命周期
-            new_instances.push(child);
+            new_elements.push(child);
             const $sub = props.build(child);
             if (!$sub) {
               continue;
             }
             if ($sub.isDocumentFragment()) {
               const child_nodes = Array.from($sub.getChildNodes());
-              new_nodes.push(...child_nodes);
+              // new_nodes.push(...child_nodes);
               children$.push(...child_nodes);
             } else {
-              new_nodes.push($sub);
+              // new_nodes.push($sub);
               if ($sub.$elm) {
                 children$.push($sub.$elm as ChildNode);
               }
@@ -154,6 +154,14 @@ export function DOMLazyView(props: {
           }
         }
         $fragment.appendChild($anchor);
+        for (const child of new_elements) {
+          if (isElement(child) && child.onMounted) {
+            child.onMounted({
+              target: child.$elm,
+            });
+          }
+        }
+        elements = new_elements;
       }
 
       return $anchor;
@@ -163,42 +171,50 @@ export function DOMLazyView(props: {
       this.addContent(children);
     },
     addContent(children: (TimelessElement | null)[]) {
-      const new_nodes: any[] = [];
-      const new_instances: any[] = [];
+      // const new_nodes: any[] = [];
+      const new_elements: any[] = [];
       const $parent = $anchor.parentElement;
       if (!$parent || !children) {
         return;
       }
       // console.log("[]show - in render", elm.children);
       for (let child of children) {
-        console.log("[]show addContent", child);
+        // console.log("[]show addContent", child);
         if (!child) {
           continue;
         }
         if (isElement(child)) {
           // 即使 render 返回 null（如 Portal），也要保存实例以便调用生命周期
-          new_instances.push(child);
+          new_elements.push(child);
           const $sub = props.build(child);
           if (!$sub) {
             continue;
           }
           if ($sub.isDocumentFragment()) {
             const child_nodes = Array.from($sub.getChildNodes());
-            new_nodes.push(...child_nodes);
+            // new_nodes.push(...child_nodes);
             children$.push(...child_nodes);
           } else {
-            new_nodes.push($sub);
+            // new_nodes.push($sub);
             if ($sub.$elm) {
               children$.push($sub.$elm as ChildNode);
             }
           }
-          console.log("[]show addContent before $sub.$elm", $sub.$elm);
+          // console.log("[]show addContent before $sub.$elm", $sub.$elm);
           if ($sub.$elm) {
             $fragment.appendChild($sub.$elm);
           }
         }
       }
       $parent.appendChild($fragment);
+      for (const child of new_elements) {
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({
+            target: child.$elm,
+          });
+        }
+      }
+      elements = new_elements;
       // console.log("[]show - the end of addContent", children$);
     },
     removeContent() {
@@ -210,8 +226,13 @@ export function DOMLazyView(props: {
           $parent.removeChild(node);
         }
       }
-      children$ = [];
+      children$.length = 0;
       // @fragment 会在 appendChild 自己清空，无需手动清空
+      for (const element of elements) {
+        if (element.onUnmounted) {
+          element.onUnmounted();
+        }
+      }
     },
   };
 }

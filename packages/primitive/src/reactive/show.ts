@@ -44,7 +44,7 @@ export function Show(props: ShowProps) {
       return next;
     },
     setup_value_subscribe() {
-      console.log("[show] - setup_value_subscribe", when);
+      // console.log("[show] - setup_value_subscribe", when);
       if (isRef(when)) {
         state.value = when.value as boolean;
         when.subscribe({

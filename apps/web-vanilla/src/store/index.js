@@ -7,6 +7,9 @@ import HomeIndexPageView from "@/pages/home/index.js";
 import HomeIndexGeneralView from "@/pages/home/index.general.js";
 import AdminLayoutView from "@/pages/admin/layout.js";
 
+console.log("init");
+ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
+InputPrimitive.setInputProvider(Timeless.web);
 Timeless.kit.NavigatorCore.prefix = "/";
 
 const routes_configure = /** @type {const} */ ({
@@ -338,8 +341,6 @@ export const app = new Timeless.kit.ApplicationModel({
   },
 });
 Timeless.web.provide_app(app);
-
-ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
 
 history$.onRouteChange(({ reason, view, href, ignore }) => {
   if (!ignore) {

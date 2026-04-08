@@ -159,9 +159,11 @@ export function DOMFor(props: {
     },
     refresh: methods.refresh,
     render(elm: TimelessElement) {
+      const new_instances: TimelessElement[] = [];
       if (elm.children) {
         for (const child of elm.children) {
           if (isElement(child)) {
+            new_instances.push(child);
             const $sub = props.build(child);
             if ($sub && $sub.$elm) {
               children$.push($sub.$elm);
@@ -171,6 +173,13 @@ export function DOMFor(props: {
         }
       }
       $fragment.appendChild($anchor);
+      for (const child of new_instances) {
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({
+            target: child.$elm,
+          });
+        }
+      }
       return $fragment;
     },
   };

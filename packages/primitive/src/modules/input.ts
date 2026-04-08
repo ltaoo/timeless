@@ -3,24 +3,18 @@ import { InputCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import {
-  viewStyleToCssText,
-  isStyleRef,
-  classNames,
-  styleNames,
-} from "@/style/index";
 import { InputProps, Input as NativeInput } from "@/input/input";
+import { styleNames } from "@/style/index";
 import { ListenerManager } from "@/util/listener";
-// import { safeCreateElement } from "@/util/env";
-// import { getHost } from "@/host";
 
-type Provider = Partial<{
+type Provider = {
   provide_ui_input: (store: InputCore<any>, $input: any) => void;
-}>;
+};
 
 let global_provider: Provider | undefined;
 
-export function setInputProvider(provider?: Provider) {
+export function setInputProvider(provider: Provider) {
+  console.log("set setInputProvider", provider);
   global_provider = provider;
 }
 
@@ -62,6 +56,16 @@ export function Input(
       if (props.onMounted) {
         props.onMounted(event);
       }
+      const $elm = event.target;
+      if (global_provider) {
+        console.log("inject provider", $elm);
+        global_provider.provide_ui_input(store, $elm);
+      }
+    },
+    onUnmounted() {
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
       listener$.clean();
     },
     onInput(e) {
@@ -70,13 +74,13 @@ export function Input(
         store.setValue(e.target.value as string);
       }
     },
-    onChange(event) {
-      // console.log("input something");
-      if (event.target) {
-        // @ts-ignore
-        store.setValue(event.target.value as string);
-      }
-    },
+    // onChange(event) {
+    //   // console.log("input something");
+    //   if (event.target) {
+    //     // @ts-ignore
+    //     store.setValue(event.target.value as string);
+    //   }
+    // },
   });
 }
 
@@ -136,10 +140,8 @@ export function Clear(
       onClick(event) {
         event.preventDefault();
         event.stopPropagation();
+        store.focus();
         store.clear();
-        setTimeout(() => {
-          store.focus();
-        }, 0);
       },
     },
     children,

@@ -26,62 +26,70 @@ export default function HomePageView(props) {
     ]),
   });
 
-  return View({ class: "h-full" }, [
-    SplitLayout({
-      direction: "horizontal",
-      items: [
-        {
-          defaultSize: 25,
-          minSize: 20,
-          maxSize: 50,
-          scroll: false,
-          children: [
-            Flex({ direction: "col", class: "py-4" }, [
-              Flex(
-                { items: "center", justify: "between", class: "px-3 mb-3" },
-                [
-                  View(
-                    {
-                      class:
-                        "text-xs font-bold text-zinc-400 uppercase tracking-widest",
-                    },
-                    ["Components"],
-                  ),
-                ],
-              ),
-              View({ class: "flex-1 overflow-y-auto" }, [
-                For({
-                  each: sidemenu$.menus,
-                  render(menu) {
-                    return View(
+  return View(
+    {
+      class: "h-full",
+      // onMounted() {
+      //   console.log("home/index.js mounted");
+      // },
+    },
+    [
+      SplitLayout({
+        direction: "horizontal",
+        items: [
+          {
+            defaultSize: 25,
+            minSize: 20,
+            maxSize: 50,
+            scroll: false,
+            children: [
+              Flex({ direction: "col", class: "py-4" }, [
+                Flex(
+                  { items: "center", justify: "between", class: "px-3 mb-3" },
+                  [
+                    View(
                       {
-                        class: classNames([
-                          "px-3 py-2 text-sm cursor-pointer transition-colors",
-                          computed(sidemenu$.cur, (t) => {
-                            return sidemenu$.isSelected(t, menu)
-                              ? "text-zinc-900 bg-zinc-100 font-medium dark:text-zinc-50 dark:bg-zinc-800"
-                              : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50";
-                          }),
-                        ]),
-                        onClick() {
-                          props.history.push(menu.name);
-                        },
+                        class:
+                          "text-xs font-bold text-zinc-400 uppercase tracking-widest",
                       },
-                      [menu.title],
-                    );
-                  },
-                }),
+                      ["Components"],
+                    ),
+                  ],
+                ),
+                View({ class: "flex-1 overflow-y-auto" }, [
+                  For({
+                    each: sidemenu$.menus,
+                    render(menu) {
+                      return View(
+                        {
+                          class: classNames([
+                            "px-3 py-2 text-sm cursor-pointer transition-colors",
+                            computed(sidemenu$.cur, (t) => {
+                              return sidemenu$.isSelected(t, menu)
+                                ? "text-zinc-900 bg-zinc-100 font-medium dark:text-zinc-50 dark:bg-zinc-800"
+                                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50";
+                            }),
+                          ]),
+                          onClick() {
+                            props.history.push(menu.name);
+                          },
+                        },
+                        [menu.title],
+                      );
+                    },
+                  }),
+                ]),
               ]),
-            ]),
-          ],
-        },
-        {
-          defaultSize: 85,
-          minSize: 70,
-          scroll: false,
-          children: [KeepAliveSubViews(props)],
-        },
-      ],
-    }),
-  ]);
+            ],
+          },
+          {
+            defaultSize: 85,
+            minSize: 70,
+            scroll: false,
+            children: [KeepAliveSubViews(props)],
+          },
+        ],
+      }),
+    ],
+  );
 }

@@ -55,33 +55,31 @@ export interface ViewProps {
   onDrop?: (e: DragEvent) => void;
   onAnimationEnd?: (e: AnimationEvent) => void;
 }
+type ViewEvents = Partial<{
+  onClick?: (e: MouseEvent) => void;
+  onDoubleClick?: (e: MouseEvent) => void;
+  onLongPress?: (e: PointerEvent) => void;
+  onPointerDown?: (e: PointerEvent) => void;
+  onFocus?: (e: FocusEvent) => void;
+  onBlur?: (e: FocusEvent) => void;
+  onKeyDown?: (e: KeyboardEvent) => void;
+  onContextMenu?: (e: MouseEvent) => void;
+  onMouseEnter?: (e: MouseEvent) => void;
+  onMouseLeave?: (e: MouseEvent) => void;
+  onDragStart?: (e: DragEvent) => void;
+  onDrag?: (e: DragEvent) => void;
+  onDragEnd?: (e: DragEvent) => void;
+  onDragEnter?: (e: DragEvent) => void;
+  onDragOver?: (e: DragEvent) => void;
+  onDragLeave?: (e: DragEvent) => void;
+  onDrop?: (e: DragEvent) => void;
+  onAnimationEnd?: (e: AnimationEvent) => void;
+}>;
 type ViewState = {
   rendered: boolean;
+  style: RawViewStyleProperties;
+  styleSet?: string[];
   attributes: Record<string, string | number | boolean | undefined>;
-  props: {
-    styleSet?: string[];
-    style: RawViewStyleProperties;
-  };
-  events: Partial<{
-    onClick?: (e: MouseEvent) => void;
-    onDoubleClick?: (e: MouseEvent) => void;
-    onLongPress?: (e: PointerEvent) => void;
-    onPointerDown?: (e: PointerEvent) => void;
-    onFocus?: (e: FocusEvent) => void;
-    onBlur?: (e: FocusEvent) => void;
-    onKeyDown?: (e: KeyboardEvent) => void;
-    onContextMenu?: (e: MouseEvent) => void;
-    onMouseEnter?: (e: MouseEvent) => void;
-    onMouseLeave?: (e: MouseEvent) => void;
-    onDragStart?: (e: DragEvent) => void;
-    onDrag?: (e: DragEvent) => void;
-    onDragEnd?: (e: DragEvent) => void;
-    onDragEnter?: (e: DragEvent) => void;
-    onDragOver?: (e: DragEvent) => void;
-    onDragLeave?: (e: DragEvent) => void;
-    onDrop?: (e: DragEvent) => void;
-    onAnimationEnd?: (e: AnimationEvent) => void;
-  }>;
   children: (TimelessElement | null)[];
 };
 
@@ -121,31 +119,30 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
   const state: ViewState = {
     rendered: false,
-    props: {
-      style: {},
-    },
+    style: {},
+    styleSet: [],
     attributes: {},
-    events: {
-      onClick,
-      onDoubleClick,
-      onLongPress,
-      onPointerDown,
-      onFocus,
-      onBlur,
-      onKeyDown,
-      onContextMenu,
-      onMouseEnter,
-      onMouseLeave,
-      onDragStart,
-      onDrag,
-      onDragEnd,
-      onDragEnter,
-      onDragOver,
-      onDragLeave,
-      onDrop,
-      onAnimationEnd,
-    },
     children: [],
+  };
+  const events = {
+    onClick,
+    onDoubleClick,
+    onLongPress,
+    onPointerDown,
+    onFocus,
+    onBlur,
+    onKeyDown,
+    onContextMenu,
+    onMouseEnter,
+    onMouseLeave,
+    onDragStart,
+    onDrag,
+    onDragEnd,
+    onDragEnter,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+    onAnimationEnd,
   };
 
   const methods = {
@@ -257,7 +254,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
       if (cls) {
         if (typeof cls === "string") {
-          state.props.styleSet = [cls];
+          state.styleSet = [cls];
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
@@ -267,7 +264,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
               }
             },
           });
-          state.props.styleSet = [cls.value];
+          state.styleSet = [cls.value];
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
@@ -276,9 +273,9 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
               }
             },
           });
-          state.props.styleSet = cls.toString().split(" ");
+          state.styleSet = cls.toString().split(" ");
         } else {
-          state.props.styleSet = [];
+          state.styleSet = [];
         }
       }
       if (style) {
@@ -293,9 +290,9 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
                   }
                 },
               });
-              state.props.style[k] = sv.value;
+              state.style[k] = sv.value;
             } else {
-              state.props.style[k] = sv;
+              state.style[k] = sv;
             }
           });
           style.subscribe({
@@ -305,7 +302,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
               //   ...(style.value || {}),
               // };
               if ($elm && typeof $elm.setStyle === "function") {
-                $elm.setStyle(state.props.style);
+                $elm.setStyle(state.style);
               }
             },
           });
@@ -313,7 +310,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           Object.keys(style).forEach((k) => {
             const v = style[k];
             if (isRef(v)) {
-              state.props.style[k] = v.value;
+              state.style[k] = v.value;
               v.subscribe({
                 onChange(v) {
                   if ($elm) {
@@ -322,7 +319,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
                 },
               });
             } else {
-              state.props.style[k] = v;
+              state.style[k] = v;
             }
           });
         }
@@ -517,31 +514,15 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       $elm = v;
     },
     value: "",
+    state,
     children: state.children,
-    props: state.props,
-    attributes: state.attributes,
-    events: state.events,
+    events,
     /** @deprecated */
     render() {
       if (state.rendered) {
         return $elm;
       }
       state.rendered = true;
-      // Create element if not already created
-      methods.setup_children(children);
-      methods.setup_value_subscribe();
-
-      if (onMounted) {
-        manager$.push(onMounted({ target: $elm }));
-      }
-      for (let i = 0; i < state.children.length; i += 1) {
-        const node = state.children[i];
-        if (isElement(node)) {
-          if (node.onMounted) {
-            node.onMounted({ target: node.$elm });
-          }
-        }
-      }
       return $elm;
     },
     hydrate(existingDom: any) {
@@ -614,6 +595,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     },
     onMounted(event: MountedEvent) {
       // console.log("the view mounted", event.target);
+      state.rendered = true;
       if (onMounted) {
         onMounted(event);
       }

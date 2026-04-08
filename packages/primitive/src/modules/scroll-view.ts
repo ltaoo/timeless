@@ -32,7 +32,8 @@ export function Root(
     {
       ...rest,
       onMounted(event) {
-        const $elm = (event as any).target as HTMLElement;
+        // alert('scrollview load');
+        const $elm = event.target;
         store.setRect({
           width: $elm.clientWidth,
           height: $elm.clientHeight,

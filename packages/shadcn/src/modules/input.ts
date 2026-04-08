@@ -16,14 +16,12 @@ export function Input(
   });
 
   const allowClear = computed(state_, (d) => d.allowClear);
-  const value_ = computed(state_, (d) => d.value);
   const hasValue = computed(state_, (d) => d.value && d.value.length > 0);
   const isLoading = computed(state_, (d) => d.loading || false);
 
   return InputPrimitive.Root(
     { store, class: classNames(["t-input relative", props.class]) },
     [
-      value_,
       InputPrimitive.Input({
         ...rest,
         id,
