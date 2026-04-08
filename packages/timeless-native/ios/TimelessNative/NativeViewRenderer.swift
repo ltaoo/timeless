@@ -1,4 +1,19 @@
 import UIKit
+import ObjectiveC
+
+/// Target-action handler for UITextField text changes.
+private class InputHandler: NSObject {
+    static var associatedKey: UInt8 = 0
+    let onTextChanged: (String) -> Void
+
+    init(onTextChanged: @escaping (String) -> Void) {
+        self.onTextChanged = onTextChanged
+    }
+
+    @objc func textDidChange(_ textField: UITextField) {
+        onTextChanged(textField.text ?? "")
+    }
+}
 
 /// Converts a `NativeNode` tree into a real UIKit view hierarchy.
 enum NativeViewRenderer {
@@ -16,7 +31,7 @@ enum NativeViewRenderer {
         case .view(let style, let children):
             let stack = UIStackView()
             stack.axis = .vertical
-            stack.alignment = .leading
+            stack.alignment = .fill
             stack.distribution = .equalSpacing
             stack.spacing = 0
             applyStyle(style, to: stack)
@@ -77,11 +92,13 @@ enum NativeViewRenderer {
             }
             return button
 
-        case .input(let value, let placeholder, let style, _):
+        case .input(let value, let placeholder, let style, let onTextChanged):
             let textField = UITextField()
             textField.text = value
-            textField.placeholder = placeholder
+            textField.placeholder = placeholder.isEmpty ? " " : placeholder
             textField.borderStyle = .roundedRect
+            textField.isUserInteractionEnabled = true
+            textField.clearButtonMode = .whileEditing
             applyStyle(style, to: textField)
             if let fontSize = style["font-size"] {
                 let size = parsePx(fontSize)
@@ -91,6 +108,26 @@ enum NativeViewRenderer {
             }
             if let color = style["color"], let c = parseColor(color) {
                 textField.textColor = c
+            }
+            // Ensure the text field has a usable size and stretches to fill parent
+            textField.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            textField.setContentCompressionResistancePriority(.required, for: .vertical)
+            let w = parsePx(style["width"])
+            if w > 0 {
+                textField.widthAnchor.constraint(equalToConstant: w).isActive = true
+            }
+            let h = parsePx(style["height"])
+            if h > 0 {
+                textField.heightAnchor.constraint(equalToConstant: h).isActive = true
+            } else {
+                textField.heightAnchor.constraint(greaterThanOrEqualToConstant: 36).isActive = true
+            }
+            // Wire text change callback to JS listener
+            if let callback = onTextChanged {
+                let handler = InputHandler(onTextChanged: callback)
+                textField.addTarget(handler, action: #selector(InputHandler.textDidChange(_:)), for: .editingChanged)
+                // Retain the handler alongside the text field
+                objc_setAssociatedObject(textField, &InputHandler.associatedKey, handler, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
             }
             return textField
         }

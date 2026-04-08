@@ -16,8 +16,9 @@ class RootViewController: NSViewController {
             nsView.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(nsView)
             NSLayoutConstraint.activate([
-                nsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                nsView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                nsView.topAnchor.constraint(equalTo: view.topAnchor),
+                nsView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                nsView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             ])
         }
     }

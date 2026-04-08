@@ -42,10 +42,19 @@ enum NativeViewRenderer {
                     let marginTop = childMarginTop(child)
                     offsetY += marginTop
 
-                    NSLayoutConstraint.activate([
+                    var constraints = [
                         childView.topAnchor.constraint(equalTo: container.topAnchor, constant: offsetY),
                         childView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: paddingLeft),
-                    ])
+                    ]
+                    // Views with no intrinsic width (e.g. editable NSTextField) need
+                    // a trailing constraint so they stretch to fill the container.
+                    if childView.intrinsicContentSize.width < 0 {
+                        let paddingRight = parsePx(style["padding-right"] ?? style["padding"])
+                        constraints.append(
+                            childView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -paddingRight)
+                        )
+                    }
+                    NSLayoutConstraint.activate(constraints)
 
                     childView.layoutSubtreeIfNeeded()
                     let childHeight = resolveHeight(childView)

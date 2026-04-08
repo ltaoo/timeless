@@ -7,7 +7,7 @@ enum NativeNode {
     case text(value: String)
     case img(src: String, style: [String: String])
     case button(style: [String: String], children: [NativeNode], listeners: [String: Any])
-    case input(value: String, placeholder: String, style: [String: String], attrs: [String: String])
+    case input(value: String, placeholder: String, style: [String: String], onTextChanged: ((String) -> Void)?)
 }
 
 /// Bridge between JavaScriptCore and native rendering.
@@ -118,10 +118,11 @@ class JSBridge {
         if type == "view" {
             let style = dict["style"] as? [String: String] ?? [:]
             var children: [NativeNode] = []
-            if let jsChildren = dict["children"] as? [[String: Any]] {
-                for child in jsChildren {
-                    let childValue = JSValue(object: child, in: value.context)!
-                    if let node = parseNode(childValue) {
+            // Use original JSValue to preserve function references in children
+            if let jsChildren = value.forProperty("children"), jsChildren.isArray {
+                let length = Int(jsChildren.forProperty("length").toInt32())
+                for i in 0..<length {
+                    if let child = jsChildren.atIndex(i), let node = parseNode(child) {
                         children.append(node)
                     }
                 }
@@ -139,10 +140,10 @@ class JSBridge {
             let style = dict["style"] as? [String: String] ?? [:]
             let listeners = dict["listeners"] as? [String: Any] ?? [:]
             var children: [NativeNode] = []
-            if let jsChildren = dict["children"] as? [[String: Any]] {
-                for child in jsChildren {
-                    let childValue = JSValue(object: child, in: value.context)!
-                    if let node = parseNode(childValue) {
+            if let jsChildren = value.forProperty("children"), jsChildren.isArray {
+                let length = Int(jsChildren.forProperty("length").toInt32())
+                for i in 0..<length {
+                    if let child = jsChildren.atIndex(i), let node = parseNode(child) {
                         children.append(node)
                     }
                 }
@@ -154,8 +155,17 @@ class JSBridge {
             let inputValue = dict["value"] as? String ?? ""
             let placeholder = dict["placeholder"] as? String ?? ""
             let style = dict["style"] as? [String: String] ?? [:]
-            let attrs = dict["attrs"] as? [String: String] ?? [:]
-            return .input(value: inputValue, placeholder: placeholder, style: style, attrs: attrs)
+
+            // Preserve JS listener functions as callable closures
+            var onTextChanged: ((String) -> Void)?
+            let listenersJS = value.forProperty("listeners")
+            if let inputFn = listenersJS?.forProperty("input"), !inputFn.isUndefined {
+                onTextChanged = { text in
+                    let event: [String: Any] = ["target": ["value": text]]
+                    inputFn.call(withArguments: [event])
+                }
+            }
+            return .input(value: inputValue, placeholder: placeholder, style: style, onTextChanged: onTextChanged)
         }
 
         return nil

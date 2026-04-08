@@ -141,11 +141,16 @@ class JSBridge {
                 let length = Int(jsChildren.forProperty("length").toInt32())
                 for i in 0..<length {
                     guard let childJSValue = jsChildren.atIndex(i) else { continue }
+
+
+
                     if let node = parseNode(childJSValue) {
                         children.append(node)
                     }
                 }
             }
+
+
             return .view(style: style, children: children)
         }
 
@@ -174,6 +179,8 @@ class JSBridge {
             let inputValue = dict["value"] as? String ?? ""
             let placeholder = dict["placeholder"] as? String ?? ""
             let style = dict["style"] as? [String: String] ?? [:]
+
+
             return .input(value: inputValue, placeholder: placeholder, style: style, jsValue: value)
         }
 

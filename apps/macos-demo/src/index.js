@@ -74,14 +74,14 @@ function ApplicationView() {
         },
         ["Image Component:"],
       ),
-      Img({
-        src: "https://picsum.photos/200/120",
-        style: {
-          width: "200px",
-          height: "120px",
-          "margin-bottom": "12px",
-        },
-      }),
+      // Img({
+      //   src: "https://picsum.photos/200/120",
+      //   style: {
+      //     width: "200px",
+      //     height: "120px",
+      //     "margin-bottom": "12px",
+      //   },
+      // }),
       // Input example
       View(
         {

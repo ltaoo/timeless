@@ -1,10 +1,20 @@
 import Cocoa
 
+/// A root view that resigns first responder when clicking on empty areas.
+private class ClickableView: NSView {
+    override var acceptsFirstResponder: Bool { true }
+
+    override func mouseDown(with event: NSEvent) {
+        window?.makeFirstResponder(self)
+        super.mouseDown(with: event)
+    }
+}
+
 class RootViewController: NSViewController {
     private let bridge = JSBridge()
 
     override func loadView() {
-        view = NSView(frame: NSRect(x: 0, y: 0, width: 600, height: 400))
+        view = ClickableView(frame: NSRect(x: 0, y: 0, width: 600, height: 400))
     }
 
     override func viewDidLoad() {
@@ -22,5 +32,11 @@ class RootViewController: NSViewController {
                 nsView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             ])
         }
+    }
+
+    override func viewDidAppear() {
+        super.viewDidAppear()
+        // Prevent auto-focus on the first text field
+        view.window?.makeFirstResponder(view)
     }
 }

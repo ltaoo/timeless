@@ -129,6 +129,10 @@ export function NativeInput(props: {
           $elm.placeholder = String(elProps.placeholder);
         }
       }
+      // Ensure input has explicit height so native layout can size it
+      if (!$elm.style["height"]) {
+        $elm.style["height"] = "28px";
+      }
       return $elm;
     },
   };

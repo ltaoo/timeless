@@ -1,4 +1,20 @@
 import Cocoa
+import ObjectiveC
+
+/// Target-action handler for NSTextField text changes.
+private class InputHandler: NSObject, NSTextFieldDelegate {
+    static var associatedKey: UInt8 = 0
+    let onTextChanged: (String) -> Void
+
+    init(onTextChanged: @escaping (String) -> Void) {
+        self.onTextChanged = onTextChanged
+    }
+
+    func controlTextDidChange(_ obj: Notification) {
+        guard let textField = obj.object as? NSTextField else { return }
+        onTextChanged(textField.stringValue)
+    }
+}
 
 /// Converts a `NativeNode` tree into an AppKit (NSView) hierarchy.
 enum NativeViewRenderer {
@@ -16,29 +32,23 @@ enum NativeViewRenderer {
             return label
 
         case .view(let style, let children):
-            let container = NSView()
-            applyStyle(style, to: container)
+            let stack = NSStackView()
+            stack.orientation = .vertical
+            stack.alignment = .leading
+            stack.spacing = 0
+            applyStyle(style, to: stack)
 
-            var offsetY: CGFloat = 0
             for child in children {
                 if let childView = render(child) {
-                    childView.translatesAutoresizingMaskIntoConstraints = false
-                    container.addSubview(childView)
-
-                    NSLayoutConstraint.activate([
-                        childView.topAnchor.constraint(equalTo: container.topAnchor, constant: offsetY),
-                        childView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-                    ])
-                    childView.layoutSubtreeIfNeeded()
-                    offsetY += childView.intrinsicContentSize.height
+                    stack.addArrangedSubview(childView)
+                    // Let input fields stretch to fill width
+                    if childView is NSTextField && (childView as! NSTextField).isEditable {
+                        childView.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+                    }
                 }
             }
 
-            if offsetY > 0 {
-                container.heightAnchor.constraint(greaterThanOrEqualToConstant: offsetY).isActive = true
-            }
-
-            return container
+            return stack
 
         case .img(let src, let style):
             let imageView = NSImageView()
@@ -82,22 +92,43 @@ enum NativeViewRenderer {
             }
             return button
 
-        case .input(let value, let placeholder, let style, _):
+        case .input(let value, let placeholder, let style, let onTextChanged):
             let textField = NSTextField()
             textField.stringValue = value
-            textField.placeholderString = placeholder
+            textField.placeholderString = placeholder.isEmpty ? "Type here..." : placeholder
             textField.isEditable = true
+            textField.isSelectable = true
+            textField.drawsBackground = true
+            textField.backgroundColor = .textBackgroundColor
+            textField.isBordered = true
             textField.isBezeled = true
-            textField.bezelStyle = .roundedBezel
-            applyStyle(style, to: textField)
+            textField.bezelStyle = .squareBezel
+            textField.focusRingType = .exterior
+            textField.wantsLayer = true
+            textField.layer?.borderColor = NSColor.separatorColor.cgColor
+            textField.layer?.borderWidth = 1.0
+            textField.layer?.cornerRadius = 4.0
             if let fontSize = style["font-size"] {
                 let size = parsePx(fontSize)
                 if size > 0 {
                     textField.font = .systemFont(ofSize: size)
                 }
+            } else {
+                textField.font = .systemFont(ofSize: 14)
             }
             if let color = style["color"], let c = parseColor(color) {
                 textField.textColor = c
+            }
+            // Explicit size
+            let w = parsePx(style["width"])
+            textField.widthAnchor.constraint(equalToConstant: w > 0 ? w : 240).isActive = true
+            let h = parsePx(style["height"])
+            textField.heightAnchor.constraint(equalToConstant: h > 0 ? h : 28).isActive = true
+            // Wire text change callback to JS listener
+            if let callback = onTextChanged {
+                let handler = InputHandler(onTextChanged: callback)
+                textField.delegate = handler
+                objc_setAssociatedObject(textField, &InputHandler.associatedKey, handler, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
             }
             return textField
         }

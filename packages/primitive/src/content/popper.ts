@@ -5,13 +5,13 @@ import { MountedEvent } from "@/event";
 import { isElement, MaybeSignal, TimelessElement, ViewChildren } from "./type";
 import { Txt } from "./text";
 
-type DOMPopperProps = {
+type PopperProps = {
   x: MaybeSignal<number>;
   y: MaybeSignal<number>;
   placed: MaybeSignal<boolean>;
   onMounted?: (event: MountedEvent) => void;
 };
-type DOMPopperState = {
+type PopperState = {
   children: TimelessElement[];
   width: number;
   height: number;
@@ -25,8 +25,8 @@ type DOMPopperState = {
   };
 };
 
-export function Popper(props: DOMPopperProps, children?: ViewChildren) {
-  const state: DOMPopperState = {
+export function Popper(props: PopperProps, children?: ViewChildren) {
+  const state: PopperState = {
     children: [],
     width: 0,
     height: 0,
