@@ -144,6 +144,7 @@ export function LazyView(
     set $elm(v: any) {
       $elm = v;
     },
+    state: {},
     children: state.children,
     render() {
       return $elm;

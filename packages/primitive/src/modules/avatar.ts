@@ -2,8 +2,7 @@ import { computed, ref, isRef, Ref } from "@timeless/reactive";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { getHost } from "@/host";
-import { safeCreateElement } from "@/util/env";
+import { Img } from "@/content/img";
 
 export function Root(
   props: ViewProps & { size?: "default" | "large" },
@@ -27,81 +26,56 @@ export function Image(
     onLoadingStatusChange?: (status: "loading" | "loaded" | "error") => void;
   },
 ) {
-  const host = getHost();
+  // const host = getHost();
   const { src, alt, onLoadingStatusChange, ...rest } = props || {};
 
-  const srcRef = isRef(src) ? src : ref(src || "");
+  let $elm: any = null;
+  // const srcRef = isRef(src) ? src : ref(src || "");
 
-  const $img = safeCreateElement("img");
-  let rendered = false;
+  // const $img = safeCreateElement("img");
+  // let rendered = false;
 
-  const setProp = (key: string, value: any) => {
-    if (host.setProperty) {
-      host.setProperty($img, key, value);
-      return;
-    }
-    ($img as any)[key] = value;
-  };
+  // const setProp = (key: string, value: any) => {
+  //   if (host.setProperty) {
+  //     host.setProperty($img, key, value);
+  //     return;
+  //   }
+  //   ($img as any)[key] = value;
+  // };
 
-  const updateSrc = (v: unknown) => {
-    const srcText = String(v ?? "");
-    if (srcText) {
-      setProp("src", srcText);
-      host.patchStyle?.($img, { display: "" });
-      onLoadingStatusChange?.("loading");
-    } else {
-      host.patchStyle?.($img, { display: "none" });
-      onLoadingStatusChange?.("error");
-    }
-  };
+  // const updateSrc = (v: unknown) => {
+  //   const srcText = String(v ?? "");
+  //   if (srcText) {
+  //     setProp("src", srcText);
+  //     host.patchStyle?.($img, { display: "" });
+  //     onLoadingStatusChange?.("loading");
+  //   } else {
+  //     host.patchStyle?.($img, { display: "none" });
+  //     onLoadingStatusChange?.("error");
+  //   }
+  // };
 
-  updateSrc(srcRef.value);
-  if (isRef(src)) {
-    src.subscribe({ onChange: updateSrc });
-  }
+  // updateSrc(srcRef.value);
+  // if (isRef(src)) {
+  //   src.subscribe({ onChange: updateSrc });
+  // }
 
-  const handleLoad = () => {
-    onLoadingStatusChange?.("loaded");
-  };
+  // const handleLoad = () => {
+  //   onLoadingStatusChange?.("loaded");
+  // };
 
-  const handleError = () => {
-    onLoadingStatusChange?.("error");
-    host.patchStyle?.($img, { display: "none" });
-  };
+  // const handleError = () => {
+  //   onLoadingStatusChange?.("error");
+  //   host.patchStyle?.($img, { display: "none" });
+  // };
 
-  host.addEventListener($img, "load", handleLoad);
-  host.addEventListener($img, "error", handleError);
+  // host.addEventListener($img, "load", handleLoad);
+  // host.addEventListener($img, "error", handleError);
 
-  if (alt) setProp("alt", alt);
-  if (rest.class) host.setClassName($img, String(rest.class));
+  // if (alt) setProp("alt", alt);
+  // if (rest.class) host.setClassName($img, String(rest.class));
 
-  return {
-    t: "view",
-    $elm: $img,
-    render() {
-      if (rendered) {
-        return $img;
-      }
-      rendered = true;
-      return $img;
-    },
-    onMounted() {},
-    beforeUnmounted() {},
-    onUnmounted() {
-      host.removeEventListener($img, "load", handleLoad);
-      host.removeEventListener($img, "error", handleError);
-
-      // Reset state for potential re-render
-      rendered = false;
-    },
-    append(node: any) {
-      host.appendChild($img, node);
-    },
-    setContent(html: string) {
-      host.setInnerHTML?.($img, html);
-    },
-    class$: null,
-  };
+  return Img(props);
 }
 
 export function Fallback(props: ViewProps, children?: ViewChildren) {

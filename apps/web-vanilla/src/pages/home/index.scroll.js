@@ -224,7 +224,9 @@ function DownloadTaskItem(props) {
             ];
           },
         }),
-        View({ class: classNames(["mt-0.5 text-xs", statusColor_]) }, [statusText_]),
+        View({ class: classNames(["mt-0.5 text-xs", statusColor_]) }, [
+          statusText_,
+        ]),
       ]),
       // Action button
       View(
@@ -236,8 +238,7 @@ function DownloadTaskItem(props) {
             when: computed(task, (t) => t.status === "running"),
             ok() {
               return [
-                h(
-                  Button,
+                Button(
                   {
                     class: "pause",
                     store: new Timeless.ui.ButtonCore({
@@ -261,8 +262,7 @@ function DownloadTaskItem(props) {
                   ),
                   ok() {
                     return [
-                      h(
-                        Button,
+                      Button(
                         {
                           class: "retry_or_resume",
                           store: new Timeless.ui.ButtonCore({
@@ -419,7 +419,9 @@ export default function HomeIndexScrollViewExampleView() {
                     }),
                     View(
                       {
-                        class: classNames(["py-3 text-center text-xs text-zinc-400"]),
+                        class: classNames([
+                          "py-3 text-center text-xs text-zinc-400",
+                        ]),
                       },
                       [Txt("Scroll to bottom to load more")],
                     ),
@@ -629,7 +631,9 @@ export default function HomeIndexScrollViewExampleView() {
                     }),
                     View(
                       {
-                        class: classNames(["py-3 text-center text-xs text-zinc-400"]),
+                        class: classNames([
+                          "py-3 text-center text-xs text-zinc-400",
+                        ]),
                       },
                       [Txt("Scroll to bottom to load more")],
                     ),
@@ -811,7 +815,9 @@ export default function HomeIndexScrollViewExampleView() {
                     }),
                     View(
                       {
-                        class: classNames(["py-3 text-center text-xs text-zinc-400"]),
+                        class: classNames([
+                          "py-3 text-center text-xs text-zinc-400",
+                        ]),
                       },
                       [Txt("Scroll to bottom to load more")],
                     ),
@@ -1008,8 +1014,7 @@ export default function HomeIndexScrollViewExampleView() {
                                     },
                                     ["Done"],
                                   ),
-                                  h(
-                                    Button,
+                                  Button(
                                     {
                                       class:
                                         "text-xs text-red-400 hover:text-red-600",
@@ -1229,7 +1234,9 @@ export default function HomeIndexScrollViewExampleView() {
                     }),
                     View(
                       {
-                        class: classNames(["py-3 text-center text-xs text-zinc-400"]),
+                        class: classNames([
+                          "py-3 text-center text-xs text-zinc-400",
+                        ]),
                       },
                       [Txt("Scroll to bottom to load more")],
                     ),
@@ -1310,7 +1317,9 @@ export default function HomeIndexScrollViewExampleView() {
                 content: [
                   View(
                     {
-                      class: classNames(["w-[340px] rounded-lg overflow-hidden"]),
+                      class: classNames([
+                        "w-[340px] rounded-lg overflow-hidden",
+                      ]),
                     },
                     [
                       // Header
@@ -1504,7 +1513,9 @@ export default function HomeIndexScrollViewExampleView() {
                 content: [
                   View(
                     {
-                      class: classNames(["w-[340px] rounded-lg overflow-hidden"]),
+                      class: classNames([
+                        "w-[340px] rounded-lg overflow-hidden",
+                      ]),
                     },
                     [
                       // Header

@@ -20,7 +20,7 @@ function LifecyclePageA(props) {
         [
           View(
             { class: "text-sm font-medium text-blue-900 dark:text-blue-100" },
-            "页面 A",
+            ["页面 A"],
           ),
           View({ class: "text-xs text-blue-600 dark:text-blue-400 mt-1" }, [
             "这是一个子页面，用于演示 onMounted / onUnmounted 生命周期",
@@ -51,7 +51,7 @@ function LifecyclePageB(props) {
         [
           View(
             { class: "text-sm font-medium text-green-900 dark:text-green-100" },
-            "页面 B",
+            ["页面 B"],
           ),
           View({ class: "text-xs text-green-600 dark:text-green-400 mt-1" }, [
             "这是另一个子页面，用于对比演示生命周期的调用",
@@ -84,7 +84,7 @@ function LifecyclePageC(props) {
             {
               class: "text-sm font-medium text-purple-900 dark:text-purple-100",
             },
-            "页面 C",
+            ["页面 C"],
           ),
           View({ class: "text-xs text-purple-600 dark:text-purple-400 mt-1" }, [
             "第三个子页面，用于观察多次切换时的生命周期调用",
@@ -117,7 +117,7 @@ function LifecyclePageD(props) {
             {
               class: "text-sm font-medium text-purple-900 dark:text-purple-100",
             },
-            "页面 D",
+            ["页面 D"],
           ),
           View({ class: "text-xs text-purple-600 dark:text-purple-400 mt-1" }, [
             "第四个子页面，观察懒加载的页面能否正确触发生命周期",
@@ -150,7 +150,7 @@ function LifecyclePageE(props) {
             {
               class: "text-sm font-medium text-purple-900 dark:text-purple-100",
             },
-            "页面 E",
+            ["页面 E"],
           ),
           View({ class: "text-xs text-purple-600 dark:text-purple-400 mt-1" }, [
             "第五个子页面，观察懒加载的页面能否正确触发生命周期",
@@ -305,7 +305,7 @@ export default function LifecycleView(props) {
                           subhistory$.push(item.name);
                         },
                       },
-                      item.label,
+                      [item.label],
                     );
                   },
                 }),
@@ -335,7 +335,7 @@ export default function LifecycleView(props) {
                                 class:
                                   "text-sm text-zinc-400 dark:text-zinc-500",
                               },
-                              "加载中...",
+                              ["加载中..."],
                             ),
                           ]),
                         ],
@@ -359,7 +359,7 @@ export default function LifecycleView(props) {
                       "px-4 py-2 border-b dark:border-zinc-800 flex items-center justify-between",
                   },
                   [
-                    View({ class: "text-sm font-medium" }, "Lifecycle Logs"),
+                    View({ class: "text-sm font-medium" }, ["Lifecycle Logs"]),
                     View(
                       {
                         class:
@@ -368,7 +368,7 @@ export default function LifecycleView(props) {
                           logs.splice(0, logs.length);
                         },
                       },
-                      "Clear",
+                      ["Clear"],
                     ),
                   ],
                 ),

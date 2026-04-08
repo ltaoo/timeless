@@ -29,6 +29,7 @@ export function Icon(props: IconProps) {
       color: state.color,
       size: state.size,
     },
+    state: {},
     props: {
       styleSet: [],
       style: {},

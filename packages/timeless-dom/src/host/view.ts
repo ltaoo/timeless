@@ -30,12 +30,18 @@ export interface DOMView {
     options?: any,
   ): void;
   render(elm: TimelessElement): HTMLDivElement;
+  removeContent(): void;
 }
 
 export function DOMView(props: {
   build: (elm: TimelessElement) => DOMHostNode;
 }): DOMView {
   const $elm = document.createElement("div");
+  // 要记 DOMXXX 实例，就是 $sub，通过它来销毁，而不是保留 ChildNode 这种宿主元素
+  // 移除子内容，由于子内容可能是 Fragment、Show 等等
+  // 完全可以调用 DOMFragment.removeContent、DOMShow.removeContent 来移除
+  // 就不用判断 isDocumentFragment，然后把子容器的 ChildNode 放到自身上来，别扭
+  // 移除子元素，让容器自己来做
   const children$: ChildNode[] = [];
 
   const methods = {
@@ -151,10 +157,15 @@ export function DOMView(props: {
       $elm.removeEventListener(type, handler, options);
     },
     render(elm: TimelessElement) {
-      if (elm.state?.style) {
-        methods.setStyle(elm.state.style);
+      try {
+        if (elm.state.style) {
+          methods.setStyle(elm.state.style);
+        }
+      } catch (e) {
+        console.log(elm);
+        console.error(e);
       }
-      if (elm.state?.styleSet) {
+      if (elm.state.styleSet) {
         methods.setStyleSet(elm.state.styleSet);
       }
       const attrs = elm.state.attributes;
@@ -182,6 +193,15 @@ export function DOMView(props: {
         }
       }
       return $elm;
+    },
+    removeContent() {
+      for (const child of children$) {
+        const $parent = child.parentElement;
+        if ($parent) {
+          $parent.removeChild(child);
+        }
+      }
+      children$.length = 0;
     },
   };
 }

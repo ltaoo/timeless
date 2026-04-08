@@ -44,6 +44,7 @@ export function Txt(
       $elm = v;
     },
     value: state.value,
+    state,
     props: {
       // styleSet: [],
       style: {},

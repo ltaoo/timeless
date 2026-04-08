@@ -291,7 +291,7 @@ export default function DownloadTaskPageView(props) {
                 when: computed(vm$.state.taskCount, (d) => d > 0),
                 ok() {
                   return [
-                    h(Waterfall, {
+                    Waterfall({
                       store: vm$.ui.waterfall$,
                       render(task) {
                         return DownloadTaskCard({
@@ -304,8 +304,7 @@ export default function DownloadTaskPageView(props) {
                 },
                 else() {
                   return [
-                    h(
-                      View,
+                    View(
                       {
                         class:
                           "flex items-center justify-center h-[200px] text-sm text-zinc-400",

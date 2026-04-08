@@ -645,7 +645,7 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
       }
       // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
       // host.clearChildren($elm);
-      $elm.clearChildren();
+      $elm.removeContent();
       // console.log("[View] onUnmounted completed");
 
       // Reset state for potential re-render (e.g., when Show toggles when back to true)

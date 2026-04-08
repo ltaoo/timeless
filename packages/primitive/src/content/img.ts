@@ -428,6 +428,7 @@ export function Img(props: ImgProps = {}) {
       $elm = v;
     },
     value: state.props.src,
+    state: {},
     props: state.props,
     render() {
       if (rendered) {

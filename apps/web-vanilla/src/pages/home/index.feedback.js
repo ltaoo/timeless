@@ -114,11 +114,10 @@ export default function FeedbackView() {
             {
               class:
                 "relative w-full h-[320px] max-w-md rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 p-4",
-              /** @param {HTMLDivElement} $el */
-              onMounted($el) {
+              onMounted(event) {
                 viewportDialog$.setViewport({
                   getRect() {
-                    return $el.getBoundingClientRect();
+                    return event.target.getBoundingClientRect();
                   },
                 });
               },

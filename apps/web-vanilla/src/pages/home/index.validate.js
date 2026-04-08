@@ -69,7 +69,7 @@ function FormRender(props, children) {
               when: inline,
               ok() {
                 return [
-                  h(FieldInlineLabel, {
+                  FieldInlineLabel({
                     for: fid,
                     store: field$,
                   }),

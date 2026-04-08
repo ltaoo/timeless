@@ -43,6 +43,7 @@ export function Root(
     $elm: view$.$elm,
     value: "",
     children: [],
+    state: {},
     props: { style: {} },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
@@ -92,6 +93,7 @@ export function Column(
     $elm: view$.$elm,
     value: "",
     children: [],
+    state: {},
     props: { style: {} },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
@@ -152,6 +154,7 @@ export function Cell(
     $elm: view$.$elm,
     value: "",
     children: [],
+    state: {},
     props: { style: {} },
     beforeUnmounted() {
       if (props.beforeUnmounted) {

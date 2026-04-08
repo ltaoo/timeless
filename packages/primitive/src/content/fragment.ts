@@ -47,17 +47,14 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
 
   return {
     t: "fragment",
-    state,
     get $elm() {
       return $fragment;
     },
     set $elm(v) {
       $fragment = v;
     },
+    state,
     children: state.children,
-    // set $elm(v) {
-    //   $fragment = v;
-    // },
     append(node: any) {
       state.children.push(node);
     },

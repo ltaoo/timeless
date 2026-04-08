@@ -31,7 +31,7 @@ export function Anchor(
     {
       ...rest,
       onMounted(event) {
-        const $el = (event as any).target as HTMLDivElement;
+        const $el = event.target as HTMLDivElement;
         store.setReference({
           $el,
           getRect() {

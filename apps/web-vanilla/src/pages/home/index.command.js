@@ -262,11 +262,10 @@ export default function CommandView() {
                 {
                   class:
                     "fixed z-50 w-full max-w-[560px] pointer-events-auto rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-white dark:bg-zinc-900",
-                  /** @param {HTMLDivElement} $el */
-                  onMounted($el) {
+                  onMounted(event) {
                     syncPaletteAnchor();
                     $clickOutside.methods.setTargetRect(() =>
-                      $el.getBoundingClientRect(),
+                      event.target.getBoundingClientRect(),
                     );
                     $clickOutside.methods.activate();
                   },

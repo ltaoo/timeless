@@ -504,6 +504,7 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
     },
     value: "",
     children: state.children,
+    state: {},
     props: state.props,
     events: state.events,
     /** @deprecated */
@@ -622,7 +623,7 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
       }
       // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
       // host.clearChildren($elm);
-      $elm.clearChildren();
+      $elm.removeContent();
       // console.log("[View] onUnmounted completed");
       // Reset state for potential re-render (e.g., when Show toggles when back to true)
       state.rendered = false;

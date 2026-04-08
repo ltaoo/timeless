@@ -12,6 +12,7 @@ export function DangerouslyInnerHTML(html: string | Ref<string>) {
     set $elm(v) {
       $elm = v;
     },
+    state: {},
     render() {
       let _local_value = (() => {
         if (isRef(html)) {

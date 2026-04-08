@@ -21,7 +21,7 @@ export function Input(
   const host = getHost();
   const { store, style: st, class: cls, dataset = {}, id, ...rest } = props;
 
-  const $elm = safeCreateElement("input");
+  let $elm = safeCreateElement("input");
   let rendered = false;
   const listenerCleanups: (() => void)[] = [];
 
@@ -51,7 +51,13 @@ export function Input(
 
   return {
     t: "view",
-    $elm,
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      $elm = v;
+    },
+    state: {},
     render() {
       if (rendered) {
         return $elm;

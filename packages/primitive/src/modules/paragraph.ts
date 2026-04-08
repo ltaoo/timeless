@@ -2,12 +2,18 @@ import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 
 export function Paragraph(props: ViewProps & {}, children?: ViewChildren) {
-  const node$ = View({ ...props, as: "p" }, children);
+  let $elm: any = null;
+
   return {
     t: "view",
-    render() {
-      return node$.render();
+    get $elm() {
+      return $elm;
     },
+    set $elm(v) {
+      $elm = v;
+    },
+    state: {},
+    render() {},
     // onMounted() {
     //   if (node$.onMounted) {
     //     node$.onMounted();

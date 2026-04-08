@@ -129,6 +129,7 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
       $elm = value;
     },
     children: state.children,
+    state,
     props: state.props,
     get value() {
       return {
