@@ -1,6 +1,7 @@
 import { ViewProps } from "./view";
 import { Txt } from "./text";
 import { TimelessElement, ViewChildren, isElement } from "./type";
+import { MountedEvent } from "@/event";
 
 export function Fragment(props: ViewProps, children: ViewChildren = []) {
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
@@ -26,10 +27,10 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       continue;
     }
     // 处理 h() 返回的延迟执行函数
-    if (typeof node === "function") {
-      node = node();
-      state.children[i] = node;
-    }
+    // if (typeof node === "function") {
+    //   node = node();
+    //   state.children[i] = node;
+    // }
     if (typeof node === "string" || typeof node === "number") {
       // $fragment.appendChild(Txt(String(node)));
       state.children[i] = Txt(String(node));
@@ -54,6 +55,41 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
     // set $elm(v) {
     //   $fragment = v;
     // },
+    append(node: any) {
+      state.children.push(node);
+    },
+    render() {
+      if (state.rendered) {
+        return $fragment;
+      }
+      state.rendered = true;
+
+      // Create fragment if not already created
+      // if (!$fragment) {
+      //   $fragment = safeCreateDocumentFragment();
+      // }
+
+      if (onMounted) {
+        const cleanup = onMounted({ target: $fragment as any });
+        if (typeof cleanup === "function") {
+          onMountedCleanup = cleanup;
+        }
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node)) {
+          if (node.onMounted) {
+            node.onMounted({ target: node.$elm });
+          }
+        }
+      }
+      return $fragment;
+    },
+    onMounted(event: MountedEvent) {
+      if (onMounted) {
+        onMounted(event);
+      }
+    },
     beforeUnmounted() {
       // console.log("[Fragment] beforeUnmounted");
       if (beforeUnmounted) {
@@ -85,36 +121,6 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       // Reset state for potential re-render
       state.rendered = false;
       // $fragment = null;
-    },
-    append(node: any) {
-      state.children.push(node);
-    },
-    render() {
-      if (state.rendered) {
-        return $fragment;
-      }
-      state.rendered = true;
-
-      // Create fragment if not already created
-      // if (!$fragment) {
-      //   $fragment = safeCreateDocumentFragment();
-      // }
-
-      if (onMounted) {
-        const cleanup = onMounted({ target: $fragment as any });
-        if (typeof cleanup === "function") {
-          onMountedCleanup = cleanup;
-        }
-      }
-      for (let i = 0; i < state.children.length; i += 1) {
-        const node = state.children[i];
-        if (isElement(node)) {
-          if (node.onMounted) {
-            node.onMounted({ target: node.$elm });
-          }
-        }
-      }
-      return $fragment;
     },
   };
 }

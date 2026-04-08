@@ -3,7 +3,6 @@ import {
   ToastPrimitive,
   For,
   Show,
-  h,
   ViewChildren,
   ViewProps,
 } from "@timeless/primitive";
@@ -25,8 +24,7 @@ export function Toast(
       when: computed(state_, (d) => !!d.mask),
       ok() {
         return [
-          h(
-            ToastPrimitive.Mask,
+          ToastPrimitive.Mask(
             {
               store,
               class: "fixed inset-0 z-[998] bg-black/20",
@@ -62,8 +60,7 @@ export function Toast(
               when: computed(state_, (d) => d.icon === "loading"),
               ok() {
                 return [
-                  h(
-                    ToastPrimitive.Icon,
+                  ToastPrimitive.Icon(
                     {
                       store,
                       class:

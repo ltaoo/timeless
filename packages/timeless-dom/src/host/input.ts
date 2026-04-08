@@ -22,6 +22,7 @@ export interface DOMInput {
     handler: (event: any) => void,
     options?: any,
   ): void;
+  setValue(value: string): void;
   render(elm: TimelessElement): any;
 }
 
@@ -146,12 +147,15 @@ export function DOMInput(props: {
     ) {
       $elm.removeEventListener(type, handler, options);
     },
+    setValue(value: string) {
+      $elm.value = value;
+    },
     render(elm: TimelessElement) {
-      $elm.style.backgroundColor = "transparent";
+      // $elm.style.backgroundColor = "transparent";
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
-      $elm.value = "";
       $elm.type = "text";
+      $elm.value = elm.value;
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }

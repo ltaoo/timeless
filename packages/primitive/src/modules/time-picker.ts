@@ -11,6 +11,7 @@ import { getHost } from "@/host";
 import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
+import { Button, ButtonProps } from "@/interaction/button";
 
 export function Root(
   props: ViewProps & { store: TimePickerCore },
@@ -270,15 +271,10 @@ export function HourColumn(
   return View(rest, [
     For({
       each: hours,
-      // @ts-ignore
       render(hour) {
-        return HourItem(
-          {
-            store,
-            value: hour,
-          },
-          [String(hour).padStart(2, "0")],
-        );
+        return HourItem({ store, value: hour }, [
+          String(hour).padStart(2, "0"),
+        ]);
       },
     }),
   ]);
@@ -327,15 +323,10 @@ export function MinuteColumn(
   return View(rest, [
     For({
       each: minutes,
-      // @ts-ignore
       render(minute) {
-        return MinuteItem(
-          {
-            store,
-            value: minute,
-          },
-          [String(minute).padStart(2, "0")],
-        );
+        return MinuteItem({ store, value: minute }, [
+          String(minute).padStart(2, "0"),
+        ]);
       },
     }),
   ]);
@@ -384,22 +375,17 @@ export function SecondColumn(
   return View(rest, [
     For({
       each: seconds,
-      // @ts-ignore
       render(second) {
-        return SecondItem(
-          {
-            store,
-            value: second,
-          },
-          [String(second).padStart(2, "0")],
-        );
+        return SecondItem({ store, value: second }, [
+          String(second).padStart(2, "0"),
+        ]);
       },
     }),
   ]);
 }
 
 export function SecondItem(
-  props: ViewProps & {
+  props: ButtonProps & {
     store: TimePickerCore;
     value: number;
   },
@@ -407,10 +393,9 @@ export function SecondItem(
 ) {
   const { store, value, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.selectSecond(value);
       },

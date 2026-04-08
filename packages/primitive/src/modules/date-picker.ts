@@ -333,7 +333,7 @@ export function CalendarGridBody(
       is_today: boolean;
       is_prev_month: boolean;
       is_next_month: boolean;
-    }) => TimelessElement | (() => TimelessElement) | null;
+    }) => TimelessElement | null;
   },
   children?: ViewChildren,
 ) {

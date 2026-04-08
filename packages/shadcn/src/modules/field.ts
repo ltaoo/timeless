@@ -10,9 +10,7 @@ import {
   Show,
   ViewProps,
   ViewChildren,
-  h,
   Match,
-  // Case,
   Fragment,
   Label as NativeLabel,
 } from "@timeless/primitive";
@@ -257,8 +255,7 @@ export function Field(
         when: !props.inline,
         ok() {
           return [
-            h(
-              FieldLabel,
+            FieldLabel(
               {
                 store: props.store,
                 for: fid,

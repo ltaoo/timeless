@@ -118,7 +118,7 @@ export function Progress(
         when: !!children,
         ok() {
           return [
-            h(View, {
+            View({
               class: "inline-flex justify-center items-center w-full h-full",
               style: { transition: "all 300ms" },
             }),

@@ -16,7 +16,7 @@ import type {
   PrimitiveSignal,
   Signal,
 } from "./signal";
-import { isRef, isArrayRef } from "./types";
+import { isRef, isWriteableRef, isArrayRef } from "./types";
 import { ref } from "./ref";
 import { refArray } from "./reactive-array";
 import { refObject } from "./reactive-object";
@@ -46,6 +46,7 @@ export {
   ObjectSignal,
   ArraySignal,
   isRef,
+  isWriteableRef,
   isArrayRef,
   ref,
   signal,

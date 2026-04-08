@@ -73,7 +73,7 @@ declare module "packages/reactive/src/types" {
         set: (key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])) => void;
         get: (key: keyof T) => unknown;
         delete: (key: keyof T) => void;
-        as: (nextObj: T | ((cur: T | null) => T)) => void;
+        as: (v: T | ((cur: T | null) => T)) => void;
         refresh: () => void;
         has: (key: keyof T) => boolean;
         keys: () => (keyof T)[];
@@ -99,6 +99,7 @@ declare module "packages/reactive/src/types" {
     };
     export type TimelessRefArray<T> = {
         __is_ref: true;
+        __is_ref_array: true;
         subscribe: (ctx: Subscriber) => void;
         destroy: () => void;
         value: T[];
@@ -185,17 +186,21 @@ declare module "packages/reactive/src/types" {
         at: (index: number) => T | undefined;
         toArray: () => T[];
     };
-    export type Ref<T> = {
+    export type DerivedRef<T> = {
         __is_ref: true;
         subscribe: (ctx: Subscriber) => void;
         destroy: () => void;
         value: T;
-        as: (v: T) => void;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
     };
-    export function isRef<T>(v: Ref<T> | T): v is Ref<T>;
-    export function isRef(v: unknown): v is Ref<any>;
+    export type Ref<T> = DerivedRef<T> & {
+        as: (value: T | ((cur: T | null) => T)) => void;
+    };
+    export function isRef<T>(v: DerivedRef<T> | Ref<T> | T): v is DerivedRef<T>;
+    export function isRef(v: unknown): v is DerivedRef<any>;
+    export function isArrayRef<T>(v: T[] | TimelessRefArray<T>): v is TimelessRefArray<T>;
+    export function isArrayRef<T>(v: unknown): v is TimelessRefArray<T>;
 }
 declare module "packages/reactive/src/reactive-array" {
     import { Ref, TimelessRefArray } from "packages/reactive/src/types";
@@ -286,13 +291,13 @@ declare module "packages/reactive/src/reactive-array" {
     }>): TimelessRefArray<T>;
 }
 declare module "packages/reactive/src/registry" {
-    import { Ref } from "packages/reactive/src/types";
+    import { DerivedRef, Ref } from "packages/reactive/src/types";
     import type { RefObject } from "packages/reactive/src/reactive-object";
     import type { RefArray } from "packages/reactive/src/reactive-array";
-    export function release(ref: Ref<any>): void;
-    export function set(key: any, v: Ref<any>): void;
+    export function release(ref: DerivedRef<any> | Ref<any>): void;
+    export function set(key: any, v: DerivedRef<any> | Ref<any>): void;
     export function has(v: any): boolean;
-    export function get(v: any): Ref<any>;
+    export function get(v: any): DerivedRef<any> | Ref<any>;
     export function getobj<T extends Record<string, any>>(v: any): RefObject<T> | undefined;
     export function getarr<T>(v: any): RefArray<T> | undefined;
 }
@@ -327,7 +332,7 @@ declare module "packages/reactive/src/reactive-object" {
         hasIn(path: string): boolean;
         update(key: keyof T, fn: (current: T[keyof T]) => T[keyof T]): void;
     }
-    export interface RefObjectNullable<T> extends Ref<T | null> {
+    export interface RefObjectNullable<T> extends Ref<T> {
         set(key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])): void;
         get(key: keyof T): unknown;
         delete(key: keyof T): void;
@@ -406,7 +411,7 @@ declare module "packages/reactive/src/model" {
     }): TimelessViewModel<S, M, H, U, Sr>;
 }
 declare module "packages/reactive/src/computed" {
-    import { Ref } from "packages/reactive/src/types";
+    import { DerivedRef } from "packages/reactive/src/types";
     type RefValue<R> = R extends {
         __is_ref: true;
         value: infer T;
@@ -414,27 +419,27 @@ declare module "packages/reactive/src/computed" {
     export function computed<D extends {
         __is_ref: true;
         value: any;
-    }, R>(deps: D, fn: (val: RefValue<D>) => R): Ref<R>;
-    export function computed<T extends object, R>(deps: T, fn: (val: T) => R): Ref<R>;
+    }, R>(deps: D, fn: (val: RefValue<D>) => R): DerivedRef<R>;
+    export function computed<T extends object, R>(deps: T, fn: (val: T) => R): DerivedRef<R>;
 }
 declare module "packages/reactive/src/derive" {
-    import { Ref } from "packages/reactive/src/types";
-    type UnwrapRef<T> = T extends Ref<infer V> ? (V extends Ref<any> ? UnwrapRef<V> : V) : T;
+    import { Ref, DerivedRef } from "packages/reactive/src/types";
+    type UnwrapRef<T> = T extends Ref<infer V> ? V extends Ref<any> ? UnwrapRef<V> : V : T extends DerivedRef<infer V> ? V extends DerivedRef<any> ? UnwrapRef<V> : V : T;
     export function derive<T extends readonly any[], R>(deps: readonly [...T], fn: (...args: {
         [K in keyof T]: UnwrapRef<T[K]>;
     } & {
         length: T["length"];
-    }) => R): Ref<R>;
+    }) => R): DerivedRef<R>;
     export function derive<T extends Record<string, any>, R>(deps: T, fn: (args: {
         [K in keyof T]: UnwrapRef<T[K]>;
-    }) => R): Ref<R>;
+    }) => R): DerivedRef<R>;
 }
 declare module "packages/reactive/src/index" {
-    import type { Subscriber, Ref, TimelessRefArray } from "packages/reactive/src/types";
+    import type { Subscriber, Ref, DerivedRef, TimelessRefArray } from "packages/reactive/src/types";
     import type { RefObject } from "packages/reactive/src/reactive-object";
     import type { RefArray } from "packages/reactive/src/reactive-array";
     import type { ArraySignal, ObjectSignal, PrimitiveSignal, Signal } from "packages/reactive/src/signal";
-    import { isRef } from "packages/reactive/src/types";
+    import { isRef, isArrayRef } from "packages/reactive/src/types";
     import { ref } from "packages/reactive/src/ref";
     import { refArray } from "packages/reactive/src/reactive-array";
     import { refObject } from "packages/reactive/src/reactive-object";
@@ -443,7 +448,7 @@ declare module "packages/reactive/src/index" {
     import { computed } from "packages/reactive/src/computed";
     import { derive } from "packages/reactive/src/derive";
     import { release, get as registryGet, set as registrySet, getobj as registryGetObj, getarr as registryGetArr } from "packages/reactive/src/registry";
-    export { Subscriber, Ref, RefObject, RefArray, TimelessRefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
+    export { Subscriber, Ref, DerivedRef, RefObject, RefArray, TimelessRefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, isArrayRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
 }
 declare module "packages/primitive/src/host/stub" {
     export const STUB_MARKER = "__stub__";
@@ -566,13 +571,13 @@ declare module "packages/primitive/src/host/index" {
     export function getRendererScheduler(): RendererScheduler;
 }
 declare module "packages/primitive/src/reactive/for" {
-    import { Ref } from "packages/reactive/src/index";
+    import { Ref, DerivedRef } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
     import { TimelessElement } from "@/content/type";
     export function For<T>(props: ViewProps & {
         key?: string;
-        each: T[] | Ref<T[]>;
-        render: (item: T, idx: Ref<number>) => TimelessElement | (() => TimelessElement) | null;
+        each: T[] | DerivedRef<T[]> | Ref<T[]>;
+        render: (item: T, idx: DerivedRef<number>) => TimelessElement | (() => TimelessElement) | null;
     }): {
         t: string;
         $elm: any;
@@ -584,10 +589,10 @@ declare module "packages/primitive/src/reactive/for" {
     };
 }
 declare module "packages/primitive/src/reactive/show" {
-    import { Ref } from "packages/reactive/src/index";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewChildren } from "@/content/type";
     export function Show(props: {
-        when: Ref<boolean> | Ref<boolean | undefined | null> | boolean;
+        when: DerivedRef<boolean | undefined | null> | Ref<boolean | undefined | null> | boolean;
         ok: () => ViewChildren;
         else?: () => ViewChildren;
         onMounted?: ($fg: any) => void;
@@ -652,13 +657,12 @@ declare module "packages/primitive/src/content/lazy-view" {
     export function isLazyElement(v: unknown): v is TimelessLazyComponent;
 }
 declare module "packages/primitive/src/content/type" {
-    import { Ref, Signal } from "packages/reactive/src/index";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewStyleProperties } from "@/style";
     import { MountedEvent } from "@/event";
     import { TimelessLazyComponent } from "packages/primitive/src/content/lazy-view";
     export type ViewPropValue = string | number | boolean | undefined | null;
-    export type MaybeSignal<T = any> = T | Signal<T>;
-    export type ViewAttributes = Record<string, MaybeSignal>;
+    export type ViewAttributes = Record<string, any>;
     export type TimelessNormalComponent = (...args: unknown[]) => TimelessElement;
     export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
     export interface TimelessElement<T = any> {
@@ -666,7 +670,7 @@ declare module "packages/primitive/src/content/type" {
         $elm: any;
         children?: TimelessElement[];
         props?: {
-            styleSet?: MaybeSignal<string[]>;
+            styleSet?: string[] | DerivedRef<string[]> | Ref<string[]>;
             style?: ViewStyleProperties;
         };
         value?: T;
@@ -698,26 +702,26 @@ declare module "packages/primitive/src/content/type" {
         onUnmounted?(): void;
     }
     export function isElement(v: any): v is TimelessElement;
-    export type ViewChildren = (Ref<string | number> | TimelessElement | string | number | (() => TimelessElement) | null)[];
+    export type ViewChildren = (DerivedRef<string | number> | Ref<string | number> | TimelessElement | string | number | (() => TimelessElement) | null)[];
 }
 declare module "packages/primitive/src/content/text" {
-    import { Ref } from "packages/reactive/src/index";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { TimelessElement } from "packages/primitive/src/content/type";
-    export function Txt(value: Ref<string | number> | string | number): TimelessElement;
+    export function Txt(value: DerivedRef<string | number> | Ref<string | number> | string | number): TimelessElement;
 }
 declare module "packages/primitive/src/content/view" {
-    import { Ref, Signal } from "packages/reactive/src/index";
+    import { DerivedRef, Ref, Signal } from "packages/reactive/src/index";
     import { ViewStyleProperties, ViewStyle, ClassNameRef } from "@/style/index";
     import { MountedEvent } from "@/event/index";
-    import { MaybeSignal, TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
+    import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
     export interface ViewProps {
         key?: string | number;
         as?: string;
         style?: ViewStyle;
-        class?: string | Ref<string> | ClassNameRef;
+        class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
         draggable?: boolean;
         attributes?: ViewAttributes;
-        dataset?: Record<string, MaybeSignal<string | number>>;
+        dataset?: Record<string, undefined | string | number | DerivedRef<string | number | boolean | undefined> | Ref<string | number | boolean | undefined>>;
         onMounted?(event: MountedEvent): void | (() => void);
         beforeUnmounted?(): void;
         onUnmounted?(): void;
@@ -811,6 +815,7 @@ declare module "packages/primitive/src/content/html" {
     };
 }
 declare module "packages/primitive/src/content/icon" {
+    import { MountedEvent } from "@/event";
     export function Icon(props: {
         name: string;
         size: number;
@@ -819,19 +824,22 @@ declare module "packages/primitive/src/content/icon" {
         $elm: any;
         value: string;
         props: {
-            name: string;
-            size: number;
+            styleSet: any[];
+            style: {};
         };
+        render(): any;
+        onMounted(event: MountedEvent): void;
     };
     export function isIcon(v: any): boolean;
 }
 declare module "packages/primitive/src/content/popper" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { MountedEvent } from "@/event";
-    import { MaybeSignal, TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
+    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
     type PopperProps = {
-        x: MaybeSignal<number>;
-        y: MaybeSignal<number>;
-        placed: MaybeSignal<boolean>;
+        x: number | DerivedRef<number> | Ref<number>;
+        y: number | DerivedRef<number> | Ref<number>;
+        placed: boolean | DerivedRef<boolean> | Ref<boolean>;
         onMounted?: (event: MountedEvent) => void;
     };
     export function Popper(props: PopperProps, children?: ViewChildren): {
@@ -853,17 +861,17 @@ declare module "packages/primitive/src/content/popper" {
     };
 }
 declare module "packages/primitive/src/content/list-view" {
-    import { Signal } from "packages/reactive/src/index";
+    import { DerivedRef, Ref, Signal } from "packages/reactive/src/index";
     import { ViewStyleProperties, ViewStyle, ClassNameRef } from "@/style/index";
     import { MountedEvent } from "@/event/index";
-    import { MaybeSignal, TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
+    import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
     export interface ListViewProps {
         key?: string | number;
         style?: ViewStyle;
-        class?: MaybeSignal<string> | ClassNameRef;
+        class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
         draggable?: boolean;
         attributes?: ViewAttributes;
-        dataset?: Record<string, MaybeSignal<string | number>>;
+        dataset?: Record<string, string | number | DerivedRef<string> | Ref<string | number>>;
         onMounted?(event: MountedEvent): void | (() => void);
         beforeUnmounted?(): void;
         onUnmounted?(): void;
@@ -945,30 +953,30 @@ declare module "packages/primitive/src/event/index" {
     }
 }
 declare module "packages/primitive/src/input/input" {
-    import { Ref } from "packages/reactive/src/index";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
     import { MountedEvent } from "@/event";
     export interface InputProps extends Omit<ViewProps, "as" | "type"> {
         id?: string;
-        value?: Ref<string>;
-        placeholder?: string | Ref<string>;
-        disabled?: boolean | Ref<boolean>;
-        readonly?: boolean | Ref<boolean>;
-        maxLength?: number | Ref<number>;
-        minLength?: number | Ref<number>;
-        pattern?: string | Ref<string>;
-        required?: boolean | Ref<boolean>;
-        autocomplete?: string | Ref<string>;
-        autocorrect?: string;
+        value?: DerivedRef<string> | Ref<string>;
+        placeholder?: string | DerivedRef<string> | Ref<string>;
+        disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        maxLength?: number | DerivedRef<number> | Ref<number>;
+        minLength?: number | DerivedRef<number> | Ref<number>;
+        pattern?: string | DerivedRef<string> | Ref<string>;
+        required?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        autocomplete?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        autocorrect?: boolean;
         inputMode?: string;
-        name?: string | Ref<string>;
+        name?: string | DerivedRef<string> | Ref<string>;
         onInput?: (e: Event) => void;
         onChange?: (e: Event) => void;
     }
     export function Input(props?: InputProps): {
         t: string;
         $elm: any;
-        props: Record<string, any>;
+        props: InputProps;
         events: {
             onInput: (e: Event) => void;
             onChange: (e: Event) => void;
@@ -984,54 +992,47 @@ declare module "packages/primitive/src/input/input" {
     };
 }
 declare module "packages/primitive/src/input/password" {
-    import { InputProps } from "packages/primitive/src/input/input";
-    export interface PasswordInputProps extends Omit<InputProps, "type"> {
+    import { MountedEvent } from "@/event";
+    export interface PasswordInputProps {
+        onMounted: (event: MountedEvent) => void;
     }
-    export function PasswordInput(props?: PasswordInputProps): {
+    export function PasswordInput(props: PasswordInputProps): {
         t: string;
         $elm: any;
-        props: Record<string, any>;
-        events: {
-            onInput: (e: Event) => void;
-            onChange: (e: Event) => void;
-            onFocus: ViewProps;
-            onBlur: ViewProps;
-            onKeyDown: ViewProps;
-        };
-        readonly value: string;
         onMounted(event: MountedEvent): void;
-        render(): any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
     };
 }
 declare module "packages/primitive/src/input/checkbox" {
-    import { Ref } from "packages/reactive/src/index";
-    import { InputProps } from "packages/primitive/src/input/input";
-    export interface NativeCheckboxProps extends Omit<InputProps, "type"> {
-        checked?: boolean | Ref<boolean>;
-        indeterminate?: boolean | Ref<boolean>;
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { MountedEvent } from "@/event";
+    import { ViewProps } from "@/content/view";
+    export interface CheckboxProps {
+        id?: string;
+        name?: string | DerivedRef<string> | Ref<string>;
+        class?: ViewProps["class"];
+        style?: ViewProps["style"];
+        attributes?: ViewProps["attributes"];
+        dataset?: ViewProps["dataset"];
+        checked?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        indeterminate?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        required?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        onChange?: (event: MouseEvent) => void;
+        onClick?: (event: Event) => void;
+        onMounted?: ViewProps["onMounted"];
+        beforeUnmounted?: ViewProps["beforeUnmounted"];
+        onUnmounted?: ViewProps["onUnmounted"];
     }
-    export function Checkbox(props?: NativeCheckboxProps): {
+    export function Checkbox(props: CheckboxProps): {
         t: string;
         $elm: any;
-        props: Record<string, any>;
-        events: {
-            onInput: (e: Event) => void;
-            onChange: (e: Event) => void;
-            onFocus: ViewProps;
-            onBlur: ViewProps;
-            onKeyDown: ViewProps;
-        };
-        readonly value: string;
-        onMounted(event: MountedEvent): void;
         render(): any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
+        onMounted(event: MountedEvent): void;
     };
 }
 declare module "packages/primitive/src/input/select" {
-    import { Ref } from "packages/reactive/src/index";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { TimelessElement } from "@/content/type";
     import { ViewProps } from "@/content/view";
     import { MountedEvent } from "@/event";
@@ -1040,7 +1041,7 @@ declare module "packages/primitive/src/input/select" {
         id?: string | Ref<string>;
         key?: string;
         each: T[] | Ref<T[]>;
-        render: (item: T, idx: Ref<number>) => TimelessElement | (() => TimelessElement) | null;
+        render: (item: T, idx: DerivedRef<number>) => TimelessElement | (() => TimelessElement) | null;
         name?: string | Ref<string>;
         placeholder?: string | Ref<string>;
         disabled?: boolean | Ref<boolean>;
@@ -1066,69 +1067,49 @@ declare module "packages/primitive/src/input/select" {
 }
 declare module "packages/primitive/src/input/slider" {
     import { Ref } from "packages/reactive/src/index";
-    import { InputProps } from "packages/primitive/src/input/input";
+    import { MountedEvent } from "@/event";
     type SliderNum = number | string;
-    export interface SliderProps extends Omit<InputProps, "type" | "value" | "minLength" | "maxLength"> {
+    export interface SliderProps {
         value?: SliderNum | Ref<SliderNum>;
         min?: SliderNum | Ref<SliderNum>;
         max?: SliderNum | Ref<SliderNum>;
         step?: SliderNum | Ref<SliderNum>;
+        onMounted?: (event: MountedEvent) => void;
+        onChange?: (event: InputEvent) => void;
     }
     export function Slider(props?: SliderProps): {
         t: string;
         $elm: any;
-        props: Record<string, any>;
-        events: {
-            onInput: (e: Event) => void;
-            onChange: (e: Event) => void;
-            onFocus: ViewProps;
-            onBlur: ViewProps;
-            onKeyDown: ViewProps;
-        };
-        readonly value: string;
         onMounted(event: MountedEvent): void;
-        render(): any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
     };
 }
 declare module "packages/primitive/src/input/file-input" {
     import { Ref } from "packages/reactive/src/index";
-    import { InputProps } from "packages/primitive/src/input/input";
-    export interface FileSelectProps extends Omit<InputProps, "type" | "value" | "maxLength" | "minLength" | "pattern" | "inputMode"> {
+    import { MountedEvent } from "@/event";
+    export interface FileSelectProps {
         accept?: string | Ref<string>;
         multiple?: boolean | Ref<boolean>;
         capture?: string | Ref<string>;
         files?: Ref<FileList | null>;
+        onMounted?: (event: MountedEvent) => void;
+        onChange?: (event: Event) => void;
     }
     export function FileSelect(props?: FileSelectProps): {
         t: string;
         $elm: any;
-        props: Record<string, any>;
-        events: {
-            onInput: (e: Event) => void;
-            onChange: (e: Event) => void;
-            onFocus: ViewProps;
-            onBlur: ViewProps;
-            onKeyDown: ViewProps;
-        };
-        readonly value: string;
         onMounted(event: MountedEvent): void;
-        render(): any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
     };
 }
 declare module "packages/primitive/src/content/svg" {
-    import { Ref } from "packages/reactive/src/index";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewStyle, ClassNameRef } from "@/style/index";
     import { MountedEvent } from "@/event/index";
-    type AttrValue = string | number | Ref<string> | Ref<number>;
+    type AttrValue = string | number | DerivedRef<string | number> | Ref<string | number>;
     /** Props shared by all SVG elements (lifecycle, events, style, class) */
     interface SVGBaseProps {
         style?: ViewStyle;
-        class?: string | Ref<string> | ClassNameRef;
-        dataset?: Record<string, string>;
+        class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
+        dataset?: Record<string, AttrValue>;
         id?: AttrValue;
         tabindex?: AttrValue;
         role?: string;
@@ -1455,23 +1436,23 @@ declare module "packages/primitive/src/content/style" {
     export function NativeStyle(props?: NativeStyleProps, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/content/img" {
-    import { Ref } from "packages/reactive/src/index";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
     import { ViewStyleProperties } from "@/style";
     import { MountedEvent } from "@/event/index";
     export interface ImgProps extends Omit<ViewProps, "type" | "as"> {
-        src?: string | Ref<string>;
-        alt?: string | Ref<string>;
-        width?: number | string | Ref<number | string>;
-        height?: number | string | Ref<number | string>;
-        loading?: "lazy" | "eager" | Ref<string>;
-        decoding?: "async" | "sync" | "auto" | Ref<string>;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | Ref<string>;
+        src?: string | DerivedRef<string> | Ref<string>;
+        alt?: string | DerivedRef<string> | Ref<string>;
+        width?: number | string | DerivedRef<number | string> | Ref<number | string>;
+        height?: number | string | DerivedRef<number | string> | Ref<number | string>;
+        loading?: "lazy" | "eager" | DerivedRef<string> | Ref<string>;
+        decoding?: "async" | "sync" | "auto" | DerivedRef<string> | Ref<string>;
+        crossOrigin?: "anonymous" | "use-credentials" | "" | DerivedRef<string> | Ref<string>;
         srcset?: string | Ref<string>;
         sizes?: string | Ref<string>;
         referrerPolicy?: ReferrerPolicy | Ref<string>;
-        fetchPriority?: "high" | "low" | "auto" | Ref<string>;
-        useMap?: string | Ref<string>;
+        fetchPriority?: "high" | "low" | "auto" | DerivedRef<string> | Ref<string>;
+        useMap?: string | DerivedRef<string> | Ref<string>;
         isMap?: boolean;
         onLoad?(e: Event): void;
         onError?(e: Event): void;
@@ -1494,14 +1475,14 @@ declare module "packages/primitive/src/content/img" {
     export function isImg(v: any): boolean;
 }
 declare module "packages/primitive/src/content/label" {
-    import { Ref } from "packages/reactive/src/index";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     export interface NativeLabelProps extends Omit<ViewProps, "as"> {
-        for?: string | Ref<string>;
+        for?: string | DerivedRef<string> | Ref<string>;
         htmlFor?: string | Ref<string>;
     }
-    export function NativeLabel(props?: NativeLabelProps, children?: ViewChildren): any;
+    export function Label(props?: NativeLabelProps, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/interaction/link" {
     import { Ref } from "packages/reactive/src/index";
@@ -1523,18 +1504,18 @@ declare module "packages/primitive/src/interaction/link" {
     export function Link(props?: LinkProps, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/interaction/button" {
-    import { Signal } from "packages/reactive/src/index";
+    import { Ref, Signal } from "packages/reactive/src/index";
+    import { ViewAttributes, ViewChildren, ViewPropValue } from "@/content/type";
     import { ViewStyleProperties, ViewStyle, ClassNameRef } from "@/style/index";
     import { MountedEvent } from "@/event/index";
-    import { MaybeSignal, ViewAttributes, ViewChildren, ViewPropValue } from "@/content/type";
     export interface ButtonProps {
         key?: string | number;
         as?: string;
         style?: ViewStyle;
-        class?: MaybeSignal<string> | ClassNameRef;
+        class?: string | Ref<string> | ClassNameRef;
         draggable?: boolean;
         attributes?: ViewAttributes;
-        dataset?: Record<string, MaybeSignal<ViewPropValue>>;
+        dataset?: Record<string, ViewPropValue | Ref<ViewPropValue>>;
         onMounted?(event: MountedEvent): void | (() => void);
         beforeUnmounted?(): void;
         onUnmounted?(): void;
@@ -9662,7 +9643,7 @@ declare module "packages/primitive/src/modules/checkbox" {
     import { CheckboxCore, CheckboxGroupCore } from "packages/ui/src/index";
     import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
-    import { InputProps } from "@/input/input";
+    import { CheckboxProps } from "@/input/checkbox";
     export function Root(props: ViewProps & {
         store: CheckboxCore;
     }, children?: ViewChildren): any;
@@ -9673,7 +9654,7 @@ declare module "packages/primitive/src/modules/checkbox" {
     export function Indicator(props: ViewProps & {
         store: CheckboxCore;
     }, children?: ViewChildren): any;
-    export function Input(props: InputProps & {
+    export function Input(props: CheckboxProps & {
         store: CheckboxCore;
         id?: string;
     }): any;
@@ -9699,7 +9680,7 @@ declare module "packages/primitive/src/modules/radio" {
     import { RadioCore, RadioGroupCore } from "packages/ui/src/index";
     import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
-    import { InputProps } from "@/input/input";
+    import { RadioProps } from "@/input/radio";
     export function Root(props: ViewProps & {
         store: RadioCore;
     }, children?: ViewChildren): any;
@@ -9710,7 +9691,7 @@ declare module "packages/primitive/src/modules/radio" {
     export function Indicator(props: ViewProps & {
         store: RadioCore;
     }, children?: ViewChildren): any;
-    export function Input(props: InputProps & {
+    export function Input(props: RadioProps & {
         store: RadioCore;
         id?: string;
     }): any;
@@ -11717,12 +11698,12 @@ declare module "packages/primitive/src/modules/standard-sub-views" {
     }): any;
 }
 declare module "packages/primitive/src/style/index" {
-    import { Ref, Subscriber, Signal } from "packages/reactive/src/index";
-    type ViewStylePropValue = Signal<string | number | boolean | null | undefined> | string | number | boolean | undefined | null;
+    import { Ref, Subscriber, Signal, DerivedRef } from "packages/reactive/src/index";
+    type ViewStylePropValue = DerivedRef<string | number | boolean | null | undefined> | Ref<string | number | boolean | null | undefined> | string | number | boolean | undefined | null;
     export type ViewStyleProperties = {
         [k: string]: ViewStylePropValue;
     };
-    export type ViewStyle = ViewStyleProperties | Ref<ViewStyleProperties>;
+    export type ViewStyle = ViewStyleProperties | DerivedRef<ViewStyleProperties> | Ref<ViewStyleProperties>;
     export type ViewStyleInput = ViewStyle;
     export function viewStyleToCssText(style: ViewStyleInput): string;
     export type ClassNameRef = {
@@ -11735,7 +11716,7 @@ declare module "packages/primitive/src/style/index" {
         toString(): string;
     };
     export function isClassNameRef(v: any): v is ClassNameRef;
-    export function classNames(items: (string | Ref<string> | ClassNameRef | undefined)[]): ClassNameRef;
+    export function classNames(items: (string | DerivedRef<string> | Ref<string> | ClassNameRef | undefined)[]): ClassNameRef;
     export function join(v: (string | Signal<string>)[]): Signal<string>;
     export type StyleObject = Record<string, any>;
     export interface StyleRef {
@@ -11745,7 +11726,7 @@ declare module "packages/primitive/src/style/index" {
         toString(): string;
     }
     export function isStyleRef(v: any): v is StyleRef;
-    export function styleNames(items: (ViewStyleProperties | Ref<StyleRef | ViewStyleProperties> | StyleRef | undefined)[]): Ref<ViewStyleProperties>;
+    export function styleNames(items: (ViewStyleProperties | DerivedRef<StyleRef | ViewStyleProperties> | Ref<StyleRef | ViewStyleProperties> | StyleRef | undefined)[]): DerivedRef<ViewStyleProperties>;
 }
 declare module "packages/primitive/src/util/env" {
     import { isBrowser } from "@/host";
@@ -11766,49 +11747,6 @@ declare module "packages/primitive/src/util/render-to-string" {
 }
 declare module "packages/primitive/src/util/lazy" {
     export function lazy(path: string): () => Promise<any>;
-}
-declare module "packages/primitive/src/util/reactive-data" {
-    import { ref, refarr } from "packages/reactive/src/index";
-    /**
-     * Convert plain data object to reactive data for client-side hydration.
-     *
-     * - Primitive values (number, string, boolean) → ref()
-     * - Arrays → refarr()
-     * - Nested objects → recursive conversion with Proxy
-     *
-     * This allows the same component code to work on both server and client:
-     * - Server: uses plain values for SSR
-     * - Client: uses reactive refs for interactivity
-     *
-     * @example
-     * ```js
-     * const data = createReactiveData({
-     *   count: 0,
-     *   fruits: ["Apple", "Banana"],
-     *   user: { name: "John" }
-     * });
-     *
-     * // data.count is ref(0)
-     * // data.fruits is refarr(["Apple", "Banana"])
-     * // data.user.name is ref("John")
-     * ```
-     */
-    export function createReactiveData<T extends Record<string, any>>(data: T): ReactiveData<T>;
-    /**
-     * Check if a value is reactive data created by createReactiveData
-     */
-    export function isReactiveData(value: any): value is ReactiveData<any>;
-    /**
-     * Get the raw reactive store from reactive data
-     */
-    export function getRawReactiveStore(data: ReactiveData<any>): Record<string, any>;
-    type ReactiveValue<T> = T extends any[] ? ReturnType<typeof refarr<T[number]>> : T extends object ? ReactiveData<T> : ReturnType<typeof ref<T>>;
-    export type ReactiveData<T extends Record<string, any>> = {
-        [K in keyof T]: ReactiveValue<T[K]>;
-    } & {
-        __isReactiveData: true;
-        __raw: Record<string, any>;
-    };
 }
 declare module "packages/primitive/src/util/h" {
     import { TimelessElement, ViewChildren } from "@/content/type";
@@ -12222,7 +12160,6 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/util/env";
     export * from "packages/primitive/src/util/render-to-string";
     export * from "packages/primitive/src/util/lazy";
-    export * from "packages/primitive/src/util/reactive-data";
     export * from "packages/primitive/src/util/h";
     export * from "packages/primitive/src/interaction/dismissable";
     export * from "packages/primitive/src/host/index";
@@ -12230,7 +12167,7 @@ declare module "packages/primitive/src/index" {
 }
 declare module "packages/timeless/src/index" {
     export * from "packages/primitive/src/index";
-    export { base, BaseDomain, BaseEvents, Result, BizError, applyMixins, } from "packages/base/src/index";
+    export { base, BaseDomain, BaseEvents, Result, BizError } from "packages/base/src/index";
     export type { Handler, EventType } from "packages/base/src/index";
     export * from "packages/base/src/index";
     export * as reactive from "packages/reactive/src/index";
@@ -14110,6 +14047,7 @@ declare const DangerouslyInnerHTML: typeof import("@timeless/timeless").Dangerou
 declare const DatePickerPrimitive: typeof import("@timeless/timeless").DatePickerPrimitive;
 declare const DateRangePickerPrimitive: typeof import("@timeless/timeless").DateRangePickerPrimitive;
 declare const Defs: typeof import("@timeless/timeless").Defs;
+declare const DerivedRef: typeof import("@timeless/timeless").DerivedRef;
 declare const DialogPrimitive: typeof import("@timeless/timeless").DialogPrimitive;
 declare const DismissableLayer: typeof import("@timeless/timeless").DismissableLayer;
 declare const DropdownMenuPrimitive: typeof import("@timeless/timeless").DropdownMenuPrimitive;
@@ -14136,7 +14074,6 @@ declare const ListView: typeof import("@timeless/timeless").ListView;
 declare const Mask: typeof import("@timeless/timeless").Mask;
 declare const Match: typeof import("@timeless/timeless").Match;
 declare const MenuPrimitive: typeof import("@timeless/timeless").MenuPrimitive;
-declare const NativeLabel: typeof import("@timeless/timeless").NativeLabel;
 declare const NativeStyle: typeof import("@timeless/timeless").NativeStyle;
 declare const NumberInputPrimitive: typeof import("@timeless/timeless").NumberInputPrimitive;
 declare const ObjectSignal: typeof import("@timeless/timeless").ObjectSignal;
@@ -14197,16 +14134,15 @@ declare const applyMixins: typeof import("@timeless/timeless").applyMixins;
 declare const classNames: typeof import("@timeless/timeless").classNames;
 declare const combine: typeof import("@timeless/timeless").combine;
 declare const computed: typeof import("@timeless/timeless").computed;
-declare const createReactiveData: typeof import("@timeless/timeless").createReactiveData;
 declare const defineModel: typeof import("@timeless/timeless").defineModel;
 declare const derive: typeof import("@timeless/timeless").derive;
 declare const getHost: typeof import("@timeless/timeless").getHost;
-declare const getRawReactiveStore: typeof import("@timeless/timeless").getRawReactiveStore;
 declare const getRenderer: typeof import("@timeless/timeless").getRenderer;
 declare const getRendererScheduler: typeof import("@timeless/timeless").getRendererScheduler;
 declare const getarr: typeof import("@timeless/timeless").getarr;
 declare const getobj: typeof import("@timeless/timeless").getobj;
 declare const h: typeof import("@timeless/timeless").h;
+declare const isArrayRef: typeof import("@timeless/timeless").isArrayRef;
 declare const isBrowser: typeof import("@timeless/timeless").isBrowser;
 declare const isClassNameRef: typeof import("@timeless/timeless").isClassNameRef;
 declare const isElement: typeof import("@timeless/timeless").isElement;
@@ -14214,7 +14150,6 @@ declare const isFragment: typeof import("@timeless/timeless").isFragment;
 declare const isIcon: typeof import("@timeless/timeless").isIcon;
 declare const isImg: typeof import("@timeless/timeless").isImg;
 declare const isLazyElement: typeof import("@timeless/timeless").isLazyElement;
-declare const isReactiveData: typeof import("@timeless/timeless").isReactiveData;
 declare const isRef: typeof import("@timeless/timeless").isRef;
 declare const isStyleRef: typeof import("@timeless/timeless").isStyleRef;
 declare const join: typeof import("@timeless/timeless").join;

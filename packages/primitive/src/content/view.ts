@@ -54,6 +54,35 @@ export interface ViewProps {
   onDrop?: (e: DragEvent) => void;
   onAnimationEnd?: (e: AnimationEvent) => void;
 }
+type ViewState = {
+  rendered: boolean;
+  attributes: Record<string, string | number | boolean | undefined>;
+  props: {
+    styleSet?: string[] | Signal<string[]>;
+    style: ViewStyleProperties;
+  };
+  events: Partial<{
+    onClick?: (e: MouseEvent) => void;
+    onDoubleClick?: (e: MouseEvent) => void;
+    onLongPress?: (e: PointerEvent) => void;
+    onPointerDown?: (e: PointerEvent) => void;
+    onFocus?: (e: FocusEvent) => void;
+    onBlur?: (e: FocusEvent) => void;
+    onKeyDown?: (e: KeyboardEvent) => void;
+    onContextMenu?: (e: MouseEvent) => void;
+    onMouseEnter?: (e: MouseEvent) => void;
+    onMouseLeave?: (e: MouseEvent) => void;
+    onDragStart?: (e: DragEvent) => void;
+    onDrag?: (e: DragEvent) => void;
+    onDragEnd?: (e: DragEvent) => void;
+    onDragEnter?: (e: DragEvent) => void;
+    onDragOver?: (e: DragEvent) => void;
+    onDragLeave?: (e: DragEvent) => void;
+    onDrop?: (e: DragEvent) => void;
+    onAnimationEnd?: (e: AnimationEvent) => void;
+  }>;
+  children: (TimelessElement | null)[];
+};
 
 export function View(props: ViewProps = {}, children?: ViewChildren) {
   const {
@@ -89,38 +118,12 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
   let $elm: any = null;
 
-  const state: {
-    rendered: boolean;
-    props: {
-      styleSet?: string[] | Signal<string[]>;
-      style: ViewStyleProperties;
-    };
-    events: Partial<{
-      onClick?: (e: MouseEvent) => void;
-      onDoubleClick?: (e: MouseEvent) => void;
-      onLongPress?: (e: PointerEvent) => void;
-      onPointerDown?: (e: PointerEvent) => void;
-      onFocus?: (e: FocusEvent) => void;
-      onBlur?: (e: FocusEvent) => void;
-      onKeyDown?: (e: KeyboardEvent) => void;
-      onContextMenu?: (e: MouseEvent) => void;
-      onMouseEnter?: (e: MouseEvent) => void;
-      onMouseLeave?: (e: MouseEvent) => void;
-      onDragStart?: (e: DragEvent) => void;
-      onDrag?: (e: DragEvent) => void;
-      onDragEnd?: (e: DragEvent) => void;
-      onDragEnter?: (e: DragEvent) => void;
-      onDragOver?: (e: DragEvent) => void;
-      onDragLeave?: (e: DragEvent) => void;
-      onDrop?: (e: DragEvent) => void;
-      onAnimationEnd?: (e: AnimationEvent) => void;
-    }>;
-    children: TimelessElement[];
-  } = {
+  const state: ViewState = {
     rendered: false,
     props: {
       style: {},
     },
+    attributes: {},
     events: {
       onClick,
       onDoubleClick,
@@ -154,11 +157,11 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         const child = children[i];
         // console.log("for children", child);
         (() => {
-          if (typeof child === "function") {
-            const r = child();
-            state.children[i] = r;
-            return;
-          }
+          // if (typeof child === "function") {
+          //   const r = child();
+          //   state.children[i] = r;
+          //   return;
+          // }
           if (isElement(child)) {
             state.children[i] = child;
             return;
@@ -214,7 +217,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     },
 
     // Helper: setup bindings (attributes, class, style, events)
-    setup_reactive_props_bindings() {
+    setup_value_subscribe() {
       if (attributes) {
         Object.keys(attributes).forEach((k) => {
           const vv = attributes[k];
@@ -233,27 +236,26 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         });
       }
       Object.keys(dataset).forEach((k) => {
-        if (!dataset) return;
         const vv = dataset[k];
-        const attrName = `data-${k}`;
+        const attr_name = `data-${k}`;
         if (isRef(vv)) {
           vv.subscribe({
             onChange(v) {
               if ($elm) {
-                methods.apply_attr(attrName, v);
+                methods.apply_attr(attr_name, v);
               }
             },
           });
-          methods.apply_attr(attrName, vv.value);
+          // methods.apply_attr(attr_name, vv.value);
+          state.attributes[attr_name] = vv.value;
           return;
         }
-        methods.apply_attr(attrName, vv);
+        state.attributes[attr_name] = vv;
+        // methods.apply_attr(attr_name, vv);
       });
 
       if (cls) {
         if (typeof cls === "string") {
-          // host.setClassName($elm, cls);
-          // $elm.setStyleSet(cls);
           state.props.styleSet = [cls];
         } else if (isRef(cls)) {
           cls.subscribe({
@@ -264,42 +266,35 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
               }
             },
           });
-          // host.setClassName($elm, cls.value);
-          // $elm.setStyleSet(cls.value);
           state.props.styleSet = [cls.value];
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
               if ($elm) {
-                // host.setClassName($elm, v.join(" "));
                 $elm.setStyleSet(v.join(" "));
               }
             },
           });
-          // host.setClassName($elm, cls.toString());
-          // $elm.setStyleSet(cls.toString());
           state.props.styleSet = cls.toString().split(" ");
         } else {
           state.props.styleSet = [];
         }
       }
       if (style) {
-        (() => {
-          if (isRef(style)) {
-            state.props.style = (style.value || {}) as ViewStyleProperties;
-            style.subscribe({
-              onChange() {
-                state.props.style = {
-                  ...state.props.style,
-                  ...(style.value || {}),
-                };
-                if ($elm && typeof $elm.setStyle === "function") {
-                  $elm.setStyle(state.props.style);
-                }
-              },
-            });
-            return;
-          }
+        if (isRef(style)) {
+          state.props.style = (style.value || {}) as ViewStyleProperties;
+          style.subscribe({
+            onChange() {
+              state.props.style = {
+                ...state.props.style,
+                ...(style.value || {}),
+              };
+              if ($elm && typeof $elm.setStyle === "function") {
+                $elm.setStyle(state.props.style);
+              }
+            },
+          });
+        } else {
           Object.keys(style).forEach((k) => {
             const v = style[k];
             if (isRef(v)) {
@@ -315,8 +310,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
               state.props.style[k] = v;
             }
           });
-          return;
-        })();
+        }
       }
 
       if (!$elm) {
@@ -497,7 +491,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
   };
 
   methods.setup_children(children);
-  methods.setup_reactive_props_bindings();
+  methods.setup_value_subscribe();
 
   return {
     t: "view",
@@ -510,6 +504,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     value: "",
     children: state.children,
     props: state.props,
+    attributes: state.attributes,
     events: state.events,
     /** @deprecated */
     render() {
@@ -519,7 +514,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       state.rendered = true;
       // Create element if not already created
       methods.setup_children(children);
-      methods.setup_reactive_props_bindings();
+      methods.setup_value_subscribe();
 
       if (onMounted) {
         manager$.push(onMounted({ target: $elm }));
@@ -542,7 +537,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
       $elm = existingDom;
       methods.setup_children();
-      methods.setup_reactive_props_bindings();
+      methods.setup_value_subscribe();
 
       // Hydrate children recursively
       // let childDom = host.getFirstChild($elm);
@@ -604,8 +599,8 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     },
     onMounted(event: MountedEvent) {
       // console.log("the view mounted", event.target);
-      if (props.onMounted) {
-        props.onMounted(event);
+      if (onMounted) {
+        onMounted(event);
       }
       for (let i = 0; i < state.children.length; i += 1) {
         const child = state.children[i];
@@ -615,8 +610,8 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       }
     },
     beforeUnmounted() {
-      if (props.beforeUnmounted) {
-        props.beforeUnmounted();
+      if (beforeUnmounted) {
+        beforeUnmounted();
       }
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
@@ -630,9 +625,9 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       //   "[View] onUnmounted called, children count:",
       //   _children.length,
       // );
-      if (props.onUnmounted) {
+      if (onUnmounted) {
         // console.log("[View] calling props.onUnmounted");
-        props.onUnmounted();
+        onUnmounted();
       }
       manager$.clean();
       for (let i = 0; i < state.children.length; i += 1) {

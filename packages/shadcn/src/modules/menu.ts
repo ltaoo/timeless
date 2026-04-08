@@ -6,7 +6,6 @@ import {
   Show,
   ViewProps,
   TimelessElement,
-  h,
 } from "@timeless/primitive";
 import {
   MenuCore,
@@ -135,10 +134,10 @@ function MenuGroup(props: ViewProps & { store: MenuGroupCore }) {
       when: has_label_,
       ok() {
         return [
-          h(
-            MenuPrimitive.GroupLabel,
+          MenuPrimitive.GroupLabel(
             {
-              class: "px-1.5 py-1.5 text-xs font-medium text-muted-foreground data-inset:pl-7",
+              class:
+                "px-1.5 py-1.5 text-xs font-medium text-muted-foreground data-inset:pl-7",
             },
             [computed(state_, (t) => t.label)],
           ),
@@ -185,9 +184,7 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
         store: props.store,
         class: classNames([
           computed(state_, (t) => {
-            return t.focused
-              ? "bg-accent text-accent-foreground"
-              : "";
+            return t.focused ? "bg-accent text-accent-foreground" : "";
           }),
           computed(state_, (t) => {
             return t.disabled
@@ -202,8 +199,7 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
           when: has_icon_,
           ok() {
             return [
-              h(
-                View,
+              View(
                 {
                   class: "flex size-4 shrink-0 items-center justify-center",
                 },
@@ -217,8 +213,7 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
           when: has_shortcut_,
           ok() {
             return [
-              h(
-                View,
+              View(
                 {
                   class:
                     "ml-auto text-xs tracking-widest text-muted-foreground group-focus/menubar-item:text-accent-foreground",
@@ -232,11 +227,7 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
           when: has_submenu_,
           ok() {
             return [
-              h(
-                ChevronRightOutlined,
-                { class: "cn-rtl-flip ml-auto size-4" },
-                [],
-              ),
+              ChevronRightOutlined({ class: "cn-rtl-flip ml-auto size-4" }, []),
             ];
           },
         }),

@@ -1,11 +1,13 @@
-import { classNames, computed, refobj } from "@timeless/primitive";
 import {
   For,
-  Input,
+  Input as NativeInput,
   SelectPrimitive,
   Show,
   View,
   ViewProps,
+  classNames,
+  computed,
+  refobj,
 } from "@timeless/primitive";
 import { SelectCore } from "@timeless/ui";
 import { CheckOutlined, ChevronDownOutlined } from "@timeless/icons";
@@ -171,7 +173,7 @@ export function SearchSelect<T>(
         },
       },
       [
-        Input({
+        NativeInput({
           class:
             "w-full bg-transparent outline-none placeholder:text-muted-foreground",
           placeholder: computed(

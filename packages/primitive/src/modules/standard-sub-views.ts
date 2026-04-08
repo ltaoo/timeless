@@ -57,9 +57,10 @@ export function StandardSubViews(
     return View({ class: ref("not-found") }, ["Not Found"]);
   })();
 
-  const nodes: any[] = [];
+  // const nodes: any[] = [];
 
   return For({
+    key: "id",
     each: subviews,
     render(subview: SubView, idx: any) {
       const PageView = props.views[subview.name];
@@ -67,11 +68,8 @@ export function StandardSubViews(
         return NotFoundPageView;
       }
       return Show({
-        when: computed(cur_subview, (d) => {
-          if (d && d.id === subview.id) {
-            return true;
-          }
-          return false;
+        when: computed(cur_subview, (t) => {
+          return t && t.id === subview.id;
         }),
         ok() {
           return [
@@ -97,11 +95,11 @@ export function StandardSubViews(
                       {
                         ...props,
                         view: subview,
-                        onMounted() {
-                          nodes.push(this);
-                        },
+                        // onMounted() {
+                        //   nodes.push(this);
+                        // },
                       },
-                      [PageView],
+                      PageView,
                     ),
                   subview.name,
                   props.ErrorFallback,

@@ -4,7 +4,7 @@ import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { isStyleRef } from "@/style/index";
-import { getHost } from "@/host";
+// import { getHost } from "@/host";
 
 // ResizablePanels Group - 容器组件
 export function Group(
@@ -107,8 +107,8 @@ export function Handle(
   },
   children?: ViewChildren,
 ) {
-  const host = getHost();
   const { store, panelBefore, panelAfter, ...rest } = props;
+
   const state_ = refobj(store.state);
   const isDragging_ = ref(false);
   const extraStyle =
@@ -147,7 +147,7 @@ export function Handle(
         const state = store.state;
         const cursor =
           state.direction === "horizontal" ? "col-resize" : "row-resize";
-        host.patchBodyStyle?.({ cursor, userSelect: "none" });
+        // host.patchBodyStyle?.({ cursor, userSelect: "none" });
 
         rest.onPointerDown?.(e);
       },
@@ -172,19 +172,19 @@ export function Handle(
             isDragging_.as(false);
             store.endResize();
             // 恢复光标
-            host.patchBodyStyle?.({ cursor: "", userSelect: "" });
+            // host.patchBodyStyle?.({ cursor: "", userSelect: "" });
           }
         };
 
-        host.addDocumentEventListener?.("pointermove", handlePointerMove);
-        host.addDocumentEventListener?.("pointerup", handlePointerUp);
+        // host.addDocumentEventListener?.("pointermove", handlePointerMove);
+        // host.addDocumentEventListener?.("pointerup", handlePointerUp);
 
         // 保存清理函数到元素上
-        const cleanup = () => {
-          host.removeDocumentEventListener?.("pointermove", handlePointerMove);
-          host.removeDocumentEventListener?.("pointerup", handlePointerUp);
-        };
-        ($el as any)._resizeCleanup = cleanup;
+        // const cleanup = () => {
+        //   host.removeDocumentEventListener?.("pointermove", handlePointerMove);
+        //   host.removeDocumentEventListener?.("pointerup", handlePointerUp);
+        // };
+        // ($el as any)._resizeCleanup = cleanup;
 
         rest.onMounted?.(event);
       },

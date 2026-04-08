@@ -5,7 +5,7 @@ import {
   refobj,
   ViewStyleProperties,
 } from "@timeless/primitive";
-import { View, Show, ViewChildren, ViewProps, h } from "@timeless/primitive";
+import { View, Show, ViewChildren, ViewProps } from "@timeless/primitive";
 import { PopconfirmPrimitive } from "@timeless/primitive";
 
 export function Popconfirm(
@@ -108,8 +108,7 @@ export function Popconfirm(
               when: ref(!!props.title),
               ok() {
                 return [
-                  h(
-                    View,
+                  View(
                     {
                       class:
                         "mb-1 text-sm font-medium text-zinc-950 dark:text-zinc-50",
@@ -123,8 +122,7 @@ export function Popconfirm(
               when: ref(!!props.description),
               ok() {
                 return [
-                  h(
-                    View,
+                  View(
                     {
                       class: "mb-4 text-sm text-zinc-500 dark:text-zinc-400",
                     },

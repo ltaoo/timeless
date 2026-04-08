@@ -1,11 +1,12 @@
 import { ref, computed } from "@timeless/reactive";
 import { CheckboxCore, CheckboxGroupCore } from "@timeless/ui";
 
+import { Show } from "@/reactive/show";
 import { Fragment } from "@/content/fragment";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { Show } from "@/reactive/show";
 import { Checkbox, CheckboxProps } from "@/input/checkbox";
+import { ListenerManager } from "@/util/listener";
 
 export function Root(
   props: ViewProps & { store: CheckboxCore },
@@ -96,10 +97,11 @@ export function Input(
   props: CheckboxProps & { store: CheckboxCore; id?: string },
 ) {
   const { store, id, ...rest } = props;
-  const events: any[] = [];
+  // const events: any[] = [];
+  const listener$ = ListenerManager();
 
   return Checkbox({
-    ...rest,
+    // ...rest,
     id,
     style: {
       position: "absolute",
@@ -114,17 +116,18 @@ export function Input(
       store.toggle();
     },
     onMounted(event) {
-      const $elm = event.target as HTMLInputElement;
-      $elm.checked = !!store.state.checked;
-      events.push(
+      // const $elm = event.target as HTMLInputElement;
+      // $elm.checked = !!store.state.checked;
+      listener$.push(
         store.onStateChange(() => {
-          $elm.checked = !!store.state.checked;
+          // $elm.checked = !!store.state.checked;
         }),
       );
       if (rest.onMounted) rest.onMounted(event);
     },
     onUnmounted() {
-      for (const fn of events) if (typeof fn === "function") fn();
+      // for (const fn of events) if (typeof fn === "function") fn();
+      listener$.clean();
       if (rest.onUnmounted) rest.onUnmounted();
     },
   });

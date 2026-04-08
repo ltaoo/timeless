@@ -1,5 +1,5 @@
 import { classNames, combine, computed, refobj } from "@timeless/primitive";
-import { h, InputPrimitive, Show, ViewProps } from "@timeless/primitive";
+import { InputPrimitive, Show, ViewProps } from "@timeless/primitive";
 import { InputCore } from "@timeless/ui";
 import { CircleXOutlined, LoaderOutlined } from "@timeless/icons";
 
@@ -41,14 +41,13 @@ export function Input(
         ),
         ok() {
           return [
-            h(
-              InputPrimitive.Clear,
+            InputPrimitive.Clear(
               {
                 store,
                 class:
                   "absolute top-1/2 -translate-y-1/2 right-2 flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
               },
-              [h(CircleXOutlined, { class: "h-4 w-4" })],
+              [CircleXOutlined({ class: "h-4 w-4" })],
             ),
           ];
         },

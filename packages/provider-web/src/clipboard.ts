@@ -1,4 +1,4 @@
-import { Result } from "@timeless/base";
+import { Result } from "@timeless/timeless";
 
 import { ClipboardModel } from "@timeless/kit";
 

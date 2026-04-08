@@ -35,16 +35,17 @@ export default function GeneralView() {
           Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
           Button({ store: new Timeless.ui.ButtonCore({ size: "lg" }) }, ["LG"]),
           Button({ store: new Timeless.ui.ButtonCore({ size: "icon-xs" }) }, [
-            Timeless.icons.BoltOutlined(),
+            Icon({ name: "bolt", size: 12 }),
           ]),
           Button({ store: new Timeless.ui.ButtonCore({ size: "icon-sm" }) }, [
-            Timeless.icons.BoltOutlined(),
+            Icon({ name: "bolt", size: 16 }),
           ]),
           Button({ store: new Timeless.ui.ButtonCore({ size: "icon" }) }, [
             Timeless.icons.BoltOutlined(),
+            Icon({ name: "bolt", size: 24 }),
           ]),
           Button({ store: new Timeless.ui.ButtonCore({ size: "icon-lg" }) }, [
-            Timeless.icons.BoltOutlined(),
+            Icon({ name: "bolt", size: 28 }),
           ]),
         ]),
         Item("Loading", [
@@ -88,7 +89,7 @@ export default function GeneralView() {
           Button(
             {
               store: new Timeless.ui.ButtonCore({}),
-              prefix: [Timeless.icons.DownloadOutlined({ class: "w-4 h-4" })],
+              prefix: [Icon({ name: "download", size: 24 })],
             },
             ["Download"],
           ),
@@ -114,9 +115,7 @@ export default function GeneralView() {
                     Button(
                       {
                         store: playStore,
-                        prefix: [
-                          Timeless.icons.PlayOutlined({ class: "w-4 h-4" }),
-                        ],
+                        prefix: [Icon({ name: "play", size: 24 })],
                       },
                       ["Play"],
                     ),
@@ -136,7 +135,7 @@ export default function GeneralView() {
                               class: "inline-block h-4 w-4 animate-spin",
                               style: { "transform-origin": "center" },
                             },
-                            [Timeless.icons.LoaderCircleOutlined()],
+                            [Icon({ name: "loader-circle", size: 24 })],
                           ),
                         ],
                       },
@@ -150,7 +149,7 @@ export default function GeneralView() {
           Button(
             {
               store: new Timeless.ui.ButtonCore({ variant: "outline" }),
-              prefix: [Timeless.icons.BoltOutlined({ class: "w-4 h-4" })],
+              prefix: [Icon({ name: "bolt", size: 24 })],
             },
             ["Settings"],
           ),
@@ -190,11 +189,10 @@ export default function GeneralView() {
       Section("Separator", [
         Item("Horizontal", [View({ class: "w-full" }, [Separator({})])]),
         Item("Vertical", [
-          View({ class: Timeless.classNames(["flex items-center h-6 gap-3"]) }, [
-            "Left",
-            Separator({ orientation: "vertical" }),
-            "Right",
-          ]),
+          View(
+            { class: Timeless.classNames(["flex items-center h-6 gap-3"]) },
+            ["Left", Separator({ orientation: "vertical" }), "Right"],
+          ),
         ]),
       ]),
       // Section("Avatar", [

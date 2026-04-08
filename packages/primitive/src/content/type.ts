@@ -14,13 +14,14 @@ export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 export interface TimelessElement<T = any> {
   t: string;
   $elm: any;
-  children?: TimelessElement[];
+  children?: (TimelessElement | null)[];
   props?: {
     styleSet?: string[] | DerivedRef<string[]> | Ref<string[]>;
     style?: ViewStyleProperties;
   };
   value?: T;
   events?: {
+    onChange?: (e: Event) => void;
     onClick?: (e: MouseEvent) => void;
     onDoubleClick?: (e: MouseEvent) => void;
     onLongPress?: (e: PointerEvent) => void;
@@ -64,6 +65,5 @@ export type ViewChildren = (
   | TimelessElement
   | string
   | number
-  | (() => TimelessElement)
   | null
 )[];

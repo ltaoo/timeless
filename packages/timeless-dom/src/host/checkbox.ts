@@ -1,23 +1,16 @@
-import {
-  isElement,
-  isRef,
-  TimelessElement,
-  ViewStyleProperties,
-} from "@timeless/timeless";
+import { TimelessElement, ViewStyleProperties } from "@timeless/timeless";
 
 import { viewStyleToCssText } from "./style";
 import { DOMHostNode } from "./type";
 
-export interface DOMView {
-  t: "view";
-  $elm: HTMLDivElement;
+export interface DOMCheckbox {
+  t: "checkbox";
+  $elm: any;
   isDocumentFragment(): boolean;
-  getChildNodes(): NodeListOf<ChildNode>;
+  getChildNodes(): any[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
-  setStyleSet(key: string): void;
   setAttribute(key: string, value: string): void;
-  getBoundingClientRect(): DOMRect;
   removeAttribute(key: string): void;
   addEventListener(
     type: string,
@@ -29,105 +22,115 @@ export interface DOMView {
     handler: (event: any) => void,
     options?: any,
   ): void;
-  render(elm: TimelessElement): HTMLDivElement;
+  render(elm: TimelessElement): any;
 }
 
-export function DOMView(props: {
+export function DOMCheckbox(props: {
+  // canvas: Document;
   build: (elm: TimelessElement) => DOMHostNode;
-}): DOMView {
-  const $elm = document.createElement("div");
+}): DOMCheckbox {
+  // const canvas = props.canvas;
+  // const $elm = canvas.createElement("div");
+  const $elm = document.createElement("input");
 
   const methods = {
     setStyle(style: ViewStyleProperties) {
       const cssText = viewStyleToCssText(style);
       $elm.style.cssText = cssText;
+      // canvas.setStyleText($elm, cssText);
     },
     setStyleSet(styleSet: string[]) {
+      // canvas.setClassName($elm, styleSet.join(" "));
       $elm.className = styleSet.join(" ");
     },
     setupEventListener(events: any) {
       if (events.onClick) {
-        $elm.addEventListener("click", events.onClick);
+        // canvas.addEventListener($elm, "click", events.onClick);
       }
       if (events.onDoubleClick) {
-        $elm.addEventListener("dblclick", events.onDoubleClick);
+        // canvas.addEventListener($elm, "dblclick", events.onDoubleClick);
       }
       if (events.onPointerDown) {
-        $elm.addEventListener("pointerdown", events.onPointerDown);
+        // canvas.addEventListener($elm, "pointerdown", events.onPointerDown);
+      }
+      if (events.onInput) {
+        $elm.addEventListener("input", events.onInput);
+      }
+      if (events.onChange) {
+        $elm.addEventListener("change", events.onChange);
       }
       if (events.onFocus) {
+        // canvas.addEventListener($elm, "focus", events.onFocus);
         $elm.addEventListener("focus", events.onFocus);
       }
       if (events.onBlur) {
+        // canvas.addEventListener($elm, "blur", events.onBlur);
         $elm.addEventListener("blur", events.onBlur);
       }
       if (events.onKeyDown) {
+        // canvas.addEventListener($elm, "keydown", events.onKeyDown);
         $elm.addEventListener("keydown", events.onKeyDown);
       }
       if (events.onContextMenu) {
-        $elm.addEventListener("contextmenu", events.onContextMenu);
+        // canvas.addEventListener($elm, "contextmenu", events.onContextMenu);
       }
       if (events.onMouseEnter) {
-        $elm.addEventListener("mouseenter", events.onMouseEnter);
+        // canvas.addEventListener($elm, "mouseenter", events.onMouseEnter);
       }
       if (events.onMouseLeave) {
-        $elm.addEventListener("mouseleave", events.onMouseLeave);
+        // canvas.addEventListener($elm, "mouseleave", events.onMouseLeave);
       }
       if (events.onDragStart) {
-        $elm.addEventListener("dragstart", events.onDragStart);
+        // canvas.addEventListener($elm, "dragstart", events.onDragStart);
       }
       if (events.onDrag) {
-        $elm.addEventListener("drag", events.onDrag);
+        // canvas.addEventListener($elm, "drag", events.onDrag);
       }
       if (events.onDragEnd) {
-        $elm.addEventListener("dragend", events.onDragEnd);
+        // canvas.addEventListener($elm, "dragend", events.onDragEnd);
       }
       if (events.onDragEnter) {
-        $elm.addEventListener("dragenter", events.onDragEnter);
+        // canvas.addEventListener($elm, "dragenter", events.onDragEnter);
       }
       if (events.onDragOver) {
-        $elm.addEventListener("dragover", events.onDragOver);
+        // canvas.addEventListener($elm, "dragover", events.onDragOver);
       }
       if (events.onDragLeave) {
-        $elm.addEventListener("dragleave", events.onDragLeave);
+        // canvas.addEventListener($elm, "dragleave", events.onDragLeave);
       }
       if (events.onDrop) {
-        $elm.addEventListener("drop", events.onDrop);
+        // canvas.addEventListener($elm, "drop", events.onDrop);
       }
       if (events.onAnimationEnd) {
-        $elm.addEventListener("animationend", events.onAnimationEnd);
+        // canvas.addEventListener($elm, "animationend", events.onAnimationEnd);
       }
     },
   };
 
   return {
-    t: "view",
+    t: "checkbox",
     get $elm() {
       return $elm;
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
     getChildNodes() {
-      return $elm.childNodes;
+      return [];
     },
     setStyle(style: ViewStyleProperties) {
       methods.setStyle(style);
     },
     setStyleValue(key: any, value: string) {
+      // console.log("[View] setStyleValue", key, value);
+      // canvas.patchStyle?.($elm, { [key]: value });
       $elm.style[key] = value;
-    },
-    setStyleSet(name: string) {
-      $elm.className = name;
     },
     setAttribute(key: string, value: string) {
       $elm.setAttribute(key, value);
     },
     removeAttribute(key: string) {
       $elm.removeAttribute(key);
-    },
-    getBoundingClientRect() {
-      return $elm.getBoundingClientRect();
     },
     addEventListener(
       type: string,
@@ -144,45 +147,30 @@ export function DOMView(props: {
       $elm.removeEventListener(type, handler, options);
     },
     render(elm: TimelessElement) {
+      $elm.type = "checkbox";
+      $elm.checked = !!elm.value;
+      // $elm.style.backgroundColor = "transparent";
+      // console.log("[DOMCheckbox] render", elm.value);
+      // $elm.style.outline = "none";
+      // $elm.style.border = "none";
       if (elm.props?.style) {
         methods.setStyle(elm.props.style);
       }
-      if (elm.props?.styleSet) {
-        if (isRef(elm.props.styleSet)) {
-          methods.setStyleSet(elm.props.styleSet.value);
-        } else {
-          methods.setStyleSet(elm.props.styleSet);
-        }
-      }
-      // @ts-ignore
-      const attrs = elm.attributes;
-      if (attrs) {
-        for (const [key, value] of Object.entries(attrs)) {
-          if (value !== undefined) {
-            $elm.setAttribute(key, String(value));
-          } else {
-            $elm.removeAttribute(key);
-          }
-        }
-      }
+      // if (elm.props?.styleSet) {
+      //   if (isRef(elm.props.styleSet)) {
+      //     methods.setStyleSet(elm.props.styleSet.value);
+      //   } else {
+      //     methods.setStyleSet(elm.props.styleSet);
+      //   }
+      // }
       if (elm.events) {
         methods.setupEventListener(elm.events);
-      }
-      if (elm.children) {
-        for (const child of elm.children) {
-          if (isElement(child)) {
-            const $sub = props.build(child);
-            if ($sub && $sub.$elm) {
-              $elm.appendChild($sub.$elm);
-            }
-          }
-        }
       }
       return $elm;
     },
   };
 }
 
-export function isDOMView(value: any): value is DOMView {
-  return value.t === "view";
+export function isDOMCheckbox(value: any): value is DOMCheckbox {
+  return value.t === "checkbox";
 }

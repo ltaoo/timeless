@@ -1,72 +1,61 @@
 import {
   isRef,
   Ref,
-  ref,
   registryGet,
   registrySet,
   computed,
   DerivedRef,
+  isWriteableRef,
+  isArrayRef,
 } from "@timeless/reactive";
 
-import { ViewProps } from "@/content/view";
 import { TimelessElement, isElement } from "@/content/type";
-import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
+import { MountedEvent } from "@/event";
+// import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
 
-export function For<T>(
-  props: ViewProps & {
-    key?: string;
-    each: T[] | DerivedRef<T[]> | Ref<T[]>;
-    render: (
-      item: T,
-      idx: DerivedRef<number>,
-    ) => TimelessElement | (() => TimelessElement) | null;
-  },
-) {
-  // const host = getHost();
-  // const scheduler = getRendererScheduler();
-  // const renderer = getRenderer();
-  const { key, each, render, onMounted, onUnmounted } = props;
-  // const lineH = 24;
+export type ForProps<T> = {
+  key?: string;
+  each: T[] | DerivedRef<T[]> | Ref<T[]>;
+  render: (item: T, idx: DerivedRef<number>) => TimelessElement | null;
+  onMounted?: (event: MountedEvent) => void;
+  beforeUnmounted?: () => void;
+  onUnmounted?: () => void;
+};
+export type ForState<T> = {
+  rendered: boolean;
+  items: T[];
+  children: (TimelessElement | null)[];
+};
+
+export function For<T>(props: ForProps<T>) {
+  let $anchor: any = null;
+  let $elm: any = null;
+
+  const { key, each, render, onMounted, beforeUnmounted, onUnmounted } = props;
 
   const _key = key;
-  let _mounted = false;
-  let _values: T[] = [];
+  const state: ForState<T> = {
+    rendered: false,
+    items: [],
+    children: [],
+  };
+  // let _values: T[] = [];
   let _elements: (TimelessElement | null)[] = [];
   let _$children: (any | null)[] = [];
   let _original_items: T[] = []; // Store original item references for indexOf lookup
   let _index_computed: DerivedRef<number>[] = []; // Computed indexes that depend on `each`
 
   // Helper to create a computed index that depends on `each`
-  const createIndexComputed = (originalItem: T): DerivedRef<number> => {
+  const create_idx = (origin_item: T): DerivedRef<number> => {
     return computed(each, () => {
-      // Use refarr's indexOf if available (supports registry lookup)
-      if (isRef(each) && typeof (each as any).indexOf === "function") {
-        return (each as any).indexOf(originalItem);
-      }
-      // Fallback for plain arrays
       const arr = isRef(each) ? each.value : each;
-      return arr ? arr.indexOf(originalItem) : -1;
+      return arr ? arr.indexOf(origin_item) : -1;
     });
   };
 
-  let anchor: any = null;
-  let $elm: any = null;
-
   const _existing_map = new Map();
 
-  // const isVNode = (v: any): v is VNode => {
-  //   const k = v?.kind;
-  //   return k === "element" || k === "text" || k === "fragment";
-  // };
-
-  // const destroyVNode = (node: VNode) => {
-  //   if (node.kind === "element" || node.kind === "fragment") {
-  //     for (const child of node.children) destroyVNode(child);
-  //   }
-  //   renderer.removeNode(node);
-  // };
-
-  const renderResult = (input: any) => {
+  const render_result = (input: any) => {
     let res = input;
     if (typeof res === "function") res = res();
     if (!res) return { node: null, elm: null, trackElm: null, empty: true };
@@ -87,7 +76,7 @@ export function For<T>(
   };
 
   const methods = {
-    _render_item(item: T, idxComputed: DerivedRef<number>) {
+    render_item(item: T, idxComputed: DerivedRef<number>) {
       const rr: {
         node: null | TimelessElement;
         elm: null | any;
@@ -95,8 +84,7 @@ export function For<T>(
         empty?: boolean;
         delete?: boolean;
       } = (() => {
-        const base = renderResult(() => render(item, idxComputed));
-        if (!base.elm) return base;
+        const base = render_result(() => render(item, idxComputed));
         // Canvas：为子节点添加定位容器，并填充宽高
         // if (host.kind === "canvas") {
         //   const wrap = host.createElement("div");
@@ -126,77 +114,89 @@ export function For<T>(
       })();
       return rr;
     },
-    _insert(index: number, items: T[]) {
-      const $base = _$children[index] || anchor;
-      // const $parent = host.getParentNode(anchor);
-      const $parent = anchor.getParentNode();
+    /** 在指定位置，插入 n 个节点 */
+    insert(index: number, items: T[]) {
+      const inserted_elements: (TimelessElement | null)[] = [];
 
-      if (!$parent) return;
-
-      const $fragment = safeCreateDocumentFragment();
       for (let i = 0; i < items.length; i++) {
-        const item_prepare_insert = items[i];
+        const child = items[i];
         // Create computed index that depends on `each`
-        const idxComputed = createIndexComputed(item_prepare_insert);
-        _values.splice(index + i, 0, item_prepare_insert);
-        _original_items.splice(index + i, 0, item_prepare_insert);
-        _index_computed.splice(index + i, 0, idxComputed);
-        const res = renderResult(() =>
-          render(item_prepare_insert, idxComputed),
-        );
-        _elements.splice(index + i, 0, res.node);
+        const idx = create_idx(child);
+        state.items.splice(index + i, 0, child);
+        _original_items.splice(index + i, 0, child);
+        _index_computed.splice(index + i, 0, idx);
+        const res = render(child, idx);
+        inserted_elements.push(res);
+        state.children.splice(index + i, 0, res);
+        // _elements.splice(index + i, 0, res.node);
         // _$children.splice(index + i, 0, res.trackElm || res.elm);
-        if (res.elm) {
-          // host.appendChild($fragment, res.elm);
-          $fragment.appendChild(res.elm);
-        }
+        // if (res.elm) {
+        //   // host.appendChild($fragment, res.elm);
+        //   $fragment.appendChild(res.elm);
+        // }
       }
-      // No need to manually update computed indexes - they auto-recompute
-      // host.insertBefore($parent, $fragment, $base);
-      $parent.insertBefore($fragment, $base);
-    },
-    _remove(index: number, count: number) {
-      // const $parent = host.getParentNode(anchor);
-      const $parent = anchor.getParentNode();
-      if (!$parent) return;
 
+      if ($elm && typeof $elm.insert === "function") {
+        $elm.insert(index, inserted_elements);
+      }
+
+      // const $base = _$children[index] || anchor;
+      // // const $parent = host.getParentNode(anchor);
+      // const $parent = anchor.getParentNode();
+
+      // if (!$parent) return;
+
+      // const $fragment = safeCreateDocumentFragment();
+
+      // $parent.insertBefore($fragment, $base);
+    },
+    /** 从指定下标移除 n 个元素 */
+    remove(index: number, count: number) {
       for (let i = 0; i < count; i += 1) {
-        const elm = _$children[index];
-        const $pa = elm.getParentNode();
-        if (elm && $pa === $parent) {
-          try {
-            // host.removeChild($parent, elm);
-            $parent.removeChild(elm);
-          } catch (e) {
-            // ignore
-          }
-        }
-        const item = _values[index];
+        // const elm = _$children[index];
+        // const $pa = elm.getParentNode();
+        // if (elm && $pa === $parent) {
+        //   try {
+        //     // host.removeChild($parent, elm);
+        //     $parent.removeChild(elm);
+        //   } catch (e) {
+        //     // ignore
+        //   }
+        // }
+        const item = state.items[index];
         if (_existing_map.has(item)) {
           _existing_map.delete(item);
         }
-        _values.splice(index, 1);
+        state.children.splice(index, 1);
+        state.items.splice(index, 1);
         _elements.splice(index, 1);
         _$children.splice(index, 1);
         _original_items.splice(index, 1);
         _index_computed.splice(index, 1);
       }
+
+      if ($elm && typeof $elm.remove === "function") {
+        $elm.remove(index, count);
+      }
+      // const $parent = host.getParentNode(anchor);
+      // const $parent = anchor.getParentNode();
+      // if (!$parent) return;
+
       // No need to manually update computed indexes - they auto-recompute
     },
-    _update(index: number, item: any) {
+    update(index: number, item: any) {
       // const $parent = host.getParentNode(anchor);
-      const $parent = anchor.getParentNode();
+      const $parent = $anchor.getParentNode();
       if (!$parent) return;
 
       // Reuse existing computed index or create new one
       let idxComputed = _index_computed[index];
       if (!idxComputed) {
-        idxComputed = createIndexComputed(item);
+        idxComputed = create_idx(item);
         _index_computed[index] = idxComputed;
         _original_items[index] = item;
       }
-
-      const res = methods._render_item(item, idxComputed);
+      const res = methods.render_item(item, idxComputed);
       if (!res) {
         return;
       }
@@ -210,42 +210,78 @@ export function For<T>(
         $parent.replaceChild(res.elm, old);
       } else if (res.elm) {
         // host.insertBefore($parent, res.elm, anchor);
-        $parent.insertBefore(res.elm, anchor);
+        $parent.insertBefore(res.elm, $anchor);
       }
-
-      const oldItem = _values[index];
-      if (oldItem !== item && _existing_map.has(oldItem)) {
-        _existing_map.delete(oldItem);
+      const prev_item = state.items[index];
+      if (prev_item !== item && _existing_map.has(prev_item)) {
+        _existing_map.delete(prev_item);
       }
-
-      _values[index] = item;
+      state.items[index] = item;
       _elements[index] = res.node;
       _$children[index] = res.elm;
     },
-    _refresh(v: T[]) {
+    /** 将元素从 from 位置移动到 to 位置（splice 语义） */
+    move(from: number, to: number) {
+      const splice_arr = (arr: any[]) => {
+        const [item] = arr.splice(from, 1);
+        arr.splice(to, 0, item);
+      };
+      splice_arr(state.items);
+      splice_arr(state.children);
+      splice_arr(_elements);
+      splice_arr(_$children);
+      splice_arr(_original_items);
+      splice_arr(_index_computed);
+
+      if ($elm && typeof $elm.move === "function") {
+        $elm.move(from, to);
+      }
+    },
+    /** 交换 indexA 和 indexB 位置的元素 */
+    swap(indexA: number, indexB: number) {
+      const swap_arr = (arr: any[]) => {
+        const tmp = arr[indexA];
+        arr[indexA] = arr[indexB];
+        arr[indexB] = tmp;
+      };
+      swap_arr(state.items);
+      swap_arr(state.children);
+      swap_arr(_elements);
+      swap_arr(_$children);
+      swap_arr(_original_items);
+      swap_arr(_index_computed);
+
+      if ($elm && typeof $elm.swap === "function") {
+        $elm.swap(indexA, indexB);
+      }
+    },
+    /**
+     * 使用新的列表，覆盖原先的
+     * 计算出 新增、更新 和 删除 的记录，提交给宿主层，刷新视图
+     */
+    refresh(v: T[]) {
       console.log(
         "[For _refresh] called with",
         v.length,
         "items, current:",
-        _values.length,
+        state.items.length,
       );
       const new_items = v;
-      const prev_items = _values;
+      const prev_items = state.items;
       const prev_elements = _elements;
       const prev_children = _$children;
       const prev_original_items = _original_items;
       const prev_index_computed = _index_computed;
 
-      // const $parent = host.getParentNode(anchor);
-      const $parent = anchor.getParentNode();
-      if (!$parent) return;
+      // const $parent = anchor.getParentNode();
+      // if (!$parent) return;
 
       // 1. Prepare target state
       const new_elements: (TimelessElement | null)[] = new Array(
         new_items.length,
       );
-      const new_children: (any | null)[] = new Array(new_items.length);
-      const new_original_items: T[] = new Array(new_items.length);
+      // const new_children: (any | null)[] = new Array(new_items.length);
+      // const new_original_items: T[] = new Array(new_items.length);
       const new_index_computed: DerivedRef<number>[] = new Array(
         new_items.length,
       );
@@ -253,7 +289,7 @@ export function For<T>(
       // 2. Index old items for O(1) lookup
       const old_map = new Map<any, number[]>();
       prev_items.forEach((item, index) => {
-        const k = _key && item ? (item as any)[_key] : item;
+        const k = props.key && item ? (item as any)[props.key] : item;
         let indices = old_map.get(k);
         if (!indices) {
           indices = [];
@@ -263,64 +299,65 @@ export function For<T>(
       });
 
       // 3. Diff Phase: Identify operations
-      const added_nodes: {
-        node: any;
-        elm: any;
-      }[] = [];
-      const removed_nodes: {
-        elm: any | null;
-        component: any | null;
-      }[] = [];
+      const added_nodes: { idx: number; element: TimelessElement | null }[] =
+        [];
+      const removed_nodes: { idx: number }[] = [];
+      const moved_nodes: { from: number; to: number }[] = [];
 
       // Iterate new items -> Determine Reused vs Added
       for (let i = 0; i < new_items.length; i++) {
-        const item = new_items[i];
-        const k = _key && item ? (item as any)[_key] : item;
+        const new_item = new_items[i];
+        const k =
+          props.key && new_item ? (new_item as any)[props.key] : new_item;
         const prev_indices = old_map.get(k);
-
         if (prev_indices && prev_indices.length > 0) {
           // Reused - same key found in old list
-          const oldIndex = prev_indices.shift()!;
-          const oldItem = prev_items[oldIndex];
+          const old_idx = prev_indices.shift()!;
+          const prev_item = prev_items[old_idx];
 
           // Reuse existing DOM element and computed index
-          new_elements[i] = prev_elements[oldIndex];
-          new_children[i] = prev_children[oldIndex];
-          new_original_items[i] = prev_original_items[oldIndex];
-          new_index_computed[i] = prev_index_computed[oldIndex];
+          new_elements[i] = prev_elements[old_idx];
+          // new_children[i] = prev_children[old_idx];
+          // new_original_items[i] = prev_original_items[old_idx];
+          new_index_computed[i] = prev_index_computed[old_idx];
+
+          // Track moved items
+          if (old_idx !== i) {
+            moved_nodes.push({ from: old_idx, to: i });
+          }
 
           // No need to manually update index - computed auto-recomputes based on `each`
 
           // If item data changed, update the reactive proxy so computed values re-evaluate
-          if (item !== oldItem && oldItem && typeof oldItem === "object") {
-            const proxy = registryGet(oldItem);
-            if (proxy && typeof (proxy as any).as === "function") {
-              (proxy as any).as(item);
+          if (
+            new_item !== prev_item &&
+            prev_item &&
+            typeof prev_item === "object"
+          ) {
+            const proxy = registryGet(prev_item);
+            if (proxy && isWriteableRef(proxy)) {
+              proxy.as(new_item);
               // Update registry to map new item to the same proxy
-              registrySet(item, proxy);
+              registrySet(new_item, proxy);
             }
           }
         } else {
           // Added (New) - create new computed index and render
-          const idxComputed = createIndexComputed(item);
-          new_original_items[i] = item;
-          new_index_computed[i] = idxComputed;
-          const res = methods._render_item(item, idxComputed);
-          new_elements[i] = res.node;
-          new_children[i] = res.trackElm || res.elm;
-          if (res.node && res.elm && isElement(res.node as any)) {
-            added_nodes.push({ node: res.node, elm: res.elm });
-          }
+          const idx_computed = create_idx(new_item);
+          // new_original_items[i] = new_item;
+          new_index_computed[i] = idx_computed;
+          const res = render(new_item, idx_computed);
+          state.children[i] = res;
+          // new_elements[i] = res.node;
+          // new_children[i] = res.trackElm || res.elm;
+          added_nodes.push({ idx: i, element: res });
         }
       }
 
       // Remaining items in old_map are Removed
       for (const indices of old_map.values()) {
         for (const index of indices) {
-          removed_nodes.push({
-            elm: prev_children[index],
-            component: prev_elements[index],
-          });
+          removed_nodes.push({ idx: index });
         }
       }
 
@@ -329,113 +366,151 @@ export function For<T>(
         removed_nodes.length,
         "added:",
         added_nodes.length,
+        "moved:",
+        moved_nodes.length,
       );
+
+      const diff = {
+        children: new_elements,
+        added: added_nodes,
+        removed: removed_nodes,
+        moved: moved_nodes,
+      };
 
       // 4. Patch Phase: Apply to DOM
 
       // 4.1 Remove nodes
-      for (const { elm, component } of removed_nodes) {
-        const $pa = elm.getParentNode();
-        if (elm && $pa === $parent) {
-          // host.removeChild($parent, elm);
-          $parent.removeChild(elm);
-        }
-        if (component) {
-          if (isElement(component)) {
-            if (typeof component.onUnmounted === "function") {
-              component.onUnmounted();
-            }
-          }
-        }
+      if ($elm && typeof $elm.refresh === "function") {
+        $elm.refresh(diff);
       }
+      // for (const { elm, component } of removed_nodes) {
+      //   const $pa = elm.getParentNode();
+      //   if (elm && $pa === $parent) {
+      //     // host.removeChild($parent, elm);
+      //     $parent.removeChild(elm);
+      //   }
+      //   if (component) {
+      //     if (isElement(component)) {
+      //       if (typeof component.onUnmounted === "function") {
+      //         component.onUnmounted();
+      //       }
+      //     }
+      //   }
+      // }
 
-      // 4.2 Reorder / Insert nodes
-      // Backward loop for correct insertion relative to anchor
-      let next_sibling: any | null = anchor;
-      for (let i = new_children.length - 1; i >= 0; i--) {
-        const node = new_children[i];
-        if (!node) continue;
+      // // 4.2 Reorder / Insert nodes
+      // // Backward loop for correct insertion relative to anchor
+      // let next_sibling: any | null = anchor;
+      // for (let i = new_children.length - 1; i >= 0; i--) {
+      //   const node = new_children[i];
+      //   if (!node) continue;
 
-        // If node is already in correct position (immediately before nextSibling), skip.
-        const $sibling = node.getNextSibling();
-        if ($sibling === next_sibling) {
-          next_sibling = node;
-          continue;
-        }
+      //   // If node is already in correct position (immediately before nextSibling), skip.
+      //   const $sibling = node.getNextSibling();
+      //   if ($sibling === next_sibling) {
+      //     next_sibling = node;
+      //     continue;
+      //   }
 
-        if ($parent) {
-          // If node is already in DOM elsewhere, insertBefore moves it.
-          // host.insertBefore($parent, node, next_sibling);
-          $parent.insertBefore(node, next_sibling);
-        }
+      //   if ($parent) {
+      //     // If node is already in DOM elsewhere, insertBefore moves it.
+      //     // host.insertBefore($parent, node, next_sibling);
+      //     $parent.insertBefore(node, next_sibling);
+      //   }
 
-        next_sibling = node;
-      }
+      //   next_sibling = node;
+      // }
 
-      // 4.3 Trigger Lifecycle (Mounted)
-      for (const { node, elm } of added_nodes) {
-        if (node && typeof node.onMounted === "function") {
-          node.onMounted({ target: elm });
-        }
-      }
+      // // 4.3 Trigger Lifecycle (Mounted)
+      // for (const { node, elm } of added_nodes) {
+      //   if (node && typeof node.onMounted === "function") {
+      //     node.onMounted({ target: elm });
+      //   }
+      // }
 
       // 5. Update State
       // Use slice() to create a copy, preventing _values from referencing _local_value directly
       // This ensures prev_items reflects the state before reverse/sort operations
-      _values = new_items.slice();
-      _elements = new_elements;
-      _$children = new_children;
-      _original_items = new_original_items;
+      state.items = new_items.slice();
+      state.children = new_elements;
+      // _elements = new_elements;
+      // _$children = new_children;
+      // _original_items = new_original_items;
       _index_computed = new_index_computed;
+
+      return diff;
     },
   };
 
-  const ctx = {
-    onPatch(change: any) {
-      // console.log("[headless]For - ctx.onPatch - handle patch", change);
-      if (change.type === "insert") {
-        methods._insert(change.index, change.items);
-      }
-      if (change.type === "delete") {
-        methods._remove(change.index, change.deleteCount);
-      }
-      if (change.type === "update") {
-        methods._update(change.index, change.item);
-      }
-    },
-    onChange(v: T[] = []) {
-      // console.log('[headless]For - ctx.onChange', v);
-      if (!_mounted) {
-        return;
-      }
-      methods._refresh(v);
-    },
-  };
-
-  if (isRef(each)) {
-    // @ts-ignore
-    each.subscribe(ctx);
+  if (isArrayRef(each)) {
+    each.subscribe({
+      // @ts-ignore
+      onPatch(action: {
+        type: "insert" | "delete" | "update" | "move" | "swap";
+        index: number;
+        item: T;
+        items?: T[];
+        deleteCount?: number;
+        from?: number;
+        to?: number;
+      }) {
+        if (!state.rendered) {
+          return;
+        }
+        console.log("[primitive]For - ctx.onPatch - handle patch", action);
+        if (action.type === "insert" && action.items !== undefined) {
+          methods.insert(action.index, action.items);
+        }
+        if (action.type === "delete" && action.deleteCount !== undefined) {
+          methods.remove(action.index, action.deleteCount);
+        }
+        if (action.type === "update") {
+          methods.update(action.index, action.item);
+        }
+        if (
+          action.type === "move" &&
+          action.from !== undefined &&
+          action.to !== undefined
+        ) {
+          methods.move(action.from, action.to);
+        }
+        if (
+          action.type === "swap" &&
+          action.from !== undefined &&
+          action.to !== undefined
+        ) {
+          methods.swap(action.from, action.to);
+        }
+      },
+      onChange(v: any) {
+        console.log("[primitive]For - ctx.onChange", v, state.rendered);
+        // if (!state.rendered) {
+        //   return;
+        // }
+        methods.refresh(v);
+      },
+    });
   }
 
-  const state: {
-    children: any[];
-  } = {
-    children: [],
-  };
-
-  const _c = (() => {
-    if (isRef(each)) {
-      return each.value;
-    }
-    return each;
-  })();
-  for (let i = 0; i < _c.length; i += 1) {
-    const v = _c[i];
-    const idx = _c.indexOf(v);
-    const r = render(v, ref(idx));
-    if (r) {
-      state.children.push(r);
-    }
+  const _children = isRef(each) ? each.value : each;
+  for (let i = 0; i < _children.length; i += 1) {
+    // const v = _children[i];
+    // const idx = _children.indexOf(v);
+    // const r = render(v, ref(idx));
+    // if (r) {
+    //   state.children.push(r);
+    // }
+    const child = _children[i];
+    state.items[i] = child;
+    // const idx = _children.indexOf(child);
+    const idx_computed = create_idx(child);
+    // const res = render_result(() => );
+    const res = render(child, idx_computed);
+    state.children.push(res);
+    _original_items[i] = child;
+    _index_computed[i] = idx_computed;
+    // _elements[i] = res.node;
+    // _$children[i] = res.trackElm || res.elm;
   }
 
   return {
@@ -444,69 +519,33 @@ export function For<T>(
       return $elm;
     },
     set $elm(v) {
-      $elm = $elm;
+      $elm = v;
     },
-    // _props: { each, render, key },
-    // _values,
-    // _elements,
-    // _$children,
     value: "",
     children: state.children,
 
     render() {
-      const nodes = (isRef(each) ? each.value : each) || [];
-
-      // Create anchor if not already created
-      if (!anchor) {
-        anchor = safeCreateTextNode("");
-        $elm = anchor;
-      }
-
-      const $fragment = safeCreateDocumentFragment();
-      for (let i = 0; i < nodes.length; i += 1) {
-        const item = nodes[i];
-        _values[i] = item;
-        // Create computed index that depends on `each`
-        _original_items[i] = item;
-        const idxComputed = createIndexComputed(item);
-        _index_computed[i] = idxComputed;
-        const res = renderResult(() => render(item, idxComputed));
-        _elements[i] = res.node;
-        _$children[i] = res.trackElm || res.elm;
-        if (res.elm) {
-          // host.appendChild($fragment, res.elm);
-          $fragment.appendChild(res.elm);
-        }
-      }
-      // host.appendChild($fragment, anchor);
-      $fragment.appendChild(anchor);
-      _mounted = true;
-
-      if (onMounted) {
-        onMounted(anchor);
-      }
-      return $fragment;
+      return $elm;
     },
-    hydrate(startDom: any, parentDom?: any) {
+    hydrate(start_dom: any, parent_dom?: any) {
       const nodes = (isRef(each) ? each.value : each) || [];
 
       // Create anchor if not already created
-      if (!anchor) {
-        anchor = safeCreateTextNode("");
-        $elm = anchor;
+      if (!$anchor) {
+        // anchor = safeCreateTextNode("");
+        $elm = $anchor;
       }
 
-      let currentDom = startDom;
+      let cur_dom = start_dom;
 
       for (let i = 0; i < nodes.length; i += 1) {
         const item = nodes[i];
-        _values[i] = item;
+        state.items[i] = item;
         // Create computed index that depends on `each`
         _original_items[i] = item;
-        const idxComputed = createIndexComputed(item);
-        _index_computed[i] = idxComputed;
-
-        let res = render(item, idxComputed);
+        const idx_computed = create_idx(item);
+        _index_computed[i] = idx_computed;
+        let res = render(item, idx_computed);
         // if (typeof res === "function") {
         //   res = res();
         // }
@@ -518,48 +557,48 @@ export function For<T>(
 
         if (isElement(res)) {
           _elements[i] = res;
-          if (currentDom && typeof (res as any).hydrate === "function") {
-            (res as any).hydrate(currentDom);
+          if (cur_dom && typeof (res as any).hydrate === "function") {
+            (res as any).hydrate(cur_dom);
             _$children[i] = res.$elm;
             const $sibling = (() => {
               if (res.$elm) {
                 return res.$elm.getNextSibling();
               }
-              return currentDom.getNextSibling();
+              return cur_dom.getNextSibling();
             })();
-            currentDom = $sibling;
-          } else if (currentDom) {
-            res.$elm = currentDom;
+            cur_dom = $sibling;
+          } else if (cur_dom) {
+            res.$elm = cur_dom;
             res.render();
             _$children[i] = res.$elm;
-            currentDom = currentDom.getNextSibling();
+            cur_dom = cur_dom.getNextSibling();
           }
         }
       }
 
       const $parent = (() => {
-        if (parentDom) {
-          return parentDom;
+        if (parent_dom) {
+          return parent_dom;
         }
-        if (startDom) {
-          return startDom.getParentNode();
+        if (start_dom) {
+          return start_dom.getParentNode();
         }
         return null;
       })();
       if ($parent) {
-        if (currentDom) {
+        if (cur_dom) {
           // host.insertBefore($parent, anchor, currentDom);
-          $parent.insertBefore(currentDom, anchor);
+          $parent.insertBefore(cur_dom, $anchor);
         } else {
           // host.appendChild($parent, anchor);
-          $parent.appendChild(anchor);
+          $parent.appendChild($anchor);
         }
       }
 
-      _mounted = true;
+      state.rendered = true;
 
       if (onMounted) {
-        onMounted({ target: anchor });
+        onMounted({ target: $anchor });
       }
 
       // Call onMounted for children
@@ -569,42 +608,59 @@ export function For<T>(
           el.onMounted({ target: el.$elm });
         }
       }
-
-      return anchor;
+      return $anchor;
+    },
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (onMounted) {
+        onMounted(event);
+      }
+    },
+    beforeUnmounted() {
+      if (beforeUnmounted) {
+        beforeUnmounted();
+      }
     },
     onUnmounted() {
+      state.rendered = true;
       if (onUnmounted) {
         onUnmounted();
       }
       for (let i = 0; i < _elements.length; i += 1) {
         const component = _elements[i];
-        if (!component) continue;
-        if (isElement(component)) {
-          if (typeof component.onUnmounted === "function") {
-            component.onUnmounted();
-          }
+        if (!component) {
+          continue;
+        }
+        if (
+          isElement(component) &&
+          typeof component.onUnmounted === "function"
+        ) {
+          component.onUnmounted();
         }
       }
 
       // Remove DOM nodes
-      // const $parent = host.getParentNode(anchor);
-      const $parent = anchor.getParentNode();
-      if ($parent) {
-        for (const elm of _$children) {
-          const $pa = elm.getParentNode();
-          if (elm && $pa === $parent) {
-            try {
-              // host.removeChild($parent, elm);
-              $parent.removeChild(elm);
-            } catch (e) {
-              // ignore
-            }
-          }
-        }
+      if ($elm && $elm.removeContent) {
+        $elm.removeContent();
       }
+      // const $parent = host.getParentNode(anchor);
+      // const $parent = $anchor.getParentNode();
+      // if ($parent) {
+      //   for (const elm of _$children) {
+      //     const $pa = elm.getParentNode();
+      //     if (elm && $pa === $parent) {
+      //       try {
+      //         // host.removeChild($parent, elm);
+      //         $parent.removeChild(elm);
+      //       } catch (e) {
+      //         // ignore
+      //       }
+      //     }
+      //   }
+      // }
 
-      _mounted = false;
-      _values = [];
+      state.rendered = false;
+      state.items = [];
       _elements = [];
       _$children = [];
       _original_items = [];

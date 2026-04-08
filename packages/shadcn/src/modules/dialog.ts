@@ -5,7 +5,6 @@ import {
   ViewChildren,
   ViewProps,
   Show,
-  h,
 } from "@timeless/primitive";
 import { DialogCore } from "@timeless/ui";
 import { CircleXOutlined } from "@timeless/icons";
@@ -119,15 +118,13 @@ export function Dialog(
                     when: computed(state_, (d) => !!d.title),
                     ok() {
                       return [
-                        h(
-                          DialogPrimitive.Header,
+                        DialogPrimitive.Header(
                           {
                             store,
                             class: "flex flex-col gap-2",
                           },
                           [
-                            h(
-                              DialogPrimitive.Title,
+                            DialogPrimitive.Title(
                               {
                                 store,
                                 class: "text-base leading-none font-medium",
@@ -152,16 +149,15 @@ export function Dialog(
                     when: computed(state_, (d) => !!d.footer),
                     ok() {
                       return [
-                        h(
-                          DialogPrimitive.Footer,
+                        DialogPrimitive.Footer(
                           {
                             store,
                             class:
                               "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
                           },
                           [
-                            h(Button, { store: store.cancelBtn }, ["取消"]),
-                            h(Button, { store: store.okBtn }, ["确认"]),
+                            Button({ store: store.cancelBtn }, ["取消"]),
+                            Button({ store: store.okBtn }, ["确认"]),
                           ],
                         ),
                       ];

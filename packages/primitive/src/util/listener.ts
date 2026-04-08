@@ -1,3 +1,5 @@
+function noop() {}
+
 export function ListenerManager() {
   const cleanups: (() => void)[] = [];
 
@@ -6,6 +8,7 @@ export function ListenerManager() {
       if (clean) {
         cleanups.push(clean);
       }
+      return clean || noop;
     },
   };
 

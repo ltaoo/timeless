@@ -10,12 +10,14 @@ import {
   Portal,
   Fragment,
   Img,
+  Checkbox,
   ref,
   combine,
   computed,
   refarr,
   refobj,
   DismissableLayer,
+  getobj,
 } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
 
@@ -46,14 +48,22 @@ function ApplicationView() {
   const columns = 4;
   const focused = ref({ x: 0, y: 0 });
   const keyword_ = ref("");
+  const todo_ = ref("");
   const todos = refarr([
     {
       id: 1,
       title: "Buy groceries",
+      completed: true,
     },
     {
       id: 2,
       title: "Study for exam exam exam",
+      completed: false,
+    },
+    {
+      id: 3,
+      title: "Read a book",
+      completed: false,
     },
   ]);
   const dissmissable$ = DismissableLayer();
@@ -146,7 +156,7 @@ function ApplicationView() {
 
   function handleKeydown(event) {
     const { key } = event;
-    console.log("handleKeydown", key);
+    // console.log("handleKeydown", key);
     if (key === "ArrowLeft") {
       moveFocus("left");
     }
@@ -166,233 +176,351 @@ function ApplicationView() {
       class: "page",
       onMounted() {
         console.log("[ApplicationView] onMounted");
-        const timer = setInterval(() => {
-          count_.as((prev) => {
-            return prev + 1;
-          });
-        }, 1000);
-        return function () {
-          clearInterval(timer);
-        };
+        // const timer = setInterval(() => {
+        //   count_.as((prev) => {
+        //     return prev + 1;
+        //   });
+        // }, 1000);
+        // return function () {
+        //   clearInterval(timer);
+        // };
       },
     },
     [
-      Img({
-        src: "/public/avatar.jpeg",
-        style: {
-          width: "60px",
-          height: "60px",
-        },
-      }),
-      View({}, [
-        Button(
-          {
-            onMounted(event) {
-              // console.log(event.target);
-              const { x, y, width, height } =
-                event.target.getBoundingClientRect();
-              dissmissable$.addIgnore({
-                x,
-                y,
-                width,
-                height,
-              });
-              popper_.as({
-                x: x,
-                y: y + height + 2,
-                placed: false,
-              });
-            },
-            onClick(event) {
-              // event.stopPropagation();
-              visible_.as((prev) => {
-                return !prev;
-              });
-              popper_.assign({
-                placed: true,
-              });
-            },
-          },
-          ["Click it"],
-        ),
-      ]),
-      Show({
-        when: visible_,
-        ok() {
-          return Portal({}, [
-            Popper(
-              {
-                placement: "top",
-                strategy: "absolute",
-                x: computed(popper_, (t) => t.x),
-                y: computed(popper_, (t) => t.y),
-                placed: computed(popper_, (t) => t.placed),
-              },
-              [
-                View(
-                  {
-                    style: {
-                      "background-color": "#fff",
-                    },
-                    onMounted(event) {
-                      console.log("[Popper] onMounted", event.target);
-                      const { x, y, width, height } =
-                        event.target.getBoundingClientRect();
-                      dissmissable$.addIgnore({
-                        x,
-                        y,
-                        width,
-                        height,
-                      });
-                    },
-                  },
-                  [
-                    View({}, ["first content in body"]),
-                    View({}, ["second content in body"]),
-                  ],
-                ),
-              ],
-            ),
-          ]);
-        },
-      }),
-
-      Icon({ name: "bolt", color: "#fff" }),
-      View(
-        {
-          style: {
-            color: "#fff",
-          },
-        },
-        [count_],
-      ),
       Input({
-        placeholder: "Search",
-        value: keyword_,
-        onMounted(event) {
-          console.log("the input mounted", event.target);
+        value: todo_,
+        onMounted() {
+          console.log("[Input] onMounted");
+        },
+        onChange(event) {
+          todo_.as(event.target.value);
         },
       }),
       Button(
         {
+          onMounted() {
+            console.log("[Button] onMounted");
+          },
           onClick() {
-            const v = keyword_.value;
-            console.log("click button", v);
+            const v = todo_.value;
+            todo_.as("");
+            if (!v) {
+              return;
+            }
+            todos.push({
+              id: todos.length,
+              completed: false,
+              title: v,
+            });
           },
         },
-        ["Click it"],
+        ["Add Todo"],
       ),
-      View(
+      Button(
         {
-          class: "navigation",
+          onClick() {
+            const v = todo_.value;
+            if (!v) {
+              return;
+            }
+            todo_.as("");
+            todos.unshift({
+              id: todos.length,
+              completed: false,
+              title: v,
+            });
+          },
         },
-        [
-          View(
-            {
-              class: "navigate-to",
-              style: {
-                color: "white",
-              },
-              onClick() {
-                page.set("todo");
-              },
-            },
-            ["Goto Todo List"],
-          ),
-          View(
-            {
-              class: "navigate-to",
-              style: {
-                color: "white",
-              },
-              onClick() {
-                console.log("click app");
-                page.set("app");
-              },
-            },
-            ["Goto Application List"],
-          ),
-        ],
+        ["Unshift Todo"],
       ),
-      Show({
-        when: computed(page, (t) => t === "todo"),
-        ok() {
-          return [
-            View(
+      Button(
+        {
+          onClick() {
+            todos.as([
               {
-                class: "subpage-title",
+                id: 2,
+                title: "Study for exam exam exam",
+                completed: false,
               },
-              ["Todo List Page"],
-            ),
-            For({
-              each: todos,
-              render(todo) {
-                return View({}, [todo.title]);
+              {
+                id: 1,
+                title: "Buy groceries_update",
+                completed: true,
               },
-            }),
-          ];
+              {
+                id: 4,
+                title: "Sleep",
+                completed: false,
+              },
+            ]);
+          },
         },
-      }),
-      Show({
-        when: computed(page, (t) => t === "app"),
-        ok() {
-          return [
-            View(
-              {
-                class: "subpage-title",
+        ["Refresh"],
+      ),
+      For({
+        key: "id",
+        each: todos,
+        render(todo, idx) {
+          return View(
+            {
+              style: {
+                display: "flex",
               },
-              ["Application List Page"],
-            ),
-            Grid(
-              { columns, gap: 16 },
-              apps.map((app, idx) => {
-                return View(
-                  {
-                    style: {
-                      "border-style": "solid",
-                      "border-width": "2px",
-                      "border-color": combine({ focused, idx }, (t) => {
-                        return isFocusedCell(t.focused, t.idx)
-                          ? "#007bff"
-                          : "rgba(255,255,255,0.18)";
-                      }),
-                    },
-                    onClick() {
-                      handleSelectCard(idx.value);
-                    },
-                  },
-                  [
-                    View(
-                      { style: { "text-align": "center", "font-size": 22 } },
-                      [app.icon],
-                    ),
-                    View(
-                      {
-                        style: {
-                          "text-align": "center",
-                          "font-weight": "bold",
-                          fontSize: 14,
-                        },
-                      },
-                      [app.title],
-                    ),
-                    View(
-                      {
-                        style: {
-                          "text-align": "center",
-                          "font-size": 12,
-                          color: "gray",
-                        },
-                      },
-                      [app.subtitle],
-                    ),
-                  ],
-                );
+            },
+            [
+              Checkbox({
+                checked: computed(todo, (t) => t.completed),
+                onChange(event) {
+                  const todo$ = getobj(todo);
+                  if (todo$) {
+                    todo$.set("completed", event.target.checked);
+                  }
+                },
               }),
-            ),
-          ];
+              // idx,
+              View(
+                {
+                  style: {
+                    color: "#fff",
+                    "text-decoration": computed(todo, (t) =>
+                      t.completed ? "line-through" : "none",
+                    ),
+                  },
+                },
+                [computed(todo, (t) => t.title)],
+              ),
+              View(
+                {
+                  class: "icon",
+                  onClick() {
+                    todos.remove(todo);
+                  },
+                },
+                [Icon({ name: "trash", color: "#fff", size: 16 })],
+              ),
+            ],
+          );
+        },
+        onMounted() {
+          console.log("[Todo For] onMounted");
         },
       }),
+      // Img({
+      //   src: "/public/avatar.jpeg",
+      //   style: {
+      //     width: "60px",
+      //     height: "60px",
+      //   },
+      // }),
+      // View({}, [
+      //   Button(
+      //     {
+      //       onMounted(event) {
+      //         // console.log(event.target);
+      //         const { x, y, width, height } =
+      //           event.target.getBoundingClientRect();
+      //         dissmissable$.addIgnore({
+      //           x,
+      //           y,
+      //           width,
+      //           height,
+      //         });
+      //         popper_.as({
+      //           x: x,
+      //           y: y + height + 2,
+      //           placed: false,
+      //         });
+      //       },
+      //       onClick(event) {
+      //         // event.stopPropagation();
+      //         visible_.as((prev) => {
+      //           return !prev;
+      //         });
+      //         popper_.assign({
+      //           placed: true,
+      //         });
+      //       },
+      //     },
+      //     ["Click it"],
+      //   ),
+      // ]),
+      // Show({
+      //   when: visible_,
+      //   ok() {
+      //     return Portal({}, [
+      //       Popper(
+      //         {
+      //           placement: "top",
+      //           strategy: "absolute",
+      //           x: computed(popper_, (t) => t.x),
+      //           y: computed(popper_, (t) => t.y),
+      //           placed: computed(popper_, (t) => t.placed),
+      //         },
+      //         [
+      //           View(
+      //             {
+      //               style: {
+      //                 "background-color": "#fff",
+      //               },
+      //               onMounted(event) {
+      //                 console.log("[Popper] onMounted", event.target);
+      //                 const { x, y, width, height } =
+      //                   event.target.getBoundingClientRect();
+      //                 dissmissable$.addIgnore({
+      //                   x,
+      //                   y,
+      //                   width,
+      //                   height,
+      //                 });
+      //               },
+      //             },
+      //             [
+      //               View({}, ["first content in body"]),
+      //               View({}, ["second content in body"]),
+      //             ],
+      //           ),
+      //         ],
+      //       ),
+      //     ]);
+      //   },
+      // }),
+
+      // Icon({ name: "bolt", color: "#fff" }),
+      // View(
+      //   {
+      //     style: {
+      //       color: "#fff",
+      //     },
+      //   },
+      //   [count_],
+      // ),
+      // Input({
+      //   placeholder: "Search",
+      //   value: keyword_,
+      //   onMounted(event) {
+      //     console.log("the input mounted", event.target);
+      //   },
+      // }),
+      // Button(
+      //   {
+      //     onClick() {
+      //       const v = keyword_.value;
+      //       console.log("click button", v);
+      //     },
+      //   },
+      //   ["Click it"],
+      // ),
+      // View(
+      //   {
+      //     class: "navigation",
+      //   },
+      //   [
+      //     View(
+      //       {
+      //         class: "navigate-to",
+      //         style: {
+      //           color: "white",
+      //         },
+      //         onClick() {
+      //           page.set("todo");
+      //         },
+      //       },
+      //       ["Goto Todo List"],
+      //     ),
+      //     View(
+      //       {
+      //         class: "navigate-to",
+      //         style: {
+      //           color: "white",
+      //         },
+      //         onClick() {
+      //           console.log("click app");
+      //           page.set("app");
+      //         },
+      //       },
+      //       ["Goto Application List"],
+      //     ),
+      //   ],
+      // ),
+      // Show({
+      //   when: computed(page, (t) => t === "todo"),
+      //   ok() {
+      //     return [
+      //       View(
+      //         {
+      //           class: "subpage-title",
+      //         },
+      //         ["Todo List Page"],
+      //       ),
+      //       For({
+      //         each: todos,
+      //         render(todo) {
+      //           return View({}, [todo.title]);
+      //         },
+      //       }),
+      //     ];
+      //   },
+      // }),
+      // Show({
+      //   when: computed(page, (t) => t === "app"),
+      //   ok() {
+      //     return [
+      //       View(
+      //         {
+      //           class: "subpage-title",
+      //         },
+      //         ["Application List Page"],
+      //       ),
+      //       Grid(
+      //         { columns, gap: 16 },
+      //         apps.map((app, idx) => {
+      //           return View(
+      //             {
+      //               style: {
+      //                 "border-style": "solid",
+      //                 "border-width": "2px",
+      //                 "border-color": combine({ focused, idx }, (t) => {
+      //                   return isFocusedCell(t.focused, t.idx)
+      //                     ? "#007bff"
+      //                     : "rgba(255,255,255,0.18)";
+      //                 }),
+      //               },
+      //               onClick() {
+      //                 handleSelectCard(idx.value);
+      //               },
+      //             },
+      //             [
+      //               View(
+      //                 { style: { "text-align": "center", "font-size": 22 } },
+      //                 [app.icon],
+      //               ),
+      //               View(
+      //                 {
+      //                   style: {
+      //                     "text-align": "center",
+      //                     "font-weight": "bold",
+      //                     fontSize: 14,
+      //                   },
+      //                 },
+      //                 [app.title],
+      //               ),
+      //               View(
+      //                 {
+      //                   style: {
+      //                     "text-align": "center",
+      //                     "font-size": 12,
+      //                     color: "gray",
+      //                   },
+      //                 },
+      //                 [app.subtitle],
+      //               ),
+      //             ],
+      //           );
+      //         }),
+      //       ),
+      //     ];
+      //   },
+      // }),
     ],
   );
 }

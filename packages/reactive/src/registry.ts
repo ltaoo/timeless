@@ -15,9 +15,9 @@ export function has(v: any) {
 export function get(v: any) {
   return global_refs.get(v);
 }
-export function getobj<T extends Record<string, any>>(v: any) {
+export function getobj<T extends Record<string, any>>(v: T) {
   return global_refs.get(v) as RefObject<T> | undefined;
 }
-export function getarr<T>(v: any) {
+export function getarr<T>(v: T[]) {
   return global_refs.get(v) as RefArray<T> | undefined;
 }

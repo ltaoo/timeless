@@ -6,7 +6,6 @@ import {
   ViewChildren,
   ViewProps,
   Txt,
-  h,
 } from "@timeless/primitive";
 import { TabHeaderCore } from "@timeless/ui";
 
@@ -85,31 +84,26 @@ export function Tabs(
         },
         else() {
           return [
-            h(
-              For as any,
-              {
-                each: items || computed(state_, (d) => d.tabs),
-                render(item: TabItem) {
-                  return Show({
-                    when: computed(state_, (d) => d.curId === item.value),
-                    ok() {
-                      return [
-                        h(
-                          TabsPrimitive.Content,
-                          {
-                            store,
-                            value: item.value,
-                            class: "mt-2",
-                          },
-                          item.content,
-                        ),
-                      ];
-                    },
-                  });
-                },
+            For({
+              each: items || computed(state_, (d) => d.tabs),
+              render(item: TabItem) {
+                return Show({
+                  when: computed(state_, (d) => d.curId === item.value),
+                  ok() {
+                    return [
+                      TabsPrimitive.Content(
+                        {
+                          store,
+                          value: item.value,
+                          class: "mt-2",
+                        },
+                        item.content,
+                      ),
+                    ];
+                  },
+                });
               },
-              [],
-            ),
+            }),
           ];
         },
       }),

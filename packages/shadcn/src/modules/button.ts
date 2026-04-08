@@ -4,7 +4,6 @@ import {
   View,
   ViewChildren,
   ViewProps,
-  h,
   refobj,
   computed,
 } from "@timeless/primitive";
@@ -101,7 +100,7 @@ export function Button(
       Show({
         when: !!prefix,
         ok() {
-          return [h(ButtonPrimitive.Prefix, {}, prefix)];
+          return [ButtonPrimitive.Prefix({}, prefix)];
         },
       }),
       ButtonPrimitive.Content({}, children),

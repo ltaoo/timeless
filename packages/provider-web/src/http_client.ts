@@ -1,6 +1,6 @@
 import axios, { CancelTokenSource } from "axios";
 
-import { Result } from "@timeless/base";
+import { Result } from "@timeless/timeless";
 import { HttpClientCore } from "@timeless/kit";
 
 export function connect(store: HttpClientCore) {

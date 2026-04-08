@@ -1,5 +1,5 @@
 import { classNames, combine, computed, refobj } from "@timeless/primitive";
-import { h, FileInputPrimitive, Show, ViewProps } from "@timeless/primitive";
+import { FileInputPrimitive, Show, ViewProps } from "@timeless/primitive";
 import { FileInputCore } from "@timeless/ui";
 import { CircleXOutlined, LoaderOutlined } from "@timeless/icons";
 
@@ -34,17 +34,19 @@ export function FileInput(
         ]),
       }),
       Show({
-        when: combine({ hasValue, isLoading }, (t) => t.hasValue && !t.isLoading),
+        when: combine(
+          { hasValue, isLoading },
+          (t) => t.hasValue && !t.isLoading,
+        ),
         ok() {
           return [
-            h(
-              FileInputPrimitive.Clear,
+            FileInputPrimitive.Clear(
               {
                 store,
                 class:
                   "absolute top-1/2 -translate-y-1/2 right-2 flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
               },
-              [h(CircleXOutlined, { class: "h-4 w-4" })],
+              [CircleXOutlined({ class: "h-4 w-4" })],
             ),
           ];
         },

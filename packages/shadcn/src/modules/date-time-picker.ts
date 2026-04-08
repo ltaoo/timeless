@@ -5,7 +5,6 @@ import {
   For,
   View,
   ViewProps,
-  h,
   Show,
   ScrollViewPrimitive,
 } from "@timeless/primitive";
@@ -434,8 +433,7 @@ export function DateTimePicker(
                     when: time$.showSeconds,
                     ok() {
                       return [
-                        h(
-                          ScrollViewPrimitive.Root,
+                        ScrollViewPrimitive.Root(
                           {
                             store: secondview$,
                             class:
@@ -463,15 +461,17 @@ export function DateTimePicker(
                                   {
                                     store: time$,
                                     value: second,
-                                    class: computed(time_state_, (s) => {
-                                      const isSelected = s.tempSecond === second;
-                                      const baseClass =
-                                        "w-full h-8 text-sm rounded-md transition-colors outline-hidden";
-                                      if (isSelected) {
-                                        return `${baseClass} bg-primary text-primary-foreground`;
-                                      }
-                                      return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
-                                    }),
+                                    class: classNames([
+                                      "w-full h-8 text-sm rounded-md transition-colors outline-hidden",
+                                      computed(time_state_, (s) => {
+                                        const isSelected =
+                                          s.tempSecond === second;
+                                        if (isSelected) {
+                                          return `bg-primary text-primary-foreground`;
+                                        }
+                                        return `hover:bg-accent hover:text-accent-foreground`;
+                                      }),
+                                    ]),
                                   },
                                   [String(second).padStart(2, "0")],
                                 );

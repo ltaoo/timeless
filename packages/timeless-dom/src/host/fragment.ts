@@ -31,7 +31,7 @@ export function DOMFragment(props: {
     render(elm: TimelessElement) {
       const new_nodes: any[] = [];
       const new_instances: any[] = [];
-      console.log('[]fragment - in render', elm.children);
+      // console.log('[]fragment - in render', elm.children);
       if (elm.children) {
         // console.log("[]show - in render", elm.children);
         for (let child of elm.children) {

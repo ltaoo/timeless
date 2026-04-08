@@ -15,7 +15,15 @@ type ASNNode = {
   children?: readonly ASNNode[];
 };
 
-function renderASNToDOM(asn: ASNNode, props?: any): SVGElement {
+function render_asn_to_svg(
+  asn: ASNNode,
+  props?: {
+    color: string;
+    size: number;
+    // style?: ViewStyleProperties;
+    // styleSet?: string[];
+  },
+): SVGElement {
   const { tag, attrs = {}, children } = asn;
 
   // Create SVG element
@@ -35,13 +43,14 @@ function renderASNToDOM(asn: ASNNode, props?: any): SVGElement {
     // Apply color if provided
     if (props?.color) {
       element.style.color = props.color;
+      element.style.stroke = props.color;
     }
   }
 
   // Recursively render children
   if (children && children.length > 0) {
     for (const child of children) {
-      const childElement = renderASNToDOM(child, props);
+      const childElement = render_asn_to_svg(child, props);
       element.appendChild(childElement);
     }
   }
@@ -51,19 +60,23 @@ function renderASNToDOM(asn: ASNNode, props?: any): SVGElement {
 
 export interface DOMIcon {
   t: "icon";
-  $elm: HTMLDivElement;
+  $elm: SVGSVGElement;
   isDocumentFragment(): boolean;
   getChildNodes(): NodeListOf<ChildNode>;
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
-  render(elm: TimelessElement): HTMLDivElement;
+  render(elm: TimelessElement): SVGSVGElement;
 }
 
 export function DOMIcon(props: {
   build: (elm: TimelessElement) => DOMHostNode;
 }): DOMIcon {
-  const $elm = document.createElement("div");
+  let $elm: SVGSVGElement = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg",
+  );
+  // let $elm = document.createElement("svg");
 
   const methods = {
     setStyle(style: ViewStyleProperties) {
@@ -71,7 +84,7 @@ export function DOMIcon(props: {
       $elm.style.cssText = cssText;
     },
     setStyleSet(styleSet: string[]) {
-      $elm.className = styleSet.join(" ");
+      // $elm.className = styleSet.join(" ");
     },
     setupEventListener(events: any) {
       if (events.onClick) {
@@ -134,7 +147,7 @@ export function DOMIcon(props: {
       return $elm;
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
     getChildNodes() {
       return $elm.childNodes;
@@ -146,10 +159,10 @@ export function DOMIcon(props: {
       $elm.style[key] = value;
     },
     setStyleSet(name: string) {
-      $elm.className = name;
+      // $elm.className = name;
     },
     render(elm: TimelessElement) {
-      const name = elm.value as string;
+      const name = elm.value.name as string;
       if (!name) {
         return $elm;
       }
@@ -167,11 +180,11 @@ export function DOMIcon(props: {
       }
 
       // Clear previous content
-      $elm.innerHTML = "";
+      // $elm.innerHTML = "";
 
       // Render ASN to SVG element
-      const $svg = renderASNToDOM(asn_node, elm.props);
-      $elm.appendChild($svg);
+      $elm = render_asn_to_svg(asn_node, elm.value) as SVGSVGElement;
+      // $elm.appendChild($svg);
 
       return $elm;
     },

@@ -106,13 +106,13 @@ export function CanvasIcon(props: {
       canvas.setClassName($elm, name);
     },
     render(elm: TimelessElement) {
-      const name = elm.value as string;
+      const name = elm.value.name as string;
       if (!name) {
         return $elm;
       }
 
       // Set size
-      const props = elm.props as any;
+      const props = elm.value as any;
       const size = props?.size ? String(props.size) : "24";
       const sizeNum = parseFloat(size);
       canvas.setAttribute($elm, "width", size);

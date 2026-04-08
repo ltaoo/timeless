@@ -1,9 +1,20 @@
-export function Icon(props: { name: string; size: number }) {
-  const state = {
-    props,
-  };
+import { MountedEvent } from "@/event";
 
+type IconState = {
+  name: string;
+  size: number;
+  color: string;
+};
+type IconProps = { name: string; color: string; size: number };
+
+export function Icon(props: IconProps) {
   let $elm: any = null;
+  const state: IconState = {
+    name: props.name,
+    size: props.size,
+    color: props.color,
+    // props,
+  };
 
   return {
     t: "icon",
@@ -13,8 +24,21 @@ export function Icon(props: { name: string; size: number }) {
     set $elm(v: any) {
       $elm = v;
     },
-    value: props.name,
-    props: state.props,
+    value: {
+      name: state.name,
+      color: state.color,
+      size: state.size,
+    },
+    props: {
+      styleSet: [],
+      style: {},
+    },
+    render() {
+      return $elm;
+    },
+    onMounted(event: MountedEvent) {
+      // ...
+    },
   };
 }
 

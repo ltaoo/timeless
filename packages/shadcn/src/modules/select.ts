@@ -123,9 +123,7 @@ export function Select(
         Show({
           when: !!entry.label,
           ok() {
-            return [
-              View({ class: GROUP_LABEL_CLASS }, [() => entry.label ?? null]),
-            ];
+            return [View({ class: GROUP_LABEL_CLASS }, [entry.label ?? null])];
           },
         }),
         For({

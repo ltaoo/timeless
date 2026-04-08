@@ -1,18 +1,20 @@
 import { type TimelessElement, isElement } from "@timeless/timeless";
 
+import { DOMHostNode } from "@/host/type";
 import { DOMView, isDOMView } from "@/host/view";
 import { DOMGrid } from "@/host/grid";
 import { DOMText } from "@/host/text";
 import { DOMShow } from "@/host/show";
 import { DOMFor } from "@/host/for";
-import { DOMHostNode } from "@/host/type";
 import { DOMFragment, isDocumentFragment } from "@/host/fragment";
+import { DOMLazyView } from "@/host/lazy-view";
 import { DOMImg } from "@/host/img";
 import { DOMIcon } from "@/host/icon";
 import { DOMInput } from "@/host/input";
 import { DOMButton } from "@/host/button";
 import { DOMPortal } from "@/host/portal";
 import { DOMPopper } from "@/host/popper";
+import { DOMCheckbox } from "@/host/checkbox";
 
 function build(elm: TimelessElement): DOMHostNode {
   if (elm.t === "view") {
@@ -32,6 +34,12 @@ function build(elm: TimelessElement): DOMHostNode {
     elm.$elm = fragment$;
     fragment$.render(elm);
     return fragment$;
+  }
+  if (elm.t === "lazy-view") {
+    const lazyView$ = DOMLazyView({ build });
+    elm.$elm = lazyView$;
+    lazyView$.render(elm);
+    return lazyView$;
   }
   if (elm.t === "popper") {
     const popper$ = DOMPopper({ build });
@@ -62,6 +70,12 @@ function build(elm: TimelessElement): DOMHostNode {
     elm.$elm = input$;
     input$.render(elm);
     return input$;
+  }
+  if (elm.t === "checkbox") {
+    const checkbox$ = DOMCheckbox({ build });
+    elm.$elm = checkbox$;
+    checkbox$.render(elm);
+    return checkbox$;
   }
   if (elm.t === "button") {
     const button$ = DOMButton({ build });

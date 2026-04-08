@@ -268,6 +268,11 @@ export type Ref<T> = DerivedRef<T> & {
   as: (value: T | ((cur: T | null) => T)) => void;
 };
 
+export function isWriteableRef<T>(v: Ref<T> | T): v is Ref<T>;
+export function isWriteableRef(v: any): boolean {
+  return isRef(v) && typeof (v as any).as === "function";
+}
+
 export function isRef<T>(v: DerivedRef<T> | Ref<T> | T): v is DerivedRef<T>;
 export function isRef(v: unknown): v is DerivedRef<any>;
 export function isRef(v: unknown): boolean {

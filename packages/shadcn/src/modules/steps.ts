@@ -1,5 +1,5 @@
 import { refobj, computed, classNames } from "@timeless/primitive";
-import { StepsPrimitive, For, Show, Txt, ViewProps, h } from "@timeless/primitive";
+import { StepsPrimitive, For, Show, Txt, ViewProps } from "@timeless/primitive";
 import { StepCore } from "@timeless/ui";
 
 export type StepItem = {
@@ -7,7 +7,9 @@ export type StepItem = {
   description?: string;
 };
 
-export function Steps(props: ViewProps & { store: StepCore; items: StepItem[] }) {
+export function Steps(
+  props: ViewProps & { store: StepCore; items: StepItem[] },
+) {
   const { store, items, class: cn, ...rest } = props;
 
   const state_ = refobj(store.state);
@@ -66,8 +68,7 @@ export function Steps(props: ViewProps & { store: StepCore; items: StepItem[] })
                     when: i < items.length - 1,
                     ok() {
                       return [
-                        h(
-                          StepsPrimitive.Connector,
+                        StepsPrimitive.Connector(
                           {
                             store,
                             index: i,

@@ -146,11 +146,11 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
         const child = children[i];
         // console.log("for children", child);
         (() => {
-          if (typeof child === "function") {
-            const r = child();
-            state.children[i] = r;
-            return;
-          }
+          // if (typeof child === "function") {
+          //   const r = child();
+          //   state.children[i] = r;
+          //   return;
+          // }
           if (isRef(child)) {
             state.children[i] = Txt(child);
             return;

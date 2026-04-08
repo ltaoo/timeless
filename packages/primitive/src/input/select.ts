@@ -4,7 +4,8 @@ import { TimelessElement } from "@/content/type";
 import { View, ViewProps } from "@/content/view";
 import { MountedEvent } from "@/event";
 import { isClassNameRef } from "@/style";
-import { For } from "@/reactive/for";
+import { For, ForProps } from "@/reactive/for";
+import { ListenerManager } from "@/util/listener";
 
 type SelectValue = string[];
 
@@ -12,10 +13,7 @@ export interface SelectProps<T> extends Omit<ViewProps, "as"> {
   id?: string | Ref<string>;
   key?: string;
   each: T[] | Ref<T[]>;
-  render: (
-    item: T,
-    idx: DerivedRef<number>,
-  ) => TimelessElement | (() => TimelessElement) | null;
+  render: ForProps<T>["render"];
   name?: string | Ref<string>;
   placeholder?: string | Ref<string>;
   disabled?: boolean | Ref<boolean>;
@@ -104,8 +102,7 @@ export function Select<T>(props: SelectProps<T>) {
       // console.log("listen", type, $elm, handler, options);
       // host.addEventListener($elm, type, handler, options);
       $elm.addEventListener(type, handler, options);
-      listenerCleanups.push(() => {
-        // host.removeEventListener($elm, type, handler, options);
+      return listener$.push(function () {
         $elm.removeEventListener(type, handler, options);
       });
     },
@@ -358,8 +355,9 @@ export function Select<T>(props: SelectProps<T>) {
     },
   };
 
-  const listenerCleanups: (() => void)[] = [];
-  let onMountedCleanup: (() => void) | undefined;
+  const listener$ = ListenerManager();
+  // const listenerCleanups: (() => void)[] = [];
+  // let onMountedCleanup: (() => void) | undefined;
   let rendered = false;
   let $elm: any = null;
   const for$ = For({
@@ -515,10 +513,11 @@ export function Select<T>(props: SelectProps<T>) {
       }
 
       if (onMounted) {
-        const cleanup = onMounted({ target: $elm });
-        if (typeof cleanup === "function") {
-          onMountedCleanup = cleanup;
-        }
+        listener$.push(onMounted({ target: $elm }));
+        // const cleanup = onMounted({ target: $elm });
+        // if (typeof cleanup === "function") {
+        //   onMountedCleanup = cleanup;
+        // }
       }
 
       return $elm;
@@ -529,13 +528,14 @@ export function Select<T>(props: SelectProps<T>) {
       }
     },
     onUnmounted() {
-      for (const fn of listenerCleanups) {
-        fn();
-      }
-      listenerCleanups.length = 0;
-      if (onMountedCleanup) {
-        onMountedCleanup();
-      }
+      // for (const fn of listenerCleanups) {
+      //   fn();
+      // }
+      // listenerCleanups.length = 0;
+      // if (onMountedCleanup) {
+      //   onMountedCleanup();
+      // }
+      listener$.clean();
       if (onUnmounted) {
         onUnmounted();
       }

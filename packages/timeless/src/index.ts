@@ -5,14 +5,7 @@ console.log("timeless.version" + __Version);
 export * from "@timeless/primitive";
 
 // Re-export base packages
-export {
-  base,
-  BaseDomain,
-  BaseEvents,
-  Result,
-  BizError,
-  applyMixins,
-} from "@timeless/base";
+export { base, BaseDomain, BaseEvents, Result, BizError } from "@timeless/base";
 export type { Handler, EventType } from "@timeless/base";
 export * from "@timeless/base";
 

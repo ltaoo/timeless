@@ -46,12 +46,10 @@ export default function HomeLayoutView(props) {
                     return sidemenu$.isSelected(t, sidemenu$.menus[0]);
                   }),
                   ok() {
-                    return [
-                      h(View, {
-                        class:
-                          "absolute top-[-4px] right-[-4px] w-2 h-2 rounded-full bg-zinc-500",
-                      }),
-                    ];
+                    return View({
+                      class:
+                        "absolute top-[-4px] right-[-4px] w-2 h-2 rounded-full bg-zinc-500",
+                    });
                   },
                 }),
               ],
@@ -72,7 +70,7 @@ export default function HomeLayoutView(props) {
                       props.history.push("root.home_layout.article");
                     },
                   },
-                  [Timeless.icons.RSSOutlined({ class: "size-4" })],
+                  [Icon({ name: "rss", size: 24 })],
                 ),
                 Separator({ orientation: "horizontal", class: "w-8 mx-auto" }),
                 Flex({ direction: "col", items: "center", class: "gap-2" }, [
@@ -117,7 +115,7 @@ export default function HomeLayoutView(props) {
                     },
                   }),
                 },
-                [Timeless.icons.Grid3x3Outlined({ class: "size-4" })],
+                [Icon({ name: "grid-3x3", size: 24 })],
               ),
               // Settings Icon
               // View(
@@ -149,7 +147,7 @@ export default function HomeLayoutView(props) {
                     },
                   }),
                 },
-                [Timeless.icons.SunOutlined({ class: "size-4" })],
+                [Icon({ name: "sun", size: 24 })],
               ),
               // User Avatar
               (() => {
