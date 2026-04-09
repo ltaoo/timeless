@@ -4,6 +4,7 @@ import { ViewStyleProperties } from "@/style";
 import { MountedEvent } from "@/event";
 
 import { TimelessLazyComponent } from "./lazy-view";
+import { VNodeView } from "@/vnode/view";
 
 export type ViewPropValue = string | number | boolean | undefined | null;
 export type ViewAttributes = Record<string, any>;
@@ -11,25 +12,22 @@ export type ViewAttributes = Record<string, any>;
 export type TimelessNormalComponent = (...args: unknown[]) => TimelessElement;
 export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 
-export interface TimelessElement<T = any> {
+export interface TimelessElement<T = any, Elm = any> {
   t: string;
-  $elm: any;
-  children?: (TimelessElement | null)[];
+  $elm: VNodeView<Elm>;
   /** 描述该元素的状态，用来替代 value */
-  state?: any;
-  props?: {
-    styleSet?: string[];
-    style?: ViewStyleProperties;
-  };
-  value?: T;
+  state: T;
+  children?: (TimelessElement | null)[];
   events?: {
+    onMounted?: (e: MountedEvent<VNodeView<Elm>>) => void;
     onClick?: (e: MouseEvent) => void;
     onDoubleClick?: (e: MouseEvent) => void;
     onLongPress?: (e: PointerEvent) => void;
     onPointerDown?: (e: PointerEvent) => void;
     onMouseEnter?: (e: MouseEvent) => void;
     onMouseLeave?: (e: MouseEvent) => void;
-    onChange?: (e: InputEvent) => void;
+    onChange?: (e: Event) => void;
+    onInput?: (e: Event) => void;
     onFocus?: (e: FocusEvent) => void;
     onBlur?: (e: FocusEvent) => void;
     onKeyDown?: (e: KeyboardEvent) => void;
@@ -43,7 +41,7 @@ export interface TimelessElement<T = any> {
     onDrop?: (e: DragEvent) => void;
     onAnimationEnd?: (e: AnimationEvent) => void;
   };
-  render(): any;
+  // render(): any;
   hydrate?(existingDom: any): any;
   cleanup?: () => void;
   onMounted?(event: MountedEvent): void;

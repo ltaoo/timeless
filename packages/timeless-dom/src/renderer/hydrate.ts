@@ -746,7 +746,7 @@ function hydrateNode(
         return (vnode as any).hydrate(domNode);
       }
       // Fallback to render
-      return vnode.render();
+      // return vnode.render();
   }
 }
 
@@ -767,7 +767,7 @@ function hydrateView(
     console.warn(
       `[Hydrate] Tag mismatch: expected ${expectedTag}, got ${actualTag}. Falling back to render.`,
     );
-    return vnode.render();
+    // return vnode.render();
   }
 
   // Use the hydrate method
@@ -777,7 +777,7 @@ function hydrateView(
 
   // Fallback
   vnode.$elm = domNode;
-  return vnode.render();
+  // return vnode.render();
 }
 
 /**
@@ -793,7 +793,7 @@ function hydrateText(
   }
 
   vnode.$elm = domNode;
-  return vnode.render();
+  // return vnode.render();
 }
 
 /**
@@ -809,7 +809,7 @@ function hydrateFor(
     return (vnode as any).hydrate(domNode, parent);
   }
 
-  return vnode.render();
+  // return vnode.render();
 }
 
 /**
@@ -825,5 +825,5 @@ function hydrateShow(
     return (vnode as any).hydrate(domNode, parent);
   }
 
-  return vnode.render();
+  // return vnode.render();
 }

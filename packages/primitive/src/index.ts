@@ -17,7 +17,7 @@ export * from "./content/text";
 export * from "./content/icon";
 export * from "./content/popper";
 export * from "./content/list-view";
-export * from "./modules/portal";
+export * from "./content/portal";
 export * from "./content/lazy-view";
 export * from "./content/type";
 
@@ -132,4 +132,5 @@ export * from "./util/listener";
 export * from "./interaction/dismissable";
 
 export * from "./host";
-export * as VNode from "./vnode";
+// export * as VNode from "./vnode";
+export * from "./vnode/view";

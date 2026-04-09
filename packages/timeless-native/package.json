@@ -1,6 +1,6 @@
 {
   "name": "@timeless/timeless-native",
-  "version": "0.14.2",
+  "version": "0.14.4",
   "main": "dist/index.js",
   "module": "dist/timeless.native.esm.js",
   "types": "dist/index.d.ts",

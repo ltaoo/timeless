@@ -3,8 +3,8 @@ import { ToastCore, ExternalToast, SonnerCore } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Txt } from "@/content/text";
+import { Portal as NativePortal } from "@/content/portal";
 
-import { Portal } from "./portal";
 import { Presence } from "./presence";
 
 const sonner = SonnerCore.getInstance();
@@ -15,7 +15,7 @@ export function Root(
 ) {
   const { store, ...rest } = props;
 
-  return Portal(rest, [Presence({ store: store.presence }, children)]);
+  return NativePortal(rest, [Presence({ store: store.presence }, children)]);
 }
 
 export function Mask(

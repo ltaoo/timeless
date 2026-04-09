@@ -4,9 +4,9 @@ import { PopoverCore, Align, Side, getGlobalLayerManager } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
+import { Portal as NativePortal } from "@/content/portal";
 import { getHost } from "@/host";
 
-import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
 

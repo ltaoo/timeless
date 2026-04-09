@@ -196,18 +196,27 @@ export default function CommandView() {
                 "w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0",
             },
             [
-              cmd.icon && iconMap[cmd.icon]
-                ? iconMap[cmd.icon]({
-                    class: "w-4 h-4 text-zinc-500 dark:text-zinc-400",
-                  })
-                : View({ class: "w-4 h-4" }),
+              (() => {
+                const icon = cmd.icon && iconMap[cmd.icon];
+                if (icon) {
+                  return View(
+                    {
+                      class: "w-4 h-4 text-zinc-500 dark:text-zinc-400",
+                    },
+                    [icon],
+                  );
+                }
+                return View({ class: "w-4 h-4" });
+              })(),
             ],
           ),
           View({ class: "flex-1 text-sm text-zinc-700 dark:text-zinc-200" }, [
             Txt(cmd.label),
           ]),
-          cmd.shortcut
-            ? View(
+          Show({
+            when: !!cmd.shortcut,
+            ok() {
+              return View(
                 { class: "flex items-center gap-0.5 text-xs text-zinc-400" },
                 [
                   ...cmd.shortcut.split("").map((char) =>
@@ -220,8 +229,9 @@ export default function CommandView() {
                     ),
                   ),
                 ],
-              )
-            : null,
+              );
+            },
+          }),
         ],
       );
     },
@@ -246,7 +256,7 @@ export default function CommandView() {
                   open();
                 },
               }),
-              prefix: [Timeless.icons.SearchOutlined({ class: "w-4 h-4" })],
+              prefix: [Icon({ name: "search", size: 24 })],
             },
             ["Open Command Palette"],
           ),
@@ -292,9 +302,7 @@ export default function CommandView() {
                         "flex items-center gap-3 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700",
                     },
                     [
-                      Timeless.icons.SearchOutlined({
-                        class: "w-5 h-5 text-zinc-400 flex-shrink-0",
-                      }),
+                      Icon({ name: "search", size: 24 }),
                       Input({
                         store: searchInput,
                         class:

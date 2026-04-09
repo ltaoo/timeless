@@ -210,7 +210,7 @@ export default function OverlayView() {
                   new Timeless.ui.MenuItemCore({
                     label: "Undo",
                     shortcut: "⌘Z",
-                    icon: Timeless.icons.Undo2Outlined({ class: "w-4 h-4" }),
+                    icon: Icon({ name: "undo-2", size: 24 }),
                     onClick() {
                       console.log("undo");
                     },
@@ -218,9 +218,7 @@ export default function OverlayView() {
                   new Timeless.ui.MenuItemCore({
                     label: "Redo",
                     shortcut: "⇧⌘Z",
-                    icon: Timeless.icons.RefreshCcwOutlined({
-                      class: "w-4 h-4",
-                    }),
+                    icon: Icon({ name: "refresh-ccw", size: 24 }),
                     onClick() {
                       console.log("redo");
                     },
@@ -237,9 +235,7 @@ export default function OverlayView() {
                   new Timeless.ui.MenuItemCore({
                     label: "Copy",
                     shortcut: "⌘C",
-                    icon: Timeless.icons.FileSymlinkOutlined({
-                      class: "w-4 h-4",
-                    }),
+                    icon: Icon({ name: "file-symlink", size: 24 }),
                     onClick() {
                       console.log("copy");
                     },
@@ -256,7 +252,7 @@ export default function OverlayView() {
                   new Timeless.ui.MenuItemCore({
                     label: "Delete",
                     shortcut: "⌘⌫",
-                    icon: Timeless.icons.Trash2Outlined({ class: "w-4 h-4" }),
+                    icon: Icon({ name: "trash-2", size: 24 }),
                     onClick() {
                       console.log("delete");
                     },
@@ -373,7 +369,7 @@ export default function OverlayView() {
                     menu: new Timeless.ui.MenuCore({
                       content: View({ class: "p-4 w-[200px]" }, [
                         View({ class: "text-sm font-medium mb-2" }, [
-                          Txt("Preview Panel"),
+                          "Preview Panel",
                         ]),
                         View(
                           {
@@ -381,9 +377,7 @@ export default function OverlayView() {
                               "text-xs text-gray-500 dark:text-gray-400 mb-3",
                           },
                           [
-                            Txt(
-                              "This is custom popover content rendered instead of menu items.",
-                            ),
+                            "This is custom popover content rendered instead of menu items.",
                           ],
                         ),
                         View(
@@ -391,7 +385,7 @@ export default function OverlayView() {
                             class:
                               "h-[80px] rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-400",
                           },
-                          [Txt("Image placeholder")],
+                          ["Image placeholder"],
                         ),
                       ]),
                     }),
@@ -596,9 +590,7 @@ export default function OverlayView() {
                       new Timeless.ui.MenuItemCore({
                         label: "Undo",
                         shortcut: "⌘Z",
-                        icon: Timeless.icons.Undo2Outlined({
-                          class: "w-4 h-4",
-                        }),
+                        icon: Icon({ name: "undo-2", size: 24 }),
                         onClick() {
                           console.log("undo");
                         },
@@ -606,9 +598,7 @@ export default function OverlayView() {
                       new Timeless.ui.MenuItemCore({
                         label: "Redo",
                         shortcut: "⇧⌘Z",
-                        icon: Timeless.icons.RefreshCcwOutlined({
-                          class: "w-4 h-4",
-                        }),
+                        icon: Icon({ name: "refresh-ccw", size: 24 }),
                         onClick() {
                           console.log("redo");
                         },
@@ -630,9 +620,7 @@ export default function OverlayView() {
                       new Timeless.ui.MenuItemCore({
                         label: "Copy",
                         shortcut: "⌘C",
-                        icon: Timeless.icons.FileSymlinkOutlined({
-                          class: "w-4 h-4",
-                        }),
+                        icon: Icon({ name: "file-symlink", size: 24 }),
                         onClick() {
                           console.log("copy");
                         },
@@ -653,9 +641,7 @@ export default function OverlayView() {
                     items: [
                       new Timeless.ui.MenuItemCore({
                         label: "Email",
-                        icon: Timeless.icons.SearchOutlined({
-                          class: "w-4 h-4",
-                        }),
+                        icon: Icon({ name: "search", size: 24 }),
                         onClick() {
                           console.log("email");
                         },
@@ -663,18 +649,14 @@ export default function OverlayView() {
                       new Timeless.ui.MenuItemCore({
                         label: "Home",
                         shortcut: "⌘M",
-                        icon: Timeless.icons.HouseOutlined({
-                          class: "w-4 h-4",
-                        }),
+                        icon: Icon({ name: "house", size: 24 }),
                         onClick() {
                           console.log("home");
                         },
                       }),
                       new Timeless.ui.MenuItemCore({
                         label: "More",
-                        icon: Timeless.icons.EllipsisOutlined({
-                          class: "w-4 h-4",
-                        }),
+                        icon: Icon({ name: "ellipsis", size: 24 }),
                         menu: new Timeless.ui.MenuCore({
                           items: [
                             new Timeless.ui.MenuItemCore({
@@ -726,9 +708,7 @@ export default function OverlayView() {
                       new Timeless.ui.MenuItemCore({
                         label: "Delete",
                         shortcut: "⌘⌫",
-                        icon: Timeless.icons.Trash2Outlined({
-                          class: "w-4 h-4",
-                        }),
+                        icon: Icon({ name: "trash-2", size: 24 }),
                         onClick() {
                           console.log("delete");
                         },
@@ -812,7 +792,7 @@ export default function OverlayView() {
                   class:
                     "flex items-center justify-center w-[300px] h-[150px] rounded-md border-2 border-dashed border-zinc-300 dark:border-zinc-700 text-sm text-zinc-500 select-none",
                 },
-                [Txt("Right click here")],
+                ["Right click here"],
               ),
             ]);
           })(),

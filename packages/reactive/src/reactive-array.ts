@@ -153,13 +153,16 @@ export function refArray<T>(
     to?: number;
   }) {
     for (let i = 0; i < deps.length; i += 1) {
-      console.log("[]reactive-array - notifiy", i, action);
+      console.log("[]reactive-array - notifiy", i, action, deps.length);
       const ctx = deps[i];
+      if (action.type === "refresh") {
+        if (ctx.onChange) {
+          ctx.onChange(_raw_value);
+        }
+        return;
+      }
       if (ctx.onPatch) {
         ctx.onPatch(action);
-      }
-      if (ctx.onChange) {
-        ctx.onChange(_raw_value);
       }
     }
   }
@@ -325,11 +328,14 @@ export function refArray<T>(
     slice(start?: number, end?: number) {
       return _raw_value.slice(start, end).map((item: any) => getProxy(item));
     },
-    indexOf(v: T, from_idx?: number) {
+    indexOf(v: T | Ref<T>, from_idx?: number) {
+      if (isRef(v)) {
+        return _raw_value.indexOf(v.value, from_idx);
+      }
       // First try direct reference lookup
-      const directIndex = _raw_value.indexOf(v, from_idx);
-      if (directIndex !== -1) {
-        return directIndex;
+      const idx = _raw_value.indexOf(v, from_idx);
+      if (idx !== -1) {
+        return idx;
       }
       // If not found, try registry-based lookup (for reused items with different references)
       if (typeof v === "object" && v !== null) {

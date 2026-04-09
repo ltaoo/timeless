@@ -100,13 +100,12 @@ export function Input(props: RadioProps & { store: RadioCore; id?: string }) {
       store.check();
     },
     onMounted(event) {
-      const $elm = (event as any).target as HTMLInputElement;
-      $elm.checked = !!store.state.checked;
-      events.push(
-        store.onStateChange(() => {
-          $elm.checked = !!store.state.checked;
-        }),
-      );
+      const $elm = event.target;
+      // events.push(
+      //   store.onStateChange(() => {
+      //     $elm.checked = !!store.state.checked;
+      //   }),
+      // );
       if (rest.onMounted) rest.onMounted(event);
     },
     onUnmounted() {

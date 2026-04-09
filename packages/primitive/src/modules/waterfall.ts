@@ -41,10 +41,8 @@ export function Root(
   return {
     t: "view",
     $elm: view$.$elm,
-    value: "",
-    children: [],
     state: {},
-    props: { style: {} },
+    children: [],
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -56,13 +54,13 @@ export function Root(
         props.onUnmounted();
       }
     },
-    render() {
-      const $elm = view$.render();
-      if (props.onMounted) {
-        props.onMounted({ target: $elm });
-      }
-      return $elm;
-    },
+    // render() {
+    //   const $elm = view$.render();
+    //   if (props.onMounted) {
+    //     props.onMounted({ target: $elm });
+    //   }
+    //   return $elm;
+    // },
   };
 }
 
@@ -91,10 +89,8 @@ export function Column(
   return {
     t: "view",
     $elm: view$.$elm,
-    value: "",
-    children: [],
     state: {},
-    props: { style: {} },
+    children: [],
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -106,13 +102,13 @@ export function Column(
         props.onUnmounted();
       }
     },
-    render() {
-      const $elm = view$.render();
-      if (props.onMounted) {
-        props.onMounted({ target: $elm });
-      }
-      return $elm;
-    },
+    // render() {
+    //   const $elm = view$.render();
+    //   if (props.onMounted) {
+    //     props.onMounted({ target: $elm });
+    //   }
+    //   return $elm;
+    // },
   };
 }
 
@@ -152,10 +148,8 @@ export function Cell(
   return {
     t: "view",
     $elm: view$.$elm,
-    value: "",
-    children: [],
     state: {},
-    props: { style: {} },
+    children: [],
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -167,12 +161,12 @@ export function Cell(
         props.onUnmounted();
       }
     },
-    render() {
-      const $elm = view$.render();
-      if (props.onMounted) {
-        props.onMounted({ target: $elm });
-      }
-      return $elm;
-    },
+    // render() {
+    //   const $elm = view$.render();
+    //   if (props.onMounted) {
+    //     props.onMounted({ target: $elm });
+    //   }
+    //   return $elm;
+    // },
   };
 }

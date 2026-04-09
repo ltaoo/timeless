@@ -32,7 +32,7 @@ done
 echo ""
 echo "Updated $COUNT packages to version $VERSION"
 
-echo ""
-echo "Building all packages..."
-pnpm build
-echo "Build complete."
+# echo ""
+# echo "Building all packages..."
+# pnpm build
+# echo "Build complete."

@@ -26,12 +26,16 @@ export default function HomePageView(props) {
     ]),
   });
 
+  props.view.onSubViewsChange((subviews) => {
+    console.log("[]index.js - subviews change", subviews, subviews.length);
+  });
+
   return View(
     {
       class: "h-full",
-      // onMounted() {
-      //   console.log("home/index.js mounted");
-      // },
+      onMounted() {
+        console.log("home/index.js mounted");
+      },
     },
     [
       SplitLayout({

@@ -88,19 +88,26 @@ function ApplicationRootView() {
     console.error(err);
   });
 
-  return Fragment({}, [
-    StandardSubViews({
-      view: root_view$,
-      views,
-      history: history$,
-      app,
-      client: client$,
-      storage: storage$,
-      NotFound: NotFoundPageView,
-      ErrorFallback: ErrorFallbackView,
-    }),
-    // HistoryPanel({ store: history }),
-  ]);
+  return Fragment(
+    {
+      // onMounted() {
+      //   console.log("root fragment mounted");
+      // },
+    },
+    [
+      StandardSubViews({
+        view: root_view$,
+        views,
+        history: history$,
+        app,
+        client: client$,
+        storage: storage$,
+        NotFound: NotFoundPageView,
+        ErrorFallback: ErrorFallbackView,
+      }),
+      // HistoryPanel({ store: history }),
+    ],
+  );
 }
 
 document.addEventListener("DOMContentLoaded", function () {

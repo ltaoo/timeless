@@ -1,65 +1,52 @@
-import { isElement, TimelessElement } from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { DOMHostNode } from "./type";
 import { DOMView } from "./view";
 
-export interface DOMGrid {
-  $elm: HTMLDivElement;
-  getChildNodes(): ChildNode[];
-  isDocumentFragment(): boolean;
+export type DOMGrid = VNodeView<HTMLDivElement> & {
+  t: "grid";
   render(elm: TimelessElement): HTMLDivElement;
-}
+};
 
 export function DOMGrid(props: {
-  build: (elm: TimelessElement) => DOMHostNode;
+  build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
 }): DOMGrid {
   const view$ = DOMView(props);
 
   return {
-    get $elm() {
-      return view$.$elm;
-    },
-    getChildNodes() {
-      return [];
+    t: "grid",
+    getType() {
+      return "view";
     },
     isDocumentFragment() {
       return false;
     },
+    setStyle: view$.setStyle,
+    setStyleValue: view$.setStyleValue,
+    setStyleSet: view$.setStyleSet,
+    setAttribute: view$.setAttribute,
+    removeAttribute: view$.removeAttribute,
+    addEventListener: view$.addEventListener,
+    removeEventListener: view$.removeEventListener,
+    getBoundingClientRect: view$.getBoundingClientRect,
     render(elm: TimelessElement) {
-      const $elm = view$.$elm;
-      if (elm.props) {
-        const cols = (elm.props as any).columns ?? 4;
-        const gap = (elm.props as any).gap ?? 16;
+      const $elm = view$.render(elm);
+      if (elm.state) {
+        const cols = elm.state.columns ?? 4;
+        const gap = elm.state.gap ?? 16;
         $elm.style.display = "grid";
         $elm.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
         $elm.style.gap = `${gap}px`;
       }
-      if (elm.children) {
-        for (let child of elm.children) {
-          if (!child) {
-            continue;
-          }
-          if (isElement(child)) {
-            const $sub = props.build(child);
-            if (!$sub) {
-              continue;
-            }
-            if ($sub.$elm) {
-              $elm.appendChild($sub.$elm);
-            }
-          }
-        }
-      }
       return $elm;
     },
+    getChildren: view$.getChildren,
+    appendChildren: view$.appendChildren,
+    insertChildren: view$.insertChildren,
+    removeChildren: view$.removeChildren,
+    getParent: view$.getParent,
   };
 }
 
 export function isDOMGrid(value: any): value is DOMGrid {
-  return (
-    value &&
-    typeof value === "object" &&
-    typeof value.isDocumentFragment === "function" &&
-    typeof value.render === "function"
-  );
+  return value.t === "grid";
 }

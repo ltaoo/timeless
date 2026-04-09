@@ -7,7 +7,6 @@ import HomeIndexPageView from "@/pages/home/index.js";
 import HomeIndexGeneralView from "@/pages/home/index.general.js";
 import AdminLayoutView from "@/pages/admin/layout.js";
 
-console.log("init");
 ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
 InputPrimitive.setInputProvider(Timeless.web);
 TextareaPrimitive.setTextareaProvider(Timeless.web);

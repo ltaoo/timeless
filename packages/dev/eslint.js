@@ -98,7 +98,6 @@ export const globals = {
   Transition: "readonly",
   Txt: "readonly",
   Use: "readonly",
-  VNode: "readonly",
   VideoPlayerPrimitive: "readonly",
   View: "readonly",
   WaterfallPrimitive: "readonly",

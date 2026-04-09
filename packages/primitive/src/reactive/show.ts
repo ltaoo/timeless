@@ -2,6 +2,7 @@ import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { ViewChildren, isElement } from "@/content/type";
 import { safeCreateTextNode } from "@/util/env";
+import { MountedEvent } from "@/event";
 
 type ShowProps = {
   when:
@@ -34,7 +35,7 @@ export function Show(props: ShowProps) {
       }
       return [children];
     },
-    get_children_with_condition(condition: boolean) {
+    build_children_with_condition(condition: boolean) {
       const next = condition
         ? methods.normalize(props.ok())
         : props.else
@@ -57,19 +58,19 @@ export function Show(props: ShowProps) {
             }
             state.value = condition;
             if (!condition) {
-              if ($elm && typeof $elm.removeContent === "function") {
-                $elm.removeContent();
+              if ($elm && typeof $elm.removeChildren === "function") {
+                $elm.removeChildren();
                 // _current_nodes = [];
                 state.children = [];
               }
             } else {
-              const target = methods.get_children_with_condition(condition);
+              const target = methods.build_children_with_condition(condition);
               if (
                 $elm &&
                 target.length > 0 &&
-                typeof $elm.addContent === "function"
+                typeof $elm.insertChildren === "function"
               ) {
-                $elm.addContent(target);
+                $elm.insertChildren(target);
                 state.children = target;
               }
             }
@@ -81,7 +82,7 @@ export function Show(props: ShowProps) {
     },
   };
   methods.setup_value_subscribe();
-  methods.get_children_with_condition(state.value);
+  methods.build_children_with_condition(state.value);
 
   return {
     t: "show",
@@ -95,14 +96,6 @@ export function Show(props: ShowProps) {
     state,
     children: state.children,
     props: state.props,
-    cleanup() {
-      // console.log("[Show] cleanup called");
-      // 清理当前挂载的所有内容
-      if (typeof $elm?.removeContent === "function") {
-        $elm.removeContent();
-        state.children = [];
-      }
-    },
     render() {
       const condition = isRef(when) ? !!when.value : !!when;
       state.value = condition;
@@ -112,7 +105,7 @@ export function Show(props: ShowProps) {
         $elm = safeCreateTextNode("");
       }
 
-      const target = methods.get_children_with_condition(condition);
+      const target = methods.build_children_with_condition(condition);
       state.children = target;
 
       // 如果宿主不支持，返回 anchor
@@ -126,9 +119,7 @@ export function Show(props: ShowProps) {
       if (!$elm) {
         $elm = safeCreateTextNode("");
       }
-
-      const targetChildren = methods.get_children_with_condition(condition);
-
+      const targetChildren = methods.build_children_with_condition(condition);
       // 调用宿主层方法进行 hydrate
       if (typeof $elm.hydrateContent === "function") {
         return $elm.hydrateContent(
@@ -146,8 +137,15 @@ export function Show(props: ShowProps) {
       // 如果宿主不支持，返回 anchor
       return $elm;
     },
+    onMounted(event: MountedEvent) {
+      if (onMounted) {
+        onMounted(event);
+      }
+    },
     beforeUnmounted() {
-      if (beforeUnmounted) beforeUnmounted();
+      if (beforeUnmounted) {
+        beforeUnmounted();
+      }
       for (const child of state.children) {
         if (isElement(child) && child.beforeUnmounted) {
           child.beforeUnmounted();
@@ -158,10 +156,10 @@ export function Show(props: ShowProps) {
       if (onUnmounted) {
         onUnmounted();
       }
-      if (typeof $elm?.removeContent === "function") {
-        $elm.removeContent();
-        state.children = [];
+      if ($elm && typeof $elm.removeChildren === "function") {
+        $elm.removeChildren();
       }
+      state.children = [];
     },
   };
 }

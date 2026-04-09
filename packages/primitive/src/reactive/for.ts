@@ -67,10 +67,10 @@ export function For<T>(props: ForProps<T>) {
     //   return { node: vnode, elm, trackElm: elm };
     // }
 
-    if (isElement(res)) {
-      const elm = res.render();
-      return { node: res, elm, trackElm: res.$elm };
-    }
+    // if (isElement(res)) {
+    //   const elm = res.render();
+    //   return { node: res, elm, trackElm: res.$elm };
+    // }
 
     return { node: null, elm: null, trackElm: null, empty: true };
   };
@@ -184,42 +184,42 @@ export function For<T>(props: ForProps<T>) {
 
       // No need to manually update computed indexes - they auto-recompute
     },
-    update(index: number, item: any) {
-      // const $parent = host.getParentNode(anchor);
-      const $parent = $anchor.getParentNode();
-      if (!$parent) return;
+    // update(index: number, item: any) {
+    //   // const $parent = host.getParentNode(anchor);
+    //   const $parent = $anchor.getParentNode();
+    //   if (!$parent) return;
 
-      // Reuse existing computed index or create new one
-      let idxComputed = _index_computed[index];
-      if (!idxComputed) {
-        idxComputed = create_idx(item);
-        _index_computed[index] = idxComputed;
-        _original_items[index] = item;
-      }
-      const res = methods.render_item(item, idxComputed);
-      if (!res) {
-        return;
-      }
-      if (res.delete) {
-        return;
-      }
-      const old = _$children[index];
-      const $pa = old.getParentNode();
-      if (old && $pa === $parent && res.elm) {
-        // host.replaceChild($parent, res.elm, old);
-        $parent.replaceChild(res.elm, old);
-      } else if (res.elm) {
-        // host.insertBefore($parent, res.elm, anchor);
-        $parent.insertBefore(res.elm, $anchor);
-      }
-      const prev_item = state.items[index];
-      if (prev_item !== item && _existing_map.has(prev_item)) {
-        _existing_map.delete(prev_item);
-      }
-      state.items[index] = item;
-      _elements[index] = res.node;
-      _$children[index] = res.elm;
-    },
+    //   // Reuse existing computed index or create new one
+    //   let idxComputed = _index_computed[index];
+    //   if (!idxComputed) {
+    //     idxComputed = create_idx(item);
+    //     _index_computed[index] = idxComputed;
+    //     _original_items[index] = item;
+    //   }
+    //   const res = methods.render_item(item, idxComputed);
+    //   if (!res) {
+    //     return;
+    //   }
+    //   if (res.delete) {
+    //     return;
+    //   }
+    //   const old = _$children[index];
+    //   const $pa = old.getParentNode();
+    //   if (old && $pa === $parent && res.elm) {
+    //     // host.replaceChild($parent, res.elm, old);
+    //     $parent.replaceChild(res.elm, old);
+    //   } else if (res.elm) {
+    //     // host.insertBefore($parent, res.elm, anchor);
+    //     $parent.insertBefore(res.elm, $anchor);
+    //   }
+    //   const prev_item = state.items[index];
+    //   if (prev_item !== item && _existing_map.has(prev_item)) {
+    //     _existing_map.delete(prev_item);
+    //   }
+    //   state.items[index] = item;
+    //   _elements[index] = res.node;
+    //   _$children[index] = res.elm;
+    // },
     /** 将元素从 from 位置移动到 to 位置（splice 语义） */
     move(from: number, to: number) {
       const splice_arr = (arr: any[]) => {
@@ -464,9 +464,9 @@ export function For<T>(props: ForProps<T>) {
         if (action.type === "delete" && action.deleteCount !== undefined) {
           methods.remove(action.index, action.deleteCount);
         }
-        if (action.type === "update") {
-          methods.update(action.index, action.item);
-        }
+        // if (action.type === "update") {
+        //   methods.update(action.index, action.item);
+        // }
         if (
           action.type === "move" &&
           action.from !== undefined &&
@@ -521,9 +521,8 @@ export function For<T>(props: ForProps<T>) {
     set $elm(v) {
       $elm = v;
     },
-    value: "",
-    children: state.children,
     state,
+    children: state.children,
     render() {
       return $elm;
     },
@@ -560,18 +559,18 @@ export function For<T>(props: ForProps<T>) {
           if (cur_dom && typeof (res as any).hydrate === "function") {
             (res as any).hydrate(cur_dom);
             _$children[i] = res.$elm;
-            const $sibling = (() => {
-              if (res.$elm) {
-                return res.$elm.getNextSibling();
-              }
-              return cur_dom.getNextSibling();
-            })();
-            cur_dom = $sibling;
+            // const $sibling = (() => {
+            //   if (res.$elm) {
+            //     return res.$elm.getNextSibling();
+            //   }
+            //   return cur_dom.getNextSibling();
+            // })();
+            // cur_dom = $sibling;
           } else if (cur_dom) {
             res.$elm = cur_dom;
-            res.render();
-            _$children[i] = res.$elm;
-            cur_dom = cur_dom.getNextSibling();
+            // res.render();
+            // _$children[i] = res.$elm;
+            // cur_dom = cur_dom.getNextSibling();
           }
         }
       }
@@ -615,6 +614,11 @@ export function For<T>(props: ForProps<T>) {
       if (onMounted) {
         onMounted(event);
       }
+      // for (const child of state.children) {
+      //   if (isElement(child) && child.onMounted) {
+      //     child.onMounted({ target: child.$elm });
+      //   }
+      // }
     },
     beforeUnmounted() {
       if (beforeUnmounted) {
@@ -640,8 +644,8 @@ export function For<T>(props: ForProps<T>) {
       }
 
       // Remove DOM nodes
-      if ($elm && $elm.removeContent) {
-        $elm.removeContent();
+      if ($elm && $elm.removeChildren) {
+        $elm.removeChildren();
       }
       // const $parent = host.getParentNode(anchor);
       // const $parent = $anchor.getParentNode();

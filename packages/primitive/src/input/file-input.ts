@@ -17,6 +17,7 @@ export function FileSelect(props: FileSelectProps = {}) {
     props;
 
   let $elm: any = null;
+  const state = {};
   // return Input({
   //   ...(rest as any),
   //   type: "file",
@@ -42,6 +43,8 @@ export function FileSelect(props: FileSelectProps = {}) {
     set $elm(value: any) {
       $elm = value;
     },
+    state,
+    children: [],
     onMounted(event: MountedEvent) {
       if (props.onMounted) {
         props.onMounted(event);

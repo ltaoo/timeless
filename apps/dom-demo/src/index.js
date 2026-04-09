@@ -50,7 +50,7 @@ function ApplicationView() {
   const focused = ref({ x: 0, y: 0 });
   const keyword_ = ref("");
   const todo_ = ref("");
-  const todos = refarr([
+  const todos_ = refarr([
     {
       id: 1,
       title: "Buy groceries",
@@ -188,28 +188,28 @@ function ApplicationView() {
       },
     },
     [
-      Show({
-        when: visible_,
-        ok() {
-          return Fragment(
-            {
-              onMounted() {
-                console.log("[fragment] hello wrap onMounted");
-              },
-            },
-            [
-              View(
-                {
-                  onMounted() {
-                    console.log("[hello] onMounted");
-                  },
-                },
-                ["Hello"],
-              ),
-            ],
-          );
-        },
-      }),
+      // Show({
+      //   when: visible_,
+      //   ok() {
+      //     return Fragment(
+      //       {
+      //         onMounted() {
+      //           console.log("[fragment] hello wrap onMounted");
+      //         },
+      //       },
+      //       [
+      //         View(
+      //           {
+      //             onMounted() {
+      //               console.log("[hello] onMounted");
+      //             },
+      //           },
+      //           ["Hello"],
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // }),
       // View(
       //   {
       //     style: styleNames([
@@ -240,19 +240,20 @@ function ApplicationView() {
             console.log("[Button] onMounted");
           },
           onClick() {
-            visible_.as((prev) => {
-              return !prev;
-            });
-            // const v = todo_.value;
-            // todo_.as("");
-            // if (!v) {
-            //   return;
-            // }
-            // todos.push({
-            //   id: todos.length,
-            //   completed: false,
-            //   title: v,
+            // visible_.as((prev) => {
+            //   return !prev;
             // });
+            const v = todo_.value;
+            todo_.as("");
+            if (!v) {
+              alert("must input todo");
+              return;
+            }
+            todos_.push({
+              id: todos_.length,
+              completed: false,
+              title: v,
+            });
           },
         },
         ["Add Todo"],
@@ -265,8 +266,8 @@ function ApplicationView() {
               return;
             }
             todo_.as("");
-            todos.unshift({
-              id: todos.length,
+            todos_.unshift({
+              id: todos_.length,
               completed: false,
               title: v,
             });
@@ -277,7 +278,7 @@ function ApplicationView() {
       Button(
         {
           onClick() {
-            todos.as([
+            todos_.as([
               {
                 id: 2,
                 title: "Study for exam exam exam",
@@ -300,47 +301,62 @@ function ApplicationView() {
       ),
       For({
         key: "id",
-        each: todos,
+        each: todos_,
         render(todo, idx) {
-          return View(
-            {
-              style: {
-                display: "flex",
-              },
+          return Show({
+            onMounted() {
+              console.log("show mounted");
             },
-            [
-              Checkbox({
-                checked: computed(todo, (t) => t.completed),
-                onChange(event) {
-                  const todo$ = getobj(todo);
-                  if (todo$) {
-                    todo$.set("completed", event.target.checked);
-                  }
-                },
-              }),
-              // idx,
-              View(
+            when: computed(todo, (t) => !t.completed),
+            ok() {
+              return View(
                 {
                   style: {
                     color: "#fff",
-                    "text-decoration": computed(todo, (t) =>
-                      t.completed ? "line-through" : "none",
-                    ),
                   },
                 },
                 [computed(todo, (t) => t.title)],
-              ),
-              View(
-                {
-                  class: "icon",
-                  onClick() {
-                    todos.remove(todo);
-                  },
-                },
-                [Icon({ name: "trash", color: "#fff", size: 16 })],
-              ),
-            ],
-          );
+              );
+            },
+          });
+          // return View(
+          //   {
+          //     style: {
+          //       display: "flex",
+          //     },
+          //   },
+          //   [
+          //     Checkbox({
+          //       checked: computed(todo, (t) => t.completed),
+          //       onChange(event) {
+          //         const todo$ = getobj(todo);
+          //         if (todo$) {
+          //           todo$.set("completed", event.target.checked);
+          //         }
+          //       },
+          //     }),
+          //     View(
+          //       {
+          //         style: {
+          //           color: "#fff",
+          //           "text-decoration": computed(todo, (t) =>
+          //             t.completed ? "line-through" : "none",
+          //           ),
+          //         },
+          //       },
+          //       [idx, " ", computed(todo, (t) => t.title)],
+          //     ),
+          //     View(
+          //       {
+          //         class: "icon",
+          //         onClick() {
+          //           todos_.remove(todo);
+          //         },
+          //       },
+          //       [Icon({ name: "trash", color: "#fff", size: 16 })],
+          //     ),
+          //   ],
+          // );
         },
         onMounted() {
           console.log("[Todo For] onMounted");
@@ -387,46 +403,69 @@ function ApplicationView() {
       // ]),
       // Show({
       //   when: visible_,
+      //   onMounted() {
+      //     console.log("[Show] onMounted");
+      //   },
+      //   onUnmounted() {
+      //     console.log("[Show] onUnmounted");
+      //   },
       //   ok() {
-      //     return Portal({}, [
-      //       Popper(
-      //         {
-      //           placement: "top",
-      //           strategy: "absolute",
-      //           x: computed(popper_, (t) => t.x),
-      //           y: computed(popper_, (t) => t.y),
-      //           placed: computed(popper_, (t) => t.placed),
+      //     return Portal(
+      //       {
+      //         onMounted() {
+      //           console.log("[Portal in Show] onMounted");
       //         },
-      //         [
-      //           View(
-      //             {
-      //               style: {
-      //                 "background-color": "#fff",
-      //               },
-      //               onMounted(event) {
-      //                 console.log("[Popper] onMounted", event.target);
-      //                 const { x, y, width, height } =
-      //                   event.target.getBoundingClientRect();
-      //                 dissmissable$.addIgnore({
-      //                   x,
-      //                   y,
-      //                   width,
-      //                   height,
-      //                 });
-      //               },
+      //         onUnmounted() {
+      //           console.log("[Portal in Show] onUnmounted");
+      //         },
+      //       },
+      //       [
+      //         Popper(
+      //           {
+      //             placement: "top",
+      //             strategy: "absolute",
+      //             x: computed(popper_, (t) => t.x),
+      //             y: computed(popper_, (t) => t.y),
+      //             placed: computed(popper_, (t) => t.placed),
+      //             onMounted() {
+      //               console.log("[Popper in Portal] onMounted");
       //             },
-      //             [
-      //               View({}, ["first content in body"]),
-      //               View({}, ["second content in body"]),
-      //             ],
-      //           ),
-      //         ],
-      //       ),
-      //     ]);
+      //             onUnmounted() {
+      //               console.log("[Popper in Portal] onUnmounted");
+      //             },
+      //           },
+      //           [
+      //             View(
+      //               {
+      //                 style: {
+      //                   "background-color": "#fff",
+      //                 },
+      //                 onMounted(event) {
+      //                   console.log("[View in Popper] onMounted", event.target);
+      //                   const { x, y, width, height } =
+      //                     event.target.getBoundingClientRect();
+      //                   dissmissable$.addIgnore({
+      //                     x,
+      //                     y,
+      //                     width,
+      //                     height,
+      //                   });
+      //                 },
+      //                 onUnmounted() {
+      //                   console.log("[View in Popper] onUnmounted");
+      //                 },
+      //               },
+      //               [
+      //                 View({}, ["first content in body"]),
+      //                 View({}, ["second content in body"]),
+      //               ],
+      //             ),
+      //           ],
+      //         ),
+      //       ],
+      //     );
       //   },
       // }),
-
-      // Icon({ name: "bolt", color: "#fff" }),
       // View(
       //   {
       //     style: {

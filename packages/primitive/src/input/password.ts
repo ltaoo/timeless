@@ -6,6 +6,7 @@ export interface PasswordInputProps {
 
 export function PasswordInput(props: PasswordInputProps) {
   let $elm: any = null;
+  const state = {};
   // return Input({
   //   ...(props as any),
   //   type: "password",
@@ -18,6 +19,8 @@ export function PasswordInput(props: PasswordInputProps) {
     set $elm(value: any) {
       $elm = value;
     },
+    state,
+    children: [],
     onMounted(event: MountedEvent) {
       if (props.onMounted) {
         props.onMounted(event);

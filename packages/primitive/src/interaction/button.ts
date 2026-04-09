@@ -499,36 +499,9 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
     set $elm(v) {
       $elm = v;
     },
-    value: "",
-    children: state.children,
     state,
-    props: state.props,
+    children: state.children,
     events: state.events,
-    render() {
-      if (state.rendered) {
-        return $elm;
-      }
-      state.rendered = true;
-      // Create element if not already created
-      methods.normalize_children(children);
-      methods.setup_reactive_props_bindings();
-
-      if (onMounted) {
-        const cleanup = onMounted({ target: $elm });
-        if (typeof cleanup === "function") {
-          onMountedCleanup = cleanup;
-        }
-      }
-      for (let i = 0; i < state.children.length; i += 1) {
-        const node = state.children[i];
-        if (isElement(node)) {
-          if (node.onMounted) {
-            node.onMounted({ target: node.$elm });
-          }
-        }
-      }
-      return $elm;
-    },
     hydrate(existingDom: any) {
       if (state.rendered) {
         return $elm;
@@ -561,25 +534,25 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
             (node as any).hydrate(childDom, $elm);
             if (childDom) {
               // childDom = host.getNextSibling(node.$elm || childDom);
-              if (node.$elm) {
-                childDom = node.$elm.getNextSibling();
-              } else if (childDom) {
-                childDom = childDom.getNextSibling();
-              }
+              // if (node.$elm) {
+              //   childDom = node.$elm.getNextSibling();
+              // } else if (childDom) {
+              //   childDom = childDom.getNextSibling();
+              // }
             }
           } else if (childDom) {
             // Fallback: just assign $elm and setup
             node.$elm = childDom;
-            node.render();
+            // node.render();
             // childDom = host.getNextSibling(childDom);
             childDom = childDom.getNextSibling();
           } else {
             // childDom 为 null 时，直接 render 并插入
-            const result = node.render();
-            if (result) {
-              // host.appendChild($elm, result);
-              $elm.appendChild(result);
-            }
+            // const result = node.render();
+            // if (result) {
+            //   // host.appendChild($elm, result);
+            //   $elm.appendChild(result);
+            // }
           }
         }
       }
@@ -617,35 +590,26 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
       //   "[View] onUnmounted called, children count:",
       //   _children.length,
       // );
-      if (onMountedCleanup) {
-        // console.log("[View] calling onMounted cleanup function");
-        onMountedCleanup();
-      }
       if (props.onUnmounted) {
-        // console.log("[View] calling props.onUnmounted");
         props.onUnmounted();
       }
-      for (const fn of listenerCleanups) {
-        fn();
-      }
-      listenerCleanups.length = 0;
-      for (let i = 0; i < state.children.length; i += 1) {
-        const node = state.children[i];
-        if (isElement(node)) {
-          // 如果是 Portal 组件，调用其 cleanup 方法
-          if (node.t === "portal" && typeof node.cleanup === "function") {
-            // console.log("[View] calling cleanup on Portal child");
-            node.cleanup();
-          } else if (node.onUnmounted) {
-            // 否则调用标准的 onUnmounted
-            // console.log("[View] calling onUnmounted on child:", node.t);
-            node.onUnmounted();
-          }
-        }
-      }
+      // for (let i = 0; i < state.children.length; i += 1) {
+      //   const node = state.children[i];
+      //   if (isElement(node)) {
+      //     // 如果是 Portal 组件，调用其 cleanup 方法
+      //     if (node.t === "portal" && typeof node.cleanup === "function") {
+      //       // console.log("[View] calling cleanup on Portal child");
+      //       node.cleanup();
+      //     } else if (node.onUnmounted) {
+      //       // 否则调用标准的 onUnmounted
+      //       // console.log("[View] calling onUnmounted on child:", node.t);
+      //       node.onUnmounted();
+      //     }
+      //   }
+      // }
       // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
       // host.clearChildren($elm);
-      $elm.removeContent();
+      // $elm.removeChildren();
       // console.log("[View] onUnmounted completed");
 
       // Reset state for potential re-render (e.g., when Show toggles when back to true)

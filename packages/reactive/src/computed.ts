@@ -70,6 +70,10 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
   })();
 
   _computed_ref.subscribe({
+    onPatch() {
+      _local_value = fn(_computed_ref.value);
+      notify({ type: "refresh" });
+    },
     onChange() {
       // console.log("computed ref is changed");
       _local_value = fn(_computed_ref.value);

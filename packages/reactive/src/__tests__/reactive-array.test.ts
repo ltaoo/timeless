@@ -77,6 +77,13 @@ describe("RefArray", () => {
       expect(newLength).toBe(4);
       expect(arr.value).toEqual([1, 2, 3, 4]);
     });
+
+    it("should preserve reference after unshift", () => {
+      const arr = refArray([{ id: 1 }, { id: 2 }]);
+      const v = arr.get(0)!;
+      arr.unshift({ id: 3 });
+      expect(arr.indexOf(v)).toBe(1);
+    });
   });
 
   describe("pop", () => {

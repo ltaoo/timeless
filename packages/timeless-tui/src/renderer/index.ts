@@ -13,30 +13,25 @@ export function build(
 ): TuiHostNode {
   if (elm.t === "view") {
     const view$ = TuiView({ build });
-    elm.$elm = view$;
     view$.render(elm);
     return view$;
   }
   if (elm.t === "text") {
-    const text$ = TuiText(elm.value as any);
-    elm.$elm = text$;
+    const text$ = TuiText(elm.state.value as any);
     return text$;
   }
   if (elm.t === "grid") {
     const grid$ = TuiGrid({ build });
-    elm.$elm = grid$;
     grid$.render(elm);
     return grid$;
   }
   if (elm.t === "show") {
     const show$ = TuiShow({ build });
-    elm.$elm = show$;
     show$.render(elm);
     return show$;
   }
   if (elm.t === "for") {
     const for$ = TuiFor({ build });
-    elm.$elm = for$;
     for$.render(elm);
     return for$;
   }

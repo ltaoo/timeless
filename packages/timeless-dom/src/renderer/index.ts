@@ -1,4 +1,4 @@
-import { type TimelessElement, isElement } from "@timeless/timeless";
+import { type TimelessElement, VNodeView, isElement } from "@timeless/timeless";
 
 import { DOMHostNode } from "@/host/type";
 import { DOMView, isDOMView } from "@/host/view";
@@ -19,110 +19,123 @@ import { DOMCheckbox } from "@/host/checkbox";
 import { DOMLabel } from "@/host/label";
 import { DOMTextarea } from "@/host/textarea";
 
-function build(elm: TimelessElement): DOMHostNode {
+function build(elm: TimelessElement): VNodeView<any> {
   if (elm.t === "view") {
     const view$ = DOMView({ build });
     elm.$elm = view$;
-    view$.render(elm);
+    // view$.render(elm);
     return view$;
   }
   if (elm.t === "text") {
-    // console.log("[]in build elm.t is text", elm.value);
-    const text$ = DOMText(elm.value as any);
+    const text$ = DOMText({ build });
     elm.$elm = text$;
+    // text$.render(elm);
     return text$;
   }
   if (elm.t === "label") {
     const label$ = DOMLabel({ build });
     elm.$elm = label$;
-    label$.render(elm);
+    // label$.render(elm);
     return label$;
   }
   if (elm.t === "fragment") {
     const fragment$ = DOMFragment({ build });
     elm.$elm = fragment$;
-    fragment$.render(elm);
+    // fragment$.render(elm);
     return fragment$;
   }
   if (elm.t === "lazy-view") {
     const lazyView$ = DOMLazyView({ build });
     elm.$elm = lazyView$;
-    lazyView$.render(elm);
+    // lazyView$.render(elm);
     return lazyView$;
   }
   if (elm.t === "popper") {
     const popper$ = DOMPopper({ build });
     elm.$elm = popper$;
-    popper$.render(elm);
+    // popper$.render(elm);
     return popper$;
   }
   if (elm.t === "icon") {
     const icon$ = DOMIcon({ build });
     elm.$elm = icon$;
-    icon$.render(elm);
+    // icon$.render(elm);
     return icon$;
   }
   if (elm.t === "img") {
     const img$ = DOMImg({ build });
     elm.$elm = img$;
-    img$.render(elm);
+    // img$.render(elm);
     return img$;
   }
   if (elm.t === "grid") {
     const grid$ = DOMGrid({ build });
     elm.$elm = grid$;
-    grid$.render(elm);
+    // grid$.render(elm);
     return grid$;
   }
   if (elm.t === "input") {
     const input$ = DOMInput({ build });
     elm.$elm = input$;
-    input$.render(elm);
+    // input$.render(elm);
     return input$;
   }
   if (elm.t === "textarea") {
     const textarea$ = DOMTextarea({ build });
     elm.$elm = textarea$;
-    textarea$.render(elm);
+    // textarea$.render(elm);
     return textarea$;
   }
   if (elm.t === "checkbox") {
     const checkbox$ = DOMCheckbox({ build });
     elm.$elm = checkbox$;
-    checkbox$.render(elm);
+    // checkbox$.render(elm);
     return checkbox$;
   }
   if (elm.t === "button") {
     const button$ = DOMButton({ build });
     elm.$elm = button$;
-    button$.render(elm);
+    // button$.render(elm);
     return button$;
   }
   if (elm.t === "portal") {
     const portal$ = DOMPortal({ build });
     elm.$elm = portal$;
-    portal$.render(elm);
+    // portal$.render(elm);
     return portal$;
   }
   if (elm.t === "show") {
     const show$ = DOMShow({ build });
     elm.$elm = show$;
-    show$.render(elm);
+    // show$.render(elm);
     return show$;
   }
   if (elm.t === "match") {
     const match$ = DOMMatch({ build });
     elm.$elm = match$;
-    match$.render(elm);
+    // match$.render(elm);
     return match$;
   }
   if (elm.t === "for") {
     const for$ = DOMFor({ build });
     elm.$elm = for$;
-    for$.render(elm);
+    // for$.render(elm);
     return for$;
   }
-  return null;
+  const view$ = DOMView({ build });
+  // view$.render({
+  //   t: "view",
+  //   $elm: null as any,
+  //   state: {},
+  //   children: [
+  //     {
+  //       t: "text",
+  //       $elm: null as any,
+  //       state: { value: "unkonwn elm" },
+  //     },
+  //   ],
+  // });
+  return view$;
 }
 
 /**
@@ -158,9 +171,13 @@ export function render(
       );
       return;
     }
-    $root.appendChild(host$.$elm);
+    const $elm = host$.render(elm);
+    if (!$elm) {
+      return;
+    }
+    $root.appendChild($elm);
     if (typeof elm.onMounted === "function") {
-      elm.onMounted({ target: host$.$elm });
+      elm.onMounted({ reason: "append to $root", target: $elm });
     }
     return;
   }

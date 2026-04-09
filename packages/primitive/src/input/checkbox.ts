@@ -312,8 +312,8 @@ export function Checkbox(props: CheckboxProps) {
     set $elm(value: any) {
       $elm = value;
     },
-    value: state.checked,
     state,
+    children: [],
     events,
     render() {
       return $elm;

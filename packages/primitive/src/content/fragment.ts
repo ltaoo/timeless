@@ -2,21 +2,21 @@ import { ViewProps } from "./view";
 import { Txt } from "./text";
 import { TimelessElement, ViewChildren, isElement } from "./type";
 import { MountedEvent } from "@/event";
+import { ListenerManager } from "@/util/listener";
 
+type FragmentState = {
+  rendered: boolean;
+  children: TimelessElement[];
+};
 export function Fragment(props: ViewProps, children: ViewChildren = []) {
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
-  let onMountedCleanup: (() => void) | undefined;
 
-  // 关联一个 宿主平台 节点
-  let $fragment: any = null;
-
-  const state: {
-    rendered: boolean;
-    children: TimelessElement[];
-  } = {
+  let $elm: any = null;
+  const state: FragmentState = {
     rendered: false,
     children: [],
   };
+  const listener$ = ListenerManager();
 
   // console.log("[Fragment] created with", _children.length, "children");
 
@@ -48,56 +48,30 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
   return {
     t: "fragment",
     get $elm() {
-      return $fragment;
+      return $elm;
     },
     set $elm(v) {
-      $fragment = v;
+      $elm = v;
     },
     state,
     children: state.children,
     append(node: any) {
       state.children.push(node);
     },
-    render() {
-      if (state.rendered) {
-        return $fragment;
-      }
-      state.rendered = true;
-
-      // Create fragment if not already created
-      // if (!$fragment) {
-      //   $fragment = safeCreateDocumentFragment();
-      // }
-
-      if (onMounted) {
-        const cleanup = onMounted({ target: $fragment as any });
-        if (typeof cleanup === "function") {
-          onMountedCleanup = cleanup;
-        }
-      }
-      for (let i = 0; i < state.children.length; i += 1) {
-        const node = state.children[i];
-        if (isElement(node)) {
-          if (node.onMounted) {
-            node.onMounted({ target: node.$elm });
-          }
-        }
-      }
-      return $fragment;
-    },
     onMounted(event: MountedEvent) {
       if (onMounted) {
         onMounted(event);
       }
       for (let i = 0; i < state.children.length; i += 1) {
-        const node = state.children[i];
-        if (isElement(node) && node.onMounted) {
-          node.onMounted(event);
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({
+            target: child.$elm,
+          });
         }
       }
     },
     beforeUnmounted() {
-      // console.log("[Fragment] beforeUnmounted");
       if (beforeUnmounted) {
         beforeUnmounted();
       }
@@ -109,11 +83,7 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       }
     },
     onUnmounted() {
-      // console.log("[Fragment] onUnmounted");
-      if (onMountedCleanup) {
-        onMountedCleanup();
-        onMountedCleanup = undefined;
-      }
+      listener$.clean();
       if (onUnmounted) {
         onUnmounted();
       }

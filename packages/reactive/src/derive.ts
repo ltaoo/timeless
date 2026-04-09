@@ -72,7 +72,7 @@ export function derive(deps: any, fn: any): DerivedRef<any> {
 
   dep_refs.forEach((ref) => {
     if (isRef(ref)) {
-      ref.subscribe({ onChange });
+      ref.subscribe({ onPatch: onChange, onChange });
     }
   });
 

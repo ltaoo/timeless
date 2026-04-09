@@ -60,26 +60,34 @@ function normalize_flow(flow: GridAutoFlow) {
   return flow;
 }
 
-export function Grid(
-  props: {
-    columns?: number | string;
-    rows?: number | string;
-    autoRows?: string;
-    autoCols?: string;
-    flow?: GridAutoFlow;
-    gap?: string;
-    gapX?: string;
-    gapY?: string;
-    alignItems?: GridAlign;
-    justifyItems?: GridAlign;
-    alignContent?: GridJustify;
-    justifyContent?: GridJustify;
-    placeItems?: string;
-    placeContent?: string;
-    class?: string | Ref<string> | ClassNameRef;
-  } & ViewProps,
-  children?: ViewChildren,
-) {
+type GridProps = {
+  columns?: number | string;
+  rows?: number | string;
+  autoRows?: string;
+  autoCols?: string;
+  flow?: GridAutoFlow;
+  gap?: string;
+  gapX?: string;
+  gapY?: string;
+  alignItems?: GridAlign;
+  justifyItems?: GridAlign;
+  alignContent?: GridJustify;
+  justifyContent?: GridJustify;
+  placeItems?: string;
+  placeContent?: string;
+  class?: string | Ref<string> | ClassNameRef;
+} & ViewProps;
+type GridState = {
+  columns: number;
+  rows: number;
+  gap: string;
+  alignItems: GridAlign;
+  justifyItems: GridAlign;
+  alignContent: GridJustify;
+  justifyContent: GridJustify;
+};
+
+export function Grid(props: GridProps, children?: ViewChildren) {
   const {
     columns = 24,
     rows,
@@ -100,6 +108,15 @@ export function Grid(
     ...rest
   } = props;
 
+  const state: GridState = {
+    columns: 0,
+    rows: 0,
+    gap: "",
+    alignItems: "start",
+    justifyItems: "start",
+    alignContent: "start",
+    justifyContent: "start",
+  };
   const baseStyle: Record<string, any> = { display: "grid" };
 
   if (columns !== undefined) {

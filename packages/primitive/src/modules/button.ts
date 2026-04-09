@@ -20,9 +20,6 @@ export function Root(
         if (rest.onClick) rest.onClick(e);
         store.click();
       },
-      onUnmounted() {
-        if (rest.onUnmounted) rest.onUnmounted();
-      },
     },
     children,
   );
@@ -33,8 +30,8 @@ export function Loading(
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
+
   const state = ref(store.state);
-  const events: any[] = [];
 
   return Show({
     when: computed(state, (d) => d.loading),
@@ -42,14 +39,9 @@ export function Loading(
       return children || [];
     },
     onMounted() {
-      events.push(
-        store.onStateChange(() => {
-          state.as(store.state);
-        }),
-      );
-    },
-    onUnmounted() {
-      for (const fn of events) if (typeof fn === "function") fn();
+      return store.onStateChange(() => {
+        state.as(store.state);
+      });
     },
   });
 }

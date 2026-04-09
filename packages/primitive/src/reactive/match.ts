@@ -89,16 +89,19 @@ export function Match(props: MatchProps) {
             methods.cleanup_old_children();
 
             // 移除旧内容
-            if (typeof $elm.removeContent === "function") {
-              $elm.removeContent();
+            if (typeof $elm.removeChildren === "function") {
+              $elm.removeChildren();
             }
 
             // 获取新内容
             const target = methods.get_children_with_value(value);
 
             // 添加新内容
-            if (target.length > 0 && typeof $elm.addContent === "function") {
-              $elm.addContent(target);
+            if (
+              target.length > 0 &&
+              typeof $elm.insertChildren === "function"
+            ) {
+              $elm.insertChildren(target);
             } else {
               state.children = [];
             }
@@ -167,8 +170,8 @@ export function Match(props: MatchProps) {
     },
     cleanup() {
       methods.cleanup_old_children();
-      if (typeof $elm?.removeContent === "function") {
-        $elm.removeContent();
+      if (typeof $elm?.removeChildren === "function") {
+        $elm.removeChildren();
         state.children = [];
       }
     },
@@ -186,8 +189,8 @@ export function Match(props: MatchProps) {
       if (onUnmounted) {
         onUnmounted();
       }
-      if (typeof $elm?.removeContent === "function") {
-        $elm.removeContent();
+      if ($elm && typeof $elm.removeChildren === "function") {
+        $elm.removeChildren();
         state.children = [];
       }
     },

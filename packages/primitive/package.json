@@ -1,6 +1,6 @@
 {
   "name": "@timeless/primitive",
-  "version": "0.14.2",
+  "version": "0.14.4",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -164,11 +164,6 @@
       "types": "./dist/popper/index.d.ts",
       "import": "./dist/popper/index.esm.js",
       "require": "./dist/popper/index.js"
-    },
-    "./portal": {
-      "types": "./dist/portal/index.d.ts",
-      "import": "./dist/portal/index.esm.js",
-      "require": "./dist/portal/index.js"
     },
     "./presence": {
       "types": "./dist/presence/index.d.ts",

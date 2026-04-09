@@ -1,15 +1,15 @@
 import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
-import {
-  viewStyleToCssText,
-  isClassNameRef,
-  isStyleRef,
-  ViewStyleProperties,
-} from "@/style";
+import { isClassNameRef, RawViewStyleProperties } from "@/style";
 import { MountedEvent } from "@/event/index";
+import { ListenerManager } from "@/util/listener";
 
-export interface ImgProps extends Omit<ViewProps, "type" | "as"> {
+export interface ImgProps {
+  style: ViewProps["style"];
+  class: ViewProps["class"];
+  dataset: ViewProps["dataset"];
+  attributes: ViewProps["attributes"];
   src?: string | DerivedRef<string> | Ref<string>;
   alt?: string | DerivedRef<string> | Ref<string>;
   width?: number | string | DerivedRef<number | string> | Ref<number | string>;
@@ -31,9 +31,17 @@ export interface ImgProps extends Omit<ViewProps, "type" | "as"> {
   onLoad?(e: Event): void;
   onError?(e: Event): void;
   onMounted?(event: MountedEvent<HTMLImageElement>): void | (() => void);
+  beforeUnmounted?: () => void;
+  onUnmounted?: () => void;
 }
+export type ImgState = {
+  rendered: boolean;
+  src: string | null;
+  style: RawViewStyleProperties;
+  styleSet: string[];
+};
 
-export function Img(props: ImgProps = {}) {
+export function Img(props: ImgProps) {
   // const host = getHost();
   const {
     style,
@@ -65,12 +73,39 @@ export function Img(props: ImgProps = {}) {
     ...rest
   } = props as ImgProps & Record<string, any>;
 
-  let onMountedCleanup: (() => void) | undefined;
-  const listenerCleanups: (() => void)[] = [];
-
   let $elm: any = null;
-  let rendered = false;
-  // const $elm = safeCreateElement("img") as unknown as HTMLImageElement;
+  const state: ImgState = {
+    rendered: false,
+    src: null,
+    style: {},
+    styleSet: [],
+  };
+  const events = {
+    onClick,
+    onDoubleClick,
+    onLongPress,
+    onFocus,
+    onBlur,
+    onPointerDown,
+    onKeyDown,
+    onMouseEnter,
+    onMouseLeave,
+    onDragStart,
+    onDrag,
+    onDragEnd,
+    onDragEnter,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+    draggable,
+    isMap,
+    onLoad,
+    onError,
+    onMounted,
+    onUnmounted,
+    beforeUnmounted,
+  };
+  const listener$ = ListenerManager();
 
   const methods = {
     apply_attr(k: string, v: any) {
@@ -101,15 +136,13 @@ export function Img(props: ImgProps = {}) {
       handler: (event: any) => void,
       options?: any,
     ) {
-      // host.addEventListener(target, type, handler, options);
       target.addEventListener(type, handler, options);
-      listenerCleanups.push(() => {
-        // host.removeEventListener(target, type, handler, options);
+      listener$.push(function () {
         target.removeEventListener(type, handler, options);
       });
     },
 
-    setup_reactive_props_bindings() {
+    setup_value_subscribe() {
       const attributes = props.attributes ?? {};
       if (attributes) {
         Object.keys(attributes).forEach((k) => {
@@ -145,12 +178,26 @@ export function Img(props: ImgProps = {}) {
         }
         methods.apply_attr(attrName, vv);
       });
-
+      if (props.src) {
+        if (isRef(props.src)) {
+          state.src = props.src.value;
+          props.src.subscribe({
+            onChange(v: any) {
+              state.src = v;
+              if ($elm && $elm.setSrc) {
+                $elm.setSrc(v);
+              }
+            },
+          });
+        } else {
+          state.src = props.src;
+        }
+      }
       if (cls) {
         if (typeof cls === "string") {
           // host.setClassName($elm, cls);
           // $elm.setStyleSet(cls);
-          state.props.styleSet = [cls];
+          state.styleSet = [cls];
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
@@ -162,7 +209,7 @@ export function Img(props: ImgProps = {}) {
           });
           // host.setClassName($elm, cls.value);
           // $elm.setStyleSet(cls.value);
-          state.props.styleSet = [cls.value];
+          state.styleSet = [cls.value];
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
@@ -174,32 +221,32 @@ export function Img(props: ImgProps = {}) {
           });
           // host.setClassName($elm, cls.toString());
           // $elm.setStyleSet(cls.toString());
-          state.props.styleSet = cls.toString().split(" ");
+          state.styleSet = cls.toString().split(" ");
         } else {
-          state.props.styleSet = [];
+          state.styleSet = [];
         }
       }
       if (style) {
         (() => {
           if (isRef(style)) {
-            state.props.style = style.value || {};
-            style.subscribe({
-              onChange() {
-                state.props.style = {
-                  ...state.props.style,
-                  ...(style.value || {}),
-                };
-                if ($elm && typeof $elm.setStyle === "function") {
-                  $elm.setStyle(state.props.style);
-                }
-              },
-            });
+            state.style = style.value as RawViewStyleProperties;
+            // style.subscribe({
+            //   onChange() {
+            //     state.style = {
+            //       ...state.style,
+            //       ...(style.value || {}),
+            //     };
+            //     if ($elm && typeof $elm.setStyle === "function") {
+            //       $elm.setStyle(state.style);
+            //     }
+            //   },
+            // });
             return;
           }
           Object.keys(style).forEach((k) => {
             const v = style[k];
             if (isRef(v)) {
-              state.props.style[k] = v.value;
+              state.style[k] = v.value;
               v.subscribe({
                 onChange(v) {
                   if ($elm) {
@@ -208,7 +255,7 @@ export function Img(props: ImgProps = {}) {
                 },
               });
             } else {
-              state.props.style[k] = v;
+              state.style[k] = v;
             }
           });
           return;
@@ -387,37 +434,7 @@ export function Img(props: ImgProps = {}) {
     },
   };
 
-  const state: {
-    props: {
-      src: string | null;
-      style: ViewStyleProperties;
-      styleSet: string[];
-    };
-  } = {
-    props: {
-      src: null,
-      style: {},
-      styleSet: [],
-    },
-  };
-
-  if (props.src) {
-    if (isRef(props.src)) {
-      state.props.src = props.src.value;
-      props.src.subscribe({
-        onChange(v: any) {
-          state.props.src = v;
-          if ($elm && $elm.setSrc) {
-            $elm.setSrc(v);
-          }
-        },
-      });
-    } else {
-      state.props.src = props.src;
-    }
-  }
-
-  methods.setup_reactive_props_bindings();
+  methods.setup_value_subscribe();
 
   return {
     t: "img",
@@ -427,306 +444,12 @@ export function Img(props: ImgProps = {}) {
     set $elm(v: any) {
       $elm = v;
     },
-    value: state.props.src,
-    state: {},
-    props: state.props,
-    render() {
-      if (rendered) {
-        return $elm;
-      }
-      rendered = true;
-
-      // const listen = (
-      //   type: string,
-      //   handler: (event: any) => void,
-      //   options?: any,
-      // ) => {
-      //   host.addEventListener($elm, type, handler, options);
-      //   listenerCleanups.push(() => {
-      //     host.removeEventListener($elm, type, handler, options);
-      //   });
-      // };
-
-      // const applyAttr = (k: string, v: any) => {
-      //   if (v === undefined || v === null || v === false) {
-      //     host.removeAttribute($elm, k);
-      //     return;
-      //   }
-      //   if (v === true) {
-      //     host.setAttribute($elm, k, "");
-      //     return;
-      //   }
-      //   host.setAttribute($elm, k, String(v));
-      // };
-
-      // Object.keys(rest).forEach((k) => {
-      //   const vv = rest[k];
-      //   if (vv !== undefined && vv !== null) {
-      //     if (isRef(vv)) {
-      //       vv.subscribe({
-      //         onChange(v) {
-      //           applyAttr(k, v);
-      //         },
-      //       });
-      //       applyAttr(k, vv.value);
-      //     } else if (typeof vv === "string" || typeof vv === "number") {
-      //       applyAttr(k, vv);
-      //     }
-      //   }
-      // });
-
-      // Object.keys(dataset).forEach((k) => {
-      //   if (!dataset) return;
-      //   const vv = dataset[k];
-      //   const attrName = `data-${k}`;
-      //   if (isRef(vv)) {
-      //     vv.subscribe({
-      //       onChange(v) {
-      //         applyAttr(attrName, v);
-      //       },
-      //     });
-      //     applyAttr(attrName, vv.value);
-      //     return;
-      //   }
-      //   applyAttr(attrName, vv);
-      // });
-
-      // if (cls) {
-      //   if (typeof cls === "string") {
-      //     host.setClassName($elm, cls);
-      //   } else if (isRef(cls)) {
-      //     cls.subscribe({
-      //       onChange(v) {
-      //         host.setClassName($elm, String(v));
-      //       },
-      //     });
-      //     host.setClassName($elm, String(cls.value));
-      //   } else if (isClassName(cls)) {
-      //     cls.subscribe({
-      //       onChange(v: any) {
-      //         host.setClassName(
-      //           $elm,
-      //           Array.isArray(v) ? v.join(" ") : String(v ?? ""),
-      //         );
-      //       },
-      //     });
-      //     host.setClassName($elm, cls.toString());
-      //   }
-      // }
-
-      // if (style) {
-      //   if (isStyleRef(style as any)) {
-      //     const st = style as any;
-      //     st.subscribe({
-      //       onChange(v: any) {
-      //         host.setStyleText($elm, viewStyleToCssText(v ?? {}));
-      //       },
-      //     });
-      //     host.setStyleText($elm, viewStyleToCssText(st.value));
-      //   } else if (isRef(style)) {
-      //     const st = style as any;
-      //     const apply = () =>
-      //       host.setStyleText($elm, viewStyleToCssText(st.value || {}));
-      //     st.subscribe({
-      //       onChange() {
-      //         apply();
-      //       },
-      //     });
-      //     apply();
-      //   } else {
-      //     const applyStyle = () => {
-      //       host.setStyleText($elm, viewStyleToCssText(style as any));
-      //     };
-      //     Object.keys(style as any).forEach((k) => {
-      //       const vv = (style as any)[k];
-      //       if (isRef(vv)) {
-      //         (vv as any).subscribe({
-      //           onChange() {
-      //             applyStyle();
-      //           },
-      //         });
-      //       }
-      //     });
-      //     applyStyle();
-      //   }
-      // }
-
-      // if (onClick) {
-      //   const handler = function (event: MouseEvent) {
-      //     if (onClick) {
-      //       onClick(event);
-      //     }
-      //   };
-      //   listen("click", handler);
-      // }
-
-      // if (onDoubleClick) {
-      //   const handler = function (event: MouseEvent) {
-      //     if (onDoubleClick) {
-      //       onDoubleClick(event);
-      //     }
-      //   };
-      //   listen("dblclick", handler);
-      // }
-
-      // if (onLongPress) {
-      //   let longPressTimer: any = null;
-      //   let startX = 0;
-      //   let startY = 0;
-      //   const longPressDuration = 500;
-      //   const moveThreshold = 10;
-
-      //   const handleStart = (event: PointerEvent) => {
-      //     startX = event.clientX;
-      //     startY = event.clientY;
-      //     longPressTimer = host.setTimeout(() => {
-      //       if (onLongPress) {
-      //         onLongPress(event);
-      //       }
-      //       longPressTimer = null;
-      //     }, longPressDuration);
-      //   };
-
-      //   const handleMove = (event: PointerEvent) => {
-      //     if (longPressTimer) {
-      //       const deltaX = Math.abs(event.clientX - startX);
-      //       const deltaY = Math.abs(event.clientY - startY);
-      //       if (deltaX > moveThreshold || deltaY > moveThreshold) {
-      //         host.clearTimeout(longPressTimer);
-      //         longPressTimer = null;
-      //       }
-      //     }
-      //   };
-
-      //   const handleEnd = () => {
-      //     if (longPressTimer) {
-      //       host.clearTimeout(longPressTimer);
-      //       longPressTimer = null;
-      //     }
-      //   };
-
-      //   listen("pointerdown", handleStart);
-      //   listen("pointermove", handleMove);
-      //   listen("pointerup", handleEnd);
-      //   listen("pointercancel", handleEnd);
-      // }
-
-      // if (onPointerDown) {
-      //   const handler = function (event: PointerEvent) {
-      //     if (onPointerDown) onPointerDown(event);
-      //   };
-      //   listen("pointerdown", handler);
-      // }
-      // if (onFocus) {
-      //   const handler = function (event: FocusEvent) {
-      //     onFocus(event);
-      //   };
-      //   listen("focus", handler);
-      // }
-      // if (onBlur) {
-      //   const handler = function (event: FocusEvent) {
-      //     if (onBlur) onBlur(event);
-      //   };
-      //   listen("blur", handler);
-      // }
-      // if (onKeyDown) {
-      //   const handler = function (event: KeyboardEvent) {
-      //     if (onKeyDown) onKeyDown(event);
-      //   };
-      //   listen("keydown", handler);
-      // }
-      // if (onMouseEnter) {
-      //   const handler = function (event: MouseEvent) {
-      //     onMouseEnter(event);
-      //   };
-      //   listen("mouseenter", handler);
-      // }
-      // if (onMouseLeave) {
-      //   const handler = function (event: MouseEvent) {
-      //     onMouseLeave(event);
-      //   };
-      //   listen("mouseleave", handler);
-      // }
-
-      // if (draggable !== undefined) {
-      //   host.setAttribute($elm, "draggable", String(draggable));
-      // }
-
-      // if (onDragStart) {
-      //   const handler = function (event: DragEvent) {
-      //     if (onDragStart) onDragStart(event);
-      //   };
-      //   listen("dragstart", handler);
-      // }
-
-      // if (onDrag) {
-      //   const handler = function (event: DragEvent) {
-      //     if (onDrag) onDrag(event);
-      //   };
-      //   listen("drag", handler);
-      // }
-
-      // if (onDragEnd) {
-      //   const handler = function (event: DragEvent) {
-      //     if (onDragEnd) onDragEnd(event);
-      //   };
-      //   listen("dragend", handler);
-      // }
-
-      // if (onDragEnter) {
-      //   const handler = function (event: DragEvent) {
-      //     if (onDragEnter) onDragEnter(event);
-      //   };
-      //   listen("dragenter", handler);
-      // }
-
-      // if (onDragOver) {
-      //   const handler = function (event: DragEvent) {
-      //     if (onDragOver) onDragOver(event);
-      //   };
-      //   listen("dragover", handler);
-      // }
-
-      // if (onDragLeave) {
-      //   const handler = function (event: DragEvent) {
-      //     if (onDragLeave) onDragLeave(event);
-      //   };
-      //   listen("dragleave", handler);
-      // }
-
-      // if (onDrop) {
-      //   const handler = function (event: DragEvent) {
-      //     if (onDrop) onDrop(event);
-      //   };
-      //   listen("drop", handler);
-      // }
-
-      // if (isMap) {
-      //   host.setAttribute($elm, "ismap", "");
-      // }
-
-      // if (onLoad) {
-      //   const handler = function (event: Event) {
-      //     if (onLoad) onLoad(event);
-      //   };
-      //   listen("load", handler);
-      // }
-
-      // if (onError) {
-      //   const handler = function (event: Event) {
-      //     if (onError) onError(event);
-      //   };
-      //   listen("error", handler);
-      // }
-
+    state,
+    events,
+    onMounted(event: MountedEvent) {
       if (onMounted) {
-        const cleanup = onMounted({ target: $elm });
-        if (typeof cleanup === "function") {
-          onMountedCleanup = cleanup;
-        }
+        onMounted(event);
       }
-
-      return $elm;
     },
     beforeUnmounted() {
       if (beforeUnmounted) {
@@ -734,19 +457,12 @@ export function Img(props: ImgProps = {}) {
       }
     },
     onUnmounted() {
-      for (const fn of listenerCleanups) {
-        fn();
-      }
-      listenerCleanups.length = 0;
-      if (onMountedCleanup) {
-        onMountedCleanup();
-      }
+      listener$.clean();
       if (onUnmounted) {
         onUnmounted();
       }
-
       // Reset state for potential re-render
-      rendered = false;
+      state.rendered = false;
     },
   };
 }

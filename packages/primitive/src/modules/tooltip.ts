@@ -4,10 +4,10 @@ import { TooltipCore, Align, Side } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
+import { Portal as NativePortal } from "@/content/portal";
 import { isStyleRef } from "@/style/index";
 import { getHost } from "@/host";
 
-import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 
 export type TooltipProps = Partial<{

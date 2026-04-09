@@ -3,10 +3,10 @@ import { MenuCore, MenuItemCore, MenuGroupCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
+import { Portal as NativePortal } from "@/content/portal";
 import { Show } from "@/reactive/show";
 import { getHost } from "@/host";
 
-import { Portal as NativePortal } from "./portal";
 import { Arrow as NativeArrow } from "./arrow";
 import * as PopperPrimitive from "./popper";
 

@@ -11,7 +11,7 @@ export interface SliderProps {
   max?: SliderNum | Ref<SliderNum>;
   step?: SliderNum | Ref<SliderNum>;
   onMounted?: (event: MountedEvent) => void;
-  onChange?: (event: InputEvent) => void;
+  onChange?: (event: Event) => void;
 }
 
 export function Slider(props: SliderProps = {}) {

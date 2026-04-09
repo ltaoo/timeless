@@ -1,11 +1,10 @@
-import { DerivedRef, Ref, Signal, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
 import {
   isClassNameRef,
   isStyleRef,
   RawViewStyleProperties,
-  ViewStyleProperties,
 } from "@/style/index";
 import { MountedEvent } from "@/event";
 import { ListenerManager } from "@/util/listener";
@@ -23,9 +22,8 @@ export interface InputProps extends Omit<ViewProps, "as" | "type"> {
   required?: boolean | DerivedRef<boolean> | Ref<boolean>;
   autocomplete?: boolean | DerivedRef<boolean> | Ref<boolean>;
   autocorrect?: boolean;
-  // inputMode?: string;
-  onInput?: (e: InputEvent) => void;
-  onChange?: (e: InputEvent) => void;
+  onInput?: (e: Event) => void;
+  onChange?: (e: Event) => void;
 }
 type InputState = {
   rendered: boolean;
@@ -435,8 +433,8 @@ export function Input(props: InputProps = {}) {
     set $elm(value: any) {
       $elm = value;
     },
-    value: state.value,
     state,
+    children: [],
     events: events,
     render() {
       // if (state.rendered) {

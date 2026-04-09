@@ -1,3 +1,5 @@
+import { isRef } from "@timeless/reactive";
+
 import { MountedEvent } from "@/event";
 
 type IconState = {
@@ -5,16 +7,59 @@ type IconState = {
   size: number;
   color: string;
 };
-type IconProps = { name: string; color?: string; size?: number };
+type IconProps = {
+  name: string;
+  color?: string;
+  size?: number;
+  onMounted?: (event: MountedEvent) => void;
+  beforeUnmounted?: () => void;
+  onUnmounted?: () => void;
+};
 
 export function Icon(props: IconProps) {
   let $elm: any = null;
   const state: IconState = {
-    name: props.name,
-    size: props.size ?? 24,
-    color: props.color ?? "currentColor",
-    // props,
+    name: "",
+    size: 24,
+    color: "currentColor",
   };
+
+  const methods = {
+    setup_value_subscribe() {
+      if (props.name !== undefined) {
+        if (isRef(props.name)) {
+          props.name.subscribe({
+            onChange(v) {},
+          });
+          state.name = props.name.value;
+        } else {
+          state.name = props.name;
+        }
+      }
+      if (props.size !== undefined) {
+        if (isRef(props.size)) {
+          props.size.subscribe({
+            onChange(v) {},
+          });
+          state.size = props.size.value;
+        } else {
+          state.size = props.size;
+        }
+      }
+      if (props.color !== undefined) {
+        if (isRef(props.color)) {
+          props.color.subscribe({
+            onChange(v) {},
+          });
+          state.color = props.color.value;
+        } else {
+          state.color = props.color;
+        }
+      }
+    },
+  };
+
+  methods.setup_value_subscribe();
 
   return {
     t: "icon",
@@ -24,21 +69,18 @@ export function Icon(props: IconProps) {
     set $elm(v: any) {
       $elm = v;
     },
-    value: {
+    state: {
       name: state.name,
       color: state.color,
       size: state.size,
-    },
-    state: {},
-    props: {
-      styleSet: [],
-      style: {},
     },
     render() {
       return $elm;
     },
     onMounted(event: MountedEvent) {
-      // ...
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
     },
   };
 }

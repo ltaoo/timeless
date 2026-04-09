@@ -819,11 +819,11 @@ declare module "packages/primitive/src/content/fragment" {
     import { MountedEvent } from "@/event";
     export function Fragment(props: ViewProps, children?: ViewChildren): {
         t: string;
+        $elm: any;
         state: {
             rendered: boolean;
             children: TimelessElement[];
         };
-        $elm: any;
         children: TimelessElement<any>[];
         append(node: any): void;
         render(): any;
@@ -839,6 +839,7 @@ declare module "packages/primitive/src/content/html" {
     export function DangerouslyInnerHTML(html: string | Ref<string>): {
         t: string;
         $elm: any;
+        state: {};
         render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
@@ -863,6 +864,7 @@ declare module "packages/primitive/src/content/icon" {
             color: string;
             size: number;
         };
+        state: {};
         props: {
             styleSet: any[];
             style: {};
@@ -874,9 +876,11 @@ declare module "packages/primitive/src/content/icon" {
 }
 declare module "packages/primitive/src/content/popper" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { styleNames } from "@/style";
     import { MountedEvent } from "@/event";
+    import { ViewProps } from "packages/primitive/src/content/view";
     import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
-    type PopperProps = {
+    type PopperProps = ViewProps & {
         x: number | DerivedRef<number> | Ref<number>;
         y: number | DerivedRef<number> | Ref<number>;
         placed: boolean | DerivedRef<boolean> | Ref<boolean>;
@@ -885,19 +889,42 @@ declare module "packages/primitive/src/content/popper" {
     export function Popper(props: PopperProps, children?: ViewChildren): {
         t: string;
         $elm: any;
+        value: string;
+        state: {
+            rendered: boolean;
+            style: styleNames;
+            styleSet?: string[];
+            attributes: Record<string, string | number | boolean | undefined>;
+            children: (TimelessElement | null)[];
+        };
         children: TimelessElement<any>[];
-        props: {
-            side: "top" | "bottom" | "left" | "right";
-            placement: "start" | "end" | "middle";
-            strategy: "absolute" | "fixed";
+        events: {
+            onClick: (e: MouseEvent) => void;
+            onDoubleClick: (e: MouseEvent) => void;
+            onMouseEnter: (e: MouseEvent) => void;
+            onMouseLeave: (e: MouseEvent) => void;
+            onMouseDown: (e: MouseEvent) => void;
+            onMouseUp: (e: MouseEvent) => void;
+            onLongPress: (e: PointerEvent) => void;
+            onPointerDown: (e: PointerEvent) => void;
+            onFocus: (e: FocusEvent) => void;
+            onBlur: (e: FocusEvent) => void;
+            onKeyDown: (e: KeyboardEvent) => void;
+            onContextMenu: (e: MouseEvent) => void;
+            onDragStart: (e: DragEvent) => void;
+            onDrag: (e: DragEvent) => void;
+            onDragEnd: (e: DragEvent) => void;
+            onDragEnter: (e: DragEvent) => void;
+            onDragOver: (e: DragEvent) => void;
+            onDragLeave: (e: DragEvent) => void;
+            onDrop: (e: DragEvent) => void;
+            onAnimationEnd: (e: AnimationEvent) => void;
         };
-        readonly value: {
-            placed: boolean;
-            x: number;
-            y: number;
-            zIndex: number;
-        };
+        render(): any;
+        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
     };
 }
 declare module "packages/primitive/src/content/list-view" {
@@ -939,6 +966,7 @@ declare module "packages/primitive/src/content/list-view" {
         $elm: any;
         value: string;
         children: TimelessElement<any>[];
+        state: {};
         props: {
             styleSet?: string[] | Signal<string[]>;
             style: ViewStyleProperties;
@@ -1531,6 +1559,7 @@ declare module "packages/primitive/src/content/img" {
         t: string;
         $elm: any;
         value: string;
+        state: {};
         props: {
             src: string | null;
             style: ViewStyleProperties;
@@ -8830,7 +8859,9 @@ declare module "packages/primitive/src/modules/paragraph" {
     import { ViewChildren } from "@/content/type";
     export function Paragraph(props: ViewProps & {}, children?: ViewChildren): {
         t: string;
-        render(): any;
+        $elm: any;
+        state: {};
+        render(): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -8905,17 +8936,7 @@ declare module "packages/primitive/src/modules/avatar" {
         src: string | Ref<string>;
         alt?: string;
         onLoadingStatusChange?: (status: "loading" | "loaded" | "error") => void;
-    }): {
-        t: string;
-        $elm: any;
-        render(): any;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-        setContent(html: string): void;
-        class$: any;
-    };
+    }): any;
     export function Fallback(props: ViewProps, children?: ViewChildren): any;
     export function Avatar(props: ViewProps & {
         src: string | Ref<string>;
@@ -9251,6 +9272,7 @@ declare module "packages/primitive/src/modules/file-input" {
     }): {
         t: string;
         $elm: any;
+        state: {};
         render(): any;
         onMounted(): void;
         beforeUnmounted(): void;
@@ -11860,310 +11882,26 @@ declare module "packages/primitive/src/interaction/dismissable" {
         clear(): void;
     };
 }
-declare module "packages/primitive/src/vnode/types" {
-    export type VNodeKind = "element" | "text" | "fragment";
-    export type VNodeKey = string | number;
-    export type VNodePlatform = "web" | "tui" | "canvas" | "ios" | "android" | "macos" | "windows";
-    export interface VNodeStyle {
-        width?: number | string;
-        height?: number | string;
-        minWidth?: number | string;
-        minHeight?: number | string;
-        maxWidth?: number | string;
-        maxHeight?: number | string;
-        margin?: number | string;
-        marginTop?: number | string;
-        marginRight?: number | string;
-        marginBottom?: number | string;
-        marginLeft?: number | string;
-        padding?: number | string;
-        paddingTop?: number | string;
-        paddingRight?: number | string;
-        paddingBottom?: number | string;
-        paddingLeft?: number | string;
-        position?: "static" | "relative" | "absolute" | "fixed" | "sticky";
-        top?: number | string;
-        right?: number | string;
-        bottom?: number | string;
-        left?: number | string;
-        zIndex?: number;
-        color?: string;
-        backgroundColor?: string;
-        opacity?: number;
-        borderWidth?: number;
-        borderStyle?: "none" | "solid" | "dashed" | "dotted";
-        borderColor?: string;
-        borderRadius?: number;
-        borderTopWidth?: number;
-        borderRightWidth?: number;
-        borderBottomWidth?: number;
-        borderLeftWidth?: number;
-        borderTopLeftRadius?: number;
-        borderTopRightRadius?: number;
-        borderBottomLeftRadius?: number;
-        borderBottomRightRadius?: number;
-        fontSize?: number;
-        fontWeight?: number | "bold" | "normal";
-        fontFamily?: string;
-        fontStyle?: "normal" | "italic";
-        lineHeight?: number;
-        letterSpacing?: number;
-        textAlign?: "left" | "center" | "right" | "justify";
-        textDecoration?: "none" | "underline" | "line-through";
-        textTransform?: "none" | "capitalize" | "uppercase" | "lowercase";
-        maxLines?: number;
-        overflow?: "visible" | "hidden";
-        pointerEvents?: "auto" | "none";
-        transforms?: VNodeTransform[];
-        shadows?: VNodeShadow[];
-        [key: string]: any;
-    }
-    export interface VNodeTransform {
-        translate?: {
-            x?: number;
-            y?: number;
-            z?: number;
-        };
-        rotate?: number;
-        rotateX?: number;
-        rotateY?: number;
-        rotateZ?: number;
-        scale?: number | {
-            x?: number;
-            y?: number;
-        };
-        skew?: {
-            x?: number;
-            y?: number;
-        };
-    }
-    export interface VNodeShadow {
-        color: string;
-        offsetX: number;
-        offsetY: number;
-        blurRadius: number;
-        spreadRadius?: number;
-    }
-    export interface VNodeA11y {
-        label?: string;
-        hint?: string;
-        role?: string;
-        hidden?: boolean;
-        value?: string;
-        live?: "polite" | "assertive";
-    }
-    export type VNodeEventHandler = (event: any) => void;
-    export type VNodeEvents = Partial<Record<string, VNodeEventHandler>>;
-    export interface VNodeBase {
-        kind: VNodeKind;
-        key?: VNodeKey;
-        parent: VNodeElement | VNodeFragment | null;
-        nextSibling: VNode | null;
-        _hostNode?: any;
-    }
-    export interface VNodeElement extends VNodeBase {
-        kind: "element";
-        tag: string;
-        style: VNodeStyle;
-        stylePresets: string[];
-        attrs: Record<string, string | boolean | number>;
-        props: Record<string, any>;
-        events: VNodeEvents;
-        children: VNode[];
-        focusable?: boolean;
-        draggable?: boolean;
-        a11y?: VNodeA11y;
-        platform?: {
-            web?: Record<string, any>;
-            ios?: Record<string, any>;
-            android?: Record<string, any>;
-            macos?: Record<string, any>;
-            windows?: Record<string, any>;
-        };
-    }
-    export interface VNodeText extends VNodeBase {
-        kind: "text";
-        text: string;
-    }
-    export interface VNodeFragment extends VNodeBase {
-        kind: "fragment";
-        children: VNode[];
-    }
-    export type VNode = VNodeElement | VNodeText | VNodeFragment;
-}
-declare module "packages/primitive/src/vnode/descriptor" {
-    import type { VNode, VNodeKey } from "packages/primitive/src/vnode/types";
-    export const ELEMENT_TYPE: unique symbol;
-    export type ComponentFn<P extends Record<string, any> = Record<string, any>> = (props: P, children: ChildDescriptor[]) => VNode;
-    export type ComponentType = ComponentFn | string;
-    export interface ElementDescriptor {
-        $$typeof: typeof ELEMENT_TYPE;
-        type: ComponentType;
-        props: Record<string, any>;
-        children: ChildDescriptor[];
-        key?: VNodeKey;
-    }
-    export type ChildDescriptor = ElementDescriptor | string | number | null;
-    export function isDescriptor(v: unknown): v is ElementDescriptor;
-}
-declare module "packages/primitive/src/vnode/h" {
-    import type { ChildDescriptor, ComponentType, ElementDescriptor } from "packages/primitive/src/vnode/descriptor";
-    export function h(type: ComponentType, props?: Record<string, any> | null, children?: ChildDescriptor[]): ElementDescriptor;
-}
-declare module "packages/primitive/src/vnode/create" {
-    import type { VNode, VNodeText, VNodeElement, VNodeFragment, VNodeKey, VNodeStyle, VNodeEvents } from "packages/primitive/src/vnode/types";
-    export function createElement(tag: string, config?: {
-        key?: VNodeKey;
-        style?: VNodeStyle;
-        stylePresets?: string[];
-        attrs?: Record<string, string | boolean | number>;
-        props?: Record<string, any>;
-        events?: VNodeEvents;
-        draggable?: boolean;
-        focusable?: boolean;
-    }, children?: VNode[]): VNodeElement;
-    export function createText(text: string): VNodeText;
-    export function createFragment(children?: VNode[]): VNodeFragment;
-    export function appendChild(parent: VNodeElement | VNodeFragment, child: VNode): void;
-    export function removeChild(parent: VNodeElement | VNodeFragment, child: VNode): void;
-    export function insertBefore(parent: VNodeElement | VNodeFragment, child: VNode, before: VNode | null): void;
-    export function replaceChild(parent: VNodeElement | VNodeFragment, newChild: VNode, oldChild: VNode): void;
-    export function clearChildren(parent: VNodeElement | VNodeFragment): void;
-    export function replaceChildren(parent: VNodeElement, newChildren: VNode[]): void;
-}
-declare module "packages/primitive/src/vnode/animation" {
-    import type { VNodeStyle } from "packages/primitive/src/vnode/types";
-    export interface AnimationConfig {
-        property: keyof VNodeStyle;
-        from?: any;
-        to: any;
-        duration: number;
-        easing?: "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out";
-        delay?: number;
-    }
-}
-declare module "packages/primitive/src/vnode/host-renderer" {
-    import type { AnimationConfig } from "packages/primitive/src/vnode/animation";
-    import type { VNode, VNodeA11y, VNodePlatform, VNodeStyle } from "packages/primitive/src/vnode/types";
-    export type BoundingRect = {
-        top: number;
-        left: number;
-        right: number;
-        bottom: number;
-        width: number;
-        height: number;
-        x?: number;
-        y?: number;
+declare module "packages/primitive/src/vnode/view" {
+    import { TimelessElement } from "@/content/type";
+    import { RawViewStyleProperties } from "@/style";
+    export type VNodeRect = {};
+    export type VNodeEvent = {};
+    export type VNodeView<HostElm> = {
+        $elm: HostElm;
+        isDocumentFragment(): boolean;
+        getChildNodes(): ChildNode[];
+        setStyle(style: RawViewStyleProperties): void;
+        setStyleValue(key: string, value: string): void;
+        setStyleSet(key: string): void;
+        setAttribute(key: string, value: string): void;
+        removeAttribute(key: string): void;
+        /** 获取视图的矩形位置 */
+        getBoundingClientRect(): VNodeRect;
+        addEventListener(type: string, handler: (event: VNodeEvent) => void, options?: any): void;
+        removeEventListener(type: string, handler: (event: any) => void, options?: any): void;
+        render(elm: TimelessElement): HostElm;
     };
-    export interface VNodePatch {
-        style?: Partial<VNodeStyle>;
-        stylePresets?: string[];
-        attrs?: Record<string, string | boolean | number | null>;
-        props?: Record<string, any>;
-        text?: string;
-        a11y?: Partial<VNodeA11y>;
-    }
-    export interface HostRenderer {
-        kind: string;
-        platform: VNodePlatform;
-        createNode(vnode: VNode): void;
-        removeNode(vnode: VNode): void;
-        patchNode(vnode: VNode, changes: VNodePatch): void;
-        insertChild(parent: VNode, child: VNode, before: VNode | null): void;
-        removeChild(parent: VNode, child: VNode): void;
-        getBoundingRect(vnode: VNode): BoundingRect;
-        getViewportSize(): {
-            width: number;
-            height: number;
-        };
-        focus(vnode: VNode): void;
-        blur(vnode: VNode): void;
-        getBody(): any;
-        animate(vnode: VNode, animations: AnimationConfig[]): Promise<void>;
-        cancelAnimation(vnode: VNode): void;
-        setTimeout(handler: () => void, ms: number): any;
-        clearTimeout(id: any): void;
-        addGlobalEventListener(type: string, handler: (e: any) => void, options?: any): void;
-        removeGlobalEventListener(type: string, handler: (e: any) => void, options?: any): void;
-        getSafeAreaInsets?(): {
-            top: number;
-            right: number;
-            bottom: number;
-            left: number;
-        };
-    }
-}
-declare module "packages/primitive/src/vnode/commit" {
-    import type { HostRenderer, VNodePatch } from "packages/primitive/src/vnode/host-renderer";
-    import type { VNode } from "packages/primitive/src/vnode/types";
-    export function commitTree(root: VNode, renderer: HostRenderer): void;
-    export function commitPatches(dirty: Set<VNode>, patches: Map<VNode, VNodePatch>, renderer: HostRenderer): void;
-}
-declare module "packages/primitive/src/vnode/reactive" {
-    import { type Signal } from "packages/reactive/src/index";
-    import type { HostRenderer, VNodePatch } from "packages/primitive/src/vnode/host-renderer";
-    import type { VNode, VNodeElement, VNodeStyle, VNodeText } from "packages/primitive/src/vnode/types";
-    export interface RendererScheduler {
-        markDirty(vnode: VNode): void;
-        scheduleFlush(): void;
-        flush(): void;
-        patch(vnode: VNode, patch: VNodePatch): void;
-    }
-    export function createRendererScheduler(renderer: HostRenderer): RendererScheduler;
-    export function bindStyle(vnode: VNodeElement, key: keyof VNodeStyle, ref: Signal<any>, scheduler: RendererScheduler): void;
-    export function bindStylePresets(vnode: VNodeElement, ref: Signal<string[]>, scheduler: RendererScheduler): void;
-    export function bindAttr(vnode: VNodeElement, name: string, ref: Signal<any>, scheduler: RendererScheduler): void;
-    export function bindProp(vnode: VNodeElement, name: string, ref: Signal<any>, scheduler: RendererScheduler): void;
-    export function bindText(vnode: VNodeText, ref: Signal<string>, scheduler: RendererScheduler): void;
-    export function setupReactiveBindings(vnode: VNodeElement, props: Record<string, any>, scheduler: RendererScheduler | null): void;
-}
-declare module "packages/primitive/src/vnode/style-preset" {
-    import type { VNodeStyle } from "packages/primitive/src/vnode/types";
-    export type StylePreset = VNodeStyle;
-    export interface StylePresetRegistry {
-        define(name: string, style: StylePreset): void;
-        defineMany(presets: Record<string, StylePreset>): void;
-        get(name: string): StylePreset | undefined;
-        has(name: string): boolean;
-    }
-    export function createStylePresetRegistry(): StylePresetRegistry;
-    export function getStylePresets(): StylePresetRegistry;
-    export function resolveComputedStyle(vnode: {
-        style: VNodeStyle;
-        stylePresets: string[];
-    }): VNodeStyle;
-}
-declare module "packages/primitive/src/vnode/events" {
-    export type PointerEventData = any;
-    export type KeyEventData = any;
-    export type GestureEventData = any;
-}
-declare module "packages/primitive/src/vnode/mount" {
-    import type { ChildDescriptor, ElementDescriptor } from "packages/primitive/src/vnode/descriptor";
-    import type { RendererScheduler } from "packages/primitive/src/vnode/reactive";
-    import type { VNode } from "packages/primitive/src/vnode/types";
-    export function mountChild(child: ChildDescriptor, scheduler: RendererScheduler | null): VNode | null;
-    export function mount(descriptor: ElementDescriptor, scheduler?: RendererScheduler | null): VNode;
-}
-declare module "packages/primitive/src/vnode/serialize" {
-    import type { ElementDescriptor } from "packages/primitive/src/vnode/descriptor";
-    import type { VNode } from "packages/primitive/src/vnode/types";
-    export function renderToString(descriptor: ElementDescriptor): string;
-    export function vnodeToJSON(vnode: VNode): object;
-}
-declare module "packages/primitive/src/vnode/index" {
-    export * from "packages/primitive/src/vnode/types";
-    export * from "packages/primitive/src/vnode/descriptor";
-    export * from "packages/primitive/src/vnode/h";
-    export * from "packages/primitive/src/vnode/create";
-    export * from "packages/primitive/src/vnode/host-renderer";
-    export * from "packages/primitive/src/vnode/commit";
-    export * from "packages/primitive/src/vnode/reactive";
-    export * from "packages/primitive/src/vnode/style-preset";
-    export * from "packages/primitive/src/vnode/animation";
-    export * from "packages/primitive/src/vnode/events";
-    export * from "packages/primitive/src/vnode/mount";
-    export * from "packages/primitive/src/vnode/serialize";
 }
 declare module "packages/primitive/src/index" {
     export * from "packages/reactive/src/index";
@@ -12255,7 +11993,7 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/util/listener";
     export * from "packages/primitive/src/interaction/dismissable";
     export * from "packages/primitive/src/host/index";
-    export * as VNode from "packages/primitive/src/vnode/index";
+    export * from "packages/primitive/src/vnode/view";
 }
 declare module "packages/timeless/src/index" {
     export * from "packages/primitive/src/index";
@@ -13230,11 +12968,11 @@ declare module "packages/shadcn/src/modules/dropdown-menu" {
         store: DropdownMenuCore;
     }, children?: ViewChildren): {
         t: string;
+        $elm: any;
         state: {
             rendered: boolean;
             children: TimelessElement[];
         };
-        $elm: any;
         children: TimelessElement<any>[];
         append(node: any): void;
         render(): any;
@@ -13250,11 +12988,11 @@ declare module "packages/shadcn/src/modules/context-menu" {
         store: ContextMenuCore;
     }, children?: ViewChildren): {
         t: string;
+        $elm: any;
         state: {
             rendered: boolean;
             children: TimelessElement[];
         };
-        $elm: any;
         children: TimelessElement<any>[];
         append(node: any): void;
         render(): any;
@@ -14335,7 +14073,6 @@ declare const TooltipPrimitive: typeof import("@timeless/timeless").TooltipPrimi
 declare const Transition: typeof import("@timeless/timeless").Transition;
 declare const Txt: typeof import("@timeless/timeless").Txt;
 declare const Use: typeof import("@timeless/timeless").Use;
-declare const VNode: typeof import("@timeless/timeless").VNode;
 declare const VideoPlayerPrimitive: typeof import("@timeless/timeless").VideoPlayerPrimitive;
 declare const View: typeof import("@timeless/timeless").View;
 declare const WaterfallPrimitive: typeof import("@timeless/timeless").WaterfallPrimitive;

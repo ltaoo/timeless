@@ -7,16 +7,17 @@ import {
   ApplicationModel,
 } from "@timeless/kit";
 
-import { For } from "@/reactive/for";
-import { View, ViewProps } from "@/content/view";
+import { View } from "@/content/view";
 import {
   ViewChildren,
   TimelessComponent,
   TimelessElement,
 } from "@/content/type";
 import { LazyView } from "@/content/lazy-view";
+import { For } from "@/reactive/for";
 import { ErrorFallbackFn, withErrorBoundary } from "@/modules/error-boundary";
 import { MountedEvent } from "@/event";
+import { ListenerManager } from "@/util/listener";
 
 type SubView = { id?: unknown; name: string; pathname?: string } & Record<
   string,
@@ -39,38 +40,50 @@ export function KeepAliveSubViews(props: {
 }) {
   const subviews = refarr(props.view.subViews as SubView[]);
   const cur_subview = refobj(props.view.curView as SubView);
-
-  props.view.onCurViewChange((view: SubView) => {
-    cur_subview.as(view);
-  });
-  props.view.onSubViewAppended((v: SubView) => {
-    console.log("[KeepAliveSubViews] onSubViewAppended", v);
-    subviews.push(v);
-  });
-  props.view.onSubViewRemoved((v: SubView) => {
-    subviews.remove(v);
-  });
-
+  const listener$ = ListenerManager();
   const NotFoundPageView = (() => {
     if (props.NotFound) {
       return props.NotFound();
     }
-    return View({ class: ref("not-found") }, ["Not Found"]);
+    return View({ class: "not-found" }, ["Not Found"]);
   })();
 
   return For({
     key: "id",
     each: subviews,
-    render(subview) {
+    onMounted(event) {
+      console.log("the For Mounted in KeepAliveSubViews", event);
+      listener$.append([
+        props.view.onCurViewChange((view: SubView) => {
+          cur_subview.as(view);
+        }),
+        props.view.onSubViewAppended((v: SubView) => {
+          // console.log(
+          //   "[KeepAliveSubViews] onSubViewAppended",
+          //   v,
+          //   subviews.length,
+          // );
+          subviews.push(v);
+        }),
+        props.view.onSubViewRemoved((v: SubView) => {
+          subviews.remove(v);
+        }),
+      ]);
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+      return listener$.clear;
+    },
+    render(subview, idx) {
       const PageView = props.views[subview.name];
-      const idx = subviews.indexOf(subview);
+      // const idx = subviews.indexOf(subview);
       if (!PageView) {
         return NotFoundPageView;
       }
       return View(
         {
           style: {
-            "z-index": idx + 1,
+            "z-index": computed(idx, (t) => t + 1),
             position: "relative",
             width: "100%",
             height: "100%",
@@ -84,26 +97,21 @@ export function KeepAliveSubViews(props: {
           },
         },
         [
-          withErrorBoundary(
-            () =>
-              LazyView(
-                {
-                  ...props,
-                  view: subview,
-                },
-                PageView,
-              ),
-            subview.name,
-            props.ErrorFallback,
+          LazyView(
+            {
+              ...props,
+              view: subview,
+            },
+            PageView,
           ),
+          // withErrorBoundary(
+          //   () =>
+          //     ,
+          //   subview.name,
+          //   props.ErrorFallback,
+          // ),
         ],
       );
-    },
-    onMounted(event) {
-      console.log("the For Mounted in KeepAliveSubViews", event);
-      if (props.onMounted) {
-        props.onMounted(event);
-      }
     },
     beforeUnmounted() {
       if (props.beforeUnmounted) {

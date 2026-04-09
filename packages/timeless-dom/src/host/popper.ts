@@ -3,178 +3,70 @@ import {
   isRef,
   TimelessElement,
   ViewStyleProperties,
+  VNodeView,
 } from "@timeless/timeless";
 
 import { viewStyleToCssText } from "./style";
 import { DOMHostNode } from "./type";
+import { HostElement } from "./box";
 
-export interface DOMPopper {
+export type DOMPopper = VNodeView<HTMLDivElement> & {
   t: "popper";
   $elm: HTMLDivElement;
-  isDocumentFragment(): boolean;
-  getChildNodes(): ChildNode[];
-  setStyle(style: ViewStyleProperties): void;
-  setStyleValue(key: string, value: string): void;
-  setStyleSet(key: string): void;
-  setAttribute(key: string, value: string): void;
-  removeAttribute(key: string): void;
-  getBoundingClientRect(): DOMRect;
-  addEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ): void;
-  removeEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ): void;
   render(elm: TimelessElement): HTMLDivElement;
-}
+};
 
 export function DOMPopper(props: {
-  build: (elm: TimelessElement) => DOMHostNode;
+  build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
 }): DOMPopper {
+  const t = "popper";
   const $elm = document.createElement("div");
-  let children$: ChildNode[] = [];
-
-  const methods = {
-    setStyle(style: ViewStyleProperties) {
-      const cssText = viewStyleToCssText(style);
-      $elm.style.cssText = cssText;
-    },
-    setStyleSet(styleSet: string[]) {
-      $elm.className = styleSet.join(" ");
-    },
-    setupEventListener(events: any) {
-      if (events.onClick) {
-        $elm.addEventListener("click", events.onClick);
-      }
-      if (events.onDoubleClick) {
-        $elm.addEventListener("dblclick", events.onDoubleClick);
-      }
-      if (events.onPointerDown) {
-        $elm.addEventListener("pointerdown", events.onPointerDown);
-      }
-      if (events.onFocus) {
-        $elm.addEventListener("focus", events.onFocus);
-      }
-      if (events.onBlur) {
-        $elm.addEventListener("blur", events.onBlur);
-      }
-      if (events.onKeyDown) {
-        $elm.addEventListener("keydown", events.onKeyDown);
-      }
-      if (events.onContextMenu) {
-        $elm.addEventListener("contextmenu", events.onContextMenu);
-      }
-      if (events.onMouseEnter) {
-        $elm.addEventListener("mouseenter", events.onMouseEnter);
-      }
-      if (events.onMouseLeave) {
-        $elm.addEventListener("mouseleave", events.onMouseLeave);
-      }
-      if (events.onDragStart) {
-        $elm.addEventListener("dragstart", events.onDragStart);
-      }
-      if (events.onDrag) {
-        $elm.addEventListener("drag", events.onDrag);
-      }
-      if (events.onDragEnd) {
-        $elm.addEventListener("dragend", events.onDragEnd);
-      }
-      if (events.onDragEnter) {
-        $elm.addEventListener("dragenter", events.onDragEnter);
-      }
-      if (events.onDragOver) {
-        $elm.addEventListener("dragover", events.onDragOver);
-      }
-      if (events.onDragLeave) {
-        $elm.addEventListener("dragleave", events.onDragLeave);
-      }
-      if (events.onDrop) {
-        $elm.addEventListener("drop", events.onDrop);
-      }
-      if (events.onAnimationEnd) {
-        $elm.addEventListener("animationend", events.onAnimationEnd);
-      }
-    },
-  };
+  const common$ = HostElement({ $elm, t, build: props.build });
 
   return {
-    t: "popper",
+    t,
+    getType() {
+      return "view";
+    },
     get $elm() {
       return $elm;
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
-    getChildNodes() {
-      return children$;
-    },
-    setStyle(style: ViewStyleProperties) {
-      methods.setStyle(style);
-    },
-    setStyleValue(key: any, value: string) {
-      $elm.style[key] = value;
-    },
-    setStyleSet(name: string) {
-      $elm.className = name;
-    },
-    setAttribute(key: string, value: string) {
-      $elm.setAttribute(key, value);
-    },
-    removeAttribute(key: string) {
-      $elm.removeAttribute(key);
-    },
-    getBoundingClientRect() {
-      return $elm.getBoundingClientRect();
-    },
-    addEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      $elm.addEventListener(type, handler, options);
-    },
-    removeEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      $elm.removeEventListener(type, handler, options);
-    },
+    setStyle: common$.methods.setStyle,
+    setStyleValue: common$.methods.setStyleValue,
+    setStyleSet: common$.methods.setStyleSet,
+    setAttribute: common$.methods.setAttribute,
+    removeAttribute: common$.methods.removeAttribute,
+    addEventListener: common$.methods.addEventListener,
+    removeEventListener: common$.methods.removeEventListener,
+    getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
-      //       if (elm.props?.style) {
-      //         methods.setStyle(elm.props.style);
-      //       }
-      if (elm.value) {
-        methods.setStyle({
-          "z-index": elm.value.zIndex,
+      if (elm.state) {
+        common$.methods.setStyle({
+          "z-index": elm.state.zIndex,
           position: "fixed",
           left: 0,
           top: 0,
-          opacity: elm.value.placed ? 1 : 0,
-          "pointer-event": elm.value.placed ? "initial" : "none",
-          transform: elm.value.placed
-            ? `translate3d(${Math.round(elm.value.x)}px, ${Math.round(elm.value.y)}px, 0)`
+          opacity: elm.state.placed ? 1 : 0,
+          "pointer-event": elm.state.placed ? "initial" : "none",
+          transform: elm.state.placed
+            ? `translate3d(${Math.round(elm.state.x)}px, ${Math.round(elm.state.y)}px, 0)`
             : "translate3d(0, 0, 0)",
         });
       }
-      if (elm.events) {
-        methods.setupEventListener(elm.events);
-      }
-      if (elm.children) {
-        for (const child of elm.children) {
-          if (isElement(child)) {
-            const $sub = props.build(child);
-            if ($sub && $sub.$elm) {
-              $elm.appendChild($sub.$elm);
-            }
-          }
-        }
-      }
+      const $fragments = common$.methods.render(elm.children);
+      $elm.appendChild($fragments);
+      common$.methods.setupEventListener(elm.events);
       return $elm;
+    },
+    getChildren: common$.methods.getChildren,
+    appendChildren: common$.methods.appendChildren,
+    insertChildren: common$.methods.insertChildren,
+    removeChildren: common$.methods.removeChildren,
+    getParent() {
+      return $elm.parentElement;
     },
   };
 }

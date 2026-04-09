@@ -3,11 +3,11 @@ import { CascaderCore, CascaderOption } from "@timeless/ui";
 
 import { classNames } from "@/style/index";
 import { View, ViewProps } from "@/content/view";
+import { Portal as NativePortal } from "@/content/portal";
 import { ViewChildren } from "@/content/type";
 import { Show } from "@/reactive/show";
 import { getHost } from "@/host";
 
-import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Fragment } from "@/content/fragment";
 

@@ -1,5 +1,6 @@
 import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
+import { VNodeView } from "@/vnode/view";
 import {
   ViewStyle,
   isClassNameRef,
@@ -34,7 +35,7 @@ export type ViewProps = {
   >;
 } & ViewEvents;
 type ViewEvents = Partial<{
-  onMounted?: (event: MountedEvent) => void | (() => void);
+  onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
   onClick?: (e: MouseEvent) => void;
@@ -45,7 +46,8 @@ type ViewEvents = Partial<{
   onMouseLeave?: (e: MouseEvent) => void;
   onLongPress?: (e: PointerEvent) => void;
   onPointerDown?: (e: PointerEvent) => void;
-  onChange?: (e: InputEvent) => void;
+  onInput?: (e: Event) => void;
+  onChange?: (e: Event) => void;
   onFocus?: (e: FocusEvent) => void;
   onBlur?: (e: FocusEvent) => void;
   onKeyDown?: (e: KeyboardEvent) => void;
@@ -62,7 +64,7 @@ type ViewEvents = Partial<{
 type ViewState = {
   rendered: boolean;
   style: RawViewStyleProperties;
-  styleSet?: string[];
+  styleSet: string[];
   attributes: Record<string, string | number | boolean | undefined>;
   children: (TimelessElement | null)[];
 };
@@ -240,24 +242,23 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         // methods.apply_attr(attr_name, vv);
       });
 
-      if (cls) {
+      if (cls !== undefined) {
         if (typeof cls === "string") {
-          state.styleSet = [cls];
+          state.styleSet = cls.split(" ");
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
               if ($elm) {
-                // host.setClassName($elm, v);
-                $elm.setStyleSet(v);
+                $elm.setStyleSet(v.split(" "));
               }
             },
           });
-          state.styleSet = [cls.value];
+          state.styleSet = cls.value.split(" ");
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
-            onChange(v: any) {
+            onChange(v) {
               if ($elm) {
-                $elm.setStyleSet(v.join(" "));
+                $elm.setStyleSet(v);
               }
             },
           });
@@ -502,7 +503,6 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     set $elm(v) {
       $elm = v;
     },
-    value: "",
     state,
     children: state.children,
     events,
@@ -546,25 +546,25 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
             (node as any).hydrate(childDom, $elm);
             if (childDom) {
               // childDom = host.getNextSibling(node.$elm || childDom);
-              if (node.$elm) {
-                childDom = node.$elm.getNextSibling();
-              } else if (childDom) {
-                childDom = childDom.getNextSibling();
-              }
+              // if (node.$elm) {
+              //   childDom = node.$elm.getNextSibling();
+              // } else if (childDom) {
+              //   childDom = childDom.getNextSibling();
+              // }
             }
           } else if (childDom) {
             // Fallback: just assign $elm and setup
             node.$elm = childDom;
-            node.render();
-            // childDom = host.getNextSibling(childDom);
-            childDom = childDom.getNextSibling();
+            // node.render();
+            // // childDom = host.getNextSibling(childDom);
+            // childDom = childDom.getNextSibling();
           } else {
             // childDom 为 null 时，直接 render 并插入
-            const result = node.render();
-            if (result) {
-              // host.appendChild($elm, result);
-              $elm.appendChild(result);
-            }
+            // const result = node.render();
+            // if (result) {
+            //   // host.appendChild($elm, result);
+            //   $elm.appendChild(result);
+            // }
           }
         }
       }
@@ -611,23 +611,23 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         onUnmounted();
       }
       manager$.clean();
-      for (let i = 0; i < state.children.length; i += 1) {
-        const node = state.children[i];
-        if (isElement(node)) {
-          // 如果是 Portal 组件，调用其 cleanup 方法
-          if (node.t === "portal" && typeof node.cleanup === "function") {
-            // console.log("[View] calling cleanup on Portal child");
-            node.cleanup();
-          } else if (node.onUnmounted) {
-            // 否则调用标准的 onUnmounted
-            // console.log("[View] calling onUnmounted on child:", node.t);
-            node.onUnmounted();
-          }
-        }
-      }
+      // for (let i = 0; i < state.children.length; i += 1) {
+      //   const node = state.children[i];
+      //   if (isElement(node)) {
+      //     // 如果是 Portal 组件，调用其 cleanup 方法
+      //     if (node.t === "portal" && typeof node.cleanup === "function") {
+      //       // console.log("[View] calling cleanup on Portal child");
+      //       node.cleanup();
+      //     } else if (node.onUnmounted) {
+      //       // 否则调用标准的 onUnmounted
+      //       // console.log("[View] calling onUnmounted on child:", node.t);
+      //       node.onUnmounted();
+      //     }
+      //   }
+      // }
       // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
       // host.clearChildren($elm);
-      $elm.removeContent();
+      // $elm.removeChildren();
       // console.log("[View] onUnmounted completed");
       // Reset state for potential re-render (e.g., when Show toggles when back to true)
       state.rendered = false;

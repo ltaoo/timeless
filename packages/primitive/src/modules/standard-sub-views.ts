@@ -17,6 +17,7 @@ import { For } from "@/reactive/for";
 import { Show } from "@/reactive/show";
 import { LazyView } from "@/content/lazy-view";
 import { ErrorFallbackFn, withErrorBoundary } from "@/modules/error-boundary";
+import { ListenerManager } from "@/util/listener";
 
 type SubView = { id?: unknown; name: string; pathname?: string } & Record<
   string,
@@ -38,16 +39,7 @@ export function StandardSubViews(
 ) {
   const subviews = refarr(props.view.subViews as SubView[]);
   const cur_subview = refobj(props.view.curView as SubView);
-
-  props.view.onCurViewChange((view: SubView) => {
-    cur_subview.as(view);
-  });
-  props.view.onSubViewAppended((v: SubView) => {
-    subviews.push(v);
-  });
-  props.view.onSubViewRemoved((v: SubView) => {
-    subviews.remove(v);
-  });
+  const listener$ = ListenerManager();
 
   const NotFoundPageView = (() => {
     if (props.NotFound) {
@@ -61,6 +53,24 @@ export function StandardSubViews(
   return For({
     key: "id",
     each: subviews,
+    onMounted(event) {
+      // console.log("standard-subview mounted");
+      listener$.append([
+        props.view.onCurViewChange((view: SubView) => {
+          cur_subview.as(view);
+        }),
+        props.view.onSubViewAppended((v: SubView) => {
+          subviews.push(v);
+        }),
+        props.view.onSubViewRemoved((v: SubView) => {
+          subviews.remove(v);
+        }),
+      ]);
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+      return listener$.clean;
+    },
     render(subview: SubView, idx: any) {
       const PageView = props.views[subview.name];
       if (!PageView) {
@@ -88,21 +98,22 @@ export function StandardSubViews(
                 },
               },
               [
-                withErrorBoundary(
-                  () =>
-                    LazyView(
-                      {
-                        ...props,
-                        view: subview,
-                        // onMounted() {
-                        //   nodes.push(this);
-                        // },
-                      },
-                      PageView,
-                    ),
-                  subview.name,
-                  props.ErrorFallback,
+                LazyView(
+                  {
+                    ...props,
+                    view: subview,
+                    // onMounted() {
+                    //   nodes.push(this);
+                    // },
+                  },
+                  PageView,
                 ),
+                // withErrorBoundary(
+                //   () =>
+                //     ,
+                //   subview.name,
+                //   props.ErrorFallback,
+                // ),
               ],
             ),
           ];

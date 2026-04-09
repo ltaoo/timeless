@@ -1,4 +1,11 @@
-import { ref, computed, refobj, classNames } from "@timeless/timeless";
+import {
+  ref,
+  computed,
+  refobj,
+  classNames,
+  Icon,
+  ListenerManager,
+} from "@timeless/timeless";
 import {
   ContextMenuPrimitive,
   For,
@@ -16,7 +23,6 @@ import {
   MenuSeparatorCore,
   MenuGroupCore,
 } from "@timeless/ui";
-import { ChevronRightOutlined } from "@timeless/icons";
 
 const MENU_CONTENT_CLASS =
   "cn-menu-target cn-menu-translucent z-50 min-w-36 origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fill-mode-both data-open:fade-in-0 data-open:zoom-in-95";
@@ -117,128 +123,140 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
   const menu_state_ = refobj(
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
   );
-  [
+  const listener$ = ListenerManager();
+  listener$.push(
     props.store.onStateChange((v) => {
       state_.as(v);
     }),
-    (() => {
-      if (props.store.menu) {
-        return props.store.menu.onStateChange((v) => {
-          menu_state_.as(v);
-        });
-      }
-      return () => {};
-    })(),
-  ];
-
-  return View({ class: "t-context-menu-item-wrap" }, [
-    ContextMenuPrimitive.Item(
-      {
-        store: props.store,
-        class: classNames([
-          computed(state_, (t) => {
-            return t.focused ? "bg-accent text-accent-foreground" : "";
-          }),
-          computed(state_, (t) => {
-            return t.disabled
-              ? "pointer-events-none opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50"
-              : "";
-          }),
-          MENU_ITEM_CLASS,
-        ]),
+  );
+  if (props.store.menu) {
+    listener$.push(
+      props.store.menu.onStateChange((v) => {
+        menu_state_.as(v);
+      }),
+    );
+  }
+  return View(
+    {
+      class: "t-context-menu-item-wrap",
+      onUnmounted() {
+        listener$.clear();
       },
-      [
-        Show({
-          when: has_icon_,
-          ok() {
-            return [
+    },
+    [
+      ContextMenuPrimitive.Item(
+        {
+          store: props.store,
+          class: classNames([
+            computed(state_, (t) => {
+              return t.focused ? "bg-accent text-accent-foreground" : "";
+            }),
+            computed(state_, (t) => {
+              return t.disabled
+                ? "pointer-events-none opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50"
+                : "";
+            }),
+            MENU_ITEM_CLASS,
+          ]),
+        },
+        [
+          Show({
+            when: has_icon_,
+            ok() {
+              return [
+                View(
+                  {
+                    class: "flex size-4 shrink-0 items-center justify-center",
+                  },
+                  [props.store.icon as TimelessElement],
+                ),
+              ];
+            },
+          }),
+          props.store.label,
+          Show({
+            when: has_shortcut_,
+            ok() {
+              return [
+                View(
+                  {
+                    class:
+                      "ml-auto text-xs tracking-widest text-muted-foreground group-focus/menubar-item:text-accent-foreground",
+                  },
+                  [computed(state_, (t) => t.shortcut)],
+                ),
+              ];
+            },
+          }),
+          Show({
+            when: show_chevron_,
+            ok() {
+              return [
+                View(
+                  {
+                    class: "cn-rtl-flip ml-auto size-4",
+                  },
+                  [Icon({ name: "chevron-right", size: 24 })],
+                ),
+              ];
+            },
+          }),
+        ],
+      ),
+      (() => {
+        if (!props.store.menu) {
+          return View({}, [null]);
+        }
+        const menu = props.store.menu;
+        if (menu.content) {
+          const inner$ = ContextMenuPrimitive.SubMenuContent(
+            {
+              store: menu,
+              animation: {
+                in: "animate-in fade-in-0 zoom-in-95",
+                out: "animate-out fade-out-0 zoom-out-95",
+              },
+            },
+            [
               View(
                 {
-                  class: "flex size-4 shrink-0 items-center justify-center",
+                  class: MENU_SUB_CONTENT_CLASS,
                 },
-                [props.store.icon as TimelessElement],
+                [menu.content as TimelessElement],
               ),
-            ];
-          },
-        }),
-        props.store.label,
-        Show({
-          when: has_shortcut_,
-          ok() {
-            return [
-              View(
-                {
-                  class:
-                    "ml-auto text-xs tracking-widest text-muted-foreground group-focus/menubar-item:text-accent-foreground",
-                },
-                [computed(state_, (t) => t.shortcut)],
-              ),
-            ];
-          },
-        }),
-        Show({
-          when: show_chevron_,
-          ok() {
-            return [
-              ChevronRightOutlined({ class: "cn-rtl-flip ml-auto size-4" }, []),
-            ];
-          },
-        }),
-      ],
-    ),
-    (() => {
-      if (!props.store.menu) {
-        return View({}, [null]);
-      }
-      const menu = props.store.menu;
-      if (menu.content) {
+            ],
+          );
+          return View({}, [inner$]);
+        }
         const inner$ = ContextMenuPrimitive.SubMenuContent(
           {
             store: menu,
             animation: {
-              in: "animate-in fade-in-0 zoom-in-95",
-              out: "animate-out fade-out-0 zoom-out-95",
+              in: "animate-in fill-mode-both fade-in-0 zoom-in-95",
+              out: "animate-out fill-mode-both fade-out-0 zoom-out-95",
             },
           },
           [
-            View(
-              {
-                class: MENU_SUB_CONTENT_CLASS,
-              },
-              [menu.content as TimelessElement],
-            ),
+            View({ class: MENU_SUB_CONTENT_CLASS }, [
+              For({
+                each: computed(menu_state_, (t) => {
+                  return t.items;
+                }),
+                render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
+                  if (item instanceof MenuSeparatorCore) {
+                    return ContextMenuSeparator({});
+                  }
+                  if (item instanceof MenuGroupCore) {
+                    return ContextMenuGroup({ store: item });
+                  }
+                  return ContextMenuItem({ store: item as MenuItemCore });
+                },
+              }),
+            ]),
           ],
         );
         return View({}, [inner$]);
-      }
-      const inner$ = ContextMenuPrimitive.SubMenuContent(
-        {
-          store: menu,
-          animation: {
-            in: "animate-in fill-mode-both fade-in-0 zoom-in-95",
-            out: "animate-out fill-mode-both fade-out-0 zoom-out-95",
-          },
-        },
-        [
-          View({ class: MENU_SUB_CONTENT_CLASS }, [
-            For({
-              each: computed(menu_state_, (t) => {
-                return t.items;
-              }),
-              render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
-                if (item instanceof MenuSeparatorCore) {
-                  return ContextMenuSeparator({});
-                }
-                if (item instanceof MenuGroupCore) {
-                  return ContextMenuGroup({ store: item });
-                }
-                return ContextMenuItem({ store: item as MenuItemCore });
-              },
-            }),
-          ]),
-        ],
-      );
-      return View({}, [inner$]);
-    })(),
-  ]);
+      })(),
+    ],
+  );
 }

@@ -1,207 +1,50 @@
-import {
-  isElement,
-  isRef,
-  TimelessElement,
-  ViewStyleProperties,
-} from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { viewStyleToCssText } from "./style";
-import { DOMHostNode } from "./type";
+import { HostElement } from "./box";
 
-export interface DOMPortal {
+export type DOMPortal = VNodeView<Text> & {
   t: "portal";
-  $elm: DocumentFragment;
-  isDocumentFragment(): boolean;
-  getChildNodes(): ChildNode[];
-  setStyle(style: ViewStyleProperties): void;
-  setStyleValue(key: string, value: string): void;
-  setStyleSet(key: string): void;
-  setAttribute(key: string, value: string): void;
-  removeAttribute(key: string): void;
-  addEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ): void;
-  removeEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ): void;
-  render(elm: TimelessElement): Text;
-  removeContent(): void;
-}
+  render(elm: TimelessElement): DocumentFragment;
+};
 
 export function DOMPortal(props: {
-  build: (elm: TimelessElement) => DOMHostNode;
+  build: (elm: TimelessElement) => VNodeView<Text>;
 }): DOMPortal {
-  const $fragment = document.createDocumentFragment();
+  const t = "portal";
   const $anchor = document.createTextNode("");
-
-  const methods = {
-    setStyle(style: ViewStyleProperties) {
-      const cssText = viewStyleToCssText(style);
-      //       $elm.style.cssText = cssText;
-    },
-    setStyleSet(styleSet: string[]) {
-      //       $elm.className = styleSet.join(" ");
-    },
-    setupEventListener(events: any) {
-      if (events.onClick) {
-        $fragment.addEventListener("click", events.onClick);
-      }
-      if (events.onDoubleClick) {
-        $fragment.addEventListener("dblclick", events.onDoubleClick);
-      }
-      if (events.onPointerDown) {
-        $fragment.addEventListener("pointerdown", events.onPointerDown);
-      }
-      if (events.onFocus) {
-        $fragment.addEventListener("focus", events.onFocus);
-      }
-      if (events.onBlur) {
-        $fragment.addEventListener("blur", events.onBlur);
-      }
-      if (events.onKeyDown) {
-        $fragment.addEventListener("keydown", events.onKeyDown);
-      }
-      if (events.onContextMenu) {
-        $fragment.addEventListener("contextmenu", events.onContextMenu);
-      }
-      if (events.onMouseEnter) {
-        $fragment.addEventListener("mouseenter", events.onMouseEnter);
-      }
-      if (events.onMouseLeave) {
-        $fragment.addEventListener("mouseleave", events.onMouseLeave);
-      }
-      if (events.onDragStart) {
-        $fragment.addEventListener("dragstart", events.onDragStart);
-      }
-      if (events.onDrag) {
-        $fragment.addEventListener("drag", events.onDrag);
-      }
-      if (events.onDragEnd) {
-        $fragment.addEventListener("dragend", events.onDragEnd);
-      }
-      if (events.onDragEnter) {
-        $fragment.addEventListener("dragenter", events.onDragEnter);
-      }
-      if (events.onDragOver) {
-        $fragment.addEventListener("dragover", events.onDragOver);
-      }
-      if (events.onDragLeave) {
-        $fragment.addEventListener("dragleave", events.onDragLeave);
-      }
-      if (events.onDrop) {
-        $fragment.addEventListener("drop", events.onDrop);
-      }
-      if (events.onAnimationEnd) {
-        $fragment.addEventListener("animationend", events.onAnimationEnd);
-      }
-    },
-  };
-
-  let children$: ChildNode[] = [];
+  const common$ = HostElement({ $elm: $anchor, t, build: props.build });
 
   return {
-    t: "portal",
-    get $elm() {
-      return $fragment;
+    t,
+    getType() {
+      return "view";
     },
     isDocumentFragment() {
       return true;
     },
-    getChildNodes() {
-      return children$;
-    },
-    setStyle(style: ViewStyleProperties) {
-      methods.setStyle(style);
-    },
-    setStyleValue(key: any, value: string) {
-      //       $elm.style[key] = value;
-    },
-    setStyleSet(name: string) {
-      //       $elm.className = name;
-    },
-    setAttribute(key: string, value: string) {
-      //       $elm.setAttribute(key, value);
-    },
-    removeAttribute(key: string) {
-      //       $elm.removeAttribute(key);
-    },
-    addEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      $fragment.addEventListener(type, handler, options);
-    },
-    removeEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      $fragment.removeEventListener(type, handler, options);
-    },
+    setStyle: common$.methods.setStyle,
+    setStyleValue: common$.methods.setStyleValue,
+    setStyleSet: common$.methods.setStyleSet,
+    setAttribute: common$.methods.setAttribute,
+    removeAttribute: common$.methods.removeAttribute,
+    addEventListener: common$.methods.addEventListener,
+    removeEventListener: common$.methods.removeEventListener,
+    getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
-      }
-      // if (elm.props?.styleSet) {
-      //   if (isRef(elm.props.styleSet)) {
-      //     methods.setStyleSet(elm.props.styleSet.value);
-      //   } else {
-      //     methods.setStyleSet(elm.props.styleSet);
-      //   }
-      // }
-      if (elm.events) {
-        methods.setupEventListener(elm.events);
-      }
-      const new_nodes: any[] = [];
-      const new_instances: any[] = [];
-      if (elm.children) {
-        // console.log("[]show - in render", elm.children);
-        for (let child of elm.children) {
-          if (!child) {
-            continue;
-          }
-          if (isElement(child)) {
-            // 即使 render 返回 null（如 Portal），也要保存实例以便调用生命周期
-            new_instances.push(child);
-            const $sub = props.build(child);
-            if (!$sub) {
-              continue;
-            }
-            if ($sub.isDocumentFragment()) {
-              const child_nodes = Array.from($sub.getChildNodes());
-              new_nodes.push(...child_nodes);
-              children$.push(...child_nodes);
-            } else {
-              new_nodes.push($sub);
-              if ($sub.$elm) {
-                children$.push($sub.$elm as ChildNode);
-              }
-            }
-            if ($sub.$elm) {
-              $fragment.appendChild($sub.$elm);
-            }
-          }
-        }
-        $fragment.appendChild($anchor);
-      }
+      common$.methods.applyState(elm.state);
+      common$.methods.setupEventListener(elm.events);
+      const $fragment = common$.methods.render(elm.children);
+      $fragment.appendChild($anchor);
       document.body.appendChild($fragment);
-      return $anchor;
+      common$.methods.handleElementsMounted();
+      return $fragment;
     },
-    removeContent() {
-      for (const node of children$) {
-        const $parent = node.parentElement;
-        // console.log("[]show remove content", node, $parent);
-        if ($parent) {
-          $parent.removeChild(node);
-        }
-      }
-      children$ = [];
-      // @fragment 会在 appendChild 自己清空，无需手动清空
+    getChildren: common$.methods.getChildren,
+    appendChildren: common$.methods.appendChildren,
+    insertChildren: common$.methods.insertChildren,
+    removeChildren: common$.methods.removeChildren,
+    getParent() {
+      return $anchor.parentElement;
     },
   };
 }

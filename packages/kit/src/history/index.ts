@@ -137,17 +137,23 @@ export class HistoryCore<
     // }
     const route1 = this.routes[name];
     if (!route1) {
-      console.log("[DOMAIN]history/index - push 2. no matched route", name);
+      console.warn("[DOMAIN]history/index - push 2. no matched route", name);
       return;
     }
     const uniqueKey = [route1.pathname, qs_stringify(query)]
       .filter(Boolean)
       .join("?");
     if (uniqueKey === this.$router.href) {
-      // console.log("[DOMAIN]history/index - push target url is", uniqueKey, "and cur href is", this.$router.href);
+      console.warn(
+        "[DOMAIN]history/index - target url is",
+        uniqueKey,
+        "cur href is",
+        this.$router.href,
+      );
       return;
     }
     const view = this.views[uniqueKey];
+    console.warn("[DOMAIN]history/index - the the views is existing", view);
     if (view) {
       this.ensureParent(view, query);
       view.query = query;

@@ -1,8 +1,8 @@
 import { request } from "@/biz/request.js";
 
 export default function OverlayView() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
-  const hourview$ = new Timeless.ui.ScrollViewCore({});
+  const contextFocusedRecord_ = refobj(null);
+
   const ITEM_HEIGHT = 56;
   let nextId = 1;
   const TOTAL = 50;
@@ -68,8 +68,6 @@ export default function OverlayView() {
     { pageSize: 10 },
   );
 
-  const contextFocusedRecord_ = refobj(null);
-
   const ui = {
     view$: new Timeless.ui.ScrollViewCore({
       onScroll(pos) {
@@ -80,6 +78,8 @@ export default function OverlayView() {
         ui.view$.finishLoadingMore();
       },
     }),
+    // view$ = new Timeless.ui.ScrollViewCore({});
+    hourview$: new Timeless.ui.ScrollViewCore({}),
     waterfall$: Timeless.ui.WaterfallModel({
       column: 1,
       size: 10,
@@ -117,23 +117,53 @@ export default function OverlayView() {
     ui.waterfall$.methods.appendItems(items);
   });
 
-  list$.init();
+  // list$.init();
 
-  return View(
+  return ScrollView(
     {
       class: "p-6 h-screen",
-      // store: view$,
-      onMounted() {
-        console.log("[]home/index.debug.js mounted");
-      },
+      store: ui.view$,
     },
     [
-      Input({
-        store: new Timeless.ui.InputCore({
-          placeholder: "Search",
-          defaultValue: "",
-        }),
-      }),
+      DropdownMenu(
+        {
+          store: new Timeless.ui.DropdownMenuCore({
+            items: [
+              new Timeless.ui.MenuItemCore({
+                label: "Edit",
+                onClick() {
+                  console.log("edit");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Duplicate",
+                onClick() {
+                  console.log("duplicate");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Delete",
+                onClick() {
+                  console.log("delete");
+                },
+              }),
+            ],
+          }),
+        },
+        [
+          Button(
+            {
+              store: new Timeless.ui.ButtonCore({
+                variant: "outline",
+                onClick() {
+                  console.log("click Open Menu");
+                },
+              }),
+            },
+            ["Open Menu"],
+          ),
+        ],
+      ),
       View({ class: "space-y-8" }, [
         // Section("Popover", [
         //   Item("Default", [
@@ -210,7 +240,6 @@ export default function OverlayView() {
         //     ),
         //   ]),
         // ]),
-
         // Section("Dropdown Menu", [
         //   Item("Default", [
         //     DropdownMenu(
@@ -361,43 +390,6 @@ export default function OverlayView() {
         //     ),
         //   ]),
         // ]),
-        ScrollViewPrimitive.Root(
-          {
-            class: "overflow-y-auto w-12 h-48",
-            store: hourview$,
-            onMounted($el) {
-              const itemHeight = 32;
-              const scrollPaddingItems = 2;
-              const targetHour = 17;
-              const index = targetHour - 1;
-              const top = Math.max(
-                0,
-                (index - scrollPaddingItems) * itemHeight,
-              );
-              // setTimeout(() => {
-              //   console.log("top", top, $el.scrollTop);
-              //   hourview$.scrollTo({ top });
-              // });
-            },
-          },
-          [
-            For({
-              each: [
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-                19, 20, 21, 22, 23, 24,
-              ],
-              render(hour) {
-                return View(
-                  {
-                    class:
-                      "h-8 flex items-center justify-center text-sm select-none",
-                  },
-                  [hour],
-                );
-              },
-            }),
-          ],
-        ),
       ]),
     ],
   );

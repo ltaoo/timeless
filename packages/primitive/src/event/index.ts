@@ -3,5 +3,7 @@ export type MouseEvent<T = any> = {
 };
 
 export interface MountedEvent<T = any> {
+  reason?: string;
   target: T;
+  error?: Error;
 }

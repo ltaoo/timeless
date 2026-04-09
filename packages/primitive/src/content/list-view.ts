@@ -147,13 +147,14 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
       }
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
-        // console.log("for children", child);
+        console.log("ListView children", child);
         (() => {
-          // if (typeof child === "function") {
-          //   const r = child();
-          //   state.children[i] = r;
-          //   return;
-          // }
+          if (typeof child === "function") {
+            // @ts-ignore
+            const r = child();
+            state.children[i] = r;
+            return;
+          }
           if (isElement(child)) {
             state.children[i] = child;
             return;
@@ -502,15 +503,9 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
     set $elm(v) {
       $elm = v;
     },
-    value: "",
-    children: state.children,
     state: {},
-    props: state.props,
+    children: state.children,
     events: state.events,
-    /** @deprecated */
-    render() {
-      return $elm;
-    },
     hydrate(existing_dom: any) {
       if (state.rendered) {
         return $elm;
@@ -539,27 +534,27 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
           if (typeof (node as any).hydrate === "function") {
             // 传递 $elm 作为 parentDom，即使 childDom 为 null 也要调用 hydrate
             (node as any).hydrate($child, $elm);
-            if ($child) {
-              // childDom = host.getNextSibling(node.$elm || childDom);
-              if (node.$elm) {
-                $child = node.$elm.getNextSibling();
-              } else if ($child) {
-                $child = $child.getNextSibling();
-              }
-            }
+            // if ($child) {
+            //   // childDom = host.getNextSibling(node.$elm || childDom);
+            //   if (node.$elm) {
+            //     $child = node.$elm.getNextSibling();
+            //   } else if ($child) {
+            //     $child = $child.getNextSibling();
+            //   }
+            // }
           } else if ($child) {
             // Fallback: just assign $elm and setup
-            node.$elm = $child;
-            node.render();
-            // childDom = host.getNextSibling(childDom);
-            $child = $child.getNextSibling();
+            // node.$elm = $child;
+            // node.render();
+            // // childDom = host.getNextSibling(childDom);
+            // $child = $child.getNextSibling();
           } else {
             // childDom 为 null 时，直接 render 并插入
-            const result = node.render();
-            if (result) {
-              // host.appendChild($elm, result);
-              $elm.appendChild(result);
-            }
+            // const result = node.render();
+            // if (result) {
+            //   // host.appendChild($elm, result);
+            //   $elm.appendChild(result);
+            // }
           }
         }
       }
@@ -623,7 +618,7 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
       }
       // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
       // host.clearChildren($elm);
-      $elm.removeContent();
+      $elm.removeChildren();
       // console.log("[View] onUnmounted completed");
       // Reset state for potential re-render (e.g., when Show toggles when back to true)
       state.rendered = false;

@@ -3,12 +3,12 @@ import { DatePickerCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren, TimelessElement } from "@/content/type";
+import { Portal as NativePortal } from "@/content/portal";
 import { Fragment } from "@/content/fragment";
 import { For } from "@/reactive/for";
 import { classNames } from "@/style/index";
 import { getHost } from "@/host";
 
-import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
 

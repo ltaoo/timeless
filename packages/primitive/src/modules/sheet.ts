@@ -2,8 +2,8 @@ import { DialogCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
+import { Portal as NativePortal } from "@/content/portal";
 
-import { Portal } from "./portal";
 import { Presence } from "./presence";
 
 export function Root(
@@ -12,7 +12,7 @@ export function Root(
 ) {
   const { store, ...rest } = props;
 
-  return Portal(
+  return NativePortal(
     {
       onUnmounted() {
         if (rest.onUnmounted) {

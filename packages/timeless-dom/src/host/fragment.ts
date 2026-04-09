@@ -1,80 +1,46 @@
-import { isElement, TimelessElement } from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { DOMHostNode } from "./type";
+import { HostElement } from "./box";
 
-export interface DOMFragment {
+export type DOMFragment = VNodeView<Text> & {
   t: "fragment";
-  $elm: DocumentFragment;
-  getChildNodes(): ChildNode[];
-  isDocumentFragment(): boolean;
-  render(elm: TimelessElement): Text;
-}
+  render(elm: TimelessElement): DocumentFragment;
+};
 
 export function DOMFragment(props: {
-  build: (elm: TimelessElement) => DOMHostNode;
+  build: (elm: TimelessElement) => VNodeView<Text>;
 }): DOMFragment {
-  const $fragment = document.createDocumentFragment();
+  const t = "fragment";
   const $anchor = document.createTextNode("");
-
-  let elements: TimelessElement[] = [];
-  let children$: ChildNode[] = [];
+  const common$ = HostElement({ $elm: $anchor, t, build: props.build });
 
   return {
-    t: "fragment",
-    get $elm() {
-      return $fragment;
-    },
-    getChildNodes() {
-      return children$;
+    t,
+    getType() {
+      return "view";
     },
     isDocumentFragment() {
       return true;
     },
+    setStyle: common$.methods.setStyle,
+    setStyleValue: common$.methods.setStyleValue,
+    setStyleSet: common$.methods.setStyleSet,
+    setAttribute: common$.methods.setAttribute,
+    removeAttribute: common$.methods.removeAttribute,
+    addEventListener: common$.methods.addEventListener,
+    removeEventListener: common$.methods.removeEventListener,
+    getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
-      // console.log('[]fragment render', elm.children);
-      // const new_nodes: any[] = [];
-      const new_instances: TimelessElement[] = [];
-      // console.log('[]fragment - in render', elm.children);
-      if (elm.children) {
-        // console.log("[]show - in render", elm.children);
-        for (let child of elm.children) {
-          if (!child) {
-            continue;
-          }
-          if (isElement(child)) {
-            // 即使 render 返回 null（如 Portal），也要保存实例以便调用生命周期
-            new_instances.push(child);
-            const $sub = props.build(child);
-            if (!$sub) {
-              continue;
-            }
-            if ($sub.isDocumentFragment()) {
-              const child_nodes = Array.from($sub.getChildNodes());
-              // new_nodes.push(...child_nodes);
-              children$.push(...child_nodes);
-            } else {
-              // new_nodes.push($sub);
-              if ($sub.$elm) {
-                children$.push($sub.$elm as ChildNode);
-              }
-            }
-            if ($sub.$elm) {
-              $fragment.appendChild($sub.$elm);
-            }
-          }
-        }
-        $fragment.appendChild($anchor);
-        for (let child of elements) {
-          if (child.onMounted) {
-            child.onMounted({
-              target: child.$elm,
-            });
-          }
-        }
-        elements = new_instances;
-      }
-
-      return $anchor;
+      const $fragment = common$.methods.render(elm.children);
+      $fragment.appendChild($anchor);
+      return $fragment;
+    },
+    getChildren: common$.methods.getChildren,
+    appendChildren: common$.methods.appendChildren,
+    insertChildren: common$.methods.insertChildren,
+    removeChildren: common$.methods.removeChildren,
+    getParent() {
+      return $anchor.parentElement;
     },
   };
 }

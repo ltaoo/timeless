@@ -3,12 +3,12 @@ import { SelectCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
+import { Portal as NativePortal } from "@/content/portal";
 import { Show } from "@/reactive/show";
 import { Input as NativeInput } from "@/input/input";
 import { isStyleRef, classNames } from "@/style/index";
 import { getHost } from "@/host";
 
-import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Fragment } from "@/content/fragment";
 

@@ -4,11 +4,11 @@ import { DateRangePickerCore } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
+import { Portal as NativePortal } from "@/content/portal";
 import { For } from "@/reactive/for";
 import { classNames } from "@/style/index";
 import { getHost } from "@/host";
 
-import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
 

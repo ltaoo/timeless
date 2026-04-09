@@ -3,6 +3,7 @@ import { TagSelectCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
+import { Portal as NativePortal } from "@/content/portal";
 import { Show } from "@/reactive/show";
 import { For } from "@/reactive/for";
 import { Fragment } from "@/content/fragment";
@@ -10,7 +11,6 @@ import { Input as NativeInput } from "@/input/input";
 import { isStyleRef, classNames } from "@/style/index";
 import { getHost } from "@/host";
 
-import { Portal as NativePortal } from "./portal";
 import * as PopperPrimitive from "./popper";
 
 export function Root(
@@ -437,12 +437,12 @@ export function Search(
       e.stopPropagation();
     },
     onMounted(event) {
-      const $elm = (event as any).target as HTMLInputElement;
-      $elm.value = store.state.keyword;
+      const $elm = event.target;
+      // $elm.setValue = store.state.keyword;
       store.onStateChange((state) => {
-        if ($elm.value !== state.keyword) {
-          $elm.value = state.keyword;
-        }
+        // if ($elm.value !== state.keyword) {
+        //   $elm.value = state.keyword;
+        // }
       });
       if (rest.onMounted) {
         rest.onMounted(event);
