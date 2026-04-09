@@ -36,7 +36,6 @@ export function DOMPortal(props: {
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);
       document.body.appendChild($fragment);
-      common$.methods.handleElementsMounted();
       return $fragment;
     },
     getChildren: common$.methods.getChildren,

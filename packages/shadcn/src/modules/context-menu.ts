@@ -124,23 +124,26 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
     props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
   );
   const listener$ = ListenerManager();
-  listener$.push(
-    props.store.onStateChange((v) => {
-      state_.as(v);
-    }),
-  );
-  if (props.store.menu) {
-    listener$.push(
-      props.store.menu.onStateChange((v) => {
-        menu_state_.as(v);
-      }),
-    );
-  }
   return View(
     {
       class: "t-context-menu-item-wrap",
-      onUnmounted() {
-        listener$.clear();
+      onMounted(event) {
+        listener$.push(
+          props.store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
+        if (props.store.menu) {
+          listener$.push(
+            props.store.menu.onStateChange((v) => {
+              menu_state_.as(v);
+            }),
+          );
+        }
+        if (props.onMounted) {
+          listener$.add(props.onMounted(event));
+        }
+        return listener$.clean;
       },
     },
     [
@@ -148,6 +151,7 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
         {
           store: props.store,
           class: classNames([
+            MENU_ITEM_CLASS,
             computed(state_, (t) => {
               return t.focused ? "bg-accent text-accent-foreground" : "";
             }),
@@ -156,7 +160,6 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
                 ? "pointer-events-none opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50"
                 : "";
             }),
-            MENU_ITEM_CLASS,
           ]),
         },
         [
@@ -165,9 +168,7 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
             ok() {
               return [
                 View(
-                  {
-                    class: "flex size-4 shrink-0 items-center justify-center",
-                  },
+                  { class: "flex size-4 shrink-0 items-center justify-center" },
                   [props.store.icon as TimelessElement],
                 ),
               ];
@@ -192,12 +193,11 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
             when: show_chevron_,
             ok() {
               return [
-                View(
-                  {
-                    class: "cn-rtl-flip ml-auto size-4",
-                  },
-                  [Icon({ name: "chevron-right", size: 24 })],
-                ),
+                Icon({
+                  class: "cn-rtl-flip ml-auto size-4",
+                  name: "chevron-right",
+                  size: 24,
+                }),
               ];
             },
           }),
@@ -218,12 +218,9 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
               },
             },
             [
-              View(
-                {
-                  class: MENU_SUB_CONTENT_CLASS,
-                },
-                [menu.content as TimelessElement],
-              ),
+              View({ class: MENU_SUB_CONTENT_CLASS }, [
+                menu.content as TimelessElement,
+              ]),
             ],
           );
           return View({}, [inner$]);

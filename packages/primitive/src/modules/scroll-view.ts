@@ -34,12 +34,15 @@ export function Root(
       onMounted(event) {
         // alert('scrollview load');
         const $elm = event.target;
+        const { width, height } = $elm.getBoundingClientRect();
         store.setRect({
-          width: $elm.clientWidth,
-          height: $elm.clientHeight,
+          width,
+          height,
         });
         const provide = global_provider?.provide_ui_scroll_view_scroll;
-        if (typeof provide === "function") provide(store, $elm);
+        if (typeof provide === "function") {
+          provide(store, $elm as any);
+        }
         if (props.onMounted) {
           props.onMounted(event);
         }
@@ -78,15 +81,15 @@ export function Indicator(
         props.onUnmounted();
       }
     },
-    render() {
-      const $elm = indicator$.render();
-      const provide = global_provider?.provide_ui_scroll_view_indicator;
-      if (typeof provide === "function") provide(store, indicator$.$elm);
-      if (props.onMounted) {
-        props.onMounted({ target: $elm });
-      }
-      return $elm;
-    },
+    // render() {
+    //   const $elm = indicator$.render();
+    //   const provide = global_provider?.provide_ui_scroll_view_indicator;
+    //   if (typeof provide === "function") provide(store, indicator$.$elm);
+    //   if (props.onMounted) {
+    //     props.onMounted({ target: $elm });
+    //   }
+    //   return $elm;
+    // },
   };
 }
 
@@ -133,6 +136,13 @@ export function Progress(
     t: "view",
     $elm: progress$.$elm,
     state: {},
+    // render() {
+    //   const $elm = progress$.render();
+    //   if (props.onMounted) {
+    //     props.onMounted({ target: $elm });
+    //   }
+    //   return $elm;
+    // },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -143,13 +153,6 @@ export function Progress(
       if (props.onUnmounted) {
         props.onUnmounted();
       }
-    },
-    render() {
-      const $elm = progress$.render();
-      if (props.onMounted) {
-        props.onMounted({ target: $elm });
-      }
-      return $elm;
     },
   };
 }

@@ -293,24 +293,9 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 计算浮动元素位置 */
   async place() {
-    const has$el = !!(this.reference as any)?.$el;
-    const refRect = this.reference?.getRect?.();
-    const floatingRect = this.floating?.getRect?.();
-    console.log("[DEBUG-POPPER] place()", this.unique_id, {
-      hasRef: !!this.reference,
-      hasFloating: !!this.floating,
-      has$el,
-      refRect,
-      floatingRect,
-      offsetX: this.offsetX,
-      offsetY: this.offsetY,
-    });
-    if (this.reference === null || this.floating === null) {
-      // console.log(
-      //   "[DEBUG-POPPER] place() early return - missing ref or floating",
-      //   this.reference?.$el ?? null,
-      //   this.floating?.$el ?? null,
-      // );
+    // const has$el = !!(this.reference as any)?.$el;
+    if (!this.reference || !this.floating) {
+      console.warn("[DEBUG-POPPER] place() missing ref or floating");
       return;
     }
     const coords = await this.computePosition();
@@ -372,19 +357,10 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   async computePosition() {
     const { placement, strategy } = this;
 
-    const referenceEl = this.reference;
-    const floatingEl = this.floating;
+    const reference$ = this.reference;
+    const floating$ = this.floating;
 
-    console.log("[DEBUG-POPPER] computePosition", this.unique_id, {
-      // refIsElement: referenceEl instanceof Element,
-      // floatingIsElement: floatingEl instanceof Element,
-      // refElRect: referenceEl ? referenceEl.getBoundingClientRect() : null,
-      // floatingElRect: floatingEl ? floatingEl.getBoundingClientRect() : null,
-      placement,
-      strategy,
-    });
-
-    if (!floatingEl) {
+    if (!floating$) {
       console.log(
         "[DEBUG-POPPER] computePosition early return - no floatingEl",
       );
@@ -400,30 +376,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     // Use real element or virtual element (for updateReference with only getRect)
     // const useVirtual = !(referenceEl instanceof Element);
     const useVirtual = false;
-    const referenceArg = referenceEl;
-    // const referenceArg: any =
-    //   referenceEl instanceof Element
-    //     ? referenceEl
-    //     : {
-    //         getBoundingClientRect: () => {
-    //           const r = this.reference!.getRect();
-    //           console.log(
-    //             "[DEBUG-POPPER] virtual getBoundingClientRect called",
-    //             this.unique_id,
-    //             r,
-    //           );
-    //           return {
-    //             x: r.x,
-    //             y: r.y,
-    //             width: r.width,
-    //             height: r.height,
-    //             top: r.y,
-    //             left: r.x,
-    //             right: r.x + r.width,
-    //             bottom: r.y + r.height,
-    //           };
-    //         },
-    //       };
 
     const middleware: any[] = [
       offset(this.arrowElement ? 12 : 4),
@@ -439,34 +391,30 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     // void (floatingEl as HTMLElement).offsetHeight;
 
     // Manual test: compute position without floating-ui
-    const refRect = referenceEl.getRect();
-    const floatRect = floatingEl.getRect();
+    const reference_rect = reference$.getRect();
+    const floating_rect = floating$.getRect();
     console.log(
       "[DEBUG-POPPER] MANUAL TEST before computeDomPosition",
       this.unique_id,
       {
-        refRect: {
-          x: refRect.x,
-          y: refRect.y,
-          width: refRect.width,
-          height: refRect.height,
+        reference: {
+          x: reference_rect.x,
+          y: reference_rect.y,
+          width: reference_rect.width,
+          height: reference_rect.height,
         },
-        floatRect: {
-          x: floatRect.x,
-          y: floatRect.y,
-          width: floatRect.width,
-          height: floatRect.height,
+        floating: {
+          x: floating_rect.x,
+          y: floating_rect.y,
+          width: floating_rect.width,
+          height: floating_rect.height,
         },
-        // floatTransform: (floatingEl as HTMLElement).style.transform,
-        // floatComputedTransform: getComputedStyle(floatingEl).transform,
-        // floatParent: floatingEl.parentElement?.tagName,
-        // floatInDOM: document.body.contains(floatingEl),
         placement,
       },
     );
 
     const platform = getDOMPlatform();
-    const result = await computeCorePosition(referenceArg, floatingEl, {
+    const result = await computeCorePosition(reference$, floating$, {
       placement,
       strategy,
       middleware,

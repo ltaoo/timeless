@@ -92,8 +92,6 @@ import "./styles/globals.css";
 
 console.log("shadcn.version" + __Version);
 
-export * as icons from "@timeless/icons";
-
 // export const Result = kit.Result;
 export {
   Input,

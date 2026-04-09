@@ -1,12 +1,12 @@
-import { combine, computed, ref, refobj } from "@timeless/timeless";
-import { DatePickerPrimitive, For, Show, View, ViewProps } from "@timeless/timeless";
-import { DatePickerCore } from "@timeless/ui";
+import { combine, computed, Icon, ref, refobj } from "@timeless/timeless";
 import {
-  CalendarOutlined,
-  ChevronLeftOutlined,
-  ChevronRightOutlined,
-  CircleXOutlined,
-} from "@timeless/icons";
+  DatePickerPrimitive,
+  For,
+  Show,
+  View,
+  ViewProps,
+} from "@timeless/timeless";
+import { DatePickerCore } from "@timeless/ui";
 
 export function DatePicker(
   props: ViewProps & {
@@ -78,7 +78,7 @@ export function DatePicker(
                   class:
                     "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
                 },
-                [CircleXOutlined({ class: "size-4" })],
+                [Icon({ name: "circle-x", size: 16 })],
               ),
             ];
           },
@@ -86,7 +86,7 @@ export function DatePicker(
             return [
               DatePickerPrimitive.Icon(
                 { class: "size-4 text-muted-foreground" },
-                [CalendarOutlined({})],
+                [Icon({ name: "calendar", size: 16 })],
               ),
             ];
           },
@@ -119,7 +119,7 @@ export function DatePicker(
                     class:
                       "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                   },
-                  [ChevronLeftOutlined({ class: "size-4" })],
+                  [Icon({ name: "chevron-left", size: 16 })],
                 ),
                 DatePickerPrimitive.CalendarHeader({
                   store,
@@ -131,7 +131,7 @@ export function DatePicker(
                     class:
                       "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                   },
-                  [ChevronRightOutlined({ class: "size-4" })],
+                  [Icon({ name: "chevron-right", size: 16 })],
                 ),
               ],
             ),

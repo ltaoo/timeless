@@ -48,6 +48,8 @@ export function DOMIcon(props: {
         return null;
       }
       const $elm = render_asn_to_svg(asn_node, elm.state) as SVGSVGElement;
+      common$.methods.set$elm($elm);
+      // common$.methods.applyState(elm.state);
       return $elm;
     },
     getChildren: common$.methods.getChildren,
@@ -73,7 +75,7 @@ type ASNNode = {
 
 function render_asn_to_svg(
   asn: ASNNode,
-  props: { color: string; size: number },
+  props: { styleSet?: string[]; color: string; size: number },
 ): SVGElement {
   const { tag, attrs = {}, children } = asn;
 
@@ -87,6 +89,7 @@ function render_asn_to_svg(
 
   // Apply size and color for SVG element
   if (tag === "svg") {
+    // console.log("render_asn_to_svg", props.styleSet);
     const size = props.size ? String(props.size) : "24";
     element.setAttribute("width", size);
     element.setAttribute("height", size);
@@ -95,6 +98,9 @@ function render_asn_to_svg(
     if (props.color) {
       element.style.color = props.color;
       element.style.stroke = props.color;
+    }
+    if (props.styleSet) {
+      element.classList.add(...props.styleSet);
     }
   }
 

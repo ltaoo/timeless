@@ -6,8 +6,8 @@ import {
   ViewProps,
   refobj,
   computed,
+  Icon,
 } from "@timeless/timeless";
-import { LoaderCircleOutlined } from "@timeless/icons";
 import { ButtonCore } from "@timeless/ui";
 
 const VARIANTS = {
@@ -94,7 +94,7 @@ export function Button(
             class: "inline-block animate-spin",
             style: { "transform-origin": "center" },
           },
-          [LoaderCircleOutlined()],
+          [Icon({ name: "loader-circle", size: 16 })],
         ),
       ]),
       Show({

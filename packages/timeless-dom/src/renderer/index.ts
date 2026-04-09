@@ -176,9 +176,11 @@ export function render(
       return;
     }
     $root.appendChild($elm);
-    if (typeof elm.onMounted === "function") {
-      elm.onMounted({ reason: "append to $root", target: $elm });
-    }
+    setTimeout(() => {
+      if (typeof elm.onMounted === "function") {
+        elm.onMounted({ reason: "append to $root", target: $elm });
+      }
+    }, 0);
     return;
   }
 

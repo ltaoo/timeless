@@ -1,4 +1,4 @@
-import { computed, ref, refobj } from "@timeless/timeless";
+import { computed, Icon, ref, refobj } from "@timeless/timeless";
 import {
   DialogPrimitive,
   View,
@@ -7,7 +7,6 @@ import {
   Show,
 } from "@timeless/timeless";
 import { DialogCore } from "@timeless/ui";
-import { CircleXOutlined } from "@timeless/icons";
 
 import { Button } from "./button";
 
@@ -143,7 +142,7 @@ export function Dialog(
                       class:
                         "absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     },
-                    [CircleXOutlined({})],
+                    [Icon({ name: "circle-x", size: 16 })],
                   ),
                   Show({
                     when: computed(state_, (d) => !!d.footer),

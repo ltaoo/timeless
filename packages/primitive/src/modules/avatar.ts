@@ -2,7 +2,7 @@ import { computed, ref, isRef, Ref } from "@timeless/reactive";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { Img } from "@/content/img";
+import { Img, ImgProps } from "@/content/img";
 
 export function Root(
   props: ViewProps & { size?: "default" | "large" },
@@ -20,8 +20,7 @@ export function Root(
 }
 
 export function Image(
-  props: ViewProps & {
-    src: string | Ref<string>;
+  props: ImgProps & {
     alt?: string;
     onLoadingStatusChange?: (status: "loading" | "loaded" | "error") => void;
   },
@@ -90,12 +89,12 @@ export function Fallback(props: ViewProps, children?: ViewChildren) {
 
 // Convenience component that combines Root, Image, and Fallback
 export function Avatar(
-  props: ViewProps & {
-    src: string | Ref<string>;
-    alt?: string;
-    size?: "default" | "large";
-    fallback?: string;
-  },
+  props: Omit<ViewProps, "onMounted"> &
+    ImgProps & {
+      alt?: string;
+      size?: "default" | "large";
+      fallback?: string;
+    },
   children?: ViewChildren,
 ) {
   const { src, alt, fallback, size = "default", ...rest } = props || {};
@@ -103,11 +102,11 @@ export function Avatar(
   const imgError = ref(false);
   const srcRef = isRef(src) ? src : ref(src || "");
 
-  return Root({ ...rest, size }, [
+  return Root({ size }, [
     Image({
       src: srcRef,
       alt,
-      onLoadingStatusChange: (status) => {
+      onLoadingStatusChange(status) {
         imgError.as(status === "error");
       },
     }),

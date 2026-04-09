@@ -34,8 +34,6 @@ export function DOMLazyView(props: {
     render(elm: TimelessElement) {
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);
-      // 这个生命周期还是要好好捋一捋
-      common$.methods.handleElementsMounted();
       return $fragment;
     },
     replaceChildren(children: (TimelessElement | null)[]) {
@@ -50,7 +48,12 @@ export function DOMLazyView(props: {
       if ($parent) {
         $parent.appendChild($fragment);
       }
-      common$.methods.handleElementsMounted();
+      console.log(
+        "[timeless-dom]replaceChildren - before handleElementsMounted",
+      );
+      setTimeout(() => {
+        common$.methods.handleElementsMounted();
+      }, 0);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

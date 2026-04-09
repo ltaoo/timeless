@@ -124,12 +124,7 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
   // methods.setup_children(children);
   methods.setup_value_subscribe();
 
-  return View(
-    {
-      style: styleNames([props.style, style_]),
-    },
-    children,
-  );
+  return View({ ...props, style: styleNames([props.style, style_]) }, children);
   // return {
   //   t: "popper",
   //   get $elm() {

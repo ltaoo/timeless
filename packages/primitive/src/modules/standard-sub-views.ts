@@ -54,7 +54,7 @@ export function StandardSubViews(
     key: "id",
     each: subviews,
     onMounted(event) {
-      // console.log("standard-subview mounted");
+      console.log("[timeless/primitive]For in StandardSubview mounted");
       listener$.append([
         props.view.onCurViewChange((view: SubView) => {
           cur_subview.as(view);

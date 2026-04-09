@@ -2,30 +2,31 @@ import { isRef } from "@timeless/reactive";
 
 import { MountedEvent } from "@/event";
 
+import { Box, BoxProps, BoxState } from "./box";
+
+type IconProps = BoxProps & {
+  name: string;
+  color?: string;
+  size?: number;
+};
 type IconState = {
   name: string;
   size: number;
   color: string;
 };
-type IconProps = {
-  name: string;
-  color?: string;
-  size?: number;
-  onMounted?: (event: MountedEvent) => void;
-  beforeUnmounted?: () => void;
-  onUnmounted?: () => void;
-};
 
 export function Icon(props: IconProps) {
   let $elm: any = null;
-  const state: IconState = {
+  const box$ = Box<IconState>(props, {
     name: "",
     size: 24,
     color: "currentColor",
-  };
+  });
+  const state = box$.state;
 
   const methods = {
     setup_value_subscribe() {
+      box$.methods.handle_value();
       if (props.name !== undefined) {
         if (isRef(props.name)) {
           props.name.subscribe({
@@ -69,14 +70,7 @@ export function Icon(props: IconProps) {
     set $elm(v: any) {
       $elm = v;
     },
-    state: {
-      name: state.name,
-      color: state.color,
-      size: state.size,
-    },
-    render() {
-      return $elm;
-    },
+    state,
     onMounted(event: MountedEvent) {
       if (props.onMounted) {
         props.onMounted(event);

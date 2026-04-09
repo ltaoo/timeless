@@ -125,6 +125,7 @@ export default function OverlayView() {
       store: ui.view$,
     },
     [
+      Icon({ class: "123", name: "bolt" }),
       DropdownMenu(
         {
           store: new Timeless.ui.DropdownMenuCore({

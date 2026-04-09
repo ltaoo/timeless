@@ -1,7 +1,13 @@
 import { HistoryCore } from "@timeless/kit";
-import { computed, combine, refarr, refobj, ref } from "@timeless/timeless";
+import {
+  computed,
+  combine,
+  refarr,
+  refobj,
+  ref,
+  Icon,
+} from "@timeless/timeless";
 import { View, ViewProps, For, Show, Txt } from "@timeless/timeless";
-import { ChevronDownOutlined, ChevronUpOutlined } from "@timeless/icons";
 
 export function HistoryPanel(
   props: ViewProps & { store: HistoryCore<string, any> },
@@ -53,9 +59,9 @@ export function HistoryPanel(
                 when: collapsed,
                 ok() {
                   return [
-                    ChevronDownOutlined({
-                      class: "text-zinc-500 dark:text-zinc-400",
-                    }),
+                    View({ class: "text-zinc-500 dark:text-zinc-400" }, [
+                      Icon({ name: "chevron-right", size: 16 }),
+                    ]),
                   ];
                 },
               }),
@@ -63,9 +69,9 @@ export function HistoryPanel(
                 when: computed(collapsed, (c) => !c),
                 ok() {
                   return [
-                    ChevronUpOutlined({
-                      class: "text-zinc-500 dark:text-zinc-400",
-                    }),
+                    View({ class: "text-zinc-500 dark:text-zinc-400" }, [
+                      Icon({ name: "arrow-down-to-line", size: 16 }),
+                    ]),
                   ];
                 },
               }),

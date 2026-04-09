@@ -12,7 +12,7 @@ export function HostElement(props: {
   $elm: null | HTMLElement | Text;
   build: (elm: TimelessElement) => VNodeView<any>;
 }) {
-  const { $elm } = props;
+  let $elm = props.$elm;
 
   /** 宿主平台的子节点列表 */
   let child_host_nodes: any[] = [];
@@ -22,6 +22,9 @@ export function HostElement(props: {
   let child_elements: TimelessElement[] = [];
 
   const methods = {
+    set$elm(elm: any) {
+      $elm = elm;
+    },
     getChildren() {
       return child_nodes;
     },
@@ -83,6 +86,9 @@ export function HostElement(props: {
       }
       $elm.addEventListener(type, handler, options);
       return function () {
+        if (!$elm || $elm instanceof Text) {
+          return;
+        }
         $elm.removeEventListener(type, handler, options);
       };
     },
@@ -198,7 +204,7 @@ export function HostElement(props: {
       return $fragment;
     },
     handleElementsMounted() {
-      // console.log(props.t + "[]box handleElements Mounted", child_elements);
+      console.log(props.t + "[]box handleElements Mounted", child_elements);
       for (const child of child_elements) {
         if (child.onMounted) {
           child.onMounted({
@@ -214,6 +220,7 @@ export function HostElement(props: {
         }
       }
     },
+    /** 应该重命名为 build children */
     appendChildren(children: (TimelessElement | null)[]) {
       // console.log("append children", children);
       const $fragment = document.createDocumentFragment();
@@ -236,28 +243,18 @@ export function HostElement(props: {
           }
         }
       }
-      // for (let child of child_elements) {
-      //   if (child.onMounted) {
-      //     child.onMounted({
-      //       target: child.$elm,
-      //     });
-      //   }
-      // }
       return $fragment;
     },
     insertChildren(children: (TimelessElement | null)[]) {
-      const $fragment = this.appendChildren(children);
+      const $fragment = methods.appendChildren(children);
       const $parent = methods.getParent();
       if ($parent) {
         $parent.appendChild($fragment);
       }
-      for (let child of child_elements) {
-        if (child.onMounted) {
-          child.onMounted({
-            target: child.$elm,
-          });
-        }
-      }
+      setTimeout(() => {
+        console.log("invoke children onMounted function");
+        methods.handleElementsMounted();
+      }, 0);
     },
     removeChildren() {
       if (child_host_nodes.length === 0) {
@@ -281,11 +278,7 @@ export function HostElement(props: {
       //   props.t + "[]removeChildren invoke onUnmounted",
       //   child_elements,
       // );
-      for (let child of child_elements) {
-        if (child.onUnmounted) {
-          child.onUnmounted();
-        }
-      }
+      methods.handleElementUnmounted();
       child_elements = [];
       child_host_nodes = [];
       child_nodes = [];

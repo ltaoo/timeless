@@ -243,7 +243,7 @@ export default function OverlayView() {
                   new Timeless.ui.MenuItemCore({
                     label: "Paste",
                     shortcut: "⌘V",
-                    icon: Icon({ name: "arrow-download-to-line" }),
+                    icon: Icon({ name: "arrow-down-to-line" }),
                     onClick() {
                       console.log("paste");
                     },
@@ -612,7 +612,7 @@ export default function OverlayView() {
                       new Timeless.ui.MenuItemCore({
                         label: "Cut",
                         // shortcut: "⌘X",
-                        icon: Icon({ name: "bolt" }),
+                        icon: Icon({ name: "bolt", size: 16 }),
                         onClick() {
                           console.log("cut");
                         },
@@ -620,7 +620,7 @@ export default function OverlayView() {
                       new Timeless.ui.MenuItemCore({
                         label: "Copy",
                         shortcut: "⌘C",
-                        icon: Icon({ name: "file-symlink", size: 24 }),
+                        icon: Icon({ name: "file-symlink", size: 16 }),
                         onClick() {
                           console.log("copy");
                         },
@@ -628,7 +628,7 @@ export default function OverlayView() {
                       new Timeless.ui.MenuItemCore({
                         label: "Paste",
                         shortcut: "⌘V",
-                        icon: Icon({ name: "arrow-download-to-line" }),
+                        icon: Icon({ name: "arrow-down-to-line", size: 16 }),
                         onClick() {
                           console.log("paste");
                         },

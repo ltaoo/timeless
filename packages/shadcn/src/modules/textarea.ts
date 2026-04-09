@@ -1,7 +1,6 @@
-import { combine, computed, refobj } from "@timeless/timeless";
+import { combine, computed, Icon, refobj, View } from "@timeless/timeless";
 import { TextareaPrimitive, Show, ViewProps } from "@timeless/timeless";
 import { InputCore } from "@timeless/ui";
-import { CircleXOutlined, LoaderOutlined } from "@timeless/icons";
 
 export function Textarea(
   props: ViewProps & {
@@ -56,7 +55,7 @@ export function Textarea(
                     : "hidden",
                 ),
               },
-              [CircleXOutlined({ class: "size-4" }, [])],
+              [Icon({ name: "circle-x" })],
             ),
           ];
         },
@@ -74,7 +73,14 @@ export function Textarea(
                     : "hidden",
                 ),
               },
-              [LoaderOutlined({ class: "size-4 animate-spin" }, [])],
+              [
+                View(
+                  {
+                    class: "animate-spin",
+                  },
+                  [Icon({ name: "loader", size: 16 })],
+                ),
+              ],
             ),
           ];
         },

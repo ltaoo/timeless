@@ -1,4 +1,10 @@
-import { classNames, combine, computed, refobj } from "@timeless/timeless";
+import {
+  classNames,
+  combine,
+  computed,
+  Icon,
+  refobj,
+} from "@timeless/timeless";
 import {
   DatePickerPrimitive,
   TimePickerPrimitive,
@@ -9,11 +15,6 @@ import {
   ScrollViewPrimitive,
 } from "@timeless/timeless";
 import { DatePickerCore, ScrollViewCore, TimePickerCore } from "@timeless/ui";
-import {
-  CalendarOutlined,
-  ChevronLeftOutlined,
-  ChevronRightOutlined,
-} from "@timeless/icons";
 
 export function DateTimePicker(
   props: ViewProps & {
@@ -173,7 +174,7 @@ export function DateTimePicker(
           ],
         ),
         DatePickerPrimitive.Icon({ class: "size-4 text-muted-foreground" }, [
-          CalendarOutlined({}),
+          Icon({ name: "calendar", size: 16 }),
         ]),
       ],
     ),
@@ -217,7 +218,7 @@ export function DateTimePicker(
                         class:
                           "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                       },
-                      [ChevronLeftOutlined({ class: "size-4" })],
+                      [Icon({ name: "chevron-left", size: 16 })],
                     ),
                     DatePickerPrimitive.CalendarHeader({
                       store: date$,
@@ -229,7 +230,7 @@ export function DateTimePicker(
                         class:
                           "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                       },
-                      [ChevronRightOutlined({ class: "size-4" })],
+                      [Icon({ name: "chevron-right", size: 16 })],
                     ),
                   ],
                 ),

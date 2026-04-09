@@ -312,50 +312,37 @@ function DownloadTaskItem(props) {
   );
 }
 
-export default function HomeIndexScrollViewExampleView() {
+/**
+ *
+ * @param {ViewComponentProps} props
+ * @returns
+ */
+export default function HomeIndexScrollViewExampleView(props) {
   const view$ = new Timeless.ui.ScrollViewCore({});
-  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
-    View({ class: "space-y-8" }, [
-      Section("ScrollView", [
-        Item("Basic", [
-          View({ class: classNames(["w-[300px] h-[200px]"]) }, [
-            ScrollView(
-              {
-                store: new Timeless.ui.ScrollViewCore(),
-                class: classNames([
-                  "rounded-md border border-zinc-200 dark:border-zinc-800",
-                ]).toString(),
-              },
-              [
-                View({ class: classNames(["p-4 space-y-4"]) }, [
-                  ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) =>
-                    View(
-                      {
-                        class: classNames([
-                          "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
-                        ]),
-                      },
-                      [Txt(`Item ${i} — Scrollable content`)],
-                    ),
-                  ),
-                ]),
-              ],
-            ),
-          ]),
-        ]),
-        Item("Pull to Refresh", [
-          (() => {
-            const store = new Timeless.ui.ScrollViewCore({
-              onPullToRefresh() {
-                setTimeout(() => {
-                  store.finishPullToRefresh();
-                }, 1500);
-              },
-            });
-            return View({ class: classNames(["w-[300px] h-[200px]"]) }, [
+  const listener$ = ListenerManager();
+
+  props.history.onRouteChange((v) => {
+    if (v.view !== props.view) {
+      listener$.clean();
+    }
+  });
+
+  return ScrollView(
+    {
+      class: "p-6 h-screen",
+      store: view$,
+      onUnmounted() {
+        listener$.clear();
+      },
+    },
+    [
+      View({ class: "space-y-8" }, [
+        Section("ScrollView", [
+          Item("Basic", [
+            View({ class: classNames(["w-[300px] h-[200px]"]) }, [
               ScrollView(
                 {
-                  store,
+                  store: new Timeless.ui.ScrollViewCore(),
                   class: classNames([
                     "rounded-md border border-zinc-200 dark:border-zinc-800",
                   ]).toString(),
@@ -369,81 +356,24 @@ export default function HomeIndexScrollViewExampleView() {
                             "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
                           ]),
                         },
-                        [Txt(`Pull down to refresh — Item ${i}`)],
+                        [Txt(`Item ${i} — Scrollable content`)],
                       ),
                     ),
                   ]),
                 ],
               ),
-            ]);
-          })(),
-        ]),
-        Item("Reach Bottom", [
-          (() => {
-            const items = refarr(
-              Array.from({ length: 10 }, (_, i) => `Item ${i + 1}`),
-            );
-            const store = new Timeless.ui.ScrollViewCore({
-              onReachBottom() {
-                const cur = items.value.length;
-                const more = Array.from(
-                  { length: 5 },
-                  (_, i) => `Item ${cur + i + 1}`,
-                );
-                items.as([...items.value, ...more]);
-                store.finishLoadingMore();
-              },
-            });
-            return View({ class: classNames(["w-[300px] h-[200px]"]) }, [
-              ScrollView(
-                {
-                  store,
-                  class: classNames([
-                    "rounded-md border border-zinc-200 dark:border-zinc-800",
-                  ]).toString(),
+            ]),
+          ]),
+          Item("Pull to Refresh", [
+            (() => {
+              const store = new Timeless.ui.ScrollViewCore({
+                onPullToRefresh() {
+                  setTimeout(() => {
+                    store.finishPullToRefresh();
+                  }, 1500);
                 },
-                [
-                  View({ class: classNames(["p-4"]) }, [
-                    For({
-                      each: items,
-                      render(item) {
-                        return View(
-                          {
-                            class: classNames([
-                              "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
-                            ]),
-                          },
-                          [Txt(item)],
-                        );
-                      },
-                    }),
-                    View(
-                      {
-                        class: classNames([
-                          "py-3 text-center text-xs text-zinc-400",
-                        ]),
-                      },
-                      [Txt("Scroll to bottom to load more")],
-                    ),
-                  ]),
-                ],
-              ),
-            ]);
-          })(),
-        ]),
-        Item("Scroll Events", [
-          (() => {
-            const scrollTop = ref(0);
-            const store = new Timeless.ui.ScrollViewCore({
-              onScroll(pos) {
-                scrollTop.as(Math.round(pos.scrollTop));
-              },
-            });
-            return View({ class: classNames(["space-y-2"]) }, [
-              View({ class: classNames(["text-xs text-zinc-400"]) }, [
-                Txt(computed(scrollTop, (v) => `scrollTop: ${v}px`)),
-              ]),
-              View({ class: classNames(["w-[300px] h-[200px]"]) }, [
+              });
+              return View({ class: classNames(["w-[300px] h-[200px]"]) }, [
                 ScrollView(
                   {
                     store,
@@ -453,516 +383,224 @@ export default function HomeIndexScrollViewExampleView() {
                   },
                   [
                     View({ class: classNames(["p-4 space-y-4"]) }, [
-                      ...[
-                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-                      ].map((i) =>
+                      ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) =>
                         View(
                           {
                             class: classNames([
                               "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
                             ]),
                           },
-                          [Txt(`Scroll me — Item ${i}`)],
+                          [Txt(`Pull down to refresh — Item ${i}`)],
                         ),
                       ),
                     ]),
                   ],
                 ),
-              ]),
-            ]);
-          })(),
-        ]),
-      ]),
-      Section("Virtual List (Waterfall)", [
-        Item("Infinite Scroll — Completed Downloads", [
-          (() => {
-            const ITEM_HEIGHT = 56;
-            let nextId = 1;
-
-            const fileNames = [
-              "project-archive.zip",
-              "design-assets.psd",
-              "video-tutorial.mp4",
-              "database-backup.sql",
-              "photo-gallery.jpg",
-              "report-2024.pdf",
-              "music-collection.mp3",
-              "source-code.tar.gz",
-              "presentation.pptx",
-              "firmware-update.bin",
-              "app-installer.dmg",
-              "font-pack.otf",
-              "dataset-train.csv",
-              "wallpaper-4k.png",
-              "ebook-guide.epub",
-            ];
-
-            function generateDownloads(count) {
-              return Array.from({ length: count }, () => {
-                const id = nextId++;
-                return {
-                  id,
-                  name: fileNames[(id - 1) % fileNames.length],
-                  size: Math.floor(Math.random() * 500000000) + 1000000,
-                  status: "completed",
-                  progress: 100,
-                  height: ITEM_HEIGHT,
-                };
+              ]);
+            })(),
+          ]),
+          Item("Reach Bottom", [
+            (() => {
+              const items = refarr(
+                Array.from({ length: 10 }, (_, i) => `Item ${i + 1}`),
+              );
+              const store = new Timeless.ui.ScrollViewCore({
+                onReachBottom() {
+                  const cur = items.value.length;
+                  const more = Array.from(
+                    { length: 5 },
+                    (_, i) => `Item ${cur + i + 1}`,
+                  );
+                  items.as([...items.value, ...more]);
+                  store.finishLoadingMore();
+                },
               });
-            }
-
-            const waterfall = Timeless.ui.WaterfallModel({
-              column: 1,
-              size: 10,
-              buffer: 3,
-              gutter: 0,
-            });
-
-            // Initial data
-            let totalItemCount = 30;
-            waterfall.methods.appendItems(generateDownloads(totalItemCount));
-
-            const totalCount = ref(totalItemCount);
-
-            const scrollStore = new Timeless.ui.ScrollViewCore({
-              onScroll(pos) {
-                waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
-              },
-              onReachBottom() {
-                const newItems = generateDownloads(10);
-                waterfall.methods.appendItems(newItems);
-                totalItemCount += 10;
-                totalCount.as(totalItemCount);
-                scrollStore.finishLoadingMore();
-              },
-            });
-
-            return View(
-              {
-                class: classNames([
-                  "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
-                ]),
-              },
-              [
-                // Header
-                View(
+              return View({ class: classNames(["w-[300px] h-[200px]"]) }, [
+                ScrollView(
                   {
+                    store,
                     class: classNames([
-                      "flex items-center justify-between px-3 py-2.5",
-                      "border-b border-zinc-200 dark:border-zinc-800",
-                      "bg-zinc-50 dark:bg-zinc-900",
-                    ]),
+                      "rounded-md border border-zinc-200 dark:border-zinc-800",
+                    ]).toString(),
                   },
                   [
-                    View(
-                      {
-                        class: classNames([
-                          "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
-                        ]),
-                      },
-                      [
-                        Txt("Completed Downloads"),
-                        Txt(computed(totalCount, (c) => ` (${c})`)),
-                      ],
-                    ),
-                  ],
-                ),
-                // ScrollView + Waterfall
-                View({ class: "h-[300px]" }, [
-                  ScrollView({ store: scrollStore }, [
-                    Waterfall({
-                      store: waterfall,
-                      class: "!overflow-visible !h-auto",
-                      /** @param {{name: string; size: number}} task  */
-                      render(task) {
-                        return View(
-                          {
-                            class: classNames([
-                              "flex items-center gap-3 px-3 py-2.5",
-                              "border-b border-zinc-100 dark:border-zinc-800",
-                            ]),
-                          },
-                          [
-                            View(
-                              {
-                                class: classNames([
-                                  "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                                ]),
-                              },
-                              [
-                                (() => {
-                                  if (task.name) {
-                                    const ext = task.name
-                                      .split(".")
-                                      .pop()
-                                      .toUpperCase();
-                                    return ext.length <= 4 ? ext : "FILE";
-                                  }
-                                  return "FILE";
-                                })(),
-                              ],
-                            ),
-                            View({ class: "flex-1 min-w-0" }, [
-                              View(
-                                {
-                                  class:
-                                    "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                                },
-                                [task.name],
-                              ),
-                              View(
-                                {
-                                  class: "mt-0.5 text-xs text-emerald-500",
-                                },
-                                [formatSize(task.size)],
-                              ),
-                            ]),
-                            View(
-                              {
-                                class:
-                                  "flex-shrink-0 text-xs text-emerald-500 font-medium",
-                              },
-                              ["Done"],
-                            ),
-                          ],
-                        );
-                      },
-                    }),
-                    View(
-                      {
-                        class: classNames([
-                          "py-3 text-center text-xs text-zinc-400",
-                        ]),
-                      },
-                      [Txt("Scroll to bottom to load more")],
-                    ),
-                  ]),
-                ]),
-              ],
-            );
-          })(),
-        ]),
-        Item("Unshift Items — Prepend Downloads", [
-          (() => {
-            const ITEM_HEIGHT = 56;
-            let nextId = 1;
-
-            const fileNames = [
-              "backup-daily.zip",
-              "logs-server.txt",
-              "snapshot-db.sql",
-              "metrics-export.csv",
-              "config-prod.yaml",
-              "cert-renewal.pem",
-              "audit-trail.json",
-              "cache-dump.bin",
-            ];
-
-            function generateDownloads(count) {
-              return Array.from({ length: count }, () => {
-                const id = nextId++;
-                return {
-                  id,
-                  name: fileNames[(id - 1) % fileNames.length],
-                  size: Math.floor(Math.random() * 500000000) + 1000000,
-                  status: "completed",
-                  progress: 100,
-                  height: ITEM_HEIGHT,
-                };
-              });
-            }
-
-            const waterfall = Timeless.ui.WaterfallModel({
-              column: 1,
-              size: 10,
-              buffer: 3,
-              gutter: 0,
-            });
-
-            let totalItemCount = 20;
-            waterfall.methods.appendItems(generateDownloads(totalItemCount));
-
-            const totalCount = ref(totalItemCount);
-
-            const scrollStore = new Timeless.ui.ScrollViewCore({
-              onScroll(pos) {
-                waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
-              },
-              onReachBottom() {
-                const newItems = generateDownloads(10);
-                waterfall.methods.appendItems(newItems);
-                totalItemCount += 10;
-                totalCount.as(totalItemCount);
-                scrollStore.finishLoadingMore();
-              },
-            });
-
-            function handleUnshift() {
-              const count = 5;
-              const newItems = generateDownloads(count);
-              const cells = waterfall.methods.unshiftItems(newItems);
-              totalItemCount += count;
-              totalCount.as(totalItemCount);
-              // Adjust scroll position to keep current view stable
-              const addedHeight = count * ITEM_HEIGHT;
-              scrollStore.addScrollTop(addedHeight);
-            }
-
-            return View(
-              {
-                class: classNames([
-                  "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
-                ]),
-              },
-              [
-                // Header
-                View(
-                  {
-                    class: classNames([
-                      "flex items-center justify-between px-3 py-2.5",
-                      "border-b border-zinc-200 dark:border-zinc-800",
-                      "bg-zinc-50 dark:bg-zinc-900",
+                    View({ class: classNames(["p-4"]) }, [
+                      For({
+                        each: items,
+                        render(item) {
+                          return View(
+                            {
+                              class: classNames([
+                                "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
+                              ]),
+                            },
+                            [Txt(item)],
+                          );
+                        },
+                      }),
+                      View(
+                        {
+                          class: classNames([
+                            "py-3 text-center text-xs text-zinc-400",
+                          ]),
+                        },
+                        [Txt("Scroll to bottom to load more")],
+                      ),
                     ]),
-                  },
-                  [
-                    View(
-                      {
-                        class: classNames([
-                          "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
-                        ]),
-                      },
-                      [
-                        Txt("Download History"),
-                        Txt(computed(totalCount, (c) => ` (${c})`)),
-                      ],
-                    ),
-                    Button(
-                      {
-                        store: new Timeless.ui.ButtonCore({
-                          size: "sm",
-                          variant: "outline",
-                          onClick() {
-                            handleUnshift();
-                          },
-                        }),
-                      },
-                      ["+ Prepend 5"],
-                    ),
                   ],
                 ),
-                // ScrollView + Waterfall
-                View({ class: "h-[300px]" }, [
-                  ScrollView({ store: scrollStore }, [
-                    Waterfall({
-                      store: waterfall,
-                      class: "!overflow-visible !h-auto",
-                      /** @param {{id: number; name: string; size: number}} task */
-                      render(task) {
-                        return View(
-                          {
-                            class: classNames([
-                              "flex items-center gap-3 px-3 py-2.5",
-                              "border-b border-zinc-100 dark:border-zinc-800",
-                            ]),
-                          },
-                          [
-                            View(
-                              {
-                                class: classNames([
-                                  "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                                ]),
-                              },
-                              [
-                                (() => {
-                                  if (task.name) {
-                                    const ext = task.name
-                                      .split(".")
-                                      .pop()
-                                      .toUpperCase();
-                                    return ext.length <= 4 ? ext : "FILE";
-                                  }
-                                  return "FILE";
-                                })(),
-                              ],
-                            ),
-                            View({ class: "flex-1 min-w-0" }, [
-                              View(
-                                {
-                                  class:
-                                    "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                                },
-                                [`#${task.id} ${task.name}`],
-                              ),
-                              View(
-                                {
-                                  class: "mt-0.5 text-xs text-emerald-500",
-                                },
-                                [formatSize(task.size)],
-                              ),
-                            ]),
-                            View(
-                              {
-                                class:
-                                  "flex-shrink-0 text-xs text-emerald-500 font-medium",
-                              },
-                              ["Done"],
-                            ),
-                          ],
-                        );
-                      },
-                    }),
-                    View(
-                      {
-                        class: classNames([
-                          "py-3 text-center text-xs text-zinc-400",
-                        ]),
-                      },
-                      [Txt("Scroll to bottom to load more")],
-                    ),
-                  ]),
-                ]),
-              ],
-            );
-          })(),
-        ]),
-        Item("Unshift Items with Gutter — Test Jitter", [
-          (() => {
-            const ITEM_HEIGHT = 56;
-            const GUTTER = 8;
-            let nextId = 1;
-
-            const fileNames = [
-              "backup-daily.zip",
-              "logs-server.txt",
-              "snapshot-db.sql",
-              "metrics-export.csv",
-              "config-prod.yaml",
-              "cert-renewal.pem",
-              "audit-trail.json",
-              "cache-dump.bin",
-            ];
-
-            function generateDownloads(count) {
-              return Array.from({ length: count }, () => {
-                const id = nextId++;
-                return {
-                  id,
-                  name: fileNames[(id - 1) % fileNames.length],
-                  size: Math.floor(Math.random() * 500000000) + 1000000,
-                  status: "completed",
-                  progress: 100,
-                  height: ITEM_HEIGHT,
-                };
+              ]);
+            })(),
+          ]),
+          Item("Scroll Events", [
+            (() => {
+              const scrollTop = ref(0);
+              const store = new Timeless.ui.ScrollViewCore({
+                onScroll(pos) {
+                  scrollTop.as(Math.round(pos.scrollTop));
+                },
               });
-            }
-
-            const waterfall = Timeless.ui.WaterfallModel({
-              column: 1,
-              size: 10,
-              buffer: 3,
-              gutter: GUTTER,
-            });
-
-            let totalItemCount = 20;
-            waterfall.methods.appendItems(generateDownloads(totalItemCount));
-
-            const totalCount = ref(totalItemCount);
-
-            let loadedMore = false;
-
-            const scrollStore = new Timeless.ui.ScrollViewCore({
-              onScroll(pos) {
-                waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
-              },
-              onReachBottom() {
-                if (loadedMore) {
-                  scrollStore.finishLoadingMore();
-                  return;
-                }
-                loadedMore = true;
-                const newItems = generateDownloads(10);
-                waterfall.methods.appendItems(newItems);
-                totalItemCount += 10;
-                totalCount.as(totalItemCount);
-                scrollStore.finishLoadingMore();
-              },
-            });
-
-            function handleUnshift() {
-              const count = 5;
-              const newItems = generateDownloads(count);
-              waterfall.methods.unshiftItems(newItems);
-              totalItemCount += count;
-              totalCount.as(totalItemCount);
-              // Adjust scroll position: each prepended item adds its height + gutter
-              const addedHeight = count * (ITEM_HEIGHT + GUTTER);
-              scrollStore.addScrollTop(addedHeight);
-            }
-
-            return View(
-              {
-                class: classNames([
-                  "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+              return View({ class: classNames(["space-y-2"]) }, [
+                View({ class: classNames(["text-xs text-zinc-400"]) }, [
+                  Txt(computed(scrollTop, (v) => `scrollTop: ${v}px`)),
                 ]),
-              },
-              [
-                // Header
-                View(
-                  {
-                    class: classNames([
-                      "flex items-center justify-between px-3 py-2.5",
-                      "border-b border-zinc-200 dark:border-zinc-800",
-                      "bg-zinc-50 dark:bg-zinc-900",
-                    ]),
-                  },
-                  [
-                    View(
-                      {
-                        class: classNames([
-                          "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
-                        ]),
-                      },
-                      [
-                        Txt("Gutter Test"),
-                        Txt(computed(totalCount, (c) => ` (${c})`)),
-                      ],
-                    ),
-                    Button(
-                      {
-                        store: new Timeless.ui.ButtonCore({
-                          size: "sm",
-                          variant: "outline",
-                          onClick() {
-                            handleUnshift();
-                          },
-                        }),
-                      },
-                      ["+ Prepend 5"],
-                    ),
-                  ],
-                ),
-                // ScrollView + Waterfall
-                View({ class: "h-[300px]" }, [
+                View({ class: classNames(["w-[300px] h-[200px]"]) }, [
                   ScrollView(
                     {
-                      store: scrollStore,
-                      class: "bg-zinc-100 dark:bg-zinc-900",
+                      store,
+                      class: classNames([
+                        "rounded-md border border-zinc-200 dark:border-zinc-800",
+                      ]).toString(),
                     },
                     [
+                      View({ class: classNames(["p-4 space-y-4"]) }, [
+                        ...[
+                          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                        ].map((i) =>
+                          View(
+                            {
+                              class: classNames([
+                                "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
+                              ]),
+                            },
+                            [Txt(`Scroll me — Item ${i}`)],
+                          ),
+                        ),
+                      ]),
+                    ],
+                  ),
+                ]),
+              ]);
+            })(),
+          ]),
+        ]),
+        Section("Virtual List (Waterfall)", [
+          Item("Infinite Scroll — Completed Downloads", [
+            (() => {
+              const ITEM_HEIGHT = 56;
+              let nextId = 1;
+
+              const fileNames = [
+                "project-archive.zip",
+                "design-assets.psd",
+                "video-tutorial.mp4",
+                "database-backup.sql",
+                "photo-gallery.jpg",
+                "report-2024.pdf",
+                "music-collection.mp3",
+                "source-code.tar.gz",
+                "presentation.pptx",
+                "firmware-update.bin",
+                "app-installer.dmg",
+                "font-pack.otf",
+                "dataset-train.csv",
+                "wallpaper-4k.png",
+                "ebook-guide.epub",
+              ];
+
+              function generateDownloads(count) {
+                return Array.from({ length: count }, () => {
+                  const id = nextId++;
+                  return {
+                    id,
+                    name: fileNames[(id - 1) % fileNames.length],
+                    size: Math.floor(Math.random() * 500000000) + 1000000,
+                    status: "completed",
+                    progress: 100,
+                    height: ITEM_HEIGHT,
+                  };
+                });
+              }
+
+              const waterfall = Timeless.ui.WaterfallModel({
+                column: 1,
+                size: 10,
+                buffer: 3,
+                gutter: 0,
+              });
+
+              // Initial data
+              let totalItemCount = 30;
+              waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+              const totalCount = ref(totalItemCount);
+
+              const scrollStore = new Timeless.ui.ScrollViewCore({
+                onScroll(pos) {
+                  waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+                },
+                onReachBottom() {
+                  const newItems = generateDownloads(10);
+                  waterfall.methods.appendItems(newItems);
+                  totalItemCount += 10;
+                  totalCount.as(totalItemCount);
+                  scrollStore.finishLoadingMore();
+                },
+              });
+
+              return View(
+                {
+                  class: classNames([
+                    "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+                  ]),
+                },
+                [
+                  // Header
+                  View(
+                    {
+                      class: classNames([
+                        "flex items-center justify-between px-3 py-2.5",
+                        "border-b border-zinc-200 dark:border-zinc-800",
+                        "bg-zinc-50 dark:bg-zinc-900",
+                      ]),
+                    },
+                    [
+                      View(
+                        {
+                          class: classNames([
+                            "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                          ]),
+                        },
+                        [
+                          Txt("Completed Downloads"),
+                          Txt(computed(totalCount, (c) => ` (${c})`)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  // ScrollView + Waterfall
+                  View({ class: "h-[300px]" }, [
+                    ScrollView({ store: scrollStore }, [
                       Waterfall({
                         store: waterfall,
-                        class:
-                          "bg-zinc-100 dark:bg-zinc-900 !overflow-visible !h-auto px-2 pt-2",
-                        /** @param {{id: number; name: string; size: number}} task */
+                        class: "!overflow-visible !h-auto",
+                        /** @param {{name: string; size: number}} task  */
                         render(task) {
                           return View(
                             {
                               class: classNames([
                                 "flex items-center gap-3 px-3 py-2.5",
-                                "rounded-lg",
-                                "shadow-sm",
+                                "border-b border-zinc-100 dark:border-zinc-800",
                               ]),
                             },
                             [
@@ -970,7 +608,191 @@ export default function HomeIndexScrollViewExampleView() {
                                 {
                                   class: classNames([
                                     "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                    "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
+                                    "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                  ]),
+                                },
+                                [
+                                  (() => {
+                                    if (task.name) {
+                                      const ext = task.name
+                                        .split(".")
+                                        .pop()
+                                        .toUpperCase();
+                                      return ext.length <= 4 ? ext : "FILE";
+                                    }
+                                    return "FILE";
+                                  })(),
+                                ],
+                              ),
+                              View({ class: "flex-1 min-w-0" }, [
+                                View(
+                                  {
+                                    class:
+                                      "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                                  },
+                                  [task.name],
+                                ),
+                                View(
+                                  {
+                                    class: "mt-0.5 text-xs text-emerald-500",
+                                  },
+                                  [formatSize(task.size)],
+                                ),
+                              ]),
+                              View(
+                                {
+                                  class:
+                                    "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                },
+                                ["Done"],
+                              ),
+                            ],
+                          );
+                        },
+                      }),
+                      View(
+                        {
+                          class: classNames([
+                            "py-3 text-center text-xs text-zinc-400",
+                          ]),
+                        },
+                        [Txt("Scroll to bottom to load more")],
+                      ),
+                    ]),
+                  ]),
+                ],
+              );
+            })(),
+          ]),
+          Item("Unshift Items — Prepend Downloads", [
+            (() => {
+              const ITEM_HEIGHT = 56;
+              let nextId = 1;
+
+              const fileNames = [
+                "backup-daily.zip",
+                "logs-server.txt",
+                "snapshot-db.sql",
+                "metrics-export.csv",
+                "config-prod.yaml",
+                "cert-renewal.pem",
+                "audit-trail.json",
+                "cache-dump.bin",
+              ];
+
+              function generateDownloads(count) {
+                return Array.from({ length: count }, () => {
+                  const id = nextId++;
+                  return {
+                    id,
+                    name: fileNames[(id - 1) % fileNames.length],
+                    size: Math.floor(Math.random() * 500000000) + 1000000,
+                    status: "completed",
+                    progress: 100,
+                    height: ITEM_HEIGHT,
+                  };
+                });
+              }
+
+              const waterfall = Timeless.ui.WaterfallModel({
+                column: 1,
+                size: 10,
+                buffer: 3,
+                gutter: 0,
+              });
+
+              let totalItemCount = 20;
+              waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+              const totalCount = ref(totalItemCount);
+
+              const scrollStore = new Timeless.ui.ScrollViewCore({
+                onScroll(pos) {
+                  waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+                },
+                onReachBottom() {
+                  const newItems = generateDownloads(10);
+                  waterfall.methods.appendItems(newItems);
+                  totalItemCount += 10;
+                  totalCount.as(totalItemCount);
+                  scrollStore.finishLoadingMore();
+                },
+              });
+
+              function handleUnshift() {
+                const count = 5;
+                const newItems = generateDownloads(count);
+                const cells = waterfall.methods.unshiftItems(newItems);
+                totalItemCount += count;
+                totalCount.as(totalItemCount);
+                // Adjust scroll position to keep current view stable
+                const addedHeight = count * ITEM_HEIGHT;
+                scrollStore.addScrollTop(addedHeight);
+              }
+
+              return View(
+                {
+                  class: classNames([
+                    "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+                  ]),
+                },
+                [
+                  // Header
+                  View(
+                    {
+                      class: classNames([
+                        "flex items-center justify-between px-3 py-2.5",
+                        "border-b border-zinc-200 dark:border-zinc-800",
+                        "bg-zinc-50 dark:bg-zinc-900",
+                      ]),
+                    },
+                    [
+                      View(
+                        {
+                          class: classNames([
+                            "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                          ]),
+                        },
+                        [
+                          Txt("Download History"),
+                          Txt(computed(totalCount, (c) => ` (${c})`)),
+                        ],
+                      ),
+                      Button(
+                        {
+                          store: new Timeless.ui.ButtonCore({
+                            size: "sm",
+                            variant: "outline",
+                            onClick() {
+                              handleUnshift();
+                            },
+                          }),
+                        },
+                        ["+ Prepend 5"],
+                      ),
+                    ],
+                  ),
+                  // ScrollView + Waterfall
+                  View({ class: "h-[300px]" }, [
+                    ScrollView({ store: scrollStore }, [
+                      Waterfall({
+                        store: waterfall,
+                        class: "!overflow-visible !h-auto",
+                        /** @param {{id: number; name: string; size: number}} task */
+                        render(task) {
+                          return View(
+                            {
+                              class: classNames([
+                                "flex items-center gap-3 px-3 py-2.5",
+                                "border-b border-zinc-100 dark:border-zinc-800",
+                              ]),
+                            },
+                            [
+                              View(
+                                {
+                                  class: classNames([
+                                    "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                    "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
                                   ]),
                                 },
                                 [
@@ -996,7 +818,7 @@ export default function HomeIndexScrollViewExampleView() {
                                 ),
                                 View(
                                   {
-                                    class: "mt-0.5 text-xs text-zinc-400",
+                                    class: "mt-0.5 text-xs text-emerald-500",
                                   },
                                   [formatSize(task.size)],
                                 ),
@@ -1004,721 +826,334 @@ export default function HomeIndexScrollViewExampleView() {
                               View(
                                 {
                                   class:
-                                    "flex-shrink-0 flex items-center gap-2",
+                                    "flex-shrink-0 text-xs text-emerald-500 font-medium",
                                 },
-                                [
-                                  View(
-                                    {
-                                      class:
-                                        "text-xs text-emerald-500 font-medium",
-                                    },
-                                    ["Done"],
-                                  ),
-                                  Button(
-                                    {
-                                      class:
-                                        "text-xs text-red-400 hover:text-red-600",
-                                      store: new Timeless.ui.ButtonCore({
-                                        size: "sm",
-                                        variant: "ghost",
-                                        onClick() {
-                                          waterfall.methods.deleteCell(
-                                            (v) => v.id === task.id,
-                                          );
-                                          totalItemCount -= 1;
-                                          totalCount.as(totalItemCount);
-                                        },
-                                      }),
-                                    },
-                                    ["Delete"],
-                                  ),
-                                ],
+                                ["Done"],
                               ),
                             ],
                           );
                         },
                       }),
-                    ],
-                  ),
-                ]),
-              ],
-            );
-          })(),
-        ]),
-        Item("Clear Downloads", [
-          (() => {
-            const ITEM_HEIGHT = 56;
-            let nextId = 1;
-
-            const fileNames = [
-              "project-archive.zip",
-              "design-assets.psd",
-              "video-tutorial.mp4",
-              "database-backup.sql",
-              "photo-gallery.jpg",
-              "report-2024.pdf",
-              "music-collection.mp3",
-              "source-code.tar.gz",
-            ];
-
-            function generateDownloads(count) {
-              return Array.from({ length: count }, () => {
-                const id = nextId++;
-                return {
-                  id,
-                  name: fileNames[(id - 1) % fileNames.length],
-                  size: Math.floor(Math.random() * 500000000) + 1000000,
-                  status: "completed",
-                  progress: 100,
-                  height: ITEM_HEIGHT,
-                };
-              });
-            }
-
-            const waterfall = Timeless.ui.WaterfallModel({
-              column: 1,
-              size: 10,
-              buffer: 3,
-              gutter: 0,
-            });
-
-            let totalItemCount = 20;
-            waterfall.methods.appendItems(generateDownloads(totalItemCount));
-
-            const totalCount = ref(totalItemCount);
-
-            const scrollStore = new Timeless.ui.ScrollViewCore({
-              onScroll(pos) {
-                waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
-              },
-              onReachBottom() {
-                const newItems = generateDownloads(10);
-                waterfall.methods.appendItems(newItems);
-                totalItemCount += 10;
-                totalCount.as(totalItemCount);
-                scrollStore.finishLoadingMore();
-              },
-            });
-
-            function handleClear() {
-              waterfall.methods.cleanColumns();
-              totalItemCount = 0;
-              totalCount.as(0);
-            }
-
-            function handleReload() {
-              waterfall.methods.cleanColumns();
-              nextId = 1;
-              totalItemCount = 20;
-              waterfall.methods.appendItems(generateDownloads(totalItemCount));
-              totalCount.as(totalItemCount);
-            }
-
-            return View(
-              {
-                class: classNames([
-                  "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
-                ]),
-              },
-              [
-                // Header
-                View(
-                  {
-                    class: classNames([
-                      "flex items-center justify-between px-3 py-2.5",
-                      "border-b border-zinc-200 dark:border-zinc-800",
-                      "bg-zinc-50 dark:bg-zinc-900",
+                      View(
+                        {
+                          class: classNames([
+                            "py-3 text-center text-xs text-zinc-400",
+                          ]),
+                        },
+                        [Txt("Scroll to bottom to load more")],
+                      ),
                     ]),
-                  },
-                  [
-                    View(
-                      {
-                        class: classNames([
-                          "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
-                        ]),
-                      },
-                      [
-                        Txt("Downloads"),
-                        Txt(computed(totalCount, (c) => ` (${c})`)),
-                      ],
-                    ),
-                    View({ class: "flex items-center gap-1" }, [
+                  ]),
+                ],
+              );
+            })(),
+          ]),
+          Item("Unshift Items with Gutter — Test Jitter", [
+            (() => {
+              const ITEM_HEIGHT = 56;
+              const GUTTER = 8;
+              let nextId = 1;
+
+              const fileNames = [
+                "backup-daily.zip",
+                "logs-server.txt",
+                "snapshot-db.sql",
+                "metrics-export.csv",
+                "config-prod.yaml",
+                "cert-renewal.pem",
+                "audit-trail.json",
+                "cache-dump.bin",
+              ];
+
+              function generateDownloads(count) {
+                return Array.from({ length: count }, () => {
+                  const id = nextId++;
+                  return {
+                    id,
+                    name: fileNames[(id - 1) % fileNames.length],
+                    size: Math.floor(Math.random() * 500000000) + 1000000,
+                    status: "completed",
+                    progress: 100,
+                    height: ITEM_HEIGHT,
+                  };
+                });
+              }
+
+              const waterfall = Timeless.ui.WaterfallModel({
+                column: 1,
+                size: 10,
+                buffer: 3,
+                gutter: GUTTER,
+              });
+
+              let totalItemCount = 20;
+              waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+              const totalCount = ref(totalItemCount);
+
+              let loadedMore = false;
+
+              const scrollStore = new Timeless.ui.ScrollViewCore({
+                onScroll(pos) {
+                  waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+                },
+                onReachBottom() {
+                  if (loadedMore) {
+                    scrollStore.finishLoadingMore();
+                    return;
+                  }
+                  loadedMore = true;
+                  const newItems = generateDownloads(10);
+                  waterfall.methods.appendItems(newItems);
+                  totalItemCount += 10;
+                  totalCount.as(totalItemCount);
+                  scrollStore.finishLoadingMore();
+                },
+              });
+
+              function handleUnshift() {
+                const count = 5;
+                const newItems = generateDownloads(count);
+                waterfall.methods.unshiftItems(newItems);
+                totalItemCount += count;
+                totalCount.as(totalItemCount);
+                // Adjust scroll position: each prepended item adds its height + gutter
+                const addedHeight = count * (ITEM_HEIGHT + GUTTER);
+                scrollStore.addScrollTop(addedHeight);
+              }
+
+              return View(
+                {
+                  class: classNames([
+                    "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+                  ]),
+                },
+                [
+                  // Header
+                  View(
+                    {
+                      class: classNames([
+                        "flex items-center justify-between px-3 py-2.5",
+                        "border-b border-zinc-200 dark:border-zinc-800",
+                        "bg-zinc-50 dark:bg-zinc-900",
+                      ]),
+                    },
+                    [
+                      View(
+                        {
+                          class: classNames([
+                            "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                          ]),
+                        },
+                        [
+                          Txt("Gutter Test"),
+                          Txt(computed(totalCount, (c) => ` (${c})`)),
+                        ],
+                      ),
                       Button(
                         {
                           store: new Timeless.ui.ButtonCore({
                             size: "sm",
                             variant: "outline",
                             onClick() {
-                              handleReload();
+                              handleUnshift();
                             },
                           }),
                         },
-                        ["Reload"],
+                        ["+ Prepend 5"],
                       ),
-                      Button(
-                        {
-                          store: new Timeless.ui.ButtonCore({
-                            size: "sm",
-                            variant: "ghost",
-                            onClick() {
-                              handleClear();
-                            },
-                          }),
-                        },
-                        ["Clear"],
-                      ),
-                    ]),
-                  ],
-                ),
-                // ScrollView + Waterfall
-                View({ class: "h-[300px]" }, [
-                  ScrollView({ store: scrollStore }, [
-                    Waterfall({
-                      store: waterfall,
-                      class: "!overflow-visible !h-auto",
-                      /** @param {{id: number; name: string; size: number}} task */
-                      render(task) {
-                        return View(
-                          {
-                            class: classNames([
-                              "flex items-center gap-3 px-3 py-2.5",
-                              "border-b border-zinc-100 dark:border-zinc-800",
-                            ]),
-                          },
-                          [
-                            View(
+                    ],
+                  ),
+                  // ScrollView + Waterfall
+                  View({ class: "h-[300px]" }, [
+                    ScrollView(
+                      {
+                        store: scrollStore,
+                        class: "bg-zinc-100 dark:bg-zinc-900",
+                      },
+                      [
+                        Waterfall({
+                          store: waterfall,
+                          class:
+                            "bg-zinc-100 dark:bg-zinc-900 !overflow-visible !h-auto px-2 pt-2",
+                          /** @param {{id: number; name: string; size: number}} task */
+                          render(task) {
+                            return View(
                               {
                                 class: classNames([
-                                  "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                  "flex items-center gap-3 px-3 py-2.5",
+                                  "rounded-lg",
+                                  "shadow-sm",
                                 ]),
                               },
                               [
-                                (() => {
-                                  if (task.name) {
-                                    const ext = task.name
-                                      .split(".")
-                                      .pop()
-                                      .toUpperCase();
-                                    return ext.length <= 4 ? ext : "FILE";
-                                  }
-                                  return "FILE";
-                                })(),
+                                View(
+                                  {
+                                    class: classNames([
+                                      "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                      "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
+                                    ]),
+                                  },
+                                  [
+                                    (() => {
+                                      if (task.name) {
+                                        const ext = task.name
+                                          .split(".")
+                                          .pop()
+                                          .toUpperCase();
+                                        return ext.length <= 4 ? ext : "FILE";
+                                      }
+                                      return "FILE";
+                                    })(),
+                                  ],
+                                ),
+                                View({ class: "flex-1 min-w-0" }, [
+                                  View(
+                                    {
+                                      class:
+                                        "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                                    },
+                                    [`#${task.id} ${task.name}`],
+                                  ),
+                                  View(
+                                    {
+                                      class: "mt-0.5 text-xs text-zinc-400",
+                                    },
+                                    [formatSize(task.size)],
+                                  ),
+                                ]),
+                                View(
+                                  {
+                                    class:
+                                      "flex-shrink-0 flex items-center gap-2",
+                                  },
+                                  [
+                                    View(
+                                      {
+                                        class:
+                                          "text-xs text-emerald-500 font-medium",
+                                      },
+                                      ["Done"],
+                                    ),
+                                    Button(
+                                      {
+                                        class:
+                                          "text-xs text-red-400 hover:text-red-600",
+                                        store: new Timeless.ui.ButtonCore({
+                                          size: "sm",
+                                          variant: "ghost",
+                                          onClick() {
+                                            waterfall.methods.deleteCell(
+                                              (v) => v.id === task.id,
+                                            );
+                                            totalItemCount -= 1;
+                                            totalCount.as(totalItemCount);
+                                          },
+                                        }),
+                                      },
+                                      ["Delete"],
+                                    ),
+                                  ],
+                                ),
                               ],
-                            ),
-                            View({ class: "flex-1 min-w-0" }, [
-                              View(
-                                {
-                                  class:
-                                    "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                                },
-                                [`#${task.id} ${task.name}`],
-                              ),
-                              View(
-                                {
-                                  class: "mt-0.5 text-xs text-emerald-500",
-                                },
-                                [formatSize(task.size)],
-                              ),
-                            ]),
-                            View(
-                              {
-                                class:
-                                  "flex-shrink-0 text-xs text-emerald-500 font-medium",
-                              },
-                              ["Done"],
-                            ),
-                          ],
-                        );
-                      },
-                    }),
-                    View(
-                      {
-                        class: classNames([
-                          "py-3 text-center text-xs text-zinc-400",
-                        ]),
-                      },
-                      [Txt("Scroll to bottom to load more")],
+                            );
+                          },
+                        }),
+                      ],
                     ),
                   ]),
-                ]),
-              ],
-            );
-          })(),
-        ]),
-      ]),
-      Section("Popover + Virtual List", [
-        Item("State Preservation on Reopen", [
-          (() => {
-            const ITEM_HEIGHT = 56;
-            let nextId = 1;
-
-            const fileNames = [
-              "project-archive.zip",
-              "design-assets.psd",
-              "video-tutorial.mp4",
-              "database-backup.sql",
-              "photo-gallery.jpg",
-              "report-2024.pdf",
-              "music-collection.mp3",
-              "source-code.tar.gz",
-              "presentation.pptx",
-              "firmware-update.bin",
-            ];
-
-            function generateDownloads(count) {
-              return Array.from({ length: count }, () => {
-                const id = nextId++;
-                return {
-                  id,
-                  name: fileNames[(id - 1) % fileNames.length],
-                  size: Math.floor(Math.random() * 500000000) + 1000000,
-                  status: "completed",
-                  progress: 100,
-                  height: ITEM_HEIGHT,
-                };
-              });
-            }
-
-            const waterfall = Timeless.ui.WaterfallModel({
-              column: 1,
-              size: 10,
-              buffer: 3,
-              gutter: 0,
-            });
-
-            let totalItemCount = 20;
-            waterfall.methods.appendItems(generateDownloads(totalItemCount));
-
-            const totalCount = ref(totalItemCount);
-
-            const scrollStore = new Timeless.ui.ScrollViewCore({
-              onScroll(pos) {
-                waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
-              },
-              onReachBottom() {
-                const newItems = generateDownloads(10);
-                waterfall.methods.appendItems(newItems);
-                totalItemCount += 10;
-                totalCount.as(totalItemCount);
-                scrollStore.finishLoadingMore();
-              },
-            });
-
-            const popoverStore = new Timeless.ui.PopoverCore({
-              side: "bottom",
-              align: "start",
-              destroyOnClose: false,
-            });
-
-            return Popover(
-              {
-                store: popoverStore,
-                content: [
-                  View(
-                    {
-                      class: classNames([
-                        "w-[340px] rounded-lg overflow-hidden",
-                      ]),
-                    },
-                    [
-                      // Header
-                      View(
-                        {
-                          class: classNames([
-                            "flex items-center justify-between px-3 py-2.5",
-                            "border-b border-zinc-200 dark:border-zinc-800",
-                            "bg-zinc-50 dark:bg-zinc-900",
-                          ]),
-                        },
-                        [
-                          View(
-                            {
-                              class: classNames([
-                                "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
-                              ]),
-                            },
-                            [
-                              Txt("Downloads"),
-                              Txt(computed(totalCount, (c) => ` (${c})`)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      // ScrollView + Waterfall
-                      View({ class: "h-[300px]" }, [
-                        ScrollView({ store: scrollStore }, [
-                          Waterfall({
-                            store: waterfall,
-                            class: "!overflow-visible !h-auto",
-                            /** @param {{id: number; name: string; size: number}} task */
-                            render(task) {
-                              return View(
-                                {
-                                  class: classNames([
-                                    "flex items-center gap-3 px-3 py-2.5",
-                                    "border-b border-zinc-100 dark:border-zinc-800",
-                                  ]),
-                                },
-                                [
-                                  View(
-                                    {
-                                      class: classNames([
-                                        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                        "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                                      ]),
-                                    },
-                                    [
-                                      (() => {
-                                        if (task.name) {
-                                          const ext = task.name
-                                            .split(".")
-                                            .pop()
-                                            .toUpperCase();
-                                          return ext.length <= 4 ? ext : "FILE";
-                                        }
-                                        return "FILE";
-                                      })(),
-                                    ],
-                                  ),
-                                  View({ class: "flex-1 min-w-0" }, [
-                                    View(
-                                      {
-                                        class:
-                                          "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                                      },
-                                      [`#${task.id} ${task.name}`],
-                                    ),
-                                    View(
-                                      {
-                                        class:
-                                          "mt-0.5 text-xs text-emerald-500",
-                                      },
-                                      [formatSize(task.size)],
-                                    ),
-                                  ]),
-                                  View(
-                                    {
-                                      class:
-                                        "flex-shrink-0 text-xs text-emerald-500 font-medium",
-                                    },
-                                    ["Done"],
-                                  ),
-                                ],
-                              );
-                            },
-                          }),
-                          View(
-                            {
-                              class: classNames([
-                                "py-3 text-center text-xs text-zinc-400",
-                              ]),
-                            },
-                            [Txt("Scroll to bottom to load more")],
-                          ),
-                        ]),
-                      ]),
-                    ],
-                  ),
                 ],
-              },
-              [
-                Button(
-                  {
-                    store: new Timeless.ui.ButtonCore({
-                      variant: "outline",
-                    }),
-                  },
-                  ["Open Downloads"],
-                ),
-              ],
-            );
-          })(),
-        ]),
-        Item("Destroy on Close (default)", [
-          (() => {
-            const ITEM_HEIGHT = 56;
-            const INITIAL_COUNT = 20;
+              );
+            })(),
+          ]),
+          Item("Clear Downloads", [
+            (() => {
+              const ITEM_HEIGHT = 56;
+              let nextId = 1;
 
-            const fileNames = [
-              "project-archive.zip",
-              "design-assets.psd",
-              "video-tutorial.mp4",
-              "database-backup.sql",
-              "photo-gallery.jpg",
-              "report-2024.pdf",
-              "music-collection.mp3",
-              "source-code.tar.gz",
-              "presentation.pptx",
-              "firmware-update.bin",
-            ];
+              const fileNames = [
+                "project-archive.zip",
+                "design-assets.psd",
+                "video-tutorial.mp4",
+                "database-backup.sql",
+                "photo-gallery.jpg",
+                "report-2024.pdf",
+                "music-collection.mp3",
+                "source-code.tar.gz",
+              ];
 
-            let nextId = 1;
-            function generateDownloads(count) {
-              return Array.from({ length: count }, () => {
-                const id = nextId++;
-                return {
-                  id,
-                  name: fileNames[(id - 1) % fileNames.length],
-                  size: Math.floor(Math.random() * 500000000) + 1000000,
-                  status: "completed",
-                  progress: 100,
-                  height: ITEM_HEIGHT,
-                };
-              });
-            }
-
-            const waterfall = Timeless.ui.WaterfallModel({
-              column: 1,
-              size: 10,
-              buffer: 3,
-              gutter: 0,
-            });
-
-            let totalItemCount = INITIAL_COUNT;
-            waterfall.methods.appendItems(generateDownloads(totalItemCount));
-
-            const totalCount = ref(totalItemCount);
-
-            const scrollStore = new Timeless.ui.ScrollViewCore({
-              onScroll(pos) {
-                waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
-              },
-              onReachBottom() {
-                const newItems = generateDownloads(10);
-                waterfall.methods.appendItems(newItems);
-                totalItemCount += 10;
-                totalCount.as(totalItemCount);
-                scrollStore.finishLoadingMore();
-              },
-            });
-
-            const popoverStore = new Timeless.ui.PopoverCore({
-              side: "bottom",
-              align: "start",
-            });
-
-            // 每次打开都重置为初始状态
-            popoverStore.onShow(() => {
-              waterfall.methods.cleanColumns();
-              nextId = 1;
-              totalItemCount = INITIAL_COUNT;
-              waterfall.methods.appendItems(generateDownloads(totalItemCount));
-              totalCount.as(totalItemCount);
-            });
-
-            return Popover(
-              {
-                store: popoverStore,
-                content: [
-                  View(
-                    {
-                      class: classNames([
-                        "w-[340px] rounded-lg overflow-hidden",
-                      ]),
-                    },
-                    [
-                      // Header
-                      View(
-                        {
-                          class: classNames([
-                            "flex items-center justify-between px-3 py-2.5",
-                            "border-b border-zinc-200 dark:border-zinc-800",
-                            "bg-zinc-50 dark:bg-zinc-900",
-                          ]),
-                        },
-                        [
-                          View(
-                            {
-                              class: classNames([
-                                "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
-                              ]),
-                            },
-                            [
-                              Txt("Downloads"),
-                              Txt(computed(totalCount, (c) => ` (${c})`)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      // ScrollView + Waterfall
-                      View({ class: "h-[300px]" }, [
-                        ScrollView({ store: scrollStore }, [
-                          Waterfall({
-                            store: waterfall,
-                            class: "!overflow-visible !h-auto",
-                            /** @param {{id: number; name: string; size: number}} task */
-                            render(task) {
-                              return View(
-                                {
-                                  class: classNames([
-                                    "flex items-center gap-3 px-3 py-2.5",
-                                    "border-b border-zinc-100 dark:border-zinc-800",
-                                  ]),
-                                },
-                                [
-                                  View(
-                                    {
-                                      class: classNames([
-                                        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                        "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-                                      ]),
-                                    },
-                                    [
-                                      (() => {
-                                        if (task.name) {
-                                          const ext = task.name
-                                            .split(".")
-                                            .pop()
-                                            .toUpperCase();
-                                          return ext.length <= 4 ? ext : "FILE";
-                                        }
-                                        return "FILE";
-                                      })(),
-                                    ],
-                                  ),
-                                  View({ class: "flex-1 min-w-0" }, [
-                                    View(
-                                      {
-                                        class:
-                                          "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-                                      },
-                                      [`#${task.id} ${task.name}`],
-                                    ),
-                                    View(
-                                      {
-                                        class:
-                                          "mt-0.5 text-xs text-emerald-500",
-                                      },
-                                      [formatSize(task.size)],
-                                    ),
-                                  ]),
-                                  View(
-                                    {
-                                      class:
-                                        "flex-shrink-0 text-xs text-emerald-500 font-medium",
-                                    },
-                                    ["Done"],
-                                  ),
-                                ],
-                              );
-                            },
-                          }),
-                          View(
-                            {
-                              class: classNames([
-                                "py-3 text-center text-xs text-zinc-400",
-                              ]),
-                            },
-                            [Txt("Scroll to bottom to load more")],
-                          ),
-                        ]),
-                      ]),
-                    ],
-                  ),
-                ],
-              },
-              [
-                Button(
-                  {
-                    store: new Timeless.ui.ButtonCore({
-                      variant: "outline",
-                    }),
-                  },
-                  ["Open Downloads (Reset)"],
-                ),
-              ],
-            );
-          })(),
-        ]),
-      ]),
-      Section("Download List", [
-        Item("Real-world Scenario", [
-          (() => {
-            const mockData = createMockTasks();
-            const tasks_ = refarr(mockData);
-            const taskCount_ = ref(mockData.length);
-
-            const scrollStore = new Timeless.ui.ScrollViewCore({
-              onPullToRefresh() {
-                // Simulate refreshing task statuses
-                setTimeout(() => {
-                  const updated = tasks_.value.map((t) => {
-                    if (t.status === "running") {
-                      const newProgress = Math.min(
-                        100,
-                        t.progress + Math.floor(Math.random() * 15),
-                      );
-                      // t.progress = newProgress;
-                      // t.status = newProgress >= 100 ? "completed" : "running";
-                      return {
-                        ...t,
-                        progress: newProgress,
-                        status: newProgress >= 100 ? "completed" : "running",
-                      };
-                    }
-                    return t;
-                  });
-                  tasks_.as(updated);
-                  scrollStore.finishPullToRefresh();
-                }, 1000);
-              },
-            });
-
-            // Simulate running downloads
-            let timer = null;
-            timer = setInterval(() => {
-              const updated = tasks_.value.map((t) => {
-                if (t.status === "running") {
-                  const newProgress = Math.min(
-                    100,
-                    t.progress + Math.floor(Math.random() * 3) + 1,
-                  );
+              function generateDownloads(count) {
+                return Array.from({ length: count }, () => {
+                  const id = nextId++;
                   return {
-                    ...t,
-                    progress: newProgress,
-                    speed: t.speed + (Math.random() - 0.5) * 500000,
-                    status: newProgress >= 100 ? "completed" : "running",
+                    id,
+                    name: fileNames[(id - 1) % fileNames.length],
+                    size: Math.floor(Math.random() * 500000000) + 1000000,
+                    status: "completed",
+                    progress: 100,
+                    height: ITEM_HEIGHT,
                   };
-                }
-                return t;
-              });
-              tasks_.as(updated);
-              // Start pending tasks if no running tasks
-              const runningCount = updated.filter(
-                (t) => t.status === "running",
-              ).length;
-              if (runningCount < 2) {
-                const pending = updated.find((t) => t.status === "pending");
-                if (pending) {
-                  const started = updated.map((t) =>
-                    t.id === pending.id
-                      ? { ...t, status: "running", speed: 1200000 }
-                      : t,
-                  );
-                  tasks_.as(started);
-                }
+                });
               }
-            }, 800);
 
-            return View(
-              {
-                class: classNames([
-                  "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
-                ]),
-              },
-              [
-                // Header
-                View(
-                  {
-                    class: classNames([
-                      "flex items-center justify-between px-3 py-2.5",
-                      "border-b border-zinc-200 dark:border-zinc-800",
-                      "bg-zinc-50 dark:bg-zinc-900",
-                    ]),
-                  },
-                  [
-                    View({ class: classNames(["flex items-center gap-2"]) }, [
+              const waterfall = Timeless.ui.WaterfallModel({
+                column: 1,
+                size: 10,
+                buffer: 3,
+                gutter: 0,
+              });
+
+              let totalItemCount = 20;
+              waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+              const totalCount = ref(totalItemCount);
+
+              const scrollStore = new Timeless.ui.ScrollViewCore({
+                onScroll(pos) {
+                  waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+                },
+                onReachBottom() {
+                  const newItems = generateDownloads(10);
+                  waterfall.methods.appendItems(newItems);
+                  totalItemCount += 10;
+                  totalCount.as(totalItemCount);
+                  scrollStore.finishLoadingMore();
+                },
+              });
+
+              function handleClear() {
+                waterfall.methods.cleanColumns();
+                totalItemCount = 0;
+                totalCount.as(0);
+              }
+
+              function handleReload() {
+                waterfall.methods.cleanColumns();
+                nextId = 1;
+                totalItemCount = 20;
+                waterfall.methods.appendItems(
+                  generateDownloads(totalItemCount),
+                );
+                totalCount.as(totalItemCount);
+              }
+
+              return View(
+                {
+                  class: classNames([
+                    "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+                  ]),
+                },
+                [
+                  // Header
+                  View(
+                    {
+                      class: classNames([
+                        "flex items-center justify-between px-3 py-2.5",
+                        "border-b border-zinc-200 dark:border-zinc-800",
+                        "bg-zinc-50 dark:bg-zinc-900",
+                      ]),
+                    },
+                    [
                       View(
                         {
                           class: classNames([
@@ -1727,67 +1162,667 @@ export default function HomeIndexScrollViewExampleView() {
                         },
                         [
                           Txt("Downloads"),
-                          Txt(
-                            computed(taskCount_, (d) =>
-                              d > 0 ? ` (${d})` : "",
-                            ),
-                          ),
+                          Txt(computed(totalCount, (c) => ` (${c})`)),
                         ],
                       ),
-                    ]),
-                    Button(
-                      {
-                        store: new Timeless.ui.ButtonCore({
-                          size: "sm",
-                          variant: "ghost",
-                          onClick() {
-                            if (timer) clearInterval(timer);
-                            tasks_.as([]);
-                            taskCount_.as(0);
+                      View({ class: "flex items-center gap-1" }, [
+                        Button(
+                          {
+                            store: new Timeless.ui.ButtonCore({
+                              size: "sm",
+                              variant: "outline",
+                              onClick() {
+                                handleReload();
+                              },
+                            }),
                           },
-                        }),
+                          ["Reload"],
+                        ),
+                        Button(
+                          {
+                            store: new Timeless.ui.ButtonCore({
+                              size: "sm",
+                              variant: "ghost",
+                              onClick() {
+                                handleClear();
+                              },
+                            }),
+                          },
+                          ["Clear"],
+                        ),
+                      ]),
+                    ],
+                  ),
+                  // ScrollView + Waterfall
+                  View({ class: "h-[300px]" }, [
+                    ScrollView({ store: scrollStore }, [
+                      Waterfall({
+                        store: waterfall,
+                        class: "!overflow-visible !h-auto",
+                        /** @param {{id: number; name: string; size: number}} task */
+                        render(task) {
+                          return View(
+                            {
+                              class: classNames([
+                                "flex items-center gap-3 px-3 py-2.5",
+                                "border-b border-zinc-100 dark:border-zinc-800",
+                              ]),
+                            },
+                            [
+                              View(
+                                {
+                                  class: classNames([
+                                    "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                    "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                  ]),
+                                },
+                                [
+                                  (() => {
+                                    if (task.name) {
+                                      const ext = task.name
+                                        .split(".")
+                                        .pop()
+                                        .toUpperCase();
+                                      return ext.length <= 4 ? ext : "FILE";
+                                    }
+                                    return "FILE";
+                                  })(),
+                                ],
+                              ),
+                              View({ class: "flex-1 min-w-0" }, [
+                                View(
+                                  {
+                                    class:
+                                      "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                                  },
+                                  [`#${task.id} ${task.name}`],
+                                ),
+                                View(
+                                  {
+                                    class: "mt-0.5 text-xs text-emerald-500",
+                                  },
+                                  [formatSize(task.size)],
+                                ),
+                              ]),
+                              View(
+                                {
+                                  class:
+                                    "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                },
+                                ["Done"],
+                              ),
+                            ],
+                          );
+                        },
+                      }),
+                      View(
+                        {
+                          class: classNames([
+                            "py-3 text-center text-xs text-zinc-400",
+                          ]),
+                        },
+                        [Txt("Scroll to bottom to load more")],
+                      ),
+                    ]),
+                  ]),
+                ],
+              );
+            })(),
+          ]),
+        ]),
+        Section("Popover + Virtual List", [
+          Item("State Preservation on Reopen", [
+            (() => {
+              const ITEM_HEIGHT = 56;
+              let nextId = 1;
+
+              const fileNames = [
+                "project-archive.zip",
+                "design-assets.psd",
+                "video-tutorial.mp4",
+                "database-backup.sql",
+                "photo-gallery.jpg",
+                "report-2024.pdf",
+                "music-collection.mp3",
+                "source-code.tar.gz",
+                "presentation.pptx",
+                "firmware-update.bin",
+              ];
+
+              function generateDownloads(count) {
+                return Array.from({ length: count }, () => {
+                  const id = nextId++;
+                  return {
+                    id,
+                    name: fileNames[(id - 1) % fileNames.length],
+                    size: Math.floor(Math.random() * 500000000) + 1000000,
+                    status: "completed",
+                    progress: 100,
+                    height: ITEM_HEIGHT,
+                  };
+                });
+              }
+
+              const waterfall = Timeless.ui.WaterfallModel({
+                column: 1,
+                size: 10,
+                buffer: 3,
+                gutter: 0,
+              });
+
+              let totalItemCount = 20;
+              waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+              const totalCount = ref(totalItemCount);
+
+              const scrollStore = new Timeless.ui.ScrollViewCore({
+                onScroll(pos) {
+                  waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+                },
+                onReachBottom() {
+                  const newItems = generateDownloads(10);
+                  waterfall.methods.appendItems(newItems);
+                  totalItemCount += 10;
+                  totalCount.as(totalItemCount);
+                  scrollStore.finishLoadingMore();
+                },
+              });
+
+              const popoverStore = new Timeless.ui.PopoverCore({
+                side: "bottom",
+                align: "start",
+                destroyOnClose: false,
+              });
+
+              return Popover(
+                {
+                  store: popoverStore,
+                  content: [
+                    View(
+                      {
+                        class: classNames([
+                          "w-[340px] rounded-lg overflow-hidden",
+                        ]),
                       },
-                      ["Clear"],
+                      [
+                        // Header
+                        View(
+                          {
+                            class: classNames([
+                              "flex items-center justify-between px-3 py-2.5",
+                              "border-b border-zinc-200 dark:border-zinc-800",
+                              "bg-zinc-50 dark:bg-zinc-900",
+                            ]),
+                          },
+                          [
+                            View(
+                              {
+                                class: classNames([
+                                  "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                                ]),
+                              },
+                              [
+                                Txt("Downloads"),
+                                Txt(computed(totalCount, (c) => ` (${c})`)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        // ScrollView + Waterfall
+                        View({ class: "h-[300px]" }, [
+                          ScrollView({ store: scrollStore }, [
+                            Waterfall({
+                              store: waterfall,
+                              class: "!overflow-visible !h-auto",
+                              /** @param {{id: number; name: string; size: number}} task */
+                              render(task) {
+                                return View(
+                                  {
+                                    class: classNames([
+                                      "flex items-center gap-3 px-3 py-2.5",
+                                      "border-b border-zinc-100 dark:border-zinc-800",
+                                    ]),
+                                  },
+                                  [
+                                    View(
+                                      {
+                                        class: classNames([
+                                          "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                          "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                        ]),
+                                      },
+                                      [
+                                        (() => {
+                                          if (task.name) {
+                                            const ext = task.name
+                                              .split(".")
+                                              .pop()
+                                              .toUpperCase();
+                                            return ext.length <= 4
+                                              ? ext
+                                              : "FILE";
+                                          }
+                                          return "FILE";
+                                        })(),
+                                      ],
+                                    ),
+                                    View({ class: "flex-1 min-w-0" }, [
+                                      View(
+                                        {
+                                          class:
+                                            "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                                        },
+                                        [`#${task.id} ${task.name}`],
+                                      ),
+                                      View(
+                                        {
+                                          class:
+                                            "mt-0.5 text-xs text-emerald-500",
+                                        },
+                                        [formatSize(task.size)],
+                                      ),
+                                    ]),
+                                    View(
+                                      {
+                                        class:
+                                          "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                      },
+                                      ["Done"],
+                                    ),
+                                  ],
+                                );
+                              },
+                            }),
+                            View(
+                              {
+                                class: classNames([
+                                  "py-3 text-center text-xs text-zinc-400",
+                                ]),
+                              },
+                              ["Scroll to bottom to load more"],
+                            ),
+                          ]),
+                        ]),
+                      ],
                     ),
                   ],
-                ),
-                // Scrollable task list
-                View({ class: "max-h-[400px] min-h-[120px] overflow-hidden" }, [
-                  ScrollView({ store: scrollStore }, [
-                    Show({
-                      when: computed(taskCount_, (d) => d > 0),
-                      ok() {
-                        return [
-                          For({
-                            key: "id",
-                            each: tasks_,
-                            render(task) {
-                              return DownloadTaskItem({
-                                task,
-                              });
+                },
+                [
+                  Button(
+                    {
+                      store: new Timeless.ui.ButtonCore({
+                        variant: "outline",
+                      }),
+                    },
+                    ["Open Downloads"],
+                  ),
+                ],
+              );
+            })(),
+          ]),
+          Item("Destroy on Close (default)", [
+            (() => {
+              const ITEM_HEIGHT = 56;
+              const INITIAL_COUNT = 20;
+
+              const fileNames = [
+                "project-archive.zip",
+                "design-assets.psd",
+                "video-tutorial.mp4",
+                "database-backup.sql",
+                "photo-gallery.jpg",
+                "report-2024.pdf",
+                "music-collection.mp3",
+                "source-code.tar.gz",
+                "presentation.pptx",
+                "firmware-update.bin",
+              ];
+
+              let nextId = 1;
+              function generateDownloads(count) {
+                return Array.from({ length: count }, () => {
+                  const id = nextId++;
+                  return {
+                    id,
+                    name: fileNames[(id - 1) % fileNames.length],
+                    size: Math.floor(Math.random() * 500000000) + 1000000,
+                    status: "completed",
+                    progress: 100,
+                    height: ITEM_HEIGHT,
+                  };
+                });
+              }
+
+              const waterfall = Timeless.ui.WaterfallModel({
+                column: 1,
+                size: 10,
+                buffer: 3,
+                gutter: 0,
+              });
+
+              let totalItemCount = INITIAL_COUNT;
+              waterfall.methods.appendItems(generateDownloads(totalItemCount));
+
+              const totalCount = ref(totalItemCount);
+
+              const scrollStore = new Timeless.ui.ScrollViewCore({
+                onScroll(pos) {
+                  waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
+                },
+                onReachBottom() {
+                  const newItems = generateDownloads(10);
+                  waterfall.methods.appendItems(newItems);
+                  totalItemCount += 10;
+                  totalCount.as(totalItemCount);
+                  scrollStore.finishLoadingMore();
+                },
+              });
+
+              const popoverStore = new Timeless.ui.PopoverCore({
+                side: "bottom",
+                align: "start",
+              });
+
+              // 每次打开都重置为初始状态
+              popoverStore.onShow(() => {
+                waterfall.methods.cleanColumns();
+                nextId = 1;
+                totalItemCount = INITIAL_COUNT;
+                waterfall.methods.appendItems(
+                  generateDownloads(totalItemCount),
+                );
+                totalCount.as(totalItemCount);
+              });
+
+              return Popover(
+                {
+                  store: popoverStore,
+                  content: [
+                    View(
+                      {
+                        class: classNames([
+                          "w-[340px] rounded-lg overflow-hidden",
+                        ]),
+                      },
+                      [
+                        // Header
+                        View(
+                          {
+                            class: classNames([
+                              "flex items-center justify-between px-3 py-2.5",
+                              "border-b border-zinc-200 dark:border-zinc-800",
+                              "bg-zinc-50 dark:bg-zinc-900",
+                            ]),
+                          },
+                          [
+                            View(
+                              {
+                                class: classNames([
+                                  "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                                ]),
+                              },
+                              [
+                                Txt("Downloads"),
+                                Txt(computed(totalCount, (c) => ` (${c})`)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        // ScrollView + Waterfall
+                        View({ class: "h-[300px]" }, [
+                          ScrollView({ store: scrollStore }, [
+                            Waterfall({
+                              store: waterfall,
+                              class: "!overflow-visible !h-auto",
+                              /** @param {{id: number; name: string; size: number}} task */
+                              render(task) {
+                                return View(
+                                  {
+                                    class: classNames([
+                                      "flex items-center gap-3 px-3 py-2.5",
+                                      "border-b border-zinc-100 dark:border-zinc-800",
+                                    ]),
+                                  },
+                                  [
+                                    View(
+                                      {
+                                        class: classNames([
+                                          "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
+                                          "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
+                                        ]),
+                                      },
+                                      [
+                                        (() => {
+                                          if (task.name) {
+                                            const ext = task.name
+                                              .split(".")
+                                              .pop()
+                                              .toUpperCase();
+                                            return ext.length <= 4
+                                              ? ext
+                                              : "FILE";
+                                          }
+                                          return "FILE";
+                                        })(),
+                                      ],
+                                    ),
+                                    View({ class: "flex-1 min-w-0" }, [
+                                      View(
+                                        {
+                                          class:
+                                            "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
+                                        },
+                                        [`#${task.id} ${task.name}`],
+                                      ),
+                                      View(
+                                        {
+                                          class:
+                                            "mt-0.5 text-xs text-emerald-500",
+                                        },
+                                        [formatSize(task.size)],
+                                      ),
+                                    ]),
+                                    View(
+                                      {
+                                        class:
+                                          "flex-shrink-0 text-xs text-emerald-500 font-medium",
+                                      },
+                                      ["Done"],
+                                    ),
+                                  ],
+                                );
+                              },
+                            }),
+                            View(
+                              {
+                                class: classNames([
+                                  "py-3 text-center text-xs text-zinc-400",
+                                ]),
+                              },
+                              [Txt("Scroll to bottom to load more")],
+                            ),
+                          ]),
+                        ]),
+                      ],
+                    ),
+                  ],
+                },
+                [
+                  Button(
+                    {
+                      store: new Timeless.ui.ButtonCore({
+                        variant: "outline",
+                      }),
+                    },
+                    ["Open Downloads (Reset)"],
+                  ),
+                ],
+              );
+            })(),
+          ]),
+        ]),
+        Section("Download List", [
+          Item("Real-world Scenario", [
+            (() => {
+              const mockData = createMockTasks();
+              const tasks_ = refarr(mockData);
+              const taskCount_ = ref(mockData.length);
+
+              const scrollStore = new Timeless.ui.ScrollViewCore({
+                onPullToRefresh() {
+                  // Simulate refreshing task statuses
+                  setTimeout(() => {
+                    const updated = tasks_.value.map((t) => {
+                      if (t.status === "running") {
+                        const newProgress = Math.min(
+                          100,
+                          t.progress + Math.floor(Math.random() * 15),
+                        );
+                        // t.progress = newProgress;
+                        // t.status = newProgress >= 100 ? "completed" : "running";
+                        return {
+                          ...t,
+                          progress: newProgress,
+                          status: newProgress >= 100 ? "completed" : "running",
+                        };
+                      }
+                      return t;
+                    });
+                    tasks_.as(updated);
+                    scrollStore.finishPullToRefresh();
+                  }, 1000);
+                },
+              });
+
+              // Simulate running downloads
+              let timer = setInterval(() => {
+                const updated = tasks_.value.map((t) => {
+                  if (t.status === "running") {
+                    const newProgress = Math.min(
+                      100,
+                      t.progress + Math.floor(Math.random() * 3) + 1,
+                    );
+                    return {
+                      ...t,
+                      progress: newProgress,
+                      speed: t.speed + (Math.random() - 0.5) * 500000,
+                      status: newProgress >= 100 ? "completed" : "running",
+                    };
+                  }
+                  return t;
+                });
+                tasks_.as(updated);
+                // Start pending tasks if no running tasks
+                const runningCount = updated.filter(
+                  (t) => t.status === "running",
+                ).length;
+                if (runningCount < 2) {
+                  const pending = updated.find((t) => t.status === "pending");
+                  if (pending) {
+                    const started = updated.map((t) =>
+                      t.id === pending.id
+                        ? { ...t, status: "running", speed: 1200000 }
+                        : t,
+                    );
+                    tasks_.as(started);
+                  }
+                }
+              }, 800);
+              listener$.add(function () {
+                clearInterval(timer);
+              });
+
+              return View(
+                {
+                  class: classNames([
+                    "w-[380px] rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+                  ]),
+                },
+                [
+                  // Header
+                  View(
+                    {
+                      class: classNames([
+                        "flex items-center justify-between px-3 py-2.5",
+                        "border-b border-zinc-200 dark:border-zinc-800",
+                        "bg-zinc-50 dark:bg-zinc-900",
+                      ]),
+                    },
+                    [
+                      View({ class: classNames(["flex items-center gap-2"]) }, [
+                        View(
+                          {
+                            class: classNames([
+                              "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
+                            ]),
+                          },
+                          [
+                            Txt("Downloads"),
+                            Txt(
+                              computed(taskCount_, (d) =>
+                                d > 0 ? ` (${d})` : "",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ]),
+                      Button(
+                        {
+                          store: new Timeless.ui.ButtonCore({
+                            size: "sm",
+                            variant: "ghost",
+                            onClick() {
+                              if (timer) clearInterval(timer);
+                              tasks_.as([]);
+                              taskCount_.as(0);
                             },
                           }),
-                        ];
-                      },
-                      else() {
-                        return [
-                          View(
-                            {
-                              class:
-                                "flex items-center justify-center h-[200px] text-sm text-zinc-400",
-                            },
-                            ["No download tasks"],
-                          ),
-                        ];
-                      },
-                    }),
-                  ]),
-                ]),
-              ],
-            );
-          })(),
+                        },
+                        ["Clear"],
+                      ),
+                    ],
+                  ),
+                  // Scrollable task list
+                  View(
+                    { class: "max-h-[400px] min-h-[120px] overflow-hidden" },
+                    [
+                      ScrollView({ store: scrollStore }, [
+                        Show({
+                          when: computed(taskCount_, (d) => d > 0),
+                          ok() {
+                            return [
+                              For({
+                                key: "id",
+                                each: tasks_,
+                                render(task) {
+                                  return DownloadTaskItem({
+                                    task,
+                                  });
+                                },
+                              }),
+                            ];
+                          },
+                          else() {
+                            return [
+                              View(
+                                {
+                                  class:
+                                    "flex items-center justify-center h-[200px] text-sm text-zinc-400",
+                                },
+                                ["No download tasks"],
+                              ),
+                            ];
+                          },
+                        }),
+                      ]),
+                    ],
+                  ),
+                ],
+              );
+            })(),
+          ]),
         ]),
       ]),
-    ]),
-  ]);
+    ],
+  );
 }

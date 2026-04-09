@@ -1,4 +1,4 @@
-import { isElement, TimelessElement, VNodeView } from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement } from "./box";
 
@@ -39,6 +39,7 @@ export function DOMShow(props: {
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,
     insertChildren(children: TimelessElement[]) {
+      common$.methods.removeChildren();
       common$.methods.insertChildren(children);
     },
     removeChildren: common$.methods.removeChildren,

@@ -1,5 +1,4 @@
-import { CheckboxPrimitive, ViewProps } from "@timeless/timeless";
-import { CheckOutlined } from "@timeless/icons";
+import { CheckboxPrimitive, Icon, ViewProps } from "@timeless/timeless";
 import { ref, computed, classNames } from "@timeless/timeless";
 import { CheckboxCore } from "@timeless/ui";
 
@@ -34,7 +33,11 @@ export function Checkbox(
           unsub();
         },
       },
-      [CheckboxPrimitive.Indicator({ store }, [CheckOutlined()])],
+      [
+        CheckboxPrimitive.Indicator({ store }, [
+          Icon({ name: "check", size: 16 }),
+        ]),
+      ],
     ),
   ]);
 }

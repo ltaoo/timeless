@@ -1,7 +1,13 @@
-import { classNames, combine, computed, refobj } from "@timeless/timeless";
+import {
+  classNames,
+  combine,
+  computed,
+  Icon,
+  refobj,
+  View,
+} from "@timeless/timeless";
 import { FileInputPrimitive, Show, ViewProps } from "@timeless/timeless";
 import { FileInputCore } from "@timeless/ui";
-import { CircleXOutlined, LoaderOutlined } from "@timeless/icons";
 
 export function FileInput(
   props: ViewProps & {
@@ -46,7 +52,7 @@ export function FileInput(
                 class:
                   "absolute top-1/2 -translate-y-1/2 right-2 flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
               },
-              [CircleXOutlined({ class: "h-4 w-4" })],
+              [Icon({ name: "circle-x", size: 16 })],
             ),
           ];
         },
@@ -57,7 +63,7 @@ export function FileInput(
           class:
             "absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500",
         },
-        [LoaderOutlined({ class: "h-4 w-4 animate-spin" })],
+        [View({ class: "h-4 w-4 animate-spin" }, [Icon({ name: "loader" })])],
       ),
     ],
   );

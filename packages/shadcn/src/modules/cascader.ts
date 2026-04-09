@@ -1,4 +1,4 @@
-import { combine, computed, ref, refobj } from "@timeless/timeless";
+import { combine, computed, Icon, ref, refobj } from "@timeless/timeless";
 import {
   CascaderPrimitive,
   For,
@@ -7,11 +7,6 @@ import {
   ViewProps,
 } from "@timeless/timeless";
 import { CascaderCore, CascaderOption } from "@timeless/ui";
-import {
-  ChevronDownOutlined,
-  ChevronRightOutlined,
-  CircleXOutlined,
-} from "@timeless/icons";
 
 export function Cascader(
   props: ViewProps & { store: CascaderCore<any>; id?: string },
@@ -79,7 +74,7 @@ export function Cascader(
                   class:
                     "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
                 },
-                [CircleXOutlined({ class: "size-4" })],
+                [Icon({ name: "circle-x" })],
               ),
             ];
           },
@@ -87,7 +82,7 @@ export function Cascader(
             return [
               CascaderPrimitive.Icon(
                 { class: "size-4 text-muted-foreground" },
-                [ChevronDownOutlined({})],
+                [Icon({ name: "chevron-down" })],
               ),
             ];
           },
@@ -224,7 +219,7 @@ export function Cascader(
                                 ),
                                 class: "size-4 text-muted-foreground",
                               },
-                              [ChevronRightOutlined({ class: "size-3" })],
+                              [Icon({ name: "chevron-right" })],
                             ),
                           ],
                         );

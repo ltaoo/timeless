@@ -45,7 +45,7 @@ export function DOMFor(props: {
     render(elm: TimelessElement) {
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);
-      common$.methods.handleElementsMounted();
+      // common$.methods.handleElementsMounted();
       return $fragment;
     },
     getChildren: common$.methods.getChildren,

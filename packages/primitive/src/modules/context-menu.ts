@@ -8,9 +8,11 @@ import {
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { getHost } from "@/host";
+// import { getHost } from "@/host";
 
 import * as MenuPrimitive from "./menu";
+import { getHost } from "@/host";
+import { ListenerManager } from "@/util/listener";
 
 // Shared hover timer state to coordinate between Trigger and Content
 const hoverTimers = new WeakMap<ContextMenuCore, { timer: any }>();
@@ -25,19 +27,19 @@ function getHoverTimer(store: ContextMenuCore) {
 }
 
 function _hoverClearHide(store: ContextMenuCore) {
-  const host = getHost();
+  // const host = getHost();
   const state = getHoverTimer(store);
   if (state.timer) {
-    host.clearTimeout(state.timer);
+    clearTimeout(state.timer);
     state.timer = null;
   }
 }
 
 function _hoverScheduleHide(store: ContextMenuCore) {
-  const host = getHost();
+  // const host = getHost();
   _hoverClearHide(store);
   const state = getHoverTimer(store);
-  state.timer = host.setTimeout(() => {
+  state.timer = setTimeout(() => {
     store.hide();
     state.timer = null;
   }, 300);
@@ -54,19 +56,20 @@ export function Trigger(
   props: ViewProps & { store: ContextMenuCore },
   children?: ViewChildren,
 ) {
-  const host = getHost();
   const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
-
-  store.onStateChange((v) => {
-    state_.as(v);
-  });
+  const listener$ = ListenerManager();
 
   return View(
     {
       onMounted(event) {
-        const $elm = (event as any).target as HTMLDivElement;
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
+        const $elm = event.target;
         // Don't set reference here - it will be set dynamically on contextmenu event
         // Handle context menu (right-click)
         const handleContextMenu = (e: any) => {
@@ -79,12 +82,14 @@ export function Trigger(
             y: e.clientY - 4,
           });
         };
-        host.addEventListener($elm, "contextmenu", handleContextMenu);
+        listener$.add($elm.addEventListener("contextmenu", handleContextMenu));
 
         // Handle hover trigger if enabled
         if (store.trigger === "hover") {
           const handleMouseEnter = () => {
-            if (store.disabled) return;
+            if (store.disabled) {
+              return;
+            }
             _hoverClearHide(store);
             store.show();
           };
@@ -95,19 +100,12 @@ export function Trigger(
             e.stopPropagation();
           };
 
-          host.addEventListener($elm, "mouseenter", handleMouseEnter);
-          host.addEventListener($elm, "pointerdown", handlePointerDown);
-
-          return () => {
-            host.removeEventListener($elm, "contextmenu", handleContextMenu);
-            host.removeEventListener($elm, "mouseenter", handleMouseEnter);
-            host.removeEventListener($elm, "pointerdown", handlePointerDown);
-          };
+          listener$.append([
+            $elm.addEventListener("mouseenter", handleMouseEnter),
+            $elm.addEventListener("pointerdown", handlePointerDown),
+          ]);
         }
-
-        return () => {
-          host.removeEventListener($elm, "contextmenu", handleContextMenu);
-        };
+        return listener$.clean;
       },
     },
     children,

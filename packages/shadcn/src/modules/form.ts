@@ -1,13 +1,5 @@
-import {
-  View,
-  ViewProps,
-  ViewChildren,
-  FieldPrimitive,
-} from "@timeless/timeless";
+import { View, ViewProps, ViewChildren } from "@timeless/timeless";
 import { ObjectFieldCore, ArrayFieldCore } from "@timeless/ui";
-import { XOutlined } from "@timeless/icons";
-
-import { Button } from "./button";
 
 export function Form(
   props: ViewProps & { store: ObjectFieldCore<any> | ArrayFieldCore<any> },

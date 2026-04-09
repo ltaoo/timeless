@@ -1,4 +1,4 @@
-import { computed, refobj } from "@timeless/timeless";
+import { computed, Icon, refobj } from "@timeless/timeless";
 import {
   SheetPrimitive,
   View,
@@ -6,7 +6,6 @@ import {
   ViewProps,
 } from "@timeless/timeless";
 import { DialogCore } from "@timeless/ui";
-import { XOutlined } from "@timeless/icons";
 
 const WRAPPER_CLASSES = {
   right: "inset-y-0 right-0 h-full w-3/4 max-w-sm",
@@ -92,7 +91,7 @@ export function Sheet(
                 class:
                   "absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 cursor-pointer",
               },
-              [XOutlined({})],
+              [Icon({ name: "x" })],
             ),
             // @ts-ignore
             children,

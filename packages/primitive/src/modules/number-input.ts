@@ -44,6 +44,8 @@ export function Input(
   return {
     t: "view",
     $elm,
+    state: {},
+    children: [],
     render() {
       if (rendered) {
         return $elm;

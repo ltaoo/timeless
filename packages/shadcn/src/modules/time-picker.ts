@@ -2,6 +2,7 @@ import {
   classNames,
   combine,
   computed,
+  Icon,
   ref,
   refobj,
 } from "@timeless/timeless";
@@ -14,7 +15,6 @@ import {
   ScrollViewPrimitive,
 } from "@timeless/timeless";
 import { ScrollViewCore, TimePickerCore } from "@timeless/ui";
-import { CircleXOutlined, ClockOutlined } from "@timeless/icons";
 
 export function TimePicker(
   props: ViewProps & {
@@ -116,7 +116,7 @@ export function TimePicker(
                   class:
                     "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
                 },
-                [CircleXOutlined({ class: "size-4" })],
+                [Icon({ name: "circle-x", size: 16 })],
               ),
             ];
           },
@@ -124,7 +124,7 @@ export function TimePicker(
             return [
               TimePickerPrimitive.Icon(
                 { class: "size-4 text-muted-foreground" },
-                [ClockOutlined({})],
+                [Icon({ name: "clock", size: 16 })],
               ),
             ];
           },

@@ -1,4 +1,4 @@
-import { ref, computed, refobj, classNames } from "@timeless/timeless";
+import { ref, computed, refobj, classNames, Icon } from "@timeless/timeless";
 import {
   DropdownMenuPrimitive,
   For,
@@ -19,7 +19,6 @@ import {
   MenuRadioItem,
   MenuRadioGroupItem,
 } from "@timeless/ui";
-import { CheckOutlined, ChevronRightOutlined } from "@timeless/icons";
 
 const MENU_CONTENT_CLASS =
   "cn-menu-target cn-menu-translucent z-50 min-w-36 origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fill-mode-both data-open:fade-in-0 data-open:zoom-in-95";
@@ -190,7 +189,7 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
                   Show({
                     when: is_checked_,
                     ok() {
-                      return [CheckOutlined({ class: "size-4" }, [])];
+                      return [Icon({ name: "check", size: 16 })];
                     },
                   }),
                 ],
@@ -230,7 +229,11 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
           when: show_chevron_,
           ok() {
             return [
-              ChevronRightOutlined({ class: "cn-rtl-flip ml-auto size-4" }, []),
+              Icon({
+                class: "cn-rtl-flip ml-auto size-4",
+                name: "chevron-right",
+                size: 16,
+              }),
             ];
           },
         }),

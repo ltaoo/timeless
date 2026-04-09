@@ -6,6 +6,7 @@ import type {
   MiddlewareData,
   Platform,
 } from "./types";
+import { Rect } from "./utils";
 
 // Maximum number of resets that can occur before bailing to avoid infinite reset loops.
 const MAX_RESET_COUNT = 50;
@@ -18,8 +19,12 @@ const MAX_RESET_COUNT = 50;
  * write one for the platform you are using Floating UI with.
  */
 export const computePosition: ComputePosition = async (
-  reference,
-  floating,
+  reference: {
+    getRect: () => Rect;
+  },
+  floating: {
+    getRect: () => Rect;
+  },
   config,
 ) => {
   const {
@@ -34,7 +39,10 @@ export const computePosition: ComputePosition = async (
   ) as Platform & { detectOverflow: typeof detectOverflow };
   const rtl = await platform.isRTL?.(floating);
 
-  let rects = await platform.getElementRects({ reference, floating, strategy });
+  let rects = {
+    reference: reference.getRect(),
+    floating: floating.getRect(),
+  };
   let { x, y } = computeCoordsFromPlacement(rects, placement, rtl);
   let statefulPlacement = placement;
   let resetCount = 0;
@@ -86,7 +94,11 @@ export const computePosition: ComputePosition = async (
         if (reset.rects) {
           rects =
             reset.rects === true
-              ? await platform.getElementRects({ reference, floating, strategy })
+              ? await platform.getElementRects({
+                  reference,
+                  floating,
+                  strategy,
+                })
               : reset.rects;
         }
 

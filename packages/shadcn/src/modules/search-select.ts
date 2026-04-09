@@ -1,5 +1,6 @@
 import {
   For,
+  Icon,
   // Input as NativeInput,
   SelectPrimitive,
   Show,
@@ -10,7 +11,6 @@ import {
   refobj,
 } from "@timeless/timeless";
 import { SelectCore } from "@timeless/ui";
-import { CheckOutlined, ChevronDownOutlined } from "@timeless/icons";
 
 export function SearchSelect<T>(
   props: ViewProps & {
@@ -233,7 +233,7 @@ export function SearchSelect<T>(
         //   },
         // }),
         SelectPrimitive.Icon({ store, class: "size-4 text-muted-foreground" }, [
-          ChevronDownOutlined({}),
+          Icon({ name: "chevron-down", size: 16 }),
         ]),
       ],
     ),
@@ -297,7 +297,7 @@ export function SearchSelect<T>(
                             class:
                               "pointer-events-none absolute right-2 flex size-4 items-center justify-center",
                           },
-                          [CheckOutlined({})],
+                          [Icon({ name: "check", size: 16 })],
                         ),
                         SelectPrimitive.ItemText({}, [option.label]),
                       ],

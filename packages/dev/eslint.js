@@ -246,7 +246,6 @@ export const globals = {
   Tooltip: "readonly",
   TooltipProvider: "readonly",
   Waterfall: "readonly",
-  icons: "readonly",
   ArrowDownToLineOutlined: "readonly",
   BoltOutlined: "readonly",
   CalendarOutlined: "readonly",

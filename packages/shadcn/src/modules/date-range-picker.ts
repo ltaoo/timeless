@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { computed, refobj } from "@timeless/timeless";
+import { computed, Icon, refobj } from "@timeless/timeless";
 import {
   DateRangePickerPrimitive,
   For,
@@ -9,11 +9,7 @@ import {
   h,
 } from "@timeless/timeless";
 import { DateRangePickerCore, TooltipCore } from "@timeless/ui";
-import {
-  CalendarOutlined,
-  ChevronLeftOutlined,
-  ChevronRightOutlined,
-} from "@timeless/icons";
+
 import { Tooltip } from "./tooltip";
 
 const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
@@ -47,13 +43,13 @@ function NavButton(props: {
         when: computed(calendar_state_, (s) => !s.canLeftNext),
         ok() {
           return [
-            h(
-              Tooltip,
+            Tooltip(
               {
+                // @ts-ignore
                 store: tooltip$,
                 content: ["不能超过右侧面板"],
               },
-              [h(View, { class: NAV_BTN_DISABLED_CLASS }, children)],
+              [View({ class: NAV_BTN_DISABLED_CLASS }, children)],
             ),
           ];
         },
@@ -61,7 +57,7 @@ function NavButton(props: {
       Show({
         when: computed(calendar_state_, (s) => s.canLeftNext),
         ok() {
-          return [h(ButtonComponent, { store, class: NAV_BTN_CLASS }, children)];
+          return [ButtonComponent({ store, class: NAV_BTN_CLASS }, children)];
         },
       }),
     ]);
@@ -74,13 +70,13 @@ function NavButton(props: {
         when: computed(calendar_state_, (s) => !s.canRightPrev),
         ok() {
           return [
-            h(
-              Tooltip,
+            Tooltip(
               {
+                // @ts-ignore
                 store: tooltip$,
                 content: ["不能早于左侧面板"],
               },
-              [h(View, { class: NAV_BTN_DISABLED_CLASS }, children)],
+              [View({ class: NAV_BTN_DISABLED_CLASS }, children)],
             ),
           ];
         },
@@ -88,7 +84,7 @@ function NavButton(props: {
       Show({
         when: computed(calendar_state_, (s) => s.canRightPrev),
         ok() {
-          return [h(ButtonComponent, { store, class: NAV_BTN_CLASS }, children)];
+          return [ButtonComponent({ store, class: NAV_BTN_CLASS }, children)];
         },
       }),
     ]);
@@ -117,14 +113,14 @@ function CalendarPanel(props: {
         store,
         calendar_state_,
         type: side === "left" ? "leftPrev" : "rightPrev",
-        children: [ChevronLeftOutlined({ class: "size-4" })],
+        children: [Icon({ name: "chevron-left", size: 16 })],
       }),
       Header({ store, class: "text-sm font-medium" }),
       NavButton({
         store,
         calendar_state_,
         type: side === "left" ? "leftNext" : "rightNext",
-        children: [ChevronRightOutlined({ class: "size-4" })],
+        children: [Icon({ name: "chevron-right", size: 16 })],
       }),
     ]),
     // Grid
@@ -154,6 +150,7 @@ function CalendarPanel(props: {
         render(week) {
           return View({ class: "grid grid-cols-7" }, [
             For({
+              // @ts-ignore
               each: computed(week, (t) => t.dates),
               /**
                * @param {{value: number; is_today: boolean; is_prev_month: boolean; is_next_month: boolean; text: string}} day
@@ -307,7 +304,7 @@ export function DateRangePicker(
         }),
         DateRangePickerPrimitive.Icon(
           { class: "size-4 text-muted-foreground" },
-          [CalendarOutlined({})],
+          [Icon({ name: "calendar", size: 16 })],
         ),
       ],
     ),

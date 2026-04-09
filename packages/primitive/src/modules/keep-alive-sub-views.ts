@@ -52,7 +52,7 @@ export function KeepAliveSubViews(props: {
     key: "id",
     each: subviews,
     onMounted(event) {
-      // console.log("the For Mounted in KeepAliveSubViews", event);
+      console.log("the For Mounted in KeepAliveSubViews", event);
       listener$.append([
         props.view.onCurViewChange((view: SubView) => {
           cur_subview.as(view);

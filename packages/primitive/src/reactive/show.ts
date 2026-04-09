@@ -50,7 +50,7 @@ export function Show(props: ShowProps) {
         state.value = when.value as boolean;
         when.subscribe({
           onChange(value) {
-            console.log("the when is changed", value, state.value);
+            // console.log("the when is changed", value, state.value);
             const condition = !!value;
             // 如果条件没有变化，直接返回
             if (condition === state.value) {
@@ -58,20 +58,15 @@ export function Show(props: ShowProps) {
             }
             state.value = condition;
             if (!condition) {
+              state.children = [];
               if ($elm && typeof $elm.removeChildren === "function") {
                 $elm.removeChildren();
-                // _current_nodes = [];
-                state.children = [];
               }
             } else {
               const target = methods.build_children_with_condition(condition);
-              if (
-                $elm &&
-                target.length > 0 &&
-                typeof $elm.insertChildren === "function"
-              ) {
+              state.children = target;
+              if ($elm && typeof $elm.insertChildren === "function") {
                 $elm.insertChildren(target);
-                state.children = target;
               }
             }
           },
@@ -95,22 +90,6 @@ export function Show(props: ShowProps) {
     value: state.value,
     state,
     children: state.children,
-    props: state.props,
-    render() {
-      const condition = isRef(when) ? !!when.value : !!when;
-      state.value = condition;
-
-      // Create anchor if not already created
-      if (!$elm) {
-        $elm = safeCreateTextNode("");
-      }
-
-      const target = methods.build_children_with_condition(condition);
-      state.children = target;
-
-      // 如果宿主不支持，返回 anchor
-      return $elm;
-    },
     hydrate(startDom: any, parentDom?: any) {
       const condition = isRef(when) ? !!when.value : !!when;
       state.value = condition;

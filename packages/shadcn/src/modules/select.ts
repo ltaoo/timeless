@@ -8,12 +8,6 @@ import {
   Icon,
 } from "@timeless/timeless";
 import { SelectCore } from "@timeless/ui";
-// import {
-//   CheckOutlined,
-//   ChevronDownOutlined,
-//   ChevronUpOutlined,
-//   CircleXOutlined,
-// } from "@timeless/icons";
 
 export function Select(
   props: ViewProps & { store: SelectCore<any>; id?: string },

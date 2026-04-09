@@ -4,12 +4,13 @@ import { ViewProps } from "@/content/view";
 import { isClassNameRef, RawViewStyleProperties } from "@/style";
 import { MountedEvent } from "@/event/index";
 import { ListenerManager } from "@/util/listener";
+import { VNodeView } from "@/vnode/view";
 
 export interface ImgProps {
-  style: ViewProps["style"];
-  class: ViewProps["class"];
-  dataset: ViewProps["dataset"];
-  attributes: ViewProps["attributes"];
+  style?: ViewProps["style"];
+  class?: ViewProps["class"];
+  dataset?: ViewProps["dataset"];
+  attributes?: ViewProps["attributes"];
   src?: string | DerivedRef<string> | Ref<string>;
   alt?: string | DerivedRef<string> | Ref<string>;
   width?: number | string | DerivedRef<number | string> | Ref<number | string>;
@@ -30,7 +31,9 @@ export interface ImgProps {
   isMap?: boolean;
   onLoad?(e: Event): void;
   onError?(e: Event): void;
-  onMounted?(event: MountedEvent<HTMLImageElement>): void | (() => void);
+  onMounted?(
+    event: MountedEvent<VNodeView<HTMLImageElement>>,
+  ): void | (() => void);
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
 }

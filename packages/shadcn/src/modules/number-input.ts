@@ -1,4 +1,4 @@
-import { combine, computed, refobj } from "@timeless/timeless";
+import { combine, computed, Icon, refobj } from "@timeless/timeless";
 import {
   NumberInputPrimitive,
   Show,
@@ -6,7 +6,6 @@ import {
   ViewProps,
 } from "@timeless/timeless";
 import { NumberInputCore } from "@timeless/ui";
-import { ChevronUpOutlined, ChevronDownOutlined } from "@timeless/icons";
 
 export function NumberInput(
   props: ViewProps & {
@@ -38,6 +37,7 @@ export function NumberInput(
     },
     [
       NumberInputPrimitive.Input({
+        ...rest,
         store,
         id,
         class: [
@@ -48,7 +48,6 @@ export function NumberInput(
           "md:text-sm dark:bg-input/30 dark:disabled:bg-input/80",
           showControls ? "pr-8" : "",
         ].join(" "),
-        ...rest,
       }),
       Show({
         when: showControls,
@@ -74,7 +73,7 @@ export function NumberInput(
                       ].join(" ");
                     }),
                   },
-                  [ChevronUpOutlined({ class: "size-3" }, [])],
+                  [Icon({ name: "chevron-up", size: 12 })],
                 ),
                 NumberInputPrimitive.DecreaseButton(
                   {
@@ -89,7 +88,7 @@ export function NumberInput(
                       ].join(" ");
                     }),
                   },
-                  [ChevronDownOutlined({ class: "size-3" }, [])],
+                  [Icon({ name: "chevron-down", size: 12 })],
                 ),
               ],
             ),
