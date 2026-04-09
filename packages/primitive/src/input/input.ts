@@ -371,9 +371,7 @@ export function Input(props: InputProps = {}) {
             onChange(v: any) {
               state.styleSet = v as string[];
               if ($elm) {
-                $elm.setStyleSet(
-                  Array.isArray(v) ? v.join(" ") : String(v ?? ""),
-                );
+                $elm.setStyleSet(Array.isArray(v) ? v : [v]);
               }
             },
           });

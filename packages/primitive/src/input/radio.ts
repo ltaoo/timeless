@@ -202,9 +202,7 @@ export function Radio(props: RadioProps) {
               //   Array.isArray(v) ? v.join(" ") : String(v ?? ""),
               // );
               if ($elm) {
-                $elm.setStyleSet(
-                  Array.isArray(v) ? v.join(" ") : String(v ?? ""),
-                );
+                $elm.setStyleSet(Array.isArray(v) ? v : [v]);
               }
             },
           });

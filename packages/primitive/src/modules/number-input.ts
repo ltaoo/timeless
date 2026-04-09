@@ -3,14 +3,17 @@ import { NumberInputCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { viewStyleToCssText, isStyleRef, classNames } from "@/style/index";
-import { safeCreateElement } from "@/util/env";
+import { Input as NativeInput } from "@/input/input";
 
 export function Root(
   props: ViewProps & { store?: NumberInputCore },
   children?: ViewChildren,
 ) {
   return View(props, children);
+}
+
+export function Input(props: ViewProps & { store: NumberInputCore }) {
+  return NativeInput(props);
 }
 
 export function IncreaseButton(

@@ -99,6 +99,9 @@ export function Box<T>(props: BoxProps, extra_state: T) {
   };
 
   const methods = {
+    set$elm(elm: any) {
+      $elm = elm;
+    },
     // Helper: apply attribute
     apply_attr(k: string, v: any) {
       if (v === undefined || v === null || v === false) {
@@ -166,6 +169,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
+              state.styleSet = v.split(" ");
               if ($elm) {
                 $elm.setStyleSet(v.split(" "));
               }
@@ -175,12 +179,14 @@ export function Box<T>(props: BoxProps, extra_state: T) {
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v) {
-              if ($elm) {
+              state.styleSet = v as string[];
+              if ($elm && typeof $elm.setStyleSet === "function") {
+                // console.log("class changed", v, $elm);
                 $elm.setStyleSet(v);
               }
             },
           });
-          state.styleSet = cls.toString().split(" ");
+          state.styleSet = cls.value;
         } else {
           state.styleSet = [];
         }

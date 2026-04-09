@@ -178,14 +178,13 @@ export function Select(
                 SelectPrimitive.Icon(
                   { store, class: "size-4 text-muted-foreground" },
                   [
-                    Show({
-                      when: computed(state_, (t) => t.open),
-                      ok() {
-                        return [Icon({ name: "chevron-up" })];
-                      },
-                      else() {
-                        return [Icon({ name: "chevron-down" })];
-                      },
+                    Icon({
+                      name: "chevron-up",
+                      class: classNames([
+                        computed(state_, (t) => {
+                          return t.open ? "" : "rotate-180";
+                        }),
+                      ]),
                     }),
                   ],
                 ),

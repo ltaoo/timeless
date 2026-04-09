@@ -1,3 +1,5 @@
+import { TimelessElement } from "@timeless/timeless";
+
 export interface NativeTextElm {
   type: "text";
   value: string;
@@ -50,7 +52,7 @@ export function NativeText(value?: string | null): NativeText {
     setStyle(style: Record<string, string>) {
       Object.assign($text.style, style);
     },
-    render() {
+    render(elm: TimelessElement) {
       return $text;
     },
   };

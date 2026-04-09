@@ -52,6 +52,7 @@ export function viewStyleToCssText(style: ViewStyleInput) {
 
 export type ClassNameRef = {
   __cn_ref: true;
+  value: string[];
   subscribe(ctx: Subscriber): void;
   as(v: string): void;
   del(v: string): void;
@@ -207,6 +208,9 @@ export function classNames(
         const v = segments[i];
         this.add(v);
       }
+    },
+    get value() {
+      return _names;
     },
     toString() {
       return _names.filter(Boolean).join(" ");

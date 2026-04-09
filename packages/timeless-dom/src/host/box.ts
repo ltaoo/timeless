@@ -38,10 +38,11 @@ export function HostElement(props: {
       }
     },
     setStyleSet(styleSet: string[]) {
-      if (!$elm || $elm instanceof Text || !styleSet || styleSet.length === 0) {
+      console.log("123", $elm, styleSet);
+      if (!$elm || $elm instanceof Text || !styleSet) {
         return;
       }
-      $elm.className = styleSet.join(" ");
+      $elm.setAttribute("class", styleSet.join(" "));
     },
     setStyleValue(key: any, value: string) {
       if (!$elm || $elm instanceof Text) {

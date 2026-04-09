@@ -385,10 +385,10 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
           continue;
         }
         if (isElement(node)) {
-          const result = node.render();
-          if (result) {
-            host.appendChild($elm, result);
-          }
+          // const result = node.render();
+          // if (result) {
+          //   host.appendChild($elm, result);
+          // }
         }
       }
       if (onMounted) {

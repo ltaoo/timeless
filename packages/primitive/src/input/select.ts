@@ -6,11 +6,16 @@ import { MountedEvent } from "@/event";
 import { isClassNameRef } from "@/style";
 import { For, ForProps } from "@/reactive/for";
 import { ListenerManager } from "@/util/listener";
+import { BoxEvents } from "@/content/box";
 
 type SelectValue = string[];
 
-export interface SelectProps<T> extends Omit<ViewProps, "as"> {
+export type SelectProps<T> = BoxEvents & {
   id?: string | Ref<string>;
+  style?: ViewProps["style"];
+  class?: ViewProps["class"];
+  dataset?: ViewProps["dataset"];
+  attributes?: ViewProps["attributes"];
   key?: string;
   each: T[] | Ref<T[]>;
   render: ForProps<T>["render"];
@@ -24,7 +29,7 @@ export interface SelectProps<T> extends Omit<ViewProps, "as"> {
   value?: Ref<SelectValue>;
   onChange?: (e: Event) => void;
   onInput?: (e: Event) => void;
-}
+};
 
 function getOptionValue(option: any) {
   if (option == null) return "";
@@ -302,9 +307,7 @@ export function Select<T>(props: SelectProps<T>) {
               //   Array.isArray(v) ? v.join(" ") : String(v ?? ""),
               // );
               if ($elm) {
-                $elm.setStyleSet(
-                  Array.isArray(v) ? v.join(" ") : String(v ?? ""),
-                );
+                $elm.setStyleSet(Array.isArray(v) ? v : [v]);
               }
             },
           });

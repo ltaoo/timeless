@@ -12,6 +12,7 @@ export function DOMIcon(props: {
   build: (elm: TimelessElement) => VNodeView<SVGSVGElement>;
 }): DOMIcon {
   const t = "icon";
+  let $elm: any = null;
   const common$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
@@ -47,7 +48,7 @@ export function DOMIcon(props: {
         console.warn(`Icon "${name}" not found in @timeless/svg/asn`);
         return null;
       }
-      const $elm = render_asn_to_svg(asn_node, elm.state) as SVGSVGElement;
+      $elm = render_asn_to_svg(asn_node, elm.state) as SVGSVGElement;
       common$.methods.set$elm($elm);
       // common$.methods.applyState(elm.state);
       return $elm;
@@ -95,10 +96,10 @@ function render_asn_to_svg(
     element.setAttribute("height", size);
 
     // Apply color if provided
-    if (props.color) {
-      element.style.color = props.color;
-      element.style.stroke = props.color;
-    }
+    // if (props.color) {
+    //   element.style.color = props.color;
+    //   element.style.stroke = props.color;
+    // }
     if (props.styleSet) {
       element.classList.add(...props.styleSet);
     }

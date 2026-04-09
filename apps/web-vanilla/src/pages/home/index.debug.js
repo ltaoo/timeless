@@ -118,6 +118,9 @@ export default function OverlayView() {
   });
 
   // list$.init();
+  const state_ = refobj({
+    open: false,
+  });
 
   return ScrollView(
     {
@@ -125,7 +128,31 @@ export default function OverlayView() {
       store: ui.view$,
     },
     [
-      Icon({ class: "123", name: "bolt" }),
+      Icon({
+        name: "chevron-up",
+        class: classNames([
+          computed(state_, (t) => {
+            console.log("open changed", t.open);
+            return t.open ? "" : "rotate-180";
+          }),
+        ]),
+      }),
+      Button(
+        {
+          store: new Timeless.ui.ButtonCore({
+            onClick() {
+              state_.as((prev) => {
+                return {
+                  ...prev,
+                  open: !prev.open,
+                };
+              });
+            },
+          }),
+        },
+        ["Click it"],
+      ),
+      // Icon({ class: "123", name: "bolt" }),
       DropdownMenu(
         {
           store: new Timeless.ui.DropdownMenuCore({

@@ -68,6 +68,7 @@ export function Icon(props: IconProps) {
       return $elm;
     },
     set $elm(v: any) {
+      box$.methods.set$elm(v);
       $elm = v;
     },
     state,

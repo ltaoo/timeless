@@ -19,6 +19,7 @@ import {
 } from "./type";
 
 export type ViewProps = {
+  id?: string;
   key?: string | number;
   as?: string;
   style?: ViewStyle;

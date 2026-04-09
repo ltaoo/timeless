@@ -9,30 +9,28 @@ import { NativeInput } from "@/host/input";
 function build(elm: TimelessElement): any {
   if (elm.t === "view") {
     const view$ = NativeView({ build });
-    elm.$elm = view$;
+    // elm.$elm = view$;
     view$.render(elm);
     return view$;
   }
   if (elm.t === "text") {
-    const text$ = NativeText(elm.value as any);
-    elm.$elm = text$;
+    const text$ = NativeText();
+    // elm.$elm = text$;
+    text$.render(elm);
     return text$;
   }
   if (elm.t === "img") {
     const img$ = NativeImg({ build });
-    elm.$elm = img$;
     img$.render(elm);
     return img$;
   }
   if (elm.t === "button") {
     const button$ = NativeButton({ build });
-    elm.$elm = button$;
     button$.render(elm);
     return button$;
   }
   if (elm.t === "input") {
     const input$ = NativeInput({ build });
-    elm.$elm = input$;
     input$.render(elm);
     return input$;
   }
