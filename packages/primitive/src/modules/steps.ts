@@ -119,10 +119,8 @@ export function Indicator(
         when: !!children,
         ok() {
           return [
-            Txt(
-              computed(state_, (s) =>
-                index < s.value ? "✓" : String(index + 1),
-              ),
+            computed(state_, (s) =>
+              index < s.value ? "✓" : String(index + 1),
             ),
           ];
         },

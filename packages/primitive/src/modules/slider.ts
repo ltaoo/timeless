@@ -3,7 +3,6 @@ import { computed, isRef, ref } from "@timeless/reactive";
 import { isStyleRef } from "@/style/index";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { getHost } from "@/host";
 
 export function Root(
   props: ViewProps & {
@@ -16,7 +15,6 @@ export function Root(
   },
   children?: ViewChildren,
 ) {
-  const host = getHost();
   const {
     min: _min = 0,
     max: _max = 100,
@@ -35,40 +33,40 @@ export function Root(
   });
 
   const updateValue = (clientX: number) => {
-    if (disabled || !containerRef.current) return;
-    const rect = host.getBoundingClientRect?.(containerRef.current) as any;
-    if (!rect || !rect.width) return;
-    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
-    let newVal = _min + (x / rect.width) * (_max - _min);
-    if (_step > 0) newVal = _min + Math.round((newVal - _min) / _step) * _step;
-    newVal = Math.max(_min, Math.min(newVal, _max));
-    if (newVal !== valueRef.value) {
-      valueRef.as(newVal);
-      if (onChange) {
-        onChange(newVal);
-      }
-    }
+    // if (disabled || !containerRef.current) return;
+    // const rect = host.getBoundingClientRect?.(containerRef.current) as any;
+    // if (!rect || !rect.width) return;
+    // const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    // let newVal = _min + (x / rect.width) * (_max - _min);
+    // if (_step > 0) newVal = _min + Math.round((newVal - _min) / _step) * _step;
+    // newVal = Math.max(_min, Math.min(newVal, _max));
+    // if (newVal !== valueRef.value) {
+    //   valueRef.as(newVal);
+    //   if (onChange) {
+    //     onChange(newVal);
+    //   }
+    // }
   };
 
   let cleanupDrag: any;
   const onPointerDown = (e: any) => {
-    if (disabled) return;
-    e.preventDefault();
-    updateValue(e.clientX);
-    host.setPointerCapture?.(e.target, e.pointerId);
-    const onMove = (ev: any) => updateValue(ev.clientX);
-    const onUp = (ev: any) => {
-      host.releasePointerCapture?.(ev.target, ev.pointerId);
-      host.removeDocumentEventListener?.("pointermove", onMove);
-      host.removeDocumentEventListener?.("pointerup", onUp);
-      cleanupDrag = null;
-    };
-    host.addDocumentEventListener?.("pointermove", onMove);
-    host.addDocumentEventListener?.("pointerup", onUp);
-    cleanupDrag = () => {
-      host.removeDocumentEventListener?.("pointermove", onMove);
-      host.removeDocumentEventListener?.("pointerup", onUp);
-    };
+    // if (disabled) return;
+    // e.preventDefault();
+    // updateValue(e.clientX);
+    // host.setPointerCapture?.(e.target, e.pointerId);
+    // const onMove = (ev: any) => updateValue(ev.clientX);
+    // const onUp = (ev: any) => {
+    //   host.releasePointerCapture?.(ev.target, ev.pointerId);
+    //   host.removeDocumentEventListener?.("pointermove", onMove);
+    //   host.removeDocumentEventListener?.("pointerup", onUp);
+    //   cleanupDrag = null;
+    // };
+    // host.addDocumentEventListener?.("pointermove", onMove);
+    // host.addDocumentEventListener?.("pointerup", onUp);
+    // cleanupDrag = () => {
+    //   host.removeDocumentEventListener?.("pointermove", onMove);
+    //   host.removeDocumentEventListener?.("pointerup", onUp);
+    // };
   };
 
   return View(
@@ -76,14 +74,14 @@ export function Root(
       ...rest,
       // "data-percentage": pct,
       onMounted(event) {
-        const elm = (event as any).target as any;
+        const elm = event.target;
         containerRef.current = elm;
-        host.addEventListener(elm, "pointerdown", onPointerDown);
+        elm.addEventListener("pointerdown", onPointerDown);
         if (rest.onMounted) {
           rest.onMounted(event);
         }
         return () => {
-          host.removeEventListener(elm, "pointerdown", onPointerDown);
+          elm.removeEventListener("pointerdown", onPointerDown);
         };
       },
       onUnmounted() {

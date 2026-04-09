@@ -7,7 +7,6 @@ import { Portal as NativePortal } from "@/content/portal";
 import { Show } from "@/reactive/show";
 import { Input as NativeInput } from "@/input/input";
 import { isStyleRef, classNames } from "@/style/index";
-import { getHost } from "@/host";
 
 import * as PopperPrimitive from "./popper";
 import { Fragment } from "@/content/fragment";
@@ -29,7 +28,6 @@ export function Trigger(
   props: ViewProps & { store: SelectCore<any>; id?: string },
   children: ViewChildren = [],
 ) {
-  const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -74,11 +72,11 @@ export function Trigger(
       // }
     },
     onMounted(event) {
-      const $elm = (event as any).target as HTMLInputElement;
-      host.setProperty?.($elm, "value", store.state.value || "");
+      const $elm = event.target;
+      $elm.setAttribute("value", store.state.value || "");
       events.push(
         store.onStateChange(() => {
-          host.setProperty?.($elm, "value", store.state.value || "");
+          $elm.setAttribute("value", store.state.value || "");
         }),
       );
     },
@@ -88,20 +86,16 @@ export function Trigger(
     {
       ...rest,
       onMounted(event) {
-        const $elm = (event as any).target as HTMLDivElement;
+        const $elm = event.target;
         // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
         store.popper.setReference(
           {
             $el: $elm,
             getRect() {
-              return host.getBoundingClientRect?.($elm) as any;
+              return $elm.getBoundingClientRect();
             },
           },
           { force: true },
-        );
-        console.log(
-          "[]Select Trigger Mounted",
-          host.getBoundingClientRect?.($elm),
         );
         // const rect = $elm.getBoundingClientRect();
         // store.setPosition({
@@ -137,13 +131,13 @@ export function Trigger(
           }
           props.store.show();
         };
-        host.addEventListener($elm, "pointerdown", handlePointerDown);
+        $elm.addEventListener("pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
           rest.onMounted(event);
         }
         return () => {
-          host.removeEventListener($elm, "pointerdown", handlePointerDown);
+          $elm.removeEventListener("pointerdown", handlePointerDown);
         };
       },
       onUnmounted() {
@@ -236,7 +230,6 @@ export function Content(
   },
   children: ViewChildren,
 ) {
-  const host = getHost();
   const { store, animation, ...rest } = props;
 
   const presence_ = refobj(store.presence.state);
@@ -322,17 +315,17 @@ export function Content(
                     }
                   },
                   onMounted(event) {
-                    const $elm = (event as any).target as HTMLElement;
-                    host.setTimeout(() => {
-                      if (store.state.search) {
-                        const input = host.querySelector?.($elm, "input");
-                        if (input instanceof HTMLInputElement) {
-                          host.focus?.(input);
-                          return;
-                        }
-                      }
-                      host.focus?.($elm);
-                    }, 0);
+                    const $elm = event.target;
+                    // setTimeout(() => {
+                    //   if (store.state.search) {
+                    //     const input = host.querySelector?.($elm, "input");
+                    //     if (input instanceof HTMLInputElement) {
+                    //       host.focus?.(input);
+                    //       return;
+                    //     }
+                    //   }
+                    //   $elm.focus();
+                    // }, 0);
                     if (rest.onMounted) {
                       rest.onMounted(event);
                     }
@@ -359,7 +352,6 @@ export function Search(
   props: ViewProps & { store: SelectCore<any> },
   children?: ViewChildren,
 ) {
-  const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -376,14 +368,16 @@ export function Search(
           placeholder: computed(state_, (s) => s.searchPlaceholder),
           value: computed(state_, (s) => s.searchKeyword),
           onInput(e: Event) {
-            const target = e.target as HTMLInputElement;
+            const target = e.target;
+            // @ts-ignore
             store.setSearchKeyword(target.value);
           },
           onMounted(event) {
-            const $elm = (event as any).target as HTMLInputElement;
+            const $elm = event.target;
             // 自动聚焦搜索框
-            host.setTimeout(() => {
-              host.focus?.($elm);
+            setTimeout(() => {
+              // @ts-ignore
+              $elm.focus();
             }, 0);
             if (rest.onMounted) {
               rest.onMounted(event);

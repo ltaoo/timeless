@@ -2,8 +2,8 @@ import { ToastCore, ExternalToast, SonnerCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { Txt } from "@/content/text";
 import { Portal as NativePortal } from "@/content/portal";
+import { Icon as NativeIcon } from "@/content/icon";
 
 import { Presence } from "./presence";
 
@@ -55,7 +55,7 @@ export function Text(
   children?: ViewChildren,
 ) {
   const { store, text, ...rest } = props;
-  return View(rest, children || [Txt(text)]);
+  return View(rest, children || [text]);
 }
 
 export function Close(
@@ -71,7 +71,7 @@ export function Close(
         store.hide();
       },
     },
-    children || [Txt("✕")],
+    children || [NativeIcon({ name: "circle", size: 16 })],
   );
 }
 

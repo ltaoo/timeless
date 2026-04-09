@@ -2,7 +2,6 @@ import { TabHeaderCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { getHost } from "@/host";
 
 export function Root(
   props: ViewProps & { store: TabHeaderCore<any> },
@@ -28,7 +27,6 @@ export function Tab(
   },
   children?: ViewChildren,
 ) {
-  const host = getHost();
   const { store, value, index, ...rest } = props;
 
   return View(
@@ -36,10 +34,10 @@ export function Tab(
       as: "button",
       ...rest,
       onMounted(event) {
-        const $el = (event as any).target as HTMLDivElement;
+        const $el = event.target;
         store.updateTabClient(index, {
           rect() {
-            return host.getBoundingClientRect?.($el) as any;
+            return $el.getBoundingClientRect();
           },
         });
         if (rest.onMounted) {

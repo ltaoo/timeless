@@ -8,11 +8,9 @@ import {
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-// import { getHost } from "@/host";
+import { ListenerManager } from "@/util/listener";
 
 import * as MenuPrimitive from "./menu";
-import { getHost } from "@/host";
-import { ListenerManager } from "@/util/listener";
 
 // Shared hover timer state to coordinate between Trigger and Content
 const hoverTimers = new WeakMap<ContextMenuCore, { timer: any }>();

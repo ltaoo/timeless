@@ -6,7 +6,7 @@ import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
 import { Portal as NativePortal } from "@/content/portal";
 import { isStyleRef } from "@/style/index";
-import { getHost } from "@/host";
+// import { getHost } from "@/host";
 
 import * as PopperPrimitive from "./popper";
 
@@ -58,7 +58,6 @@ export function Trigger(
   props: ViewProps & { content?: ViewChildren; side?: Side; align?: Align },
   children?: ViewChildren,
 ) {
-  const host = getHost();
   const { content, side = "top", align = "center", ...rest } = props;
   const userOnMounted = rest.onMounted;
   const userOnMouseEnter = rest.onMouseEnter;
@@ -71,9 +70,9 @@ export function Trigger(
     {
       ...rest,
       onMounted(event) {
-        const $e = (event as any).target as HTMLDivElement;
-        const nodes = host.getChildNodes($e);
-        $ref = nodes.find((n: any) => n?.nodeType === 1) || $e;
+        const $e = event.target;
+        const nodes = $e.getChildren();
+        $ref = nodes.find((n) => n.getType() === "view") || $e;
 
         const cleanup = userOnMounted ? userOnMounted(event) : undefined;
         return () => {
@@ -92,7 +91,7 @@ export function Trigger(
           {
             $el: $ref,
             getRect() {
-              return host.getBoundingClientRect?.($ref) as any;
+              return $ref.getBoundingClientRect();
             },
           },
           { force: true },

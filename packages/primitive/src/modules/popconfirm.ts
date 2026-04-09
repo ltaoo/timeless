@@ -5,7 +5,6 @@ import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
 import { Portal as NativePortal } from "@/content/portal";
-import { getHost } from "@/host";
 
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
@@ -32,18 +31,17 @@ export function Trigger(
   props: ViewProps & { store: PopconfirmCore },
   children?: ViewChildren,
 ) {
-  const host = getHost();
   return View(
     {
       onMounted(event) {
-        const $e = (event as any).target as HTMLDivElement;
-        const nodes = host.getChildNodes($e);
-        const $ref = nodes.find((n: any) => n?.nodeType === 1) || $e;
+        const $e = event.target;
+        const nodes = $e.getChildren();
+        const $ref = nodes.find((n) => n.getType() === "view") || $e;
         props.store.popper.setReference(
           {
             $el: $ref,
             getRect() {
-              return host.getBoundingClientRect?.($ref) as any;
+              return $e.getBoundingClientRect();
             },
           },
           { force: true },
@@ -54,9 +52,9 @@ export function Trigger(
           e.stopPropagation();
           props.store.toggle();
         };
-        host.addEventListener($e, "pointerdown", handlePointerDown);
+        $e.addEventListener("pointerdown", handlePointerDown);
         return () => {
-          host.removeEventListener($e, "pointerdown", handlePointerDown);
+          $e.removeEventListener("pointerdown", handlePointerDown);
         };
       },
     },

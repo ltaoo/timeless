@@ -1,6 +1,6 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { TimelessElement, ViewChildren, isElement } from "@/content/type";
+import { TimelessElement, isElement } from "@/content/type";
 import { safeCreateTextNode } from "@/util/env";
 import { MountedEvent } from "@/event";
 

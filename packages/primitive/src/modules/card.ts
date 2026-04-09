@@ -5,7 +5,7 @@ export function Card(props: ViewProps, children?: ViewChildren) {
   return View(
     {
       ...props,
-      // "data-card": "",
+      dataset: { card: "" },
     },
     children,
   );
@@ -15,7 +15,7 @@ export function CardHeader(props: ViewProps, children?: ViewChildren) {
   return View(
     {
       ...props,
-      // "data-card-header": "",
+      dataset: { "card-header": "" },
     },
     children,
   );
@@ -25,7 +25,7 @@ export function CardTitle(props: ViewProps, children?: ViewChildren) {
   return View(
     {
       ...props,
-      // "data-card-title": "",
+      dataset: { "card-title": "" },
     },
     children,
   );
@@ -35,7 +35,7 @@ export function CardDescription(props: ViewProps, children?: ViewChildren) {
   return View(
     {
       ...props,
-      // "data-card-description": "",
+      dataset: { "card-description": "" },
     },
     children,
   );
@@ -45,7 +45,7 @@ export function CardContent(props: ViewProps, children?: ViewChildren) {
   return View(
     {
       ...props,
-      // "data-card-content": "",
+      dataset: { "card-content": "" },
     },
     children,
   );
@@ -55,7 +55,7 @@ export function CardFooter(props: ViewProps, children?: ViewChildren) {
   return View(
     {
       ...props,
-      // "data-card-footer": "",
+      dataset: { "card-footer": "" },
     },
     children,
   );

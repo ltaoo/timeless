@@ -5,7 +5,7 @@ import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Portal as NativePortal } from "@/content/portal";
 import { Show } from "@/reactive/show";
-import { getHost } from "@/host";
+// import { getHost } from "@/host";
 
 import { Arrow as NativeArrow } from "./arrow";
 import * as PopperPrimitive from "./popper";
@@ -107,9 +107,7 @@ export function ContentImpl(
                   props.store.parent_menu &&
                   props.store.parent_menu.hide_sub_timer !== null
                 ) {
-                  getHost().clearTimeout(
-                    props.store.parent_menu.hide_sub_timer,
-                  );
+                  clearTimeout(props.store.parent_menu.hide_sub_timer);
                   props.store.parent_menu.hide_sub_timer = null;
                 }
                 if (rest.onMouseEnter) {
@@ -196,7 +194,7 @@ export function ItemImpl(
   props: ViewProps & { store: MenuItemCore },
   children: ViewChildren,
 ) {
-  const host = getHost();
+  // const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(props.store.state);
 
@@ -217,21 +215,23 @@ export function ItemImpl(
         }),
       },
       onMounted(event) {
-        const $el = (event as any).target as HTMLDivElement;
+        const $el = event.target;
         // console.log("[ItemImpl] mounted", props.store.label);
         if (props.store.menu) {
           props.store.menu.popper.setReference({
             $el,
             getRect() {
-              return host.getBoundingClientRect?.($el) as any;
+              return $el.getBoundingClientRect();
             },
           });
         }
         props.store.onFocus(() => {
-          host.focus?.($el);
+          // @ts-ignore
+          $el.focus();
         });
         props.store.onBlur(() => {
-          host.blur?.($el);
+          // @ts-ignore
+          $el.blur();
         });
       },
       onClick() {
@@ -287,7 +287,6 @@ export function SubMenuTrigger(
   props: ViewProps & { store: MenuItemCore },
   children: ViewChildren,
 ) {
-  const host = getHost();
   return Anchor(
     {
       class: "menu-item-with-sub-menu",
@@ -299,7 +298,7 @@ export function SubMenuTrigger(
         }
         props.store.menu.popper.setReference({
           getRect() {
-            return host.getBoundingClientRect?.($el) as any;
+            return $el.getBoundingClientRect();
           },
         });
       },
@@ -328,7 +327,6 @@ export function SubMenuContent(
   },
   children: ViewChildren,
 ) {
-  const host = getHost();
   return ContentImpl(
     {
       ...props,
@@ -339,7 +337,7 @@ export function SubMenuContent(
           props.store.parent_menu &&
           props.store.parent_menu.hide_sub_timer !== null
         ) {
-          host.clearTimeout(props.store.parent_menu.hide_sub_timer);
+          clearTimeout(props.store.parent_menu.hide_sub_timer);
           props.store.parent_menu.hide_sub_timer = null;
         }
       },

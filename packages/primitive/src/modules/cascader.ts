@@ -5,11 +5,11 @@ import { classNames } from "@/style/index";
 import { View, ViewProps } from "@/content/view";
 import { Portal as NativePortal } from "@/content/portal";
 import { ViewChildren } from "@/content/type";
+import { Fragment } from "@/content/fragment";
 import { Show } from "@/reactive/show";
-import { getHost } from "@/host";
+// import { getHost } from "@/host";
 
 import * as PopperPrimitive from "./popper";
-import { Fragment } from "@/content/fragment";
 
 export function Root(
   props: ViewProps & { store: CascaderCore<any> },
@@ -28,7 +28,7 @@ export function Trigger(
   props: ViewProps & { store: CascaderCore<any>; id?: string },
   children: ViewChildren = [],
 ) {
-  const host = getHost();
+  // const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -68,13 +68,13 @@ export function Trigger(
         e.stopPropagation();
       },
       onMounted(event) {
-        const $elm = (event as any).target as HTMLInputElement;
+        const $elm = event.target;
         const value = store.state.value;
-        host.setProperty?.($elm, "value", value ? value.join(",") : "");
+        $elm.setAttribute("value", value ? value.join(",") : "");
         events.push(
           store.onStateChange(() => {
             const v = store.state.value;
-            host.setProperty?.($elm, "value", v ? v.join(",") : "");
+            $elm.setAttribute("value", v ? v.join(",") : "");
           }),
         );
       },
@@ -86,12 +86,12 @@ export function Trigger(
     {
       ...rest,
       onMounted(event) {
-        const $elm = (event as any).target as HTMLDivElement;
+        const $elm = event.target;
         store.popper.setReference(
           {
             $el: $elm,
             getRect() {
-              return host.getBoundingClientRect?.($elm) as any;
+              return $elm.getBoundingClientRect();
             },
           },
           { force: true },
@@ -112,13 +112,15 @@ export function Trigger(
           }
           props.store.show();
         };
-        host.addEventListener($elm, "pointerdown", handlePointerDown);
+        // @ts-ignore
+        $elm.addEventListener("pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
           rest.onMounted(event);
         }
         return () => {
-          host.removeEventListener($elm, "pointerdown", handlePointerDown);
+          // @ts-ignore
+          $elm.removeEventListener("pointerdown", handlePointerDown);
         };
       },
       onUnmounted() {
@@ -196,7 +198,7 @@ export function Content(
   },
   children: ViewChildren,
 ) {
-  const host = getHost();
+  // const host = getHost();
   const { store, animation, ...rest } = props;
 
   const presence_ = refobj(store.presence.state);
@@ -288,9 +290,10 @@ export function Content(
                   },
                   onKeyDown: handleKeyDown,
                   onMounted(event) {
-                    const $elm = (event as any).target as HTMLElement;
-                    host.setTimeout(() => {
-                      host.focus?.($elm);
+                    const $elm = event.target;
+                    setTimeout(() => {
+                      // @ts-ignore
+                      $elm.focus();
                     }, 0);
                     if (rest.onMounted) {
                       rest.onMounted(event);
@@ -374,7 +377,7 @@ export function Search(
   props: ViewProps & { store: CascaderCore<any> },
   children?: ViewChildren,
 ) {
-  const host = getHost();
+  // const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -391,34 +394,31 @@ export function Search(
             ...rest,
             as: "input",
             onMounted(event) {
-              const $elm = (event as any).target as HTMLInputElement;
-              host.setProperty?.(
-                $elm,
-                "placeholder",
-                store.state.searchPlaceholder,
-              );
-              host.setProperty?.($elm, "value", store.state.searchKeyword);
+              const $elm = event.target;
+              $elm.setAttribute("placeholder", store.state.searchPlaceholder);
+              $elm.setAttribute("value", store.state.searchKeyword);
 
               const handleInput = (e: any) => {
                 const target = e.target as HTMLInputElement;
                 store.setSearchKeyword(target.value);
               };
-              host.addEventListener($elm, "input", handleInput);
+              $elm.addEventListener("input", handleInput);
 
               store.onStateChange((s) => {
-                host.setProperty?.($elm, "placeholder", s.searchPlaceholder);
-                host.setProperty?.($elm, "value", s.searchKeyword);
+                $elm.setAttribute("placeholder", s.searchPlaceholder);
+                $elm.setAttribute("value", s.searchKeyword);
               });
 
-              host.setTimeout(() => {
-                host.focus?.($elm);
+              setTimeout(() => {
+                // @ts-ignore
+                $elm.focus();
               }, 0);
 
               if (rest.onMounted) {
                 rest.onMounted(event);
               }
               return () => {
-                host.removeEventListener($elm, "input", handleInput);
+                $elm.removeEventListener("input", handleInput);
               };
             },
             onClick(e: Event) {

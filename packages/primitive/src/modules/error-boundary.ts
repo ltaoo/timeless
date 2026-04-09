@@ -64,21 +64,21 @@ export function withErrorBoundary(
     console.error(`[ErrorBoundary] Error creating "${viewName}":`, error);
     return renderError(error, viewName);
   }
-  const originalRender = element.render;
-  element.render = function () {
-    try {
-      return originalRender.call(element);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      console.error(`[ErrorBoundary] Error rendering "${viewName}":`, error);
-      const errorView = renderError(error, viewName);
-      const result = errorView.render();
-      if (element.$elm.parentNode) {
-        element.$elm.parentNode.replaceChild(errorView.$elm, element.$elm);
-      }
-      element.$elm = errorView.$elm;
-      return result;
-    }
-  };
+  // const originalRender = element.render;
+  // element.render = function () {
+  //   try {
+  //     return originalRender.call(element);
+  //   } catch (err) {
+  //     const error = err instanceof Error ? err : new Error(String(err));
+  //     console.error(`[ErrorBoundary] Error rendering "${viewName}":`, error);
+  //     const errorView = renderError(error, viewName);
+  //     const result = errorView.render();
+  //     if (element.$elm.parentNode) {
+  //       element.$elm.parentNode.replaceChild(errorView.$elm, element.$elm);
+  //     }
+  //     element.$elm = errorView.$elm;
+  //     return result;
+  //   }
+  // };
   return element;
 }

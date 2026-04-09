@@ -4,13 +4,13 @@ import { PopperCore } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { isStyleRef } from "@/style/index";
-import { getHost } from "@/host";
+// import { getHost } from "@/host";
 
 export function Arrow(
   props: ViewProps & { store: PopperCore },
   children?: ViewChildren,
 ) {
-  const host = getHost();
+  // const host = getHost();
   const { store, ...rest } = props;
   const state = refobj(store.state);
 
@@ -62,13 +62,14 @@ export function Arrow(
         ...extraStyle,
       },
       onMounted(event) {
-        const $el = (event as any).target as HTMLDivElement;
-        const rect = host.getBoundingClientRect?.($el) as any;
+        const $el = event.target;
+        const rect = $el.getBoundingClientRect();
         const width = rect?.width ?? 0;
         const height = rect?.height ?? 0;
-        host.patchStyle?.($el, {
-          "--t1-popper-arrow-offset": `${Math.ceil(Math.max(width, height) / 2)}px`,
-        });
+        $el.setStyleValue(
+          "--t1-popper-arrow-offset",
+          `${Math.ceil(Math.max(width, height) / 2)}px`,
+        );
         if ((store as any).setArrowElement) {
           (store as any).setArrowElement($el);
         }
