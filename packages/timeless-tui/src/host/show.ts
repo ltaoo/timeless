@@ -69,7 +69,9 @@ export function TuiShow(props: {
 
       for (const child of new_instances) {
         if (isElement(child) && child.onMounted) {
-          child.onMounted(child.$elm);
+          child.onMounted({
+            target: child.$elm,
+          });
         }
       }
 

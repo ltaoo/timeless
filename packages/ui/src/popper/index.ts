@@ -94,7 +94,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   } | null = null;
   floating: {
     getRect: () => Rect;
-    $el?: unknown;
+    $el?: {};
     // x: number;
     // y: number;
     // width: number;
@@ -234,15 +234,15 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         );
         return;
       }
-      const el = (floating as any)?.$el as HTMLElement | undefined;
+      const el = floating.getRect();
       console.log(
         "[DEBUG-POPPER] tryPlace - checking element",
         this.unique_id,
         {
           hasEl: !!el,
-          offsetWidth: el?.offsetWidth,
-          offsetHeight: el?.offsetHeight,
-          isConnected: el?.isConnected,
+          // offsetWidth: el?.offsetWidth,
+          // offsetHeight: el?.offsetHeight,
+          // isConnected: el?.isConnected,
         },
       );
       this.place();
@@ -372,25 +372,19 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   async computePosition() {
     const { placement, strategy } = this;
 
-    const referenceEl = (this.reference as any)?.$el as HTMLElement | undefined;
-    const floatingEl = (this.floating as any)?.$el as HTMLElement | undefined;
+    const referenceEl = this.reference;
+    const floatingEl = this.floating;
 
     console.log("[DEBUG-POPPER] computePosition", this.unique_id, {
-      refIsElement: referenceEl instanceof Element,
-      floatingIsElement: floatingEl instanceof Element,
-      refElRect:
-        referenceEl instanceof Element
-          ? referenceEl.getBoundingClientRect()
-          : null,
-      floatingElRect:
-        floatingEl instanceof Element
-          ? floatingEl.getBoundingClientRect()
-          : null,
+      // refIsElement: referenceEl instanceof Element,
+      // floatingIsElement: floatingEl instanceof Element,
+      // refElRect: referenceEl ? referenceEl.getBoundingClientRect() : null,
+      // floatingElRect: floatingEl ? floatingEl.getBoundingClientRect() : null,
       placement,
       strategy,
     });
 
-    if (!floatingEl || !(floatingEl instanceof Element)) {
+    if (!floatingEl) {
       console.log(
         "[DEBUG-POPPER] computePosition early return - no floatingEl",
       );
@@ -404,30 +398,32 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     }
 
     // Use real element or virtual element (for updateReference with only getRect)
-    const useVirtual = !(referenceEl instanceof Element);
-    const referenceArg: any =
-      referenceEl instanceof Element
-        ? referenceEl
-        : {
-            getBoundingClientRect: () => {
-              const r = this.reference!.getRect();
-              console.log(
-                "[DEBUG-POPPER] virtual getBoundingClientRect called",
-                this.unique_id,
-                r,
-              );
-              return {
-                x: r.x,
-                y: r.y,
-                width: r.width,
-                height: r.height,
-                top: r.y,
-                left: r.x,
-                right: r.x + r.width,
-                bottom: r.y + r.height,
-              };
-            },
-          };
+    // const useVirtual = !(referenceEl instanceof Element);
+    const useVirtual = false;
+    const referenceArg = referenceEl;
+    // const referenceArg: any =
+    //   referenceEl instanceof Element
+    //     ? referenceEl
+    //     : {
+    //         getBoundingClientRect: () => {
+    //           const r = this.reference!.getRect();
+    //           console.log(
+    //             "[DEBUG-POPPER] virtual getBoundingClientRect called",
+    //             this.unique_id,
+    //             r,
+    //           );
+    //           return {
+    //             x: r.x,
+    //             y: r.y,
+    //             width: r.width,
+    //             height: r.height,
+    //             top: r.y,
+    //             left: r.x,
+    //             right: r.x + r.width,
+    //             bottom: r.y + r.height,
+    //           };
+    //         },
+    //       };
 
     const middleware: any[] = [
       offset(this.arrowElement ? 12 : 4),
@@ -439,15 +435,12 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     }
 
     // Reset floating element position and force reflow before computing
-    (floatingEl as HTMLElement).style.transform = "translate3d(0, 0, 0)";
-    void (floatingEl as HTMLElement).offsetHeight;
+    // (floatingEl as HTMLElement).style.transform = "translate3d(0, 0, 0)";
+    // void (floatingEl as HTMLElement).offsetHeight;
 
     // Manual test: compute position without floating-ui
-    const refRect =
-      referenceEl instanceof Element
-        ? referenceEl.getBoundingClientRect()
-        : referenceArg.getBoundingClientRect();
-    const floatRect = floatingEl.getBoundingClientRect();
+    const refRect = referenceEl.getRect();
+    const floatRect = floatingEl.getRect();
     console.log(
       "[DEBUG-POPPER] MANUAL TEST before computeDomPosition",
       this.unique_id,
@@ -464,10 +457,10 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
           width: floatRect.width,
           height: floatRect.height,
         },
-        floatTransform: (floatingEl as HTMLElement).style.transform,
-        floatComputedTransform: getComputedStyle(floatingEl).transform,
-        floatParent: floatingEl.parentElement?.tagName,
-        floatInDOM: document.body.contains(floatingEl),
+        // floatTransform: (floatingEl as HTMLElement).style.transform,
+        // floatComputedTransform: getComputedStyle(floatingEl).transform,
+        // floatParent: floatingEl.parentElement?.tagName,
+        // floatInDOM: document.body.contains(floatingEl),
         placement,
       },
     );

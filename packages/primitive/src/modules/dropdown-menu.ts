@@ -73,7 +73,6 @@ export function Trigger(
   props: ViewProps & { store: DropdownMenuCore },
   children?: ViewChildren,
 ) {
-  // const host = getHost();
   const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
@@ -81,7 +80,9 @@ export function Trigger(
 
   return View(
     {
+      class: "dropdown-menu-trigger",
       onMounted(event) {
+        // console.log("before set referenece");
         listener$.add(
           store.onStateChange((v) => {
             state_.as(v);
@@ -90,19 +91,26 @@ export function Trigger(
         const $elm = event.target;
         const nodes = $elm.getChildren();
         const $ref = nodes.find((n) => n.getType() === "view") || $elm;
-        console.log("before set referenece");
-        props.store.menu.popper.setReference(
-          {
-            $el: $ref,
-            getRect() {
-              return $ref.getBoundingClientRect();
-            },
-          },
-          { force: true },
+        console.log(
+          "[primitive]dropdownmenu - Trigger mounted",
+          nodes,
+          $ref.getBoundingClientRect(),
         );
+        setTimeout(() => {
+          props.store.menu.popper.setReference(
+            {
+              $el: $ref,
+              getRect() {
+                return $ref.getBoundingClientRect();
+              },
+            },
+            { force: true },
+          );
+        }, 0);
         // Handle click trigger
         if (store.trigger === "click") {
           const handlePointerDown = (e: any) => {
+            // console.log("handle pointer down");
             if (store.disabled) {
               return;
             }
@@ -117,10 +125,9 @@ export function Trigger(
             }
             store.show();
           };
-          // host.addEventListener($elm, "pointerdown", handlePointerDown);
-          // return () => {
-          //   host.removeEventListener($elm, "pointerdown", handlePointerDown);
-          // };
+          listener$.add(
+            $elm.addEventListener("pointerdown", handlePointerDown),
+          );
         }
         // Handle hover trigger
         if (store.trigger === "hover") {
@@ -147,15 +154,19 @@ export function Trigger(
             e.stopPropagation();
           };
 
-          // host.addEventListener($elm, "mouseenter", handleMouseEnter);
-          // host.addEventListener($elm, "mouseleave", handleMouseLeave);
-          // host.addEventListener($elm, "pointerdown", handlePointerDown);
-
+          listener$.append([
+            $elm.addEventListener("mouseenter", handleMouseEnter),
+            $elm.addEventListener("mouseleave", handleMouseLeave),
+            $elm.addEventListener("pointerdown", handlePointerDown),
+          ]);
           // return () => {
           //   host.removeEventListener($elm, "mouseenter", handleMouseEnter);
           //   host.removeEventListener($elm, "mouseleave", handleMouseLeave);
           //   host.removeEventListener($elm, "pointerdown", handlePointerDown);
           // };
+        }
+        if (props.onMounted) {
+          listener$.add(props.onMounted(event));
         }
         return listener$.clean;
       },

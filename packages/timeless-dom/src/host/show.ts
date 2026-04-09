@@ -40,7 +40,6 @@ export function DOMShow(props: {
     appendChildren: common$.methods.appendChildren,
     insertChildren(children: TimelessElement[]) {
       common$.methods.insertChildren(children);
-      common$.methods.handleElementsMounted();
     },
     removeChildren: common$.methods.removeChildren,
     getParent() {

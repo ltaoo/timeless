@@ -141,6 +141,13 @@ export function Show(props: ShowProps) {
       if (onMounted) {
         onMounted(event);
       }
+      for (const child of state.children) {
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({
+            target: child.$elm,
+          });
+        }
+      }
     },
     beforeUnmounted() {
       if (beforeUnmounted) {

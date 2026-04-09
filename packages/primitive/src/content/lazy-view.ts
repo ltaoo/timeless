@@ -46,7 +46,7 @@ export function LazyView(
     setup_children(children: TimelessComponent) {
       // let loaded_element: TimelessElement | undefined;
       const result = children(props);
-      console.log("[]LazyView - result", result);
+      // console.log("[]LazyView - result", result);
       if (isElement(result)) {
         state.children = [result];
       } else if (isPromise(result)) {

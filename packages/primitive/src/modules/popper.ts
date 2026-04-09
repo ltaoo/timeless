@@ -8,10 +8,10 @@ import {
 
 import { styleNames, classNames } from "@/style";
 import { View, ViewProps } from "@/content/view";
-import { isElement, TimelessElement, ViewChildren } from "@/content/type";
+import { TimelessElement, ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
 import { MountedEvent } from "@/event";
-import { Txt } from "@/content/text";
+import { ListenerManager } from "@/util/listener";
 
 let layer_id_counter = 0;
 
@@ -31,21 +31,16 @@ export function Anchor(
     {
       ...rest,
       onMounted(event) {
-        const $el = event.target as HTMLDivElement;
+        const $el = event.target;
+        console.log("[primitive]popper Anchor mounted - ");
         store.setReference({
           $el,
           getRect() {
             return $el.getBoundingClientRect();
-            // return host.getBoundingClientRect?.($el) as any;
           },
         });
         if (rest.onMounted) {
-          rest.onMounted(event);
-        }
-      },
-      onUnmounted() {
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
+          return rest.onMounted(event);
         }
       },
     },
@@ -74,35 +69,25 @@ export function Content(
   } = props;
 
   const state_ = refobj(store.state);
+  const listener$ = ListenerManager();
 
   // 初始化全局监听器
   initGlobalPointerListener();
-
-  // const extraStyle =
-  //   rest.style &&
-  //   typeof rest.style === "object" &&
-  //   !isRef(rest.style) &&
-  //   !isStyleRef(rest.style)
-  //     ? rest.style
-  //     : {};
 
   return View(
     {
       ...rest,
       class: classNames(["t1-popper", rest.class]),
       style: styleNames([
-        // @ts-ignore
         props.style,
         {
           "z-index": zIndex,
           position: "fixed",
           left: 0,
           top: 0,
-          // @ts-ignore
           opacity: computed(state_, (t) => {
             return t.isPlaced ? 1 : 0;
           }),
-          // @ts-ignore
           "pointer-event": computed(state_, (t) => {
             return t.isPlaced ? "initial" : "none";
           }),
@@ -114,16 +99,21 @@ export function Content(
         },
       ]),
       onMounted(event) {
-        const $e = (event as any).target as HTMLDivElement;
-        const $element = $e;
+        const $elm = event.target;
         const layer_id = `popper-${++layer_id_counter}`;
+        console.log("the floating mounted", $elm.getBoundingClientRect());
         store.setFloating({
-          $el: $e,
+          $el: $elm,
           getRect() {
             // return host.getBoundingClientRect?.($e) as any;
-            return $e.getBoundingClientRect();
+            return $elm.getBoundingClientRect();
           },
         });
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
 
         // 滚动监听
         function handleScroll() {
@@ -163,11 +153,11 @@ export function Content(
           const layer: Layer = {
             id: layer_id,
             containsPoint(x: number, y: number) {
-              if (!$element) {
+              if (!$elm) {
                 return false;
               }
               // const rect = host.getBoundingClientRect?.($element) as any;
-              const rect = $element.getBoundingClientRect();
+              const rect = $elm.getBoundingClientRect();
               // 同时检查 anchor 元素
               const $anchor_el = (store.reference as any)?.$el as
                 | HTMLElement
@@ -200,13 +190,10 @@ export function Content(
           layer_manager.register(layer);
         }
         if (rest.onMounted) {
-          rest.onMounted(event);
+          listener$.add(rest.onMounted(event));
         }
-        const unlisten = store.onStateChange((v) => {
-          state_.as(v);
-        });
         return () => {
-          unlisten();
+          listener$.clean();
           store.setFloating(null);
           // host.removeDocumentEventListener?.("scroll", handleScroll, true);
           // 从 LayerManager 注销
@@ -215,15 +202,6 @@ export function Content(
             layerManager.unregister(layer_id);
           }
         };
-      },
-      onUnmounted() {
-        // 清理监听器
-        // for (const unlisten of unlisteners) {
-        //   unlisten();
-        // }
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
-        }
       },
     },
     children,

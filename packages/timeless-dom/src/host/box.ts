@@ -30,7 +30,9 @@ export function HostElement(props: {
         return;
       }
       const cssText = viewStyleToCssText(style);
-      $elm.style.cssText = cssText;
+      if (cssText) {
+        $elm.style.cssText = cssText;
+      }
     },
     setStyleSet(styleSet: string[]) {
       if (!$elm || $elm instanceof Text || !styleSet || styleSet.length === 0) {
@@ -80,6 +82,9 @@ export function HostElement(props: {
         return;
       }
       $elm.addEventListener(type, handler, options);
+      return function () {
+        $elm.removeEventListener(type, handler, options);
+      };
     },
     removeEventListener(
       type: string,

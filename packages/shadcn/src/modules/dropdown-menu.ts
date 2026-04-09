@@ -34,43 +34,53 @@ export function DropdownMenu(
 ) {
   const state_ = refobj(props.store.state);
 
-  return Fragment({}, [
-    Show({
-      when: !!children,
-      ok() {
-        return [
-          DropdownMenuPrimitive.Trigger({ store: props.store }, children),
-        ];
-      },
-    }),
-    DropdownMenuPrimitive.Content(
-      {
-        ...props,
-        animation: {
-          in: "animate-in fill-mode-both fade-in-0 zoom-in-95",
-          out: "animate-out fill-mode-both fade-out-0 zoom-out-95",
+  return Fragment(
+    {
+      // onMounted() {
+      //   console.log("dropdown menu Fragment mounted");
+      // },
+    },
+    [
+      Show({
+        when: !!children,
+        // onMounted() {
+        //   console.log("dropdown menu Show mounted");
+        // },
+        ok() {
+          return [
+            DropdownMenuPrimitive.Trigger({ store: props.store }, children),
+          ];
         },
-      },
-      [
-        View({ class: MENU_CONTENT_CLASS }, [
-          For({
-            each: computed(state_, (t) => {
-              return t.items;
+      }),
+      DropdownMenuPrimitive.Content(
+        {
+          ...props,
+          animation: {
+            in: "animate-in fill-mode-both fade-in-0 zoom-in-95",
+            out: "animate-out fill-mode-both fade-out-0 zoom-out-95",
+          },
+        },
+        [
+          View({ class: MENU_CONTENT_CLASS }, [
+            For({
+              each: computed(state_, (t) => {
+                return t.items;
+              }),
+              render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
+                if (item instanceof MenuSeparatorCore) {
+                  return DropdownMenuSeparator({});
+                }
+                if (item instanceof MenuGroupCore) {
+                  return DropdownMenuGroup({ store: item });
+                }
+                return DropdownMenuItem({ store: item as MenuItemCore });
+              },
             }),
-            render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
-              if (item instanceof MenuSeparatorCore) {
-                return DropdownMenuSeparator({});
-              }
-              if (item instanceof MenuGroupCore) {
-                return DropdownMenuGroup({ store: item });
-              }
-              return DropdownMenuItem({ store: item as MenuItemCore });
-            },
-          }),
-        ]),
-      ],
-    ),
-  ]);
+          ]),
+        ],
+      ),
+    ],
+  );
 }
 
 function DropdownMenuSeparator(_props: ViewProps) {
