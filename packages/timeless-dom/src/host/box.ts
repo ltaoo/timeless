@@ -342,18 +342,27 @@ export function HostElement(props: {
       }
     },
     remove(idx: number, count: number) {
-      // console.log("[dom]For - remove", idx, count, child_host_nodes);
       const $parent = methods.getParent();
       if (!$parent) {
+        console.warn("remove parent not found");
         return;
       }
+      const removed_elements: TimelessElement[] = [];
       for (let i = 0; i < count; i++) {
         const $child = child_host_nodes[idx + i];
-        if ($child) {
+        if ($child && $child.parentElement === $parent) {
           child_host_nodes.splice(idx + i, 1);
+          removed_elements.push(child_elements[idx + i]);
           $parent.removeChild($child);
         }
       }
+      setTimeout(() => {
+        for (const child of removed_elements) {
+          if (child && child.onUnmounted) {
+            child.onUnmounted();
+          }
+        }
+      }, 0);
     },
     move(from: number, to: number) {
       const $parent = methods.getParent();

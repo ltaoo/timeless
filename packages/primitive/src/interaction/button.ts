@@ -150,77 +150,77 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
     state,
     children: state.children,
     events,
-    hydrate(existingDom: any) {
-      // if (state.rendered) {
-      //   return $elm;
-      // }
-      // state.rendered = true;
+    // hydrate(existingDom: any) {
+    //   // if (state.rendered) {
+    //   //   return $elm;
+    //   // }
+    //   // state.rendered = true;
 
-      // $elm = existingDom;
-      // methods.normalize_children();
-      // methods.setup_reactive_props_bindings();
+    //   // $elm = existingDom;
+    //   // methods.normalize_children();
+    //   // methods.setup_reactive_props_bindings();
 
-      // // Hydrate children recursively
-      // // let childDom = host.getFirstChild($elm);
-      // let childDom = $elm.getFirstChild();
-      // for (let i = 0; i < state.children.length; i += 1) {
-      //   const node = state.children[i];
-      //   if (!node) continue;
+    //   // // Hydrate children recursively
+    //   // // let childDom = host.getFirstChild($elm);
+    //   // let childDom = $elm.getFirstChild();
+    //   // for (let i = 0; i < state.children.length; i += 1) {
+    //   //   const node = state.children[i];
+    //   //   if (!node) continue;
 
-      //   if (typeof node === "string" || typeof node === "number") {
-      //     // Skip text nodes
-      //     if (childDom) {
-      //       // childDom = host.getNextSibling(childDom);
-      //       childDom = childDom.getNextSibling();
-      //     }
-      //     continue;
-      //   }
+    //   //   if (typeof node === "string" || typeof node === "number") {
+    //   //     // Skip text nodes
+    //   //     if (childDom) {
+    //   //       // childDom = host.getNextSibling(childDom);
+    //   //       childDom = childDom.getNextSibling();
+    //   //     }
+    //   //     continue;
+    //   //   }
 
-      //   if (isElement(node)) {
-      //     if (typeof (node as any).hydrate === "function") {
-      //       // 传递 $elm 作为 parentDom，即使 childDom 为 null 也要调用 hydrate
-      //       (node as any).hydrate(childDom, $elm);
-      //       if (childDom) {
-      //         // childDom = host.getNextSibling(node.$elm || childDom);
-      //         // if (node.$elm) {
-      //         //   childDom = node.$elm.getNextSibling();
-      //         // } else if (childDom) {
-      //         //   childDom = childDom.getNextSibling();
-      //         // }
-      //       }
-      //     } else if (childDom) {
-      //       // Fallback: just assign $elm and setup
-      //       node.$elm = childDom;
-      //       // node.render();
-      //       // childDom = host.getNextSibling(childDom);
-      //       childDom = childDom.getNextSibling();
-      //     } else {
-      //       // childDom 为 null 时，直接 render 并插入
-      //       // const result = node.render();
-      //       // if (result) {
-      //       //   // host.appendChild($elm, result);
-      //       //   $elm.appendChild(result);
-      //       // }
-      //     }
-      //   }
-      // }
+    //   //   if (isElement(node)) {
+    //   //     if (typeof (node as any).hydrate === "function") {
+    //   //       // 传递 $elm 作为 parentDom，即使 childDom 为 null 也要调用 hydrate
+    //   //       (node as any).hydrate(childDom, $elm);
+    //   //       if (childDom) {
+    //   //         // childDom = host.getNextSibling(node.$elm || childDom);
+    //   //         // if (node.$elm) {
+    //   //         //   childDom = node.$elm.getNextSibling();
+    //   //         // } else if (childDom) {
+    //   //         //   childDom = childDom.getNextSibling();
+    //   //         // }
+    //   //       }
+    //   //     } else if (childDom) {
+    //   //       // Fallback: just assign $elm and setup
+    //   //       node.$elm = childDom;
+    //   //       // node.render();
+    //   //       // childDom = host.getNextSibling(childDom);
+    //   //       childDom = childDom.getNextSibling();
+    //   //     } else {
+    //   //       // childDom 为 null 时，直接 render 并插入
+    //   //       // const result = node.render();
+    //   //       // if (result) {
+    //   //       //   // host.appendChild($elm, result);
+    //   //       //   $elm.appendChild(result);
+    //   //       // }
+    //   //     }
+    //   //   }
+    //   // }
 
-      // if (onMounted) {
-      //   const cleanup = onMounted({ target: $elm });
-      //   if (typeof cleanup === "function") {
-      //     onMountedCleanup = cleanup;
-      //   }
-      // }
+    //   // if (onMounted) {
+    //   //   const cleanup = onMounted({ target: $elm });
+    //   //   if (typeof cleanup === "function") {
+    //   //     onMountedCleanup = cleanup;
+    //   //   }
+    //   // }
 
-      // for (let i = 0; i < state.children.length; i += 1) {
-      //   const node = state.children[i];
-      //   if (isElement(node) && node.onMounted) {
-      //     node.onMounted({ target: node.$elm });
-      //   }
-      // }
+    //   // for (let i = 0; i < state.children.length; i += 1) {
+    //   //   const node = state.children[i];
+    //   //   if (isElement(node) && node.onMounted) {
+    //   //     node.onMounted({ target: node.$elm });
+    //   //   }
+    //   // }
 
-      return $elm;
-    },
+    //   return $elm;
+    // },
     onMounted: props.onMounted,
     beforeUnmounted() {
       if (props.beforeUnmounted) {

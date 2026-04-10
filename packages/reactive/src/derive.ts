@@ -22,8 +22,8 @@ export function derive<T extends Record<string, any>, R>(
   fn: (args: { [K in keyof T]: UnwrapRef<T[K]> }) => R,
 ): DerivedRef<R>;
 
-export function derive(deps: any, fn: any): DerivedRef<any> {
-  const _deps: Subscriber[] = [];
+export function derive<T>(deps: any, fn: any): DerivedRef<T> {
+  const _deps: Subscriber<T>[] = [];
   let raw_value: any;
 
   const is_single_ref = isRef(deps);
@@ -69,19 +69,24 @@ export function derive(deps: any, fn: any): DerivedRef<any> {
     raw_value = next_value;
     notify();
   };
-
+  const unsubscribe_list: (() => void)[] = [];
   dep_refs.forEach((ref) => {
     if (isRef(ref)) {
-      ref.subscribe({ onPatch: onChange, onChange });
+      const unsubscribe = ref.subscribe({ onPatch: onChange, onChange });
+      unsubscribe_list.push(unsubscribe);
     }
   });
 
   return {
     __is_ref: true as const,
-    subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber<T>) {
       _deps.push(ctx);
+      return function () {
+        _deps.splice(_deps.indexOf(ctx), 1);
+      };
     },
     destroy() {
+      unsubscribe_list.forEach((unsubscribe) => unsubscribe());
       _deps.length = 0;
     },
     get value() {

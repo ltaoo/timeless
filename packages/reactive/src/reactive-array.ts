@@ -15,7 +15,7 @@ export interface RefArray<T> extends Ref<T[]> {
   shift(): T | undefined;
   delete(idx: number): void;
   remove(item: T): void;
-  as(items: T[] | ((cur: T[]) => T[])): void;
+  as(items: T[] | ((cur: T[]) => T[]), opt?: { silent?: boolean }): void;
   assign(items: T[]): void;
   refresh(): void;
   filter(predicate: (item: T, index: number, array: T[]) => boolean): T[];
@@ -141,10 +141,10 @@ export function refArray<T>(
   items: T[],
   opt: Partial<{ key: any }> = {},
 ): TimelessRefArray<T> {
-  let _raw_value = items;
-  const deps: Subscriber[] = [];
+  let raw_value = items;
+  const deps: Subscriber<T[]>[] = [];
   function notify(action: {
-    type: string;
+    type: "insert" | "delete" | "update" | "move" | "swap" | "refresh";
     index?: number;
     item?: T;
     items?: T[];
@@ -158,11 +158,12 @@ export function refArray<T>(
       (() => {
         if (action.type === "refresh") {
           if (ctx.onChange) {
-            ctx.onChange(_raw_value);
+            ctx.onChange(raw_value);
           }
           return;
         }
         if (ctx.onPatch) {
+          // @ts-ignore
           ctx.onPatch(action);
         }
       })();
@@ -188,65 +189,63 @@ export function refArray<T>(
   const r = {
     __is_ref: true as const,
     __is_ref_array: true as const,
-    subscribe(ctx: Subscriber) {
-      if (deps.includes(ctx)) return;
+    key: opt.key,
+    get value() {
+      return raw_value;
+    },
+    get length() {
+      return raw_value.length;
+    },
+    subscribe(ctx: Subscriber<T[]>) {
       deps.push(ctx);
+      return function () {
+        deps.splice(deps.indexOf(ctx), 1);
+      };
     },
     destroy() {
       deps.length = 0;
     },
-    key: opt.key,
-    get value() {
-      return _raw_value;
-    },
     isSame(v: unknown) {
-      return Object.is(_raw_value, v);
+      return Object.is(raw_value, v);
     },
     isStrictEqual(v: unknown) {
-      return _raw_value === v;
-    },
-    get length() {
-      return _raw_value.length;
+      return raw_value === v;
     },
     get(idx: number) {
-      const vv = _raw_value[idx];
+      const vv = raw_value[idx];
       return getProxy(vv, idx);
     },
     set(idx: number, item: any) {
-      Array.prototype.splice.call(_raw_value, idx, 1, item);
+      Array.prototype.splice.call(raw_value, idx, 1, item);
       notify({ type: "update", index: idx, item });
     },
     splice(idx: number, dcount: number, ...items: any[]) {
-      const res = Array.prototype.splice.call(
-        _raw_value,
-        idx,
-        dcount,
-        ...items,
-      );
+      const res = Array.prototype.splice.call(raw_value, idx, dcount, ...items);
       notify({ type: "refresh" });
       return res.map((item: any) => getProxy(item));
     },
     insert(idx: number, ...items: any[]) {
-      Array.prototype.splice.call(_raw_value, idx, 0, ...items);
+      Array.prototype.splice.call(raw_value, idx, 0, ...items);
       notify({
         type: "insert",
         index: idx,
         deleteCount: 0,
         items,
       });
-      return _raw_value.length;
+      return raw_value.length;
     },
     push(...items: T[]) {
-      const res = Array.prototype.push.call(_raw_value, ...items);
+      console.log("[reactive]reactive-array - push", items);
+      const res = Array.prototype.push.call(raw_value, ...items);
       notify({
         type: "insert",
-        index: _raw_value.length - items.length,
+        index: raw_value.length - items.length,
         items,
       });
       return res;
     },
     unshift(...items: any[]) {
-      const res = Array.prototype.unshift.call(_raw_value, ...items);
+      const res = Array.prototype.unshift.call(raw_value, ...items);
       notify({
         type: "insert",
         index: 0,
@@ -256,87 +255,97 @@ export function refArray<T>(
       return res;
     },
     pop() {
-      if (_raw_value.length === 0) return undefined;
-      const index = _raw_value.length - 1;
-      const item = Array.prototype.pop.call(_raw_value);
+      if (raw_value.length === 0) {
+        return null;
+      }
+      console.log(
+        "[reactive]reactive-array - pop",
+        raw_value,
+        raw_value.length,
+      );
+      const index = raw_value.length - 1;
+      const item = Array.prototype.pop.call(raw_value);
       notify({ type: "delete", index, deleteCount: 1 });
       return getProxy(item);
     },
     shift() {
-      if (_raw_value.length === 0) return undefined;
-      const item = Array.prototype.shift.call(_raw_value);
+      if (raw_value.length === 0) return undefined;
+      const item = Array.prototype.shift.call(raw_value);
       notify({ type: "delete", index: 0, deleteCount: 1 });
       return getProxy(item);
     },
     delete(idx: number) {
-      Array.prototype.splice.call(_raw_value, idx, 1);
+      Array.prototype.splice.call(raw_value, idx, 1);
       notify({ type: "delete", index: idx, deleteCount: 1 });
     },
     remove(item: T) {
-      const index = _raw_value.indexOf(item);
+      const index = raw_value.indexOf(item);
       if (index === -1) {
         return;
       }
-      Array.prototype.splice.call(_raw_value, index, 1);
+      Array.prototype.splice.call(raw_value, index, 1);
       notify({ type: "delete", index, deleteCount: 1 });
     },
-    as(items: T[] | ((cur: T[]) => T[])) {
+    as(items: T[] | ((cur: T[]) => T[]), opt: { silent?: boolean } = {}) {
       if (typeof items === "function") {
-        _raw_value = items(_raw_value);
+        raw_value = items(raw_value);
       } else {
-        _raw_value = items;
+        raw_value = items;
+      }
+      if (opt.silent) {
+        return;
       }
       notify({ type: "refresh" });
     },
     assign(items: T[]) {
-      _raw_value = items;
+      raw_value = items;
       _inner.length = 0;
       notify({ type: "refresh" });
     },
     filter(predicate: (item: T, index: number, array: T[]) => boolean) {
-      return _raw_value.filter(predicate).map((item: any) => getProxy(item));
+      return raw_value.filter(predicate).map((item: any) => getProxy(item));
     },
     includes(item: T) {
-      return _raw_value.includes(item);
+      return raw_value.includes(item);
     },
     refresh() {
       notify({ type: "refresh" });
     },
     reverse() {
-      Array.prototype.reverse.call(_raw_value);
+      Array.prototype.reverse.call(raw_value);
       notify({ type: "refresh" });
       return r;
     },
     sort(compareFn?: (a: T, b: T) => number) {
-      Array.prototype.sort.call(_raw_value, compareFn);
+      Array.prototype.sort.call(raw_value, compareFn);
       notify({ type: "refresh" });
       return r;
     },
     fill(value: T, start?: number, end?: number) {
-      Array.prototype.fill.call(_raw_value, value, start, end);
+      Array.prototype.fill.call(raw_value, value, start, end);
       notify({ type: "refresh" });
       return r;
     },
     copyWithin(target: number, start: number, end?: number) {
-      Array.prototype.copyWithin.call(_raw_value, target, start, end);
+      Array.prototype.copyWithin.call(raw_value, target, start, end);
       notify({ type: "refresh" });
       return r;
     },
     concat(...items: (ConcatArray<T> | T)[]) {
-      return _raw_value.concat(...items);
+      return raw_value.concat(...items);
     },
     join(separator?: string) {
-      return _raw_value.join(separator);
+      return raw_value.join(separator);
     },
     slice(start?: number, end?: number) {
-      return _raw_value.slice(start, end).map((item: any) => getProxy(item));
+      return raw_value.slice(start, end).map((item: any) => getProxy(item));
     },
     indexOf(v: T | Ref<T>, from_idx?: number) {
       if (isRef(v)) {
-        return _raw_value.indexOf(v.value, from_idx);
+        return raw_value.indexOf(v.value, from_idx);
       }
       // First try direct reference lookup
-      const idx = _raw_value.indexOf(v, from_idx);
+      const idx = raw_value.indexOf(v, from_idx);
       if (idx !== -1) {
         return idx;
       }
@@ -345,8 +354,8 @@ export function refArray<T>(
         const proxy = get(v);
         if (proxy) {
           const start = from_idx ?? 0;
-          for (let i = start; i < _raw_value.length; i++) {
-            const item = _raw_value[i];
+          for (let i = start; i < raw_value.length; i++) {
+            const item = raw_value[i];
             if (
               typeof item === "object" &&
               item !== null &&
@@ -360,112 +369,113 @@ export function refArray<T>(
       return -1;
     },
     lastIndexOf(v: T, from_idx?: number) {
-      return _raw_value.lastIndexOf(v, from_idx);
+      return raw_value.lastIndexOf(v, from_idx);
     },
     every(
       predicate: (value: T, index: number, array: T[]) => unknown,
       thisArg?: any,
     ) {
-      return _raw_value.every(predicate, thisArg);
+      return raw_value.every(predicate, thisArg);
     },
     some(
       predicate: (value: T, index: number, array: T[]) => unknown,
       thisArg?: any,
     ) {
-      return _raw_value.some(predicate, thisArg);
+      return raw_value.some(predicate, thisArg);
     },
     forEach(
       callbackfn: (value: T, index: number, array: T[]) => void,
       thisArg?: any,
     ) {
-      return _raw_value.forEach(callbackfn, thisArg);
+      return raw_value.forEach(callbackfn, thisArg);
     },
     map<U>(
       callbackfn: (value: T, index: number, array: T[]) => U,
       thisArg?: any,
     ) {
-      return _raw_value.map(callbackfn, thisArg);
+      return raw_value.map(callbackfn, thisArg);
     },
     reduce(callbackfn: any, initialValue?: any) {
-      return _raw_value.reduce(callbackfn, initialValue);
+      return raw_value.reduce(callbackfn, initialValue);
     },
     reduceRight(callbackfn: any, initialValue?: any) {
-      return _raw_value.reduceRight(callbackfn, initialValue);
+      return raw_value.reduceRight(callbackfn, initialValue);
     },
     find(
       predicate: (value: T, index: number, obj: T[]) => unknown,
       thisArg?: any,
     ) {
-      const idx = _raw_value.findIndex(predicate, thisArg);
+      const idx = raw_value.findIndex(predicate, thisArg);
       if (idx === -1) {
         return null;
       }
-      const vv = _raw_value[idx];
+      const vv = raw_value[idx];
       return getProxy(vv, idx);
     },
     findIndex(
       predicate: (value: T, index: number, obj: T[]) => unknown,
       thisArg?: any,
     ) {
-      return _raw_value.findIndex(predicate, thisArg);
+      return raw_value.findIndex(predicate, thisArg);
     },
     entries() {
-      return _raw_value.entries();
+      return raw_value.entries();
     },
     keys() {
-      return _raw_value.keys();
+      return raw_value.keys();
     },
     values() {
-      return _raw_value.values();
+      return raw_value.values();
     },
     flat(depth?: number) {
-      return _raw_value.flat(depth);
+      return raw_value.flat(depth);
     },
     flatMap(callback: any, thisArg?: any) {
-      return _raw_value.flatMap(callback, thisArg);
+      return raw_value.flatMap(callback, thisArg);
     },
     toString() {
-      return _raw_value.toString();
+      return raw_value.toString();
     },
     toLocaleString() {
-      return _raw_value.toLocaleString();
+      return raw_value.toLocaleString();
     },
     move(fromIndex: number, toIndex: number) {
       if (fromIndex === toIndex) return r;
       if (
         fromIndex < 0 ||
-        fromIndex >= _raw_value.length ||
+        fromIndex >= raw_value.length ||
         toIndex < 0 ||
-        toIndex > _raw_value.length
-      )
+        toIndex > raw_value.length
+      ) {
         return r;
-      const [item] = Array.prototype.splice.call(_raw_value, fromIndex, 1);
-      Array.prototype.splice.call(_raw_value, toIndex, 0, item);
+      }
+      const [item] = Array.prototype.splice.call(raw_value, fromIndex, 1);
+      Array.prototype.splice.call(raw_value, toIndex, 0, item);
       notify({ type: "move", from: fromIndex, to: toIndex });
       return r;
     },
     up(index: number | DerivedRef<number> | Ref<number>) {
       const v = isRef(index) ? index.value : index;
-      if (v <= 0 || v >= _raw_value.length) return r;
+      if (v <= 0 || v >= raw_value.length) return r;
       return r.move(v, v - 1);
     },
     down(index: number | DerivedRef<number> | Ref<number>) {
       const v = isRef(index) ? index.value : index;
-      if (v < 0 || v >= _raw_value.length - 1) return r;
+      if (v < 0 || v >= raw_value.length - 1) return r;
       return r.move(v, v + 1);
     },
     swap(indexA: number, indexB: number) {
       if (indexA === indexB) return r;
       if (
         indexA < 0 ||
-        indexA >= _raw_value.length ||
+        indexA >= raw_value.length ||
         indexB < 0 ||
-        indexB >= _raw_value.length
+        indexB >= raw_value.length
       )
         return r;
-      const temp = _raw_value[indexA];
-      _raw_value[indexA] = _raw_value[indexB];
-      _raw_value[indexB] = temp;
+      const temp = raw_value[indexA];
+      raw_value[indexA] = raw_value[indexB];
+      raw_value[indexB] = temp;
       notify({ type: "swap", from: indexA, to: indexB });
       return r;
     },
@@ -473,10 +483,10 @@ export function refArray<T>(
       return r.move(index, 0);
     },
     moveToLast(index: number) {
-      return r.move(index, _raw_value.length - 1);
+      return r.move(index, raw_value.length - 1);
     },
     toggle(item: T) {
-      const idx = _raw_value.indexOf(item);
+      const idx = raw_value.indexOf(item);
       if (idx === -1) {
         r.push(item);
       } else {
@@ -485,22 +495,22 @@ export function refArray<T>(
       return r;
     },
     removeBy(predicate: (item: T, index: number) => boolean) {
-      for (let i = _raw_value.length - 1; i >= 0; i--) {
-        if (predicate(_raw_value[i], i)) {
-          Array.prototype.splice.call(_raw_value, i, 1);
+      for (let i = raw_value.length - 1; i >= 0; i--) {
+        if (predicate(raw_value[i], i)) {
+          Array.prototype.splice.call(raw_value, i, 1);
         }
       }
       notify({ type: "refresh" });
     },
     clear() {
-      _raw_value.length = 0;
+      raw_value.length = 0;
       _inner.length = 0;
       notify({ type: "refresh" });
     },
     replace(oldItem: T, newItem: T) {
-      const idx = _raw_value.indexOf(oldItem);
+      const idx = raw_value.indexOf(oldItem);
       if (idx === -1) return false;
-      Array.prototype.splice.call(_raw_value, idx, 1, newItem);
+      Array.prototype.splice.call(raw_value, idx, 1, newItem);
       notify({ type: "update", index: idx, item: newItem });
       return true;
     },
@@ -508,32 +518,32 @@ export function refArray<T>(
       return r.unshift(...items);
     },
     first() {
-      if (_raw_value.length === 0) return undefined;
-      return getProxy(_raw_value[0], 0);
+      if (raw_value.length === 0) return undefined;
+      return getProxy(raw_value[0], 0);
     },
     last() {
-      if (_raw_value.length === 0) return undefined;
-      const idx = _raw_value.length - 1;
-      return getProxy(_raw_value[idx], idx);
+      if (raw_value.length === 0) return undefined;
+      const idx = raw_value.length - 1;
+      return getProxy(raw_value[idx], idx);
     },
     nth(index: number) {
-      const len = _raw_value.length;
+      const len = raw_value.length;
       const idx = index < 0 ? len + index : index;
       if (idx < 0 || idx >= len) return undefined;
-      return getProxy(_raw_value[idx], idx);
+      return getProxy(raw_value[idx], idx);
     },
     count(predicate?: (item: T, index: number) => boolean) {
-      if (!predicate) return _raw_value.length;
+      if (!predicate) return raw_value.length;
       let count = 0;
-      for (let i = 0; i < _raw_value.length; i++) {
-        if (predicate(_raw_value[i], i)) count++;
+      for (let i = 0; i < raw_value.length; i++) {
+        if (predicate(raw_value[i], i)) count++;
       }
       return count;
     },
     distinct(keyFn?: (item: T) => any) {
       const seen = new Set();
       const result: T[] = [];
-      for (const item of _raw_value) {
+      for (const item of raw_value) {
         const key = keyFn ? keyFn(item) : item;
         if (!seen.has(key)) {
           seen.add(key);
@@ -544,7 +554,7 @@ export function refArray<T>(
     },
     groupBy(keyFn: (item: T) => string | number) {
       const groups: Record<string | number, T[]> = {};
-      for (const item of _raw_value) {
+      for (const item of raw_value) {
         const key = keyFn(item);
         if (!groups[key]) groups[key] = [];
         groups[key].push(item);
@@ -554,31 +564,31 @@ export function refArray<T>(
     chunk(size: number) {
       if (size <= 0) return [];
       const chunks: T[][] = [];
-      for (let i = 0; i < _raw_value.length; i += size) {
-        chunks.push(_raw_value.slice(i, i + size));
+      for (let i = 0; i < raw_value.length; i += size) {
+        chunks.push(raw_value.slice(i, i + size));
       }
       return chunks;
     },
     partition(predicate: (item: T, index: number) => boolean) {
       const pass: T[] = [];
       const fail: T[] = [];
-      for (let i = 0; i < _raw_value.length; i++) {
-        if (predicate(_raw_value[i], i)) {
-          pass.push(_raw_value[i]);
+      for (let i = 0; i < raw_value.length; i++) {
+        if (predicate(raw_value[i], i)) {
+          pass.push(raw_value[i]);
         } else {
-          fail.push(_raw_value[i]);
+          fail.push(raw_value[i]);
         }
       }
       return [pass, fail] as [T[], T[]];
     },
     intersect(other: T[]) {
       const set = new Set(other);
-      return _raw_value.filter((item) => set.has(item));
+      return raw_value.filter((item) => set.has(item));
     },
     union(...others: T[][]) {
       const seen = new Set();
       const result: T[] = [];
-      for (const arr of [_raw_value, ...others]) {
+      for (const arr of [raw_value, ...others]) {
         for (const item of arr) {
           if (!seen.has(item)) {
             seen.add(item);
@@ -590,13 +600,13 @@ export function refArray<T>(
     },
     diff(other: T[]) {
       const set = new Set(other);
-      return _raw_value.filter((item) => !set.has(item));
+      return raw_value.filter((item) => !set.has(item));
     },
     symmetricDiff(other: T[]) {
-      const setA = new Set(_raw_value);
+      const setA = new Set(raw_value);
       const setB = new Set(other);
       const result: T[] = [];
-      for (const item of _raw_value) {
+      for (const item of raw_value) {
         if (!setB.has(item)) result.push(item);
       }
       for (const item of other) {
@@ -606,64 +616,64 @@ export function refArray<T>(
     },
     sum(fn?: (item: T) => number) {
       let total = 0;
-      for (const item of _raw_value) {
+      for (const item of raw_value) {
         total += fn ? fn(item) : (item as any);
       }
       return total;
     },
     min(fn?: (item: T) => number) {
-      if (_raw_value.length === 0) return undefined;
-      let minVal = fn ? fn(_raw_value[0]) : (_raw_value[0] as any);
-      let result = _raw_value[0];
-      for (let i = 1; i < _raw_value.length; i++) {
-        const val = fn ? fn(_raw_value[i]) : (_raw_value[i] as any);
+      if (raw_value.length === 0) return undefined;
+      let minVal = fn ? fn(raw_value[0]) : (raw_value[0] as any);
+      let result = raw_value[0];
+      for (let i = 1; i < raw_value.length; i++) {
+        const val = fn ? fn(raw_value[i]) : (raw_value[i] as any);
         if (val < minVal) {
           minVal = val;
-          result = _raw_value[i];
+          result = raw_value[i];
         }
       }
       return result;
     },
     max(fn?: (item: T) => number) {
-      if (_raw_value.length === 0) return undefined;
-      let maxVal = fn ? fn(_raw_value[0]) : (_raw_value[0] as any);
-      let result = _raw_value[0];
-      for (let i = 1; i < _raw_value.length; i++) {
-        const val = fn ? fn(_raw_value[i]) : (_raw_value[i] as any);
+      if (raw_value.length === 0) return undefined;
+      let maxVal = fn ? fn(raw_value[0]) : (raw_value[0] as any);
+      let result = raw_value[0];
+      for (let i = 1; i < raw_value.length; i++) {
+        const val = fn ? fn(raw_value[i]) : (raw_value[i] as any);
         if (val > maxVal) {
           maxVal = val;
-          result = _raw_value[i];
+          result = raw_value[i];
         }
       }
       return result;
     },
     shuffle() {
-      for (let i = _raw_value.length - 1; i > 0; i--) {
+      for (let i = raw_value.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        const temp = _raw_value[i];
-        _raw_value[i] = _raw_value[j];
-        _raw_value[j] = temp;
+        const temp = raw_value[i];
+        raw_value[i] = raw_value[j];
+        raw_value[j] = temp;
       }
       notify({ type: "refresh" });
       return r;
     },
     rotate(n: number) {
-      const len = _raw_value.length;
+      const len = raw_value.length;
       if (len === 0) return r;
       const offset = ((n % len) + len) % len;
       if (offset === 0) return r;
       const rotated = [
-        ..._raw_value.slice(len - offset),
-        ..._raw_value.slice(0, len - offset),
+        ...raw_value.slice(len - offset),
+        ...raw_value.slice(0, len - offset),
       ];
       for (let i = 0; i < len; i++) {
-        _raw_value[i] = rotated[i];
+        raw_value[i] = rotated[i];
       }
       notify({ type: "refresh" });
       return r;
     },
     compact() {
-      return _raw_value.filter(
+      return raw_value.filter(
         (item) =>
           item !== null &&
           item !== undefined &&
@@ -673,24 +683,24 @@ export function refArray<T>(
       );
     },
     take(n: number) {
-      return _raw_value.slice(0, n);
+      return raw_value.slice(0, n);
     },
     skip(n: number) {
-      return _raw_value.slice(n);
+      return raw_value.slice(n);
     },
     isEmpty() {
-      return _raw_value.length === 0;
+      return raw_value.length === 0;
     },
     at(index: number) {
-      const idx = index < 0 ? _raw_value.length + index : index;
-      if (idx < 0 || idx >= _raw_value.length) return undefined;
-      return getProxy(_raw_value[idx], idx);
+      const idx = index < 0 ? raw_value.length + index : index;
+      if (idx < 0 || idx >= raw_value.length) return undefined;
+      return getProxy(raw_value[idx], idx);
     },
     toArray() {
-      return _raw_value.slice();
+      return raw_value.slice();
     },
     [Symbol.iterator]() {
-      return _raw_value[Symbol.iterator]();
+      return raw_value[Symbol.iterator]();
     },
   };
   return r;

@@ -19,7 +19,7 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
   // if (dep) {
   //   return dep;
   // }
-  let raw_vallue = fn(
+  let raw_value = fn(
     (() => {
       if (isRef(deps)) {
         return deps.value;
@@ -28,26 +28,16 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
     })(),
   );
 
-  const _deps: Subscriber[] = [];
+  const _deps: Subscriber<T>[] = [];
   function notify(action: { type: string }) {
     // console.log("computed notify", action, _deps);
     for (let i = 0; i < _deps.length; i += 1) {
       const ctx = _deps[i];
       if (ctx.onChange) {
-        ctx.onChange(raw_vallue);
+        ctx.onChange(raw_value);
       }
     }
   }
-
-  // const computedRef = {
-  //   __is_ref: true as const,
-  //   subscribe(ctx: Subscriber) {
-  //     ctx.ignore = true;
-  //   },
-  //   get value() {
-  //     return _v;
-  //   },
-  // };
   const _computed_ref: DerivedRef<any> = (() => {
     const existing = get(deps);
     if (existing) {
@@ -69,34 +59,46 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
     return r;
   })();
 
-  _computed_ref.subscribe({
+  const unsubscribe = _computed_ref.subscribe({
     onPatch() {
-      raw_vallue = fn(_computed_ref.value);
+      const r = fn(_computed_ref.value);
+      console.log("[reactive]computed - on patch", raw_value, r);
+      if (r === raw_value) {
+        return;
+      }
+      raw_value = r;
       notify({ type: "refresh" });
     },
     onChange() {
       // console.log("computed ref is changed");
-      raw_vallue = fn(_computed_ref.value);
+      const r = fn(_computed_ref.value);
+      if (r === raw_value) {
+        return;
+      }
+      raw_value = r;
       notify({ type: "refresh" });
     },
   });
   const res = {
     __is_ref: true as const,
-    subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber<T>) {
       _deps.push(ctx);
+      return function () {
+        _deps.splice(_deps.indexOf(ctx), 1);
+      };
     },
     destroy() {
-      _computed_ref.destroy();
+      unsubscribe();
       _deps.length = 0;
     },
     get value() {
-      return raw_vallue;
+      return raw_value;
     },
     isSame(v: unknown) {
-      return Object.is(raw_vallue, v);
+      return Object.is(raw_value, v);
     },
     isStrictEqual(v: unknown) {
-      return raw_vallue === v;
+      return raw_value === v;
     },
   };
 

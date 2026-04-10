@@ -30,6 +30,12 @@ describe("RefArray", () => {
       arr.push(4);
       expect(arr.length).toBe(4);
     });
+
+    it("should update length after mutation", () => {
+      const arr = refArray([{ v: 1 }, { v: 2 }, { v: 3 }]);
+      arr.push({ v: 4 });
+      expect(arr.length).toBe(4);
+    });
   });
 
   describe("splice", () => {

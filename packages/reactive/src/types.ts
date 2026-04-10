@@ -1,12 +1,20 @@
-export type Subscriber = {
-  onChange: (v: unknown) => void;
-  onPatch?: (c: unknown) => void;
+export type Subscriber<T> = {
+  onChange: (v: T) => void;
+  onPatch?: (action: {
+    type: "insert" | "delete" | "update" | "move" | "swap";
+    index: number;
+    item: T;
+    items?: T;
+    deleteCount?: number;
+    from?: number;
+    to?: number;
+  }) => void;
   ignore?: boolean;
 };
 
 export type TimelessRef<T> = {
   __is_ref: true;
-  subscribe: (ctx: Subscriber) => void;
+  subscribe: (ctx: Subscriber<T>) => () => void;
   destroy: () => void;
   value: T;
   eq: (v: T) => boolean;
@@ -30,7 +38,7 @@ export type TimelessRef<T> = {
 
 export type TimelessRefObject<T> = {
   __is_ref: true;
-  subscribe: (ctx: Subscriber) => void;
+  subscribe: (ctx: Subscriber<T>) => () => void;
   destroy: () => void;
   value: T;
   isSame: (v: unknown) => boolean;
@@ -71,7 +79,7 @@ export type TimelessRefObject<T> = {
 
 export type TimelessRefObjectNullable<T> = {
   __is_ref: true;
-  subscribe: (ctx: Subscriber) => void;
+  subscribe: (ctx: Subscriber<T>) => () => void;
   destroy: () => void;
   value: T | null;
   isSame: (v: unknown) => boolean;
@@ -112,7 +120,7 @@ export type TimelessRefObjectNullable<T> = {
 export type TimelessRefArray<T> = {
   __is_ref: true;
   __is_ref_array: true;
-  subscribe: (ctx: Subscriber) => void;
+  subscribe: (ctx: Subscriber<T[]>) => () => void;
   destroy: () => void;
   value: T[];
   isSame: (v: unknown) => boolean;
@@ -259,7 +267,7 @@ export type TimelessRefArray<T> = {
 
 export type DerivedRef<T> = {
   __is_ref: true;
-  subscribe: (ctx: Subscriber) => void;
+  subscribe: (ctx: Subscriber<T>) => () => void;
   destroy: () => void;
   value: T;
   isSame: (v: unknown) => boolean;

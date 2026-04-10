@@ -103,20 +103,23 @@ export function refObject<T extends Record<string, any>>(
   obj: T | null,
 ): TimelessRefObject<T> | TimelessRefObjectNullable<T> {
   let _v = obj;
-  const deps: Subscriber[] = [];
+  const deps: Subscriber<T>[] = [];
   function notify(action: { type: string }) {
     for (let i = 0; i < deps.length; i += 1) {
       const ctx = deps[i];
       if (ctx.onChange) {
-        ctx.onChange(_v);
+        ctx.onChange(_v as T);
       }
     }
   }
   const _inner: Partial<Record<keyof T, Ref<unknown>>> = {};
   const r = {
     __is_ref: true as const,
-    subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber<T>) {
       deps.push(ctx);
+      return function () {
+        deps.splice(deps.indexOf(ctx), 1);
+      };
     },
     destroy() {
       deps.length = 0;

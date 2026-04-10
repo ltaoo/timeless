@@ -127,5 +127,4 @@ export * from "./util/h";
 export * from "./util/listener";
 export * from "./interaction/dismissable";
 
-// export * as VNode from "./vnode";
 export * from "./vnode/view";

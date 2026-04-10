@@ -14,6 +14,7 @@ export type DOMFor = VNodeView<Text> & {
     moved: { from: number; to: number }[];
   }): void;
   move(from: number, to: number): void;
+  swap(from: number, to: number): void;
   render(elm: TimelessElement): DocumentFragment;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
@@ -43,9 +44,12 @@ export function DOMFor(props: {
     removeEventListener: common$.methods.removeEventListener,
     getBoundingClientRect: common$.methods.getBoundingClientRect,
     insert: common$.methods.insert,
-    remove: common$.methods.remove,
+    remove(idx: number, count: number) {
+      common$.methods.remove(idx, count);
+    },
     refresh: common$.methods.refresh,
     move: common$.methods.move,
+    swap: common$.methods.move,
     render(elm: TimelessElement) {
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);

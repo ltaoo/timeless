@@ -3,7 +3,7 @@ import { DerivedRef, isRef, Ref, Subscriber, TimelessRef } from "./types";
 export function ref<T = any>(v: T): TimelessRef<T> {
   let raw_value = v;
   const _initial_value = v;
-  const deps: Subscriber[] = [];
+  const deps: Subscriber<T>[] = [];
   function notify(action: {
     type: string;
     index?: number;
@@ -16,12 +16,14 @@ export function ref<T = any>(v: T): TimelessRef<T> {
       (() => {
         if (action.type === "insert") {
           if (ctx.onPatch) {
+            // @ts-ignore
             ctx.onPatch(action);
           }
           return;
         }
         if (action.type === "update") {
           if (ctx.onPatch) {
+            // @ts-ignore
             ctx.onPatch(action);
           }
           return;
@@ -34,8 +36,11 @@ export function ref<T = any>(v: T): TimelessRef<T> {
   }
   const r = {
     __is_ref: true as const,
-    subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber<T>) {
       deps.push(ctx);
+      return function () {
+        deps.splice(deps.indexOf(ctx), 1);
+      };
     },
     destroy() {
       deps.length = 0;

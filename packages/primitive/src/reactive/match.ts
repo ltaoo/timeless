@@ -1,12 +1,13 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { TimelessElement, isElement } from "@/content/type";
+import { TimelessElement, ViewChildren, isElement } from "@/content/type";
 import { MountedEvent } from "@/event";
+import { Txt } from "@/content/text";
 
 type MatchProps = {
   when: Ref<any> | any;
-  cases: Record<string | number, () => TimelessElement[]>;
-  fallback?: () => TimelessElement;
+  cases: Record<string | number, () => ViewChildren>;
+  fallback?: () => ViewChildren;
   onMounted?: (event: MountedEvent) => void;
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
@@ -32,9 +33,7 @@ export function Match(props: MatchProps) {
   };
 
   const methods = {
-    normalize(
-      children: TimelessElement[] | TimelessElement,
-    ): TimelessElement[] {
+    normalize(children: ViewChildren): ViewChildren {
       if (children === null || children === undefined) return [];
       if (Array.isArray(children)) {
         return children;
@@ -43,19 +42,44 @@ export function Match(props: MatchProps) {
     },
 
     get_children_with_value(value: any) {
+      const result: TimelessElement[] = [];
       state.value = value;
-
       // 查找匹配的 case
       if (cases && cases[value]) {
-        const next = methods.normalize(cases[value]());
-        state.children.push(...next);
-        return next;
+        const children = cases[value]();
+        const next = methods.normalize(children);
+        for (const child of next) {
+          if (isElement(child)) {
+            // state.children.push(child);
+            result.push(child);
+          } else if (isRef(child)) {
+            // state.children.push(Txt(child));
+            result.push(Txt(child));
+          } else if (child) {
+            // state.children.push(Txt(String(child)));
+            result.push(Txt(String(child)));
+          }
+        }
+        state.children = result;
+        return result;
       }
 
       // 使用 fallback
-      const next = fallback ? methods.normalize(fallback()) : [];
-      state.children = next;
-      return next;
+      if (fallback) {
+        const children = methods.normalize(fallback());
+        for (const child of children) {
+          if (isElement(child)) {
+            result.push(child);
+          } else if (isRef(child)) {
+            result.push(Txt(child));
+          } else if (child) {
+            result.push(Txt(String(child)));
+          }
+        }
+        state.children = result;
+        return result;
+      }
+      return [];
     },
 
     cleanup_old_children() {
@@ -91,7 +115,6 @@ export function Match(props: MatchProps) {
             if (typeof $elm.removeChildren === "function") {
               $elm.removeChildren();
             }
-
             // 获取新内容
             const target = methods.get_children_with_value(value);
 
@@ -123,8 +146,9 @@ export function Match(props: MatchProps) {
     set $elm(v) {
       $elm = v;
     },
-    value: state.value,
-    state,
+    state: {
+      value: state.value,
+    },
     children: state.children,
     // props: state.props,
     render() {

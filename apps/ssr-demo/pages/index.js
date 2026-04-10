@@ -87,29 +87,6 @@ export default function Page({ data }) {
           ),
         ]),
       ]),
-      Button(
-        {
-          onClick() {
-            visible_.as((v) => !v);
-          },
-        },
-        ["Toggle Content"],
-      ),
-      Button(
-        {
-          onClick() {
-            content.as((prev) => prev + "_new");
-          },
-        },
-        ["update Content"],
-      ),
-      Show({
-        when: visible_,
-        ok() {
-          return [View({}, [content])];
-        },
-      }),
-
       // Mouse Events Section
       View({ as: "section", style: sectionStyle }, [
         View({ as: "h2", style: subtitleStyle }, ["Mouse Events Test"]),
@@ -205,7 +182,8 @@ export default function Page({ data }) {
                         },
                       },
                       [
-                        computed(idx, (t) => `${t + 1}、`),
+                        // computed(idx, (t) => `${t + 1}、`),
+                        idx,
                         View({ as: "span" }, [item]),
                       ],
                     );

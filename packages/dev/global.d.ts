@@ -27,6 +27,8 @@ declare module "packages/reactive/src/types" {
         clear: () => void;
         clone: () => T;
         isNullish: () => boolean;
+        lt: (v: T | DerivedRef<T> | Ref<T>) => boolean;
+        gt: (v: T | DerivedRef<T> | Ref<T>) => boolean;
     };
     export type TimelessRefObject<T> = {
         __is_ref: true;
@@ -451,126 +453,6 @@ declare module "packages/reactive/src/index" {
     import { release, get as registryGet, set as registrySet, getobj as registryGetObj, getarr as registryGetArr } from "packages/reactive/src/registry";
     export { Subscriber, Ref, DerivedRef, RefObject, RefArray, TimelessRefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, isWriteableRef, isArrayRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
 }
-declare module "packages/primitive/src/host/stub" {
-    export const STUB_MARKER = "__stub__";
-    export function createStubHost(): {
-        kind: string;
-        createElement(tag: string): any;
-        createElementNS(_namespace: string, tag: string): any;
-        createTextNode(text: string): any;
-        createDocumentFragment(): any;
-        appendChild(parent: any, child: any): void;
-        removeChild(parent: any, child: any): void;
-        insertBefore(parent: any, child: any, before: any): void;
-        replaceChild(parent: any, newChild: any, oldChild: any): void;
-        clearChildren(parent: any): void;
-        setAttribute(el: any, name: string, value: string): void;
-        removeAttribute(el: any, name: string): void;
-        setClassName(el: any, className: string): void;
-        setStyleText(el: any, cssText: string): void;
-        patchStyle(el: any, patch: Record<string, string>): void;
-        setTextContent(node: any, text: string): void;
-        setInnerHTML(el: any, html: string): void;
-        setProperty(el: any, key: string, value: any): void;
-        addEventListener(): void;
-        removeEventListener(): void;
-        setTimeout(handler: () => void, ms: number): NodeJS.Timeout;
-        clearTimeout(id: any): void;
-        setPointerCapture(target: any, pointerId: number): void;
-        releasePointerCapture(target: any, pointerId: number): void;
-        focus(target: any): void;
-        blur(target: any): void;
-        querySelector(root: any, selector: string): any;
-        getBoundingClientRect(el: any): any;
-        getViewportSize(): {
-            width: number;
-            height: number;
-        };
-        getBody(): any;
-        isDocumentFragment(node: any): boolean;
-        getChildNodes(node: any): any[];
-        getParentNode(node: any): any;
-        getNextSibling(node: any): any;
-        getFirstChild(node: any): any;
-    };
-}
-declare module "packages/primitive/src/host/legacy-adapter" {
-    import type { TimelessHost } from "packages/primitive/src/host/index";
-    import type { HostRenderer, VNodePatch } from "@/vnode/host-renderer";
-    import type { VNode } from "@/vnode/types";
-    export function createLegacyHostAdapter(host: TimelessHost): HostRenderer;
-    export function buildInitialPatch(vnode: VNode): VNodePatch;
-}
-declare module "packages/primitive/src/host/index" {
-    import type { HostRenderer } from "@/vnode/host-renderer";
-    export type HostNode = any;
-    export type BoundingRect = {
-        top: number;
-        left: number;
-        right: number;
-        bottom: number;
-        width: number;
-        height: number;
-        x?: number;
-        y?: number;
-    };
-    export type GlobalStylePatch = Partial<{
-        cursor: string;
-        userSelect: string;
-    }>;
-    export type StylePatch = Record<string, string>;
-    export interface TimelessHost {
-        kind: string;
-        createElement(tag: string): HostNode;
-        createElementNS?(namespace: string, tag: string): HostNode;
-        createTextNode(text: string): HostNode;
-        createDocumentFragment(): HostNode;
-        appendChild(parent: HostNode, child: HostNode): void;
-        removeChild(parent: HostNode, child: HostNode): void;
-        insertBefore(parent: HostNode, child: HostNode, before: HostNode | null): void;
-        replaceChild(parent: HostNode, newChild: HostNode, oldChild: HostNode): void;
-        clearChildren(parent: HostNode): void;
-        setAttribute(el: HostNode, name: string, value: string): void;
-        removeAttribute(el: HostNode, name: string): void;
-        setClassName(el: HostNode, className: string): void;
-        setStyleText(el: HostNode, cssText: string): void;
-        patchStyle?(el: HostNode, patch: StylePatch): void;
-        setTextContent(node: HostNode, text: string): void;
-        setInnerHTML?(el: HostNode, html: string): void;
-        setProperty?(el: HostNode, key: string, value: any): void;
-        addEventListener(target: HostNode, type: string, handler: (event: any) => void, options?: any): void;
-        removeEventListener(target: HostNode, type: string, handler: (event: any) => void, options?: any): void;
-        addDocumentEventListener?(type: string, handler: (event: any) => void, options?: any): void;
-        removeDocumentEventListener?(type: string, handler: (event: any) => void, options?: any): void;
-        patchBodyStyle?(patch: GlobalStylePatch): void;
-        setTimeout(handler: () => void, ms: number): any;
-        clearTimeout(id: any): void;
-        setPointerCapture?(target: HostNode, pointerId: number): void;
-        releasePointerCapture?(target: HostNode, pointerId: number): void;
-        focus?(target: HostNode): void;
-        blur?(target: HostNode): void;
-        querySelector?(root: HostNode, selector: string): HostNode | null;
-        getBoundingClientRect?(el: HostNode): BoundingRect;
-        getViewportSize?(): {
-            width: number;
-            height: number;
-        };
-        getBody?(): HostNode | null;
-        isDocumentFragment(node: HostNode): boolean;
-        getChildNodes(node: HostNode): HostNode[];
-        getParentNode(node: HostNode): HostNode | null;
-        getNextSibling(node: HostNode): HostNode | null;
-        getFirstChild(node: HostNode): HostNode | null;
-    }
-    export let isBrowser: boolean;
-    export function registerComponent(original: Function, replacement: Function): void;
-    export function resolveComponent(fn: Function): Function;
-    export function setHost(host: TimelessHost): void;
-    export function getHost(): TimelessHost;
-    export function setRenderer(renderer: HostRenderer): void;
-    export function getRenderer(): HostRenderer;
-    export function getRendererScheduler(): RendererScheduler;
-}
 declare module "packages/primitive/src/reactive/for" {
     import { Ref, DerivedRef } from "packages/reactive/src/index";
     import { TimelessElement } from "@/content/type";
@@ -588,13 +470,25 @@ declare module "packages/primitive/src/reactive/for" {
         items: T[];
         children: (TimelessElement | null)[];
     };
-    export function For<T>(props: ForProps<T>): {
+    export function For<T>(props: ForProps<T>, bus?: Partial<{
+        onRefresh: (diff: {
+            added: {
+                idx: number;
+                element: TimelessElement<any, any> | null;
+            }[];
+            removed: {
+                idx: number;
+            }[];
+            moved: {
+                from: number;
+                to: number;
+            }[];
+        }) => void;
+    }>): {
         t: string;
         $elm: any;
         state: ForState<T>;
         children: any[];
-        render(): any;
-        hydrate(start_dom: any, parent_dom?: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -602,7 +496,7 @@ declare module "packages/primitive/src/reactive/for" {
 }
 declare module "packages/primitive/src/reactive/show" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { ViewChildren } from "@/content/type";
+    import { TimelessElement, ViewChildren } from "@/content/type";
     import { MountedEvent } from "@/event";
     type ShowProps = {
         when: DerivedRef<boolean | undefined | null> | Ref<boolean | undefined | null> | boolean;
@@ -614,16 +508,13 @@ declare module "packages/primitive/src/reactive/show" {
     };
     type ShowState = {
         value: boolean;
-        children: any[];
-        props: any;
+        children: TimelessElement[];
     };
     export function Show(props: ShowProps): {
         t: string;
         $elm: any;
-        value: boolean;
         state: ShowState;
-        children: any[];
-        hydrate(startDom: any, parentDom?: any): any;
+        children: TimelessElement[];
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -710,11 +601,20 @@ declare module "packages/primitive/src/content/type" {
             onDrop?: (e: DragEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
         };
+        a11y?: VNodeA11y;
         hydrate?(existingDom: any): any;
         cleanup?: () => void;
         onMounted?(event: MountedEvent): void;
         beforeUnmounted?(): void;
         onUnmounted?(): void;
+    }
+    export interface VNodeA11y {
+        label?: string;
+        hint?: string;
+        role?: string;
+        hidden?: boolean;
+        value?: string;
+        live?: "polite" | "assertive";
     }
     export function isElement(v: any): v is TimelessElement;
     export type ViewChildren = (DerivedRef<string | number> | Ref<string | number> | TimelessElement | string | number | null)[];
@@ -731,6 +631,7 @@ declare module "packages/primitive/src/content/view" {
     import { MountedEvent } from "@/event/index";
     import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
     export type ViewProps = {
+        id?: string;
         key?: string | number;
         as?: string;
         style?: ViewStyle;
@@ -800,8 +701,6 @@ declare module "packages/primitive/src/content/view" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        /** @deprecated */
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -891,6 +790,7 @@ declare module "packages/primitive/src/content/box" {
         style: RawViewStyleProperties;
         styleSet: string[];
         attributes: Record<string, string | number | boolean | undefined>;
+        dataset: Record<string, string | number | boolean | undefined>;
         children: (TimelessElement | null)[];
     };
     export function Box<T>(props: BoxProps, extra_state: T): {
@@ -920,6 +820,7 @@ declare module "packages/primitive/src/content/box" {
             onAnimationEnd: (e: AnimationEvent) => void;
         };
         methods: {
+            set$elm(elm: any): void;
             apply_attr(k: string, v: any): void;
             handle_value(): void;
         };
@@ -991,7 +892,6 @@ declare module "packages/primitive/src/content/popper" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -1208,9 +1108,14 @@ declare module "packages/primitive/src/input/select" {
     import { ViewProps } from "@/content/view";
     import { MountedEvent } from "@/event";
     import { ForProps } from "@/reactive/for";
+    import { BoxEvents } from "@/content/box";
     type SelectValue = string[];
-    export interface SelectProps<T> extends Omit<ViewProps, "as"> {
+    export type SelectProps<T> = BoxEvents & {
         id?: string | Ref<string>;
+        style?: ViewProps["style"];
+        class?: ViewProps["class"];
+        dataset?: ViewProps["dataset"];
+        attributes?: ViewProps["attributes"];
         key?: string;
         each: T[] | Ref<T[]>;
         render: ForProps<T>["render"];
@@ -1224,7 +1129,7 @@ declare module "packages/primitive/src/input/select" {
         value?: Ref<SelectValue>;
         onChange?: (e: Event) => void;
         onInput?: (e: Event) => void;
-    }
+    };
     export function Select<T>(props: SelectProps<T>): {
         t: string;
         $elm: any;
@@ -1445,8 +1350,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function G(props?: GProps, children?: any): {
         t: string;
@@ -1454,8 +1357,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Circle(props?: CircleProps, children?: any): {
         t: string;
@@ -1463,8 +1364,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Rect(props?: RectProps, children?: any): {
         t: string;
@@ -1472,8 +1371,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Path(props?: PathProps, children?: any): {
         t: string;
@@ -1481,8 +1378,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Line(props?: LineProps, children?: any): {
         t: string;
@@ -1490,8 +1385,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Polyline(props?: PolylineProps, children?: any): {
         t: string;
@@ -1499,8 +1392,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Polygon(props?: PolygonProps, children?: any): {
         t: string;
@@ -1508,8 +1399,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Text(props?: TextProps, children?: any): {
         t: string;
@@ -1517,8 +1406,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Defs(props?: DefsProps, children?: any): {
         t: string;
@@ -1526,8 +1413,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Symbol(props?: SymbolProps, children?: any): {
         t: string;
@@ -1535,8 +1420,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Use(props?: UseProps, children?: any): {
         t: string;
@@ -1544,8 +1427,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function LinearGradient(props?: LinearGradientProps, children?: any): {
         t: string;
@@ -1553,8 +1434,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function RadialGradient(props?: RadialGradientProps, children?: any): {
         t: string;
@@ -1562,8 +1441,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Stop(props?: StopProps, children?: any): {
         t: string;
@@ -1571,8 +1448,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Mask(props?: MaskProps, children?: any): {
         t: string;
@@ -1580,8 +1455,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function ClipPath(props?: ClipPathProps, children?: any): {
         t: string;
@@ -1589,8 +1462,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
     export function Ellipse(props?: EllipseProps, children?: any): {
         t: string;
@@ -1598,8 +1469,6 @@ declare module "packages/primitive/src/content/svg" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/primitive/src/content/style" {
@@ -1726,94 +1595,36 @@ declare module "packages/primitive/src/interaction/link" {
     export function Link(props?: LinkProps, children?: ViewChildren): any;
 }
 declare module "packages/primitive/src/interaction/button" {
-    import { Ref } from "packages/reactive/src/index";
-    import { TimelessElement, ViewAttributes, ViewChildren, ViewPropValue } from "@/content/type";
-    import { ViewStyleProperties, ViewStyle, ClassNameRef } from "@/style/index";
-    import { MountedEvent } from "@/event/index";
-    export interface ButtonProps {
-        key?: string | number;
-        as?: string;
-        style?: ViewStyle;
-        class?: string | Ref<string> | ClassNameRef;
-        draggable?: boolean;
-        attributes?: ViewAttributes;
-        dataset?: Record<string, ViewPropValue | Ref<ViewPropValue>>;
-        onMounted?(event: MountedEvent): void | (() => void);
-        beforeUnmounted?(): void;
-        onUnmounted?(): void;
-        onClick?(e: MouseEvent): void;
-        onDoubleClick?(e: MouseEvent): void;
-        onLongPress?(e: PointerEvent): void;
-        onPointerDown?: (e: PointerEvent) => void;
-        onFocus?(e: FocusEvent): void;
-        onBlur?(e: FocusEvent): void;
-        onKeyDown?: (e: KeyboardEvent) => void;
-        onContextMenu?: (e: MouseEvent) => void;
-        onMouseEnter?: (e: MouseEvent) => void;
-        onMouseLeave?: (e: MouseEvent) => void;
-        onDragStart?: (e: DragEvent) => void;
-        onDrag?: (e: DragEvent) => void;
-        onDragEnd?: (e: DragEvent) => void;
-        onDragEnter?: (e: DragEvent) => void;
-        onDragOver?: (e: DragEvent) => void;
-        onDragLeave?: (e: DragEvent) => void;
-        onDrop?: (e: DragEvent) => void;
-        onAnimationEnd?: (e: AnimationEvent) => void;
-    }
+    import { ViewChildren } from "@/content/type";
+    import { BoxProps } from "@/content/box";
+    export type ButtonProps = BoxProps & {};
     export function Button(props?: ButtonProps, children?: ViewChildren): {
         t: string;
         $elm: any;
-        state: {
-            rendered: boolean;
-            props: {
-                styleSet?: string[];
-                style: ViewStyleProperties;
-            };
-            events: Partial<{
-                onClick?: (e: MouseEvent) => void;
-                onDoubleClick?: (e: MouseEvent) => void;
-                onLongPress?: (e: PointerEvent) => void;
-                onPointerDown?: (e: PointerEvent) => void;
-                onFocus?: (e: FocusEvent) => void;
-                onBlur?: (e: FocusEvent) => void;
-                onKeyDown?: (e: KeyboardEvent) => void;
-                onContextMenu?: (e: MouseEvent) => void;
-                onMouseEnter?: (e: MouseEvent) => void;
-                onMouseLeave?: (e: MouseEvent) => void;
-                onDragStart?: (e: DragEvent) => void;
-                onDrag?: (e: DragEvent) => void;
-                onDragEnd?: (e: DragEvent) => void;
-                onDragEnter?: (e: DragEvent) => void;
-                onDragOver?: (e: DragEvent) => void;
-                onDragLeave?: (e: DragEvent) => void;
-                onDrop?: (e: DragEvent) => void;
-                onAnimationEnd?: (e: AnimationEvent) => void;
-            }>;
-            children: TimelessElement[];
+        state: any;
+        children: any;
+        events: {
+            onClick: any;
+            onDoubleClick: any;
+            onLongPress: any;
+            onPointerDown: any;
+            onFocus: any;
+            onBlur: any;
+            onKeyDown: any;
+            onContextMenu: any;
+            onMouseEnter: any;
+            onMouseLeave: any;
+            onDragStart: any;
+            onDrag: any;
+            onDragEnd: any;
+            onDragEnter: any;
+            onDragOver: any;
+            onDragLeave: any;
+            onDrop: any;
+            onAnimationEnd: any;
         };
-        children: TimelessElement[];
-        events: Partial<{
-            onClick?: (e: MouseEvent) => void;
-            onDoubleClick?: (e: MouseEvent) => void;
-            onLongPress?: (e: PointerEvent) => void;
-            onPointerDown?: (e: PointerEvent) => void;
-            onFocus?: (e: FocusEvent) => void;
-            onBlur?: (e: FocusEvent) => void;
-            onKeyDown?: (e: KeyboardEvent) => void;
-            onContextMenu?: (e: MouseEvent) => void;
-            onMouseEnter?: (e: MouseEvent) => void;
-            onMouseLeave?: (e: MouseEvent) => void;
-            onDragStart?: (e: DragEvent) => void;
-            onDrag?: (e: DragEvent) => void;
-            onDragEnd?: (e: DragEvent) => void;
-            onDragEnter?: (e: DragEvent) => void;
-            onDragOver?: (e: DragEvent) => void;
-            onDragLeave?: (e: DragEvent) => void;
-            onDrop?: (e: DragEvent) => void;
-            onAnimationEnd?: (e: AnimationEvent) => void;
-        }>;
         hydrate(existingDom: any): any;
-        onMounted: (event: MountedEvent) => void | (() => void);
+        onMounted: any;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -9350,15 +9161,7 @@ declare module "packages/primitive/src/modules/file-input" {
     export function Input(props: ViewProps & {
         store: FileInputCore;
         id?: string;
-    }): {
-        t: string;
-        $elm: any;
-        state: {};
-        render(): any;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): any;
     export function Clear(props: ViewProps & {
         store: FileInputCore;
     }, children?: ViewChildren): any;
@@ -9378,17 +9181,7 @@ declare module "packages/primitive/src/modules/number-input" {
     }, children?: ViewChildren): any;
     export function Input(props: ViewProps & {
         store: NumberInputCore;
-        id?: string;
-    }): {
-        t: string;
-        $elm: any;
-        state: {};
-        children: any[];
-        render(): any;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): any;
     export function IncreaseButton(props: ViewProps & {
         store: NumberInputCore;
     }, children?: ViewChildren): any;
@@ -11811,13 +11604,91 @@ declare module "packages/primitive/src/style/index" {
         [k: string]: ViewStylePropValue;
     };
     export type ViewStyle = ViewStyleProperties | DerivedRef<ViewStyleProperties> | Ref<ViewStyleProperties>;
-    export type RawViewStyleProperties = {
-        [k: string]: string | number | boolean | null | undefined;
-    };
+    export interface RawViewStyleProperties {
+        width?: number | string;
+        height?: number | string;
+        minWidth?: number | string;
+        minHeight?: number | string;
+        maxWidth?: number | string;
+        maxHeight?: number | string;
+        margin?: number | string;
+        marginTop?: number | string;
+        marginRight?: number | string;
+        marginBottom?: number | string;
+        marginLeft?: number | string;
+        padding?: number | string;
+        paddingTop?: number | string;
+        paddingRight?: number | string;
+        paddingBottom?: number | string;
+        paddingLeft?: number | string;
+        position?: "static" | "relative" | "absolute" | "fixed" | "sticky";
+        top?: number | string;
+        right?: number | string;
+        bottom?: number | string;
+        left?: number | string;
+        zIndex?: number;
+        color?: string;
+        backgroundColor?: string;
+        opacity?: number;
+        borderWidth?: number;
+        borderStyle?: "none" | "solid" | "dashed" | "dotted";
+        borderColor?: string;
+        borderRadius?: number;
+        borderTopWidth?: number;
+        borderRightWidth?: number;
+        borderBottomWidth?: number;
+        borderLeftWidth?: number;
+        borderTopLeftRadius?: number;
+        borderTopRightRadius?: number;
+        borderBottomLeftRadius?: number;
+        borderBottomRightRadius?: number;
+        fontSize?: number;
+        fontWeight?: number | "bold" | "normal";
+        fontFamily?: string;
+        fontStyle?: "normal" | "italic";
+        lineHeight?: number;
+        letterSpacing?: number;
+        textAlign?: "left" | "center" | "right" | "justify";
+        textDecoration?: "none" | "underline" | "line-through";
+        textTransform?: "none" | "capitalize" | "uppercase" | "lowercase";
+        maxLines?: number;
+        overflow?: "visible" | "hidden";
+        pointerEvents?: "auto" | "none";
+        transforms?: VNodeTransform[];
+        shadows?: VNodeShadow[];
+        [key: string]: any;
+    }
+    export interface VNodeTransform {
+        translate?: {
+            x?: number;
+            y?: number;
+            z?: number;
+        };
+        rotate?: number;
+        rotateX?: number;
+        rotateY?: number;
+        rotateZ?: number;
+        scale?: number | {
+            x?: number;
+            y?: number;
+        };
+        skew?: {
+            x?: number;
+            y?: number;
+        };
+    }
+    export interface VNodeShadow {
+        color: string;
+        offsetX: number;
+        offsetY: number;
+        blurRadius: number;
+        spreadRadius?: number;
+    }
     export type ViewStyleInput = ViewStyle;
     export function viewStyleToCssText(style: ViewStyleInput): string;
     export type ClassNameRef = {
         __cn_ref: true;
+        value: string[];
         subscribe(ctx: Subscriber): void;
         as(v: string): void;
         del(v: string): void;
@@ -11837,23 +11708,6 @@ declare module "packages/primitive/src/style/index" {
     }
     export function isStyleRef(v: any): v is StyleRef;
     export function styleNames(items: (ViewStyleProperties | DerivedRef<StyleRef | ViewStyleProperties> | Ref<StyleRef | ViewStyleProperties> | StyleRef | undefined)[]): DerivedRef<ViewStyleProperties>;
-}
-declare module "packages/primitive/src/util/env" {
-    import { isBrowser } from "@/host";
-    export { STUB_MARKER } from "@/host/stub";
-    export { isBrowser };
-    export function safeCreateElement(tag: string): any;
-    export function safeCreateElementNS(namespace: string, tag: string): any;
-    export function safeCreateTextNode(text: string): any;
-    export function safeCreateDocumentFragment(): any;
-}
-declare module "packages/primitive/src/util/render-to-string" {
-    import { TimelessElement } from "@/content/type";
-    /**
-     * Render a TimelessElement tree to an HTML string (for SSR).
-     * Only works on the server where stub nodes track structure.
-     */
-    export function renderToString(el: TimelessElement): string;
 }
 declare module "packages/primitive/src/util/lazy" {
     export function lazy(path: string): () => Promise<any>;
@@ -11907,8 +11761,9 @@ declare module "packages/primitive/src/vnode/view" {
     export type VNodeEvent<T> = {
         target: T;
     };
+    type VNodeViewType = "view" | "text" | "button" | "input" | "fragment" | "reactive";
     export type VNodeView<HostElm = any> = {
-        getType(): "view" | "text" | "button" | "input" | "reactive";
+        getType(): VNodeViewType;
         isDocumentFragment(): boolean;
         getChildren(): VNodeView<any>[];
         setStyle(style: RawViewStyleProperties): void;
@@ -11921,6 +11776,7 @@ declare module "packages/primitive/src/vnode/view" {
         addEventListener(type: string, handler: (event: VNodeEvent<VNodeView<HostElm>>) => void, options?: any): void;
         removeEventListener(type: string, handler: (event: VNodeEvent<VNodeView<HostElm>>) => void, options?: any): void;
         render(elm: TimelessElement): any;
+        hydrate(elm: TimelessElement, $dom: HostElm): any;
         /** 构建 */
         appendChildren(children: (TimelessElement | null)[]): any;
         insertChildren(children: (TimelessElement | null)[]): void;
@@ -11930,7 +11786,6 @@ declare module "packages/primitive/src/vnode/view" {
 }
 declare module "packages/primitive/src/index" {
     export * from "packages/reactive/src/index";
-    export * from "packages/primitive/src/host/index";
     export * from "packages/primitive/src/reactive/for";
     export * from "packages/primitive/src/reactive/show";
     export * from "packages/primitive/src/reactive/match";
@@ -12011,13 +11866,10 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/modules/standard-sub-views";
     export * from "packages/primitive/src/modules/error-boundary";
     export * from "packages/primitive/src/style/index";
-    export * from "packages/primitive/src/util/env";
-    export * from "packages/primitive/src/util/render-to-string";
     export * from "packages/primitive/src/util/lazy";
     export * from "packages/primitive/src/util/h";
     export * from "packages/primitive/src/util/listener";
     export * from "packages/primitive/src/interaction/dismissable";
-    export * from "packages/primitive/src/host/index";
     export * from "packages/primitive/src/vnode/view";
 }
 declare module "packages/timeless/src/index" {
@@ -12134,7 +11986,6 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12195,7 +12046,6 @@ declare module "packages/shadcn/src/modules/radio" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12401,7 +12251,6 @@ declare module "packages/shadcn/src/modules/menu" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12555,7 +12404,6 @@ declare module "packages/shadcn/src/modules/scroll-area" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12604,7 +12452,6 @@ declare module "packages/shadcn/src/modules/aspect-ratio" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12658,7 +12505,6 @@ declare module "packages/shadcn/src/modules/kbd" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12697,7 +12543,6 @@ declare module "packages/shadcn/src/modules/kbd" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12751,7 +12596,6 @@ declare module "packages/shadcn/src/modules/form" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12794,7 +12638,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12833,7 +12676,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12872,7 +12714,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12911,7 +12752,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -12977,7 +12817,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -13016,7 +12855,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -13060,7 +12898,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -13131,7 +12968,6 @@ declare module "packages/shadcn/src/modules/history-panel" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -13222,7 +13058,6 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -13263,7 +13098,6 @@ declare module "packages/shadcn/src/modules/sonner" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -13310,7 +13144,6 @@ declare module "packages/shadcn/src/modules/affix" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        render(): any;
         hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -13400,8 +13233,6 @@ declare module "packages/icons/src/util/index" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/arrow-down-to-line" {
@@ -13411,8 +13242,6 @@ declare module "packages/icons/src/icons/arrow-down-to-line" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/calendar" {
@@ -13422,8 +13251,6 @@ declare module "packages/icons/src/icons/calendar" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/chevron-down" {
@@ -13433,8 +13260,6 @@ declare module "packages/icons/src/icons/chevron-down" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/chevron-left" {
@@ -13444,8 +13269,6 @@ declare module "packages/icons/src/icons/chevron-left" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/chevron-right" {
@@ -13455,8 +13278,6 @@ declare module "packages/icons/src/icons/chevron-right" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/circle-arrow-down" {
@@ -13466,8 +13287,6 @@ declare module "packages/icons/src/icons/circle-arrow-down" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/circle-x" {
@@ -13477,8 +13296,6 @@ declare module "packages/icons/src/icons/circle-x" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/clock-arrow-down" {
@@ -13488,8 +13305,6 @@ declare module "packages/icons/src/icons/clock-arrow-down" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/cloud-download" {
@@ -13499,8 +13314,6 @@ declare module "packages/icons/src/icons/cloud-download" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/download" {
@@ -13510,8 +13323,6 @@ declare module "packages/icons/src/icons/download" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/ellipsis-vertical" {
@@ -13521,8 +13332,6 @@ declare module "packages/icons/src/icons/ellipsis-vertical" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/ellipsis" {
@@ -13532,8 +13341,6 @@ declare module "packages/icons/src/icons/ellipsis" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-box" {
@@ -13543,8 +13350,6 @@ declare module "packages/icons/src/icons/file-box" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-image" {
@@ -13554,8 +13359,6 @@ declare module "packages/icons/src/icons/file-image" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-lock" {
@@ -13565,8 +13368,6 @@ declare module "packages/icons/src/icons/file-lock" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-play" {
@@ -13576,8 +13377,6 @@ declare module "packages/icons/src/icons/file-play" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-symlink" {
@@ -13587,8 +13386,6 @@ declare module "packages/icons/src/icons/file-symlink" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-video-camera" {
@@ -13598,8 +13395,6 @@ declare module "packages/icons/src/icons/file-video-camera" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file-volume" {
@@ -13609,8 +13404,6 @@ declare module "packages/icons/src/icons/file-volume" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/file" {
@@ -13620,8 +13413,6 @@ declare module "packages/icons/src/icons/file" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/folder-closed" {
@@ -13631,8 +13422,6 @@ declare module "packages/icons/src/icons/folder-closed" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/folder" {
@@ -13642,8 +13431,6 @@ declare module "packages/icons/src/icons/folder" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/pause" {
@@ -13653,8 +13440,6 @@ declare module "packages/icons/src/icons/pause" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/play" {
@@ -13664,8 +13449,6 @@ declare module "packages/icons/src/icons/play" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/refresh-ccw" {
@@ -13675,8 +13458,6 @@ declare module "packages/icons/src/icons/refresh-ccw" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/rss" {
@@ -13686,8 +13467,6 @@ declare module "packages/icons/src/icons/rss" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/square-arrow-down" {
@@ -13697,8 +13476,6 @@ declare module "packages/icons/src/icons/square-arrow-down" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/trash-2" {
@@ -13708,8 +13485,6 @@ declare module "packages/icons/src/icons/trash-2" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/trash" {
@@ -13719,8 +13494,6 @@ declare module "packages/icons/src/icons/trash" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/search" {
@@ -13730,8 +13503,6 @@ declare module "packages/icons/src/icons/search" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/undo-2" {
@@ -13741,8 +13512,6 @@ declare module "packages/icons/src/icons/undo-2" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/x" {
@@ -13752,8 +13521,6 @@ declare module "packages/icons/src/icons/x" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/bolt" {
@@ -13763,8 +13530,6 @@ declare module "packages/icons/src/icons/bolt" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/loader" {
@@ -13774,8 +13539,6 @@ declare module "packages/icons/src/icons/loader" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/loader-circle" {
@@ -13785,8 +13548,6 @@ declare module "packages/icons/src/icons/loader-circle" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/check" {
@@ -13796,8 +13557,6 @@ declare module "packages/icons/src/icons/check" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/chevron-up" {
@@ -13807,8 +13566,6 @@ declare module "packages/icons/src/icons/chevron-up" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/clock" {
@@ -13818,8 +13575,6 @@ declare module "packages/icons/src/icons/clock" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/grid-3x3" {
@@ -13829,8 +13584,6 @@ declare module "packages/icons/src/icons/grid-3x3" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/menu" {
@@ -13840,8 +13593,6 @@ declare module "packages/icons/src/icons/menu" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/circle-ellipsis" {
@@ -13851,8 +13602,6 @@ declare module "packages/icons/src/icons/circle-ellipsis" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/house" {
@@ -13862,8 +13611,6 @@ declare module "packages/icons/src/icons/house" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/moon" {
@@ -13873,8 +13620,6 @@ declare module "packages/icons/src/icons/moon" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/icons/sun" {
@@ -13884,8 +13629,6 @@ declare module "packages/icons/src/icons/sun" {
         beforeUnmounted(): void;
         onUnmounted(): void;
         append(node: any): void;
-        setContent(html: string): void;
-        render(): any;
     };
 }
 declare module "packages/icons/src/index" {
@@ -14026,7 +13769,6 @@ declare const Ref: typeof import("@timeless/timeless").Ref;
 declare const RefArray: typeof import("@timeless/timeless").RefArray;
 declare const RefObject: typeof import("@timeless/timeless").RefObject;
 declare const ResizablePanelsPrimitive: typeof import("@timeless/timeless").ResizablePanelsPrimitive;
-declare const STUB_MARKER: typeof import("@timeless/timeless").STUB_MARKER;
 declare const SVG: typeof import("@timeless/timeless").SVG;
 declare const ScrollViewPrimitive: typeof import("@timeless/timeless").ScrollViewPrimitive;
 declare const SelectPrimitive: typeof import("@timeless/timeless").SelectPrimitive;
@@ -14065,14 +13807,10 @@ declare const computed: typeof import("@timeless/timeless").computed;
 declare const defaultErrorView: typeof import("@timeless/timeless").defaultErrorView;
 declare const defineModel: typeof import("@timeless/timeless").defineModel;
 declare const derive: typeof import("@timeless/timeless").derive;
-declare const getHost: typeof import("@timeless/timeless").getHost;
-declare const getRenderer: typeof import("@timeless/timeless").getRenderer;
-declare const getRendererScheduler: typeof import("@timeless/timeless").getRendererScheduler;
 declare const getarr: typeof import("@timeless/timeless").getarr;
 declare const getobj: typeof import("@timeless/timeless").getobj;
 declare const h: typeof import("@timeless/timeless").h;
 declare const isArrayRef: typeof import("@timeless/timeless").isArrayRef;
-declare const isBrowser: typeof import("@timeless/timeless").isBrowser;
 declare const isClassNameRef: typeof import("@timeless/timeless").isClassNameRef;
 declare const isElement: typeof import("@timeless/timeless").isElement;
 declare const isFragment: typeof import("@timeless/timeless").isFragment;
@@ -14091,20 +13829,11 @@ declare const reactiveObject: typeof import("@timeless/timeless").reactiveObject
 declare const ref: typeof import("@timeless/timeless").ref;
 declare const refarr: typeof import("@timeless/timeless").refarr;
 declare const refobj: typeof import("@timeless/timeless").refobj;
-declare const registerComponent: typeof import("@timeless/timeless").registerComponent;
 declare const registryGet: typeof import("@timeless/timeless").registryGet;
 declare const registryGetArr: typeof import("@timeless/timeless").registryGetArr;
 declare const registryGetObj: typeof import("@timeless/timeless").registryGetObj;
 declare const registrySet: typeof import("@timeless/timeless").registrySet;
 declare const release: typeof import("@timeless/timeless").release;
-declare const renderToString: typeof import("@timeless/timeless").renderToString;
-declare const resolveComponent: typeof import("@timeless/timeless").resolveComponent;
-declare const safeCreateDocumentFragment: typeof import("@timeless/timeless").safeCreateDocumentFragment;
-declare const safeCreateElement: typeof import("@timeless/timeless").safeCreateElement;
-declare const safeCreateElementNS: typeof import("@timeless/timeless").safeCreateElementNS;
-declare const safeCreateTextNode: typeof import("@timeless/timeless").safeCreateTextNode;
-declare const setHost: typeof import("@timeless/timeless").setHost;
-declare const setRenderer: typeof import("@timeless/timeless").setRenderer;
 declare const signal: typeof import("@timeless/timeless").signal;
 declare const styleNames: typeof import("@timeless/timeless").styleNames;
 declare const ui: typeof import("@timeless/timeless").ui;

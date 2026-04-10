@@ -113,7 +113,9 @@ export function Show(props: ShowProps) {
     set $elm(v) {
       $elm = v;
     },
-    state,
+    state: {
+      value: state.value,
+    },
     children: state.children,
     // hydrate(startDom: any, parentDom?: any) {
     //   const condition = isRef(when) ? !!when.value : !!when;

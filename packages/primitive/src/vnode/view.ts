@@ -48,7 +48,9 @@ export type VNodeView<HostElm = any> = {
     handler: (event: VNodeEvent<VNodeView<HostElm>>) => void,
     options?: any,
   ): void;
+  /** 构建宿主 node tree */
   render(elm: TimelessElement): any;
+  /** 水合 */
   hydrate(elm: TimelessElement, $dom: HostElm): any;
   /** 构建 */
   appendChildren(children: (TimelessElement | null)[]): any;

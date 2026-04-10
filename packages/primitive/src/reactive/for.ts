@@ -7,11 +7,13 @@ import {
   DerivedRef,
   isWriteableRef,
   isArrayRef,
+  refarr,
+  RefArray,
 } from "@timeless/reactive";
 
 import { TimelessElement, isElement } from "@/content/type";
 import { MountedEvent } from "@/event";
-// import { safeCreateTextNode, safeCreateDocumentFragment } from "@/util/env";
+import { Txt } from "@/content/text";
 
 export type ForProps<T> = {
   key?: string;
@@ -24,7 +26,9 @@ export type ForProps<T> = {
 export type ForState<T> = {
   rendered: boolean;
   items: T[];
+  wrapped_items: { k: number; v: T }[];
   children: (TimelessElement | null)[];
+  idx_arr: DerivedRef<number>[];
 };
 
 export function For<T>(
@@ -45,158 +49,174 @@ export function For<T>(
     }) => void;
   }>,
 ) {
-  // let $anchor: any = null;
   let $elm: any = null;
 
-  const { key, each, render, onMounted, beforeUnmounted, onUnmounted } = props;
-
-  const _key = key;
+  const _key = props.key;
   const state: ForState<T> = {
     rendered: false,
     items: [],
+    wrapped_items: [] as { k: number; v: T }[],
     children: [],
+    idx_arr: [],
   };
-  // let _values: T[] = [];
-  let _elements: (TimelessElement | null)[] = [];
-  let _$children: (any | null)[] = [];
-  let _original_items: T[] = []; // Store original item references for indexOf lookup
-  let _index_computed: DerivedRef<number>[] = []; // Computed indexes that depend on `each`
-
-  // Helper to create a computed index that depends on `each`
-  const create_idx = (origin_item: T): DerivedRef<number> => {
-    return computed(each, () => {
-      const arr = isRef(each) ? each.value : each;
-      // console.log(
-      //   "recompute index when the each is changed",
-      //   JSON.stringify(arr),
-      //   origin_item,
-      // );
-      return arr ? arr.indexOf(origin_item) : -1;
-    });
-  };
-
+  let _id = 0;
   const _existing_map = new Map();
 
-  const render_result = (input: any) => {
-    let res = input;
-    if (typeof res === "function") res = res();
-    if (!res) return { node: null, elm: null, trackElm: null, empty: true };
-
-    // if (isVNodeDescriptor(res)) {
-    //   const vnode = mount(res as any, scheduler);
-    //   commitTree(vnode, renderer);
-    //   const elm = (vnode as any)._hostNode ?? null;
-    //   return { node: vnode, elm, trackElm: elm };
-    // }
-
-    // if (isElement(res)) {
-    //   const elm = res.render();
-    //   return { node: res, elm, trackElm: res.$elm };
-    // }
-
-    return { node: null, elm: null, trackElm: null, empty: true };
-  };
-
   const methods = {
-    render_item(item: T, idxComputed: DerivedRef<number>) {
-      const rr: {
-        node: null | TimelessElement;
-        elm: null | any;
-        trackElm?: null | any;
-        empty?: boolean;
-        delete?: boolean;
-      } = (() => {
-        const base = render_result(() => render(item, idxComputed));
-        // Canvas：为子节点添加定位容器，并填充宽高
-        // if (host.kind === "canvas") {
-        //   const wrap = host.createElement("div");
-        //   const y = Math.max(0, Number(idxComputed.value || 0)) * lineH;
-        //   host.setStyleText(
-        //     wrap,
-        //     `left: 0; top: ${y}px; width: 100%; height: ${lineH}px;`,
-        //   );
-        //   // 子节点填满容器
-        //   if (host.patchStyle) {
-        //     host.patchStyle(base.elm, {
-        //       left: "0",
-        //       top: "0",
-        //       width: "100%",
-        //       height: `${lineH}px`,
-        //     });
-        //   } else {
-        //     host.setStyleText(
-        //       base.elm,
-        //       "left: 0; top: 0; width: 100%; height: 24px;",
-        //     );
-        //   }
-        //   host.appendChild(wrap, base.elm);
-        //   return { node: base.node, elm: wrap, trackElm: wrap };
-        // }
-        return base;
-      })();
-      return rr;
+    unique_id() {
+      return _id++;
+    },
+    subscribe_value() {
+      const vv = props.each;
+      if (!isArrayRef(vv)) {
+        state.wrapped_items = (vv as T[]).map((item) => ({
+          k: methods.unique_id(),
+          v: item,
+        }));
+        state.items = [...(vv as T[])];
+        return;
+      }
+      state.wrapped_items = (vv.value as T[]).map((item) => ({
+        k: methods.unique_id(),
+        v: item,
+      }));
+      state.items = [...(vv.value as T[])];
+      vv.subscribe({
+        onPatch(action) {
+          if (!state.rendered) {
+            return;
+          }
+          console.log(
+            "[primitive]For - ctx.onPatch - handle patch",
+            action,
+            vv.value,
+          );
+          if (action.type === "insert" && action.items !== undefined) {
+            methods.insert(action.index, action.items as T[]);
+            return;
+          }
+          if (action.type === "delete" && action.deleteCount !== undefined) {
+            methods.remove(action.index, action.deleteCount);
+            return;
+          }
+          if (
+            action.type === "move" &&
+            action.from !== undefined &&
+            action.to !== undefined
+          ) {
+            methods.move(action.from, action.to);
+            return;
+          }
+          if (
+            action.type === "swap" &&
+            action.from !== undefined &&
+            action.to !== undefined
+          ) {
+            methods.swap(action.from, action.to);
+            return;
+          }
+        },
+        onChange(v) {
+          console.log("[primitive]For - ctx.onChange", v, state.rendered);
+          // if (!state.rendered) {
+          //   return;
+          // }
+          methods.refresh(v as T[]);
+        },
+      });
+    },
+    // Helper to create a computed index that depends on `each`
+    create_idx(origin_item: { k: number; v: T }): DerivedRef<number> {
+      return computed(props.each, (t) => {
+        const r = state.wrapped_items.indexOf(origin_item);
+        console.log(
+          "recompute index when the each is changed",
+          JSON.stringify(state.wrapped_items),
+          origin_item,
+        );
+        return r;
+      });
+    },
+    build_children() {
+      const items = state.wrapped_items;
+      for (let i = 0; i < items.length; i += 1) {
+        const item = items[i];
+        const idx_computed = methods.create_idx(item);
+        const elm = props.render(item.v, idx_computed);
+        state.items[i] = item.v;
+        state.children.push(elm);
+        state.idx_arr[i] = idx_computed;
+      }
     },
     /** 在指定位置，插入 n 个节点 */
     insert(index: number, items: T[]) {
+      console.log("[primitive]for - insert", index, items);
       const inserted_elements: (TimelessElement | null)[] = [];
-
+      const inserted_items: T[] = [];
+      const inserted_wrapped_items: { k: number; v: T }[] = [];
+      const inserted_idx: DerivedRef<number>[] = [];
       for (let i = 0; i < items.length; i++) {
-        const child = items[i];
-        // Create computed index that depends on `each`
-        const idx = create_idx(child);
-        state.items.splice(index + i, 0, child);
-        _original_items.splice(index + i, 0, child);
-        _index_computed.splice(index + i, 0, idx);
-        const res = render(child, idx);
-        inserted_elements.push(res);
-        state.children.splice(index + i, 0, res);
-        // _elements.splice(index + i, 0, res.node);
-        // _$children.splice(index + i, 0, res.trackElm || res.elm);
-        // if (res.elm) {
-        //   // host.appendChild($fragment, res.elm);
-        //   $fragment.appendChild(res.elm);
-        // }
+        const item = items[i];
+        const wrapped_item = { k: methods.unique_id(), v: item };
+        const idx = methods.create_idx(wrapped_item);
+        console.log(
+          "[primitive]for - insert items",
+          isRef(props.each) ? props.each.value : props.each,
+          item,
+          idx.value,
+        );
+        inserted_wrapped_items.push(wrapped_item);
+        inserted_items.push(item);
+        inserted_idx.push(idx);
+        const child_tmp = props.render(item, idx);
+        const child = (() => {
+          if (isElement(child_tmp)) {
+            return child_tmp;
+          }
+          if (isRef(child_tmp)) {
+            return Txt(child_tmp);
+          }
+          if (typeof child_tmp === "function") {
+          }
+          if (child_tmp) {
+            return Txt(child_tmp);
+          }
+          return null;
+        })();
+        inserted_elements[i] = child;
       }
-
+      state.wrapped_items.splice(index, 0, ...inserted_wrapped_items);
+      state.items.splice(index, 0, ...inserted_items);
+      state.idx_arr.splice(index, 0, ...inserted_idx);
+      state.children.splice(index, 0, ...inserted_elements);
       if ($elm && typeof $elm.insert === "function") {
         $elm.insert(index, inserted_elements);
       }
-
-      // const $base = _$children[index] || anchor;
-      // // const $parent = host.getParentNode(anchor);
-      // const $parent = anchor.getParentNode();
-
-      // if (!$parent) return;
-
-      // const $fragment = safeCreateDocumentFragment();
-
-      // $parent.insertBefore($fragment, $base);
     },
     /** 从指定下标移除 n 个元素 */
     remove(index: number, count: number) {
+      console.log("[primitive]for - remove", index, count, state.idx_arr);
+      const removed_idx: DerivedRef<number>[] = [];
       for (let i = 0; i < count; i += 1) {
-        // const elm = _$children[index];
-        // const $pa = elm.getParentNode();
-        // if (elm && $pa === $parent) {
-        //   try {
-        //     // host.removeChild($parent, elm);
-        //     $parent.removeChild(elm);
-        //   } catch (e) {
-        //     // ignore
-        //   }
-        // }
-        const item = state.items[index];
+        const item = state.items[index + i];
         if (_existing_map.has(item)) {
           _existing_map.delete(item);
         }
-        state.children.splice(index, 1);
-        state.items.splice(index, 1);
-        _elements.splice(index, 1);
-        _$children.splice(index, 1);
-        _original_items.splice(index, 1);
-        _index_computed.splice(index, 1);
+        console.log(
+          "[primitive]for - remove in loop",
+          index + i,
+          state.idx_arr[index + i],
+        );
+        removed_idx.push(state.idx_arr[index + i]);
       }
-
+      console.log("[primitive]for - remove before destroy idx", removed_idx);
+      for (const idx of removed_idx) {
+        idx.destroy();
+      }
+      state.wrapped_items.splice(index, count);
+      state.items.splice(index, count);
+      state.idx_arr.splice(index, count);
+      state.children.splice(index, count);
       if ($elm && typeof $elm.remove === "function") {
         $elm.remove(index, count);
       }
@@ -249,11 +269,9 @@ export function For<T>(
         arr.splice(to, 0, item);
       };
       splice_arr(state.items);
+      splice_arr(state.wrapped_items);
       splice_arr(state.children);
-      splice_arr(_elements);
-      splice_arr(_$children);
-      splice_arr(_original_items);
-      splice_arr(_index_computed);
+      splice_arr(state.idx_arr);
 
       // console.log('[]For move', $elm);
       if ($elm && typeof $elm.move === "function") {
@@ -276,11 +294,9 @@ export function For<T>(
         arr[indexB] = tmp;
       };
       swap_arr(state.items);
+      swap_arr(state.wrapped_items);
       swap_arr(state.children);
-      swap_arr(_elements);
-      swap_arr(_$children);
-      swap_arr(_original_items);
-      swap_arr(_index_computed);
+      swap_arr(state.idx_arr);
 
       if ($elm && typeof $elm.swap === "function") {
         $elm.swap(indexA, indexB);
@@ -297,24 +313,25 @@ export function For<T>(
         "items, current:",
         state.items.length,
       );
-      const new_items = v;
+      const new_wrapped_items = v.map((item) => ({
+        k: methods.unique_id(),
+        v: item,
+      }));
       const prev_items = state.items;
-      const prev_elements = _elements;
-      const prev_children = _$children;
-      const prev_original_items = _original_items;
-      const prev_index_computed = _index_computed;
+      const prev_elements = state.children;
+      const prev_index_computed = state.idx_arr;
 
       // const $parent = anchor.getParentNode();
       // if (!$parent) return;
 
       // 1. Prepare target state
       const new_elements: (TimelessElement | null)[] = new Array(
-        new_items.length,
+        new_wrapped_items.length,
       );
       // const new_children: (any | null)[] = new Array(new_items.length);
       // const new_original_items: T[] = new Array(new_items.length);
       const new_index_computed: DerivedRef<number>[] = new Array(
-        new_items.length,
+        new_wrapped_items.length,
       );
 
       // 2. Index old items for O(1) lookup
@@ -336,8 +353,8 @@ export function For<T>(
       const moved_nodes: { from: number; to: number }[] = [];
 
       // Iterate new items -> Determine Reused vs Added
-      for (let i = 0; i < new_items.length; i++) {
-        const new_item = new_items[i];
+      for (let i = 0; i < new_wrapped_items.length; i++) {
+        const new_item = new_wrapped_items[i];
         const k =
           props.key && new_item ? (new_item as any)[props.key] : new_item;
         const prev_indices = old_map.get(k);
@@ -374,13 +391,10 @@ export function For<T>(
           }
         } else {
           // Added (New) - create new computed index and render
-          const idx_computed = create_idx(new_item);
-          // new_original_items[i] = new_item;
+          const idx_computed = methods.create_idx(new_item);
           new_index_computed[i] = idx_computed;
-          const res = render(new_item, idx_computed);
+          const res = props.render(new_item.v, idx_computed);
           state.children[i] = res;
-          // new_elements[i] = res.node;
-          // new_children[i] = res.trackElm || res.elm;
           added_nodes.push({ idx: i, element: res });
         }
       }
@@ -465,87 +479,17 @@ export function For<T>(
       // 5. Update State
       // Use slice() to create a copy, preventing _values from referencing _local_value directly
       // This ensures prev_items reflects the state before reverse/sort operations
-      state.items = new_items.slice();
+      state.wrapped_items = new_wrapped_items.slice();
+      state.items = new_wrapped_items.slice().map((item) => item.v);
       state.children = new_elements;
-      // _elements = new_elements;
-      // _$children = new_children;
-      // _original_items = new_original_items;
-      _index_computed = new_index_computed;
+      state.idx_arr = new_index_computed;
 
       return diff;
     },
   };
 
-  if (isArrayRef(each)) {
-    each.subscribe({
-      // @ts-ignore
-      onPatch(action: {
-        type: "insert" | "delete" | "update" | "move" | "swap";
-        index: number;
-        item: T;
-        items?: T[];
-        deleteCount?: number;
-        from?: number;
-        to?: number;
-      }) {
-        if (!state.rendered) {
-          return;
-        }
-        console.log("[primitive]For - ctx.onPatch - handle patch", action);
-        if (action.type === "insert" && action.items !== undefined) {
-          methods.insert(action.index, action.items);
-        }
-        if (action.type === "delete" && action.deleteCount !== undefined) {
-          methods.remove(action.index, action.deleteCount);
-        }
-        // if (action.type === "update") {
-        //   methods.update(action.index, action.item);
-        // }
-        if (
-          action.type === "move" &&
-          action.from !== undefined &&
-          action.to !== undefined
-        ) {
-          methods.move(action.from, action.to);
-        }
-        if (
-          action.type === "swap" &&
-          action.from !== undefined &&
-          action.to !== undefined
-        ) {
-          methods.swap(action.from, action.to);
-        }
-      },
-      onChange(v: any) {
-        console.log("[primitive]For - ctx.onChange", v, state.rendered);
-        // if (!state.rendered) {
-        //   return;
-        // }
-        methods.refresh(v);
-      },
-    });
-  }
-
-  const _children = isRef(each) ? each.value : each;
-  for (let i = 0; i < _children.length; i += 1) {
-    // const v = _children[i];
-    // const idx = _children.indexOf(v);
-    // const r = render(v, ref(idx));
-    // if (r) {
-    //   state.children.push(r);
-    // }
-    const child = _children[i];
-    state.items[i] = child;
-    // const idx = _children.indexOf(child);
-    const idx_computed = create_idx(child);
-    // const res = render_result(() => );
-    const res = render(child, idx_computed);
-    state.children.push(res);
-    _original_items[i] = child;
-    _index_computed[i] = idx_computed;
-    // _elements[i] = res.node;
-    // _$children[i] = res.trackElm || res.elm;
-  }
+  methods.subscribe_value();
+  methods.build_children();
 
   return {
     t: "for",
@@ -555,95 +499,14 @@ export function For<T>(
     set $elm(v) {
       $elm = v;
     },
-    state,
+    state: {
+      items: state.items,
+    },
     children: state.children,
-    // hydrate(start_dom: any, parent_dom?: any) {
-    //   const nodes = (isRef(each) ? each.value : each) || [];
-
-    //   // Create anchor if not already created
-    //   if (!$anchor) {
-    //     // anchor = safeCreateTextNode("");
-    //     $elm = $anchor;
-    //   }
-
-    //   let cur_dom = start_dom;
-
-    //   for (let i = 0; i < nodes.length; i += 1) {
-    //     const item = nodes[i];
-    //     state.items[i] = item;
-    //     // Create computed index that depends on `each`
-    //     _original_items[i] = item;
-    //     const idx_computed = create_idx(item);
-    //     _index_computed[i] = idx_computed;
-    //     let res = render(item, idx_computed);
-    //     // if (typeof res === "function") {
-    //     //   res = res();
-    //     // }
-
-    //     if (!res) {
-    //       _elements[i] = null;
-    //       continue;
-    //     }
-
-    //     if (isElement(res)) {
-    //       _elements[i] = res;
-    //       if (cur_dom && typeof (res as any).hydrate === "function") {
-    //         (res as any).hydrate(cur_dom);
-    //         _$children[i] = res.$elm;
-    //         // const $sibling = (() => {
-    //         //   if (res.$elm) {
-    //         //     return res.$elm.getNextSibling();
-    //         //   }
-    //         //   return cur_dom.getNextSibling();
-    //         // })();
-    //         // cur_dom = $sibling;
-    //       } else if (cur_dom) {
-    //         res.$elm = cur_dom;
-    //         // res.render();
-    //         // _$children[i] = res.$elm;
-    //         // cur_dom = cur_dom.getNextSibling();
-    //       }
-    //     }
-    //   }
-
-    //   const $parent = (() => {
-    //     if (parent_dom) {
-    //       return parent_dom;
-    //     }
-    //     if (start_dom) {
-    //       return start_dom.getParentNode();
-    //     }
-    //     return null;
-    //   })();
-    //   if ($parent) {
-    //     if (cur_dom) {
-    //       // host.insertBefore($parent, anchor, currentDom);
-    //       $parent.insertBefore(cur_dom, $anchor);
-    //     } else {
-    //       // host.appendChild($parent, anchor);
-    //       $parent.appendChild($anchor);
-    //     }
-    //   }
-
-    //   state.rendered = true;
-
-    //   if (onMounted) {
-    //     onMounted({ target: $anchor });
-    //   }
-
-    //   // Call onMounted for children
-    //   for (let i = 0; i < _elements.length; i += 1) {
-    //     const el = _elements[i];
-    //     if (isElement(el) && el.onMounted) {
-    //       el.onMounted({ target: el.$elm });
-    //     }
-    //   }
-    //   return $anchor;
-    // },
     onMounted(event: MountedEvent) {
       state.rendered = true;
-      if (onMounted) {
-        onMounted(event);
+      if (props.onMounted) {
+        props.onMounted(event);
       }
       for (const child of state.children) {
         if (isElement(child) && child.onMounted) {
@@ -652,17 +515,17 @@ export function For<T>(
       }
     },
     beforeUnmounted() {
-      if (beforeUnmounted) {
-        beforeUnmounted();
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
       }
     },
     onUnmounted() {
       state.rendered = true;
-      if (onUnmounted) {
-        onUnmounted();
+      if (props.onUnmounted) {
+        props.onUnmounted();
       }
-      for (let i = 0; i < _elements.length; i += 1) {
-        const component = _elements[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const component = state.children[i];
         if (!component) {
           continue;
         }
@@ -696,10 +559,8 @@ export function For<T>(
 
       state.rendered = false;
       state.items = [];
-      _elements = [];
-      _$children = [];
-      _original_items = [];
-      _index_computed = [];
+      state.children = [];
+      state.idx_arr = [];
     },
   };
 }

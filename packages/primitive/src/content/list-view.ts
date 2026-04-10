@@ -606,14 +606,14 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
         const node = state.children[i];
         if (isElement(node)) {
           // 如果是 Portal 组件，调用其 cleanup 方法
-          if (node.t === "portal" && typeof node.cleanup === "function") {
-            // console.log("[View] calling cleanup on Portal child");
-            node.cleanup();
-          } else if (node.onUnmounted) {
-            // 否则调用标准的 onUnmounted
-            // console.log("[View] calling onUnmounted on child:", node.t);
-            node.onUnmounted();
-          }
+          // if (node.t === "portal" && typeof node.cleanup === "function") {
+          //   // console.log("[View] calling cleanup on Portal child");
+          //   node.cleanup();
+          // } else if (node.onUnmounted) {
+          //   // 否则调用标准的 onUnmounted
+          //   // console.log("[View] calling onUnmounted on child:", node.t);
+          //   node.onUnmounted();
+          // }
         }
       }
       // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);

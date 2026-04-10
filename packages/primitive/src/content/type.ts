@@ -1,10 +1,9 @@
-import { DerivedRef, Ref, Signal } from "@timeless/reactive";
+import { DerivedRef, Ref } from "@timeless/reactive";
 
-import { ViewStyleProperties } from "@/style";
+import { VNodeView } from "@/vnode/view";
 import { MountedEvent } from "@/event";
 
 import { TimelessLazyComponent } from "./lazy-view";
-import { VNodeView } from "@/vnode/view";
 
 export type ViewPropValue = string | number | boolean | undefined | null;
 export type ViewAttributes = Record<string, any>;
@@ -42,8 +41,8 @@ export interface TimelessElement<T = any, Elm = any> {
     onAnimationEnd?: (e: AnimationEvent) => void;
   };
   a11y?: VNodeA11y;
-  hydrate?(existingDom: any): any;
-  cleanup?: () => void;
+  // hydrate?(existingDom: any): any;
+  // cleanup?: () => void;
   onMounted?(event: MountedEvent): void;
   beforeUnmounted?(): void;
   onUnmounted?(): void;

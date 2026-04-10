@@ -11,16 +11,16 @@ export function Txt(
     value: "",
   };
   const methods = {
-    setup_value_subscription() {
+    subscribe_value() {
       if (isRef(value)) {
         value.subscribe({
-          onChange(v: any) {
-            console.log("[]Text handle value changed", v);
+          onChange(v) {
+            // console.log("[]Text handle value changed", v === state.value);
             if (v === state.value) {
               return;
             }
             // Always update local value to stay in sync with ref
-            state.value = v;
+            state.value = String(v);
             // Only update DOM if element exists (component is mounted)
             if ($elm && typeof $elm.setContent === "function") {
               // host.setTextContent($elm, _local_value);
@@ -28,14 +28,14 @@ export function Txt(
             }
           },
         });
-        state.value = value.value as string;
+        state.value = String(value.value);
       } else {
-        state.value = value as string;
+        state.value = String(value);
       }
     },
   };
 
-  methods.setup_value_subscription();
+  methods.subscribe_value();
 
   return {
     t: "text",
@@ -45,26 +45,10 @@ export function Txt(
     set $elm(v) {
       $elm = v;
     },
-    state,
-    children: [],
-    // render() {
-    //   if (state.rendered) {
-    //     return $elm;
-    //   }
-    //   state.rendered = true;
-    //   // $elm = safeCreateTextNode(state.value);
-    //   setup_value_subscription();
-    //   return $elm;
-    // },
-    hydrate(existingDom: any) {
-      if (state.rendered) {
-        return $elm;
-      }
-      state.rendered = true;
-      $elm = existingDom;
-      methods.setup_value_subscription();
-      return $elm;
+    state: {
+      value: state.value,
     },
+    children: [],
     onMounted() {},
     beforeUnmounted() {},
     onUnmounted() {
