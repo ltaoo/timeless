@@ -39,22 +39,17 @@ export function DOMFragment(props: {
       return $fragment;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
-      if ($elm instanceof Text) {
-        return;
-      }
-      if (!elm.children) {
-        return;
-      }
-      const $children = Array.from($elm.childNodes);
-      common$.methods.set$elm($elm);
-      for (let i = 0; i < elm.children.length; i += 1) {
-        const child = elm.children[i];
-        if (child) {
-          hydrate_node(child, $children[i] as HTMLElement | Text);
-        }
-      }
       const $anchor = document.createTextNode("");
       common$.methods.set$elm($anchor);
+      if (elm.children) {
+        const $children = Array.from($elm.childNodes);
+        for (let i = 0; i < elm.children.length; i += 1) {
+          const child = elm.children[i];
+          if (child) {
+            hydrate_node(child, $children[i] as HTMLElement | Text);
+          }
+        }
+      }
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

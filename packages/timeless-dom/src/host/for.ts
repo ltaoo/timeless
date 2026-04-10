@@ -53,9 +53,6 @@ export function DOMFor(props: {
       return $fragment;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
-      if ($elm instanceof Text) {
-        return;
-      }
       const $anchor = document.createTextNode("");
       common$.methods.set$elm($anchor);
       if (elm.children) {

@@ -39,9 +39,6 @@ export function DOMShow(props: {
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
       console.log("[timeless-dom] show hydrate", elm, $elm);
-      if ($elm instanceof Text) {
-        return;
-      }
       const $anchor = document.createTextNode("");
       common$.methods.set$elm($anchor);
       if (elm.children) {

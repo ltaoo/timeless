@@ -47,14 +47,13 @@ export function DOMView(props: {
       // console.log("[DOMView] hydrate", elm.children, $elm.childNodes);
       common$.methods.set$elm($elm);
       common$.methods.setupEventListener(elm.events);
-      if (!elm.children) {
-        return;
-      }
-      const $children = Array.from($elm.childNodes);
-      for (let i = 0; i < elm.children.length; i += 1) {
-        const child = elm.children[i];
-        if (child) {
-          hydrate_node(child, $children[i] as HTMLElement | Text);
+      if (elm.children) {
+        const $children = Array.from($elm.childNodes);
+        for (let i = 0; i < elm.children.length; i += 1) {
+          const child = elm.children[i];
+          if (child) {
+            hydrate_node(child, $children[i] as HTMLElement | Text);
+          }
         }
       }
     },

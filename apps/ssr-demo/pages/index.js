@@ -49,285 +49,291 @@ export default function Page({ data }) {
   const fruits = refarr(data.fruits);
   const selectedFruit = ref(data.selectedFruit);
 
-  return View({ class: "app", style: appStyle }, [
-    // Header
-    // View({ style: titleStyle }, [data.message]),
+  return View(
+    {
+      class: "app",
+      style: appStyle,
+    },
+    [
+      // Header
+      View({ style: titleStyle }, [data.message]),
 
-    // View({ style: infoStyle }, [
-    //   "This page is server-rendered and hydrated on the client.",
-    // ]),
+      View({ style: infoStyle }, [
+        "This page is server-rendered and hydrated on the client.",
+      ]),
 
-    // Counter Section
-    // View({ style: sectionStyle }, [
-    //   View({ style: subtitleStyle }, ["Counter"]),
-    //   View({ style: counterStyle }, [
-    //     Button(
-    //       {
-    //         style: buttonStyle,
-    //         onClick() {
-    //           count.as((v) => v - 1);
-    //         },
-    //       },
-    //       ["-"],
-    //     ),
-    //     View({ as: "span", style: countStyle }, [count]),
-    //     Button(
-    //       {
-    //         style: buttonStyle,
-    //         onClick() {
-    //           count.as((v) => v + 2);
-    //         },
-    //       },
-    //       ["+"],
-    //     ),
-    //   ]),
-    // ]),
-    // Button(
-    //   {
-    //     onClick() {
-    //       visible_.as((v) => !v);
-    //     },
-    //   },
-    //   ["Toggle Content"],
-    // ),
-    // Button(
-    //   {
-    //     onClick() {
-    //       content.as((prev) => prev + "_new");
-    //     },
-    //   },
-    //   ["update Content"],
-    // ),
-    // Show({
-    //   when: visible_,
-    //   ok() {
-    //     return [View({}, [content])];
-    //   },
-    // }),
-
-    // Mouse Events Section
-    // View({ as: "section", style: sectionStyle }, [
-    //   View({ as: "h2", style: subtitleStyle }, ["Mouse Events Test"]),
-    //   View({ as: "p", style: infoStyle }, [
-    //     "Hover over the boxes to test mouseenter/mouseleave events:",
-    //   ]),
-    //   View({ style: hoverBoxContainerStyle }, [
-    //     View(
-    //       {
-    //         style: hoverBoxStyle,
-    //         onMouseEnter() {
-    //           console.log("Box 1: mouseenter triggered");
-    //           hoverBox1.as(true);
-    //         },
-    //         onMouseLeave() {
-    //           console.log("Box 1: mouseleave triggered");
-    //           hoverBox1.as(false);
-    //         },
-    //       },
-    //       [
-    //         Show({
-    //           when: hoverBox1,
-    //           ok() {
-    //             return ["Hovering!"];
-    //           },
-    //           else() {
-    //             return ["Hover me"];
-    //           },
-    //         }),
-    //       ],
-    //     ),
-    //     View(
-    //       {
-    //         style: hoverBoxStyle,
-    //         onMouseEnter() {
-    //           console.log("Box 2: mouseenter triggered");
-    //           hoverBox2.as(true);
-    //         },
-    //         onMouseLeave() {
-    //           console.log("Box 2: mouseleave triggered");
-    //           hoverBox2.as(false);
-    //         },
-    //       },
-    //       [
-    //         Show({
-    //           when: hoverBox2,
-    //           ok() {
-    //             return ["Hovering!"];
-    //           },
-    //           else() {
-    //             return ["Hover me"];
-    //           },
-    //         }),
-    //       ],
-    //     ),
-    //   ]),
-    // ]),
-
-    // List Section
-    View({ style: sectionStyle }, [
-      View({ style: subtitleStyle }, ["Fruit List"]),
+      // Counter Section
+      View({ style: sectionStyle }, [
+        View({ style: subtitleStyle }, ["Counter"]),
+        View({ style: counterStyle }, [
+          Button(
+            {
+              style: buttonStyle,
+              onClick() {
+                count.as((v) => v - 1);
+              },
+            },
+            ["-"],
+          ),
+          View({ as: "span", style: countStyle }, [count]),
+          Button(
+            {
+              style: buttonStyle,
+              onClick() {
+                count.as((v) => v + 2);
+              },
+            },
+            ["+"],
+          ),
+        ]),
+      ]),
       Button(
         {
-          style: toggleButtonStyle,
           onClick() {
-            showList.as((v) => !v);
+            visible_.as((v) => !v);
           },
         },
-        ["Toggle List"],
+        ["Toggle Content"],
+      ),
+      Button(
+        {
+          onClick() {
+            content.as((prev) => prev + "_new");
+          },
+        },
+        ["update Content"],
       ),
       Show({
-        when: showList,
+        when: visible_,
         ok() {
-          return [
-            View({ style: listStyle }, [
-              For({
-                each: fruits,
-                render(item, idx) {
-                  const itemStyle = computed(selectedFruit, (sel) => {
-                    const selected = sel === item;
-                    return {
-                      cursor: "pointer",
-                      background: selected ? "#e0f2fe" : "white",
-                      "border-color": selected ? "#38bdf8" : "#e5e7eb",
-                    };
-                  });
-                  // console.log("[]fruit render");
-                  return View(
-                    {
-                      style: styleNames([listItemStyle, itemStyle]),
-                      onClick() {
-                        selectedFruit.as(item);
-                      },
-                    },
-                    [
-                      computed(idx, (t) => `${t + 1}、`),
-                      View({ as: "span" }, [item]),
-                    ],
-                  );
-                },
-              }),
-            ]),
-          ];
+          return [View({}, [content])];
         },
       }),
-      View({ style: buttonGroupStyle }, [
-        Button(
-          {
-            style: buttonStyle,
-            onClick() {
-              const names = ["Mango", "Grape", "Peach", "Kiwi", "Pear"];
-              const pick = names[Math.floor(Math.random() * names.length)];
-              fruits.push(pick);
+
+      // Mouse Events Section
+      View({ as: "section", style: sectionStyle }, [
+        View({ as: "h2", style: subtitleStyle }, ["Mouse Events Test"]),
+        View({ as: "p", style: infoStyle }, [
+          "Hover over the boxes to test mouseenter/mouseleave events:",
+        ]),
+        View({ style: hoverBoxContainerStyle }, [
+          View(
+            {
+              style: hoverBoxStyle,
+              onMouseEnter() {
+                console.log("Box 1: mouseenter triggered");
+                hoverBox1.as(true);
+              },
+              onMouseLeave() {
+                console.log("Box 1: mouseleave triggered");
+                hoverBox1.as(false);
+              },
             },
-          },
-          ["Add Fruit"],
-        ),
-        Button(
-          {
-            style: buttonStyle,
-            onClick: () => {
-              if (fruits.length > 0) {
-                fruits.pop();
-              }
+            [
+              Show({
+                when: hoverBox1,
+                ok() {
+                  return ["Hovering!"];
+                },
+                else() {
+                  return ["Hover me"];
+                },
+              }),
+            ],
+          ),
+          View(
+            {
+              style: hoverBoxStyle,
+              onMouseEnter() {
+                console.log("Box 2: mouseenter triggered");
+                hoverBox2.as(true);
+              },
+              onMouseLeave() {
+                console.log("Box 2: mouseleave triggered");
+                hoverBox2.as(false);
+              },
             },
-          },
-          ["Remove Last"],
-        ),
+            [
+              Show({
+                when: hoverBox2,
+                ok() {
+                  return ["Hovering!"];
+                },
+                else() {
+                  return ["Hover me"];
+                },
+              }),
+            ],
+          ),
+        ]),
       ]),
-      // View(
-      //   {
-      //     style: {
-      //       margin: "12px 0 8px",
-      //       color: "#666",
-      //       "font-size": "14px",
-      //     },
-      //   },
-      //   ["Click an item to select, then reorder:"],
-      // ),
-      // View({ style: buttonGroupStyle }, [
-      //   Button(
-      //     {
-      //       style: buttonStyle,
-      //       onClick() {
-      //         const idx = fruits.indexOf(selectedFruit);
-      //         console.log("up", idx);
-      //         if (idx > 0) {
-      //           fruits.up(idx);
-      //           console.log(fruits.value);
-      //         }
-      //       },
-      //     },
-      //     ["↑ Up"],
-      //   ),
-      //   Button(
-      //     {
-      //       style: buttonStyle,
-      //       onClick() {
-      //         const idx = fruits.indexOf(selectedFruit);
-      //         console.log("down", idx);
-      //         if (idx < fruits.length - 1) {
-      //           fruits.down(idx);
-      //           console.log(fruits.value);
-      //         }
-      //       },
-      //     },
-      //     ["↓ Down"],
-      //   ),
-      //   View(
-      //     {
-      //       style: buttonStyle,
-      //       onClick() {
-      //         const idx = fruits.indexOf(selectedFruit.value);
-      //         fruits.moveToFirst(idx);
-      //       },
-      //     },
-      //     ["⇤ First"],
-      //   ),
-      //   Button(
-      //     {
-      //       style: buttonStyle,
-      //       onClick() {
-      //         const idx = fruits.indexOf(selectedFruit.value);
-      //         fruits.moveToLast(idx);
-      //       },
-      //     },
-      //     ["Last ⇥"],
-      //   ),
-      // ]),
-      // View({ style: buttonGroupStyle }, [
-      //   Button(
-      //     {
-      //       style: buttonStyle,
-      //       onClick() {
-      //         const idx = fruits.indexOf(selectedFruit.value);
-      //         if (idx < fruits.length - 1) {
-      //           fruits.swap(idx, idx + 1);
-      //         }
-      //       },
-      //     },
-      //     ["Swap with Next"],
-      //   ),
-      //   Button(
-      //     {
-      //       style: buttonStyle,
-      //       onClick() {
-      //         fruits.shuffle();
-      //       },
-      //     },
-      //     ["Shuffle"],
-      //   ),
-      //   Button(
-      //     {
-      //       style: buttonStyle,
-      //       onClick() {
-      //         fruits.reverse();
-      //       },
-      //     },
-      //     ["Reverse"],
-      //   ),
-      // ]),
-    ]),
-  ]);
+
+      // List Section
+      View({ style: sectionStyle }, [
+        View({ style: subtitleStyle }, ["Fruit List"]),
+        Button(
+          {
+            style: toggleButtonStyle,
+            onClick() {
+              showList.as((v) => !v);
+            },
+          },
+          ["Toggle List"],
+        ),
+        Show({
+          when: showList,
+          ok() {
+            return [
+              View({ style: listStyle }, [
+                For({
+                  each: fruits,
+                  render(item, idx) {
+                    const itemStyle = computed(selectedFruit, (sel) => {
+                      const selected = sel === item;
+                      return {
+                        cursor: "pointer",
+                        background: selected ? "#e0f2fe" : "white",
+                        "border-color": selected ? "#38bdf8" : "#e5e7eb",
+                      };
+                    });
+                    // console.log("[]fruit render");
+                    return View(
+                      {
+                        style: styleNames([listItemStyle, itemStyle]),
+                        onClick() {
+                          selectedFruit.as(item);
+                        },
+                      },
+                      [
+                        computed(idx, (t) => `${t + 1}、`),
+                        View({ as: "span" }, [item]),
+                      ],
+                    );
+                  },
+                }),
+              ]),
+            ];
+          },
+        }),
+        View({ style: buttonGroupStyle }, [
+          Button(
+            {
+              style: buttonStyle,
+              onClick() {
+                const names = ["Mango", "Grape", "Peach", "Kiwi", "Pear"];
+                const pick = names[Math.floor(Math.random() * names.length)];
+                fruits.push(pick);
+              },
+            },
+            ["Add Fruit"],
+          ),
+          Button(
+            {
+              style: buttonStyle,
+              onClick: () => {
+                if (fruits.length > 0) {
+                  fruits.pop();
+                }
+              },
+            },
+            ["Remove Last"],
+          ),
+        ]),
+        View(
+          {
+            style: {
+              margin: "12px 0 8px",
+              color: "#666",
+              "font-size": "14px",
+            },
+          },
+          ["Click an item to select, then reorder:"],
+        ),
+        View({ style: buttonGroupStyle }, [
+          Button(
+            {
+              style: buttonStyle,
+              onClick() {
+                const idx = fruits.indexOf(selectedFruit);
+                console.log("up", idx);
+                if (idx > 0) {
+                  fruits.up(idx);
+                  console.log(fruits.value);
+                }
+              },
+            },
+            ["↑ Up"],
+          ),
+          Button(
+            {
+              style: buttonStyle,
+              onClick() {
+                const idx = fruits.indexOf(selectedFruit);
+                console.log("down", idx);
+                if (idx < fruits.length - 1) {
+                  fruits.down(idx);
+                  console.log(fruits.value);
+                }
+              },
+            },
+            ["↓ Down"],
+          ),
+          View(
+            {
+              style: buttonStyle,
+              onClick() {
+                const idx = fruits.indexOf(selectedFruit.value);
+                fruits.moveToFirst(idx);
+              },
+            },
+            ["⇤ First"],
+          ),
+          Button(
+            {
+              style: buttonStyle,
+              onClick() {
+                const idx = fruits.indexOf(selectedFruit.value);
+                fruits.moveToLast(idx);
+              },
+            },
+            ["Last ⇥"],
+          ),
+        ]),
+        View({ style: buttonGroupStyle }, [
+          Button(
+            {
+              style: buttonStyle,
+              onClick() {
+                const idx = fruits.indexOf(selectedFruit.value);
+                if (idx < fruits.length - 1) {
+                  fruits.swap(idx, idx + 1);
+                }
+              },
+            },
+            ["Swap with Next"],
+          ),
+          Button(
+            {
+              style: buttonStyle,
+              onClick() {
+                fruits.shuffle();
+              },
+            },
+            ["Shuffle"],
+          ),
+          Button(
+            {
+              style: buttonStyle,
+              onClick() {
+                fruits.reverse();
+              },
+            },
+            ["Reverse"],
+          ),
+        ]),
+      ]),
+    ],
+  );
 }
 
 // Styles

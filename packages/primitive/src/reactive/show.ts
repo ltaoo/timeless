@@ -35,7 +35,7 @@ export function Show(props: ShowProps) {
       return [children];
     },
     build_children_with_condition(condition: boolean) {
-      console.log("build_children_with_condition", condition);
+      // console.log("build_children_with_condition", condition);
       const children: TimelessElement[] = [];
       const next = condition
         ? methods.normalize_children(props.ok())
@@ -76,6 +76,14 @@ export function Show(props: ShowProps) {
             }
             state.value = condition;
             if (!condition) {
+              if (props.else) {
+                const target = methods.build_children_with_condition(condition);
+                state.children = target;
+                if ($elm && typeof $elm.insertChildren === "function") {
+                  $elm.insertChildren(target);
+                }
+                return;
+              }
               state.children = [];
               if ($elm && typeof $elm.removeChildren === "function") {
                 $elm.removeChildren();
