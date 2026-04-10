@@ -1,9 +1,14 @@
-import { isElement, TimelessElement, isRef } from "@timeless/timeless";
+import {
+  isElement,
+  TimelessElement,
+  isRef,
+  VNodeView,
+} from "@timeless/timeless";
 
 import { CanvasHostNode } from "./type";
 import { CanvasDocument } from "./draw";
 
-export interface CanvasFragment {
+export type CanvasFragment = VNodeView<any> & {
   $elm: any;
   methods: {
     unmount(event: {
@@ -22,7 +27,7 @@ export interface CanvasFragment {
   addContent(children: (TimelessElement | null)[]): void;
   removeContent(): void;
   render(elm: TimelessElement): any;
-}
+};
 
 export function CanvasFragment(props: {
   canvas: CanvasDocument;
@@ -72,7 +77,9 @@ export function CanvasFragment(props: {
 
       for (const child of new_instances) {
         if (isElement(child) && child.onMounted) {
-          child.onMounted(child.$elm);
+          child.onMounted({
+            target: child.$elm,
+          });
         }
       }
 

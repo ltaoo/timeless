@@ -1,14 +1,14 @@
-import { TimelessElement } from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { CanvasDocument } from "./draw";
 
-export interface CanvasText {
+export type CanvasText = VNodeView<any> & {
   $elm: any;
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
   setContent: (v: string | number | null) => void;
   render(elm: TimelessElement): any;
-}
+};
 
 export function CanvasText(
   value: string | null,
@@ -32,7 +32,7 @@ export function CanvasText(
       }
     },
     render(elm: TimelessElement) {
-      if (!elm.value) {
+      if (!elm.state.value) {
         return null;
       }
       return $text;

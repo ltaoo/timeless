@@ -1,14 +1,15 @@
-import { isElement, TimelessElement } from "@timeless/timeless";
+import { isElement, TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { CanvasHostNode } from "./type";
 import { CanvasDocument } from "./draw";
 
-export interface CanvasFor {
+export type CanvasFor = VNodeView<any> & {
   $elm: any;
   getChildNodes(): any[];
   isDocumentFragment(): boolean;
   render(elm: TimelessElement): any;
-}
+  hydrate(elm: TimelessElement, $dom: any): void;
+};
 
 export function CanvasFor(props: {
   canvas: CanvasDocument;
@@ -39,6 +40,9 @@ export function CanvasFor(props: {
         }
       }
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: any) {
+      // common$.methods.hydrate(elm, $dom);
     },
   };
 }

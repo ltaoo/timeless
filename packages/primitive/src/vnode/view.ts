@@ -18,9 +18,17 @@ export type VNodeEvent<T> = {
   target: T;
 };
 
+type VNodeViewType =
+  | "view"
+  | "text"
+  | "button"
+  | "input"
+  | "fragment"
+  | "reactive";
+
 export type VNodeView<HostElm = any> = {
   // $elm: HostElm;
-  getType(): "view" | "text" | "button" | "input" | "reactive";
+  getType(): VNodeViewType;
   isDocumentFragment(): boolean;
   getChildren(): VNodeView<any>[];
   setStyle(style: RawViewStyleProperties): void;
@@ -41,6 +49,7 @@ export type VNodeView<HostElm = any> = {
     options?: any,
   ): void;
   render(elm: TimelessElement): any;
+  hydrate(elm: TimelessElement, $dom: HostElm): any;
   /** 构建 */
   appendChildren(children: (TimelessElement | null)[]): any;
   insertChildren(children: (TimelessElement | null)[]): void;

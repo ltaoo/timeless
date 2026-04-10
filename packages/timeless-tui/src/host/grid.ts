@@ -26,13 +26,11 @@ export function TuiGrid(props: {
       return false;
     },
     render(elm: TimelessElement) {
-      if (elm.props) {
-        const cols = (elm.props as any).columns ?? 4;
-        const gap = (elm.props as any).gap ?? 16;
-        ($elm as any).style = {
-          cssText: `display: grid; grid-template-columns: repeat(${cols}, 1fr); gap: ${gap}px;`,
-        };
-      }
+      const cols = elm.state.columns ?? 4;
+      const gap = elm.state.gap ?? 16;
+      $elm.style = {
+        cssText: `display: grid; grid-template-columns: repeat(${cols}, 1fr); gap: ${gap}px;`,
+      };
       if (elm.children) {
         for (let child of elm.children) {
           if (!child) {

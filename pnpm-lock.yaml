@@ -412,9 +412,9 @@ importers:
       '@timeless/timeless':
         specifier: workspace:^
         version: link:../timeless
-      '@timeless/timeless-dom':
+      '@timeless/timeless-ssr':
         specifier: workspace:^
-        version: link:../timeless-dom
+        version: link:../timeless-ssr
       cac:
         specifier: ^6.7.14
         version: 6.7.14
@@ -681,6 +681,15 @@ importers:
 
   packages/timeless-native:
     dependencies:
+      '@timeless/timeless':
+        specifier: workspace:*
+        version: link:../timeless
+
+  packages/timeless-ssr:
+    dependencies:
+      '@timeless/svg':
+        specifier: workspace:*
+        version: link:../svg
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless

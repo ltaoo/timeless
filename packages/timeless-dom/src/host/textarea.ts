@@ -9,6 +9,7 @@ export type DOMTextarea = VNodeView<HTMLTextAreaElement> & {
   focus(): void;
   blur(): void;
   render(elm: TimelessElement): HTMLTextAreaElement;
+  hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMTextarea(props: {
@@ -48,7 +49,7 @@ export function DOMTextarea(props: {
       // $elm.style.backgroundColor = "transparent";
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
-      common$.methods.applyState(elm.state);
+      common$.methods.applyState(elm.state, { initial: true });
       $elm.value = elm.state.value;
       if (elm.state.id) {
         $elm.id = elm.state.id;
@@ -82,6 +83,9 @@ export function DOMTextarea(props: {
         }
       }
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: any) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren() {},

@@ -99,8 +99,8 @@ export function NativeView(props: {
       delete $elm.listeners[type];
     },
     render(elm: TimelessElement) {
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state.style) {
+        methods.setStyle(elm.state.style);
       }
       if (elm.events) {
         methods.setupEventListener(elm.events);

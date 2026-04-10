@@ -5,6 +5,7 @@ import { HostElement } from "./box";
 export type DOMView = VNodeView<HTMLDivElement> & {
   t: "view";
   render(elm: TimelessElement): HTMLDivElement;
+  hydrate(elm: TimelessElement, $e: HTMLDivElement): void;
 };
 
 export function CommonFragment() {}
@@ -13,17 +14,14 @@ export function DOMView(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
 }): DOMView {
   const t = "view";
-  const $elm = document.createElement("div");
-  const common$ = HostElement({ $elm, t, build: props.build });
+  let $elm: HTMLDivElement;
+  const common$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
     t,
     getType() {
       return "view";
     },
-    // get $elm() {
-    //   return $elm;
-    // },
     isDocumentFragment() {
       return true;
     },
@@ -36,11 +34,18 @@ export function DOMView(props: {
     addEventListener: common$.methods.addEventListener,
     removeEventListener: common$.methods.removeEventListener,
     render(elm: TimelessElement) {
-      common$.methods.applyState(elm.state);
+      $elm = document.createElement("div");
+      common$.methods.set$elm($elm);
+      common$.methods.applyState(elm.state, { initial: true });
       const $fragment = common$.methods.render(elm.children);
       common$.methods.setupEventListener(elm.events);
       $elm.appendChild($fragment);
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $e: HTMLDivElement) {
+      $elm = $e;
+      common$.methods.set$elm($elm);
+      common$.methods.setupEventListener(elm.events);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

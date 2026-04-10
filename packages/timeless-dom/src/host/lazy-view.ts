@@ -4,8 +4,9 @@ import { HostElement } from "./box";
 
 export type DOMLazyView = VNodeView<Text> & {
   t: "lazy-view";
-  render(elm: TimelessElement): DocumentFragment;
   replaceChildren(children: (TimelessElement | null)[]): void;
+  render(elm: TimelessElement): DocumentFragment;
+  hydrate(elm: TimelessElement, $dom: Text): void;
 };
 
 export function DOMLazyView(props: {
@@ -35,6 +36,9 @@ export function DOMLazyView(props: {
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
+    },
+    hydrate(elm: TimelessElement, $dom: Text) {
+      // common$.methods.hydrate(elm, $dom);
     },
     replaceChildren(children: (TimelessElement | null)[]) {
       this.removeChildren();

@@ -270,6 +270,8 @@ export function Radio(props: RadioProps) {
     set $elm(value: any) {
       $elm = value;
     },
+    state: {},
+    children: [],
     render() {
       return null;
     },

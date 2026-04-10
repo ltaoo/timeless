@@ -207,21 +207,24 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
     // Helper: setup bindings (attributes, class, style, events)
     setup_value_subscribe() {
+      console.log("attributes", attributes);
       if (attributes) {
         Object.keys(attributes).forEach((k) => {
           const vv = attributes[k];
           if (isRef(vv)) {
             vv.subscribe({
               onChange(v) {
+                state.attributes[k] = v as string;
                 if ($elm) {
                   methods.apply_attr(k, v);
                 }
               },
             });
-            methods.apply_attr(k, vv.value);
+            state.attributes[k] = vv.value;
             return;
           }
-          methods.apply_attr(k, vv);
+          // methods.apply_attr(k, vv);
+          state.attributes[k] = vv;
         });
       }
       Object.keys(dataset).forEach((k) => {
@@ -230,17 +233,16 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         if (isRef(vv)) {
           vv.subscribe({
             onChange(v) {
+              state.attributes[attr_name] = v as string;
               if ($elm) {
                 methods.apply_attr(attr_name, v);
               }
             },
           });
-          // methods.apply_attr(attr_name, vv.value);
           state.attributes[attr_name] = vv.value;
           return;
         }
         state.attributes[attr_name] = vv;
-        // methods.apply_attr(attr_name, vv);
       });
 
       if (cls !== undefined) {
@@ -249,6 +251,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v: any) {
+              state.styleSet = v.split(" ");
               if ($elm) {
                 $elm.setStyleSet(v.split(" "));
               }
@@ -258,6 +261,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v) {
+              state.styleSet = v as string[];
               if ($elm) {
                 $elm.setStyleSet(v);
               }
@@ -275,6 +279,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
             if (isRef(sv)) {
               sv.subscribe({
                 onChange(v) {
+                  state.style[k] = v as RawViewStyleProperties;
                   if ($elm) {
                     $elm.setStyleValue(k, v);
                   }
@@ -297,6 +302,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
               }
             },
           });
+          state.style = style.value;
         } else {
           Object.keys(style).forEach((k) => {
             const v = style[k];
@@ -304,6 +310,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
               state.style[k] = v.value;
               v.subscribe({
                 onChange(v) {
+                  state.style[k] = v as any;
                   if ($elm) {
                     $elm.setStyleValue(k, v);
                   }
@@ -507,14 +514,6 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     state,
     children: state.children,
     events,
-    /** @deprecated */
-    render() {
-      if (state.rendered) {
-        return $elm;
-      }
-      state.rendered = true;
-      return $elm;
-    },
     hydrate(existingDom: any) {
       if (state.rendered) {
         return $elm;

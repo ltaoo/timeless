@@ -5,6 +5,7 @@ import { HostElement } from "./box";
 export type DOMPortal = VNodeView<Text> & {
   t: "portal";
   render(elm: TimelessElement): DocumentFragment;
+  hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMPortal(props: {
@@ -31,12 +32,15 @@ export function DOMPortal(props: {
     removeEventListener: common$.methods.removeEventListener,
     getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
-      common$.methods.applyState(elm.state);
+      common$.methods.applyState(elm.state, { initial: true });
       common$.methods.setupEventListener(elm.events);
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);
       document.body.appendChild($fragment);
       return $fragment;
+    },
+    hydrate(elm: TimelessElement, $dom: any) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

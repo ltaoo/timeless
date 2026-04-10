@@ -269,30 +269,30 @@ export function Field(
           ];
         },
       }),
-      Match(
-        {
-          when: combine({ state: state_, error: error_ }, (t) => {
-            // console.log("Field match", t.error);
-            if (t.error) {
-              return "error";
-            }
-            if (t.state.help) {
-              return "help";
-            }
-            return "none";
-          }),
+      Match({
+        when: combine({ state: state_, error: error_ }, (t) => {
+          // console.log("Field match", t.error);
+          if (t.error) {
+            return "error";
+          }
+          if (t.state.help) {
+            return "help";
+          }
+          return "none";
+        }),
+        cases: {
+          error() {
+            return [
+              FieldError({ store: props.store }, [
+                computed(error_, (e) => e?.message || ""),
+              ]),
+            ];
+          },
+          help() {
+            return [FieldHelp({ store: props.store }, [props.store.help])];
+          },
         },
-        [
-          // Case("error", [
-          //   h(FieldError, { store: props.store }, [
-          //     computed(error_, (e) => e?.message || ""),
-          //   ]),
-          // ]),
-          // Case("help", [
-          //   h(FieldHelp, { store: props.store }, [props.store.help]),
-          // ]),
-        ],
-      ),
+      }),
     ],
   );
 }

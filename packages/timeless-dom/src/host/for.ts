@@ -13,6 +13,7 @@ export type DOMFor = VNodeView<Text> & {
     moved: { from: number; to: number }[];
   }): void;
   render(elm: TimelessElement): DocumentFragment;
+  hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMFor(props: {
@@ -47,6 +48,9 @@ export function DOMFor(props: {
       $fragment.appendChild($anchor);
       // common$.methods.handleElementsMounted();
       return $fragment;
+    },
+    hydrate(elm: TimelessElement, $dom: any) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

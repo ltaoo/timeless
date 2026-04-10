@@ -5,6 +5,7 @@ import { HostElement } from "./box";
 export type DOMButton = VNodeView<HTMLButtonElement> & {
   t: "button";
   render(elm: TimelessElement): HTMLButtonElement;
+  hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMButton(props: {
@@ -34,11 +35,14 @@ export function DOMButton(props: {
     removeEventListener: common$.methods.removeEventListener,
     getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
-      common$.methods.applyState(elm.state);
+      common$.methods.applyState(elm.state, { initial: true });
       const $fragment = common$.methods.render(elm.children);
       common$.methods.setupEventListener(elm.events);
       $elm.appendChild($fragment);
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: any) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

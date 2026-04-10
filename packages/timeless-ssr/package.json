@@ -1,0 +1,20 @@
+{
+  "name": "@timeless/timeless-ssr",
+  "version": "0.15.0",
+  "main": "dist/timeless.ssr.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "type": "module",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@timeless/timeless": "workspace:*",
+    "@timeless/svg": "workspace:*"
+  }
+}

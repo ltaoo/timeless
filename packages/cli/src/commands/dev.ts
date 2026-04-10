@@ -2,6 +2,7 @@ import { createServer as createViteServer, type ViteDevServer } from "vite";
 import http from "node:http";
 import path from "node:path";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import pc from "picocolors";
 
 import { timelessPlugin } from "../server/vite-plugin.js";
@@ -48,6 +49,16 @@ export async function dev(options: DevOptions) {
     }
   }
 
+  // Resolve @timeless/timeless-ssr from CLI's own dependencies
+  // so Vite can find it even when root is the user's project directory
+  const cliRequire = createRequire(import.meta.url);
+  const ssrAlias: Record<string, string> = {};
+  try {
+    ssrAlias["@timeless/timeless-ssr"] = cliRequire.resolve(
+      "@timeless/timeless-ssr",
+    );
+  } catch {}
+
   // Create Vite server in middleware mode
   const vite = await createViteServer({
     root,
@@ -59,6 +70,9 @@ export async function dev(options: DevOptions) {
     },
     appType: "custom",
     plugins: [timelessPlugin()],
+    resolve: {
+      alias: ssrAlias,
+    },
     optimizeDeps: {
       include: ["@timeless/timeless", "@timeless/timeless-dom"],
     },

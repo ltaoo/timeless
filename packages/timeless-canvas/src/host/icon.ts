@@ -1,10 +1,14 @@
-import { TimelessElement, ViewStyleProperties } from "@timeless/timeless";
+import {
+  TimelessElement,
+  ViewStyleProperties,
+  VNodeView,
+} from "@timeless/timeless";
 
 import { viewStyleToCssText } from "./style";
 import { CanvasHostNode } from "./type";
 import { CanvasDocument } from "./draw";
 
-export interface CanvasIcon {
+export type CanvasIcon = VNodeView<any> & {
   t: "icon";
   $elm: any;
   isDocumentFragment(): boolean;
@@ -13,7 +17,7 @@ export interface CanvasIcon {
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
   render(elm: TimelessElement): any;
-}
+};
 
 export function CanvasIcon(props: {
   canvas: CanvasDocument;

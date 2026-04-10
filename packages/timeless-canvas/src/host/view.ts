@@ -3,6 +3,7 @@ import {
   isRef,
   TimelessElement,
   ViewStyleProperties,
+  VNodeView,
 } from "@timeless/timeless";
 
 import { viewStyleToCssText } from "./style";
@@ -21,7 +22,7 @@ export interface CanvasView {
 
 export function CanvasView(props: {
   canvas: CanvasDocument;
-  build: (elm: TimelessElement, canvas: CanvasDocument) => CanvasHostNode;
+  build: (elm: TimelessElement, canvas: CanvasDocument) => VNodeView<any>;
 }): CanvasView {
   const canvas = props.canvas;
   const $elm = canvas.createElement("div");
@@ -107,15 +108,11 @@ export function CanvasView(props: {
       canvas.patchStyle?.($elm, { [key]: value });
     },
     render(elm: TimelessElement) {
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state.style) {
+        methods.setStyle(elm.state.style);
       }
-      if (elm.props?.styleSet) {
-        if (isRef(elm.props.styleSet)) {
-          methods.setStyleSet(elm.props.styleSet.value);
-        } else {
-          methods.setStyleSet(elm.props.styleSet);
-        }
+      if (elm.state.styleSet) {
+        methods.setStyleSet(elm.state.styleSet);
       }
       if (elm.events) {
         methods.setupEventListener(elm.events);
@@ -123,9 +120,9 @@ export function CanvasView(props: {
       if (elm.children) {
         for (const child of elm.children) {
           if (isElement(child)) {
-            const $sub = props.build(child, canvas);
-            if ($sub && $sub.$elm) {
-              canvas.appendChild($elm, $sub.$elm);
+            const child$ = props.build(child, canvas);
+            if (child$) {
+              canvas.appendChild($elm, child$.render(child));
             }
           } else if (typeof child === "string" || typeof child === "number") {
             // 处理文本节点

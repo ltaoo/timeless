@@ -5,6 +5,7 @@ import { DOMView } from "./view";
 export type DOMGrid = VNodeView<HTMLDivElement> & {
   t: "grid";
   render(elm: TimelessElement): HTMLDivElement;
+  hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMGrid(props: {
@@ -38,6 +39,9 @@ export function DOMGrid(props: {
         $elm.style.gap = `${gap}px`;
       }
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: HTMLDivElement) {
+      // view$.hydrate(elm, $dom);
     },
     getChildren: view$.getChildren,
     appendChildren: view$.appendChildren,

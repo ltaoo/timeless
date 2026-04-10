@@ -59,6 +59,7 @@ export type BoxState = {
   style: RawViewStyleProperties;
   styleSet: string[];
   attributes: Record<string, string | number | boolean | undefined>;
+  dataset: Record<string, string | number | boolean | undefined>;
   children: (TimelessElement | null)[];
 };
 
@@ -69,6 +70,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
     rendered: false,
     style: {},
     styleSet: [],
+    dataset: {},
     attributes: {},
     children: [],
     ...extra_state,
@@ -131,34 +133,34 @@ export function Box<T>(props: BoxProps, extra_state: T) {
           if (isRef(vv)) {
             vv.subscribe({
               onChange(v) {
+                state.attributes[k] = v as any;
                 if ($elm) {
                   methods.apply_attr(k, v);
                 }
               },
             });
-            methods.apply_attr(k, vv.value);
+            state.attributes[k] = vv.value;
             return;
           }
-          methods.apply_attr(k, vv);
+          state.attributes[k] = vv;
         });
       }
       const dataset = props.dataset;
       if (dataset) {
         Object.keys(dataset).forEach((k) => {
           const vv = dataset[k];
-          const attr_name = `data-${k}`;
           if (isRef(vv)) {
             vv.subscribe({
               onChange(v) {
                 if ($elm) {
-                  methods.apply_attr(attr_name, v);
+                  methods.apply_attr(k, v);
                 }
               },
             });
-            state.attributes[attr_name] = vv.value;
+            state.dataset[k] = vv.value;
             return;
           }
-          state.attributes[attr_name] = vv;
+          state.dataset[k] = vv;
         });
       }
       const cls = props.class;
@@ -181,7 +183,6 @@ export function Box<T>(props: BoxProps, extra_state: T) {
             onChange(v) {
               state.styleSet = v as string[];
               if ($elm && typeof $elm.setStyleSet === "function") {
-                // console.log("class changed", v, $elm);
                 $elm.setStyleSet(v);
               }
             },

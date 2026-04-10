@@ -10,6 +10,7 @@ import { HostElement } from "./box";
 export type DOMLabel = VNodeView<HTMLLabelElement> & {
   t: "label";
   render(elm: TimelessElement): HTMLLabelElement;
+  hydrate(elm: TimelessElement, $dom: HTMLLabelElement): void;
 };
 
 export function DOMLabel(props: {
@@ -46,6 +47,9 @@ export function DOMLabel(props: {
       const $fragment = common$.methods.render(elm.children);
       $elm.appendChild($fragment);
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: HTMLLabelElement) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

@@ -1,11 +1,5 @@
-import {
-  TimelessElement,
-  ViewStyleProperties,
-  VNodeView,
-} from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { viewStyleToCssText } from "./style";
-import { DOMHostNode } from "./type";
 import { HostElement } from "./box";
 
 export type DOMInput = VNodeView<HTMLInputElement> & {
@@ -14,6 +8,7 @@ export type DOMInput = VNodeView<HTMLInputElement> & {
   focus(): void;
   blur(): void;
   render(elm: TimelessElement): HTMLInputElement;
+  hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMInput(props: {
@@ -63,7 +58,7 @@ export function DOMInput(props: {
       if (elm.state.disabled) {
         $elm.disabled = elm.state.disabled;
       }
-      common$.methods.applyState(elm.state);
+      common$.methods.applyState(elm.state, { initial: true });
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
       if (events) {
@@ -84,6 +79,9 @@ export function DOMInput(props: {
         }
       }
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: any) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

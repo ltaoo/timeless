@@ -1,11 +1,11 @@
 import { isElement, TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { DOMHostNode } from "./type";
 import { HostElement } from "./box";
 
 export type DOMMatch = VNodeView<Text> & {
   t: "match";
   render(elm: TimelessElement): DocumentFragment;
+  hydrate(elm: TimelessElement, $dom: Text): void;
 };
 
 export function DOMMatch(props: {
@@ -36,6 +36,9 @@ export function DOMMatch(props: {
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
+    },
+    hydrate(elm: TimelessElement, $dom: Text) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

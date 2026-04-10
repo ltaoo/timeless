@@ -110,21 +110,19 @@ export function NativeInput(props: {
       delete $elm.listeners[type];
     },
     render(elm: TimelessElement) {
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state.style) {
+        methods.setStyle(elm.state.style);
       }
-      if ((elm as any).events) {
+      if (elm.events) {
         methods.setupEventListener((elm as any).events);
       }
       // Apply input-specific attributes from element props
-      const elProps = (elm as any).props;
-      if (elProps) {
-        if (elProps.value !== undefined) {
-          $elm.value = String(elProps.value);
-        }
-        if (elProps.placeholder !== undefined) {
-          $elm.placeholder = String(elProps.placeholder);
-        }
+      // const elProps = elm.props;
+      if (elm.state.value !== undefined) {
+        $elm.value = String(elm.state.value);
+      }
+      if (elm.state.placeholder !== undefined) {
+        $elm.placeholder = String(elm.state.placeholder);
       }
       // Ensure input has explicit height so native layout can size it
       if (!$elm.style["height"]) {

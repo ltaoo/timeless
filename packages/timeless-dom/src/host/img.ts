@@ -1,19 +1,12 @@
-import {
-  isElement,
-  isRef,
-  TimelessElement,
-  ViewStyleProperties,
-  VNodeView,
-} from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { DOMHostNode } from "./type";
-import { viewStyleToCssText } from "./style";
 import { HostElement } from "./box";
 
 export type DOMImg = VNodeView<HTMLImageElement> & {
   t: "img";
-  render(elm: TimelessElement): HTMLImageElement;
   setSrc(v: string): void;
+  render(elm: TimelessElement): HTMLImageElement;
+  hydrate(elm: TimelessElement, $dom: HTMLImageElement): void;
 };
 
 export function DOMImg(props: {
@@ -51,6 +44,9 @@ export function DOMImg(props: {
       }
       common$.methods.setupEventListener(elm.events);
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: HTMLImageElement) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

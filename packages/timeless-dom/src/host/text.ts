@@ -4,6 +4,7 @@ import { HostElement } from "./box";
 export type DOMText = VNodeView<Text> & {
   t: "text";
   render(elm: TimelessElement): Text | null;
+  hydrate(elm: TimelessElement, $text: Text | null): void;
   setContent(value: string | number | null): void;
 };
 
@@ -12,11 +13,7 @@ export function DOMText(props: {
 }): DOMText {
   const t = "text";
   let $text: any = null;
-  const common$ = HostElement({
-    $elm: null,
-    t,
-    build: props.build,
-  });
+  const common$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
     t,
@@ -54,6 +51,12 @@ export function DOMText(props: {
         })(),
       );
       return $text;
+    },
+    hydrate(elm: TimelessElement, $t: Text | null) {
+      $text = $t;
+      if ($text) {
+        $text.textContent = String(elm.state.value);
+      }
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

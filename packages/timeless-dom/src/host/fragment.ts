@@ -5,6 +5,7 @@ import { HostElement } from "./box";
 export type DOMFragment = VNodeView<Text> & {
   t: "fragment";
   render(elm: TimelessElement): DocumentFragment;
+  hydrate(elm: TimelessElement, $dom: Text): void;
 };
 
 export function DOMFragment(props: {
@@ -34,6 +35,9 @@ export function DOMFragment(props: {
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
+    },
+    hydrate(elm: TimelessElement, $dom: Text) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

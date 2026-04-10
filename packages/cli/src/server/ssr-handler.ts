@@ -165,7 +165,9 @@ export function createSSRHandler(
     }
 
     // Import renderToString dynamically to use Vite's SSR transform
-    const { renderToString } = await vite.ssrLoadModule("@timeless/timeless");
+    const { renderToString } = await vite.ssrLoadModule(
+      "@timeless/timeless-ssr",
+    );
 
     // Render the page
     let appHtml = "";

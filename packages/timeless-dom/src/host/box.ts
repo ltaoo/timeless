@@ -28,21 +28,41 @@ export function HostElement(props: {
     getChildren() {
       return child_nodes;
     },
-    setStyle(style: ViewStyleProperties) {
+    setStyle(
+      style: ViewStyleProperties,
+      opt: Partial<{ initial?: boolean }> = {},
+    ) {
       if (!$elm || $elm instanceof Text) {
         return;
       }
       const cssText = viewStyleToCssText(style);
-      if (cssText) {
-        $elm.style.cssText = cssText;
+      if (!opt.initial) {
+        if (cssText) {
+          $elm.style.cssText = cssText;
+        } else {
+          $elm.removeAttribute("style");
+        }
+      } else {
+        if (cssText) {
+          $elm.style.cssText = cssText;
+        }
       }
     },
-    setStyleSet(styleSet: string[]) {
-      console.log("123", $elm, styleSet);
+    setStyleSet(styleSet: string[], opt: Partial<{ initial?: boolean }> = {}) {
       if (!$elm || $elm instanceof Text || !styleSet) {
         return;
       }
-      $elm.setAttribute("class", styleSet.join(" "));
+      if (!opt.initial) {
+        if (styleSet.length === 0) {
+          $elm.removeAttribute("class");
+        } else {
+          $elm.setAttribute("class", styleSet.join(" "));
+        }
+      } else {
+        if (styleSet.length !== 0) {
+          $elm.setAttribute("class", styleSet.join(" "));
+        }
+      }
     },
     setStyleValue(key: any, value: string) {
       if (!$elm || $elm instanceof Text) {
@@ -165,15 +185,18 @@ export function HostElement(props: {
         $elm.addEventListener("animationend", events.onAnimationEnd);
       }
     },
-    applyState(state: TimelessElement["state"]) {
+    applyState(
+      state: TimelessElement["state"],
+      opt: Partial<{ initial?: boolean }> = {},
+    ) {
       if (!state) {
         return;
       }
       if (state.style) {
-        methods.setStyle(state.style);
+        methods.setStyle(state.style, opt);
       }
       if (state.styleSet) {
-        methods.setStyleSet(state.styleSet);
+        methods.setStyleSet(state.styleSet, opt);
       }
       const attrs = state.attributes;
       if (attrs) {

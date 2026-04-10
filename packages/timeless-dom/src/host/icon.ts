@@ -6,6 +6,7 @@ import { HostElement } from "./box";
 export type DOMIcon = VNodeView<SVGSVGElement> & {
   t: "icon";
   render(elm: TimelessElement): SVGSVGElement | null;
+  hydrate(elm: TimelessElement, $dom: SVGSVGElement): void;
 };
 
 export function DOMIcon(props: {
@@ -52,6 +53,9 @@ export function DOMIcon(props: {
       common$.methods.set$elm($elm);
       // common$.methods.applyState(elm.state);
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: SVGSVGElement) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

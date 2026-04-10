@@ -93,8 +93,8 @@ export function NativeButton(props: {
       delete $elm.attrs[key];
     },
     render(elm: TimelessElement) {
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state.style) {
+        methods.setStyle(elm.state.style);
       }
       if (elm.events) {
         methods.setupEventListener(elm.events);

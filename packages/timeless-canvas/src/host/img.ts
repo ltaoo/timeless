@@ -2,13 +2,14 @@ import {
   isRef,
   TimelessElement,
   ViewStyleProperties,
+  VNodeView,
 } from "@timeless/timeless";
 
 import { viewStyleToCssText } from "./style";
 import { CanvasHostNode } from "./type";
 import { CanvasDocument } from "./draw";
 
-export interface CanvasImg {
+export type CanvasImg = VNodeView<any> & {
   $elm: any;
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
@@ -16,11 +17,11 @@ export interface CanvasImg {
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   render(elm: TimelessElement): any;
-}
+};
 
 export function CanvasImg(props: {
   canvas: CanvasDocument;
-  build: (elm: TimelessElement, canvas: CanvasDocument) => CanvasHostNode;
+  build: (elm: TimelessElement, canvas: CanvasDocument) => VNodeView<any>;
 }): CanvasImg {
   const canvas = props.canvas;
   const $elm = canvas.createElement("img");
@@ -137,17 +138,17 @@ export function CanvasImg(props: {
       canvas.patchStyle?.($elm, { [key]: value });
     },
     render(elm: TimelessElement) {
-      if (elm.value) {
-        methods.setSrc(elm.value as string);
+      if (elm.state.value) {
+        methods.setSrc(elm.state.value as string);
       }
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state.style) {
+        methods.setStyle(elm.state.style);
       }
-      if (elm.props?.styleSet) {
-        if (isRef(elm.props.styleSet)) {
-          methods.setStyleSet(elm.props.styleSet.value);
+      if (elm.state.styleSet) {
+        if (isRef(elm.state.styleSet)) {
+          methods.setStyleSet(elm.state.styleSet.value);
         } else {
-          methods.setStyleSet(elm.props.styleSet);
+          methods.setStyleSet(elm.state.styleSet);
         }
       }
       if (elm.events) {

@@ -10,6 +10,7 @@ import { HostElement } from "./box";
 export type DOMSelect = VNodeView<HTMLDivElement> & {
   t: "select";
   render(elm: TimelessElement): HTMLDivElement;
+  hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMSelect(props: {
@@ -45,9 +46,12 @@ export function DOMSelect(props: {
       $elm.style.backgroundColor = "transparent";
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
-      common$.methods.applyState(elm.state);
+      common$.methods.applyState(elm.state, { initial: true });
       common$.methods.setupEventListener(elm.events);
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: any) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

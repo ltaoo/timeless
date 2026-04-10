@@ -1,6 +1,6 @@
 import {
   isElement,
-  type TimelessHost,
+  // type TimelessHost,
   type TimelessElement,
 } from "@timeless/timeless";
 
@@ -20,17 +20,17 @@ import {
   showCursor,
 } from "./host/draw";
 import { build } from "./renderer/index";
-import { setTuiHost } from "./host-accessor";
+// import { setTuiHost } from "./host-accessor";
 import { createTuiInput, parseKey, type KeyName } from "./modules/input";
 
 // import { _setAppFn, _startTui } from "./tui";
 
 // const { isDescriptor, mount, commitTree } = VNode;
 
-type TuiHost = TimelessHost & {
-  getBody: NonNullable<TimelessHost["getBody"]>;
-  appendChild: NonNullable<TimelessHost["appendChild"]>;
-};
+// type TuiHost = TimelessHost & {
+//   getBody: NonNullable<TimelessHost["getBody"]>;
+//   appendChild: NonNullable<TimelessHost["appendChild"]>;
+// };
 
 type RenderOptions = Partial<{
   out: NodeJS.WritableStream;
@@ -389,7 +389,7 @@ function handleDefaultNavigation(body: TuiNode, event: any): boolean {
 
 export function createTuiHost(
   options: { out?: NodeJS.WritableStream } = {},
-): TuiHost {
+): any {
   const out = options.out ?? process.stdout;
   const body = createTuiElement("body");
   _activeBody = body;

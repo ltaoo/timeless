@@ -1,19 +1,12 @@
-import {
-  isElement,
-  isRef,
-  TimelessElement,
-  ViewStyleProperties,
-  VNodeView,
-} from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { viewStyleToCssText } from "./style";
-import { DOMHostNode } from "./type";
 import { HostElement } from "./box";
 
 export type DOMPopper = VNodeView<HTMLDivElement> & {
   t: "popper";
   $elm: HTMLDivElement;
   render(elm: TimelessElement): HTMLDivElement;
+  hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMPopper(props: {
@@ -60,6 +53,9 @@ export function DOMPopper(props: {
       $elm.appendChild($fragments);
       common$.methods.setupEventListener(elm.events);
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: HTMLDivElement) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

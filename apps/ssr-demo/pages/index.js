@@ -1,5 +1,5 @@
 // Use UMD global to ensure same module instance on client and server
-const { View, For, Show, Button, computed, ref, refarr } = window.Timeless;
+const { View, For, Show, Button, styleNames, computed, ref, refarr } = window.Timeless;
 
 /**
  * load() - Server-side data fetching
@@ -185,16 +185,16 @@ export default function Page({ data }) {
                   const itemStyle = computed(selectedFruit, (sel) => {
                     // console.log("compare", sel, item);
                     const selected = sel === item;
-                    return `${listItemStyle}; cursor: pointer; ${
-                      selected
-                        ? "background: #e0f2fe; border-color: #38bdf8;"
-                        : "background: white; border-color: #e5e7eb;"
-                    }`;
+                    return {
+                      cursor: "pointer",
+                      background: selected ? "#e0f2fe" : "white",
+                      "border-color": selected ? "#38bdf8" : "#e5e7eb",
+                    };
                   });
                   // console.log("[]fruit render");
                   return View(
                     {
-                      style: itemStyle,
+                      style: styleNames([listItemStyle, itemStyle]),
                       onClick() {
                         selectedFruit.as(item);
                       },
@@ -235,7 +235,13 @@ export default function Page({ data }) {
             ]),
 
             View(
-              { style: `margin: 12px 0 8px; color: #666; font-size: 14px;` },
+              {
+                style: {
+                  margin: "12px 0 8px",
+                  color: "#666",
+                  "font-size": "14px",
+                },
+              },
               ["Click an item to select, then reorder:"],
             ),
             View({ style: buttonGroupStyle }, [
@@ -324,106 +330,106 @@ export default function Page({ data }) {
 }
 
 // Styles
-const appStyle = `
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 32px;
-  font-family: system-ui, -apple-system, sans-serif;
-`;
+const appStyle = {
+  "max-width": "600px",
+  margin: "0 auto",
+  padding: "32px",
+  "font-family": "system-ui, -apple-system, sans-serif",
+};
 
-const titleStyle = `
-  font-size: 28px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #1a1a1a;
-`;
+const titleStyle = {
+  "font-size": "28px",
+  "font-weight": "600",
+  "margin-bottom": "8px",
+  color: "#1a1a1a",
+};
 
-const infoStyle = `
-  color: #666;
-  margin-bottom: 24px;
-`;
+const infoStyle = {
+  color: "#666",
+  "margin-bottom": "24px",
+};
 
-const sectionStyle = `
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-`;
+const sectionStyle = {
+  background: "#f9fafb",
+  "border-radius": "12px",
+  padding: "20px",
+  "margin-bottom": "20px",
+};
 
-const subtitleStyle = `
-  font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 16px;
-  color: #333;
-`;
+const subtitleStyle = {
+  "font-size": "18px",
+  "font-weight": "500",
+  "margin-bottom": "16px",
+  color: "#333",
+};
 
-const counterStyle = `
-  display: flex;
-  align-items: center;
-  gap: 16px;
-`;
+const counterStyle = {
+  display: "flex",
+  "align-items": "center",
+  gap: "16px",
+};
 
-const countStyle = `
-  font-size: 32px;
-  font-weight: 600;
-  min-width: 60px;
-  text-align: center;
-`;
+const countStyle = {
+  "font-size": "32px",
+  "font-weight": "600",
+  "min-width": "60px",
+  "text-align": "center",
+};
 
-const buttonStyle = `
-  padding: 8px 16px;
-  font-size: 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: white;
-  cursor: pointer;
-  transition: background 0.2s;
-`;
+const buttonStyle = {
+  padding: "8px 16px",
+  "font-size": "16px",
+  border: "1px solid #d1d5db",
+  "border-radius": "8px",
+  background: "white",
+  cursor: "pointer",
+  transition: "background 0.2s",
+};
 
-const toggleButtonStyle = `
-  padding: 8px 16px;
-  font-size: 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: white;
-  cursor: pointer;
-  margin-bottom: 16px;
-`;
+const toggleButtonStyle = {
+  padding: "8px 16px",
+  "font-size": "14px",
+  border: "1px solid #d1d5db",
+  "border-radius": "8px",
+  background: "white",
+  cursor: "pointer",
+  "margin-bottom": "16px",
+};
 
-const listStyle = `
-  list-style: none;
-  padding: 0;
-  margin: 0 0 16px 0;
-`;
+const listStyle = {
+  "list-style": "none",
+  padding: "0",
+  margin: "0 0 16px 0",
+};
 
-const listItemStyle = `
-  padding: 12px 16px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  margin-bottom: 8px;
-`;
+const listItemStyle = {
+  padding: "12px 16px",
+  background: "white",
+  border: "1px solid #e5e7eb",
+  "border-radius": "8px",
+  "margin-bottom": "8px",
+};
 
-const buttonGroupStyle = `
-  display: flex;
-  gap: 8px;
-`;
+const buttonGroupStyle = {
+  display: "flex",
+  gap: "8px",
+};
 
-const hoverBoxContainerStyle = `
-  display: flex;
-  gap: 16px;
-`;
+const hoverBoxContainerStyle = {
+  display: "flex",
+  gap: "16px",
+};
 
-const hoverBoxStyle = `
-  width: 120px;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  border: 2px solid #d1d5db;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-weight: 500;
-`;
+const hoverBoxStyle = {
+  width: "120px",
+  height: "80px",
+  display: "flex",
+  "align-items": "center",
+  "justify-content": "center",
+  background: "white",
+  border: "2px solid #d1d5db",
+  "border-radius": "8px",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  "font-weight": "500",
+};

@@ -5,6 +5,7 @@ import { HostElement } from "./box";
 export type DOMCheckbox = VNodeView<HTMLInputElement> & {
   t: "checkbox";
   render(elm: TimelessElement): HTMLInputElement;
+  hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMCheckbox(props: {
@@ -47,7 +48,7 @@ export function DOMCheckbox(props: {
       if (elm.state.name) {
         $elm.name = elm.state.name;
       }
-      common$.methods.applyState(elm.state);
+      common$.methods.applyState(elm.state, { initial: true });
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
       if (events) {
@@ -71,6 +72,9 @@ export function DOMCheckbox(props: {
         }
       }
       return $elm;
+    },
+    hydrate(elm: TimelessElement, $dom: any) {
+      // common$.methods.hydrate(elm, $dom);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

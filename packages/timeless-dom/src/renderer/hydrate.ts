@@ -1,688 +1,13 @@
-import {
-  type TimelessHost,
-  type TimelessElement,
-  setHost,
-} from "@timeless/timeless";
+import { VNodeView, type TimelessElement } from "@timeless/timeless";
 
 import { render } from "./index";
+import { build } from "./build";
 
-type AnyEventHandler = (event: any) => void;
-
-export function installDomHost(options?: Parameters<typeof createDomHost>[0]) {
-  const host = createDomHost(options);
-  setHost(host);
-  return host;
-}
-
-export function createDomHost(
-  options: {
-    document?: Document;
-    window?: Window;
-    body?: HTMLElement | null;
-  } = {},
-): TimelessHost {
-  const doc = options.document ?? globalThis.document;
-  const win = options.window ?? globalThis.window;
-  const getBody = () => options.body ?? doc?.body ?? null;
-
-  const handlerStore = new WeakMap<
-    any,
-    Map<string, { capture: Set<AnyEventHandler>; bubble: Set<AnyEventHandler> }>
-  >();
-
-  const dispatcherState = new Map<
-    string,
-    {
-      captureCount: number;
-      bubbleCount: number;
-      captureListener: (event: Event) => void;
-      bubbleListener: (event: Event) => void;
-    }
-  >();
-
-  const getHandlerBucket = (target: any, type: string) => {
-    let perTarget = handlerStore.get(target);
-    if (!perTarget) {
-      perTarget = new Map();
-      handlerStore.set(target, perTarget);
-    }
-    let bucket = perTarget.get(type);
-    if (!bucket) {
-      bucket = { capture: new Set(), bubble: new Set() };
-      perTarget.set(type, bucket);
-    }
-    return bucket;
-  };
-
-  const normalizeCapture = (options?: any) => {
-    if (typeof options === "boolean") return options;
-    return !!options?.capture;
-  };
-
-  const buildPath = (start: any) => {
-    const path: any[] = [];
-    let cur = start;
-    while (cur) {
-      path.push(cur);
-      if (cur === doc) break;
-      cur = cur.parentNode ?? cur.host ?? null;
-    }
-    if (path[path.length - 1] !== doc) {
-      path.push(doc);
-    }
-    return path;
-  };
-
-  const createEventProxy = (event: any, currentTarget: any) => {
-    return new Proxy(event, {
-      get(target, prop) {
-        if (prop === "currentTarget") return currentTarget;
-        if (prop === "target") return event.target;
-        if (prop === "stopPropagation") {
-          return () => event.stopPropagation();
-        }
-        if (prop === "stopImmediatePropagation") {
-          return () => event.stopImmediatePropagation();
-        }
-        if (prop === "preventDefault") {
-          return () => event.preventDefault();
-        }
-        return Reflect.get(target, prop);
-      },
-    });
-  };
-
-  const makeDispatcher = (type: string, phase: "capture" | "bubble") => {
-    return (event: Event) => {
-      let stopped = false;
-      let immediateStopped = false;
-      const originalStopPropagation = (event as any).stopPropagation?.bind(
-        event,
-      );
-      const originalStopImmediatePropagation = (
-        event as any
-      ).stopImmediatePropagation?.bind(event);
-
-      if (originalStopPropagation) {
-        (event as any).stopPropagation = () => {
-          stopped = true;
-          originalStopPropagation();
-        };
-      }
-
-      if (originalStopImmediatePropagation) {
-        (event as any).stopImmediatePropagation = () => {
-          immediateStopped = true;
-          stopped = true;
-          originalStopImmediatePropagation();
-        };
-      }
-
-      try {
-        const start = (event as any).target ?? doc;
-        const path = buildPath(start);
-        const iter = phase === "capture" ? [...path].reverse() : path;
-
-        for (let i = 0; i < iter.length; i++) {
-          const node = iter[i];
-          const perTarget = handlerStore.get(node);
-          const bucket = perTarget?.get(type);
-          const set = phase === "capture" ? bucket?.capture : bucket?.bubble;
-          if (!set || set.size === 0) {
-            if (stopped) break;
-            continue;
-          }
-
-          const e2 = createEventProxy(event, node);
-          for (const handler of Array.from(set)) {
-            handler(e2);
-            if (immediateStopped) break;
-          }
-
-          if (stopped) break;
-        }
-      } finally {
-        if (originalStopPropagation) {
-          (event as any).stopPropagation = originalStopPropagation;
-        }
-        if (originalStopImmediatePropagation) {
-          (event as any).stopImmediatePropagation =
-            originalStopImmediatePropagation;
-        }
-      }
-    };
-  };
-
-  const ensureDispatcher = (type: string) => {
-    let state = dispatcherState.get(type);
-    if (!state) {
-      state = {
-        captureCount: 0,
-        bubbleCount: 0,
-        captureListener: makeDispatcher(type, "capture"),
-        bubbleListener: makeDispatcher(type, "bubble"),
-      };
-      dispatcherState.set(type, state);
-    }
-    return state;
-  };
-
-  return {
-    kind: "dom",
-    createElement(tag: string) {
-      const el = doc.createElement(tag);
-      // 添加统一的样式更新接口
-      (el as any).setStyleValue = function (styleObj: Record<string, any>) {
-        Object.keys(styleObj).forEach((key) => {
-          (el.style as any)[key] = styleObj[key];
-        });
-      };
-      // 添加样式集（class）更新接口
-      (el as any).setStyleSet = function (classNames: string | string[]) {
-        if (Array.isArray(classNames)) {
-          el.className = classNames.join(" ");
-        } else {
-          el.className = classNames;
-        }
-      };
-      // 添加子节点操作接口
-      (el as any).clearChildren = function () {
-        while (el.firstChild) {
-          el.removeChild(el.firstChild);
-        }
-      };
-      (el as any).getFirstChild = function () {
-        return el.firstChild;
-      };
-      (el as any).getNextSibling = function () {
-        return el.nextSibling;
-      };
-      return el;
-    },
-    createElementNS(namespace: string, tag: string) {
-      return doc.createElementNS(namespace, tag);
-    },
-    createTextNode(text: string) {
-      const textNode = doc.createTextNode(text);
-      // 为 Show 组件的 anchor 添加内容管理方法
-      (textNode as any).addContent = function (
-        newTargetChildren: any[],
-        onMounted: any,
-        updateState: (newNodes: any[], newInstances: any[]) => void
-      ) {
-        const parent = textNode.parentNode;
-        if (!parent) return;
-
-        // 1. 准备新内容
-        const fragment = doc.createDocumentFragment();
-        const newNodes: any[] = [];
-        const newInstances: any[] = [];
-
-        for (let node of newTargetChildren) {
-          if (node === null || node === undefined) continue;
-          if (typeof node === "function") {
-            node = node();
-          }
-
-          if (node && typeof node.render === "function") {
-            const result = node.render();
-            newInstances.push(node);
-            if (result) {
-              if (result instanceof DocumentFragment) {
-                const children = Array.from(result.childNodes);
-                newNodes.push(...children);
-              } else {
-                newNodes.push(result);
-              }
-              fragment.appendChild(result);
-            }
-          } else if (typeof node === "string" || typeof node === "number") {
-            const tn = doc.createTextNode(String(node));
-            fragment.appendChild(tn);
-            newNodes.push(tn);
-          }
-        }
-
-        // 2. 插入新内容到 anchor 之前
-        if (newNodes.length > 0) {
-          parent.insertBefore(fragment, textNode);
-        }
-
-        // 3. 更新状态
-        updateState(newNodes, newInstances);
-
-        // 4. 调用新内容的 onMounted
-        if (onMounted) {
-          onMounted({ target: textNode });
-        }
-        for (const child of newInstances) {
-          if (child && typeof child.onMounted === "function") {
-            child.onMounted({ target: child.$elm });
-          }
-        }
-      };
-
-      (textNode as any).buildInitialContent = function (
-        targetChildren: any[],
-        onMounted: any,
-        updateState: (newNodes: any[], newInstances: any[]) => void
-      ) {
-        // 1. 准备新内容
-        const fragment = doc.createDocumentFragment();
-        const newNodes: any[] = [];
-        const newInstances: any[] = [];
-
-        for (let node of targetChildren) {
-          if (node === null || node === undefined) continue;
-          if (typeof node === "function") {
-            node = node();
-          }
-
-          if (node && typeof node.render === "function") {
-            const result = node.render();
-            newInstances.push(node);
-            if (result) {
-              if (result instanceof DocumentFragment) {
-                const children = Array.from(result.childNodes);
-                newNodes.push(...children);
-              } else {
-                newNodes.push(result);
-              }
-              fragment.appendChild(result);
-            }
-          } else if (typeof node === "string" || typeof node === "number") {
-            const tn = doc.createTextNode(String(node));
-            fragment.appendChild(tn);
-            newNodes.push(tn);
-          }
-        }
-
-        // 2. 将 anchor 添加到 fragment
-        fragment.appendChild(textNode);
-
-        // 3. 更新状态
-        updateState(newNodes, newInstances);
-
-        // 4. 调用新内容的 onMounted
-        if (onMounted) {
-          onMounted({ target: textNode });
-        }
-        for (const child of newInstances) {
-          if (child && typeof child.onMounted === "function") {
-            child.onMounted({ target: child.$elm });
-          }
-        }
-
-        return fragment;
-      };
-
-      (textNode as any).removeContent = function (
-        oldChildren: any[],
-        oldNodes: any[],
-        updateState: () => void
-      ) {
-        // 1. 调用旧内容的 beforeUnmounted
-        for (const child of oldChildren) {
-          if (child && typeof child.beforeUnmounted === "function") {
-            child.beforeUnmounted();
-          }
-        }
-
-        // 2. 移除旧内容的 DOM
-        for (const node of oldNodes) {
-          if (node && node.parentNode) {
-            node.parentNode.removeChild(node);
-          }
-        }
-
-        // 3. 调用旧内容的 onUnmounted
-        for (const child of oldChildren) {
-          if (child) {
-            if (child.t === "portal" && typeof child.cleanup === "function") {
-              child.cleanup();
-            } else if (typeof child.onUnmounted === "function") {
-              child.onUnmounted();
-            }
-          }
-        }
-
-        // 4. 更新状态
-        updateState();
-      };
-
-      return textNode;
-    },
-    createDocumentFragment() {
-      const fragment = doc.createDocumentFragment();
-      // 为 Show 组件的 fragment 添加内容管理方法
-      (fragment as any).addContent = function (
-        newTargetChildren: any[],
-        onMounted: any,
-        updateState: (newNodes: any[], newInstances: any[]) => void
-      ) {
-        const parent = fragment.parentNode;
-        if (!parent) return;
-
-        // 1. 准备新内容
-        const newFragment = doc.createDocumentFragment();
-        const newNodes: any[] = [];
-        const newInstances: any[] = [];
-
-        for (let node of newTargetChildren) {
-          if (node === null || node === undefined) continue;
-          if (typeof node === "function") {
-            node = node();
-          }
-
-          if (node && typeof node.render === "function") {
-            const result = node.render();
-            newInstances.push(node);
-            if (result) {
-              if (result instanceof DocumentFragment) {
-                const children = Array.from(result.childNodes);
-                newNodes.push(...children);
-              } else {
-                newNodes.push(result);
-              }
-              newFragment.appendChild(result);
-            }
-          } else if (typeof node === "string" || typeof node === "number") {
-            const tn = doc.createTextNode(String(node));
-            newFragment.appendChild(tn);
-            newNodes.push(tn);
-          }
-        }
-
-        // 2. 插入新内容到 fragment 之前
-        if (newNodes.length > 0) {
-          parent.insertBefore(newFragment, fragment);
-        }
-
-        // 3. 更新状态
-        updateState(newNodes, newInstances);
-
-        // 4. 调用新内容的 onMounted
-        if (onMounted) {
-          onMounted({ target: fragment });
-        }
-        for (const child of newInstances) {
-          if (child && typeof child.onMounted === "function") {
-            child.onMounted({ target: child.$elm });
-          }
-        }
-      };
-
-      (fragment as any).buildInitialContent = function (
-        targetChildren: any[],
-        onMounted: any,
-        updateState: (newNodes: any[], newInstances: any[]) => void
-      ) {
-        // 1. 准备新内容
-        const resultFragment = doc.createDocumentFragment();
-        const newNodes: any[] = [];
-        const newInstances: any[] = [];
-
-        for (let node of targetChildren) {
-          if (node === null || node === undefined) continue;
-          if (typeof node === "function") {
-            node = node();
-          }
-
-          if (node && typeof node.render === "function") {
-            const result = node.render();
-            newInstances.push(node);
-            if (result) {
-              if (result instanceof DocumentFragment) {
-                const children = Array.from(result.childNodes);
-                newNodes.push(...children);
-              } else {
-                newNodes.push(result);
-              }
-              resultFragment.appendChild(result);
-            }
-          } else if (typeof node === "string" || typeof node === "number") {
-            const tn = doc.createTextNode(String(node));
-            resultFragment.appendChild(tn);
-            newNodes.push(tn);
-          }
-        }
-
-        // 2. 将 anchor (fragment) 添加到结果
-        resultFragment.appendChild(fragment);
-
-        // 3. 更新状态
-        updateState(newNodes, newInstances);
-
-        // 4. 调用新内容的 onMounted
-        if (onMounted) {
-          onMounted({ target: fragment });
-        }
-        for (const child of newInstances) {
-          if (child && typeof child.onMounted === "function") {
-            child.onMounted({ target: child.$elm });
-          }
-        }
-
-        return resultFragment;
-      };
-
-      (fragment as any).removeContent = function (
-        oldChildren: any[],
-        oldNodes: any[],
-        updateState: () => void
-      ) {
-        // 1. 调用旧内容的 beforeUnmounted
-        for (const child of oldChildren) {
-          if (child && typeof child.beforeUnmounted === "function") {
-            child.beforeUnmounted();
-          }
-        }
-
-        // 2. 移除旧内容的 DOM
-        for (const node of oldNodes) {
-          if (node && node.parentNode) {
-            node.parentNode.removeChild(node);
-          }
-        }
-
-        // 3. 调用旧内容的 onUnmounted
-        for (const child of oldChildren) {
-          if (child) {
-            if (child.t === "portal" && typeof child.cleanup === "function") {
-              child.cleanup();
-            } else if (typeof child.onUnmounted === "function") {
-              child.onUnmounted();
-            }
-          }
-        }
-
-        // 4. 更新状态
-        updateState();
-      };
-
-      return fragment;
-    },
-    appendChild(parent: any, child: any) {
-      parent.appendChild(child);
-    },
-    removeChild(parent: any, child: any) {
-      parent.removeChild(child);
-    },
-    insertBefore(parent: any, child: any, before: any) {
-      parent.insertBefore(child, before);
-    },
-    replaceChild(parent: any, newChild: any, oldChild: any) {
-      parent.replaceChild(newChild, oldChild);
-    },
-    clearChildren(parent: any) {
-      while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
-      }
-    },
-    setAttribute(el: any, name: string, value: string) {
-      el.setAttribute(name, value);
-    },
-    removeAttribute(el: any, name: string) {
-      el.removeAttribute(name);
-    },
-    setClassName(el: any, className: string) {
-      el.className = className;
-    },
-    setStyleText(el: any, cssText: string) {
-      el.style.cssText = cssText;
-    },
-    patchStyle(el: any, patch: Record<string, string>) {
-      for (const k of Object.keys(patch)) {
-        el.style[k] = patch[k];
-      }
-    },
-    setTextContent(node: any, text: string) {
-      node.textContent = text;
-    },
-    setInnerHTML(el: any, html: string) {
-      el.innerHTML = html;
-    },
-    setProperty(el: any, key: string, value: any) {
-      el[key] = value;
-    },
-    addEventListener(target: any, type: string, handler: any, options?: any) {
-      // Non-bubbling events must be bound directly to the target element
-      const nonBubblingEvents = [
-        "mouseenter",
-        "mouseleave",
-        "focus",
-        "blur",
-        "load",
-        "unload",
-        "scroll",
-      ];
-      if (nonBubblingEvents.includes(type)) {
-        target.addEventListener(type, handler, options);
-        return;
-      }
-
-      const capture = normalizeCapture(options);
-      const bucket = getHandlerBucket(target, type);
-      const state = ensureDispatcher(type);
-      const set = capture ? bucket.capture : bucket.bubble;
-      if (set.has(handler)) return;
-      set.add(handler);
-
-      if (capture) {
-        if (state.captureCount === 0) {
-          doc.addEventListener(type, state.captureListener, true);
-        }
-        state.captureCount += 1;
-      } else {
-        if (state.bubbleCount === 0) {
-          doc.addEventListener(type, state.bubbleListener, false);
-        }
-        state.bubbleCount += 1;
-      }
-    },
-    removeEventListener(
-      target: any,
-      type: string,
-      handler: any,
-      options?: any,
-    ) {
-      // Non-bubbling events are bound directly to the target element
-      const nonBubblingEvents = [
-        "mouseenter",
-        "mouseleave",
-        "focus",
-        "blur",
-        "load",
-        "unload",
-        "scroll",
-      ];
-      if (nonBubblingEvents.includes(type)) {
-        target.removeEventListener(type, handler, options);
-        return;
-      }
-
-      const capture = normalizeCapture(options);
-      const perTarget = handlerStore.get(target);
-      const bucket = perTarget?.get(type);
-      const state = dispatcherState.get(type);
-      if (!bucket || !state) return;
-
-      const set = capture ? bucket.capture : bucket.bubble;
-      if (!set.has(handler)) return;
-      set.delete(handler);
-
-      if (capture) {
-        state.captureCount = Math.max(0, state.captureCount - 1);
-        if (state.captureCount === 0) {
-          doc.removeEventListener(type, state.captureListener, true);
-        }
-      } else {
-        state.bubbleCount = Math.max(0, state.bubbleCount - 1);
-        if (state.bubbleCount === 0) {
-          doc.removeEventListener(type, state.bubbleListener, false);
-        }
-      }
-    },
-    addDocumentEventListener(type: string, handler: any, options?: any) {
-      doc.addEventListener(type, handler, options);
-    },
-    removeDocumentEventListener(type: string, handler: any, options?: any) {
-      doc.removeEventListener(type, handler, options);
-    },
-    patchBodyStyle(patch: { cursor?: string; userSelect?: string }) {
-      const body = getBody();
-      if (!body) return;
-      if (patch.cursor !== undefined) body.style.cursor = patch.cursor;
-      if (patch.userSelect !== undefined)
-        body.style.userSelect = patch.userSelect;
-    },
-    setTimeout(handler: () => void, ms: number) {
-      return win.setTimeout(handler, ms);
-    },
-    clearTimeout(id: any) {
-      win.clearTimeout(id);
-    },
-    setPointerCapture(target: any, pointerId: number) {
-      target.setPointerCapture(pointerId);
-    },
-    releasePointerCapture(target: any, pointerId: number) {
-      target.releasePointerCapture(pointerId);
-    },
-    focus(target: any) {
-      target.focus();
-    },
-    blur(target: any) {
-      target.blur();
-    },
-    querySelector(root: any, selector: string) {
-      return root.querySelector(selector);
-    },
-    getBoundingClientRect(el: any) {
-      return el.getBoundingClientRect();
-    },
-    getViewportSize() {
-      return { width: win.innerWidth, height: win.innerHeight };
-    },
-    getBody() {
-      return getBody();
-    },
-    isDocumentFragment(node: any) {
-      return !!node && node.nodeType === 11;
-    },
-    getChildNodes(node: any) {
-      return Array.from(node.childNodes ?? []);
-    },
-    getParentNode(node: any) {
-      return node.parentNode ?? null;
-    },
-    getNextSibling(node: any) {
-      return node.nextSibling ?? null;
-    },
-    getFirstChild(node: any) {
-      return node.firstChild ?? null;
-    },
-  };
-}
+// export function installDomHost(options?: Parameters<typeof createDomHost>[0]) {
+//   const host = createDomHost(options);
+//   setHost(host);
+//   return host;
+// }
 
 /**
  * Hydrate a virtual node tree onto existing server-rendered DOM.
@@ -704,8 +29,7 @@ export function hydrate(
     return;
   }
 
-  const host = createDomHost();
-  const firstChild = host.getFirstChild(container);
+  const firstChild = container.firstChild;
 
   if (!firstChild) {
     console.warn("[Hydrate] No SSR content found, falling back to render");
@@ -714,116 +38,82 @@ export function hydrate(
   }
 
   // Perform hydration
-  hydrateNode(vnode, firstChild, host);
+  hydrateNode(vnode, firstChild);
 }
 
 /**
  * Recursively hydrate a virtual node onto an existing DOM node.
  */
-function hydrateNode(
-  vnode: TimelessElement,
-  domNode: any,
-  host: TimelessHost,
-): any {
+function hydrateNode(vnode: TimelessElement, domNode: any): any {
   if (!vnode || !domNode) {
     return domNode;
   }
 
-  const vnodeType = (vnode as any).t;
+  const vnodeType = vnode.t;
 
   switch (vnodeType) {
     case "view":
-      return hydrateView(vnode, domNode, host);
+      return hydrateView(vnode, domNode);
     case "text":
-      return hydrateText(vnode, domNode, host);
+      return hydrateText(vnode, domNode);
     case "for":
-      return hydrateFor(vnode, domNode, host);
+      return hydrateFor(vnode, domNode);
     case "show":
-      return hydrateShow(vnode, domNode, host);
+      return hydrateShow(vnode, domNode);
     default:
       // Unknown type, try to use hydrate method if available
       if (typeof (vnode as any).hydrate === "function") {
         return (vnode as any).hydrate(domNode);
       }
-      // Fallback to render
-      // return vnode.render();
+    // Fallback to render
+    // return vnode.render();
   }
 }
 
 /**
  * Hydrate a View component.
  */
-function hydrateView(
-  vnode: TimelessElement,
-  domNode: any,
-  host: TimelessHost,
-): any {
-  const props = (vnode as any)._props || {};
-  const expectedTag = (props.as || "div").toUpperCase();
-  const actualTag = domNode.nodeName || domNode.tagName || "";
+function hydrateView(vnode: TimelessElement, $elm: HTMLElement) {
+  const view$ = build(vnode);
+  const expected_tag = "div";
+  const actual_tag = $elm.nodeName || $elm.tagName || "";
 
   // Validate tag match
-  if (actualTag.toUpperCase() !== expectedTag) {
+  if (actual_tag.toUpperCase() !== expected_tag) {
     console.warn(
-      `[Hydrate] Tag mismatch: expected ${expectedTag}, got ${actualTag}. Falling back to render.`,
+      `[Hydrate] Tag mismatch: expected ${expected_tag}, got ${actual_tag}. Falling back to render.`,
     );
-    // return vnode.render();
+    return view$.render(vnode);
   }
-
-  // Use the hydrate method
-  if (typeof (vnode as any).hydrate === "function") {
-    return (vnode as any).hydrate(domNode);
-  }
-
-  // Fallback
-  vnode.$elm = domNode;
-  // return vnode.render();
+  view$.hydrate(vnode, $elm);
 }
 
 /**
  * Hydrate a Text component.
  */
-function hydrateText(
-  vnode: TimelessElement,
-  domNode: any,
-  host: TimelessHost,
-): any {
-  if (typeof (vnode as any).hydrate === "function") {
-    return (vnode as any).hydrate(domNode);
-  }
-
-  vnode.$elm = domNode;
-  // return vnode.render();
+function hydrateText(vnode: TimelessElement, $elm: Text): any {
+  const text$ = build(vnode);
+  text$.hydrate(vnode, $elm);
 }
 
 /**
  * Hydrate a For component.
  */
-function hydrateFor(
-  vnode: TimelessElement,
-  domNode: any,
-  host: TimelessHost,
-): any {
-  if (typeof (vnode as any).hydrate === "function") {
-    const parent = host.getParentNode(domNode);
-    return (vnode as any).hydrate(domNode, parent);
-  }
-
+function hydrateFor(vnode: TimelessElement, domNode: any) {
+  // if (typeof (vnode as any).hydrate === "function") {
+  //   // const parent = host.getParentNode(domNode);
+  //   return (vnode as any).hydrate(domNode, parent);
+  // }
   // return vnode.render();
 }
 
 /**
  * Hydrate a Show component.
  */
-function hydrateShow(
-  vnode: TimelessElement,
-  domNode: any,
-  host: TimelessHost,
-): any {
-  if (typeof (vnode as any).hydrate === "function") {
-    const parent = host.getParentNode(domNode);
-    return (vnode as any).hydrate(domNode, parent);
-  }
-
+function hydrateShow(vnode: TimelessElement, domNode: any) {
+  // if (typeof (vnode as any).hydrate === "function") {
+  //   const parent = host.getParentNode(domNode);
+  //   return (vnode as any).hydrate(domNode, parent);
+  // }
   // return vnode.render();
 }

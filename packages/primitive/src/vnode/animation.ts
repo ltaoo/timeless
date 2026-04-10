@@ -1,7 +1,7 @@
-import type { VNodeStyle } from "./types";
+// import type { VNodeStyle } from "./types";
 
 export interface AnimationConfig {
-  property: keyof VNodeStyle;
+  // property: keyof VNodeStyle;
   from?: any;
   to: any;
   duration: number;

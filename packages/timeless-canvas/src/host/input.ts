@@ -3,6 +3,7 @@ import {
   isRef,
   TimelessElement,
   ViewStyleProperties,
+  VNodeView,
 } from "@timeless/timeless";
 
 import { viewStyleToCssText } from "./style";
@@ -10,14 +11,14 @@ import { CanvasHostNode } from "./type";
 import { CanvasDocument } from "./draw";
 // import { canvas } from "./draw";
 
-export interface CanvasInput {
+export type CanvasInput = VNodeView<any> & {
   $elm: any;
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   render(elm: TimelessElement): any;
-}
+};
 
 export function CanvasInput(props: {
   canvas: CanvasDocument;
@@ -107,15 +108,11 @@ export function CanvasInput(props: {
       canvas.patchStyle?.($elm, { [key]: value });
     },
     render(elm: TimelessElement) {
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state?.style) {
+        methods.setStyle(elm.state.style);
       }
-      if (elm.props?.styleSet) {
-        if (isRef(elm.props.styleSet)) {
-          methods.setStyleSet(elm.props.styleSet.value);
-        } else {
-          methods.setStyleSet(elm.props.styleSet);
-        }
+      if (elm.state.styleSet) {
+        methods.setStyleSet(elm.state.styleSet);
       }
       if (elm.events) {
         methods.setupEventListener(elm.events);

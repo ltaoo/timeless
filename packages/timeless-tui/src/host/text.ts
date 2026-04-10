@@ -29,7 +29,7 @@ export function TuiText(value: string | null): TuiText {
       }
     },
     render(elm: TimelessElement) {
-      if (!elm.value) {
+      if (!elm.state.value) {
         return null;
       }
       return $text;

@@ -72,11 +72,11 @@ export function NativeImg(props: {
       $elm.style[k] = value;
     },
     render(elm: TimelessElement) {
-      if (elm.value) {
-        methods.setSrc(elm.value as string);
+      if (elm.state.value) {
+        methods.setSrc(elm.state.value as string);
       }
-      if (elm.props?.style) {
-        methods.setStyle(elm.props.style);
+      if (elm.state.style) {
+        methods.setStyle(elm.state.style);
       }
       if (elm.events) {
         methods.setupEventListener(elm.events);
