@@ -21,6 +21,7 @@ export function SSRText(props: {
     },
     setContent() {},
     render(elm: TimelessElement) {
+      console.log("render text element", elm);
       const value = elm.state.value;
       if (value !== null && value !== undefined) {
         return textEscape(String(value));

@@ -1,6 +1,7 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement } from "./box";
+import { hydrate_node } from "@/renderer/hydrate";
 
 export type DOMFor = VNodeView<Text> & {
   t: "for";
@@ -49,8 +50,22 @@ export function DOMFor(props: {
       // common$.methods.handleElementsMounted();
       return $fragment;
     },
-    hydrate(elm: TimelessElement, $dom: any) {
-      // common$.methods.hydrate(elm, $dom);
+    hydrate(elm: TimelessElement, $dom: HTMLElement | Text) {
+      if ($dom instanceof Text) {
+        return;
+      }
+      if (!elm.children) {
+        return;
+      }
+      const $children = Array.from($dom.childNodes);
+      for (let i = 0; i < elm.children.length; i += 1) {
+        const child = elm.children[i];
+        if (child) {
+          hydrate_node(child, $children[i] as HTMLElement | Text);
+        }
+      }
+      const $anchor = document.createTextNode("");
+      common$.methods.set$elm($anchor);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

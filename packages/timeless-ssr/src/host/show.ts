@@ -19,9 +19,12 @@ export function SSRShow(props: {
       return "reactive";
     },
     render(elm: TimelessElement) {
-      if (!elm.children) return "";
+      if (!elm.children) {
+        return "";
+      }
       let result = "";
-      for (const child of elm.children) {
+      for (let i = 0; i < elm.children.length; i++) {
+        const child = elm.children[i];
         if (child) {
           const child$ = props.build(child);
           result += child$.render(child);

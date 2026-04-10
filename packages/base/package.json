@@ -1,6 +1,6 @@
 {
   "name": "@timeless/base",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "main": "dist/index.js",
   "module": "dist/timeless.base.esm.js",
   "types": "dist/index.d.ts",

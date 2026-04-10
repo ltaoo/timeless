@@ -1,5 +1,6 @@
 // Use UMD global to ensure same module instance on client and server
-const { View, For, Show, Button, styleNames, computed, ref, refarr } = window.Timeless;
+const { View, For, Show, Button, styleNames, computed, ref, refarr } =
+  window.Timeless;
 
 /**
  * load() - Server-side data fetching
@@ -39,7 +40,8 @@ export function head({ data }) {
  */
 export default function Page({ data }) {
   const count = ref(data.count);
-  const visible = ref(data.visible);
+  // const visible_ = ref(data.visible);
+  const visible_ = ref(true);
   const content = ref("content");
   const hoverBox1 = ref(data.hoverBox1);
   const hoverBox2 = ref(data.hoverBox2);
@@ -49,41 +51,41 @@ export default function Page({ data }) {
 
   return View({ class: "app", style: appStyle }, [
     // Header
-    View({ style: titleStyle }, [data.message]),
+    // View({ style: titleStyle }, [data.message]),
 
-    View({ style: infoStyle }, [
-      "This page is server-rendered and hydrated on the client.",
-    ]),
+    // View({ style: infoStyle }, [
+    //   "This page is server-rendered and hydrated on the client.",
+    // ]),
 
     // Counter Section
-    View({ style: sectionStyle }, [
-      View({ style: subtitleStyle }, ["Counter"]),
-      View({ style: counterStyle }, [
-        Button(
-          {
-            style: buttonStyle,
-            onClick() {
-              count.as((v) => v - 1);
-            },
-          },
-          ["-"],
-        ),
-        View({ as: "span", style: countStyle }, [count]),
-        Button(
-          {
-            style: buttonStyle,
-            onClick() {
-              count.as((v) => v + 2);
-            },
-          },
-          ["+"],
-        ),
-      ]),
-    ]),
+    // View({ style: sectionStyle }, [
+    //   View({ style: subtitleStyle }, ["Counter"]),
+    //   View({ style: counterStyle }, [
+    //     Button(
+    //       {
+    //         style: buttonStyle,
+    //         onClick() {
+    //           count.as((v) => v - 1);
+    //         },
+    //       },
+    //       ["-"],
+    //     ),
+    //     View({ as: "span", style: countStyle }, [count]),
+    //     Button(
+    //       {
+    //         style: buttonStyle,
+    //         onClick() {
+    //           count.as((v) => v + 2);
+    //         },
+    //       },
+    //       ["+"],
+    //     ),
+    //   ]),
+    // ]),
     Button(
       {
         onClick() {
-          visible.as((v) => !v);
+          visible_.as((v) => !v);
         },
       },
       ["Toggle Content"],
@@ -97,235 +99,235 @@ export default function Page({ data }) {
       ["update Content"],
     ),
     Show({
-      when: visible,
+      when: visible_,
       ok() {
         return [View({}, [content])];
       },
     }),
 
     // Mouse Events Section
-    View({ as: "section", style: sectionStyle }, [
-      View({ as: "h2", style: subtitleStyle }, ["Mouse Events Test"]),
-      View({ as: "p", style: infoStyle }, [
-        "Hover over the boxes to test mouseenter/mouseleave events:",
-      ]),
-      View({ style: hoverBoxContainerStyle }, [
-        View(
-          {
-            style: hoverBoxStyle,
-            onMouseEnter() {
-              console.log("Box 1: mouseenter triggered");
-              hoverBox1.as(true);
-            },
-            onMouseLeave() {
-              console.log("Box 1: mouseleave triggered");
-              hoverBox1.as(false);
-            },
-          },
-          [
-            Show({
-              when: hoverBox1,
-              ok() {
-                return ["Hovering!"];
-              },
-              else() {
-                return ["Hover me"];
-              },
-            }),
-          ],
-        ),
-        View(
-          {
-            style: hoverBoxStyle,
-            onMouseEnter() {
-              console.log("Box 2: mouseenter triggered");
-              hoverBox2.as(true);
-            },
-            onMouseLeave() {
-              console.log("Box 2: mouseleave triggered");
-              hoverBox2.as(false);
-            },
-          },
-          [
-            Show({
-              when: hoverBox2,
-              ok() {
-                return ["Hovering!"];
-              },
-              else() {
-                return ["Hover me"];
-              },
-            }),
-          ],
-        ),
-      ]),
-    ]),
+    // View({ as: "section", style: sectionStyle }, [
+    //   View({ as: "h2", style: subtitleStyle }, ["Mouse Events Test"]),
+    //   View({ as: "p", style: infoStyle }, [
+    //     "Hover over the boxes to test mouseenter/mouseleave events:",
+    //   ]),
+    //   View({ style: hoverBoxContainerStyle }, [
+    //     View(
+    //       {
+    //         style: hoverBoxStyle,
+    //         onMouseEnter() {
+    //           console.log("Box 1: mouseenter triggered");
+    //           hoverBox1.as(true);
+    //         },
+    //         onMouseLeave() {
+    //           console.log("Box 1: mouseleave triggered");
+    //           hoverBox1.as(false);
+    //         },
+    //       },
+    //       [
+    //         Show({
+    //           when: hoverBox1,
+    //           ok() {
+    //             return ["Hovering!"];
+    //           },
+    //           else() {
+    //             return ["Hover me"];
+    //           },
+    //         }),
+    //       ],
+    //     ),
+    //     View(
+    //       {
+    //         style: hoverBoxStyle,
+    //         onMouseEnter() {
+    //           console.log("Box 2: mouseenter triggered");
+    //           hoverBox2.as(true);
+    //         },
+    //         onMouseLeave() {
+    //           console.log("Box 2: mouseleave triggered");
+    //           hoverBox2.as(false);
+    //         },
+    //       },
+    //       [
+    //         Show({
+    //           when: hoverBox2,
+    //           ok() {
+    //             return ["Hovering!"];
+    //           },
+    //           else() {
+    //             return ["Hover me"];
+    //           },
+    //         }),
+    //       ],
+    //     ),
+    //   ]),
+    // ]),
 
     // List Section
-    View({ style: sectionStyle }, [
-      View({ style: subtitleStyle }, ["Fruit List"]),
-      Button(
-        {
-          style: toggleButtonStyle,
-          onClick() {
-            showList.as((v) => !v);
-          },
-        },
-        ["Toggle List"],
-      ),
+    // View({ style: sectionStyle }, [
+    //   View({ style: subtitleStyle }, ["Fruit List"]),
+    //   Button(
+    //     {
+    //       style: toggleButtonStyle,
+    //       onClick() {
+    //         showList.as((v) => !v);
+    //       },
+    //     },
+    //     ["Toggle List"],
+    //   ),
 
-      Show({
-        when: showList,
-        ok() {
-          return [
-            View({ style: listStyle }, [
-              For({
-                each: fruits,
-                render(item, idx) {
-                  const itemStyle = computed(selectedFruit, (sel) => {
-                    // console.log("compare", sel, item);
-                    const selected = sel === item;
-                    return {
-                      cursor: "pointer",
-                      background: selected ? "#e0f2fe" : "white",
-                      "border-color": selected ? "#38bdf8" : "#e5e7eb",
-                    };
-                  });
-                  // console.log("[]fruit render");
-                  return View(
-                    {
-                      style: styleNames([listItemStyle, itemStyle]),
-                      onClick() {
-                        selectedFruit.as(item);
-                      },
-                    },
-                    [
-                      computed(idx, (t) => `${t + 1}、`),
-                      View({ as: "span" }, [item]),
-                    ],
-                  );
-                },
-              }),
-            ]),
+    //   Show({
+    //     when: showList,
+    //     ok() {
+    //       return [
+    //         View({ style: listStyle }, [
+    //           For({
+    //             each: fruits,
+    //             render(item, idx) {
+    //               const itemStyle = computed(selectedFruit, (sel) => {
+    //                 // console.log("compare", sel, item);
+    //                 const selected = sel === item;
+    //                 return {
+    //                   cursor: "pointer",
+    //                   background: selected ? "#e0f2fe" : "white",
+    //                   "border-color": selected ? "#38bdf8" : "#e5e7eb",
+    //                 };
+    //               });
+    //               // console.log("[]fruit render");
+    //               return View(
+    //                 {
+    //                   style: styleNames([listItemStyle, itemStyle]),
+    //                   onClick() {
+    //                     selectedFruit.as(item);
+    //                   },
+    //                 },
+    //                 [
+    //                   computed(idx, (t) => `${t + 1}、`),
+    //                   View({ as: "span" }, [item]),
+    //                 ],
+    //               );
+    //             },
+    //           }),
+    //         ]),
 
-            View({ style: buttonGroupStyle }, [
-              Button(
-                {
-                  style: buttonStyle,
-                  onClick: () => {
-                    const names = ["Mango", "Grape", "Peach", "Kiwi", "Pear"];
-                    const pick =
-                      names[Math.floor(Math.random() * names.length)];
-                    fruits.push(pick);
-                  },
-                },
-                ["Add Fruit"],
-              ),
-              Button(
-                {
-                  style: buttonStyle,
-                  onClick: () => {
-                    if (fruits.length > 0) {
-                      fruits.pop();
-                    }
-                  },
-                },
-                ["Remove Last"],
-              ),
-            ]),
+    //         View({ style: buttonGroupStyle }, [
+    //           Button(
+    //             {
+    //               style: buttonStyle,
+    //               onClick: () => {
+    //                 const names = ["Mango", "Grape", "Peach", "Kiwi", "Pear"];
+    //                 const pick =
+    //                   names[Math.floor(Math.random() * names.length)];
+    //                 fruits.push(pick);
+    //               },
+    //             },
+    //             ["Add Fruit"],
+    //           ),
+    //           Button(
+    //             {
+    //               style: buttonStyle,
+    //               onClick: () => {
+    //                 if (fruits.length > 0) {
+    //                   fruits.pop();
+    //                 }
+    //               },
+    //             },
+    //             ["Remove Last"],
+    //           ),
+    //         ]),
 
-            View(
-              {
-                style: {
-                  margin: "12px 0 8px",
-                  color: "#666",
-                  "font-size": "14px",
-                },
-              },
-              ["Click an item to select, then reorder:"],
-            ),
-            View({ style: buttonGroupStyle }, [
-              Button(
-                {
-                  style: buttonStyle,
-                  onClick() {
-                    const idx = fruits.indexOf(selectedFruit.value);
-                    console.log("up", idx);
-                    if (idx > 0) {
-                      fruits.up(idx);
-                    }
-                  },
-                },
-                ["↑ Up"],
-              ),
-              Button(
-                {
-                  style: buttonStyle,
-                  onClick() {
-                    const idx = fruits.indexOf(selectedFruit.value);
-                    console.log("down", idx);
-                    if (idx < fruits.length - 1) fruits.down(idx);
-                  },
-                },
-                ["↓ Down"],
-              ),
-              View(
-                {
-                  style: buttonStyle,
-                  onClick() {
-                    const idx = fruits.indexOf(selectedFruit.value);
-                    fruits.moveToFirst(idx);
-                  },
-                },
-                ["⇤ First"],
-              ),
-              Button(
-                {
-                  style: buttonStyle,
-                  onClick() {
-                    const idx = fruits.indexOf(selectedFruit.value);
-                    fruits.moveToLast(idx);
-                  },
-                },
-                ["Last ⇥"],
-              ),
-            ]),
-            View({ style: buttonGroupStyle }, [
-              Button(
-                {
-                  style: buttonStyle,
-                  onClick() {
-                    const idx = fruits.indexOf(selectedFruit.value);
-                    if (idx < fruits.length - 1) {
-                      fruits.swap(idx, idx + 1);
-                    }
-                  },
-                },
-                ["Swap with Next"],
-              ),
-              Button(
-                {
-                  style: buttonStyle,
-                  onClick() {
-                    fruits.shuffle();
-                  },
-                },
-                ["Shuffle"],
-              ),
-              Button(
-                {
-                  style: buttonStyle,
-                  onClick() {
-                    fruits.reverse();
-                  },
-                },
-                ["Reverse"],
-              ),
-            ]),
-          ];
-        },
-      }),
-    ]),
+    //         View(
+    //           {
+    //             style: {
+    //               margin: "12px 0 8px",
+    //               color: "#666",
+    //               "font-size": "14px",
+    //             },
+    //           },
+    //           ["Click an item to select, then reorder:"],
+    //         ),
+    //         View({ style: buttonGroupStyle }, [
+    //           Button(
+    //             {
+    //               style: buttonStyle,
+    //               onClick() {
+    //                 const idx = fruits.indexOf(selectedFruit.value);
+    //                 console.log("up", idx);
+    //                 if (idx > 0) {
+    //                   fruits.up(idx);
+    //                 }
+    //               },
+    //             },
+    //             ["↑ Up"],
+    //           ),
+    //           Button(
+    //             {
+    //               style: buttonStyle,
+    //               onClick() {
+    //                 const idx = fruits.indexOf(selectedFruit.value);
+    //                 console.log("down", idx);
+    //                 if (idx < fruits.length - 1) fruits.down(idx);
+    //               },
+    //             },
+    //             ["↓ Down"],
+    //           ),
+    //           View(
+    //             {
+    //               style: buttonStyle,
+    //               onClick() {
+    //                 const idx = fruits.indexOf(selectedFruit.value);
+    //                 fruits.moveToFirst(idx);
+    //               },
+    //             },
+    //             ["⇤ First"],
+    //           ),
+    //           Button(
+    //             {
+    //               style: buttonStyle,
+    //               onClick() {
+    //                 const idx = fruits.indexOf(selectedFruit.value);
+    //                 fruits.moveToLast(idx);
+    //               },
+    //             },
+    //             ["Last ⇥"],
+    //           ),
+    //         ]),
+    //         View({ style: buttonGroupStyle }, [
+    //           Button(
+    //             {
+    //               style: buttonStyle,
+    //               onClick() {
+    //                 const idx = fruits.indexOf(selectedFruit.value);
+    //                 if (idx < fruits.length - 1) {
+    //                   fruits.swap(idx, idx + 1);
+    //                 }
+    //               },
+    //             },
+    //             ["Swap with Next"],
+    //           ),
+    //           Button(
+    //             {
+    //               style: buttonStyle,
+    //               onClick() {
+    //                 fruits.shuffle();
+    //               },
+    //             },
+    //             ["Shuffle"],
+    //           ),
+    //           Button(
+    //             {
+    //               style: buttonStyle,
+    //               onClick() {
+    //                 fruits.reverse();
+    //               },
+    //             },
+    //             ["Reverse"],
+    //           ),
+    //         ]),
+    //       ];
+    //     },
+    //   }),
+    // ]),
   ]);
 }
 

@@ -33,6 +33,19 @@ export function renderToString(elm: TimelessElement): string {
     console.error("[SSR] Root Element can't be lazy element");
     return "";
   }
+  // console.log("render to string");
+  function print(elm: TimelessElement) {
+    // console.log("elm.t", elm.t, elm.state, elm.children?.length);
+    if (elm.children) {
+      for (let i = 0; i < elm.children.length; i += 1) {
+        const child = elm.children[i];
+        if (isElement(child)) {
+          print(child);
+        }
+      }
+    }
+  }
+  // print(elm);
   const root$ = build(elm);
   if (!root$) return "";
   return root$.render(elm);

@@ -146,11 +146,6 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         const child = children[i];
         // console.log("for children", child);
         (() => {
-          // if (typeof child === "function") {
-          //   const r = child();
-          //   state.children[i] = r;
-          //   return;
-          // }
           if (isElement(child)) {
             state.children[i] = child;
             return;

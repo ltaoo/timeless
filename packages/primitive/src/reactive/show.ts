@@ -1,7 +1,8 @@
 import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
-import { ViewChildren, isElement } from "@/content/type";
+import { TimelessElement, ViewChildren, isElement } from "@/content/type";
 import { MountedEvent } from "@/event";
+import { Txt } from "@/content/text";
 
 type ShowProps = {
   when:
@@ -14,7 +15,7 @@ type ShowProps = {
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
 };
-type ShowState = { value: boolean; children: any[]; props: any };
+type ShowState = { value: boolean; children: TimelessElement[] };
 
 export function Show(props: ShowProps) {
   const { when, onMounted, beforeUnmounted, onUnmounted } = props;
@@ -23,11 +24,10 @@ export function Show(props: ShowProps) {
   const state: ShowState = {
     value: false,
     children: [],
-    props,
   };
 
   const methods = {
-    normalize(children: ViewChildren) {
+    normalize_children(children: ViewChildren) {
       if (children === null || children === undefined) return [];
       if (Array.isArray(children)) {
         return children;
@@ -35,13 +35,32 @@ export function Show(props: ShowProps) {
       return [children];
     },
     build_children_with_condition(condition: boolean) {
+      console.log("build_children_with_condition", condition);
+      const children: TimelessElement[] = [];
       const next = condition
-        ? methods.normalize(props.ok())
+        ? methods.normalize_children(props.ok())
         : props.else
-          ? methods.normalize(props.else())
+          ? methods.normalize_children(props.else())
           : [];
-      state.children = next;
-      return next;
+      for (let i = 0; i < next.length; i += 1) {
+        const node = next[i];
+        (() => {
+          if (isElement(node)) {
+            children[i] = node;
+            return;
+          }
+          if (isRef(node)) {
+            children[i] = Txt(node);
+            return;
+          }
+          if (node) {
+            children[i] = Txt(String(node));
+            return;
+          }
+        })();
+      }
+      // console.log('build children', next.length, children);
+      return children;
     },
     setup_value_subscribe() {
       // console.log("[show] - setup_value_subscribe", when);
@@ -76,7 +95,7 @@ export function Show(props: ShowProps) {
     },
   };
   methods.setup_value_subscribe();
-  methods.build_children_with_condition(state.value);
+  state.children = methods.build_children_with_condition(state.value);
 
   return {
     t: "show",
@@ -86,34 +105,33 @@ export function Show(props: ShowProps) {
     set $elm(v) {
       $elm = v;
     },
-    value: state.value,
     state,
     children: state.children,
-    hydrate(startDom: any, parentDom?: any) {
-      const condition = isRef(when) ? !!when.value : !!when;
-      state.value = condition;
-      // Create anchor if not already created
-      if (!$elm) {
-        // $elm = safeCreateTextNode("");
-      }
-      const targetChildren = methods.build_children_with_condition(condition);
-      // 调用宿主层方法进行 hydrate
-      if (typeof $elm.hydrateContent === "function") {
-        return $elm.hydrateContent(
-          targetChildren,
-          startDom,
-          parentDom,
-          onMounted,
-          (newNodes: any[], newInstances: any[]) => {
-            // _current_nodes = newNodes;
-            state.children = newInstances;
-          },
-        );
-      }
+    // hydrate(startDom: any, parentDom?: any) {
+    //   const condition = isRef(when) ? !!when.value : !!when;
+    //   state.value = condition;
+    //   // Create anchor if not already created
+    //   if (!$elm) {
+    //     // $elm = safeCreateTextNode("");
+    //   }
+    //   const targetChildren = methods.build_children_with_condition(condition);
+    //   // 调用宿主层方法进行 hydrate
+    //   if (typeof $elm.hydrateContent === "function") {
+    //     return $elm.hydrateContent(
+    //       targetChildren,
+    //       startDom,
+    //       parentDom,
+    //       onMounted,
+    //       (newNodes: any[], newInstances: any[]) => {
+    //         // _current_nodes = newNodes;
+    //         state.children = newInstances;
+    //       },
+    //     );
+    //   }
 
-      // 如果宿主不支持，返回 anchor
-      return $elm;
-    },
+    //   // 如果宿主不支持，返回 anchor
+    //   return $elm;
+    // },
     onMounted(event: MountedEvent) {
       if (onMounted) {
         onMounted(event);

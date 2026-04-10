@@ -22,11 +22,11 @@ export function HostElement(props: {
   let child_elements: TimelessElement[] = [];
 
   const methods = {
-    set$elm(elm: any) {
+    set$elm(elm: HTMLElement | Text) {
       $elm = elm;
     },
-    getChildren() {
-      return child_nodes;
+    set$childrne(v: any[]) {
+      child_host_nodes = v;
     },
     setStyle(
       style: ViewStyleProperties,
@@ -243,6 +243,9 @@ export function HostElement(props: {
           child.onUnmounted();
         }
       }
+    },
+    getChildren() {
+      return child_nodes;
     },
     /** 应该重命名为 build children */
     appendChildren(children: (TimelessElement | null)[]) {

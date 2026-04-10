@@ -1,6 +1,7 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement } from "./box";
+import { hydrate_node } from "@/renderer/hydrate";
 
 export type DOMFragment = VNodeView<Text> & {
   t: "fragment";
@@ -12,8 +13,8 @@ export function DOMFragment(props: {
   build: (elm: TimelessElement) => VNodeView<Text>;
 }): DOMFragment {
   const t = "fragment";
-  const $anchor = document.createTextNode("");
-  const common$ = HostElement({ $elm: $anchor, t, build: props.build });
+  let $anchor: Text;
+  const common$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
     t,
@@ -32,12 +33,28 @@ export function DOMFragment(props: {
     removeEventListener: common$.methods.removeEventListener,
     getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
+      $anchor = document.createTextNode("");
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
     },
-    hydrate(elm: TimelessElement, $dom: Text) {
-      // common$.methods.hydrate(elm, $dom);
+    hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
+      if ($elm instanceof Text) {
+        return;
+      }
+      if (!elm.children) {
+        return;
+      }
+      const $children = Array.from($elm.childNodes);
+      common$.methods.set$elm($elm);
+      for (let i = 0; i < elm.children.length; i += 1) {
+        const child = elm.children[i];
+        if (child) {
+          hydrate_node(child, $children[i] as HTMLElement | Text);
+        }
+      }
+      const $anchor = document.createTextNode("");
+      common$.methods.set$elm($anchor);
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

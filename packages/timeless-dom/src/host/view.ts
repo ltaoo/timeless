@@ -1,6 +1,7 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement } from "./box";
+import { hydrate_node } from "@/renderer/hydrate";
 
 export type DOMView = VNodeView<HTMLDivElement> & {
   t: "view";
@@ -42,10 +43,20 @@ export function DOMView(props: {
       $elm.appendChild($fragment);
       return $elm;
     },
-    hydrate(elm: TimelessElement, $e: HTMLDivElement) {
-      $elm = $e;
+    hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
+      console.log("[DOMView] hydrate", elm.children, $elm.childNodes);
       common$.methods.set$elm($elm);
       common$.methods.setupEventListener(elm.events);
+      if (!elm.children) {
+        return;
+      }
+      const $children = Array.from($elm.childNodes);
+      for (let i = 0; i < elm.children.length; i += 1) {
+        const child = elm.children[i];
+        if (child) {
+          hydrate_node(child, $children[i] as HTMLElement | Text);
+        }
+      }
     },
     getChildren: common$.methods.getChildren,
     appendChildren: common$.methods.appendChildren,

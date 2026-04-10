@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Button, View } from "@timeless/timeless";
+import { Button, ref, Show, View } from "@timeless/timeless";
 
 import { renderToString } from "../index";
 
@@ -103,5 +103,37 @@ describe("renderToString", () => {
     );
     const result = renderToString(element);
     expect(result).toBe(`<button>Toggle Content</button>`);
+  });
+
+  it("show element", () => {
+    const element = View(
+      {
+        onClick() {
+          console.log("hello");
+        },
+      },
+      [
+        Show({
+          when: true,
+          ok() {
+            return ["Toggle Content"];
+          },
+        }),
+      ],
+    );
+    const result = renderToString(element);
+    expect(result).toBe(`<div>Toggle Content</div>`);
+  });
+
+  it("show element with reactive value", () => {
+    const visible_ = ref(true);
+    const element = Show({
+      when: visible_,
+      ok() {
+        return ["Toggle Content"];
+      },
+    });
+    const result = renderToString(element);
+    expect(result).toBe(`Toggle Content`);
   });
 });

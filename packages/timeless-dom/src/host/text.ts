@@ -4,7 +4,7 @@ import { HostElement } from "./box";
 export type DOMText = VNodeView<Text> & {
   t: "text";
   render(elm: TimelessElement): Text | null;
-  hydrate(elm: TimelessElement, $text: Text | null): void;
+  hydrate(elm: TimelessElement, $text: HTMLElement | Text): void;
   setContent(value: string | number | null): void;
 };
 
@@ -31,7 +31,7 @@ export function DOMText(props: {
     addEventListener: common$.methods.addEventListener,
     removeEventListener: common$.methods.removeEventListener,
     getBoundingClientRect: common$.methods.getBoundingClientRect,
-    setContent(v: string | number | null) {
+    setContent(v?: string | number | null) {
       if (v !== undefined && v !== null) {
         $text.textContent = String(v);
       } else {
@@ -52,10 +52,11 @@ export function DOMText(props: {
       );
       return $text;
     },
-    hydrate(elm: TimelessElement, $t: Text | null) {
-      $text = $t;
-      if ($text) {
-        $text.textContent = String(elm.state.value);
+    hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
+      if ($elm instanceof Text) {
+        $text = $elm;
+        common$.methods.set$elm($text);
+        common$.methods.setupEventListener(elm.events);
       }
     },
     getChildren: common$.methods.getChildren,

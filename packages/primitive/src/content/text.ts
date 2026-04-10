@@ -15,6 +15,7 @@ export function Txt(
       if (isRef(value)) {
         value.subscribe({
           onChange(v: any) {
+            console.log("[]Text handle value changed", v);
             if (v === state.value) {
               return;
             }
