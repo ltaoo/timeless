@@ -27,8 +27,25 @@ export type ForState<T> = {
   children: (TimelessElement | null)[];
 };
 
-export function For<T>(props: ForProps<T>) {
-  let $anchor: any = null;
+export function For<T>(
+  props: ForProps<T>,
+  bus?: Partial<{
+    onRefresh: (diff: {
+      added: {
+        idx: number;
+        element: TimelessElement<any, any> | null;
+      }[];
+      removed: {
+        idx: number;
+      }[];
+      moved: {
+        from: number;
+        to: number;
+      }[];
+    }) => void;
+  }>,
+) {
+  // let $anchor: any = null;
   let $elm: any = null;
 
   const { key, each, render, onMounted, beforeUnmounted, onUnmounted } = props;
@@ -49,6 +66,11 @@ export function For<T>(props: ForProps<T>) {
   const create_idx = (origin_item: T): DerivedRef<number> => {
     return computed(each, () => {
       const arr = isRef(each) ? each.value : each;
+      // console.log(
+      //   "recompute index when the each is changed",
+      //   JSON.stringify(arr),
+      //   origin_item,
+      // );
       return arr ? arr.indexOf(origin_item) : -1;
     });
   };
@@ -233,8 +255,17 @@ export function For<T>(props: ForProps<T>) {
       splice_arr(_original_items);
       splice_arr(_index_computed);
 
+      // console.log('[]For move', $elm);
       if ($elm && typeof $elm.move === "function") {
         $elm.move(from, to);
+      }
+
+      if (bus?.onRefresh) {
+        bus.onRefresh({
+          added: [],
+          removed: [],
+          moved: [{ from, to }],
+        });
       }
     },
     /** 交换 indexA 和 indexB 位置的元素 */
@@ -379,6 +410,9 @@ export function For<T>(props: ForProps<T>) {
 
       // 4. Patch Phase: Apply to DOM
 
+      if (bus?.onRefresh) {
+        bus.onRefresh(diff);
+      }
       // 4.1 Remove nodes
       if ($elm && typeof $elm.refresh === "function") {
         $elm.refresh(diff);
@@ -523,92 +557,89 @@ export function For<T>(props: ForProps<T>) {
     },
     state,
     children: state.children,
-    render() {
-      return $elm;
-    },
-    hydrate(start_dom: any, parent_dom?: any) {
-      const nodes = (isRef(each) ? each.value : each) || [];
+    // hydrate(start_dom: any, parent_dom?: any) {
+    //   const nodes = (isRef(each) ? each.value : each) || [];
 
-      // Create anchor if not already created
-      if (!$anchor) {
-        // anchor = safeCreateTextNode("");
-        $elm = $anchor;
-      }
+    //   // Create anchor if not already created
+    //   if (!$anchor) {
+    //     // anchor = safeCreateTextNode("");
+    //     $elm = $anchor;
+    //   }
 
-      let cur_dom = start_dom;
+    //   let cur_dom = start_dom;
 
-      for (let i = 0; i < nodes.length; i += 1) {
-        const item = nodes[i];
-        state.items[i] = item;
-        // Create computed index that depends on `each`
-        _original_items[i] = item;
-        const idx_computed = create_idx(item);
-        _index_computed[i] = idx_computed;
-        let res = render(item, idx_computed);
-        // if (typeof res === "function") {
-        //   res = res();
-        // }
+    //   for (let i = 0; i < nodes.length; i += 1) {
+    //     const item = nodes[i];
+    //     state.items[i] = item;
+    //     // Create computed index that depends on `each`
+    //     _original_items[i] = item;
+    //     const idx_computed = create_idx(item);
+    //     _index_computed[i] = idx_computed;
+    //     let res = render(item, idx_computed);
+    //     // if (typeof res === "function") {
+    //     //   res = res();
+    //     // }
 
-        if (!res) {
-          _elements[i] = null;
-          continue;
-        }
+    //     if (!res) {
+    //       _elements[i] = null;
+    //       continue;
+    //     }
 
-        if (isElement(res)) {
-          _elements[i] = res;
-          if (cur_dom && typeof (res as any).hydrate === "function") {
-            (res as any).hydrate(cur_dom);
-            _$children[i] = res.$elm;
-            // const $sibling = (() => {
-            //   if (res.$elm) {
-            //     return res.$elm.getNextSibling();
-            //   }
-            //   return cur_dom.getNextSibling();
-            // })();
-            // cur_dom = $sibling;
-          } else if (cur_dom) {
-            res.$elm = cur_dom;
-            // res.render();
-            // _$children[i] = res.$elm;
-            // cur_dom = cur_dom.getNextSibling();
-          }
-        }
-      }
+    //     if (isElement(res)) {
+    //       _elements[i] = res;
+    //       if (cur_dom && typeof (res as any).hydrate === "function") {
+    //         (res as any).hydrate(cur_dom);
+    //         _$children[i] = res.$elm;
+    //         // const $sibling = (() => {
+    //         //   if (res.$elm) {
+    //         //     return res.$elm.getNextSibling();
+    //         //   }
+    //         //   return cur_dom.getNextSibling();
+    //         // })();
+    //         // cur_dom = $sibling;
+    //       } else if (cur_dom) {
+    //         res.$elm = cur_dom;
+    //         // res.render();
+    //         // _$children[i] = res.$elm;
+    //         // cur_dom = cur_dom.getNextSibling();
+    //       }
+    //     }
+    //   }
 
-      const $parent = (() => {
-        if (parent_dom) {
-          return parent_dom;
-        }
-        if (start_dom) {
-          return start_dom.getParentNode();
-        }
-        return null;
-      })();
-      if ($parent) {
-        if (cur_dom) {
-          // host.insertBefore($parent, anchor, currentDom);
-          $parent.insertBefore(cur_dom, $anchor);
-        } else {
-          // host.appendChild($parent, anchor);
-          $parent.appendChild($anchor);
-        }
-      }
+    //   const $parent = (() => {
+    //     if (parent_dom) {
+    //       return parent_dom;
+    //     }
+    //     if (start_dom) {
+    //       return start_dom.getParentNode();
+    //     }
+    //     return null;
+    //   })();
+    //   if ($parent) {
+    //     if (cur_dom) {
+    //       // host.insertBefore($parent, anchor, currentDom);
+    //       $parent.insertBefore(cur_dom, $anchor);
+    //     } else {
+    //       // host.appendChild($parent, anchor);
+    //       $parent.appendChild($anchor);
+    //     }
+    //   }
 
-      state.rendered = true;
+    //   state.rendered = true;
 
-      if (onMounted) {
-        onMounted({ target: $anchor });
-      }
+    //   if (onMounted) {
+    //     onMounted({ target: $anchor });
+    //   }
 
-      // Call onMounted for children
-      for (let i = 0; i < _elements.length; i += 1) {
-        const el = _elements[i];
-        if (isElement(el) && el.onMounted) {
-          el.onMounted({ target: el.$elm });
-        }
-      }
-      return $anchor;
-    },
+    //   // Call onMounted for children
+    //   for (let i = 0; i < _elements.length; i += 1) {
+    //     const el = _elements[i];
+    //     if (isElement(el) && el.onMounted) {
+    //       el.onMounted({ target: el.$elm });
+    //     }
+    //   }
+    //   return $anchor;
+    // },
     onMounted(event: MountedEvent) {
       state.rendered = true;
       if (onMounted) {

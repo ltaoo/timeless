@@ -1,7 +1,7 @@
-import { Subscriber, TimelessRef } from "./types";
+import { DerivedRef, isRef, Ref, Subscriber, TimelessRef } from "./types";
 
 export function ref<T = any>(v: T): TimelessRef<T> {
-  let _local_value = v;
+  let raw_value = v;
   const _initial_value = v;
   const deps: Subscriber[] = [];
   function notify(action: {
@@ -27,7 +27,7 @@ export function ref<T = any>(v: T): TimelessRef<T> {
           return;
         }
         if (ctx.onChange) {
-          ctx.onChange(_local_value);
+          ctx.onChange(raw_value);
         }
       })();
     }
@@ -41,86 +41,93 @@ export function ref<T = any>(v: T): TimelessRef<T> {
       deps.length = 0;
     },
     get value() {
-      return _local_value;
+      return raw_value;
     },
     eq(v: T) {
-      return _local_value === v;
+      return raw_value === v;
     },
     isSame(v: unknown) {
-      return Object.is(_local_value, v);
+      return Object.is(raw_value, v);
     },
     isStrictEqual(v: unknown) {
-      return _local_value === v;
+      return raw_value === v;
     },
     as(value: T | ((cur: T) => T)) {
       if (typeof value === "function") {
-        _local_value = (value as (cur: T) => T)(_local_value);
+        raw_value = (value as (cur: T) => T)(raw_value);
       } else {
-        _local_value = value;
+        raw_value = value;
       }
       notify({ type: "refresh" });
     },
     set(value: T) {
-      _local_value = value;
+      raw_value = value;
       notify({ type: "refresh" });
     },
     update(fn: (current: T) => T) {
-      _local_value = fn(_local_value);
+      raw_value = fn(raw_value);
       notify({ type: "refresh" });
     },
     reset() {
-      _local_value = _initial_value;
+      raw_value = _initial_value;
       notify({ type: "refresh" });
     },
     toggle(): boolean {
-      _local_value = !(_local_value as any) as T;
+      raw_value = !(raw_value as any) as T;
       notify({ type: "refresh" });
-      return _local_value as any;
+      return raw_value as any;
     },
     increment(amount: number = 1): number {
-      _local_value = ((_local_value as any) + amount) as T;
+      raw_value = ((raw_value as any) + amount) as T;
       notify({ type: "refresh" });
-      return _local_value as any;
+      return raw_value as any;
     },
     decrement(amount: number = 1): number {
-      _local_value = ((_local_value as any) - amount) as T;
+      raw_value = ((raw_value as any) - amount) as T;
       notify({ type: "refresh" });
-      return _local_value as any;
+      return raw_value as any;
     },
     append(suffix: string): string {
-      _local_value = ((_local_value as any) + suffix) as T;
+      raw_value = ((raw_value as any) + suffix) as T;
       notify({ type: "refresh" });
-      return _local_value as any;
+      return raw_value as any;
     },
     prepend(prefix: string): string {
-      _local_value = (prefix + (_local_value as any)) as T;
+      raw_value = (prefix + (raw_value as any)) as T;
       notify({ type: "refresh" });
-      return _local_value as any;
+      return raw_value as any;
     },
     clear() {
-      if (typeof _local_value === "string") {
-        _local_value = "" as T;
-      } else if (typeof _local_value === "number") {
-        _local_value = 0 as T;
-      } else if (typeof _local_value === "boolean") {
-        _local_value = false as T;
-      } else if (Array.isArray(_local_value)) {
-        (_local_value as any).length = 0;
+      if (typeof raw_value === "string") {
+        raw_value = "" as T;
+      } else if (typeof raw_value === "number") {
+        raw_value = 0 as T;
+      } else if (typeof raw_value === "boolean") {
+        raw_value = false as T;
+      } else if (Array.isArray(raw_value)) {
+        (raw_value as any).length = 0;
       } else {
-        _local_value = null as T;
+        raw_value = null as T;
       }
       notify({ type: "refresh" });
     },
     clone(): T {
-      if (_local_value === null || _local_value === undefined)
-        return _local_value;
-      if (typeof _local_value === "object") {
-        return JSON.parse(JSON.stringify(_local_value));
+      if (raw_value === null || raw_value === undefined) return raw_value;
+      if (typeof raw_value === "object") {
+        return JSON.parse(JSON.stringify(raw_value));
       }
-      return _local_value;
+      return raw_value;
     },
     isNullish(): boolean {
-      return _local_value === null || _local_value === undefined;
+      return raw_value === null || raw_value === undefined;
+    },
+    lt(v: T | DerivedRef<T> | Ref<T>): boolean {
+      const comparisonValue = isRef(v) ? (v as any).value : v;
+      return (raw_value as any) < comparisonValue;
+    },
+    gt(v: T | DerivedRef<T> | Ref<T>): boolean {
+      const comparisonValue = isRef(v) ? (v as any).value : v;
+      return (raw_value as any) > comparisonValue;
     },
   };
   return r;

@@ -1,6 +1,6 @@
 import { has, get } from "./registry";
 import { refObject } from "./reactive-object";
-import { Subscriber, Ref, isRef, TimelessRefArray } from "./types";
+import { Subscriber, Ref, isRef, TimelessRefArray, DerivedRef } from "./types";
 
 export interface RefArray<T> extends Ref<T[]> {
   key: unknown;
@@ -155,15 +155,17 @@ export function refArray<T>(
     for (let i = 0; i < deps.length; i += 1) {
       console.log("[]reactive-array - notifiy", i, action, deps.length);
       const ctx = deps[i];
-      if (action.type === "refresh") {
-        if (ctx.onChange) {
-          ctx.onChange(_raw_value);
+      (() => {
+        if (action.type === "refresh") {
+          if (ctx.onChange) {
+            ctx.onChange(_raw_value);
+          }
+          return;
         }
-        return;
-      }
-      if (ctx.onPatch) {
-        ctx.onPatch(action);
-      }
+        if (ctx.onPatch) {
+          ctx.onPatch(action);
+        }
+      })();
     }
   }
   const _inner: any[] = [];
@@ -187,6 +189,7 @@ export function refArray<T>(
     __is_ref: true as const,
     __is_ref_array: true as const,
     subscribe(ctx: Subscriber) {
+      if (deps.includes(ctx)) return;
       deps.push(ctx);
     },
     destroy() {
@@ -441,13 +444,15 @@ export function refArray<T>(
       notify({ type: "move", from: fromIndex, to: toIndex });
       return r;
     },
-    up(index: number) {
-      if (index <= 0 || index >= _raw_value.length) return r;
-      return r.move(index, index - 1);
+    up(index: number | DerivedRef<number> | Ref<number>) {
+      const v = isRef(index) ? index.value : index;
+      if (v <= 0 || v >= _raw_value.length) return r;
+      return r.move(v, v - 1);
     },
-    down(index: number) {
-      if (index < 0 || index >= _raw_value.length - 1) return r;
-      return r.move(index, index + 1);
+    down(index: number | DerivedRef<number> | Ref<number>) {
+      const v = isRef(index) ? index.value : index;
+      if (v < 0 || v >= _raw_value.length - 1) return r;
+      return r.move(v, v + 1);
     },
     swap(indexA: number, indexB: number) {
       if (indexA === indexB) return r;

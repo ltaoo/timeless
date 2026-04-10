@@ -24,7 +24,7 @@ export function derive<T extends Record<string, any>, R>(
 
 export function derive(deps: any, fn: any): DerivedRef<any> {
   const _deps: Subscriber[] = [];
-  let _local_value: any;
+  let raw_value: any;
 
   const is_single_ref = isRef(deps);
   const is_array = is_single_ref || Array.isArray(deps);
@@ -49,13 +49,13 @@ export function derive(deps: any, fn: any): DerivedRef<any> {
     return res;
   };
 
-  _local_value = is_array ? fn(...get_values()) : fn(get_values());
+  raw_value = is_array ? fn(...get_values()) : fn(get_values());
 
   function notify() {
     for (let i = 0; i < _deps.length; i += 1) {
       const ctx = _deps[i];
       if (ctx.onChange) {
-        ctx.onChange(_local_value);
+        ctx.onChange(raw_value);
       }
     }
   }
@@ -63,10 +63,10 @@ export function derive(deps: any, fn: any): DerivedRef<any> {
   const onChange = () => {
     const args = get_values();
     const next_value = is_array ? fn(...args) : fn(args);
-    if (_local_value === next_value) {
+    if (raw_value === next_value) {
       return;
     }
-    _local_value = next_value;
+    raw_value = next_value;
     notify();
   };
 
@@ -85,13 +85,13 @@ export function derive(deps: any, fn: any): DerivedRef<any> {
       _deps.length = 0;
     },
     get value() {
-      return _local_value;
+      return raw_value;
     },
     isSame(v: unknown) {
-      return Object.is(_local_value, v);
+      return Object.is(raw_value, v);
     },
     isStrictEqual(v: unknown) {
-      return _local_value === v;
+      return raw_value === v;
     },
   };
 }

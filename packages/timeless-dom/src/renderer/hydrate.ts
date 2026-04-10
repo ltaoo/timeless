@@ -1,13 +1,7 @@
-import { VNodeView, type TimelessElement } from "@timeless/timeless";
+import { type TimelessElement } from "@timeless/timeless";
 
 import { render } from "./index";
 import { build } from "./build";
-
-// export function installDomHost(options?: Parameters<typeof createDomHost>[0]) {
-//   const host = createDomHost(options);
-//   setHost(host);
-//   return host;
-// }
 
 /**
  * Hydrate a virtual node tree onto existing server-rendered DOM.
@@ -39,6 +33,11 @@ export function hydrate(
 
   // Perform hydration
   hydrate_node(vnode, container, { initial: true });
+  if (vnode.onMounted) {
+    vnode.onMounted({
+      target: container,
+    });
+  }
 }
 
 /**
@@ -51,7 +50,7 @@ export function hydrate_node(
     initial: boolean;
   }> = {},
 ) {
-  console.log("hydrate node", vnode.t, $elm);
+  // console.log("hydrate node", vnode.t, $elm);
   if (!vnode || !$elm) {
     return;
   }
@@ -64,36 +63,36 @@ export function hydrate_node(
       if (!$first) {
         return;
       }
-      hydrateView(vnode, $first as HTMLElement);
+      hydrate_view(vnode, $first as HTMLElement);
       return;
     }
-    hydrateView(vnode, $elm as HTMLElement);
+    hydrate_view(vnode, $elm as HTMLElement);
     return;
   }
   if (vnode.t === "text") {
     if (!($elm instanceof Text)) {
       return;
     }
-    hydrateText(vnode, $elm as Text);
+    hydrate_text(vnode, $elm as Text);
     return;
   }
   if (vnode.t === "fragment") {
-    hydrateFragment(vnode, $elm as HTMLElement);
+    hydrate_fragment(vnode, $elm as HTMLElement);
     return;
   }
   if (vnode.t === "for") {
-    hydrateFor(vnode, $elm as HTMLElement);
+    hydrate_for(vnode, $elm as HTMLElement);
     return;
   }
   if (vnode.t === "show") {
-    hydrateShow(vnode, $elm as HTMLElement);
+    hydrate_show(vnode, $elm as HTMLElement);
     return;
   }
   // if (vnode.t === "match") {
   //   return hydrateMatch(vnode, domNode);
   // }
   if (vnode.t === "button") {
-    hydrateButton(vnode, $elm as HTMLElement);
+    hydrate_button(vnode, $elm as HTMLElement);
     return;
   }
   // if (vnode.t === "img") {
@@ -116,7 +115,7 @@ export function hydrate_node(
 /**
  * Hydrate a View component.
  */
-function hydrateView(vnode: TimelessElement, $elm: HTMLElement) {
+function hydrate_view(vnode: TimelessElement, $elm: HTMLElement) {
   const view$ = build(vnode);
   vnode.$elm = view$;
   view$.hydrate(vnode, $elm);
@@ -125,13 +124,13 @@ function hydrateView(vnode: TimelessElement, $elm: HTMLElement) {
 /**
  * Hydrate a Text component.
  */
-function hydrateText(vnode: TimelessElement, $elm: Text): any {
+function hydrate_text(vnode: TimelessElement, $elm: Text): any {
   const text$ = build(vnode);
   vnode.$elm = text$;
   text$.hydrate(vnode, $elm);
 }
 
-function hydrateFragment(vnode: TimelessElement, $elm: HTMLElement) {
+function hydrate_fragment(vnode: TimelessElement, $elm: HTMLElement) {
   const fragment$ = build(vnode);
   vnode.$elm = fragment$;
   fragment$.hydrate(vnode, $elm);
@@ -140,24 +139,22 @@ function hydrateFragment(vnode: TimelessElement, $elm: HTMLElement) {
 /**
  * Hydrate a For component.
  */
-function hydrateFor(vnode: TimelessElement, domNode: any) {
-  // if (typeof (vnode as any).hydrate === "function") {
-  //   // const parent = host.getParentNode(domNode);
-  //   return (vnode as any).hydrate(domNode, parent);
-  // }
-  // return vnode.render();
+function hydrate_for(vnode: TimelessElement, $elm: HTMLElement) {
+  const for$ = build(vnode);
+  vnode.$elm = for$;
+  for$.hydrate(vnode, $elm);
 }
 
 /**
  * Hydrate a Show component.
  */
-function hydrateShow(vnode: TimelessElement, $elm: HTMLElement) {
+function hydrate_show(vnode: TimelessElement, $elm: HTMLElement) {
   const show$ = build(vnode);
   vnode.$elm = show$;
   show$.hydrate(vnode, $elm);
 }
 
-function hydrateButton(vnode: TimelessElement, $elm: HTMLElement) {
+function hydrate_button(vnode: TimelessElement, $elm: HTMLElement) {
   const button$ = build(vnode);
   vnode.$elm = button$;
   button$.hydrate(vnode, $elm);

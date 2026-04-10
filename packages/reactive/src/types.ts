@@ -24,6 +24,8 @@ export type TimelessRef<T> = {
   clear: () => void;
   clone: () => T;
   isNullish: () => boolean;
+  lt: (v: T | DerivedRef<T> | Ref<T>) => boolean;
+  gt: (v: T | DerivedRef<T> | Ref<T>) => boolean;
 };
 
 export type TimelessRefObject<T> = {

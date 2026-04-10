@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { refarr } from "@timeless/reactive";
+
+import { View } from "@/content/view";
+
 import { For } from "../reactive/for";
 
 type Todo = {
@@ -225,6 +228,134 @@ describe("For", () => {
 
       expect(moveSpy).toHaveBeenCalledWith(0, 1);
       expect(forNode.children.map((c: any) => c?.value?.id)).toEqual([2, 1, 3]);
+      expect(todos.value).toStrictEqual([
+        { id: 2, title: "B", completed: false },
+        { id: 1, title: "A", completed: false },
+        { id: 3, title: "C", completed: false },
+      ]);
+    });
+
+    it("should handle down() which delegates to move() of plain text content", () => {
+      const todos = refarr(["Apple", "Banana", "Cherry"]);
+      const handleRefresh = vi.fn();
+      const for$ = For(
+        {
+          each: todos,
+          render(todo) {
+            return View({}, [todo]);
+          },
+        },
+        {
+          onRefresh: handleRefresh,
+        },
+      );
+      for$.onMounted({ target: null });
+      todos.down(0);
+      expect(handleRefresh).toHaveBeenCalledWith({
+        added: [],
+        removed: [],
+        moved: [{ from: 0, to: 1 }],
+      });
+      expect(todos.value).toStrictEqual(["Banana", "Apple", "Cherry"]);
+    });
+
+    it("test diff with reverse", () => {
+      const todos = refarr(["Apple", "Banana", "Cherry"]);
+      const handleRefresh = vi.fn();
+      const for$ = For(
+        {
+          each: todos,
+          render(todo) {
+            return View({}, [todo]);
+          },
+        },
+        {
+          onRefresh: handleRefresh,
+        },
+      );
+      for$.onMounted({ target: null });
+      todos.reverse();
+      expect(handleRefresh).toHaveBeenCalledWith(
+        expect.objectContaining({
+          added: [],
+          removed: [],
+          moved: [{ from: 2, to: 0 }, { from: 0, to: 2 }],
+        }),
+      );
+      expect(todos.value).toStrictEqual(["Cherry", "Banana", "Apple"]);
+    });
+
+    it("test diff with reverse on larger list", () => {
+      const todos = refarr(["A", "B", "C", "D", "E", "F"]);
+      const handleRefresh = vi.fn();
+      const for$ = For(
+        {
+          each: todos,
+          render(todo) {
+            return View({}, [todo]);
+          },
+        },
+        {
+          onRefresh: handleRefresh,
+        },
+      );
+      for$.onMounted({ target: null });
+      todos.reverse();
+      // A(0)→5, B(1)→4, C(2)→3, D(3)→2, E(4)→1, F(5)→0
+      // C(2)↔D(3) stay? No — C was at 2, now at 3; D was at 3, now at 2
+      // All items change position except none
+      expect(handleRefresh).toHaveBeenCalledWith(
+        expect.objectContaining({
+          added: [],
+          removed: [],
+          moved: [
+            { from: 5, to: 0 }, // F: 5→0
+            { from: 4, to: 1 }, // E: 4→1
+            { from: 3, to: 2 }, // D: 3→2
+            { from: 2, to: 3 }, // C: 2→3
+            { from: 1, to: 4 }, // B: 1→4
+            { from: 0, to: 5 }, // A: 0→5
+          ],
+        }),
+      );
+      expect(todos.value).toStrictEqual(["F", "E", "D", "C", "B", "A"]);
+    });
+
+    it("test diff with reverse on duplicated items", () => {
+      const todos = refarr(["A", "B", "A", "C", "A"]);
+      const handleRefresh = vi.fn();
+      const for$ = For(
+        {
+          each: todos,
+          render(todo) {
+            return View({}, [todo]);
+          },
+        },
+        {
+          onRefresh: handleRefresh,
+        },
+      );
+      for$.onMounted({ target: null });
+      // ["A", "B", "A", "C", "A"] → ["A", "C", "A", "B", "A"]
+      // old_map FIFO: "A"→[0,2,4], "B"→[1], "C"→[3]
+      // new[0]="A" ← old 0, same pos → no move
+      // new[1]="C" ← old 3, 3≠1    → moved {from:3,to:1}
+      // new[2]="A" ← old 2, same pos → no move
+      // new[3]="B" ← old 1, 1≠3    → moved {from:1,to:3}
+      // new[4]="A" ← old 4, same pos → no move
+      // Duplicated "A"s pair by FIFO and stay in place; only B↔C swap
+      todos.reverse();
+      expect(handleRefresh).toHaveBeenCalledWith(
+        expect.objectContaining({
+          added: [],
+          removed: [],
+          moved: [
+            { from: 3, to: 1 }, // C: 3→1
+            { from: 1, to: 3 }, // B: 1→3
+          ],
+        }),
+      );
+      expect(todos.value).toStrictEqual(["A", "C", "A", "B", "A"]);
     });
   });
 

@@ -223,129 +223,159 @@ function ApplicationView() {
       //   },
       //   ["Hello"],
       // ),
-      // Input({
-      //   class: "w-full",
-      //   placeholder: "Add a todo todo",
-      //   value: todo_,
-      //   onMounted() {
-      //     console.log("[Input] onMounted");
-      //   },
-      //   onChange(event) {
-      //     todo_.as(event.target.value);
-      //   },
-      // }),
-      // Button(
-      //   {
-      //     onMounted() {
-      //       console.log("[Button] onMounted");
-      //     },
-      //     onClick() {
-      //       // visible_.as((prev) => {
-      //       //   return !prev;
-      //       // });
-      //       const v = todo_.value;
-      //       todo_.as("");
-      //       if (!v) {
-      //         alert("must input todo");
-      //         return;
-      //       }
-      //       todos_.push({
-      //         id: todos_.length,
-      //         completed: false,
-      //         title: v,
-      //       });
-      //     },
-      //   },
-      //   ["Add Todo"],
-      // ),
-      // Button(
-      //   {
-      //     onClick() {
-      //       const v = todo_.value;
-      //       if (!v) {
-      //         return;
-      //       }
-      //       todo_.as("");
-      //       todos_.unshift({
-      //         id: todos_.length,
-      //         completed: false,
-      //         title: v,
-      //       });
-      //     },
-      //   },
-      //   ["Unshift Todo"],
-      // ),
-      // Button(
-      //   {
-      //     onClick() {
-      //       todos_.as([
-      //         {
-      //           id: 2,
-      //           title: "Study for exam exam exam",
-      //           completed: false,
-      //         },
-      //         {
-      //           id: 1,
-      //           title: "Buy groceries_update",
-      //           completed: true,
-      //         },
-      //         {
-      //           id: 4,
-      //           title: "Sleep",
-      //           completed: false,
-      //         },
-      //       ]);
-      //     },
-      //   },
-      //   ["Refresh"],
-      // ),
-      // For({
-      //   key: "id",
-      //   each: todos_,
-      //   render(todo, idx) {
-      //     return View(
-      //       {
-      //         style: {
-      //           display: "flex",
-      //         },
-      //       },
-      //       [
-      //         Checkbox({
-      //           checked: computed(todo, (t) => t.completed),
-      //           onChange(event) {
-      //             const todo$ = getobj(todo);
-      //             if (todo$) {
-      //               todo$.set("completed", event.target.checked);
-      //             }
-      //           },
-      //         }),
-      //         View(
-      //           {
-      //             style: {
-      //               color: "#fff",
-      //               "text-decoration": computed(todo, (t) =>
-      //                 t.completed ? "line-through" : "none",
-      //               ),
-      //             },
-      //           },
-      //           [idx, " ", computed(todo, (t) => t.title)],
-      //         ),
-      //         View(
-      //           {
-      //             class: "icon",
-      //             onClick() {
-      //               todos_.remove(todo);
-      //             },
-      //           },
-      //           [Icon({ name: "trash", color: "#fff", size: 16 })],
-      //         ),
-      //       ],
-      //     );
-      //   },
-      //   onMounted() {
-      //     console.log("[Todo For] onMounted");
-      //   },
-      // }),
+      Input({
+        class: "w-full",
+        placeholder: "Add a todo todo",
+        value: todo_,
+        onMounted() {
+          console.log("[Input] onMounted");
+        },
+        onChange(event) {
+          todo_.as(event.target.value);
+        },
+      }),
+      Button(
+        {
+          onMounted() {
+            console.log("[Button] onMounted");
+          },
+          onClick() {
+            // visible_.as((prev) => {
+            //   return !prev;
+            // });
+            const v = todo_.value;
+            todo_.as("");
+            if (!v) {
+              alert("must input todo");
+              return;
+            }
+            todos_.push({
+              id: todos_.length,
+              completed: false,
+              title: v,
+            });
+          },
+        },
+        ["Add Todo"],
+      ),
+      Button(
+        {
+          onClick() {
+            const v = todo_.value;
+            if (!v) {
+              return;
+            }
+            todo_.as("");
+            todos_.unshift({
+              id: todos_.length,
+              completed: false,
+              title: v,
+            });
+          },
+        },
+        ["Unshift Todo"],
+      ),
+      Button(
+        {
+          onClick() {
+            todos_.as([
+              {
+                id: 2,
+                title: "Study for exam exam exam",
+                completed: false,
+              },
+              {
+                id: 1,
+                title: "Buy groceries_update",
+                completed: true,
+              },
+              {
+                id: 4,
+                title: "Sleep",
+                completed: false,
+              },
+            ]);
+          },
+        },
+        ["Refresh"],
+      ),
+      For({
+        key: "id",
+        each: todos_,
+        render(todo, idx) {
+          return View(
+            {
+              style: {
+                display: "flex",
+              },
+            },
+            [
+              Checkbox({
+                checked: computed(todo, (t) => t.completed),
+                onChange(event) {
+                  const todo$ = getobj(todo);
+                  if (todo$) {
+                    todo$.set("completed", event.target.checked);
+                  }
+                },
+              }),
+              View(
+                {
+                  style: {
+                    color: "#fff",
+                    "text-decoration": computed(todo, (t) =>
+                      t.completed ? "line-through" : "none",
+                    ),
+                  },
+                },
+                [idx, " ", computed(todo, (t) => t.title)],
+              ),
+              View(
+                {
+                  class: "icon",
+                  style: {
+                    color: "#fff",
+                    cursor: "pointer",
+                  },
+                  onClick() {
+                    todos_.remove(todo);
+                  },
+                },
+                [Icon({ name: "trash", color: "#fff", size: 16 })],
+              ),
+              View(
+                {
+                  class: "icon",
+                  style: {
+                    color: "#fff",
+                    cursor: "pointer",
+                  },
+                  onClick() {
+                    todos_.up(idx);
+                  },
+                },
+                [Icon({ name: "chevron-up", color: "#fff", size: 16 })],
+              ),
+              View(
+                {
+                  class: "icon",
+                  style: {
+                    color: "#fff",
+                    cursor: "pointer",
+                  },
+                  onClick() {
+                    todos_.down(idx);
+                  },
+                },
+                [Icon({ name: "chevron-down", color: "#fff", size: 16 })],
+              ),
+            ],
+          );
+        },
+        onMounted() {
+          console.log("[Todo For] onMounted");
+        },
+      }),
       // Img({
       //   src: "/public/avatar.jpeg",
       //   style: {
@@ -353,127 +383,127 @@ function ApplicationView() {
       //     height: "60px",
       //   },
       // }),
-      View(
-        {
-          style: {
-            padding: "20px",
-          },
-        },
-        [
-          Button(
-            {
-              onMounted(event) {
-                // console.log(event.target);
-                const { x, y, width, height } =
-                  event.target.getBoundingClientRect();
-                dissmissable$.addIgnore({
-                  x,
-                  y,
-                  width,
-                  height,
-                });
-                popper_.as({
-                  x: x,
-                  y: y + height + 2,
-                  placed: false,
-                });
-              },
-              onClick(event) {
-                // event.stopPropagation();
-                visible_.as((prev) => {
-                  return !prev;
-                });
-                popper_.assign({
-                  placed: true,
-                });
-              },
-            },
-            ["Click it"],
-          ),
-        ],
-      ),
-      Show({
-        when: visible_,
-        onMounted() {
-          console.log("[Show] onMounted");
-        },
-        onUnmounted() {
-          console.log("[Show] onUnmounted");
-        },
-        ok() {
-          return Portal(
-            {
-              onMounted() {
-                console.log("[Portal in Show] onMounted");
-              },
-              onUnmounted() {
-                console.log("[Portal in Show] onUnmounted");
-              },
-            },
-            [
-              Popper(
-                {
-                  placement: "top",
-                  strategy: "absolute",
-                  x: computed(popper_, (t) => t.x),
-                  y: computed(popper_, (t) => t.y),
-                  placed: computed(popper_, (t) => t.placed),
-                  onMounted(event) {
-                    const rect = event.target.getBoundingClientRect();
-                    console.log("[Popper in Portal] onMounted", rect);
-                  },
-                  onUnmounted() {
-                    console.log("[Popper in Portal] onUnmounted");
-                  },
-                },
-                [
-                  View(
-                    {
-                      style: {
-                        "background-color": "#fff",
-                      },
-                      onMounted(event) {
-                        const rect = event.target.getBoundingClientRect();
-                        console.log("[View in Popper] onMounted", rect);
-                        dissmissable$.addIgnore({
-                          x: rect.x,
-                          y: rect.y,
-                          width: rect.width,
-                          height: rect.height,
-                        });
-                      },
-                      onUnmounted() {
-                        console.log("[View in Popper] onUnmounted");
-                      },
-                    },
-                    [
-                      View(
-                        {
-                          onMounted() {
-                            console.log("text1 in View mounted");
-                          },
-                        },
-                        ["first content in body"],
-                      ),
-                      View(
-                        {
-                          onMounted(event) {
-                            console.log(
-                              "text2 in View mounted",
-                              event.target.getBoundingClientRect(),
-                            );
-                          },
-                        },
-                        ["second content in body"],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-      }),
+      // View(
+      //   {
+      //     style: {
+      //       padding: "20px",
+      //     },
+      //   },
+      //   [
+      //     Button(
+      //       {
+      //         onMounted(event) {
+      //           // console.log(event.target);
+      //           const { x, y, width, height } =
+      //             event.target.getBoundingClientRect();
+      //           dissmissable$.addIgnore({
+      //             x,
+      //             y,
+      //             width,
+      //             height,
+      //           });
+      //           popper_.as({
+      //             x: x,
+      //             y: y + height + 2,
+      //             placed: false,
+      //           });
+      //         },
+      //         onClick(event) {
+      //           // event.stopPropagation();
+      //           visible_.as((prev) => {
+      //             return !prev;
+      //           });
+      //           popper_.assign({
+      //             placed: true,
+      //           });
+      //         },
+      //       },
+      //       ["Click it"],
+      //     ),
+      //   ],
+      // ),
+      // Show({
+      //   when: visible_,
+      //   onMounted() {
+      //     console.log("[Show] onMounted");
+      //   },
+      //   onUnmounted() {
+      //     console.log("[Show] onUnmounted");
+      //   },
+      //   ok() {
+      //     return Portal(
+      //       {
+      //         onMounted() {
+      //           console.log("[Portal in Show] onMounted");
+      //         },
+      //         onUnmounted() {
+      //           console.log("[Portal in Show] onUnmounted");
+      //         },
+      //       },
+      //       [
+      //         Popper(
+      //           {
+      //             placement: "top",
+      //             strategy: "absolute",
+      //             x: computed(popper_, (t) => t.x),
+      //             y: computed(popper_, (t) => t.y),
+      //             placed: computed(popper_, (t) => t.placed),
+      //             onMounted(event) {
+      //               const rect = event.target.getBoundingClientRect();
+      //               console.log("[Popper in Portal] onMounted", rect);
+      //             },
+      //             onUnmounted() {
+      //               console.log("[Popper in Portal] onUnmounted");
+      //             },
+      //           },
+      //           [
+      //             View(
+      //               {
+      //                 style: {
+      //                   "background-color": "#fff",
+      //                 },
+      //                 onMounted(event) {
+      //                   const rect = event.target.getBoundingClientRect();
+      //                   console.log("[View in Popper] onMounted", rect);
+      //                   dissmissable$.addIgnore({
+      //                     x: rect.x,
+      //                     y: rect.y,
+      //                     width: rect.width,
+      //                     height: rect.height,
+      //                   });
+      //                 },
+      //                 onUnmounted() {
+      //                   console.log("[View in Popper] onUnmounted");
+      //                 },
+      //               },
+      //               [
+      //                 View(
+      //                   {
+      //                     onMounted() {
+      //                       console.log("text1 in View mounted");
+      //                     },
+      //                   },
+      //                   ["first content in body"],
+      //                 ),
+      //                 View(
+      //                   {
+      //                     onMounted(event) {
+      //                       console.log(
+      //                         "text2 in View mounted",
+      //                         event.target.getBoundingClientRect(),
+      //                       );
+      //                     },
+      //                   },
+      //                   ["second content in body"],
+      //                 ),
+      //               ],
+      //             ),
+      //           ],
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // }),
       // View(
       //   {
       //     style: {
@@ -541,7 +571,7 @@ function ApplicationView() {
       //         ["Todo List Page"],
       //       ),
       //       For({
-      //         each: todos,
+      //         each: todos_,
       //         render(todo) {
       //           return View({}, [todo.title]);
       //         },

@@ -43,7 +43,7 @@ export function DOMButton(props: {
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLButtonElement) {
-      console.log("hydrate button element", $elm, elm.events);
+      // console.log("hydrate button element", $elm, elm.events);
       if ($elm instanceof Text) {
         return;
       }

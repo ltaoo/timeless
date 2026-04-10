@@ -38,6 +38,7 @@ export function DOMShow(props: {
       return $fragment;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
+      console.log("[timeless-dom] show hydrate", elm, $elm);
       if ($elm instanceof Text) {
         return;
       }
@@ -50,26 +51,22 @@ export function DOMShow(props: {
         if ($parent) {
           const $children = Array.from($parent.childNodes);
           const idx = $children.indexOf($elm);
-          const $children_belong_show = $children.slice(idx, idx + count + 1);
-          console.log(
-            "[]show $children belong show",
-            idx,
-            $children_belong_show,
-          );
-          common$.methods.set$childrne($children_belong_show);
-          const $last = $children_belong_show[$children_belong_show.length];
+          const $children_belong_me = $children.slice(idx, idx + count);
+          console.log("[]show $children belong me", idx, $children_belong_me);
+          common$.methods.set$childrne($children_belong_me);
+          const $last = $children[idx + count];
+          console.log("[]show $children belong me", idx + count, $last);
           if ($last) {
+            console.log("[]show insert before ");
             $parent.insertBefore($anchor, $last);
           } else {
+            console.log("[]show append child");
             $parent.appendChild($anchor);
           }
           for (let i = 0; i < elm.children.length; i += 1) {
             const child = elm.children[i];
             if (child) {
-              hydrate_node(
-                child,
-                $children_belong_show[i] as HTMLElement | Text,
-              );
+              hydrate_node(child, $children_belong_me[i] as HTMLElement | Text);
             }
           }
         }

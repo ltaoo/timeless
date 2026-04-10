@@ -202,7 +202,6 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
     // Helper: setup bindings (attributes, class, style, events)
     setup_value_subscribe() {
-      console.log("attributes", attributes);
       if (attributes) {
         Object.keys(attributes).forEach((k) => {
           const vv = attributes[k];

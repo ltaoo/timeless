@@ -276,7 +276,11 @@ export function HostElement(props: {
       const $fragment = methods.appendChildren(children);
       const $parent = methods.getParent();
       if ($parent) {
-        $parent.appendChild($fragment);
+        if ($elm && $elm instanceof Text) {
+          $parent.insertBefore($fragment, $elm);
+        } else {
+          $parent.appendChild($fragment);
+        }
       }
       setTimeout(() => {
         console.log("invoke children onMounted function");
@@ -296,6 +300,9 @@ export function HostElement(props: {
       }
       if ($parent) {
         for (const $child of child_host_nodes) {
+          if ($child === $elm) {
+            continue;
+          }
           if ($child && $child.parentElement === $parent) {
             $parent.removeChild($child);
           }
@@ -312,9 +319,8 @@ export function HostElement(props: {
     },
     insert(idx: number, children: (TimelessElement | null)[]) {
       const $parent = methods.getParent();
-      // console.log("[dom]For - insert", idx, children, $parent);
+      console.log("[dom]insert child", idx, children, $parent);
       if (!$parent) {
-        // console.warn("[dom]For - insert - $parent is null");
         return;
       }
       for (const child of children) {
@@ -349,6 +355,25 @@ export function HostElement(props: {
         }
       }
     },
+    move(from: number, to: number) {
+      const $parent = methods.getParent();
+      if (!$parent) {
+        console.warn("move parent not found");
+        return;
+      }
+      const $from = child_host_nodes[from];
+      if (!$from) {
+        console.warn("move node not found from", from);
+        return;
+      }
+      console.log("[timeless-dom]move node", from, to, $from);
+
+      child_host_nodes.splice(from, 1);
+      child_host_nodes.splice(to, 0, $from);
+
+      const $to = child_host_nodes[to + 1] || null;
+      $parent.insertBefore($from, $to);
+    },
     refresh(data: {
       children: (TimelessElement | null)[];
       added: { idx: number; element: TimelessElement | null }[];
@@ -358,6 +383,7 @@ export function HostElement(props: {
       const { added, removed, moved } = data;
       const $parent = methods.getParent();
       if (!$parent) {
+        console.warn("refresh parent not found");
         return;
       }
       // 1. Remove (descending order to keep indices stable)
@@ -370,36 +396,31 @@ export function HostElement(props: {
         child_host_nodes.splice(idx, 1);
       }
 
-      // 2. Move (detach moved nodes, rebuild order, reinsert)
+      // 2. Move
       if (moved.length > 0) {
-        const move_entries = moved.map(({ from, to }) => ({
-          $node: child_host_nodes[from],
-          to,
-        }));
+        // for (let i = 0; i < moved.length; i++) {
+        //   const { from, to } = moved[i];
+        // }
+        // moved.from 是原始数组下标，需映射到 remove 之后的下标
+        const removedIdxs = removed.map((r) => r.idx).sort((a, b) => a - b);
+        const entries = moved
+          .map(({ from, to }) => {
+            let shift = 0;
+            for (const ri of removedIdxs) {
+              if (ri < from) shift++;
+              else break;
+            }
+            return { $node: child_host_nodes[from - shift], to };
+          })
+          .sort((a, b) => a.to - b.to);
 
-        const moved_from_set = new Set(moved.map((m) => m.from));
-        const remaining = child_host_nodes.filter(
-          (_, i) => !moved_from_set.has(i),
-        );
-
-        // Insert moved nodes at their target positions (ascending order)
-        const sorted_moves = [...move_entries].sort((a, b) => a.to - b.to);
-        const result: ChildNode[] = [...remaining];
-        for (const { $node, to } of sorted_moves) {
-          if ($node) {
-            result.splice(to, 0, $node);
+        for (const { $node, to } of entries) {
+          if (!$node) continue;
+          const currentFrom = child_host_nodes.indexOf($node);
+          if (currentFrom !== -1 && currentFrom !== to) {
+            methods.move(currentFrom, to);
           }
         }
-
-        // Reinsert all children in correct order before anchor
-        for (const $node of result) {
-          if ($node) {
-            $parent.insertBefore($node, $elm);
-          }
-        }
-
-        child_host_nodes = [];
-        child_host_nodes.push(...result);
       }
 
       // 3. Insert added nodes

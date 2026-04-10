@@ -19,7 +19,7 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
   // if (dep) {
   //   return dep;
   // }
-  let _local_value = fn(
+  let raw_vallue = fn(
     (() => {
       if (isRef(deps)) {
         return deps.value;
@@ -34,7 +34,7 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
     for (let i = 0; i < _deps.length; i += 1) {
       const ctx = _deps[i];
       if (ctx.onChange) {
-        ctx.onChange(_local_value);
+        ctx.onChange(raw_vallue);
       }
     }
   }
@@ -71,12 +71,12 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
 
   _computed_ref.subscribe({
     onPatch() {
-      _local_value = fn(_computed_ref.value);
+      raw_vallue = fn(_computed_ref.value);
       notify({ type: "refresh" });
     },
     onChange() {
       // console.log("computed ref is changed");
-      _local_value = fn(_computed_ref.value);
+      raw_vallue = fn(_computed_ref.value);
       notify({ type: "refresh" });
     },
   });
@@ -90,13 +90,13 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
       _deps.length = 0;
     },
     get value() {
-      return _local_value;
+      return raw_vallue;
     },
     isSame(v: unknown) {
-      return Object.is(_local_value, v);
+      return Object.is(raw_vallue, v);
     },
     isStrictEqual(v: unknown) {
-      return _local_value === v;
+      return raw_vallue === v;
     },
   };
 

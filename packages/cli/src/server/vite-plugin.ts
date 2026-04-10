@@ -79,7 +79,7 @@ async function main() {
     }
 
     // Pass plain data to Page - components can use ref(data.xxx) for reactivity
-    console.log("[Timeless] Hydrating with plain data");
+    // console.log("[Timeless] Hydrating with plain data");
 
     // Hydrate the app
     const root = document.getElementById("root");

@@ -14,7 +14,7 @@ export function DangerouslyInnerHTML(html: string | Ref<string>) {
     },
     state: {},
     render() {
-      let _local_value = (() => {
+      let raw_value = (() => {
         if (isRef(html)) {
           return html.value;
         }
@@ -26,7 +26,7 @@ export function DangerouslyInnerHTML(html: string | Ref<string>) {
             // host.setInnerHTML?.($elm, v);
           },
         });
-        _local_value = html.value;
+        raw_value = html.value;
       }
       // host.setInnerHTML?.($elm, _local_value);
       return $elm;

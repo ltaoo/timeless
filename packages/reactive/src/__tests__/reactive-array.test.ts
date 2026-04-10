@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { refArray } from "../reactive-array";
+import { computed } from "@/computed";
 
 describe("RefArray", () => {
   describe("get/set", () => {
@@ -549,9 +550,9 @@ describe("RefArray", () => {
 
   describe("down", () => {
     it("should move item one position backward", () => {
-      const arr = refArray([1, 2, 3, 4]);
+      const arr = refArray(["Apple", "Banner", "Cherry"]);
       arr.down(1);
-      expect(arr.value).toEqual([1, 3, 2, 4]);
+      expect(arr.value).toEqual(["Apple", "Cherry", "Banner"]);
     });
 
     it("should return self without change if index is last", () => {
@@ -1031,6 +1032,27 @@ describe("RefArray", () => {
       arr.destroy();
       arr.push(4);
       expect(handler).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("refarr with computed", () => {
+    it("should work fine", () => {
+      const arr = refArray([1, 2, 3]);
+      const handler = vi.fn();
+      arr.subscribe({ onChange: handler });
+      const spy = vi.fn();
+      const idx = computed(arr, (t) => {
+        spy(t);
+        console.log(t);
+        return t.indexOf(1);
+      });
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenNthCalledWith(1, [1, 2, 3]);
+      expect(idx.value).toBe(0);
+      arr.reverse();
+      expect(spy).toHaveBeenCalledTimes(2);
+      expect(spy).toHaveBeenNthCalledWith(2, [3, 2, 1]);
+      expect(idx.value).toBe(2);
     });
   });
 });
