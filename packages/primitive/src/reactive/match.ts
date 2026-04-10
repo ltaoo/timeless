@@ -1,7 +1,6 @@
 import { isRef, Ref } from "@timeless/reactive";
 
 import { TimelessElement, isElement } from "@/content/type";
-import { safeCreateTextNode } from "@/util/env";
 import { MountedEvent } from "@/event";
 
 type MatchProps = {
@@ -133,9 +132,9 @@ export function Match(props: MatchProps) {
       state.value = value;
 
       // Create anchor if not already created
-      if (!$elm) {
-        $elm = safeCreateTextNode("");
-      }
+      // if (!$elm) {
+      //   $elm = safeCreateTextNode("");
+      // }
 
       const target = methods.get_children_with_value(value);
       state.children = target;
@@ -147,9 +146,9 @@ export function Match(props: MatchProps) {
       state.value = value;
 
       // Create anchor if not already created
-      if (!$elm) {
-        $elm = safeCreateTextNode("");
-      }
+      // if (!$elm) {
+      //   $elm = safeCreateTextNode("");
+      // }
 
       const targetChildren = methods.get_children_with_value(value);
 

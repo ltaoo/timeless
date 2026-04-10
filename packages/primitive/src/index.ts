@@ -3,8 +3,6 @@ console.log("primitive.version " + __Version);
 // Re-export reactive for convenience
 export * from "@timeless/reactive";
 
-export * from "./host";
-
 export * from "./reactive/for";
 export * from "./reactive/show";
 export * from "./reactive/match";
@@ -131,6 +129,5 @@ export * from "./util/h";
 export * from "./util/listener";
 export * from "./interaction/dismissable";
 
-export * from "./host";
 // export * as VNode from "./vnode";
 export * from "./vnode/view";

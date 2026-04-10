@@ -1,7 +1,8 @@
-import type { ElementDescriptor } from "./descriptor";
-import { mount } from "./mount";
+// import type { ElementDescriptor } from "./descriptor";
+// import { mount } from "./mount";
 import type { VNode, VNodeElement, VNodeStyle } from "./types";
 import { resolveComputedStyle } from "./style-preset";
+import { TimelessElement } from "@/content/type";
 
 const VOID_ELEMENTS = new Set([
   "area",
@@ -90,9 +91,10 @@ function vnodeToHtml(node: VNode): string {
   return html;
 }
 
-export function renderToString(descriptor: ElementDescriptor): string {
-  const vnode = mount(descriptor, null);
-  return vnodeToHtml(vnode);
+export function renderToString(descriptor: TimelessElement): string {
+  // const vnode = mount(descriptor, null);
+  // return vnodeToHtml(vnode);
+  return "";
 }
 
 export function vnodeToJSON(vnode: VNode): object {
@@ -100,7 +102,11 @@ export function vnodeToJSON(vnode: VNode): object {
     return { kind: "text", text: vnode.text, key: vnode.key };
   }
   if (vnode.kind === "fragment") {
-    return { kind: "fragment", key: vnode.key, children: vnode.children.map(vnodeToJSON) };
+    return {
+      kind: "fragment",
+      key: vnode.key,
+      children: vnode.children.map(vnodeToJSON),
+    };
   }
   return {
     kind: "element",
@@ -113,4 +119,3 @@ export function vnodeToJSON(vnode: VNode): object {
     children: vnode.children.map(vnodeToJSON),
   };
 }
-

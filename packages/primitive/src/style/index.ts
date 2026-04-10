@@ -26,9 +26,90 @@ export type ViewStyle =
   | DerivedRef<ViewStyleProperties>
   | Ref<ViewStyleProperties>;
 
-export type RawViewStyleProperties = {
-  [k: string]: string | number | boolean | null | undefined;
-};
+// export type RawViewStyleProperties = {
+// [k: string]: string | number | boolean | null | undefined;
+// };
+
+export interface RawViewStyleProperties {
+  width?: number | string;
+  height?: number | string;
+  minWidth?: number | string;
+  minHeight?: number | string;
+  maxWidth?: number | string;
+  maxHeight?: number | string;
+
+  margin?: number | string;
+  marginTop?: number | string;
+  marginRight?: number | string;
+  marginBottom?: number | string;
+  marginLeft?: number | string;
+  padding?: number | string;
+  paddingTop?: number | string;
+  paddingRight?: number | string;
+  paddingBottom?: number | string;
+  paddingLeft?: number | string;
+
+  position?: "static" | "relative" | "absolute" | "fixed" | "sticky";
+  top?: number | string;
+  right?: number | string;
+  bottom?: number | string;
+  left?: number | string;
+  zIndex?: number;
+
+  color?: string;
+  backgroundColor?: string;
+  opacity?: number;
+
+  borderWidth?: number;
+  borderStyle?: "none" | "solid" | "dashed" | "dotted";
+  borderColor?: string;
+  borderRadius?: number;
+  borderTopWidth?: number;
+  borderRightWidth?: number;
+  borderBottomWidth?: number;
+  borderLeftWidth?: number;
+  borderTopLeftRadius?: number;
+  borderTopRightRadius?: number;
+  borderBottomLeftRadius?: number;
+  borderBottomRightRadius?: number;
+
+  fontSize?: number;
+  fontWeight?: number | "bold" | "normal";
+  fontFamily?: string;
+  fontStyle?: "normal" | "italic";
+  lineHeight?: number;
+  letterSpacing?: number;
+  textAlign?: "left" | "center" | "right" | "justify";
+  textDecoration?: "none" | "underline" | "line-through";
+  textTransform?: "none" | "capitalize" | "uppercase" | "lowercase";
+  maxLines?: number;
+  overflow?: "visible" | "hidden";
+
+  pointerEvents?: "auto" | "none";
+
+  transforms?: VNodeTransform[];
+  shadows?: VNodeShadow[];
+
+  [key: string]: any;
+}
+
+export interface VNodeTransform {
+  translate?: { x?: number; y?: number; z?: number };
+  rotate?: number;
+  rotateX?: number;
+  rotateY?: number;
+  rotateZ?: number;
+  scale?: number | { x?: number; y?: number };
+  skew?: { x?: number; y?: number };
+}
+
+export interface VNodeShadow {
+  color: string;
+  offsetX: number;
+  offsetY: number;
+  blurRadius: number;
+  spreadRadius?: number;
+}
 
 export type ViewStyleInput = ViewStyle;
 

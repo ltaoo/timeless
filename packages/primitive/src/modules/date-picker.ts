@@ -7,7 +7,6 @@ import { Portal as NativePortal } from "@/content/portal";
 import { Fragment } from "@/content/fragment";
 import { For } from "@/reactive/for";
 import { classNames } from "@/style/index";
-// import { getHost } from "@/host";
 
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";

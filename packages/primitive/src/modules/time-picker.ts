@@ -6,12 +6,11 @@ import { ViewChildren } from "@/content/type";
 import { Portal as NativePortal } from "@/content/portal";
 import { Fragment } from "@/content/fragment";
 import { For } from "@/reactive/for";
+import { Button, ButtonProps } from "@/interaction/button";
 import { classNames } from "@/style/index";
-import { getHost } from "@/host";
 
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";
-import { Button, ButtonProps } from "@/interaction/button";
 
 export function Root(
   props: ViewProps & { store: TimePickerCore },
@@ -30,7 +29,6 @@ export function Trigger(
   props: ViewProps & { store: TimePickerCore; id?: string },
   children: ViewChildren = [],
 ) {
-  const host = getHost();
   const { store, ...rest } = props;
 
   const events: (() => void)[] = [];
@@ -68,12 +66,12 @@ export function Trigger(
     {
       ...rest,
       onMounted(event) {
-        const $elm = (event as any).target as HTMLDivElement;
+        const $elm = event.target;
         store.$popper.setReference(
           {
             $el: $elm,
             getRect() {
-              return host.getBoundingClientRect?.($elm) as any;
+              return $elm.getBoundingClientRect();
             },
           },
           { force: true },
@@ -92,13 +90,15 @@ export function Trigger(
           store.$presence.show();
           store.$popper.place();
         };
-        host.addEventListener($elm, "pointerdown", handlePointerDown);
+        // @ts-ignore
+        $elm.addEventListener("pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
           rest.onMounted(event);
         }
         return () => {
-          host.removeEventListener($elm, "pointerdown", handlePointerDown);
+          // @ts-ignore
+          $elm.removeEventListener("pointerdown", handlePointerDown);
         };
       },
       onUnmounted() {

@@ -1,5 +1,5 @@
 // Use UMD global to ensure same module instance on client and server
-const { View, For, Show, h, computed, ref, refarr } = window.Timeless;
+const { View, For, Show, Button, computed, ref, refarr } = window.Timeless;
 
 /**
  * load() - Server-side data fetching
@@ -47,50 +47,49 @@ export default function Page({ data }) {
   const fruits = refarr(data.fruits);
   const selectedFruit = ref(data.selectedFruit);
 
-  return View({ as: "div", class: "app", style: appStyle }, [
+  return View({ class: "app", style: appStyle }, [
     // Header
-    View({ as: "h1", style: titleStyle }, [data.message]),
+    View({ style: titleStyle }, [data.message]),
 
-    View({ as: "p", style: infoStyle }, [
+    View({ style: infoStyle }, [
       "This page is server-rendered and hydrated on the client.",
     ]),
 
     // Counter Section
-    View({ as: "section", style: sectionStyle }, [
-      View({ as: "h2", style: subtitleStyle }, ["Counter"]),
-      View({ as: "div", style: counterStyle }, [
-        View(
+    View({ style: sectionStyle }, [
+      View({ style: subtitleStyle }, ["Counter"]),
+      View({ style: counterStyle }, [
+        Button(
           {
-            as: "button",
             style: buttonStyle,
-            onClick: () => count.as((v) => v - 1),
+            onClick() {
+              count.as((v) => v - 1);
+            },
           },
           ["-"],
         ),
         View({ as: "span", style: countStyle }, [count]),
-        View(
+        Button(
           {
-            as: "button",
             style: buttonStyle,
-            onClick: () => count.as((v) => v + 2),
+            onClick() {
+              count.as((v) => v + 2);
+            },
           },
           ["+"],
         ),
       ]),
     ]),
-
-    View(
+    Button(
       {
-        as: "button",
         onClick() {
           visible.as((v) => !v);
         },
       },
       ["Toggle Content"],
     ),
-    View(
+    Button(
       {
-        as: "button",
         onClick() {
           content.as((prev) => prev + "_new");
         },
@@ -110,16 +109,15 @@ export default function Page({ data }) {
       View({ as: "p", style: infoStyle }, [
         "Hover over the boxes to test mouseenter/mouseleave events:",
       ]),
-      View({ as: "div", style: hoverBoxContainerStyle }, [
+      View({ style: hoverBoxContainerStyle }, [
         View(
           {
-            as: "div",
             style: hoverBoxStyle,
-            onMouseEnter: () => {
+            onMouseEnter() {
               console.log("Box 1: mouseenter triggered");
               hoverBox1.as(true);
             },
-            onMouseLeave: () => {
+            onMouseLeave() {
               console.log("Box 1: mouseleave triggered");
               hoverBox1.as(false);
             },
@@ -138,13 +136,12 @@ export default function Page({ data }) {
         ),
         View(
           {
-            as: "div",
             style: hoverBoxStyle,
-            onMouseEnter: () => {
+            onMouseEnter() {
               console.log("Box 2: mouseenter triggered");
               hoverBox2.as(true);
             },
-            onMouseLeave: () => {
+            onMouseLeave() {
               console.log("Box 2: mouseleave triggered");
               hoverBox2.as(false);
             },
@@ -165,14 +162,14 @@ export default function Page({ data }) {
     ]),
 
     // List Section
-    View({ as: "section", style: sectionStyle }, [
-      View({ as: "h2", style: subtitleStyle }, ["Fruit List"]),
-
-      View(
+    View({ style: sectionStyle }, [
+      View({ style: subtitleStyle }, ["Fruit List"]),
+      Button(
         {
-          as: "button",
           style: toggleButtonStyle,
-          onClick: () => showList.as((v) => !v),
+          onClick() {
+            showList.as((v) => !v);
+          },
         },
         ["Toggle List"],
       ),
@@ -181,162 +178,144 @@ export default function Page({ data }) {
         when: showList,
         ok() {
           return [
-        h(View, { as: "ul", style: listStyle }, [
-          h(For, {
-            each: fruits,
-            render(item, idx) {
-              const itemStyle = computed(selectedFruit, (sel) => {
-                // console.log("compare", sel, item);
-                const selected = sel === item;
-                return `${listItemStyle}; cursor: pointer; ${
-                  selected
-                    ? "background: #e0f2fe; border-color: #38bdf8;"
-                    : "background: white; border-color: #e5e7eb;"
-                }`;
-              });
-              // console.log("[]fruit render");
-              return View(
+            View({ style: listStyle }, [
+              For({
+                each: fruits,
+                render(item, idx) {
+                  const itemStyle = computed(selectedFruit, (sel) => {
+                    // console.log("compare", sel, item);
+                    const selected = sel === item;
+                    return `${listItemStyle}; cursor: pointer; ${
+                      selected
+                        ? "background: #e0f2fe; border-color: #38bdf8;"
+                        : "background: white; border-color: #e5e7eb;"
+                    }`;
+                  });
+                  // console.log("[]fruit render");
+                  return View(
+                    {
+                      style: itemStyle,
+                      onClick() {
+                        selectedFruit.as(item);
+                      },
+                    },
+                    [
+                      computed(idx, (t) => `${t + 1}、`),
+                      View({ as: "span" }, [item]),
+                    ],
+                  );
+                },
+              }),
+            ]),
+
+            View({ style: buttonGroupStyle }, [
+              Button(
                 {
-                  as: "li",
-                  style: itemStyle,
-                  onClick() {
-                    selectedFruit.as(item);
+                  style: buttonStyle,
+                  onClick: () => {
+                    const names = ["Mango", "Grape", "Peach", "Kiwi", "Pear"];
+                    const pick =
+                      names[Math.floor(Math.random() * names.length)];
+                    fruits.push(pick);
                   },
                 },
-                [
-                  computed(idx, (t) => `${t + 1}、`),
-                  View({ as: "span" }, [item]),
-                ],
-              );
-            },
-          }),
-        ]),
+                ["Add Fruit"],
+              ),
+              Button(
+                {
+                  style: buttonStyle,
+                  onClick: () => {
+                    if (fruits.length > 0) {
+                      fruits.pop();
+                    }
+                  },
+                },
+                ["Remove Last"],
+              ),
+            ]),
 
-        h(View, { as: "div", style: buttonGroupStyle }, [
-          h(
-            View,
-            {
-              as: "button",
-              style: buttonStyle,
-              onClick: () => {
-                const names = ["Mango", "Grape", "Peach", "Kiwi", "Pear"];
-                const pick = names[Math.floor(Math.random() * names.length)];
-                fruits.push(pick);
-              },
-            },
-            ["Add Fruit"],
-          ),
-          h(
-            View,
-            {
-              as: "button",
-              style: buttonStyle,
-              onClick: () => {
-                if (fruits.length > 0) {
-                  fruits.pop();
-                }
-              },
-            },
-            ["Remove Last"],
-          ),
-        ]),
-
-        h(
-          View,
-          {
-            as: "p",
-            style: `margin: 12px 0 8px; color: #666; font-size: 14px;`,
-          },
-          ["Click an item to select, then reorder:"],
-        ),
-        h(View, { as: "div", style: buttonGroupStyle }, [
-          h(
-            View,
-            {
-              as: "button",
-              style: buttonStyle,
-              onClick: () => {
-                const idx = fruits.indexOf(selectedFruit.value);
-                console.log("up", idx);
-                if (idx > 0) {
-                  fruits.up(idx);
-                }
-              },
-            },
-            ["↑ Up"],
-          ),
-          h(
-            View,
-            {
-              as: "button",
-              style: buttonStyle,
-              onClick: () => {
-                const idx = fruits.indexOf(selectedFruit.value);
-                console.log("down", idx);
-                if (idx < fruits.length - 1) fruits.down(idx);
-              },
-            },
-            ["↓ Down"],
-          ),
-          h(
-            View,
-            {
-              as: "button",
-              style: buttonStyle,
-              onClick: () => {
-                const idx = fruits.indexOf(selectedFruit.value);
-                fruits.moveToFirst(idx);
-              },
-            },
-            ["⇤ First"],
-          ),
-          h(
-            View,
-            {
-              as: "button",
-              style: buttonStyle,
-              onClick: () => {
-                const idx = fruits.indexOf(selectedFruit.value);
-                fruits.moveToLast(idx);
-              },
-            },
-            ["Last ⇥"],
-          ),
-        ]),
-        h(View, { as: "div", style: buttonGroupStyle }, [
-          h(
-            View,
-            {
-              as: "button",
-              style: buttonStyle,
-              onClick: () => {
-                const idx = fruits.indexOf(selectedFruit.value);
-                if (idx < fruits.length - 1) {
-                  fruits.swap(idx, idx + 1);
-                }
-              },
-            },
-            ["Swap with Next"],
-          ),
-          h(
-            View,
-            {
-              as: "button",
-              style: buttonStyle,
-              onClick: () => fruits.shuffle(),
-            },
-            ["Shuffle"],
-          ),
-          h(
-            View,
-            {
-              as: "button",
-              style: buttonStyle,
-              onClick: () => fruits.reverse(),
-            },
-            ["Reverse"],
-          ),
-        ]),
+            View(
+              { style: `margin: 12px 0 8px; color: #666; font-size: 14px;` },
+              ["Click an item to select, then reorder:"],
+            ),
+            View({ style: buttonGroupStyle }, [
+              Button(
+                {
+                  style: buttonStyle,
+                  onClick() {
+                    const idx = fruits.indexOf(selectedFruit.value);
+                    console.log("up", idx);
+                    if (idx > 0) {
+                      fruits.up(idx);
+                    }
+                  },
+                },
+                ["↑ Up"],
+              ),
+              Button(
+                {
+                  style: buttonStyle,
+                  onClick() {
+                    const idx = fruits.indexOf(selectedFruit.value);
+                    console.log("down", idx);
+                    if (idx < fruits.length - 1) fruits.down(idx);
+                  },
+                },
+                ["↓ Down"],
+              ),
+              View(
+                {
+                  style: buttonStyle,
+                  onClick() {
+                    const idx = fruits.indexOf(selectedFruit.value);
+                    fruits.moveToFirst(idx);
+                  },
+                },
+                ["⇤ First"],
+              ),
+              Button(
+                {
+                  style: buttonStyle,
+                  onClick() {
+                    const idx = fruits.indexOf(selectedFruit.value);
+                    fruits.moveToLast(idx);
+                  },
+                },
+                ["Last ⇥"],
+              ),
+            ]),
+            View({ style: buttonGroupStyle }, [
+              Button(
+                {
+                  style: buttonStyle,
+                  onClick() {
+                    const idx = fruits.indexOf(selectedFruit.value);
+                    if (idx < fruits.length - 1) {
+                      fruits.swap(idx, idx + 1);
+                    }
+                  },
+                },
+                ["Swap with Next"],
+              ),
+              Button(
+                {
+                  style: buttonStyle,
+                  onClick() {
+                    fruits.shuffle();
+                  },
+                },
+                ["Shuffle"],
+              ),
+              Button(
+                {
+                  style: buttonStyle,
+                  onClick() {
+                    fruits.reverse();
+                  },
+                },
+                ["Reverse"],
+              ),
+            ]),
           ];
         },
       }),

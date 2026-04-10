@@ -9,7 +9,6 @@ import { For } from "@/reactive/for";
 import { Fragment } from "@/content/fragment";
 import { Input as NativeInput } from "@/input/input";
 import { isStyleRef, classNames } from "@/style/index";
-import { getHost } from "@/host";
 
 import * as PopperPrimitive from "./popper";
 
@@ -30,7 +29,6 @@ export function Trigger(
   props: ViewProps & { store: TagSelectCore<any>; id?: string },
   children: ViewChildren = [],
 ) {
-  const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -67,11 +65,11 @@ export function Trigger(
       e.stopPropagation();
     },
     onMounted(event) {
-      const $elm = (event as any).target as HTMLInputElement;
-      host.setProperty?.($elm, "value", store.state.values.join(",") || "");
+      const $elm = event.target;
+      $elm.setAttribute("value", store.state.values.join(",") || "");
       events.push(
         store.onStateChange(() => {
-          host.setProperty?.($elm, "value", store.state.values.join(",") || "");
+          $elm.setAttribute("value", store.state.values.join(",") || "");
         }),
       );
     },
@@ -81,12 +79,12 @@ export function Trigger(
     {
       ...rest,
       onMounted(event) {
-        const $elm = (event as any).target as HTMLDivElement;
+        const $elm = event.target;
         store.popper.setReference(
           {
             $el: $elm,
             getRect() {
-              return host.getBoundingClientRect?.($elm) as any;
+              return $elm.getBoundingClientRect();
             },
           },
           { force: true },
@@ -108,13 +106,13 @@ export function Trigger(
           props.store.presence.show();
           props.store.popper.place();
         };
-        host.addEventListener($elm, "pointerdown", handlePointerDown);
+        $elm.addEventListener("pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
           rest.onMounted(event);
         }
         return () => {
-          host.removeEventListener($elm, "pointerdown", handlePointerDown);
+          $elm.removeEventListener("pointerdown", handlePointerDown);
         };
       },
       onUnmounted() {

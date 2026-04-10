@@ -41,12 +41,21 @@ export interface TimelessElement<T = any, Elm = any> {
     onDrop?: (e: DragEvent) => void;
     onAnimationEnd?: (e: AnimationEvent) => void;
   };
-  // render(): any;
+  a11y?: VNodeA11y;
   hydrate?(existingDom: any): any;
   cleanup?: () => void;
   onMounted?(event: MountedEvent): void;
   beforeUnmounted?(): void;
   onUnmounted?(): void;
+}
+
+export interface VNodeA11y {
+  label?: string;
+  hint?: string;
+  role?: string;
+  hidden?: boolean;
+  value?: string;
+  live?: "polite" | "assertive";
 }
 
 export function isElement(v: any): v is TimelessElement {

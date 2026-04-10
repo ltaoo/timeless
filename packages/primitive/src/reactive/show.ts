@@ -1,7 +1,6 @@
 import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { ViewChildren, isElement } from "@/content/type";
-import { safeCreateTextNode } from "@/util/env";
 import { MountedEvent } from "@/event";
 
 type ShowProps = {
@@ -93,10 +92,9 @@ export function Show(props: ShowProps) {
     hydrate(startDom: any, parentDom?: any) {
       const condition = isRef(when) ? !!when.value : !!when;
       state.value = condition;
-
       // Create anchor if not already created
       if (!$elm) {
-        $elm = safeCreateTextNode("");
+        // $elm = safeCreateTextNode("");
       }
       const targetChildren = methods.build_children_with_condition(condition);
       // 调用宿主层方法进行 hydrate

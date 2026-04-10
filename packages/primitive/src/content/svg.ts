@@ -1,15 +1,8 @@
-import { DerivedRef, Ref, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref } from "@timeless/reactive";
 
 import { isElement } from "@/content/type";
-import { safeCreateElementNS, safeCreateTextNode } from "@/util/env";
-import {
-  ViewStyle,
-  viewStyleToCssText,
-  isClassNameRef,
-  ClassNameRef,
-} from "@/style/index";
+import { ViewStyle, ClassNameRef } from "@/style/index";
 import { MountedEvent } from "@/event/index";
-import { getHost } from "@/host";
 
 type AttrValue =
   | string
@@ -199,7 +192,7 @@ type InternalSVGProps = SVGBaseProps &
   SVGPresentationAttrs & { type?: string } & Record<string, any>;
 
 function createSVGElement(props: InternalSVGProps = {}, children?: any) {
-  const host = getHost();
+  // const host = getHost();
   const {
     type = "svg",
     style,
@@ -218,7 +211,8 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
     beforeUnmounted,
     ...rest
   } = props;
-  const $elm = safeCreateElementNS("http://www.w3.org/2000/svg", type);
+  // const $elm = safeCreateElementNS("http://www.w3.org/2000/svg", type);
+  let $elm: any = null;
 
   let _children = children ?? [];
   if (!Array.isArray(_children)) {
@@ -227,7 +221,12 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
 
   return {
     t: "svg",
-    $elm,
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v: any) {
+      $elm = v;
+    },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -252,157 +251,6 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
     },
     append(node: any) {
       _children.push(node);
-    },
-    setContent(html: string) {
-      host.setInnerHTML?.($elm, html);
-    },
-    render() {
-      Object.keys(rest).forEach((k) => {
-        const vv = rest[k];
-        if (vv) {
-          if (isRef(vv)) {
-            vv.subscribe({
-              onChange(v) {
-                host.setAttribute($elm, k, String(v));
-              },
-            });
-            host.setAttribute($elm, k, String(vv.value));
-          } else if (typeof vv === "string" || typeof vv === "number") {
-            host.setAttribute($elm, k, String(vv));
-          }
-        }
-      });
-      Object.keys(dataset).forEach((k) => {
-        const v = dataset[k];
-        if (isRef(v)) {
-          host.setAttribute($elm, `data-${k}`, String(v.value));
-        } else {
-          host.setAttribute($elm, `data-${k}`, String(v));
-        }
-      });
-
-      if (cls) {
-        if (typeof cls === "string") {
-          host.setAttribute($elm, "class", cls);
-        } else if (isRef(cls)) {
-          cls.subscribe({
-            onChange(v) {
-              host.setAttribute($elm, "class", String(v));
-            },
-          });
-          host.setAttribute($elm, "class", String(cls.value));
-        } else if (isClassNameRef(cls)) {
-          cls.subscribe({
-            onChange(v: any) {
-              host.setAttribute(
-                $elm,
-                "class",
-                Array.isArray(v) ? v.join(" ") : String(v ?? ""),
-              );
-            },
-          });
-          host.setAttribute($elm, "class", cls.toString());
-        }
-      }
-
-      if (style) {
-        const s: any = style;
-        const applyStyle = () => {
-          host.setStyleText(
-            $elm,
-            viewStyleToCssText((isRef(s) ? s.value : s) || {}),
-          );
-        };
-        if (isRef(s)) {
-          s.subscribe({
-            onChange() {
-              applyStyle();
-            },
-          });
-          applyStyle();
-        } else {
-          Object.keys(s).forEach((k: string) => {
-            const vv = s[k];
-            if (isRef(vv)) {
-              (vv as any).subscribe({
-                onChange() {
-                  applyStyle();
-                },
-              });
-            }
-          });
-          applyStyle();
-        }
-      }
-      if (onClick) {
-        host.addEventListener($elm, "click", function (event: any) {
-          if (onClick) {
-            onClick(event);
-          }
-        });
-      }
-      if (onFocus) {
-        host.addEventListener($elm, "focus", function (event: any) {
-          if (onFocus) onFocus(event);
-        });
-      }
-      if (onBlur) {
-        host.addEventListener($elm, "blur", function (event: any) {
-          if (onBlur) onBlur(event);
-        });
-      }
-      if (onPointerDown) {
-        host.addEventListener($elm, "pointerdown", function (event: any) {
-          if (onPointerDown) onPointerDown(event);
-        });
-      }
-      if (onPointerUp) {
-        host.addEventListener($elm, "pointerup", function (event: any) {
-          if (onPointerUp) onPointerUp(event);
-        });
-      }
-      if (onPointerMove) {
-        host.addEventListener($elm, "pointermove", function (event: any) {
-          if (onPointerMove) onPointerMove(event);
-        });
-      }
-      if (onMouseEnter) {
-        host.addEventListener($elm, "mouseenter", function (event: any) {
-          if (onMouseEnter) onMouseEnter(event);
-        });
-      }
-      if (onMouseLeave) {
-        host.addEventListener($elm, "mouseleave", function (event: any) {
-          if (onMouseLeave) onMouseLeave(event);
-        });
-      }
-
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
-        if (!node) continue;
-        if (typeof node === "string" || typeof node === "number") {
-          host.appendChild($elm, safeCreateTextNode(String(node)));
-          continue;
-        }
-        if (isElement(node)) {
-          // const result = node.render();
-          // if (result) {
-          //   host.appendChild($elm, result);
-          // }
-        }
-      }
-      if (onMounted) {
-        onMounted({ target: $elm });
-      }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
-        if (isElement(node)) {
-          if (node.onMounted) {
-            node.onMounted({ target: node.$elm });
-          }
-        }
-      }
-      return $elm;
     },
   };
 }
