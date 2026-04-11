@@ -1,5 +1,59 @@
 import { Section, Item } from "@/components/index.js";
 
+const client$ = new Timeless.kit.HttpClientCore({});
+// @ts-ignore
+client$.fetch = async (options) => {
+  await new Promise((r) => setTimeout(r, 400));
+  // @ts-ignore
+  const url = new URL(options.url, "http://localhost");
+  const keyword = (url.searchParams.get("keyword") || "").toLowerCase();
+  const all = [
+    { value: "apple", label: "苹果" },
+    { value: "banana", label: "香蕉" },
+    { value: "orange", label: "橙子" },
+    { value: "grape", label: "葡萄" },
+    { value: "watermelon", label: "西瓜" },
+    { value: "peach", label: "桃子" },
+    { value: "pear", label: "梨" },
+    { value: "strawberry", label: "草莓" },
+  ];
+  const matched = keyword
+    ? all.filter((o) => {
+        const v = String(o.value).toLowerCase();
+        const l = String(o.label).toLowerCase();
+        return v.includes(keyword) || l.includes(keyword);
+      })
+    : [];
+  return {
+    data: {
+      options: matched.slice(0, 8),
+    },
+  };
+};
+
+const request = Timeless.kit.request_factory({
+  headers: { "Content-Type": "application/json" },
+});
+const searchSelectOptionsReq = new Timeless.kit.RequestCore(
+  (params) => request.get("/api/mock/select/search", params),
+  {
+    client: client$,
+    process(r) {
+      if (r.error) return r.error;
+      const options = r.data?.options || [];
+      return Timeless.Result.Ok(options);
+    },
+  },
+);
+
+async function fetchSearchSelectOptions(keyword) {
+  const r = await searchSelectOptionsReq.run({ keyword });
+  if (r.error) {
+    return [];
+  }
+  return r.data;
+}
+
 export default function FormView() {
   const view$ = new Timeless.ui.ScrollViewCore({});
   const searchSelect$ = new Timeless.ui.SelectCore({
@@ -9,60 +63,6 @@ export default function FormView() {
     search: false,
     searchPlaceholder: "输入水果名...",
   });
-
-  const mockClient = new Timeless.kit.HttpClientCore({});
-  // @ts-ignore
-  mockClient.fetch = async (options) => {
-    await new Promise((r) => setTimeout(r, 400));
-    // @ts-ignore
-    const url = new URL(options.url, "http://localhost");
-    const keyword = (url.searchParams.get("keyword") || "").toLowerCase();
-    const all = [
-      { value: "apple", label: "苹果" },
-      { value: "banana", label: "香蕉" },
-      { value: "orange", label: "橙子" },
-      { value: "grape", label: "葡萄" },
-      { value: "watermelon", label: "西瓜" },
-      { value: "peach", label: "桃子" },
-      { value: "pear", label: "梨" },
-      { value: "strawberry", label: "草莓" },
-    ];
-    const matched = keyword
-      ? all.filter((o) => {
-          const v = String(o.value).toLowerCase();
-          const l = String(o.label).toLowerCase();
-          return v.includes(keyword) || l.includes(keyword);
-        })
-      : [];
-    return {
-      data: {
-        options: matched.slice(0, 8),
-      },
-    };
-  };
-
-  const request = Timeless.kit.request_factory({
-    headers: { "Content-Type": "application/json" },
-  });
-  const searchSelectOptionsReq = new Timeless.kit.RequestCore(
-    (params) => request.get("/api/mock/select/search", params),
-    {
-      client: mockClient,
-      process(r) {
-        if (r.error) return r.error;
-        const options = r.data?.options || [];
-        return Timeless.Result.Ok(options);
-      },
-    },
-  );
-
-  async function fetchSearchSelectOptions(keyword) {
-    const r = await searchSelectOptionsReq.run({ keyword });
-    if (r.error) {
-      return [];
-    }
-    return r.data;
-  }
 
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
@@ -88,6 +88,14 @@ export default function FormView() {
           ]),
         ]),
       ]),
+      View(
+        {
+          style: {
+            height: "1320px",
+          },
+        },
+        [],
+      ),
       Section("FileInput", [
         Item("Default", [
           FileInput({
@@ -113,49 +121,49 @@ export default function FormView() {
         ]),
       ]),
       Section("NumberInput", [
-        Item("Default", [
-          NumberInput({
-            store: new Timeless.ui.NumberInputCore({
-              placeholder: "请输入数字",
-            }),
-          }),
-        ]),
-        Item("With Min/Max", [
-          NumberInput({
-            store: new Timeless.ui.NumberInputCore({
-              placeholder: "0-100",
-              min: 0,
-              max: 100,
-            }),
-          }),
-        ]),
-        Item("With Step", [
-          NumberInput({
-            store: new Timeless.ui.NumberInputCore({
-              placeholder: "步长为5",
-              step: 5,
-              defaultValue: 10,
-            }),
-          }),
-        ]),
-        Item("With Precision", [
-          NumberInput({
-            store: new Timeless.ui.NumberInputCore({
-              placeholder: "保留2位小数",
-              precision: 2,
-              step: 0.01,
-              defaultValue: 3.14,
-            }),
-          }),
-        ]),
-        Item("Without Controls", [
-          NumberInput({
-            store: new Timeless.ui.NumberInputCore({
-              placeholder: "无控制按钮",
-            }),
-            showControls: false,
-          }),
-        ]),
+        // Item("Default", [
+        //   NumberInput({
+        //     store: new Timeless.ui.NumberInputCore({
+        //       placeholder: "请输入数字",
+        //     }),
+        //   }),
+        // ]),
+        // Item("With Min/Max", [
+        //   NumberInput({
+        //     store: new Timeless.ui.NumberInputCore({
+        //       placeholder: "0-100",
+        //       min: 0,
+        //       max: 100,
+        //     }),
+        //   }),
+        // ]),
+        // Item("With Step", [
+        //   NumberInput({
+        //     store: new Timeless.ui.NumberInputCore({
+        //       placeholder: "步长为5",
+        //       step: 5,
+        //       defaultValue: 10,
+        //     }),
+        //   }),
+        // ]),
+        // Item("With Precision", [
+        //   NumberInput({
+        //     store: new Timeless.ui.NumberInputCore({
+        //       placeholder: "保留2位小数",
+        //       precision: 2,
+        //       step: 0.01,
+        //       defaultValue: 3.14,
+        //     }),
+        //   }),
+        // ]),
+        // Item("Without Controls", [
+        //   NumberInput({
+        //     store: new Timeless.ui.NumberInputCore({
+        //       placeholder: "无控制按钮",
+        //     }),
+        //     showControls: false,
+        //   }),
+        // ]),
       ]),
       Section("Textarea", [
         Item("Default", [
@@ -164,14 +172,13 @@ export default function FormView() {
               defaultValue: "",
               placeholder: "Enter your message...",
             }),
-            // rows: "3",
           }),
         ]),
       ]),
       Section("Label", [
         Item("With Input", [
           View({ class: "space-y-2 w-full" }, [
-            Label({}, [Txt("Email")]),
+            Label({}, ["Email"]),
             Input({
               store: new Timeless.ui.InputCore({
                 defaultValue: "",

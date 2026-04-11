@@ -6,10 +6,17 @@ import {
   RawViewStyleProperties,
   ViewStyle,
 } from "@/style";
-
-import { TimelessElement, ViewAttributes } from "./type";
 import { MountedEvent } from "@/event";
 import { VNodeView } from "@/vnode/view";
+import { ListenerManager } from "@/util/listener";
+
+import {
+  isElement,
+  TimelessElement,
+  ViewAttributes,
+  ViewChildren,
+} from "./type";
+import { Text } from "./text";
 
 export type BoxProps = {
   key?: string | number;
@@ -65,6 +72,7 @@ export type BoxState = {
 
 export function Box<T>(props: BoxProps, extra_state: T) {
   let $elm: any = null;
+  const listener$ = ListenerManager();
 
   const state: BoxState & T = {
     rendered: false,
@@ -75,30 +83,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
     children: [],
     ...extra_state,
   };
-  const events = {
-    onClick: props.onClick,
-    onDoubleClick: props.onDoubleClick,
-    onMouseEnter: props.onMouseEnter,
-    onMouseLeave: props.onMouseLeave,
-    onMouseDown: props.onMouseDown,
-    onMouseUp: props.onMouseUp,
-    onLongPress: props.onLongPress,
-    onPointerDown: props.onPointerDown,
-    onInput: props.onInput,
-    onChange: props.onChange,
-    onFocus: props.onFocus,
-    onBlur: props.onBlur,
-    onKeyDown: props.onKeyDown,
-    onContextMenu: props.onContextMenu,
-    onDragStart: props.onDragStart,
-    onDrag: props.onDrag,
-    onDragEnd: props.onDragEnd,
-    onDragEnter: props.onDragEnter,
-    onDragOver: props.onDragOver,
-    onDragLeave: props.onDragLeave,
-    onDrop: props.onDrop,
-    onAnimationEnd: props.onAnimationEnd,
-  };
+  const events: BoxEvents = {};
 
   const methods = {
     set$elm(elm: any) {
@@ -125,69 +110,37 @@ export function Box<T>(props: BoxProps, extra_state: T) {
         $elm.setAttribute(k, String(v));
       }
     },
-    handle_value() {
-      const attributes = props.attributes;
-      if (attributes) {
-        Object.keys(attributes).forEach((k) => {
-          const vv = attributes[k];
-          if (isRef(vv)) {
-            vv.subscribe({
-              onChange(v) {
-                state.attributes[k] = v as any;
-                if ($elm) {
-                  methods.apply_attr(k, v);
-                }
-              },
-            });
-            state.attributes[k] = vv.value;
-            return;
-          }
-          state.attributes[k] = vv;
-        });
-      }
-      const dataset = props.dataset;
-      if (dataset) {
-        Object.keys(dataset).forEach((k) => {
-          const vv = dataset[k];
-          if (isRef(vv)) {
-            vv.subscribe({
-              onChange(v) {
-                if ($elm) {
-                  methods.apply_attr(k, v);
-                }
-              },
-            });
-            state.dataset[k] = vv.value;
-            return;
-          }
-          state.dataset[k] = vv;
-        });
-      }
+    subscribe_props() {
       const cls = props.class;
+      // console.log("[]box - before subscribe class", cls);
       if (cls !== undefined) {
         if (typeof cls === "string") {
           state.styleSet = cls.split(" ");
           //   console.log("split cls", cls, state.styleSet);
         } else if (isRef(cls)) {
-          cls.subscribe({
+          state.styleSet = cls.value.split(" ");
+          const unsubscribe = cls.subscribe({
             onChange(v: any) {
               state.styleSet = v.split(" ");
-              if ($elm) {
+              if ($elm && typeof $elm.setStyleSet === "function") {
+                console.log("[primitive]before invoke setStyle1");
                 $elm.setStyleSet(v.split(" "));
               }
             },
           });
-          state.styleSet = cls.value.split(" ");
+          listener$.add(unsubscribe);
         } else if (isClassNameRef(cls)) {
-          cls.subscribe({
-            onChange(v) {
+          state.styleSet = cls.value;
+          const unsubscribe = cls.subscribe({
+            onChange(v: string[]) {
               state.styleSet = v as string[];
               if ($elm && typeof $elm.setStyleSet === "function") {
+                console.log("[primitive]before invoke setStyle2");
                 $elm.setStyleSet(v);
               }
             },
           });
-          state.styleSet = cls.value;
+          listener$.add(unsubscribe);
         } else {
           state.styleSet = [];
         }
@@ -198,19 +151,20 @@ export function Box<T>(props: BoxProps, extra_state: T) {
           Object.keys(style.value || {}).forEach((k) => {
             const sv = style.value[k];
             if (isRef(sv)) {
-              sv.subscribe({
+              state.style[k] = sv.value;
+              const unsubscribe = sv.subscribe({
                 onChange(v) {
                   if ($elm) {
                     $elm.setStyleValue(k, v);
                   }
                 },
               });
-              state.style[k] = sv.value;
+              listener$.add(unsubscribe);
             } else {
               state.style[k] = sv;
             }
           });
-          style.subscribe({
+          const unsubscribe = style.subscribe({
             onChange(v) {
               state.style = v as RawViewStyleProperties;
               if ($elm && typeof $elm.setStyle === "function") {
@@ -218,24 +172,147 @@ export function Box<T>(props: BoxProps, extra_state: T) {
               }
             },
           });
+          listener$.add(unsubscribe);
         } else {
           Object.keys(style).forEach((k) => {
             const v = style[k];
             if (isRef(v)) {
               state.style[k] = v.value;
-              v.subscribe({
+              const unsubscribe = v.subscribe({
                 onChange(v) {
                   if ($elm) {
                     $elm.setStyleValue(k, v);
                   }
                 },
               });
+              listener$.add(unsubscribe);
             } else {
               state.style[k] = v;
             }
           });
         }
       }
+      const attributes = props.attributes;
+      if (attributes) {
+        Object.keys(attributes).forEach((k) => {
+          const vv = attributes[k];
+          if (isRef(vv)) {
+            state.attributes[k] = vv.value;
+            const unsubscribe = vv.subscribe({
+              onChange(v) {
+                state.attributes[k] = v as any;
+                if ($elm) {
+                  methods.apply_attr(k, v);
+                }
+              },
+            });
+            listener$.add(unsubscribe);
+          } else {
+            state.attributes[k] = vv;
+          }
+        });
+      }
+      const dataset = props.dataset;
+      if (dataset) {
+        Object.keys(dataset).forEach((k) => {
+          const vv = dataset[k];
+          if (isRef(vv)) {
+            state.dataset[k] = vv.value;
+            const unsubscribe = vv.subscribe({
+              onChange(v) {
+                if ($elm) {
+                  methods.apply_attr(k, v);
+                }
+              },
+            });
+            listener$.add(unsubscribe);
+          } else {
+            state.dataset[k] = vv;
+          }
+        });
+      }
+    },
+    build_children(children?: ViewChildren) {
+      if (!children) {
+        return;
+      }
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        // console.log("for children", child);
+        (() => {
+          if (child === null) {
+            state.children[i] = null;
+            return;
+          }
+          if (isElement(child)) {
+            state.children[i] = child;
+            return;
+          }
+          if (isRef(child)) {
+            state.children[i] = Text(child);
+            return;
+          }
+          if (child) {
+            state.children[i] = Text(String(child));
+            return;
+          }
+          state.children[i] = null;
+        })();
+      }
+    },
+    add_event() {
+      if (props.onClick) {
+        events.onClick = props.onClick;
+      }
+      if (props.onDoubleClick) {
+        events.onDoubleClick = props.onDoubleClick;
+      }
+      if (props.onMouseEnter) {
+        events.onMouseEnter = props.onMouseEnter;
+      }
+      if (props.onMouseDown) {
+        events.onMouseDown = props.onMouseDown;
+      }
+      if (props.onMouseUp) {
+        events.onMouseUp = props.onMouseUp;
+      }
+      if (props.onLongPress) {
+        events.onLongPress = props.onLongPress;
+      }
+      if (props.onPointerDown) {
+        events.onPointerDown = props.onPointerDown;
+      }
+      if (props.onInput) {
+        events.onInput = props.onInput;
+      }
+      if (props.onChange) {
+        events.onChange = props.onChange;
+      }
+      if (props.onBlur) {
+        events.onBlur = props.onBlur;
+      }
+      if (props.onKeyDown) {
+        events.onDragEnd = props.onDragEnd;
+      }
+      if (props.onDragEnter) {
+        events.onDragEnter = props.onDragEnter;
+      }
+      if (props.onDragOver) {
+        events.onDragOver = props.onDragOver;
+      }
+      if (props.onDragLeave) {
+        events.onDragLeave = props.onDragLeave;
+      }
+      if (props.onDrop) {
+        events.onDrop = props.onDrop;
+      }
+      if (props.onAnimationEnd) {
+        events.onAnimationEnd = props.onAnimationEnd;
+      }
+    },
+    add_listen: listener$.add,
+    destroy() {
+      listener$.clean();
     },
   };
   return {

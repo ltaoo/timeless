@@ -2,7 +2,7 @@ import { isRef } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
 import { TimelessElement, ViewChildren, isElement } from "@/content/type";
-import { Txt } from "@/content/text";
+import { Text } from "@/content/text";
 import { MountedEvent } from "@/event";
 
 type PortalProps = {
@@ -38,11 +38,11 @@ export function Portal(props: PortalProps, children?: ViewChildren) {
           //   return;
           // }
           if (isRef(child)) {
-            state.children[i] = Txt(child);
+            state.children[i] = Text(child);
             return;
           }
           if (typeof child === "string") {
-            state.children[i] = Txt(String(child));
+            state.children[i] = Text(String(child));
             return;
           }
           if (isElement(child)) {

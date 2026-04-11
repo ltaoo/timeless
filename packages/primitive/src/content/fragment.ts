@@ -1,49 +1,26 @@
-import { ViewProps } from "./view";
-import { Txt } from "./text";
-import { TimelessElement, ViewChildren, isElement } from "./type";
 import { MountedEvent } from "@/event";
-import { ListenerManager } from "@/util/listener";
 
+import { TimelessElement, ViewChildren, isElement } from "./type";
+import { Box } from "./box";
+
+export type FragmentProps = {
+  onMounted?: (event: MountedEvent) => void;
+  beforeUnmounted?: () => void;
+  onUnmounted?: () => void;
+};
 type FragmentState = {
   rendered: boolean;
   children: TimelessElement[];
 };
-export function Fragment(props: ViewProps, children: ViewChildren = []) {
+export function Fragment(props: FragmentProps, children?: ViewChildren) {
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
 
   let $elm: any = null;
-  const state: FragmentState = {
-    rendered: false,
-    children: [],
-  };
-  const listener$ = ListenerManager();
+  const box$ = Box<FragmentState>({}, {} as FragmentState);
 
-  // console.log("[Fragment] created with", _children.length, "children");
+  const state = box$.state;
 
-  // console.log("[Fragment] render, children count:", _children.length);
-  for (let i = 0; i < children.length; i += 1) {
-    let node = children[i];
-    if (!node) {
-      continue;
-    }
-    // 处理 h() 返回的延迟执行函数
-    // if (typeof node === "function") {
-    //   node = node();
-    //   state.children[i] = node;
-    // }
-    if (typeof node === "string" || typeof node === "number") {
-      // $fragment.appendChild(Txt(String(node)));
-      state.children[i] = Txt(String(node));
-      continue;
-    }
-    if (isElement(node)) {
-      state.children[i] = node;
-      // const result = node.render();
-      // if (result) {
-      //   $fragment.appendChild(result);
-      // }
-    }
-  }
+  box$.methods.build_children(children);
 
   return {
     t: "fragment",
@@ -60,7 +37,7 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
     },
     onMounted(event: MountedEvent) {
       if (onMounted) {
-        onMounted(event);
+        box$.methods.add_listen(onMounted(event));
       }
       for (let i = 0; i < state.children.length; i += 1) {
         const child = state.children[i];
@@ -83,7 +60,7 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
       }
     },
     onUnmounted() {
-      listener$.clean();
+      box$.methods.destroy();
       if (onUnmounted) {
         onUnmounted();
       }
@@ -93,10 +70,8 @@ export function Fragment(props: ViewProps, children: ViewChildren = []) {
           node.onUnmounted();
         }
       }
-
       // Reset state for potential re-render
       state.rendered = false;
-      // $fragment = null;
     },
   };
 }

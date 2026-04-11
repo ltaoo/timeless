@@ -2,7 +2,7 @@ import { isRef, Ref } from "@timeless/reactive";
 
 import { TimelessElement, ViewChildren, isElement } from "@/content/type";
 import { MountedEvent } from "@/event";
-import { Txt } from "@/content/text";
+import { Text } from "@/content/text";
 
 type MatchProps = {
   when: Ref<any> | any;
@@ -40,8 +40,7 @@ export function Match(props: MatchProps) {
       }
       return [children];
     },
-
-    get_children_with_value(value: any) {
+    build_children_with_value(value: any) {
       const result: TimelessElement[] = [];
       state.value = value;
       // 查找匹配的 case
@@ -50,14 +49,11 @@ export function Match(props: MatchProps) {
         const next = methods.normalize(children);
         for (const child of next) {
           if (isElement(child)) {
-            // state.children.push(child);
             result.push(child);
           } else if (isRef(child)) {
-            // state.children.push(Txt(child));
-            result.push(Txt(child));
+            result.push(Text(child));
           } else if (child) {
-            // state.children.push(Txt(String(child)));
-            result.push(Txt(String(child)));
+            result.push(Text(String(child)));
           }
         }
         state.children = result;
@@ -71,9 +67,9 @@ export function Match(props: MatchProps) {
           if (isElement(child)) {
             result.push(child);
           } else if (isRef(child)) {
-            result.push(Txt(child));
+            result.push(Text(child));
           } else if (child) {
-            result.push(Txt(String(child)));
+            result.push(Text(String(child)));
           }
         }
         state.children = result;
@@ -116,7 +112,7 @@ export function Match(props: MatchProps) {
               $elm.removeChildren();
             }
             // 获取新内容
-            const target = methods.get_children_with_value(value);
+            const target = methods.build_children_with_value(value);
 
             // 添加新内容
             if (
@@ -135,7 +131,7 @@ export function Match(props: MatchProps) {
 
   const v = isRef(when) ? when.value : when;
   state.value = v;
-  methods.get_children_with_value(v);
+  methods.build_children_with_value(v);
   methods.setup_value_subscribe();
 
   return {
@@ -160,7 +156,7 @@ export function Match(props: MatchProps) {
       //   $elm = safeCreateTextNode("");
       // }
 
-      const target = methods.get_children_with_value(value);
+      const target = methods.build_children_with_value(value);
       state.children = target;
 
       return $elm;
@@ -174,7 +170,7 @@ export function Match(props: MatchProps) {
       //   $elm = safeCreateTextNode("");
       // }
 
-      const targetChildren = methods.get_children_with_value(value);
+      const targetChildren = methods.build_children_with_value(value);
 
       // 调用宿主层方法进行 hydrate
       if (typeof $elm.hydrateContent === "function") {

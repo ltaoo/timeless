@@ -1,5 +1,5 @@
 import { refobj, computed, classNames } from "@timeless/timeless";
-import { StepsPrimitive, For, Show, Txt, ViewProps } from "@timeless/timeless";
+import { StepsPrimitive, For, Show, ViewProps } from "@timeless/timeless";
 import { StepCore } from "@timeless/ui";
 
 export type StepItem = {
@@ -60,7 +60,7 @@ export function Steps(
                           class:
                             "mt-2 text-xs font-medium text-zinc-500 dark:text-zinc-400",
                         },
-                        [Txt(item.title)],
+                        [item.title],
                       ),
                     ],
                   ),
@@ -122,6 +122,10 @@ function StepIndicatorCircle(props: { store: StepCore; index: number }) {
         }),
       ]),
     },
-    [Txt(computed(state_, (s) => (index < s.value ? "✓" : String(index + 1))))],
+    [
+      computed(state_, (s) => {
+        return index < s.value ? "✓" : String(index + 1);
+      }),
+    ],
   );
 }

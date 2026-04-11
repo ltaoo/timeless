@@ -4,7 +4,6 @@ import {
   For,
   ViewChildren,
   ViewProps,
-  Txt,
 } from "@timeless/timeless";
 import { AccordionCore } from "@timeless/ui";
 
@@ -53,7 +52,7 @@ export function Accordion(
                 },
                 [
                   ...(typeof item.title === "string"
-                    ? [Txt(item.title)]
+                    ? [item.title]
                     : item.title),
                   AccordionPrimitive.Chevron(
                     {
@@ -69,7 +68,7 @@ export function Accordion(
                           .join(" ");
                       }),
                     },
-                    [Txt("▾")],
+                    ["▾"],
                   ),
                 ],
               ),

@@ -1,15 +1,16 @@
-import { refobj, computed } from "@timeless/reactive";
+import { refobj, computed, ref } from "@timeless/reactive";
 import { CascaderCore, CascaderOption } from "@timeless/ui";
 
 import { classNames } from "@/style/index";
 import { View, ViewProps } from "@/content/view";
 import { Portal as NativePortal } from "@/content/portal";
 import { ViewChildren } from "@/content/type";
+import { Input as NativeInput } from "@/input/input";
 import { Fragment } from "@/content/fragment";
 import { Show } from "@/reactive/show";
-// import { getHost } from "@/host";
 
 import * as PopperPrimitive from "./popper";
+import { ListenerManager } from "@/util/listener";
 
 export function Root(
   props: ViewProps & { store: CascaderCore<any> },
@@ -28,65 +29,49 @@ export function Trigger(
   props: ViewProps & { store: CascaderCore<any>; id?: string },
   children: ViewChildren = [],
 ) {
-  // const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
+  const value_ = ref(store.state.value);
 
-  store.onStateChange((v) => {
-    state_.as(v);
-  });
+  const listener$ = ListenerManager();
 
-  const events: any[] = [];
-
-  const mergedInputAttributes = {
-    ...(rest.attributes || {}),
-    id: props.store.id || props.id || rest.attributes?.id,
-  };
-
-  const _input$ = View(
-    {
-      as: "input",
-      attributes: mergedInputAttributes,
-      style: {
-        position: "absolute",
-        width: "1px",
-        height: "1px",
-        padding: 0,
-        margin: "-1px",
-        overflow: "hidden",
-        clip: "rect(0, 0, 0, 0)",
-        "white-space": "nowrap",
-        "border-width": 0,
-      },
-      onFocus() {
-        if (props.store.presence.state.visible) {
-          return;
-        }
-        props.store.show();
-      },
-      onClick(e: Event) {
-        e.stopPropagation();
-      },
-      onMounted(event) {
-        const $elm = event.target;
-        const value = store.state.value;
-        $elm.setAttribute("value", value ? value.join(",") : "");
-        events.push(
-          store.onStateChange(() => {
-            const v = store.state.value;
-            $elm.setAttribute("value", v ? v.join(",") : "");
-          }),
-        );
-      },
+  const _input$ = NativeInput({
+    ...rest,
+    // value: value_,
+    style: {
+      position: "absolute",
+      width: "1px",
+      height: "1px",
+      padding: 0,
+      margin: "-1px",
+      overflow: "hidden",
+      clip: "rect(0, 0, 0, 0)",
+      "white-space": "nowrap",
+      "border-width": 0,
     },
-    [],
-  );
+    onFocus() {
+      if (props.store.presence.state.visible) {
+        return;
+      }
+      props.store.show();
+    },
+    onClick(e: Event) {
+      e.stopPropagation();
+    },
+  });
 
   return View(
     {
       ...rest,
       onMounted(event) {
         const $elm = event.target;
+
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
+
         store.popper.setReference(
           {
             $el: $elm,
@@ -116,7 +101,7 @@ export function Trigger(
         $elm.addEventListener("pointerdown", handlePointerDown);
 
         if (rest.onMounted) {
-          rest.onMounted(event);
+          listener$.add(rest.onMounted(event));
         }
         return () => {
           // @ts-ignore
@@ -124,9 +109,7 @@ export function Trigger(
         };
       },
       onUnmounted() {
-        for (const fn of events) {
-          if (typeof fn === "function") fn();
-        }
+        listener$.clear();
         if (rest.onUnmounted) {
           rest.onUnmounted();
         }
@@ -201,12 +184,9 @@ export function Content(
   // const host = getHost();
   const { store, animation, ...rest } = props;
 
-  const presence_ = refobj(store.presence.state);
   let _was_exiting = false;
-
-  store.presence.onStateChange((v) => {
-    presence_.as(v);
-  });
+  const presence_ = refobj(store.presence.state);
+  const listener$ = ListenerManager([presence_.destroy]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
     switch (e.key) {
@@ -241,6 +221,13 @@ export function Content(
     when: computed(presence_, (t) => {
       return t.mounted;
     }),
+    onMounted() {
+      listener$.add(
+        store.presence.onStateChange((v) => {
+          presence_.as(v);
+        }),
+      );
+    },
     ok() {
       return [
         NativePortal({}, [
@@ -260,7 +247,7 @@ export function Content(
                     "tab-index": 0,
                   },
                   class: classNames([
-                    rest.class,
+                    // rest.class,
                     computed(presence_, (t) => {
                       if (t.exit) {
                         _was_exiting = true;
@@ -293,11 +280,15 @@ export function Content(
                     const $elm = event.target;
                     setTimeout(() => {
                       // @ts-ignore
-                      $elm.focus();
+                      if (typeof $elm.focus === "function") {
+                        // @ts-ignore
+                        $elm.focus();
+                      }
                     }, 0);
                     if (rest.onMounted) {
-                      rest.onMounted(event);
+                      listener$.add(rest.onMounted(event));
                     }
+                    return listener$.clean;
                   },
                 },
                 children,

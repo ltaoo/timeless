@@ -9,7 +9,7 @@ import {
 } from "@/content/type";
 import { MountedEvent } from "@/event";
 
-import { Txt } from "./text";
+import { Text } from "./text";
 
 export interface LabelProps {
   for?: string | DerivedRef<string> | Ref<string>;
@@ -44,10 +44,10 @@ export function Label(props: LabelProps = {}, children?: ViewChildren) {
           state.children.push(child);
         }
         if (isRef(child)) {
-          state.children.push(Txt(child));
+          state.children.push(Text(child));
         }
         if (typeof child === "string" || typeof child === "number") {
-          state.children.push(Txt(child));
+          state.children.push(Text(child));
         }
       }
     },

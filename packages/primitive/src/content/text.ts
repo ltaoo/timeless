@@ -2,7 +2,7 @@ import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { TimelessElement } from "./type";
 
-export function Txt(
+export function Text(
   value: DerivedRef<string | number> | Ref<string | number> | string | number,
 ): TimelessElement {
   let $elm: any = null;

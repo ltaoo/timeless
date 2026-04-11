@@ -8,8 +8,10 @@ import { DOMImg } from "./img";
 import { DOMIcon } from "./icon";
 
 import { DOMInput } from "./input";
+import { DOMFilePicker } from "./file-picker";
 import { DOMTextarea } from "./textarea";
 import { DOMCheckbox } from "./checkbox";
+import { DOMNumberInput } from "./number-input";
 
 import { DOMButton } from "./button";
 import { DOMPortal } from "./portal";
@@ -31,6 +33,8 @@ export type DOMHostNode =
   | DOMIcon
   | DOMInput
   | DOMTextarea
+  | DOMFilePicker
+  | DOMNumberInput
   | DOMCheckbox
   | DOMButton
   | DOMPortal

@@ -180,6 +180,15 @@ export default function Page({ data }) {
                         onClick() {
                           selectedFruit.as(item);
                         },
+                        onMounted(event) {
+                          console.log(
+                            `[]fruit ${item} mounted`,
+                            event.target.getBoundingClientRect(),
+                          );
+                        },
+                        onUnmounted() {
+                          console.log(`[]fruit ${item} unmount`);
+                        },
                       },
                       [
                         // computed(idx, (t) => `${t + 1}、`),

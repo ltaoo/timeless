@@ -46,6 +46,7 @@ export function DOMShow(props: {
         const $parent = $elm.parentElement;
         console.log("[]show check has $parent", $parent, count);
         if ($parent) {
+          const child_nodes: VNodeView[] = [];
           const $children = Array.from($parent.childNodes);
           const idx = $children.indexOf($elm);
           const $children_belong_me = $children.slice(idx, idx + count);
@@ -63,9 +64,16 @@ export function DOMShow(props: {
           for (let i = 0; i < elm.children.length; i += 1) {
             const child = elm.children[i];
             if (child) {
-              hydrate_node(child, $children_belong_me[i] as HTMLElement | Text);
+              const child$ = hydrate_node(
+                child,
+                $children_belong_me[i] as HTMLElement | Text,
+              );
+              if (child$) {
+                child_nodes.push(child$);
+              }
             }
           }
+          common$.methods.setchildnode(child_nodes);
         }
       }
     },

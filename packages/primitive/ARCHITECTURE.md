@@ -739,7 +739,7 @@ function commitPatches(dirty: Set<VNode>, patches: Map<VNode, VNodePatch>, rende
 
 当前 Timeless 的调用方式：
 ```typescript
-View({ style: { color: "red" } }, [Txt("hello")])
+View({ style: { color: "red" } }, ["hello"])
 // → 立即执行 View 函数，立即执行 Txt 函数
 ```
 

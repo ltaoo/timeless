@@ -356,7 +356,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                             "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
                           ]),
                         },
-                        [Txt(`Item ${i} — Scrollable content`)],
+                        [`Item ${i} — Scrollable content`],
                       ),
                     ),
                   ]),
@@ -390,7 +390,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                               "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
                             ]),
                           },
-                          [Txt(`Pull down to refresh — Item ${i}`)],
+                          [`Pull down to refresh — Item ${i}`],
                         ),
                       ),
                     ]),
@@ -434,7 +434,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                                 "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
                               ]),
                             },
-                            [Txt(item)],
+                            [item],
                           );
                         },
                       }),
@@ -444,7 +444,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                             "py-3 text-center text-xs text-zinc-400",
                           ]),
                         },
-                        [Txt("Scroll to bottom to load more")],
+                        ["Scroll to bottom to load more"],
                       ),
                     ]),
                   ],
@@ -462,7 +462,7 @@ export default function HomeIndexScrollViewExampleView(props) {
               });
               return View({ class: classNames(["space-y-2"]) }, [
                 View({ class: classNames(["text-xs text-zinc-400"]) }, [
-                  Txt(computed(scrollTop, (v) => `scrollTop: ${v}px`)),
+                  computed(scrollTop, (v) => `scrollTop: ${v}px`),
                 ]),
                 View({ class: classNames(["w-[300px] h-[200px]"]) }, [
                   ScrollView(
@@ -483,7 +483,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                                 "py-2 border-b border-zinc-100 dark:border-zinc-800 text-sm",
                               ]),
                             },
-                            [Txt(`Scroll me — Item ${i}`)],
+                            [`Scroll me — Item ${i}`],
                           ),
                         ),
                       ]),
@@ -582,8 +582,8 @@ export default function HomeIndexScrollViewExampleView(props) {
                           ]),
                         },
                         [
-                          Txt("Completed Downloads"),
-                          Txt(computed(totalCount, (c) => ` (${c})`)),
+                          "Completed Downloads",
+                          computed(totalCount, (c) => ` (${c})`),
                         ],
                       ),
                     ],
@@ -656,7 +656,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                             "py-3 text-center text-xs text-zinc-400",
                           ]),
                         },
-                        [Txt("Scroll to bottom to load more")],
+                        ["Scroll to bottom to load more"],
                       ),
                     ]),
                   ]),
@@ -754,8 +754,8 @@ export default function HomeIndexScrollViewExampleView(props) {
                           ]),
                         },
                         [
-                          Txt("Download History"),
-                          Txt(computed(totalCount, (c) => ` (${c})`)),
+                          "Download History",
+                          computed(totalCount, (c) => ` (${c})`),
                         ],
                       ),
                       Button(
@@ -840,7 +840,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                             "py-3 text-center text-xs text-zinc-400",
                           ]),
                         },
-                        [Txt("Scroll to bottom to load more")],
+                        ["Scroll to bottom to load more"],
                       ),
                     ]),
                   ]),
@@ -945,10 +945,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                             "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
                           ]),
                         },
-                        [
-                          Txt("Gutter Test"),
-                          Txt(computed(totalCount, (c) => ` (${c})`)),
-                        ],
+                        ["Gutter Test", computed(totalCount, (c) => ` (${c})`)],
                       ),
                       Button(
                         {
@@ -1160,10 +1157,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                             "text-sm font-semibold text-zinc-700 dark:text-zinc-300",
                           ]),
                         },
-                        [
-                          Txt("Downloads"),
-                          Txt(computed(totalCount, (c) => ` (${c})`)),
-                        ],
+                        ["Downloads", computed(totalCount, (c) => ` (${c})`)],
                       ),
                       View({ class: "flex items-center gap-1" }, [
                         Button(
@@ -1261,7 +1255,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                             "py-3 text-center text-xs text-zinc-400",
                           ]),
                         },
-                        [Txt("Scroll to bottom to load more")],
+                        ["Scroll to bottom to load more"],
                       ),
                     ]),
                   ]),
@@ -1362,8 +1356,8 @@ export default function HomeIndexScrollViewExampleView(props) {
                                 ]),
                               },
                               [
-                                Txt("Downloads"),
-                                Txt(computed(totalCount, (c) => ` (${c})`)),
+                                "Downloads",
+                                computed(totalCount, (c) => ` (${c})`),
                               ],
                             ),
                           ],
@@ -1562,8 +1556,8 @@ export default function HomeIndexScrollViewExampleView(props) {
                                 ]),
                               },
                               [
-                                Txt("Downloads"),
-                                Txt(computed(totalCount, (c) => ` (${c})`)),
+                                "Downloads",
+                                computed(totalCount, (c) => ` (${c})`),
                               ],
                             ),
                           ],
@@ -1639,7 +1633,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                                   "py-3 text-center text-xs text-zinc-400",
                                 ]),
                               },
-                              [Txt("Scroll to bottom to load more")],
+                              ["Scroll to bottom to load more"],
                             ),
                           ]),
                         ]),
@@ -1757,11 +1751,9 @@ export default function HomeIndexScrollViewExampleView(props) {
                             ]),
                           },
                           [
-                            Txt("Downloads"),
-                            Txt(
-                              computed(taskCount_, (d) =>
-                                d > 0 ? ` (${d})` : "",
-                              ),
+                            "Downloads",
+                            computed(taskCount_, (d) =>
+                              d > 0 ? ` (${d})` : "",
                             ),
                           ],
                         ),

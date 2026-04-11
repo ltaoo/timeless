@@ -10,48 +10,28 @@ export * from "./reactive/match";
 // Content
 export * from "./content/view";
 export * from "./content/fragment";
-export * from "./content/html";
-export * from "./content/text";
 export * from "./content/icon";
 export * from "./content/popper";
 export * from "./content/list-view";
 export * from "./content/portal";
 export * from "./content/lazy-view";
 export * from "./content/type";
+export * as SVG from "./content/svg";
+export * from "./content/img";
+export * from "./content/label";
+export * from "./content/style";
+export * from "./content/rich-text";
 
 export * from "./event";
 
 // Input
 export * from "./input/input";
-export * from "./input/password";
+export * from "./input/number-input";
+export * from "./input/password-input";
 export * from "./input/checkbox";
 export * from "./input/select";
 export * from "./input/slider";
-export * from "./input/file-input";
-
-export {
-  SVG,
-  G,
-  Circle,
-  Rect,
-  Path,
-  Line,
-  Polyline,
-  Polygon,
-  Text,
-  Defs,
-  Symbol,
-  Use,
-  LinearGradient,
-  RadialGradient,
-  Stop,
-  Mask,
-  ClipPath,
-  Ellipse,
-} from "./content/svg";
-export * from "./content/style";
-export * from "./content/img";
-export * from "./content/label";
+export * from "./input/file-picker";
 
 export * from "./interaction/link";
 export * from "./interaction/button";
@@ -88,7 +68,7 @@ export * as AccordionPrimitive from "./modules/accordion";
 
 // form
 export * as InputPrimitive from "./modules/input";
-export * as FileInputPrimitive from "./modules/file-input";
+export * as FilePickerPrimitive from "./modules/file-picker";
 export * as NumberInputPrimitive from "./modules/number-input";
 export * as TextareaPrimitive from "./modules/textarea";
 export * as SelectPrimitive from "./modules/select";

@@ -17,6 +17,8 @@ import { DOMPopper } from "@/host/popper";
 import { DOMCheckbox } from "@/host/checkbox";
 import { DOMLabel } from "@/host/label";
 import { DOMTextarea } from "@/host/textarea";
+import { DOMFilePicker } from "@/host/file-picker";
+import { DOMNumberInput } from "@/host/number-input";
 
 export function build(elm: TimelessElement): VNodeView<any> {
   if (elm.t === "view") {
@@ -78,6 +80,16 @@ export function build(elm: TimelessElement): VNodeView<any> {
     elm.$elm = input$;
     // input$.render(elm);
     return input$;
+  }
+  if (elm.t === "file-picker") {
+    const file_picker$ = DOMFilePicker({ build });
+    elm.$elm = file_picker$;
+    return file_picker$;
+  }
+  if (elm.t === "number-input") {
+    const number_input$ = DOMNumberInput({ build });
+    elm.$elm = number_input$;
+    return number_input$;
   }
   if (elm.t === "textarea") {
     const textarea$ = DOMTextarea({ build });

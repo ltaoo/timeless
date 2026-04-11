@@ -28,6 +28,12 @@ export function HostElement(props: {
     set$childrne(v: any[]) {
       child_host_nodes = v;
     },
+    setchildrenelement(v: any[]) {
+      child_elements = v;
+    },
+    setchildnode(v: any[]) {
+      child_nodes = v;
+    },
     setStyle(
       style: ViewStyleProperties,
       opt: Partial<{ initial?: boolean }> = {},
@@ -49,6 +55,7 @@ export function HostElement(props: {
       }
     },
     setStyleSet(styleSet: string[], opt: Partial<{ initial?: boolean }> = {}) {
+      // console.log(`[dom]${props.t} - setStyleSet`, $elm, styleSet, opt);
       if (!$elm || $elm instanceof Text || !styleSet) {
         return;
       }
@@ -293,6 +300,7 @@ export function HostElement(props: {
       }
       const $parent = methods.getParent();
       console.log(props.t + "[]removeChildren", $parent, child_host_nodes);
+      // hydrate 加载的，没有 child_nodes，导致通过该方法销毁的子元素没有 onUnmounted 方法
       for (const child of child_nodes) {
         if (child) {
           child.removeChildren();
@@ -319,6 +327,8 @@ export function HostElement(props: {
     },
     insert(idx: number, children: (TimelessElement | null)[]) {
       const $parent = methods.getParent();
+      const inserted_elements: TimelessElement[] = [];
+      const inserted_child: VNodeView[] = [];
       console.log("[dom]insert child", idx, children, $parent);
       if (!$parent) {
         return;
@@ -326,22 +336,36 @@ export function HostElement(props: {
       for (const child of children) {
         if (child) {
           const child$ = props.build(child);
+          inserted_child.push(child$);
           const $reference = child_host_nodes[idx];
           // console.log("[dom]For - insert - $child", child$, idx, $reference);
           const $child = child$.render(child);
           if ($child) {
             if ($reference) {
               child_host_nodes.splice(idx, 0, $child);
+              inserted_elements.push(child);
               $parent.insertBefore($child, $reference);
             } else {
               child_host_nodes.push($child);
+              inserted_elements.push(child);
               $parent.appendChild($child);
             }
           }
         }
       }
+      child_elements.splice(idx, 0, ...inserted_elements);
+      child_nodes.splice(idx, 0, ...inserted_child);
+      console.log("[dom]for - insert", inserted_elements);
+      for (const child of inserted_elements) {
+        if (child.onMounted) {
+          child.onMounted({
+            target: child.$elm,
+          });
+        }
+      }
     },
     remove(idx: number, count: number) {
+      // console.log("[dom]for - remove", child_elements);
       const $parent = methods.getParent();
       if (!$parent) {
         console.warn("remove parent not found");
@@ -356,9 +380,16 @@ export function HostElement(props: {
           $parent.removeChild($child);
         }
       }
+      child_elements.splice(idx, count);
+      child_nodes.splice(idx, count);
       setTimeout(() => {
+        // console.log(
+        //   "[dom]for - remove - before invoke onUnmounted",
+        //   removed_elements,
+        // );
         for (const child of removed_elements) {
           if (child && child.onUnmounted) {
+            // console.log("invoke child.onUnmounted");
             child.onUnmounted();
           }
         }

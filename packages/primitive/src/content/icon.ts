@@ -26,7 +26,7 @@ export function Icon(props: IconProps) {
 
   const methods = {
     setup_value_subscribe() {
-      box$.methods.handle_value();
+      box$.methods.subscribe_props();
       if (props.name !== undefined) {
         if (isRef(props.name)) {
           props.name.subscribe({

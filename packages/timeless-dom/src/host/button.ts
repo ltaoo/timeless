@@ -49,15 +49,22 @@ export function DOMButton(props: {
       }
       common$.methods.set$elm($elm);
       common$.methods.setupEventListener(elm.events);
-      if (!elm.children) {
-        return;
-      }
-      const $children = Array.from($elm.childNodes);
-      for (let i = 0; i < elm.children.length; i += 1) {
-        const child = elm.children[i];
-        if (child) {
-          hydrate_node(child, $children[i] as HTMLElement | Text);
+      if (elm.children) {
+        const child_nodes: VNodeView[] = [];
+        const $children = Array.from($elm.childNodes);
+        for (let i = 0; i < elm.children.length; i += 1) {
+          const child = elm.children[i];
+          if (child) {
+            const child$ = hydrate_node(
+              child,
+              $children[i] as HTMLElement | Text,
+            );
+            if (child$) {
+              child_nodes.push(child$);
+            }
+          }
         }
+        common$.methods.setchildnode(child_nodes);
       }
     },
     getChildren: common$.methods.getChildren,

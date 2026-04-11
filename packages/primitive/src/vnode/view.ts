@@ -14,8 +14,10 @@ export type VNodeRect = {
   right: number;
   bottom: number;
 };
-export type VNodeEvent<T> = {
+export type VNodeEvent<T = any> = {
   target: T;
+  stopPropagation(): void;
+  preventDefault(): void;
 };
 
 type VNodeViewType =

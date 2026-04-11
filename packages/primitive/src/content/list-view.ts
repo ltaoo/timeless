@@ -9,7 +9,7 @@ import {
 import { MountedEvent } from "@/event/index";
 import { ListenerManager } from "@/util/listener";
 
-import { Txt } from "./text";
+import { Text } from "./text";
 import {
   isElement,
   TimelessElement,
@@ -160,11 +160,11 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
             return;
           }
           if (isRef(child)) {
-            state.children[i] = Txt(child);
+            state.children[i] = Text(child);
             return;
           }
           if (child) {
-            state.children[i] = Txt(String(child));
+            state.children[i] = Text(String(child));
             return;
           }
           // state.children[i] = null;

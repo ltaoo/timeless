@@ -6,14 +6,12 @@ import {
   computed,
   DerivedRef,
   isWriteableRef,
-  isArrayRef,
-  refarr,
-  RefArray,
 } from "@timeless/reactive";
 
 import { TimelessElement, isElement } from "@/content/type";
 import { MountedEvent } from "@/event";
-import { Txt } from "@/content/text";
+import { Text } from "@/content/text";
+import { ListenerManager } from "@/util/listener";
 
 export type ForProps<T> = {
   key?: string;
@@ -61,6 +59,7 @@ export function For<T>(
   };
   let _id = 0;
   const _existing_map = new Map();
+  const listener$ = ListenerManager();
 
   const methods = {
     unique_id() {
@@ -68,72 +67,73 @@ export function For<T>(
     },
     subscribe_value() {
       const vv = props.each;
-      if (!isArrayRef(vv)) {
+      if (isRef(vv)) {
+        state.wrapped_items = (vv.value as T[]).map((item) => ({
+          k: methods.unique_id(),
+          v: item,
+        }));
+        state.items = [...(vv.value as T[])];
+        listener$.add(
+          vv.subscribe({
+            onPatch(action) {
+              if (!state.rendered) {
+                return;
+              }
+              console.log(
+                "[primitive]For - ctx.onPatch - handle patch",
+                action,
+                vv.value,
+              );
+              if (action.type === "insert" && action.items !== undefined) {
+                methods.insert(action.index, action.items as T[]);
+                return;
+              }
+              if (
+                action.type === "delete" &&
+                action.deleteCount !== undefined
+              ) {
+                methods.remove(action.index, action.deleteCount);
+                return;
+              }
+              if (
+                action.type === "move" &&
+                action.from !== undefined &&
+                action.to !== undefined
+              ) {
+                methods.move(action.from, action.to);
+                return;
+              }
+              if (
+                action.type === "swap" &&
+                action.from !== undefined &&
+                action.to !== undefined
+              ) {
+                methods.swap(action.from, action.to);
+                return;
+              }
+            },
+            onChange(v) {
+              console.log("[primitive]For - ctx.onChange", v, state.rendered);
+              // if (!state.rendered) {
+              //   return;
+              // }
+              methods.refresh(v as T[]);
+            },
+          }),
+        );
+      } else {
         state.wrapped_items = (vv as T[]).map((item) => ({
           k: methods.unique_id(),
           v: item,
         }));
         state.items = [...(vv as T[])];
-        return;
       }
-      state.wrapped_items = (vv.value as T[]).map((item) => ({
-        k: methods.unique_id(),
-        v: item,
-      }));
-      state.items = [...(vv.value as T[])];
-      vv.subscribe({
-        onPatch(action) {
-          if (!state.rendered) {
-            return;
-          }
-          console.log(
-            "[primitive]For - ctx.onPatch - handle patch",
-            action,
-            vv.value,
-          );
-          if (action.type === "insert" && action.items !== undefined) {
-            methods.insert(action.index, action.items as T[]);
-            return;
-          }
-          if (action.type === "delete" && action.deleteCount !== undefined) {
-            methods.remove(action.index, action.deleteCount);
-            return;
-          }
-          if (
-            action.type === "move" &&
-            action.from !== undefined &&
-            action.to !== undefined
-          ) {
-            methods.move(action.from, action.to);
-            return;
-          }
-          if (
-            action.type === "swap" &&
-            action.from !== undefined &&
-            action.to !== undefined
-          ) {
-            methods.swap(action.from, action.to);
-            return;
-          }
-        },
-        onChange(v) {
-          console.log("[primitive]For - ctx.onChange", v, state.rendered);
-          // if (!state.rendered) {
-          //   return;
-          // }
-          methods.refresh(v as T[]);
-        },
-      });
     },
     // Helper to create a computed index that depends on `each`
     create_idx(origin_item: { k: number; v: T }): DerivedRef<number> {
       return computed(props.each, (t) => {
         const r = state.wrapped_items.indexOf(origin_item);
-        console.log(
-          "recompute index when the each is changed",
-          JSON.stringify(state.wrapped_items),
-          origin_item,
-        );
+        // console.log("recompute index when the each is changed", origin_item);
         return r;
       });
     },
@@ -174,12 +174,12 @@ export function For<T>(
             return child_tmp;
           }
           if (isRef(child_tmp)) {
-            return Txt(child_tmp);
+            return Text(child_tmp);
           }
           if (typeof child_tmp === "function") {
           }
           if (child_tmp) {
-            return Txt(child_tmp);
+            return Text(child_tmp);
           }
           return null;
         })();
@@ -506,7 +506,7 @@ export function For<T>(
     onMounted(event: MountedEvent) {
       state.rendered = true;
       if (props.onMounted) {
-        props.onMounted(event);
+        listener$.add(props.onMounted(event));
       }
       for (const child of state.children) {
         if (isElement(child) && child.onMounted) {
@@ -524,6 +524,10 @@ export function For<T>(
       if (props.onUnmounted) {
         props.onUnmounted();
       }
+      for (let i = 0; i < state.idx_arr.length; i += 1) {
+        state.idx_arr[i].destroy();
+      }
+      listener$.clean();
       for (let i = 0; i < state.children.length; i += 1) {
         const component = state.children[i];
         if (!component) {

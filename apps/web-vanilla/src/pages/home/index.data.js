@@ -11,7 +11,7 @@ export default function DataDisplayView() {
         Item("Offset Top 20px", [
           View({ class: classNames(["h-[600px] space-y-4"]) }, [
             View({ class: classNames(["text-sm text-zinc-400"]) }, [
-              Txt("Scroll down to see the affix effect"),
+              "Scroll down to see the affix effect",
             ]),
             Affix(
               {
@@ -127,7 +127,7 @@ export default function DataDisplayView() {
               View({ class: classNames(["space-y-4"]) }, [
                 ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) =>
                   View({ class: classNames(["text-sm"]) }, [
-                    Txt(`Item ${i} — Scrollable content area`),
+                    `Item ${i} — Scrollable content area`,
                   ]),
                 ),
               ]),
@@ -145,7 +145,7 @@ export default function DataDisplayView() {
                     "flex items-center justify-center w-full h-full rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500",
                   ]),
                 },
-                [Txt("16 : 9")],
+                ["16 : 9"],
               ),
             ]),
           ]),
@@ -156,26 +156,26 @@ export default function DataDisplayView() {
           Table({}, [
             TableHeader({}, [
               TableRow({}, [
-                TableHead({}, [Txt("Name")]),
-                TableHead({}, [Txt("Status")]),
-                TableHead({}, [Txt("Role")]),
+                TableHead({}, ["Name"]),
+                TableHead({}, ["Status"]),
+                TableHead({}, ["Role"]),
               ]),
             ]),
             TableBody({}, [
               TableRow({}, [
-                TableCell({}, [Txt("Alice")]),
-                TableCell({}, [Txt("Active")]),
-                TableCell({}, [Txt("Admin")]),
+                TableCell({}, ["Alice"]),
+                TableCell({}, ["Active"]),
+                TableCell({}, ["Admin"]),
               ]),
               TableRow({}, [
-                TableCell({}, [Txt("Bob")]),
-                TableCell({}, [Txt("Inactive")]),
-                TableCell({}, [Txt("User")]),
+                TableCell({}, ["Bob"]),
+                TableCell({}, ["Inactive"]),
+                TableCell({}, ["User"]),
               ]),
               TableRow({}, [
-                TableCell({}, [Txt("Charlie")]),
-                TableCell({}, [Txt("Active")]),
-                TableCell({}, [Txt("Editor")]),
+                TableCell({}, ["Charlie"]),
+                TableCell({}, ["Active"]),
+                TableCell({}, ["Editor"]),
               ]),
             ]),
           ]),

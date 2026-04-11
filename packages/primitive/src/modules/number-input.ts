@@ -1,9 +1,11 @@
-import { ref, refobj, isRef } from "@timeless/reactive";
+import { ref, refobj, isRef, computed, combine } from "@timeless/reactive";
 import { NumberInputCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { Input as NativeInput } from "@/input/input";
+import { NumberInput as NativeNumberInput } from "@/input/number-input";
+import { ListenerManager } from "@/util/listener";
+import { VNodeEvent, VNodeView } from "@/vnode/view";
 
 export function Root(
   props: ViewProps & { store?: NumberInputCore },
@@ -13,7 +15,41 @@ export function Root(
 }
 
 export function Input(props: ViewProps & { store: NumberInputCore }) {
-  return NativeInput(props);
+  const { store, ...rest } = props;
+
+  const listener$ = ListenerManager();
+
+  const value_ = ref(store.value);
+  const placeholder_ = ref(store.placeholder || "");
+  const disabled_ = ref(store.disabled || false);
+
+  return NativeNumberInput({
+    ...rest,
+    value: value_,
+    placeholder: placeholder_,
+    disabled: disabled_,
+    onMounted(event) {
+      listener$.add(
+        store.onStateChange((state) => {
+          value_.as(state.value);
+          placeholder_.as(state.placeholder || "");
+          disabled_.as(state.disabled || false);
+        }),
+      );
+      if (rest.onMounted) {
+        listener$.add(rest.onMounted(event));
+      }
+    },
+    onUnmounted() {
+      value_.destroy();
+      placeholder_.destroy();
+      disabled_.destroy();
+      listener$.clean();
+      if (rest.onUnmounted) {
+        rest.onUnmounted();
+      }
+    },
+  });
 }
 
 export function IncreaseButton(
@@ -22,50 +58,47 @@ export function IncreaseButton(
 ) {
   const { store, ...rest } = props;
 
-  const canIncrease$ = ref(store.canIncrease());
-  const disabled$ = ref(store.disabled || false);
-
-  store.onStateChange(() => {
-    canIncrease$.as(store.canIncrease());
-    disabled$.as(store.disabled || false);
-  });
+  const can_increase_ = ref(store.canIncrease());
+  const disabled_ = ref(store.disabled || false);
+  const disabled_derived_ = combine(
+    { disabled: disabled_, can_increase: can_increase_ },
+    (t) => {
+      return t.disabled || !t.can_increase;
+    },
+  );
+  const listener$ = ListenerManager();
 
   return View(
     {
       ...rest,
+      dataset: {
+        disabled: disabled_derived_,
+      },
+      attributes: {
+        "aria-disabled": disabled_derived_,
+      },
       onMounted(event) {
         const $e = event.target;
-        const updateState = () => {
-          const canIncrease = canIncrease$.value;
-          const disabled = disabled$.value;
-          if (disabled || !canIncrease) {
-            $e.setAttribute("data-disabled", "true");
-            $e.setAttribute("aria-disabled", "true");
-          } else {
-            $e.removeAttribute("data-disabled");
-            $e.removeAttribute("aria-disabled");
-          }
-        };
-        canIncrease$.subscribe({ onChange: updateState });
-        disabled$.subscribe({ onChange: updateState });
-        updateState();
-
-        const handleMouseDown = (e: any) => {
+        listener$.add(
+          store.onStateChange(() => {
+            can_increase_.as(store.canIncrease());
+            disabled_.as(store.disabled || false);
+          }),
+        );
+        const handleMouseDown = (e: VNodeEvent) => {
           e.preventDefault();
         };
-        const handleClick = (e: any) => {
+        const handleClick = (e: VNodeEvent) => {
           e.preventDefault();
           e.stopPropagation();
           store.increase();
         };
-        $e.addEventListener("mousedown", handleMouseDown);
-        $e.addEventListener("click", handleClick);
-
-        if (rest.onMounted) rest.onMounted(event);
-        return () => {
-          $e.removeEventListener("mousedown", handleMouseDown);
-          $e.removeEventListener("click", handleClick);
-        };
+        listener$.add($e.addEventListener("mousedown", handleMouseDown));
+        listener$.add($e.addEventListener("click", handleClick));
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.clean;
       },
     },
     children,
@@ -78,50 +111,49 @@ export function DecreaseButton(
 ) {
   const { store, ...rest } = props;
 
-  const canDecrease$ = ref(store.canDecrease());
-  const disabled$ = ref(store.disabled || false);
-
-  store.onStateChange(() => {
-    canDecrease$.as(store.canDecrease());
-    disabled$.as(store.disabled || false);
-  });
+  const can_decrease_ = ref(store.canDecrease());
+  const disabled_ = ref(store.disabled || false);
+  const disabled_derived_ = combine(
+    { disabled: disabled_, can_decrease: can_decrease_ },
+    (t) => {
+      return t.disabled || !t.can_decrease;
+    },
+  );
+  const listener$ = ListenerManager();
 
   return View(
     {
       ...rest,
+      dataset: {
+        disabled: disabled_derived_,
+      },
+      attributes: {
+        "aria-disabled": disabled_derived_,
+      },
       onMounted(event) {
         const $e = event.target;
-        const updateState = () => {
-          const canDecrease = canDecrease$.value;
-          const disabled = disabled$.value;
-          if (disabled || !canDecrease) {
-            $e.setAttribute("data-disabled", "true");
-            $e.setAttribute("aria-disabled", "true");
-          } else {
-            $e.removeAttribute("data-disabled");
-            $e.removeAttribute("aria-disabled");
-          }
-        };
-        canDecrease$.subscribe({ onChange: updateState });
-        disabled$.subscribe({ onChange: updateState });
-        updateState();
-
-        const handleMouseDown = (e: any) => {
+        listener$.add(
+          store.onStateChange(() => {
+            can_decrease_.as(store.canDecrease());
+            disabled_.as(store.disabled || false);
+          }),
+        );
+        const handleMouseDown = (e: VNodeEvent) => {
           e.preventDefault();
         };
-        const handleClick = (e: any) => {
+        const handleClick = (e: VNodeEvent) => {
           e.preventDefault();
           e.stopPropagation();
           store.decrease();
         };
-        $e.addEventListener("mousedown", handleMouseDown);
-        $e.addEventListener("click", handleClick);
-
-        if (rest.onMounted) rest.onMounted(event);
-        return () => {
-          $e.removeEventListener("mousedown", handleMouseDown);
-          $e.removeEventListener("click", handleClick);
-        };
+        listener$.append([
+          $e.addEventListener("mousedown", handleMouseDown),
+          $e.addEventListener("click", handleClick),
+        ]);
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        listener$.clean;
       },
     },
     children,
@@ -133,26 +165,25 @@ export function Value(
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
-  const value$ = ref(store.value);
+  const value_ = ref(store.value);
 
-  store.onStateChange(() => {
-    value$.as(store.value);
-  });
+  const listener$ = ListenerManager();
 
   return View(
     {
       ...rest,
       onMounted(event) {
         const $e = event.target;
-        const updateText = () => {
-          // host.setTextContent(
-          //   $e,
-          //   value$.value !== null ? String(value$.value) : "",
-          // );
-        };
-        value$.subscribe({ onChange: updateText });
-        updateText();
-        if (rest.onMounted) rest.onMounted(event);
+
+        listener$.add(
+          store.onStateChange(() => {
+            value_.as(store.value);
+          }),
+        );
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        listener$.clean;
       },
     },
     children,

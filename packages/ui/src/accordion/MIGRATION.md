@@ -232,7 +232,7 @@ export function Chevron(
         return typeof baseClass === "string" ? baseClass : "";
       }),
     },
-    children || [Txt("▾")],
+    children || ["▾"],
   );
 }
 
@@ -353,7 +353,7 @@ export function Accordion(
                     "flex w-full items-center justify-between py-4 font-medium transition-all cursor-pointer hover:underline",
                 },
                 [
-                  Txt(item.title),
+                  item.title,
                   // Chevron 箭头
                   AccordionPrimitive.Chevron(
                     {
@@ -369,7 +369,7 @@ export function Accordion(
                           .join(" ");
                       }),
                     },
-                    [Txt("▾")],
+                    ["▾"],
                   ),
                 ],
               ),
@@ -421,11 +421,11 @@ Accordion({
   items: [
     {
       title: "Section 1",
-      content: [Txt("Content 1")],
+      content: ["Content 1"],
     },
     {
       title: "Section 2",
-      content: [Txt("Content 2")],
+      content: ["Content 2"],
     },
   ],
 });

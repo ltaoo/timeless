@@ -11,6 +11,8 @@ import {
   Fragment,
   Img,
   Checkbox,
+  FilePicker,
+  NumberInput,
   DismissableLayer,
   ref,
   styleNames,
@@ -19,6 +21,7 @@ import {
   refarr,
   refobj,
   getobj,
+  classNames,
 } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
 
@@ -174,7 +177,12 @@ function ApplicationView() {
 
   return View(
     {
-      class: "page",
+      class: classNames([
+        "page",
+        computed(page, (t) => {
+          return t.value === "todo" ? "todo-page" : "home-page";
+        }),
+      ]),
       onMounted() {
         console.log("[ApplicationView] onMounted");
         // const timer = setInterval(() => {
@@ -188,6 +196,13 @@ function ApplicationView() {
       },
     },
     [
+      "Hello",
+      // FilePicker({
+      //   class: "w-full",
+      // }),
+      // NumberInput({
+      //   class: "w-full",
+      // }),
       // Show({
       //   when: visible_,
       //   ok() {
@@ -223,159 +238,159 @@ function ApplicationView() {
       //   },
       //   ["Hello"],
       // ),
-      Input({
-        class: "w-full",
-        placeholder: "Add a todo todo",
-        value: todo_,
-        onMounted() {
-          console.log("[Input] onMounted");
-        },
-        onChange(event) {
-          todo_.as(event.target.value);
-        },
-      }),
-      Button(
-        {
-          onMounted() {
-            console.log("[Button] onMounted");
-          },
-          onClick() {
-            // visible_.as((prev) => {
-            //   return !prev;
-            // });
-            const v = todo_.value;
-            todo_.as("");
-            if (!v) {
-              alert("must input todo");
-              return;
-            }
-            todos_.push({
-              id: todos_.length,
-              completed: false,
-              title: v,
-            });
-          },
-        },
-        ["Add Todo"],
-      ),
-      Button(
-        {
-          onClick() {
-            const v = todo_.value;
-            if (!v) {
-              return;
-            }
-            todo_.as("");
-            todos_.unshift({
-              id: todos_.length,
-              completed: false,
-              title: v,
-            });
-          },
-        },
-        ["Unshift Todo"],
-      ),
-      Button(
-        {
-          onClick() {
-            todos_.as([
-              {
-                id: 2,
-                title: "Study for exam exam exam",
-                completed: false,
-              },
-              {
-                id: 1,
-                title: "Buy groceries_update",
-                completed: true,
-              },
-              {
-                id: 4,
-                title: "Sleep",
-                completed: false,
-              },
-            ]);
-          },
-        },
-        ["Refresh"],
-      ),
-      For({
-        key: "id",
-        each: todos_,
-        render(todo, idx) {
-          return View(
-            {
-              style: {
-                display: "flex",
-              },
-            },
-            [
-              Checkbox({
-                checked: computed(todo, (t) => t.completed),
-                onChange(event) {
-                  const todo$ = getobj(todo);
-                  if (todo$) {
-                    todo$.set("completed", event.target.checked);
-                  }
-                },
-              }),
-              View(
-                {
-                  style: {
-                    color: "#fff",
-                    "text-decoration": computed(todo, (t) =>
-                      t.completed ? "line-through" : "none",
-                    ),
-                  },
-                },
-                [idx, " ", computed(todo, (t) => t.title)],
-              ),
-              View(
-                {
-                  class: "icon",
-                  style: {
-                    color: "#fff",
-                    cursor: "pointer",
-                  },
-                  onClick() {
-                    todos_.remove(todo);
-                  },
-                },
-                [Icon({ name: "trash", color: "#fff", size: 16 })],
-              ),
-              View(
-                {
-                  class: "icon",
-                  style: {
-                    color: "#fff",
-                    cursor: "pointer",
-                  },
-                  onClick() {
-                    todos_.up(idx);
-                  },
-                },
-                [Icon({ name: "chevron-up", color: "#fff", size: 16 })],
-              ),
-              View(
-                {
-                  class: "icon",
-                  style: {
-                    color: "#fff",
-                    cursor: "pointer",
-                  },
-                  onClick() {
-                    todos_.down(idx);
-                  },
-                },
-                [Icon({ name: "chevron-down", color: "#fff", size: 16 })],
-              ),
-            ],
-          );
-        },
-        onMounted() {
-          console.log("[Todo For] onMounted");
-        },
-      }),
+      // Input({
+      //   class: "w-full",
+      //   placeholder: "Add a todo todo",
+      //   value: todo_,
+      //   onMounted() {
+      //     console.log("[Input] onMounted");
+      //   },
+      //   onChange(event) {
+      //     todo_.as(event.target.value);
+      //   },
+      // }),
+      // Button(
+      //   {
+      //     onMounted() {
+      //       console.log("[Button] onMounted");
+      //     },
+      //     onClick() {
+      //       // visible_.as((prev) => {
+      //       //   return !prev;
+      //       // });
+      //       const v = todo_.value;
+      //       todo_.as("");
+      //       if (!v) {
+      //         alert("must input todo");
+      //         return;
+      //       }
+      //       todos_.push({
+      //         id: todos_.length,
+      //         completed: false,
+      //         title: v,
+      //       });
+      //     },
+      //   },
+      //   ["Add Todo"],
+      // ),
+      // Button(
+      //   {
+      //     onClick() {
+      //       const v = todo_.value;
+      //       if (!v) {
+      //         return;
+      //       }
+      //       todo_.as("");
+      //       todos_.unshift({
+      //         id: todos_.length,
+      //         completed: false,
+      //         title: v,
+      //       });
+      //     },
+      //   },
+      //   ["Unshift Todo"],
+      // ),
+      // Button(
+      //   {
+      //     onClick() {
+      //       todos_.as([
+      //         {
+      //           id: 2,
+      //           title: "Study for exam exam exam",
+      //           completed: false,
+      //         },
+      //         {
+      //           id: 1,
+      //           title: "Buy groceries_update",
+      //           completed: true,
+      //         },
+      //         {
+      //           id: 4,
+      //           title: "Sleep",
+      //           completed: false,
+      //         },
+      //       ]);
+      //     },
+      //   },
+      //   ["Refresh"],
+      // ),
+      // For({
+      //   key: "id",
+      //   each: todos_,
+      //   render(todo, idx) {
+      //     return View(
+      //       {
+      //         style: {
+      //           display: "flex",
+      //         },
+      //       },
+      //       [
+      //         Checkbox({
+      //           checked: computed(todo, (t) => t.completed),
+      //           onChange(event) {
+      //             const todo$ = getobj(todo);
+      //             if (todo$) {
+      //               todo$.set("completed", event.target.checked);
+      //             }
+      //           },
+      //         }),
+      //         View(
+      //           {
+      //             style: {
+      //               color: "#fff",
+      //               "text-decoration": computed(todo, (t) =>
+      //                 t.completed ? "line-through" : "none",
+      //               ),
+      //             },
+      //           },
+      //           [idx, " ", computed(todo, (t) => t.title)],
+      //         ),
+      //         View(
+      //           {
+      //             class: "icon",
+      //             style: {
+      //               color: "#fff",
+      //               cursor: "pointer",
+      //             },
+      //             onClick() {
+      //               todos_.remove(todo);
+      //             },
+      //           },
+      //           [Icon({ name: "trash", color: "#fff", size: 16 })],
+      //         ),
+      //         View(
+      //           {
+      //             class: "icon",
+      //             style: {
+      //               color: "#fff",
+      //               cursor: "pointer",
+      //             },
+      //             onClick() {
+      //               todos_.up(idx);
+      //             },
+      //           },
+      //           [Icon({ name: "chevron-up", color: "#fff", size: 16 })],
+      //         ),
+      //         View(
+      //           {
+      //             class: "icon",
+      //             style: {
+      //               color: "#fff",
+      //               cursor: "pointer",
+      //             },
+      //             onClick() {
+      //               todos_.down(idx);
+      //             },
+      //           },
+      //           [Icon({ name: "chevron-down", color: "#fff", size: 16 })],
+      //         ),
+      //       ],
+      //     );
+      //   },
+      //   onMounted() {
+      //     console.log("[Todo For] onMounted");
+      //   },
+      // }),
       // Img({
       //   src: "/public/avatar.jpeg",
       //   style: {

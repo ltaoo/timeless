@@ -9,8 +9,6 @@ export type DOMView = VNodeView<HTMLDivElement> & {
   hydrate(elm: TimelessElement, $e: HTMLDivElement): void;
 };
 
-export function CommonFragment() {}
-
 export function DOMView(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
 }): DOMView {
@@ -48,13 +46,24 @@ export function DOMView(props: {
       common$.methods.set$elm($elm);
       common$.methods.setupEventListener(elm.events);
       if (elm.children) {
+        const child_nodes: VNodeView[] = [];
+        const child_elements: (TimelessElement | null)[] = [];
         const $children = Array.from($elm.childNodes);
         for (let i = 0; i < elm.children.length; i += 1) {
           const child = elm.children[i];
+          child_elements.push(child);
           if (child) {
-            hydrate_node(child, $children[i] as HTMLElement | Text);
+            const child$ = hydrate_node(
+              child,
+              $children[i] as HTMLElement | Text,
+            );
+            if (child$) {
+              child_nodes.push(child$);
+            }
           }
         }
+        common$.methods.setchildrenelement(child_elements);
+        common$.methods.setchildnode(child_nodes);
       }
     },
     getChildren: common$.methods.getChildren,

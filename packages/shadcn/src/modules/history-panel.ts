@@ -7,7 +7,7 @@ import {
   ref,
   Icon,
 } from "@timeless/timeless";
-import { View, ViewProps, For, Show, Txt } from "@timeless/timeless";
+import { View, ViewProps, For, Show } from "@timeless/timeless";
 
 export function HistoryPanel(
   props: ViewProps & { store: HistoryCore<string, any> },
@@ -53,7 +53,7 @@ export function HistoryPanel(
                   class:
                     "px-3 py-1.5 rounded-md bg-zinc-100 text-sm font-mono text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
                 },
-                [Txt(href)],
+                [href],
               ),
               Show({
                 when: collapsed,

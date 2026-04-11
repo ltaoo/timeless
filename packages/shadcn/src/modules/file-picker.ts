@@ -6,7 +6,7 @@ import {
   refobj,
   View,
 } from "@timeless/timeless";
-import { FileInputPrimitive, Show, ViewProps } from "@timeless/timeless";
+import { FilePickerPrimitive, Show, ViewProps } from "@timeless/timeless";
 import { FileInputCore } from "@timeless/ui";
 
 export function FileInput(
@@ -25,10 +25,10 @@ export function FileInput(
   const hasValue = computed(state_, (d) => d.value && d.value.length > 0);
   const isLoading = computed(state_, (d) => d.loading || false);
 
-  return FileInputPrimitive.Root(
+  return FilePickerPrimitive.Root(
     { store, class: classNames(["t-file-input relative", props.class]) },
     [
-      FileInputPrimitive.Input({
+      FilePickerPrimitive.Input({
         ...rest,
         id,
         store,
@@ -46,7 +46,7 @@ export function FileInput(
         ),
         ok() {
           return [
-            FileInputPrimitive.Clear(
+            FilePickerPrimitive.Clear(
               {
                 store,
                 class:
@@ -57,7 +57,7 @@ export function FileInput(
           ];
         },
       }),
-      FileInputPrimitive.Loading(
+      FilePickerPrimitive.Loading(
         {
           store,
           class:

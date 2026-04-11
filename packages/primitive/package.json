@@ -110,10 +110,10 @@
       "import": "./dist/field/index.esm.js",
       "require": "./dist/field/index.js"
     },
-    "./file-input": {
-      "types": "./dist/file-input/index.d.ts",
-      "import": "./dist/file-input/index.esm.js",
-      "require": "./dist/file-input/index.js"
+    "./file-picker": {
+      "types": "./dist/file-picker/index.d.ts",
+      "import": "./dist/file-picker/index.esm.js",
+      "require": "./dist/file-picker/index.js"
     },
     "./head": {
       "types": "./dist/head/index.d.ts",

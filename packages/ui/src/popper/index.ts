@@ -161,16 +161,16 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     reference: { $el?: unknown; getRect: () => Rect },
     opt: Partial<{ force: boolean }> = {},
   ) {
-    console.log(
-      "[DEBUG-POPPER] setReference",
-      this.unique_id,
-      "has$el:",
-      !!(reference as any)?.$el,
-      "hasGetRect:",
-      !!reference?.getRect,
-      "prevRef:",
-      !!this.reference,
-    );
+    // console.log(
+    //   "[DEBUG-POPPER] setReference",
+    //   this.unique_id,
+    //   "has$el:",
+    //   !!(reference as any)?.$el,
+    //   "hasGetRect:",
+    //   !!reference?.getRect,
+    //   "prevRef:",
+    //   !!this.reference,
+    // );
     if (!reference) {
       return;
     }

@@ -1,5 +1,5 @@
 import { Input } from "./modules/input";
-import { FileInput } from "./modules/file-input";
+import { FileInput } from "./modules/file-picker";
 import { NumberInput } from "./modules/number-input";
 import { Textarea } from "./modules/textarea";
 import { Label } from "./modules/label";

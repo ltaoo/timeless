@@ -5,7 +5,7 @@ import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { For } from "@/reactive/for";
 import { Show } from "@/reactive/show";
-import { Txt } from "@/content/text";
+import { Text } from "@/content/text";
 
 export type StepItem = {
   title: string;
@@ -54,7 +54,7 @@ export function List(
             { store, index: idx, item },
             [
               Indicator({ store, index: idx }),
-              Title({}, [Txt(item.title)]),
+              Title({}, [Text(item.title)]),
               idx < items.length - 1 ? Connector({ store, index: idx }) : null,
             ].filter(Boolean) as ViewChildren,
           );

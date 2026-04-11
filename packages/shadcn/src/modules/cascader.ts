@@ -1,4 +1,11 @@
-import { combine, computed, Icon, ref, refobj } from "@timeless/timeless";
+import {
+  classNames,
+  combine,
+  computed,
+  Icon,
+  ref,
+  refobj,
+} from "@timeless/timeless";
 import {
   CascaderPrimitive,
   For,
@@ -34,14 +41,14 @@ export function Cascader(
       {
         store,
         id,
-        class: computed(state_, (d) => {
-          const baseClass =
-            "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4";
-          const openClass = d.open
-            ? "border-ring ring-3 ring-ring/50"
-            : "dark:hover:bg-input/50";
-          return `${baseClass} ${openClass}`;
-        }),
+        class: classNames([
+          "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+          computed(state_, (d) => {
+            return d.open
+              ? "border-ring ring-3 ring-ring/50"
+              : "dark:hover:bg-input/50";
+          }),
+        ]),
         onMouseEnter() {
           hovering.as(true);
         },
@@ -49,7 +56,7 @@ export function Cascader(
           hovering.as(false);
         },
         onMounted(event) {
-          const el = (event as any).target as HTMLElement;
+          const el = event.target;
           el.addEventListener("mousedown", (e) => {
             e.stopPropagation();
           });

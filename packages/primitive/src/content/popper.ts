@@ -3,7 +3,7 @@ import { DerivedRef, isRef, Ref, refobj } from "@timeless/reactive";
 import { styleNames } from "@/style";
 import { MountedEvent } from "@/event";
 
-import { Txt } from "./text";
+import { Text } from "./text";
 import { View, ViewProps } from "./view";
 import { isElement, TimelessElement, ViewChildren } from "./type";
 
@@ -59,11 +59,11 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
           //   return;
           // }
           if (isRef(child)) {
-            state.children[i] = Txt(child);
+            state.children[i] = Text(child);
             return;
           }
           if (typeof child === "string") {
-            state.children[i] = Txt(String(child));
+            state.children[i] = Text(String(child));
             return;
           }
           if (isElement(child)) {

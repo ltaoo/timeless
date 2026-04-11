@@ -357,14 +357,12 @@ export function Input(props: InputProps = {}) {
         } else if (isRef(cls)) {
           cls.subscribe({
             onChange(v) {
-              // host.setClassName($elm, String(v));
+              state.styleSet = v.split(" ");
               if ($elm) {
-                state.styleSet = v as string[];
                 $elm.setStyleSet(v);
               }
             },
           });
-          // host.setClassName($elm, String(cls.value));
           state.styleSet = [cls.value];
         } else if (isClassNameRef(cls)) {
           cls.subscribe({

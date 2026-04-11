@@ -5,7 +5,6 @@ import {
   Show,
   ViewChildren,
   ViewProps,
-  Txt,
 } from "@timeless/timeless";
 import { TabHeaderCore } from "@timeless/ui";
 
@@ -63,7 +62,7 @@ export function Tabs(
                   }),
                 },
                 [
-                  Txt(item.label),
+                  item.label,
                   TabsPrimitive.Indicator({
                     store,
                     value: item.value,

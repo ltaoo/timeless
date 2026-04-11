@@ -2,7 +2,7 @@ import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { TimelessElement, ViewChildren, isElement } from "@/content/type";
 import { MountedEvent } from "@/event";
-import { Txt } from "@/content/text";
+import { Text } from "@/content/text";
 
 type ShowProps = {
   when:
@@ -50,11 +50,11 @@ export function Show(props: ShowProps) {
             return;
           }
           if (isRef(node)) {
-            children[i] = Txt(node);
+            children[i] = Text(node);
             return;
           }
           if (node) {
-            children[i] = Txt(String(node));
+            children[i] = Text(String(node));
             return;
           }
         })();

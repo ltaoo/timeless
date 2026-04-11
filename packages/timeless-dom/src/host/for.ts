@@ -57,17 +57,21 @@ export function DOMFor(props: {
       return $fragment;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
+      // console.log("[dom]for hydrate", elm.children);
       const $anchor = document.createTextNode("");
       common$.methods.set$elm($anchor);
+      // const hydrated_elements: (TimelessElement | null)[] = [];
+      // const hydrated_child_nodes: VNodeView[] = [];
       if (elm.children) {
+        common$.methods.setchildrenelement([...elm.children]);
         const count = elm.children.length;
         const $parent = $elm.parentElement;
-        console.log("[]for check has $parent", $parent, count);
+        // console.log("[]for check has $parent", $parent, count);
         if ($parent) {
           const $children = Array.from($parent.childNodes);
           const idx = $children.indexOf($elm);
           const $children_belong_me = $children.slice(idx, idx + count + 1);
-          console.log("[]for $children belong me", idx, $children_belong_me);
+          // console.log("[]for $children belong me", idx, $children_belong_me);
           common$.methods.set$childrne($children_belong_me);
           const $last = $children_belong_me[$children_belong_me.length];
           if ($last) {
@@ -75,12 +79,20 @@ export function DOMFor(props: {
           } else {
             $parent.appendChild($anchor);
           }
+          const child_nodes: VNodeView[] = [];
           for (let i = 0; i < elm.children.length; i += 1) {
             const child = elm.children[i];
             if (child) {
-              hydrate_node(child, $children_belong_me[i] as HTMLElement | Text);
+              const child$ = hydrate_node(
+                child,
+                $children_belong_me[i] as HTMLElement | Text,
+              );
+              if (child$) {
+                child_nodes.push(child$);
+              }
             }
           }
+          common$.methods.setchildnode(child_nodes);
         }
       }
     },

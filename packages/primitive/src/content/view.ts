@@ -10,7 +10,7 @@ import {
 import { MountedEvent } from "@/event/index";
 import { ListenerManager } from "@/util/listener";
 
-import { Txt } from "./text";
+import { Text } from "./text";
 import {
   isElement,
   TimelessElement,
@@ -102,7 +102,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     onAnimationEnd,
   } = props;
 
-  const manager$ = ListenerManager();
+  const listener$ = ListenerManager();
 
   let $elm: any = null;
 
@@ -151,11 +151,11 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
             return;
           }
           if (isRef(child)) {
-            state.children[i] = Txt(child);
+            state.children[i] = Text(child);
             return;
           }
           if (child) {
-            state.children[i] = Txt(String(child));
+            state.children[i] = Text(String(child));
             return;
           }
           // state.children[i] = null;
@@ -194,7 +194,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     ) {
       // host.addEventListener(target, type, handler, options);
       target.addEventListener(type, handler, options);
-      manager$.push(() => {
+      listener$.push(() => {
         // host.removeEventListener(target, type, handler, options);
         target.removeEventListener(type, handler, options);
       });
@@ -254,8 +254,8 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           state.styleSet = cls.value.split(" ");
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
-            onChange(v) {
-              state.styleSet = v as string[];
+            onChange(v: string[]) {
+              state.styleSet = v;
               if ($elm) {
                 $elm.setStyleSet(v);
               }
@@ -273,7 +273,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
             if (isRef(sv)) {
               sv.subscribe({
                 onChange(v) {
-                  state.style[k] = v as RawViewStyleProperties;
+                  state.style[k] = v;
                   if ($elm) {
                     $elm.setStyleValue(k, v);
                   }
@@ -580,7 +580,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       // console.log("the view mounted", event.target);
       state.rendered = true;
       if (onMounted) {
-        onMounted(event);
+        listener$.push(onMounted(event));
       }
       for (let i = 0; i < state.children.length; i += 1) {
         const child = state.children[i];
@@ -601,10 +601,11 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       }
     },
     onUnmounted() {
+      console.log("[primitive]view - onUnmounted", onUnmounted);
       if (onUnmounted) {
         onUnmounted();
       }
-      manager$.clean();
+      listener$.clean();
       // for (let i = 0; i < state.children.length; i += 1) {
       //   const node = state.children[i];
       //   if (isElement(node)) {

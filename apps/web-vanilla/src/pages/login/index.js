@@ -64,7 +64,7 @@ export default function LoginPage(props) {
               "dark:text-white", // Dark mode text
             ]),
           },
-          [Txt("Timeless")],
+          ["Timeless"],
         ),
         View(
           {
@@ -73,14 +73,16 @@ export default function LoginPage(props) {
               "dark:text-zinc-400", // Dark mode secondary text
             ]),
           },
-          [Txt("Sign in to your account")],
+          ["Sign in to your account"],
         ),
       ]),
 
       View({ class: classNames(["mt-8 sm:mx-auto sm:w-full sm:max-w-md"]) }, [
         View(
           {
-            class: classNames(["py-8 px-4 shadow sm:rounded-lg sm:px-10 space-y-6"]),
+            class: classNames([
+              "py-8 px-4 shadow sm:rounded-lg sm:px-10 space-y-6",
+            ]),
           },
           [
             // Username Input
@@ -92,7 +94,7 @@ export default function LoginPage(props) {
                     "dark:text-zinc-300", // Dark mode label text
                   ]),
                 },
-                [Txt("Username")],
+                ["Username"],
               ),
               View({ class: "mt-1" }, [
                 Input({
@@ -114,7 +116,7 @@ export default function LoginPage(props) {
                     "dark:text-zinc-300", // Dark mode label text
                   ]),
                 },
-                [Txt("Password")],
+                ["Password"],
               ),
               View({ class: "mt-1" }, [
                 Input({
@@ -137,7 +139,7 @@ export default function LoginPage(props) {
                     "dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-400", // Dark mode button styles
                   ]),
                 },
-                [Txt("Sign in")],
+                ["Sign in"],
               ),
             ]),
 
@@ -150,7 +152,7 @@ export default function LoginPage(props) {
                 ]),
               },
               [
-                Txt("Hint: Use username "),
+                "Hint: Use username ",
                 View(
                   {
                     as: "span",
@@ -159,9 +161,9 @@ export default function LoginPage(props) {
                       "dark:text-zinc-300", // Dark mode code text
                     ]),
                   },
-                  [Txt("admin")],
+                  ["admin"],
                 ),
-                Txt(" and password "),
+                " and password ",
                 View(
                   {
                     as: "span",
@@ -170,7 +172,7 @@ export default function LoginPage(props) {
                       "dark:text-zinc-300", // Dark mode code text
                     ]),
                   },
-                  [Txt("123456")],
+                  ["123456"],
                 ),
               ],
             ),

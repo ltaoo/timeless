@@ -1,5 +1,5 @@
 import { ref, computed } from "@timeless/timeless";
-import { CheckboxPrimitive, View, For, Txt } from "@timeless/timeless";
+import { CheckboxPrimitive, View, For } from "@timeless/timeless";
 import { CheckboxGroupCore, CheckboxCore } from "@timeless/ui";
 
 import { Checkbox } from "./checkbox";
@@ -73,7 +73,7 @@ export function CheckboxGroupItem(props: {
           class:
             "text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
         },
-        [Txt(item.label)],
+        [item.label],
       ),
     ],
   );

@@ -211,7 +211,7 @@ export default function CommandView() {
             ],
           ),
           View({ class: "flex-1 text-sm text-zinc-700 dark:text-zinc-200" }, [
-            Txt(cmd.label),
+            cmd.label,
           ]),
           Show({
             when: !!cmd.shortcut,
@@ -352,7 +352,7 @@ export default function CommandView() {
                               class:
                                 "px-4 py-8 text-center text-sm text-zinc-400",
                             },
-                            [Txt("No commands found")],
+                            ["No commands found"],
                           ),
                         ];
                       },
@@ -381,7 +381,7 @@ export default function CommandView() {
                             },
                             ["↓"],
                           ),
-                          Txt(" Navigate"),
+                          " Navigate",
                         ]),
                         View({ class: "flex items-center gap-1" }, [
                           View(
@@ -391,10 +391,10 @@ export default function CommandView() {
                             },
                             ["↵"],
                           ),
-                          Txt(" Select"),
+                          " Select",
                         ]),
                       ]),
-                      Txt("Command Palette"),
+                      "Command Palette",
                     ],
                   ),
                 ],
