@@ -55,9 +55,15 @@ export type VNodeView<HostElm = any> = {
   /** 水合 */
   hydrate(elm: TimelessElement, $dom: HostElm): any;
   /** 构建 */
-  appendChildren(children: (TimelessElement | null)[]): any;
+  buildChildren(children: (TimelessElement | null)[]): {
+    $fragment: any;
+    child_elements: (TimelessElement | null)[];
+    child_host_nodes: HostElm[];
+    child_nodes: VNodeView<any>[];
+  };
   insertChildren(children: (TimelessElement | null)[]): void;
   removeChildren(): void;
   // getParent(): VNodeView<any>;
   getParent(): any;
+  get$elm(): HostElm;
 };

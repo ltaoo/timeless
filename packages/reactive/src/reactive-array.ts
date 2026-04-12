@@ -153,7 +153,7 @@ export function refArray<T>(
     to?: number;
   }) {
     for (let i = 0; i < deps.length; i += 1) {
-      console.log("[]reactive-array - notifiy", i, action, deps.length);
+      console.log("[]reactive-array - notify", i, action, deps.length);
       const ctx = deps[i];
       (() => {
         if (action.type === "refresh") {

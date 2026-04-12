@@ -88,6 +88,19 @@ function ApplicationRootView() {
     console.error(err);
   });
 
+  // const elm = Select({
+  //   class: "w-[120px]",
+  //   store: new Timeless.ui.SelectCore({
+  //     defaultValue: "apple",
+  //     options: [
+  //       { value: "apple", label: "苹果" },
+  //       { value: "banana", label: "香蕉" },
+  //       { value: "orange", label: "橙子" },
+  //     ],
+  //   }),
+  // });
+  // console.log("elm", elm);
+  // return elm;
   return Fragment(
     {
       // onMounted() {

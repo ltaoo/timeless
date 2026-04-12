@@ -69,14 +69,14 @@ export class CheckboxCore extends BaseDomain<TheTypesOfEvents> {
   /** 切换选中状态 */
   toggle() {
     const prev_checked = this.checked;
-    // console.log("[DOMAIN]checkbox - check", prevChecked);
-    (() => {
-      if (prev_checked) {
-        this.presence.hide();
-        return;
-      }
-      this.presence.show();
-    })();
+    console.log("[DOMAIN]checkbox - check", prev_checked);
+    // (() => {
+    //   if (prev_checked) {
+    //     this.presence.hide();
+    //     return;
+    //   }
+    //   this.presence.show();
+    // })();
     this.checked = true;
     if (prev_checked) {
       this.checked = false;

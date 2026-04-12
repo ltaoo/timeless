@@ -6,6 +6,7 @@ export type DOMCheckbox = VNodeView<HTMLInputElement> & {
   t: "checkbox";
   render(elm: TimelessElement): HTMLInputElement;
   hydrate(elm: TimelessElement, $dom: any): void;
+  setChecked(checked: boolean): void;
 };
 
 export function DOMCheckbox(props: {
@@ -13,29 +14,20 @@ export function DOMCheckbox(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLInputElement>;
 }): DOMCheckbox {
   const t = "checkbox";
-  const $elm = document.createElement("input");
-  const common$ = HostElement({ $elm, t, build: props.build });
+  const common$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
+    ...common$.methods,
     t,
     getType() {
       return "input";
     },
-    // get $elm() {
-    //   return $elm;
-    // },
+    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },
-    setStyle: common$.methods.setStyle,
-    setStyleValue: common$.methods.setStyleValue,
-    setStyleSet: common$.methods.setStyleSet,
-    setAttribute: common$.methods.setAttribute,
-    removeAttribute: common$.methods.removeAttribute,
-    addEventListener: common$.methods.addEventListener,
-    removeEventListener: common$.methods.removeEventListener,
-    getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
+      const $elm = document.createElement("input");
       // $elm.style.backgroundColor = "transparent";
       // console.log("[DOMCheckbox] render", elm.value);
       // $elm.style.outline = "none";
@@ -48,40 +40,50 @@ export function DOMCheckbox(props: {
       if (elm.state.name) {
         $elm.name = elm.state.name;
       }
+      common$.methods.set$elm($elm);
       common$.methods.applyState(elm.state, { initial: true });
+      delete elm.state.value;
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
+      $elm.addEventListener("click", function (event) {
+        event.preventDefault();
+        if (events && events.onChange) {
+          events.onChange(event);
+        }
+      });
       if (events) {
-        if (events.onInput) {
-          $elm.addEventListener("input", events.onInput);
-        }
-        if (events.onChange) {
-          $elm.addEventListener("change", events.onChange);
-        }
+        // const onChange = events.onChange;
+        // if (onChange) {
+        //   $elm.addEventListener("change", function (event) {
+        //     event.preventDefault();
+        //     onChange(event);
+        //   });
+        // }
         if (events.onFocus) {
-          // canvas.addEventListener($elm, "focus", events.onFocus);
           $elm.addEventListener("focus", events.onFocus);
         }
         if (events.onBlur) {
-          // canvas.addEventListener($elm, "blur", events.onBlur);
           $elm.addEventListener("blur", events.onBlur);
-        }
-        if (events.onKeyDown) {
-          // canvas.addEventListener($elm, "keydown", events.onKeyDown);
-          $elm.addEventListener("keydown", events.onKeyDown);
         }
       }
       return $elm;
     },
-    hydrate(elm: TimelessElement, $dom: any) {
-      // common$.methods.hydrate(elm, $dom);
+    hydrate(elm: TimelessElement, $elm: HTMLElement) {
+      common$.methods.set$elm($elm);
+      common$.methods.setupEventListener(elm.events);
     },
-    getChildren: common$.methods.getChildren,
-    appendChildren: common$.methods.appendChildren,
-    insertChildren: common$.methods.insertChildren,
-    removeChildren: common$.methods.removeChildren,
-    getParent() {
-      return $elm.parentElement;
+    setChecked(checked: boolean) {
+      const $elm = common$.methods.get$elm();
+      if (!$elm) {
+        console.warn("DOMInput setValue: $elm is null");
+        return;
+      }
+      if (!checked) {
+        $elm.removeAttribute("checked");
+      } else {
+        $elm.setAttribute("checked", "checked");
+      }
+      $elm.checked = checked;
     },
   };
 }

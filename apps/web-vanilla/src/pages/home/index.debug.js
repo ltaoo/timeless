@@ -121,6 +121,7 @@ export default function OverlayView() {
   const state_ = refobj({
     open: false,
   });
+  const checked_ = ref(false);
 
   return ScrollView(
     {
@@ -128,71 +129,142 @@ export default function OverlayView() {
       store: ui.view$,
     },
     [
-      Icon({
-        name: "chevron-up",
-        class: classNames([
-          computed(state_, (t) => {
-            console.log("open changed", t.open);
-            return t.open ? "" : "rotate-180";
-          }),
-        ]),
-      }),
-      Button(
-        {
-          store: new Timeless.ui.ButtonCore({
-            onClick() {
-              state_.as((prev) => {
-                return {
-                  ...prev,
-                  open: !prev.open,
-                };
-              });
-            },
-          }),
-        },
-        ["Click it"],
-      ),
-      // Icon({ class: "123", name: "bolt" }),
-      DropdownMenu(
-        {
-          store: new Timeless.ui.DropdownMenuCore({
-            items: [
-              new Timeless.ui.MenuItemCore({
-                label: "Edit",
-                onClick() {
-                  console.log("edit");
-                },
-              }),
-              new Timeless.ui.MenuItemCore({
-                label: "Duplicate",
-                onClick() {
-                  console.log("duplicate");
-                },
-              }),
-              new Timeless.ui.MenuItemCore({
-                label: "Delete",
-                onClick() {
-                  console.log("delete");
-                },
-              }),
-            ],
-          }),
-        },
-        [
-          Button(
-            {
-              store: new Timeless.ui.ButtonCore({
-                variant: "outline",
-                onClick() {
-                  console.log("click Open Menu");
-                },
-              }),
-            },
-            ["Open Menu"],
-          ),
-        ],
-      ),
+      // Icon({
+      //   name: "chevron-up",
+      //   class: classNames([
+      //     computed(state_, (t) => {
+      //       console.log("open changed", t.open);
+      //       return t.open ? "" : "rotate-180";
+      //     }),
+      //   ]),
+      // }),
+      // Button(
+      //   {
+      //     store: new Timeless.ui.ButtonCore({
+      //       onClick() {
+      //         state_.as((prev) => {
+      //           return {
+      //             ...prev,
+      //             open: !prev.open,
+      //           };
+      //         });
+      //       },
+      //     }),
+      //   },
+      //   ["Click it"],
+      // ),
+      // DropdownMenu(
+      //   {
+      //     store: new Timeless.ui.DropdownMenuCore({
+      //       items: [
+      //         new Timeless.ui.MenuItemCore({
+      //           label: "Edit",
+      //           onClick() {
+      //             console.log("edit");
+      //           },
+      //         }),
+      //         new Timeless.ui.MenuItemCore({
+      //           label: "Duplicate",
+      //           onClick() {
+      //             console.log("duplicate");
+      //           },
+      //         }),
+      //         new Timeless.ui.MenuItemCore({
+      //           label: "Delete",
+      //           onClick() {
+      //             console.log("delete");
+      //           },
+      //         }),
+      //       ],
+      //     }),
+      //   },
+      //   [
+      //     Button(
+      //       {
+      //         store: new Timeless.ui.ButtonCore({
+      //           variant: "outline",
+      //           onClick() {
+      //             console.log("click Open Menu");
+      //           },
+      //         }),
+      //       },
+      //       ["Open Menu"],
+      //     ),
+      //   ],
+      // ),
       View({ class: "space-y-8" }, [
+        View({ class: "flex items-center gap-2" }, [
+          Checkbox({
+            id: "checkbox_with_label1",
+            store: new Timeless.ui.CheckboxCore({}),
+          }),
+          Label({ for: "checkbox_with_label1", class: "text-sm" }, [
+            "Accept terms and conditions",
+          ]),
+        ]),
+        // Select({
+        //   class: "w-[120px]",
+        //   store: new Timeless.ui.SelectCore({
+        //     defaultValue: "apple",
+        //     options: [
+        //       { value: "apple", label: "苹果" },
+        //       { value: "banana", label: "香蕉" },
+        //       { value: "orange", label: "橙子" },
+        //     ],
+        //   }),
+        // }),
+        // DropdownMenu(
+        //   {
+        //     store: new Timeless.ui.DropdownMenuCore({
+        //       items: [
+        //         new Timeless.ui.MenuItemCore({
+        //           label: "Cut",
+        //           onClick() {
+        //             console.log("cut");
+        //           },
+        //         }),
+        //         new Timeless.ui.MenuItemCore({
+        //           label: "Copy",
+        //           onClick() {
+        //             console.log("copy");
+        //           },
+        //         }),
+        //         new Timeless.ui.MenuItemCore({
+        //           label: "Share",
+        //           menu: new Timeless.ui.MenuCore({
+        //             items: [
+        //               new Timeless.ui.MenuItemCore({
+        //                 label: "Email",
+        //                 onClick() {
+        //                   console.log("email");
+        //                 },
+        //               }),
+        //               new Timeless.ui.MenuItemCore({
+        //                 label: "Message",
+        //                 onClick() {
+        //                   console.log("message");
+        //                 },
+        //               }),
+        //               new Timeless.ui.MenuItemCore({
+        //                 label: "AirDrop",
+        //                 onClick() {
+        //                   console.log("airdrop");
+        //                 },
+        //               }),
+        //             ],
+        //           }),
+        //         }),
+        //         new Timeless.ui.MenuItemCore({
+        //           label: "Delete",
+        //           onClick() {
+        //             console.log("delete");
+        //           },
+        //         }),
+        //       ],
+        //     }),
+        //   },
+        //   [Button({ store: new Timeless.ui.ButtonCore({}) }, ["With Submenu"])],
+        // ),
         // Section("Popover", [
         //   Item("Default", [
         //     Popover(

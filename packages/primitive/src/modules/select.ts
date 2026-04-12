@@ -4,12 +4,13 @@ import { SelectCore } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Portal as NativePortal } from "@/content/portal";
+import { Fragment } from "@/content/fragment";
 import { Show } from "@/reactive/show";
 import { Input as NativeInput } from "@/input/input";
-import { isStyleRef, classNames } from "@/style/index";
+import { isStyleRef, classNames, styleNames } from "@/style/index";
 
 import * as PopperPrimitive from "./popper";
-import { Fragment } from "@/content/fragment";
+import { ListenerManager } from "@/util/listener";
 
 export function Root(
   props: ViewProps & { store: SelectCore<any> },
@@ -31,9 +32,7 @@ export function Trigger(
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
-  store.onStateChange((v) => {
-    state_.as(v);
-  });
+  const listener$ = ListenerManager();
 
   const events: any[] = [];
 
@@ -58,28 +57,6 @@ export function Trigger(
       }
       props.store.show();
     },
-    onClick(e) {
-      e.stopPropagation();
-      // if (store.disabled) {
-      //   return;
-      // }
-      // store.layer.pointerDown();
-      // if (store.open) {
-      //   store.hide();
-      // } else {
-      //   store.presence.show();
-      //   store.show();
-      // }
-    },
-    onMounted(event) {
-      const $elm = event.target;
-      $elm.setAttribute("value", store.state.value || "");
-      events.push(
-        store.onStateChange(() => {
-          $elm.setAttribute("value", store.state.value || "");
-        }),
-      );
-    },
   });
 
   return View(
@@ -87,6 +64,13 @@ export function Trigger(
       ...rest,
       onMounted(event) {
         const $elm = event.target;
+
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
+
         // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
         store.popper.setReference(
           {
@@ -97,17 +81,6 @@ export function Trigger(
           },
           { force: true },
         );
-        // const rect = $elm.getBoundingClientRect();
-        // store.setPosition({
-        //   width: rect.width,
-        //   height: rect.height,
-        //   x: rect.x,
-        //   y: rect.y,
-        //   left: rect.left,
-        //   right: rect.right,
-        //   top: rect.top,
-        //   bottom: rect.bottom,
-        // });
         const handlePointerDown = (e: any) => {
           e.preventDefault();
           e.stopPropagation();
@@ -131,46 +104,40 @@ export function Trigger(
           }
           props.store.show();
         };
-        $elm.addEventListener("pointerdown", handlePointerDown);
-
+        listener$.add($elm.addEventListener("pointerdown", handlePointerDown));
         if (rest.onMounted) {
-          rest.onMounted(event);
+          listener$.add(rest.onMounted(event));
         }
-        return () => {
-          $elm.removeEventListener("pointerdown", handlePointerDown);
-        };
-      },
-      onUnmounted() {
-        for (const fn of events) {
-          if (typeof fn === "function") fn();
-        }
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
-        }
+        return listener$.clean;
       },
     },
     [_input$, Fragment({}, children)],
   );
 }
 
-export function Value(
-  props: ViewProps & { store: SelectCore<any> },
-  children?: ViewChildren,
-) {
+export function Value(props: ViewProps & { store: SelectCore<any> }) {
   const { store, ...rest } = props;
-  const state = refobj(store.state);
+  const state_ = refobj(store.state);
 
-  store.onStateChange((v) => {
-    state.as(v);
-  });
+  const listener$ = ListenerManager([]);
 
   return View(
     {
       ...rest,
-      as: "span",
+      onMounted(event) {
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.clean;
+      },
     },
     [
-      computed(state, (d) => {
+      computed(state_, (d) => {
         const opt = (d.options || []).find((o) => o.value === d.value);
         if (opt) {
           return opt.label;
@@ -230,15 +197,11 @@ export function Content(
   },
   children: ViewChildren,
 ) {
-  const { store, animation, ...rest } = props;
+  const { store, animation, onMounted, ...rest } = props;
 
-  const presence_ = refobj(store.presence.state);
   let _was_exiting = false;
-
-  store.presence.onStateChange((v) => {
-    // console.log("[]Select Content Presence State Change", v);
-    presence_.as(v);
-  });
+  const presence_ = refobj(store.presence.state);
+  const listener$ = ListenerManager([presence_]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
     switch (e.key) {
@@ -265,6 +228,17 @@ export function Content(
     when: computed(presence_, (t) => {
       return t.mounted;
     }),
+    onMounted(event) {
+      listener$.add(
+        store.presence.onStateChange((v) => {
+          presence_.as(v);
+        }),
+      );
+      if (onMounted) {
+        listener$.add(onMounted(event));
+      }
+      return listener$.clean;
+    },
     ok() {
       return [
         NativePortal({}, [
@@ -314,22 +288,6 @@ export function Content(
                       rest.onAnimationEnd(e);
                     }
                   },
-                  onMounted(event) {
-                    const $elm = event.target;
-                    // setTimeout(() => {
-                    //   if (store.state.search) {
-                    //     const input = host.querySelector?.($elm, "input");
-                    //     if (input instanceof HTMLInputElement) {
-                    //       host.focus?.(input);
-                    //       return;
-                    //     }
-                    //   }
-                    //   $elm.focus();
-                    // }, 0);
-                    if (rest.onMounted) {
-                      rest.onMounted(event);
-                    }
-                  },
                 },
                 children,
               ),
@@ -354,13 +312,17 @@ export function Search(
 ) {
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
-
-  store.onStateChange((v) => {
-    state_.as(v);
-  });
+  const listener$ = ListenerManager();
 
   return Show({
     when: computed(state_, (s) => s.search),
+    onMounted() {
+      listener$.add(
+        store.onStateChange((v) => {
+          state_.as(v);
+        }),
+      );
+    },
     ok() {
       return [
         NativeInput({
@@ -380,8 +342,9 @@ export function Search(
               $elm.focus();
             }, 0);
             if (rest.onMounted) {
-              rest.onMounted(event);
+              listener$.add(rest.onMounted(event));
             }
+            return listener$.clean;
           },
           onClick(e: Event) {
             // 阻止点击搜索框时关闭下拉菜单
@@ -406,7 +369,9 @@ export function Item(
   return View(
     {
       ...rest,
-      "data-disabled": disabled ? "" : undefined,
+      dataset: {
+        disabled: computed(disabled, (d) => (d ? "" : undefined)),
+      },
       onClick() {
         if (disabled) {
           return;
@@ -415,6 +380,7 @@ export function Item(
         store.hide();
       },
       onMouseEnter() {
+        console.log("[select] - onMouseEnter", value);
         if (disabled) {
           return;
         }
@@ -440,27 +406,37 @@ export function ItemIndicator(
   children: ViewChildren,
 ) {
   const { store, value, ...rest } = props;
-  const state = refobj(store.state);
-  const extraStyle =
-    rest.style &&
-    typeof rest.style === "object" &&
-    !isRef(rest.style) &&
-    !isStyleRef(rest.style)
-      ? rest.style
-      : {};
 
-  store.onStateChange((v) => {
-    state.as(v);
-  });
-
-  const selected = computed(state, (d) => d.value === value);
+  const state_ = refobj(store.state);
+  const selected_ = computed(state_, (d) => d.value === value);
+  const listener$ = ListenerManager([state_, selected_]);
 
   return View(
     {
       ...rest,
-      style: {
-        ...extraStyle,
-        display: computed(selected, (d) => (d ? undefined : "none")),
+      style: styleNames([
+        rest.style,
+        {
+          display: computed(selected_, (d) => (d ? undefined : "none")),
+        },
+      ]),
+      onMounted(event) {
+        console.log("[primitive]Select - item indicator mounted", value);
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        // return listener$.clean;
+      },
+      onUnmounted() {
+        console.log("[primitive]Select - item indicator unmounted", value);
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
+        }
       },
     },
     children,

@@ -190,19 +190,6 @@ export function DateTimePicker(
           "cn-menu-target cn-menu-translucent z-50 w-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
       [
-        View(
-          {
-            as: "style",
-          },
-          [
-            `
-            .overlay-scrollbar { scrollbar-width: none; }
-            .overlay-scrollbar::-webkit-scrollbar { width: 0; height: 0; }
-            .overlay-scrollbar::-webkit-scrollbar-thumb { background: transparent; }
-            .overlay-scrollbar::-webkit-scrollbar-track { background: transparent; }
-            `,
-          ],
-        ),
         View({ class: "" }, [
           View({ class: "grid grid-cols-[280px_auto] items-start gap-0" }, [
             View({ class: "w-[280px] p-3 border-r border-border" }, [

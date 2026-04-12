@@ -4,17 +4,10 @@ import { MountedEvent } from "@/event";
 import { ViewProps } from "@/content/view";
 import { ListenerManager } from "@/util/listener";
 import { isClassNameRef, isStyleRef, RawViewStyleProperties } from "@/style";
+import { Logger } from "@/util/logger";
 
-type CheckboxState = {
-  id: string;
-  name: string;
-  checked: boolean;
-  indeterminate: boolean;
-  disabled: boolean;
-  required: boolean;
-  style: RawViewStyleProperties;
-  styleSet: string[];
-};
+const logger = Logger({ prefix: "primitive", scope: "input/checkbox" });
+
 export interface CheckboxProps {
   id?: string;
   name?: string | DerivedRef<string> | Ref<string>;
@@ -33,6 +26,17 @@ export interface CheckboxProps {
   beforeUnmounted?: ViewProps["beforeUnmounted"];
   onUnmounted?: ViewProps["onUnmounted"];
 }
+
+type CheckboxState = {
+  id: string;
+  name: string;
+  checked: boolean;
+  indeterminate: boolean;
+  disabled: boolean;
+  required: boolean;
+  style: RawViewStyleProperties;
+  styleSet: string[];
+};
 
 export function Checkbox(props: CheckboxProps) {
   const {
@@ -62,20 +66,25 @@ export function Checkbox(props: CheckboxProps) {
     styleSet: [],
   };
   const events = {
-    onChange,
+    onChange(event: any) {
+      // logger.log("handle change", event);
+      if (props.onChange) {
+        props.onChange(event);
+      }
+    },
+    onClick(event: any) {
+      if (props.onClick) {
+        props.onClick(event);
+      }
+    },
   };
 
-  const manager$ = ListenerManager();
+  const listener$ = ListenerManager();
 
   const methods = {
-    listen(type: string, handler: (event: any) => void, options?: any) {
-      $elm.addEventListener(type, handler, options);
-      return function () {
-        $elm.removeEventListener(type, handler, options);
-      };
-    },
     setProp(key: string, value: any) {
-      if ($elm) {
+      console.log("set prop", key, value, $elm, $elm.setAttribute);
+      if ($elm && typeof $elm.setAttribute === "function") {
         $elm.setAttribute(key, value);
       }
       // state.props[key] = value;
@@ -100,7 +109,7 @@ export function Checkbox(props: CheckboxProps) {
         $elm.setAttribute(k, String(v));
       }
     },
-    setup_value_subscribe() {
+    subscribe_props() {
       if (id !== undefined) {
         if (isRef(id)) {
           id.subscribe({
@@ -122,8 +131,12 @@ export function Checkbox(props: CheckboxProps) {
         if (isRef(checked)) {
           checked.subscribe({
             onChange(v) {
-              state.checked = v as boolean;
-              methods.setProp("checked", v);
+              state.checked = v;
+              if ($elm && typeof $elm.setChecked === "function") {
+                setTimeout(() => {
+                  $elm.setChecked(v);
+                }, 0);
+              }
             },
           });
           state.checked = checked.value;
@@ -232,7 +245,7 @@ export function Checkbox(props: CheckboxProps) {
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
             onChange(v) {
-              state.styleSet = [v as string];
+              state.styleSet = v;
               if ($elm) {
                 $elm.setStyleSet(Array.isArray(v) ? v : [v]);
               }
@@ -287,7 +300,7 @@ export function Checkbox(props: CheckboxProps) {
             if (isRef(vv)) {
               vv.subscribe({
                 onChange(v) {
-                  $elm.setStyleSet(v as RawViewStyleProperties);
+                  $elm.setStyleSet(v);
                 },
               });
               state.style[k] = vv.value;
@@ -300,7 +313,7 @@ export function Checkbox(props: CheckboxProps) {
     },
   };
 
-  methods.setup_value_subscribe();
+  methods.subscribe_props();
 
   return {
     t: "checkbox",
@@ -313,12 +326,14 @@ export function Checkbox(props: CheckboxProps) {
     state,
     children: [],
     events,
-    render() {
-      return $elm;
-    },
     onMounted(event: MountedEvent) {
       if (props.onMounted) {
         props.onMounted(event);
+      }
+    },
+    onUnmounted() {
+      if (props.onUnmounted) {
+        props.onUnmounted();
       }
     },
   };

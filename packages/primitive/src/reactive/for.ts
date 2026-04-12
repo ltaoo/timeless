@@ -12,6 +12,7 @@ import { TimelessElement, isElement } from "@/content/type";
 import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
+import { Logger } from "@/util/logger";
 
 export type ForProps<T> = {
   key?: string;
@@ -28,6 +29,8 @@ export type ForState<T> = {
   children: (TimelessElement | null)[];
   idx_arr: DerivedRef<number>[];
 };
+
+const logger = Logger({ prefix: "primitive", scope: "reactive/for" });
 
 export function For<T>(
   props: ForProps<T>,
@@ -114,10 +117,10 @@ export function For<T>(
             },
             onChange(v) {
               console.log("[primitive]For - ctx.onChange", v, state.rendered);
-              // if (!state.rendered) {
-              //   return;
-              // }
-              methods.refresh(v as T[]);
+              if (!state.rendered) {
+                return;
+              }
+              methods.refresh(v);
             },
           }),
         );
@@ -308,22 +311,32 @@ export function For<T>(
      */
     refresh(v: T[]) {
       console.log(
-        "[For _refresh] called with",
+        "[primitive]for - refresh called with",
         v.length,
         "items, current:",
         state.items.length,
       );
-      const new_wrapped_items = v.map((item) => ({
-        k: methods.unique_id(),
-        v: item,
-      }));
+      const new_wrapped_items = v.map((item) => {
+        const existing = state.wrapped_items.find((vv) => {
+          if (_key && typeof item === "object") {
+            // @ts-ignore
+            if (item[_key] === vv.v[_key]) {
+              return true;
+            }
+          }
+          return item === vv.v;
+        });
+        if (existing) {
+          return existing;
+        }
+        return {
+          k: methods.unique_id(),
+          v: item,
+        };
+      });
       const prev_items = state.items;
       const prev_elements = state.children;
       const prev_index_computed = state.idx_arr;
-
-      // const $parent = anchor.getParentNode();
-      // if (!$parent) return;
-
       // 1. Prepare target state
       const new_elements: (TimelessElement | null)[] = new Array(
         new_wrapped_items.length,
@@ -356,37 +369,36 @@ export function For<T>(
       for (let i = 0; i < new_wrapped_items.length; i++) {
         const new_item = new_wrapped_items[i];
         const k =
-          props.key && new_item ? (new_item as any)[props.key] : new_item;
+          _key && new_item
+            ? // @ts-ignore
+              new_item.v[_key]
+            : new_item.v;
         const prev_indices = old_map.get(k);
         if (prev_indices && prev_indices.length > 0) {
           // Reused - same key found in old list
           const old_idx = prev_indices.shift()!;
           const prev_item = prev_items[old_idx];
-
           // Reuse existing DOM element and computed index
           new_elements[i] = prev_elements[old_idx];
           // new_children[i] = prev_children[old_idx];
           // new_original_items[i] = prev_original_items[old_idx];
           new_index_computed[i] = prev_index_computed[old_idx];
-
           // Track moved items
           if (old_idx !== i) {
             moved_nodes.push({ from: old_idx, to: i });
           }
-
           // No need to manually update index - computed auto-recomputes based on `each`
-
           // If item data changed, update the reactive proxy so computed values re-evaluate
           if (
-            new_item !== prev_item &&
+            new_item.v !== prev_item &&
             prev_item &&
             typeof prev_item === "object"
           ) {
             const proxy = registryGet(prev_item);
             if (proxy && isWriteableRef(proxy)) {
-              proxy.as(new_item);
+              proxy.as(new_item.v);
               // Update registry to map new item to the same proxy
-              registrySet(new_item, proxy);
+              registrySet(new_item.v, proxy);
             }
           }
         } else {
@@ -405,9 +417,8 @@ export function For<T>(
           removed_nodes.push({ idx: index });
         }
       }
-
       console.log(
-        "[For _refresh] removed:",
+        "[primitive]for removed:",
         removed_nodes.length,
         "added:",
         added_nodes.length,
@@ -502,8 +513,9 @@ export function For<T>(
     state: {
       items: state.items,
     },
-    children: state.children,
+    children: [...state.children],
     onMounted(event: MountedEvent) {
+      logger.log("onMounted", state.children);
       state.rendered = true;
       if (props.onMounted) {
         listener$.add(props.onMounted(event));
@@ -527,43 +539,11 @@ export function For<T>(
       for (let i = 0; i < state.idx_arr.length; i += 1) {
         state.idx_arr[i].destroy();
       }
-      listener$.clean();
-      for (let i = 0; i < state.children.length; i += 1) {
-        const component = state.children[i];
-        if (!component) {
-          continue;
-        }
-        if (
-          isElement(component) &&
-          typeof component.onUnmounted === "function"
-        ) {
-          component.onUnmounted();
-        }
-      }
-
-      // Remove DOM nodes
-      if ($elm && $elm.removeChildren) {
-        $elm.removeChildren();
-      }
-      // const $parent = host.getParentNode(anchor);
-      // const $parent = $anchor.getParentNode();
-      // if ($parent) {
-      //   for (const elm of _$children) {
-      //     const $pa = elm.getParentNode();
-      //     if (elm && $pa === $parent) {
-      //       try {
-      //         // host.removeChild($parent, elm);
-      //         $parent.removeChild(elm);
-      //       } catch (e) {
-      //         // ignore
-      //       }
-      //     }
-      //   }
-      // }
-
+      listener$.destroy();
       state.rendered = false;
       state.items = [];
-      state.children = [];
+      state.wrapped_items = [];
+      // state.children = [];
       state.idx_arr = [];
     },
   };

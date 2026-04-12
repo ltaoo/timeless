@@ -5,8 +5,6 @@ import { HostElement } from "./box";
 export type DOMInput = VNodeView<HTMLInputElement> & {
   t: "input";
   setValue(value: string): void;
-  focus(): void;
-  blur(): void;
   render(elm: TimelessElement): HTMLInputElement;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
@@ -18,29 +16,20 @@ export function DOMInput(props: {
   // const canvas = props.canvas;
   // const $elm = canvas.createElement("div");
   const t = "input";
-  const $elm = document.createElement("input");
-  const common$ = HostElement({ $elm, t, build: props.build });
+  const common$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
+    ...common$.methods,
     t,
     getType() {
       return "input";
     },
-    // get $elm() {
-    //   return $elm;
-    // },
+    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },
-    setStyle: common$.methods.setStyle,
-    setStyleValue: common$.methods.setStyleValue,
-    setStyleSet: common$.methods.setStyleSet,
-    setAttribute: common$.methods.setAttribute,
-    removeAttribute: common$.methods.removeAttribute,
-    addEventListener: common$.methods.addEventListener,
-    removeEventListener: common$.methods.removeEventListener,
-    getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
+      const $elm = document.createElement("input");
       // $elm.style.backgroundColor = "transparent";
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
@@ -58,6 +47,7 @@ export function DOMInput(props: {
       if (elm.state.disabled) {
         $elm.disabled = elm.state.disabled;
       }
+      common$.methods.set$elm($elm);
       common$.methods.applyState(elm.state, { initial: true });
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
@@ -80,24 +70,17 @@ export function DOMInput(props: {
       }
       return $elm;
     },
-    hydrate(elm: TimelessElement, $dom: any) {
-      // common$.methods.hydrate(elm, $dom);
-    },
-    getChildren: common$.methods.getChildren,
-    appendChildren: common$.methods.appendChildren,
-    insertChildren: common$.methods.insertChildren,
-    removeChildren: common$.methods.removeChildren,
-    getParent() {
-      return $elm.parentElement;
+    hydrate(elm: TimelessElement, $elm: HTMLInputElement) {
+      common$.methods.set$elm($elm);
+      common$.methods.setupEventListener(elm.events);
     },
     setValue(value: string) {
+      const $elm = common$.methods.get$elm();
+      if (!$elm) {
+        console.warn("DOMInput setValue: $elm is null");
+        return;
+      }
       $elm.value = value;
-    },
-    focus() {
-      $elm.focus();
-    },
-    blur() {
-      $elm.blur();
     },
   };
 }

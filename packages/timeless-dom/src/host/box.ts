@@ -9,7 +9,7 @@ import { viewStyleToCssText } from "./style";
 
 export function HostElement(props: {
   t: string;
-  $elm: null | HTMLElement | Text;
+  $elm: null | any;
   build: (elm: TimelessElement) => VNodeView<any>;
 }) {
   let $elm = props.$elm;
@@ -19,11 +19,14 @@ export function HostElement(props: {
   /** 对宿主平台抽象的子节点列表 */
   let child_nodes: VNodeView<any>[] = [];
   /** Timeless 子列表 */
-  let child_elements: TimelessElement[] = [];
+  let child_elements: (TimelessElement | null)[] = [];
 
   const methods = {
     set$elm(elm: HTMLElement | Text) {
       $elm = elm;
+    },
+    get$elm() {
+      return $elm;
     },
     set$childrne(v: any[]) {
       child_host_nodes = v;
@@ -78,6 +81,7 @@ export function HostElement(props: {
       $elm.style[key] = value;
     },
     setAttribute(key: string, value: string) {
+      // console.log(props.t + "[dom]box - setAttribute", key, value, $elm);
       if (!$elm || $elm instanceof Text) {
         return;
       }
@@ -103,6 +107,18 @@ export function HostElement(props: {
         };
       }
       return $elm.getBoundingClientRect();
+    },
+    blur() {
+      if (!$elm || $elm instanceof Text) {
+        return;
+      }
+      $elm.blur();
+    },
+    focus() {
+      if (!$elm || $elm instanceof Text) {
+        return;
+      }
+      $elm.focus();
     },
     addEventListener(
       type: string,
@@ -221,10 +237,10 @@ export function HostElement(props: {
       const $fragment = document.createDocumentFragment();
       for (const child of children) {
         if (isElement(child)) {
-          child_elements.push(child);
           const child$ = props.build(child);
-          child_nodes.push(child$);
           const $child = child$.render(child);
+          child_elements.push(child);
+          child_nodes.push(child$);
           if ($child) {
             child_host_nodes.push($child);
             $fragment.appendChild($child);
@@ -237,7 +253,7 @@ export function HostElement(props: {
     handleElementsMounted() {
       console.log(props.t + "[]box handleElements Mounted", child_elements);
       for (const child of child_elements) {
-        if (child.onMounted) {
+        if (child && child.onMounted) {
           child.onMounted({
             target: child.$elm,
           });
@@ -246,7 +262,7 @@ export function HostElement(props: {
     },
     handleElementUnmounted() {
       for (const child of child_elements) {
-        if (child.onUnmounted) {
+        if (child && child.onUnmounted) {
           child.onUnmounted();
         }
       }
@@ -254,11 +270,15 @@ export function HostElement(props: {
     getChildren() {
       return child_nodes;
     },
-    /** 应该重命名为 build children */
-    appendChildren(children: (TimelessElement | null)[]) {
+    buildChildren(children?: (TimelessElement | null)[]) {
+      const child_elements: (TimelessElement | null)[] = [];
+      const child_host_nodes: any[] = [];
+      const child_nodes: VNodeView<any>[] = [];
       // console.log("append children", children);
       const $fragment = document.createDocumentFragment();
-      child_elements = [];
+      if (!children) {
+        return { $fragment, child_elements, child_host_nodes, child_nodes };
+      }
       for (let child of children) {
         if (!child) {
           continue;
@@ -277,20 +297,28 @@ export function HostElement(props: {
           }
         }
       }
-      return $fragment;
+      return {
+        $fragment,
+        child_elements,
+        child_host_nodes,
+        child_nodes,
+      };
     },
     insertChildren(children: (TimelessElement | null)[]) {
-      const $fragment = methods.appendChildren(children);
+      const r = methods.buildChildren(children);
       const $parent = methods.getParent();
       if ($parent) {
         if ($elm && $elm instanceof Text) {
-          $parent.insertBefore($fragment, $elm);
+          $parent.insertBefore(r.$fragment, $elm);
         } else {
-          $parent.appendChild($fragment);
+          $parent.appendChild(r.$fragment);
         }
       }
+      child_elements = r.child_elements as TimelessElement[];
+      child_host_nodes = r.child_host_nodes;
+      child_nodes = r.child_nodes;
       setTimeout(() => {
-        console.log("invoke children onMounted function");
+        console.log(props.t + "[]invoke children onMounted function");
         methods.handleElementsMounted();
       }, 0);
     },
@@ -299,7 +327,7 @@ export function HostElement(props: {
         return;
       }
       const $parent = methods.getParent();
-      console.log(props.t + "[]removeChildren", $parent, child_host_nodes);
+      // console.log(props.t + "[]removeChildren", $parent, child_host_nodes);
       // hydrate 加载的，没有 child_nodes，导致通过该方法销毁的子元素没有 onUnmounted 方法
       for (const child of child_nodes) {
         if (child) {
@@ -329,7 +357,7 @@ export function HostElement(props: {
       const $parent = methods.getParent();
       const inserted_elements: TimelessElement[] = [];
       const inserted_child: VNodeView[] = [];
-      console.log("[dom]insert child", idx, children, $parent);
+      // console.log("[dom]insert child", idx, children, $parent);
       if (!$parent) {
         return;
       }
@@ -355,7 +383,7 @@ export function HostElement(props: {
       }
       child_elements.splice(idx, 0, ...inserted_elements);
       child_nodes.splice(idx, 0, ...inserted_child);
-      console.log("[dom]for - insert", inserted_elements);
+      // console.log("[dom]for - insert", inserted_elements);
       for (const child of inserted_elements) {
         if (child.onMounted) {
           child.onMounted({
@@ -376,7 +404,10 @@ export function HostElement(props: {
         const $child = child_host_nodes[idx + i];
         if ($child && $child.parentElement === $parent) {
           child_host_nodes.splice(idx + i, 1);
-          removed_elements.push(child_elements[idx + i]);
+          const child_elm = child_elements[idx + i];
+          if (child_elm) {
+            removed_elements.push(child_elm);
+          }
           $parent.removeChild($child);
         }
       }

@@ -20,6 +20,7 @@ import { DOMPopper } from "./popper";
 import { DOMShow } from "./show";
 import { DOMMatch } from "./match";
 import { DOMFor } from "./for";
+import { DOMSelect } from "./select";
 
 export type DOMHostNode =
   | null
@@ -36,6 +37,7 @@ export type DOMHostNode =
   | DOMFilePicker
   | DOMNumberInput
   | DOMCheckbox
+  | DOMSelect
   | DOMButton
   | DOMPortal
   | DOMShow

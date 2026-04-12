@@ -29,11 +29,15 @@ export function Image(
     {
       ...rest,
       onMounted(event) {
-        const $elm = (event as any).target;
-        const $img = $elm as HTMLDivElement;
+        const $elm = event.target;
+        const $img = $elm;
         const provide = global_provider?.provide_ui_image;
-        if (typeof provide === "function") provide(store, $img);
-        if (props.onMounted) props.onMounted(event);
+        if (typeof provide === "function") {
+          provide(store, $img.get$elm());
+        }
+        if (props.onMounted) {
+          return props.onMounted(event);
+        }
       },
     },
     children,

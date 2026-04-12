@@ -16,21 +16,15 @@ export function DOMText(props: {
   const common$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
+    ...common$.methods,
     t,
     getType() {
       return "text";
     },
+    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },
-    setStyle: common$.methods.setStyle,
-    setStyleValue: common$.methods.setStyleValue,
-    setStyleSet: common$.methods.setStyleSet,
-    setAttribute: common$.methods.setAttribute,
-    removeAttribute: common$.methods.removeAttribute,
-    addEventListener: common$.methods.addEventListener,
-    removeEventListener: common$.methods.removeEventListener,
-    getBoundingClientRect: common$.methods.getBoundingClientRect,
     setContent(v?: string | number | null) {
       if (v !== undefined && v !== null) {
         $text.textContent = String(v);
@@ -58,13 +52,6 @@ export function DOMText(props: {
         common$.methods.set$elm($text);
         common$.methods.setupEventListener(elm.events);
       }
-    },
-    getChildren: common$.methods.getChildren,
-    appendChildren: common$.methods.appendChildren,
-    insertChildren: common$.methods.insertChildren,
-    removeChildren: common$.methods.removeChildren,
-    getParent() {
-      return $text.parentElement;
     },
   };
 }

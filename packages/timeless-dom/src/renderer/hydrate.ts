@@ -103,9 +103,9 @@ export function hydrate_node(
   if (vnode.t === "number-input") {
     return hydrate_number_input(vnode, $elm as HTMLInputElement);
   }
-  // if (vnode.t === "select") {
-  //   return hydrateSelect(vnode, domNode);
-  // }
+  if (vnode.t === "select") {
+    return hydrate_select(vnode, $elm as HTMLDivElement);
+  }
   // if (vnode.t === "option") {
   //   return hydrateOption(vnode, domNode);
   // }
@@ -199,4 +199,14 @@ function hydrate_number_input(
   vnode.$elm = number_input$;
   number_input$.hydrate(vnode, $elm);
   return number_input$;
+}
+
+function hydrate_select(
+  vnode: TimelessElement,
+  $elm: HTMLDivElement,
+): VNodeView<HTMLDivElement> {
+  const select$ = build(vnode);
+  vnode.$elm = select$;
+  select$.hydrate(vnode, $elm);
+  return select$;
 }

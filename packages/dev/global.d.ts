@@ -2,14 +2,22 @@
 
 // === Bundled package type declarations ===
 declare module "packages/reactive/src/types" {
-    export type Subscriber = {
-        onChange: (v: unknown) => void;
-        onPatch?: (c: unknown) => void;
+    export type Subscriber<T> = {
+        onChange: (v: T) => void;
+        onPatch?: (action: {
+            type: "insert" | "delete" | "update" | "move" | "swap";
+            index: number;
+            item: T;
+            items?: T;
+            deleteCount?: number;
+            from?: number;
+            to?: number;
+        }) => void;
         ignore?: boolean;
     };
     export type TimelessRef<T> = {
         __is_ref: true;
-        subscribe: (ctx: Subscriber) => void;
+        subscribe: (ctx: Subscriber<T>) => () => void;
         destroy: () => void;
         value: T;
         eq: (v: T) => boolean;
@@ -32,7 +40,7 @@ declare module "packages/reactive/src/types" {
     };
     export type TimelessRefObject<T> = {
         __is_ref: true;
-        subscribe: (ctx: Subscriber) => void;
+        subscribe: (ctx: Subscriber<T>) => () => void;
         destroy: () => void;
         value: T;
         isSame: (v: unknown) => boolean;
@@ -67,7 +75,7 @@ declare module "packages/reactive/src/types" {
     };
     export type TimelessRefObjectNullable<T> = {
         __is_ref: true;
-        subscribe: (ctx: Subscriber) => void;
+        subscribe: (ctx: Subscriber<T>) => () => void;
         destroy: () => void;
         value: T | null;
         isSame: (v: unknown) => boolean;
@@ -102,7 +110,7 @@ declare module "packages/reactive/src/types" {
     export type TimelessRefArray<T> = {
         __is_ref: true;
         __is_ref_array: true;
-        subscribe: (ctx: Subscriber) => void;
+        subscribe: (ctx: Subscriber<T[]>) => () => void;
         destroy: () => void;
         value: T[];
         isSame: (v: unknown) => boolean;
@@ -190,7 +198,7 @@ declare module "packages/reactive/src/types" {
     };
     export type DerivedRef<T> = {
         __is_ref: true;
-        subscribe: (ctx: Subscriber) => void;
+        subscribe: (ctx: Subscriber<T>) => () => void;
         destroy: () => void;
         value: T;
         isSame: (v: unknown) => boolean;
@@ -220,7 +228,9 @@ declare module "packages/reactive/src/reactive-array" {
         shift(): T | undefined;
         delete(idx: number): void;
         remove(item: T): void;
-        as(items: T[] | ((cur: T[]) => T[])): void;
+        as(items: T[] | ((cur: T[]) => T[]), opt?: {
+            silent?: boolean;
+        }): void;
         assign(items: T[]): void;
         refresh(): void;
         filter(predicate: (item: T, index: number, array: T[]) => boolean): T[];
@@ -468,7 +478,12 @@ declare module "packages/primitive/src/reactive/for" {
     export type ForState<T> = {
         rendered: boolean;
         items: T[];
+        wrapped_items: {
+            k: number;
+            v: T;
+        }[];
         children: (TimelessElement | null)[];
+        idx_arr: DerivedRef<number>[];
     };
     export function For<T>(props: ForProps<T>, bus?: Partial<{
         onRefresh: (diff: {
@@ -487,7 +502,9 @@ declare module "packages/primitive/src/reactive/for" {
     }>): {
         t: string;
         $elm: any;
-        state: ForState<T>;
+        state: {
+            items: T[];
+        };
         children: any[];
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -496,7 +513,7 @@ declare module "packages/primitive/src/reactive/for" {
 }
 declare module "packages/primitive/src/reactive/show" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { TimelessElement, ViewChildren } from "@/content/type";
+    import { ViewChildren } from "@/content/type";
     import { MountedEvent } from "@/event";
     type ShowProps = {
         when: DerivedRef<boolean | undefined | null> | Ref<boolean | undefined | null> | boolean;
@@ -506,15 +523,13 @@ declare module "packages/primitive/src/reactive/show" {
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
     };
-    type ShowState = {
-        value: boolean;
-        children: TimelessElement[];
-    };
     export function Show(props: ShowProps): {
         t: string;
         $elm: any;
-        state: ShowState;
-        children: TimelessElement[];
+        state: {
+            value: boolean;
+        };
+        children: any[];
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -522,26 +537,22 @@ declare module "packages/primitive/src/reactive/show" {
 }
 declare module "packages/primitive/src/reactive/match" {
     import { Ref } from "packages/reactive/src/index";
-    import { TimelessElement } from "@/content/type";
+    import { ViewChildren } from "@/content/type";
     import { MountedEvent } from "@/event";
     type MatchProps = {
         when: Ref<any> | any;
-        cases: Record<string | number, () => TimelessElement[]>;
-        fallback?: () => TimelessElement;
+        cases: Record<string | number, () => ViewChildren>;
+        fallback?: () => ViewChildren;
         onMounted?: (event: MountedEvent) => void;
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
     };
-    type MatchState = {
-        rendered: boolean;
-        value: any;
-        children: TimelessElement[];
-    };
     export function Match(props: MatchProps): {
         t: string;
         $elm: any;
-        value: any;
-        state: MatchState;
+        state: {
+            value: any;
+        };
         children: TimelessElement[];
         render(): any;
         hydrate(startDom: any, parentDom?: any): any;
@@ -565,9 +576,9 @@ declare module "packages/primitive/src/content/lazy-view" {
 }
 declare module "packages/primitive/src/content/type" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { VNodeView } from "@/vnode/view";
     import { MountedEvent } from "@/event";
     import { TimelessLazyComponent } from "packages/primitive/src/content/lazy-view";
-    import { VNodeView } from "@/vnode/view";
     export type ViewPropValue = string | number | boolean | undefined | null;
     export type ViewAttributes = Record<string, any>;
     export type TimelessNormalComponent = (...args: unknown[]) => TimelessElement;
@@ -602,8 +613,6 @@ declare module "packages/primitive/src/content/type" {
             onAnimationEnd?: (e: AnimationEvent) => void;
         };
         a11y?: VNodeA11y;
-        hydrate?(existingDom: any): any;
-        cleanup?: () => void;
         onMounted?(event: MountedEvent): void;
         beforeUnmounted?(): void;
         onUnmounted?(): void;
@@ -622,7 +631,7 @@ declare module "packages/primitive/src/content/type" {
 declare module "packages/primitive/src/content/text" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { TimelessElement } from "packages/primitive/src/content/type";
-    export function Txt(value: DerivedRef<string | number> | Ref<string | number> | string | number): TimelessElement;
+    export function Text(value: DerivedRef<string | number> | Ref<string | number> | string | number): TimelessElement;
 }
 declare module "packages/primitive/src/content/view" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
@@ -701,54 +710,17 @@ declare module "packages/primitive/src/content/view" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
-    };
-}
-declare module "packages/primitive/src/content/fragment" {
-    import { ViewProps } from "packages/primitive/src/content/view";
-    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
-    import { MountedEvent } from "@/event";
-    type FragmentState = {
-        rendered: boolean;
-        children: TimelessElement[];
-    };
-    export function Fragment(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: FragmentState;
-        children: TimelessElement<any, any>[];
-        append(node: any): void;
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    type Fragment = ReturnType<typeof Fragment>;
-    export function isFragment(v: any): v is Fragment;
-}
-declare module "packages/primitive/src/content/html" {
-    import { Ref } from "packages/reactive/src/index";
-    export function DangerouslyInnerHTML(html: string | Ref<string>): {
-        t: string;
-        $elm: any;
-        state: {};
-        render(): any;
-        onMounted(): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-        setContent(html: string): void;
-        class$: any;
     };
 }
 declare module "packages/primitive/src/content/box" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ClassNameRef, RawViewStyleProperties, ViewStyle } from "@/style";
-    import { TimelessElement, ViewAttributes } from "packages/primitive/src/content/type";
     import { MountedEvent } from "@/event";
     import { VNodeView } from "@/vnode/view";
+    import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
     export type BoxProps = {
         key?: string | number;
         as?: string;
@@ -795,36 +767,68 @@ declare module "packages/primitive/src/content/box" {
     };
     export function Box<T>(props: BoxProps, extra_state: T): {
         state: BoxState & T;
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onInput: (e: Event) => void;
-            onChange: (e: Event) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
         methods: {
             set$elm(elm: any): void;
             apply_attr(k: string, v: any): void;
-            handle_value(): void;
+            subscribe_props(): void;
+            build_children(children?: ViewChildren): void;
+            add_event(): void;
+            add_listen: any;
+            destroy(): void;
         };
     };
+}
+declare module "packages/primitive/src/content/fragment" {
+    import { MountedEvent } from "@/event";
+    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
+    export type FragmentProps = {
+        onMounted?: (event: MountedEvent) => void;
+        beforeUnmounted?: () => void;
+        onUnmounted?: () => void;
+    };
+    type FragmentState = {
+        rendered: boolean;
+        children: TimelessElement[];
+    };
+    export function Fragment(props: FragmentProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & FragmentState;
+        children: TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    type Fragment = ReturnType<typeof Fragment>;
+    export function isFragment(v: any): v is Fragment;
 }
 declare module "packages/primitive/src/content/icon" {
     import { MountedEvent } from "@/event";
@@ -892,7 +896,6 @@ declare module "packages/primitive/src/content/popper" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -972,211 +975,15 @@ declare module "packages/primitive/src/content/portal" {
         onUnmounted?: () => void;
     };
     type PortalState = {
-        children: TimelessElement[];
+        children: (TimelessElement | null)[];
     };
     export function Portal(props: PortalProps, children?: ViewChildren): {
         t: string;
         $elm: any;
         state: PortalState;
-        children: TimelessElement[];
+        children: any[];
         onMounted(event: MountedEvent): void;
         onUnmounted(): void;
-    };
-}
-declare module "packages/primitive/src/event/index" {
-    export type MouseEvent<T = any> = {
-        target: T;
-    };
-    export interface MountedEvent<T = any> {
-        reason?: string;
-        target: T;
-        error?: Error;
-    }
-}
-declare module "packages/primitive/src/input/input" {
-    import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { ViewProps } from "@/content/view";
-    import { RawViewStyleProperties } from "@/style/index";
-    import { MountedEvent } from "@/event";
-    export interface InputProps extends Omit<ViewProps, "as" | "type"> {
-        id?: string;
-        name?: string | DerivedRef<string> | Ref<string>;
-        value?: DerivedRef<string> | Ref<string>;
-        placeholder?: string | DerivedRef<string> | Ref<string>;
-        disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
-        readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
-        maxLength?: number | DerivedRef<number> | Ref<number>;
-        minLength?: number | DerivedRef<number> | Ref<number>;
-        pattern?: string | DerivedRef<string> | Ref<string>;
-        required?: boolean | DerivedRef<boolean> | Ref<boolean>;
-        autocomplete?: boolean | DerivedRef<boolean> | Ref<boolean>;
-        autocorrect?: boolean;
-        onInput?: (e: Event) => void;
-        onChange?: (e: Event) => void;
-    }
-    type InputState = {
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet?: string[];
-        id?: string;
-        name?: string;
-        value: string;
-        placeholder?: string;
-        disabled?: boolean;
-        required?: boolean;
-        maxLength?: number;
-        minLength?: number;
-    };
-    export function Input(props?: InputProps): {
-        t: string;
-        $elm: any;
-        state: InputState;
-        children: any[];
-        events: {
-            onInput: (e: Event) => void;
-            onChange: (e: Event) => void;
-            onFocus: ViewProps;
-            onBlur: ViewProps;
-            onKeyDown: ViewProps;
-        };
-        render(): any;
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/primitive/src/input/password" {
-    import { MountedEvent } from "@/event";
-    export interface PasswordInputProps {
-        onMounted: (event: MountedEvent) => void;
-    }
-    export function PasswordInput(props: PasswordInputProps): {
-        t: string;
-        $elm: any;
-        state: {};
-        children: any[];
-        onMounted(event: MountedEvent): void;
-    };
-}
-declare module "packages/primitive/src/input/checkbox" {
-    import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { MountedEvent } from "@/event";
-    import { ViewProps } from "@/content/view";
-    import { RawViewStyleProperties } from "@/style";
-    type CheckboxState = {
-        id: string;
-        name: string;
-        checked: boolean;
-        indeterminate: boolean;
-        disabled: boolean;
-        required: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-    };
-    export interface CheckboxProps {
-        id?: string;
-        name?: string | DerivedRef<string> | Ref<string>;
-        class?: ViewProps["class"];
-        style?: ViewProps["style"];
-        attributes?: ViewProps["attributes"];
-        dataset?: ViewProps["dataset"];
-        checked?: boolean | DerivedRef<boolean> | Ref<boolean>;
-        indeterminate?: boolean | DerivedRef<boolean> | Ref<boolean>;
-        readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
-        disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
-        required?: boolean | DerivedRef<boolean> | Ref<boolean>;
-        onChange?: (event: Event) => void;
-        onClick?: (event: MouseEvent) => void;
-        onMounted?: ViewProps["onMounted"];
-        beforeUnmounted?: ViewProps["beforeUnmounted"];
-        onUnmounted?: ViewProps["onUnmounted"];
-    }
-    export function Checkbox(props: CheckboxProps): {
-        t: string;
-        $elm: any;
-        state: CheckboxState;
-        children: any[];
-        events: {
-            onChange: (event: Event) => void;
-        };
-        render(): any;
-        onMounted(event: MountedEvent): void;
-    };
-}
-declare module "packages/primitive/src/input/select" {
-    import { Ref } from "packages/reactive/src/index";
-    import { ViewProps } from "@/content/view";
-    import { MountedEvent } from "@/event";
-    import { ForProps } from "@/reactive/for";
-    import { BoxEvents } from "@/content/box";
-    type SelectValue = string[];
-    export type SelectProps<T> = BoxEvents & {
-        id?: string | Ref<string>;
-        style?: ViewProps["style"];
-        class?: ViewProps["class"];
-        dataset?: ViewProps["dataset"];
-        attributes?: ViewProps["attributes"];
-        key?: string;
-        each: T[] | Ref<T[]>;
-        render: ForProps<T>["render"];
-        name?: string | Ref<string>;
-        placeholder?: string | Ref<string>;
-        disabled?: boolean | Ref<boolean>;
-        readonly?: boolean | Ref<boolean>;
-        required?: boolean | Ref<boolean>;
-        multiple?: boolean | Ref<boolean>;
-        size?: number | Ref<number>;
-        value?: Ref<SelectValue>;
-        onChange?: (e: Event) => void;
-        onInput?: (e: Event) => void;
-    };
-    export function Select<T>(props: SelectProps<T>): {
-        t: string;
-        $elm: any;
-        props: {};
-        readonly value: string;
-        children: any;
-        onMounted(event: MountedEvent): void;
-        render(): any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-}
-declare module "packages/primitive/src/input/slider" {
-    import { Ref } from "packages/reactive/src/index";
-    import { MountedEvent } from "@/event";
-    type SliderNum = number | string;
-    export interface SliderProps {
-        value?: SliderNum | Ref<SliderNum>;
-        min?: SliderNum | Ref<SliderNum>;
-        max?: SliderNum | Ref<SliderNum>;
-        step?: SliderNum | Ref<SliderNum>;
-        onMounted?: (event: MountedEvent) => void;
-        onChange?: (event: Event) => void;
-    }
-    export function Slider(props?: SliderProps): {
-        t: string;
-        $elm: any;
-        onMounted(event: MountedEvent): void;
-    };
-}
-declare module "packages/primitive/src/input/file-input" {
-    import { Ref } from "packages/reactive/src/index";
-    import { MountedEvent } from "@/event";
-    export interface FileSelectProps {
-        accept?: string | Ref<string>;
-        multiple?: boolean | Ref<boolean>;
-        capture?: string | Ref<string>;
-        files?: Ref<FileList | null>;
-        onMounted?: (event: MountedEvent) => void;
-        onChange?: (event: Event) => void;
-    }
-    export function FileSelect(props?: FileSelectProps): {
-        t: string;
-        $elm: any;
-        state: {};
-        children: any[];
-        onMounted(event: MountedEvent): void;
     };
 }
 declare module "packages/primitive/src/content/svg" {
@@ -1471,13 +1278,6 @@ declare module "packages/primitive/src/content/svg" {
         append(node: any): void;
     };
 }
-declare module "packages/primitive/src/content/style" {
-    import { ViewProps } from "@/content/view";
-    import { ViewChildren } from "@/content/type";
-    export interface NativeStyleProps extends Omit<ViewProps, "as"> {
-    }
-    export function NativeStyle(props?: NativeStyleProps, children?: ViewChildren): any;
-}
 declare module "packages/primitive/src/content/img" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
@@ -1575,6 +1375,253 @@ declare module "packages/primitive/src/content/label" {
         onMounted(event: MountedEvent): void;
     };
 }
+declare module "packages/primitive/src/content/style" {
+    import { ViewProps } from "@/content/view";
+    import { ViewChildren } from "@/content/type";
+    export interface NativeStyleProps extends Omit<ViewProps, "as"> {
+    }
+    export function NativeStyle(props?: NativeStyleProps, children?: ViewChildren): any;
+}
+declare module "packages/primitive/src/content/rich-text" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { MountedEvent } from "@/event";
+    import { BoxProps } from "packages/primitive/src/content/box";
+    export type RichTextProps = BoxProps & {
+        content: string | DerivedRef<string> | Ref<string>;
+    };
+    type RichTextState = {
+        content: string;
+    };
+    export function RichText(props: RichTextProps): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & RichTextState;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/event/index" {
+    export type MouseEvent<T = any> = {
+        target: T;
+    };
+    export interface MountedEvent<T = any> {
+        reason?: string;
+        target: T;
+        error?: Error;
+    }
+}
+declare module "packages/primitive/src/input/input" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { ViewProps } from "@/content/view";
+    import { RawViewStyleProperties } from "@/style/index";
+    import { MountedEvent } from "@/event";
+    export interface InputProps extends Omit<ViewProps, "as" | "type"> {
+        id?: string;
+        name?: string | DerivedRef<string> | Ref<string>;
+        value?: DerivedRef<string> | Ref<string>;
+        placeholder?: string | DerivedRef<string> | Ref<string>;
+        disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        maxLength?: number | DerivedRef<number> | Ref<number>;
+        minLength?: number | DerivedRef<number> | Ref<number>;
+        pattern?: string | DerivedRef<string> | Ref<string>;
+        required?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        autocomplete?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        autocorrect?: boolean;
+        onInput?: (e: Event) => void;
+        onChange?: (e: Event) => void;
+    }
+    type InputState = {
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet?: string[];
+        id?: string;
+        name?: string;
+        value: string;
+        placeholder?: string;
+        disabled?: boolean;
+        required?: boolean;
+        maxLength?: number;
+        minLength?: number;
+    };
+    export function Input(props?: InputProps): {
+        t: string;
+        $elm: any;
+        state: InputState;
+        children: any[];
+        events: {
+            onInput: (e: Event) => void;
+            onChange: (e: Event) => void;
+            onFocus: ViewProps;
+            onBlur: ViewProps;
+            onKeyDown: ViewProps;
+        };
+        render(): any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/input/number-input" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "@/content/box";
+    import { MountedEvent } from "@/event";
+    export type NumberInputProps = BoxProps & {
+        value?: (number | null) | DerivedRef<number | null> | Ref<number | null>;
+        step?: number | DerivedRef<number> | Ref<number>;
+        precision?: number | DerivedRef<number> | Ref<number>;
+        min?: number | DerivedRef<number> | Ref<number>;
+        max?: number | DerivedRef<number> | Ref<number>;
+        placeholder?: string | DerivedRef<string> | Ref<string>;
+        disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        onChange?: (event: Event) => void;
+    };
+    export function NumberInput(props?: NumberInputProps): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any[];
+        events: any;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/input/password-input" {
+    import { BoxProps } from "@/content/box";
+    import { MountedEvent } from "@/event";
+    export type PasswordInputProps = BoxProps & {
+        onMounted: (event: MountedEvent) => void;
+    };
+    export function PasswordInput(props: PasswordInputProps): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any[];
+        events: any;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/input/checkbox" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { MountedEvent } from "@/event";
+    import { ViewProps } from "@/content/view";
+    import { RawViewStyleProperties } from "@/style";
+    type CheckboxState = {
+        id: string;
+        name: string;
+        checked: boolean;
+        indeterminate: boolean;
+        disabled: boolean;
+        required: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+    };
+    export interface CheckboxProps {
+        id?: string;
+        name?: string | DerivedRef<string> | Ref<string>;
+        class?: ViewProps["class"];
+        style?: ViewProps["style"];
+        attributes?: ViewProps["attributes"];
+        dataset?: ViewProps["dataset"];
+        checked?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        indeterminate?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        required?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        onChange?: (event: Event) => void;
+        onClick?: (event: MouseEvent) => void;
+        onMounted?: ViewProps["onMounted"];
+        beforeUnmounted?: ViewProps["beforeUnmounted"];
+        onUnmounted?: ViewProps["onUnmounted"];
+    }
+    export function Checkbox(props: CheckboxProps): {
+        t: string;
+        $elm: any;
+        state: CheckboxState;
+        children: any[];
+        events: {
+            onChange: (event: Event) => void;
+        };
+        render(): any;
+        onMounted(event: MountedEvent): void;
+    };
+}
+declare module "packages/primitive/src/input/select" {
+    import { Ref } from "packages/reactive/src/index";
+    import { ViewChildren } from "@/content/type";
+    import { MountedEvent } from "@/event";
+    import { ForProps } from "@/reactive/for";
+    import { BoxProps } from "@/content/box";
+    type SelectValue = string[];
+    export type SelectProps<T> = BoxProps & {
+        id?: string | Ref<string>;
+        name?: string | Ref<string>;
+        key?: string;
+        options: ForProps<T>["each"];
+        render?: ForProps<T>["render"];
+        value?: Ref<SelectValue>;
+        placeholder?: string | Ref<string>;
+        disabled?: boolean | Ref<boolean>;
+        readonly?: boolean | Ref<boolean>;
+        required?: boolean | Ref<boolean>;
+        multiple?: boolean | Ref<boolean>;
+        onChange?: (e: Event) => void;
+        onInput?: (e: Event) => void;
+    };
+    export function Select<T extends {
+        value: any;
+        label: string;
+    }>(props: SelectProps<T>, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/input/slider" {
+    import { Ref } from "packages/reactive/src/index";
+    import { MountedEvent } from "@/event";
+    type SliderNum = number | string;
+    export interface SliderProps {
+        value?: SliderNum | Ref<SliderNum>;
+        min?: SliderNum | Ref<SliderNum>;
+        max?: SliderNum | Ref<SliderNum>;
+        step?: SliderNum | Ref<SliderNum>;
+        onMounted?: (event: MountedEvent) => void;
+        onChange?: (event: Event) => void;
+    }
+    export function Slider(props?: SliderProps): {
+        t: string;
+        $elm: any;
+        onMounted(event: MountedEvent): void;
+    };
+}
+declare module "packages/primitive/src/input/file-picker" {
+    import { Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "@/content/box";
+    import { MountedEvent } from "@/event";
+    export type FilePickerProps = BoxProps & {
+        accept?: string | Ref<string>;
+        multiple?: boolean | Ref<boolean>;
+        capture?: string | Ref<string>;
+        files?: Ref<FileList | null>;
+        onChange?: (event: Event) => void;
+    };
+    export function FilePicker(props?: FilePickerProps): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any[];
+        events: any;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+}
 declare module "packages/primitive/src/interaction/link" {
     import { Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
@@ -1623,7 +1670,6 @@ declare module "packages/primitive/src/interaction/button" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        hydrate(existingDom: any): any;
         onMounted: any;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -1669,6 +1715,25 @@ declare module "packages/base/src/base" {
         onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
         get [Symbol.toStringTag](): string;
     }
+    export type LogLevel = "info" | "debug" | "warn" | "error";
+    export interface LoggerProps {
+        prefix?: string;
+        scope?: string;
+        time?: boolean;
+        level?: LogLevel;
+        mode?: "minimal" | "classic" | "verbose";
+        color?: string;
+    }
+    export function Logger(props?: LoggerProps): {
+        log: (...args: unknown[]) => void;
+        debug: (...args: unknown[]) => void;
+        info: (...args: unknown[]) => void;
+        warn: (...args: unknown[]) => void;
+        error: (...args: unknown[]) => void;
+        scope: string;
+        color: string;
+        setColor(value: string): void;
+    };
     export function applyMixins(derivedCtor: any, constructors: any[]): void;
 }
 declare module "packages/base/src/result/index" {
@@ -1695,10 +1760,29 @@ declare module "packages/base/src/error/index" {
         constructor(msg: string[], code?: string | number, data?: unknown);
     }
 }
+declare module "packages/base/src/logger" {
+    export type LogLevel = "info" | "debug" | "warn" | "error";
+    export interface LoggerProps {
+        prefix?: string;
+        scope?: string;
+        time?: boolean;
+        level?: LogLevel;
+        mode?: "minimal" | "classic" | "verbose";
+    }
+    export function Logger(props?: LoggerProps): {
+        log: (...args: unknown[]) => void;
+        debug: (...args: unknown[]) => void;
+        info: (...args: unknown[]) => void;
+        warn: (...args: unknown[]) => void;
+        error: (...args: unknown[]) => void;
+        scope: string;
+    };
+}
 declare module "packages/base/src/index" {
     export * from "packages/base/src/base";
     export * from "packages/base/src/result/index";
     export * from "packages/base/src/error/index";
+    export * from "packages/base/src/logger";
 }
 declare module "packages/ui/src/accordion/index" {
     import { Handler } from "packages/base/src/index";
@@ -8944,7 +9028,7 @@ declare module "packages/primitive/src/modules/menu" {
     export function ItemImpl(props: ViewProps & {
         store: MenuItemCore;
     }, children: ViewChildren): any;
-    export function Separator(props: ViewProps, children: ViewChildren): any;
+    export function Separator(props: ViewProps): any;
     export function Arrow(props: ViewProps & {
         store: MenuCore;
     }, children: ViewChildren): any;
@@ -8993,7 +9077,7 @@ declare module "packages/primitive/src/modules/dropdown-menu" {
     export function Item(props: ViewProps & {
         store: MenuItemCore;
     }, children: ViewChildren): any;
-    export function Separator(props: ViewProps, children: ViewChildren): any;
+    export function Separator(props: ViewProps): any;
     export function Arrow(props: ViewProps & {
         store: DropdownMenuCore;
     }, children: ViewChildren): any;
@@ -9151,7 +9235,7 @@ declare module "packages/primitive/src/modules/input" {
         store: InputCore<any>;
     }, children?: ViewChildren): any;
 }
-declare module "packages/primitive/src/modules/file-input" {
+declare module "packages/primitive/src/modules/file-picker" {
     import { FileInputCore } from "packages/ui/src/index";
     import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
@@ -9239,7 +9323,7 @@ declare module "packages/primitive/src/modules/select" {
     }, children?: ViewChildren): any;
     export function Value(props: ViewProps & {
         store: SelectCore<any>;
-    }, children?: ViewChildren): any;
+    }): any;
     export function Icon(props: ViewProps & {
         store?: SelectCore<any>;
     }, children: ViewChildren): any;
@@ -11689,7 +11773,8 @@ declare module "packages/primitive/src/style/index" {
     export type ClassNameRef = {
         __cn_ref: true;
         value: string[];
-        subscribe(ctx: Subscriber): void;
+        subscribe(ctx: Subscriber<string[]>): () => void;
+        destroy(): void;
         as(v: string): void;
         del(v: string): void;
         add(v: string): void;
@@ -11703,7 +11788,7 @@ declare module "packages/primitive/src/style/index" {
     export interface StyleRef {
         __style_ref: true;
         value: StyleObject;
-        subscribe(ctx: Subscriber): void;
+        subscribe(ctx: Subscriber<StyleObject>): () => void;
         toString(): string;
     }
     export function isStyleRef(v: any): v is StyleRef;
@@ -11717,12 +11802,14 @@ declare module "packages/primitive/src/util/h" {
     export function h<P, R extends TimelessElement>(component: (props: P, children?: any) => R, props: P, children?: ViewChildren): () => R;
 }
 declare module "packages/primitive/src/util/listener" {
-    export function ListenerManager(): {
-        add: (clean?: void | (() => void)) => () => void;
-        push: (clean?: void | (() => void)) => () => void;
-        append: (arr: (void | (() => void))[]) => void;
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    export function ListenerManager(fns?: (DerivedRef<any> | Ref<any> | any | (() => void))[]): {
+        add: (clean?: void | (() => void) | DerivedRef<any> | Ref<any> | any) => any;
+        push: (clean?: void | (() => void) | DerivedRef<any> | Ref<any> | any) => any;
+        append: (arr: (Ref<any> | DerivedRef<any> | any | void | (() => void))[]) => void;
         clean: () => void;
         clear: () => void;
+        destroy: () => void;
     };
 }
 declare module "packages/primitive/src/interaction/dismissable" {
@@ -11758,8 +11845,10 @@ declare module "packages/primitive/src/vnode/view" {
         right: number;
         bottom: number;
     };
-    export type VNodeEvent<T> = {
+    export type VNodeEvent<T = any> = {
         target: T;
+        stopPropagation(): void;
+        preventDefault(): void;
     };
     type VNodeViewType = "view" | "text" | "button" | "input" | "fragment" | "reactive";
     export type VNodeView<HostElm = any> = {
@@ -11775,13 +11864,21 @@ declare module "packages/primitive/src/vnode/view" {
         getBoundingClientRect(): VNodeRect;
         addEventListener(type: string, handler: (event: VNodeEvent<VNodeView<HostElm>>) => void, options?: any): void;
         removeEventListener(type: string, handler: (event: VNodeEvent<VNodeView<HostElm>>) => void, options?: any): void;
+        /** 构建宿主 node tree */
         render(elm: TimelessElement): any;
+        /** 水合 */
         hydrate(elm: TimelessElement, $dom: HostElm): any;
         /** 构建 */
-        appendChildren(children: (TimelessElement | null)[]): any;
+        buildChildren(children: (TimelessElement | null)[]): {
+            $fragment: any;
+            child_elements: (TimelessElement | null)[];
+            child_host_nodes: HostElm[];
+            child_nodes: VNodeView<any>[];
+        };
         insertChildren(children: (TimelessElement | null)[]): void;
         removeChildren(): void;
         getParent(): any;
+        get$elm(): HostElm;
     };
 }
 declare module "packages/primitive/src/index" {
@@ -11791,25 +11888,25 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/reactive/match";
     export * from "packages/primitive/src/content/view";
     export * from "packages/primitive/src/content/fragment";
-    export * from "packages/primitive/src/content/html";
-    export * from "packages/primitive/src/content/text";
     export * from "packages/primitive/src/content/icon";
     export * from "packages/primitive/src/content/popper";
     export * from "packages/primitive/src/content/list-view";
     export * from "packages/primitive/src/content/portal";
     export * from "packages/primitive/src/content/lazy-view";
     export * from "packages/primitive/src/content/type";
+    export * as SVG from "packages/primitive/src/content/svg";
+    export * from "packages/primitive/src/content/img";
+    export * from "packages/primitive/src/content/label";
+    export * from "packages/primitive/src/content/style";
+    export * from "packages/primitive/src/content/rich-text";
     export * from "packages/primitive/src/event/index";
     export * from "packages/primitive/src/input/input";
-    export * from "packages/primitive/src/input/password";
+    export * from "packages/primitive/src/input/number-input";
+    export * from "packages/primitive/src/input/password-input";
     export * from "packages/primitive/src/input/checkbox";
     export * from "packages/primitive/src/input/select";
     export * from "packages/primitive/src/input/slider";
-    export * from "packages/primitive/src/input/file-input";
-    export { SVG, G, Circle, Rect, Path, Line, Polyline, Polygon, Text, Defs, Symbol, Use, LinearGradient, RadialGradient, Stop, Mask, ClipPath, Ellipse, } from "packages/primitive/src/content/svg";
-    export * from "packages/primitive/src/content/style";
-    export * from "packages/primitive/src/content/img";
-    export * from "packages/primitive/src/content/label";
+    export * from "packages/primitive/src/input/file-picker";
     export * from "packages/primitive/src/interaction/link";
     export * from "packages/primitive/src/interaction/button";
     export * from "packages/primitive/src/modules/presence";
@@ -11837,7 +11934,7 @@ declare module "packages/primitive/src/index" {
     export * as TabsPrimitive from "packages/primitive/src/modules/tabs";
     export * as AccordionPrimitive from "packages/primitive/src/modules/accordion";
     export * as InputPrimitive from "packages/primitive/src/modules/input";
-    export * as FileInputPrimitive from "packages/primitive/src/modules/file-input";
+    export * as FilePickerPrimitive from "packages/primitive/src/modules/file-picker";
     export * as NumberInputPrimitive from "packages/primitive/src/modules/number-input";
     export * as TextareaPrimitive from "packages/primitive/src/modules/textarea";
     export * as SelectPrimitive from "packages/primitive/src/modules/select";
@@ -11890,7 +11987,7 @@ declare module "packages/shadcn/src/modules/input" {
         id?: string;
     }): any;
 }
-declare module "packages/shadcn/src/modules/file-input" {
+declare module "packages/shadcn/src/modules/file-picker" {
     import { ViewProps } from "packages/timeless/src/index";
     import { FileInputCore } from "packages/ui/src/index";
     export function FileInput(props: ViewProps & {
@@ -11986,7 +12083,6 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12046,7 +12142,6 @@ declare module "packages/shadcn/src/modules/radio" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12251,7 +12346,6 @@ declare module "packages/shadcn/src/modules/menu" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12265,7 +12359,7 @@ declare module "packages/shadcn/src/modules/dropdown-menu" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        state: {
+        state: import("packages/primitive/src/content/box").BoxState & {
             rendered: boolean;
             children: TimelessElement[];
         };
@@ -12284,7 +12378,7 @@ declare module "packages/shadcn/src/modules/context-menu" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        state: {
+        state: import("packages/primitive/src/content/box").BoxState & {
             rendered: boolean;
             children: TimelessElement[];
         };
@@ -12404,7 +12498,6 @@ declare module "packages/shadcn/src/modules/scroll-area" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12452,7 +12545,6 @@ declare module "packages/shadcn/src/modules/aspect-ratio" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12505,7 +12597,6 @@ declare module "packages/shadcn/src/modules/kbd" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12543,7 +12634,6 @@ declare module "packages/shadcn/src/modules/kbd" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12596,7 +12686,6 @@ declare module "packages/shadcn/src/modules/form" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12638,7 +12727,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12676,7 +12764,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12714,7 +12801,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12752,7 +12838,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12817,7 +12902,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12855,7 +12939,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12898,7 +12981,6 @@ declare module "packages/shadcn/src/modules/field" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12968,7 +13050,6 @@ declare module "packages/shadcn/src/modules/history-panel" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13058,7 +13139,6 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13098,7 +13178,6 @@ declare module "packages/shadcn/src/modules/sonner" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13144,7 +13223,6 @@ declare module "packages/shadcn/src/modules/affix" {
             onDrop: (e: DragEvent) => void;
             onAnimationEnd: (e: AnimationEvent) => void;
         };
-        hydrate(existingDom: any): any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13152,7 +13230,7 @@ declare module "packages/shadcn/src/modules/affix" {
 }
 declare module "packages/shadcn/src/index" {
     import { Input } from "packages/shadcn/src/modules/input";
-    import { FileInput } from "packages/shadcn/src/modules/file-input";
+    import { FileInput } from "packages/shadcn/src/modules/file-picker";
     import { NumberInput } from "packages/shadcn/src/modules/number-input";
     import { Textarea } from "packages/shadcn/src/modules/textarea";
     import { Label } from "packages/shadcn/src/modules/label";
@@ -13227,409 +13305,139 @@ declare module "packages/icons/src/util/index" {
         attrs?: Record<string, string>;
         children?: readonly ASNNode[];
     };
-    export function createIcon(asn: ASNNode): (props?: IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export function createIcon(asn: ASNNode): (props?: IconProps) => any;
 }
 declare module "packages/icons/src/icons/arrow-down-to-line" {
-    export const ArrowDownToLineOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const ArrowDownToLineOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/calendar" {
-    export const CalendarOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const CalendarOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/chevron-down" {
-    export const ChevronDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const ChevronDownOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/chevron-left" {
-    export const ChevronLeftOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const ChevronLeftOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/chevron-right" {
-    export const ChevronRightOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const ChevronRightOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/circle-arrow-down" {
-    export const CircleArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const CircleArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/circle-x" {
-    export const CircleXOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const CircleXOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/clock-arrow-down" {
-    export const ClockArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const ClockArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/cloud-download" {
-    export const CloudDownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const CloudDownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/download" {
-    export const DownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const DownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/ellipsis-vertical" {
-    export const EllipsisVerticalOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const EllipsisVerticalOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/ellipsis" {
-    export const EllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const EllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/file-box" {
-    export const FileBoxOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const FileBoxOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/file-image" {
-    export const FileImageOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const FileImageOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/file-lock" {
-    export const FileLockOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const FileLockOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/file-play" {
-    export const FilePlayOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const FilePlayOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/file-symlink" {
-    export const FileSymlinkOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const FileSymlinkOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/file-video-camera" {
-    export const FileVideoCameraOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const FileVideoCameraOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/file-volume" {
-    export const FileVolumeOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const FileVolumeOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/file" {
-    export const FileOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const FileOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/folder-closed" {
-    export const FolderClosedOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const FolderClosedOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/folder" {
-    export const FolderOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const FolderOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/pause" {
-    export const PauseOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const PauseOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/play" {
-    export const PlayOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const PlayOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/refresh-ccw" {
-    export const RefreshCcwOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const RefreshCcwOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/rss" {
-    export const RssOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const RssOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/square-arrow-down" {
-    export const SquareArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const SquareArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/trash-2" {
-    export const Trash2Outlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const Trash2Outlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/trash" {
-    export const TrashOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const TrashOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/search" {
-    export const SearchOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const SearchOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/undo-2" {
-    export const Undo2Outlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const Undo2Outlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/x" {
-    export const XOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const XOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/bolt" {
-    export const BoltOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const BoltOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/loader" {
-    export const LoaderOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const LoaderOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/loader-circle" {
-    export const LoaderCircleOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const LoaderCircleOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/check" {
-    export const CheckOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const CheckOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/chevron-up" {
-    export const ChevronUpOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const ChevronUpOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/clock" {
-    export const ClockOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const ClockOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/grid-3x3" {
-    export const Grid3x3Outlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const Grid3x3Outlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/menu" {
-    export const MenuOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const MenuOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/circle-ellipsis" {
-    export const CircleEllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const CircleEllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/house" {
-    export const HouseOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const HouseOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/moon" {
-    export const MoonOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const MoonOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/icons/sun" {
-    export const SunOutlined: (props?: import("packages/icons/src/util").IconProps) => {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    export const SunOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
 }
 declare module "packages/icons/src/index" {
     export * from "packages/icons/src/icons/arrow-down-to-line";
@@ -13711,26 +13519,20 @@ declare const ButtonPrimitive: typeof import("@timeless/timeless").ButtonPrimiti
 declare const CardPrimitive: typeof import("@timeless/timeless").CardPrimitive;
 declare const CascaderPrimitive: typeof import("@timeless/timeless").CascaderPrimitive;
 declare const CheckboxPrimitive: typeof import("@timeless/timeless").CheckboxPrimitive;
-declare const Circle: typeof import("@timeless/timeless").Circle;
-declare const ClipPath: typeof import("@timeless/timeless").ClipPath;
 declare const Column: typeof import("@timeless/timeless").Column;
 declare const ContextMenuPrimitive: typeof import("@timeless/timeless").ContextMenuPrimitive;
-declare const DangerouslyInnerHTML: typeof import("@timeless/timeless").DangerouslyInnerHTML;
 declare const DatePickerPrimitive: typeof import("@timeless/timeless").DatePickerPrimitive;
 declare const DateRangePickerPrimitive: typeof import("@timeless/timeless").DateRangePickerPrimitive;
-declare const Defs: typeof import("@timeless/timeless").Defs;
 declare const DerivedRef: typeof import("@timeless/timeless").DerivedRef;
 declare const DialogPrimitive: typeof import("@timeless/timeless").DialogPrimitive;
 declare const DismissableLayer: typeof import("@timeless/timeless").DismissableLayer;
 declare const DropdownMenuPrimitive: typeof import("@timeless/timeless").DropdownMenuPrimitive;
-declare const Ellipse: typeof import("@timeless/timeless").Ellipse;
 declare const FieldPrimitive: typeof import("@timeless/timeless").FieldPrimitive;
-declare const FileInputPrimitive: typeof import("@timeless/timeless").FileInputPrimitive;
-declare const FileSelect: typeof import("@timeless/timeless").FileSelect;
+declare const FilePicker: typeof import("@timeless/timeless").FilePicker;
+declare const FilePickerPrimitive: typeof import("@timeless/timeless").FilePickerPrimitive;
 declare const Flex: typeof import("@timeless/timeless").Flex;
 declare const For: typeof import("@timeless/timeless").For;
 declare const Fragment: typeof import("@timeless/timeless").Fragment;
-declare const G: typeof import("@timeless/timeless").G;
 declare const Grid: typeof import("@timeless/timeless").Grid;
 declare const HeadPrimitive: typeof import("@timeless/timeless").HeadPrimitive;
 declare const Icon: typeof import("@timeless/timeless").Icon;
@@ -13739,11 +13541,9 @@ declare const Img: typeof import("@timeless/timeless").Img;
 declare const InputPrimitive: typeof import("@timeless/timeless").InputPrimitive;
 declare const KeepAliveSubViews: typeof import("@timeless/timeless").KeepAliveSubViews;
 declare const LazyView: typeof import("@timeless/timeless").LazyView;
-declare const Line: typeof import("@timeless/timeless").Line;
-declare const LinearGradient: typeof import("@timeless/timeless").LinearGradient;
 declare const ListView: typeof import("@timeless/timeless").ListView;
 declare const ListenerManager: typeof import("@timeless/timeless").ListenerManager;
-declare const Mask: typeof import("@timeless/timeless").Mask;
+declare const Logger: typeof import("@timeless/timeless").Logger;
 declare const Match: typeof import("@timeless/timeless").Match;
 declare const MenuPrimitive: typeof import("@timeless/timeless").MenuPrimitive;
 declare const NativeStyle: typeof import("@timeless/timeless").NativeStyle;
@@ -13751,9 +13551,6 @@ declare const NumberInputPrimitive: typeof import("@timeless/timeless").NumberIn
 declare const ObjectSignal: typeof import("@timeless/timeless").ObjectSignal;
 declare const ParagraphPrimitive: typeof import("@timeless/timeless").ParagraphPrimitive;
 declare const PasswordInput: typeof import("@timeless/timeless").PasswordInput;
-declare const Path: typeof import("@timeless/timeless").Path;
-declare const Polygon: typeof import("@timeless/timeless").Polygon;
-declare const Polyline: typeof import("@timeless/timeless").Polyline;
 declare const PopconfirmPrimitive: typeof import("@timeless/timeless").PopconfirmPrimitive;
 declare const PopoverPrimitive: typeof import("@timeless/timeless").PopoverPrimitive;
 declare const Popper: typeof import("@timeless/timeless").Popper;
@@ -13762,13 +13559,12 @@ declare const Portal: typeof import("@timeless/timeless").Portal;
 declare const Presence: typeof import("@timeless/timeless").Presence;
 declare const PrimitiveSignal: typeof import("@timeless/timeless").PrimitiveSignal;
 declare const ProgressPrimitive: typeof import("@timeless/timeless").ProgressPrimitive;
-declare const RadialGradient: typeof import("@timeless/timeless").RadialGradient;
 declare const RadioPrimitive: typeof import("@timeless/timeless").RadioPrimitive;
-declare const Rect: typeof import("@timeless/timeless").Rect;
 declare const Ref: typeof import("@timeless/timeless").Ref;
 declare const RefArray: typeof import("@timeless/timeless").RefArray;
 declare const RefObject: typeof import("@timeless/timeless").RefObject;
 declare const ResizablePanelsPrimitive: typeof import("@timeless/timeless").ResizablePanelsPrimitive;
+declare const RichText: typeof import("@timeless/timeless").RichText;
 declare const SVG: typeof import("@timeless/timeless").SVG;
 declare const ScrollViewPrimitive: typeof import("@timeless/timeless").ScrollViewPrimitive;
 declare const SelectPrimitive: typeof import("@timeless/timeless").SelectPrimitive;
@@ -13780,14 +13576,11 @@ declare const SkeletonPrimitive: typeof import("@timeless/timeless").SkeletonPri
 declare const SliderPrimitive: typeof import("@timeless/timeless").SliderPrimitive;
 declare const StandardSubViews: typeof import("@timeless/timeless").StandardSubViews;
 declare const StepsPrimitive: typeof import("@timeless/timeless").StepsPrimitive;
-declare const Stop: typeof import("@timeless/timeless").Stop;
 declare const Subscriber: typeof import("@timeless/timeless").Subscriber;
 declare const SwitchPrimitive: typeof import("@timeless/timeless").SwitchPrimitive;
-declare const Symbol: typeof import("@timeless/timeless").Symbol;
 declare const TablePrimitive: typeof import("@timeless/timeless").TablePrimitive;
 declare const TabsPrimitive: typeof import("@timeless/timeless").TabsPrimitive;
 declare const TagSelectPrimitive: typeof import("@timeless/timeless").TagSelectPrimitive;
-declare const Text: typeof import("@timeless/timeless").Text;
 declare const TextareaPrimitive: typeof import("@timeless/timeless").TextareaPrimitive;
 declare const TimePickerPrimitive: typeof import("@timeless/timeless").TimePickerPrimitive;
 declare const TimelessRefArray: typeof import("@timeless/timeless").TimelessRefArray;
@@ -13795,8 +13588,6 @@ declare const ToastPrimitive: typeof import("@timeless/timeless").ToastPrimitive
 declare const TogglePrimitive: typeof import("@timeless/timeless").TogglePrimitive;
 declare const TooltipPrimitive: typeof import("@timeless/timeless").TooltipPrimitive;
 declare const Transition: typeof import("@timeless/timeless").Transition;
-declare const Txt: typeof import("@timeless/timeless").Txt;
-declare const Use: typeof import("@timeless/timeless").Use;
 declare const VideoPlayerPrimitive: typeof import("@timeless/timeless").VideoPlayerPrimitive;
 declare const View: typeof import("@timeless/timeless").View;
 declare const WaterfallPrimitive: typeof import("@timeless/timeless").WaterfallPrimitive;

@@ -5,10 +5,13 @@ import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Portal as NativePortal } from "@/content/portal";
 import { Show } from "@/reactive/show";
-// import { getHost } from "@/host";
+import { ListenerManager } from "@/util/listener";
+import { Logger } from "@/util/logger";
 
 import { Arrow as NativeArrow } from "./arrow";
 import * as PopperPrimitive from "./popper";
+
+const logger = Logger({ prefix: "primitive", scope: "menu.ts" });
 
 export function Root(
   props: ViewProps & { store: MenuCore },
@@ -70,26 +73,33 @@ export function ContentImpl(
 ) {
   const { animation, ...rest } = props;
 
+  let _was_exiting = false;
   const state_ = refobj(props.store.state);
   const presence_ = refobj(props.store.presence.state);
-  // Track exit animation to prevent flash when unmounting
-  let _was_exiting = false;
-
-  const listeners = [
-    props.store.onStateChange((v) => {
-      state_.as(v);
-    }),
-    props.store.presence.onStateChange((v) => {
-      console.log("[Menu Content] presence change", v.mounted);
-      presence_.as(v);
-    }),
-  ];
+  const listener$ = ListenerManager([state_, presence_]);
 
   return Show({
     when: computed(presence_, (t) => {
       return t.mounted;
     }),
+    onMounted() {
+      listener$.append([
+        props.store.onStateChange((v) => {
+          state_.as(v);
+        }),
+        props.store.presence.onStateChange((v) => {
+          console.log(
+            "[Menu Content] presence change",
+            v.mounted,
+            presence_.value.mounted,
+          );
+          presence_.as(v);
+        }),
+      ]);
+      // return listener$.destroy;
+    },
     ok() {
+      logger.log("Content mounted");
       return [
         NativePortal({}, [
           PopperPrimitive.Content(
@@ -150,7 +160,6 @@ export function ContentImpl(
                       props.store.presence.handleAnimationEnd();
                     }
                     if (rest.onAnimationEnd) {
-                      // @ts-ignore
                       rest.onAnimationEnd(e);
                     }
                   },
@@ -161,11 +170,6 @@ export function ContentImpl(
           ),
         ]),
       ];
-    },
-    onUnmounted() {
-      for (let i = 0; i < listeners.length; i += 1) {
-        listeners[i]();
-      }
     },
   });
 }
@@ -198,12 +202,6 @@ export function ItemImpl(
   const { store, ...rest } = props;
   const state_ = refobj(props.store.state);
 
-  // console.log("[ItemImpl] render", props.store.label);
-  props.store.onStateChange((v) => {
-    // console.log("[ItemImpl] handle store.onStateChange", v.focused);
-    state_.as(v);
-  });
-
   return View(
     {
       ...rest,
@@ -215,6 +213,15 @@ export function ItemImpl(
         }),
       },
       onMounted(event) {
+        logger.log(
+          "[ItemImpl] onMounted",
+          props.store.label,
+          !!props.store.menu,
+        );
+        props.store.onStateChange((v) => {
+          // console.log("[ItemImpl] handle store.onStateChange", v.focused);
+          state_.as(v);
+        });
         const $el = event.target;
         // console.log("[ItemImpl] mounted", props.store.label);
         if (props.store.menu) {
@@ -233,6 +240,15 @@ export function ItemImpl(
           // @ts-ignore
           $el.blur();
         });
+        if (rest.onMounted) {
+          return rest.onMounted(event);
+        }
+      },
+      onUnmounted() {
+        logger.log("[ItemImpl] unmounted", props.store.label);
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
+        }
       },
       onClick() {
         props.store.handleClick();
@@ -249,16 +265,13 @@ export function ItemImpl(
       onMouseLeave() {
         props.store.handlePointerLeave();
       },
-      onUnmounted() {
-        console.log("[ItemImpl] unmounted", props.store.label);
-      },
     },
     children,
   );
 }
 
-export function Separator(props: ViewProps, children: ViewChildren) {
-  return View(props, children);
+export function Separator(props: ViewProps) {
+  return View(props);
 }
 export function Arrow(
   props: ViewProps & { store: MenuCore },
@@ -292,31 +305,32 @@ export function SubMenuTrigger(
       class: "menu-item-with-sub-menu",
       store: props.store.menu!,
       onMounted(event) {
-        const $el = (event as any).target as HTMLDivElement;
-        if (!props.store.menu) {
-          return;
+        console.log(
+          "[primitive]menu.ts/SubMenuTrigger mounted",
+          props.store.label,
+        );
+        if (props.store.menu) {
+          const $el = event.target;
+          props.store.menu.popper.setReference({
+            getRect() {
+              return $el.getBoundingClientRect();
+            },
+          });
         }
-        props.store.menu.popper.setReference({
-          getRect() {
-            return $el.getBoundingClientRect();
-          },
-        });
+        if (props.onMounted) {
+          return props.onMounted(event);
+        }
       },
       onUnmounted() {
-        if (!props.store.menu) {
-          return;
+        if (props.store.menu) {
+          props.store.menu.popper.removeReference();
         }
-        props.store.menu.popper.removeReference();
+        if (props.onUnmounted) {
+          props.onUnmounted();
+        }
       },
     },
-    [
-      ItemImpl(
-        {
-          store: props.store,
-        },
-        children,
-      ),
-    ],
+    [ItemImpl({ store: props.store }, children)],
   );
 }
 
@@ -339,11 +353,6 @@ export function SubMenuContent(
         ) {
           clearTimeout(props.store.parent_menu.hide_sub_timer);
           props.store.parent_menu.hide_sub_timer = null;
-        }
-      },
-      onMounted(event) {
-        if (props.onMounted) {
-          props.onMounted(event);
         }
       },
     },

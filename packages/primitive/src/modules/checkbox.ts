@@ -1,4 +1,4 @@
-import { ref, computed } from "@timeless/reactive";
+import { ref, computed, refobj } from "@timeless/reactive";
 import { CheckboxCore, CheckboxGroupCore } from "@timeless/ui";
 
 import { Show } from "@/reactive/show";
@@ -8,6 +8,9 @@ import { ViewChildren } from "@/content/type";
 import { Checkbox, CheckboxProps } from "@/input/checkbox";
 import { Button, ButtonProps } from "@/interaction/button";
 import { ListenerManager } from "@/util/listener";
+import { Logger } from "@/util/logger";
+
+const logger = Logger({ prefix: "primitive", scope: "modules.checkbox" });
 
 export function Root(
   props: ViewProps & { store: CheckboxCore },
@@ -23,38 +26,44 @@ export function Box(
   children?: ViewChildren,
 ) {
   const { store, id, ...rest } = props;
-  const state = ref(store.state);
-  const events: any[] = [];
+  const state_ = refobj(store.state);
+  const listener$ = ListenerManager([state_]);
 
   return Button(
     {
       ...rest,
-      // id,
-      onClick(e) {
-        if (rest.onClick) rest.onClick(e);
-        store.toggle();
-      },
       dataset: {
-        // checked: computed(state, (d) => (d.checked ? "" : undefined)),
-        // disabled: computed(state, (d) => (d.disabled ? "" : undefined)),
+        checked: computed(state_, (d) => (d.checked ? "" : undefined)),
+        disabled: computed(state_, (d) => (d.disabled ? "" : undefined)),
       },
-      onMounted() {
-        events.push(
+      onMounted(event) {
+        listener$.push(
           store.onStateChange(() => {
-            state.as(store.state);
+            state_.as(store.state);
           }),
         );
         if (store.onChange) {
-          events.push(
+          listener$.push(
             store.onChange(() => {
-              state.as(store.state);
+              state_.as(store.state);
             }),
           );
         }
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
       },
       onUnmounted() {
-        for (const fn of events) if (typeof fn === "function") fn();
-        if (rest.onUnmounted) rest.onUnmounted();
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
+        }
+      },
+      onClick(e) {
+        logger.log("Box onClick");
+        if (rest.onClick) {
+          rest.onClick(e);
+        }
+        store.toggle();
       },
     },
     children,
@@ -67,29 +76,25 @@ export function Indicator(
 ) {
   const { store, ...rest } = props;
   const state_ = ref(store.state);
-  const events: any[] = [];
+  const listener$ = ListenerManager([state_]);
+
+  listener$.push(
+    store.onStateChange((v) => {
+      // logger.log("Indicator onStateChange", v.checked);
+      state_.as(v);
+    }),
+  );
 
   return Show({
     when: computed(state_, (d) => !!d.checked),
     ok() {
       return children || [];
     },
-    onMounted() {
-      events.push(
-        store.onStateChange(() => {
-          state_.as(store.state);
-        }),
-      );
-      if (store.onChange) {
-        events.push(
-          store.onChange(() => {
-            state_.as(store.state);
-          }),
-        );
+    onMounted(event) {
+      // logger.log("Indicator onMounted");
+      if (rest.onMounted) {
+        listener$.push(rest.onMounted(event));
       }
-    },
-    onUnmounted() {
-      for (const fn of events) if (typeof fn === "function") fn();
     },
   });
 }
@@ -124,12 +129,11 @@ export function Input(
         }),
       );
       if (rest.onMounted) {
-        rest.onMounted(event);
+        listener$.push(rest.onMounted(event));
       }
     },
     onUnmounted() {
-      // for (const fn of events) if (typeof fn === "function") fn();
-      listener$.clean();
+      // listener$.destroy();
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }

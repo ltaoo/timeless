@@ -3,7 +3,7 @@ import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 function noop() {}
 
 export function ListenerManager(
-  fns?: (DerivedRef<any> | Ref<any> | (() => void))[],
+  fns?: (DerivedRef<any> | Ref<any> | any | (() => void))[],
 ) {
   const cleanups: (() => void)[] = [];
 
@@ -12,29 +12,29 @@ export function ListenerManager(
       const item = fns[i];
       if (isRef(item)) {
         cleanups.push(item.destroy);
-      } else if (item) {
+      } else if (typeof item === "function") {
         cleanups.push(item);
       }
     }
   }
 
   const methods = {
-    add(clean?: void | (() => void) | DerivedRef<any> | Ref<any>) {
+    add(clean?: void | (() => void) | DerivedRef<any> | Ref<any> | any) {
       if (clean) {
         if (isRef(clean)) {
           cleanups.push(clean.destroy);
-        } else {
+        } else if (typeof clean === "function") {
           cleanups.push(clean);
         }
       }
       return clean || noop;
     },
-    append(arr: (Ref<any> | DerivedRef<any> | void | (() => void))[]) {
+    append(arr: (Ref<any> | DerivedRef<any> | any | void | (() => void))[]) {
       for (const item of arr) {
         if (item) {
           if (isRef(item)) {
             cleanups.push(item.destroy);
-          } else {
+          } else if (typeof item === "function") {
             cleanups.push(item);
           }
         }
@@ -52,5 +52,6 @@ export function ListenerManager(
     append: methods.append,
     clean: methods.clean,
     clear: methods.clean,
+    destroy: methods.clean,
   };
 }

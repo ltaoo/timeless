@@ -15,7 +15,7 @@ export interface NativeText {
   getChildNodes(): any[];
   setContent(value: string | number | null): void;
   setStyle(style: Record<string, string>): void;
-  render(): any;
+  render(elm: TimelessElement): any;
 }
 
 export function NativeText(value?: string | null): NativeText {

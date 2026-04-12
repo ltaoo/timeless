@@ -1,11 +1,12 @@
 import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
-import { MountedEvent } from "@/event";
 import { ViewProps } from "@/content/view";
-import { ListenerManager } from "@/util/listener";
+import { BoxProps } from "@/content/box";
 import { isClassNameRef } from "@/style";
+import { MountedEvent } from "@/event";
+import { ListenerManager } from "@/util/listener";
 
-export interface RadioProps {
+export type RadioProps = BoxProps & {
   id?: string;
   name?: string | DerivedRef<string> | Ref<string>;
   class?: ViewProps["class"];
@@ -22,7 +23,7 @@ export interface RadioProps {
   onMounted?: ViewProps["onMounted"];
   beforeUnmounted?: ViewProps["beforeUnmounted"];
   onUnmounted?: ViewProps["onUnmounted"];
-}
+};
 
 export function Radio(props: RadioProps) {
   const {
@@ -42,7 +43,7 @@ export function Radio(props: RadioProps) {
 
   let $elm: any = null;
 
-  const manager$ = ListenerManager();
+  // const manager$ = ListenerManager();
 
   const methods = {
     listen(type: string, handler: (event: any) => void, options?: any) {

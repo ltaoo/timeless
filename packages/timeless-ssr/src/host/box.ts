@@ -100,6 +100,9 @@ export function SSRBox() {
     isDocumentFragment() {
       return false;
     },
+    get$elm() {
+      return "";
+    },
     setStyle() {},
     setStyleValue() {},
     setStyleSet() {},
@@ -124,7 +127,7 @@ export function SSRBox() {
     getChildren() {
       return [];
     },
-    appendChildren() {},
+    buildChildren() {},
     insertChildren() {},
     removeChildren() {},
     getParent() {

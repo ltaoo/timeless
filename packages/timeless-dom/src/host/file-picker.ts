@@ -21,27 +21,21 @@ export function DOMFilePicker(props: {
   const common$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
+    ...common$.methods,
     t,
     getType() {
       return "input";
     },
+    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },
-    setStyle: common$.methods.setStyle,
-    setStyleValue: common$.methods.setStyleValue,
-    setStyleSet: common$.methods.setStyleSet,
-    setAttribute: common$.methods.setAttribute,
-    removeAttribute: common$.methods.removeAttribute,
-    addEventListener: common$.methods.addEventListener,
-    removeEventListener: common$.methods.removeEventListener,
-    getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
       const $elm = document.createElement("input");
       // $elm.style.backgroundColor = "transparent";
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
-      console.log("[dom]file-picker - render create file-picker");
+      // console.log("[dom]file-picker - render create file-picker");
       $elm.type = "file";
       //       $elm.value = elm.state.value;
       if (elm.state.id) {
@@ -86,11 +80,6 @@ export function DOMFilePicker(props: {
       common$.methods.set$elm($elm);
       common$.methods.setupEventListener(elm.events);
     },
-    getChildren: common$.methods.getChildren,
-    appendChildren: common$.methods.appendChildren,
-    insertChildren: common$.methods.insertChildren,
-    removeChildren: common$.methods.removeChildren,
-    getParent: common$.methods.getParent,
     setValue(value: File) {
       //       $elm.value = value;
     },

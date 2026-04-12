@@ -62,7 +62,7 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
   const unsubscribe = _computed_ref.subscribe({
     onPatch() {
       const r = fn(_computed_ref.value);
-      console.log("[reactive]computed - on patch", raw_value, r);
+      // console.log("[reactive]computed - on patch", r, raw_value === r);
       if (r === raw_value) {
         return;
       }
@@ -70,8 +70,8 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
       notify({ type: "refresh" });
     },
     onChange() {
-      // console.log("computed ref is changed");
       const r = fn(_computed_ref.value);
+      // console.log("[reactive]computed - on change", r, raw_value === r);
       if (r === raw_value) {
         return;
       }

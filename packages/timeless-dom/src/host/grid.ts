@@ -1,6 +1,7 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { DOMView } from "./view";
+import { HostElement } from "./box";
 
 export type DOMGrid = VNodeView<HTMLDivElement> & {
   t: "grid";
@@ -12,12 +13,14 @@ export function DOMGrid(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
 }): DOMGrid {
   const view$ = DOMView(props);
+  const common$ = HostElement({ $elm: null, t: "grid", build: props.build });
 
   return {
     t: "grid",
     getType() {
       return "view";
     },
+    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },

@@ -32,7 +32,6 @@ export function Root(
     {
       ...rest,
       onMounted(event) {
-        // alert('scrollview load');
         const $elm = event.target;
         const { width, height } = $elm.getBoundingClientRect();
         store.setRect({
@@ -41,7 +40,7 @@ export function Root(
         });
         const provide = global_provider?.provide_ui_scroll_view_scroll;
         if (typeof provide === "function") {
-          provide(store, $elm as any);
+          provide(store, $elm.get$elm());
         }
         if (props.onMounted) {
           props.onMounted(event);
@@ -61,7 +60,9 @@ export function Indicator(
   const indicator$ = View(
     {
       ...rest,
-      // "data-scroll-view-indicator": "",
+      dataset: {
+        "scroll-view-indicator": "",
+      },
     },
     children,
   );

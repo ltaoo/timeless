@@ -9,6 +9,7 @@ import {
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { ListenerManager } from "@/util/listener";
+import { VNodeEvent } from "@/vnode/view";
 
 import * as MenuPrimitive from "./menu";
 
@@ -75,7 +76,7 @@ export function Trigger(
   const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
-  const listener$ = ListenerManager();
+  const listener$ = ListenerManager([state_]);
 
   return View(
     {
@@ -90,11 +91,11 @@ export function Trigger(
         const $elm = event.target;
         const nodes = $elm.getChildren();
         const $ref = nodes.find((n) => n.getType() === "view") || $elm;
-        console.log(
-          "[primitive]dropdownmenu - Trigger mounted",
-          nodes,
-          $ref.getBoundingClientRect(),
-        );
+        // console.log(
+        //   "[primitive]dropdownmenu - Trigger mounted",
+        //   nodes,
+        //   $ref.getBoundingClientRect(),
+        // );
         setTimeout(() => {
           props.store.menu.popper.setReference(
             {
@@ -149,25 +150,19 @@ export function Trigger(
           };
 
           // Prevent click from closing the menu in hover mode
-          const handlePointerDown = (e: any) => {
+          const handlePointerDown = (e: VNodeEvent) => {
             e.stopPropagation();
           };
-
           listener$.append([
             $elm.addEventListener("mouseenter", handleMouseEnter),
             $elm.addEventListener("mouseleave", handleMouseLeave),
             $elm.addEventListener("pointerdown", handlePointerDown),
           ]);
-          // return () => {
-          //   host.removeEventListener($elm, "mouseenter", handleMouseEnter);
-          //   host.removeEventListener($elm, "mouseleave", handleMouseLeave);
-          //   host.removeEventListener($elm, "pointerdown", handlePointerDown);
-          // };
         }
         if (props.onMounted) {
           listener$.add(props.onMounted(event));
         }
-        return listener$.clean;
+        // return listener$.destroy;
       },
     },
     children,
@@ -230,8 +225,8 @@ export function Item(
   return MenuPrimitive.Item(props, children);
 }
 
-export function Separator(props: ViewProps, children: ViewChildren) {
-  return MenuPrimitive.Separator(props, children);
+export function Separator(props: ViewProps) {
+  return MenuPrimitive.Separator(props);
 }
 
 export function Arrow(
@@ -265,7 +260,7 @@ export function SubMenuContent(
 ) {
   // const host = getHost();
   // Get the parent DropdownMenuCore from the menu's parent
-  const parentDropdown = (props.store as any).parentDropdown as
+  const parent_dropdown$ = (props.store as any).parentDropdown as
     | DropdownMenuCore
     | undefined;
 
@@ -279,16 +274,16 @@ export function SubMenuContent(
         clearTimeout(props.store.parent_menu.hide_sub_timer);
         props.store.parent_menu.hide_sub_timer = null;
       }
-      if (parentDropdown && parentDropdown.trigger === "hover") {
-        _hoverClearHide(parentDropdown);
+      if (parent_dropdown$ && parent_dropdown$.trigger === "hover") {
+        _hoverClearHide(parent_dropdown$);
       }
       if (props.onMouseEnter) {
         props.onMouseEnter(event);
       }
     },
     onMouseLeave(event: MouseEvent) {
-      if (parentDropdown && parentDropdown.trigger === "hover") {
-        _hoverScheduleHide(parentDropdown);
+      if (parent_dropdown$ && parent_dropdown$.trigger === "hover") {
+        _hoverScheduleHide(parent_dropdown$);
       }
       if (props.onMouseLeave) {
         props.onMouseLeave(event);

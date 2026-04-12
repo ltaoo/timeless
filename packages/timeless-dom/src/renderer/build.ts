@@ -19,66 +19,57 @@ import { DOMLabel } from "@/host/label";
 import { DOMTextarea } from "@/host/textarea";
 import { DOMFilePicker } from "@/host/file-picker";
 import { DOMNumberInput } from "@/host/number-input";
+import { DOMSelect } from "@/host/select";
 
 export function build(elm: TimelessElement): VNodeView<any> {
   if (elm.t === "view") {
     const view$ = DOMView({ build });
     elm.$elm = view$;
-    // view$.render(elm);
     return view$;
   }
   if (elm.t === "text") {
     const text$ = DOMText({ build });
     elm.$elm = text$;
-    // text$.render(elm);
     return text$;
   }
   if (elm.t === "label") {
     const label$ = DOMLabel({ build });
     elm.$elm = label$;
-    // label$.render(elm);
     return label$;
   }
   if (elm.t === "fragment") {
     const fragment$ = DOMFragment({ build });
     elm.$elm = fragment$;
-    // fragment$.render(elm);
     return fragment$;
   }
   if (elm.t === "lazy-view") {
     const lazyView$ = DOMLazyView({ build });
     elm.$elm = lazyView$;
-    // lazyView$.render(elm);
     return lazyView$;
   }
   if (elm.t === "popper") {
     const popper$ = DOMPopper({ build });
     elm.$elm = popper$;
-    // popper$.render(elm);
     return popper$;
   }
   if (elm.t === "icon") {
     const icon$ = DOMIcon({ build });
     elm.$elm = icon$;
-    // icon$.render(elm);
     return icon$;
   }
   if (elm.t === "img") {
     const img$ = DOMImg({ build });
     elm.$elm = img$;
-    // img$.render(elm);
     return img$;
   }
   if (elm.t === "grid") {
     const grid$ = DOMGrid({ build });
     elm.$elm = grid$;
-    // grid$.render(elm);
     return grid$;
   }
   if (elm.t === "input") {
     const input$ = DOMInput({ build });
     elm.$elm = input$;
-    // input$.render(elm);
     return input$;
   }
   if (elm.t === "file-picker") {
@@ -94,57 +85,42 @@ export function build(elm: TimelessElement): VNodeView<any> {
   if (elm.t === "textarea") {
     const textarea$ = DOMTextarea({ build });
     elm.$elm = textarea$;
-    // textarea$.render(elm);
     return textarea$;
   }
   if (elm.t === "checkbox") {
     const checkbox$ = DOMCheckbox({ build });
     elm.$elm = checkbox$;
-    // checkbox$.render(elm);
     return checkbox$;
+  }
+  if (elm.t === "select") {
+    const select$ = DOMSelect({ build });
+    elm.$elm = select$;
+    return select$;
   }
   if (elm.t === "button") {
     const button$ = DOMButton({ build });
     elm.$elm = button$;
-    // button$.render(elm);
     return button$;
   }
   if (elm.t === "portal") {
     const portal$ = DOMPortal({ build });
     elm.$elm = portal$;
-    // portal$.render(elm);
     return portal$;
   }
   if (elm.t === "show") {
     const show$ = DOMShow({ build });
     elm.$elm = show$;
-    // show$.render(elm);
     return show$;
   }
   if (elm.t === "match") {
     const match$ = DOMMatch({ build });
     elm.$elm = match$;
-    // match$.render(elm);
     return match$;
   }
   if (elm.t === "for") {
     const for$ = DOMFor({ build });
     elm.$elm = for$;
-    // for$.render(elm);
     return for$;
   }
-  const view$ = DOMView({ build });
-  // view$.render({
-  //   t: "view",
-  //   $elm: null as any,
-  //   state: {},
-  //   children: [
-  //     {
-  //       t: "text",
-  //       $elm: null as any,
-  //       state: { value: "unkonwn elm" },
-  //     },
-  //   ],
-  // });
-  return view$;
+  return DOMView({ build });
 }

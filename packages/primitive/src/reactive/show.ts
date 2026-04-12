@@ -3,6 +3,10 @@ import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 import { TimelessElement, ViewChildren, isElement } from "@/content/type";
 import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
+import { ListenerManager } from "@/util/listener";
+import { Logger } from "@/util/logger";
+
+const logger = Logger({ prefix: "primitive", scope: "reactive/show" });
 
 type ShowProps = {
   when:
@@ -15,7 +19,7 @@ type ShowProps = {
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
 };
-type ShowState = { value: boolean; children: TimelessElement[] };
+type ShowState = { value: boolean; children: (TimelessElement | null)[] };
 
 export function Show(props: ShowProps) {
   const { when, onMounted, beforeUnmounted, onUnmounted } = props;
@@ -25,6 +29,7 @@ export function Show(props: ShowProps) {
     value: false,
     children: [],
   };
+  const listener$ = ListenerManager([when]);
 
   const methods = {
     normalize_children(children: ViewChildren) {
@@ -36,7 +41,7 @@ export function Show(props: ShowProps) {
     },
     build_children_with_condition(condition: boolean) {
       // console.log("build_children_with_condition", condition);
-      const children: TimelessElement[] = [];
+      const children: (TimelessElement | null)[] = [];
       const next = condition
         ? methods.normalize_children(props.ok())
         : props.else
@@ -57,19 +62,20 @@ export function Show(props: ShowProps) {
             children[i] = Text(String(node));
             return;
           }
+          children[i] = null;
         })();
       }
       // console.log('build children', next.length, children);
       return children;
     },
-    setup_value_subscribe() {
+    subscribe_props() {
       // console.log("[show] - setup_value_subscribe", when);
       if (isRef(when)) {
-        state.value = when.value as boolean;
-        when.subscribe({
+        state.value = !!when.value;
+        const unsubscribe = when.subscribe({
           onChange(value) {
-            // console.log("the when is changed", value, state.value);
             const condition = !!value;
+            logger.log("the when is changed", condition, state.value);
             // 如果条件没有变化，直接返回
             if (condition === state.value) {
               return;
@@ -91,18 +97,20 @@ export function Show(props: ShowProps) {
             } else {
               const target = methods.build_children_with_condition(condition);
               state.children = target;
+              logger.log("before insert children", target.length);
               if ($elm && typeof $elm.insertChildren === "function") {
                 $elm.insertChildren(target);
               }
             }
           },
         });
+        listener$.add(unsubscribe);
       } else {
         state.value = !!when;
       }
     },
   };
-  methods.setup_value_subscribe();
+  methods.subscribe_props();
   state.children = methods.build_children_with_condition(state.value);
 
   return {
@@ -117,34 +125,9 @@ export function Show(props: ShowProps) {
       value: state.value,
     },
     children: state.children,
-    // hydrate(startDom: any, parentDom?: any) {
-    //   const condition = isRef(when) ? !!when.value : !!when;
-    //   state.value = condition;
-    //   // Create anchor if not already created
-    //   if (!$elm) {
-    //     // $elm = safeCreateTextNode("");
-    //   }
-    //   const targetChildren = methods.build_children_with_condition(condition);
-    //   // 调用宿主层方法进行 hydrate
-    //   if (typeof $elm.hydrateContent === "function") {
-    //     return $elm.hydrateContent(
-    //       targetChildren,
-    //       startDom,
-    //       parentDom,
-    //       onMounted,
-    //       (newNodes: any[], newInstances: any[]) => {
-    //         // _current_nodes = newNodes;
-    //         state.children = newInstances;
-    //       },
-    //     );
-    //   }
-
-    //   // 如果宿主不支持，返回 anchor
-    //   return $elm;
-    // },
     onMounted(event: MountedEvent) {
       if (onMounted) {
-        onMounted(event);
+        listener$.add(onMounted(event));
       }
       for (const child of state.children) {
         if (isElement(child) && child.onMounted) {
@@ -168,9 +151,7 @@ export function Show(props: ShowProps) {
       if (onUnmounted) {
         onUnmounted();
       }
-      if ($elm && typeof $elm.removeChildren === "function") {
-        $elm.removeChildren();
-      }
+      // listener$.clean();
       state.children = [];
     },
   };

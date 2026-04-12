@@ -21,6 +21,7 @@ export function DOMLazyView(props: {
     getType() {
       return "view";
     },
+    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return true;
     },
@@ -47,10 +48,13 @@ export function DOMLazyView(props: {
         console.warn("[]-view parent is null");
         return;
       }
-      const $fragment = common$.methods.appendChildren(children);
-      $fragment.appendChild($anchor);
+      const r = common$.methods.buildChildren(children);
+      common$.methods.setchildnode(r.child_nodes);
+      common$.methods.set$childrne(r.child_host_nodes);
+      common$.methods.setchildrenelement(r.child_elements);
+      r.$fragment.appendChild($anchor);
       if ($parent) {
-        $parent.appendChild($fragment);
+        $parent.appendChild(r.$fragment);
       }
       console.log(
         "[timeless-dom]replaceChildren - before handleElementsMounted",
@@ -60,7 +64,7 @@ export function DOMLazyView(props: {
       }, 0);
     },
     getChildren: common$.methods.getChildren,
-    appendChildren: common$.methods.appendChildren,
+    buildChildren: common$.methods.buildChildren,
     insertChildren: common$.methods.insertChildren,
     removeChildren: common$.methods.removeChildren,
     getParent() {

@@ -17,24 +17,15 @@ export function DOMButton(props: {
   const common$ = HostElement({ $elm, t, build: props.build });
 
   return {
+    ...common$.methods,
     t,
     getType() {
       return "button";
     },
-    // get $elm() {
-    //   return $elm;
-    // },
+    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return true;
     },
-    setStyle: common$.methods.setStyle,
-    setStyleValue: common$.methods.setStyleValue,
-    setStyleSet: common$.methods.setStyleSet,
-    setAttribute: common$.methods.setAttribute,
-    removeAttribute: common$.methods.removeAttribute,
-    addEventListener: common$.methods.addEventListener,
-    removeEventListener: common$.methods.removeEventListener,
-    getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
       common$.methods.applyState(elm.state, { initial: true });
       const $fragment = common$.methods.render(elm.children);
@@ -66,13 +57,6 @@ export function DOMButton(props: {
         }
         common$.methods.setchildnode(child_nodes);
       }
-    },
-    getChildren: common$.methods.getChildren,
-    appendChildren: common$.methods.appendChildren,
-    insertChildren: common$.methods.insertChildren,
-    removeChildren: common$.methods.removeChildren,
-    getParent() {
-      return $elm.parentElement;
     },
   };
 }

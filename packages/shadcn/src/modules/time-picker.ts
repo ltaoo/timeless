@@ -73,7 +73,7 @@ export function TimePicker(
   function scroll_to_index(view$: ScrollViewCore, index: number) {
     const safeIndex = index >= 0 ? index : 0;
     const top = Math.max(0, (safeIndex - scroll_padding_items) * item_height);
-    view$.scrollTo({ top });
+    view$.setScrollTop(top);
   }
 
   return TimePickerPrimitive.Root({ store }, [
@@ -143,19 +143,6 @@ export function TimePicker(
           "cn-menu-target cn-menu-translucent z-50 w-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
       [
-        View(
-          {
-            as: "style",
-          },
-          [
-            `
-            .overlay-scrollbar { scrollbar-width: none; }
-            .overlay-scrollbar::-webkit-scrollbar { width: 0; height: 0; }
-            .overlay-scrollbar::-webkit-scrollbar-thumb { background: transparent; }
-            .overlay-scrollbar::-webkit-scrollbar-track { background: transparent; }
-            `,
-          ],
-        ),
         View({ class: "flex flex-col" }, [
           View(
             {

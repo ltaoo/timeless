@@ -134,7 +134,8 @@ export function viewStyleToCssText(style: ViewStyleInput) {
 export type ClassNameRef = {
   __cn_ref: true;
   value: string[];
-  subscribe(ctx: Subscriber): void;
+  subscribe(ctx: Subscriber<string[]>): () => void;
+  destroy(): void;
   as(v: string): void;
   del(v: string): void;
   add(v: string): void;
@@ -162,8 +163,9 @@ export function classNames(
     | ClassNameRef
     | undefined
   )[] = [];
-  // const manualAdds = new Set<string>();
-  const _deps: Subscriber[] = [];
+  const _deps: Subscriber<string[]>[] = [];
+  const unsubscribe_fns: (() => void)[] = [];
+
   function notify(action: { type: string }) {
     // console.log("cn notify", action, _deps);
     for (let i = 0; i < _deps.length; i += 1) {
@@ -240,20 +242,22 @@ export function classNames(
     }
     if (isClassNameRef(item)) {
       sources.push(item);
-      item.subscribe({
+      const unsubscribe = item.subscribe({
         onChange() {
           recompute();
         },
       });
+      unsubscribe_fns.push(unsubscribe);
       return;
     }
     if (isRef(item)) {
       sources.push(item as Ref<string>);
-      item.subscribe({
+      const unsubscribe = item.subscribe({
         onChange() {
           recompute();
         },
       });
+      unsubscribe_fns.push(unsubscribe);
     }
   }
   if (Array.isArray(items)) {
@@ -264,8 +268,14 @@ export function classNames(
   recompute();
   return {
     __cn_ref: true as const,
-    subscribe(ctx: Subscriber) {
+    subscribe(ctx: Subscriber<string[]>) {
       _deps.push(ctx);
+      return function () {
+        _deps.splice(_deps.indexOf(ctx), 1);
+      };
+    },
+    destroy() {
+      unsubscribe_fns.forEach((v) => v());
     },
     as(v: string) {
       return;
@@ -346,7 +356,7 @@ export type StyleObject = Record<string, any>;
 export interface StyleRef {
   __style_ref: true;
   value: StyleObject;
-  subscribe(ctx: Subscriber): void;
+  subscribe(ctx: Subscriber<StyleObject>): () => void;
   toString(): string;
 }
 
@@ -370,7 +380,7 @@ function styleObjectToCssText(obj: StyleObject): string {
   return parts.join("; ");
 }
 
-function parseCssDeclarations(cssText: string, target: StyleObject) {
+function parse_css_declarations(cssText: string, target: StyleObject) {
   const declarations = cssText.split(";").filter(Boolean);
   for (const decl of declarations) {
     const colonIndex = decl.indexOf(":");
@@ -400,7 +410,8 @@ export function styleNames(
     | StyleRef
     | undefined
   )[] = [];
-  const _deps: Subscriber[] = [];
+  const _deps: Subscriber<StyleObject>[] = [];
+  const unsubscribe_fns: (() => void)[] = [];
 
   function notify() {
     const styleObj = compute_style();
@@ -422,11 +433,11 @@ export function styleNames(
       }
 
       if (typeof source === "string") {
-        parseCssDeclarations(source, result);
+        parse_css_declarations(source, result);
       } else if (isRef(source)) {
         const val = source.value;
         if (typeof val === "string") {
-          parseCssDeclarations(val, result);
+          parse_css_declarations(val, result);
         } else if (isStyleRef(val)) {
           Object.assign(result, val.value);
         } else if (val && typeof val === "object") {
@@ -455,12 +466,11 @@ export function styleNames(
     return result;
   }
 
-  function addSourceFromItem(
+  function add_source_from_item(
     item:
       | ViewStyleProperties
-      | Ref<StyleRef | ViewStyleProperties | undefined>
+      | Ref<StyleRef | ViewStyleProperties>
       | StyleRef
-      | undefined
       | null,
   ) {
     if (!item) {
@@ -472,11 +482,12 @@ export function styleNames(
       Object.keys(obj).forEach((k) => {
         const vv = (obj as any)[k];
         if (isRef(vv)) {
-          (vv as any).subscribe({
+          const unsubscribe = vv.subscribe({
             onChange() {
               notify();
             },
           });
+          unsubscribe_fns.push(unsubscribe);
         }
       });
       sources.push(obj);
@@ -484,21 +495,22 @@ export function styleNames(
     }
     if (isStyleRef(item)) {
       sources.push(item);
-      item.subscribe({
+      const unsubscribe = item.subscribe({
         onChange() {
           notify();
         },
       });
+      unsubscribe_fns.push(unsubscribe);
       return;
     }
     if (isRef(item)) {
-      // @ts-ignore
       sources.push(item);
-      item.subscribe({
+      const unsubscribe = item.subscribe({
         onChange() {
           notify();
         },
       });
+      unsubscribe_fns.push(unsubscribe);
     }
   }
 
@@ -507,7 +519,7 @@ export function styleNames(
       const item = items[i];
       if (item) {
         // @ts-ignore
-        addSourceFromItem(item);
+        add_source_from_item(item);
       }
     }
   }
@@ -517,6 +529,19 @@ export function styleNames(
     get value() {
       return compute_style();
     },
+    destroy() {
+      for (const unsubscribe of unsubscribe_fns) {
+        unsubscribe();
+      }
+      _deps.length = 0;
+      unsubscribe_fns.length = 0;
+    },
+    subscribe(ctx: Subscriber<StyleObject>) {
+      _deps.push(ctx);
+      return function () {
+        _deps.splice(_deps.indexOf(ctx), 1);
+      };
+    },
     isSame(v: any) {
       // return v === this.value;
       return false;
@@ -524,12 +549,6 @@ export function styleNames(
     isStrictEqual(v: any) {
       // return v === this.value;
       return false;
-    },
-    destroy() {
-      notify();
-    },
-    subscribe(ctx: Subscriber) {
-      _deps.push(ctx);
     },
     // toString() {
     //   return styleObjectToCssText(computeStyle());

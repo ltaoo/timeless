@@ -28,21 +28,15 @@ export function DOMFor(props: {
   const common$ = HostElement({ $elm: $anchor, t, build: props.build });
 
   return {
+    ...common$.methods,
     t,
     getType() {
       return "reactive";
     },
+    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return true;
     },
-    setStyle: common$.methods.setStyle,
-    setStyleValue: common$.methods.setStyleValue,
-    setStyleSet: common$.methods.setStyleSet,
-    setAttribute: common$.methods.setAttribute,
-    removeAttribute: common$.methods.removeAttribute,
-    addEventListener: common$.methods.addEventListener,
-    removeEventListener: common$.methods.removeEventListener,
-    getBoundingClientRect: common$.methods.getBoundingClientRect,
     insert: common$.methods.insert,
     remove(idx: number, count: number) {
       common$.methods.remove(idx, count);
@@ -95,13 +89,6 @@ export function DOMFor(props: {
           common$.methods.setchildnode(child_nodes);
         }
       }
-    },
-    getChildren: common$.methods.getChildren,
-    appendChildren: common$.methods.appendChildren,
-    insertChildren: common$.methods.insertChildren,
-    removeChildren: common$.methods.removeChildren,
-    getParent() {
-      return $anchor.parentElement;
     },
   };
 }

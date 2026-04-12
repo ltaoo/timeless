@@ -1,12 +1,13 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { HostElement } from "./box";
 import { hydrate_node } from "@/renderer/hydrate";
+
+import { HostElement } from "./box";
 
 export type DOMShow = VNodeView<Text> & {
   t: "show";
   render(elm: TimelessElement): DocumentFragment;
-  hydrate(elm: TimelessElement, $dom: Text): void;
+  hydrate(elm: TimelessElement, $elm: Text): void;
 };
 
 export function DOMShow(props: {
@@ -21,6 +22,7 @@ export function DOMShow(props: {
     getType() {
       return "reactive";
     },
+    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },
@@ -78,13 +80,13 @@ export function DOMShow(props: {
       }
     },
     getChildren: common$.methods.getChildren,
-    appendChildren: common$.methods.appendChildren,
+    buildChildren: common$.methods.buildChildren,
     insertChildren(children: TimelessElement[]) {
       common$.methods.removeChildren();
       common$.methods.insertChildren(children);
     },
     removeChildren() {
-      console.log("[]show remove children");
+      // console.log("[]show remove children");
       common$.methods.removeChildren();
     },
     getParent() {

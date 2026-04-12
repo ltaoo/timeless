@@ -12,6 +12,7 @@ import {
   Img,
   Checkbox,
   FilePicker,
+  Select,
   NumberInput,
   DismissableLayer,
   ref,
@@ -22,6 +23,7 @@ import {
   refobj,
   getobj,
   classNames,
+  Label,
 } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
 
@@ -70,6 +72,7 @@ function ApplicationView() {
       completed: false,
     },
   ]);
+  const selected_fruit_ = ref("apple");
   const dissmissable$ = DismissableLayer();
 
   function handleSelectCard(idx) {
@@ -196,7 +199,102 @@ function ApplicationView() {
       },
     },
     [
-      "Hello",
+      Checkbox({
+        id: "fruit",
+        checked: visible_,
+        onChange(event) {
+          console.log("checkbox onChange", event.target.checked);
+          visible_.as(event.target.checked);
+        },
+      }),
+      computed(visible_, (t) => {
+        return t ? "Checked" : "No Checked";
+      }),
+      View({}, [
+        Label(
+          {
+            for: "fruit",
+          },
+          ["Select a fruit"],
+        ),
+        Button(
+          {
+            onClick() {
+              visible_.as(!visible_.value);
+            },
+          },
+          ["click it"],
+        ),
+      ]),
+      // Show({
+      //   when: visible_,
+      //   ok() {
+      //     return [
+      //       For({
+      //         each: todos_,
+      //         render(fruit) {
+      //           return View(
+      //             {
+      //               class: "text-2xl font-medium",
+      //               style: {
+      //                 color: "#fff",
+      //               },
+      //               onMounted() {
+      //                 console.log("[fruit] onMounted");
+      //               },
+      //               onUnmounted() {
+      //                 console.log("[fruit] onUnmounted");
+      //               },
+      //             },
+      //             [fruit.title],
+      //           );
+      //         },
+      //       }),
+      //     ];
+      //   },
+      // }),
+      // View(
+      //   {
+      //     style: computed(visible_, (t) => {
+      //       return t ? { color: "red" } : {};
+      //     }),
+      //     onClick() {
+      //       visible_.as(!visible_.value);
+      //     },
+      //   },
+      //   ["Hello"],
+      // ),
+      // Select(
+      //   {
+      //     options: [
+      //       {
+      //         label: "Apple",
+      //         value: "apple",
+      //       },
+      //       {
+      //         label: "Banana",
+      //         value: "banana",
+      //       },
+      //       {
+      //         label: "Orange",
+      //         value: "orange",
+      //       },
+      //     ],
+      //     value: selected_fruit_,
+      //     placeholder: "Select an app",
+      //   },
+      //   [
+      //     View(
+      //       {
+      //         class: "text-2xl font-medium",
+      //         style: {
+      //           color: "#fff",
+      //         },
+      //       },
+      //       [selected_fruit_.value],
+      //     ),
+      //   ],
+      // ),
       // FilePicker({
       //   class: "w-full",
       // }),

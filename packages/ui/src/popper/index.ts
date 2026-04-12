@@ -397,20 +397,18 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       "[DEBUG-POPPER] MANUAL TEST before computeDomPosition",
       this.unique_id,
       {
-        reference: {
-          x: reference_rect.x,
-          y: reference_rect.y,
-          width: reference_rect.width,
-          height: reference_rect.height,
-        },
-        floating: {
-          x: floating_rect.x,
-          y: floating_rect.y,
-          width: floating_rect.width,
-          height: floating_rect.height,
-        },
-        placement,
+        x: reference_rect.x,
+        y: reference_rect.y,
+        width: reference_rect.width,
+        height: reference_rect.height,
       },
+      {
+        x: floating_rect.x,
+        y: floating_rect.y,
+        width: floating_rect.width,
+        height: floating_rect.height,
+      },
+      placement,
     );
 
     const platform = getDOMPlatform();

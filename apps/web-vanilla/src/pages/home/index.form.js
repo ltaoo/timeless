@@ -88,14 +88,6 @@ export default function FormView() {
           ]),
         ]),
       ]),
-      View(
-        {
-          style: {
-            height: "1320px",
-          },
-        },
-        [],
-      ),
       Section("FileInput", [
         Item("Default", [
           FileInput({
@@ -121,49 +113,49 @@ export default function FormView() {
         ]),
       ]),
       Section("NumberInput", [
-        // Item("Default", [
-        //   NumberInput({
-        //     store: new Timeless.ui.NumberInputCore({
-        //       placeholder: "请输入数字",
-        //     }),
-        //   }),
-        // ]),
-        // Item("With Min/Max", [
-        //   NumberInput({
-        //     store: new Timeless.ui.NumberInputCore({
-        //       placeholder: "0-100",
-        //       min: 0,
-        //       max: 100,
-        //     }),
-        //   }),
-        // ]),
-        // Item("With Step", [
-        //   NumberInput({
-        //     store: new Timeless.ui.NumberInputCore({
-        //       placeholder: "步长为5",
-        //       step: 5,
-        //       defaultValue: 10,
-        //     }),
-        //   }),
-        // ]),
-        // Item("With Precision", [
-        //   NumberInput({
-        //     store: new Timeless.ui.NumberInputCore({
-        //       placeholder: "保留2位小数",
-        //       precision: 2,
-        //       step: 0.01,
-        //       defaultValue: 3.14,
-        //     }),
-        //   }),
-        // ]),
-        // Item("Without Controls", [
-        //   NumberInput({
-        //     store: new Timeless.ui.NumberInputCore({
-        //       placeholder: "无控制按钮",
-        //     }),
-        //     showControls: false,
-        //   }),
-        // ]),
+        Item("Default", [
+          NumberInput({
+            store: new Timeless.ui.NumberInputCore({
+              placeholder: "请输入数字",
+            }),
+          }),
+        ]),
+        Item("With Min/Max", [
+          NumberInput({
+            store: new Timeless.ui.NumberInputCore({
+              placeholder: "0-100",
+              min: 0,
+              max: 100,
+            }),
+          }),
+        ]),
+        Item("With Step", [
+          NumberInput({
+            store: new Timeless.ui.NumberInputCore({
+              placeholder: "步长为5",
+              step: 5,
+              defaultValue: 10,
+            }),
+          }),
+        ]),
+        Item("With Precision", [
+          NumberInput({
+            store: new Timeless.ui.NumberInputCore({
+              placeholder: "保留2位小数",
+              precision: 2,
+              step: 0.01,
+              defaultValue: 3.14,
+            }),
+          }),
+        ]),
+        Item("Without Controls", [
+          NumberInput({
+            store: new Timeless.ui.NumberInputCore({
+              placeholder: "无控制按钮",
+            }),
+            showControls: false,
+          }),
+        ]),
       ]),
       Section("Textarea", [
         Item("Default", [

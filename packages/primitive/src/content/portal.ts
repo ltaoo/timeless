@@ -1,9 +1,9 @@
 import { isRef } from "@timeless/reactive";
 
-import { ViewProps } from "@/content/view";
 import { TimelessElement, ViewChildren, isElement } from "@/content/type";
 import { Text } from "@/content/text";
 import { MountedEvent } from "@/event";
+import { Logger } from "@/util/logger";
 
 type PortalProps = {
   onMounted?: (e: MountedEvent) => void;
@@ -11,20 +11,19 @@ type PortalProps = {
   onUnmounted?: () => void;
 };
 type PortalState = {
-  children: TimelessElement[];
+  children: (TimelessElement | null)[];
 };
+
+const logger = Logger({ prefix: "primitive", scope: "content/portal" });
 
 export function Portal(props: PortalProps, children?: ViewChildren) {
   let $elm: any = null;
-  // let _mounted_children: Node[] = [];
-  // let _mountedChildren: any[] = [];
-  // let _mounted = false;
   const state: PortalState = {
     children: [],
   };
 
   const methods = {
-    setup_children(children?: ViewChildren) {
+    build_children(children?: ViewChildren) {
       if (!children) {
         return;
       }
@@ -37,26 +36,25 @@ export function Portal(props: PortalProps, children?: ViewChildren) {
           //   state.children[i] = r;
           //   return;
           // }
-          if (isRef(child)) {
-            state.children[i] = Text(child);
-            return;
-          }
-          if (typeof child === "string") {
-            state.children[i] = Text(String(child));
-            return;
-          }
           if (isElement(child)) {
             state.children[i] = child;
             return;
           }
-          // state.children[i] = null;
+          if (isRef(child)) {
+            state.children[i] = Text(child);
+            return;
+          }
+          if (child) {
+            state.children[i] = Text(String(child));
+            return;
+          }
+          state.children[i] = null;
         })();
       }
     },
-    cleanup() {},
   };
 
-  methods.setup_children(children);
+  methods.build_children(children);
 
   return {
     t: "portal",
@@ -69,6 +67,7 @@ export function Portal(props: PortalProps, children?: ViewChildren) {
     state,
     children: state.children,
     onMounted(event: MountedEvent) {
+      logger.info("onMounted", state.children.length);
       if (props.onMounted) {
         props.onMounted({ target: event.target });
       }
@@ -79,9 +78,6 @@ export function Portal(props: PortalProps, children?: ViewChildren) {
       }
     },
     onUnmounted() {
-      // _mounted_children = [];
-      // _mountedChildren = [];
-      // _mounted = false;
       if (props.onUnmounted) {
         props.onUnmounted();
       }

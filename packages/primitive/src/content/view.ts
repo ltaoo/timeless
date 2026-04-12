@@ -9,6 +9,7 @@ import {
 } from "@/style/index";
 import { MountedEvent } from "@/event/index";
 import { ListenerManager } from "@/util/listener";
+import { Logger } from "@/util/logger";
 
 import { Text } from "./text";
 import {
@@ -69,6 +70,8 @@ type ViewState = {
   attributes: Record<string, string | number | boolean | undefined>;
   children: (TimelessElement | null)[];
 };
+
+const logger = Logger({ prefix: "primitive", scope: "content/view" });
 
 export function View(props: ViewProps = {}, children?: ViewChildren) {
   const {
@@ -508,76 +511,8 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     state,
     children: state.children,
     events,
-    // hydrate(existingDom: any) {
-    //   if (state.rendered) {
-    //     return $elm;
-    //   }
-    //   state.rendered = true;
-
-    //   $elm = existingDom;
-    //   methods.setup_children();
-    //   methods.setup_value_subscribe();
-
-    //   // Hydrate children recursively
-    //   // let childDom = host.getFirstChild($elm);
-    //   let childDom = $elm.getFirstChild();
-    //   for (let i = 0; i < state.children.length; i += 1) {
-    //     const node = state.children[i];
-    //     if (!node) continue;
-
-    //     if (typeof node === "string" || typeof node === "number") {
-    //       // Skip text nodes
-    //       if (childDom) {
-    //         // childDom = host.getNextSibling(childDom);
-    //         childDom = childDom.getNextSibling();
-    //       }
-    //       continue;
-    //     }
-
-    //     if (isElement(node)) {
-    //       if (typeof (node as any).hydrate === "function") {
-    //         // 传递 $elm 作为 parentDom，即使 childDom 为 null 也要调用 hydrate
-    //         (node as any).hydrate(childDom, $elm);
-    //         if (childDom) {
-    //           // childDom = host.getNextSibling(node.$elm || childDom);
-    //           // if (node.$elm) {
-    //           //   childDom = node.$elm.getNextSibling();
-    //           // } else if (childDom) {
-    //           //   childDom = childDom.getNextSibling();
-    //           // }
-    //         }
-    //       } else if (childDom) {
-    //         // Fallback: just assign $elm and setup
-    //         node.$elm = childDom;
-    //         // node.render();
-    //         // // childDom = host.getNextSibling(childDom);
-    //         // childDom = childDom.getNextSibling();
-    //       } else {
-    //         // childDom 为 null 时，直接 render 并插入
-    //         // const result = node.render();
-    //         // if (result) {
-    //         //   // host.appendChild($elm, result);
-    //         //   $elm.appendChild(result);
-    //         // }
-    //       }
-    //     }
-    //   }
-
-    //   if (onMounted) {
-    //     manager$.push(onMounted({ target: $elm }));
-    //   }
-
-    //   for (let i = 0; i < state.children.length; i += 1) {
-    //     const node = state.children[i];
-    //     if (isElement(node) && node.onMounted) {
-    //       node.onMounted({ target: node.$elm });
-    //     }
-    //   }
-
-    //   return $elm;
-    // },
     onMounted(event: MountedEvent) {
-      // console.log("the view mounted", event.target);
+      logger.log("onMounted", state.children.length);
       state.rendered = true;
       if (onMounted) {
         listener$.push(onMounted(event));
@@ -601,30 +536,11 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
       }
     },
     onUnmounted() {
-      console.log("[primitive]view - onUnmounted", onUnmounted);
+      // console.log("[primitive]view - onUnmounted", onUnmounted);
       if (onUnmounted) {
         onUnmounted();
       }
-      listener$.clean();
-      // for (let i = 0; i < state.children.length; i += 1) {
-      //   const node = state.children[i];
-      //   if (isElement(node)) {
-      //     // 如果是 Portal 组件，调用其 cleanup 方法
-      //     if (node.t === "portal" && typeof node.cleanup === "function") {
-      //       // console.log("[View] calling cleanup on Portal child");
-      //       node.cleanup();
-      //     } else if (node.onUnmounted) {
-      //       // 否则调用标准的 onUnmounted
-      //       // console.log("[View] calling onUnmounted on child:", node.t);
-      //       node.onUnmounted();
-      //     }
-      //   }
-      // }
-      // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
-      // host.clearChildren($elm);
-      // $elm.removeChildren();
-      // console.log("[View] onUnmounted completed");
-      // Reset state for potential re-render (e.g., when Show toggles when back to true)
+      listener$.destroy();
       state.rendered = false;
       $elm = null;
     },

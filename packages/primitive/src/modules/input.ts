@@ -29,42 +29,32 @@ export function Input(
 ) {
   const { store } = props;
 
-  let $elm: any = null;
-  let rendered = false;
-
   const value$ = refobj(store.value || "");
   const placeholder$ = ref(store.placeholder || "");
   const disabled$ = ref(store.disabled || false);
 
   const listener$ = ListenerManager();
-
-  listener$.push(
-    store.onStateChange((state) => {
-      value$.as(state.value || "");
-      placeholder$.as(state.placeholder || "");
-      disabled$.as(state.disabled || false);
-    }),
-  );
-
   return NativeInput({
     ...props,
     placeholder: placeholder$,
     disabled: disabled$,
     value: value$,
     onMounted(event) {
-      if (props.onMounted) {
-        props.onMounted(event);
-      }
+      listener$.push(
+        store.onStateChange((state) => {
+          value$.as(state.value || "");
+          placeholder$.as(state.placeholder || "");
+          disabled$.as(state.disabled || false);
+        }),
+      );
       const $elm = event.target;
       if (global_provider) {
-        global_provider.provide_ui_input(store, $elm);
+        global_provider.provide_ui_input(store, $elm.get$elm());
       }
-    },
-    onUnmounted() {
-      if (props.onUnmounted) {
-        props.onUnmounted();
+      if (props.onMounted) {
+        listener$.add(props.onMounted(event));
       }
-      listener$.clean();
+      return listener$.destroy;
     },
     onInput(e) {
       if (e.target) {

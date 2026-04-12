@@ -17,24 +17,18 @@ export function DOMPopper(props: {
   const common$ = HostElement({ $elm, t, build: props.build });
 
   return {
+    ...common$.methods,
     t,
     getType() {
       return "view";
     },
+    get$elm: common$.methods.get$elm,
     get $elm() {
       return $elm;
     },
     isDocumentFragment() {
       return false;
     },
-    setStyle: common$.methods.setStyle,
-    setStyleValue: common$.methods.setStyleValue,
-    setStyleSet: common$.methods.setStyleSet,
-    setAttribute: common$.methods.setAttribute,
-    removeAttribute: common$.methods.removeAttribute,
-    addEventListener: common$.methods.addEventListener,
-    removeEventListener: common$.methods.removeEventListener,
-    getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
       if (elm.state) {
         common$.methods.setStyle({
@@ -56,13 +50,6 @@ export function DOMPopper(props: {
     },
     hydrate(elm: TimelessElement, $dom: HTMLDivElement) {
       // common$.methods.hydrate(elm, $dom);
-    },
-    getChildren: common$.methods.getChildren,
-    appendChildren: common$.methods.appendChildren,
-    insertChildren: common$.methods.insertChildren,
-    removeChildren: common$.methods.removeChildren,
-    getParent() {
-      return $elm.parentElement;
     },
   };
 }

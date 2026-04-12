@@ -170,6 +170,134 @@ export class BaseDomain<Events extends Record<EventType, unknown>> {
   }
 }
 
+export type LogLevel = "info" | "debug" | "warn" | "error";
+
+export interface LoggerProps {
+  prefix?: string;
+  scope?: string;
+  time?: boolean;
+  level?: LogLevel;
+  mode?: "minimal" | "classic" | "verbose";
+  color?: string;
+}
+
+type LogStyle = {
+  bg: string;
+  color: string;
+  borderRadius?: string;
+};
+
+const DEFAULT_STYLES: Record<LogLevel, LogStyle> = {
+  info: { bg: "#5470c6", color: "white" },
+  debug: { bg: "#dfa639", color: "white" },
+  warn: { bg: "#e6a23c", color: "white" },
+  error: { bg: "#f56c6c", color: "white" },
+};
+
+const SCOPE_STYLE: LogStyle = { bg: "#19be6b", color: "white" };
+
+const LOG_COLORS = [
+  "#5470c6",
+  "#73d897",
+  "#e6a23c",
+  "#f56c6c",
+  "#9c60e2",
+  "#37a4c9",
+  "#c45acb",
+];
+
+let _loggerColorIndex = 0;
+
+function getNextLoggerColor(): string {
+  const color = LOG_COLORS[_loggerColorIndex % LOG_COLORS.length];
+  _loggerColorIndex += 1;
+  return color;
+}
+
+function formatTime(): string {
+  const now = new Date();
+  return now.toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function buildLogParts(
+  props: LoggerProps,
+  level: LogLevel,
+  loggerColor: string,
+): string[] {
+  const { prefix = "CORE", scope = "", time = false, mode = "classic" } = props;
+  const levelStyle = DEFAULT_STYLES[level];
+  const parts: string[] = [];
+  const styles: string[] = [];
+
+  if (mode === "verbose") {
+    if (time) {
+      parts.push(`%c[${formatTime()}]%c`);
+      styles.push("color:#909399;", "font-weight:bold;");
+    }
+    parts.push(`%c${level.toUpperCase()}%c`);
+    styles.push(
+      `color:white;background:${levelStyle.bg};border-radius:2px;`,
+      `color:${levelStyle.bg};`,
+    );
+  } else if (mode === "classic") {
+    parts.push(`%c ${prefix} %c ${scope || level.toUpperCase()} %c`);
+    styles.push(
+      `color:white;background:${levelStyle.bg};border-top-left-radius:2px;border-bottom-left-radius:2px;`,
+      `color:white;background:${loggerColor};border-top-right-radius:2px;border-bottom-right-radius:2px;`,
+      `color:${loggerColor};`,
+    );
+  } else {
+    parts.push(`%c${prefix}%c`);
+    styles.push(
+      `color:white;background:${levelStyle.bg};border-radius:2px;`,
+      `color:${levelStyle.color};`,
+    );
+  }
+
+  return [parts.join(" "), ...styles];
+}
+
+export function Logger(props: LoggerProps = {}) {
+  const { scope = "" } = props;
+  let loggerColor = props.color || getNextLoggerColor();
+  const logMethods: Record<LogLevel, (...args: unknown[]) => void> = {
+    info(...args: unknown[]) {
+      console.log(...buildLogParts(props, "info", loggerColor), ...args);
+    },
+    debug(...args: unknown[]) {
+      console.log(...buildLogParts(props, "debug", loggerColor), ...args);
+    },
+    warn(...args: unknown[]) {
+      console.warn(...buildLogParts(props, "warn", loggerColor), ...args);
+    },
+    error(...args: unknown[]) {
+      console.error(...buildLogParts(props, "error", loggerColor), ...args);
+    },
+  };
+
+  const logger = {
+    scope,
+    get color() {
+      return loggerColor;
+    },
+    set color(value: string) {
+      loggerColor = value;
+    },
+    setColor(value: string) {
+      loggerColor = value;
+    },
+    ...logMethods,
+    log: logMethods.info,
+  };
+
+  return logger;
+}
+
 // This can live anywhere in your codebase:
 export function applyMixins(derivedCtor: any, constructors: any[]) {
   constructors.forEach((baseCtor) => {
