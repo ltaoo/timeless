@@ -1,21 +1,20 @@
 import { ref, computed } from "@timeless/reactive";
 import { ButtonCore } from "@timeless/ui";
 
-import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { Fragment } from "@/content/fragment";
+import { Fragment, FragmentProps } from "@/content/fragment";
 import { Show } from "@/reactive/show";
+import { Button, ButtonProps } from "@/interaction/button";
 
 export function Root(
-  props: ViewProps & { store: ButtonCore },
+  props: ButtonProps & { store: ButtonCore },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick(e) {
         if (rest.onClick) rest.onClick(e);
         store.click();
@@ -25,11 +24,8 @@ export function Root(
   );
 }
 
-export function Loading(
-  props: ViewProps & { store: ButtonCore },
-  children?: ViewChildren,
-) {
-  const { store, ...rest } = props;
+export function Loading(props: { store: ButtonCore }, children?: ViewChildren) {
+  const { store } = props;
 
   const state = ref(store.state);
 
@@ -46,10 +42,10 @@ export function Loading(
   });
 }
 
-export function Prefix(props: ViewProps, children?: ViewChildren) {
+export function Prefix(props: FragmentProps, children?: ViewChildren) {
   return Fragment(props, children);
 }
 
-export function Content(props: ViewProps, children?: ViewChildren) {
+export function Content(props: FragmentProps, children?: ViewChildren) {
   return Fragment(props, children);
 }

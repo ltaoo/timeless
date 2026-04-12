@@ -6,6 +6,7 @@ import { ViewChildren, TimelessElement } from "@/content/type";
 import { Portal as NativePortal } from "@/content/portal";
 import { Fragment } from "@/content/fragment";
 import { For } from "@/reactive/for";
+import { Button, ButtonProps } from "@/interaction/button";
 import { classNames } from "@/style/index";
 
 import * as PopperPrimitive from "./popper";
@@ -271,15 +272,14 @@ export function CalendarHeader(
 }
 
 export function CalendarPrevButton(
-  props: ViewProps & { store: DatePickerCore },
+  props: ButtonProps & { store: DatePickerCore },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.$calendar.prevMonth();
       },
@@ -289,15 +289,14 @@ export function CalendarPrevButton(
 }
 
 export function CalendarNextButton(
-  props: ViewProps & { store: DatePickerCore },
+  props: ButtonProps & { store: DatePickerCore },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.$calendar.nextMonth();
       },
@@ -379,7 +378,7 @@ export function CalendarGridBody(
 }
 
 export function CalendarCell(
-  props: ViewProps & {
+  props: ButtonProps & {
     store: DatePickerCore;
     value: Date;
     isToday?: boolean;
@@ -390,13 +389,14 @@ export function CalendarCell(
 ) {
   const { store, value, isToday, isPrevMonth, isNextMonth, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
-      // "data-today": isToday ? "" : undefined,
-      // "data-prev-month": isPrevMonth ? "" : undefined,
-      // "data-next-month": isNextMonth ? "" : undefined,
+      dataset: {
+        today: isToday ? "" : undefined,
+        "prev-month": isPrevMonth ? "" : undefined,
+        "next-month": isNextMonth ? "" : undefined,
+      },
       onClick() {
         store.$calendar.selectDay(value);
         store.$presence.hide();

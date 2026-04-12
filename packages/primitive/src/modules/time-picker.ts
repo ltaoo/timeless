@@ -281,7 +281,7 @@ export function HourColumn(
 }
 
 export function HourItem(
-  props: ViewProps & {
+  props: ButtonProps & {
     store: TimePickerCore;
     value: number;
   },
@@ -289,10 +289,9 @@ export function HourItem(
 ) {
   const { store, value, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.selectHour(value);
       },
@@ -333,7 +332,7 @@ export function MinuteColumn(
 }
 
 export function MinuteItem(
-  props: ViewProps & {
+  props: ButtonProps & {
     store: TimePickerCore;
     value: number;
   },
@@ -341,10 +340,9 @@ export function MinuteItem(
 ) {
   const { store, value, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.selectMinute(value);
       },
@@ -405,15 +403,14 @@ export function SecondItem(
 }
 
 export function ConfirmButton(
-  props: ViewProps & { store: TimePickerCore },
+  props: ButtonProps & { store: TimePickerCore },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.confirm();
       },
@@ -423,15 +420,14 @@ export function ConfirmButton(
 }
 
 export function ClearButton(
-  props: ViewProps & { store: TimePickerCore },
+  props: ButtonProps & { store: TimePickerCore },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.clear();
         store.$presence.hide();

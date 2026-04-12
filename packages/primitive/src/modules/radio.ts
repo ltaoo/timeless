@@ -7,6 +7,7 @@ import { Show } from "@/reactive/show";
 // import { InputProps } from "@/input/input";
 import { Fragment } from "@/content/fragment";
 import { Radio, RadioProps } from "@/input/radio";
+import { Button, ButtonProps } from "@/interaction/button";
 
 export function Root(
   props: ViewProps & { store: RadioCore },
@@ -16,7 +17,7 @@ export function Root(
 }
 
 export function Box(
-  props: ViewProps & { store: RadioCore; id?: string },
+  props: ButtonProps & { store: RadioCore; id?: string },
   children?: ViewChildren,
 ) {
   const { store, id, ...rest } = props;
@@ -24,13 +25,12 @@ export function Box(
   const state = ref(store.state);
   const events: any[] = [];
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       dataset: {
-        // checked: computed(state, (d) => (d.checked ? "" : undefined)),
-        // disabled: computed(state, (d) => (d.disabled ? "" : undefined)),
+        checked: computed(state, (d) => (d.checked ? "" : undefined)),
+        disabled: computed(state, (d) => (d.disabled ? "" : undefined)),
       },
       onClick(e) {
         if (rest.onClick) {

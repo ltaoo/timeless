@@ -193,15 +193,20 @@ export default function OverlayView() {
       //   ],
       // ),
       View({ class: "space-y-8" }, [
-        View({ class: "flex items-center gap-2" }, [
-          Checkbox({
-            id: "checkbox_with_label1",
-            store: new Timeless.ui.CheckboxCore({}),
-          }),
-          Label({ for: "checkbox_with_label1", class: "text-sm" }, [
-            "Accept terms and conditions",
-          ]),
-        ]),
+        DateTimePicker({
+          date: Timeless.ui.DatePickerCore({ today: new Date() }),
+          time: Timeless.ui.TimePickerCore({}),
+          placeholder: "选择日期时间",
+        }),
+        // View({ class: "flex items-center gap-2" }, [
+        //   Checkbox({
+        //     id: "checkbox_with_label1",
+        //     store: new Timeless.ui.CheckboxCore({}),
+        //   }),
+        //   Label({ for: "checkbox_with_label1", class: "text-sm" }, [
+        //     "Accept terms and conditions",
+        //   ]),
+        // ]),
         // Select({
         //   class: "w-[120px]",
         //   store: new Timeless.ui.SelectCore({

@@ -2,6 +2,7 @@ import { TabHeaderCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
+import { Button, ButtonProps } from "@/interaction/button";
 
 export function Root(
   props: ViewProps & { store: TabHeaderCore<any> },
@@ -20,7 +21,7 @@ export function List(
 }
 
 export function Tab(
-  props: ViewProps & {
+  props: ButtonProps & {
     store: TabHeaderCore<any>;
     value: string;
     index: number;
@@ -29,9 +30,8 @@ export function Tab(
 ) {
   const { store, value, index, ...rest } = props;
 
-  return View(
+  return Button(
     {
-      as: "button",
       ...rest,
       onMounted(event) {
         const $el = event.target;

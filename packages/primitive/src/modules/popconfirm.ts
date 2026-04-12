@@ -4,6 +4,7 @@ import { PopconfirmCore } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
+import { Button, ButtonProps } from "@/interaction/button";
 import { Portal as NativePortal } from "@/content/portal";
 
 import * as PopperPrimitive from "./popper";
@@ -104,13 +105,12 @@ export function Portal(
 }
 
 export function Confirm(
-  props: ViewProps & { store: PopconfirmCore },
+  props: ButtonProps & { store: PopconfirmCore },
   children?: ViewChildren,
 ) {
-  return View(
+  return Button(
     {
       ...props,
-      as: "button",
       onClick() {
         props.store.confirm();
       },
@@ -120,13 +120,12 @@ export function Confirm(
 }
 
 export function Cancel(
-  props: ViewProps & { store: PopconfirmCore },
+  props: ButtonProps & { store: PopconfirmCore },
   children?: ViewChildren,
 ) {
-  return View(
+  return Button(
     {
       ...props,
-      as: "button",
       onClick() {
         props.store.cancel();
       },
@@ -136,13 +135,12 @@ export function Cancel(
 }
 
 export function Close(
-  props: ViewProps & { store: PopconfirmCore },
+  props: ButtonProps & { store: PopconfirmCore },
   children?: ViewChildren,
 ) {
-  return View(
+  return Button(
     {
       ...props,
-      as: "button",
       onClick() {
         props.store.hide();
       },

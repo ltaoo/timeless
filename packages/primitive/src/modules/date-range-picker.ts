@@ -6,6 +6,7 @@ import { ViewChildren } from "@/content/type";
 import { Fragment } from "@/content/fragment";
 import { Portal as NativePortal } from "@/content/portal";
 import { For } from "@/reactive/for";
+import { Button, ButtonProps } from "@/interaction/button";
 import { classNames } from "@/style/index";
 
 import * as PopperPrimitive from "./popper";
@@ -287,15 +288,14 @@ export function RightCalendarHeader(
 
 // 左侧上一月按钮
 export function LeftPrevButton(
-  props: ViewProps & { store: DateRangePickerCore },
+  props: ButtonProps & { store: DateRangePickerCore },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.$calendar.leftPrevMonth();
       },
@@ -306,15 +306,14 @@ export function LeftPrevButton(
 
 // 左侧下一月按钮
 export function LeftNextButton(
-  props: ViewProps & { store: DateRangePickerCore },
+  props: ButtonProps & { store: DateRangePickerCore },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.$calendar.leftNextMonth();
       },
@@ -325,15 +324,14 @@ export function LeftNextButton(
 
 // 右侧上一月按钮
 export function RightPrevButton(
-  props: ViewProps & { store: DateRangePickerCore },
+  props: ButtonProps & { store: DateRangePickerCore },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.$calendar.rightPrevMonth();
       },
@@ -344,15 +342,14 @@ export function RightPrevButton(
 
 // 右侧下一月按钮
 export function RightNextButton(
-  props: ViewProps & { store: DateRangePickerCore },
+  props: ButtonProps & { store: DateRangePickerCore },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.$calendar.rightNextMonth();
       },
@@ -473,7 +470,7 @@ export function RightCalendarGridBody(
 }
 
 export function CalendarCell(
-  props: ViewProps & {
+  props: ButtonProps & {
     store: DateRangePickerCore;
     value: Date;
     isToday?: boolean;
@@ -484,10 +481,9 @@ export function CalendarCell(
 ) {
   const { store, value, isToday, isPrevMonth, isNextMonth, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       onClick() {
         store.$calendar.selectDay(value);
         // 只有当范围选择完成后才关闭

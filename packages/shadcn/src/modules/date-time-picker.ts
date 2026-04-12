@@ -1,4 +1,5 @@
 import {
+  Button,
   classNames,
   combine,
   computed,
@@ -36,6 +37,8 @@ export function DateTimePicker(
   const time_state_ = refobj(time$.state);
   const presence_ = refobj(date$.$presence.state);
 
+  console.log("------- time$.init", time$.state.tempHour);
+
   date$.onStateChange((v) => {
     date_state_.as(v);
   });
@@ -49,6 +52,7 @@ export function DateTimePicker(
     }
   });
   time$.onStateChange((v) => {
+    console.log("------- time$.onStateChange", v);
     time_state_.as(v);
   });
 
@@ -135,7 +139,7 @@ export function DateTimePicker(
   function scroll_to_index(view$: ScrollViewCore, index: number) {
     const safeIndex = index >= 0 ? index : 0;
     const top = Math.max(0, (safeIndex - scroll_padding_items) * item_height);
-    view$.scrollTo({ top });
+    view$.setScrollTop(top);
   }
 
   return DatePickerPrimitive.Root({ store: date$ }, [
@@ -310,11 +314,11 @@ export function DateTimePicker(
                       style: { "line-height": "28px" },
                     },
                     [
-                      combine({ time: time_state_ }, (t) => {
+                      computed(time_state_, (t) => {
                         return `${format_temp_time({
-                          t_hour: t.time.tempHour,
-                          t_minute: t.time.tempMinute,
-                          t_second: t.time.tempSecond,
+                          t_hour: t.tempHour,
+                          t_minute: t.tempMinute,
+                          t_second: t.tempSecond,
                         })}`;
                       }),
                     ],
@@ -357,8 +361,8 @@ export function DateTimePicker(
                               class: classNames([
                                 "w-full h-8 text-sm rounded-md transition-colors outline-hidden",
                                 computed(time_state_, (s) => {
-                                  const isSelected = s.tempHour === hour;
-                                  if (isSelected) {
+                                  const is_selected = s.tempHour === hour;
+                                  if (is_selected) {
                                     return `bg-primary text-primary-foreground`;
                                   }
                                   return `hover:bg-accent hover:text-accent-foreground`;
@@ -401,15 +405,16 @@ export function DateTimePicker(
                             {
                               store: time$,
                               value: minute,
-                              class: computed(time_state_, (s) => {
-                                const isSelected = s.tempMinute === minute;
-                                const baseClass =
-                                  "w-full h-8 text-sm rounded-md transition-colors outline-hidden";
-                                if (isSelected) {
-                                  return `${baseClass} bg-primary text-primary-foreground`;
-                                }
-                                return `${baseClass} hover:bg-accent hover:text-accent-foreground`;
-                              }),
+                              class: classNames([
+                                "w-full h-8 text-sm rounded-md transition-colors outline-hidden",
+                                computed(time_state_, (s) => {
+                                  const is_selected = s.tempMinute === minute;
+                                  if (is_selected) {
+                                    return `bg-primary text-primary-foreground`;
+                                  }
+                                  return `hover:bg-accent hover:text-accent-foreground`;
+                                }),
+                              ]),
                             },
                             [String(minute).padStart(2, "0")],
                           );
@@ -452,9 +457,9 @@ export function DateTimePicker(
                                     class: classNames([
                                       "w-full h-8 text-sm rounded-md transition-colors outline-hidden",
                                       computed(time_state_, (s) => {
-                                        const isSelected =
+                                        const is_selected =
                                           s.tempSecond === second;
-                                        if (isSelected) {
+                                        if (is_selected) {
                                           return `bg-primary text-primary-foreground`;
                                         }
                                         return `hover:bg-accent hover:text-accent-foreground`;
@@ -475,9 +480,8 @@ export function DateTimePicker(
             ]),
           ]),
           View({ class: "flex justify-end gap-2 border-t border-border p-3" }, [
-            View(
+            Button(
               {
-                as: "button",
                 class:
                   "px-3 py-1 text-sm rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors",
                 onClick() {
@@ -486,9 +490,8 @@ export function DateTimePicker(
               },
               ["清除"],
             ),
-            View(
+            Button(
               {
-                as: "button",
                 class:
                   "px-3 py-1 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors",
                 onClick() {

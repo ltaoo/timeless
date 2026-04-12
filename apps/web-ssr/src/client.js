@@ -53,7 +53,6 @@
         View({ style: { marginTop: "12px", display: "flex", gap: "8px" } }, [
           Button(
             {
-              as: "button",
               style: {
                 padding: "6px 12px",
                 border: "1px solid #ccc",
@@ -70,7 +69,6 @@
           ),
           Button(
             {
-              as: "button",
               style: {
                 padding: "6px 12px",
                 border: "1px solid #ccc",

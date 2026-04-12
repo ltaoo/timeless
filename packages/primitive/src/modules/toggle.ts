@@ -3,9 +3,10 @@ import { SwitchCore } from "@timeless/ui";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Checkbox } from "@/input/checkbox";
+import { Button, ButtonProps } from "@/interaction/button";
 
 export function Root(
-  props: ViewProps & {
+  props: ButtonProps & {
     store: SwitchCore;
     id?: string;
   },
@@ -13,10 +14,9 @@ export function Root(
 ) {
   const { store, id, ...rest } = props;
 
-  return View(
+  return Button(
     {
       ...rest,
-      as: "button",
       attributes: {
         role: "switch",
         // "aria-checked": computed(state() => store.state.checked),

@@ -3,7 +3,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { View, For, isBrowser, renderToString } from "@timeless/timeless";
+import {
+  View,
+  For,
+  isBrowser,
+  renderToString,
+  Button,
+} from "@timeless/timeless";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../../..");
@@ -24,9 +30,9 @@ function App() {
     View({ as: "div", class: "counter-section" }, [
       View({ as: "h2" }, ["Counter"]),
       View({ as: "div", class: "counter" }, [
-        View({ as: "button" }, ["-"]),
+        Button({}, ["-"]),
         View({ as: "span" }, ["0"]),
-        View({ as: "button" }, ["+"]),
+        Button({}, ["+"]),
       ]),
     ]),
     View({ as: "div", class: "list-section" }, [
@@ -43,9 +49,8 @@ function App() {
           style: { marginTop: "12px", display: "flex", gap: "8px" },
         },
         [
-          View(
+          Button(
             {
-              as: "button",
               style: {
                 padding: "6px 12px",
                 border: "1px solid #ccc",
@@ -55,9 +60,8 @@ function App() {
             },
             ["Add Fruit"],
           ),
-          View(
+          Button(
             {
-              as: "button",
               style: {
                 padding: "6px 12px",
                 border: "1px solid #ccc",
