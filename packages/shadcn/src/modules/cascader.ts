@@ -197,7 +197,7 @@ export function Cascader(
                   return View(
                     {
                       class:
-                        "cascader__panel min-w-36 max-h-72 overflow-auto p-1 border-r border-border last:border-r-0",
+                        "cascader__panel min-w-36 max-h-72 overflow-auto p-1 border-r border-border last:border-r-transparent",
                     },
                     [
                       For({

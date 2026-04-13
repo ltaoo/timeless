@@ -39,7 +39,7 @@ export function NumberInput(props: NumberInputProps = {}) {
   const events = box$.events;
 
   const methods = {
-    subscribe_value() {
+    subscribe_props() {
       box$.methods.subscribe_props();
       const value = props.value;
       if (value !== undefined) {
@@ -49,6 +49,9 @@ export function NumberInput(props: NumberInputProps = {}) {
             value.subscribe({
               onChange(v) {
                 state.value = v === null ? "0" : String(v);
+                if ($elm && typeof $elm.setValue === "function") {
+                  $elm.setValue(v);
+                }
               },
             }),
           );
@@ -104,7 +107,7 @@ export function NumberInput(props: NumberInputProps = {}) {
     },
   };
 
-  methods.subscribe_value();
+  methods.subscribe_props();
 
   return {
     t: "number-input",

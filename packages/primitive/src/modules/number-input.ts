@@ -1,4 +1,4 @@
-import { ref, refobj, isRef, computed, combine } from "@timeless/reactive";
+import { ref, combine } from "@timeless/reactive";
 import { NumberInputCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
@@ -23,19 +23,21 @@ export function Input(props: ViewProps & { store: NumberInputCore }) {
   const placeholder_ = ref(store.placeholder || "");
   const disabled_ = ref(store.disabled || false);
 
+  listener$.add(
+    store.onStateChange((state) => {
+      console.log("the value is changed", state.value);
+      value_.as(state.value);
+      placeholder_.as(state.placeholder || "");
+      disabled_.as(state.disabled || false);
+    }),
+  );
+
   return NativeNumberInput({
     ...rest,
     value: value_,
     placeholder: placeholder_,
     disabled: disabled_,
     onMounted(event) {
-      listener$.add(
-        store.onStateChange((state) => {
-          value_.as(state.value);
-          placeholder_.as(state.placeholder || "");
-          disabled_.as(state.disabled || false);
-        }),
-      );
       if (rest.onMounted) {
         listener$.add(rest.onMounted(event));
       }
@@ -85,20 +87,28 @@ export function IncreaseButton(
             disabled_.as(store.disabled || false);
           }),
         );
-        const handleMouseDown = (e: VNodeEvent) => {
-          e.preventDefault();
-        };
-        const handleClick = (e: VNodeEvent) => {
-          e.preventDefault();
-          e.stopPropagation();
-          store.increase();
-        };
-        listener$.add($e.addEventListener("mousedown", handleMouseDown));
-        listener$.add($e.addEventListener("click", handleClick));
+        // const handleMouseDown = (e: VNodeEvent) => {
+        //   e.preventDefault();
+        // };
+        // const handleClick = (e: VNodeEvent) => {
+        //   e.preventDefault();
+        //   e.stopPropagation();
+        //   store.increase();
+        // };
+        // listener$.add($e.addEventListener("mousedown", handleMouseDown));
+        // listener$.add($e.addEventListener("click", handleClick));
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
         return listener$.clean;
+      },
+      onMouseDown(e) {
+        e.preventDefault();
+      },
+      onClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.increase();
       },
     },
     children,

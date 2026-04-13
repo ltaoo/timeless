@@ -4,11 +4,11 @@ import { HostElement } from "./box";
 
 export type DOMNumberInput = VNodeView<HTMLInputElement> & {
   t: "number-input";
+  render(elm: TimelessElement): HTMLInputElement;
+  hydrate(elm: TimelessElement, $dom: any): void;
   setValue(value: string): void;
   focus(): void;
   blur(): void;
-  render(elm: TimelessElement): HTMLInputElement;
-  hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMNumberInput(props: {
@@ -18,15 +18,15 @@ export function DOMNumberInput(props: {
   // const canvas = props.canvas;
   // const $elm = canvas.createElement("div");
   const t = "number-input";
-  const common$ = HostElement({ $elm: null, t, build: props.build });
+  const box$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
-    ...common$.methods,
+    ...box$.methods,
     t,
     getType() {
       return "input";
     },
-    get$elm: common$.methods.get$elm,
+    get$elm: box$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },
@@ -51,9 +51,9 @@ export function DOMNumberInput(props: {
       if (elm.state.disabled !== undefined) {
         $elm.disabled = elm.state.disabled;
       }
-      common$.methods.set$elm($elm);
-      common$.methods.applyState(elm.state, { initial: true });
-      common$.methods.setupEventListener(elm.events);
+      box$.methods.set$elm($elm);
+      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.setupEventListener(elm.events);
       const events = elm.events;
       if (events) {
         if (events.onInput) {
@@ -75,17 +75,26 @@ export function DOMNumberInput(props: {
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLInputElement) {
-      common$.methods.set$elm($elm);
-      common$.methods.setupEventListener(elm.events);
+      box$.methods.set$elm($elm);
+      box$.methods.setupEventListener(elm.events);
     },
     setValue(value: string) {
-      // $elm.value = value;
+      const $elm = box$.methods.get$elm();
+      if ($elm) {
+        $elm.value = value;
+      }
     },
     focus() {
-      // $elm.focus();
+      const $elm = box$.methods.get$elm();
+      if ($elm) {
+        $elm.focus();
+      }
     },
     blur() {
-      // $elm.blur();
+      const $elm = box$.methods.get$elm();
+      if ($elm) {
+        $elm.blur();
+      }
     },
   };
 }
