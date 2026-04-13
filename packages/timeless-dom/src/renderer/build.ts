@@ -15,6 +15,7 @@ import { DOMButton } from "@/host/button";
 import { DOMPortal } from "@/host/portal";
 import { DOMPopper } from "@/host/popper";
 import { DOMCheckbox } from "@/host/checkbox";
+import { DOMRadio } from "@/host/radio";
 import { DOMLabel } from "@/host/label";
 import { DOMTextarea } from "@/host/textarea";
 import { DOMFilePicker } from "@/host/file-picker";
@@ -103,6 +104,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const checkbox$ = DOMCheckbox({ build });
     elm.$elm = checkbox$;
     return checkbox$;
+  }
+  if (elm.t === "radio") {
+    const radio$ = DOMRadio({ build });
+    elm.$elm = radio$;
+    return radio$;
   }
   if (elm.t === "select") {
     const select$ = DOMSelect({ build });

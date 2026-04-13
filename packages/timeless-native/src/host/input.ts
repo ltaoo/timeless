@@ -1,30 +1,18 @@
-import { TimelessElement, ViewStyleProperties } from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-export interface NativeInput {
+import { HostElement, BoxMethods } from "./box";
+
+export type NativeInput = VNodeView<any> & {
   t: "input";
-  $elm: any;
-  isDocumentFragment(): boolean;
-  getChildNodes(): any[];
-  setStyle(style: ViewStyleProperties): void;
-  setStyleValue(key: string, value: string): void;
-  setAttribute(key: string, value: string): void;
-  removeAttribute(key: string): void;
-  addEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ): void;
-  removeEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ): void;
   render(elm: TimelessElement): any;
-}
+};
 
 export function NativeInput(props: {
-  build: (elm: TimelessElement) => any;
+  build: (elm: TimelessElement) => VNodeView<any>;
 }): NativeInput {
+  const t = "input";
+  const box$ = HostElement({ t, $elm: null, build: props.build });
+
   const $elm = {
     type: "input",
     value: "" as string,
@@ -34,54 +22,29 @@ export function NativeInput(props: {
     listeners: {} as Record<string, any>,
   };
 
-  const methods = {
-    setStyle(style: ViewStyleProperties) {
-      const styleObj: Record<string, string> = {};
-      Object.keys(style).forEach((key) => {
-        const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-        const v = style[key as keyof ViewStyleProperties];
-        if (v !== undefined && v !== null) {
-          styleObj[k] = String(v);
-        }
-      });
-      $elm.style = styleObj;
-    },
-    setupEventListener(events: any) {
-      if (events.onInput) {
-        $elm.listeners.input = events.onInput;
-      }
-      if (events.onChange) {
-        $elm.listeners.change = events.onChange;
-      }
-      if (events.onFocus) {
-        $elm.listeners.focus = events.onFocus;
-      }
-      if (events.onBlur) {
-        $elm.listeners.blur = events.onBlur;
-      }
-      if (events.onKeyDown) {
-        $elm.listeners.keydown = events.onKeyDown;
-      }
-    },
-  };
+  const methods: BoxMethods = box$.methods;
 
   return {
-    t: "input",
+    ...methods,
+    t,
     get $elm() {
       return $elm;
+    },
+    getType() {
+      return "input";
     },
     isDocumentFragment() {
       return false;
     },
-    getChildNodes() {
-      return [];
-    },
-    setStyle(style: ViewStyleProperties) {
+    setStyle(style: any) {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
       const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
       $elm.style[k] = value;
+    },
+    setStyleSet(set: string[]) {
+      $elm.attrs.class = set.join(" ");
     },
     setAttribute(key: string, value: string) {
       $elm.attrs[key] = value;
@@ -109,30 +72,54 @@ export function NativeInput(props: {
     ) {
       delete $elm.listeners[type];
     },
+    getBoundingClientRect() {
+      return {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      };
+    },
     render(elm: TimelessElement) {
-      if (elm.state.style) {
-        methods.setStyle(elm.state.style);
-      }
-      if (elm.events) {
-        methods.setupEventListener((elm as any).events);
-      }
-      // Apply input-specific attributes from element props
-      // const elProps = elm.props;
+      methods.set$elm($elm);
+      methods.applyState(elm.state, { initial: true });
+      methods.setupEventListener(elm.events);
       if (elm.state.value !== undefined) {
         $elm.value = String(elm.state.value);
       }
       if (elm.state.placeholder !== undefined) {
         $elm.placeholder = String(elm.state.placeholder);
       }
-      // Ensure input has explicit height so native layout can size it
       if (!$elm.style["height"]) {
         $elm.style["height"] = "28px";
       }
       return $elm;
     },
+    hydrate(elm: TimelessElement, $dom: any) {
+      methods.set$elm($dom);
+      methods.setupEventListener(elm.events);
+    },
+    buildChildren(children: (TimelessElement | null)[]) {
+      return methods.buildChildren(children);
+    },
+    insertChildren(children: (TimelessElement | null)[]) {
+      methods.insertChildren(children);
+    },
+    removeChildren() {
+      methods.removeChildren();
+    },
+    getParent() {
+      return null;
+    },
+    get$elm() {
+      return $elm;
+    },
+    getChildren() {
+      return methods.getChildren();
+    },
   };
-}
-
-export function isNativeInput(value: any): value is NativeInput {
-  return value.t === "input";
 }

@@ -6,6 +6,7 @@ import pc from "picocolors";
 import { dev } from "./commands/dev.js";
 import { build } from "./commands/build.js";
 import { start } from "./commands/start.js";
+import { frontend } from "./commands/frontend.js";
 import { version } from "./commands/version.js";
 import { VERSION } from "./version.js";
 
@@ -31,6 +32,11 @@ cli
   .option("-p, --port <port>", "Server port", { default: 3000 })
   .action(withVersion(start));
 
+cli
+  .command("frontend", "Start frontend dev server with HMR")
+  .option("-p, --port <port>", "Server port", { default: 3000 })
+  .action(withVersion(frontend));
+
 cli.command("version", "Show version number").action(version);
 
 cli.help();
@@ -44,10 +50,11 @@ if (!process.argv.slice(2).length) {
   console.log(`  ${pc.cyan("timeless")} ${pc.green("<command>")} [options]`);
   console.log();
   console.log("  Commands:");
-  console.log(`    ${pc.green("dev")}       Start development server`);
-  console.log(`    ${pc.green("build")}     Build for production`);
-  console.log(`    ${pc.green("start")}     Start production server`);
-  console.log(`    ${pc.green("version")}   Show version number`);
+  console.log(`    ${pc.green("dev")}        Start development server`);
+  console.log(`    ${pc.green("build")}      Build for production`);
+  console.log(`    ${pc.green("start")}      Start production server`);
+  console.log(`    ${pc.green("frontend")}   Start frontend dev server with HMR`);
+  console.log(`    ${pc.green("version")}    Show version number`);
   console.log();
   console.log(`  Run ${pc.cyan("timeless <command> --help")} for more info`);
   console.log();

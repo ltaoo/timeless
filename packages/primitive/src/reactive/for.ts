@@ -544,10 +544,10 @@ export function For<T>(
       //   state.idx_arr[i].destroy();
       // }
       // state.rendered = false;
-      state.items = [];
-      state.wrapped_items = [];
-      state.idx_arr = [];
-      state.children = [];
+      // state.items = [];
+      // state.wrapped_items = [];
+      // state.idx_arr = [];
+      // state.children = [];
     },
   };
 }

@@ -1,19 +1,18 @@
-import { TimelessElement, ViewStyleProperties } from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-export interface NativeImg {
+import { HostElement, BoxMethods } from "./box";
+
+export type NativeImg = VNodeView<any> & {
   t: "img";
-  $elm: any;
-  isDocumentFragment(): boolean;
-  getChildNodes(): any[];
-  setSrc(v: string): void;
-  setStyle(style: ViewStyleProperties): void;
-  setStyleValue(key: string, value: string): void;
   render(elm: TimelessElement): any;
-}
+};
 
 export function NativeImg(props: {
-  build: (elm: TimelessElement) => any;
+  build: (elm: TimelessElement) => VNodeView<any>;
 }): NativeImg {
+  const t = "img";
+  const box$ = HostElement({ t, $elm: null, build: props.build });
+
   const $elm = {
     type: "img",
     src: "" as string,
@@ -22,70 +21,92 @@ export function NativeImg(props: {
     listeners: {} as Record<string, any>,
   };
 
-  const methods = {
-    setSrc(v: string) {
-      $elm.src = v;
-    },
-    setStyle(style: ViewStyleProperties) {
-      const styleObj: Record<string, string> = {};
-      Object.keys(style).forEach((key) => {
-        const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-        const v = style[key as keyof ViewStyleProperties];
-        if (v !== undefined && v !== null) {
-          styleObj[k] = String(v);
-        }
-      });
-      $elm.style = styleObj;
-    },
-    setupEventListener(events: any) {
-      if (events.onClick) {
-        $elm.listeners.click = events.onClick;
-      }
-      if (events.onLoad) {
-        $elm.listeners.load = events.onLoad;
-      }
-      if (events.onError) {
-        $elm.listeners.error = events.onError;
-      }
-    },
-  };
+  const methods: BoxMethods = box$.methods;
 
   return {
-    t: "img",
+    ...methods,
+    t,
     get $elm() {
       return $elm;
+    },
+    getType() {
+      return "view";
     },
     isDocumentFragment() {
       return true;
     },
-    getChildNodes() {
-      return [];
-    },
-    setSrc(v: string) {
-      methods.setSrc(v);
-    },
-    setStyle(style: ViewStyleProperties) {
+    setStyle(style: any) {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
       const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
       $elm.style[k] = value;
     },
+    setStyleSet(set: string[]) {
+      $elm.attrs.class = set.join(" ");
+    },
+    setAttribute(key: string, value: string) {
+      $elm.attrs[key] = value;
+    },
+    removeAttribute(key: string) {
+      delete $elm.attrs[key];
+    },
+    addEventListener(
+      type: string,
+      handler: (event: any) => void,
+      options?: any,
+    ) {
+      $elm.listeners[type] = handler;
+    },
+    removeEventListener(
+      type: string,
+      handler: (event: any) => void,
+      options?: any,
+    ) {
+      delete $elm.listeners[type];
+    },
+    getBoundingClientRect() {
+      return {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      };
+    },
     render(elm: TimelessElement) {
+      methods.set$elm($elm);
+      methods.applyState(elm.state, { initial: true });
+      methods.setupEventListener(elm.events);
       if (elm.state.value) {
-        methods.setSrc(elm.state.value as string);
-      }
-      if (elm.state.style) {
-        methods.setStyle(elm.state.style);
-      }
-      if (elm.events) {
-        methods.setupEventListener(elm.events);
+        $elm.src = String(elm.state.value);
       }
       return $elm;
     },
+    hydrate(elm: TimelessElement, $dom: any) {
+      methods.set$elm($dom);
+      methods.setupEventListener(elm.events);
+    },
+    buildChildren(children: (TimelessElement | null)[]) {
+      return methods.buildChildren(children);
+    },
+    insertChildren(children: (TimelessElement | null)[]) {
+      methods.insertChildren(children);
+    },
+    removeChildren() {
+      methods.removeChildren();
+    },
+    getParent() {
+      return null;
+    },
+    get$elm() {
+      return $elm;
+    },
+    getChildren() {
+      return methods.getChildren();
+    },
   };
-}
-
-export function isNativeImg(value: any): value is NativeImg {
-  return value.t === "img";
 }

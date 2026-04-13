@@ -1,3 +1,5 @@
 export function lazy(path: string) {
-  return () => import(path).then((m) => m.default);
+  const fn = () => import(path).then((m) => m.default);
+  (fn as any).__hmr_path = path;
+  return fn;
 }

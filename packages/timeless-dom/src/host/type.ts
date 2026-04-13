@@ -11,6 +11,7 @@ import { DOMInput } from "./input";
 import { DOMFilePicker } from "./file-picker";
 import { DOMTextarea } from "./textarea";
 import { DOMCheckbox } from "./checkbox";
+import { DOMRadio } from "./radio";
 import { DOMNumberInput } from "./number-input";
 
 import { DOMButton } from "./button";
@@ -37,6 +38,7 @@ export type DOMHostNode =
   | DOMFilePicker
   | DOMNumberInput
   | DOMCheckbox
+  | DOMRadio
   | DOMSelect
   | DOMButton
   | DOMPortal

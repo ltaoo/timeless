@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@timeless/dev": "workspace:*",
+    "@timeless/cli": "workspace:*",
     "eslint": "^8.56.0"
   },
   "dependencies": {

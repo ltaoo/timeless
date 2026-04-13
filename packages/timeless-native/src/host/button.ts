@@ -1,25 +1,18 @@
-import {
-  isElement,
-  TimelessElement,
-  ViewStyleProperties,
-} from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-export interface NativeButton {
+import { HostElement, BoxMethods } from "./box";
+
+export type NativeButton = VNodeView<any> & {
   t: "button";
-  $elm: any;
-  isDocumentFragment(): boolean;
-  getChildNodes(): any[];
-  setStyle(style: ViewStyleProperties): void;
-  setStyleValue(key: string, value: string): void;
-  setStyleSet(key: string): void;
-  setAttribute(key: string, value: string): void;
-  removeAttribute(key: string): void;
   render(elm: TimelessElement): any;
-}
+};
 
 export function NativeButton(props: {
-  build: (elm: TimelessElement) => any;
+  build: (elm: TimelessElement) => VNodeView<any>;
 }): NativeButton {
+  const t = "button";
+  const box$ = HostElement({ t, $elm: null, build: props.build });
+
   const $elm = {
     type: "button",
     children: [] as any[],
@@ -28,63 +21,29 @@ export function NativeButton(props: {
     listeners: {} as Record<string, any>,
   };
 
-  const methods = {
-    setStyle(style: ViewStyleProperties) {
-      const styleObj: Record<string, string> = {};
-      Object.keys(style).forEach((key) => {
-        const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-        const v = style[key as keyof ViewStyleProperties];
-        if (v !== undefined && v !== null) {
-          styleObj[k] = String(v);
-        }
-      });
-      $elm.style = styleObj;
-    },
-    setupEventListener(events: any) {
-      if (events.onClick) {
-        $elm.listeners.click = events.onClick;
-      }
-      if (events.onPointerDown) {
-        $elm.listeners.pointerdown = events.onPointerDown;
-      }
-      if (events.onFocus) {
-        $elm.listeners.focus = events.onFocus;
-      }
-      if (events.onBlur) {
-        $elm.listeners.blur = events.onBlur;
-      }
-      if (events.onKeyDown) {
-        $elm.listeners.keydown = events.onKeyDown;
-      }
-      if (events.onMouseEnter) {
-        $elm.listeners.mouseenter = events.onMouseEnter;
-      }
-      if (events.onMouseLeave) {
-        $elm.listeners.mouseleave = events.onMouseLeave;
-      }
-    },
-  };
+  const methods: BoxMethods = box$.methods;
 
   return {
-    t: "button",
+    ...methods,
+    t,
     get $elm() {
       return $elm;
+    },
+    getType() {
+      return "button";
     },
     isDocumentFragment() {
       return true;
     },
-    getChildNodes() {
-      return $elm.children;
-    },
-    setStyle(style: ViewStyleProperties) {
+    setStyle(style: any) {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
       const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
       $elm.style[k] = value;
     },
-    setStyleSet(name: string) {
-      $elm.attrs.class = name;
+    setStyleSet(set: string[]) {
+      $elm.attrs.class = set.join(" ");
     },
     setAttribute(key: string, value: string) {
       $elm.attrs[key] = value;
@@ -92,28 +51,62 @@ export function NativeButton(props: {
     removeAttribute(key: string) {
       delete $elm.attrs[key];
     },
+    addEventListener(
+      type: string,
+      handler: (event: any) => void,
+      options?: any,
+    ) {
+      $elm.listeners[type] = handler;
+    },
+    removeEventListener(
+      type: string,
+      handler: (event: any) => void,
+      options?: any,
+    ) {
+      delete $elm.listeners[type];
+    },
+    getBoundingClientRect() {
+      return {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      };
+    },
     render(elm: TimelessElement) {
-      if (elm.state.style) {
-        methods.setStyle(elm.state.style);
-      }
-      if (elm.events) {
-        methods.setupEventListener(elm.events);
-      }
+      methods.set$elm($elm);
+      methods.applyState(elm.state, { initial: true });
+      methods.setupEventListener(elm.events);
       if (elm.children) {
-        for (const child of elm.children) {
-          if (isElement(child)) {
-            const $sub = props.build(child);
-            if ($sub && $sub.$elm) {
-              $elm.children.push($sub.$elm);
-            }
-          }
-        }
+        methods.render(elm.children);
       }
       return $elm;
     },
+    hydrate(elm: TimelessElement, $dom: any) {
+      methods.set$elm($dom);
+      methods.setupEventListener(elm.events);
+    },
+    buildChildren(children: (TimelessElement | null)[]) {
+      return methods.buildChildren(children);
+    },
+    insertChildren(children: (TimelessElement | null)[]) {
+      methods.insertChildren(children);
+    },
+    removeChildren() {
+      methods.removeChildren();
+    },
+    getParent() {
+      return null;
+    },
+    get$elm() {
+      return $elm;
+    },
+    getChildren() {
+      return methods.getChildren();
+    },
   };
-}
-
-export function isNativeButton(value: any): value is NativeButton {
-  return value.t === "button";
 }

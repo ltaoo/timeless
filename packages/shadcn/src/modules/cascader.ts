@@ -176,17 +176,7 @@ export function Cascader(
               For({
                 key: "key",
                 each: computed(state_, (d) => d.panels),
-                render(
-                  panel: {
-                    key: string;
-                    options: (CascaderOption<any> & {
-                      selected: boolean;
-                      focused: boolean;
-                    })[];
-                    selectedValue: any;
-                  },
-                  idx,
-                ) {
+                render(_, idx) {
                   const cur_panel = combine({ state: state_, idx }, (t) => {
                     return t.state.panels[t.idx] ?? null;
                   });
