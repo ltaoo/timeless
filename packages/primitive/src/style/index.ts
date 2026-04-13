@@ -2,7 +2,6 @@ import {
   ref,
   isRef,
   Ref,
-  RefObject,
   Subscriber,
   Signal,
   DerivedRef,
@@ -167,7 +166,12 @@ export function classNames(
   const unsubscribe_fns: (() => void)[] = [];
 
   function notify(action: { type: string }) {
-    // console.log("cn notify", action, _deps);
+    console.log(
+      "[primitive]style/index - classNames notify",
+      action,
+      _names,
+      _deps,
+    );
     for (let i = 0; i < _deps.length; i += 1) {
       const ctx = _deps[i];
       if (ctx.onChange) {

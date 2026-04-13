@@ -24,6 +24,8 @@ import {
   getobj,
   classNames,
   Label,
+  Row,
+  Column,
 } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
 
@@ -178,75 +180,58 @@ function ApplicationView() {
     }
   }
 
-  return View(
+  return Column(
     {
-      class: classNames([
-        "page",
-        computed(page, (t) => {
-          return t.value === "todo" ? "todo-page" : "home-page";
-        }),
-      ]),
+      gap: 12,
       style: {
         color: "#fff",
       },
-      onMounted() {
-        console.log("[ApplicationView] onMounted");
-        // const timer = setInterval(() => {
-        //   count_.as((prev) => {
-        //     return prev + 1;
-        //   });
-        // }, 1000);
-        // return function () {
-        //   clearInterval(timer);
-        // };
-      },
+      class: classNames([
+        "page",
+        computed(keyword_, (t) => {
+          console.log('recompute className', t);
+          return t.includes("_new") ? "updated" : "origin";
+        }),
+      ]),
     },
     [
-      Checkbox({
-        id: "fruit",
-        checked: visible_,
-        onChange(event) {
-          console.log("checkbox onChange", event.target.checked);
-          visible_.as(event.target.checked);
-        },
-      }),
-      computed(visible_, (t) => {
-        return t ? "Checked" : "No Checked";
-      }),
-      View({}, [
-        Label(
-          {
-            for: "fruit",
-          },
-          ["Select a fruit"],
-        ),
-        Button(
-          {
-            onClick() {
-              visible_.as(!visible_.value);
-            },
-          },
-          ["click it"],
-        ),
-      ]),
-      Input({
-        id: "keyword",
-        value: keyword_,
-        onInput(event) {
-          // console.log("input onChange", event.target.value);
-          keyword_.as(event.target.value);
-        },
-      }),
-      keyword_,
-      Button(
+      Column(
         {
-          onClick() {
-            keyword_.as((prev) => prev + "_new");
+          gap: 4,
+          style: {
+            padding: "16px",
           },
         },
-        ["update keyword"],
+        [
+          Label({ for: "keyword" }, ["Keyword"]),
+          Row({ gap: 4 }, [
+            Input({
+              id: "keyword",
+              value: keyword_,
+              onInput(event) {
+                // console.log("input onChange", event.target.value);
+                keyword_.as(event.target.value);
+              },
+            }),
+            Button(
+              {
+                onClick() {
+                  keyword_.as((prev) => prev + "_new");
+                },
+              },
+              ["Search"],
+            ),
+          ]),
+        ],
       ),
-      View({}, [Label({ for: "keyword" }, ["Keyword Label"])]),
+      Column(
+        {
+          style: {
+            padding: "16px",
+          },
+        },
+        [View({}, ["Search Result List"])],
+      ),
       // Show({
       //   when: visible_,
       //   ok() {

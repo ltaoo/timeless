@@ -24,6 +24,7 @@ export type ForProps<T> = {
 };
 export type ForState<T> = {
   rendered: boolean;
+  subscribed: boolean;
   items: T[];
   wrapped_items: { k: number; v: T }[];
   children: (TimelessElement | null)[];
@@ -55,6 +56,7 @@ export function For<T>(
   const _key = props.key;
   const state: ForState<T> = {
     rendered: false,
+    subscribed: false,
     items: [],
     wrapped_items: [] as { k: number; v: T }[],
     children: [],
@@ -68,14 +70,22 @@ export function For<T>(
     unique_id() {
       return _id++;
     },
+    init_state() {
+      const vv = props.each;
+      const items = isRef(vv) ? (vv.value as T[]) : (vv as T[]);
+      state.wrapped_items = items.map((item) => ({
+        k: methods.unique_id(),
+        v: item,
+      }));
+      state.items = [...items];
+    },
     subscribe_value() {
+      if (state.subscribed) {
+        return;
+      }
+      state.subscribed = true;
       const vv = props.each;
       if (isRef(vv)) {
-        state.wrapped_items = (vv.value as T[]).map((item) => ({
-          k: methods.unique_id(),
-          v: item,
-        }));
-        state.items = [...(vv.value as T[])];
         listener$.add(
           vv.subscribe({
             onPatch(action) {
@@ -117,19 +127,13 @@ export function For<T>(
             },
             onChange(v) {
               console.log("[primitive]For - ctx.onChange", v, state.rendered);
-              if (!state.rendered) {
-                return;
-              }
+              // if (!state.rendered) {
+              //   return;
+              // }
               methods.refresh(v);
             },
           }),
         );
-      } else {
-        state.wrapped_items = (vv as T[]).map((item) => ({
-          k: methods.unique_id(),
-          v: item,
-        }));
-        state.items = [...(vv as T[])];
       }
     },
     // Helper to create a computed index that depends on `each`
@@ -223,11 +227,6 @@ export function For<T>(
       if ($elm && typeof $elm.remove === "function") {
         $elm.remove(index, count);
       }
-      // const $parent = host.getParentNode(anchor);
-      // const $parent = anchor.getParentNode();
-      // if (!$parent) return;
-
-      // No need to manually update computed indexes - they auto-recompute
     },
     // update(index: number, item: any) {
     //   // const $parent = host.getParentNode(anchor);
@@ -406,7 +405,7 @@ export function For<T>(
           const idx_computed = methods.create_idx(new_item);
           new_index_computed[i] = idx_computed;
           const res = props.render(new_item.v, idx_computed);
-          state.children[i] = res;
+          new_elements[i] = res;
           added_nodes.push({ idx: i, element: res });
         }
       }
@@ -492,13 +491,14 @@ export function For<T>(
       // This ensures prev_items reflects the state before reverse/sort operations
       state.wrapped_items = new_wrapped_items.slice();
       state.items = new_wrapped_items.slice().map((item) => item.v);
-      state.children = new_elements;
       state.idx_arr = new_index_computed;
+      state.children = new_elements;
 
       return diff;
     },
   };
 
+  methods.init_state();
   methods.subscribe_value();
   methods.build_children();
 
@@ -513,9 +513,12 @@ export function For<T>(
     state: {
       items: state.items,
     },
-    children: [...state.children],
+    get children() {
+      return [...state.children];
+    },
     onMounted(event: MountedEvent) {
       logger.log("onMounted", state.children);
+      methods.subscribe_value();
       state.rendered = true;
       if (props.onMounted) {
         listener$.add(props.onMounted(event));
@@ -536,15 +539,15 @@ export function For<T>(
       if (props.onUnmounted) {
         props.onUnmounted();
       }
-      for (let i = 0; i < state.idx_arr.length; i += 1) {
-        state.idx_arr[i].destroy();
-      }
-      listener$.destroy();
-      state.rendered = false;
+      // listener$.destroy();
+      // for (let i = 0; i < state.idx_arr.length; i += 1) {
+      //   state.idx_arr[i].destroy();
+      // }
+      // state.rendered = false;
       state.items = [];
       state.wrapped_items = [];
-      // state.children = [];
       state.idx_arr = [];
+      state.children = [];
     },
   };
 }

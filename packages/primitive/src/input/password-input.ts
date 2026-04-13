@@ -19,8 +19,9 @@ export function PasswordInput(props: PasswordInputProps) {
     get $elm() {
       return $elm;
     },
-    set $elm(value: any) {
-      $elm = value;
+    set $elm(v: any) {
+      box$.methods.set$elm(v);
+      $elm = v;
     },
     state,
     children: [],

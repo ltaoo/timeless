@@ -193,20 +193,82 @@ export default function OverlayView() {
       //   ],
       // ),
       View({ class: "space-y-8" }, [
-        DateTimePicker({
-          date: Timeless.ui.DatePickerCore({ today: new Date() }),
-          time: Timeless.ui.TimePickerCore({}),
-          placeholder: "选择日期时间",
-        }),
-        // View({ class: "flex items-center gap-2" }, [
-        //   Checkbox({
-        //     id: "checkbox_with_label1",
-        //     store: new Timeless.ui.CheckboxCore({}),
+        // Cascader({
+        //   store: new Timeless.ui.CascaderCore({
+        //     placeholder: "请选择地区",
+        //     options: [
+        //       {
+        //         value: "zhejiang",
+        //         label: "浙江",
+        //         children: [
+        //           {
+        //             value: "hangzhou",
+        //             label: "杭州",
+        //             children: [
+        //               { value: "xihu", label: "西湖区" },
+        //               { value: "binjiang", label: "滨江区" },
+        //             ],
+        //           },
+        //           {
+        //             value: "ningbo",
+        //             label: "宁波",
+        //             children: [
+        //               { value: "haishu", label: "海曙区" },
+        //               { value: "jiangbei", label: "江北区" },
+        //               { value: "xian", label: "下城区" },
+        //             ],
+        //           },
+        //           {
+        //             label: "绍兴",
+        //             value: "shaoxing",
+        //             children: [{ value: "wuxi", label: "吴市" }],
+        //           },
+        //         ],
+        //       },
+        //       {
+        //         value: "jiangsu",
+        //         label: "江苏",
+        //         children: [
+        //           {
+        //             value: "nanjing",
+        //             label: "南京",
+        //             children: [
+        //               { value: "xuanwu", label: "玄武区" },
+        //               { value: "qinhuai", label: "秦淮区" },
+        //             ],
+        //           },
+        //           {
+        //             value: "suzhou",
+        //             label: "苏州",
+        //             children: [
+        //               { value: "gusu", label: "姑苏区" },
+        //               { value: "wuzhong", label: "吴中区" },
+        //             ],
+        //           },
+        //           {
+        //             value: "wuxi",
+        //             label: "吴",
+        //             children: [{ value: "wuxi", label: "吴市" }],
+        //           },
+        //         ],
+        //       },
+        //     ],
         //   }),
-        //   Label({ for: "checkbox_with_label1", class: "text-sm" }, [
-        //     "Accept terms and conditions",
-        //   ]),
-        // ]),
+        // }),
+        // DateTimePicker({
+        //   date: Timeless.ui.DatePickerCore({ today: new Date() }),
+        //   time: Timeless.ui.TimePickerCore({}),
+        //   placeholder: "选择日期时间",
+        // }),
+        View({ class: "flex items-center gap-2" }, [
+          Checkbox({
+            id: "checkbox_with_label1",
+            store: new Timeless.ui.CheckboxCore({}),
+          }),
+          Label({ for: "checkbox_with_label1", class: "text-sm" }, [
+            "Accept terms and conditions",
+          ]),
+        ]),
         // Select({
         //   class: "w-[120px]",
         //   store: new Timeless.ui.SelectCore({

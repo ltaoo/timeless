@@ -15,14 +15,16 @@ import { SSRLabel } from "./host/label";
 import { SSRButton } from "./host/button";
 import { SSRInput } from "./host/input";
 import { SSRCheckbox } from "./host/checkbox";
+import { SSRRow } from "./host/row";
 
 function build(elm: TimelessElement): VNodeView<string> {
-  if (elm.t === "view") return SSRView({ build });
-  if (elm.t === "text") return SSRText({ build });
-  if (elm.t === "fragment") return SSRFragment({ build });
   if (elm.t === "show") return SSRShow({ build });
   if (elm.t === "match") return SSRMatch({ build });
   if (elm.t === "for") return SSRFor({ build });
+  if (elm.t === "fragment") return SSRFragment({ build });
+  if (elm.t === "view") return SSRView({ build });
+  if (elm.t === "text") return SSRText({ build });
+  if (elm.t === "row") return SSRRow({ build });
   if (elm.t === "button") return SSRButton({ build });
   if (elm.t === "input") return SSRInput({ build });
   if (elm.t === "checkbox") return SSRCheckbox({ build });

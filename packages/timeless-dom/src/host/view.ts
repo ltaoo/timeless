@@ -13,10 +13,10 @@ export function DOMView(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
 }): DOMView {
   const t = "view";
-  const common$ = HostElement({ $elm: null, t, build: props.build });
+  const box$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
-    ...common$.methods,
+    ...box$.methods,
     t,
     getType() {
       return "view";
@@ -26,17 +26,17 @@ export function DOMView(props: {
     },
     render(elm: TimelessElement) {
       const $elm = document.createElement("div");
-      common$.methods.set$elm($elm);
-      common$.methods.applyState(elm.state, { initial: true });
-      const $fragment = common$.methods.render(elm.children);
-      common$.methods.setupEventListener(elm.events);
+      box$.methods.set$elm($elm);
+      box$.methods.applyState(elm.state, { initial: true });
+      const $fragment = box$.methods.render(elm.children);
+      box$.methods.setupEventListener(elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
       console.log("[dom]host/view - hydrate", $elm, elm.state);
-      common$.methods.set$elm($elm);
-      common$.methods.setupEventListener(elm.events);
+      box$.methods.set$elm($elm);
+      box$.methods.setupEventListener(elm.events);
       if (elm.children) {
         const child_nodes: VNodeView[] = [];
         const child_elements: (TimelessElement | null)[] = [];
@@ -54,13 +54,15 @@ export function DOMView(props: {
             }
           }
         }
-        common$.methods.setchildrenelement(child_elements);
-        common$.methods.setchildnode(child_nodes);
+        box$.methods.setchildrenelement(child_elements);
+        box$.methods.setchildnode(child_nodes);
       }
     },
   };
 }
 
-export function isDOMView(value: any): value is DOMView {
-  return value.t === "view";
+export function isDOMView(
+  value: { t?: string } & VNodeView<any>,
+): value is DOMView {
+  return value.t === "view" || value.getType() === "view";
 }

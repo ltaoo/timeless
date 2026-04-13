@@ -112,15 +112,15 @@ export function Box<T>(props: BoxProps, extra_state: T) {
     },
     subscribe_props() {
       const cls = props.class;
-      // console.log("[]box - before subscribe class", cls);
+      console.log("[]box - before subscribe class", cls);
       if (cls !== undefined) {
         if (typeof cls === "string") {
           state.styleSet = cls.split(" ");
-          //   console.log("split cls", cls, state.styleSet);
         } else if (isRef(cls)) {
+          console.log("the className is Ref", cls.value);
           state.styleSet = cls.value.split(" ");
           const unsubscribe = cls.subscribe({
-            onChange(v: any) {
+            onChange(v: string) {
               state.styleSet = v.split(" ");
               if ($elm && typeof $elm.setStyleSet === "function") {
                 console.log("[primitive]before invoke setStyle1");
@@ -134,6 +134,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
           const unsubscribe = cls.subscribe({
             onChange(v: string[]) {
               state.styleSet = v;
+              console.log("the className is ClassNameRef", v, $elm);
               if ($elm && typeof $elm.setStyleSet === "function") {
                 console.log("[primitive]before invoke setStyle2");
                 $elm.setStyleSet(v);

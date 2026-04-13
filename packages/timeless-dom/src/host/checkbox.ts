@@ -46,7 +46,7 @@ export function DOMCheckbox(props: {
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
       $elm.addEventListener("click", function (event) {
-        event.preventDefault();
+        // event.preventDefault();
         if (events && events.onChange) {
           events.onChange(event);
         }
@@ -73,7 +73,8 @@ export function DOMCheckbox(props: {
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
       $elm.addEventListener("click", function (event) {
-        event.preventDefault();
+        console.log('click', event)
+        // event.preventDefault();
         if (events && events.onChange) {
           events.onChange(event);
         }

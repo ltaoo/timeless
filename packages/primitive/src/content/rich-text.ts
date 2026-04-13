@@ -24,6 +24,7 @@ export function RichText(props: RichTextProps) {
       return $elm;
     },
     set $elm(v) {
+      box$.methods.set$elm(v);
       $elm = v;
     },
     state: box$.state,

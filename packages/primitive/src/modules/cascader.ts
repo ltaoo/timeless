@@ -1,4 +1,4 @@
-import { refobj, computed, ref } from "@timeless/reactive";
+import { refobj, computed } from "@timeless/reactive";
 import { CascaderCore, CascaderOption } from "@timeless/ui";
 
 import { classNames } from "@/style/index";
@@ -8,9 +8,12 @@ import { ViewChildren } from "@/content/type";
 import { Input as NativeInput } from "@/input/input";
 import { Fragment } from "@/content/fragment";
 import { Show } from "@/reactive/show";
+import { ListenerManager } from "@/util/listener";
+import { Logger } from "@/util/logger";
 
 import * as PopperPrimitive from "./popper";
-import { ListenerManager } from "@/util/listener";
+
+const logger = Logger({ prefix: "primitive", scope: "modules/cascader" });
 
 export function Root(
   props: ViewProps & { store: CascaderCore<any> },
@@ -30,14 +33,13 @@ export function Trigger(
   children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
-  const state_ = refobj(store.state);
-  const value_ = ref(store.state.value);
 
+  const state_ = refobj(store.state);
   const listener$ = ListenerManager();
 
   const _input$ = NativeInput({
-    ...rest,
-    // value: value_,
+    id: props.id || props.store.id,
+    attributes: rest.attributes,
     style: {
       position: "absolute",
       width: "1px",
@@ -54,9 +56,6 @@ export function Trigger(
         return;
       }
       props.store.show();
-    },
-    onClick(e: Event) {
-      e.stopPropagation();
     },
   });
 
@@ -81,11 +80,11 @@ export function Trigger(
           },
           { force: true },
         );
-
         const handlePointerDown = (e: PointerEvent) => {
           e.preventDefault();
           e.stopPropagation();
-          if ((e.target as HTMLElement).tagName === "INPUT") {
+          // @ts-ignore
+          if (e.target.tagName === "INPUT") {
             return;
           }
           if (store.disabled) {
@@ -98,21 +97,11 @@ export function Trigger(
           props.store.show();
         };
         // @ts-ignore
-        $elm.addEventListener("pointerdown", handlePointerDown);
-
+        listener$.add($elm.addEventListener("pointerdown", handlePointerDown));
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
-        return () => {
-          // @ts-ignore
-          $elm.removeEventListener("pointerdown", handlePointerDown);
-        };
-      },
-      onUnmounted() {
-        listener$.clear();
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
-        }
+        // return listener$.destroy;
       },
     },
     [_input$, Fragment({}, children)],
@@ -124,19 +113,27 @@ export function Value(
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
-  const state = refobj(store.state);
+  const state_ = refobj(store.state);
 
-  store.onStateChange((v) => {
-    state.as(v);
-  });
+  const listener$ = ListenerManager([]);
 
   return View(
     {
       ...rest,
-      as: "span",
+      onMounted(event) {
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        // return listener$.clean;
+      },
     },
     [
-      computed(state, (d) => {
+      computed(state_, (d) => {
         if (d.displayText) {
           return d.displayText;
         }
@@ -146,8 +143,12 @@ export function Value(
   );
 }
 
-export function Icon(props: ViewProps, children: ViewChildren) {
-  return View(props, children);
+export function Icon(
+  props: ViewProps & { store?: CascaderCore<any> },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props as any;
+  return View(rest, children);
 }
 
 export function Clear(
@@ -181,12 +182,11 @@ export function Content(
   },
   children: ViewChildren,
 ) {
-  // const host = getHost();
-  const { store, animation, ...rest } = props;
+  const { store, animation, onMounted, ...rest } = props;
 
   let _was_exiting = false;
   const presence_ = refobj(store.presence.state);
-  const listener$ = ListenerManager([presence_.destroy]);
+  const listener$ = ListenerManager([presence_]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
     switch (e.key) {
@@ -221,12 +221,16 @@ export function Content(
     when: computed(presence_, (t) => {
       return t.mounted;
     }),
-    onMounted() {
+    onMounted(event) {
       listener$.add(
         store.presence.onStateChange((v) => {
           presence_.as(v);
         }),
       );
+      if (onMounted) {
+        listener$.add(onMounted(event));
+      }
+      // return listener$.destroy;
     },
     ok() {
       return [
@@ -247,7 +251,7 @@ export function Content(
                     "tab-index": 0,
                   },
                   class: classNames([
-                    // rest.class,
+                    rest.class,
                     computed(presence_, (t) => {
                       if (t.exit) {
                         _was_exiting = true;
@@ -267,28 +271,15 @@ export function Content(
                         .join(" ");
                     }),
                   ]),
+                  onKeyDown: handleKeyDown,
                   onAnimationEnd(e: AnimationEvent) {
                     if (e.target === e.currentTarget) {
                       store.presence.handleAnimationEnd();
                     }
                     if (rest.onAnimationEnd) {
+                      // @ts-ignore
                       rest.onAnimationEnd(e);
                     }
-                  },
-                  onKeyDown: handleKeyDown,
-                  onMounted(event) {
-                    const $elm = event.target;
-                    setTimeout(() => {
-                      // @ts-ignore
-                      if (typeof $elm.focus === "function") {
-                        // @ts-ignore
-                        $elm.focus();
-                      }
-                    }, 0);
-                    if (rest.onMounted) {
-                      listener$.add(rest.onMounted(event));
-                    }
-                    return listener$.clean;
                   },
                 },
                 children,
@@ -336,6 +327,7 @@ export function Item(
         store.clickOption(panelIndex, option);
       },
       onMouseEnter() {
+        logger.log("[]Item - onMouseEnter", panelIndex, option);
         store.hoverOption(panelIndex, option);
       },
     },
@@ -344,7 +336,7 @@ export function Item(
 }
 
 export function ItemText(props: ViewProps, children: ViewChildren) {
-  return View({ ...props, as: "span" }, children);
+  return View({ ...props }, children);
 }
 
 export function ItemIndicator(
@@ -368,59 +360,48 @@ export function Search(
   props: ViewProps & { store: CascaderCore<any> },
   children?: ViewChildren,
 ) {
-  // const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
-
-  store.onStateChange((v) => {
-    state_.as(v);
-  });
+  const listener$ = ListenerManager();
 
   return Show({
     when: computed(state_, (s) => Boolean(s.search)),
+    onMounted() {
+      listener$.add(
+        store.onStateChange((v) => {
+          state_.as(v);
+        }),
+      );
+    },
     ok() {
       return [
-        View(
-          {
-            ...rest,
-            as: "input",
-            onMounted(event) {
-              const $elm = event.target;
-              $elm.setAttribute("placeholder", store.state.searchPlaceholder);
-              $elm.setAttribute("value", store.state.searchKeyword);
-
-              const handleInput = (e: any) => {
-                const target = e.target as HTMLInputElement;
-                store.setSearchKeyword(target.value);
-              };
-              $elm.addEventListener("input", handleInput);
-
-              store.onStateChange((s) => {
-                $elm.setAttribute("placeholder", s.searchPlaceholder);
-                $elm.setAttribute("value", s.searchKeyword);
-              });
-
-              setTimeout(() => {
-                // @ts-ignore
-                $elm.focus();
-              }, 0);
-
-              if (rest.onMounted) {
-                rest.onMounted(event);
-              }
-              return () => {
-                $elm.removeEventListener("input", handleInput);
-              };
-            },
-            onClick(e: Event) {
-              e.stopPropagation();
-            },
-            onKeyDown(e: KeyboardEvent) {
-              e.stopPropagation();
-            },
+        NativeInput({
+          ...rest,
+          placeholder: computed(state_, (s) => s.searchPlaceholder),
+          value: computed(state_, (s) => s.searchKeyword),
+          onInput(e: Event) {
+            const target = e.target;
+            // @ts-ignore
+            store.setSearchKeyword(target.value);
           },
-          children,
-        ),
+          onMounted(event) {
+            const $elm = event.target;
+            setTimeout(() => {
+              // @ts-ignore
+              $elm.focus();
+            }, 0);
+            if (rest.onMounted) {
+              listener$.add(rest.onMounted(event));
+            }
+            return listener$.clean;
+          },
+          onClick(e: Event) {
+            e.stopPropagation();
+          },
+          onKeyDown(e: KeyboardEvent) {
+            e.stopPropagation();
+          },
+        }),
       ];
     },
   });

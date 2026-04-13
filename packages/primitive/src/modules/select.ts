@@ -30,11 +30,9 @@ export function Trigger(
   children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
+
   const state_ = refobj(store.state);
-
   const listener$ = ListenerManager();
-
-  const events: any[] = [];
 
   // 创建隐藏的 input 用于可访问性
   const _input$ = NativeInput({

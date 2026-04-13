@@ -73,6 +73,9 @@ export function hydrate_node(
     }
     return hydrate_text(vnode, $elm as Text);
   }
+  if (vnode.t === "row") {
+    return hydrate_row(vnode, $elm as HTMLElement);
+  }
   if (vnode.t === "fragment") {
     return hydrate_fragment(vnode, $elm as HTMLElement);
   }
@@ -126,6 +129,19 @@ function hydrate_view(
   vnode.$elm = view$;
   view$.hydrate(vnode, $elm);
   return view$;
+}
+
+/**
+ * Hydrate a View component.
+ */
+function hydrate_row(
+  vnode: TimelessElement,
+  $elm: HTMLElement,
+): VNodeView<HTMLElement> {
+  const row$ = build(vnode);
+  vnode.$elm = row$;
+  row$.hydrate(vnode, $elm);
+  return row$;
 }
 
 /**

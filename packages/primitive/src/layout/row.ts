@@ -5,7 +5,7 @@ import { ViewChildren } from "@/content/type";
 import { isStyleRef, ClassNameRef } from "@/style";
 import { Box } from "@/content/box";
 
-export type ColumnProps = ViewProps & {
+export type RowProps = ViewProps & {
   gap?: number | DerivedRef<number> | Ref<number>;
   span?: number;
   start?: number;
@@ -15,16 +15,16 @@ export type ColumnProps = ViewProps & {
   rowStart?: number;
   rowEnd?: number;
 };
-type ColumnState = {
+type RowState = {
   gap?: number;
 };
 
-export function Column(props: ColumnProps, children?: ViewChildren) {
+export function Row(props: RowProps, children?: ViewChildren) {
   const { gap, span, start, end, offset, rowSpan, rowStart, rowEnd, ...rest } =
     props;
 
   let $elm: any = null;
-  const box$ = Box<ColumnState>(rest, {} as ColumnState);
+  const box$ = Box<RowState>(rest, {} as RowState);
   const state = box$.state;
   const events = box$.events;
 
@@ -50,7 +50,7 @@ export function Column(props: ColumnProps, children?: ViewChildren) {
   box$.methods.build_children(children);
 
   return {
-    t: "column",
+    t: "row",
     get $elm() {
       return $elm;
     },

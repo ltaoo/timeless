@@ -59,7 +59,6 @@ export function Content(
   },
   children: ViewChildren = [],
 ) {
-  // const host = getHost();
   const {
     store,
     zIndex = 99,
@@ -119,7 +118,7 @@ export function Content(
         function handleScroll() {
           if (store.reference) {
             const ref_rect = store.reference.getRect();
-            const $ref_el = (store.reference as any).$el;
+            const $ref_el = store.reference.$el;
             const is_virtual_element =
               !$ref_el ||
               typeof ($ref_el as any).getBoundingClientRect !== "function";

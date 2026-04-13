@@ -145,6 +145,7 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
       return $elm;
     },
     set $elm(v) {
+      box$.methods.set$elm(v);
       $elm = v;
     },
     state,

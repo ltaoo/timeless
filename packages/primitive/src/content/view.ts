@@ -141,7 +141,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
 
   const methods = {
     // Helper: normalize children (convert functions, wrap refs)
-    setup_children(children?: ViewChildren) {
+    build_children(children?: ViewChildren) {
       if (!children) {
         return;
       }
@@ -204,7 +204,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     },
 
     // Helper: setup bindings (attributes, class, style, events)
-    setup_value_subscribe() {
+    subscribe_props() {
       if (attributes) {
         Object.keys(attributes).forEach((k) => {
           const vv = attributes[k];
@@ -247,7 +247,7 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           state.styleSet = cls.split(" ");
         } else if (isRef(cls)) {
           cls.subscribe({
-            onChange(v: any) {
+            onChange(v: string) {
               state.styleSet = v.split(" ");
               if ($elm) {
                 $elm.setStyleSet(v.split(" "));
@@ -256,15 +256,16 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
           });
           state.styleSet = cls.value.split(" ");
         } else if (isClassNameRef(cls)) {
+          state.styleSet = cls.toString().split(" ");
           cls.subscribe({
             onChange(v: string[]) {
               state.styleSet = v;
+              console.log("[primitive]content/view - classNames notify", v);
               if ($elm) {
                 $elm.setStyleSet(v);
               }
             },
           });
-          state.styleSet = cls.toString().split(" ");
         } else {
           state.styleSet = [];
         }
@@ -497,8 +498,8 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
     handleUnmounted() {},
   };
 
-  methods.setup_children(children);
-  methods.setup_value_subscribe();
+  methods.subscribe_props();
+  methods.build_children(children);
 
   return {
     t: "view",

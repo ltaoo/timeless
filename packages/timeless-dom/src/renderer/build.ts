@@ -20,6 +20,8 @@ import { DOMTextarea } from "@/host/textarea";
 import { DOMFilePicker } from "@/host/file-picker";
 import { DOMNumberInput } from "@/host/number-input";
 import { DOMSelect } from "@/host/select";
+import { DOMRow } from "@/host/row";
+import { DOMColumn } from "@/host/column";
 
 export function build(elm: TimelessElement): VNodeView<any> {
   if (elm.t === "view") {
@@ -66,6 +68,16 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const grid$ = DOMGrid({ build });
     elm.$elm = grid$;
     return grid$;
+  }
+  if (elm.t === "row") {
+    const row$ = DOMRow({ build });
+    elm.$elm = row$;
+    return row$;
+  }
+  if (elm.t === "column") {
+    const column$ = DOMColumn({ build });
+    elm.$elm = column$;
+    return column$;
   }
   if (elm.t === "input") {
     const input$ = DOMInput({ build });

@@ -9,8 +9,8 @@ import {
 import { MountedEvent } from "@/event";
 import { ListenerManager } from "@/util/listener";
 
-export interface InputProps extends Omit<ViewProps, "as" | "type"> {
-  id?: string;
+export interface InputProps extends Omit<ViewProps, "as" | "type" | "id"> {
+  id?: string | null;
   name?: string | DerivedRef<string> | Ref<string>;
   value?: DerivedRef<string> | Ref<string>;
   placeholder?: string | DerivedRef<string> | Ref<string>;
@@ -125,7 +125,7 @@ export function Input(props: InputProps = {}) {
       }
     },
     setup_value_subscribe() {
-      if (id !== undefined) {
+      if (id !== undefined && id !== null) {
         if (isRef(id)) {
           id.subscribe({
             onChange(v) {
@@ -427,6 +427,7 @@ export function Input(props: InputProps = {}) {
       return $elm;
     },
     set $elm(value: any) {
+      // box$.methods.set$elm(v);
       $elm = value;
     },
     state,
