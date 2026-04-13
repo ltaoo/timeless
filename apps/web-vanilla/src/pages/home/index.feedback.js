@@ -1,3 +1,4 @@
+import { TestDialog } from "@/components/dialogtest.js";
 import { Section, Item } from "@/components/index.js";
 
 export default function FeedbackView() {
@@ -101,13 +102,9 @@ export default function FeedbackView() {
                 },
               }),
             },
-            ["Open Dialog"],
+            ["Open Dialog hello"],
           ),
-          Dialog({ store: dialog$ }, [
-            View({ class: "text-sm text-zinc-500" }, [
-              "This is a dialog content area. You can put anything here.",
-            ]),
-          ]),
+          TestDialog({ store: dialog$ }),
         ]),
         Item("setViewport({ getRect })", [
           View(

@@ -2,19 +2,19 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
 
-export type NativeView = VNodeView<any> & {
-  t: "view";
+export type NativeShow = VNodeView<any> & {
+  t: "show";
   render(elm: TimelessElement): any;
 };
 
-export function NativeView(props: {
+export function NativeShow(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
-}): NativeView {
-  const t = "view";
+}): NativeShow {
+  const t = "show";
   const box$ = HostElement({ t, $elm: null, build: props.build });
 
   const $elm = {
-    type: "view",
+    type: "show",
     children: [] as any[],
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
@@ -30,12 +30,11 @@ export function NativeView(props: {
       return $elm;
     },
     getType() {
-      return "view";
+      return "reactive";
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
-
     setStyle(style: any) {
       methods.setStyle(style);
     },
@@ -81,20 +80,20 @@ export function NativeView(props: {
     render(elm: TimelessElement) {
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+
       if (elm.children) {
         methods.render(elm.children);
       }
+      methods.setupEventListener(elm.events);
+
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
       methods.set$elm($dom);
       methods.setupEventListener(elm.events);
     },
-    buildChildren(children: (TimelessElement | null)[]) {
-      return methods.buildChildren(children);
-    },
     insertChildren(children: (TimelessElement | null)[]) {
+      methods.removeChildren();
       methods.insertChildren(children);
     },
     removeChildren() {
@@ -112,6 +111,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+export function isNativeShow(value: any): value is NativeShow {
+  return value.t === "show";
 }

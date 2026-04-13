@@ -2,19 +2,19 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
 
-export type NativeView = VNodeView<any> & {
-  t: "view";
+export type NativeFragment = VNodeView<any> & {
+  t: "fragment";
   render(elm: TimelessElement): any;
 };
 
-export function NativeView(props: {
+export function NativeFragment(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
-}): NativeView {
-  const t = "view";
+}): NativeFragment {
+  const t = "fragment";
   const box$ = HostElement({ t, $elm: null, build: props.build });
 
   const $elm = {
-    type: "view",
+    type: "fragment",
     children: [] as any[],
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
@@ -35,7 +35,6 @@ export function NativeView(props: {
     isDocumentFragment() {
       return true;
     },
-
     setStyle(style: any) {
       methods.setStyle(style);
     },
@@ -81,10 +80,12 @@ export function NativeView(props: {
     render(elm: TimelessElement) {
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+
       if (elm.children) {
         methods.render(elm.children);
       }
+      methods.setupEventListener(elm.events);
+
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
@@ -112,6 +113,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+export function isNativeFragment(value: any): value is NativeFragment {
+  return value.t === "fragment";
 }

@@ -2,20 +2,22 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
 
-export type NativeView = VNodeView<any> & {
-  t: "view";
+export type NativeCheckbox = VNodeView<any> & {
+  t: "checkbox";
   render(elm: TimelessElement): any;
+  setChecked(checked: boolean): void;
 };
 
-export function NativeView(props: {
+export function NativeCheckbox(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
-}): NativeView {
-  const t = "view";
+}): NativeCheckbox {
+  const t = "checkbox";
   const box$ = HostElement({ t, $elm: null, build: props.build });
 
   const $elm = {
-    type: "view",
-    children: [] as any[],
+    type: "checkbox",
+    checked: false,
+    value: "" as string,
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
     listeners: {} as Record<string, any>,
@@ -30,12 +32,11 @@ export function NativeView(props: {
       return $elm;
     },
     getType() {
-      return "view";
+      return "input";
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
-
     setStyle(style: any) {
       methods.setStyle(style);
     },
@@ -82,14 +83,34 @@ export function NativeView(props: {
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
       methods.setupEventListener(elm.events);
-      if (elm.children) {
-        methods.render(elm.children);
+
+      $elm.checked = !!elm.state.value;
+      if (elm.state.id) {
+        $elm.attrs.id = elm.state.id;
       }
+      if (elm.state.name) {
+        $elm.attrs.name = elm.state.name;
+      }
+
+      const events = elm.events;
+      if (events && events.onChange) {
+        $elm.listeners.click = events.onChange;
+      }
+      if (events && events.onFocus) {
+        $elm.listeners.focus = events.onFocus;
+      }
+      if (events && events.onBlur) {
+        $elm.listeners.blur = events.onBlur;
+      }
+
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
       methods.set$elm($dom);
       methods.setupEventListener(elm.events);
+    },
+    setChecked(checked: boolean) {
+      $elm.checked = checked;
     },
     buildChildren(children: (TimelessElement | null)[]) {
       return methods.buildChildren(children);
@@ -112,6 +133,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+export function isNativeCheckbox(value: any): value is NativeCheckbox {
+  return value.t === "checkbox";
 }

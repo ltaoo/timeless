@@ -2,19 +2,20 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
 
-export type NativeView = VNodeView<any> & {
-  t: "view";
+export type NativeLabel = VNodeView<any> & {
+  t: "label";
   render(elm: TimelessElement): any;
 };
 
-export function NativeView(props: {
+export function NativeLabel(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
-}): NativeView {
-  const t = "view";
+}): NativeLabel {
+  const t = "label";
   const box$ = HostElement({ t, $elm: null, build: props.build });
 
   const $elm = {
-    type: "view",
+    type: "label",
+    for: "" as string,
     children: [] as any[],
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
@@ -35,7 +36,6 @@ export function NativeView(props: {
     isDocumentFragment() {
       return true;
     },
-
     setStyle(style: any) {
       methods.setStyle(style);
     },
@@ -48,6 +48,9 @@ export function NativeView(props: {
     },
     setAttribute(key: string, value: string) {
       $elm.attrs[key] = value;
+      if (key === "for") {
+        $elm.for = value;
+      }
     },
     removeAttribute(key: string) {
       delete $elm.attrs[key];
@@ -82,9 +85,16 @@ export function NativeView(props: {
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
       methods.setupEventListener(elm.events);
+
+      if (elm.state.for) {
+        $elm.for = elm.state.for as string;
+        $elm.attrs["for"] = elm.state.for as string;
+      }
+
       if (elm.children) {
         methods.render(elm.children);
       }
+
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
@@ -112,6 +122,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+export function isNativeLabel(value: any): value is NativeLabel {
+  return value.t === "label";
 }

@@ -2,20 +2,22 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
 
-export type NativeView = VNodeView<any> & {
-  t: "view";
+export type NativeIcon = VNodeView<any> & {
+  t: "icon";
   render(elm: TimelessElement): any;
 };
 
-export function NativeView(props: {
+export function NativeIcon(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
-}): NativeView {
-  const t = "view";
+}): NativeIcon {
+  const t = "icon";
   const box$ = HostElement({ t, $elm: null, build: props.build });
 
   const $elm = {
-    type: "view",
-    children: [] as any[],
+    type: "icon",
+    name: "" as string,
+    color: "" as string,
+    size: 24,
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
     listeners: {} as Record<string, any>,
@@ -33,9 +35,8 @@ export function NativeView(props: {
       return "view";
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
-
     setStyle(style: any) {
       methods.setStyle(style);
     },
@@ -82,9 +83,17 @@ export function NativeView(props: {
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
       methods.setupEventListener(elm.events);
-      if (elm.children) {
-        methods.render(elm.children);
+
+      if (elm.state.name) {
+        $elm.name = elm.state.name as string;
       }
+      if (elm.state.color) {
+        $elm.color = elm.state.color as string;
+      }
+      if (elm.state.size !== undefined) {
+        $elm.size = elm.state.size as number;
+      }
+
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
@@ -112,6 +121,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+export function isNativeIcon(value: any): value is NativeIcon {
+  return value.t === "icon";
 }

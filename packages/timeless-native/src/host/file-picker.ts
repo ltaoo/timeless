@@ -2,20 +2,27 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
 
-export type NativeView = VNodeView<any> & {
-  t: "view";
+export type NativeFilePicker = VNodeView<any> & {
+  t: "file-picker";
   render(elm: TimelessElement): any;
+  setValue(file: File): void;
+  focus(): void;
+  blur(): void;
 };
 
-export function NativeView(props: {
+export function NativeFilePicker(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
-}): NativeView {
-  const t = "view";
+}): NativeFilePicker {
+  const t = "file-picker";
   const box$ = HostElement({ t, $elm: null, build: props.build });
 
   const $elm = {
-    type: "view",
-    children: [] as any[],
+    type: "file-picker",
+    value: null as File | null,
+    placeholder: "" as string,
+    disabled: false,
+    accept: "" as string,
+    multiple: false,
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
     listeners: {} as Record<string, any>,
@@ -30,12 +37,11 @@ export function NativeView(props: {
       return $elm;
     },
     getType() {
-      return "view";
+      return "input";
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
-
     setStyle(style: any) {
       methods.setStyle(style);
     },
@@ -82,15 +88,53 @@ export function NativeView(props: {
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
       methods.setupEventListener(elm.events);
-      if (elm.children) {
-        methods.render(elm.children);
+
+      if (elm.state.id) {
+        $elm.attrs.id = elm.state.id;
       }
+      if (elm.state.name) {
+        $elm.attrs.name = elm.state.name;
+      }
+      if (elm.state.placeholder) {
+        $elm.placeholder = elm.state.placeholder;
+      }
+      if (elm.state.disabled) {
+        $elm.disabled = elm.state.disabled;
+      }
+      if (elm.state.accept) {
+        $elm.accept = elm.state.accept;
+      }
+      if (elm.state.multiple) {
+        $elm.multiple = elm.state.multiple;
+      }
+
+      const events = elm.events;
+      if (events) {
+        if (events.onChange) {
+          $elm.listeners.change = events.onChange;
+        }
+        if (events.onFocus) {
+          $elm.listeners.focus = events.onFocus;
+        }
+        if (events.onBlur) {
+          $elm.listeners.blur = events.onBlur;
+        }
+        if (events.onKeyDown) {
+          $elm.listeners.keydown = events.onKeyDown;
+        }
+      }
+
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
       methods.set$elm($dom);
       methods.setupEventListener(elm.events);
     },
+    setValue(file: File) {
+      $elm.value = file;
+    },
+    focus() {},
+    blur() {},
     buildChildren(children: (TimelessElement | null)[]) {
       return methods.buildChildren(children);
     },
@@ -112,6 +156,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+export function isNativeFilePicker(value: any): value is NativeFilePicker {
+  return value.t === "file-picker";
 }

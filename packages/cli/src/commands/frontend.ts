@@ -31,6 +31,48 @@ const HMR_CLIENT_SCRIPT = `
 <script>
 (function() {
   var registry = {};
+  var storeRegistry = {};
+  var recordingPath = null;
+  var recordingStores = [];
+  var constructorsWrapped = false;
+  var reuseQueues = {};
+
+  function ensureConstructorsWrapped() {
+    if (constructorsWrapped) return;
+    constructorsWrapped = true;
+    if (typeof Timeless === "undefined" || !Timeless.ui) return;
+    var ui = Timeless.ui;
+    var keys = Object.keys(ui);
+    for (var k = 0; k < keys.length; k++) {
+      var name = keys[k];
+      if (!/Core$/.test(name)) continue;
+      var Original = ui[name];
+      if (typeof Original !== "function") continue;
+      (function(name, Original) {
+        var proxy = new Proxy(Original, {
+          construct: function(target, args, newTarget) {
+            var queue = reuseQueues[name];
+            if (queue && queue.length > 0) {
+              var cached = queue.shift();
+              console.log("[HMR] Reusing store " + name + " #" + (cached.__hmr_index || 0));
+              if (recordingPath !== null) {
+                cached.__hmr_constructor = name;
+                recordingStores.push(cached);
+              }
+              return cached;
+            }
+            var instance = Reflect.construct(target, args, newTarget);
+            instance.__hmr_constructor = name;
+            if (recordingPath !== null) {
+              recordingStores.push(instance);
+            }
+            return instance;
+          }
+        });
+        ui[name] = proxy;
+      })(name, Original);
+    }
+  }
 
   globalThis.__TIMELESS_HMR__ = {
     register: function(path, entry) {
@@ -39,6 +81,23 @@ const HMR_CLIENT_SCRIPT = `
     },
     unregister: function(path) {
       delete registry[path];
+    },
+    beginRecord: function(path) {
+      ensureConstructorsWrapped();
+      recordingPath = path;
+      recordingStores = [];
+    },
+    endRecord: function() {
+      if (recordingPath !== null) {
+        storeRegistry[recordingPath] = recordingStores;
+      }
+      recordingPath = null;
+      recordingStores = [];
+    },
+    _recordStore: function(instance) {
+      if (recordingPath !== null) {
+        recordingStores.push(instance);
+      }
     },
     accept: function(path, newModule) {
       var entries = registry[path];
@@ -51,18 +110,44 @@ const HMR_CLIENT_SCRIPT = `
         console.warn("[HMR] Module has no default export function:", path);
         return false;
       }
+
+      ensureConstructorsWrapped();
+
+      var oldStores = storeRegistry[path] || [];
+      reuseQueues = {};
+      for (var s = 0; s < oldStores.length; s++) {
+        var store = oldStores[s];
+        var ctorName = store.__hmr_constructor;
+        if (ctorName) {
+          if (!reuseQueues[ctorName]) reuseQueues[ctorName] = [];
+          reuseQueues[ctorName].push(store);
+        }
+      }
+
       for (var i = 0; i < entries.length; i++) {
         var entry = entries[i];
         try {
+          recordingPath = path;
+          recordingStores = [];
+
           var newElement = Factory(entry.props);
+
+          storeRegistry[path] = recordingStores;
+          recordingPath = null;
+          recordingStores = [];
+
           if (newElement && entry.$elm && typeof entry.$elm.replaceChildren === "function") {
             entry.$elm.replaceChildren([newElement]);
             entry.element = newElement;
           }
         } catch (err) {
+          recordingPath = null;
+          recordingStores = [];
           console.error("[HMR] Error applying update for", path, err);
         }
       }
+
+      reuseQueues = {};
       return true;
     }
   };

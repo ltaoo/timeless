@@ -2,19 +2,20 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
 
-export type NativeView = VNodeView<any> & {
-  t: "view";
+export type NativeLazyView = VNodeView<any> & {
+  t: "lazy-view";
   render(elm: TimelessElement): any;
+  replaceChildren(children: (TimelessElement | null)[]): void;
 };
 
-export function NativeView(props: {
+export function NativeLazyView(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
-}): NativeView {
-  const t = "view";
+}): NativeLazyView {
+  const t = "lazy-view";
   const box$ = HostElement({ t, $elm: null, build: props.build });
 
   const $elm = {
-    type: "view",
+    type: "lazy-view",
     children: [] as any[],
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
@@ -35,7 +36,6 @@ export function NativeView(props: {
     isDocumentFragment() {
       return true;
     },
-
     setStyle(style: any) {
       methods.setStyle(style);
     },
@@ -81,15 +81,32 @@ export function NativeView(props: {
     render(elm: TimelessElement) {
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+
       if (elm.children) {
         methods.render(elm.children);
       }
+      methods.setupEventListener(elm.events);
+
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
       methods.set$elm($dom);
       methods.setupEventListener(elm.events);
+    },
+    replaceChildren(children: (TimelessElement | null)[]) {
+      this.removeChildren();
+      const r = methods.buildChildren(children);
+      methods.setchildnode(r.child_nodes);
+      methods.set$childrne(r.child_host_nodes);
+      methods.setchildrenelement(r.child_elements);
+      if ($elm.children) {
+        for (const $child of r.child_host_nodes) {
+          $elm.children.push($child);
+        }
+      }
+      setTimeout(() => {
+        methods.handleElementsMounted();
+      }, 0);
     },
     buildChildren(children: (TimelessElement | null)[]) {
       return methods.buildChildren(children);
@@ -112,6 +129,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+export function isNativeLazyView(value: any): value is NativeLazyView {
+  return value.t === "lazy-view";
 }

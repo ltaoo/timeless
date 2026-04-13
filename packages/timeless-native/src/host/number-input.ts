@@ -2,20 +2,25 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
 
-export type NativeView = VNodeView<any> & {
-  t: "view";
+export type NativeNumberInput = VNodeView<any> & {
+  t: "number-input";
   render(elm: TimelessElement): any;
+  setValue(value: string): void;
+  focus(): void;
+  blur(): void;
 };
 
-export function NativeView(props: {
+export function NativeNumberInput(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
-}): NativeView {
-  const t = "view";
+}): NativeNumberInput {
+  const t = "number-input";
   const box$ = HostElement({ t, $elm: null, build: props.build });
 
   const $elm = {
-    type: "view",
-    children: [] as any[],
+    type: "number-input",
+    value: "" as string,
+    placeholder: "" as string,
+    disabled: false,
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
     listeners: {} as Record<string, any>,
@@ -30,12 +35,11 @@ export function NativeView(props: {
       return $elm;
     },
     getType() {
-      return "view";
+      return "input";
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
-
     setStyle(style: any) {
       methods.setStyle(style);
     },
@@ -82,15 +86,53 @@ export function NativeView(props: {
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
       methods.setupEventListener(elm.events);
-      if (elm.children) {
-        methods.render(elm.children);
+
+      if (elm.state.id !== undefined) {
+        $elm.attrs.id = elm.state.id;
       }
+      if (elm.state.name) {
+        $elm.attrs.name = elm.state.name;
+      }
+      if (elm.state.value !== undefined) {
+        $elm.value = String(elm.state.value);
+      }
+      if (elm.state.placeholder !== undefined) {
+        $elm.placeholder = String(elm.state.placeholder);
+      }
+      if (elm.state.disabled !== undefined) {
+        $elm.disabled = elm.state.disabled;
+      }
+
+      const events = elm.events;
+      if (events) {
+        if (events.onInput) {
+          $elm.listeners.input = events.onInput;
+        }
+        if (events.onChange) {
+          $elm.listeners.change = events.onChange;
+        }
+        if (events.onFocus) {
+          $elm.listeners.focus = events.onFocus;
+        }
+        if (events.onBlur) {
+          $elm.listeners.blur = events.onBlur;
+        }
+        if (events.onKeyDown) {
+          $elm.listeners.keydown = events.onKeyDown;
+        }
+      }
+
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
       methods.set$elm($dom);
       methods.setupEventListener(elm.events);
     },
+    setValue(value: string) {
+      $elm.value = value;
+    },
+    focus() {},
+    blur() {},
     buildChildren(children: (TimelessElement | null)[]) {
       return methods.buildChildren(children);
     },
@@ -112,6 +154,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+export function isNativeNumberInput(value: any): value is NativeNumberInput {
+  return value.t === "number-input";
 }

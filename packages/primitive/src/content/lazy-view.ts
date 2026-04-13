@@ -54,7 +54,24 @@ export function LazyView(
           const Factory = m.default || m;
           if (typeof Factory === "function") {
             try {
+              const hmr_path = (children as any).__hmr_path;
+              if (
+                hmr_path &&
+                // @ts-ignore
+                typeof globalThis.__TIMELESS_HMR__ !== "undefined"
+              ) {
+                // @ts-ignore
+                globalThis.__TIMELESS_HMR__.beginRecord?.(hmr_path);
+              }
               const element = Factory(props);
+              if (
+                hmr_path &&
+                // @ts-ignore
+                typeof globalThis.__TIMELESS_HMR__ !== "undefined"
+              ) {
+                // @ts-ignore
+                globalThis.__TIMELESS_HMR__.endRecord?.();
+              }
               if (!element) {
                 return;
               }
@@ -63,7 +80,6 @@ export function LazyView(
                 if ($elm && typeof $elm.replaceChildren === "function") {
                   $elm.replaceChildren(state.children);
                 }
-                const hmr_path = (children as any).__hmr_path;
                 if (
                   hmr_path &&
                   // @ts-ignore

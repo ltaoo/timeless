@@ -2,20 +2,25 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
 
-export type NativeView = VNodeView<any> & {
-  t: "view";
+export type NativeTextarea = VNodeView<any> & {
+  t: "textarea";
   render(elm: TimelessElement): any;
+  setValue(value: string): void;
+  focus(): void;
+  blur(): void;
 };
 
-export function NativeView(props: {
+export function NativeTextarea(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
-}): NativeView {
-  const t = "view";
+}): NativeTextarea {
+  const t = "textarea";
   const box$ = HostElement({ t, $elm: null, build: props.build });
 
   const $elm = {
-    type: "view",
-    children: [] as any[],
+    type: "textarea",
+    value: "" as string,
+    placeholder: "" as string,
+    disabled: false,
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
     listeners: {} as Record<string, any>,
@@ -30,12 +35,11 @@ export function NativeView(props: {
       return $elm;
     },
     getType() {
-      return "view";
+      return "input";
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
-
     setStyle(style: any) {
       methods.setStyle(style);
     },
@@ -78,19 +82,57 @@ export function NativeView(props: {
         bottom: 0,
       };
     },
+    setValue(value: string) {
+      $elm.value = value;
+    },
     render(elm: TimelessElement) {
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
-      if (elm.children) {
-        methods.render(elm.children);
+
+      if (elm.state.value !== undefined) {
+        $elm.value = String(elm.state.value);
       }
+      if (elm.state.id) {
+        $elm.attrs.id = elm.state.id;
+      }
+      if (elm.state.name) {
+        $elm.attrs.name = elm.state.name;
+      }
+      if (elm.state.placeholder) {
+        $elm.placeholder = elm.state.placeholder;
+      }
+      if (elm.state.disabled) {
+        $elm.disabled = elm.state.disabled;
+      }
+
+      methods.setupEventListener(elm.events);
+      const events = elm.events;
+      if (events) {
+        if (events.onInput) {
+          $elm.listeners.input = events.onInput;
+        }
+        if (events.onChange) {
+          $elm.listeners.change = events.onChange;
+        }
+        if (events.onFocus) {
+          $elm.listeners.focus = events.onFocus;
+        }
+        if (events.onBlur) {
+          $elm.listeners.blur = events.onBlur;
+        }
+        if (events.onKeyDown) {
+          $elm.listeners.keydown = events.onKeyDown;
+        }
+      }
+
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
       methods.set$elm($dom);
       methods.setupEventListener(elm.events);
     },
+    focus() {},
+    blur() {},
     buildChildren(children: (TimelessElement | null)[]) {
       return methods.buildChildren(children);
     },
@@ -112,6 +154,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+export function isNativeTextarea(value: any): value is NativeTextarea {
+  return value.t === "textarea";
 }

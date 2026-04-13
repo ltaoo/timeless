@@ -2,19 +2,29 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
 
-export type NativeView = VNodeView<any> & {
-  t: "view";
+export type NativeFor = VNodeView<any> & {
+  t: "for";
   render(elm: TimelessElement): any;
+  insert(idx: number, element: (TimelessElement | null)[]): void;
+  remove(idx: number, count: number): void;
+  refresh(data: {
+    children: (TimelessElement | null)[];
+    added: { idx: number; element: TimelessElement | null }[];
+    removed: { idx: number }[];
+    moved: { from: number; to: number }[];
+  }): void;
+  move(from: number, to: number): void;
+  swap(from: number, to: number): void;
 };
 
-export function NativeView(props: {
+export function NativeFor(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
-}): NativeView {
-  const t = "view";
+}): NativeFor {
+  const t = "for";
   const box$ = HostElement({ t, $elm: null, build: props.build });
 
   const $elm = {
-    type: "view",
+    type: "for",
     children: [] as any[],
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
@@ -30,12 +40,11 @@ export function NativeView(props: {
       return $elm;
     },
     getType() {
-      return "view";
+      return "reactive";
     },
     isDocumentFragment() {
       return true;
     },
-
     setStyle(style: any) {
       methods.setStyle(style);
     },
@@ -81,16 +90,23 @@ export function NativeView(props: {
     render(elm: TimelessElement) {
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+
       if (elm.children) {
         methods.render(elm.children);
       }
+      methods.setupEventListener(elm.events);
+
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
       methods.set$elm($dom);
       methods.setupEventListener(elm.events);
     },
+    insert: methods.insert,
+    remove: methods.remove,
+    refresh: methods.refresh,
+    move: methods.move,
+    swap: methods.move,
     buildChildren(children: (TimelessElement | null)[]) {
       return methods.buildChildren(children);
     },
@@ -112,6 +128,6 @@ export function NativeView(props: {
   };
 }
 
-export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+export function isNativeFor(value: any): value is NativeFor {
+  return value.t === "for";
 }

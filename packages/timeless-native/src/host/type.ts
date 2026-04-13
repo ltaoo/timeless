@@ -1,31 +1,46 @@
-import { TimelessElement, ViewStyleProperties } from "@timeless/timeless";
+import { NativeGrid } from "./grid";
+import { NativeView } from "./view";
+import { NativeText } from "./text";
+import { NativeLabel } from "./label";
+import { NativeFragment } from "./fragment";
+import { NativeLazyView } from "./lazy-view";
+import { NativeImg } from "./img";
+import { NativeIcon } from "./icon";
 
-export interface NativeHostNode {
-  $elm: any;
-  isDocumentFragment(): boolean;
-  getChildNodes(): any[];
-  render(elm: TimelessElement): any;
-}
+import { NativeInput } from "./input";
+import { NativeFilePicker } from "./file-picker";
+import { NativeTextarea } from "./textarea";
+import { NativeCheckbox } from "./checkbox";
+import { NativeRadio } from "./radio";
+import { NativeNumberInput } from "./number-input";
 
-export interface NativeView {
-  t: "view";
-  $elm: any;
-  isDocumentFragment(): boolean;
-  getChildNodes(): any[];
-  setStyle(style: ViewStyleProperties): void;
-  setStyleValue(key: string, value: string): void;
-  setStyleSet(key: string): void;
-  setAttribute(key: string, value: string): void;
-  removeAttribute(key: string): void;
-  addEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ): void;
-  removeEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ): void;
-  render(elm: TimelessElement): any;
-}
+import { NativeButton } from "./button";
+import { NativePortal } from "./portal";
+
+import { NativeShow } from "./show";
+import { NativeMatch } from "./match";
+import { NativeFor } from "./for";
+import { NativeSelect } from "./select";
+
+export type NativeHostNode =
+  | null
+  | NativeGrid
+  | NativeFragment
+  | NativeLazyView
+  | NativeView
+  | NativeText
+  | NativeLabel
+  | NativeImg
+  | NativeIcon
+  | NativeInput
+  | NativeTextarea
+  | NativeFilePicker
+  | NativeNumberInput
+  | NativeCheckbox
+  | NativeRadio
+  | NativeSelect
+  | NativeButton
+  | NativePortal
+  | NativeShow
+  | NativeMatch
+  | NativeFor;
