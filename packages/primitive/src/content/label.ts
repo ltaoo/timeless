@@ -10,14 +10,11 @@ import {
 import { MountedEvent } from "@/event";
 
 import { Text } from "./text";
+import { Box, BoxProps } from "./box";
 
-export interface LabelProps {
+export type LabelProps = BoxProps & {
   for?: string | DerivedRef<string> | Ref<string>;
-  class?: ViewProps["class"];
-  style?: ViewProps["style"];
-  attributes?: ViewProps["attributes"];
-  onMounted?: ViewProps["onMounted"];
-}
+};
 
 export interface LabelState {
   for?: string;
@@ -25,33 +22,16 @@ export interface LabelState {
 }
 
 export function Label(props: LabelProps = {}, children?: ViewChildren) {
-  const { for: htmlFor, attributes, onMounted, ...rest } = props;
+  const { for: htmlFor, ...rest } = props;
 
   let $elm: any = null;
+  const box$ = Box<LabelState>(rest, {} as LabelState);
 
-  const state: LabelState = {
-    for: "",
-    children: [],
-  };
+  const state = box$.state;
 
   const methods = {
-    setup_children(children?: ViewChildren) {
-      if (!children) {
-        return;
-      }
-      for (const child of children) {
-        if (isElement(child)) {
-          state.children.push(child);
-        }
-        if (isRef(child)) {
-          state.children.push(Text(child));
-        }
-        if (typeof child === "string" || typeof child === "number") {
-          state.children.push(Text(child));
-        }
-      }
-    },
-    setup_value_subscribe() {
+    subsctibe_props() {
+      box$.methods.subscribe_props();
       if (htmlFor !== undefined) {
         if (isRef(htmlFor)) {
           htmlFor.subscribe({
@@ -70,19 +50,22 @@ export function Label(props: LabelProps = {}, children?: ViewChildren) {
     },
   };
 
-  methods.setup_children(children);
-  methods.setup_value_subscribe();
+  methods.subsctibe_props();
+  box$.methods.build_children(children);
 
   return {
     t: "label",
     get $elm() {
       return $elm;
     },
-    set $elm(value: any) {
-      $elm = value;
+    set $elm(v: any) {
+      box$.methods.set$elm(v);
+      $elm = v;
     },
     state,
-    children: state.children,
+    get children() {
+      return state.children;
+    },
     render() {
       return $elm;
     },

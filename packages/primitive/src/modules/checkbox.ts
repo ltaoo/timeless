@@ -5,6 +5,7 @@ import { Show } from "@/reactive/show";
 import { Fragment } from "@/content/fragment";
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
+import { Label as NativeLabel } from "@/content/label";
 import { Checkbox, CheckboxProps } from "@/input/checkbox";
 import { Button, ButtonProps } from "@/interaction/button";
 import { ListenerManager } from "@/util/listener";
@@ -145,19 +146,8 @@ export function Label(
   props: ViewProps & { for?: string; store?: CheckboxCore },
   children?: ViewChildren,
 ) {
-  const { for: htmlFor, store, ...rest } = props;
-  const events: any[] = [];
-  return View(
-    {
-      ...rest,
-      as: "label",
-      onUnmounted() {
-        for (const fn of events) if (typeof fn === "function") fn();
-        if (rest.onUnmounted) rest.onUnmounted();
-      },
-    },
-    children,
-  );
+  const { store, ...rest } = props;
+  return NativeLabel({ ...rest }, children);
 }
 
 export function Group(

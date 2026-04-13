@@ -3,11 +3,12 @@ import { RadioCore, RadioGroupCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { Show } from "@/reactive/show";
-// import { InputProps } from "@/input/input";
+import { Show, ShowProps } from "@/reactive/show";
 import { Fragment } from "@/content/fragment";
 import { Radio, RadioProps } from "@/input/radio";
+import { Label as NativeLabel } from "@/content/label";
 import { Button, ButtonProps } from "@/interaction/button";
+import { ListenerManager } from "@/util/listener";
 
 export function Root(
   props: ViewProps & { store: RadioCore },
@@ -55,27 +56,23 @@ export function Box(
 }
 
 export function Indicator(
-  props: ViewProps & { store: RadioCore },
+  props: { store: RadioCore },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
   const state_ = ref(store.state);
-  const events: any[] = [];
+
+  const listener$ = ListenerManager([state_]);
+  listener$.add(
+    store.onStateChange(() => {
+      state_.as(store.state);
+    }),
+  );
 
   return Show({
     when: computed(state_, (d) => d.checked),
     ok() {
       return children || [];
-    },
-    onMounted() {
-      events.push(
-        store.onStateChange(() => {
-          state_.as(store.state);
-        }),
-      );
-    },
-    onUnmounted() {
-      for (const fn of events) if (typeof fn === "function") fn();
     },
   });
 }
@@ -119,49 +116,9 @@ export function Label(
   props: ViewProps & { for?: string; store?: RadioCore },
   children?: ViewChildren,
 ) {
-  const { for: htmlFor, store, ...rest } = props;
-  const events: any[] = [];
+  const { store, ...rest } = props;
 
-  // const hiddenInput = store
-  //   ? View(
-  //       {
-  //         as: "input",
-  //         dataset: {
-  //           type: "radio",
-  //         },
-  //         id: htmlFor,
-  //         // name: htmlFor,
-  //         style:
-  //           "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;",
-  //         onClick(e) {
-  //           e.stopPropagation();
-  //           store.check();
-  //         },
-  //         onMounted($elm: HTMLInputElement) {
-  //           $elm.checked = !!store.state.checked;
-  //           events.push(
-  //             store.onStateChange(() => {
-  //               $elm.checked = !!store.state.checked;
-  //             }),
-  //           );
-  //         },
-  //       },
-  //       [],
-  //     )
-  //   : null;
-
-  return View(
-    {
-      ...rest,
-      as: "label",
-      onUnmounted() {
-        for (const fn of events) if (typeof fn === "function") fn();
-        if (rest.onUnmounted) rest.onUnmounted();
-      },
-    },
-    // hiddenInput ? [hiddenInput, ...(children || [])] : children,
-    children,
-  );
+  return NativeLabel({ ...rest }, children);
 }
 
 // RadioGroup primitives
@@ -174,7 +131,9 @@ export function Group(
   return View(
     {
       ...rest,
-      // role: "radiogroup",
+      attributes: {
+        role: "radiogroup",
+      },
     },
     children,
   );
@@ -184,27 +143,14 @@ export function GroupItem(
   props: ViewProps & {
     store: RadioGroupCore<any>;
     item: { label: string; value: any; core: RadioCore };
-    renderRadio?: (core: RadioCore) => ViewChildren;
-    renderLabel?: (label: string) => ViewChildren;
   },
   children?: ViewChildren,
 ) {
-  const { store, item, renderRadio, renderLabel, ...rest } = props;
+  const { store, item, ...rest } = props;
 
-  // const radioContent = renderRadio
-  //   ? renderRadio(item.core)
-  //   : Box({ store: item.core }, [Indicator({ store: item.core }, children)]);
-  const radioContent = Box({ store: item.core }, [
+  const content$ = Box({ store: item.core }, [
     Indicator({ store: item.core }, children),
   ]);
 
-  // const labelContent = renderLabel ? renderLabel(item.label) : item.label;
-  const labelContent = item.label;
-
-  return View(
-    {
-      ...rest,
-    },
-    [radioContent, labelContent],
-  );
+  return View({ ...rest }, [content$, item.label]);
 }

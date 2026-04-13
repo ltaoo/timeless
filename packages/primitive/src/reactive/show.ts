@@ -8,7 +8,7 @@ import { Logger } from "@/util/logger";
 
 const logger = Logger({ prefix: "primitive", scope: "reactive/show" });
 
-type ShowProps = {
+export type ShowProps = {
   when:
     | DerivedRef<boolean | undefined | null>
     | Ref<boolean | undefined | null>

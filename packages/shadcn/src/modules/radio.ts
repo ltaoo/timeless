@@ -1,5 +1,11 @@
 import { ref, computed, classNames } from "@timeless/timeless";
-import { RadioPrimitive, View, For, ViewProps } from "@timeless/timeless";
+import {
+  RadioPrimitive,
+  View,
+  For,
+  ViewProps,
+  Label as NativeLabel,
+} from "@timeless/timeless";
 import { RadioGroupCore, RadioCore } from "@timeless/ui";
 
 export function Radio(props: { store: RadioCore; id?: string }) {
@@ -106,12 +112,9 @@ export function RadioGroupItem(props: {
     },
     [
       Radio({ id: item.value, store: item.core }),
-      View(
+      NativeLabel(
         {
-          attributes: {
-            for: item.value,
-          },
-          as: "label",
+          for: item.value,
           class:
             "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
         },
