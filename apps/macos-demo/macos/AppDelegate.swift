@@ -8,7 +8,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let rootVC = RootViewController()
 
         window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
+            contentRect: NSRect(x: 0, y: 0, width: 800, height: 560),
             styleMask: [.titled, .closable, .resizable, .miniaturizable],
             backing: .buffered,
             defer: false

@@ -1,44 +1,47 @@
 import {
   View,
-  For,
-  Show,
   ref,
   computed,
-  refarr,
   Img,
   Button,
   Input,
   Checkbox,
+  Row,
+  Column,
+  Textarea,
+  NumberInput,
+  Radio,
+  Select,
+  Icon,
 } from "@timeless/timeless";
 import { render, TimelessNativeVersion } from "@timeless/timeless-native";
-// import { render } from "@timeless/timeless-dom";
 
-const apps = [
-  { icon: "Movies", title: "Movies", subtitle: "Movies & Shows" },
-  { icon: "Music", title: "Music", subtitle: "Your Favorites" },
-  { icon: "Photos", title: "Photos", subtitle: "Photo Library" },
-  { icon: "Settings", title: "Settings", subtitle: "Preferences" },
-  { icon: "Weather", title: "Weather", subtitle: "5-Day Forecast" },
-  { icon: "Browser", title: "Browser", subtitle: "Surf the Web" },
-];
-
-function ApplicationView() {
-  const page = ref("todo");
-  const count_ = ref(0);
-  const todos = refarr([
-    { id: 1, title: "Buy groceries" },
-    { id: 2, title: "Study for exam" },
-    { id: 3, title: "Build native app" },
-  ]);
-  const input_ = ref("");
-  const agreed = ref(false);
-  const subscribe = ref(false);
-
+function SectionTitle(text) {
   return View(
     {
       style: {
-        padding: "20px",
+        "font-size": "16px",
+        "font-weight": "bold",
+        "margin-bottom": "8px",
       },
+    },
+    [text],
+  );
+}
+
+function ApplicationView() {
+  const count_ = ref(0);
+  const input_ = ref("");
+  const agreed = ref(false);
+  const subscribe = ref(false);
+  const textareaContent_ = ref("");
+  const numberValue_ = ref("");
+  const selectedFruit_ = ref("apple");
+  const selectedColor_ = ref("Red");
+
+  return View(
+    {
+      style: { padding: "20px" },
       onMounted() {
         console.log("[macOS Demo] onMounted");
         const timer = setInterval(() => {
@@ -48,6 +51,7 @@ function ApplicationView() {
       },
     },
     [
+      // Title & version
       View(
         {
           style: {
@@ -60,156 +64,140 @@ function ApplicationView() {
       ),
       View({}, [TimelessNativeVersion]),
       View(
-        {
-          style: {
-            "margin-bottom": "12px",
-            color: "#666",
-          },
-        },
+        { style: { "margin-bottom": "12px", color: "#666" } },
         ["Counter: ", count_],
       ),
-      // Image example
-      View(
-        {
-          style: {
-            "margin-bottom": "12px",
-            "font-size": "16px",
-            "font-weight": "bold",
-          },
-        },
-        ["Image Component:"],
-      ),
+
+      // ── Image ──────────────────────────────────────────────
+      SectionTitle("Image:"),
       Img({
         src: "https://picsum.photos/200/120",
-        style: {
-          width: "200px",
-          height: "120px",
-          "margin-bottom": "12px",
-        },
+        style: { width: "200px", height: "120px", "margin-bottom": "12px" },
       }),
-      // Input example
-      View(
-        {
-          style: {
-            "margin-bottom": "8px",
-            "font-size": "16px",
-            "font-weight": "bold",
-          },
-        },
-        ["Input Component:"],
+
+      // ── Icon (SF Symbols) ──────────────────────────────────
+      SectionTitle("Icon (SF Symbols):"),
+      Row(
+        { gap: 12, style: { "margin-bottom": "12px" } },
+        [
+          Icon({ name: "star.fill", color: "#FFB800", size: 28 }),
+          Icon({ name: "heart.fill", color: "#FF3B30", size: 28 }),
+          Icon({ name: "house.fill", color: "#007AFF", size: 28 }),
+          Icon({ name: "gear", color: "#8E8E93", size: 28 }),
+          Icon({ name: "person.circle.fill", color: "#34C759", size: 28 }),
+        ],
       ),
-      View({}, [
-        View({}, [
-          Input({
-            placeholder: "Type something here...",
-            value: input_,
-            style: {
-              "font-size": "14px",
-              "margin-bottom": "8px",
-            },
-            onInput(e) {
-              input_.set(e.target.value);
-            },
-          }),
-          Button({}, ["Search"]),
-        ]),
+
+      // ── Row ────────────────────────────────────────────────
+      SectionTitle("Row (horizontal layout with gap):"),
+      Row(
+        { gap: 8, style: { "margin-bottom": "12px" } },
+        [Button({}, ["Alpha"]), Button({}, ["Beta"]), Button({}, ["Gamma"])],
+      ),
+
+      // ── Column ─────────────────────────────────────────────
+      SectionTitle("Column (vertical layout with gap):"),
+      Column(
+        { gap: 6, style: { "margin-bottom": "12px" } },
+        [Button({}, ["First"]), Button({}, ["Second"]), Button({}, ["Third"])],
+      ),
+
+      // ── Input ──────────────────────────────────────────────
+      SectionTitle("Input:"),
+      View({ style: { "margin-bottom": "12px" } }, [
+        Row(
+          { gap: 8, style: { "margin-bottom": "8px" } },
+          [
+            Input({
+              placeholder: "Type something...",
+              value: input_,
+              style: { "font-size": "14px" },
+              onInput(e) {
+                input_.set(e.target.value);
+              },
+            }),
+            Button({}, ["Search"]),
+          ],
+        ),
         View(
-          {
-            style: {
-              "margin-bottom": "12px",
-              color: "#888",
-              "font-size": "13px",
-            },
-          },
+          { style: { color: "#888", "font-size": "13px" } },
           ["You typed: ", input_],
         ),
       ]),
-      // Button examples
-      View(
-        {
-          style: {
-            "margin-bottom": "8px",
-            "font-size": "16px",
-            "font-weight": "bold",
+
+      // ── Textarea ───────────────────────────────────────────
+      SectionTitle("Textarea:"),
+      View({ style: { "margin-bottom": "12px" } }, [
+        Textarea({
+          placeholder: "Enter multiple lines...",
+          value: textareaContent_,
+          style: { height: "80px" },
+          onInput(e) {
+            textareaContent_.set(e.target.value);
           },
-        },
-        ["Button Component:"],
-      ),
+        }),
+        View(
+          { style: { color: "#888", "font-size": "13px", "margin-top": "4px" } },
+          ["Content: ", textareaContent_],
+        ),
+      ]),
+
+      // ── NumberInput ────────────────────────────────────────
+      SectionTitle("NumberInput:"),
+      View({ style: { "margin-bottom": "12px" } }, [
+        NumberInput({
+          value: numberValue_,
+          placeholder: "Enter a number...",
+          onInput(e) {
+            numberValue_.set(e.target.value);
+          },
+        }),
+        View(
+          { style: { color: "#888", "font-size": "13px" } },
+          ["Value: ", numberValue_],
+        ),
+      ]),
+
+      // ── Button ─────────────────────────────────────────────
+      SectionTitle("Button:"),
       Button(
         {
-          style: {
-            "margin-bottom": "12px",
-          },
+          style: { "margin-bottom": "12px" },
           onClick() {
             count_.set(0);
           },
         },
         ["Reset Counter"],
       ),
-      View(
-        {
-          style: {
-            "margin-bottom": "8px",
-            "font-size": "16px",
-            "font-weight": "bold",
-          },
-        },
-        ["Checkbox Component:"],
-      ),
-      View(
-        {
-          style: {
-            "margin-bottom": "8px",
-          },
-        },
+
+      // ── Checkbox ───────────────────────────────────────────
+      SectionTitle("Checkbox:"),
+      Row(
+        { gap: 8, style: { "margin-bottom": "8px" } },
         [
           Checkbox({
             checked: agreed,
-            onChange(event) {
-              agreed.set(event.target.checked);
+            onChange(e) {
+              agreed.set(e.target.checked);
             },
           }),
-          View(
-            {
-              style: {
-                "margin-left": "8px",
-              },
-            },
-            ["I agree to terms"],
-          ),
+          View({}, ["I agree to terms"]),
         ],
       ),
-      View(
-        {
-          style: {
-            "margin-bottom": "8px",
-          },
-        },
+      Row(
+        { gap: 8, style: { "margin-bottom": "8px" } },
         [
           Checkbox({
             checked: subscribe,
-            onChange(event) {
-              subscribe.set(event.target.checked);
+            onChange(e) {
+              subscribe.set(e.target.checked);
             },
           }),
-          View(
-            {
-              style: {
-                "margin-left": "8px",
-              },
-            },
-            ["Subscribe to newsletter"],
-          ),
+          View({}, ["Subscribe to newsletter"]),
         ],
       ),
       View(
-        {
-          style: {
-            "margin-bottom": "12px",
-            color: "#888",
-            "font-size": "13px",
-          },
-        },
+        { style: { "margin-bottom": "12px", color: "#888", "font-size": "13px" } },
         [
           "Agreed: ",
           computed(agreed, (v) => (v ? "Yes" : "No")),
@@ -217,10 +205,76 @@ function ApplicationView() {
           computed(subscribe, (v) => (v ? "Yes" : "No")),
         ],
       ),
+
+      // ── Radio ──────────────────────────────────────────────
+      SectionTitle("Radio:"),
+      Column(
+        { gap: 6, style: { "margin-bottom": "8px" } },
+        [
+          Row(
+            { gap: 8 },
+            [
+              Radio({
+                checked: computed(selectedFruit_, (v) => v === "apple"),
+                onChange(e) {
+                  if (e.target.checked) selectedFruit_.set("apple");
+                },
+              }),
+              View({}, ["Apple"]),
+            ],
+          ),
+          Row(
+            { gap: 8 },
+            [
+              Radio({
+                checked: computed(selectedFruit_, (v) => v === "banana"),
+                onChange(e) {
+                  if (e.target.checked) selectedFruit_.set("banana");
+                },
+              }),
+              View({}, ["Banana"]),
+            ],
+          ),
+          Row(
+            { gap: 8 },
+            [
+              Radio({
+                checked: computed(selectedFruit_, (v) => v === "cherry"),
+                onChange(e) {
+                  if (e.target.checked) selectedFruit_.set("cherry");
+                },
+              }),
+              View({}, ["Cherry"]),
+            ],
+          ),
+        ],
+      ),
+      View(
+        { style: { "margin-bottom": "12px", color: "#888", "font-size": "13px" } },
+        ["Selected fruit: ", selectedFruit_],
+      ),
+
+      // ── Select ─────────────────────────────────────────────
+      SectionTitle("Select:"),
+      View({ style: { "margin-bottom": "12px" } }, [
+        Select({
+          options: [
+            { value: "Red", label: "Red" },
+            { value: "Green", label: "Green" },
+            { value: "Blue", label: "Blue" },
+            { value: "Yellow", label: "Yellow" },
+          ],
+          onChange(e) {
+            selectedColor_.set(e.target.value);
+          },
+        }),
+        View(
+          { style: { color: "#888", "font-size": "13px", "margin-top": "4px" } },
+          ["Selected color: ", selectedColor_],
+        ),
+      ]),
     ],
   );
 }
 
-// Render the app
-// render(ApplicationView({}), document.getElementById("root"));
 render(ApplicationView({}));

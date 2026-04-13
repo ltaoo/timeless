@@ -10,6 +10,14 @@ enum NativeNode {
     case img(src: String, style: [String: String])
     case button(style: [String: String], children: [NativeNode], jsValue: JSValue?)
     case input(value: String, placeholder: String, style: [String: String], jsValue: JSValue?)
+    case checkbox(checked: Bool, style: [String: String], jsValue: JSValue?)
+    case textarea(value: String, placeholder: String, disabled: Bool, style: [String: String], jsValue: JSValue?)
+    case numberInput(value: String, placeholder: String, disabled: Bool, style: [String: String], jsValue: JSValue?)
+    case radio(checked: Bool, style: [String: String], jsValue: JSValue?)
+    case row(style: [String: String], children: [NativeNode])
+    case column(style: [String: String], children: [NativeNode])
+    case select(items: [String], style: [String: String], jsValue: JSValue?)
+    case icon(name: String, color: String, size: CGFloat, style: [String: String])
 }
 
 /// Bridge between JavaScriptCore and native rendering.
@@ -179,11 +187,102 @@ class JSBridge {
             let inputValue = dict["value"] as? String ?? ""
             let placeholder = dict["placeholder"] as? String ?? ""
             let style = dict["style"] as? [String: String] ?? [:]
-
-
             return .input(value: inputValue, placeholder: placeholder, style: style, jsValue: value)
         }
 
+        if type == "checkbox" {
+            let checked = dict["checked"] as? Bool ?? false
+            let style = dict["style"] as? [String: String] ?? [:]
+            return .checkbox(checked: checked, style: style, jsValue: value)
+        }
+
+        if type == "textarea" {
+            let textValue = dict["value"] as? String ?? ""
+            let placeholder = dict["placeholder"] as? String ?? ""
+            let disabled = dict["disabled"] as? Bool ?? false
+            let style = dict["style"] as? [String: String] ?? [:]
+            return .textarea(value: textValue, placeholder: placeholder, disabled: disabled, style: style, jsValue: value)
+        }
+
+        if type == "number-input" {
+            let numValue = dict["value"] as? String ?? ""
+            let placeholder = dict["placeholder"] as? String ?? ""
+            let disabled = dict["disabled"] as? Bool ?? false
+            let style = dict["style"] as? [String: String] ?? [:]
+            return .numberInput(value: numValue, placeholder: placeholder, disabled: disabled, style: style, jsValue: value)
+        }
+
+        if type == "radio" {
+            let checked = dict["checked"] as? Bool ?? false
+            let style = dict["style"] as? [String: String] ?? [:]
+            return .radio(checked: checked, style: style, jsValue: value)
+        }
+
+        if type == "row" {
+            let style = dict["style"] as? [String: String] ?? [:]
+            let children = parseChildren(value)
+            return .row(style: style, children: children)
+        }
+
+        if type == "column" {
+            let style = dict["style"] as? [String: String] ?? [:]
+            let children = parseChildren(value)
+            return .column(style: style, children: children)
+        }
+
+        if type == "select" {
+            let style = dict["style"] as? [String: String] ?? [:]
+            var items: [String] = []
+            for child in parseChildren(value) {
+                switch child {
+                case .text(let label, _, _):
+                    items.append(label)
+                case .view(_, let viewChildren):
+                    // defaultSelectRender wraps each label in View({}, [text])
+                    for viewChild in viewChildren {
+                        if case .text(let label, _, _) = viewChild {
+                            items.append(label)
+                            break
+                        }
+                    }
+                default:
+                    break
+                }
+            }
+            return .select(items: items, style: style, jsValue: value)
+        }
+
+        if type == "icon" {
+            let name = dict["name"] as? String ?? ""
+            let color = dict["color"] as? String ?? ""
+            let size: CGFloat
+            if let s = dict["size"] as? Double { size = CGFloat(s) }
+            else if let s = dict["size"] as? Int { size = CGFloat(s) }
+            else { size = 24 }
+            let style = dict["style"] as? [String: String] ?? [:]
+            return .icon(name: name, color: color, size: size, style: style)
+        }
+
         return nil
+    }
+
+    private func parseChildren(_ value: JSValue) -> [NativeNode] {
+        var children: [NativeNode] = []
+        guard let jsChildren = value.forProperty("children"), jsChildren.isArray else { return children }
+        let length = Int(jsChildren.forProperty("length").toInt32())
+        for i in 0..<length {
+            guard let child = jsChildren.atIndex(i) else { continue }
+            // Flatten transparent logical containers (For, Fragment) into their parent's children
+            if let childDict = child.toDictionary(),
+               let childType = childDict["type"] as? String,
+               childType == "for" || childType == "fragment" {
+                children.append(contentsOf: parseChildren(child))
+                continue
+            }
+            if let node = parseNode(child) {
+                children.append(node)
+            }
+        }
+        return children
     }
 }

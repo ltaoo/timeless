@@ -1,6 +1,6 @@
 {
   "name": "@timeless/dev",
-  "version": "0.17.2",
+  "version": "0.18.0",
   "type": "module",
   "types": "./global.d.ts",
   "exports": {

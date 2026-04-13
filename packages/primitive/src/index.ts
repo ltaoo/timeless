@@ -32,6 +32,8 @@ export * from "./input/checkbox";
 export * from "./input/select";
 export * from "./input/slider";
 export * from "./input/file-picker";
+export * from "./input/textarea";
+export * from "./input/radio";
 
 export * from "./interaction/link";
 export * from "./interaction/button";

@@ -146,6 +146,150 @@ enum NativeViewRenderer {
                 }
             }
             return textField
+
+        case .checkbox(let checked, let style, let jsValue):
+            let button = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+            button.state = checked ? .on : .off
+            applyStyle(style, to: button)
+            if let jsValue = jsValue {
+                let listeners = jsValue.forProperty("listeners")
+                if let clickHandler = listeners?.forProperty("click"), !clickHandler.isUndefined {
+                    let helper = CheckboxClickHelper(button: button, callback: clickHandler)
+                    button.target = helper
+                    button.action = #selector(CheckboxClickHelper.handleClick)
+                    objc_setAssociatedObject(button, "checkboxHelper", helper, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+                }
+            }
+            return button
+
+        case .textarea(let value, let placeholder, let disabled, let style, let jsValue):
+            let scrollView = NSScrollView()
+            scrollView.hasVerticalScroller = true
+            scrollView.autohidesScrollers = true
+            scrollView.borderType = .bezelBorder
+            let textView = NSTextView()
+            textView.string = value
+            textView.isEditable = !disabled
+            textView.isRichText = false
+            textView.font = .systemFont(ofSize: 14)
+            // Placeholder drawn manually when empty
+            if value.isEmpty {
+                textView.string = placeholder
+                textView.textColor = .placeholderTextColor
+            } else {
+                textView.textColor = .labelColor
+            }
+            applyStyle(style, to: scrollView)
+            scrollView.documentView = textView
+            if let jsValue = jsValue {
+                let listeners = jsValue.forProperty("listeners")
+                if let inputHandler = listeners?.forProperty("input"), !inputHandler.isUndefined {
+                    let delegate = TextViewInputDelegate(placeholder: placeholder, callback: inputHandler)
+                    textView.delegate = delegate
+                    objc_setAssociatedObject(textView, "textViewDelegate", delegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+                }
+            }
+            let h = parsePx(style["height"])
+            scrollView.heightAnchor.constraint(equalToConstant: h > 0 ? h : 80).isActive = true
+            return scrollView
+
+        case .numberInput(let value, let placeholder, let disabled, let style, let jsValue):
+            let textField = NSTextField()
+            textField.stringValue = value
+            textField.placeholderString = placeholder
+            textField.isEditable = !disabled
+            textField.isBezeled = true
+            textField.bezelStyle = .roundedBezel
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            textField.formatter = formatter
+            applyStyle(style, to: textField)
+            applyTextStyle(style, to: textField)
+            if let jsValue = jsValue {
+                let listeners = jsValue.forProperty("listeners")
+                if let inputHandler = listeners?.forProperty("input"), !inputHandler.isUndefined {
+                    let delegate = TextFieldInputDelegate(callback: inputHandler)
+                    textField.delegate = delegate
+                    objc_setAssociatedObject(textField, "inputDelegate", delegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+                }
+            }
+            return textField
+
+        case .radio(let checked, let style, let jsValue):
+            let button = NSButton(radioButtonWithTitle: "", target: nil, action: nil)
+            button.state = checked ? .on : .off
+            applyStyle(style, to: button)
+            if let jsValue = jsValue {
+                let listeners = jsValue.forProperty("listeners")
+                if let clickHandler = listeners?.forProperty("click"), !clickHandler.isUndefined {
+                    let helper = CheckboxClickHelper(button: button, callback: clickHandler)
+                    button.target = helper
+                    button.action = #selector(CheckboxClickHelper.handleClick)
+                    objc_setAssociatedObject(button, "radioHelper", helper, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+                }
+            }
+            return button
+
+        case .row(let style, let children):
+            let stack = NSStackView()
+            stack.orientation = .horizontal
+            stack.alignment = .centerY
+            stack.distribution = .fill
+            stack.spacing = parsePx(style["gap"])
+            applyStyle(style, to: stack)
+            for child in children {
+                if let childView = render(child) {
+                    stack.addArrangedSubview(childView)
+                }
+            }
+            return stack
+
+        case .column(let style, let children):
+            let stack = NSStackView()
+            stack.orientation = .vertical
+            stack.alignment = .leading
+            stack.distribution = .fill
+            stack.spacing = parsePx(style["gap"])
+            applyStyle(style, to: stack)
+            for child in children {
+                if let childView = render(child) {
+                    stack.addArrangedSubview(childView)
+                }
+            }
+            return stack
+
+        case .select(let items, let style, let jsValue):
+            let popUp = NSPopUpButton(frame: .zero, pullsDown: false)
+            popUp.addItems(withTitles: items)
+            applyStyle(style, to: popUp)
+            if let jsValue = jsValue {
+                let listeners = jsValue.forProperty("listeners")
+                if let changeHandler = listeners?.forProperty("change"), !changeHandler.isUndefined {
+                    let helper = PopUpButtonChangeHelper(popUp: popUp, callback: changeHandler)
+                    popUp.target = helper
+                    popUp.action = #selector(PopUpButtonChangeHelper.handleChange)
+                    objc_setAssociatedObject(popUp, "popUpHelper", helper, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+                }
+            }
+            return popUp
+
+        case .icon(let name, let color, let size, let style):
+            let imageView = NSImageView()
+            if #available(macOS 11.0, *) {
+                let config = NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
+                if let img = NSImage(systemSymbolName: name, accessibilityDescription: nil)?
+                    .withSymbolConfiguration(config) {
+                    imageView.image = img
+                }
+            }
+            imageView.imageScaling = .scaleProportionallyUpOrDown
+            if !color.isEmpty, let c = parseColor(color) {
+                imageView.contentTintColor = c
+            }
+            applyStyle(style, to: imageView)
+            imageView.widthAnchor.constraint(equalToConstant: size).isActive = true
+            imageView.heightAnchor.constraint(equalToConstant: size).isActive = true
+            return imageView
         }
     }
 
@@ -258,6 +402,24 @@ class ButtonClickHelper: NSObject {
     }
 }
 
+// MARK: - Checkbox click helper
+
+class CheckboxClickHelper: NSObject {
+    weak var button: NSButton?
+    let callback: JSValue
+
+    init(button: NSButton, callback: JSValue) {
+        self.button = button
+        self.callback = callback
+    }
+
+    @objc func handleClick() {
+        let isChecked = button?.state == .on
+        let event: [String: Any] = ["target": ["checked": isChecked]]
+        callback.call(withArguments: [event])
+    }
+}
+
 // MARK: - TextField input delegate
 
 class TextFieldInputDelegate: NSObject, NSTextFieldDelegate {
@@ -270,6 +432,47 @@ class TextFieldInputDelegate: NSObject, NSTextFieldDelegate {
     func controlTextDidChange(_ obj: Notification) {
         guard let textField = obj.object as? NSTextField else { return }
         let event: [String: Any] = ["target": ["value": textField.stringValue]]
+        callback.call(withArguments: [event])
+    }
+}
+
+// MARK: - TextView input delegate (textarea)
+
+class TextViewInputDelegate: NSObject, NSTextViewDelegate {
+    let placeholder: String
+    let callback: JSValue
+
+    init(placeholder: String, callback: JSValue) {
+        self.placeholder = placeholder
+        self.callback = callback
+    }
+
+    func textDidChange(_ notification: Notification) {
+        guard let textView = notification.object as? NSTextView else { return }
+        // Clear placeholder style on first real input
+        if textView.textColor == .placeholderTextColor {
+            textView.string = ""
+            textView.textColor = .labelColor
+        }
+        let event: [String: Any] = ["target": ["value": textView.string]]
+        callback.call(withArguments: [event])
+    }
+}
+
+// MARK: - PopUpButton change helper (select)
+
+class PopUpButtonChangeHelper: NSObject {
+    weak var popUp: NSPopUpButton?
+    let callback: JSValue
+
+    init(popUp: NSPopUpButton, callback: JSValue) {
+        self.popUp = popUp
+        self.callback = callback
+    }
+
+    @objc func handleChange() {
+        let selected = popUp?.titleOfSelectedItem ?? ""
+        let event: [String: Any] = ["target": ["value": selected]]
         callback.call(withArguments: [event])
     }
 }

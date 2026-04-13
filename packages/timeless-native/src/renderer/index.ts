@@ -40,6 +40,7 @@ function build(elm: TimelessElement): any {
   }
   if (elm.t === "text") {
     const text$ = NativeText();
+    // @ts-ignore
     elm.$elm = text$;
     return text$;
   }
