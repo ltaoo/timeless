@@ -34,7 +34,7 @@ export function DOMView(props: {
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
-      // console.log("[DOMView] hydrate", elm.children, $elm.childNodes);
+      console.log("[dom]host/view - hydrate", $elm, elm.state);
       common$.methods.set$elm($elm);
       common$.methods.setupEventListener(elm.events);
       if (elm.children) {

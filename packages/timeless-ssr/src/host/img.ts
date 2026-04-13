@@ -20,7 +20,13 @@ export function SSRImg(props: {
     },
     render(elm: TimelessElement) {
       const attrs = box$.buildAttributes(elm.state);
-      return `<img${attrs} />`;
+      if (elm.state.src) {
+        attrs.push(`src="${elm.state.src}"`);
+      }
+      if (elm.state.alt) {
+        attrs.push(`alt="${elm.state.alt}"`);
+      }
+      return `<img${box$.stringifyAttrs(attrs)} />`;
     },
     hydrate(elm: TimelessElement, $dom: any) {},
     setSrc() {},

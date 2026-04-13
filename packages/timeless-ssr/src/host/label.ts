@@ -20,7 +20,10 @@ export function SSRLabel(props: {
     render(elm: TimelessElement) {
       const attrs = box$.buildAttributes(elm.state);
       const children = box$.buildChildren(elm.children, props.build);
-      return `<label${attrs}>${children}</label>`;
+      if (elm.state.for) {
+        attrs.push(`for="${elm.state.for}"`);
+      }
+      return `<label${box$.stringifyAttrs(attrs)} >${children}</label>`;
     },
     hydrate(elm: TimelessElement, $dom: any) {},
   };

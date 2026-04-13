@@ -186,6 +186,9 @@ function ApplicationView() {
           return t.value === "todo" ? "todo-page" : "home-page";
         }),
       ]),
+      style: {
+        color: "#fff",
+      },
       onMounted() {
         console.log("[ApplicationView] onMounted");
         // const timer = setInterval(() => {
@@ -226,6 +229,24 @@ function ApplicationView() {
           ["click it"],
         ),
       ]),
+      Input({
+        id: "keyword",
+        value: keyword_,
+        onInput(event) {
+          // console.log("input onChange", event.target.value);
+          keyword_.as(event.target.value);
+        },
+      }),
+      keyword_,
+      Button(
+        {
+          onClick() {
+            keyword_.as((prev) => prev + "_new");
+          },
+        },
+        ["update keyword"],
+      ),
+      View({}, [Label({ for: "keyword" }, ["Keyword Label"])]),
       // Show({
       //   when: visible_,
       //   ok() {

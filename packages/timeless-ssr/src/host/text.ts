@@ -5,7 +5,6 @@ export type SSRText = VNodeView<string> & {
   t: "text";
   render(elm: TimelessElement): string;
   hydrate(elm: TimelessElement, $dom: any): void;
-  setContent(value: string | number | null): void;
 };
 
 export function SSRText(props: {
@@ -19,9 +18,8 @@ export function SSRText(props: {
     getType() {
       return "text";
     },
-    setContent() {},
     render(elm: TimelessElement) {
-      console.log("render text element", elm);
+      // console.log("render text element", elm);
       const value = elm.state.value;
       if (value !== null && value !== undefined) {
         return textEscape(String(value));

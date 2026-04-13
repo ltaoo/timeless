@@ -342,26 +342,25 @@ export function Textarea(props: TextareaProps) {
           // host.setClassName($elm, cls);
         } else if (isRef(cls)) {
           cls.subscribe({
-            onChange(v) {
-              // host.setClassName($elm, String(v));
+            onChange(v: string) {
+              state.styleSet = v.split(" ");
               if ($elm) {
-                state.styleSet = v as string[];
-                $elm.setStyleSet(v);
+                $elm.setStyleSet(state.styleSet);
               }
             },
           });
           // host.setClassName($elm, String(cls.value));
-          state.styleSet = [cls.value];
+          state.styleSet = cls.value.split(" ");
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
-            onChange(v: any) {
-              state.styleSet = v as string[];
+            onChange(v: string[]) {
+              state.styleSet = v;
               if ($elm) {
-                $elm.setStyleSet(Array.isArray(v) ? v : [v]);
+                $elm.setStyleSet(v);
               }
             },
           });
-          state.styleSet = [cls.toString()];
+          state.styleSet = cls.value;
         }
       }
 

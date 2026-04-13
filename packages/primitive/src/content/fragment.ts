@@ -1,10 +1,11 @@
 import { MountedEvent } from "@/event";
+import { VNodeView } from "@/vnode/view";
 
 import { TimelessElement, ViewChildren, isElement } from "./type";
 import { Box } from "./box";
 
 export type FragmentProps = {
-  onMounted?: (event: MountedEvent) => void;
+  onMounted?: (event: MountedEvent<VNodeView<any>>) => void;
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
 };

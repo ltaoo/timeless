@@ -366,8 +366,8 @@ export function Input(props: InputProps = {}) {
           state.styleSet = [cls.value];
         } else if (isClassNameRef(cls)) {
           cls.subscribe({
-            onChange(v: any) {
-              state.styleSet = v as string[];
+            onChange(v: string[]) {
+              state.styleSet = v;
               if ($elm) {
                 $elm.setStyleSet(Array.isArray(v) ? v : [v]);
               }
@@ -432,135 +432,12 @@ export function Input(props: InputProps = {}) {
     state,
     children: [],
     events: events,
-    render() {
-      // if (state.rendered) {
-      //   return $elm;
-      // }
-      // state.rendered = true;
-
-      // // Event methods.listeners
-      // if (onClick) {
-      //   const handler = function (event: MouseEvent) {
-      //     onClick(event);
-      //   };
-      //   methods.listen("click", handler);
-      // }
-
-      // if (onDoubleClick) {
-      //   const handler = function (event: MouseEvent) {
-      //     onDoubleClick(event);
-      //   };
-      //   methods.listen("dblclick", handler);
-      // }
-
-      // if (onLongPress) {
-      //   let long_press_timer: any = null;
-      //   let start_x = 0;
-      //   let start_y = 0;
-      //   const longPressDuration = 500;
-      //   const moveThreshold = 10;
-
-      //   const handleStart = (event: PointerEvent) => {
-      //     start_x = event.clientX;
-      //     start_y = event.clientY;
-      //     long_press_timer = setTimeout(() => {
-      //       onLongPress(event);
-      //       long_press_timer = null;
-      //     }, longPressDuration);
-      //   };
-
-      //   const handleMove = (event: PointerEvent) => {
-      //     if (long_press_timer) {
-      //       const deltaX = Math.abs(event.clientX - start_x);
-      //       const deltaY = Math.abs(event.clientY - start_y);
-      //       if (deltaX > moveThreshold || deltaY > moveThreshold) {
-      //         clearTimeout(long_press_timer);
-      //         long_press_timer = null;
-      //       }
-      //     }
-      //   };
-
-      //   const handleEnd = () => {
-      //     if (long_press_timer) {
-      //       clearTimeout(long_press_timer);
-      //       long_press_timer = null;
-      //     }
-      //   };
-
-      //   methods.listen("pointerdown", handleStart);
-      //   methods.listen("pointermove", handleMove);
-      //   methods.listen("pointerup", handleEnd);
-      //   methods.listen("pointercancel", handleEnd);
-      // }
-
-      // if (onPointerDown) {
-      //   const handler = function (event: PointerEvent) {
-      //     onPointerDown(event);
-      //   };
-      //   methods.listen("pointerdown", handler);
-      // }
-
-      // if (onFocus) {
-      //   const handler = function (event: FocusEvent) {
-      //     onFocus(event);
-      //   };
-      //   methods.listen("focus", handler);
-      // }
-
-      // if (onBlur) {
-      //   const handler = function (event: FocusEvent) {
-      //     onBlur(event);
-      //   };
-      //   methods.listen("blur", handler);
-      // }
-
-      // if (onKeyDown) {
-      //   const handler = function (event: KeyboardEvent) {
-      //     onKeyDown(event);
-      //   };
-      //   methods.listen("keydown", handler);
-      // }
-
-      // if (onMouseEnter) {
-      //   const handler = function (event: MouseEvent) {
-      //     onMouseEnter(event);
-      //   };
-      //   methods.listen("mouseenter", handler);
-      // }
-
-      // if (onMouseLeave) {
-      //   const handler = function (event: MouseEvent) {
-      //     onMouseLeave(event);
-      //   };
-      //   methods.listen("mouseleave", handler);
-      // }
-
-      // if (onChange) {
-      //   const handler = function (event: Event) {
-      //     onChange(event);
-      //   };
-      //   methods.listen("change", handler);
-      // }
-
-      // if (onMounted) {
-      //   manager$.push(onMounted({ target: $elm }));
-      // }
-
-      return $elm;
-    },
     onMounted(event: MountedEvent) {
       // console.log("[]input onMounted", $elm);
-      // $elm = event.target;
       state.rendered = true;
-      const handler = function (event: InputEvent) {
-        if (onInput) {
-          onInput(event);
-        }
-      };
       if (onMounted) {
         onMounted(event);
       }
-      methods.listen("input", handler);
     },
     beforeUnmounted() {
       if (beforeUnmounted) {

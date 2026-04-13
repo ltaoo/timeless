@@ -71,6 +71,28 @@ export function DOMCheckbox(props: {
     hydrate(elm: TimelessElement, $elm: HTMLElement) {
       common$.methods.set$elm($elm);
       common$.methods.setupEventListener(elm.events);
+      const events = elm.events;
+      $elm.addEventListener("click", function (event) {
+        event.preventDefault();
+        if (events && events.onChange) {
+          events.onChange(event);
+        }
+      });
+      if (events) {
+        // const onChange = events.onChange;
+        // if (onChange) {
+        //   $elm.addEventListener("change", function (event) {
+        //     event.preventDefault();
+        //     onChange(event);
+        //   });
+        // }
+        if (events.onFocus) {
+          $elm.addEventListener("focus", events.onFocus);
+        }
+        if (events.onBlur) {
+          $elm.addEventListener("blur", events.onBlur);
+        }
+      }
     },
     setChecked(checked: boolean) {
       const $elm = common$.methods.get$elm();

@@ -17,7 +17,7 @@ export function Checkbox(
   return CheckboxPrimitive.Root(
     {
       store,
-      onMounted(event) {
+      onMounted() {
         listener$.add(
           store.onStateChange(() => {
             state_.as(store.state);

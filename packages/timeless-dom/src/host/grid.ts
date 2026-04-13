@@ -47,7 +47,7 @@ export function DOMGrid(props: {
       // view$.hydrate(elm, $dom);
     },
     getChildren: view$.getChildren,
-    appendChildren: view$.appendChildren,
+    buildChildren: view$.buildChildren,
     insertChildren: view$.insertChildren,
     removeChildren: view$.removeChildren,
     getParent: view$.getParent,

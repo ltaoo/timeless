@@ -1,5 +1,5 @@
 // Timeless umbrella package - re-exports all subpackages
-console.log("timeless.version" + __Version);
+console.log("timeless.version " + __Version);
 
 // Re-export primitive (rendering layer)
 export * from "@timeless/primitive";

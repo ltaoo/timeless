@@ -4,13 +4,19 @@ import {
   VNodeView,
 } from "@timeless/timeless";
 
-function buildAttributes(state: TimelessElement["state"]): string {
+function buildAttributes(state: TimelessElement["state"]): string[] {
   const attributes: {
     key: string;
     value: string;
   }[] = [];
   if (!state) {
-    return "";
+    return [];
+  }
+  if (state.id !== undefined) {
+    attributes.push({
+      key: "id",
+      value: state.id,
+    });
   }
   if (state.styleSet && state.styleSet.length > 0) {
     const r = state.styleSet.join(" ");
@@ -51,12 +57,9 @@ function buildAttributes(state: TimelessElement["state"]): string {
     }
   }
   if (attributes.length === 0) {
-    return "";
+    return [];
   }
-  const attr_str = attributes
-    .map((attr) => `${attr.key}="${attr.value}"`)
-    .join(" ");
-  return " " + attr_str;
+  return attributes.map((attr) => `${attr.key}="${attr.value}"`);
 }
 
 function buildChildren(
@@ -127,7 +130,14 @@ export function SSRBox() {
     getChildren() {
       return [];
     },
-    buildChildren() {},
+    buildChildren() {
+      return {
+        $fragment: null,
+        child_nodes: [],
+        child_elements: [],
+        child_host_nodes: [],
+      };
+    },
     insertChildren() {},
     removeChildren() {},
     getParent() {
@@ -137,6 +147,12 @@ export function SSRBox() {
   return {
     buildAttributes,
     buildChildren,
+    stringifyAttrs(attrs: string[]) {
+      if (attrs.length === 0) {
+        return "";
+      }
+      return " " + attrs.join(" ");
+    },
     methods,
   };
 }

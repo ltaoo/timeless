@@ -94,9 +94,12 @@ export function hydrate_node(
   // if (vnode.t === "label") {
   //   return hydrateLabel(vnode, domNode);
   // }
-  // if (vnode.t === "input") {
-  //   return hydrateInput(vnode, domNode);
-  // }
+  if (vnode.t === "input") {
+    return hydrate_input(vnode, $elm as HTMLInputElement);
+  }
+  if (vnode.t === "checkbox") {
+    return hydrate_checkbox(vnode, $elm as HTMLInputElement);
+  }
   if (vnode.t === "file-picker") {
     return hydrate_file_picker(vnode, $elm as HTMLInputElement);
   }
@@ -189,6 +192,26 @@ function hydrate_file_picker(
   vnode.$elm = file_picker$;
   file_picker$.hydrate(vnode, $elm);
   return file_picker$;
+}
+
+function hydrate_input(
+  vnode: TimelessElement,
+  $elm: HTMLInputElement,
+): VNodeView<HTMLInputElement> {
+  const input$ = build(vnode);
+  vnode.$elm = input$;
+  input$.hydrate(vnode, $elm);
+  return input$;
+}
+
+function hydrate_checkbox(
+  vnode: TimelessElement,
+  $elm: HTMLInputElement,
+): VNodeView<HTMLInputElement> {
+  const checkbox$ = build(vnode);
+  vnode.$elm = checkbox$;
+  checkbox$.hydrate(vnode, $elm);
+  return checkbox$;
 }
 
 function hydrate_number_input(

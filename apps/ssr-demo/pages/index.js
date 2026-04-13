@@ -1,6 +1,17 @@
 // Use UMD global to ensure same module instance on client and server
-const { View, For, Show, Button, styleNames, computed, ref, refarr } =
-  window.Timeless;
+const {
+  For,
+  Show,
+  View,
+  Label,
+  Button,
+  Checkbox,
+  Input,
+  styleNames,
+  computed,
+  ref,
+  refarr,
+} = window.Timeless;
 
 /**
  * load() - Server-side data fetching
@@ -17,6 +28,7 @@ export async function load({ query }) {
     hoverBox1: false,
     hoverBox2: false,
     selectedFruit: "Apple",
+    keyword: "Hot Keyword",
   };
 }
 
@@ -48,6 +60,7 @@ export default function Page({ data }) {
   const showList = ref(data.showList);
   const fruits = refarr(data.fruits);
   const selectedFruit = ref(data.selectedFruit);
+  const keyword_ = ref(data.keyword);
 
   return View(
     {
@@ -61,6 +74,62 @@ export default function Page({ data }) {
       View({ style: infoStyle }, [
         "This page is server-rendered and hydrated on the client.",
       ]),
+
+      View(
+        {
+          style: sectionStyle,
+        },
+        [
+          View({ style: subtitleStyle }, ["Form"]),
+          View({}, [
+            Checkbox({
+              id: "fruit",
+              checked: visible_,
+              onChange(event) {
+                console.log("checkbox onChange", event.target.checked);
+                visible_.as(event.target.checked);
+              },
+            }),
+            computed(visible_, (t) => {
+              return t ? "Checked" : "No Checked";
+            }),
+            View({}, [
+              Label(
+                {
+                  for: "fruit",
+                },
+                ["Select a fruit"],
+              ),
+              Button(
+                {
+                  onClick() {
+                    visible_.as(!visible_.value);
+                  },
+                },
+                ["click it"],
+              ),
+            ]),
+            Input({
+              id: "keyword",
+              value: keyword_,
+              onInput(event) {
+                // console.log("input onChange", event.target.value);
+                keyword_.as(event.target.value);
+              },
+            }),
+            keyword_,
+            Button(
+              {
+                onClick() {
+                  keyword_.as((prev) => prev + "_new");
+                },
+              },
+              ["update keyword"],
+            ),
+            View({}, [Label({ for: "keyword" }, ["Keyword Label"])]),
+          ]),
+        ],
+      ),
 
       // Counter Section
       View({ style: sectionStyle }, [

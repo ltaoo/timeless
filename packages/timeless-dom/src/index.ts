@@ -1,7 +1,7 @@
 import { render } from "./renderer";
 import { hydrate } from "./renderer/hydrate";
 
-console.log("dom.version" + __Version);
+console.log("timeless.dom.version " + __Version);
 
 export { render };
 export { hydrate };

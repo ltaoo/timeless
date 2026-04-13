@@ -133,7 +133,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
           state.styleSet = cls.value;
           const unsubscribe = cls.subscribe({
             onChange(v: string[]) {
-              state.styleSet = v as string[];
+              state.styleSet = v;
               if ($elm && typeof $elm.setStyleSet === "function") {
                 console.log("[primitive]before invoke setStyle2");
                 $elm.setStyleSet(v);

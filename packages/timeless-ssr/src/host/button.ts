@@ -21,8 +21,10 @@ export function SSRButton(props: {
     render(elm: TimelessElement) {
       const attrs = box$.buildAttributes(elm.state);
       const children = box$.buildChildren(elm.children, props.build);
-      return `<button${attrs}>${children}</button>`;
+      return `<button${box$.stringifyAttrs(attrs)}>${children}</button>`;
     },
-    hydrate(elm: TimelessElement, $dom: any) {},
+    hydrate(elm: TimelessElement, $dom: any) {
+      return "";
+    },
   };
 }

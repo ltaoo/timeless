@@ -112,12 +112,9 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
 }
 
 function MenuSeparator(_props: ViewProps) {
-  return MenuPrimitive.Separator(
-    {
-      class: "-mx-1 my-1 h-px bg-border",
-    },
-    [],
-  );
+  return MenuPrimitive.Separator({
+    class: "-mx-1 my-1 h-px bg-border",
+  });
 }
 
 function MenuGroup(props: ViewProps & { store: MenuGroupCore }) {

@@ -168,7 +168,7 @@ export function Item(
 }
 
 export function Separator(props: ViewProps, children: ViewChildren) {
-  return MenuPrimitive.Separator(props, children);
+  return MenuPrimitive.Separator(props);
 }
 
 export function Arrow(
