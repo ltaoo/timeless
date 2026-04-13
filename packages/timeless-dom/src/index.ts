@@ -1,3 +1,5 @@
+import { setPlatform } from "@timeless/timeless";
+
 import { render } from "./renderer";
 import { hydrate } from "./renderer/hydrate";
 
@@ -7,20 +9,17 @@ export { render };
 export { hydrate };
 
 // ─── Platform ────────────────────────────────────────────────────
-
-export const platform = {
-  addEventListener(type: string, handler: (event: any) => void, options?: any) {
+export const platform = setPlatform({
+  addGlobalListener(type, handler, options) {
     if (typeof window !== "undefined") {
       window.addEventListener(type, handler, options);
+      return () => window.removeEventListener(type, handler, options);
     }
+    return () => {};
   },
-  removeEventListener(
-    type: string,
-    handler: (event: any) => void,
-    options?: any,
-  ) {
+  patchBodyStyle(style) {
     if (typeof window !== "undefined") {
-      window.removeEventListener(type, handler, options);
+      Object.assign(document.body.style, style);
     }
   },
-};
+});

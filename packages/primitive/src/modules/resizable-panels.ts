@@ -3,8 +3,8 @@ import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
-import { isStyleRef } from "@/style/index";
-// import { getHost } from "@/host";
+import { isStyleRef, styleNames } from "@/style/index";
+import { getPlatform } from "@/platform";
 
 // ResizablePanels Group - 容器组件
 export function Group(
@@ -15,33 +15,32 @@ export function Group(
   children?: ViewChildren,
 ) {
   const { store, direction = "horizontal", ...rest } = props;
-  const state_ = refobj(store.state);
-  const extraStyle =
-    rest.style &&
-    typeof rest.style === "object" &&
-    !isRef(rest.style) &&
-    !isStyleRef(rest.style)
-      ? rest.style
-      : {};
+  // const state_ = refobj(store.state);
 
   return View(
     {
       ...rest,
-      style: {
-        ...extraStyle,
-        display: "flex",
-        width: "100%",
-        height: "100%",
-        "flex-direction": direction === "horizontal" ? "row" : "column",
-      },
+      style: styleNames([
+        rest.style,
+        {
+          display: "flex",
+          width: "100%",
+          height: "100%",
+          "flex-direction": direction === "horizontal" ? "row" : "column",
+        },
+      ]),
       onMounted(event) {
-        const $el = (event as any).target as HTMLDivElement;
-        store.mount($el);
-        rest.onMounted?.(event);
+        const $el = event.target;
+        store.mount($el.get$elm());
+        if (rest.onMounted) {
+          rest.onMounted(event);
+        }
       },
       onUnmounted() {
         store.unmount();
-        rest.onUnmounted?.();
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
+        }
       },
     },
     children,
@@ -57,14 +56,8 @@ export function Panel(
   children?: ViewChildren,
 ) {
   const { store, group, ...rest } = props;
+
   const size_ = ref(store.state.size);
-  const extraStyle =
-    rest.style &&
-    typeof rest.style === "object" &&
-    !isRef(rest.style) &&
-    !isStyleRef(rest.style)
-      ? rest.style
-      : {};
 
   // 监听 state 变化
   store.onStateChange((state) => {
@@ -75,23 +68,29 @@ export function Panel(
   return View(
     {
       ...rest,
-      style: {
-        ...extraStyle,
-        "flex-basis": computed(size_, (size) => (size ? `${size}%` : "auto")),
-        "flex-grow": computed(size_, (size) => (size ? 0 : 1)),
-        "flex-shrink": 1,
-      },
+      style: styleNames([
+        rest.style,
+        {
+          "flex-basis": computed(size_, (size) => (size ? `${size}%` : "auto")),
+          "flex-grow": computed(size_, (size) => (size ? 0 : 1)),
+          "flex-shrink": 1,
+        },
+      ]),
       onMounted(event) {
-        const $el = (event as any).target as HTMLDivElement;
-        store.mount($el);
+        const $el = event.target;
+        store.mount($el.get$elm());
         if (group) {
           group.registerPanel(store);
         }
-        rest.onMounted?.(event);
+        if (rest.onMounted) {
+          rest.onMounted(event);
+        }
       },
       onUnmounted() {
         store.unmount();
-        rest.onUnmounted?.();
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
+        }
       },
     },
     children,
@@ -110,36 +109,36 @@ export function Handle(
   const { store, panelBefore, panelAfter, ...rest } = props;
 
   const state_ = refobj(store.state);
-  const isDragging_ = ref(false);
-  const extraStyle =
-    rest.style &&
-    typeof rest.style === "object" &&
-    !isRef(rest.style) &&
-    !isStyleRef(rest.style)
-      ? rest.style
-      : {};
-
+  const is_dragging_ = ref(false);
+  let cleanupMove = () => {};
+  let cleanupUp = () => {};
   return View(
     {
       ...rest,
-      style: {
-        ...extraStyle,
-        cursor: computed(state_, (state) =>
-          state.direction === "horizontal" ? "col-resize" : "row-resize",
-        ),
-        "flex-shrink": 0,
-        "user-select": "none",
-      },
+      style: styleNames([
+        rest.style,
+        {
+          cursor: computed(state_, (state) =>
+            state.direction === "horizontal" ? "col-resize" : "row-resize",
+          ),
+          "flex-shrink": 0,
+          "user-select": "none",
+        },
+      ]),
       onMouseEnter(e: MouseEvent) {
-        rest.onMouseEnter?.(e);
+        if (rest.onMouseEnter) {
+          rest.onMouseEnter(e);
+        }
       },
       onMouseLeave(e: MouseEvent) {
-        rest.onMouseLeave?.(e);
+        if (rest.onMouseLeave) {
+          rest.onMouseLeave(e);
+        }
       },
       onPointerDown(e: PointerEvent) {
         // console.log("[ResizableHandle] onPointerDown triggered", e);
         e.preventDefault();
-        isDragging_.as(true);
+        is_dragging_.as(true);
         store.startResize(panelBefore, panelAfter, e);
         // console.log("[ResizableHandle] startResize called, isDragging:", isDragging_.value);
 
@@ -147,52 +146,59 @@ export function Handle(
         const state = store.state;
         const cursor =
           state.direction === "horizontal" ? "col-resize" : "row-resize";
-        // host.patchBodyStyle?.({ cursor, userSelect: "none" });
+        getPlatform().patchBodyStyle({ cursor, userSelect: "none" });
 
         rest.onPointerDown?.(e);
       },
       onMounted(event) {
-        const $el = (event as any).target as HTMLDivElement;
+        const $el = event.target;
         // console.log("[ResizableHandle] mounted", el);
         const state = store.state;
-        const cursorClass =
+        const cursor_classname =
           state.direction === "horizontal" ? "col-resize" : "row-resize";
 
         // 监听全局 pointer 事件
         const handlePointerMove = (e: PointerEvent) => {
-          if (isDragging_.value) {
+          if (is_dragging_.value) {
             // console.log("[ResizableHandle] pointermove", e.clientX, e.clientY);
             store.resize(e);
           }
         };
 
         const handlePointerUp = (e: PointerEvent) => {
-          if (isDragging_.value) {
+          if (is_dragging_.value) {
             // console.log("[ResizableHandle] pointerup");
-            isDragging_.as(false);
+            is_dragging_.as(false);
             store.endResize();
             // 恢复光标
-            // host.patchBodyStyle?.({ cursor: "", userSelect: "" });
+            getPlatform().patchBodyStyle({ cursor: "", userSelect: "" });
           }
         };
 
-        // host.addDocumentEventListener?.("pointermove", handlePointerMove);
-        // host.addDocumentEventListener?.("pointerup", handlePointerUp);
+        cleanupMove = getPlatform().addGlobalListener(
+          "pointermove",
+          handlePointerMove as EventListener,
+        );
+        cleanupUp = getPlatform().addGlobalListener(
+          "pointerup",
+          handlePointerUp as EventListener,
+        );
 
-        // 保存清理函数到元素上
-        // const cleanup = () => {
-        //   host.removeDocumentEventListener?.("pointermove", handlePointerMove);
-        //   host.removeDocumentEventListener?.("pointerup", handlePointerUp);
-        // };
-        // ($el as any)._resizeCleanup = cleanup;
-
-        rest.onMounted?.(event);
+        if (rest.onMounted) {
+          rest.onMounted(event);
+        }
       },
       beforeUnmounted() {
-        rest.beforeUnmounted?.();
+        if (rest.beforeUnmounted) {
+          rest.beforeUnmounted();
+        }
       },
       onUnmounted() {
-        rest.onUnmounted?.();
+        cleanupMove();
+        cleanupUp();
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
+        }
       },
     },
     children,

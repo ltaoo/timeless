@@ -94,6 +94,7 @@ export function FieldLabel(
 
   const state_ = refobj(store.state);
   const error_ = ref(store.state.error);
+
   store.onStateChange((v) => state_.as(v));
   store.onError((v) => error_.as(v));
 
@@ -137,16 +138,15 @@ export function FieldInlineLabel(
       ]),
     },
     [
-      computed(state_, (t) => t.label),
       Show({
         when: computed(children, (t) => {
           return !!(t && t.length);
         }),
         ok() {
-          return [Fragment({}, children)];
+          return children;
         },
         else() {
-          return [Fragment({}, [computed(state_, (t) => t.label)])];
+          return [computed(state_, (t) => t.label)];
         },
       }),
     ],

@@ -1,0 +1,27 @@
+export interface Platform {
+  /** 监听全局事件，返回取消监听的 cleanup 函数 */
+  addGlobalListener(
+    type: string,
+    handler: EventListener,
+    options?: AddEventListenerOptions,
+  ): () => void;
+
+  /** 批量设置 document.body 样式（传空字符串可清除） */
+  patchBodyStyle(style: Record<string, string>): void;
+}
+
+const noop = () => {};
+
+let _platform: Platform = {
+  addGlobalListener: () => noop,
+  patchBodyStyle: noop,
+};
+
+export function setPlatform(p: Platform) {
+  _platform = p;
+  return p;
+}
+
+export function getPlatform(): Platform {
+  return _platform;
+}

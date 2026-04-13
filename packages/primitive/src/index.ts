@@ -111,3 +111,5 @@ export * from "./util/listener";
 export * from "./interaction/dismissable";
 
 export * from "./vnode/view";
+export { setPlatform } from "./platform";
+export type { Platform } from "./platform";
