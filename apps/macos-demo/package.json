@@ -4,12 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite build --watch",
+    "dev": "vite",
     "build": "vite build",
     "build:app": "vite build && ./scripts/build-macos.sh"
   },
   "dependencies": {
     "@timeless/timeless": "workspace:^",
+    "@timeless/timeless-dom": "workspace:^",
     "@timeless/timeless-native": "workspace:^"
   },
   "devDependencies": {

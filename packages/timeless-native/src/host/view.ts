@@ -1,18 +1,18 @@
-import { TimelessElement, VNodeView } from "@timeless/timeless";
+import {
+  isElement,
+  TimelessElement,
+  ViewStyleProperties,
+  VNodeView,
+} from "@timeless/timeless";
+import { HostElement } from "./box";
 
-import { HostElement, BoxMethods } from "./box";
-
-export type NativeView = VNodeView<any> & {
+export type NativeView = VNodeView & {
   t: "view";
-  render(elm: TimelessElement): any;
 };
 
 export function NativeView(props: {
-  build: (elm: TimelessElement) => VNodeView<any>;
+  build: (elm: TimelessElement) => VNodeView;
 }): NativeView {
-  const t = "view";
-  const box$ = HostElement({ t, $elm: null, build: props.build });
-
   const $elm = {
     type: "view",
     children: [] as any[],
@@ -20,31 +20,66 @@ export function NativeView(props: {
     attrs: {} as Record<string, string>,
     listeners: {} as Record<string, any>,
   };
+  const box$ = HostElement({ t: "view", $elm, build: props.build });
 
-  const methods: BoxMethods = box$.methods;
+  const methods = {
+    setStyle(style: ViewStyleProperties) {
+      const styleObj: Record<string, string> = {};
+      Object.keys(style).forEach((key) => {
+        const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
+        const v = style[key as keyof ViewStyleProperties];
+        if (v !== undefined && v !== null) {
+          styleObj[k] = String(v);
+        }
+      });
+      $elm.style = styleObj;
+    },
+    setupEventListener(events: any) {
+      if (events.onClick) {
+        $elm.listeners.click = events.onClick;
+      }
+      if (events.onPointerDown) {
+        $elm.listeners.pointerdown = events.onPointerDown;
+      }
+      if (events.onFocus) {
+        $elm.listeners.focus = events.onFocus;
+      }
+      if (events.onBlur) {
+        $elm.listeners.blur = events.onBlur;
+      }
+      if (events.onKeyDown) {
+        $elm.listeners.keydown = events.onKeyDown;
+      }
+      if (events.onContextMenu) {
+        $elm.listeners.contextmenu = events.onContextMenu;
+      }
+      if (events.onMouseEnter) {
+        $elm.listeners.mouseenter = events.onMouseEnter;
+      }
+      if (events.onMouseLeave) {
+        $elm.listeners.mouseleave = events.onMouseLeave;
+      }
+    },
+  };
 
   return {
-    ...methods,
-    t,
-    get $elm() {
-      return $elm;
-    },
+    ...box$.methods,
+    t: "view",
     getType() {
       return "view";
     },
     isDocumentFragment() {
       return true;
     },
-
-    setStyle(style: any) {
+    setStyle(style: ViewStyleProperties) {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
       const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
       $elm.style[k] = value;
     },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
+    setStyleSet(name: string[]) {
+      $elm.attrs.class = name.join(" ");
     },
     setAttribute(key: string, value: string) {
       $elm.attrs[key] = value;
@@ -66,52 +101,56 @@ export function NativeView(props: {
     ) {
       delete $elm.listeners[type];
     },
-    getBoundingClientRect() {
-      return {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-      };
-    },
     render(elm: TimelessElement) {
-      methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+      box$.methods.set$elm($elm);
+      if (elm.state) {
+        box$.methods.applyState(elm.state);
+      }
+      if (elm.events) {
+        methods.setupEventListener(elm.events);
+      }
       if (elm.children) {
-        methods.render(elm.children);
+        // Extract inheritable text styles from parent view
+        const inheritableKeys = [
+          "font-size",
+          "font-weight",
+          "font-style",
+          "font-family",
+          "color",
+          "text-align",
+          "text-decoration",
+          "line-height",
+          "letter-spacing",
+        ];
+        const inherited_style: Record<string, string> = {};
+        for (const key of inheritableKeys) {
+          if ($elm.style[key]) {
+            inherited_style[key] = $elm.style[key];
+          }
+        }
+        for (const child of elm.children) {
+          if (isElement(child)) {
+            const child$ = props.build(child);
+            const $child = child$.render(child);
+            if (child$ && $child) {
+              // Propagate inherited text styles to text children
+              if (
+                $child.type === "text" &&
+                Object.keys(inherited_style).length > 0
+              ) {
+                $child.style = { ...inherited_style, ...$child.style };
+              }
+              $elm.children.push($child);
+            }
+          }
+        }
       }
       return $elm;
     },
-    hydrate(elm: TimelessElement, $dom: any) {
-      methods.set$elm($dom);
-      methods.setupEventListener(elm.events);
-    },
-    buildChildren(children: (TimelessElement | null)[]) {
-      return methods.buildChildren(children);
-    },
-    insertChildren(children: (TimelessElement | null)[]) {
-      methods.insertChildren(children);
-    },
-    removeChildren() {
-      methods.removeChildren();
-    },
-    getParent() {
-      return null;
-    },
-    get$elm() {
-      return $elm;
-    },
-    getChildren() {
-      return methods.getChildren();
-    },
+    hydrate(elm: TimelessElement, $elm) {},
   };
 }
 
 export function isNativeView(value: any): value is NativeView {
-  return value.t === "view" || value.getType() === "view";
+  return value.t === "view";
 }

@@ -5,7 +5,7 @@ export type DOMText = VNodeView<Text> & {
   t: "text";
   render(elm: TimelessElement): Text | null;
   hydrate(elm: TimelessElement, $text: HTMLElement | Text): void;
-  setContent(value: string | number | null): void;
+  setText(value: string | number | null): void;
 };
 
 export function DOMText(props: {
@@ -25,7 +25,7 @@ export function DOMText(props: {
     isDocumentFragment() {
       return false;
     },
-    setContent(v?: string | number | null) {
+    setText(v?: string | number | null) {
       if (v !== undefined && v !== null) {
         $text.textContent = String(v);
       } else {

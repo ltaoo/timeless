@@ -8,8 +8,10 @@ import {
   Img,
   Button,
   Input,
+  Checkbox,
 } from "@timeless/timeless";
-import { render, platform } from "@timeless/timeless-native";
+import { render, TimelessNativeVersion } from "@timeless/timeless-native";
+// import { render } from "@timeless/timeless-dom";
 
 const apps = [
   { icon: "Movies", title: "Movies", subtitle: "Movies & Shows" },
@@ -28,7 +30,9 @@ function ApplicationView() {
     { id: 2, title: "Study for exam" },
     { id: 3, title: "Build native app" },
   ]);
-  const inputText = ref("");
+  const input_ = ref("");
+  const agreed = ref(false);
+  const subscribe = ref(false);
 
   return View(
     {
@@ -54,6 +58,7 @@ function ApplicationView() {
         },
         ["Timeless macOS Demo"],
       ),
+      View({}, [TimelessNativeVersion]),
       View(
         {
           style: {
@@ -74,14 +79,14 @@ function ApplicationView() {
         },
         ["Image Component:"],
       ),
-      // Img({
-      //   src: "https://picsum.photos/200/120",
-      //   style: {
-      //     width: "200px",
-      //     height: "120px",
-      //     "margin-bottom": "12px",
-      //   },
-      // }),
+      Img({
+        src: "https://picsum.photos/200/120",
+        style: {
+          width: "200px",
+          height: "120px",
+          "margin-bottom": "12px",
+        },
+      }),
       // Input example
       View(
         {
@@ -93,27 +98,32 @@ function ApplicationView() {
         },
         ["Input Component:"],
       ),
-      Input({
-        placeholder: "Type something here...",
-        value: inputText,
-        style: {
-          "font-size": "14px",
-          "margin-bottom": "8px",
-        },
-        onInput(e) {
-          inputText.set(e.target.value);
-        },
-      }),
-      View(
-        {
-          style: {
-            "margin-bottom": "12px",
-            color: "#888",
-            "font-size": "13px",
+      View({}, [
+        View({}, [
+          Input({
+            placeholder: "Type something here...",
+            value: input_,
+            style: {
+              "font-size": "14px",
+              "margin-bottom": "8px",
+            },
+            onInput(e) {
+              input_.set(e.target.value);
+            },
+          }),
+          Button({}, ["Search"]),
+        ]),
+        View(
+          {
+            style: {
+              "margin-bottom": "12px",
+              color: "#888",
+              "font-size": "13px",
+            },
           },
-        },
-        ["You typed: ", inputText],
-      ),
+          ["You typed: ", input_],
+        ),
+      ]),
       // Button examples
       View(
         {
@@ -136,7 +146,16 @@ function ApplicationView() {
         },
         ["Reset Counter"],
       ),
-      // Navigation
+      View(
+        {
+          style: {
+            "margin-bottom": "8px",
+            "font-size": "16px",
+            "font-weight": "bold",
+          },
+        },
+        ["Checkbox Component:"],
+      ),
       View(
         {
           style: {
@@ -144,110 +163,64 @@ function ApplicationView() {
           },
         },
         [
+          Checkbox({
+            checked: agreed,
+            onChange(event) {
+              agreed.set(event.target.checked);
+            },
+          }),
           View(
             {
               style: {
-                color: "#007bff",
-                "margin-right": "16px",
-              },
-              onClick() {
-                page.set("todo");
+                "margin-left": "8px",
               },
             },
-            ["Todo List"],
-          ),
-          View(
-            {
-              style: {
-                color: "#007bff",
-              },
-              onClick() {
-                page.set("app");
-              },
-            },
-            ["App List"],
+            ["I agree to terms"],
           ),
         ],
       ),
-      Show({
-        when: computed(page, (t) => t === "todo"),
-        ok() {
-          return [
-            View(
-              {
-                style: {
-                  "font-size": "18px",
-                  "font-weight": "bold",
-                  "margin-bottom": "8px",
-                },
-              },
-              ["Todo List"],
-            ),
-            For({
-              each: todos,
-              render(todo) {
-                return View(
-                  {
-                    style: {
-                      padding: "8px",
-                      "margin-bottom": "4px",
-                      "background-color": "#f5f5f5",
-                    },
-                  },
-                  [todo.title],
-                );
-              },
-            }),
-          ];
+      View(
+        {
+          style: {
+            "margin-bottom": "8px",
+          },
         },
-      }),
-      Show({
-        when: computed(page, (t) => t === "app"),
-        ok() {
-          return [
-            View(
-              {
-                style: {
-                  "font-size": "18px",
-                  "font-weight": "bold",
-                  "margin-bottom": "8px",
-                },
+        [
+          Checkbox({
+            checked: subscribe,
+            onChange(event) {
+              subscribe.set(event.target.checked);
+            },
+          }),
+          View(
+            {
+              style: {
+                "margin-left": "8px",
               },
-              ["Applications"],
-            ),
-            ...apps.map((app) =>
-              View(
-                {
-                  style: {
-                    padding: "8px",
-                    "margin-bottom": "4px",
-                    "background-color": "#f0f0f0",
-                  },
-                },
-                [
-                  View(
-                    { style: { "font-weight": "bold" } },
-                    [app.title],
-                  ),
-                  View(
-                    { style: { color: "#888", "font-size": "12px" } },
-                    [app.subtitle],
-                  ),
-                ],
-              ),
-            ),
-          ];
+            },
+            ["Subscribe to newsletter"],
+          ),
+        ],
+      ),
+      View(
+        {
+          style: {
+            "margin-bottom": "12px",
+            color: "#888",
+            "font-size": "13px",
+          },
         },
-      }),
+        [
+          "Agreed: ",
+          computed(agreed, (v) => (v ? "Yes" : "No")),
+          " | Subscribed: ",
+          computed(subscribe, (v) => (v ? "Yes" : "No")),
+        ],
+      ),
     ],
   );
 }
 
 // Render the app
-var root = { type: "view", children: [], style: {}, attrs: {}, listeners: {} };
-var elm = ApplicationView({});
-render(elm, root);
-
-if (root.children.length > 0) {
-  __nativeBridge_render(root.children[0]);
-}
+// render(ApplicationView({}), document.getElementById("root"));
+render(ApplicationView({}));

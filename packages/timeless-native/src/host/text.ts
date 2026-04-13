@@ -9,28 +9,25 @@ export interface NativeTextElm {
   _onContentChange?: (value: string) => void;
 }
 
-export interface NativeText {
+export type NativeText = {
+  t: "text";
   $elm: NativeTextElm;
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
-  setContent(value: string | number | null): void;
   setStyle(style: Record<string, string>): void;
   render(elm: TimelessElement): any;
-}
+  setText(value: string | number | null): void;
+};
 
-export function NativeText(value?: string | null): NativeText {
+export function NativeText(): NativeText {
   const $text: NativeTextElm = {
-    type: "text" as const,
-    value: (() => {
-      if (value !== null && value !== undefined) {
-        return String(value);
-      }
-      return "";
-    })(),
+    type: "text",
+    value: "",
     style: {},
   };
 
   return {
+    t: "text",
     get $elm() {
       return $text;
     },
@@ -38,30 +35,34 @@ export function NativeText(value?: string | null): NativeText {
       return [];
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
-    setContent(v: string | number | null) {
+    setText(v: string | number | null) {
       if (v !== null && v !== undefined) {
         const str = String(v);
         $text.value = str;
         if (typeof $text._onContentChange === "function") {
           $text._onContentChange(str);
         }
+      } else {
+        $text.value = "";
       }
     },
     setStyle(style: Record<string, string>) {
       Object.assign($text.style, style);
     },
     render(elm: TimelessElement) {
+      $text.value = (() => {
+        if (elm.state.value !== null && elm.state.value !== undefined) {
+          return String(elm.state.value);
+        }
+        return "";
+      })();
       return $text;
     },
   };
 }
 
 export function isNativeText(value: any): value is NativeText {
-  return (
-    value &&
-    typeof value.isDocumentFragment === "function" &&
-    typeof value.render === "function"
-  );
+  return value.t === "text";
 }

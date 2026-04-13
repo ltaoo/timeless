@@ -6,8 +6,8 @@ export interface TuiText {
   $elm: any;
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
-  setContent: (v: string | number | null) => void;
   render(elm: TimelessElement): any;
+  setText: (v: string | number | null) => void;
 }
 
 export function TuiText(value: string | null): TuiText {
@@ -23,7 +23,7 @@ export function TuiText(value: string | null): TuiText {
     isDocumentFragment() {
       return false;
     },
-    setContent(v) {
+    setText(v) {
       if (v) {
         // $text
       }

@@ -15,6 +15,7 @@ const INCLUDED_PACKAGES = [
   "primitive",
   "timeless",
   "timeless-dom",
+  "timeless-native",
   "timeless-ssr",
   // "timeless-canvas",
   // "timeless-tui",

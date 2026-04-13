@@ -4,6 +4,8 @@ console.log("native.version" + __Version);
 
 export { render };
 
+export const TimelessNativeVersion = __Version;
+
 export const platform = {
   addEventListener(
     type: string,

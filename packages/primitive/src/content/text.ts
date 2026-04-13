@@ -11,31 +11,33 @@ export function Text(
     value: "",
   };
   const methods = {
-    subscribe_value() {
-      if (isRef(value)) {
-        value.subscribe({
-          onChange(v) {
-            // console.log("[]Text handle value changed", v === state.value);
-            if (v === state.value) {
-              return;
-            }
-            // Always update local value to stay in sync with ref
-            state.value = String(v);
-            // Only update DOM if element exists (component is mounted)
-            if ($elm && typeof $elm.setContent === "function") {
-              // host.setTextContent($elm, _local_value);
-              $elm.setContent(state.value);
-            }
-          },
-        });
-        state.value = String(value.value);
-      } else {
-        state.value = String(value);
+    subscribe_props() {
+      if (value !== undefined) {
+        if (isRef(value)) {
+          value.subscribe({
+            onChange(v) {
+              console.log("[]Text handle value changed", v === state.value, typeof $elm.setText);
+              if (v === state.value) {
+                return;
+              }
+              // Always update local value to stay in sync with ref
+              state.value = String(v);
+              // Only update DOM if element exists (component is mounted)
+              if ($elm && typeof $elm.setText === "function") {
+                // host.setTextContent($elm, _local_value);
+                $elm.setText(state.value);
+              }
+            },
+          });
+          state.value = String(value.value);
+        } else {
+          state.value = String(value);
+        }
       }
     },
   };
 
-  methods.subscribe_value();
+  methods.subscribe_props();
 
   return {
     t: "text",

@@ -1,5 +1,7 @@
 import { type TimelessElement, isElement } from "@timeless/timeless";
 
+declare const __nativeBridge_render: (tree: any) => void;
+
 import { NativeView, isNativeView } from "@/host/view";
 import { NativeText } from "@/host/text";
 import { NativeImg } from "@/host/img";
@@ -33,128 +35,118 @@ function build(elm: TimelessElement): any {
 
   if (elm.t === "view") {
     const view$ = NativeView({ build });
-    console.log("[Native Render] View created, children:", elm.children);
-    view$.render(elm);
-    // console.log("[Native Render] View rendered, $elm:", view$.$elm);
+    elm.$elm = view$;
     return view$;
   }
   if (elm.t === "text") {
-    console.log("[Native Render] Text element:", elm.state);
     const text$ = NativeText();
-    text$.render(elm);
-    console.log("[Native Render] Text rendered, $elm:", text$.$elm);
+    elm.$elm = text$;
     return text$;
   }
   if (elm.t === "img") {
     const img$ = NativeImg({ build });
-    img$.render(elm);
+    elm.$elm = img$;
     return img$;
   }
   if (elm.t === "button") {
     const button$ = NativeButton({ build });
-    button$.render(elm);
+    elm.$elm = button$;
     return button$;
   }
   if (elm.t === "input") {
     const input$ = NativeInput({ build });
-    input$.render(elm);
+    elm.$elm = input$;
     return input$;
   }
   if (elm.t === "row") {
     const row$ = NativeRow({ build });
-    row$.render(elm);
+    elm.$elm = row$;
     return row$;
   }
   if (elm.t === "column") {
     const column$ = NativeColumn({ build });
-    column$.render(elm);
+    elm.$elm = column$;
     return column$;
   }
   if (elm.t === "checkbox") {
     const checkbox$ = NativeCheckbox({ build });
-    checkbox$.render(elm);
+    elm.$elm = checkbox$;
     return checkbox$;
   }
   if (elm.t === "radio") {
     const radio$ = NativeRadio({ build });
-    radio$.render(elm);
+    elm.$elm = radio$;
     return radio$;
   }
   if (elm.t === "textarea") {
     const textarea$ = NativeTextarea({ build });
-    textarea$.render(elm);
+    elm.$elm = textarea$;
     return textarea$;
   }
   if (elm.t === "for") {
     const for$ = NativeFor({ build });
-    for$.render(elm);
+    elm.$elm = for$;
     return for$;
   }
   if (elm.t === "show") {
     const show$ = NativeShow({ build });
-    show$.render(elm);
+    elm.$elm = show$;
     return show$;
   }
   if (elm.t === "match") {
     const match$ = NativeMatch({ build });
-    match$.render(elm);
+    elm.$elm = match$;
     return match$;
   }
   if (elm.t === "fragment") {
     const fragment$ = NativeFragment({ build });
-    fragment$.render(elm);
+    elm.$elm = fragment$;
     return fragment$;
   }
   if (elm.t === "portal") {
     const portal$ = NativePortal({ build });
-    portal$.render(elm);
+    elm.$elm = portal$;
     return portal$;
   }
   if (elm.t === "lazy-view") {
     const lazyView$ = NativeLazyView({ build });
-    lazyView$.render(elm);
+    elm.$elm = lazyView$;
     return lazyView$;
   }
   if (elm.t === "grid") {
     const grid$ = NativeGrid({ build });
-    grid$.render(elm);
+    elm.$elm = grid$;
     return grid$;
   }
   if (elm.t === "label") {
     const label$ = NativeLabel({ build });
-    label$.render(elm);
+    elm.$elm = label$;
     return label$;
   }
   if (elm.t === "icon") {
     const icon$ = NativeIcon({ build });
-    icon$.render(elm);
+    elm.$elm = icon$;
     return icon$;
   }
   if (elm.t === "file-picker") {
     const filePicker$ = NativeFilePicker({ build });
-    filePicker$.render(elm);
+    elm.$elm = filePicker$;
     return filePicker$;
   }
   if (elm.t === "number-input") {
     const numberInput$ = NativeNumberInput({ build });
-    numberInput$.render(elm);
+    elm.$elm = numberInput$;
     return numberInput$;
   }
   if (elm.t === "select") {
     const select$ = NativeSelect({ build });
-    select$.render(elm);
+    elm.$elm = select$;
     return select$;
   }
-  return null;
+  return NativeView({ build });
 }
 
-export function render(
-  elm: TimelessElement,
-  $root: any,
-  extra: Partial<{
-    onVNodeCreated: (data: any) => void;
-  }> = {},
-) {
+export function render(elm: TimelessElement) {
   console.log(
     "[Native Render] render called, elm:",
     elm?.t,
@@ -183,38 +175,16 @@ export function render(
     }
     const isViewLike = isNativeView(host$) || host$.getType() === "view";
     console.log("[Native Render] isViewLike:", isViewLike);
-
-    if (isViewLike) {
-      console.log(
-        "[Native Render] pushing view to root children, $elm:",
-        host$.$elm,
-      );
-      if ($root) {
-        if (Array.isArray($root.children)) {
-          $root.children.push(host$.$elm);
-        }
-      }
+    const $root = host$.render(elm);
+    __nativeBridge_render($root);
+    console.log("[Native Render] pushing view to root children, $elm:");
+    setTimeout(() => {
       if (typeof elm.onMounted === "function") {
-        elm.onMounted({ target: host$.$elm });
+        elm.onMounted({ target: $root });
       }
-      return;
-    }
-
-    console.log(
-      "[Native Render] pushing non-view to root children, $elm:",
-      host$.$elm,
-    );
-    if ($root) {
-      if (Array.isArray($root.children)) {
-        $root.children.push(host$.$elm);
-      }
-    }
-    if (typeof elm.onMounted === "function") {
-      elm.onMounted({ target: host$.$elm });
-    }
+    }, 0);
     return;
   }
-
   console.error("[Render] Root Element can't be lazy element");
   return;
 }

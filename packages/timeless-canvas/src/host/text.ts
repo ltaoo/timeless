@@ -6,8 +6,8 @@ export type CanvasText = VNodeView<any> & {
   $elm: any;
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
-  setContent: (v: string | number | null) => void;
   render(elm: TimelessElement): any;
+  setText: (v: string | number | null) => void;
 };
 
 export function CanvasText(
@@ -26,7 +26,7 @@ export function CanvasText(
     isDocumentFragment() {
       return false;
     },
-    setContent(v) {
+    setText(v) {
       if ($text && typeof $text.setTextContent === "function") {
         $text.setTextContent(String(v ?? ""));
       }
