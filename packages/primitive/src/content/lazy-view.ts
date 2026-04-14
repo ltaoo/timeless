@@ -1,14 +1,24 @@
-import { defaultErrorView } from "@/modules/error-boundary";
 import { MountedEvent } from "@/event";
 
 import { ViewProps } from "./view";
 import {
-  TimelessNormalComponent,
   isElement,
   TimelessElement,
   ViewChildren,
   TimelessComponent,
 } from "./type";
+
+function defaultErrorView(error: Error, viewName: string): TimelessElement {
+  return {
+    t: "error-view",
+    $elm: null as any,
+    state: {
+      error,
+      viewName,
+    },
+    children: [],
+  };
+}
 
 function isPromise<T>(v: any): v is Promise<T> {
   return v instanceof Promise || typeof v.then === "function";
@@ -143,7 +153,7 @@ export function LazyView(
 }
 
 export type TimelessLazyComponent = () => Promise<{
-  default: TimelessNormalComponent;
+  default: TimelessComponent;
 }>;
 
 export function isLazyElement(v: unknown): v is TimelessLazyComponent {

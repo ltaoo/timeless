@@ -1,4 +1,4 @@
-import { VideoPlayerCore } from "@timeless/ui";
+import { VideoPlayerCore } from "@timeless/ui-vm";
 
 export function connect(
   store: VideoPlayerCore,

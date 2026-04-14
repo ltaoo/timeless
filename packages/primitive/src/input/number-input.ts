@@ -45,7 +45,7 @@ export function NumberInput(props: NumberInputProps = {}) {
       if (value !== undefined) {
         if (isRef(value)) {
           state.value = value.value === null ? "0" : String(value.value);
-          box$.methods.add_listen(
+          box$.methods.unsubscribe(
             value.subscribe({
               onChange(v) {
                 state.value = v === null ? "0" : String(v);
@@ -63,7 +63,7 @@ export function NumberInput(props: NumberInputProps = {}) {
       if (placeholder !== undefined) {
         if (isRef(placeholder)) {
           state.placeholder = placeholder.value;
-          box$.methods.add_listen(
+          box$.methods.unsubscribe(
             placeholder.subscribe({
               onChange(v) {
                 state.placeholder = v;
@@ -78,7 +78,7 @@ export function NumberInput(props: NumberInputProps = {}) {
       if (disabled !== undefined) {
         if (isRef(disabled)) {
           state.disabled = disabled.value;
-          box$.methods.add_listen(
+          box$.methods.unsubscribe(
             disabled.subscribe({
               onChange(v) {
                 state.disabled = v;
@@ -99,7 +99,7 @@ export function NumberInput(props: NumberInputProps = {}) {
               state.step = v;
             },
           });
-          box$.methods.add_listen(unsubscribe);
+          box$.methods.unsubscribe(unsubscribe);
         } else {
           state.step = step;
         }
@@ -124,7 +124,7 @@ export function NumberInput(props: NumberInputProps = {}) {
     onMounted(event: MountedEvent) {
       if (props.onMounted) {
         const unsubscribe = props.onMounted(event);
-        box$.methods.add_listen(unsubscribe);
+        box$.methods.unsubscribe(unsubscribe);
       }
     },
     onUnmounted() {

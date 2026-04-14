@@ -18,6 +18,7 @@ enum NativeNode {
     case column(style: [String: String], children: [NativeNode])
     case select(items: [String], style: [String: String], jsValue: JSValue?)
     case icon(name: String, color: String, size: CGFloat, style: [String: String])
+    case aspectRatio(ratio: CGFloat, style: [String: String], children: [NativeNode])
 }
 
 /// Bridge between JavaScriptCore and native rendering.
@@ -261,6 +262,18 @@ class JSBridge {
             else { size = 24 }
             let style = dict["style"] as? [String: String] ?? [:]
             return .icon(name: name, color: color, size: size, style: style)
+        }
+
+        if type == "aspect-ratio" {
+            let style = dict["style"] as? [String: String] ?? [:]
+            let ratio: CGFloat
+            if let r = value.forProperty("ratio"), !r.isUndefined {
+                ratio = CGFloat(r.toDouble())
+            } else {
+                ratio = 16.0 / 9.0
+            }
+            let children = parseChildren(value)
+            return .aspectRatio(ratio: ratio, style: style, children: children)
         }
 
         return nil

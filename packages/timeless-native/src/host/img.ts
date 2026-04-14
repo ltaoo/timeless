@@ -33,7 +33,7 @@ export function NativeImg(props: {
       return "view";
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
     setStyle(style: any) {
       methods.setStyle(style);
@@ -78,12 +78,12 @@ export function NativeImg(props: {
       };
     },
     render(elm: TimelessElement) {
+      if (elm.state.src) {
+        $elm.src = String(elm.state.src);
+      }
       methods.set$elm($elm);
       methods.applyState(elm.state, { initial: true });
       methods.setupEventListener(elm.events);
-      if (elm.state.value) {
-        $elm.src = String(elm.state.value);
-      }
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {

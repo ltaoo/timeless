@@ -1,5 +1,6 @@
-import { BadgePrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
+import { ViewProps, ViewChildren } from "@timeless/timeless";
+import { BadgePrimitive } from "@timeless/ui-primitive";
 
 const VARIANTS = {
   default:

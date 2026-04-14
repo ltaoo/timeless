@@ -7,12 +7,13 @@ const PACKAGES_DIR = path.join(ROOT, "packages");
 
 // Explicitly configure which packages to build
 const INCLUDED_PACKAGES = [
-  // "base",
+  "base",
   "reactive",
-  // "utils",
-  // "ui",
-  // "kit",
+  "utils",
+  "kit",
   "primitive",
+  "ui-primitive",
+  "ui-vm",
   "timeless",
   "timeless-dom",
   "timeless-native",

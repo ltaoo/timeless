@@ -16,7 +16,7 @@ export default createLibConfig({
     "@timeless/reactive": "Timeless.reactive",
     "@timeless/timeless": "Timeless",
     "@timeless/kit": "Timeless",
-    "@timeless/ui": "Timeless.ui",
+    "@timeless/ui-vm": "Timeless.ui",
   },
   formats: ["es", "cjs", "umd"],
   minify: true,

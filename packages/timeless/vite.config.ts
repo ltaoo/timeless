@@ -16,11 +16,8 @@ export default defineConfig({
     alias: {
       "@": resolve(__dirname, "src"),
       "@timeless/base": resolve(__dirname, "../base"),
-      "@timeless/icons": resolve(__dirname, "../icons"),
-      "@timeless/kit": resolve(__dirname, "../kit"),
       "@timeless/primitive": resolve(__dirname, "../primitive"),
       "@timeless/reactive": resolve(__dirname, "../reactive"),
-      "@timeless/ui": resolve(__dirname, "../ui"),
       "@timeless/utils": resolve(__dirname, "../utils"),
     },
   },

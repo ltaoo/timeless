@@ -1,4 +1,4 @@
-import { VideoPlayerCore } from "@timeless/ui";
+import { VideoPlayerCore } from "@timeless/ui-vm";
 
 /** 连接 $video 标签和 player 领域 */
 export function connect($video: HTMLVideoElement, player: VideoPlayerCore) {

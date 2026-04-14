@@ -6,15 +6,9 @@ import {
   ref,
   refobj,
 } from "@timeless/timeless";
-import {
-  SelectPrimitive,
-  For,
-  ViewProps,
-  Show,
-  View,
-  Icon,
-} from "@timeless/timeless";
-import { SelectCore } from "@timeless/ui";
+import { For, ViewProps, Show, View, Icon } from "@timeless/timeless";
+import { SelectPrimitive } from "@timeless/ui-primitive";
+import { SelectCore } from "@timeless/ui-vm";
 
 export function Select(
   props: ViewProps & { store: SelectCore<any>; id?: string },

@@ -24,6 +24,7 @@ import { NativeIcon } from "@/host/icon";
 import { NativeFilePicker } from "@/host/file-picker";
 import { NativeNumberInput } from "@/host/number-input";
 import { NativeSelect } from "@/host/select";
+import { NativeAspectRatio } from "@/host/aspect-ratio";
 
 function build(elm: TimelessElement): any {
   console.log(
@@ -68,6 +69,11 @@ function build(elm: TimelessElement): any {
     const column$ = NativeColumn({ build });
     elm.$elm = column$;
     return column$;
+  }
+  if (elm.t === "aspect-ratio") {
+    const ratio$ = NativeAspectRatio({ build });
+    elm.$elm = ratio$;
+    return ratio$;
   }
   if (elm.t === "checkbox") {
     const checkbox$ = NativeCheckbox({ build });

@@ -3,7 +3,7 @@
  */
 import { createSignal, JSX, onMount } from "solid-js";
 
-import { DropdownMenuCore, MenuCore, MenuItemCore } from "@timeless/ui";
+import { DropdownMenuCore, MenuCore, MenuItemCore } from "@timeless/ui-vm";
 import * as MenuPrimitive from "@/packages/ui/menu";
 
 const Root = (

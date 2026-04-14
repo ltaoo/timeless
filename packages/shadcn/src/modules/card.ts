@@ -1,5 +1,6 @@
-import { CardPrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
+import { ViewProps, ViewChildren } from "@timeless/timeless";
+import { CardPrimitive } from "@timeless/ui-primitive";
 
 export function Card(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;

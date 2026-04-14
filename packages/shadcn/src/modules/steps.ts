@@ -1,6 +1,7 @@
 import { refobj, computed, classNames } from "@timeless/timeless";
-import { StepsPrimitive, For, Show, ViewProps } from "@timeless/timeless";
-import { StepCore } from "@timeless/ui";
+import { For, Show, ViewProps } from "@timeless/timeless";
+import { StepsPrimitive } from "@timeless/ui-primitive";
+import { StepCore } from "@timeless/ui-vm";
 
 export type StepItem = {
   title: string;

@@ -10,7 +10,7 @@ import AdminLayoutView from "@/pages/admin/layout.js";
 ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
 InputPrimitive.setInputProvider(Timeless.web);
 TextareaPrimitive.setTextareaProvider(Timeless.web);
-Timeless.kit.NavigatorCore.prefix = "/";
+Timeless.NavigatorCore.prefix = "/";
 
 const routes_configure = /** @type {const} */ ({
   home_layout: {
@@ -187,7 +187,7 @@ const routes_configure = /** @type {const} */ ({
   },
 });
 
-const router = Timeless.kit.buildRoutes(routes_configure);
+const router = Timeless.buildRoutes(routes_configure);
 
 const routes = router.routes;
 export const views = router.views;
@@ -223,7 +223,7 @@ const DEFAULT_CACHE_VALUES = {
 };
 const key = "timeless";
 const e = globalThis.localStorage.getItem(key);
-export const storage$ = new Timeless.kit.StorageCore({
+export const storage$ = new Timeless.StorageCore({
   key,
   defaultValues: DEFAULT_CACHE_VALUES,
   values: (() => {
@@ -235,7 +235,7 @@ export const storage$ = new Timeless.kit.StorageCore({
   client: globalThis.localStorage,
 });
 // HttpClient
-export const client$ = new Timeless.kit.HttpClientCore({
+export const client$ = new Timeless.HttpClientCore({
   headers: {
     "Content-Type": "application/json",
   },
@@ -292,8 +292,8 @@ export const user$ = (() => {
 })();
 client$.appendHeaders({ Authorization: user$.token });
 Timeless.web.provide_http_client(client$);
-export const router$ = new Timeless.kit.NavigatorCore();
-export const view$ = new Timeless.kit.RouteViewCore({
+export const router$ = new Timeless.NavigatorCore();
+export const view$ = new Timeless.RouteViewCore({
   name: "root",
   pathname: "/",
   title: "ROOT",
@@ -302,7 +302,7 @@ export const view$ = new Timeless.kit.RouteViewCore({
   views: [],
 });
 view$.isRoot = true;
-export const history$ = new Timeless.kit.HistoryCore({
+export const history$ = new Timeless.HistoryCore({
   view: view$,
   router: router$,
   routes,
@@ -312,8 +312,8 @@ export const history$ = new Timeless.kit.HistoryCore({
 });
 Timeless.web.provide_history(history$);
 
-const clipboard = Timeless.kit.ClipboardModel();
-export const app = new Timeless.kit.ApplicationModel({
+const clipboard = Timeless.ClipboardModel();
+export const app = new Timeless.ApplicationModel({
   clipboard,
   storage: storage$,
   async beforeReady() {

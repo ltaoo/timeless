@@ -1,11 +1,7 @@
 import { computed, Icon, refobj } from "@timeless/timeless";
-import {
-  SheetPrimitive,
-  View,
-  ViewChildren,
-  ViewProps,
-} from "@timeless/timeless";
-import { DialogCore } from "@timeless/ui";
+import { View, ViewChildren, ViewProps } from "@timeless/timeless";
+import { SheetPrimitive } from "@timeless/ui-primitive";
+import { DialogCore } from "@timeless/ui-vm";
 
 const WRAPPER_CLASSES = {
   right: "inset-y-0 right-0 h-full w-3/4 max-w-sm",

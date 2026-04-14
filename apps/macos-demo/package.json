@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@timeless/timeless": "workspace:^",
-    "@timeless/timeless-dom": "workspace:^",
     "@timeless/timeless-native": "workspace:^"
   },
   "devDependencies": {

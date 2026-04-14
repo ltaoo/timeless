@@ -1,11 +1,7 @@
 import { ref, computed, classNames } from "@timeless/timeless";
-import {
-  ResizablePanelsPrimitive,
-  View,
-  ViewChildren,
-  ViewProps,
-} from "@timeless/timeless";
-import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
+import { View, ViewChildren, ViewProps } from "@timeless/timeless";
+import { ResizablePanelsPrimitive } from "@timeless/ui-primitive";
+import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui-vm";
 
 // ResizablePanels Group 组件
 export function ResizablePanels(

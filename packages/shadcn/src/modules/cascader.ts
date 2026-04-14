@@ -7,14 +7,9 @@ import {
   ref,
   refobj,
 } from "@timeless/timeless";
-import {
-  CascaderPrimitive,
-  For,
-  Show,
-  View,
-  ViewProps,
-} from "@timeless/timeless";
-import { CascaderCore, CascaderOption } from "@timeless/ui";
+import { For, Show, View, ViewProps } from "@timeless/timeless";
+import { CascaderPrimitive } from "@timeless/ui-primitive";
+import { CascaderCore, CascaderOption } from "@timeless/ui-vm";
 
 export function Cascader(
   props: ViewProps & { store: CascaderCore<any>; id?: string },

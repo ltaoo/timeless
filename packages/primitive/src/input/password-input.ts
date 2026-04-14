@@ -28,7 +28,7 @@ export function PasswordInput(props: PasswordInputProps) {
     events,
     onMounted(event: MountedEvent) {
       if (props.onMounted) {
-        box$.methods.add_listen(props.onMounted(event));
+        box$.methods.unsubscribe(props.onMounted(event));
       }
     },
     onUnmounted() {

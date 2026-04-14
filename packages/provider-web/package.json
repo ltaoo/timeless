@@ -1,6 +1,6 @@
 {
   "name": "@timeless/provider-web",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "main": "dist/index.js",
   "module": "dist/timeless.web.esm.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
   "dependencies": {
     "@timeless/timeless": "workspace:*",
     "@timeless/kit": "workspace:*",
-    "@timeless/ui": "workspace:*",
+    "@timeless/ui-vm": "workspace:*",
     "axios": "^1.13.2"
   },
   "peerDependencies": {}

@@ -3,7 +3,7 @@ import { SidebarLayout } from "@/components/layout.js";
 import { projects } from "@/pages/project/data.js";
 
 export default function HomeLayoutView(props) {
-  const sidemenu$ = Timeless.kit.RouteMenusModel({
+  const sidemenu$ = Timeless.RouteMenusModel({
     view: props.view,
     history: props.history,
     menus: [

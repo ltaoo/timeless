@@ -12,13 +12,13 @@ export default createLibConfig({
   external: [
     "@timeless/reactive",
     "@timeless/base",
-    "@timeless/ui",
+    "@timeless/ui-vm",
     "@timeless/utils",
   ],
   globals: {
-    "@timeless/reactive": "Timeless.reactive",
-    "@timeless/base": "Timeless.base",
-    "@timeless/ui": "Timeless.ui",
+    "@timeless/reactive": "Timeless",
+    "@timeless/base": "Timeless",
+    "@timeless/ui-vm": "Timeless.ui",
     "@timeless/utils": "Timeless.utils",
   },
   minify: true,

@@ -8,6 +8,6 @@ export default createLibConfig({
   globalName: "App",
   formats: ["umd"],
   fileName: () => "app.js",
-  minify: false,
+  minify: true,
   dts: false,
 });

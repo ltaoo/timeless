@@ -6,7 +6,6 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-MACOS_DIR="$PROJECT_DIR/macos"
 BUILD_DIR="$PROJECT_DIR/build"
 
 # Check app bundle (built by vite, includes all dependencies)
@@ -15,31 +14,18 @@ if [ ! -f "$PROJECT_DIR/dist/app.js" ]; then
     exit 1
 fi
 
-echo "==> Compiling macOS app..."
-mkdir -p "$BUILD_DIR"
-
-SWIFT_FILES=(
-    "$MACOS_DIR/main.swift"
-    "$MACOS_DIR/AppDelegate.swift"
-    "$MACOS_DIR/RootViewController.swift"
-    "$MACOS_DIR/NativeViewRenderer.swift"
-    "$MACOS_DIR/Shared/JSBridge.swift"
-)
-
-swiftc \
-    -o "$BUILD_DIR/TimelessMacDemo" \
-    -framework Cocoa \
-    -framework JavaScriptCore \
-    -target arm64-apple-macosx13.0 \
-    "${SWIFT_FILES[@]}"
+echo "==> Building macOS app with SPM..."
+cd "$PROJECT_DIR"
+swift build -c release
 
 echo "==> Creating app bundle..."
+mkdir -p "$BUILD_DIR"
 APP_BUNDLE="$BUILD_DIR/Timeless macOS Demo.app"
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources"
 
-cp "$BUILD_DIR/TimelessMacDemo" "$APP_BUNDLE/Contents/MacOS/"
+cp "$PROJECT_DIR/.build/release/TimelessMacDemo" "$APP_BUNDLE/Contents/MacOS/"
 cp "$PROJECT_DIR/dist/app.js" "$APP_BUNDLE/Contents/Resources/"
 
 cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'

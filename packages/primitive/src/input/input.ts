@@ -74,7 +74,7 @@ export function Input(props: InputProps = {}) {
   } = props;
 
   let $elm: any = null;
-  const manager$ = ListenerManager();
+  const listener$ = ListenerManager();
   const state: InputState = {
     rendered: false,
     id: "",
@@ -124,7 +124,7 @@ export function Input(props: InputProps = {}) {
         $elm.setAttribute(k, String(v));
       }
     },
-    setup_value_subscribe() {
+    subscribe_props() {
       if (id !== undefined && id !== null) {
         if (isRef(id)) {
           id.subscribe({
@@ -192,10 +192,8 @@ export function Input(props: InputProps = {}) {
               // methods.setProp("disabled", v);
             },
           });
-          // methods.setProp("disabled", disabled.value);
           state.disabled = disabled.value;
         } else {
-          // methods.setProp("disabled", disabled);
           state.disabled = disabled;
         }
       }
@@ -383,52 +381,52 @@ export function Input(props: InputProps = {}) {
           const st = style;
           st.subscribe({
             onChange(v) {
-              // host.setStyleText($elm, viewStyleToCssText(v ?? {}));
-              state.style = v as any;
+              state.style = v;
               if ($elm) {
                 $elm.setStyleSet(v);
               }
             },
           });
-          // host.setStyleText($elm, viewStyleToCssText(st.value));
-          state.style = st.value as RawViewStyleProperties;
+          state.style = st.value;
         } else if (isStyleRef(style)) {
           const st = style;
           st.subscribe({
             onChange() {
-              state.style = st.value as RawViewStyleProperties;
+              state.style = st.value;
               $elm.setStyleSet(st.value || {});
             },
           });
           state.style = st.value;
         } else {
-          Object.keys(style as any).forEach((k) => {
+          Object.keys(style).forEach((k) => {
             const vv = style[k];
             if (isRef(vv)) {
+              state.style[k] = vv;
               vv.subscribe({
-                onChange() {
-                  state.style = style as any;
+                onChange(v) {
+                  state.style[k] = v;
                   $elm.setStyleSet(style);
                 },
               });
+            } else {
+              state.style[k] = vv;
             }
           });
-          state.style = style as any;
         }
       }
     },
   };
 
-  methods.setup_value_subscribe();
+  methods.subscribe_props();
 
   return {
     t: "input",
     get $elm() {
       return $elm;
     },
-    set $elm(value: any) {
+    set $elm(v: any) {
       // box$.methods.set$elm(v);
-      $elm = value;
+      $elm = v;
     },
     state,
     children: [],
@@ -446,7 +444,7 @@ export function Input(props: InputProps = {}) {
       }
     },
     onUnmounted() {
-      manager$.clean();
+      listener$.clean();
       if (onUnmounted) {
         onUnmounted();
       }

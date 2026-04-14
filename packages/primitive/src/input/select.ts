@@ -155,7 +155,7 @@ export function Select<T extends { value: any; label: string }>(
       console.log("[primitive]select onMounted", $elm);
       state.rendered = true;
       if (rest.onMounted) {
-        box$.methods.add_listen(rest.onMounted(event));
+        box$.methods.unsubscribe(rest.onMounted(event));
       }
     },
     beforeUnmounted() {

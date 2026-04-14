@@ -9,7 +9,7 @@
 
 // export function Popover(p: Parameters<typeof H>[0], c) { return H({ ...p, theme: t }, c); }
 
-import { PopoverCore } from "@timeless/ui";
+import { PopoverCore } from "@timeless/ui-vm";
 import { computed, ref, refobj } from "@timeless/reactive";
 import { View, Show, ViewChildren, ViewProps } from "@timeless/timeless";
 import { PopoverPrimitive } from "@timeless/timeless";

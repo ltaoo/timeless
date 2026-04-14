@@ -1,6 +1,6 @@
 import { Section, Item } from "@/components/index.js";
 
-const client$ = new Timeless.kit.HttpClientCore({});
+const client$ = new Timeless.HttpClientCore({});
 // @ts-ignore
 client$.fetch = async (options) => {
   await new Promise((r) => setTimeout(r, 400));
@@ -31,10 +31,10 @@ client$.fetch = async (options) => {
   };
 };
 
-const request = Timeless.kit.request_factory({
+const request = Timeless.request_factory({
   headers: { "Content-Type": "application/json" },
 });
-const searchSelectOptionsReq = new Timeless.kit.RequestCore(
+const searchSelectOptionsReq = new Timeless.RequestCore(
   (params) => request.get("/api/mock/select/search", params),
   {
     client: client$,
@@ -91,7 +91,7 @@ export default function FormView() {
       Section("FileInput", [
         Item("Default", [
           FileInput({
-            store: new Timeless.ui.FileInputCore({
+            store: new Timeless.ui.FilePickerCore({
               accept: "image/*",
               defaultValue: null,
               onChange(e) {
@@ -102,7 +102,7 @@ export default function FormView() {
         ]),
         Item("Multiple", [
           FileInput({
-            store: new Timeless.ui.FileInputCore({
+            store: new Timeless.ui.FilePickerCore({
               accept: "*/*",
               multiple: true,
               onChange(e) {

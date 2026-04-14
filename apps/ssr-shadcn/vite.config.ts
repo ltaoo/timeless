@@ -11,9 +11,9 @@ export default defineConfig({
         __dirname,
         "../../packages/reactive/dist/timeless.reactive.esm.js",
       ),
-      "@timeless/ui": path.resolve(
+      "@timeless/ui-vm": path.resolve(
         __dirname,
-        "../../packages/ui/dist/index.esm.js",
+        "../../packages/ui-vm/dist/index.esm.js",
       ),
       "@timeless/icons": path.resolve(
         __dirname,
@@ -99,7 +99,7 @@ export default defineConfig({
     noExternal: [
       "@timeless/shadcn",
       "@timeless/reactive",
-      "@timeless/ui",
+      "@timeless/ui-vm",
       "@timeless/icons",
       "@timeless/timeless",
       "@timeless/timeless-dom",

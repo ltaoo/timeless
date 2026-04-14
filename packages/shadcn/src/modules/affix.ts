@@ -8,7 +8,7 @@ import {
   ViewStyleProperties,
   styleNames,
 } from "@timeless/timeless";
-import { AffixCore } from "@timeless/ui";
+import { AffixCore } from "@timeless/ui-vm";
 
 export function Affix(
   props: ViewProps & {

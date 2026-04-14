@@ -1,14 +1,7 @@
-// @ts-nocheck
 import { computed, Icon, refobj } from "@timeless/timeless";
-import {
-  DateRangePickerPrimitive,
-  For,
-  View,
-  ViewProps,
-  Show,
-  h,
-} from "@timeless/timeless";
-import { DateRangePickerCore, TooltipCore } from "@timeless/ui";
+import { For, View, ViewProps, Show } from "@timeless/timeless";
+import { DateRangePickerPrimitive } from "@timeless/ui-primitive";
+import { DateRangePickerCore, TooltipCore } from "@timeless/ui-vm";
 
 import { Tooltip } from "./tooltip";
 
@@ -22,11 +15,12 @@ const NAV_BTN_DISABLED_CLASS =
 
 function NavButton(props: {
   store: DateRangePickerCore;
-  calendar_state_: ReturnType<typeof refobj>;
   type: "leftPrev" | "leftNext" | "rightPrev" | "rightNext";
   children: any[];
 }) {
-  const { store, calendar_state_, type, children } = props;
+  const { store, type, children } = props;
+
+  const calendar_state_ = refobj(store.$calendar.state);
 
   const ButtonComponent = {
     leftPrev: DateRangePickerPrimitive.LeftPrevButton,
@@ -97,9 +91,10 @@ function NavButton(props: {
 function CalendarPanel(props: {
   store: DateRangePickerCore;
   side: "left" | "right";
-  calendar_state_: ReturnType<typeof refobj>;
 }) {
-  const { store, side, calendar_state_ } = props;
+  const { store, side } = props;
+
+  const calendar_state_ = refobj(store.$calendar.state);
 
   const Header =
     side === "left"
@@ -111,14 +106,12 @@ function CalendarPanel(props: {
     View({ class: "flex items-center justify-between mb-2" }, [
       NavButton({
         store,
-        calendar_state_,
         type: side === "left" ? "leftPrev" : "rightPrev",
         children: [Icon({ name: "chevron-left", size: 16 })],
       }),
       Header({ store, class: "text-sm font-medium" }),
       NavButton({
         store,
-        calendar_state_,
         type: side === "left" ? "leftNext" : "rightNext",
         children: [Icon({ name: "chevron-right", size: 16 })],
       }),
@@ -144,17 +137,10 @@ function CalendarPanel(props: {
         each: computed(calendar_state_, (s) =>
           side === "left" ? s.left.weeks : s.right.weeks,
         ),
-        /**
-         * @param {{dates: {value: number; is_today: boolean; is_prev_month: boolean; is_next_month: boolean; text: string}[]}} week
-         */
         render(week) {
           return View({ class: "grid grid-cols-7" }, [
             For({
-              // @ts-ignore
               each: computed(week, (t) => t.dates),
-              /**
-               * @param {{value: number; is_today: boolean; is_prev_month: boolean; is_next_month: boolean; text: string}} day
-               */
               render(day) {
                 return DateRangePickerPrimitive.CalendarCell(
                   {
@@ -323,10 +309,10 @@ export function DateRangePicker(
         DateRangePickerPrimitive.Calendars({ store, class: "w-full" }, [
           View({ class: "grid grid-cols-[280px_280px] items-start gap-0" }, [
             View({ class: "w-[280px] p-3 border-r border-border" }, [
-              CalendarPanel({ store, side: "left", calendar_state_ }),
+              CalendarPanel({ store, side: "left" }),
             ]),
             View({ class: "w-[280px] p-3" }, [
-              CalendarPanel({ store, side: "right", calendar_state_ }),
+              CalendarPanel({ store, side: "right" }),
             ]),
           ]),
         ]),

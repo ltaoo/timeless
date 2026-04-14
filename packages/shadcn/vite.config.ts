@@ -8,18 +8,20 @@ import { isProd } from "../../vite.config.base";
 
 const name = "timeless.shadcn";
 const externals = [
-  "@timeless/base",
-  "@timeless/kit",
+  // "@timeless/base",
+  // "@timeless/kit",
   // "@timeless/primitive",
   // "@timeless/reactive",
   "@timeless/timeless",
   // "@timeless/icons",
-  "@timeless/ui",
+  // "@timeless/ui-vm",
   // "@timeless/utils",
 ] as const;
 
 function isExternal(id: string) {
-  return externals.some((pkgName) => id === pkgName || id.startsWith(`${pkgName}/`));
+  return externals.some(
+    (pkgName) => id === pkgName || id.startsWith(`${pkgName}/`),
+  );
 }
 
 function redirectToPrimitive() {
@@ -42,10 +44,12 @@ function redirectToPrimitive() {
 function rewriteDtsImports() {
   const distDir = resolve(__dirname, "dist");
   const replacements: Array<[string, string]> = [
-    ['"@timeless/reactive"', '"@timeless/primitive"'],
-    ["'@timeless/reactive'", "'@timeless/primitive'"],
-    ['"@timeless/kit"', '"@timeless/primitive"'],
-    ["'@timeless/kit'", "'@timeless/primitive'"],
+    ['"@timeless/reactive"', '"@timeless/timeless"'],
+    ["'@timeless/reactive'", "'@timeless/timeless'"],
+    ['"@timeless/base"', '"@timeless/timeless"'],
+    ["'@timeless/base'", "'@timeless/timeless'"],
+    ['"@timeless/kit"', '"@timeless/timeless"'],
+    ["'@timeless/kit'", "'@timeless/timeless'"],
   ];
 
   function walk(dir: string) {
@@ -111,16 +115,16 @@ export default defineConfig({
     }),
     sourcemap: isProd ? false : true,
     rollupOptions: {
-      external: isExternal,
+      external: ["@timeless/timeless"],
       output: {
         extend: true,
         globals: {
-          "@timeless/base": "Timeless.base",
-          "@timeless/kit": "Timeless.kit",
           "@timeless/timeless": "Timeless",
+          // "@timeless/base": "Timeless",
+          // "@timeless/kit": "Timeless.kit",
           // "@timeless/primitive": "Timeless",
           // "@timeless/reactive": "Timeless.reactive",
-          "@timeless/ui": "Timeless.ui",
+          // "@timeless/ui-vm": "Timeless.ui",
           // "@timeless/utils": "Timeless.utils",
         },
         assetFileNames: (assetInfo) => {

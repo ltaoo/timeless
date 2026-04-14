@@ -1,10 +1,31 @@
 import Cocoa
 import JavaScriptCore
+import yoga
 
-/// Converts a `NativeNode` tree into an AppKit (NSView) hierarchy.
+/// An NSView subclass whose coordinate system origin is top-left,
+/// matching Yoga's layout output.
+class FlippedView: NSView {
+    override var isFlipped: Bool { true }
+}
+
+/// Converts a `NativeNode` tree into an AppKit (NSView) hierarchy
+/// using Yoga for layout calculation.
 enum NativeViewRenderer {
 
-    static func render(_ node: NativeNode) -> NSView? {
+    /// Build an NSView tree from a NativeNode, laid out with Yoga at the given width.
+    static func render(_ node: NativeNode, containerWidth: CGFloat) -> NSView? {
+        let yogaRoot = YogaLayoutEngine.buildYogaTree(from: node)
+        YogaLayoutEngine.calculateLayout(yogaRoot, width: Float(containerWidth))
+        let view = buildNSView(node: node, yogaNode: yogaRoot)
+        YogaLayoutEngine.freeTree(yogaRoot)
+        return view
+    }
+
+    // MARK: - View Builder
+
+    private static func buildNSView(node: NativeNode, yogaNode: YGNodeRef) -> NSView? {
+        let frame = YogaLayoutEngine.frame(of: yogaNode)
+
         switch node {
         case .text(let value, let style, let jsValue):
             let label = NSTextField(labelWithString: value)
@@ -12,9 +33,10 @@ enum NativeViewRenderer {
             label.isBezeled = false
             label.drawsBackground = false
             label.maximumNumberOfLines = 0
+            label.preferredMaxLayoutWidth = frame.width
             applyTextStyle(style, to: label)
+            label.frame = frame
 
-            // Register a callback so JS reactive updates can push new text
             if let jsValue = jsValue {
                 let onContentChange: @convention(block) (String) -> Void = { [weak label] newValue in
                     DispatchQueue.main.async {
@@ -27,55 +49,13 @@ enum NativeViewRenderer {
             return label
 
         case .view(let style, let children):
-            let container = NSView()
+            let container = FlippedView(frame: frame)
             applyStyle(style, to: container)
-
-            let paddingTop = parsePx(style["padding-top"] ?? style["padding"])
-            let paddingLeft = parsePx(style["padding-left"] ?? style["padding"])
-
-            var offsetY: CGFloat = paddingTop
-            for child in children {
-                if let childView = render(child) {
-                    childView.translatesAutoresizingMaskIntoConstraints = false
-                    container.addSubview(childView)
-
-                    let marginTop = childMarginTop(child)
-                    offsetY += marginTop
-
-                    var constraints = [
-                        childView.topAnchor.constraint(equalTo: container.topAnchor, constant: offsetY),
-                        childView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: paddingLeft),
-                    ]
-                    // Views with no intrinsic width (e.g. editable NSTextField) need
-                    // a trailing constraint so they stretch to fill the container.
-                    if childView.intrinsicContentSize.width < 0 {
-                        let paddingRight = parsePx(style["padding-right"] ?? style["padding"])
-                        constraints.append(
-                            childView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -paddingRight)
-                        )
-                    }
-                    NSLayoutConstraint.activate(constraints)
-
-                    childView.layoutSubtreeIfNeeded()
-                    let childHeight = resolveHeight(childView)
-                    offsetY += childHeight
-
-                    let marginBottom = childMarginBottom(child)
-                    offsetY += marginBottom
-                }
-            }
-
-            let paddingBottom = parsePx(style["padding-bottom"] ?? style["padding"])
-            offsetY += paddingBottom
-
-            if offsetY > 0 {
-                container.heightAnchor.constraint(greaterThanOrEqualToConstant: offsetY).isActive = true
-            }
-
+            addChildren(children, to: container, yogaParent: yogaNode)
             return container
 
         case .img(let src, let style):
-            let imageView = NSImageView()
+            let imageView = NSImageView(frame: frame)
             imageView.imageScaling = .scaleProportionallyUpOrDown
             applyStyle(style, to: imageView)
             if let url = URL(string: src) {
@@ -88,21 +68,13 @@ enum NativeViewRenderer {
                     }
                 }
             }
-            let w = parsePx(style["width"])
-            let h = parsePx(style["height"])
-            if w > 0 {
-                imageView.widthAnchor.constraint(equalToConstant: w).isActive = true
-            }
-            if h > 0 {
-                imageView.heightAnchor.constraint(equalToConstant: h).isActive = true
-            }
             return imageView
 
         case .button(let style, let children, let jsValue):
             let button = NSButton(title: "", target: nil, action: nil)
             button.bezelStyle = .rounded
+            button.frame = frame
             applyStyle(style, to: button)
-            // Use first text child as button title
             for child in children {
                 if case .text(let value, _, _) = child {
                     button.title = value
@@ -115,7 +87,6 @@ enum NativeViewRenderer {
                     button.font = .systemFont(ofSize: size)
                 }
             }
-            // Register click handler from JS listeners
             if let jsValue = jsValue {
                 let listeners = jsValue.forProperty("listeners")
                 if let clickHandler = listeners?.forProperty("click"), !clickHandler.isUndefined {
@@ -128,7 +99,7 @@ enum NativeViewRenderer {
             return button
 
         case .input(let value, let placeholder, let style, let jsValue):
-            let textField = NSTextField()
+            let textField = NSTextField(frame: frame)
             textField.stringValue = value
             textField.placeholderString = placeholder
             textField.isEditable = true
@@ -136,7 +107,6 @@ enum NativeViewRenderer {
             textField.bezelStyle = .roundedBezel
             applyStyle(style, to: textField)
             applyTextStyle(style, to: textField)
-            // Register input callback so JS can receive text changes
             if let jsValue = jsValue {
                 let listeners = jsValue.forProperty("listeners")
                 if let inputHandler = listeners?.forProperty("input"), !inputHandler.isUndefined {
@@ -150,6 +120,7 @@ enum NativeViewRenderer {
         case .checkbox(let checked, let style, let jsValue):
             let button = NSButton(checkboxWithTitle: "", target: nil, action: nil)
             button.state = checked ? .on : .off
+            button.frame = frame
             applyStyle(style, to: button)
             if let jsValue = jsValue {
                 let listeners = jsValue.forProperty("listeners")
@@ -163,16 +134,15 @@ enum NativeViewRenderer {
             return button
 
         case .textarea(let value, let placeholder, let disabled, let style, let jsValue):
-            let scrollView = NSScrollView()
+            let scrollView = NSScrollView(frame: frame)
             scrollView.hasVerticalScroller = true
             scrollView.autohidesScrollers = true
             scrollView.borderType = .bezelBorder
-            let textView = NSTextView()
+            let textView = NSTextView(frame: NSRect(origin: .zero, size: frame.size))
             textView.string = value
             textView.isEditable = !disabled
             textView.isRichText = false
             textView.font = .systemFont(ofSize: 14)
-            // Placeholder drawn manually when empty
             if value.isEmpty {
                 textView.string = placeholder
                 textView.textColor = .placeholderTextColor
@@ -189,12 +159,10 @@ enum NativeViewRenderer {
                     objc_setAssociatedObject(textView, "textViewDelegate", delegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
                 }
             }
-            let h = parsePx(style["height"])
-            scrollView.heightAnchor.constraint(equalToConstant: h > 0 ? h : 80).isActive = true
             return scrollView
 
         case .numberInput(let value, let placeholder, let disabled, let style, let jsValue):
-            let textField = NSTextField()
+            let textField = NSTextField(frame: frame)
             textField.stringValue = value
             textField.placeholderString = placeholder
             textField.isEditable = !disabled
@@ -218,6 +186,7 @@ enum NativeViewRenderer {
         case .radio(let checked, let style, let jsValue):
             let button = NSButton(radioButtonWithTitle: "", target: nil, action: nil)
             button.state = checked ? .on : .off
+            button.frame = frame
             applyStyle(style, to: button)
             if let jsValue = jsValue {
                 let listeners = jsValue.forProperty("listeners")
@@ -231,35 +200,19 @@ enum NativeViewRenderer {
             return button
 
         case .row(let style, let children):
-            let stack = NSStackView()
-            stack.orientation = .horizontal
-            stack.alignment = .centerY
-            stack.distribution = .fill
-            stack.spacing = parsePx(style["gap"])
-            applyStyle(style, to: stack)
-            for child in children {
-                if let childView = render(child) {
-                    stack.addArrangedSubview(childView)
-                }
-            }
-            return stack
+            let container = FlippedView(frame: frame)
+            applyStyle(style, to: container)
+            addChildren(children, to: container, yogaParent: yogaNode)
+            return container
 
         case .column(let style, let children):
-            let stack = NSStackView()
-            stack.orientation = .vertical
-            stack.alignment = .leading
-            stack.distribution = .fill
-            stack.spacing = parsePx(style["gap"])
-            applyStyle(style, to: stack)
-            for child in children {
-                if let childView = render(child) {
-                    stack.addArrangedSubview(childView)
-                }
-            }
-            return stack
+            let container = FlippedView(frame: frame)
+            applyStyle(style, to: container)
+            addChildren(children, to: container, yogaParent: yogaNode)
+            return container
 
         case .select(let items, let style, let jsValue):
-            let popUp = NSPopUpButton(frame: .zero, pullsDown: false)
+            let popUp = NSPopUpButton(frame: frame, pullsDown: false)
             popUp.addItems(withTitles: items)
             applyStyle(style, to: popUp)
             if let jsValue = jsValue {
@@ -274,7 +227,7 @@ enum NativeViewRenderer {
             return popUp
 
         case .icon(let name, let color, let size, let style):
-            let imageView = NSImageView()
+            let imageView = NSImageView(frame: frame)
             if #available(macOS 11.0, *) {
                 let config = NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
                 if let img = NSImage(systemSymbolName: name, accessibilityDescription: nil)?
@@ -287,42 +240,36 @@ enum NativeViewRenderer {
                 imageView.contentTintColor = c
             }
             applyStyle(style, to: imageView)
-            imageView.widthAnchor.constraint(equalToConstant: size).isActive = true
-            imageView.heightAnchor.constraint(equalToConstant: size).isActive = true
             return imageView
+
+        case .aspectRatio(_, let style, let children):
+            let container = FlippedView(frame: frame)
+            container.wantsLayer = true
+            container.layer?.masksToBounds = true
+            applyStyle(style, to: container)
+            addChildren(children, to: container, yogaParent: yogaNode)
+            // Images inside aspect-ratio should fill the container
+            for subview in container.subviews {
+                if let imageView = subview as? NSImageView {
+                    imageView.imageScaling = .scaleAxesIndependently
+                    imageView.frame = container.bounds
+                }
+            }
+            return container
         }
     }
 
-    // MARK: - Height
-
-    /// Resolve the height of a view, falling back to fittingSize for containers.
-    private static func resolveHeight(_ view: NSView) -> CGFloat {
-        let intrinsic = view.intrinsicContentSize.height
-        if intrinsic >= 0 {
-            return intrinsic
+    /// Add child views by walking the NativeNode children and matching Yoga child nodes.
+    private static func addChildren(
+        _ children: [NativeNode],
+        to parent: NSView,
+        yogaParent: YGNodeRef
+    ) {
+        for (i, child) in children.enumerated() {
+            guard let childYoga = YGNodeGetChild(yogaParent, i),
+                  let childView = buildNSView(node: child, yogaNode: childYoga) else { continue }
+            parent.addSubview(childView)
         }
-        // For container views, use fittingSize which accounts for subviews + constraints
-        let fitting = view.fittingSize.height
-        if fitting > 0 {
-            return fitting
-        }
-        return 0
-    }
-
-    // MARK: - Child margin helpers
-
-    private static func childMarginTop(_ node: NativeNode) -> CGFloat {
-        if case .view(let style, _) = node {
-            return parsePx(style["margin-top"] ?? style["margin"])
-        }
-        return 0
-    }
-
-    private static func childMarginBottom(_ node: NativeNode) -> CGFloat {
-        if case .view(let style, _) = node {
-            return parsePx(style["margin-bottom"] ?? style["margin"])
-        }
-        return 0
     }
 
     // MARK: - Style
@@ -449,7 +396,6 @@ class TextViewInputDelegate: NSObject, NSTextViewDelegate {
 
     func textDidChange(_ notification: Notification) {
         guard let textView = notification.object as? NSTextView else { return }
-        // Clear placeholder style on first real input
         if textView.textColor == .placeholderTextColor {
             textView.string = ""
             textView.textColor = .labelColor

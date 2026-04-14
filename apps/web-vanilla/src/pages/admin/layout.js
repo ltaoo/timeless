@@ -56,11 +56,11 @@ function AdminTabBar({ tabs, activeKey, navigateToTab, getTabTitle }) {
 
 /**
  *
- * @param {{ history: HistoryCore; view: RouteViewCore }} props
+ * @param {ViewComponentProps} props
  * @returns
  */
 export default function AdminLayoutView(props) {
-  const sidemenu$ = Timeless.kit.RouteMenusModel({
+  const sidemenu$ = Timeless.RouteMenusModel({
     view: props.view,
     history: props.history,
     menus: [

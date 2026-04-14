@@ -13,7 +13,7 @@
     "@timeless/utils": "workspace:*",
     "@timeless/provider-wails3": "workspace:*",
     "@timeless/provider-web": "workspace:*",
-    "@timeless/ui": "workspace:*",
+    "@timeless/ui-vm": "workspace:*",
     "@wailsio/runtime": "3.0.0-alpha.79",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

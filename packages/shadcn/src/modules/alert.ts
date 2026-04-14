@@ -1,5 +1,6 @@
-import { AlertPrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
+import { ViewProps, ViewChildren } from "@timeless/timeless";
+import { AlertPrimitive } from "@timeless/ui-primitive";
 
 const VARIANTS = {
   default:

@@ -4,7 +4,7 @@
 import { For, createSignal, JSX } from "solid-js";
 import { Portal as PortalPrimitive } from "solid-js/web";
 import { ChevronRight } from "lucide-solid";
-import { DropdownMenuCore, MenuItemCore } from "@timeless/ui";
+import { DropdownMenuCore, MenuItemCore } from "@timeless/ui-vm";
 
 import { useViewModelStore } from "@/hooks";
 import * as DropdownMenuPrimitive from "@/packages/ui/dropdown-menu";

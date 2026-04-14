@@ -58,8 +58,10 @@ const buildRelations = {
   reactive: ["timeless"],
   utils: ["timeless"],
   kit: ["timeless"],
-  ui: ["timeless"],
-  icons: ["timeless"],
+  "ui-primitive": ["timeless"],
+  "ui-vm": ["timeless"],
+  shadcn: ["timeless"],
+  // icons: ["timeless"],
   primitive: ["timeless"],
   timeless: ["shadcn", "timeless-dom"],
 };

@@ -28,7 +28,7 @@ import {
   CheckboxCore,
   SwitchCore,
   ProgressCore,
-} from "@timeless/ui";
+} from "@timeless/ui-vm";
 
 /**
  * SSR data loader

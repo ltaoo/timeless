@@ -13,6 +13,7 @@ import {
   Radio,
   Select,
   Icon,
+  AspectRatio,
 } from "@timeless/timeless";
 import { render, TimelessNativeVersion } from "@timeless/timeless-native";
 
@@ -63,66 +64,74 @@ function ApplicationView() {
         ["Timeless macOS Demo"],
       ),
       View({}, [TimelessNativeVersion]),
-      View(
-        { style: { "margin-bottom": "12px", color: "#666" } },
-        ["Counter: ", count_],
-      ),
+      View({ style: { "margin-bottom": "12px", color: "#666" } }, [
+        "Counter: ",
+        count_,
+      ]),
 
       // ── Image ──────────────────────────────────────────────
       SectionTitle("Image:"),
-      Img({
-        src: "https://picsum.photos/200/120",
-        style: { width: "200px", height: "120px", "margin-bottom": "12px" },
-      }),
+      View({ style: { width: "200px", "margin-bottom": "12px" } }, [
+        AspectRatio({ ratio: 16 / 9 }, [
+          Img({
+            src: "https://picsum.photos/200/120",
+          }),
+        ]),
+      ]),
 
       // ── Icon (SF Symbols) ──────────────────────────────────
       SectionTitle("Icon (SF Symbols):"),
-      Row(
-        { gap: 12, style: { "margin-bottom": "12px" } },
-        [
-          Icon({ name: "star.fill", color: "#FFB800", size: 28 }),
-          Icon({ name: "heart.fill", color: "#FF3B30", size: 28 }),
-          Icon({ name: "house.fill", color: "#007AFF", size: 28 }),
-          Icon({ name: "gear", color: "#8E8E93", size: 28 }),
-          Icon({ name: "person.circle.fill", color: "#34C759", size: 28 }),
-        ],
-      ),
+      Row({ gap: 12, style: { "margin-bottom": "12px" } }, [
+        Icon({ name: "star.fill", color: "#FFB800", size: 28 }),
+        Icon({ name: "heart.fill", color: "#FF3B30", size: 28 }),
+        Icon({ name: "house.fill", color: "#007AFF", size: 28 }),
+        Icon({ name: "gear", color: "#8E8E93", size: 28 }),
+        Icon({ name: "person.circle.fill", color: "#34C759", size: 28 }),
+      ]),
 
       // ── Row ────────────────────────────────────────────────
       SectionTitle("Row (horizontal layout with gap):"),
-      Row(
-        { gap: 8, style: { "margin-bottom": "12px" } },
-        [Button({}, ["Alpha"]), Button({}, ["Beta"]), Button({}, ["Gamma"])],
-      ),
+      Row({ gap: 8, style: { "margin-bottom": "12px" } }, [
+        Button({ style: { "flex-basis": "16.67%" } }, ["Alpha"]),
+        Button({ style: { "flex-grow": "1" } }, ["Beta"]),
+        Button({ style: { width: 120 } }, ["Gamma"]),
+      ]),
 
       // ── Column ─────────────────────────────────────────────
       SectionTitle("Column (vertical layout with gap):"),
-      Column(
-        { gap: 6, style: { "margin-bottom": "12px" } },
-        [Button({}, ["First"]), Button({}, ["Second"]), Button({}, ["Third"])],
+      View(
+        {
+          style: {
+            gap: 6,
+            height: 320,
+            "margin-bottom": "12px",
+          },
+        },
+        [
+          Button({ style: { "flex-basis": "16.67%" } }, ["First"]),
+          Button({ style: { "flex-grow": "1" } }, ["Second"]),
+          Button({ style: { height: 120 } }, ["Third"]),
+        ],
       ),
 
       // ── Input ──────────────────────────────────────────────
       SectionTitle("Input:"),
       View({ style: { "margin-bottom": "12px" } }, [
-        Row(
-          { gap: 8, style: { "margin-bottom": "8px" } },
-          [
-            Input({
-              placeholder: "Type something...",
-              value: input_,
-              style: { "font-size": "14px" },
-              onInput(e) {
-                input_.set(e.target.value);
-              },
-            }),
-            Button({}, ["Search"]),
-          ],
-        ),
-        View(
-          { style: { color: "#888", "font-size": "13px" } },
-          ["You typed: ", input_],
-        ),
+        Row({ gap: 6, style: { display: "flex", "margin-bottom": "8px" } }, [
+          Input({
+            placeholder: "Type something...",
+            value: input_,
+            style: { flex: 1, "font-size": "14px" },
+            onInput(e) {
+              input_.set(e.target.value);
+            },
+          }),
+          Button({ style: { width: "100px" } }, ["Search"]),
+        ]),
+        View({ style: { color: "#888", "font-size": "13px" } }, [
+          "You typed: ",
+          input_,
+        ]),
       ]),
 
       // ── Textarea ───────────────────────────────────────────
@@ -137,7 +146,9 @@ function ApplicationView() {
           },
         }),
         View(
-          { style: { color: "#888", "font-size": "13px", "margin-top": "4px" } },
+          {
+            style: { color: "#888", "font-size": "13px", "margin-top": "4px" },
+          },
           ["Content: ", textareaContent_],
         ),
       ]),
@@ -152,10 +163,10 @@ function ApplicationView() {
             numberValue_.set(e.target.value);
           },
         }),
-        View(
-          { style: { color: "#888", "font-size": "13px" } },
-          ["Value: ", numberValue_],
-        ),
+        View({ style: { color: "#888", "font-size": "13px" } }, [
+          "Value: ",
+          numberValue_,
+        ]),
       ]),
 
       // ── Button ─────────────────────────────────────────────
@@ -172,32 +183,32 @@ function ApplicationView() {
 
       // ── Checkbox ───────────────────────────────────────────
       SectionTitle("Checkbox:"),
-      Row(
-        { gap: 8, style: { "margin-bottom": "8px" } },
-        [
-          Checkbox({
-            checked: agreed,
-            onChange(e) {
-              agreed.set(e.target.checked);
-            },
-          }),
-          View({}, ["I agree to terms"]),
-        ],
-      ),
-      Row(
-        { gap: 8, style: { "margin-bottom": "8px" } },
-        [
-          Checkbox({
-            checked: subscribe,
-            onChange(e) {
-              subscribe.set(e.target.checked);
-            },
-          }),
-          View({}, ["Subscribe to newsletter"]),
-        ],
-      ),
+      Row({ gap: 8, style: { "margin-bottom": "8px" } }, [
+        Checkbox({
+          checked: agreed,
+          onChange(e) {
+            agreed.set(e.target.checked);
+          },
+        }),
+        View({}, ["I agree to terms"]),
+      ]),
+      Row({ gap: 8, style: { "margin-bottom": "8px" } }, [
+        Checkbox({
+          checked: subscribe,
+          onChange(e) {
+            subscribe.set(e.target.checked);
+          },
+        }),
+        View({}, ["Subscribe to newsletter"]),
+      ]),
       View(
-        { style: { "margin-bottom": "12px", color: "#888", "font-size": "13px" } },
+        {
+          style: {
+            "margin-bottom": "12px",
+            color: "#888",
+            "font-size": "13px",
+          },
+        },
         [
           "Agreed: ",
           computed(agreed, (v) => (v ? "Yes" : "No")),
@@ -208,49 +219,43 @@ function ApplicationView() {
 
       // ── Radio ──────────────────────────────────────────────
       SectionTitle("Radio:"),
-      Column(
-        { gap: 6, style: { "margin-bottom": "8px" } },
-        [
-          Row(
-            { gap: 8 },
-            [
-              Radio({
-                checked: computed(selectedFruit_, (v) => v === "apple"),
-                onChange(e) {
-                  if (e.target.checked) selectedFruit_.set("apple");
-                },
-              }),
-              View({}, ["Apple"]),
-            ],
-          ),
-          Row(
-            { gap: 8 },
-            [
-              Radio({
-                checked: computed(selectedFruit_, (v) => v === "banana"),
-                onChange(e) {
-                  if (e.target.checked) selectedFruit_.set("banana");
-                },
-              }),
-              View({}, ["Banana"]),
-            ],
-          ),
-          Row(
-            { gap: 8 },
-            [
-              Radio({
-                checked: computed(selectedFruit_, (v) => v === "cherry"),
-                onChange(e) {
-                  if (e.target.checked) selectedFruit_.set("cherry");
-                },
-              }),
-              View({}, ["Cherry"]),
-            ],
-          ),
-        ],
-      ),
+      Column({ gap: 6, style: { "margin-bottom": "8px" } }, [
+        Row({ gap: 8 }, [
+          Radio({
+            checked: computed(selectedFruit_, (v) => v === "apple"),
+            onChange(e) {
+              if (e.target.checked) selectedFruit_.set("apple");
+            },
+          }),
+          View({}, ["Apple"]),
+        ]),
+        Row({ gap: 8 }, [
+          Radio({
+            checked: computed(selectedFruit_, (v) => v === "banana"),
+            onChange(e) {
+              if (e.target.checked) selectedFruit_.set("banana");
+            },
+          }),
+          View({}, ["Banana"]),
+        ]),
+        Row({ gap: 8 }, [
+          Radio({
+            checked: computed(selectedFruit_, (v) => v === "cherry"),
+            onChange(e) {
+              if (e.target.checked) selectedFruit_.set("cherry");
+            },
+          }),
+          View({}, ["Cherry"]),
+        ]),
+      ]),
       View(
-        { style: { "margin-bottom": "12px", color: "#888", "font-size": "13px" } },
+        {
+          style: {
+            "margin-bottom": "12px",
+            color: "#888",
+            "font-size": "13px",
+          },
+        },
         ["Selected fruit: ", selectedFruit_],
       ),
 
@@ -269,7 +274,9 @@ function ApplicationView() {
           },
         }),
         View(
-          { style: { color: "#888", "font-size": "13px", "margin-top": "4px" } },
+          {
+            style: { color: "#888", "font-size": "13px", "margin-top": "4px" },
+          },
           ["Selected color: ", selectedColor_],
         ),
       ]),

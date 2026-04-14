@@ -30,7 +30,7 @@ export function RichText(props: RichTextProps) {
     state: box$.state,
     onMounted(event: MountedEvent) {
       if (rest.onMounted) {
-        box$.methods.add_listen(rest.onMounted(event));
+        box$.methods.unsubscribe(rest.onMounted(event));
       }
     },
     beforeUnmounted() {},

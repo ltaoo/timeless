@@ -13,37 +13,36 @@ export function DOMImg(props: {
   build: (elm: TimelessElement) => VNodeView;
 }): DOMImg {
   const t = "img";
-  const $elm = document.createElement("img");
-  const common$ = HostElement({ $elm, t, build: props.build });
-
-  const methods = {
-    setSrc(v: string) {
-      $elm.src = v;
-    },
-  };
+  const box$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
-    ...common$.methods,
+    ...box$.methods,
     t,
     getType() {
       return "view";
     },
-    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },
     render(elm: TimelessElement) {
-      if (elm.state) {
-        methods.setSrc(elm.state.src);
+      const $elm = document.createElement("img");
+      if (elm.state.src) {
+        $elm.src = elm.state.src;
       }
-      common$.methods.setupEventListener(elm.events);
+      box$.methods.set$elm($elm);
+      box$.methods.setupEventListener(elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLImageElement) {
-      common$.methods.set$elm($elm);
-      common$.methods.setupEventListener(elm.events);
+      box$.methods.set$elm($elm);
+      box$.methods.setupEventListener(elm.events);
     },
-    setSrc: methods.setSrc,
+    setSrc(v: string) {
+      const $elm = box$.methods.get$elm();
+      if ($elm) {
+        $elm.src = v;
+      }
+    },
   };
 }
 

@@ -1,4 +1,4 @@
-export { Result } from '@timeless/base';
+// export { Result } from '@timeless/base';
 
 export { ApplicationModel } from "./app";
 export type { ThemeTypes, OrientationTypes, KeyboardEvent } from "./app/types";

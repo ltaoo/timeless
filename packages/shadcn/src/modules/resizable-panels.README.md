@@ -31,8 +31,13 @@ npm install @timeless/shadcn @timeless/ui
 ### 水平布局
 
 ```typescript
-import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui";
-import { ResizablePanels, ResizablePanel, ResizableHandle, View } from "@timeless/shadcn";
+import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui-vm";
+import {
+  ResizablePanels,
+  ResizablePanel,
+  ResizableHandle,
+  View,
+} from "@timeless/shadcn";
 
 // 创建面板组
 const panelsGroup = new ResizablePanelsCore({
@@ -54,27 +59,22 @@ const rightPanel = new ResizablePanelCore({
 
 // 渲染
 const App = View({ class: "h-screen" }, [
-  ResizablePanels(
-    { store: panelsGroup, direction: "horizontal" },
-    [
-      ResizablePanel(
-        { store: leftPanel, group: panelsGroup },
-        [View({ class: "p-4" }, ["Left Panel"])],
-      ),
+  ResizablePanels({ store: panelsGroup, direction: "horizontal" }, [
+    ResizablePanel({ store: leftPanel, group: panelsGroup }, [
+      View({ class: "p-4" }, ["Left Panel"]),
+    ]),
 
-      ResizableHandle({
-        store: panelsGroup,
-        panelBefore: leftPanel,
-        panelAfter: rightPanel,
-        withHandle: true,
-      }),
+    ResizableHandle({
+      store: panelsGroup,
+      panelBefore: leftPanel,
+      panelAfter: rightPanel,
+      withHandle: true,
+    }),
 
-      ResizablePanel(
-        { store: rightPanel, group: panelsGroup },
-        [View({ class: "p-4" }, ["Right Panel"])],
-      ),
-    ],
-  ),
+    ResizablePanel({ store: rightPanel, group: panelsGroup }, [
+      View({ class: "p-4" }, ["Right Panel"]),
+    ]),
+  ]),
 ]);
 ```
 
@@ -89,18 +89,15 @@ const topPanel = new ResizablePanelCore({ defaultSize: 40 });
 const bottomPanel = new ResizablePanelCore({ defaultSize: 60 });
 
 const App = View({ class: "h-screen" }, [
-  ResizablePanels(
-    { store: verticalGroup, direction: "vertical" },
-    [
-      ResizablePanel({ store: topPanel, group: verticalGroup }, ["Top"]),
-      ResizableHandle({
-        store: verticalGroup,
-        panelBefore: topPanel,
-        panelAfter: bottomPanel,
-      }),
-      ResizablePanel({ store: bottomPanel, group: verticalGroup }, ["Bottom"]),
-    ],
-  ),
+  ResizablePanels({ store: verticalGroup, direction: "vertical" }, [
+    ResizablePanel({ store: topPanel, group: verticalGroup }, ["Top"]),
+    ResizableHandle({
+      store: verticalGroup,
+      panelBefore: topPanel,
+      panelAfter: bottomPanel,
+    }),
+    ResizablePanel({ store: bottomPanel, group: verticalGroup }, ["Bottom"]),
+  ]),
 ]);
 ```
 
@@ -115,9 +112,17 @@ const rightPanel = new ResizablePanelCore({ defaultSize: 25, minSize: 15 });
 const App = View({ class: "h-screen" }, [
   ResizablePanels({ store: mainGroup }, [
     ResizablePanel({ store: leftPanel, group: mainGroup }, ["Sidebar"]),
-    ResizableHandle({ store: mainGroup, panelBefore: leftPanel, panelAfter: middlePanel }),
+    ResizableHandle({
+      store: mainGroup,
+      panelBefore: leftPanel,
+      panelAfter: middlePanel,
+    }),
     ResizablePanel({ store: middlePanel, group: mainGroup }, ["Content"]),
-    ResizableHandle({ store: mainGroup, panelBefore: middlePanel, panelAfter: rightPanel }),
+    ResizableHandle({
+      store: mainGroup,
+      panelBefore: middlePanel,
+      panelAfter: rightPanel,
+    }),
     ResizablePanel({ store: rightPanel, group: mainGroup }, ["Inspector"]),
   ]),
 ]);
@@ -135,6 +140,7 @@ new ResizablePanelsCore({
 ```
 
 **方法：**
+
 - `mount(element: HTMLElement)`: 挂载到 DOM 元素
 - `unmount()`: 卸载
 - `registerPanel(panel: ResizablePanelCore)`: 注册面板
@@ -144,6 +150,7 @@ new ResizablePanelsCore({
 - `endResize()`: 结束调整大小
 
 **事件：**
+
 - `onStateChange(handler)`: 状态变化
 - `onPanelResize(handler)`: 面板大小变化
 
@@ -160,11 +167,13 @@ new ResizablePanelCore({
 ```
 
 **方法：**
+
 - `setSize(size: number)`: 设置大小
 - `collapse()`: 折叠面板
 - `expand()`: 展开面板
 
 **事件：**
+
 - `onStateChange(handler)`: 状态变化
 
 ### ResizableHandle Props
@@ -191,8 +200,8 @@ const collapsiblePanel = new ResizablePanelCore({
 });
 
 // 编程式控制
-collapsiblePanel.collapse();  // 折叠
-collapsiblePanel.expand();    // 展开
+collapsiblePanel.collapse(); // 折叠
+collapsiblePanel.expand(); // 展开
 ```
 
 ### 监听大小变化
@@ -220,8 +229,10 @@ ResizablePanels(
     store: panelsGroup,
     class: "rounded-lg border border-gray-300 shadow-lg",
   },
-  [/* ... */],
-)
+  [
+    /* ... */
+  ],
+);
 
 ResizablePanel(
   {
@@ -229,8 +240,10 @@ ResizablePanel(
     group: panelsGroup,
     class: "bg-blue-50 dark:bg-blue-900",
   },
-  [/* ... */],
-)
+  [
+    /* ... */
+  ],
+);
 
 ResizableHandle({
   store: panelsGroup,
@@ -238,7 +251,7 @@ ResizableHandle({
   panelAfter: rightPanel,
   withHandle: true,
   class: "bg-blue-200 hover:bg-blue-300",
-})
+});
 ```
 
 ## 特性

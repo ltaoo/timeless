@@ -4,7 +4,7 @@
  */
 import { JSX, Show, createSignal, onMount } from "solid-js";
 
-import { PopperCore } from "@timeless/ui";
+import { PopperCore } from "@timeless/ui-vm";
 
 import { Arrow as ArrowPrimitive } from "./arrow";
 

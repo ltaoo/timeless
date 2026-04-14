@@ -2,6 +2,7 @@ node_modules
 dist
 /apps/*/public/timeless
 /apps/*/build
+/apps/*/.build
 .virtual-build
 
 .DS_Store

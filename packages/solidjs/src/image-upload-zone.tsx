@@ -1,6 +1,6 @@
 import { createSignal, Show } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
-import { ImageUploadCore } from "@timeless/ui";
+import { ImageUploadCore } from "@timeless/ui-vm";
 
 export function ImageUpload(
   props: { store: ImageUploadCore } & JSX.HTMLAttributes<HTMLDivElement>,

@@ -7,12 +7,36 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../..");
 
 const PACKAGES: { name: string; entry: string; namespace: string }[] = [
-  { name: "@timeless/reactive", entry: "packages/reactive/src/index.ts", namespace: "reactive" },
-  { name: "@timeless/timeless", entry: "packages/timeless/src/index.ts", namespace: "timeless" },
-  { name: "@timeless/kit", entry: "packages/kit/src/index.ts", namespace: "kit" },
-  { name: "@timeless/shadcn", entry: "packages/shadcn/src/index.ts", namespace: "shadcn" },
-  { name: "@timeless/icons", entry: "packages/icons/src/index.ts", namespace: "icons" },
-  { name: "@timeless/ui", entry: "packages/ui/src/index.ts", namespace: "ui" },
+  {
+    name: "@timeless/reactive",
+    entry: "packages/reactive/src/index.ts",
+    namespace: "reactive",
+  },
+  {
+    name: "@timeless/timeless",
+    entry: "packages/timeless/src/index.ts",
+    namespace: "timeless",
+  },
+  {
+    name: "@timeless/kit",
+    entry: "packages/kit/src/index.ts",
+    namespace: "kit",
+  },
+  {
+    name: "@timeless/shadcn",
+    entry: "packages/shadcn/src/index.ts",
+    namespace: "shadcn",
+  },
+  {
+    name: "@timeless/icons",
+    entry: "packages/icons/src/index.ts",
+    namespace: "icons",
+  },
+  {
+    name: "@timeless/ui-vm",
+    entry: "packages/ui-vm/src/index.ts",
+    namespace: "ui",
+  },
 ];
 
 const BASE_COMPILER_OPTIONS: ts.CompilerOptions = {
@@ -117,11 +141,16 @@ function emitBundledDeclarations(): string {
   });
 
   let bundledDts = "";
-  program.emit(undefined, (fileName, text) => {
-    if (fileName.endsWith(".d.ts")) {
-      bundledDts = text;
-    }
-  }, undefined, true);
+  program.emit(
+    undefined,
+    (fileName, text) => {
+      if (fileName.endsWith(".d.ts")) {
+        bundledDts = text;
+      }
+    },
+    undefined,
+    true,
+  );
 
   if (!bundledDts) {
     console.warn("Warning: bundled declaration emit produced no output");
@@ -157,7 +186,9 @@ function generate() {
 
   for (const pkg of PACKAGES) {
     const entryModule = pkg.entry.replace(/\.ts$/, "");
-    dtsLines.push(`declare module "${pkg.name}" { export * from "${entryModule}"; }`);
+    dtsLines.push(
+      `declare module "${pkg.name}" { export * from "${entryModule}"; }`,
+    );
   }
 
   dtsLines.push("");
@@ -177,7 +208,9 @@ function generate() {
     dtsLines.push("");
     dtsLines.push(`// ${pkg.name}`);
     for (const name of names) {
-      dtsLines.push(`declare const ${name}: typeof import("${pkg.name}").${name};`);
+      dtsLines.push(
+        `declare const ${name}: typeof import("${pkg.name}").${name};`,
+      );
     }
   }
   dtsLines.push("");

@@ -1,12 +1,7 @@
 import { ref, computed, classNames } from "@timeless/timeless";
-import {
-  RadioPrimitive,
-  View,
-  For,
-  ViewProps,
-  Label as NativeLabel,
-} from "@timeless/timeless";
-import { RadioGroupCore, RadioCore } from "@timeless/ui";
+import { View, For, ViewProps, Label as NativeLabel } from "@timeless/timeless";
+import { RadioPrimitive } from "@timeless/ui-primitive";
+import { RadioGroupCore, RadioCore } from "@timeless/ui-vm";
 
 export function Radio(props: { store: RadioCore; id?: string }) {
   const { store, id } = props;

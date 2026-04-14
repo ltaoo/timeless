@@ -1,11 +1,7 @@
 import { ref, computed } from "@timeless/timeless";
-import {
-  CheckboxPrimitive,
-  View,
-  For,
-  Label as NativeLabel,
-} from "@timeless/timeless";
-import { CheckboxGroupCore, CheckboxCore } from "@timeless/ui";
+import { View, For, Label as NativeLabel } from "@timeless/timeless";
+import { CheckboxPrimitive } from "@timeless/ui-primitive";
+import { CheckboxGroupCore, CheckboxCore } from "@timeless/ui-vm";
 
 import { Checkbox } from "./checkbox";
 

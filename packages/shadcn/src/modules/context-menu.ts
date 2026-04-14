@@ -7,7 +7,6 @@ import {
   ListenerManager,
 } from "@timeless/timeless";
 import {
-  ContextMenuPrimitive,
   For,
   Fragment,
   Show,
@@ -16,13 +15,14 @@ import {
   ViewProps,
   TimelessElement,
 } from "@timeless/timeless";
+import { ContextMenuPrimitive } from "@timeless/ui-primitive";
 import {
   ContextMenuCore,
   MenuCore,
   MenuItemCore,
   MenuSeparatorCore,
   MenuGroupCore,
-} from "@timeless/ui";
+} from "@timeless/ui-vm";
 
 const MENU_CONTENT_CLASS =
   "cn-menu-target cn-menu-translucent z-50 min-w-36 origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fill-mode-both data-open:fade-in-0 data-open:zoom-in-95";

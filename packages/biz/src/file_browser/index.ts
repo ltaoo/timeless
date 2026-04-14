@@ -13,7 +13,7 @@ import {
   RequestPayload,
   RequestCore,
 } from "@timeless/kit";
-import { ScrollViewCore } from "@timeless/ui";
+import { ScrollViewCore } from "@timeless/ui-vm";
 
 export type BizFile = {
   id: string;

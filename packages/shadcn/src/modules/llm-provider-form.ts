@@ -1,6 +1,6 @@
 import { computed, refobj, classNames } from "@timeless/timeless";
 import { For, Img, Show, View, ViewProps } from "@timeless/timeless";
-import { ButtonCore, CheckboxCore, InputCore } from "@timeless/ui";
+import { ButtonCore, CheckboxCore, InputCore } from "@timeless/ui-vm";
 
 import { Button } from "./button";
 import { Card, CardContent } from "./card";

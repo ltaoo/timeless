@@ -40,7 +40,7 @@ export function FilePicker(props: FilePickerProps = {}) {
               state.accept = v;
             },
           });
-          box$.methods.add_listen(unsubscribe);
+          box$.methods.unsubscribe(unsubscribe);
         } else {
           state.accept = accept;
         }
@@ -65,7 +65,7 @@ export function FilePicker(props: FilePickerProps = {}) {
     onMounted(event: MountedEvent) {
       if (props.onMounted) {
         const unsubscribe = props.onMounted(event);
-        box$.methods.add_listen(unsubscribe);
+        box$.methods.unsubscribe(unsubscribe);
       }
     },
     onUnmounted() {

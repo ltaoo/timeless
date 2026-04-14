@@ -1,9 +1,9 @@
 export const API_HOSTNAME = "http://100.78.198.69:2022";
-const client = new Timeless.kit.HttpClientCore({
+const client = new Timeless.HttpClientCore({
   hostname: API_HOSTNAME,
 });
 Timeless.web.provide_http_client(client);
-const request = Timeless.kit.request_factory({
+const request = Timeless.request_factory({
   hostnames: {
     dev: API_HOSTNAME,
     prod: API_HOSTNAME,

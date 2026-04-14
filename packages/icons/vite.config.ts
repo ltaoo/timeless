@@ -25,7 +25,7 @@ const externals = [
   "@timeless/primitive",
   "@timeless/reactive",
   "@timeless/svg",
-  "@timeless/ui",
+  "@timeless/ui-vm",
   "@timeless/utils",
 ] as const;
 
@@ -92,7 +92,7 @@ export default defineConfig({
           "@timeless/primitive": "Timeless",
           "@timeless/reactive": "Timeless.reactive",
           "@timeless/svg": "Timeless.svg",
-          "@timeless/ui": "Timeless.ui",
+          "@timeless/ui-vm": "Timeless.ui",
           "@timeless/utils": "Timeless.utils",
         },
       },

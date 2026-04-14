@@ -5,12 +5,9 @@ import { isClassNameRef, RawViewStyleProperties } from "@/style";
 import { MountedEvent } from "@/event/index";
 import { ListenerManager } from "@/util/listener";
 import { VNodeView } from "@/vnode/view";
+import { BoxProps } from "./box";
 
-export interface ImgProps {
-  style?: ViewProps["style"];
-  class?: ViewProps["class"];
-  dataset?: ViewProps["dataset"];
-  attributes?: ViewProps["attributes"];
+export type ImgProps = BoxProps & {
   src?: string | DerivedRef<string> | Ref<string>;
   alt?: string | DerivedRef<string> | Ref<string>;
   width?: number | string | DerivedRef<number | string> | Ref<number | string>;
@@ -36,8 +33,8 @@ export interface ImgProps {
   ): void | (() => void);
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
-}
-export type ImgState = {
+};
+type ImgState = {
   rendered: boolean;
   src: string | null;
   style: RawViewStyleProperties;
@@ -145,7 +142,7 @@ export function Img(props: ImgProps) {
       });
     },
 
-    setup_value_subscribe() {
+    subscribe_props() {
       const attributes = props.attributes ?? {};
       if (attributes) {
         Object.keys(attributes).forEach((k) => {
@@ -437,7 +434,7 @@ export function Img(props: ImgProps) {
     },
   };
 
-  methods.setup_value_subscribe();
+  methods.subscribe_props();
 
   return {
     t: "img",

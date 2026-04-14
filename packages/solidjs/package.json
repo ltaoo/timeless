@@ -1,6 +1,6 @@
 {
   "name": "@timeless/solidjs",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "SolidJS components for Timeless",
   "type": "module",
   "main": "dist/index.cjs.js",
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@timeless/kit": "workspace:*",
-    "@timeless/ui": "workspace:*",
+    "@timeless/ui-vm": "workspace:*",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "lucide-solid": "^0.300.0",

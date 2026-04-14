@@ -38,7 +38,7 @@ export function Fragment(props: FragmentProps, children?: ViewChildren) {
     },
     onMounted(event: MountedEvent) {
       if (onMounted) {
-        box$.methods.add_listen(onMounted(event));
+        box$.methods.unsubscribe(onMounted(event));
       }
       for (let i = 0; i < state.children.length; i += 1) {
         const child = state.children[i];

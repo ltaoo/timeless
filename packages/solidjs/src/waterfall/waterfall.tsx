@@ -6,7 +6,7 @@ import {
   WaterfallModel,
   WaterfallCellModel,
   WaterfallColumnModel,
-} from "@timeless/ui";
+} from "@timeless/ui-vm";
 import { ListCore } from "@timeless/kit";
 
 import { useViewModelStore } from "@/hooks";

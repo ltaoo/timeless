@@ -311,7 +311,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
         events.onAnimationEnd = props.onAnimationEnd;
       }
     },
-    add_listen: listener$.add,
+    unsubscribe: listener$.add,
     destroy() {
       listener$.clean();
     },

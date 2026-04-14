@@ -1,4 +1,4 @@
-import { ScrollViewCore, PointEvent, preventDefault } from "@timeless/ui";
+import { ScrollViewCore, PointEvent, preventDefault } from "@timeless/ui-vm";
 
 const SpeedClassName = "enable-hardware";
 

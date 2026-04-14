@@ -6,16 +6,17 @@ import {
   Icon,
   refobj,
 } from "@timeless/timeless";
+import { For, View, ViewProps, Show } from "@timeless/timeless";
 import {
   DatePickerPrimitive,
   TimePickerPrimitive,
-  For,
-  View,
-  ViewProps,
-  Show,
   ScrollViewPrimitive,
-} from "@timeless/timeless";
-import { DatePickerCore, ScrollViewCore, TimePickerCore } from "@timeless/ui";
+} from "@timeless/ui-primitive";
+import {
+  DatePickerCore,
+  ScrollViewCore,
+  TimePickerCore,
+} from "@timeless/ui-vm";
 
 export function DateTimePicker(
   props: ViewProps & {

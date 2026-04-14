@@ -1,6 +1,7 @@
 import { combine, computed, Icon, refobj, View } from "@timeless/timeless";
-import { TextareaPrimitive, Show, ViewProps } from "@timeless/timeless";
-import { InputCore } from "@timeless/ui";
+import { Show, ViewProps } from "@timeless/timeless";
+import { TextareaPrimitive } from "@timeless/ui-primitive";
+import { InputCore } from "@timeless/ui-vm";
 
 export function Textarea(
   props: ViewProps & {

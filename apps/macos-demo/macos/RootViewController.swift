@@ -1,7 +1,7 @@
 import Cocoa
 
 /// A root view that resigns first responder when clicking on empty areas.
-private class ClickableView: NSView {
+private class ClickableView: FlippedView {
     override var acceptsFirstResponder: Bool { true }
 
     override func mouseDown(with event: NSEvent) {
@@ -12,8 +12,8 @@ private class ClickableView: NSView {
 
 class RootViewController: NSViewController {
     private let bridge = JSBridge()
+    private var rootNode: NativeNode?
     private var scrollView: NSScrollView?
-    private var docWidthConstraint: NSLayoutConstraint?
 
     override func loadView() {
         view = ClickableView(frame: NSRect(x: 0, y: 0, width: 800, height: 560))
@@ -22,46 +22,44 @@ class RootViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let nativeView = bridge.run()
+        rootNode = bridge.run()
 
-        guard let nsView = NativeViewRenderer.render(nativeView) else { return }
-
-        let scroll = NSScrollView()
+        let scroll = NSScrollView(frame: view.bounds)
         scroll.hasVerticalScroller = true
         scroll.autohidesScrollers = true
         scroll.drawsBackground = false
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        nsView.translatesAutoresizingMaskIntoConstraints = false
-        scroll.documentView = nsView
-
+        scroll.autoresizingMask = [.width, .height]
         view.addSubview(scroll)
-        NSLayoutConstraint.activate([
-            scroll.topAnchor.constraint(equalTo: view.topAnchor),
-            scroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            nsView.topAnchor.constraint(equalTo: scroll.contentView.topAnchor),
-            nsView.leadingAnchor.constraint(equalTo: scroll.contentView.leadingAnchor),
-        ])
-
-        // Width is set as a constant so it's never zero at startup.
-        // viewDidLayout() keeps it in sync with the actual visible width.
-        let widthConstraint = nsView.widthAnchor.constraint(equalToConstant: view.bounds.width)
-        widthConstraint.isActive = true
-        docWidthConstraint = widthConstraint
         scrollView = scroll
+
+        renderLayout()
     }
 
     override func viewDidLayout() {
         super.viewDidLayout()
-        // Sync document view width to the scroll view's visible content area.
-        if let scroll = scrollView {
-            docWidthConstraint?.constant = scroll.contentSize.width
-        }
+        renderLayout()
     }
 
     override func viewDidAppear() {
         super.viewDidAppear()
         view.window?.makeFirstResponder(view)
+    }
+
+    private func renderLayout() {
+        guard let rootNode = rootNode, let scroll = scrollView else { return }
+
+        let containerWidth = scroll.contentSize.width
+        guard containerWidth > 0 else { return }
+
+        guard let rendered = NativeViewRenderer.render(rootNode, containerWidth: containerWidth) else { return }
+
+        // Replace existing document view content
+        let docView = FlippedView(frame: NSRect(
+            x: 0, y: 0,
+            width: containerWidth,
+            height: rendered.frame.height
+        ))
+        docView.addSubview(rendered)
+        scroll.documentView = docView
     }
 }

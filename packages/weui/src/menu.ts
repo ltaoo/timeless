@@ -1,4 +1,4 @@
-// import { MenuCore } from "@timeless/ui";
+// import { MenuCore } from "@timeless/ui-vm";
 // import {
 //   Menu as HMenu,
 //   MenuItem as HItem,

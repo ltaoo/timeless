@@ -1,6 +1,6 @@
 {
   "name": "@timeless/biz",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "Biz logic for Timeless",
   "main": "dist/index.js",
   "module": "dist/timeless.biz.esm.js",
@@ -11,7 +11,7 @@
   "dependencies": {
     "@timeless/base": "workspace:*",
     "@timeless/kit": "workspace:*",
-    "@timeless/ui": "workspace:*",
+    "@timeless/ui-vm": "workspace:*",
     "@timeless/types": "workspace:*",
     "@timeless/utils": "workspace:*",
     "axios": "^1.13.2",

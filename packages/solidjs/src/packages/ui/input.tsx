@@ -2,7 +2,7 @@
  * @file 输入框
  */
 import { JSX, onMount } from "solid-js";
-import { InputCore } from "@timeless/ui";
+import { InputCore } from "@timeless/ui-vm";
 
 import { useViewModelStore } from "@/hooks";
 

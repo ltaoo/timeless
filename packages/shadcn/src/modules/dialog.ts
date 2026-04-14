@@ -1,12 +1,7 @@
 import { computed, Icon, ref, refobj } from "@timeless/timeless";
-import {
-  DialogPrimitive,
-  View,
-  ViewChildren,
-  ViewProps,
-  Show,
-} from "@timeless/timeless";
-import { DialogCore } from "@timeless/ui";
+import { View, ViewChildren, ViewProps, Show } from "@timeless/timeless";
+import { DialogPrimitive } from "@timeless/ui-primitive";
+import { DialogCore } from "@timeless/ui-vm";
 
 import { Button } from "./button";
 

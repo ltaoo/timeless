@@ -3,7 +3,7 @@
 ## request_factory
 
 ```js
-const request = Timeless.kit.request_factory({
+const request = Timeless.request_factory({
   headers: { "Content-Type": "application/json" },
 });
 
@@ -16,7 +16,7 @@ request.delete("/api/users/1");
 ## RequestCore
 
 ```js
-const req$ = new Timeless.kit.RequestCore(
+const req$ = new Timeless.RequestCore(
   (params) => request.get("/api/users", params),
   {
     process(r) {

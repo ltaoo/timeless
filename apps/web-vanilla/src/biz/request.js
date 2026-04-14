@@ -1,4 +1,4 @@
-export const request = Timeless.kit.request_factory({
+export const request = Timeless.request_factory({
   headers: { "Content-Type": "application/json" },
 });
 

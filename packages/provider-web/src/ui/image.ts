@@ -1,4 +1,4 @@
-import { ImageCore } from "@timeless/ui";
+import { ImageCore } from "@timeless/ui-vm";
 
 // const { ImageCore } = ui;
 

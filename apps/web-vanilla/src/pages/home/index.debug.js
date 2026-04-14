@@ -40,7 +40,7 @@ export default function OverlayView() {
   }
 
   // Mock HttpClient
-  const client$ = new Timeless.kit.HttpClientCore({});
+  const client$ = new Timeless.HttpClientCore({});
   // @ts-ignore
   client$.fetch = async (options) => {
     // @ts-ignore

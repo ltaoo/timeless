@@ -9,7 +9,7 @@ export function HomePageViewModel(props) {
   const response = ref(null);
 
   const services = {
-    list: new Timeless.kit.RequestCore(fetchUserList, {
+    list: new Timeless.RequestCore(fetchUserList, {
       client: props.client,
     }),
   };

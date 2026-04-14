@@ -15,12 +15,12 @@ var APIHostname = "http://100.78.198.69:2022";
 
 console.log("[]downloaderv2.js - ", FakeAPIServerAddr, APIHostname);
 
-const http_client = new Timeless.kit.HttpClientCore({
+const http_client = new Timeless.HttpClientCore({
   headers: { "Content-Type": "application/json" },
   hostname: APIHostname,
 });
 Timeless.web.provide_http_client(http_client);
-const request = Timeless.kit.request_factory({
+const request = Timeless.request_factory({
   headers: { "Content-Type": "application/json" },
   process(r) {
     if (r.error) {

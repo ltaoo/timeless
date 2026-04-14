@@ -1,5 +1,6 @@
-import { TablePrimitive, ViewProps, ViewChildren } from "@timeless/timeless";
+import { ViewProps, ViewChildren } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
+import { TablePrimitive } from "@timeless/ui-primitive";
 
 export function Table(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;

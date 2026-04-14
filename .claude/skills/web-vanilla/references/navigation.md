@@ -14,7 +14,7 @@ props.history.push("root.home.detail", { id: 123 });
 ## 菜单联动
 
 ```js
-const sidemenu$ = Timeless.kit.RouteMenusModel({
+const sidemenu$ = Timeless.RouteMenusModel({
   view: props.view,
   history: props.history,
   menus: [

@@ -3,7 +3,7 @@
  */
 import { createSignal, onCleanup, onMount, JSX } from "solid-js";
 
-import { MenuCore, MenuItemCore } from "@timeless/ui";
+import { MenuCore, MenuItemCore } from "@timeless/ui-vm";
 
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";

@@ -91,8 +91,11 @@ import "./index.css";
 import "./styles/globals.css";
 
 console.log("shadcn.version" + __Version);
+export const TimelessShadcnVersion = __Version;
 
-// export const Result = kit.Result;
+export * from "@timeless/ui-primitive";
+export * as ui from "@timeless/ui-vm";
+
 export {
   Input,
   FileInput,

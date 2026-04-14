@@ -5,8 +5,9 @@ import {
   refobj,
   View,
 } from "@timeless/timeless";
-import { Icon, InputPrimitive, Show, ViewProps } from "@timeless/timeless";
-import { InputCore } from "@timeless/ui";
+import { Icon, Show, ViewProps } from "@timeless/timeless";
+import { InputPrimitive } from "@timeless/ui-primitive";
+import { InputCore } from "@timeless/ui-vm";
 
 export function Input(
   props: ViewProps & {

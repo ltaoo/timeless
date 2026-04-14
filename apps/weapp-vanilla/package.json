@@ -9,7 +9,7 @@
     "@timeless/biz": "workspace:*",
     "@timeless/kit": "workspace:*",
     "@timeless/utils": "workspace:*",
-    "@timeless/ui": "workspace:*",
+    "@timeless/ui-vm": "workspace:*",
     "@timeless/provider-weapp": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "mitt": "^3.0.1"

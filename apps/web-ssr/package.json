@@ -9,6 +9,6 @@
   "dependencies": {
     "@timeless/timeless": "workspace:^",
     "@timeless/reactive": "workspace:^",
-    "@timeless/ui": "workspace:^"
+    "@timeless/ui-vm": "workspace:^"
   }
 }

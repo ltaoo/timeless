@@ -3,7 +3,7 @@
  */
 import { JSX, createSignal } from "solid-js";
 
-import { PresenceCore } from "@timeless/ui";
+import { PresenceCore } from "@timeless/ui-vm";
 
 import { Show } from "./show";
 

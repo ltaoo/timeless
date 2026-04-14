@@ -3,7 +3,7 @@
  */
 import { refobj } from "@timeless/reactive";
 import { base, BaseDomain, Handler, BizError } from "@timeless/base";
-import { PresenceCore } from "@timeless/ui";
+import { PresenceCore } from "@timeless/ui-vm";
 import { qs_parse, qs_stringify } from "@timeless/utils";
 
 import { NavigatorCore } from "@/navigator/index";

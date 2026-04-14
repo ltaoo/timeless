@@ -1,5 +1,4 @@
 import {
-  ButtonPrimitive,
   Show,
   View,
   ViewChildren,
@@ -7,8 +6,10 @@ import {
   refobj,
   computed,
   Icon,
+  ListenerManager,
 } from "@timeless/timeless";
-import { ButtonCore } from "@timeless/ui";
+import { ButtonPrimitive } from "@timeless/ui-primitive";
+import { ButtonCore } from "@timeless/ui-vm";
 
 const VARIANTS = {
   default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
@@ -49,8 +50,8 @@ export function Button(
   const { store, class: cls, style, prefix, ...rest } = props;
 
   const state_ = refobj(store.state);
-  const events: any[] = [];
-  events.push(store.onStateChange(() => state_.as(store.state)));
+  const listener$ = ListenerManager([state_]);
+  listener$.add(store.onStateChange(() => state_.as(store.state)));
 
   const classname_ = computed(state_, (s) => {
     const v = s.variant as ButtonVariant;
@@ -79,9 +80,7 @@ export function Button(
         "data-size": store.state.size,
       },
       onUnmounted() {
-        for (const fn of events) {
-          if (typeof fn === "function") fn();
-        }
+        listener$.destroy();
         if (rest.onUnmounted) {
           rest.onUnmounted();
         }

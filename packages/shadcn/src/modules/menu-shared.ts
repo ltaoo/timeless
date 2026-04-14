@@ -1,4 +1,4 @@
-import { MenuCore } from "@timeless/ui";
+import { MenuCore } from "@timeless/ui-vm";
 
 const MENU_CONTENT_CLASS =
   "min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-700 shadow-md dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50";

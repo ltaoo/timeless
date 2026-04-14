@@ -1,5 +1,5 @@
 import { View, ViewProps, ViewChildren } from "@timeless/timeless";
-import { ObjectFieldCore, ArrayFieldCore } from "@timeless/ui";
+import { ObjectFieldCore, ArrayFieldCore } from "@timeless/ui-vm";
 
 export function Form(
   props: ViewProps & { store: ObjectFieldCore<any> | ArrayFieldCore<any> },

@@ -5,13 +5,15 @@ import {
   Icon,
   refobj,
   View,
+  Show,
+  ViewProps,
 } from "@timeless/timeless";
-import { FilePickerPrimitive, Show, ViewProps } from "@timeless/timeless";
-import { FileInputCore } from "@timeless/ui";
+import { FilePickerPrimitive } from "@timeless/ui-primitive";
+import { FilePickerCore } from "@timeless/ui-vm";
 
 export function FileInput(
   props: ViewProps & {
-    store: FileInputCore;
+    store: FilePickerCore;
     id?: string;
   },
 ) {

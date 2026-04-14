@@ -1,8 +1,6 @@
 import {
   For,
   Icon,
-  // Input as NativeInput,
-  SelectPrimitive,
   Show,
   View,
   ViewProps,
@@ -10,7 +8,8 @@ import {
   computed,
   refobj,
 } from "@timeless/timeless";
-import { SelectCore } from "@timeless/ui";
+import { SelectPrimitive } from "@timeless/ui-primitive";
+import { SelectCore } from "@timeless/ui-vm";
 
 export function SearchSelect<T>(
   props: ViewProps & {

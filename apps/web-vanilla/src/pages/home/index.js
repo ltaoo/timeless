@@ -6,7 +6,7 @@ import { SplitLayout } from "@/components/layout.js";
  * @returns
  */
 export default function HomePageView(props) {
-  const sidemenu$ = Timeless.kit.RouteMenusModel({
+  const sidemenu$ = Timeless.RouteMenusModel({
     view: props.view,
     history: props.history,
     menus: /** @type {{ title: string; name: PageKey }[]} */ ([

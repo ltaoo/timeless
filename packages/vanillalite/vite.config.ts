@@ -19,7 +19,7 @@ export default defineConfig({
       "@timeless/reactive": resolve(__dirname, "../reactive"),
       "@timeless/base": resolve(__dirname, "../base"),
       "@timeless/kit": resolve(__dirname, "../kit"),
-      "@timeless/ui": resolve(__dirname, "../ui"),
+      "@timeless/ui-vm": resolve(__dirname, "../ui"),
       "@timeless/utils": resolve(__dirname, "../utils"),
       "@timeless/icons": resolve(__dirname, "../icons"),
     },
