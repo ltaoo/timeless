@@ -10,7 +10,7 @@ export { hydrate };
 
 // ─── Platform ────────────────────────────────────────────────────
 export const platform = setPlatform({
-  addGlobalListener(type, handler, options) {
+  addEventListener(type, handler, options) {
     if (typeof window !== "undefined") {
       window.addEventListener(type, handler, options);
       return () => window.removeEventListener(type, handler, options);

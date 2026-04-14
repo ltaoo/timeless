@@ -1,6 +1,6 @@
 export interface Platform {
   /** 监听全局事件，返回取消监听的 cleanup 函数 */
-  addGlobalListener(
+  addEventListener(
     type: string,
     handler: EventListener,
     options?: AddEventListenerOptions,
@@ -13,7 +13,7 @@ export interface Platform {
 const noop = () => {};
 
 let _platform: Platform = {
-  addGlobalListener: () => noop,
+  addEventListener: () => noop,
   patchBodyStyle: noop,
 };
 

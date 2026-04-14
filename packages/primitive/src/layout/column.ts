@@ -1,9 +1,10 @@
 import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
 import { View, ViewProps } from "@/content/view";
-import { ViewChildren } from "@/content/type";
+import { isElement, ViewChildren } from "@/content/type";
 import { isStyleRef, ClassNameRef } from "@/style";
 import { Box } from "@/content/box";
+import { MountedEvent } from "@/event";
 
 export type ColumnProps = ViewProps & {
   gap?: number | DerivedRef<number> | Ref<number>;
@@ -61,5 +62,29 @@ export function Column(props: ColumnProps, children?: ViewChildren) {
     state,
     events,
     children: state.children,
+    onMounted(event: MountedEvent) {
+      // console.log("[primitive]layout/column - onMounted", event);
+      if (rest.onMounted) {
+        rest.onMounted(event);
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    onUnmounted() {
+      // console.log("[primitive]layout/column - onUnmountmounted", event);
+      if (rest.onUnmounted) {
+        rest.onUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onUnmounted) {
+          child.onUnmounted();
+        }
+      }
+    },
   };
 }

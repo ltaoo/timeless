@@ -1,15 +1,9 @@
 import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
-import { ViewProps } from "@/content/view";
-import {
-  isClassNameRef,
-  isStyleRef,
-  RawViewStyleProperties,
-} from "@/style/index";
+import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
-import { ListenerManager } from "@/util/listener";
 
-export interface InputProps extends Omit<ViewProps, "as" | "type" | "id"> {
+export type InputProps = BoxProps & {
   id?: string | null;
   name?: string | DerivedRef<string> | Ref<string>;
   value?: DerivedRef<string> | Ref<string>;
@@ -24,17 +18,15 @@ export interface InputProps extends Omit<ViewProps, "as" | "type" | "id"> {
   autocorrect?: boolean;
   onInput?: (e: Event) => void;
   onChange?: (e: Event) => void;
-}
+};
 type InputState = {
   rendered: boolean;
-  style: RawViewStyleProperties;
-  styleSet?: string[];
   id?: string;
   name?: string;
   value: string;
-  placeholder?: string;
-  disabled?: boolean;
-  required?: boolean;
+  placeholder: string;
+  disabled: boolean;
+  required: boolean;
   maxLength?: number;
   minLength?: number;
 };
@@ -43,10 +35,6 @@ export function Input(props: InputProps = {}) {
   const {
     id,
     name,
-    style,
-    class: cls,
-    attributes,
-    dataset = {},
     value,
     placeholder,
     disabled,
@@ -57,39 +45,19 @@ export function Input(props: InputProps = {}) {
     required,
     autocomplete,
     autocorrect = "off",
-    onMounted,
-    onUnmounted,
-    beforeUnmounted,
-    onClick,
-    onDoubleClick,
-    onLongPress,
-    onFocus,
-    onBlur,
-    onPointerDown,
-    onKeyDown,
-    onMouseEnter,
-    onMouseLeave,
     onInput,
     onChange,
+    ...rest
   } = props;
 
   let $elm: any = null;
-  const listener$ = ListenerManager();
-  const state: InputState = {
-    rendered: false,
-    id: "",
-    name: "",
+
+  const box$ = Box<InputState>(rest, {
     value: "",
-    style: {},
-    styleSet: [],
-  };
-  const events = {
-    onInput,
-    onChange,
-    onFocus,
-    onBlur,
-    onKeyDown,
-  };
+  } as InputState);
+
+  const state = box$.state;
+  const events = box$.events;
 
   const methods = {
     listen(type: string, handler: (event: any) => void, options?: any) {
@@ -125,6 +93,8 @@ export function Input(props: InputProps = {}) {
       }
     },
     subscribe_props() {
+      box$.methods.subscribe_props();
+
       if (id !== undefined && id !== null) {
         if (isRef(id)) {
           id.subscribe({
@@ -133,10 +103,8 @@ export function Input(props: InputProps = {}) {
               methods.setProp("id", String(v));
             },
           });
-          // methods.setProp("id", id.value);
           state.id = id.value;
         } else {
-          // methods.setProp("id", id);
           state.id = id;
         }
       }
@@ -146,18 +114,16 @@ export function Input(props: InputProps = {}) {
         if (isRef(value)) {
           value.subscribe({
             onChange(v) {
-              state.value = v as string;
+              state.value = v;
               if ($elm && typeof $elm.setValue === "function") {
-                $elm.setValue(v as string);
+                $elm.setValue(v);
               }
               // methods.setProp("value", v);
             },
           });
           state.value = value.value;
-          // methods.setProp("value", value.value);
         } else {
           state.value = value;
-          // methods.setProp("value", value);
         }
       }
 
@@ -166,14 +132,12 @@ export function Input(props: InputProps = {}) {
         if (isRef(placeholder)) {
           placeholder.subscribe({
             onChange(v) {
-              state.placeholder = v as string;
+              state.placeholder = v;
               methods.setProp("placeholder", v);
             },
           });
-          // methods.setProp("placeholder", placeholder.value);
           state.placeholder = placeholder.value;
         } else {
-          // methods.setProp("placeholder", placeholder);
           state.placeholder = placeholder;
         }
       }
@@ -183,13 +147,12 @@ export function Input(props: InputProps = {}) {
         if (isRef(disabled)) {
           disabled.subscribe({
             onChange(v) {
-              state.disabled = v as boolean;
+              state.disabled = v;
               if (v) {
                 $elm.setAttribute("disabled", "");
               } else {
                 $elm.removeAttribute("disabled");
               }
-              // methods.setProp("disabled", v);
             },
           });
           state.disabled = disabled.value;
@@ -215,16 +178,14 @@ export function Input(props: InputProps = {}) {
       // Handle maxLength attribute
       if (maxLength !== undefined) {
         if (isRef(maxLength)) {
+          state.maxLength = maxLength.value;
           maxLength.subscribe({
             onChange(v) {
-              state.maxLength = v as number;
+              state.maxLength = v;
               methods.setProp("maxLength", v);
             },
           });
-          // methods.setProp("maxLength", maxLength.value);
-          state.maxLength = maxLength.value;
         } else {
-          // methods.setProp("maxLength", maxLength);
           state.maxLength = maxLength;
         }
       }
@@ -232,16 +193,14 @@ export function Input(props: InputProps = {}) {
       // Handle minLength attribute
       if (minLength !== undefined) {
         if (isRef(minLength)) {
+          state.minLength = minLength.value;
           minLength.subscribe({
             onChange(v) {
-              state.minLength = v as number;
+              state.minLength = v;
               methods.setProp("minLength", v);
             },
           });
-          state.minLength = minLength.value;
-          // methods.setProp("minLength", minLength.value);
         } else {
-          // methods.setProp("minLength", minLength);
           state.minLength = minLength;
         }
       }
@@ -263,16 +222,14 @@ export function Input(props: InputProps = {}) {
       // Handle required attribute
       if (required !== undefined) {
         if (isRef(required)) {
+          state.required = required.value;
           required.subscribe({
             onChange(v) {
-              state.required = v as boolean;
+              state.required = v;
               methods.setProp("required", v);
             },
           });
-          // methods.setProp("required", required.value);
-          state.required = required.value;
         } else {
-          // methods.setProp("required", required);
           state.required = required;
         }
       }
@@ -294,130 +251,23 @@ export function Input(props: InputProps = {}) {
       // Handle name attribute
       if (name !== undefined) {
         if (isRef(name)) {
+          state.name = name.value;
           name.subscribe({
             onChange(v) {
-              state.name = v as string;
+              state.name = v;
               methods.setProp("name", v);
             },
           });
-          // methods.setProp("name", name.value);
-          state.name = name.value;
         } else {
-          // methods.setProp("name", name);
           state.name = name;
-        }
-      }
-
-      // Set static attributes
-      // host.setAttribute($elm, "autocorrect", autocorrect);
-      // if ($elm) {
-      //   $elm.setAttribute("autocorrect", autocorrect);
-      // }
-
-      if (attributes) {
-        Object.keys(attributes).forEach((k) => {
-          const vv = attributes[k];
-          if (isRef(vv)) {
-            vv.subscribe({
-              onChange(v: any) {
-                methods.applyAttr(k, v);
-              },
-            });
-            methods.applyAttr(k, vv.value);
-            return;
-          }
-          methods.applyAttr(k, vv);
-        });
-      }
-
-      // Handle dataset
-      Object.keys(dataset).forEach((k) => {
-        if (!dataset) return;
-        const vv = dataset[k];
-        const attrName = `data-${k}`;
-        if (isRef(vv)) {
-          vv.subscribe({
-            onChange(v: any) {
-              methods.applyAttr(attrName, v);
-            },
-          });
-          // methods.applyAttr(attrName, vv.value);
-          return;
-        }
-        // methods.applyAttr(attrName, vv);
-      });
-
-      // Handle class
-      if (cls) {
-        if (typeof cls === "string") {
-          state.styleSet = [cls];
-          // host.setClassName($elm, cls);
-        } else if (isRef(cls)) {
-          cls.subscribe({
-            onChange(v) {
-              state.styleSet = v.split(" ");
-              if ($elm) {
-                $elm.setStyleSet(v);
-              }
-            },
-          });
-          state.styleSet = [cls.value];
-        } else if (isClassNameRef(cls)) {
-          cls.subscribe({
-            onChange(v: string[]) {
-              state.styleSet = v;
-              if ($elm) {
-                $elm.setStyleSet(Array.isArray(v) ? v : [v]);
-              }
-            },
-          });
-          state.styleSet = [cls.toString()];
-        }
-      }
-
-      // Handle style
-      if (style) {
-        if (isRef(style)) {
-          const st = style;
-          st.subscribe({
-            onChange(v) {
-              state.style = v;
-              if ($elm) {
-                $elm.setStyleSet(v);
-              }
-            },
-          });
-          state.style = st.value;
-        } else if (isStyleRef(style)) {
-          const st = style;
-          st.subscribe({
-            onChange() {
-              state.style = st.value;
-              $elm.setStyleSet(st.value || {});
-            },
-          });
-          state.style = st.value;
-        } else {
-          Object.keys(style).forEach((k) => {
-            const vv = style[k];
-            if (isRef(vv)) {
-              state.style[k] = vv;
-              vv.subscribe({
-                onChange(v) {
-                  state.style[k] = v;
-                  $elm.setStyleSet(style);
-                },
-              });
-            } else {
-              state.style[k] = vv;
-            }
-          });
         }
       }
     },
   };
 
   methods.subscribe_props();
+  events.onInput = onInput
+  events.onChange = onChange
 
   return {
     t: "input",
@@ -425,28 +275,23 @@ export function Input(props: InputProps = {}) {
       return $elm;
     },
     set $elm(v: any) {
-      // box$.methods.set$elm(v);
+      box$.methods.set$elm(v);
       $elm = v;
     },
     state,
     children: [],
-    events: events,
+    events,
     onMounted(event: MountedEvent) {
-      // console.log("[]input onMounted", $elm);
+      console.log("[]input onMounted", $elm);
       state.rendered = true;
-      if (onMounted) {
-        onMounted(event);
-      }
-    },
-    beforeUnmounted() {
-      if (beforeUnmounted) {
-        beforeUnmounted();
+      if (rest.onMounted) {
+        rest.onMounted(event);
       }
     },
     onUnmounted() {
-      listener$.clean();
-      if (onUnmounted) {
-        onUnmounted();
+      box$.methods.destroy();
+      if (rest.onUnmounted) {
+        rest.onUnmounted();
       }
       state.rendered = false;
     },

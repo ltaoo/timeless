@@ -1,7 +1,7 @@
 export * as kit from '@timeless/kit';
 
 export * as PresencePrimitive from "./modules/presence";
-export * as TransitionPrimitive from "./modules/transition";
+export * from "./modules/transition";
 export * as PopperPrimitive from "./modules/popper";
 export * as HeadPrimitive from "./modules/head";
 export * as ParagraphPrimitive from "./modules/paragraph";

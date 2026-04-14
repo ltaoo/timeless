@@ -177,11 +177,11 @@ export function Handle(
           }
         };
 
-        cleanupMove = getPlatform().addGlobalListener(
+        cleanupMove = getPlatform().addEventListener(
           "pointermove",
           handlePointerMove as EventListener,
         );
-        cleanupUp = getPlatform().addGlobalListener(
+        cleanupUp = getPlatform().addEventListener(
           "pointerup",
           handlePointerUp as EventListener,
         );

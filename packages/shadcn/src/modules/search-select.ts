@@ -14,7 +14,7 @@ import { SelectCore } from "@timeless/ui-vm";
 export function SearchSelect<T>(
   props: ViewProps & {
     store: SelectCore<T>;
-    fetchOptions: (keyword: string) => Promise<{ value: T; label: string }[]>;
+    // fetchOptions: (keyword: string) => Promise<{ value: T; label: string }[]>;
     debounce?: number;
     minLength?: number;
     emptyText?: string;
@@ -23,7 +23,7 @@ export function SearchSelect<T>(
 ) {
   const {
     store,
-    fetchOptions,
+    // fetchOptions,
     debounce = 300,
     minLength = 1,
     emptyText = "暂无数据",
@@ -56,20 +56,20 @@ export function SearchSelect<T>(
 
   async function run(keyword: string, currentSeq: number) {
     store.setLoading(true);
-    try {
-      const options = await fetchOptions(keyword);
-      if (currentSeq !== seq) {
-        return;
-      }
-      if ((store.state.searchKeyword || "").trim() !== keyword) {
-        return;
-      }
-      store.setOptions(mergeSelectedOption(options));
-    } finally {
-      if (currentSeq === seq) {
-        store.setLoading(false);
-      }
-    }
+    // try {
+    //   const options = await fetchOptions(keyword);
+    //   if (currentSeq !== seq) {
+    //     return;
+    //   }
+    //   if ((store.state.searchKeyword || "").trim() !== keyword) {
+    //     return;
+    //   }
+    //   store.setOptions(mergeSelectedOption(options));
+    // } finally {
+    //   if (currentSeq === seq) {
+    //     store.setLoading(false);
+    //   }
+    // }
   }
 
   store.onStateChange((state) => {

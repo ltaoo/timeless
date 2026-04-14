@@ -258,10 +258,10 @@ export function View(props: ViewProps = {}, children?: ViewChildren) {
         } else if (isClassNameRef(cls)) {
           state.styleSet = cls.toString().split(" ");
           cls.subscribe({
-            onChange(v: string[]) {
+            onChange(v) {
               state.styleSet = v;
-              console.log("[primitive]content/view - classNames notify", v);
-              if ($elm) {
+              // console.log("[primitive]content/view - classNames notify", v);
+              if ($elm && typeof $elm.setStyleSet === "function") {
                 $elm.setStyleSet(v);
               }
             },

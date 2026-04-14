@@ -13,8 +13,6 @@ export function DOMInput(props: {
   // canvas: Document;
   build: (elm: TimelessElement) => VNodeView<HTMLInputElement>;
 }): DOMInput {
-  // const canvas = props.canvas;
-  // const $elm = canvas.createElement("div");
   const t = "input";
   const common$ = HostElement({ $elm: null, t, build: props.build });
 
@@ -24,15 +22,11 @@ export function DOMInput(props: {
     getType() {
       return "input";
     },
-    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },
     render(elm: TimelessElement) {
       const $elm = document.createElement("input");
-      // $elm.style.backgroundColor = "transparent";
-      // $elm.style.outline = "none";
-      // $elm.style.border = "none";
       $elm.type = "text";
       $elm.value = elm.state.value;
       if (elm.state.id) {

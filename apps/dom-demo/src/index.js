@@ -189,49 +189,57 @@ function ApplicationView() {
       class: classNames([
         "page",
         computed(keyword_, (t) => {
-          console.log('recompute className', t);
           return t.includes("_new") ? "updated" : "origin";
         }),
       ]),
     },
     [
-      Column(
-        {
-          gap: 4,
-          style: {
-            padding: "16px",
-          },
+      Input({
+        value: "Hello Timeless",
+        onMounted(event) {
+          console.log("the input mounted", event.target.get$elm()?.value);
         },
-        [
-          Label({ for: "keyword" }, ["Keyword"]),
-          Row({ gap: 4 }, [
-            Input({
-              id: "keyword",
-              value: keyword_,
-              onInput(event) {
-                // console.log("input onChange", event.target.value);
-                keyword_.as(event.target.value);
-              },
-            }),
-            Button(
-              {
-                onClick() {
-                  keyword_.as((prev) => prev + "_new");
-                },
-              },
-              ["Search"],
-            ),
-          ]),
-        ],
-      ),
-      Column(
-        {
-          style: {
-            padding: "16px",
-          },
-        },
-        [View({}, ["Search Result List"])],
-      ),
+        onInput(event) {
+          console.log("onInput", event.target.value);
+        }
+      }),
+      // Column(
+      //   {
+      //     gap: 4,
+      //     style: {
+      //       padding: "16px",
+      //     },
+      //   },
+      //   [
+      //     Label({ for: "keyword" }, ["Keyword"]),
+      //     Row({ gap: 4 }, [
+      //       Input({
+      //         id: "keyword",
+      //         value: keyword_,
+      //         onInput(event) {
+      //           // console.log("input onChange", event.target.value);
+      //           keyword_.as(event.target.value);
+      //         },
+      //       }),
+      //       Button(
+      //         {
+      //           onClick() {
+      //             keyword_.as((prev) => prev + "_new");
+      //           },
+      //         },
+      //         ["Search"],
+      //       ),
+      //     ]),
+      //   ],
+      // ),
+      // Column(
+      //   {
+      //     style: {
+      //       padding: "16px",
+      //     },
+      //   },
+      //   [View({}, ["Search Result List"])],
+      // ),
       // Show({
       //   when: visible_,
       //   ok() {

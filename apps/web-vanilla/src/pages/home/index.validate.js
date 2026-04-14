@@ -1,5 +1,7 @@
 import { PageContent, SplitLayout } from "@/components/layout.js";
 
+import { PaymentViewModel } from "./index.validate.model.js";
+
 function FormRender(props, children) {
   const field_names = computed(props.store, (t) => {
     if (!t) {
@@ -107,13 +109,10 @@ function PaymentFormView(props) {
     { class: "w-full max-w-md rounded-xl border border-border p-6" },
     [
       View({ class: "space-y-6" }, [
-        // Payment Method fieldset
         View({ class: "space-y-4" }, [
           View({ class: "space-y-1" }, [
             View(
-              {
-                class: "text-base font-semibold leading-none tracking-tight",
-              },
+              { class: "text-base font-semibold leading-none tracking-tight" },
               ["Payment Method"],
             ),
             View({ class: "text-sm text-muted-foreground" }, [
@@ -164,13 +163,10 @@ function PaymentFormView(props) {
 
         Separator({}),
 
-        // Billing Address fieldset
         View({ class: "space-y-4" }, [
           View({ class: "space-y-1" }, [
             View(
-              {
-                class: "text-base font-semibold leading-none tracking-tight",
-              },
+              { class: "text-base font-semibold leading-none tracking-tight" },
               ["Billing Address"],
             ),
             View({ class: "text-sm text-muted-foreground" }, [
@@ -191,7 +187,6 @@ function PaymentFormView(props) {
 
         Separator({}),
 
-        // Comments fieldset
         View({ class: "space-y-4" }, [
           Field({ store: field_comments$ }, [
             Textarea({
@@ -201,7 +196,6 @@ function PaymentFormView(props) {
           ]),
         ]),
 
-        // Buttons
         View({ class: "flex items-center gap-2" }, [
           Button({ store: submit_payment_btn$ }, ["Submit"]),
           Button({ store: cancel_btn$ }, ["Reset"]),
@@ -209,149 +203,6 @@ function PaymentFormView(props) {
       ]),
     ],
   );
-}
-
-function PaymentViewModel() {
-  const field_card_name$ = new Timeless.ui.SingleFieldCore({
-    label: "Name on Card",
-    name: "card_name",
-    input: new Timeless.ui.InputCore({
-      defaultValue: "",
-      placeholder: "John Doe",
-    }),
-    rules: [{ required: true }],
-  });
-  const field_card_number$ = new Timeless.ui.SingleFieldCore({
-    label: "Card Number",
-    name: "card_number",
-    help: "Enter your 16-digit number.",
-    input: new Timeless.ui.InputCore({
-      defaultValue: "",
-      placeholder: "1234 5678 9012 3456",
-    }),
-    rules: [{ required: true }],
-  });
-  const field_cvv$ = new Timeless.ui.SingleFieldCore({
-    label: "CVV",
-    name: "cvv",
-    input: new Timeless.ui.InputCore({
-      defaultValue: "",
-      placeholder: "123",
-    }),
-    rules: [{ required: true }],
-  });
-  const month_options = Array.from({ length: 12 }, (_, i) => {
-    const v = String(i + 1).padStart(2, "0");
-    return { label: v, value: v };
-  });
-  const field_exp_month$ = new Timeless.ui.SingleFieldCore({
-    label: "Month",
-    name: "exp_month",
-    input: new Timeless.ui.SelectCore({
-      defaultValue: "",
-      placeholder: "MM",
-      options: month_options,
-    }),
-  });
-  const year_options = [2024, 2025, 2026, 2027, 2028, 2029].map((y) => ({
-    label: String(y),
-    value: String(y),
-  }));
-  const field_exp_year$ = new Timeless.ui.SingleFieldCore({
-    label: "Year",
-    name: "exp_year",
-    input: new Timeless.ui.SelectCore({
-      defaultValue: "",
-      placeholder: "YYYY",
-      options: year_options,
-    }),
-  });
-  const same_as_shipping$ = new Timeless.ui.CheckboxCore({});
-  const field_same_as_shipping$ = new Timeless.ui.SingleFieldCore({
-    label: "Same as shipping address",
-    name: "same_as_shipping",
-    input: same_as_shipping$,
-  });
-  const field_comments$ = new Timeless.ui.SingleFieldCore({
-    label: "Comments",
-    name: "comments",
-    input: new Timeless.ui.InputCore({
-      defaultValue: "",
-      placeholder: "Add any additional comments",
-    }),
-  });
-  const form$ = new Timeless.ui.ObjectFieldCore({
-    fields: {
-      card_name: field_card_name$,
-      card_number: field_card_number$,
-      exp_month: field_exp_month$,
-      exp_year: field_exp_year$,
-      cvv: field_cvv$,
-      same_as_shipping: field_same_as_shipping$,
-      comments: field_comments$,
-    },
-  });
-
-  const submit_payment_btn$ = new Timeless.ui.ButtonCore({
-    async onClick() {
-      const r = await form$.validate();
-      if (r.error) {
-        const keys = Object.keys(form$.fields);
-        for (let i = 0; i < keys.length; i += 1) {
-          const key = keys[i];
-          const field$ = form$.fields[key];
-          const rr = await field$.validate();
-          if (rr.error) {
-            if (
-              field$.input &&
-              field$.input.shape === "select" &&
-              typeof field$.input.show === "function"
-            ) {
-              field$.input.show();
-            } else if (
-              field$.input &&
-              typeof field$.input.focus === "function"
-            ) {
-              field$.input.focus();
-            }
-            const id1 = field$.name;
-            const id2 = `field-${field$.name}`;
-            const $elm =
-              typeof document !== "undefined"
-                ? document.getElementById(id1) || document.getElementById(id2)
-                : null;
-            if ($elm && typeof $elm.scrollIntoView === "function") {
-              $elm.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
-            break;
-          }
-        }
-        return;
-      }
-      const values = r.data;
-      console.log(values);
-    },
-  });
-  const cancel_btn$ = new Timeless.ui.ButtonCore({
-    variant: "outline",
-    async onClick() {
-      form$.reset();
-    },
-  });
-
-  const ui = {
-    field_card_name$,
-    field_card_number$,
-    field_cvv$,
-    field_exp_month$,
-    field_exp_year$,
-    same_as_shipping$,
-    field_comments$,
-    submit_payment_btn$,
-    cancel_btn$,
-    form$,
-  };
-  return { ui };
 }
 
 export default function FormValidateView() {

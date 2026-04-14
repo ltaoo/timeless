@@ -1,0 +1,19 @@
+{
+  "name": "@timeless/a2ui",
+  "version": "0.19.0",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "vite build"
+  },
+  "type": "module",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@timeless/ui-vm": "workspace:*",
+    "@timeless/timeless": "workspace:*"
+  }
+}

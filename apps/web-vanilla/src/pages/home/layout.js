@@ -11,6 +11,7 @@ export default function HomeLayoutView(props) {
       { title: "Article", name: "root.home_layout.article" },
       { title: "Project", name: "root.home_layout.project" },
       { title: "Settings", name: "root.home_layout.settings" },
+      { title: "Chat", name: "root.home_layout.chat" },
     ],
   });
 
@@ -71,6 +72,19 @@ export default function HomeLayoutView(props) {
                     },
                   },
                   [Icon({ name: "rss", size: 24 })],
+                ),
+                View(
+                  {
+                    class: computed(sidemenu$.cur, (t) => {
+                      return sidemenu$.isSelected(t, sidemenu$.menus[4])
+                        ? "w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700 cursor-pointer transition-colors dark:bg-zinc-800 dark:text-white"
+                        : "w-10 h-10 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-black cursor-pointer transition-colors dark:hover:bg-zinc-800 dark:hover:text-white";
+                    }),
+                    onClick() {
+                      props.history.push("root.home_layout.chat");
+                    },
+                  },
+                  [Icon({ name: "message-square-more", size: 24 })],
                 ),
                 Separator({ orientation: "horizontal", class: "w-8 mx-auto" }),
                 Flex({ direction: "col", items: "center", class: "gap-2" }, [

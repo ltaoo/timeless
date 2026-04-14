@@ -26,10 +26,9 @@ export default function ArticleContentPageView(props) {
                 class:
                   "w-6 h-6 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin dark:border-zinc-600 dark:border-t-zinc-300",
               }),
-              View(
-                { class: "text-sm text-zinc-400 dark:text-zinc-500" },
-                ["Loading..."],
-              ),
+              View({ class: "text-sm text-zinc-400 dark:text-zinc-500" }, [
+                "Loading...",
+              ]),
             ]),
           ]),
         ];
@@ -38,7 +37,7 @@ export default function ArticleContentPageView(props) {
     Show({
       when: computed(article, (t) => !!t),
       ok() {
-        return [h(ArticleContent, { data: article.value })];
+        return [ArticleContent({ data: article.value })];
       },
     }),
   ]);

@@ -132,6 +132,11 @@ const routes_configure = /** @type {const} */ ({
           },
         },
       },
+      chat: {
+        title: "聊天",
+        pathname: "/chat",
+        component: Timeless.lazy("@/pages/home/chat.js"),
+      },
     },
   },
   admin_layout: {

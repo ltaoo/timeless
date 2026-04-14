@@ -31,6 +31,7 @@ export { default as House } from "./house";
 export { default as LoaderCircle } from "./loader-circle";
 export { default as Loader } from "./loader";
 export { default as Menu } from "./menu";
+export { default as MessageSquareMore } from "./message-square-more";
 export { default as Moon } from "./moon";
 export { default as Pause } from "./pause";
 export { default as Play } from "./play";

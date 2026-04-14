@@ -1,19 +1,7 @@
-import { Ref, Signal, isRef } from "@timeless/reactive";
+import { isRef } from "@timeless/reactive";
 
 import { Text } from "@/content/text";
-import {
-  isElement,
-  TimelessElement,
-  ViewAttributes,
-  ViewChildren,
-  ViewPropValue,
-} from "@/content/type";
-import {
-  ViewStyleProperties,
-  ViewStyle,
-  isClassNameRef,
-  ClassNameRef,
-} from "@/style/index";
+import { isElement, ViewChildren } from "@/content/type";
 import { MountedEvent } from "@/event/index";
 import { Box, BoxProps } from "@/content/box";
 import { ListenerManager } from "@/util/listener";
@@ -222,7 +210,17 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
 
     //   return $elm;
     // },
-    onMounted: props.onMounted,
+    onMounted(event: MountedEvent) {
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();

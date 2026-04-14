@@ -12,7 +12,6 @@ import { optimize } from "svgo";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const ICONS_DIR = join(__dirname, "../../icons/src/icons");
 const SVG_DIR = join(__dirname, "../src");
 const ASN_DIR = join(__dirname, "../src/asn");
 
@@ -170,23 +169,19 @@ function main() {
   ensureDir(SVG_DIR);
   ensureDir(ASN_DIR);
 
-  const files = readdirSync(ICONS_DIR);
-  const tsFiles = files.filter((f) => f.endsWith(".ts"));
+  const files = readdirSync(SVG_DIR);
+  const svgFiles = files.filter((f) => f.endsWith(".svg"));
 
-  for (const file of tsFiles) {
-    const filePath = join(ICONS_DIR, file);
+  for (const file of svgFiles) {
+    const filePath = join(SVG_DIR, file);
     const content = readFileSync(filePath, "utf-8");
-
-    const match = content.match(/const svg = `(.*)`;/s);
-    if (match) {
-      const name = file.replace(".ts", "");
-      processIcon(name, match[1]);
-    }
+    const name = file.replace(".svg", "");
+    processIcon(name, content);
   }
 
-  const indexContent = tsFiles
+  const indexContent = svgFiles
     .map((f) => {
-      const name = f.replace(".ts", "");
+      const name = f.replace(".svg", "");
       return `export { default as ${toPascalCase(name)} } from "./${name}";`;
     })
     .join("\n");

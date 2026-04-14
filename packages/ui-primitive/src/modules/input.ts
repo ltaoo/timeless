@@ -32,25 +32,27 @@ export function Input(
 ) {
   const { store } = props;
 
-  const value$ = refobj(store.value || "");
-  const placeholder$ = ref(store.placeholder || "");
-  const disabled$ = ref(store.disabled || false);
+  const value_ = refobj(store.value || "");
+  const placeholder_ = ref(store.placeholder || "");
+  const disabled_ = ref(store.disabled || false);
 
-  const listener$ = ListenerManager();
+  const listener$ = ListenerManager([value_, placeholder_, disabled_]);
+
   return NativeInput({
     ...props,
-    placeholder: placeholder$,
-    disabled: disabled$,
-    value: value$,
+    placeholder: placeholder_,
+    disabled: disabled_,
+    value: value_,
     onMounted(event) {
       listener$.push(
         store.onStateChange((state) => {
-          value$.as(state.value || "");
-          placeholder$.as(state.placeholder || "");
-          disabled$.as(state.disabled || false);
+          value_.as(state.value || "");
+          placeholder_.as(state.placeholder || "");
+          disabled_.as(state.disabled || false);
         }),
       );
       const $elm = event.target;
+      // console.log("check has global_provider", global_provider);
       if (global_provider) {
         global_provider.provide_ui_input(store, $elm.get$elm());
       }
@@ -60,15 +62,15 @@ export function Input(
       return listener$.destroy;
     },
     onInput(e) {
+      // console.log("onInput", e.target.value);
       if (e.target) {
         // @ts-ignore
-        store.setValue(e.target.value as string);
+        store.setValue(e.target.value);
       }
     },
     // onChange(event) {
-    //   // console.log("input something");
+    //   console.log("onChange", event.target.value);
     //   if (event.target) {
-    //     // @ts-ignore
     //     store.setValue(event.target.value as string);
     //   }
     // },

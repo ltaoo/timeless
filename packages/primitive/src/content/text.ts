@@ -10,13 +10,14 @@ export function Text(
     rendered: false,
     value: "",
   };
+
   const methods = {
     subscribe_props() {
       if (value !== undefined) {
         if (isRef(value)) {
           value.subscribe({
             onChange(v) {
-              console.log("[]Text handle value changed", v === state.value, typeof $elm.setText);
+              // console.log("[]Text handle value changed", v === state.value, typeof $elm.setText);
               if (v === state.value) {
                 return;
               }

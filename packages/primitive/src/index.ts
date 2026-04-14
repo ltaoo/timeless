@@ -52,3 +52,6 @@ export * from "./vnode/view";
 export { setPlatform } from "./platform";
 export type { Platform } from "./platform";
 export { getPlatform } from "./platform";
+
+export { Logger, Result, base } from "@timeless/base";
+export type { Handler } from "@timeless/base";

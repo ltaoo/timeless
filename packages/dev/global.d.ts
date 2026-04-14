@@ -463,96 +463,6 @@ declare module "packages/reactive/src/index" {
     import { release, get as registryGet, set as registrySet, getobj as registryGetObj, getarr as registryGetArr } from "packages/reactive/src/registry";
     export { Subscriber, Ref, DerivedRef, RefObject, RefArray, TimelessRefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, isWriteableRef, isArrayRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
 }
-declare module "packages/base/src/base" {
-    /**
-     * 注册的监听器
-     */
-    import { EventType, Handler } from "mitt";
-    export type { Handler, EventType };
-    export enum BaseEvents {
-        Loading = "__loading",
-        Destroy = "__destroy"
-    }
-    type TheTypesOfBaseEvents = {
-        [BaseEvents.Destroy]: void;
-    };
-    type BaseDomainEvents<E> = TheTypesOfBaseEvents & E;
-    export function base<Events extends Record<EventType, unknown>>(): {
-        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
-        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
-        uid: () => number;
-        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
-        destroy(): void;
-    };
-    export class BaseDomain<Events extends Record<EventType, unknown>> {
-        /** 用于自己区别同名 Domain 不同实例的标志 */
-        unique_id: string;
-        debug: boolean;
-        _emitter: import("mitt").Emitter<BaseDomainEvents<Events>>;
-        listeners: Record<keyof BaseDomainEvents<Events>, (() => void)[]>;
-        constructor(props?: {});
-        uid(): number;
-        log(...args: unknown[]): unknown[];
-        errorTip(...args: unknown[]): void;
-        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
-        offEvent<Key extends keyof BaseDomainEvents<Events>>(k: Key): void;
-        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
-        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
-        /** 主动销毁所有的监听事件 */
-        destroy(): void;
-        onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
-        get [Symbol.toStringTag](): string;
-    }
-    export type LogLevel = "info" | "debug" | "warn" | "error";
-    export interface LoggerProps {
-        prefix?: string;
-        scope?: string;
-        time?: boolean;
-        level?: LogLevel;
-        mode?: "minimal" | "classic" | "verbose";
-        color?: string;
-    }
-    export function Logger(props?: LoggerProps): {
-        log: (...args: unknown[]) => void;
-        debug: (...args: unknown[]) => void;
-        info: (...args: unknown[]) => void;
-        warn: (...args: unknown[]) => void;
-        error: (...args: unknown[]) => void;
-        scope: string;
-        color: string;
-        setColor(value: string): void;
-    };
-    export function applyMixins(derivedCtor: any, constructors: any[]): void;
-}
-declare module "packages/base/src/result/index" {
-    import { BizError } from "@/error";
-    export type Resp<T> = {
-        data: T extends null ? null : T;
-        error: T extends null ? BizError : null;
-    };
-    export type Result<T> = Resp<T> | Resp<null>;
-    export type UnpackedResult<T> = NonNullable<T extends Resp<infer U> ? (U extends null ? U : U) : T>;
-    /** 构造一个结果对象 */
-    export const Result: {
-        /** 构造成功结果 */
-        Ok: <T>(value: T) => Result<T>;
-        /** 构造失败结果 */
-        Err: <T>(message: string | string[] | BizError | Error | Result<null>, code?: string | number, data?: unknown) => Resp<null>;
-    };
-}
-declare module "packages/base/src/error/index" {
-    export class BizError extends Error {
-        messages: string[];
-        code?: string | number;
-        data: unknown | null;
-        constructor(msg: string[], code?: string | number, data?: unknown);
-    }
-}
-declare module "packages/base/src/index" {
-    export * from "packages/base/src/base";
-    export * from "packages/base/src/result/index";
-    export * from "packages/base/src/error/index";
-}
 declare module "packages/primitive/src/reactive/for" {
     import { Ref, DerivedRef } from "packages/reactive/src/index";
     import { TimelessElement } from "@/content/type";
@@ -1552,6 +1462,7 @@ declare module "packages/primitive/src/layout/row" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
+    import { MountedEvent } from "@/event";
     export type RowProps = ViewProps & {
         gap?: number | DerivedRef<number> | Ref<number>;
         span?: number;
@@ -1568,12 +1479,15 @@ declare module "packages/primitive/src/layout/row" {
         state: any;
         events: any;
         children: any;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
 }
 declare module "packages/primitive/src/layout/column" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
+    import { MountedEvent } from "@/event";
     export type ColumnProps = ViewProps & {
         gap?: number | DerivedRef<number> | Ref<number>;
         span?: number;
@@ -1590,6 +1504,8 @@ declare module "packages/primitive/src/layout/column" {
         state: any;
         events: any;
         children: any;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
 }
 declare module "packages/primitive/src/style/index" {
@@ -1750,10 +1666,9 @@ declare module "packages/primitive/src/event/index" {
 }
 declare module "packages/primitive/src/input/input" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { ViewProps } from "@/content/view";
-    import { RawViewStyleProperties } from "@/style/index";
+    import { BoxProps } from "@/content/box";
     import { MountedEvent } from "@/event";
-    export interface InputProps extends Omit<ViewProps, "as" | "type" | "id"> {
+    export type InputProps = BoxProps & {
         id?: string | null;
         name?: string | DerivedRef<string> | Ref<string>;
         value?: DerivedRef<string> | Ref<string>;
@@ -1768,34 +1683,14 @@ declare module "packages/primitive/src/input/input" {
         autocorrect?: boolean;
         onInput?: (e: Event) => void;
         onChange?: (e: Event) => void;
-    }
-    type InputState = {
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet?: string[];
-        id?: string;
-        name?: string;
-        value: string;
-        placeholder?: string;
-        disabled?: boolean;
-        required?: boolean;
-        maxLength?: number;
-        minLength?: number;
     };
     export function Input(props?: InputProps): {
         t: string;
         $elm: any;
-        state: InputState;
+        state: any;
         children: any[];
-        events: {
-            onInput: (e: Event) => void;
-            onChange: (e: Event) => void;
-            onFocus: ViewProps;
-            onBlur: ViewProps;
-            onKeyDown: ViewProps;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
         onUnmounted(): void;
     };
 }
@@ -1984,7 +1879,6 @@ declare module "packages/primitive/src/input/textarea" {
         $elm: any;
         value: string;
         state: TextareaState;
-        render(): void;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -1998,12 +1892,7 @@ declare module "packages/primitive/src/input/radio" {
     export type RadioProps = BoxProps & {
         id?: string;
         name?: string | DerivedRef<string> | Ref<string>;
-        class?: ViewProps["class"];
-        style?: ViewProps["style"];
-        attributes?: ViewProps["attributes"];
-        dataset?: ViewProps["dataset"];
         checked?: boolean | DerivedRef<boolean> | Ref<boolean>;
-        indeterminate?: boolean | DerivedRef<boolean> | Ref<boolean>;
         readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
         disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
         required?: boolean | DerivedRef<boolean> | Ref<boolean>;
@@ -2016,10 +1905,11 @@ declare module "packages/primitive/src/input/radio" {
     export function Radio(props: RadioProps): {
         t: string;
         $elm: any;
-        state: {};
+        state: any;
         children: any[];
-        render(): any;
+        events: any;
         onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
 }
 declare module "packages/primitive/src/interaction/link" {
@@ -2043,6 +1933,7 @@ declare module "packages/primitive/src/interaction/link" {
 }
 declare module "packages/primitive/src/interaction/button" {
     import { ViewChildren } from "@/content/type";
+    import { MountedEvent } from "@/event/index";
     import { BoxProps } from "@/content/box";
     export type ButtonProps = BoxProps & {};
     export function Button(props?: ButtonProps, children?: ViewChildren): {
@@ -2070,7 +1961,7 @@ declare module "packages/primitive/src/interaction/button" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -2130,12 +2021,102 @@ declare module "packages/primitive/src/vnode/view" {
 declare module "packages/primitive/src/platform" {
     export interface Platform {
         /** 监听全局事件，返回取消监听的 cleanup 函数 */
-        addGlobalListener(type: string, handler: EventListener, options?: AddEventListenerOptions): () => void;
+        addEventListener(type: string, handler: EventListener, options?: AddEventListenerOptions): () => void;
         /** 批量设置 document.body 样式（传空字符串可清除） */
         patchBodyStyle(style: Record<string, string>): void;
     }
     export function setPlatform(p: Platform): Platform;
     export function getPlatform(): Platform;
+}
+declare module "packages/base/src/base" {
+    /**
+     * 注册的监听器
+     */
+    import { EventType, Handler } from "mitt";
+    export type { Handler, EventType };
+    export enum BaseEvents {
+        Loading = "__loading",
+        Destroy = "__destroy"
+    }
+    type TheTypesOfBaseEvents = {
+        [BaseEvents.Destroy]: void;
+    };
+    type BaseDomainEvents<E> = TheTypesOfBaseEvents & E;
+    export function base<Events extends Record<EventType, unknown>>(): {
+        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
+        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
+        uid: () => number;
+        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
+        destroy(): void;
+    };
+    export class BaseDomain<Events extends Record<EventType, unknown>> {
+        /** 用于自己区别同名 Domain 不同实例的标志 */
+        unique_id: string;
+        debug: boolean;
+        _emitter: import("mitt").Emitter<BaseDomainEvents<Events>>;
+        listeners: Record<keyof BaseDomainEvents<Events>, (() => void)[]>;
+        constructor(props?: {});
+        uid(): number;
+        log(...args: unknown[]): unknown[];
+        errorTip(...args: unknown[]): void;
+        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
+        offEvent<Key extends keyof BaseDomainEvents<Events>>(k: Key): void;
+        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
+        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
+        /** 主动销毁所有的监听事件 */
+        destroy(): void;
+        onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
+        get [Symbol.toStringTag](): string;
+    }
+    export type LogLevel = "info" | "debug" | "warn" | "error";
+    export interface LoggerProps {
+        prefix?: string;
+        scope?: string;
+        time?: boolean;
+        level?: LogLevel;
+        mode?: "minimal" | "classic" | "verbose";
+        color?: string;
+    }
+    export function Logger(props?: LoggerProps): {
+        log: (...args: unknown[]) => void;
+        debug: (...args: unknown[]) => void;
+        info: (...args: unknown[]) => void;
+        warn: (...args: unknown[]) => void;
+        error: (...args: unknown[]) => void;
+        scope: string;
+        color: string;
+        setColor(value: string): void;
+    };
+    export function applyMixins(derivedCtor: any, constructors: any[]): void;
+}
+declare module "packages/base/src/result/index" {
+    import { BizError } from "@/error";
+    export type Resp<T> = {
+        data: T extends null ? null : T;
+        error: T extends null ? BizError : null;
+    };
+    export type Result<T> = Resp<T> | Resp<null>;
+    export type UnpackedResult<T> = NonNullable<T extends Resp<infer U> ? (U extends null ? U : U) : T>;
+    /** 构造一个结果对象 */
+    export const Result: {
+        /** 构造成功结果 */
+        Ok: <T>(value: T) => Result<T>;
+        /** 构造失败结果 */
+        Err: <T>(message: string | string[] | BizError | Error | Result<null>, code?: string | number, data?: unknown) => Resp<null>;
+    };
+}
+declare module "packages/base/src/error/index" {
+    export class BizError extends Error {
+        messages: string[];
+        code?: string | number;
+        data: unknown | null;
+        constructor(msg: string[], code?: string | number, data?: unknown);
+    }
+}
+declare module "packages/base/src/index" {
+    export * from "packages/base/src/base";
+    export * from "packages/base/src/result/index";
+    export * from "packages/base/src/error/index";
 }
 declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/reactive/for";
@@ -2181,11 +2162,10 @@ declare module "packages/primitive/src/index" {
     export { setPlatform } from "packages/primitive/src/platform";
     export type { Platform } from "packages/primitive/src/platform";
     export { getPlatform } from "packages/primitive/src/platform";
+    export { Logger, Result, base } from "packages/base/src/index";
+    export type { Handler } from "packages/base/src/index";
 }
 declare module "packages/timeless/src/index" {
-    export { base, BaseDomain, BaseEvents, Result, BizError } from "packages/base/src/index";
-    export type { Handler, EventType } from "packages/base/src/index";
-    export * from "packages/base/src/index";
     export * from "packages/reactive/src/index";
     export * from "packages/primitive/src/index";
 }
@@ -11808,7 +11788,7 @@ declare module "packages/ui-primitive/src/modules/button" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13367,7 +13347,7 @@ declare module "packages/ui-primitive/src/modules/tabs" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -13707,29 +13687,10 @@ declare module "packages/ui-primitive/src/modules/input" {
     }): {
         t: string;
         $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet?: string[];
-            id?: string;
-            name?: string;
-            value: string;
-            placeholder?: string;
-            disabled?: boolean;
-            required?: boolean;
-            maxLength?: number;
-            minLength?: number;
-        };
+        state: any;
         children: any[];
-        events: {
-            onInput: (e: Event) => void;
-            onChange: (e: Event) => void;
-            onFocus: ViewProps;
-            onBlur: ViewProps;
-            onKeyDown: ViewProps;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
         onUnmounted(): void;
     };
     export function Value(props: ViewProps & {
@@ -14337,7 +14298,6 @@ declare module "packages/ui-primitive/src/modules/textarea" {
             maxLength?: number;
             minLength?: number;
         };
-        render(): void;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -15899,29 +15859,10 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet?: string[];
-            id?: string;
-            name?: string;
-            value: string;
-            placeholder?: string;
-            disabled?: boolean;
-            required?: boolean;
-            maxLength?: number;
-            minLength?: number;
-        };
+        state: any;
         children: any[];
-        events: {
-            onInput: (e: Event) => void;
-            onChange: (e: Event) => void;
-            onFocus: ViewProps;
-            onBlur: ViewProps;
-            onKeyDown: ViewProps;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
         onUnmounted(): void;
     };
 }
@@ -16233,7 +16174,7 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -16264,7 +16205,7 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -16423,7 +16364,7 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -16814,7 +16755,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -16845,7 +16786,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -16876,7 +16817,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -16907,7 +16848,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -17098,7 +17039,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -17412,7 +17353,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -17483,7 +17424,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -17554,7 +17495,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -17585,7 +17526,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -17616,7 +17557,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -17667,7 +17608,7 @@ declare module "packages/ui-primitive/src/modules/checkbox" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -17852,7 +17793,7 @@ declare module "packages/ui-primitive/src/modules/radio" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -17875,10 +17816,11 @@ declare module "packages/ui-primitive/src/modules/radio" {
     }): {
         t: string;
         $elm: any;
-        state: {};
+        state: any;
         children: any[];
-        render(): any;
+        events: any;
         onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
     export function Label(props: ViewProps & {
         for?: string;
@@ -18168,7 +18110,7 @@ declare module "packages/ui-primitive/src/modules/toggle" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -18243,7 +18185,7 @@ declare module "packages/ui-primitive/src/modules/switch" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -18535,7 +18477,7 @@ declare module "packages/ui-primitive/src/modules/popover" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -18673,7 +18615,7 @@ declare module "packages/ui-primitive/src/modules/popconfirm" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -18704,7 +18646,7 @@ declare module "packages/ui-primitive/src/modules/popconfirm" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -18735,7 +18677,7 @@ declare module "packages/ui-primitive/src/modules/popconfirm" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -20192,9 +20134,9 @@ declare module "packages/ui-primitive/src/modules/standard-sub-views" {
     };
 }
 declare module "packages/ui-primitive/src/index" {
-    export * from "packages/kit/src/index";
+    export * as kit from "packages/kit/src/index";
     export * as PresencePrimitive from "packages/ui-primitive/src/modules/presence";
-    export * as TransitionPrimitive from "packages/ui-primitive/src/modules/transition";
+    export * from "packages/ui-primitive/src/modules/transition";
     export * as PopperPrimitive from "packages/ui-primitive/src/modules/popper";
     export * as HeadPrimitive from "packages/ui-primitive/src/modules/head";
     export * as ParagraphPrimitive from "packages/ui-primitive/src/modules/paragraph";
@@ -20679,10 +20621,6 @@ declare module "packages/shadcn/src/modules/search-select" {
     import { SelectCore } from "packages/ui-vm/src/index";
     export function SearchSelect<T>(props: ViewProps & {
         store: SelectCore<T>;
-        fetchOptions: (keyword: string) => Promise<{
-            value: T;
-            label: string;
-        }[]>;
         debounce?: number;
         minLength?: number;
         emptyText?: string;
@@ -20950,7 +20888,7 @@ declare module "packages/shadcn/src/modules/toggle" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -20986,7 +20924,7 @@ declare module "packages/shadcn/src/modules/switch" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -21115,7 +21053,7 @@ declare module "packages/shadcn/src/modules/button" {
             onDrop: any;
             onAnimationEnd: any;
         };
-        onMounted: any;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -23059,7 +22997,7 @@ declare module "packages/shadcn/src/index" {
     import "./styles/globals.css";
     export const TimelessShadcnVersion: any;
     export * from "packages/ui-primitive/src/index";
-    export * from "packages/ui-vm/src/index";
+    export * as ui from "packages/ui-vm/src/index";
     export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, Affix, };
 }
 declare module "packages/icons/src/util/index" {
@@ -23287,7 +23225,6 @@ declare const Timeless: {
 
 // @timeless/timeless
 declare const ArraySignal: typeof import("@timeless/timeless").ArraySignal;
-declare const BaseEvents: typeof import("@timeless/timeless").BaseEvents;
 declare const Column: typeof import("@timeless/timeless").Column;
 declare const DerivedRef: typeof import("@timeless/timeless").DerivedRef;
 declare const DismissableLayer: typeof import("@timeless/timeless").DismissableLayer;
@@ -23321,7 +23258,6 @@ declare const Subscriber: typeof import("@timeless/timeless").Subscriber;
 declare const Text: typeof import("@timeless/timeless").Text;
 declare const TimelessRefArray: typeof import("@timeless/timeless").TimelessRefArray;
 declare const View: typeof import("@timeless/timeless").View;
-declare const applyMixins: typeof import("@timeless/timeless").applyMixins;
 declare const classNames: typeof import("@timeless/timeless").classNames;
 declare const combine: typeof import("@timeless/timeless").combine;
 declare const computed: typeof import("@timeless/timeless").computed;
@@ -23358,6 +23294,21 @@ declare const signal: typeof import("@timeless/timeless").signal;
 declare const styleNames: typeof import("@timeless/timeless").styleNames;
 declare const uncomputed: typeof import("@timeless/timeless").uncomputed;
 
+// @timeless/kit
+declare const ApplicationModel: typeof import("@timeless/kit").ApplicationModel;
+declare const ClipboardModel: typeof import("@timeless/kit").ClipboardModel;
+declare const HistoryCore: typeof import("@timeless/kit").HistoryCore;
+declare const HttpClientCore: typeof import("@timeless/kit").HttpClientCore;
+declare const ListCore: typeof import("@timeless/kit").ListCore;
+declare const NavigatorCore: typeof import("@timeless/kit").NavigatorCore;
+declare const RequestCore: typeof import("@timeless/kit").RequestCore;
+declare const RequestPayload: typeof import("@timeless/kit").RequestPayload;
+declare const RouteMenusModel: typeof import("@timeless/kit").RouteMenusModel;
+declare const RouteViewCore: typeof import("@timeless/kit").RouteViewCore;
+declare const StorageCore: typeof import("@timeless/kit").StorageCore;
+declare const buildRoutes: typeof import("@timeless/kit").buildRoutes;
+declare const request_factory: typeof import("@timeless/kit").request_factory;
+
 // @timeless/shadcn
 declare const Accordion: typeof import("@timeless/shadcn").Accordion;
 declare const AccordionPrimitive: typeof import("@timeless/shadcn").AccordionPrimitive;
@@ -23366,7 +23317,6 @@ declare const Alert: typeof import("@timeless/shadcn").Alert;
 declare const AlertDescription: typeof import("@timeless/shadcn").AlertDescription;
 declare const AlertPrimitive: typeof import("@timeless/shadcn").AlertPrimitive;
 declare const AlertTitle: typeof import("@timeless/shadcn").AlertTitle;
-declare const ApplicationModel: typeof import("@timeless/shadcn").ApplicationModel;
 declare const ArrowPrimitive: typeof import("@timeless/shadcn").ArrowPrimitive;
 declare const AspectRatio: typeof import("@timeless/shadcn").AspectRatio;
 declare const Avatar: typeof import("@timeless/shadcn").Avatar;
@@ -23388,7 +23338,6 @@ declare const Checkbox: typeof import("@timeless/shadcn").Checkbox;
 declare const CheckboxGroup: typeof import("@timeless/shadcn").CheckboxGroup;
 declare const CheckboxGroupItem: typeof import("@timeless/shadcn").CheckboxGroupItem;
 declare const CheckboxPrimitive: typeof import("@timeless/shadcn").CheckboxPrimitive;
-declare const ClipboardModel: typeof import("@timeless/shadcn").ClipboardModel;
 declare const ContextMenu: typeof import("@timeless/shadcn").ContextMenu;
 declare const ContextMenuPrimitive: typeof import("@timeless/shadcn").ContextMenuPrimitive;
 declare const DatePicker: typeof import("@timeless/shadcn").DatePicker;
@@ -23414,9 +23363,7 @@ declare const FileInput: typeof import("@timeless/shadcn").FileInput;
 declare const FilePickerPrimitive: typeof import("@timeless/shadcn").FilePickerPrimitive;
 declare const Form: typeof import("@timeless/shadcn").Form;
 declare const HeadPrimitive: typeof import("@timeless/shadcn").HeadPrimitive;
-declare const HistoryCore: typeof import("@timeless/shadcn").HistoryCore;
 declare const HistoryPanel: typeof import("@timeless/shadcn").HistoryPanel;
-declare const HttpClientCore: typeof import("@timeless/shadcn").HttpClientCore;
 declare const ImagePrimitive: typeof import("@timeless/shadcn").ImagePrimitive;
 declare const Input: typeof import("@timeless/shadcn").Input;
 declare const InputPrimitive: typeof import("@timeless/shadcn").InputPrimitive;
@@ -23426,10 +23373,8 @@ declare const KeepAliveSubViews: typeof import("@timeless/shadcn").KeepAliveSubV
 declare const LLMProviderForm: typeof import("@timeless/shadcn").LLMProviderForm;
 declare const Label: typeof import("@timeless/shadcn").Label;
 declare const Link: typeof import("@timeless/shadcn").Link;
-declare const ListCore: typeof import("@timeless/shadcn").ListCore;
 declare const Menu: typeof import("@timeless/shadcn").Menu;
 declare const MenuPrimitive: typeof import("@timeless/shadcn").MenuPrimitive;
-declare const NavigatorCore: typeof import("@timeless/shadcn").NavigatorCore;
 declare const NumberInput: typeof import("@timeless/shadcn").NumberInput;
 declare const NumberInputPrimitive: typeof import("@timeless/shadcn").NumberInputPrimitive;
 declare const ParagraphPrimitive: typeof import("@timeless/shadcn").ParagraphPrimitive;
@@ -23445,14 +23390,10 @@ declare const Radio: typeof import("@timeless/shadcn").Radio;
 declare const RadioGroup: typeof import("@timeless/shadcn").RadioGroup;
 declare const RadioGroupItem: typeof import("@timeless/shadcn").RadioGroupItem;
 declare const RadioPrimitive: typeof import("@timeless/shadcn").RadioPrimitive;
-declare const RequestCore: typeof import("@timeless/shadcn").RequestCore;
-declare const RequestPayload: typeof import("@timeless/shadcn").RequestPayload;
 declare const ResizableHandle: typeof import("@timeless/shadcn").ResizableHandle;
 declare const ResizablePanel: typeof import("@timeless/shadcn").ResizablePanel;
 declare const ResizablePanels: typeof import("@timeless/shadcn").ResizablePanels;
 declare const ResizablePanelsPrimitive: typeof import("@timeless/shadcn").ResizablePanelsPrimitive;
-declare const RouteMenusModel: typeof import("@timeless/shadcn").RouteMenusModel;
-declare const RouteViewCore: typeof import("@timeless/shadcn").RouteViewCore;
 declare const ScrollArea: typeof import("@timeless/shadcn").ScrollArea;
 declare const ScrollView: typeof import("@timeless/shadcn").ScrollView;
 declare const ScrollViewPrimitive: typeof import("@timeless/shadcn").ScrollViewPrimitive;
@@ -23471,7 +23412,6 @@ declare const SonnerPrimitive: typeof import("@timeless/shadcn").SonnerPrimitive
 declare const StandardSubViews: typeof import("@timeless/shadcn").StandardSubViews;
 declare const Steps: typeof import("@timeless/shadcn").Steps;
 declare const StepsPrimitive: typeof import("@timeless/shadcn").StepsPrimitive;
-declare const StorageCore: typeof import("@timeless/shadcn").StorageCore;
 declare const Switch: typeof import("@timeless/shadcn").Switch;
 declare const SwitchPrimitive: typeof import("@timeless/shadcn").SwitchPrimitive;
 declare const Table: typeof import("@timeless/shadcn").Table;
@@ -23497,12 +23437,12 @@ declare const TogglePrimitive: typeof import("@timeless/shadcn").TogglePrimitive
 declare const Tooltip: typeof import("@timeless/shadcn").Tooltip;
 declare const TooltipPrimitive: typeof import("@timeless/shadcn").TooltipPrimitive;
 declare const TooltipProvider: typeof import("@timeless/shadcn").TooltipProvider;
-declare const TransitionPrimitive: typeof import("@timeless/shadcn").TransitionPrimitive;
+declare const Transition: typeof import("@timeless/shadcn").Transition;
 declare const VideoPlayerPrimitive: typeof import("@timeless/shadcn").VideoPlayerPrimitive;
 declare const Waterfall: typeof import("@timeless/shadcn").Waterfall;
 declare const WaterfallPrimitive: typeof import("@timeless/shadcn").WaterfallPrimitive;
-declare const buildRoutes: typeof import("@timeless/shadcn").buildRoutes;
-declare const request_factory: typeof import("@timeless/shadcn").request_factory;
+declare const kit: typeof import("@timeless/shadcn").kit;
+declare const ui: typeof import("@timeless/shadcn").ui;
 
 // @timeless/icons
 declare const ArrowDownToLineOutlined: typeof import("@timeless/icons").ArrowDownToLineOutlined;
