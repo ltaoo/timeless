@@ -9498,6 +9498,185 @@ declare module "packages/ui-vm/src/click-outside/index" {
         onError(handler: Handler<TheTypesOfEvents[Events.Error]>): () => void;
     };
 }
+declare module "packages/ui-vm/src/sonner/index" {
+    /**
+     * @file SonnerCore - Toast 通知系统核心类
+     * 基于 sonner 的设计，抽象 toast 管理逻辑
+     */
+    import { Handler } from "packages/base/src/index";
+    export type ToastTypes = "normal" | "action" | "success" | "info" | "warning" | "error" | "loading" | "default";
+    type ToastShape = any;
+    export type SwipeDirection = "top" | "right" | "bottom" | "left";
+    export interface Action {
+        label: unknown;
+        onClick: (event: unknown) => void;
+        actionButtonStyle?: Record<string, unknown>;
+    }
+    export type Position = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "top-center" | "bottom-center";
+    export interface ToastToDismiss {
+        id: number | string;
+        dismiss: boolean;
+    }
+    export type ExternalToast = Omit<ToastShape, "id" | "type" | "title" | "jsx" | "delete" | "promise"> & {
+        id?: number;
+        toasterId?: string;
+    };
+    export interface PromiseData<ToastData = any> {
+        loading?: unknown;
+        success?: unknown;
+        error?: unknown;
+        description?: unknown;
+        finally?: () => void | Promise<void>;
+    }
+    export interface HeightShape {
+        height: number;
+        toastId: number;
+        position: Position;
+    }
+    export function SonnerCore(): {
+        readonly [Symbol.toStringTag]: string;
+        state: {
+            readonly toasts: any[];
+        };
+        methods: {
+            subscribe(subscriber: (toast: ToastShape | ToastToDismiss) => void): () => void;
+            publish(data: ToastShape): void;
+            addToast(data: ToastShape): void;
+            deleteToast(data: ToastShape): void;
+            create(data: ExternalToast & {
+                message?: unknown;
+                type?: ToastTypes;
+            }): number;
+            dismiss(id?: number): number;
+            message(message: unknown, data?: ExternalToast): number;
+            error(message: unknown, data?: ExternalToast): number;
+            success(message: unknown, data?: ExternalToast): number;
+            info(message: unknown, data?: ExternalToast): number;
+            warning(message: unknown, data?: ExternalToast): number;
+            loading(message: unknown, data?: ExternalToast): number;
+            custom(jsx: (id: number | string) => unknown, data?: ExternalToast): number;
+            getActiveToasts(): any[];
+        };
+        message(content: unknown): void;
+        onStateChange(handler: Handler<{
+            readonly toasts: any[];
+        }>): void;
+    };
+    export type SonnerCore = ReturnType<typeof SonnerCore>;
+    interface ToastHeightRecord {
+        toastId: number;
+        height: number;
+        position: Position;
+    }
+    type ToasterModelProps = {
+        id?: string;
+        position?: Position;
+        theme?: "light" | "dark" | "system";
+        duration?: number;
+        visibleToasts?: number;
+        closeButton?: boolean;
+        gap?: number;
+        richColors?: boolean;
+        expand?: boolean;
+        invert?: boolean;
+        offset?: number | string | {
+            top?: number | string;
+            right?: number | string;
+            bottom?: number | string;
+            left?: number | string;
+        };
+        mobileOffset?: number | string | {
+            top?: number | string;
+            right?: number | string;
+            bottom?: number | string;
+            left?: number | string;
+        };
+    };
+    export function ToasterModel(props: ToasterModelProps): {
+        readonly [Symbol.toStringTag]: string;
+        state: {
+            readonly toasts: {
+                readonly [Symbol.toStringTag]: string;
+                id: number;
+                content: unknown;
+                state: {
+                    readonly index: number;
+                    readonly offset: number;
+                    readonly removed: boolean;
+                    readonly offsetBeforeRemove: number;
+                    readonly content: unknown;
+                };
+                onStateChange(handler: Handler<{
+                    readonly index: number;
+                    readonly offset: number;
+                    readonly removed: boolean;
+                    readonly offsetBeforeRemove: number;
+                    readonly content: unknown;
+                }>): () => void;
+            }[];
+        };
+        heights: ToastHeightRecord[];
+        message(content: unknown): void;
+        onStateChange(handler: Handler<{
+            readonly toasts: {
+                readonly [Symbol.toStringTag]: string;
+                id: number;
+                content: unknown;
+                state: {
+                    readonly index: number;
+                    readonly offset: number;
+                    readonly removed: boolean;
+                    readonly offsetBeforeRemove: number;
+                    readonly content: unknown;
+                };
+                onStateChange(handler: Handler<{
+                    readonly index: number;
+                    readonly offset: number;
+                    readonly removed: boolean;
+                    readonly offsetBeforeRemove: number;
+                    readonly content: unknown;
+                }>): () => void;
+            }[];
+        }>): () => void;
+    };
+    export type ToasterModel = ReturnType<typeof ToasterModel>;
+    type ToastModelProps = {
+        toaster: ToasterModel;
+        id: number;
+        /** toast 出现的位置 */
+        position: Position;
+        /** toast 的层级，从 0 开始 */
+        index: number;
+        /** 持续时间 */
+        duration: number;
+        /** 总共可见的 toast 数量 */
+        visibleToasts: number;
+        type: string;
+        /** 是否可消失 */
+        dismissible: boolean;
+        content: unknown;
+    };
+    export function ToastModel(props: ToastModelProps): {
+        readonly [Symbol.toStringTag]: string;
+        id: number;
+        content: unknown;
+        state: {
+            readonly index: number;
+            readonly offset: number;
+            readonly removed: boolean;
+            readonly offsetBeforeRemove: number;
+            readonly content: unknown;
+        };
+        onStateChange(handler: Handler<{
+            readonly index: number;
+            readonly offset: number;
+            readonly removed: boolean;
+            readonly offsetBeforeRemove: number;
+            readonly content: unknown;
+        }>): () => void;
+    };
+    export type ToastModel = ReturnType<typeof ToastModel>;
+}
 declare module "packages/ui-vm/src/index" {
     import { Result as _Result, BizError as _BizError, base as _base, BaseDomain as _BaseDomain } from "packages/base/src/index";
     export const Result: {
@@ -9579,6 +9758,7 @@ declare module "packages/ui-vm/src/index" {
     export * from "packages/ui-vm/src/tooltip/index";
     export * from "packages/ui-vm/src/shortcut/index";
     export * from "packages/ui-vm/src/click-outside/index";
+    export * from "packages/ui-vm/src/sonner/index";
 }
 declare module "packages/kit/src/route_view/utils" {
     import { JSONObject } from "packages/types/src/index";
@@ -19983,8 +20163,48 @@ declare module "packages/ui-primitive/src/modules/waterfall" {
 }
 declare module "packages/ui-primitive/src/modules/sonner" {
     import { ViewChildren } from "packages/timeless/src/index";
-    export function Toaste(props: {
-        store: any;
+    import { SonnerCore } from "packages/ui-vm/src/index";
+    export function Toast(props: {
+        store: SonnerCore;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: {
+            rendered: boolean;
+            style: RawViewStyleProperties;
+            styleSet: string[];
+            attributes: Record<string, string | number | boolean | undefined>;
+            children: (import("@timeless/timeless").TimelessElement | null)[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        events: {
+            onClick: (e: MouseEvent) => void;
+            onDoubleClick: (e: MouseEvent) => void;
+            onMouseEnter: (e: MouseEvent) => void;
+            onMouseLeave: (e: MouseEvent) => void;
+            onMouseDown: (e: MouseEvent) => void;
+            onMouseUp: (e: MouseEvent) => void;
+            onLongPress: (e: PointerEvent) => void;
+            onPointerDown: (e: PointerEvent) => void;
+            onFocus: (e: FocusEvent) => void;
+            onBlur: (e: FocusEvent) => void;
+            onKeyDown: (e: KeyboardEvent) => void;
+            onContextMenu: (e: MouseEvent) => void;
+            onDragStart: (e: DragEvent) => void;
+            onDrag: (e: DragEvent) => void;
+            onDragEnd: (e: DragEvent) => void;
+            onDragEnter: (e: DragEvent) => void;
+            onDragOver: (e: DragEvent) => void;
+            onDragLeave: (e: DragEvent) => void;
+            onDrop: (e: DragEvent) => void;
+            onAnimationEnd: (e: AnimationEvent) => void;
+        };
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Content(props: {
+        store: SonnerCore;
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -20023,7 +20243,7 @@ declare module "packages/ui-primitive/src/modules/sonner" {
         onUnmounted(): void;
     };
     export function Close(props: {
-        store: any;
+        store: SonnerCore;
     }, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -22857,7 +23077,12 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
     };
 }
 declare module "packages/shadcn/src/modules/sonner" {
-    export function Toaster(): {
+    import { TimelessElement } from "packages/timeless/src/index";
+    import { ToasterModel, ToastModel } from "packages/ui-vm/src/index";
+    type ToasterProps = {
+        store: ToasterModel;
+    };
+    export function Toaster(props: ToasterProps): {
         t: string;
         $elm: any;
         state: {
@@ -22865,9 +23090,48 @@ declare module "packages/shadcn/src/modules/sonner" {
             style: RawViewStyleProperties;
             styleSet: string[];
             attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
+            children: (TimelessElement | null)[];
         };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        children: TimelessElement<any, any>[];
+        events: {
+            onClick: (e: MouseEvent) => void;
+            onDoubleClick: (e: MouseEvent) => void;
+            onMouseEnter: (e: MouseEvent) => void;
+            onMouseLeave: (e: MouseEvent) => void;
+            onMouseDown: (e: MouseEvent) => void;
+            onMouseUp: (e: MouseEvent) => void;
+            onLongPress: (e: PointerEvent) => void;
+            onPointerDown: (e: PointerEvent) => void;
+            onFocus: (e: FocusEvent) => void;
+            onBlur: (e: FocusEvent) => void;
+            onKeyDown: (e: KeyboardEvent) => void;
+            onContextMenu: (e: MouseEvent) => void;
+            onDragStart: (e: DragEvent) => void;
+            onDrag: (e: DragEvent) => void;
+            onDragEnd: (e: DragEvent) => void;
+            onDragEnter: (e: DragEvent) => void;
+            onDragOver: (e: DragEvent) => void;
+            onDragLeave: (e: DragEvent) => void;
+            onDrop: (e: DragEvent) => void;
+            onAnimationEnd: (e: AnimationEvent) => void;
+        };
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Toast(props: {
+        store: ToastModel;
+    }): {
+        t: string;
+        $elm: any;
+        state: {
+            rendered: boolean;
+            style: RawViewStyleProperties;
+            styleSet: string[];
+            attributes: Record<string, string | number | boolean | undefined>;
+            children: (TimelessElement | null)[];
+        };
+        children: TimelessElement<any, any>[];
         events: {
             onClick: (e: MouseEvent) => void;
             onDoubleClick: (e: MouseEvent) => void;
@@ -23561,6 +23825,7 @@ declare const SelectInListCore: typeof import("@timeless/ui-vm").SelectInListCor
 declare const ShortcutModel: typeof import("@timeless/ui-vm").ShortcutModel;
 declare const SimpleSelectCore: typeof import("@timeless/ui-vm").SimpleSelectCore;
 declare const SingleFieldCore: typeof import("@timeless/ui-vm").SingleFieldCore;
+declare const SonnerCore: typeof import("@timeless/ui-vm").SonnerCore;
 declare const StepCore: typeof import("@timeless/ui-vm").StepCore;
 declare const SwitchCore: typeof import("@timeless/ui-vm").SwitchCore;
 declare const TabHeaderCore: typeof import("@timeless/ui-vm").TabHeaderCore;
@@ -23569,6 +23834,8 @@ declare const TagInputCore: typeof import("@timeless/ui-vm").TagInputCore;
 declare const TagSelectCore: typeof import("@timeless/ui-vm").TagSelectCore;
 declare const TimePickerCore: typeof import("@timeless/ui-vm").TimePickerCore;
 declare const ToastCore: typeof import("@timeless/ui-vm").ToastCore;
+declare const ToastModel: typeof import("@timeless/ui-vm").ToastModel;
+declare const ToasterModel: typeof import("@timeless/ui-vm").ToasterModel;
 declare const ToggleCore: typeof import("@timeless/ui-vm").ToggleCore;
 declare const TooltipCore: typeof import("@timeless/ui-vm").TooltipCore;
 declare const TreeCore: typeof import("@timeless/ui-vm").TreeCore;

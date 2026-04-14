@@ -2,6 +2,9 @@
 import { SidebarLayout } from "@/components/layout.js";
 import { projects } from "@/pages/project/data.js";
 
+/**
+ * @param {ViewComponentProps} props
+ */
 export default function HomeLayoutView(props) {
   const sidemenu$ = Timeless.RouteMenusModel({
     view: props.view,
@@ -192,9 +195,11 @@ export default function HomeLayoutView(props) {
                       menu: new Timeless.ui.MenuCore({
                         items: [
                           new Timeless.ui.MenuItemCore({
-                            label: "Item 1",
+                            label: "Toast",
                             onClick() {
-                              console.log("Item 1 clicked");
+                              props.app.tip({
+                                text: ["Hello!"],
+                              });
                             },
                           }),
                           new Timeless.ui.MenuItemCore({
@@ -238,29 +243,29 @@ export default function HomeLayoutView(props) {
                     }),
                   ],
                 });
-                // return DropdownMenu(
-                //   {
-                //     store: dropdown$,
-                //   },
-                //   [
-                //     View(
-                //       {
-                //         class:
-                //           "w-10 h-10 rounded-full bg-zinc-100 overflow-hidden cursor-pointer border border-zinc-200 hover:ring-2 ring-zinc-200 transition-all dark:bg-zinc-800 dark:border-zinc-700 dark:ring-zinc-700",
-                //         onClick() {
-                //           console.log("Avatar clicked");
-                //         },
-                //       },
-                //       [
-                //         Img({
-                //           class: "w-full h-full object-cover",
-                //           src: "public/avatar.jpeg",
-                //           alt: "User Avatar",
-                //         }),
-                //       ],
-                //     ),
-                //   ],
-                // );
+                return DropdownMenu(
+                  {
+                    store: dropdown$,
+                  },
+                  [
+                    View(
+                      {
+                        class:
+                          "w-10 h-10 rounded-full bg-zinc-100 overflow-hidden cursor-pointer border border-zinc-200 hover:ring-2 ring-zinc-200 transition-all dark:bg-zinc-800 dark:border-zinc-700 dark:ring-zinc-700",
+                        onClick() {
+                          console.log("Avatar clicked");
+                        },
+                      },
+                      [
+                        Img({
+                          class: "w-full h-full object-cover",
+                          src: "public/avatar.jpeg",
+                          alt: "User Avatar",
+                        }),
+                      ],
+                    ),
+                  ],
+                );
               })(),
             ]),
           ],

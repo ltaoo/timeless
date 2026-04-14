@@ -1,5 +1,14 @@
-import { View } from "@timeless/timeless";
-// import { useEffect, useState } from "react"
+import {
+  computed,
+  For,
+  isElement,
+  ref,
+  refobj,
+  Show,
+  TimelessElement,
+  View,
+} from "@timeless/timeless";
+import { ToasterModel, ToastModel } from "@timeless/ui-vm";
 // import {
 //   CircleCheckIcon,
 //   InfoIcon,
@@ -7,60 +16,108 @@ import { View } from "@timeless/timeless";
 //   OctagonXIcon,
 //   TriangleAlertIcon,
 // } from "lucide-react"
-// import { Toaster as Sonner, type ToasterProps } from "sonner"
 
-// const sonner = SonnerCore.getInstance()
+type ToasterProps = {
+  store: ToasterModel;
+};
 
-// function Toaster({ ...props }: ToasterProps) {
-//   const [theme, setTheme] = useState<"light" | "dark">("light")
+export function Toaster(props: ToasterProps) {
+  const { store, ...rest } = props;
 
-//   useEffect(() => {
-//     const isDark =
-//       window.matchMedia &&
-//       window.matchMedia("(prefers-color-scheme: dark)").matches
-//     setTheme(isDark ? "dark" : "light")
+  const state_ = refobj(store.state);
+  const toasts_ = computed(state_, (t) => t.toasts);
 
-//     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-//     const handleChange = (e: MediaQueryListEvent) => {
-//       setTheme(e.matches ? "dark" : "light")
-//     }
+  return View(
+    {
+      class:
+        "fixed z-index-[999999999] border-box p-0 m-0 list-none outline-none transition-transform",
+      style: {
+        top: 0,
+      },
+      attributes: {
+        "z-index": 999999999,
+        "tab-index": -1,
+        "aria-live": "polite",
+        "aria-relevant": "additions text",
+        "aria-atomic": "false",
+      },
+      onMounted() {
+        store.onStateChange((v) => {
+          state_.as(v);
+        });
+      },
+    },
+    [
+      View(
+        {
+          attributes: {
+            "tab-index": -1,
+          },
+          dataset: {
+            "sonner-toaster": "",
+          },
+        },
+        [
+          For({
+            each: toasts_,
+            render(toast, idx) {
+              return View(
+                {
+                  style: {
+                    "z-index": idx,
+                  },
+                },
+                [Toast({ store: toast })],
+              );
+            },
+          }),
+        ],
+      ),
+    ],
+  );
+}
 
-//     mediaQuery.addEventListener("change", handleChange)
-//     return () => mediaQuery.removeEventListener("change", handleChange)
-//   }, [])
+export function Toast(props: { store: ToastModel }) {
+  const { store, ...rest } = props;
 
-//   return (
-//     <Sonner
-//       theme={theme as ToasterProps["theme"]}
-//       className="toaster group"
-//       visibleToasts={3}
-//       gap={14}
-//       icons={{
-//         success: <CircleCheckIcon className="size-4" />,
-//         info: <InfoIcon className="size-4" />,
-//         warning: <TriangleAlertIcon className="size-4" />,
-//         error: <OctagonXIcon className="size-4" />,
-//         loading: <Loader2Icon className="size-4 animate-spin" />,
-//       }}
-//       style={
-//         {
-//           "--normal-bg": "var(--popover)",
-//           "--normal-text": "var(--popover-foreground)",
-//           "--normal-border": "var(--border)",
-//           "--border-radius": "var(--radius)",
-//           "--width": "356px",
-//           "--gap": "14px",
-//         } as React.CSSProperties
-//       }
-//       toastOptions={{
-//         classNames: {
-//           toast: "cn-toast",
-//         },
-//       }}
-//       {...props}
-//     />
-//   )
-// }
+  const state_ = refobj(store.state);
+  const index_ = computed(state_, (t) => t.index);
+  const offset_ = computed(state_, (t) => {
+    return t.removed ? t.offsetBeforeRemove : t.offset;
+  });
+
+  return View(
+    {
+      style: {
+        "--index": index_,
+        "--toasts-before": index_,
+        "--offset": computed(offset_, (t) => `${t}px`),
+        "--y": "translateY(100%)",
+        //  '--z-index': toasts.length - index_,
+        position: "absolute",
+        opacity: 0,
+        transform: "var(--y)",
+        "touch-action": "none",
+        transition:
+          "transform 400ms, opacity 400ms, height 400ms, box-shadow 200ms",
+        "box-sizing": "border-box",
+        outline: "none",
+        "overflow-wrap": "anywhere",
+      },
+    },
+    [
+      Show({
+        when: isElement(store.content),
+        ok() {
+          return [store.content as TimelessElement];
+        },
+        else() {
+          return [View({ class: "toast-content" }, [store.content as string])];
+        },
+      }),
+    ],
+  );
+}
 
 // function toast(message: unknown, data?: ExternalToast) {
 //   return sonner.toast(message, data)
@@ -91,8 +148,3 @@ import { View } from "@timeless/timeless";
 // }
 
 // export { Toaster, toast, success, error, info, warning, loading, dismiss }
-export function Toaster() {
-  return View({}, []);
-}
-
-// export

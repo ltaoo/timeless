@@ -1,6 +1,5 @@
 import { app, history$, client$, views, storage$ } from "./store/index.js";
 import NotFoundPageView from "./pages/notfound/index.js";
-// import { initToaster } from "./components/toaster.js";
 
 function ErrorFallbackView(error, viewName) {
   return View(
@@ -76,13 +75,22 @@ function ErrorFallbackView(error, viewName) {
 
 function ApplicationRootView() {
   const root_view$ = history$.$view;
-  // const toast$ = new Timeless.ToastCore();
+  const toaster$ = Timeless.ui.ToasterModel({});
+
   app.onTip((msg) => {
     const { text } = msg;
     console.log("[]tip", text);
-    // toast$.show({
-    //   texts: text,
-    // });
+    console.log(toaster$);
+    toaster$.message(
+      View({ class: "p-4" }, [
+        For({
+          each: text,
+          render(t) {
+            return View({}, [t]);
+          },
+        }),
+      ]),
+    );
   });
   app.onError((err) => {
     console.error(err);
@@ -118,6 +126,7 @@ function ApplicationRootView() {
         NotFound: NotFoundPageView,
         ErrorFallback: ErrorFallbackView,
       }),
+      Toaster({ store: toaster$ }),
       // HistoryPanel({ store: history }),
     ],
   );

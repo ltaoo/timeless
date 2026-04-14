@@ -1,9 +1,19 @@
 import { ViewChildren, View } from "@timeless/timeless";
 
-export function Toaste(props: { store: any }, children?: ViewChildren) {
+import { SonnerCore } from "@timeless/ui-vm";
+
+export function Toast(props: { store: SonnerCore }, children?: ViewChildren) {
   return View({}, children);
 }
 
-export function Close(props: { store: any }, children?: ViewChildren) {
+export function Content(props: { store: SonnerCore }, children?: ViewChildren) {
   return View({}, children);
+}
+
+export function Close(props: { store: SonnerCore }, children?: ViewChildren) {
+  return View({
+    onClick() {
+      // props.store.methods.deleteToast()
+    }
+  }, children);
 }

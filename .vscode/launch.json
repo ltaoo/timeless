@@ -1,0 +1,24 @@
+{
+	"configurations": [
+		{
+			"type": "swift",
+			"request": "launch",
+			"args": [],
+			"cwd": "${workspaceFolder:timeless}/apps/macos-demo",
+			"name": "Debug TimelessMacDemo (apps/macos-demo)",
+			"target": "TimelessMacDemo",
+			"configuration": "debug",
+			"preLaunchTask": "swift: Build Debug TimelessMacDemo (apps/macos-demo)"
+		},
+		{
+			"type": "swift",
+			"request": "launch",
+			"args": [],
+			"cwd": "${workspaceFolder:timeless}/apps/macos-demo",
+			"name": "Release TimelessMacDemo (apps/macos-demo)",
+			"target": "TimelessMacDemo",
+			"configuration": "release",
+			"preLaunchTask": "swift: Build Release TimelessMacDemo (apps/macos-demo)"
+		}
+	]
+}
