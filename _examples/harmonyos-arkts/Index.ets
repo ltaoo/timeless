@@ -15,6 +15,7 @@ struct Index {
   @State private draftTitle: string = ''
   @State private selectedCategory: string = 'work'
   @State private nextId: number = 3
+  @State private draggedItem: TodoItem | null = null
   private categories: string[] = ['work', 'daily']
 
   private addTodo(): void {
@@ -46,6 +47,25 @@ struct Index {
 
   private get activeCount(): number {
     return this.todos.length - this.completedCount
+  }
+
+  private onDragStart(todo: TodoItem): boolean {
+    this.draggedItem = todo
+    return true
+  }
+
+  private onDrop(todo: TodoItem): void {
+    if (this.draggedItem && this.draggedItem.id !== todo.id) {
+      const fromIndex = this.todos.findIndex((t) => t.id === this.draggedItem!.id)
+      const toIndex = this.todos.findIndex((t) => t.id === todo.id)
+      if (fromIndex !== -1 && toIndex !== -1) {
+        const newTodos = [...this.todos]
+        const [removed] = newTodos.splice(fromIndex, 1)
+        newTodos.splice(toIndex, 0, removed)
+        this.todos = newTodos
+      }
+    }
+    this.draggedItem = null
   }
 
   build() {
@@ -122,9 +142,22 @@ struct Index {
               Button('Delete')
                 .type(ButtonType.Normal)
                 .onClick(() => this.removeTodo(todo.id))
+                
+              if (!todo.completed) {
+                Image($r('app.media.start_icon'))
+                  .width(24)
+                  .height(24)
+                  .margin({ left: 8 })
+                  .draggable(true)
+                  .onDragStart(() => {
+                    this.onDragStart(todo)
+                  })
+                  .onDrop(() => this.onDrop(todo))
+              }
             }
             .padding({ top: 10, bottom: 10 })
           }
+          .onDrop(() => this.onDrop(todo))
         }, (todo: TodoItem) => `${todo.id}`)
       }
       .divider({ strokeWidth: 1, color: '#E6E6E6' })

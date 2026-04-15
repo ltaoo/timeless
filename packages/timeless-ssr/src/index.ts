@@ -16,6 +16,7 @@ import { SSRButton } from "./host/button";
 import { SSRInput } from "./host/input";
 import { SSRCheckbox } from "./host/checkbox";
 import { SSRRow } from "./host/row";
+import { SSRLink } from "./host/link";
 
 function build(elm: TimelessElement): VNodeView<string> {
   if (elm.t === "show") return SSRShow({ build });
@@ -26,6 +27,7 @@ function build(elm: TimelessElement): VNodeView<string> {
   if (elm.t === "text") return SSRText({ build });
   if (elm.t === "row") return SSRRow({ build });
   if (elm.t === "button") return SSRButton({ build });
+  if (elm.t === "link") return SSRLink({ build });
   if (elm.t === "input") return SSRInput({ build });
   if (elm.t === "checkbox") return SSRCheckbox({ build });
   if (elm.t === "img") return SSRImg({ build });

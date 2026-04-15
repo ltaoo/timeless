@@ -3,7 +3,7 @@ import { Section, Item } from "@/components/index.js";
 export default function GeneralView() {
   const view$ = new Timeless.ui.ScrollViewCore({});
 
-  return ScrollView({ class: "p-6 h-screen", store: view$ }, [
+  const elm = ScrollView({ class: "p-6 h-screen", store: view$ }, [
     Flex({ direction: "col", gap: "24px" }, [
       Section("Button", [
         Item("Variants", [
@@ -221,4 +221,21 @@ export default function GeneralView() {
       ]),
     ]),
   ]);
+
+  if (import.meta.hot) {
+    import.meta.hot.data.currentElement = elm;
+  }
+
+  return elm;
+}
+
+// Vite HMR
+if (import.meta.hot) {
+  import.meta.hot.accept((newModule) => {
+    const currentElement = import.meta.hot.data.currentElement;
+    if (!newModule || !currentElement) return;
+    const newElement = newModule.default();
+    const ok = patch(currentElement, newElement);
+    console.log("[HMR] patch result:", ok);
+  });
 }

@@ -73,7 +73,7 @@ type ViewState = {
 
 const logger = Logger({ prefix: "primitive", scope: "content/view" });
 
-export function View(props: ViewProps = {}, children?: ViewChildren) {
+export function View(props: ViewProps = {}, children?: ViewChildren): TimelessElement<ViewState> {
   const {
     style,
     class: cls,

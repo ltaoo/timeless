@@ -63,7 +63,7 @@ export function Column(props: ColumnProps, children?: ViewChildren) {
     events,
     children: state.children,
     onMounted(event: MountedEvent) {
-      // console.log("[primitive]layout/column - onMounted", event);
+      console.log("[primitive]layout/column - onMounted", event);
       if (rest.onMounted) {
         rest.onMounted(event);
       }

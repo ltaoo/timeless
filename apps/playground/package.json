@@ -1,10 +1,9 @@
 {
-  "name": "@timeless/web-vanilla",
+  "name": "playground",
   "version": "1.0.0",
-  "description": "Frontend application",
+  "description": "Timeless component playground",
   "type": "module",
   "scripts": {
-    "dev": "timeless frontend",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -13,6 +12,5 @@
     "@timeless/cli": "workspace:*",
     "eslint": "^8.56.0"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

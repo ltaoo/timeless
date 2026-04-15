@@ -63,8 +63,12 @@ struct ContentView: View {
                         }
                     }
                 }
+                .onMove { source, destination in
+                    todos.move(fromOffsets: source, toOffset: destination)
+                }
             }
             .listStyle(.plain)
+            .simultaneousGesture(TapGesture().modifiers(.command))
         }
     }
     

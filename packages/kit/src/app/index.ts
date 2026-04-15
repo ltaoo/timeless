@@ -36,7 +36,11 @@ enum Events {
 type TheTypesOfEvents = {
   [Events.Ready]: void;
   [Events.Error]: Error;
-  [Events.Tip]: { icon?: unknown; text: string[]; type?: "success" | "error" | "info" | "warning" | "loading" };
+  [Events.Tip]: {
+    icon?: unknown;
+    text: string[];
+    type?: "success" | "error" | "info" | "warning" | "loading";
+  };
   [Events.Loading]: { text: string[] };
   [Events.HideLoading]: void;
   [Events.Login]: {};
@@ -191,7 +195,11 @@ export class ApplicationModel<
   tipUpdate() {
     this.emit(Events.ForceUpdate);
   }
-  tip(arg: { icon?: unknown; text: string[]; type?: "success" | "error" | "info" | "warning" | "loading" }) {
+  tip(arg: {
+    icon?: unknown;
+    text: string[];
+    type?: "success" | "error" | "info" | "warning" | "loading";
+  }) {
     this.emit(Events.Tip, arg);
     return arg.text.join("\n");
   }
@@ -213,10 +221,10 @@ export class ApplicationModel<
   }
   /** 设置页面 title */
   setTitle(title: string): void {
-    throw new Error("请实现 setTitle 方法");
+    console.warn("请在 connect.web 中实现 setTitle 方法");
   }
   openWindow(url: string) {
-    throw new Error("请实现 openWindow 方法");
+    console.warn("请在 connect.web 中实现 openWindow 方法");
   }
   setEnv(env: JSONObject) {
     this.env = {
@@ -234,17 +242,18 @@ export class ApplicationModel<
     this.$clipboard.methods.writeText(text);
   }
   getComputedStyle(el: unknown): {} {
-    throw new Error("请实现 getComputedStyle 方法");
+    console.warn("请在 connect.web 中实现 getComputedStyle 方法");
+    return {};
   }
   /** 发送推送 */
   notify(msg: { title: string; body: string }) {
-    console.log("请实现 notify 方法");
+    console.warn("请在 connect.web 中实现 notify 方法");
   }
   disablePointer() {
-    throw new Error("请实现 disablePointer 方法");
+    console.warn("请在 connect.web 中实现 disablePointer 方法");
   }
   enablePointer() {
-    throw new Error("请实现 enablePointer 方法");
+    console.warn("请在 connect.web 中实现 enablePointer 方法");
   }
   /** 平台相关的全局事件 */
   keydown(event: KeyboardEvent) {

@@ -684,37 +684,7 @@ declare module "packages/primitive/src/content/view" {
         attributes: Record<string, string | number | boolean | undefined>;
         children: (TimelessElement | null)[];
     };
-    export function View(props?: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: ViewState;
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function View(props?: ViewProps, children?: ViewChildren): TimelessElement<ViewState>;
 }
 declare module "packages/primitive/src/content/box" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
@@ -865,43 +835,13 @@ declare module "packages/primitive/src/content/popper" {
         placed: boolean | DerivedRef<boolean> | Ref<boolean>;
         onMounted?: (event: MountedEvent) => void;
     };
-    export function Popper(props: PopperProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: styleNames;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Popper(props: PopperProps, children?: ViewChildren): TimelessElement<{
+        rendered: boolean;
+        style: styleNames;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/primitive/src/content/list-view" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
@@ -2277,6 +2217,7 @@ declare module "packages/kit/src/app/index" {
         [Events.Tip]: {
             icon?: unknown;
             text: string[];
+            type?: "success" | "error" | "info" | "warning" | "loading";
         };
         [Events.Loading]: {
             text: string[];
@@ -2362,6 +2303,7 @@ declare module "packages/kit/src/app/index" {
         tip(arg: {
             icon?: unknown;
             text: string[];
+            type?: "success" | "error" | "info" | "warning" | "loading";
         }): string;
         loading(arg: {
             text: string[];
@@ -9505,7 +9447,13 @@ declare module "packages/ui-vm/src/sonner/index" {
      */
     import { Handler } from "packages/base/src/index";
     export type ToastTypes = "normal" | "action" | "success" | "info" | "warning" | "error" | "loading" | "default";
-    type ToastShape = any;
+    type ToastShape = {
+        id?: number;
+        type?: ToastTypes;
+        title: unknown;
+        position?: Position;
+        dismissible?: boolean;
+    };
     export type SwipeDirection = "top" | "right" | "bottom" | "left";
     export interface Action {
         label: unknown;
@@ -9517,7 +9465,7 @@ declare module "packages/ui-vm/src/sonner/index" {
         id: number | string;
         dismiss: boolean;
     }
-    export type ExternalToast = Omit<ToastShape, "id" | "type" | "title" | "jsx" | "delete" | "promise"> & {
+    export type ExternalToast = Omit<ToastShape, "id" | "title" | "jsx" | "delete" | "promise"> & {
         id?: number;
         toasterId?: string;
     };
@@ -9536,7 +9484,7 @@ declare module "packages/ui-vm/src/sonner/index" {
     export function SonnerCore(): {
         readonly [Symbol.toStringTag]: string;
         state: {
-            readonly toasts: any[];
+            readonly toasts: (ToastShape | ToastToDismiss)[];
         };
         methods: {
             subscribe(subscriber: (toast: ToastShape | ToastToDismiss) => void): () => void;
@@ -9554,12 +9502,11 @@ declare module "packages/ui-vm/src/sonner/index" {
             info(message: unknown, data?: ExternalToast): number;
             warning(message: unknown, data?: ExternalToast): number;
             loading(message: unknown, data?: ExternalToast): number;
-            custom(jsx: (id: number | string) => unknown, data?: ExternalToast): number;
-            getActiveToasts(): any[];
+            getActiveToasts(): (ToastShape | ToastToDismiss)[];
         };
-        message(content: unknown): void;
+        message(content: unknown, extra?: ExternalToast): void;
         onStateChange(handler: Handler<{
-            readonly toasts: any[];
+            readonly toasts: (ToastShape | ToastToDismiss)[];
         }>): void;
     };
     export type SonnerCore = ReturnType<typeof SonnerCore>;
@@ -9622,6 +9569,8 @@ declare module "packages/ui-vm/src/sonner/index" {
         };
         heights: ToastHeightRecord[];
         message(content: unknown): void;
+        pauseAllTimers(): void;
+        resumeAllTimers(): void;
         onStateChange(handler: Handler<{
             readonly toasts: {
                 readonly [Symbol.toStringTag]: string;
@@ -10795,43 +10744,13 @@ declare module "packages/ui-primitive/src/modules/popper" {
     };
     export function Anchor(props: ViewProps & {
         store: PopperCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Content(props: ViewProps & {
         zIndex?: number;
         store: PopperCore;
@@ -10839,157 +10758,37 @@ declare module "packages/ui-primitive/src/modules/popper" {
         onDismiss?: () => void;
         /** 参考元素离开视口时的回调 */
         onReferenceOutOfView?: () => void;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/head" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Head1(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Head2(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Head3(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Head1(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Head2(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Head3(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/paragraph" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -11016,735 +10815,165 @@ declare module "packages/ui-primitive/src/modules/image" {
 }
 declare module "packages/ui-primitive/src/modules/table" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Table(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function TableHeader(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function TableBody(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function TableRow(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function TableHead(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function TableCell(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/card" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Card(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function CardHeader(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function CardTitle(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function CardDescription(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function CardContent(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function CardFooter(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/badge" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Badge(props: ViewProps & {
         variant?: "default" | "secondary" | "outline" | "destructive";
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/separator" {
     import { ViewProps } from "packages/timeless/src/index";
     export function Separator(props: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/skeleton" {
     import { ViewProps } from "packages/timeless/src/index";
-    export function Skeleton(props: ViewProps): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/alert" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Alert(props: ViewProps & {
         variant?: "default" | "destructive";
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function AlertTitle(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function AlertDescription(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/avatar" {
     import { ViewProps, ViewChildren, ImgProps } from "packages/timeless/src/index";
     export function Root(props: ViewProps & {
         size?: "default" | "large";
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Image(props: ImgProps & {
         alt?: string;
         onLoadingStatusChange?: (status: "loading" | "loaded" | "error") => void;
@@ -11786,84 +11015,24 @@ declare module "packages/ui-primitive/src/modules/avatar" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
-    export function Fallback(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Fallback(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Avatar(props: Omit<ViewProps, "onMounted"> & ImgProps & {
         alt?: string;
         size?: "default" | "large";
         fallback?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/progress" {
     import { Ref } from "packages/timeless/src/index";
@@ -11873,84 +11042,24 @@ declare module "packages/ui-primitive/src/modules/progress" {
         store?: ProgressCore;
         value?: Ref<number> | number;
         max?: number;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Indicator(props: ViewProps & {
         store?: ProgressCore;
         value: Ref<number>;
         max?: number;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/button" {
     import { ViewChildren, FragmentProps, ButtonProps } from "packages/timeless/src/index";
@@ -12031,43 +11140,13 @@ declare module "packages/ui-primitive/src/modules/arrow" {
     import { PopperCore } from "packages/ui-vm/src/index";
     export function Arrow(props: ViewProps & {
         store: PopperCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/menu" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -12089,43 +11168,13 @@ declare module "packages/ui-primitive/src/modules/menu" {
     };
     export function Anchor(props: ViewProps & {
         store: MenuCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Portal(props: ViewProps & {
         store: MenuCore;
         animation?: {
@@ -12195,349 +11244,79 @@ declare module "packages/ui-primitive/src/modules/menu" {
     };
     export function Group(props: ViewProps & {
         store?: MenuGroupCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function GroupLabel(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Label(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function GroupLabel(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Label(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Item(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function ItemImpl(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Separator(props: ViewProps): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Separator(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Arrow(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function SubMenu(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function SubMenuTrigger(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function SubMenuContent(props: ViewProps & {
         store: MenuCore;
         animation?: {
@@ -12576,43 +11355,13 @@ declare module "packages/ui-primitive/src/modules/dropdown-menu" {
     };
     export function Trigger(props: ViewProps & {
         store: DropdownMenuCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Portal(props: ViewProps & {
         store: MenuCore;
         animation?: {
@@ -12648,273 +11397,63 @@ declare module "packages/ui-primitive/src/modules/dropdown-menu" {
     };
     export function Group(props: ViewProps & {
         store?: MenuGroupCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Label(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Label(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Item(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Separator(props: ViewProps): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Separator(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Arrow(props: ViewProps & {
         store: DropdownMenuCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function SubMenu(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function SubMenuTrigger(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function SubMenuContent(props: ViewProps & {
         store: MenuCore;
         animation?: {
@@ -12953,43 +11492,13 @@ declare module "packages/ui-primitive/src/modules/context-menu" {
     };
     export function Trigger(props: ViewProps & {
         store: ContextMenuCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Portal(props: ViewProps & {
         store: MenuCore;
     }, children?: ViewChildren): {
@@ -13021,273 +11530,63 @@ declare module "packages/ui-primitive/src/modules/context-menu" {
     };
     export function Group(props: ViewProps & {
         store?: MenuGroupCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Label(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Label(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Item(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Separator(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Separator(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Arrow(props: ViewProps & {
         store: ContextMenuCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function SubMenu(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function SubMenuTrigger(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function SubMenuContent(props: ViewProps & {
         store: MenuCore;
         animation?: {
@@ -13312,206 +11611,56 @@ declare module "packages/ui-primitive/src/modules/resizable-panels" {
     export function Group(props: ViewProps & {
         store: ResizablePanelsCore;
         direction?: "horizontal" | "vertical";
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Panel(props: ViewProps & {
         store: ResizablePanelCore;
         group?: ResizablePanelsCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Handle(props: ViewProps & {
         store: ResizablePanelsCore;
         panelBefore: ResizablePanelCore;
         panelAfter: ResizablePanelCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/tabs" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/timeless/src/index";
     import { TabHeaderCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: TabHeaderCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function List(props: ViewProps & {
         store: TabHeaderCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Tab(props: ButtonProps & {
         store: TabHeaderCore<any>;
         value: string;
@@ -13548,286 +11697,76 @@ declare module "packages/ui-primitive/src/modules/tabs" {
     export function Indicator(props: ViewProps & {
         store: TabHeaderCore<any>;
         value: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Content(props: ViewProps & {
         store: TabHeaderCore<any>;
         value: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/accordion" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { AccordionCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: AccordionCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Item(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Trigger(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Chevron(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Content(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/input" {
     import { ViewProps, ViewChildren, InputProps } from "packages/timeless/src/index";
@@ -13838,43 +11777,13 @@ declare module "packages/ui-primitive/src/modules/input" {
     export function setInputProvider(provider: Provider): void;
     export function Root(props: ViewProps & {
         store?: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Input(props: InputProps & {
         store: InputCore<any>;
         id?: string;
@@ -13889,203 +11798,53 @@ declare module "packages/ui-primitive/src/modules/input" {
     };
     export function Value(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Clear(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Loading(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Disabled(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/file-picker" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { FilePickerCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store?: FilePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Input(props: ViewProps & {
         store: FilePickerCore;
         id?: string;
@@ -14100,164 +11859,44 @@ declare module "packages/ui-primitive/src/modules/file-picker" {
     };
     export function Clear(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Loading(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Disabled(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/number-input" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { NumberInputCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store?: NumberInputCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Input(props: ViewProps & {
         store: NumberInputCore;
     }): {
@@ -14271,160 +11910,40 @@ declare module "packages/ui-primitive/src/modules/number-input" {
     };
     export function IncreaseButton(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function DecreaseButton(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Value(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Disabled(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/textarea" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -14435,43 +11954,13 @@ declare module "packages/ui-primitive/src/modules/textarea" {
     export function setTextareaProvider(provider: Provider): void;
     export function Root(props: ViewProps & {
         store?: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Textarea(props: ViewProps & {
         id?: string | undefined;
         store: InputCore<any>;
@@ -14498,199 +11987,49 @@ declare module "packages/ui-primitive/src/modules/textarea" {
     };
     export function Value(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Clear(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Loading(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Count(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Disabled(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/select" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -14713,160 +12052,40 @@ declare module "packages/ui-primitive/src/modules/select" {
     export function Trigger(props: ViewProps & {
         store: SelectCore<any>;
         id?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Value(props: ViewProps & {
         store: SelectCore<any>;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Icon(props: ViewProps & {
         store?: SelectCore<any>;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Clear(props: ViewProps & {
         store: SelectCore<any>;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Portal(props: ViewProps & {
         store: SelectCore<any>;
         animation?: {
@@ -14902,43 +12121,13 @@ declare module "packages/ui-primitive/src/modules/select" {
     };
     export function Viewport(props: ViewProps & {
         store: SelectCore<any>;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Search(props: ViewProps & {
         store: SelectCore<any>;
     }, children?: ViewChildren): {
@@ -14956,120 +12145,30 @@ declare module "packages/ui-primitive/src/modules/select" {
         store: SelectCore<any>;
         value: any;
         disabled?: boolean;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function ItemText(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function ItemIndicator(props: ViewProps & {
         store: SelectCore<any>;
         value: any;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/cascader" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -15092,160 +12191,40 @@ declare module "packages/ui-primitive/src/modules/cascader" {
     export function Trigger(props: ViewProps & {
         store: CascaderCore<any>;
         id?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Value(props: ViewProps & {
         store: CascaderCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Icon(props: ViewProps & {
         store?: CascaderCore<any>;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Clear(props: ViewProps & {
         store: CascaderCore<any>;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Content(props: ViewProps & {
         store: CascaderCore<any>;
         animation?: {
@@ -15265,43 +12244,13 @@ declare module "packages/ui-primitive/src/modules/cascader" {
     };
     export function Panels(props: ViewProps & {
         store: CascaderCore<any>;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Panel(props: ViewProps & {
         store: CascaderCore<any>;
         panelIndex: number;
@@ -15309,121 +12258,31 @@ declare module "packages/ui-primitive/src/modules/cascader" {
             selected: boolean;
             focused: boolean;
         })[];
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Item(props: ViewProps & {
         store: CascaderCore<any>;
         panelIndex: number;
         option: CascaderOption<any>;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function ItemText(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function ItemIndicator(props: ViewProps & {
         store: CascaderCore<any>;
         hasChildren: boolean;
@@ -15470,43 +12329,13 @@ declare module "packages/ui-primitive/src/modules/cascader" {
             path: CascaderOption<any>[];
             value: any[];
         };
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/tag-select" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -15529,238 +12358,58 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
     export function Trigger(props: ViewProps & {
         store: TagSelectCore<any>;
         id?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Value(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function TagList(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Tag(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function TagRemove(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Icon(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Portal(props: ViewProps & {
         store: TagSelectCore<any>;
         animation?: {
@@ -15796,43 +12445,13 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
     };
     export function Viewport(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function FilteredList(props: ViewProps & {
         store: TagSelectCore<any>;
         each: (option: {
@@ -15841,43 +12460,13 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
             selected: boolean;
             focused: boolean;
         }, index: number) => ViewChildren;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Empty(props: ViewProps & {
         store: TagSelectCore<any>;
     }, children: ViewChildren): {
@@ -15894,159 +12483,39 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
     export function Item(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function ItemText(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function ItemIndicator(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Clear(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Search(props: ViewProps & {
         store: TagSelectCore<any>;
         placeholder?: string;
@@ -16081,159 +12550,39 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
     export function Trigger(props: ViewProps & {
         store: DatePickerCore;
         id?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
     export function Value(props: ViewProps & {
         store: DatePickerCore;
         placeholder?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Icon(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
     export function Clear(props: ViewProps & {
         store: DatePickerCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
     export function Portal(props: ViewProps & {
         store: DatePickerCore;
     }, children?: ViewChildren): {
@@ -16265,82 +12614,22 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
     };
     export function Calendar(props: ViewProps & {
         store: DatePickerCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
     export function CalendarHeader(props: ViewProps & {
         store: DatePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
     export function CalendarPrevButton(props: ButtonProps & {
         store: DatePickerCore;
     }, children?: ViewChildren): {
@@ -16405,82 +12694,22 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
     };
     export function CalendarGrid(props: ViewProps & {
         store: DatePickerCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
     export function CalendarGridHeader(props: ViewProps & {
         store: DatePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
     export function CalendarGridBody(props: ViewProps & {
         store: DatePickerCore;
         renderCell?: (cell: {
@@ -16490,43 +12719,13 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
             is_prev_month: boolean;
             is_next_month: boolean;
         }) => TimelessElement | null;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
     export function CalendarCell(props: ButtonProps & {
         store: DatePickerCore;
         value: Date;
@@ -16584,120 +12783,30 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
     export function Trigger(props: ViewProps & {
         store: DateRangePickerCore;
         id?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Value(props: ViewProps & {
         store: DateRangePickerCore;
         placeholder?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Icon(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Portal(props: ViewProps & {
         store: DateRangePickerCore;
     }, children?: ViewChildren): {
@@ -16729,199 +12838,49 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
     };
     export function Calendars(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function LeftCalendar(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function RightCalendar(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function LeftCalendarHeader(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function RightCalendarHeader(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function LeftPrevButton(props: ButtonProps & {
         store: DateRangePickerCore;
     }, children?: ViewChildren): {
@@ -17048,160 +13007,40 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
     };
     export function CalendarGrid(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function CalendarGridHeader(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function LeftCalendarGridBody(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function RightCalendarGridBody(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function CalendarCell(props: ButtonProps & {
         store: DateRangePickerCore;
         value: Date;
@@ -17259,159 +13098,39 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     export function Trigger(props: ViewProps & {
         store: TimePickerCore;
         id?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Value(props: ViewProps & {
         store: TimePickerCore;
         placeholder?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Icon(props: ViewProps, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Clear(props: ViewProps & {
         store: TimePickerCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Portal(props: ViewProps & {
         store: TimePickerCore;
     }, children?: ViewChildren): {
@@ -17443,82 +13162,22 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     };
     export function TimePanel(props: ViewProps & {
         store: TimePickerCore;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function HourColumn(props: ViewProps & {
         store: TimePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function HourItem(props: ButtonProps & {
         store: TimePickerCore;
         value: number;
@@ -17553,43 +13212,13 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     };
     export function MinuteColumn(props: ViewProps & {
         store: TimePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function MinuteItem(props: ButtonProps & {
         store: TimePickerCore;
         value: number;
@@ -17624,43 +13253,13 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     };
     export function SecondColumn(props: ViewProps & {
         store: TimePickerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function SecondItem(props: ButtonProps & {
         store: TimePickerCore;
         value: number;
@@ -17856,43 +13455,13 @@ declare module "packages/ui-primitive/src/modules/checkbox" {
     };
     export function Group(props: ViewProps & {
         store: CheckboxGroupCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function GroupItem(props: ViewProps & {
         store: CheckboxGroupCore<any>;
         item: {
@@ -17902,43 +13471,13 @@ declare module "packages/ui-primitive/src/modules/checkbox" {
         };
         renderCheckbox?: (core: CheckboxCore) => ViewChildren;
         renderLabel?: (label: string) => ViewChildren;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/radio" {
     import { RadioProps } from "packages/timeless/src/index";
@@ -18029,43 +13568,13 @@ declare module "packages/ui-primitive/src/modules/radio" {
     };
     export function Group(props: ViewProps & {
         store: RadioGroupCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function GroupItem(props: ViewProps & {
         store: RadioGroupCore<any>;
         item: {
@@ -18073,43 +13582,13 @@ declare module "packages/ui-primitive/src/modules/radio" {
             value: any;
             core: RadioCore;
         };
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/slider" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -18120,158 +13599,38 @@ declare module "packages/ui-primitive/src/modules/slider" {
         step?: number;
         disabled?: boolean;
         onChange?: (v: number) => void;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Track(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Track(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Range(props: ViewProps & {
         percentage: any;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Thumb(props: ViewProps & {
         percentage: any;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/toggle" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/timeless/src/index";
@@ -18310,43 +13669,13 @@ declare module "packages/ui-primitive/src/modules/toggle" {
     };
     export function Thumb(props: ViewProps & {
         store: SwitchCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/switch" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/timeless/src/index";
@@ -18385,125 +13714,35 @@ declare module "packages/ui-primitive/src/modules/switch" {
     };
     export function Thumb(props: ViewProps & {
         store: SwitchCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/field" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { SingleFieldCore } from "packages/ui-vm/src/index";
     export function Label(props: ViewProps & {
         store: SingleFieldCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Control(props: ViewProps & {
         store: SingleFieldCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Error(props: ViewProps & {
         store: SingleFieldCore<any>;
         fallback?: ViewChildren;
@@ -18520,43 +13759,13 @@ declare module "packages/ui-primitive/src/modules/field" {
     };
     export function Help(props: ViewProps & {
         store: SingleFieldCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/popover" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/timeless/src/index";
@@ -18580,43 +13789,13 @@ declare module "packages/ui-primitive/src/modules/popover" {
     };
     export function Content(props: ViewProps & {
         store: PopoverCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Trigger(props: ViewProps & {
         store: PopoverCore;
     }, children?: ViewChildren): {
@@ -18694,82 +13873,22 @@ declare module "packages/ui-primitive/src/modules/popconfirm" {
     };
     export function Content(props: ViewProps & {
         store: PopconfirmCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Trigger(props: ViewProps & {
         store: PopconfirmCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Portal(props: ViewProps & {
         store: PopconfirmCore;
     }, children?: ViewChildren): {
@@ -18898,84 +14017,24 @@ declare module "packages/ui-primitive/src/modules/tooltip" {
     };
     export function Content(props: ViewProps & {
         store?: TooltipCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Trigger(props: ViewProps & {
         content?: ViewChildren;
         side?: Side;
         align?: Align;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Portal(props: ViewProps & {
         store?: TooltipCore;
     }, children?: ViewChildren): {
@@ -19006,239 +14065,59 @@ declare module "packages/ui-primitive/src/modules/sheet" {
     };
     export function Overlay(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Content(props: ViewProps & {
         store: DialogCore;
         side?: "right" | "top" | "bottom" | "left";
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Header(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Title(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Description(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Close(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/dialog" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -19257,355 +14136,85 @@ declare module "packages/ui-primitive/src/modules/dialog" {
     };
     export function Overlay(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Content(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Header(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Title(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Body(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Footer(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Close(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Cancel(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function OK(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/toast" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -19615,239 +14224,59 @@ declare module "packages/ui-primitive/src/modules/toast" {
     }, children?: ViewChildren): any[];
     export function Mask(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Viewport(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Item(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Icon(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Text(props: ViewProps & {
         store: ToastCore;
         text: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Close(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/steps" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -19859,278 +14288,68 @@ declare module "packages/ui-primitive/src/modules/steps" {
     export function Root(props: ViewProps & {
         store: StepCore;
         items: StepItem[];
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function List(props: ViewProps & {
         store: StepCore;
         items: StepItem[];
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Item(props: ViewProps & {
         store: StepCore;
         index: number;
         item?: StepItem;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Indicator(props: ViewProps & {
         store: StepCore;
         index: number;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Connector(props: ViewProps & {
         store: StepCore;
         index: number;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Title(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function Description(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Title(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function Description(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/scroll-view" {
     import { ViewProps, ViewChildren, TimelessElement } from "packages/timeless/src/index";
@@ -20180,121 +14399,31 @@ declare module "packages/ui-primitive/src/modules/sonner" {
     import { SonnerCore } from "packages/ui-vm/src/index";
     export function Toast(props: {
         store: SonnerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Content(props: {
         store: SonnerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Close(props: {
         store: SonnerCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/error-boundary" {
     import { TimelessElement } from "packages/timeless/src/index";
@@ -20428,43 +14557,13 @@ declare module "packages/shadcn/src/modules/input" {
     export function Input(props: ViewProps & {
         store: InputCore<any>;
         id?: string;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/file-picker" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -20472,43 +14571,13 @@ declare module "packages/shadcn/src/modules/file-picker" {
     export function FileInput(props: ViewProps & {
         store: FilePickerCore;
         id?: string;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/number-input" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -20517,43 +14586,13 @@ declare module "packages/shadcn/src/modules/number-input" {
         store: NumberInputCore;
         id?: string;
         showControls?: boolean;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/textarea" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -20564,43 +14603,13 @@ declare module "packages/shadcn/src/modules/textarea" {
         showClear?: boolean;
         showLoading?: boolean;
         showCount?: boolean;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/label" {
     import { ViewChildren, LabelProps } from "packages/timeless/src/index";
@@ -20640,43 +14649,13 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
         class?: string;
         itemClass?: string;
         direction?: "horizontal" | "vertical";
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function CheckboxGroupItem(props: {
         store: CheckboxGroupCore<any>;
         item: {
@@ -20685,43 +14664,13 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
             core: CheckboxCore;
         };
         class?: string;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/radio" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -20747,43 +14696,13 @@ declare module "packages/shadcn/src/modules/radio" {
         class?: string;
         itemClass?: string;
         direction?: "horizontal" | "vertical";
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function RadioGroupItem(props: {
         store: RadioGroupCore<any>;
         item: {
@@ -20792,43 +14711,13 @@ declare module "packages/shadcn/src/modules/radio" {
             core: RadioCore;
         };
         class?: string;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/select" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -20925,43 +14814,13 @@ declare module "packages/shadcn/src/modules/tooltip" {
         content?: ViewChildren;
         side?: Side;
         align?: Align;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function TooltipProvider(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -21172,43 +15031,13 @@ declare module "packages/shadcn/src/modules/slider" {
         step?: number;
         disabled?: boolean;
         onChange?: (v: number) => void;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/progress" {
     import { Ref } from "packages/timeless/src/index";
@@ -21218,43 +15047,13 @@ declare module "packages/shadcn/src/modules/progress" {
         store?: ProgressCore;
         value?: Ref<number> | number;
         max?: number;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/button" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
@@ -21313,43 +15112,13 @@ declare module "packages/shadcn/src/modules/menu" {
     import { MenuCore } from "packages/ui-vm/src/index";
     export function Menu(props: ViewProps & {
         store: MenuCore;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/dropdown-menu" {
     import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
@@ -21400,43 +15169,13 @@ declare module "packages/shadcn/src/modules/tabs" {
     export function Tabs(props: ViewProps & {
         store: TabHeaderCore<any>;
         items?: TabItem[];
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/steps" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -21448,43 +15187,13 @@ declare module "packages/shadcn/src/modules/steps" {
     export function Steps(props: ViewProps & {
         store: StepCore;
         items: StepItem[];
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/scroll-view" {
     import { ViewChildren, type ViewProps } from "packages/timeless/src/index";
@@ -21497,310 +15206,70 @@ declare module "packages/shadcn/src/modules/badge" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Badge(props: ViewProps & {
         variant?: "default" | "secondary" | "outline" | "destructive";
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/separator" {
     import { ViewProps } from "packages/timeless/src/index";
     export function Separator(props: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/card" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Card(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function CardHeader(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function CardTitle(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function CardDescription(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function CardContent(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function CardFooter(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/avatar" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -21811,238 +15280,58 @@ declare module "packages/shadcn/src/modules/avatar" {
         alt?: string;
         size?: Parameters<typeof AvatarPrimitive.Root>[0]["size"];
         fallback?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/skeleton" {
     import { ViewProps } from "packages/timeless/src/index";
-    export function Skeleton(props: ViewProps): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/alert" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Alert(props: ViewProps & {
         variant?: "default" | "destructive";
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function AlertTitle(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function AlertDescription(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/scroll-area" {
-    export function ScrollArea(props: any, children: any): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function ScrollArea(props: any, children: any): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/sheet" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
@@ -22062,43 +15351,13 @@ declare module "packages/shadcn/src/modules/sheet" {
     };
 }
 declare module "packages/shadcn/src/modules/aspect-ratio" {
-    export function AspectRatio(props: any, children: any): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function AspectRatio(props: any, children: any): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/accordion" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
@@ -22110,579 +15369,129 @@ declare module "packages/shadcn/src/modules/accordion" {
     export function Accordion(props: ViewProps & {
         store: AccordionCore;
         items: AccordionItem[];
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/kbd" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    export function Kbd(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function KbdGroup(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Kbd(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function KbdGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/table" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Table(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function TableHeader(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function TableBody(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function TableRow(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function TableHead(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function TableCell(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/form" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { ObjectFieldCore, ArrayFieldCore } from "packages/ui-vm/src/index";
     export function Form(props: ViewProps & {
         store: ObjectFieldCore<any> | ArrayFieldCore<any>;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/field" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { SingleFieldCore } from "packages/ui-vm/src/index";
-    export function FieldGroup(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function FieldSet(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function FieldLegend(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function FieldDescription(props: ViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function FieldGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function FieldSet(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function FieldLegend(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function FieldDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function FieldSeparator(props?: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function FieldLabel(props: ViewProps & {
         store?: SingleFieldCore<any>;
         for?: string;
@@ -22707,122 +15516,32 @@ declare module "packages/shadcn/src/modules/field" {
         render(): any;
         onMounted(event: MountedEvent): void;
     };
-    export function FieldHelp(props: {}, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
-    export function FieldError(props: {}, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function FieldHelp(props: {}, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
+    export function FieldError(props: {}, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function Field(props: ViewProps & {
         store: SingleFieldCore<any>;
         id?: string;
         orientation?: "vertical" | "horizontal";
         inline?: boolean;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/resizable-panels" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
@@ -22830,125 +15549,35 @@ declare module "packages/shadcn/src/modules/resizable-panels" {
     export function ResizablePanels(props: ViewProps & {
         store: ResizablePanelsCore;
         direction?: "horizontal" | "vertical";
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function ResizablePanel(props: ViewProps & {
         store: ResizablePanelCore;
         group: ResizablePanelsCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
     export function ResizableHandle(props: ViewProps & {
         store: ResizablePanelsCore;
         panelBefore: ResizablePanelCore;
         panelAfter: ResizablePanelCore;
         withHandle?: boolean;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/waterfall" {
     import { type ViewProps, type TimelessElement } from "packages/timeless/src/index";
@@ -22963,43 +15592,13 @@ declare module "packages/shadcn/src/modules/history-panel" {
     import { HistoryCore } from "packages/kit/src/index";
     export function HistoryPanel(props: ViewProps & {
         store: HistoryCore<string, any>;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/llm-provider-form" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -23052,43 +15651,13 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
     };
     export function LLMProviderForm(props: ViewProps & {
         store: LLMProviderFormStore;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/sonner" {
     import { DerivedRef, Ref, TimelessElement } from "packages/timeless/src/index";
@@ -23100,6 +15669,12 @@ declare module "packages/shadcn/src/modules/sonner" {
         bottom?: OffsetValue;
         left?: OffsetValue;
     };
+    /** 记录每个 toast 的实际 DOM 高度，用于计算偏移量 */
+    type HeightEntry = {
+        toastId: number;
+        height: number;
+        position: string;
+    };
     type ToasterProps = {
         store: ToasterModel;
         position?: string;
@@ -23110,49 +15685,13 @@ declare module "packages/shadcn/src/modules/sonner" {
         /** 默认是否展开，false 时 toast 缩小层叠，hover 时展开 */
         expand?: boolean;
     };
-    /** 记录每个 toast 的实际 DOM 高度，用于计算偏移量 */
-    type HeightEntry = {
-        toastId: number;
-        height: number;
-        position: string;
-    };
-    export function Toaster(props: ToasterProps): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    export function Toaster(props: ToasterProps): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
     export function Toast(props: {
         store: ToastModel;
         position: string;
@@ -23163,43 +15702,13 @@ declare module "packages/shadcn/src/modules/sonner" {
         toastCount: DerivedRef<number>;
         /** For 组件提供的当前列表位置索引（响应式） */
         idx: DerivedRef<number>;
-    }): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (TimelessElement | null)[];
-        };
-        children: TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }): TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/affix" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
@@ -23208,43 +15717,13 @@ declare module "packages/shadcn/src/modules/affix" {
         store: AffixCore;
         offsetTop?: number;
         target?: () => HTMLElement | Window;
-    }, children: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {
-            rendered: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-            attributes: Record<string, string | number | boolean | undefined>;
-            children: (import("@timeless/timeless").TimelessElement | null)[];
-        };
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onMouseDown: (e: MouseEvent) => void;
-            onMouseUp: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onContextMenu: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            onAnimationEnd: (e: AnimationEvent) => void;
-        };
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        children: (import("@timeless/timeless").TimelessElement | null)[];
+    }, any>;
 }
 declare module "packages/shadcn/src/index" {
     import { Input } from "packages/shadcn/src/modules/input";

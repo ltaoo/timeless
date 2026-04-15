@@ -27,7 +27,10 @@ import {
   Row,
   Column,
 } from "@timeless/timeless";
+import { patch } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
+
+import Page from "./pages/index.js";
 
 const apps = [
   { icon: "🎬", title: "Movies", subtitle: "Movies & Shows" },
@@ -184,9 +187,8 @@ function ApplicationView() {
     }
   }
 
-  return Column(
+  return View(
     {
-      gap: 12,
       style: {
         color: "#fff",
       },
@@ -196,53 +198,11 @@ function ApplicationView() {
           return t.includes("_new") ? "updated" : "origin";
         }),
       ]),
-      onMounted() {
-        const content = View(
-          {
-            class: "flex items-center gap-4 p-4",
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              padding: "16px",
-            },
-            onMounted() {
-              setTimeout(() => {
-                icon_name_.as("check");
-              }, 1000);
-            },
-          },
-          [
-            Show({
-              when: computed(icon_name_, (t) => t === "check"),
-              ok() {
-                return Icon({ name: "check", size: 16 });
-              },
-              else() {
-                return Icon({ name: "loader", size: 16 });
-              },
-            }),
-            View({}, [
-              For({
-                each: text,
-                render(t) {
-                  return View({}, [t]);
-                },
-              }),
-            ]),
-          ],
-        );
-        toasts.as((prev) => [...prev, content]);
-      },
+      onMounted() {},
     },
     [
-      For({
-        each: toasts,
-        render(toast) {
-          return toast;
-        },
-      }),
-
+      Page({}, [View({}, ["Page A"])]),
+      Page({}, [View({}, ["Page B"])]),
       // Input({
       //   value: "Hello Timeless",
       //   onMounted(event) {

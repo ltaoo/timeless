@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@interface TodoViewController : UIViewController
+@interface TodoViewController : UIViewController <UITableViewDataSource, UITableViewDragDelegate, UITableViewDropDelegate>
 @end
 
 @implementation TodoViewController {
@@ -47,6 +47,9 @@
     _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
     _tableView.translatesAutoresizingMaskIntoConstraints = NO;
     _tableView.dataSource = self;
+    _tableView.dragDelegate = self;
+    _tableView.dropDelegate = self;
+    _tableView.dragInteractionEnabled = YES;
     [_tableView registerClass:[TodoCell class] forCellReuseIdentifier:@"TodoCell"];
     [self.view addSubview:_tableView];
     
@@ -77,6 +80,43 @@
     [_todos addObject:@{@"title": title, @"category": category, @"isCompleted": @NO}];
     _textField.text = @"";
     [_tableView reloadData];
+}
+
+#pragma mark - UITableViewDragDelegate
+
+- (NSArray<UIDragItem *> *)tableView:(UITableView *)tableView itemsForBeginningDragSession:(id<UIDragSession>)session atIndexPath:(NSIndexPath *)indexPath {
+    NSDictionary *item = _todos[indexPath.row];
+    NSItemProvider *itemProvider = [[NSItemProvider alloc] initWithObject:item[@"title"]];
+    UIDragItem *dragItem = [[UIDragItem alloc] initWithItemProvider:itemProvider];
+    dragItem.localObject = item;
+    return @[dragItem];
+}
+
+#pragma mark - UITableViewDropDelegate
+
+- (UITableViewDropProposal *)tableView:(UITableView *)tableView dropSessionDidUpdate:(id<UIDropSession>)session withDestinationIndexPath:(NSIndexPath *)destinationIndexPath {
+    if (tableView.hasActiveDrag) {
+        return [[UITableViewDropProposal alloc] initWithOperation:UIDropOperationMove intent:UITableViewDropIntentInsertAtDestinationIndexPath];
+    }
+    return [[UITableViewDropProposal alloc] initWithOperation:UIDropOperationForbidden];
+}
+
+- (void)tableView:(UITableView *)tableView performDropWithCoordinator:(id<UITableViewDropCoordinator>)coordinator {
+    NSIndexPath *destinationIndexPath = coordinator.destinationIndexPath;
+    if (!destinationIndexPath) return;
+    
+    id<UIDropItem> item = coordinator.items.firstObject;
+    NSIndexPath *sourceIndexPath = item.sourceIndexPath;
+    if (!sourceIndexPath) return;
+    
+    [tableView performBatchUpdates:^{
+        NSDictionary *movedItem = [_todos[sourceIndexPath.row] mutableCopy];
+        [_todos removeObjectAtIndex:sourceIndexPath.row];
+        [_todos insertObject:movedItem atIndex:destinationIndexPath.row];
+        [tableView moveRowAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
+    } completion:nil];
+    
+    [coordinator dropItem:item.dragItem toRowAtIndexPath:destinationIndexPath];
 }
 
 #pragma mark - UITableViewDataSource

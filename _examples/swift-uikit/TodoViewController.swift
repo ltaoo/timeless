@@ -1,6 +1,6 @@
 import UIKit
 
-class TodoViewController: UIViewController {
+class TodoViewController: UIViewController, UITableViewDragDelegate, UITableViewDropDelegate {
     
     private let textField = UITextField()
     private let addButton = UIButton(type: .system)
@@ -33,6 +33,9 @@ class TodoViewController: UIViewController {
         
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
+        tableView.dragDelegate = self
+        tableView.dropDelegate = self
+        tableView.dragInteractionEnabled = true
         tableView.register(TodoCell.self, forCellReuseIdentifier: "TodoCell")
         view.addSubview(tableView)
         
@@ -62,6 +65,34 @@ class TodoViewController: UIViewController {
         todos.append((title: title, category: category, isCompleted: false))
         textField.text = ""
         tableView.reloadData()
+    }
+    
+    func tableView(_ tableView: UITableView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        let item = todos[indexPath.row]
+        let itemProvider = NSItemProvider(object: item.title as NSString)
+        let dragItem = UIDragItem(itemProvider: itemProvider)
+        dragItem.localObject = item
+        return [dragItem]
+    }
+    
+    func tableView(_ tableView: UITableView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UITableViewDropProposal {
+        if tableView.hasActiveDrag {
+            return UITableViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
+        }
+        return UITableViewDropProposal(operation: .forbidden)
+    }
+    
+    func tableView(_ tableView: UITableView, performDropWith coordinator: UITableViewDropCoordinator) {
+        guard let destinationIndexPath = coordinator.destinationIndexPath else { return }
+        guard let item = coordinator.items.first, let sourceIndexPath = item.sourceIndexPath else { return }
+        
+        tableView.performBatchUpdates {
+            let movedItem = todos.remove(at: sourceIndexPath.row)
+            todos.insert(movedItem, at: destinationIndexPath.row)
+            tableView.moveRow(at: sourceIndexPath, to: destinationIndexPath)
+        }
+        
+        coordinator.drop(item.dragItem, toRowAt: destinationIndexPath)
     }
 }
 

@@ -22,6 +22,8 @@ import { DOMShow } from "./show";
 import { DOMMatch } from "./match";
 import { DOMFor } from "./for";
 import { DOMSelect } from "./select";
+import { DOMLink } from "./link";
+import { DOMWebview } from "./webview";
 
 export type DOMHostNode =
   | null
@@ -33,6 +35,7 @@ export type DOMHostNode =
   | DOMLabel
   | DOMImg
   | DOMIcon
+  | DOMWebview
   | DOMInput
   | DOMTextarea
   | DOMFilePicker
@@ -41,6 +44,7 @@ export type DOMHostNode =
   | DOMRadio
   | DOMSelect
   | DOMButton
+  | DOMLink
   | DOMPortal
   | DOMShow
   | DOMMatch

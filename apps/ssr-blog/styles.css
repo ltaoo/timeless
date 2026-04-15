@@ -1,3 +1,4 @@
+@import "tw-animate-css";
 @import "tailwindcss";
 
 @source "../../../packages/shadcn/src";
@@ -207,5 +208,45 @@
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+}
+
+/* Blog typography styles */
+@layer base {
+  .prose h2 {
+    @apply text-2xl font-bold mt-8 mb-4 text-foreground;
+  }
+  .prose h3 {
+    @apply text-xl font-semibold mt-6 mb-3 text-foreground;
+  }
+  .prose p {
+    @apply text-base leading-7 mb-4 text-foreground/90;
+  }
+  .prose ul {
+    @apply list-disc pl-6 mb-4 space-y-1;
+  }
+  .prose ol {
+    @apply list-decimal pl-6 mb-4 space-y-1;
+  }
+  .prose li {
+    @apply text-base leading-7 text-foreground/90;
+  }
+  .prose blockquote {
+    @apply border-l-4 border-primary/30 pl-4 italic text-muted-foreground my-4;
+  }
+  .prose code {
+    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+  .prose pre {
+    @apply bg-muted p-4 rounded-lg overflow-x-auto my-4;
+  }
+  .prose pre code {
+    @apply bg-transparent p-0;
+  }
+  .prose a {
+    @apply text-primary underline underline-offset-4 hover:text-primary/80;
+  }
+  .prose hr {
+    @apply my-8 border-border;
   }
 }

@@ -27,6 +27,8 @@ public class TodoItem : ObservableObject
         get => _isCompleted;
         set => SetAndRaise(ref _isCompleted, value);
     }
+
+    public int Index { get; set; }
 }
 
 public class MainWindow : Window
@@ -37,6 +39,9 @@ public class MainWindow : Window
     private ComboBox _categoryComboBox;
     private ObservableCollection<TodoItem> _todos = new();
     private ObservableCollection<string> _categories = new() { "work", "daily" };
+    private Point _startPoint;
+    private bool _isDragging;
+    private TodoItem? _draggedItem;
 
     public MainWindow()
     {
@@ -110,7 +115,7 @@ public class MainWindow : Window
             return;
 
         var category = _categoryComboBox.SelectedItem as string ?? "work";
-        var item = new TodoItem { Title = title, Category = category, IsCompleted = false };
+        var item = new TodoItem { Title = title, Category = category, IsCompleted = false, Index = _todos.Count };
         _todos.Add(item);
 
         UpdateItemView(item);
@@ -180,8 +185,28 @@ public class MainWindow : Window
             IsVisible = item.IsCompleted,
             Margin = new Thickness(16, 0, 0, 0)
         };
-        archiveButton.Click += (s, e) => _todos.Remove(item);
+        archiveButton.Click += (s, e) =>
+        {
+            _todos.Remove(item);
+            for (int i = 0; i < _todos.Count; i++)
+            {
+                _todos[i].Index = i;
+            }
+        };
         panel.Children.Add(archiveButton);
+
+        if (!item.IsCompleted)
+        {
+            var dragHandle = new TextBlock
+            {
+                Text = "\u2630",
+                FontSize = 20,
+                Margin = new Thickness(8, 0, 0, 0),
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                Cursor = new Cursor(StandardCursorType.Hand)
+            };
+            panel.Children.Add(dragHandle);
+        }
 
         UpdateItemStyle(titleLabel, archiveButton, item.IsCompleted);
 

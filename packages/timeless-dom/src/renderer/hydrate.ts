@@ -71,25 +71,43 @@ export function hydrate_node(
     if (!($elm instanceof Text)) {
       return null;
     }
-    return hydrate_text(vnode, $elm as Text);
+    const text$ = build(vnode);
+    vnode.$elm = text$;
+    text$.hydrate(vnode, $elm);
+    return text$;
   }
   if (vnode.t === "row") {
-    return hydrate_row(vnode, $elm as HTMLElement);
+    const row$ = build(vnode);
+    vnode.$elm = row$;
+    row$.hydrate(vnode, $elm);
+    return row$;
   }
   if (vnode.t === "fragment") {
-    return hydrate_fragment(vnode, $elm as HTMLElement);
+    const fragment$ = build(vnode);
+    vnode.$elm = fragment$;
+    fragment$.hydrate(vnode, $elm);
+    return fragment$;
   }
   if (vnode.t === "for") {
-    return hydrate_for(vnode, $elm as HTMLElement);
+    const for$ = build(vnode);
+    vnode.$elm = for$;
+    for$.hydrate(vnode, $elm);
+    return for$;
   }
   if (vnode.t === "show") {
-    return hydrate_show(vnode, $elm as HTMLElement);
+    const show$ = build(vnode);
+    vnode.$elm = show$;
+    show$.hydrate(vnode, $elm);
+    return show$;
   }
   // if (vnode.t === "match") {
   //   return hydrateMatch(vnode, domNode);
   // }
   if (vnode.t === "button") {
-    return hydrate_button(vnode, $elm as HTMLElement);
+    const button$ = build(vnode);
+    vnode.$elm = button$;
+    button$.hydrate(vnode, $elm);
+    return button$;
   }
   // if (vnode.t === "img") {
   //   return hydrateImg(vnode, domNode);
@@ -98,19 +116,34 @@ export function hydrate_node(
   //   return hydrateLabel(vnode, domNode);
   // }
   if (vnode.t === "input") {
-    return hydrate_input(vnode, $elm as HTMLInputElement);
+    const input$ = build(vnode);
+    vnode.$elm = input$;
+    input$.hydrate(vnode, $elm);
+    return input$;
   }
   if (vnode.t === "checkbox") {
-    return hydrate_checkbox(vnode, $elm as HTMLInputElement);
+    const checkbox$ = build(vnode);
+    vnode.$elm = checkbox$;
+    checkbox$.hydrate(vnode, $elm);
+    return checkbox$;
   }
   if (vnode.t === "file-picker") {
-    return hydrate_file_picker(vnode, $elm as HTMLInputElement);
+    const file_picker$ = build(vnode);
+    vnode.$elm = file_picker$;
+    file_picker$.hydrate(vnode, $elm);
+    return file_picker$;
   }
   if (vnode.t === "number-input") {
-    return hydrate_number_input(vnode, $elm as HTMLInputElement);
+    const number_input$ = build(vnode);
+    vnode.$elm = number_input$;
+    number_input$.hydrate(vnode, $elm);
+    return number_input$;
   }
   if (vnode.t === "select") {
-    return hydrate_select(vnode, $elm as HTMLDivElement);
+    const select$ = build(vnode);
+    vnode.$elm = select$;
+    select$.hydrate(vnode, $elm);
+    return select$;
   }
   // if (vnode.t === "option") {
   //   return hydrateOption(vnode, domNode);
@@ -129,123 +162,4 @@ function hydrate_view(
   vnode.$elm = view$;
   view$.hydrate(vnode, $elm);
   return view$;
-}
-
-/**
- * Hydrate a View component.
- */
-function hydrate_row(
-  vnode: TimelessElement,
-  $elm: HTMLElement,
-): VNodeView<HTMLElement> {
-  const row$ = build(vnode);
-  vnode.$elm = row$;
-  row$.hydrate(vnode, $elm);
-  return row$;
-}
-
-/**
- * Hydrate a Text component.
- */
-function hydrate_text(vnode: TimelessElement, $elm: Text): VNodeView<Text> {
-  const text$ = build(vnode);
-  vnode.$elm = text$;
-  text$.hydrate(vnode, $elm);
-  return text$;
-}
-
-function hydrate_fragment(
-  vnode: TimelessElement,
-  $elm: HTMLElement,
-): VNodeView<Text> {
-  const fragment$ = build(vnode);
-  vnode.$elm = fragment$;
-  fragment$.hydrate(vnode, $elm);
-  return fragment$;
-}
-
-/**
- * Hydrate a For component.
- */
-function hydrate_for(
-  vnode: TimelessElement,
-  $elm: HTMLElement,
-): VNodeView<Text> {
-  const for$ = build(vnode);
-  vnode.$elm = for$;
-  for$.hydrate(vnode, $elm);
-  return for$;
-}
-
-/**
- * Hydrate a Show component.
- */
-function hydrate_show(
-  vnode: TimelessElement,
-  $elm: HTMLElement,
-): VNodeView<Text> {
-  const show$ = build(vnode);
-  vnode.$elm = show$;
-  show$.hydrate(vnode, $elm);
-  return show$;
-}
-
-function hydrate_button(
-  vnode: TimelessElement,
-  $elm: HTMLElement,
-): VNodeView<HTMLButtonElement> {
-  const button$ = build(vnode);
-  vnode.$elm = button$;
-  button$.hydrate(vnode, $elm);
-  return button$;
-}
-
-function hydrate_file_picker(
-  vnode: TimelessElement,
-  $elm: HTMLInputElement,
-): VNodeView<HTMLInputElement> {
-  const file_picker$ = build(vnode);
-  vnode.$elm = file_picker$;
-  file_picker$.hydrate(vnode, $elm);
-  return file_picker$;
-}
-
-function hydrate_input(
-  vnode: TimelessElement,
-  $elm: HTMLInputElement,
-): VNodeView<HTMLInputElement> {
-  const input$ = build(vnode);
-  vnode.$elm = input$;
-  input$.hydrate(vnode, $elm);
-  return input$;
-}
-
-function hydrate_checkbox(
-  vnode: TimelessElement,
-  $elm: HTMLInputElement,
-): VNodeView<HTMLInputElement> {
-  const checkbox$ = build(vnode);
-  vnode.$elm = checkbox$;
-  checkbox$.hydrate(vnode, $elm);
-  return checkbox$;
-}
-
-function hydrate_number_input(
-  vnode: TimelessElement,
-  $elm: HTMLInputElement,
-): VNodeView<HTMLInputElement> {
-  const number_input$ = build(vnode);
-  vnode.$elm = number_input$;
-  number_input$.hydrate(vnode, $elm);
-  return number_input$;
-}
-
-function hydrate_select(
-  vnode: TimelessElement,
-  $elm: HTMLDivElement,
-): VNodeView<HTMLDivElement> {
-  const select$ = build(vnode);
-  vnode.$elm = select$;
-  select$.hydrate(vnode, $elm);
-  return select$;
 }

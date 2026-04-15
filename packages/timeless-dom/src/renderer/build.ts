@@ -23,6 +23,8 @@ import { DOMNumberInput } from "@/host/number-input";
 import { DOMSelect } from "@/host/select";
 import { DOMRow } from "@/host/row";
 import { DOMColumn } from "@/host/column";
+import { DOMLink, isDOMLink } from "@/host/link";
+import { DOMWebview } from "@/host/webview";
 
 export function build(elm: TimelessElement): VNodeView<any> {
   if (elm.t === "view") {
@@ -64,6 +66,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const img$ = DOMImg({ build });
     elm.$elm = img$;
     return img$;
+  }
+  if (elm.t === "webview") {
+    const webview$ = DOMWebview({ build });
+    elm.$elm = webview$;
+    return webview$;
   }
   if (elm.t === "grid") {
     const grid$ = DOMGrid({ build });
@@ -119,6 +126,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const button$ = DOMButton({ build });
     elm.$elm = button$;
     return button$;
+  }
+  if (elm.t === "link") {
+    const link$ = DOMLink({ build });
+    elm.$elm = link$;
+    return link$;
   }
   if (elm.t === "portal") {
     const portal$ = DOMPortal({ build });

@@ -1,7 +1,10 @@
 package com.example.todo
 
+import android.content.ClipData
+import android.content.ClipDescription
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.DragEvent
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -61,6 +64,10 @@ class MainActivity : AppCompatActivity() {
                 (adapter as TodoAdapter).notifyDataSetChanged()
             }, { position ->
                 removeTodo(position)
+            }, { fromPosition, toPosition ->
+                val item = todos.removeAt(fromPosition)
+                todos.add(toPosition, item)
+                (adapter as TodoAdapter).notifyDataSetChanged()
             })
         }
         container.addView(listView)
@@ -71,7 +78,7 @@ class MainActivity : AppCompatActivity() {
     private fun addTodo() {
         val title = editText.text.toString()
         if (title.isEmpty()) return
-        todos.add(TodoItem(title, selectedCategory, false))
+        todos.add(0, TodoItem(title, selectedCategory, false))
         editText.text.clear()
         (listView.adapter as TodoAdapter).notifyDataSetChanged()
     }
@@ -87,7 +94,8 @@ data class TodoItem(val title: String, val category: String, val isCompleted: Bo
 class TodoAdapter(
     private val todos: List<TodoItem>,
     private val onCheckChanged: (Int, Boolean) -> Unit,
-    private val onArchive: (Int) -> Unit
+    private val onArchive: (Int) -> Unit,
+    private val onReorder: (Int, Int) -> Unit
 ) : BaseAdapter() {
 
     override fun getCount(): Int = todos.size
@@ -128,6 +136,15 @@ class TodoAdapter(
             (view as LinearLayout).getChildAt(3) as Button
         }
 
+        val dragHandle = if (convertView == null) {
+            ImageView(context).apply {
+                setImageDrawable(android.R.drawable.ic_menu_sort_by_size)
+                setPadding(16, 0, 16, 0)
+            }.also { (view as LinearLayout).addView(it, 4) }
+        } else {
+            (view as LinearLayout).getChildAt(4) as ImageView
+        }
+
         val todo = todos[position]
         checkBox.isChecked = todo.isCompleted
         checkBox.setOnCheckedChangeListener { _, isChecked ->
@@ -143,10 +160,36 @@ class TodoAdapter(
             titleLabel.setTextColor(android.graphics.Color.GRAY)
             archiveButton.visibility = View.VISIBLE
             archiveButton.setOnClickListener { onArchive(position) }
+            dragHandle.visibility = View.GONE
         } else {
             titleLabel.paintFlags = titleLabel.paintFlags and android.graphics.Paint.STRIKE_THRU_TEXT_FLAG.inv()
             titleLabel.setTextColor(android.graphics.Color.BLACK)
             archiveButton.visibility = View.GONE
+            dragHandle.visibility = View.VISIBLE
+            
+            dragHandle.setOnLongClickListener { v ->
+                val clipData = ClipData.newPlainText("position", position.toString())
+                val shadowBuilder = View.DragShadowBuilder(v)
+                v.startDragAndDrop(clipData, shadowBuilder, position, 0)
+                true
+            }
+            
+            view.setOnDragListener { v, event ->
+                when (event.action) {
+                    DragEvent.ACTION_DRAG_STARTED -> {
+                        event.clipDescription?.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) == true
+                    }
+                    DragEvent.ACTION_DROP -> {
+                        val fromPosition = event.localState as Int
+                        val toPosition = position
+                        if (fromPosition != toPosition) {
+                            onReorder(fromPosition, toPosition)
+                        }
+                        true
+                    }
+                    else -> true
+                }
+            }
         }
 
         titleLabel.text = todo.title

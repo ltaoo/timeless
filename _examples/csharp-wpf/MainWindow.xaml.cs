@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace TodoApp;
@@ -30,6 +31,8 @@ public class TodoItem : INotifyPropertyChanged
         set { _isCompleted = value; OnPropertyChanged(); }
     }
 
+    public int Index { get; set; }
+
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -38,6 +41,8 @@ public class TodoItem : INotifyPropertyChanged
 public partial class MainWindow : Window
 {
     private List<TodoItem> _todos = new();
+    private Point _dragStartPoint;
+    private bool _isDragging;
 
     public MainWindow()
     {
@@ -45,6 +50,87 @@ public partial class MainWindow : Window
         TodoListBox.ItemsSource = _todos;
         AddButton.Click += (s, e) => AddTodo();
         InputTextBox.KeyDown += (s, e) => { if (e.Key == Key.Enter) AddTodo(); };
+        
+        TodoListBox.PreviewMouseLeftButtonDown += TodoListBox_PreviewMouseLeftButtonDown;
+        TodoListBox.PreviewMouseMove += TodoListBox_PreviewMouseMove;
+        TodoListBox.Drop += TodoListBox_Drop;
+        TodoListBox.AllowDrop = true;
+    }
+
+    private void TodoListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _dragStartPoint = e.GetPosition(null);
+    }
+
+    private void TodoListBox_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed && !_isDragging)
+        {
+            Point position = e.GetPosition(null);
+            if (Math.Abs(position.X - _dragStartPoint.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(position.Y - _dragStartPoint.Y) > SystemParameters.MinimumVerticalDragDistance)
+            {
+                var listBox = sender as ListBox;
+                var listBoxItem = FindAncestor<ListBoxItem>((DependencyObject)e.OriginalSource);
+                
+                if (listBoxItem != null && listBox != null)
+                {
+                    var todo = listBoxItem.DataContext as TodoItem;
+                    if (todo != null && !todo.IsCompleted)
+                    {
+                        _isDragging = true;
+                        var data = new DataObject("TodoItem", todo);
+                        DragDrop.DoDragDrop(listBoxItem, data, DragDropEffects.Move);
+                        _isDragging = false;
+                    }
+                }
+            }
+        }
+    }
+
+    private void TodoListBox_Drop(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent("TodoItem"))
+        {
+            var draggedItem = e.Data.GetData("TodoItem") as TodoItem;
+            var listBox = sender as ListBox;
+            var targetItem = FindAncestor<ListBoxItem>((DependencyObject)e.OriginalSource);
+            
+            if (listBox != null && targetItem != null && draggedItem != null)
+            {
+                var targetTodo = targetItem.DataContext as TodoItem;
+                if (targetTodo != null && !targetTodo.IsCompleted && draggedItem.IsCompleted == false)
+                {
+                    var fromIndex = draggedItem.Index;
+                    var toIndex = targetTodo.Index;
+                    
+                    if (fromIndex != toIndex)
+                    {
+                        _todos.Remove(draggedItem);
+                        _todos.Insert(toIndex, draggedItem);
+                        
+                        for (int i = 0; i < _todos.Count; i++)
+                        {
+                            _todos[i].Index = i;
+                        }
+                        
+                        TodoListBox.Items.Refresh();
+                    }
+                }
+            }
+        }
+        e.Handled = true;
+    }
+
+    private static T? FindAncestor<T>(DependencyObject current) where T : DependencyObject
+    {
+        while (current != null)
+        {
+            if (current is T t)
+                return t;
+            current = VisualTreeHelper.GetParent(current);
+        }
+        return null;
     }
 
     private void AddTodo()
@@ -53,7 +139,7 @@ public partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(title)) return;
 
         var category = (CategoryComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "work";
-        var item = new TodoItem { Title = title, Category = category, IsCompleted = false };
+        var item = new TodoItem { Title = title, Category = category, IsCompleted = false, Index = _todos.Count };
         item.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(TodoItem.IsCompleted))
@@ -110,9 +196,26 @@ public partial class MainWindow : Window
         archiveButton.Click += (s, e) =>
         {
             _todos.Remove(item);
+            for (int i = 0; i < _todos.Count; i++)
+            {
+                _todos[i].Index = i;
+            }
             TodoListBox.Items.Refresh();
         };
         panel.Children.Add(archiveButton);
+
+        if (!item.IsCompleted)
+        {
+            var dragHandle = new TextBlock
+            {
+                Text = "\u2630",
+                FontSize = 20,
+                Margin = new Thickness(8, 0, 0, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                Cursor = Cursors.Hand
+            };
+            panel.Children.Add(dragHandle);
+        }
 
         UpdateItemStyle(titleLabel, archiveButton, item.IsCompleted);
 

@@ -30,126 +30,24 @@ const MIME_TYPES: Record<string, string> = {
 const HMR_CLIENT_SCRIPT = `
 <script>
 (function() {
-  var registry = {};
-  var storeRegistry = {};
-  var recordingPath = null;
-  var recordingStores = [];
-  var constructorsWrapped = false;
-  var reuseQueues = {};
+  var hotModules = {};
 
-  function ensureConstructorsWrapped() {
-    if (constructorsWrapped) return;
-    constructorsWrapped = true;
-    if (typeof Timeless === "undefined" || !Timeless.ui) return;
-    var ui = Timeless.ui;
-    var keys = Object.keys(ui);
-    for (var k = 0; k < keys.length; k++) {
-      var name = keys[k];
-      if (!/Core$/.test(name)) continue;
-      var Original = ui[name];
-      if (typeof Original !== "function") continue;
-      (function(name, Original) {
-        var proxy = new Proxy(Original, {
-          construct: function(target, args, newTarget) {
-            var queue = reuseQueues[name];
-            if (queue && queue.length > 0) {
-              var cached = queue.shift();
-              console.log("[HMR] Reusing store " + name + " #" + (cached.__hmr_index || 0));
-              if (recordingPath !== null) {
-                cached.__hmr_constructor = name;
-                recordingStores.push(cached);
-              }
-              return cached;
-            }
-            var instance = Reflect.construct(target, args, newTarget);
-            instance.__hmr_constructor = name;
-            if (recordingPath !== null) {
-              recordingStores.push(instance);
-            }
-            return instance;
-          }
-        });
-        ui[name] = proxy;
-      })(name, Original);
-    }
-  }
-
-  globalThis.__TIMELESS_HMR__ = {
-    register: function(path, entry) {
-      if (!registry[path]) registry[path] = [];
-      registry[path].push(entry);
-    },
-    unregister: function(path) {
-      delete registry[path];
-    },
-    beginRecord: function(path) {
-      ensureConstructorsWrapped();
-      recordingPath = path;
-      recordingStores = [];
-    },
-    endRecord: function() {
-      if (recordingPath !== null) {
-        storeRegistry[recordingPath] = recordingStores;
+  globalThis.__hmr_createHot__ = function(path) {
+    var existing = hotModules[path];
+    var data = existing ? existing.data : {};
+    var hot = {
+      data: data,
+      _acceptCb: existing ? existing._acceptCb : null,
+      _disposeCb: existing ? existing._disposeCb : null,
+      accept: function(cb) {
+        hot._acceptCb = cb;
+      },
+      dispose: function(cb) {
+        hot._disposeCb = cb;
       }
-      recordingPath = null;
-      recordingStores = [];
-    },
-    _recordStore: function(instance) {
-      if (recordingPath !== null) {
-        recordingStores.push(instance);
-      }
-    },
-    accept: function(path, newModule) {
-      var entries = registry[path];
-      if (!entries || entries.length === 0) {
-        console.warn("[HMR] No registered instances for", path);
-        return false;
-      }
-      var Factory = newModule.default || newModule;
-      if (typeof Factory !== "function") {
-        console.warn("[HMR] Module has no default export function:", path);
-        return false;
-      }
-
-      ensureConstructorsWrapped();
-
-      var oldStores = storeRegistry[path] || [];
-      reuseQueues = {};
-      for (var s = 0; s < oldStores.length; s++) {
-        var store = oldStores[s];
-        var ctorName = store.__hmr_constructor;
-        if (ctorName) {
-          if (!reuseQueues[ctorName]) reuseQueues[ctorName] = [];
-          reuseQueues[ctorName].push(store);
-        }
-      }
-
-      for (var i = 0; i < entries.length; i++) {
-        var entry = entries[i];
-        try {
-          recordingPath = path;
-          recordingStores = [];
-
-          var newElement = Factory(entry.props);
-
-          storeRegistry[path] = recordingStores;
-          recordingPath = null;
-          recordingStores = [];
-
-          if (newElement && entry.$elm && typeof entry.$elm.replaceChildren === "function") {
-            entry.$elm.replaceChildren([newElement]);
-            entry.element = newElement;
-          }
-        } catch (err) {
-          recordingPath = null;
-          recordingStores = [];
-          console.error("[HMR] Error applying update for", path, err);
-        }
-      }
-
-      reuseQueues = {};
-      return true;
-    }
+    };
+    hotModules[path] = hot;
+    return hot;
   };
 
   var protocol = location.protocol === "https:" ? "wss:" : "ws:";
@@ -161,11 +59,23 @@ const HMR_CLIENT_SCRIPT = `
 
     if (data.type === "update") {
       var fsPath = data.path;
-      var importPath = fsPath.replace(/^\\/?\\.?\\/?(src\\/)/, "@/");
-      console.log("[HMR] Updated " + importPath);
+      var hot = hotModules[fsPath];
+      if (!hot || !hot._acceptCb) {
+        console.log("[HMR] No accept handler for " + fsPath + ", reloading page");
+        location.reload();
+        return;
+      }
+      if (hot._disposeCb) {
+        try { hot._disposeCb(hot.data); } catch(e) {
+          console.error("[HMR] dispose error:", e);
+        }
+      }
+      console.log("[HMR] Updated " + fsPath);
       import("./" + fsPath + "?t=" + Date.now()).then(function(mod) {
-        if (!globalThis.__TIMELESS_HMR__.accept(importPath, mod)) {
-          console.log("[HMR] No accepting handler, reloading page");
+        try {
+          hot._acceptCb(mod);
+        } catch(err) {
+          console.error("[HMR] accept error:", err);
           location.reload();
         }
       }).catch(function(err) {
@@ -262,6 +172,24 @@ export async function frontend(options: FrontendOptions) {
         }
         const ext = path.extname(fp);
         const contentType = MIME_TYPES[ext] || "application/octet-stream";
+
+        // Inject import.meta.hot for JS files under src/
+        const relFromRoot = path.relative(root, fp);
+        if (
+          (ext === ".js" || ext === ".mjs") &&
+          relFromRoot.startsWith("src" + path.sep)
+        ) {
+          const hotPath = relFromRoot.replace(/\\/g, "/");
+          const preamble = `import.meta.hot = globalThis.__hmr_createHot__("${hotPath}");\n`;
+          res.writeHead(200, {
+            "Content-Type": contentType,
+            "Access-Control-Allow-Origin": "*",
+            "Cache-Control": "no-cache",
+          });
+          res.end(preamble + data.toString("utf-8"));
+          return;
+        }
+
         res.writeHead(200, {
           "Content-Type": contentType,
           "Access-Control-Allow-Origin": "*",

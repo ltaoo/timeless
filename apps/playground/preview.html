@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="/" />
+  <link href="public/timeless/0.19.0/timeless.shadcn.css" rel="stylesheet" />
+</head>
+
+<body>
+  <script>!function () { try { var d = document.documentElement; var e = localStorage.getItem('theme'); var resolved; if ('system' === e || !e) { var t = '(prefers-color-scheme: dark)', m = window.matchMedia(t); resolved = (m.media !== t || m.matches) ? 'dark' : 'light' } else { resolved = e } d.style.colorScheme = resolved; if (resolved === 'dark') { d.classList.add('dark') } else { d.classList.remove('dark') } } catch (e) { } }()</script>
+  <script src="public/tailwindcss@4.js"></script>
+  <script src="public/timeless/0.19.0/timeless.umd.min.js"></script>
+  <script src="public/timeless/0.19.0/timeless.dom.umd.min.js"></script>
+  <script src="public/timeless/0.19.0/timeless.shadcn.umd.min.js"></script>
+  <script src="public/timeless/0.19.0/timeless.web.umd.min.js"></script>
+  <script src="public/timeless/0.19.0/timeless.a2ui.umd.min.js"></script>
+  <script>
+    Object.assign(Timeless, Timeless.shadcn.kit);
+    Timeless.ui = Timeless.shadcn.ui;
+    Object.assign(window, Timeless);
+    Object.assign(window, Timeless.shadcn);
+  </script>
+  <div id="root"></div>
+  <script>
+    window.onerror = function (message, source, lineno, colno, error) {
+      parent.postMessage({ type: 'preview-error', message: message }, '*');
+    };
+    window.addEventListener('unhandledrejection', function (event) {
+      var msg = event.reason ? (event.reason.message || String(event.reason)) : 'Unhandled rejection';
+      parent.postMessage({ type: 'preview-error', message: msg }, '*');
+    });
+  </script>
+  <script type="module" src="/__playground__/__boot__.js"></script>
+</body>
+
+</html>

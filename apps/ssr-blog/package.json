@@ -1,5 +1,5 @@
 {
-  "name": "@timeless/ssr-shadcn",
+  "name": "@timeless/ssr-blog",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -13,8 +13,7 @@
     "@timeless/timeless-dom": "workspace:^",
     "@timeless/cli": "workspace:^",
     "@timeless/shadcn": "workspace:^",
-    "@timeless/ui-vm": "workspace:^",
-    "@timeless/kit": "workspace:^"
+    "@timeless/ui-vm": "workspace:^"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.0",

@@ -100,11 +100,19 @@ class _TodoScreenState extends State<TodoScreen> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: ReorderableListView.builder(
               itemCount: _todos.length,
+              onReorder: (oldIndex, newIndex) {
+                setState(() {
+                  if (newIndex > oldIndex) newIndex -= 1;
+                  final item = _todos.removeAt(oldIndex);
+                  _todos.insert(newIndex, item);
+                });
+              },
               itemBuilder: (context, index) {
                 final todo = _todos[index];
                 return ListTile(
+                  key: ValueKey(todo),
                   leading: Checkbox(
                     value: todo.isCompleted,
                     onChanged: (_) => _toggleTodo(index),
@@ -122,7 +130,10 @@ class _TodoScreenState extends State<TodoScreen> {
                           onPressed: () => _archiveTodo(index),
                           child: const Text('Archive'),
                         )
-                      : null,
+                      : ReorderableDragStartListener(
+                          index: index,
+                          child: const Icon(Icons.drag_handle),
+                        ),
                 );
               },
             ),
