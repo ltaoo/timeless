@@ -46,13 +46,20 @@ export function Root(
     $elm: view$.$elm,
     state: {},
     children: [],
+    onMounted(event) {
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+    },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
       }
     },
     onUnmounted() {
-      view$.onUnmounted();
+      if (view$.onUnmounted) {
+        view$.onUnmounted();
+      }
       if (props.onUnmounted) {
         props.onUnmounted();
       }
@@ -94,13 +101,20 @@ export function Column(
     $elm: view$.$elm,
     state: {},
     children: [],
+    onMounted(event) {
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+    },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
       }
     },
     onUnmounted() {
-      view$.onUnmounted();
+      if (view$.onUnmounted) {
+        view$.onUnmounted();
+      }
       if (props.onUnmounted) {
         props.onUnmounted();
       }
@@ -153,13 +167,20 @@ export function Cell(
     $elm: view$.$elm,
     state: {},
     children: [],
+    onMounted(event) {
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+    },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
       }
     },
     onUnmounted() {
-      view$.onUnmounted();
+      if (view$.onUnmounted) {
+        view$.onUnmounted();
+      }
       if (props.onUnmounted) {
         props.onUnmounted();
       }

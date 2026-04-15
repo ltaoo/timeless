@@ -56,6 +56,7 @@ export type { Platform } from "./platform";
 export { getPlatform } from "./platform";
 
 export { patch } from "./hmr/patch";
+export { hmrState } from "./hmr/state";
 
 export { Logger, Result, base } from "@timeless/base";
 export type { Handler } from "@timeless/base";

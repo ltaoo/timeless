@@ -43,9 +43,9 @@ export interface TimelessElement<T = any, Elm = any> {
   a11y?: VNodeA11y;
   // hydrate?(existingDom: any): any;
   // cleanup?: () => void;
-  onMounted?(event: MountedEvent): void;
+  onMounted(event: MountedEvent): void;
   beforeUnmounted?(): void;
-  onUnmounted?(): void;
+  onUnmounted(): void;
 }
 
 export interface VNodeA11y {
