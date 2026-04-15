@@ -441,50 +441,25 @@ export function For<T>(
       if ($elm && typeof $elm.refresh === "function") {
         $elm.refresh(diff);
       }
-      // for (const { elm, component } of removed_nodes) {
-      //   const $pa = elm.getParentNode();
-      //   if (elm && $pa === $parent) {
-      //     // host.removeChild($parent, elm);
-      //     $parent.removeChild(elm);
-      //   }
-      //   if (component) {
-      //     if (isElement(component)) {
-      //       if (typeof component.onUnmounted === "function") {
-      //         component.onUnmounted();
-      //       }
-      //     }
-      //   }
-      // }
+      // 4.2 Trigger Lifecycle (Unmounted) for removed elements
+      for (const { idx } of removed_nodes) {
+        const element = prev_elements[idx];
+        if (element && isElement(element)) {
+          if (element.beforeUnmounted) {
+            element.beforeUnmounted();
+          }
+          if (element.onUnmounted) {
+            element.onUnmounted();
+          }
+        }
+      }
 
-      // // 4.2 Reorder / Insert nodes
-      // // Backward loop for correct insertion relative to anchor
-      // let next_sibling: any | null = anchor;
-      // for (let i = new_children.length - 1; i >= 0; i--) {
-      //   const node = new_children[i];
-      //   if (!node) continue;
-
-      //   // If node is already in correct position (immediately before nextSibling), skip.
-      //   const $sibling = node.getNextSibling();
-      //   if ($sibling === next_sibling) {
-      //     next_sibling = node;
-      //     continue;
-      //   }
-
-      //   if ($parent) {
-      //     // If node is already in DOM elsewhere, insertBefore moves it.
-      //     // host.insertBefore($parent, node, next_sibling);
-      //     $parent.insertBefore(node, next_sibling);
-      //   }
-
-      //   next_sibling = node;
-      // }
-
-      // // 4.3 Trigger Lifecycle (Mounted)
-      // for (const { node, elm } of added_nodes) {
-      //   if (node && typeof node.onMounted === "function") {
-      //     node.onMounted({ target: elm });
-      //   }
-      // }
+      // 4.3 Trigger Lifecycle (Mounted) for newly added elements
+      for (const { element } of added_nodes) {
+        if (element && isElement(element) && element.onMounted) {
+          element.onMounted({ target: element.$elm });
+        }
+      }
 
       // 5. Update State
       // Use slice() to create a copy, preventing _values from referencing _local_value directly

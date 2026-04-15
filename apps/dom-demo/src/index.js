@@ -75,6 +75,10 @@ function ApplicationView() {
     },
   ]);
   const selected_fruit_ = ref("apple");
+  const text = ["Hello", "Timeless"];
+  const icon_name_ = ref("info");
+  const toasts = refarr([View({}, ["Initial"])]);
+
   const dissmissable$ = DismissableLayer();
 
   function handleSelectCard(idx) {
@@ -192,17 +196,62 @@ function ApplicationView() {
           return t.includes("_new") ? "updated" : "origin";
         }),
       ]),
+      onMounted() {
+        const content = View(
+          {
+            class: "flex items-center gap-4 p-4",
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              padding: "16px",
+            },
+            onMounted() {
+              setTimeout(() => {
+                icon_name_.as("check");
+              }, 1000);
+            },
+          },
+          [
+            Show({
+              when: computed(icon_name_, (t) => t === "check"),
+              ok() {
+                return Icon({ name: "check", size: 16 });
+              },
+              else() {
+                return Icon({ name: "loader", size: 16 });
+              },
+            }),
+            View({}, [
+              For({
+                each: text,
+                render(t) {
+                  return View({}, [t]);
+                },
+              }),
+            ]),
+          ],
+        );
+        toasts.as((prev) => [...prev, content]);
+      },
     },
     [
-      Input({
-        value: "Hello Timeless",
-        onMounted(event) {
-          console.log("the input mounted", event.target.get$elm()?.value);
+      For({
+        each: toasts,
+        render(toast) {
+          return toast;
         },
-        onInput(event) {
-          console.log("onInput", event.target.value);
-        }
       }),
+
+      // Input({
+      //   value: "Hello Timeless",
+      //   onMounted(event) {
+      //     console.log("the input mounted", event.target.get$elm()?.value);
+      //   },
+      //   onInput(event) {
+      //     console.log("onInput", event.target.value);
+      //   }
+      // }),
       // Column(
       //   {
       //     gap: 4,

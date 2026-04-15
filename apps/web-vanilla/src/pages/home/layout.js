@@ -178,10 +178,18 @@ export default function HomeLayoutView(props) {
                     new Timeless.ui.MenuItemCore({
                       label: "Profile",
                       onClick() {
-                        props.app.tip({
-                          text: ["Hello"],
-                        });
-                        console.log("Profile clicked");
+                        const toasts = [
+                          { type: "success", text: ["Welcome back!", "Have a productive day."] },
+                          { type: "success", text: ["Profile updated successfully."] },
+                          { type: "info", text: ["You have 3 unread notifications."] },
+                          { type: "info", text: ["Session active", "Last login: 2 hours ago."] },
+                          { type: "loading", text: ["Syncing your data...", "This may take a moment."] },
+                          { type: "warning", text: ["Storage almost full.", "Consider cleaning up."] },
+                          { type: "error", text: ["Connection lost.", "Retrying in 5s..."] },
+                          { text: ["All systems operational."] },
+                        ];
+                        const pick = toasts[Math.floor(Math.random() * toasts.length)];
+                        props.app.tip(pick);
                       },
                     }),
                     new Timeless.ui.MenuItemCore({
@@ -197,9 +205,15 @@ export default function HomeLayoutView(props) {
                           new Timeless.ui.MenuItemCore({
                             label: "Toast",
                             onClick() {
-                              props.app.tip({
-                                text: ["Hello!"],
-                              });
+                              const toasts = [
+                                { text: ["Task completed!"] },
+                                { text: ["File saved.", "Auto-backup enabled."] },
+                                { text: ["Reminder:", "Meeting starts in 15 minutes."] },
+                                { text: ["Download finished.", "3 files ready."] },
+                                { text: ["Settings applied."] },
+                              ];
+                              const pick = toasts[Math.floor(Math.random() * toasts.length)];
+                              props.app.tip(pick);
                             },
                           }),
                           new Timeless.ui.MenuItemCore({

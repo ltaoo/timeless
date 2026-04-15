@@ -47,7 +47,13 @@ export type ToastTypes =
 //   // onDismiss?: (toast: ToastShape) => void;
 //   // onAutoClose?: (toast: ToastShape) => void;
 // };
-type ToastShape = any;
+type ToastShape = {
+  id?: number;
+  type?: ToastTypes;
+  title: unknown;
+  position?: Position;
+  dismissible?: boolean;
+};
 
 export type SwipeDirection = "top" | "right" | "bottom" | "left";
 
@@ -72,7 +78,7 @@ export interface ToastToDismiss {
 
 export type ExternalToast = Omit<
   ToastShape,
-  "id" | "type" | "title" | "jsx" | "delete" | "promise"
+  "id" | "title" | "jsx" | "delete" | "promise"
 > & {
   id?: number;
   toasterId?: string;
@@ -217,11 +223,11 @@ export function SonnerCore() {
     loading(message: unknown, data?: ExternalToast) {
       return methods.create({ ...data, type: "loading", message });
     },
-    custom(jsx: (id: number | string) => unknown, data?: ExternalToast) {
-      const id = data?.id || _uid();
-      methods.create({ jsx: jsx(id), ...data, id });
-      return id;
-    },
+    // custom(jsx: (id: number | string) => unknown, data?: ExternalToast) {
+    //   const id = data?.id || _uid();
+    //   methods.create({ jsx: jsx(id), ...data, id });
+    //   return id;
+    // },
     getActiveToasts() {
       return _toasts.filter((toast) => !_dismissed_toasts.has(toast.id));
     },
@@ -247,8 +253,8 @@ export function SonnerCore() {
     },
     state,
     methods,
-    message(content: unknown) {
-      methods.create({ message: content });
+    message(content: unknown, extra?: ExternalToast) {
+      methods.create({ ...extra, message: content });
     },
     onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {
       bus.on(Events.StateChange, handler);
@@ -346,7 +352,7 @@ export function ToasterModel(props: ToasterModelProps) {
     //   return () => listeners.delete(listener);
     // },
 
-    notify(toast: ToastShape | ToastToDismiss) {
+    notify(toast?: ToastModel) {
       // listeners.forEach((fn) => fn(toast));
       methods.refresh();
     },
@@ -355,12 +361,9 @@ export function ToasterModel(props: ToasterModelProps) {
       return id ?? _uid++;
     },
 
-    create_toast$(
-      message: any,
-      type?: ToastTypes,
-      data?: ExternalToast,
-    ): ToastShape {
+    create_toast$(message: any, type?: ToastTypes, data?: ExternalToast) {
       const id = methods.uid(data?.id);
+      const index = toast$s.length;
       // @ts-ignore
       return ToastModel({
         id,
@@ -368,7 +371,8 @@ export function ToasterModel(props: ToasterModelProps) {
         type,
         dismissible: true,
         duration: config.duration,
-        position: "top-center",
+        position: config.position as Position,
+        index,
         ...data,
         onToasterChange(handler) {
           bus.on(Events.StateChange, handler);
@@ -379,9 +383,18 @@ export function ToasterModel(props: ToasterModelProps) {
     add(message: any, data?: ExternalToast): number {
       const toast$ = methods.create_toast$(message, data?.type, data);
       if (!toast$s.find((t) => t.id === toast$.id)) {
-        toast$s.push(toast$);
+        // 创建新数组引用，确保响应式系统能检测到变化
+        toast$s = [...toast$s, toast$];
       }
       methods.startTimer(toast$.id, toast$.duration ?? config.duration!);
+
+      // 超出 visibleToasts 上限时，移除最早的 toast
+      const max = config.visibleToasts!;
+      const excess = toast$s.length - max;
+      for (let i = 0; i < excess; i++) {
+        methods.remove(toast$s[i].id);
+      }
+
       methods.notify(toast$);
       return toast$.id;
     },
@@ -414,7 +427,8 @@ export function ToasterModel(props: ToasterModelProps) {
       if (id) {
         toast$s = toast$s.filter((t) => t.id !== id);
         methods.stopTimer(id);
-        methods.notify({ id, dismiss: true });
+        // methods.notify({ id, dismiss: true });
+        methods.notify();
       } else {
         toast$s.forEach((_, key) => {
           methods.dismiss(key);
@@ -431,11 +445,11 @@ export function ToasterModel(props: ToasterModelProps) {
       }
     },
 
-    getToasts(): ToastShape[] {
+    getToasts(): ToastModel[] {
       return Array.from(toast$s);
     },
 
-    getToastsByPosition(position: Position): ToastShape[] {
+    getToastsByPosition(position: Position): ToastModel[] {
       return methods
         .getToasts()
         .filter(
@@ -445,8 +459,8 @@ export function ToasterModel(props: ToasterModelProps) {
         );
     },
 
-    getToastsByToasterId(toasterId: string): ToastShape[] {
-      return methods.getToasts().filter((t) => t.toasterId === toasterId);
+    getToastsByToasterId(toasterId: number): ToastModel[] {
+      return methods.getToasts().filter((t) => t.id === toasterId);
     },
 
     getPositions(): Position[] {
@@ -524,6 +538,20 @@ export function ToasterModel(props: ToasterModelProps) {
       }
     },
 
+    pauseAllTimers() {
+      const ids = Array.from(timers.keys());
+      for (const id of ids) {
+        methods.pauseTimer(id as number);
+      }
+    },
+
+    resumeAllTimers() {
+      const ids = Array.from(timers.keys());
+      for (const id of ids) {
+        methods.resumeTimer(id as number);
+      }
+    },
+
     stopTimer(id: number | string) {
       const timer = timers.get(id);
       if (timer) {
@@ -535,16 +563,18 @@ export function ToasterModel(props: ToasterModelProps) {
     remove(id: number | string) {
       const toast = toast$s.find((t) => t.id == id);
       if (toast) {
-        // toast.onDismiss?.(toast);
-        // toast.delete = true;
+        // 先标记 toast 为 removed，触发退出动画
+        toast.remove();
         methods.notify(toast);
       }
 
+      // 等退出动画播放完毕后，真正从列表中移除
       setTimeout(() => {
         toast$s = toast$s.filter((t) => t.id !== id);
         heights = heights.filter((h) => h.toastId !== id);
         timers.delete(id);
-        methods.notify({ id, dismiss: true });
+        // methods.notify({ id, dismiss: true });
+        methods.notify();
       }, TIME_BEFORE_UNMOUNT);
     },
 
@@ -667,20 +697,6 @@ export function ToasterModel(props: ToasterModelProps) {
   };
   const bus = base<TheTypesOfEvents>();
 
-  toast$s.push(
-    ToastModel({
-      id: 1,
-      content: "hello world",
-      position: "bottom-right",
-      type: "normal",
-      index: 1,
-      duration: 3000,
-      onToasterChange(handler) {
-        bus.on(Events.StateChange, handler);
-      },
-    }),
-  );
-
   return {
     get [Symbol.toStringTag]() {
       return "ToasterModel";
@@ -689,6 +705,12 @@ export function ToasterModel(props: ToasterModelProps) {
     heights,
     message(content: unknown) {
       methods.message(content);
+    },
+    pauseAllTimers() {
+      methods.pauseAllTimers();
+    },
+    resumeAllTimers() {
+      methods.resumeAllTimers();
     },
     onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {
       return bus.on(Events.StateChange, handler);
@@ -759,6 +781,11 @@ export function ToastModel(props: ToastModelProps) {
         return prev + curr.height;
       }, 0);
     },
+    /** 标记为已移除，触发退出动画 */
+    markRemoved() {
+      _removed = true;
+      bus.emit(Events.StateChange, { ...state });
+    },
   };
 
   const state = {
@@ -799,8 +826,14 @@ export function ToastModel(props: ToastModelProps) {
       return "ToastModel";
     },
     id: props.id,
+    position: props.position,
+    duration: props.duration,
     content: props.content,
     state,
+    /** 标记为已移除，触发退出动画 */
+    remove() {
+      methods.markRemoved();
+    },
     onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {
       return bus.on(Events.StateChange, handler);
     },

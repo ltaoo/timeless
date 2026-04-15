@@ -75,22 +75,44 @@ function ErrorFallbackView(error, viewName) {
 
 function ApplicationRootView() {
   const root_view$ = history$.$view;
-  const toaster$ = Timeless.ui.ToasterModel({});
+  const toaster$ = Timeless.ui.ToasterModel({ position: "top-center" });
+  const icon_name_ = ref("info");
 
   app.onTip((msg) => {
-    const { text } = msg;
-    console.log("[]tip", text);
-    console.log(toaster$);
-    toaster$.message(
-      View({ class: "p-4" }, [
-        For({
-          each: text,
-          render(t) {
-            return View({}, [t]);
-          },
-        }),
-      ]),
+    const { text, type } = msg;
+    const content = View(
+      {
+        class: "flex items-center gap-4 p-4",
+        onMounted() {
+          setTimeout(() => {
+            icon_name_.as("check");
+          }, 1000);
+        },
+      },
+      [
+        View({}, [
+          Show({
+            when: computed(icon_name_, (t) => t === "check"),
+            ok() {
+              return Icon({ name: "check", size: 16 });
+            },
+            else() {
+              return Icon({ name: "loader", size: 16 });
+            },
+          }),
+        ]),
+        View({}, [
+          For({
+            each: text,
+            render(t) {
+              return View({}, [t]);
+            },
+          }),
+        ]),
+      ],
     );
+    const method = type && toaster$[type] ? type : "message";
+    toaster$[method](content);
   });
   app.onError((err) => {
     console.error(err);
@@ -126,7 +148,7 @@ function ApplicationRootView() {
         NotFound: NotFoundPageView,
         ErrorFallback: ErrorFallbackView,
       }),
-      Toaster({ store: toaster$ }),
+      Portal({}, [Toaster({ store: toaster$, position: "top-center" })]),
       // HistoryPanel({ store: history }),
     ],
   );

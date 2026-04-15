@@ -9598,6 +9598,8 @@ declare module "packages/ui-vm/src/sonner/index" {
             readonly toasts: {
                 readonly [Symbol.toStringTag]: string;
                 id: number;
+                position: Position;
+                duration: number;
                 content: unknown;
                 state: {
                     readonly index: number;
@@ -9606,6 +9608,8 @@ declare module "packages/ui-vm/src/sonner/index" {
                     readonly offsetBeforeRemove: number;
                     readonly content: unknown;
                 };
+                /** 标记为已移除，触发退出动画 */
+                remove(): void;
                 onStateChange(handler: Handler<{
                     readonly index: number;
                     readonly offset: number;
@@ -9614,6 +9618,7 @@ declare module "packages/ui-vm/src/sonner/index" {
                     readonly content: unknown;
                 }>): () => void;
             }[];
+            readonly heights: ToastHeightRecord[];
         };
         heights: ToastHeightRecord[];
         message(content: unknown): void;
@@ -9621,6 +9626,8 @@ declare module "packages/ui-vm/src/sonner/index" {
             readonly toasts: {
                 readonly [Symbol.toStringTag]: string;
                 id: number;
+                position: Position;
+                duration: number;
                 content: unknown;
                 state: {
                     readonly index: number;
@@ -9629,6 +9636,8 @@ declare module "packages/ui-vm/src/sonner/index" {
                     readonly offsetBeforeRemove: number;
                     readonly content: unknown;
                 };
+                /** 标记为已移除，触发退出动画 */
+                remove(): void;
                 onStateChange(handler: Handler<{
                     readonly index: number;
                     readonly offset: number;
@@ -9637,11 +9646,11 @@ declare module "packages/ui-vm/src/sonner/index" {
                     readonly content: unknown;
                 }>): () => void;
             }[];
+            readonly heights: ToastHeightRecord[];
         }>): () => void;
     };
     export type ToasterModel = ReturnType<typeof ToasterModel>;
     type ToastModelProps = {
-        toaster: ToasterModel;
         id: number;
         /** toast 出现的位置 */
         position: Position;
@@ -9650,15 +9659,18 @@ declare module "packages/ui-vm/src/sonner/index" {
         /** 持续时间 */
         duration: number;
         /** 总共可见的 toast 数量 */
-        visibleToasts: number;
+        visibleToasts?: number;
         type: string;
         /** 是否可消失 */
-        dismissible: boolean;
+        dismissible?: boolean;
         content: unknown;
+        onToasterChange: (handler: (v: ReturnType<typeof ToasterModel>["state"]) => void) => void;
     };
     export function ToastModel(props: ToastModelProps): {
         readonly [Symbol.toStringTag]: string;
         id: number;
+        position: Position;
+        duration: number;
         content: unknown;
         state: {
             readonly index: number;
@@ -9667,6 +9679,8 @@ declare module "packages/ui-vm/src/sonner/index" {
             readonly offsetBeforeRemove: number;
             readonly content: unknown;
         };
+        /** 标记为已移除，触发退出动画 */
+        remove(): void;
         onStateChange(handler: Handler<{
             readonly index: number;
             readonly offset: number;
@@ -23077,10 +23091,30 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
     };
 }
 declare module "packages/shadcn/src/modules/sonner" {
-    import { TimelessElement } from "packages/timeless/src/index";
+    import { DerivedRef, Ref, TimelessElement } from "packages/timeless/src/index";
     import { ToasterModel, ToastModel } from "packages/ui-vm/src/index";
+    type OffsetValue = number | string;
+    type Offset = OffsetValue | {
+        top?: OffsetValue;
+        right?: OffsetValue;
+        bottom?: OffsetValue;
+        left?: OffsetValue;
+    };
     type ToasterProps = {
         store: ToasterModel;
+        position?: string;
+        theme?: "light" | "dark";
+        gap?: number;
+        offset?: Offset;
+        mobileOffset?: Offset;
+        /** 默认是否展开，false 时 toast 缩小层叠，hover 时展开 */
+        expand?: boolean;
+    };
+    /** 记录每个 toast 的实际 DOM 高度，用于计算偏移量 */
+    type HeightEntry = {
+        toastId: number;
+        height: number;
+        position: string;
     };
     export function Toaster(props: ToasterProps): {
         t: string;
@@ -23121,6 +23155,14 @@ declare module "packages/shadcn/src/modules/sonner" {
     };
     export function Toast(props: {
         store: ToastModel;
+        position: string;
+        gap: number;
+        heights: Ref<HeightEntry[]>;
+        expanded: Ref<boolean>;
+        frontToastHeight: DerivedRef<number>;
+        toastCount: DerivedRef<number>;
+        /** For 组件提供的当前列表位置索引（响应式） */
+        idx: DerivedRef<number>;
     }): {
         t: string;
         $elm: any;

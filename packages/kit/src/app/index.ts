@@ -36,7 +36,7 @@ enum Events {
 type TheTypesOfEvents = {
   [Events.Ready]: void;
   [Events.Error]: Error;
-  [Events.Tip]: { icon?: unknown; text: string[] };
+  [Events.Tip]: { icon?: unknown; text: string[]; type?: "success" | "error" | "info" | "warning" | "loading" };
   [Events.Loading]: { text: string[] };
   [Events.HideLoading]: void;
   [Events.Login]: {};
@@ -191,7 +191,7 @@ export class ApplicationModel<
   tipUpdate() {
     this.emit(Events.ForceUpdate);
   }
-  tip(arg: { icon?: unknown; text: string[] }) {
+  tip(arg: { icon?: unknown; text: string[]; type?: "success" | "error" | "info" | "warning" | "loading" }) {
     this.emit(Events.Tip, arg);
     return arg.text.join("\n");
   }
