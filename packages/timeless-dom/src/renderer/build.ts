@@ -22,7 +22,7 @@ import { DOMFilePicker } from "@/host/file-picker";
 import { DOMNumberInput } from "@/host/number-input";
 import { DOMSelect } from "@/host/select";
 import { DOMRow } from "@/host/row";
-import { DOMColumn } from "@/host/column";
+import { DOMColumn, DOMCol } from "@/host/column";
 import { DOMLink, isDOMLink } from "@/host/link";
 import { DOMWebview } from "@/host/webview";
 
@@ -92,6 +92,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const column$ = DOMColumn({ build });
     elm.$elm = column$;
     return column$;
+  }
+  if (elm.t === "col") {
+    const col$ = DOMCol({ build });
+    elm.$elm = col$;
+    return col$;
   }
   if (elm.t === "input") {
     const input$ = DOMInput({ build });

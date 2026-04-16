@@ -1,95 +1,77 @@
-import { Ref, isRef } from "@timeless/reactive";
+import { ViewProps } from "@/content/view";
+import { isElement, ViewChildren } from "@/content/type";
+import { Box } from "@/content/box";
+import { MountedEvent } from "@/event";
 
-import { View, ViewProps } from "@/content/view";
-import { ViewChildren } from "@/content/type";
-import { ClassNameRef, isStyleRef } from "@/style";
+import { Breakpoint } from "./row";
 
 export type GridAlign = "start" | "end" | "center" | "stretch" | "baseline";
 export type GridJustify = GridAlign | "between" | "around" | "evenly";
-
 export type GridAutoFlow = "row" | "col" | "dense" | "row-dense" | "col-dense";
 
-function normalize_gap(gap: string) {
-  const v = String(gap).trim();
-  if (!v) return v;
-  if (/^-?\d+(\.\d+)?$/.test(v)) {
-    return `${Number(v) * 0.25}rem`;
-  }
-  return v;
-}
+/**
+ * Responsive column count.
+ * - number → same count at all breakpoints
+ * - object → per-breakpoint counts, e.g. { xs: 1, sm: 2, lg: 4 }
+ */
+export type GridCols = number | Partial<Record<Breakpoint, number>>;
 
-function normalize_content(v: string) {
-  const map: Record<string, string> = {
-    between: "space-between",
-    around: "space-around",
-    evenly: "space-evenly",
-  };
-  return map[v] || v;
-}
-
-function normalize_columns(columns: number | string) {
-  if (typeof columns === "number") {
-    return `repeat(${columns}, minmax(0, 1fr))`;
-  }
-  const v = String(columns).trim();
-  if (!v) return v;
-  if (/^\d+$/.test(v)) {
-    return `repeat(${Number(v)}, minmax(0, 1fr))`;
-  }
-  return v;
-}
-
-function normalize_rows(rows: number | string) {
-  if (typeof rows === "number") {
-    return `repeat(${rows}, minmax(0, 1fr))`;
-  }
-  const v = String(rows).trim();
-  if (!v) return v;
-  if (/^\d+$/.test(v)) {
-    return `repeat(${Number(v)}, minmax(0, 1fr))`;
-  }
-  return v;
-}
-
-function normalize_flow(flow: GridAutoFlow) {
-  if (flow === "row") return "row";
-  if (flow === "col") return "column";
-  if (flow === "dense") return "dense";
-  if (flow === "row-dense") return "row dense";
-  if (flow === "col-dense") return "column dense";
-  return flow;
-}
-
-type GridProps = {
-  columns?: number | string;
+export type GridProps = ViewProps & {
+  /** Column count – supports responsive object */
+  cols?: GridCols;
+  /** Row template */
   rows?: number | string;
+  /** grid-auto-rows */
   autoRows?: string;
+  /** grid-auto-columns */
   autoCols?: string;
+  /** grid-auto-flow */
   flow?: GridAutoFlow;
-  gap?: string;
-  gapX?: string;
-  gapY?: string;
+  /** Uniform gap (px) */
+  gap?: number;
+  /** Column gap (px) */
+  gapX?: number;
+  /** Row gap (px) */
+  gapY?: number;
   alignItems?: GridAlign;
   justifyItems?: GridAlign;
   alignContent?: GridJustify;
   justifyContent?: GridJustify;
   placeItems?: string;
   placeContent?: string;
-  class?: string | Ref<string> | ClassNameRef;
-} & ViewProps;
+  /** Shorthand spacing (px) */
+  marginBottom?: number;
+  marginTop?: number;
+  marginLeft?: number;
+  marginRight?: number;
+  padding?: number;
+};
+
 type GridState = {
-  columns: number;
-  rows: number;
-  gap: string;
-  alignItems: GridAlign;
-  justifyItems: GridAlign;
-  alignContent: GridJustify;
-  justifyContent: GridJustify;
+  cols?: GridCols;
+  rows?: number | string;
+  autoRows?: string;
+  autoCols?: string;
+  flow?: GridAutoFlow;
+  gap?: number;
+  gapX?: number;
+  gapY?: number;
+  alignItems?: GridAlign;
+  justifyItems?: GridAlign;
+  alignContent?: GridJustify;
+  justifyContent?: GridJustify;
+  placeItems?: string;
+  placeContent?: string;
+  marginBottom?: number;
+  marginTop?: number;
+  marginLeft?: number;
+  marginRight?: number;
+  padding?: number;
 };
 
 export function Grid(props: GridProps, children?: ViewChildren) {
   const {
-    columns = 24,
+    cols,
     rows,
     autoRows,
     autoCols,
@@ -103,79 +85,80 @@ export function Grid(props: GridProps, children?: ViewChildren) {
     justifyContent,
     placeItems,
     placeContent,
-    class: cls,
-    style: stl,
+    marginBottom,
+    marginTop,
+    marginLeft,
+    marginRight,
+    padding,
     ...rest
   } = props;
 
-  const state: GridState = {
-    columns: 0,
-    rows: 0,
-    gap: "",
-    alignItems: "start",
-    justifyItems: "start",
-    alignContent: "start",
-    justifyContent: "start",
+  let $elm: any = null;
+  const box$ = Box<GridState>(rest, {} as GridState);
+  const state = box$.state;
+  const events = box$.events;
+
+  const methods = {
+    subscribe_props() {
+      box$.methods.subscribe_props();
+      if (cols !== undefined) state.cols = cols;
+      if (rows !== undefined) state.rows = rows;
+      if (autoRows !== undefined) state.autoRows = autoRows;
+      if (autoCols !== undefined) state.autoCols = autoCols;
+      if (flow !== undefined) state.flow = flow;
+      if (gap !== undefined) state.gap = gap;
+      if (gapX !== undefined) state.gapX = gapX;
+      if (gapY !== undefined) state.gapY = gapY;
+      if (alignItems !== undefined) state.alignItems = alignItems;
+      if (justifyItems !== undefined) state.justifyItems = justifyItems;
+      if (alignContent !== undefined) state.alignContent = alignContent;
+      if (justifyContent !== undefined) state.justifyContent = justifyContent;
+      if (placeItems !== undefined) state.placeItems = placeItems;
+      if (placeContent !== undefined) state.placeContent = placeContent;
+      if (marginBottom !== undefined) state.marginBottom = marginBottom;
+      if (marginTop !== undefined) state.marginTop = marginTop;
+      if (marginLeft !== undefined) state.marginLeft = marginLeft;
+      if (marginRight !== undefined) state.marginRight = marginRight;
+      if (padding !== undefined) state.padding = padding;
+    },
   };
-  const baseStyle: Record<string, any> = { display: "grid" };
 
-  if (columns !== undefined) {
-    const c = normalize_columns(columns);
-    if (c) baseStyle["grid-template-columns"] = c;
-  }
-  if (rows !== undefined) {
-    const r = normalize_rows(rows);
-    if (r) baseStyle["grid-template-rows"] = r;
-  }
-  if (autoRows) baseStyle["grid-auto-rows"] = autoRows;
-  if (autoCols) baseStyle["grid-auto-columns"] = autoCols;
-  if (flow) baseStyle["grid-auto-flow"] = normalize_flow(flow);
+  methods.subscribe_props();
+  box$.methods.build_children(children);
 
-  if (gapX || gapY) {
-    if (gapY) baseStyle["row-gap"] = normalize_gap(gapY);
-    if (gapX) baseStyle["column-gap"] = normalize_gap(gapX);
-  } else if (gap) {
-    baseStyle.gap = normalize_gap(gap);
-  }
-
-  if (placeItems) {
-    baseStyle["place-items"] = placeItems;
-  } else {
-    if (alignItems) baseStyle["align-items"] = alignItems;
-    if (justifyItems) baseStyle["justify-items"] = justifyItems;
-  }
-
-  if (placeContent) {
-    baseStyle["place-content"] = normalize_content(placeContent);
-  } else {
-    if (alignContent) {
-      baseStyle["align-content"] = normalize_content(alignContent);
-    }
-    if (justifyContent) {
-      baseStyle["justify-content"] = normalize_content(justifyContent);
-    }
-  }
-
-  if (typeof stl === "string") {
-    return View(
-      {
-        ...rest,
-        class: cls,
-        // style: `${viewStyleToCssText(baseStyle)}; ${stl}`,
-      },
-      children,
-    );
-  }
-
-  const extraStyle =
-    stl && typeof stl === "object" && !isRef(stl) && !isStyleRef(stl)
-      ? stl
-      : {};
-
-  const grid$ = View(
-    { ...rest, class: cls, style: { ...baseStyle, ...extraStyle } },
-    children,
-  );
-  grid$.t = "grid";
-  return grid$;
+  return {
+    t: "grid",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    events,
+    children: state.children,
+    onMounted(event: MountedEvent) {
+      if (rest.onMounted) {
+        rest.onMounted(event);
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    onUnmounted() {
+      if (rest.onUnmounted) {
+        rest.onUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onUnmounted) {
+          child.onUnmounted();
+        }
+      }
+    },
+  };
 }

@@ -1,28 +1,46 @@
 import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
-import { View, ViewProps } from "@/content/view";
+import { ViewProps } from "@/content/view";
 import { isElement, ViewChildren } from "@/content/type";
-import { isStyleRef, ClassNameRef } from "@/style";
 import { Box } from "@/content/box";
 import { MountedEvent } from "@/event";
 
-export type RowProps = ViewProps & {
-  gap?: number | DerivedRef<number> | Ref<number>;
-  span?: number;
-  start?: number;
-  end?: number;
-  offset?: number;
-  rowSpan?: number;
-  rowStart?: number;
-  rowEnd?: number;
+import { FlexJustify } from "./flex";
+
+export type Breakpoint = "xs" | "sm" | "md" | "lg" | "xl";
+
+export type RowDirection = "row" | "column" | "row-reverse" | "column-reverse";
+
+export type FlexAlign = "start" | "end" | "center" | "stretch" | "baseline";
+
+export type RowBreakpointConfig = {
+  direction?: RowDirection;
+  gap?: number;
+  wrap?: boolean;
+  align?: FlexAlign;
+  justify?: FlexJustify;
 };
+
+export type RowProps = ViewProps & {
+  gap?: number | Ref<number> | DerivedRef<number>;
+  wrap?: boolean;
+  direction?: RowDirection;
+  align?: FlexAlign;
+  justify?: FlexJustify;
+  breakpoints?: Partial<Record<Breakpoint, RowBreakpointConfig>>;
+};
+
 type RowState = {
   gap?: number;
+  wrap?: boolean;
+  direction?: RowDirection;
+  align?: FlexAlign;
+  justify?: FlexJustify;
+  breakpoints?: Partial<Record<Breakpoint, RowBreakpointConfig>>;
 };
 
 export function Row(props: RowProps, children?: ViewChildren) {
-  const { gap, span, start, end, offset, rowSpan, rowStart, rowEnd, ...rest } =
-    props;
+  const { gap, wrap, direction, align, justify, breakpoints, ...rest } = props;
 
   let $elm: any = null;
   const box$ = Box<RowState>(rest, {} as RowState);
@@ -44,6 +62,11 @@ export function Row(props: RowProps, children?: ViewChildren) {
           state.gap = gap;
         }
       }
+      if (wrap !== undefined) state.wrap = wrap;
+      if (direction !== undefined) state.direction = direction;
+      if (align !== undefined) state.align = align;
+      if (justify !== undefined) state.justify = justify;
+      if (breakpoints !== undefined) state.breakpoints = breakpoints;
     },
   };
 
@@ -63,7 +86,6 @@ export function Row(props: RowProps, children?: ViewChildren) {
     events,
     children: state.children,
     onMounted(event: MountedEvent) {
-      // console.log("[primitive]layout/column - onMounted", event);
       if (rest.onMounted) {
         rest.onMounted(event);
       }
@@ -75,7 +97,6 @@ export function Row(props: RowProps, children?: ViewChildren) {
       }
     },
     onUnmounted() {
-      // console.log("[primitive]layout/column - onUnmountmounted", event);
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }

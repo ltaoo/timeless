@@ -82,6 +82,24 @@ export function hydrate_node(
     row$.hydrate(vnode, $elm);
     return row$;
   }
+  if (vnode.t === "column") {
+    const column$ = build(vnode);
+    vnode.$elm = column$;
+    column$.hydrate(vnode, $elm);
+    return column$;
+  }
+  if (vnode.t === "col") {
+    const col$ = build(vnode);
+    vnode.$elm = col$;
+    col$.hydrate(vnode, $elm);
+    return col$;
+  }
+  if (vnode.t === "grid") {
+    const grid$ = build(vnode);
+    vnode.$elm = grid$;
+    grid$.hydrate(vnode, $elm);
+    return grid$;
+  }
   if (vnode.t === "fragment") {
     const fragment$ = build(vnode);
     vnode.$elm = fragment$;
