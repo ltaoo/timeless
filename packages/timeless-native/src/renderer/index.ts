@@ -1,6 +1,7 @@
-import { type TimelessElement, isElement } from "@timeless/timeless";
+import { type TimelessElement, isElement, patch } from "@timeless/timeless";
 
 declare const __nativeBridge_render: (tree: any) => void;
+declare const __nativeBridge_relayout: (() => void) | undefined;
 
 import { NativeView, isNativeView } from "@/host/view";
 import { NativeText } from "@/host/text";
@@ -153,6 +154,66 @@ function build(elm: TimelessElement): any {
   return NativeView({ build });
 }
 
+// ─── buildAndRender ───────────────────────────────────────────────────────────
+
+export function buildAndRender(elm: TimelessElement) {
+  const vnode = build(elm);
+  const dom = vnode.render(elm);
+  return { vnode, dom };
+}
+
+// ─── nativePlatform ───────────────────────────────────────────────────────────
+
+export function nativePlatform() {
+  return {
+    hasParent(dom: any) {
+      return !!dom.parentNode;
+    },
+    replaceChild(oldDom: any, newDom: any) {
+      const parent = oldDom.parentNode;
+      if (!parent) return;
+      const idx = parent.children.indexOf(oldDom);
+      if (idx !== -1) {
+        parent.children[idx] = newDom;
+        newDom.parentNode = parent;
+        oldDom.parentNode = null;
+        if (typeof parent._onChildReplaced === "function") {
+          parent._onChildReplaced(idx, newDom);
+        }
+      }
+    },
+    removeChild(dom: any) {
+      const parent = dom.parentNode;
+      if (!parent) return;
+      const idx = parent.children.indexOf(dom);
+      if (idx !== -1) {
+        parent.children.splice(idx, 1);
+        dom.parentNode = null;
+        if (typeof parent._onChildRemoved === "function") {
+          parent._onChildRemoved(idx);
+        }
+      }
+    },
+    insertChild(parentDom: any, childDom: any, index: number) {
+      parentDom.children.splice(index, 0, childDom);
+      childDom.parentNode = parentDom;
+      if (typeof parentDom._onChildInserted === "function") {
+        parentDom._onChildInserted(index, childDom);
+      }
+    },
+    insertBeforeAnchor(anchorDom: any, childDom: any) {
+      // Native: children go INSIDE the anchor-based element, not as siblings
+      anchorDom.children.push(childDom);
+      childDom.parentNode = anchorDom;
+      if (typeof anchorDom._onChildInserted === "function") {
+        anchorDom._onChildInserted(anchorDom.children.length - 1, childDom);
+      }
+    },
+  };
+}
+
+// ─── render ───────────────────────────────────────────────────────────────────
+
 export function render(elm: TimelessElement) {
   console.log(
     "[Native Render] render called, elm:",
@@ -167,6 +228,29 @@ export function render(elm: TimelessElement) {
   }
 
   if (isElement(elm)) {
+    // HMR path: diff + patch instead of full rebuild
+    const hmr = (globalThis as any).__native_hmr;
+    if (hmr?.data?.__root) {
+      console.log("[Native HMR] Patching existing tree...");
+      patch(hmr.data.__root, elm, {
+        buildAndRender,
+        platform: nativePlatform(),
+      });
+      hmr.data.__root = elm;
+      if (typeof __nativeBridge_relayout !== "undefined") {
+        __nativeBridge_relayout();
+      }
+      // Re-trigger onMounted so timers/effects are re-established after HMR
+      setTimeout(() => {
+        if (typeof elm.onMounted === "function") {
+          elm.onMounted({ target: elm.$elm?.get$elm?.() || elm.$elm });
+        }
+      }, 0);
+      console.log("[Native HMR] Patch + relayout complete.");
+      return;
+    }
+
+    // Initial render (existing code)
     console.log("[Native Render] isElement true, building...");
     const host$ = build(elm);
     console.log(
@@ -185,6 +269,12 @@ export function render(elm: TimelessElement) {
     const $root = host$.render(elm);
     __nativeBridge_render($root);
     console.log("[Native Render] pushing view to root children, $elm:");
+
+    // Store root for HMR patching
+    if (hmr) {
+      hmr.data.__root = elm;
+    }
+
     setTimeout(() => {
       if (typeof elm.onMounted === "function") {
         elm.onMounted({ target: $root });

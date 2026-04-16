@@ -17,6 +17,7 @@ import type {
   Signal,
 } from "./signal";
 import { isRef, isWriteableRef, isArrayRef } from "./types";
+import { hmrScope } from "./hmr";
 import { ref } from "./ref";
 import { refArray } from "./reactive-array";
 import { refObject } from "./reactive-object";
@@ -66,4 +67,5 @@ export {
   refArray as refarr,
   refObject as refobj,
   release as uncomputed,
+  hmrScope,
 };

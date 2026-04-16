@@ -78,6 +78,13 @@ export type PatchAction =
 
 export type PatchOptions = {
   buildAndRender: (elm: TimelessElement) => { vnode: any; dom: any };
+  platform?: {
+    hasParent(dom: any): boolean;
+    replaceChild(oldDom: any, newDom: any): void;
+    removeChild(dom: any): void;
+    insertChild(parentDom: any, childDom: any, index: number): void;
+    insertBeforeAnchor(anchorDom: any, childDom: any): void;
+  };
 };
 
 // ─── diff (transfer $elm from old → new) ─────────────────────────────────────
@@ -257,19 +264,28 @@ export function patch(
         }
 
         const oldDom = old$elm.get$elm?.();
-        if (!oldDom || !oldDom.parentNode) break;
+        const plat = options.platform;
+        if (!oldDom || !(plat ? plat.hasParent(oldDom) : oldDom.parentNode)) break;
 
         let newVNode: any;
         // Portal self-manages DOM (document.body.appendChild).
         if (action.new_element.t === "portal") {
           const r = options.buildAndRender(action.new_element);
           newVNode = r.vnode;
-          oldDom.parentNode.removeChild(oldDom);
+          if (plat) {
+            plat.removeChild(oldDom);
+          } else {
+            oldDom.parentNode.removeChild(oldDom);
+          }
         } else {
           const r = options.buildAndRender(action.new_element);
           newVNode = r.vnode;
           if (!r.dom) break;
-          oldDom.parentNode.replaceChild(r.dom, oldDom);
+          if (plat) {
+            plat.replaceChild(oldDom, r.dom);
+          } else {
+            oldDom.parentNode.replaceChild(r.dom, oldDom);
+          }
         }
 
         // Sync parent's children array and internal tracking
@@ -314,18 +330,26 @@ export function patch(
         const { vnode: childVNode, dom: childDom } = options.buildAndRender(action.element);
         if (!childDom) break;
 
+        const plat = options.platform;
+
         // Anchor-based elements (fragment, show, for): insert before anchor
         if (
           action.parent.t === "fragment" ||
           action.parent.t === "show" ||
           action.parent.t === "for"
         ) {
-          if (parentDom.parentNode) {
+          if (plat) {
+            plat.insertBeforeAnchor(parentDom, childDom);
+          } else if (parentDom.parentNode) {
             parentDom.parentNode.insertBefore(childDom, parentDom);
           }
         } else {
-          const refNode = parentDom.childNodes[action.index] || null;
-          parentDom.insertBefore(childDom, refNode);
+          if (plat) {
+            plat.insertChild(parentDom, childDom, action.index);
+          } else {
+            const refNode = parentDom.childNodes[action.index] || null;
+            parentDom.insertBefore(childDom, refNode);
+          }
         }
 
         // For anchor-based children (fragment, show, for), the rendered DOM is
@@ -360,7 +384,10 @@ export function patch(
         }
 
         const childRaw = child$elm.get$elm?.();
-        if (childRaw?.parentNode) {
+        const plat = options.platform;
+        if (plat) {
+          if (childRaw) plat.removeChild(childRaw);
+        } else if (childRaw?.parentNode) {
           childRaw.parentNode.removeChild(childRaw);
         }
 

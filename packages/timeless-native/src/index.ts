@@ -1,8 +1,9 @@
 import { render } from "./renderer";
+import { buildAndRender, nativePlatform } from "./renderer";
 
 console.log("native.version" + __Version);
 
-export { render };
+export { render, buildAndRender, nativePlatform };
 
 export const TimelessNativeVersion = __Version;
 

@@ -1,6 +1,7 @@
 import { has, get } from "./registry";
 import { refObject } from "./reactive-object";
 import { Subscriber, Ref, isRef, TimelessRefArray, DerivedRef } from "./types";
+import { __hmr_get_hot } from "./hmr";
 
 export interface RefArray<T> extends Ref<T[]> {
   key: unknown;
@@ -139,8 +140,22 @@ export interface RefArray<T> extends Ref<T[]> {
 
 export function refArray<T>(
   items: T[],
-  opt: Partial<{ key: any }> = {},
+  optOrHmrKey?: Partial<{ key: any }> | string,
+  __hmr_key?: string,
 ): TimelessRefArray<T> {
+  let opt: Partial<{ key: any }> = {};
+  if (typeof optOrHmrKey === "string") {
+    __hmr_key = optOrHmrKey;
+  } else if (optOrHmrKey) {
+    opt = optOrHmrKey;
+  }
+
+  const hot = __hmr_key ? __hmr_get_hot() : null;
+
+  if (hot?.data?.__hmr_refs?.[__hmr_key!]) {
+    items = hot.data.__hmr_refs[__hmr_key!].value;
+  }
+
   let raw_value = items;
   const deps: Subscriber<T[]>[] = [];
   function notify(action: {
@@ -703,5 +718,10 @@ export function refArray<T>(
       return raw_value[Symbol.iterator]();
     },
   };
+
+  if (hot && __hmr_key) {
+    hot.data.__hmr_refs[__hmr_key] = r;
+  }
+
   return r;
 }

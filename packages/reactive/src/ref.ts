@@ -1,6 +1,13 @@
 import { DerivedRef, isRef, Ref, Subscriber, TimelessRef } from "./types";
+import { __hmr_get_hot } from "./hmr";
 
-export function ref<T = any>(v: T): TimelessRef<T> {
+export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
+  const hot = __hmr_key ? __hmr_get_hot() : null;
+
+  if (hot?.data?.__hmr_refs?.[__hmr_key!]) {
+    v = hot.data.__hmr_refs[__hmr_key!].value;
+  }
+
   let raw_value = v;
   const _initial_value = v;
   const deps: Subscriber<T>[] = [];
@@ -135,5 +142,10 @@ export function ref<T = any>(v: T): TimelessRef<T> {
       return (raw_value as any) > comparisonValue;
     },
   };
+
+  if (hot && __hmr_key) {
+    hot.data.__hmr_refs[__hmr_key] = r;
+  }
+
   return r;
 }

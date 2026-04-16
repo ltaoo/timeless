@@ -189,6 +189,7 @@ export default function HomeLayoutView(props) {
                           { text: ["All systems operational."] },
                         ];
                         const pick = toasts[Math.floor(Math.random() * toasts.length)];
+                        // @ts-ignore
                         props.app.tip(pick);
                       },
                     }),

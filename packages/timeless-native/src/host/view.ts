@@ -19,6 +19,13 @@ export function NativeView(props: {
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
     listeners: {} as Record<string, any>,
+    parentNode: null as any,
+    _onStyleChange: null as ((style: Record<string, string>) => void) | null,
+    _onAttributeChange: null as ((key: string, value: string | null) => void) | null,
+    _onEventChange: null as ((listeners: Record<string, any>) => void) | null,
+    _onChildInserted: null as ((index: number, child: any) => void) | null,
+    _onChildRemoved: null as ((index: number) => void) | null,
+    _onChildReplaced: null as ((index: number, newChild: any) => void) | null,
   };
   const box$ = HostElement({ t: "view", $elm, build: props.build });
 
@@ -33,6 +40,9 @@ export function NativeView(props: {
         }
       });
       $elm.style = styleObj;
+      if (typeof $elm._onStyleChange === "function") {
+        $elm._onStyleChange($elm.style);
+      }
     },
     setupEventListener(events: any) {
       if (events.onClick) {
@@ -59,6 +69,9 @@ export function NativeView(props: {
       if (events.onMouseLeave) {
         $elm.listeners.mouseleave = events.onMouseLeave;
       }
+      if (typeof $elm._onEventChange === "function") {
+        $elm._onEventChange($elm.listeners);
+      }
     },
   };
 
@@ -77,15 +90,24 @@ export function NativeView(props: {
     setStyleValue(key: string, value: string) {
       const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
       $elm.style[k] = value;
+      if (typeof $elm._onStyleChange === "function") {
+        $elm._onStyleChange($elm.style);
+      }
     },
     setStyleSet(name: string[]) {
       $elm.attrs.class = name.join(" ");
     },
     setAttribute(key: string, value: string) {
       $elm.attrs[key] = value;
+      if (typeof $elm._onAttributeChange === "function") {
+        $elm._onAttributeChange(key, value);
+      }
     },
     removeAttribute(key: string) {
       delete $elm.attrs[key];
+      if (typeof $elm._onAttributeChange === "function") {
+        $elm._onAttributeChange(key, null);
+      }
     },
     addEventListener(
       type: string,
@@ -140,6 +162,7 @@ export function NativeView(props: {
               ) {
                 $child.style = { ...inherited_style, ...$child.style };
               }
+              $child.parentNode = $elm;
               $elm.children.push($child);
             }
           }

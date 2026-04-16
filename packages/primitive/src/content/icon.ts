@@ -100,6 +100,11 @@ export function Icon(props: IconProps) {
         props.onMounted(event);
       }
     },
+    onUnmounted() {
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+    },
   };
 }
 

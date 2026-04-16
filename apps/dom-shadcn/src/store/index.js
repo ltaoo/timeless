@@ -1,7 +1,7 @@
 /**
  * @file Store 入口 - 路由管理
  */
-import { refobj, Result } from "@timeless/timeless";
+import { Result } from "@timeless/timeless";
 import {
   buildRoutes,
   HttpClientCore,

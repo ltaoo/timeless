@@ -96,5 +96,10 @@ export function Label(props: LabelProps = {}, children?: ViewChildren) {
         props.onMounted(event);
       }
     },
+    onUnmounted() {
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+    },
   };
 }

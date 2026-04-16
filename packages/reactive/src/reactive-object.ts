@@ -6,6 +6,7 @@ import {
   TimelessRefObjectNullable,
 } from "./types";
 import { get, has } from "./registry";
+import { __hmr_get_hot } from "./hmr";
 
 function deepMerge(target: any, source: any): any {
   if (!source || typeof source !== "object") return target;
@@ -95,13 +96,22 @@ export interface RefObjectNullable<T> extends Ref<T> {
 
 export function refObject<T extends Record<string, any>>(
   obj: T,
+  __hmr_key?: string,
 ): TimelessRefObject<T>;
 export function refObject<T extends Record<string, any>>(
   obj: T | null,
+  __hmr_key?: string,
 ): TimelessRefObjectNullable<T>;
 export function refObject<T extends Record<string, any>>(
   obj: T | null,
+  __hmr_key?: string,
 ): TimelessRefObject<T> | TimelessRefObjectNullable<T> {
+  const hot = __hmr_key ? __hmr_get_hot() : null;
+
+  if (hot?.data?.__hmr_refs?.[__hmr_key!]) {
+    obj = hot.data.__hmr_refs[__hmr_key!].value;
+  }
+
   let _v = obj;
   const deps: Subscriber<T>[] = [];
   function notify(action: { type: string }) {
@@ -349,5 +359,10 @@ export function refObject<T extends Record<string, any>>(
       notify({ type: "update" });
     },
   };
+
+  if (hot && __hmr_key) {
+    hot.data.__hmr_refs[__hmr_key] = r;
+  }
+
   return r;
 }

@@ -116,6 +116,9 @@ export function HostElement(props: {
         }
       });
       $elm.style = styleObj;
+      if (typeof $elm._onStyleChange === "function") {
+        $elm._onStyleChange($elm.style);
+      }
     },
     setStyleSet(styleSet: string[], opt: Partial<{ initial?: boolean }> = {}) {
       if (!$elm) {
@@ -135,18 +138,27 @@ export function HostElement(props: {
         .replace(/([A-Z])/g, "-$1")
         .toLowerCase();
       $elm.style[k] = value;
+      if (typeof $elm._onStyleChange === "function") {
+        $elm._onStyleChange($elm.style);
+      }
     },
     setAttribute(key: string, value: string) {
       if (!$elm) {
         return;
       }
       $elm.attrs[key] = value;
+      if (typeof $elm._onAttributeChange === "function") {
+        $elm._onAttributeChange(key, value);
+      }
     },
     removeAttribute(key: string) {
       if (!$elm) {
         return;
       }
       delete $elm.attrs[key];
+      if (typeof $elm._onAttributeChange === "function") {
+        $elm._onAttributeChange(key, null);
+      }
     },
     blur() {},
     focus() {},
@@ -234,6 +246,9 @@ export function HostElement(props: {
       if (events.onChange) {
         $elm.listeners.change = events.onChange;
       }
+      if (typeof $elm._onEventChange === "function") {
+        $elm._onEventChange($elm.listeners);
+      }
     },
     applyState(
       state: TimelessElement["state"],
@@ -276,6 +291,7 @@ export function HostElement(props: {
           if ($child) {
             child_host_nodes.push($child);
             if ($elm.children) {
+              $child.parentNode = $elm;
               $elm.children.push($child);
             }
           }
@@ -346,6 +362,7 @@ export function HostElement(props: {
       const r = methods.buildChildren(children);
       if ($elm && $elm.children) {
         for (const $child of r.child_host_nodes) {
+          $child.parentNode = $elm;
           $elm.children.push($child);
         }
       }
@@ -369,6 +386,7 @@ export function HostElement(props: {
         for (const $child of child_host_nodes) {
           const idx = $elm.children.indexOf($child);
           if (idx !== -1) {
+            $child.parentNode = null;
             $elm.children.splice(idx, 1);
           }
         }
@@ -391,6 +409,7 @@ export function HostElement(props: {
             child_host_nodes.splice(idx, 0, $child);
             inserted_elements.push(child);
             if ($elm && $elm.children) {
+              $child.parentNode = $elm;
               $elm.children.splice(idx, 0, $child);
             }
           }
@@ -422,6 +441,7 @@ export function HostElement(props: {
           if ($elm && $elm.children) {
             const childIdx = $elm.children.indexOf($child);
             if (childIdx !== -1) {
+              $child.parentNode = null;
               $elm.children.splice(childIdx, 1);
             }
           }

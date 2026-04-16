@@ -1,4 +1,13 @@
-import { View, Show, For, Fragment, Portal, ref } from "@timeless/timeless";
+import {
+  View,
+  Show,
+  For,
+  Fragment,
+  Portal,
+  Icon,
+  ref,
+  computed,
+} from "@timeless/timeless";
 import { render } from "@timeless/timeless-dom";
 import { StandardSubViews, Toaster, ui } from "@timeless/shadcn";
 
@@ -62,7 +71,7 @@ function ApplicationRootView() {
   // });
   // console.log("elm", elm);
   // return elm;
-  return View({}, [
+  return Fragment({}, [
     StandardSubViews({
       view: root_view$,
       views,

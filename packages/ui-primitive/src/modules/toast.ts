@@ -73,7 +73,7 @@ export function Close(
         // store.hide();
       },
     },
-    children || [NativeIcon({ name: "circle", size: 16 })],
+    children,
   );
 }
 

@@ -1,23 +1,7 @@
-import { refobj } from "@timeless/timeless";
 import { View, Column, Icon } from "@timeless/timeless";
 import { Button, Badge, Separator, ScrollView, ui } from "@timeless/shadcn";
 
-function SectionComponent(title, children) {
-  return View({ class: "space-y-3" }, [
-    View(
-      { class: "text-sm font-semibold text-zinc-500 uppercase tracking-wider" },
-      [title],
-    ),
-    View({ class: "space-y-4 pl-1" }, children),
-  ]);
-}
-
-function ItemComponent(label, children) {
-  return View({ class: "space-y-2" }, [
-    View({ class: "text-sm text-zinc-400" }, [label]),
-    View({ class: "flex flex-wrap items-center gap-3" }, children),
-  ]);
-}
+import { Section, Item } from "@/components/index";
 
 export default function GeneralView() {
   const view$ = new ui.ScrollViewCore({});
@@ -32,8 +16,8 @@ export default function GeneralView() {
     },
     [
       Column({ gap: "24px" }, [
-        SectionComponent("Button", [
-          ItemComponent("Variants", [
+        Section("Button", [
+          Item("Variants", [
             Button({ store: new ui.ButtonCore({}) }, ["Default"]),
             Button({ store: new ui.ButtonCore({ variant: "secondary" }) }, [
               "Secondary",
@@ -49,7 +33,7 @@ export default function GeneralView() {
             ]),
             Button({ store: new ui.ButtonCore({ variant: "link" }) }, ["Link"]),
           ]),
-          ItemComponent("Sizes", [
+          Item("Sizes", [
             Button({ store: new ui.ButtonCore({ size: "xs" }) }, ["XS"]),
             Button({ store: new ui.ButtonCore({ size: "sm" }) }, ["SM"]),
             Button({ store: new ui.ButtonCore({}) }, ["Default"]),
@@ -67,7 +51,7 @@ export default function GeneralView() {
               Icon({ name: "bolt", size: 28 }),
             ]),
           ]),
-          ItemComponent("Loading", [
+          Item("Loading", [
             (() => {
               const store = new ui.ButtonCore({
                 onClick() {
@@ -80,7 +64,7 @@ export default function GeneralView() {
               return Button({ store }, ["Click to Load"]);
             })(),
           ]),
-          ItemComponent("With Prefix Icon", [
+          Item("With Prefix Icon", [
             Button(
               {
                 store: new ui.ButtonCore({}),
@@ -96,7 +80,7 @@ export default function GeneralView() {
               ["Settings"],
             ),
           ]),
-          ItemComponent("Disabled", [
+          Item("Disabled", [
             Button({ store: new ui.ButtonCore({ disabled: true }) }, [
               "Disabled",
             ]),
@@ -120,19 +104,17 @@ export default function GeneralView() {
             ),
           ]),
         ]),
-        SectionComponent("Badge", [
-          ItemComponent("Variants", [
+        Section("Badge", [
+          Item("Variants", [
             Badge({}, ["Default"]),
             Badge({ variant: "secondary" }, ["Secondary"]),
             Badge({ variant: "outline" }, ["Outline"]),
             Badge({ variant: "destructive" }, ["Destructive"]),
           ]),
         ]),
-        SectionComponent("Separator", [
-          ItemComponent("Horizontal", [
-            View({ class: "w-full" }, [Separator({})]),
-          ]),
-          ItemComponent("Vertical", [
+        Section("Separator", [
+          Item("Horizontal", [View({ class: "w-full" }, [Separator({})])]),
+          Item("Vertical", [
             View(
               {
                 style: {

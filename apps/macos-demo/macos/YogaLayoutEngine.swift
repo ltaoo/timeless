@@ -40,6 +40,17 @@ enum YogaLayoutEngine {
             }
         }
 
+        // AspectRatio children default to flex-grow:1 so they fill the container
+        if case .aspectRatio = node {
+            for i in 0..<children.count {
+                if let child = YGNodeGetChild(yogaNode, i) {
+                    if YGNodeStyleGetFlexGrow(child) == 0 {
+                        YGNodeStyleSetFlexGrow(child, 1)
+                    }
+                }
+            }
+        }
+
         return yogaNode
     }
 
@@ -68,16 +79,16 @@ enum YogaLayoutEngine {
 
     private static func applyNodeStyles(_ yogaNode: YGNodeRef, node: NativeNode) {
         switch node {
-        case .view(let style, _):
+        case .view(let style, _, _):
             YGNodeStyleSetFlexDirection(yogaNode, .column)
             applyStyleDict(yogaNode, style: style)
             applyGridMapping(yogaNode, style: style)
 
-        case .row(let style, _):
+        case .row(let style, _, _):
             YGNodeStyleSetFlexDirection(yogaNode, .row)
             applyStyleDict(yogaNode, style: style)
 
-        case .column(let style, _):
+        case .column(let style, _, _):
             YGNodeStyleSetFlexDirection(yogaNode, .column)
             applyStyleDict(yogaNode, style: style)
 
@@ -89,7 +100,7 @@ enum YogaLayoutEngine {
             YGNodeSetMeasureFunc(yogaNode, textMeasure)
             applyStyleDict(yogaNode, style: style)
 
-        case .img(_, let style):
+        case .img(_, let style, _):
             applyStyleDict(yogaNode, style: style)
 
         case .button(let style, _, _):
@@ -123,12 +134,12 @@ enum YogaLayoutEngine {
             YGNodeStyleSetHeight(yogaNode, 26)
             applyStyleDict(yogaNode, style: style)
 
-        case .icon(_, _, let size, let style):
+        case .icon(_, _, let size, let style, _):
             YGNodeStyleSetWidth(yogaNode, Float(size))
             YGNodeStyleSetHeight(yogaNode, Float(size))
             applyStyleDict(yogaNode, style: style)
 
-        case .aspectRatio(let ratio, let style, _):
+        case .aspectRatio(let ratio, let style, _, _):
             YGNodeStyleSetAspectRatio(yogaNode, Float(ratio))
             applyStyleDict(yogaNode, style: style)
         }
@@ -413,8 +424,8 @@ enum YogaLayoutEngine {
 
     private static func nodeChildren(_ node: NativeNode) -> [NativeNode] {
         switch node {
-        case .view(_, let c), .row(_, let c), .column(_, let c),
-             .button(_, let c, _), .aspectRatio(_, _, let c):
+        case .view(_, let c, _), .row(_, let c, _), .column(_, let c, _),
+             .button(_, let c, _), .aspectRatio(_, _, let c, _):
             return c
         default:
             return []

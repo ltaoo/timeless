@@ -4,9 +4,11 @@ export interface NativeTextElm {
   type: "text";
   value: string;
   style: Record<string, string>;
+  parentNode?: any;
   /** Called by the native bridge when it creates the platform label,
    *  so that future setContent() calls can push updates. */
   _onContentChange?: (value: string) => void;
+  _onStyleChange?: (style: Record<string, string>) => void;
 }
 
 export type NativeText = {
@@ -50,6 +52,9 @@ export function NativeText(): NativeText {
     },
     setStyle(style: Record<string, string>) {
       Object.assign($text.style, style);
+      if (typeof $text._onStyleChange === "function") {
+        $text._onStyleChange($text.style);
+      }
     },
     render(elm: TimelessElement) {
       $text.value = (() => {

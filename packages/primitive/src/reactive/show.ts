@@ -13,8 +13,8 @@ export type ShowProps = {
     | DerivedRef<boolean | undefined | null>
     | Ref<boolean | undefined | null>
     | boolean;
-  ok: () => ViewChildren;
-  else?: () => ViewChildren;
+  ok: () => ViewChildren | undefined;
+  else?: () => ViewChildren | undefined;
   onMounted?: ($fg: any) => void;
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
@@ -35,7 +35,7 @@ export function Show(props: ShowProps) {
   const _hmr_subs: (() => void)[] = [];
 
   const methods = {
-    normalize_children(children: ViewChildren) {
+    normalize_children(children?: ViewChildren) {
       if (children === null || children === undefined) return [];
       if (Array.isArray(children)) {
         return children;
@@ -160,8 +160,9 @@ export function Show(props: ShowProps) {
       if (onUnmounted) {
         onUnmounted();
       }
-      // listener$.clean();
-      state.children = [];
+      // Don't clear state.children here — they are needed if this Show
+      // is re-mounted by a parent (e.g. Presence show/hide cycle).
+      // When Show's own condition flips false, onChange already clears children.
     },
     _hmr_dispose() {
       // Only unsubscribe — do NOT destroy the shared ref (visible_ etc.)

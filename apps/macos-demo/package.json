@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite build --watch --mode development",
+    "dev:app": "swift run TimelessMacDemo -- --dev",
     "build": "vite build",
     "build:app": "vite build && ./scripts/build-macos.sh"
   },
@@ -13,6 +14,7 @@
     "@timeless/timeless-native": "workspace:^"
   },
   "devDependencies": {
+    "@timeless/vite-plugin": "workspace:^",
     "vite": "^8.0.0-beta.16"
   }
 }
