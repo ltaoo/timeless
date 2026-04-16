@@ -58,3 +58,44 @@ export function hmrState<T extends Record<string, any>>(
   }
   return factory();
 }
+
+/**
+ * Low-intrusion HMR state restoration.
+ *
+ * Unlike hmrState() which wraps ref declarations in a factory, hmrRestore()
+ * leaves the original code untouched and restores values with a single line
+ * that a Vite plugin can auto-inject.
+ *
+ * Usage — original code stays unchanged:
+ *
+ *   const visible_ = ref(false);
+ *   const popper_ = refobj({ x: 0, y: 0, placed: false });
+ *   hmrRestore(import.meta.hot, { visible_, popper_ });
+ *
+ * How it works:
+ *   - On the very first render: refs are created normally, hmrRestore() is a
+ *     no-op (no saved state exists).
+ *   - On HMR reload: the accept handler sets hot.data._hmr_inject to the old
+ *     element's saved state. hmrRestore() reads old ref values and copies them
+ *     into the freshly-created refs via .as(). Since this runs before any
+ *     component subscribes, the value update is silent — no flicker.
+ *   - After the component tree is built, subscribers see the correct
+ *     (preserved) values from the start.
+ */
+export function hmrRestore(
+  hot: { data: Record<string, any> } | undefined | null,
+  refs: Record<string, any>,
+): void {
+  const saved = hot?.data?._hmr_inject;
+  if (!saved) return;
+  for (const key of Object.keys(refs)) {
+    const oldRef = saved[key];
+    const newRef = refs[key];
+    if (oldRef && newRef && typeof newRef.as === "function") {
+      const oldValue = oldRef.value;
+      if (oldValue !== undefined) {
+        newRef.as(oldValue);
+      }
+    }
+  }
+}

@@ -1,20 +1,43 @@
+/**
+ * Icon - A component for rendering icons.
+ *
+ * Icon renders a named icon from an icon library.
+ * Supports reactive name, color, and size props for dynamic updates.
+ *
+ * @example
+ * ```tsx
+ * <Icon name="home" size={24} color="blue" />
+ * ```
+ */
 import { isRef } from "@timeless/reactive";
 
 import { MountedEvent } from "@/event";
 
 import { Box, BoxProps, BoxState } from "./box";
 
+/** Props for Icon component */
 type IconProps = BoxProps & {
+  /** Icon name from the icon library */
   name: string;
+  /** Icon color - defaults to "currentColor" */
   color?: string;
+  /** Icon size in pixels - defaults to 24 */
   size?: number;
 };
+
+/** Internal state for Icon */
 type IconState = {
   name: string;
   size: number;
   color: string;
 };
 
+/**
+ * Creates an Icon component.
+ *
+ * @param props - Icon props (name, color, size)
+ * @returns A TimelessElement representing an icon
+ */
 export function Icon(props: IconProps) {
   let $elm: any = null;
   const box$ = Box<IconState>(props, {

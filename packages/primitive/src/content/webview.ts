@@ -1,3 +1,19 @@
+/**
+ * Webview - A component for embedding external web content.
+ *
+ * Webview loads and displays external URLs/HTML content.
+ * It's used for:
+ * - Embedding external websites
+ * - Loading remote HTML content
+ * - Web-based content in the app
+ *
+ * Note: This is different from an iframe - it's a native webview.
+ *
+ * @example
+ * ```tsx
+ * <Webview href="https://example.com" />
+ * ```
+ */
 import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
 import { MountedEvent } from "@/event/index";
@@ -6,16 +22,26 @@ import { Logger } from "@/util/logger";
 import { TimelessElement } from "./type";
 import { Box, BoxEvents, BoxProps } from "./box";
 
+/** Props for Webview component */
 export type WebviewProps = BoxProps & {
+  /** URL to load */
   href: string | DerivedRef<string> | Ref<string>;
 } & BoxEvents;
 
+/** Internal state for Webview */
 type WebviewState = {
   href: string;
 };
 
+/** Logger for debugging webview operations */
 const logger = Logger({ prefix: "primitive", scope: "content/webview" });
 
+/**
+ * Creates a Webview component.
+ *
+ * @param props - Webview props including href
+ * @returns A TimelessElement representing a webview
+ */
 export function Webview(props: WebviewProps): TimelessElement<WebviewState> {
   const { href, ...rest } = props;
 

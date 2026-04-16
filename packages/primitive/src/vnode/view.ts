@@ -65,6 +65,12 @@ export type VNodeView<HostElm = any> = {
   removeChildren(): void;
   setupEventListener(events: any): void;
   teardownEventListener(events: any): void;
+  /** Sync internal tracking after HMR patch inserts a child */
+  trackChild(dom: any, element: TimelessElement, vnode: VNodeView<any>, index: number): void;
+  /** Sync internal tracking after HMR patch removes a child */
+  untrackChild(index: number): void;
+  /** Replace internal tracking entry in-place (no array length change) */
+  replaceTrackedChild?(index: number, dom: any, element: TimelessElement, vnode: VNodeView<any>): void;
   // getParent(): VNodeView<any>;
   getParent(): any;
   get$elm(): HostElm;

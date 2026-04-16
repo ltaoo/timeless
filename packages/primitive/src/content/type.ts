@@ -1,3 +1,14 @@
+/**
+ * Type definitions for Timeless content components.
+ *
+ * This module exports:
+ * - TimelessElement: Core component interface
+ * - TimelessComponent: Component factory type
+ * - ViewChildren: Array of possible child types
+ * - Helper functions: isElement type guard
+ *
+ * These types form the foundation of the Timeless component system.
+ */
 import { DerivedRef, Ref } from "@timeless/reactive";
 
 import { VNodeView } from "@/vnode/view";
@@ -5,12 +16,41 @@ import { MountedEvent } from "@/event";
 
 import { TimelessLazyComponent } from "./lazy-view";
 
+/** Possible prop values */
 export type ViewPropValue = string | number | boolean | undefined | null;
+
+/** HTML attributes record */
 export type ViewAttributes = Record<string, any>;
 
+/** Standard synchronous component function */
 export type TimelessNormalComponent = (...args: unknown[]) => TimelessElement;
+
+/** Component - can be sync or lazy (async import) */
 export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 
+/**
+ * TimelessElement - Core interface for all Timeless components.
+ *
+ * Every component returns this structure containing:
+ * - t: Type identifier (e.g., "view", "text", "box")
+ * - $elm: Reference to the actual DOM/VM element
+ * - state: Component-specific state
+ * - children: Child elements
+ * - onMounted: Lifecycle called when mounted
+ * - onUnmounted: Lifecycle called when unmounted
+ *
+ * @example
+ * ```typescript
+ * interface TimelessElement<T = any, Elm = any> {
+ *   t: string;
+ *   $elm: VNodeView<Elm>;
+ *   state: T;
+ *   children?: TimelessElement[];
+ *   onMounted(event: MountedEvent): void;
+ *   onUnmounted(): void;
+ * }
+ * ```
+ */
 export interface TimelessElement<T = any, Elm = any> {
   t: string;
   $elm: VNodeView<Elm>;

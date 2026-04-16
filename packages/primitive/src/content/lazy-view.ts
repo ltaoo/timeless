@@ -1,3 +1,22 @@
+/**
+ * LazyView - A component for lazy-loading other components.
+ *
+ * LazyView enables code-splitting by accepting a component factory
+ * that returns a Promise. The actual component is only loaded when
+ * needed (when mounted).
+ *
+ * Supports:
+ * - Dynamic imports for code splitting
+ * - Error boundaries with custom fallback views
+ * - HMR (Hot Module Replacement) for development
+ *
+ * @example
+ * ```tsx
+ * const HeavyComponent = () => import('./HeavyComponent');
+ *
+ * <LazyView view={HeavyComponent} />
+ * ```
+ */
 import { MountedEvent } from "@/event";
 
 import { ViewProps } from "./view";
@@ -8,6 +27,7 @@ import {
   TimelessComponent,
 } from "./type";
 
+/** Default error view shown when lazy loading fails */
 function defaultErrorView(error: Error, viewName: string): TimelessElement {
   return {
     t: "error-view",
@@ -17,21 +37,34 @@ function defaultErrorView(error: Error, viewName: string): TimelessElement {
       viewName,
     },
     children: [],
+    onMounted() {},
+    onUnmounted() {},
   };
 }
 
+/** Type guard for Promise objects */
 function isPromise<T>(v: any): v is Promise<T> {
   return v instanceof Promise || typeof v.then === "function";
 }
 
+/** Props for LazyView component */
 type LazyViewProps = ViewProps & { placeholder?: ViewChildren } & Record<
     string,
     any
   >;
+
+/** Internal state for LazyView */
 type LazyViewState = {
   children: TimelessElement[];
 };
 
+/**
+ * Creates a LazyView component that loads content dynamically.
+ *
+ * @param props - View props including the component factory
+ * @param children - Component factory (can be async/ES module)
+ * @returns A TimelessElement with lazy-loaded content
+ */
 export function LazyView(
   props: LazyViewProps,
   children: TimelessComponent,

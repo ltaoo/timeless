@@ -47,5 +47,8 @@
       "import": "./dist/style/index.esm.js",
       "require": "./dist/style/index.js"
     }
+  },
+  "devDependencies": {
+    "typedoc": "^0.28.19"
   }
 }

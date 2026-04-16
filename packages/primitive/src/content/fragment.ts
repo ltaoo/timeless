@@ -1,18 +1,51 @@
+/**
+ * Fragment - A component that groups children without rendering a DOM wrapper.
+ *
+ * Fragment allows grouping multiple children without adding extra DOM nodes.
+ * Unlike View/Box, Fragment doesn't render an actual element -
+ * it just manages its children and their lifecycles.
+ *
+ * Use case: When you need to return multiple elements from a component
+ * but don't want a wrapper div in the DOM.
+ *
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   return (
+ *     <Fragment>
+ *       <Text>Item 1</Text>
+ *       <Text>Item 2</Text>
+ *     </Fragment>
+ *   )
+ * }
+ * ```
+ */
 import { MountedEvent } from "@/event";
 import { VNodeView } from "@/vnode/view";
 
 import { TimelessElement, ViewChildren, isElement } from "./type";
 import { Box } from "./box";
 
+/** Props for Fragment component */
 export type FragmentProps = {
   onMounted?: (event: MountedEvent<VNodeView<any>>) => void;
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
 };
+
+/** Internal state for Fragment */
 type FragmentState = {
   rendered: boolean;
   children: TimelessElement[];
 };
+
+/**
+ * Creates a Fragment - groups children without a wrapper element.
+ *
+ * @param props - Fragment lifecycle props
+ * @param children - Children to group
+ * @returns A TimelessElement representing a fragment
+ */
 export function Fragment(props: FragmentProps, children?: ViewChildren) {
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
 

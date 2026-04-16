@@ -30,6 +30,9 @@ export function Show(props: ShowProps) {
     children: [],
   };
   const listener$ = ListenerManager([when]);
+  // Track subscription unsubscribers separately for HMR —
+  // _hmr_dispose must only unsubscribe, NOT destroy the shared ref.
+  const _hmr_subs: (() => void)[] = [];
 
   const methods = {
     normalize_children(children: ViewChildren) {
@@ -105,6 +108,7 @@ export function Show(props: ShowProps) {
           },
         });
         listener$.add(unsubscribe);
+        _hmr_subs.push(unsubscribe);
       } else {
         state.value = !!when;
       }
@@ -160,7 +164,9 @@ export function Show(props: ShowProps) {
       state.children = [];
     },
     _hmr_dispose() {
-      listener$.clean();
+      // Only unsubscribe — do NOT destroy the shared ref (visible_ etc.)
+      _hmr_subs.forEach((fn) => fn());
+      _hmr_subs.length = 0;
     },
   };
 }

@@ -74,6 +74,11 @@ export function Indicator(
     t: "view",
     $elm: indicator$.$elm,
     state: {},
+    onMounted(event) {
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+    },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
@@ -147,6 +152,11 @@ export function Progress(
     //   }
     //   return $elm;
     // },
+    onMounted(event) {
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+    },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();

@@ -1,9 +1,29 @@
+/**
+ * SVG - Factory for creating SVG element components.
+ *
+ * This module provides constructors for all SVG elements:
+ * - Container elements: SVG, G, Defs, Symbol, Use
+ * - Shapes: Circle, Rect, Line, Polyline, Polygon, Ellipse, Path
+ * - Gradients: LinearGradient, RadialGradient
+ * - Filters: Stop, Mask, ClipPath
+ * - Text: Text
+ *
+ * Each returns a TimelessElement representing that SVG type.
+ *
+ * @example
+ * ```tsx
+ * <SVG viewBox="0 0 100 100">
+ *   <Circle cx={50} cy={50} r={40} fill="blue" />
+ * </SVG>
+ * ```
+ */
 import { DerivedRef, Ref } from "@timeless/reactive";
 
 import { isElement } from "@/content/type";
 import { ViewStyle, ClassNameRef } from "@/style/index";
 import { MountedEvent } from "@/event/index";
 
+/** Type for attribute values - supports static or reactive values */
 type AttrValue =
   | string
   | number

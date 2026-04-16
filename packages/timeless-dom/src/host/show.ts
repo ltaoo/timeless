@@ -35,6 +35,8 @@ export function DOMShow(props: {
     removeEventListener: common$.methods.removeEventListener,
     setupEventListener() {},
     teardownEventListener() {},
+    trackChild: common$.methods.trackChild,
+    untrackChild: common$.methods.untrackChild,
     getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
       const $fragment = common$.methods.render(elm.children);

@@ -65,6 +65,8 @@ export function For<T>(
   let _id = 0;
   const _existing_map = new Map();
   const listener$ = ListenerManager();
+  // Track subscription unsubscribers separately for HMR
+  const _hmr_subs: (() => void)[] = [];
 
   const methods = {
     unique_id() {
@@ -72,6 +74,9 @@ export function For<T>(
     },
     init_state() {
       const vv = props.each;
+      if (!vv) {
+        return;
+      }
       const items = isRef(vv) ? (vv.value as T[]) : (vv as T[]);
       state.wrapped_items = items.map((item) => ({
         k: methods.unique_id(),
@@ -79,61 +84,58 @@ export function For<T>(
       }));
       state.items = [...items];
     },
-    subscribe_value() {
+    subscribe_props() {
       if (state.subscribed) {
         return;
       }
       state.subscribed = true;
       const vv = props.each;
       if (isRef(vv)) {
-        listener$.add(
-          vv.subscribe({
-            onPatch(action) {
-              if (!state.rendered) {
-                return;
-              }
-              console.log(
-                "[primitive]For - ctx.onPatch - handle patch",
-                action,
-                vv.value,
-              );
-              if (action.type === "insert" && action.items !== undefined) {
-                methods.insert(action.index, action.items as T[]);
-                return;
-              }
-              if (
-                action.type === "delete" &&
-                action.deleteCount !== undefined
-              ) {
-                methods.remove(action.index, action.deleteCount);
-                return;
-              }
-              if (
-                action.type === "move" &&
-                action.from !== undefined &&
-                action.to !== undefined
-              ) {
-                methods.move(action.from, action.to);
-                return;
-              }
-              if (
-                action.type === "swap" &&
-                action.from !== undefined &&
-                action.to !== undefined
-              ) {
-                methods.swap(action.from, action.to);
-                return;
-              }
-            },
-            onChange(v) {
-              console.log("[primitive]For - ctx.onChange", v, state.rendered);
-              // if (!state.rendered) {
-              //   return;
-              // }
-              methods.refresh(v);
-            },
-          }),
-        );
+        const unsub = vv.subscribe({
+          onPatch(action) {
+            if (!state.rendered) {
+              return;
+            }
+            console.log(
+              "[primitive]For - ctx.onPatch - handle patch",
+              action,
+              vv.value,
+            );
+            if (action.type === "insert" && action.items !== undefined) {
+              methods.insert(action.index, action.items as T[]);
+              return;
+            }
+            if (action.type === "delete" && action.deleteCount !== undefined) {
+              methods.remove(action.index, action.deleteCount);
+              return;
+            }
+            if (
+              action.type === "move" &&
+              action.from !== undefined &&
+              action.to !== undefined
+            ) {
+              methods.move(action.from, action.to);
+              return;
+            }
+            if (
+              action.type === "swap" &&
+              action.from !== undefined &&
+              action.to !== undefined
+            ) {
+              methods.swap(action.from, action.to);
+              return;
+            }
+          },
+          onChange(v) {
+            console.log("[primitive]For - ctx.onChange", v, state.rendered);
+            // if (!state.rendered) {
+            //   return;
+            // }
+            methods.refresh(v);
+          },
+        });
+        listener$.add(unsub);
+        _hmr_subs.push(unsub);
       }
     },
     // Helper to create a computed index that depends on `each`
@@ -474,7 +476,7 @@ export function For<T>(
   };
 
   methods.init_state();
-  methods.subscribe_value();
+  methods.subscribe_props();
   methods.build_children();
 
   return {
@@ -493,7 +495,7 @@ export function For<T>(
     },
     onMounted(event: MountedEvent) {
       logger.log("onMounted", state.children);
-      methods.subscribe_value();
+      methods.subscribe_props();
       state.rendered = true;
       if (props.onMounted) {
         listener$.add(props.onMounted(event));
@@ -525,7 +527,8 @@ export function For<T>(
       // state.children = [];
     },
     _hmr_dispose() {
-      listener$.clean();
+      _hmr_subs.forEach((fn) => fn());
+      _hmr_subs.length = 0;
     },
   };
 }

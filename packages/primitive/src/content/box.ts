@@ -1,3 +1,25 @@
+/**
+ * Box - The base component for all box-like elements in Timeless.
+ *
+ * Box is the foundational component that provides:
+ * - Style support (inline styles, class names)
+ * - Event handling (click, mouse, keyboard, drag events)
+ * - Attribute and dataset management
+ * - Child element rendering
+ *
+ * Most UI components (View, Text, etc.) are built on top of Box.
+ *
+ * @example
+ * ```tsx
+ * <Box
+ *   style={{ padding: 12 }}
+ *   class="container"
+ *   onClick={() => console.log('clicked')}
+ * >
+ *   <Text>Hello</Text>
+ * </Box>
+ * ```
+ */
 import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import {
@@ -18,13 +40,21 @@ import {
 } from "./type";
 import { Text } from "./text";
 
+/** Props for Box component - common to all box-like elements */
 export type BoxProps = {
+  /** Unique key for list rendering */
   key?: string | number;
+  /** HTML tag to render as */
   as?: string;
+  /** Inline styles */
   style?: ViewStyle;
+  /** CSS class names */
   class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
+  /** Whether element is draggable */
   draggable?: boolean;
+  /** HTML attributes */
   attributes?: ViewAttributes;
+  /** Data attributes (data-*) */
   dataset?: Record<
     string,
     | undefined
@@ -34,6 +64,8 @@ export type BoxProps = {
     | Ref<string | number | boolean | undefined>
   >;
 } & BoxEvents;
+
+/** Event handlers supported by Box */
 export type BoxEvents = Partial<{
   onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
   beforeUnmounted?: () => void;
@@ -61,6 +93,8 @@ export type BoxEvents = Partial<{
   onDrop?: (e: DragEvent) => void;
   onAnimationEnd?: (e: AnimationEvent) => void;
 }>;
+
+/** Internal state structure for Box */
 export type BoxState = {
   rendered: boolean;
   style: RawViewStyleProperties;
@@ -70,6 +104,13 @@ export type BoxState = {
   children: (TimelessElement | null)[];
 };
 
+/**
+ * Creates a Box component - the base for all box-like elements.
+ *
+ * @param props - Component props including style, class, events, etc.
+ * @param extra_state - Additional state to merge into internal state
+ * @returns Object with state, events, and methods for the component
+ */
 export function Box<T>(props: BoxProps, extra_state: T) {
   let $elm: any = null;
   const listener$ = ListenerManager();

@@ -1,3 +1,26 @@
+/**
+ * Popper - A positioned floating element component.
+ *
+ * Popper renders content at a specific screen position (x, y).
+ * It's commonly used for:
+ * - Tooltips
+ * - Dropdown menus
+ * - Floating action buttons
+ * - Modal dialogs
+ *
+ * Supports reactive x, y, and placed props for dynamic positioning.
+ *
+ * @example
+ * ```tsx
+ * <Popper
+ *   x={popperX}
+ *   y={popperY}
+ *   placed={isOpen}
+ * >
+ *   <Box>Popover Content</Box>
+ * </Popper>
+ * ```
+ */
 import { DerivedRef, isRef, Ref, refobj } from "@timeless/reactive";
 
 import { styleNames } from "@/style";
@@ -7,12 +30,18 @@ import { Text } from "./text";
 import { View, ViewProps } from "./view";
 import { isElement, TimelessElement, ViewChildren } from "./type";
 
+/** Props for Popper component */
 type PopperProps = ViewProps & {
+  /** X position in pixels */
   x: number | DerivedRef<number> | Ref<number>;
+  /** Y position in pixels */
   y: number | DerivedRef<number> | Ref<number>;
+  /** Whether the popper is visible */
   placed: boolean | DerivedRef<boolean> | Ref<boolean>;
   onMounted?: (event: MountedEvent) => void;
 };
+
+/** Internal state for Popper */
 type PopperState = {
   children: TimelessElement[];
   width: number;
@@ -27,6 +56,13 @@ type PopperState = {
   };
 };
 
+/**
+ * Creates a Popper component at a specific position.
+ *
+ * @param props - Position and placement props
+ * @param children - Content to render
+ * @returns A TimelessElement representing a positioned element
+ */
 export function Popper(props: PopperProps, children?: ViewChildren) {
   let $elm: any = null;
   const state: PopperState = {

@@ -1,3 +1,15 @@
+/**
+ * Label - A component for rendering HTML label elements.
+ *
+ * Label associates itself with a form input via the "for" attribute.
+ * Supports reactive htmlFor for dynamic input associations.
+ *
+ * @example
+ * ```tsx
+ * <Label for="username">Username</Label>
+ * <Input id="username" />
+ * ```
+ */
 import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
@@ -12,15 +24,25 @@ import { MountedEvent } from "@/event";
 import { Text } from "./text";
 import { Box, BoxProps } from "./box";
 
+/** Props for Label component */
 export type LabelProps = BoxProps & {
+  /** ID of the associated input element */
   for?: string | DerivedRef<string> | Ref<string>;
 };
 
+/** Internal state for Label */
 export interface LabelState {
   for?: string;
   children: TimelessElement[];
 }
 
+/**
+ * Creates a Label component.
+ *
+ * @param props - Label props including optional htmlFor
+ * @param children - Label text/content
+ * @returns A TimelessElement representing a label
+ */
 export function Label(props: LabelProps = {}, children?: ViewChildren) {
   const { for: htmlFor, ...rest } = props;
 

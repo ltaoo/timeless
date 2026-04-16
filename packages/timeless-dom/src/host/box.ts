@@ -583,6 +583,27 @@ export function HostElement(props: {
       }
       return $elm.parentElement;
     },
+    trackChild(dom: any, element: TimelessElement, vnode: VNodeView<any>, index: number) {
+      child_host_nodes.splice(index, 0, dom);
+      child_elements.splice(index, 0, element);
+      child_nodes.splice(index, 0, vnode);
+    },
+    untrackChild(index: number) {
+      child_host_nodes.splice(index, 1);
+      child_elements.splice(index, 1);
+      child_nodes.splice(index, 1);
+    },
+    replaceTrackedChild(index: number, dom: any, element: TimelessElement, vnode: VNodeView<any>) {
+      if (index < child_host_nodes.length) {
+        child_host_nodes[index] = dom;
+        child_elements[index] = element;
+        child_nodes[index] = vnode;
+      } else {
+        child_host_nodes.splice(index, 0, dom);
+        child_elements.splice(index, 0, element);
+        child_nodes.splice(index, 0, vnode);
+      }
+    },
   };
   return {
     methods,

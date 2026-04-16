@@ -1,7 +1,30 @@
+/**
+ * Text - A component for rendering text content.
+ *
+ * Text wraps string/number values and provides:
+ * - Reactive value support (auto-updates when value changes)
+ * - DOM text node management
+ * - Lifecycle cleanup
+ *
+ * This is the basic text node component used throughout Timeless.
+ *
+ * @example
+ * ```tsx
+ * <Text>Hello World</Text>
+ * // or with reactive value
+ * <Text>{messageRef}</Text>
+ * ```
+ */
 import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { TimelessElement } from "./type";
 
+/**
+ * Creates a Text component.
+ *
+ * @param value - The text value (string, number, or reactive ref)
+ * @returns A TimelessElement representing a text node
+ */
 export function Text(
   value: DerivedRef<string | number> | Ref<string | number> | string | number,
 ): TimelessElement {

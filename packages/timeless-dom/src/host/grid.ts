@@ -33,6 +33,8 @@ export function DOMGrid(props: {
     removeEventListener: view$.removeEventListener,
     setupEventListener() {},
     teardownEventListener() {},
+    trackChild() {},
+    untrackChild() {},
     getBoundingClientRect: view$.getBoundingClientRect,
     render(elm: TimelessElement) {
       const $elm = view$.render(elm);

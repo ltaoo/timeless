@@ -245,22 +245,51 @@ export function patch(
       case "replace": {
         const old$elm = action.old_element.$elm;
         if (!old$elm) break;
+
+        // Anchor-based elements (fragment, show, for): children are siblings
+        // in the parent DOM. Must remove them before replacing the anchor.
+        const oldIsAnchorBased =
+          action.old_element.t === "fragment" ||
+          action.old_element.t === "show" ||
+          action.old_element.t === "for";
+        if (oldIsAnchorBased) {
+          old$elm.removeChildren?.();
+        }
+
         const oldDom = old$elm.get$elm?.();
         if (!oldDom || !oldDom.parentNode) break;
 
+        let newVNode: any;
         // Portal self-manages DOM (document.body.appendChild).
         if (action.new_element.t === "portal") {
-          options.buildAndRender(action.new_element);
+          const r = options.buildAndRender(action.new_element);
+          newVNode = r.vnode;
           oldDom.parentNode.removeChild(oldDom);
         } else {
-          const { dom: newDom } = options.buildAndRender(action.new_element);
-          if (!newDom) break;
-          oldDom.parentNode.replaceChild(newDom, oldDom);
+          const r = options.buildAndRender(action.new_element);
+          newVNode = r.vnode;
+          if (!r.dom) break;
+          oldDom.parentNode.replaceChild(r.dom, oldDom);
         }
 
-        // Sync parent's children array
-        if (action.parent?.children && action.index >= 0) {
-          action.parent.children[action.index] = action.new_element;
+        // Sync parent's children array and internal tracking
+        if (action.parent && action.index >= 0) {
+          if (action.parent.children) {
+            action.parent.children[action.index] = action.new_element;
+          }
+          const parent$elm = action.parent.$elm;
+          if (parent$elm) {
+            const newDom = action.new_element.$elm?.get$elm?.();
+            if (newDom && newVNode) {
+              // In-place replacement avoids index shifting from untrack+track
+              if (parent$elm.replaceTrackedChild) {
+                parent$elm.replaceTrackedChild(action.index, newDom, action.new_element, newVNode);
+              } else {
+                parent$elm.untrackChild?.(action.index);
+                parent$elm.trackChild?.(newDom, action.new_element, newVNode, action.index);
+              }
+            }
+          }
         }
         break;
       }
@@ -268,7 +297,12 @@ export function patch(
       case "insert_child": {
         // Portal self-manages DOM placement (document.body.appendChild).
         if (action.element.t === "portal") {
-          options.buildAndRender(action.element);
+          const { vnode } = options.buildAndRender(action.element);
+          // Track in parent so removeChildren() can clean up later
+          const portalDom = action.element.$elm?.get$elm?.();
+          if (portalDom) {
+            action.parent.$elm?.trackChild?.(portalDom, action.element, vnode, action.index);
+          }
           break;
         }
 
@@ -277,7 +311,7 @@ export function patch(
         const parentDom = parent$elm.get$elm?.();
         if (!parentDom) break;
 
-        const { dom: childDom } = options.buildAndRender(action.element);
+        const { vnode: childVNode, dom: childDom } = options.buildAndRender(action.element);
         if (!childDom) break;
 
         // Anchor-based elements (fragment, show, for): insert before anchor
@@ -293,15 +327,48 @@ export function patch(
           const refNode = parentDom.childNodes[action.index] || null;
           parentDom.insertBefore(childDom, refNode);
         }
+
+        // For anchor-based children (fragment, show, for), the rendered DOM is
+        // a DocumentFragment (empty after insertion). Track the anchor node
+        // instead so the parent can locate/remove this child later.
+        const childIsAnchorBased =
+          action.element.t === "fragment" ||
+          action.element.t === "show" ||
+          action.element.t === "for";
+        const trackDom = childIsAnchorBased
+          ? action.element.$elm?.get$elm?.() || childDom
+          : childDom;
+
+        // Sync parent's internal tracking so removeChildren() works later
+        parent$elm.trackChild?.(trackDom, action.element, childVNode, action.index);
         break;
       }
 
       case "remove_child": {
         const child$elm = action.element.$elm;
         if (!child$elm) break;
+
+        // Anchor-based elements (fragment, show, for): children are siblings
+        // in the parent DOM, not contained in a single node. Must remove all
+        // tracked children first, then remove the anchor itself.
+        const isAnchorBased =
+          action.element.t === "fragment" ||
+          action.element.t === "show" ||
+          action.element.t === "for";
+        if (isAnchorBased) {
+          child$elm.removeChildren?.();
+        }
+
         const childRaw = child$elm.get$elm?.();
-        if (!childRaw?.parentNode) break;
-        childRaw.parentNode.removeChild(childRaw);
+        if (childRaw?.parentNode) {
+          childRaw.parentNode.removeChild(childRaw);
+        }
+
+        // Sync parent's internal tracking
+        const parent$elm = action.parent.$elm;
+        if (parent$elm) {
+          parent$elm.untrackChild?.(action.index);
+        }
         break;
       }
     }

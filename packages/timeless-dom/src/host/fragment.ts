@@ -28,6 +28,7 @@ export function DOMFragment(props: {
     },
     render(elm: TimelessElement) {
       $anchor = document.createTextNode("");
+      common$.methods.set$elm($anchor);
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);
       return $fragment;

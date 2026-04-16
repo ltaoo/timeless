@@ -1,3 +1,27 @@
+/**
+ * View - The primary generic container component in Timeless.
+ *
+ * View is the main building block for UI, similar to a div in HTML.
+ * It's more generic than Box and provides:
+ * - Full attribute/style/class management
+ * - Complete event handling
+ * - Child rendering
+ * - Reactive prop support
+ *
+ * Most components are built on View or compose it.
+ *
+ * @example
+ * ```tsx
+ * <View
+ *   id="container"
+ *   style={{ padding: 16 }}
+ *   class="card"
+ *   onClick={handleClick}
+ * >
+ *   <Text>Content</Text>
+ * </View>
+ * ```
+ */
 import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
 import { VNodeView } from "@/vnode/view";
@@ -19,14 +43,23 @@ import {
   ViewChildren,
 } from "./type";
 
+/** Props for View component */
 export type ViewProps = {
+  /** Element ID */
   id?: string;
+  /** Unique key for list rendering */
   key?: string | number;
+  /** HTML tag to render as */
   as?: string;
+  /** Inline styles */
   style?: ViewStyle;
+  /** CSS class names */
   class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
+  /** Whether element is draggable */
   draggable?: boolean;
+  /** HTML attributes */
   attributes?: ViewAttributes;
+  /** Data attributes (data-*) */
   dataset?: Record<
     string,
     | undefined
@@ -36,6 +69,8 @@ export type ViewProps = {
     | Ref<string | number | boolean | undefined>
   >;
 } & ViewEvents;
+
+/** Event handlers supported by View */
 type ViewEvents = Partial<{
   onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
   beforeUnmounted?: () => void;
@@ -63,6 +98,8 @@ type ViewEvents = Partial<{
   onDrop?: (e: DragEvent) => void;
   onAnimationEnd?: (e: AnimationEvent) => void;
 }>;
+
+/** Internal state for View */
 type ViewState = {
   rendered: boolean;
   style: RawViewStyleProperties;
@@ -71,9 +108,20 @@ type ViewState = {
   children: (TimelessElement | null)[];
 };
 
+/** Logger for debugging view operations */
 const logger = Logger({ prefix: "primitive", scope: "content/view" });
 
-export function View(props: ViewProps = {}, children?: ViewChildren): TimelessElement<ViewState> {
+/**
+ * Creates a View component - the primary container.
+ *
+ * @param props - View props (style, class, events, etc.)
+ * @param children - Child elements
+ * @returns A TimelessElement representing a view/container
+ */
+export function View(
+  props: ViewProps = {},
+  children?: ViewChildren,
+): TimelessElement<ViewState> {
   const {
     style,
     class: cls,

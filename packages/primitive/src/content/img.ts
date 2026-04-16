@@ -1,3 +1,22 @@
+/**
+ * Img - A component for rendering image elements.
+ *
+ * Native image component with support for:
+ * - Reactive src/alt for dynamic image changes
+ * - Loading states (lazy/eager)
+ * - srcset for responsive images
+ * - All standard img attributes
+ *
+ * @example
+ * ```tsx
+ * <Img
+ *   src={imageUrl}
+ *   alt="Description"
+ *   loading="lazy"
+ *   onLoad={() => console.log('loaded')}
+ * />
+ * ```
+ */
 import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { ViewProps } from "@/content/view";
@@ -7,26 +26,42 @@ import { ListenerManager } from "@/util/listener";
 import { VNodeView } from "@/vnode/view";
 import { BoxProps } from "./box";
 
+/** Props for Img component */
 export type ImgProps = BoxProps & {
+  /** Image source URL */
   src?: string | DerivedRef<string> | Ref<string>;
+  /** Alternative text for accessibility */
   alt?: string | DerivedRef<string> | Ref<string>;
+  /** Image width */
   width?: number | string | DerivedRef<number | string> | Ref<number | string>;
+  /** Image height */
   height?: number | string | DerivedRef<number | string> | Ref<number | string>;
+  /** Loading strategy: "lazy" or "eager" */
   loading?: "lazy" | "eager" | DerivedRef<string> | Ref<string>;
+  /** Decoding strategy */
   decoding?: "async" | "sync" | "auto" | DerivedRef<string> | Ref<string>;
+  /** Cross-origin attribute */
   crossOrigin?:
     | "anonymous"
     | "use-credentials"
     | ""
     | DerivedRef<string>
     | Ref<string>;
+  /** Source set for responsive images */
   srcset?: string | Ref<string>;
+  /** Sizes descriptor */
   sizes?: string | Ref<string>;
+  /** Referrer policy */
   referrerPolicy?: ReferrerPolicy | Ref<string>;
+  /** Fetch priority */
   fetchPriority?: "high" | "low" | "auto" | DerivedRef<string> | Ref<string>;
+  /** USEMap attribute */
   useMap?: string | DerivedRef<string> | Ref<string>;
+  /** IsMap attribute */
   isMap?: boolean;
+  /** Load event handler */
   onLoad?(e: Event): void;
+  /** Error event handler */
   onError?(e: Event): void;
   onMounted?(
     event: MountedEvent<VNodeView<HTMLImageElement>>,
@@ -34,6 +69,8 @@ export type ImgProps = BoxProps & {
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
 };
+
+/** Internal state for Img */
 type ImgState = {
   rendered: boolean;
   src: string | null;
@@ -41,6 +78,12 @@ type ImgState = {
   styleSet: string[];
 };
 
+/**
+ * Creates an Img component.
+ *
+ * @param props - Image component props
+ * @returns A TimelessElement representing an image
+ */
 export function Img(props: ImgProps) {
   // const host = getHost();
   const {

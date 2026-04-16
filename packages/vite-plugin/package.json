@@ -1,0 +1,25 @@
+{
+  "name": "@timeless/vite-plugin",
+  "version": "0.19.0",
+  "description": "Timeless HMR plugin for Vite",
+  "main": "dist/index.js",
+  "module": "dist/timeless.vite-plugin.esm.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "vite build"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/timeless.vite-plugin.esm.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "vite": ">=5.0.0"
+  }
+}

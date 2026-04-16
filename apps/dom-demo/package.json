@@ -13,6 +13,7 @@
     "@timeless/timeless-dom": "workspace:^"
   },
   "devDependencies": {
+    "@timeless/vite-plugin": "workspace:^",
     "vite": "^8.0.0-beta.16"
   }
 }

@@ -1,0 +1,19 @@
+{
+  "entryPoints": [
+    "packages/primitive/src/index.ts",
+    "packages/base/src/index.ts",
+    "packages/reactive/src/index.ts",
+    "packages/kit/src/index.ts",
+    "packages/vanillakit/src/index.ts",
+    "packages/timeless/src/index.ts",
+    "packages/ui-primitive/src/index.ts"
+  ],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "name": "@timeless",
+  "readme": "README.md",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "skipErrorChecking": true,
+  "theme": "default"
+}

@@ -1,3 +1,25 @@
+/**
+ * ListView - A scrollable list container component.
+ *
+ * ListView is designed for rendering lists of items with virtual scrolling.
+ * It supports:
+ * - Child element rendering
+ * - Reactive style/class updates
+ * - Full event handling (click, drag, keyboard)
+ * - Hydration for SSR/SSG
+ *
+ * This is the main scrollable container used in Timeless apps.
+ *
+ * @example
+ * ```tsx
+ * <ListView
+ *   style={{ height: 300 }}
+ *   onScroll={(e) => console.log('scroll', e)}
+ * >
+ *   {items.map(item => <Text>{item}</Text>)}
+ * </ListView>
+ * ```
+ */
 import { DerivedRef, Ref, Signal, isRef } from "@timeless/reactive";
 
 import {
@@ -17,6 +39,7 @@ import {
   ViewChildren,
 } from "./type";
 
+/** Props for ListView component */
 export interface ListViewProps {
   key?: string | number;
   style?: ViewStyle;

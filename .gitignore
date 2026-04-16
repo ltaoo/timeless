@@ -1,5 +1,6 @@
 node_modules
 dist
+docs
 /apps/*/public/timeless
 /apps/*/build
 /apps/*/.build

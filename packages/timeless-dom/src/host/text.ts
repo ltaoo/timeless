@@ -44,6 +44,7 @@ export function DOMText(props: {
           return "";
         })(),
       );
+      common$.methods.set$elm($text);
       return $text;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
