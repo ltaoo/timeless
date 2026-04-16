@@ -7,11 +7,12 @@ import {
   Portal,
   Popper,
   computed,
-  patch,
   ref,
   refobj,
   hmrState,
+  patch,
 } from "@timeless/timeless";
+import { render, buildAndRender } from "@timeless/timeless-dom";
 
 export default function Page(props, children) {
   // Per-instance state. On a normal render the factory runs and creates fresh
@@ -41,10 +42,11 @@ export default function Page(props, children) {
     View(
       {
         style: {
-          padding: "20px",
+          padding: "16px",
         },
       },
       [
+        props.title,
         Button(
           {
             // onMounted(event) {
@@ -65,6 +67,7 @@ export default function Page(props, children) {
             //   });
             // },
             onClick(event) {
+              console.log("handle click", visible_.value);
               // event.stopPropagation();
               visible_.as((prev) => {
                 return !prev;
@@ -78,6 +81,15 @@ export default function Page(props, children) {
         ),
       ],
     ),
+    Show({
+      when: visible_,
+      ok() {
+        return [View({}, ["Ok"])];
+      },
+      else() {
+        return [View({}, ["Else AAA"])];
+      },
+    }),
     Show({
       when: visible_,
       // onMounted() {
@@ -142,7 +154,7 @@ export default function Page(props, children) {
                     //   console.log("text1 in View mounted");
                     // },
                   },
-                  ["first content in body update1"],
+                  ["first content in body"],
                 ),
                 // View(
                 //   {
@@ -161,14 +173,17 @@ export default function Page(props, children) {
         );
       },
     }),
+    Fragment({}, children),
   ]);
 
   if (import.meta.hot) {
     if (!import.meta.hot.data.elements) {
       import.meta.hot.data.elements = [];
     }
-    // Save this instance's state on the element so HMR can inject it back
+    // Save this instance's state + props so HMR can inject them back
     element._hmr_state = { visible_, popper_ };
+    element._hmr_props = props;
+    element._hmr_children = children;
     import.meta.hot.data.elements.push(element);
   }
   console.log("register elements", import.meta.hot.data.elements);
@@ -184,14 +199,23 @@ if (import.meta.hot) {
       return;
     }
     import.meta.hot.data.elements = [];
-    elements.forEach((old_element) => {
+    elements.forEach((old_element, idx) => {
       // Inject this instance's preserved state before constructing the new
       // element so hmrState() inside Page() reuses it instead of resetting.
       import.meta.hot.data._hmr_inject = old_element._hmr_state;
-      const new_element = new_mod.default();
+      const new_element = new_mod.default(
+        old_element._hmr_props,
+        old_element._hmr_children,
+      );
       import.meta.hot.data._hmr_inject = null;
-      const ok = patch(old_element, new_element);
-      console.log("[HMR] patch result:", ok);
+
+      // Precise patching: transfer $elm from old to new, apply minimal DOM updates
+      patch(old_element, new_element, { buildAndRender });
+      // Keep new element — it has new closures (ok(), onClick, subscriptions)
+      // and the transferred $elm (preserves DOM). Old element's $elm is now null
+      // so its stale subscriptions become no-ops.
+      elements[idx] = new_element;
+      console.log("[HMR] patched element", idx);
     });
     import.meta.hot.data.elements = elements;
   });

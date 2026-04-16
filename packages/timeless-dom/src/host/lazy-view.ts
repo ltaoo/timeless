@@ -32,6 +32,8 @@ export function DOMLazyView(props: {
     removeAttribute: common$.methods.removeAttribute,
     addEventListener: common$.methods.addEventListener,
     removeEventListener: common$.methods.removeEventListener,
+    setupEventListener() {},
+    teardownEventListener() {},
     getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
       const $fragment = common$.methods.render(elm.children);

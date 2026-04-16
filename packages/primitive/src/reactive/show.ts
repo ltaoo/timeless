@@ -124,7 +124,12 @@ export function Show(props: ShowProps) {
     state: {
       value: state.value,
     },
-    children: state.children,
+    get children() {
+      return state.children;
+    },
+    set children(v) {
+      state.children = v;
+    },
     onMounted(event: MountedEvent) {
       if (onMounted) {
         listener$.add(onMounted(event));
@@ -153,6 +158,9 @@ export function Show(props: ShowProps) {
       }
       // listener$.clean();
       state.children = [];
+    },
+    _hmr_dispose() {
+      listener$.clean();
     },
   };
 }

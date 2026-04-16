@@ -26,6 +26,12 @@ import { DOMColumn } from "@/host/column";
 import { DOMLink, isDOMLink } from "@/host/link";
 import { DOMWebview } from "@/host/webview";
 
+export function buildAndRender(elm: TimelessElement): { vnode: VNodeView<any>; dom: any } {
+  const vnode = build(elm);
+  const dom = vnode.render(elm);
+  return { vnode, dom };
+}
+
 export function build(elm: TimelessElement): VNodeView<any> {
   if (elm.t === "view") {
     const view$ = DOMView({ build });

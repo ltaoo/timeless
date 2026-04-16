@@ -7,6 +7,7 @@ console.log("timeless.dom.version " + __Version);
 
 export { render };
 export { hydrate };
+export { build, buildAndRender } from "./renderer/build";
 
 // ─── Platform ────────────────────────────────────────────────────
 export const platform = setPlatform({

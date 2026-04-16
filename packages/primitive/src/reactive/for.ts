@@ -524,5 +524,8 @@ export function For<T>(
       // state.idx_arr = [];
       // state.children = [];
     },
+    _hmr_dispose() {
+      listener$.clean();
+    },
   };
 }

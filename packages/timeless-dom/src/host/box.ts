@@ -208,6 +208,68 @@ export function HostElement(props: {
         $elm.addEventListener("animationend", events.onAnimationEnd);
       }
     },
+    teardownEventListener(events: any) {
+      if (!events || !$elm || $elm instanceof Text) {
+        return;
+      }
+      if (events.onClick) {
+        $elm.removeEventListener("click", events.onClick);
+      }
+      if (events.onDoubleClick) {
+        $elm.removeEventListener("dblclick", events.onDoubleClick);
+      }
+      if (events.onMouseDown) {
+        $elm.removeEventListener("mousedown", events.onMouseDown);
+      }
+      if (events.onMouseUp) {
+        $elm.removeEventListener("mouseup", events.onMouseUp);
+      }
+      if (events.onPointerDown) {
+        $elm.removeEventListener("pointerdown", events.onPointerDown);
+      }
+      if (events.onFocus) {
+        $elm.removeEventListener("focus", events.onFocus);
+      }
+      if (events.onBlur) {
+        $elm.removeEventListener("blur", events.onBlur);
+      }
+      if (events.onKeyDown) {
+        $elm.removeEventListener("keydown", events.onKeyDown);
+      }
+      if (events.onContextMenu) {
+        $elm.removeEventListener("contextmenu", events.onContextMenu);
+      }
+      if (events.onMouseEnter) {
+        $elm.removeEventListener("mouseenter", events.onMouseEnter);
+      }
+      if (events.onMouseLeave) {
+        $elm.removeEventListener("mouseleave", events.onMouseLeave);
+      }
+      if (events.onDragStart) {
+        $elm.removeEventListener("dragstart", events.onDragStart);
+      }
+      if (events.onDrag) {
+        $elm.removeEventListener("drag", events.onDrag);
+      }
+      if (events.onDragEnd) {
+        $elm.removeEventListener("dragend", events.onDragEnd);
+      }
+      if (events.onDragEnter) {
+        $elm.removeEventListener("dragenter", events.onDragEnter);
+      }
+      if (events.onDragOver) {
+        $elm.removeEventListener("dragover", events.onDragOver);
+      }
+      if (events.onDragLeave) {
+        $elm.removeEventListener("dragleave", events.onDragLeave);
+      }
+      if (events.onDrop) {
+        $elm.removeEventListener("drop", events.onDrop);
+      }
+      if (events.onAnimationEnd) {
+        $elm.removeEventListener("animationend", events.onAnimationEnd);
+      }
+    },
     applyState(
       state: TimelessElement["state"],
       opt: Partial<{ initial?: boolean }> = {},

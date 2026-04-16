@@ -63,6 +63,8 @@ export type VNodeView<HostElm = any> = {
   };
   insertChildren(children: (TimelessElement | null)[]): void;
   removeChildren(): void;
+  setupEventListener(events: any): void;
+  teardownEventListener(events: any): void;
   // getParent(): VNodeView<any>;
   getParent(): any;
   get$elm(): HostElm;

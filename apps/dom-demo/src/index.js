@@ -201,8 +201,8 @@ function ApplicationView() {
       onMounted() {},
     },
     [
-      Page({}, [View({}, ["Page A"])]),
-      Page({}, [View({}, ["Page B"])]),
+      Page({ title: "A" }, [View({}, ["Page A"])]),
+      Page({ title: "B" }, [View({}, ["Page B"])]),
       // Input({
       //   value: "Hello Timeless",
       //   onMounted(event) {
