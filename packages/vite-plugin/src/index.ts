@@ -71,8 +71,24 @@ type ComponentInfo = {
   bodyClose: number;
   refVars: string[];
   lastRefLineEnd: number;
-  returnMatch: RegExpExecArray;
   elementVar: string;
+  // Simple return: `return identifier;`
+  returnMatch: RegExpExecArray;
+  isExprReturn: false;
+} | {
+  exportName: string;
+  funcName: string;
+  propsParam: string;
+  childrenParam: string;
+  bodyOpen: number;
+  bodyClose: number;
+  refVars: string[];
+  lastRefLineEnd: number;
+  elementVar: string;
+  // Expression return: `return Expr(...);` → rewrite to temp var
+  isExprReturn: true;
+  returnKeywordIndex: number;
+  returnStmtEnd: number; // position after the ";"
 };
 
 // ─── Core transform ─────────────────────────────────────────────────────────
@@ -84,6 +100,7 @@ function transformComponent(code: string): string | null {
 
   const components: ComponentInfo[] = [];
   let funcMatch: RegExpExecArray | null;
+  let exprReturnCounter = 0;
 
   while ((funcMatch = funcRe.exec(code)) !== null) {
     const isDefault = !!funcMatch[1];
@@ -112,7 +129,7 @@ function transformComponent(code: string): string | null {
     // Collect ref/refobj/refarr declarations at depth 1
     const pattern = REACTIVE_CREATORS.join("|");
     const refRe = new RegExp(
-      `\\b(?:const|let)\\s+(\\w+)\\s*=\\s*(?:${pattern})\\s*\\(`,
+      `\\b(?:const|let)\\s+([\\w$]+)\\s*=\\s*(?:${pattern})\\s*\\(`,
       "g",
     );
 
@@ -132,12 +149,18 @@ function transformComponent(code: string): string | null {
       }
     }
 
-    // No reactive state → not a stateful component, skip this function
-    if (refVars.length === 0) continue;
-
-    // Find `return <identifier>;` at depth 1
-    const returnRe = /\breturn\s+(\w+)\s*;/g;
-    let returnMatch: RegExpExecArray | null = null;
+    // Find return statement at depth 1
+    // Supports both `return identifier;` and `return Expression(...);`
+    const returnRe = /\breturn\s+/g;
+    let returnInfo: {
+      type: "simple";
+      match: RegExpExecArray;
+      elementVar: string;
+    } | {
+      type: "expr";
+      keywordIndex: number;
+      stmtEnd: number;
+    } | null = null;
 
     while ((m = returnRe.exec(code)) !== null) {
       if (
@@ -145,13 +168,30 @@ function transformComponent(code: string): string | null {
         m.index < bodyClose &&
         depths[m.index - bodyOpen] === 1
       ) {
-        returnMatch = m;
+        const afterReturn = m.index + m[0].length;
+        // Check if it's `return identifier;`
+        const simpleRe = /^([\w$]+)\s*;/;
+        const simpleMatch = simpleRe.exec(code.slice(afterReturn));
+        if (simpleMatch) {
+          // Create a RegExpExecArray-like object for backward compat
+          const fullMatch = Object.assign(
+            [m[0] + simpleMatch[0], simpleMatch[1]] as RegExpMatchArray,
+            { index: m.index, input: code, groups: undefined },
+          ) as RegExpExecArray;
+          returnInfo = { type: "simple", match: fullMatch, elementVar: simpleMatch[1] };
+        } else {
+          // Expression return — find the end of the statement
+          const stmtEnd = findReturnStmtEnd(code, afterReturn);
+          if (stmtEnd !== -1) {
+            returnInfo = { type: "expr", keywordIndex: m.index, stmtEnd };
+          }
+        }
       }
     }
 
-    if (!returnMatch) continue;
+    if (!returnInfo) continue;
 
-    components.push({
+    const compBase = {
       exportName,
       funcName,
       propsParam,
@@ -160,9 +200,25 @@ function transformComponent(code: string): string | null {
       bodyClose,
       refVars,
       lastRefLineEnd,
-      returnMatch,
-      elementVar: returnMatch[1],
-    });
+    };
+
+    if (returnInfo.type === "simple") {
+      components.push({
+        ...compBase,
+        isExprReturn: false,
+        returnMatch: returnInfo.match,
+        elementVar: returnInfo.elementVar,
+      });
+    } else {
+      exprReturnCounter++;
+      components.push({
+        ...compBase,
+        isExprReturn: true,
+        elementVar: `__hmr_el${exprReturnCounter > 1 ? exprReturnCounter : ""}`,
+        returnKeywordIndex: returnInfo.keywordIndex,
+        returnStmtEnd: returnInfo.stmtEnd,
+      });
+    }
   }
 
   // No components found → skip file
@@ -173,8 +229,9 @@ function transformComponent(code: string): string | null {
   const insertions: { pos: number; text: string }[] = [];
 
   // a. Imports (once per file)
+  const anyHasRefs = components.some((c) => c.refVars.length > 0);
   const timelessNeeded: string[] = [];
-  if (!isImported(code, "hmrRestore")) timelessNeeded.push("hmrRestore");
+  if (anyHasRefs && !isImported(code, "hmrRestore")) timelessNeeded.push("hmrRestore");
   if (!isImported(code, "patch")) timelessNeeded.push("patch");
 
   const newImportLines: string[] = [];
@@ -197,13 +254,16 @@ function transformComponent(code: string): string | null {
 
   // b. Per-component injections
   for (const comp of components) {
+    const hasRefs = comp.refVars.length > 0;
     const refNamesStr = comp.refVars.join(", ");
 
-    // hmrRestore — after last ref declaration
-    insertions.push({
-      pos: comp.lastRefLineEnd,
-      text: `\n  hmrRestore(import.meta.hot, { ${refNamesStr} });`,
-    });
+    // hmrRestore — after last ref declaration (only for stateful components)
+    if (hasRefs) {
+      insertions.push({
+        pos: comp.lastRefLineEnd,
+        text: `\n  hmrRestore(import.meta.hot, { ${refNamesStr} });`,
+      });
+    }
 
     // Element tracking — before return
     const trackLines = [
@@ -226,10 +286,28 @@ function transformComponent(code: string): string | null {
       `    import.meta.hot.data.elements.push(${comp.elementVar});`,
       `  }`,
     );
-    insertions.push({
-      pos: comp.returnMatch.index,
-      text: trackLines.join("\n  ") + "\n  ",
-    });
+
+    if (comp.isExprReturn) {
+      // Expression return: replace `return <expr>;` with
+      // `const __hmr_el = <expr>;\n  tracking\n  return __hmr_el;`
+      const returnKeyword = "return ";
+      const exprStart = comp.returnKeywordIndex + returnKeyword.length;
+      const exprText = code.slice(exprStart, comp.returnStmtEnd - 1); // exclude ";"
+      const replacement =
+        `const ${comp.elementVar} = ${exprText};\n  ` +
+        trackLines.join("\n  ") +
+        `\n  return ${comp.elementVar};`;
+      insertions.push({
+        pos: comp.returnKeywordIndex,
+        text: replacement,
+        end: comp.returnStmtEnd,
+      } as any);
+    } else {
+      insertions.push({
+        pos: comp.returnMatch.index,
+        text: trackLines.join("\n  ") + "\n  ",
+      });
+    }
   }
 
   // c. HMR accept handler — after last component's function body
@@ -262,10 +340,16 @@ if (import.meta.hot) {
 
   // ── Apply insertions from end to start (preserves positions) ───────────────
 
-  insertions.sort((a, b) => b.pos - a.pos);
+  type Insertion = { pos: number; text: string; end?: number };
+  insertions.sort((a: Insertion, b: Insertion) => (b.end ?? b.pos) - (a.end ?? a.pos));
   let result = code;
-  for (const ins of insertions) {
-    result = result.slice(0, ins.pos) + ins.text + result.slice(ins.pos);
+  for (const ins of insertions as Insertion[]) {
+    if (ins.end != null) {
+      // Replacement: replace code[pos..end) with text
+      result = result.slice(0, ins.pos) + ins.text + result.slice(ins.end);
+    } else {
+      result = result.slice(0, ins.pos) + ins.text + result.slice(ins.pos);
+    }
   }
 
   return result;
@@ -312,6 +396,46 @@ function computeDepths(
 function isImported(code: string, name: string): boolean {
   const re = new RegExp(`import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from`);
   return re.test(code);
+}
+
+/**
+ * Find the end of a return statement (position after the ";").
+ * Tracks paren/brace/bracket nesting to handle expressions like `return View({...}, [...]);`
+ */
+function findReturnStmtEnd(code: string, exprStart: number): number {
+  let parenDepth = 0;
+  let braceDepth = 0;
+  let bracketDepth = 0;
+  let inString: string | null = null;
+  let inTemplate = false;
+
+  for (let i = exprStart; i < code.length; i++) {
+    const ch = code[i];
+    const prev = i > 0 ? code[i - 1] : "";
+
+    // Handle string literals
+    if (inString) {
+      if (ch === inString && prev !== "\\") inString = null;
+      continue;
+    }
+    if (inTemplate) {
+      if (ch === "`" && prev !== "\\") inTemplate = false;
+      continue;
+    }
+    if (ch === '"' || ch === "'") { inString = ch; continue; }
+    if (ch === "`") { inTemplate = true; continue; }
+
+    if (ch === "(") parenDepth++;
+    else if (ch === ")") parenDepth--;
+    else if (ch === "{") braceDepth++;
+    else if (ch === "}") braceDepth--;
+    else if (ch === "[") bracketDepth++;
+    else if (ch === "]") bracketDepth--;
+    else if (ch === ";" && parenDepth === 0 && braceDepth === 0 && bracketDepth === 0) {
+      return i + 1; // position after ";"
+    }
+  }
+  return -1;
 }
 
 /** Find the byte offset at the end of the last import statement. */

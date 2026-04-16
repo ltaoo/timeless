@@ -26,6 +26,7 @@ import AdminLayoutView from "@/pages/admin/layout.js";
 import AdminDashboardView from "@/pages/admin/dashboard.js";
 import NotFoundPageView from "@/pages/notfound/index.js";
 import LoginView from "@/pages/login/index.js";
+import HomeIndexOverlayView from "@/pages/home/index.overlay.js";
 
 ScrollViewPrimitive.setScrollViewProvider(web);
 InputPrimitive.setInputProvider(web);
@@ -58,6 +59,11 @@ const routes_configure = {
             title: "通用组件",
             pathname: "/home/index/general",
             component: HomeIndexGeneralView,
+          },
+          overlay: {
+            title: "Overlay",
+            pathname: "/home/index/overlay",
+            component: HomeIndexOverlayView,
           },
         },
       },
@@ -220,12 +226,7 @@ export const app = new ApplicationModel({
   async beforeReady() {
     const { pathname, query } = router$;
     const route = router.routesWithPathname[pathname];
-    console.log(
-      "[Store] beforeReady",
-      pathname,
-      route,
-      defaultRouteName,
-    );
+    console.log("[Store] beforeReady", pathname, route, defaultRouteName);
     if (!route) {
       history$.push("root.home_layout", {}, { ignore: true });
       return Result.Ok(null);

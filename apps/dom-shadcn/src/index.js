@@ -62,7 +62,7 @@ function ApplicationRootView() {
   // });
   // console.log("elm", elm);
   // return elm;
-  return Fragment({}, [
+  return View({}, [
     StandardSubViews({
       view: root_view$,
       views,
@@ -78,9 +78,24 @@ function ApplicationRootView() {
   ]);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  const { innerWidth, innerHeight } = window;
-  history$.$router.prepare(window.location);
-  app.start({ width: innerWidth, height: innerHeight });
+function mount() {
   render(ApplicationRootView(), document.querySelector("#root"));
-});
+}
+
+if (import.meta.hot && import.meta.hot.data.initialized) {
+  // HMR re-execution: module code is fresh, just re-render
+  mount();
+} else {
+  // Initial load
+  document.addEventListener("DOMContentLoaded", function () {
+    const { innerWidth, innerHeight } = window;
+    history$.$router.prepare(window.location);
+    app.start({ width: innerWidth, height: innerHeight });
+    mount();
+  });
+}
+
+if (import.meta.hot) {
+  import.meta.hot.data.initialized = true;
+  import.meta.hot.accept();
+}

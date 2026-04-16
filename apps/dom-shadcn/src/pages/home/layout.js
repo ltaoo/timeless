@@ -12,6 +12,7 @@ import {
   computed,
 } from "@timeless/timeless";
 import { KeepAliveSubViews, Separator } from "@timeless/shadcn";
+import { RouteMenusModel } from "@timeless/kit";
 
 export default function HomeLayoutView(props) {
   const projects = [
@@ -19,8 +20,9 @@ export default function HomeLayoutView(props) {
     { id: "2", name: "Project B" },
   ];
 
-  const sidemenu$ = refobj({
-    cur: "home_layout",
+  const sidemenu$ = RouteMenusModel({
+    view: props.view,
+    history: props.history,
     menus: [
       { title: "Home", name: "root.home_layout.index", children: [] },
       { title: "Article", name: "root.home_layout.article" },
@@ -28,12 +30,6 @@ export default function HomeLayoutView(props) {
       { title: "Settings", name: "root.home_layout.settings" },
       { title: "Chat", name: "root.home_layout.chat" },
     ],
-    isSelected(menu_name) {
-      return this.cur === menu_name;
-    },
-    isSubRoute(name) {
-      return this.cur?.startsWith(name);
-    },
   });
 
   return View(
@@ -49,12 +45,12 @@ export default function HomeLayoutView(props) {
         {
           class: "sidebar-wrapper",
           style: {
-            width: "72px",
+            width: "80px",
             padding: "24px 0",
-            borderRight: "1px solid #e4e4e7",
+            // "border-right": "1px solid #e4e4e7",
             display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
+            "flex-direction": "column",
+            "justify-content": "space-between",
           },
         },
         [
@@ -62,8 +58,8 @@ export default function HomeLayoutView(props) {
             {
               style: {
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+                "flex-direction": "column",
+                "align-items": "center",
                 gap: "12px",
               },
               class: "flex-1",
@@ -74,12 +70,12 @@ export default function HomeLayoutView(props) {
                   style: {
                     width: "40px",
                     height: "40px",
-                    borderRadius: "12px",
+                    "border-radius": "12px",
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: "bold",
-                    fontSize: "20px",
+                    "align-items": "center",
+                    "justify-content": "center",
+                    "font-weight": "bold",
+                    "font-size": "20px",
                     cursor: "pointer",
                   },
                   class: "bg-zinc-100 dark:bg-zinc-800",
@@ -94,10 +90,10 @@ export default function HomeLayoutView(props) {
                   style: {
                     width: "40px",
                     height: "40px",
-                    borderRadius: "8px",
+                    "border-radius": "8px",
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    "align-items": "center",
+                    "justify-content": "center",
                     cursor: "pointer",
                   },
                   class: "hover:bg-zinc-100 dark:hover:bg-zinc-800",
@@ -112,10 +108,10 @@ export default function HomeLayoutView(props) {
                   style: {
                     width: "40px",
                     height: "40px",
-                    borderRadius: "8px",
+                    "border-radius": "8px",
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    "align-items": "center",
+                    "justify-content": "center",
                     cursor: "pointer",
                   },
                   class: "hover:bg-zinc-100 dark:hover:bg-zinc-800",
@@ -160,7 +156,7 @@ export default function HomeLayoutView(props) {
             {
               style: {
                 display: "flex",
-                flexDirection: "column",
+                "flex-direction": "column",
                 alignItems: "center",
                 gap: "24px",
                 padding: "16px 0",
@@ -190,19 +186,19 @@ export default function HomeLayoutView(props) {
                   style: {
                     width: "40px",
                     height: "40px",
-                    borderRadius: "50%",
+                    "border-radius": "50%",
                     overflow: "hidden",
                     cursor: "pointer",
                   },
                 },
                 [
                   Img({
-                    src: "public/avatar.jpeg",
+                    src: "/avatar.jpeg",
                     alt: "User Avatar",
                     style: {
                       width: "100%",
                       height: "100%",
-                      objectFit: "cover",
+                      "object-fit": "cover",
                     },
                   }),
                 ],
