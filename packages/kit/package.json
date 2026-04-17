@@ -1,6 +1,6 @@
 {
   "name": "@timeless/kit",
-  "version": "0.19.0",
+  "version": "0.20.2",
   "description": "Kit for Timeless",
   "main": "dist/index.js",
   "module": "dist/timeless.kit.esm.js",

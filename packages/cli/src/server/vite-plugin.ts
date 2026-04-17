@@ -1,65 +1,47 @@
 import type { Plugin } from "vite";
 
-const VIRTUAL_CLIENT_ENTRY = "/@timeless/client";
-const RESOLVED_VIRTUAL_CLIENT = "\0" + VIRTUAL_CLIENT_ENTRY;
+const VIRTUAL_CLIENT_PREFIX = "/@timeless/client";
 
 /**
  * Vite plugin for Timeless SSR
  *
  * - Provides virtual module for client-side hydration entry
  * - Handles module transformation for SSR
+ * - Uses resolveId + load hooks so generated code goes through Vite's
+ *   transform pipeline, enabling bare ESM imports (e.g., @timeless/timeless-dom)
  */
 export function timelessPlugin(): Plugin {
   return {
     name: "timeless-ssr",
 
     resolveId(id) {
-      if (id === VIRTUAL_CLIENT_ENTRY) {
-        return RESOLVED_VIRTUAL_CLIENT;
+      // Handle /@timeless/client and /@timeless/client/<pagePath>
+      if (id === VIRTUAL_CLIENT_PREFIX || id.startsWith(VIRTUAL_CLIENT_PREFIX + "/")) {
+        return "\0" + id;
       }
     },
 
     load(id) {
-      if (id === RESOLVED_VIRTUAL_CLIENT) {
-        // This module is dynamically generated per request
-        // The actual content is injected by the SSR handler
-        return `
-          console.log("[Timeless] Client entry loaded");
-          export {};
-        `;
+      if (id.startsWith("\0" + VIRTUAL_CLIENT_PREFIX)) {
+        const rawPath = id.slice(("\0" + VIRTUAL_CLIENT_PREFIX).length);
+        const pagePath = rawPath || "/";
+        return generateClientEntry(pagePath);
       }
-    },
-
-    configureServer(server) {
-      // Handle the virtual client module dynamically
-      server.middlewares.use((req, res, next) => {
-        if (req.url?.startsWith("/@timeless/client/")) {
-          // Extract page path from URL
-          const pagePath = req.url.replace("/@timeless/client", "");
-          const clientCode = generateClientEntry(pagePath);
-
-          res.setHeader("Content-Type", "application/javascript");
-          res.end(clientCode);
-          return;
-        }
-        next();
-      });
     },
   };
 }
 
 /**
- * Generate client-side hydration code for a specific page
- * Uses global Timeless and Timeless.DOM from UMD bundles
+ * Generate client-side hydration code for a specific page.
+ * Uses ESM imports resolved by Vite — source changes take effect immediately in dev.
  */
 function generateClientEntry(pagePath: string): string {
   // Normalize page path
   const normalizedPath = pagePath === "/" ? "/index" : pagePath;
 
-  // Use global variables from UMD bundles
   return `
-// Use Timeless and Timeless.DOM from global scope (loaded via UMD)
-const { hydrate } = window.Timeless.DOM;
+import { hydrate } from "@timeless/timeless-dom";
+import "@timeless/provider-web";
 
 async function main() {
   try {
@@ -77,9 +59,6 @@ async function main() {
       console.error("[Timeless] Page component not found in module:", pageModule);
       return;
     }
-
-    // Pass plain data to Page - components can use ref(data.xxx) for reactivity
-    // console.log("[Timeless] Hydrating with plain data");
 
     // Hydrate the app
     const root = document.getElementById("root");

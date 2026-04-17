@@ -1,4 +1,4 @@
-import { refobj, computed, combine } from "@timeless/timeless";
+import { refobj, computed } from "@timeless/timeless";
 import { Logger } from "@timeless/timeless";
 import {
   View,
@@ -7,6 +7,10 @@ import {
   Portal as NativePortal,
   Show,
   ListenerManager,
+  createContext,
+  provide,
+  use,
+  Scope,
 } from "@timeless/timeless";
 import { MenuCore, MenuItemCore, MenuGroupCore } from "@timeless/ui-vm";
 
@@ -15,30 +19,38 @@ import * as PopperPrimitive from "./popper";
 
 const logger = Logger({ prefix: "primitive", scope: "menu.ts" });
 
+const MenuCtx = createContext<MenuCore>("Menu");
+
+export { MenuCtx };
+
 export function Root(
   props: ViewProps & { store: MenuCore },
-  children?: ViewChildren,
+  children: ViewChildren,
 ) {
-  return PopperPrimitive.Root(
-    { ...props, store: props.store.popper },
-    children,
+  return Scope(
+    () => provide(MenuCtx, props.store),
+    () => [
+      PopperPrimitive.Root(
+        { ...props, store: props.store.popper },
+        children,
+      ),
+    ],
   );
 }
 
 export function Anchor(
-  props: ViewProps & { store: MenuCore },
+  props: ViewProps & { store?: MenuCore },
   children: ViewChildren = [],
 ) {
-  // console.log("[Menu Anchor] created");
+  const store = props.store ?? use(MenuCtx);
   return PopperPrimitive.Anchor(
-    { ...props, store: props.store.popper },
+    { ...props, store: store.popper },
     children,
   );
 }
 
 export function Portal(
   props: ViewProps & {
-    store: MenuCore;
     animation?: { in: string; out: string };
   },
   children: ViewChildren = [],
@@ -48,12 +60,13 @@ export function Portal(
 
 export function Content(
   props: ViewProps & {
-    store: MenuCore;
+    store?: MenuCore;
     animation?: { in: string; out: string };
   },
   children: ViewChildren,
 ) {
-  return ContentNonModal(props, children);
+  const store = props.store ?? use(MenuCtx);
+  return ContentNonModal({ ...props, store }, children);
 }
 
 export function ContentNonModal(
@@ -276,13 +289,14 @@ export function Separator(props: ViewProps) {
   return View(props);
 }
 export function Arrow(
-  props: ViewProps & { store: MenuCore },
+  props: ViewProps & { store?: MenuCore },
   children: ViewChildren,
 ) {
+  const store = props.store ?? use(MenuCtx);
   return NativeArrow(
     {
       ...props,
-      store: props.store.popper,
+      store: store.popper,
     },
     children,
   );
@@ -343,21 +357,27 @@ export function SubMenuContent(
   },
   children: ViewChildren,
 ) {
-  return ContentImpl(
-    {
-      ...props,
-      store: props.store,
-      onMouseEnter() {
-        // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
-        if (
-          props.store.parent_menu &&
-          props.store.parent_menu.hide_sub_timer !== null
-        ) {
-          clearTimeout(props.store.parent_menu.hide_sub_timer);
-          props.store.parent_menu.hide_sub_timer = null;
-        }
-      },
-    },
-    children,
+  const { store, ...rest } = props;
+  return Scope(
+    () => provide(MenuCtx, store),
+    () => [
+      ContentImpl(
+        {
+          ...rest,
+          store,
+          onMouseEnter() {
+            // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
+            if (
+              store.parent_menu &&
+              store.parent_menu.hide_sub_timer !== null
+            ) {
+              clearTimeout(store.parent_menu.hide_sub_timer);
+              store.parent_menu.hide_sub_timer = null;
+            }
+          },
+        },
+        children,
+      ),
+    ],
   );
 }

@@ -1,9 +1,11 @@
 import {
   Subscriber,
+  SubscriberWithId,
   Ref,
   isRef,
   TimelessRefObject,
   TimelessRefObjectNullable,
+  DepInfo,
 } from "./types";
 import { get, has } from "./registry";
 import { __hmr_get_hot } from "./hmr";
@@ -113,7 +115,7 @@ export function refObject<T extends Record<string, any>>(
   }
 
   let _v = obj;
-  const deps: Subscriber<T>[] = [];
+  const deps: SubscriberWithId<T>[] = [];
   function notify(action: { type: string }) {
     for (let i = 0; i < deps.length; i += 1) {
       const ctx = deps[i];
@@ -126,9 +128,11 @@ export function refObject<T extends Record<string, any>>(
   const r = {
     __is_ref: true as const,
     subscribe(ctx: Subscriber<T>) {
-      deps.push(ctx);
+      const trackCtx = ctx as SubscriberWithId<T>;
+      deps.push(trackCtx);
       return function () {
-        deps.splice(deps.indexOf(ctx), 1);
+        const idx = deps.indexOf(trackCtx);
+        if (idx > -1) deps.splice(idx, 1);
       };
     },
     destroy() {
@@ -142,6 +146,21 @@ export function refObject<T extends Record<string, any>>(
     },
     isStrictEqual(v: unknown) {
       return _v === v;
+    },
+    getDeps(): DepInfo[] {
+      return deps.map((ctx) => ({
+        trackId: ctx.__trackId || "unknown",
+        trackInfo: ctx.__trackInfo,
+      }));
+    },
+    dump() {
+      console.log("[reactive.dump] refObject subscribers:", deps.length);
+      deps.forEach((ctx, i) => {
+        console.log(
+          `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
+          ctx.__trackInfo || "",
+        );
+      });
     },
     set(
       key: keyof T,

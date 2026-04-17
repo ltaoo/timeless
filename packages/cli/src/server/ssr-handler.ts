@@ -165,15 +165,17 @@ export function createSSRHandler(
     }
 
     // Import renderToString dynamically to use Vite's SSR transform
-    const { renderToString } = await vite.ssrLoadModule(
+    const { renderToString, getPortalContent } = await vite.ssrLoadModule(
       "@timeless/timeless-ssr",
     );
 
     // Render the page
     let appHtml = "";
+    let portalContent = "";
     try {
       const vnode = Page({ data });
       appHtml = renderToString(vnode);
+      portalContent = getPortalContent();
     } catch (e: any) {
       console.error("[SSR] Error rendering page:", e);
       return generateErrorPage(`Render error: ${e.message}`);
@@ -188,6 +190,7 @@ export function createSSRHandler(
       meta: headConfig.meta || [],
       links: headConfig.links || [],
       content: appHtml,
+      portalContent,
       data,
       pagePath,
       isDev,
@@ -256,6 +259,7 @@ function generateHTML(options: {
   meta: Array<{ name: string; content: string }>;
   links?: Array<{ rel: string; href: string }>;
   content: string;
+  portalContent: string;
   data: Record<string, any>;
   pagePath: string;
   isDev?: boolean;
@@ -265,6 +269,7 @@ function generateHTML(options: {
     meta,
     links = [],
     content,
+    portalContent,
     data,
     pagePath,
     isDev = true,
@@ -294,10 +299,8 @@ function generateHTML(options: {
 </head>
 <body>
   <div id="root">${content}</div>
+  ${portalContent}
   <script>window.__TIMELESS_DATA__ = ${serializedData};</script>
-  <script src="/public/timeless/${TIMELESS_VERSION}/timeless.umd.min.js"></script>
-  <script src="/public/timeless/${TIMELESS_VERSION}/timeless.dom.umd.min.js"></script>
-  <script src="/public/timeless/${TIMELESS_VERSION}/timeless.web.umd.min.js"></script>
   <script type="module" src="/@timeless/client${pagePath}"></script>
 </body>
 </html>`;

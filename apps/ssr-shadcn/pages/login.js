@@ -3,9 +3,9 @@
  * 测试: InputCore, ButtonCore, localStorage 写入, 页面跳转
  */
 import { View, ref, computed } from "@timeless/timeless";
-import { Button } from "@timeless/shadcn/src/modules/button";
-import { Input } from "@timeless/shadcn/src/modules/input";
-import { Label } from "@timeless/shadcn/src/modules/label";
+import { Button } from "@timeless/shadcn";
+import { Input } from "@timeless/shadcn";
+import { Label } from "@timeless/shadcn";
 import {
   Card,
   CardHeader,
@@ -13,8 +13,9 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from "@timeless/shadcn/src/modules/card";
+} from "@timeless/shadcn";
 import { ButtonCore, InputCore } from "@timeless/ui-vm";
+
 import { user$ } from "../store/index.js";
 
 export async function load({ query }) {
@@ -27,7 +28,9 @@ export async function load({ query }) {
 export function head() {
   return {
     title: "Timeless SSR — Login",
-    meta: [{ name: "description", content: "Login page - test localStorage write" }],
+    meta: [
+      { name: "description", content: "Login page - test localStorage write" },
+    ],
     links: [{ rel: "stylesheet", href: "/styles.css" }],
   };
 }
@@ -90,7 +93,10 @@ export default function Page({ data }) {
         // Header
         View({ class: "text-center space-y-2" }, [
           View(
-            { as: "h1", class: "text-3xl font-bold tracking-tight text-foreground" },
+            {
+              as: "h1",
+              class: "text-3xl font-bold tracking-tight text-foreground",
+            },
             ["Timeless"],
           ),
           View({ as: "p", class: "text-sm text-muted-foreground" }, [
@@ -123,46 +129,44 @@ export default function Page({ data }) {
               ]),
 
               // Error message
-              View({
-                class: computed(error_msg, (v) =>
-                  v ? "text-sm text-destructive" : "hidden",
-                ),
-              }, [
-                computed(error_msg, (v) => v),
-              ]),
+              View(
+                {
+                  class: computed(error_msg, (v) =>
+                    v ? "text-sm text-destructive" : "hidden",
+                  ),
+                },
+                [computed(error_msg, (v) => v)],
+              ),
             ]),
           ]),
           CardFooter({ class: "flex-col gap-3" }, [
-            Button(
-              { store: btn_login, class: "w-full" },
-              ["Sign in"],
-            ),
+            Button({ store: btn_login, class: "w-full" }, ["Sign in"]),
             // 如果已登录，显示登出按钮
             ...(user$.isLogin
-              ? [
-                  Button(
-                    { store: btn_logout, class: "w-full" },
-                    ["Sign out"],
-                  ),
-                ]
+              ? [Button({ store: btn_logout, class: "w-full" }, ["Sign out"])]
               : []),
           ]),
         ]),
 
         // Hint
-        View(
-          { class: "text-center text-xs text-muted-foreground" },
-          [
-            "Hint: username ",
-            View({ as: "code", class: "font-mono bg-muted px-1 py-0.5 rounded text-foreground" }, [
-              "admin",
-            ]),
-            " / password ",
-            View({ as: "code", class: "font-mono bg-muted px-1 py-0.5 rounded text-foreground" }, [
-              "123456",
-            ]),
-          ],
-        ),
+        View({ class: "text-center text-xs text-muted-foreground" }, [
+          "Hint: username ",
+          View(
+            {
+              as: "code",
+              class: "font-mono bg-muted px-1 py-0.5 rounded text-foreground",
+            },
+            ["admin"],
+          ),
+          " / password ",
+          View(
+            {
+              as: "code",
+              class: "font-mono bg-muted px-1 py-0.5 rounded text-foreground",
+            },
+            ["123456"],
+          ),
+        ]),
 
         // Back link
         View({ class: "text-center" }, [
@@ -170,7 +174,8 @@ export default function Page({ data }) {
             {
               as: "a",
               href: "/",
-              class: "text-sm text-primary underline underline-offset-4 hover:opacity-80",
+              class:
+                "text-sm text-primary underline underline-offset-4 hover:opacity-80",
             },
             ["← Back to Home"],
           ),

@@ -1,6 +1,7 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement } from "./box";
+import { countRenderedNodes } from "./fragment";
 import { hydrate_node } from "@/renderer/hydrate";
 
 export type DOMView = VNodeView<HTMLDivElement> & {
@@ -41,16 +42,30 @@ export function DOMView(props: {
         const child_nodes: VNodeView[] = [];
         const child_elements: (TimelessElement | null)[] = [];
         const $children = Array.from($elm.childNodes);
+        let cursor = 0;
         for (let i = 0; i < elm.children.length; i += 1) {
           const child = elm.children[i];
           child_elements.push(child);
           if (child) {
-            const child$ = hydrate_node(
-              child,
-              $children[i] as HTMLElement | Text,
-            );
-            if (child$) {
-              child_nodes.push(child$);
+            const nodeCount = countRenderedNodes(child);
+            if (nodeCount === 0) {
+              // Child produces 0 inline DOM nodes (portal, or show/fragment with only portal children).
+              // Hydrate it without consuming DOM cursor, pass $parent so it can place its anchor.
+              const child$ = hydrate_node(child, null as any, {
+                $parent: $elm as HTMLElement,
+              });
+              if (child$) {
+                child_nodes.push(child$);
+              }
+            } else {
+              const child$ = hydrate_node(
+                child,
+                $children[cursor] as HTMLElement | Text,
+              );
+              cursor += nodeCount;
+              if (child$) {
+                child_nodes.push(child$);
+              }
             }
           }
         }

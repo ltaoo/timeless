@@ -2,17 +2,25 @@
  * 首页 - 对应 web-vanilla 的 home layout
  * 测试: 路由导航、基础渲染、localStorage 读取
  */
-import { View, Show, For, ref, computed, Link } from "@timeless/timeless";
-import { Button } from "@timeless/shadcn/src/modules/button";
-import { Badge } from "@timeless/shadcn/src/modules/badge";
+import {
+  View,
+  Show,
+  For,
+  ref,
+  computed,
+  Link,
+  Portal,
+} from "@timeless/timeless";
+import { Button, DropdownMenu, ui } from "@timeless/shadcn";
+import { Badge } from "@timeless/shadcn";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from "@timeless/shadcn/src/modules/card";
-import { Separator } from "@timeless/shadcn/src/modules/separator";
+} from "@timeless/shadcn";
+import { Separator } from "@timeless/shadcn";
 import { ButtonCore } from "@timeless/ui-vm";
 
 import { NavBar } from "../components/index.js";
@@ -21,6 +29,7 @@ import { history$, storage$, user$ } from "../store/index.js";
 export async function load() {
   return {
     greeting: "Welcome to Timeless SSR",
+    isLogin: true,
     features: [
       {
         title: "路由",
@@ -58,7 +67,7 @@ export function head() {
 
 export default function Page({ data }) {
   // ---- 测试 localStorage：读取 user 信息 ----
-  const isLogin = user$.isLogin;
+  const isLogin = ref(data.isLogin);
   const username = user$.profile?.username || "anonymous";
 
   return View({ class: "min-h-screen bg-background" }, [
@@ -95,14 +104,31 @@ export default function Page({ data }) {
               isLogin ? "已登录" : "未登录",
             ]),
             Badge({ variant: "outline" }, [username]),
-            View(
+            DropdownMenu(
               {
-                as: "a",
-                href: "/login",
-                class:
-                  "text-sm text-primary underline underline-offset-4 hover:opacity-80",
+                store: new ui.DropdownMenuCore({
+                  defaultVisible: true,
+                  items: [
+                    new ui.MenuItemCore({
+                      label: isLogin ? "切换账号" : "去登录",
+                      onClick() {
+                        console.log("切换账号");
+                      },
+                    }),
+                  ],
+                }),
               },
-              [isLogin ? "切换账号" : "去登录"],
+              [
+                View(
+                  {
+                    as: "a",
+                    href: "/login",
+                    class:
+                      "text-sm text-primary underline underline-offset-4 hover:opacity-80",
+                  },
+                  [isLogin ? "切换账号" : "去登录"],
+                ),
+              ],
             ),
           ]),
         ]),

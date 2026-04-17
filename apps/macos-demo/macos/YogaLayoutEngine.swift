@@ -142,6 +142,55 @@ enum YogaLayoutEngine {
         case .aspectRatio(let ratio, let style, _, _):
             YGNodeStyleSetAspectRatio(yogaNode, Float(ratio))
             applyStyleDict(yogaNode, style: style)
+
+        case .splitView(let direction, _, let minSizes, let maxSizes, _, let children, _):
+            YGNodeStyleSetFlexDirection(yogaNode, direction == "horizontal" ? .row : .column)
+            if direction == "horizontal" {
+                if let minFirst = minSizes.first {
+                    YGNodeStyleSetMinWidth(yogaNode, Float(minFirst))
+                }
+                if let maxFirst = maxSizes.first {
+                    YGNodeStyleSetMaxWidth(yogaNode, Float(maxFirst))
+                }
+            } else {
+                if let minFirst = minSizes.first {
+                    YGNodeStyleSetMinHeight(yogaNode, Float(minFirst))
+                }
+                if let maxFirst = maxSizes.first {
+                    YGNodeStyleSetMaxHeight(yogaNode, Float(maxFirst))
+                }
+            }
+            for i in 0..<children.count {
+                if let childYoga = YGNodeGetChild(yogaNode, i) {
+                    YGNodeStyleSetFlexGrow(childYoga, 1)
+                }
+            }
+
+        case .splitPane(let size, let minSize, let maxSize, _, _, _, _):
+            YGNodeStyleSetFlexGrow(yogaNode, Float(size) / 100)
+            if minSize > 0 {
+                YGNodeStyleSetMinWidth(yogaNode, Float(minSize))
+                YGNodeStyleSetMinHeight(yogaNode, Float(minSize))
+            }
+            if maxSize > 0 && maxSize < 100 {
+                YGNodeStyleSetMaxWidth(yogaNode, Float(maxSize))
+                YGNodeStyleSetMaxHeight(yogaNode, Float(maxSize))
+            }
+
+        case .scrollView(_, _, _, _):
+            YGNodeStyleSetFlexGrow(yogaNode, 1)
+            YGNodeStyleSetOverflow(yogaNode, .scroll)
+
+        case .tabView(_, _, let children, _):
+            YGNodeStyleSetFlexDirection(yogaNode, .column)
+            for i in 0..<children.count {
+                if let childYoga = YGNodeGetChild(yogaNode, i) {
+                    YGNodeStyleSetFlexGrow(childYoga, 1)
+                }
+            }
+
+        case .tabPane(_, _, let children, _):
+            YGNodeStyleSetFlexGrow(yogaNode, 1)
         }
     }
 

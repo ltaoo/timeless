@@ -22,7 +22,7 @@
  * </View>
  * ```
  */
-import { DerivedRef, Ref, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, isRef, generateTrackId } from "@timeless/reactive";
 
 import { VNodeView } from "@/vnode/view";
 import {
@@ -41,6 +41,7 @@ import {
   TimelessElement,
   ViewAttributes,
   ViewChildren,
+  resolve_children,
 } from "./type";
 
 /** Props for View component */
@@ -153,6 +154,7 @@ export function View(
     onAnimationEnd,
   } = props;
 
+  const viewTrackId = generateTrackId("view");
   const listener$ = ListenerManager();
 
   let $elm: any = null;
@@ -190,13 +192,18 @@ export function View(
   const methods = {
     // Helper: normalize children (convert functions, wrap refs)
     build_children(children?: ViewChildren) {
-      if (!children) {
+      const resolved = resolve_children(children);
+      if (!resolved) {
         return;
       }
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
+      for (let i = 0; i < resolved.length; i++) {
+        const child = resolved[i];
         // console.log("for children", child);
         (() => {
+          if (typeof child === "function") {
+            state.children[i] = child();
+            return;
+          }
           if (isElement(child)) {
             state.children[i] = child;
             return;
@@ -257,7 +264,9 @@ export function View(
         Object.keys(attributes).forEach((k) => {
           const vv = attributes[k];
           if (isRef(vv)) {
-            vv.subscribe({
+            const unsub = vv.subscribe({
+              __trackId: viewTrackId,
+              __trackInfo: { type: "props", key: k },
               onChange(v) {
                 state.attributes[k] = v as string;
                 if ($elm) {
@@ -265,6 +274,7 @@ export function View(
                 }
               },
             });
+            listener$.push(unsub);
             state.attributes[k] = vv.value;
             return;
           }
@@ -276,7 +286,9 @@ export function View(
         const vv = dataset[k];
         const attr_name = `data-${k}`;
         if (isRef(vv)) {
-          vv.subscribe({
+          const unsub = vv.subscribe({
+            __trackId: viewTrackId,
+            __trackInfo: { type: "dataset", key: k },
             onChange(v) {
               state.attributes[attr_name] = v as string;
               if ($elm) {
@@ -284,6 +296,7 @@ export function View(
               }
             },
           });
+          listener$.push(unsub);
           state.attributes[attr_name] = vv.value;
           return;
         }
@@ -294,7 +307,9 @@ export function View(
         if (typeof cls === "string") {
           state.styleSet = cls.split(" ");
         } else if (isRef(cls)) {
-          cls.subscribe({
+          const unsub = cls.subscribe({
+            __trackId: viewTrackId,
+            __trackInfo: { type: "class" },
             onChange(v: string) {
               state.styleSet = v.split(" ");
               if ($elm) {
@@ -302,10 +317,11 @@ export function View(
               }
             },
           });
+          listener$.push(unsub);
           state.styleSet = cls.value.split(" ");
         } else if (isClassNameRef(cls)) {
           state.styleSet = cls.toString().split(" ");
-          cls.subscribe({
+          const unsub = cls.subscribe({
             onChange(v) {
               state.styleSet = v;
               // console.log("[primitive]content/view - classNames notify", v);
@@ -314,6 +330,7 @@ export function View(
               }
             },
           });
+          listener$.push(unsub);
         } else {
           state.styleSet = [];
         }
@@ -323,7 +340,9 @@ export function View(
           Object.keys(style.value || {}).forEach((k) => {
             const sv = style.value[k];
             if (isRef(sv)) {
-              sv.subscribe({
+              const unsub = sv.subscribe({
+                __trackId: viewTrackId,
+                __trackInfo: { type: "style", key: k },
                 onChange(v) {
                   state.style[k] = v;
                   if ($elm) {
@@ -331,30 +350,32 @@ export function View(
                   }
                 },
               });
+              listener$.push(unsub);
               state.style[k] = sv.value;
             } else {
               state.style[k] = sv;
             }
           });
-          style.subscribe({
+          const unsub = style.subscribe({
+            __trackId: viewTrackId,
+            __trackInfo: { type: "style" },
             onChange(v) {
-              // state.props.style = {
-              //   ...state.props.style,
-              //   ...(style.value || {}),
-              // };
               state.style = v as RawViewStyleProperties;
               if ($elm && typeof $elm.setStyle === "function") {
                 $elm.setStyle(v);
               }
             },
           });
+          listener$.push(unsub);
           state.style = style.value;
         } else {
           Object.keys(style).forEach((k) => {
             const v = style[k];
             if (isRef(v)) {
               state.style[k] = v.value;
-              v.subscribe({
+              const unsub = v.subscribe({
+                __trackId: viewTrackId,
+                __trackInfo: { type: "style", key: k },
                 onChange(v) {
                   state.style[k] = v as any;
                   if ($elm) {
@@ -362,6 +383,7 @@ export function View(
                   }
                 },
               });
+              listener$.push(unsub);
             } else {
               state.style[k] = v;
             }

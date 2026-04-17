@@ -1,6 +1,14 @@
 import { has, get } from "./registry";
 import { refObject } from "./reactive-object";
-import { Subscriber, Ref, isRef, TimelessRefArray, DerivedRef } from "./types";
+import {
+  Subscriber,
+  SubscriberWithId,
+  Ref,
+  isRef,
+  TimelessRefArray,
+  DerivedRef,
+  DepInfo,
+} from "./types";
 import { __hmr_get_hot } from "./hmr";
 
 export interface RefArray<T> extends Ref<T[]> {
@@ -157,16 +165,8 @@ export function refArray<T>(
   }
 
   let raw_value = items;
-  const deps: Subscriber<T[]>[] = [];
-  function notify(action: {
-    type: "insert" | "delete" | "update" | "move" | "swap" | "refresh";
-    index?: number;
-    item?: T;
-    items?: T[];
-    deleteCount?: number;
-    from?: number;
-    to?: number;
-  }) {
+  const deps: SubscriberWithId<T[]>[] = [];
+  function notify(action: any) {
     for (let i = 0; i < deps.length; i += 1) {
       console.log("[]reactive-array - notify", i, action, deps.length);
       const ctx = deps[i];
@@ -178,7 +178,6 @@ export function refArray<T>(
           return;
         }
         if (ctx.onPatch) {
-          // @ts-ignore
           ctx.onPatch(action);
         }
       })();
@@ -212,9 +211,11 @@ export function refArray<T>(
       return raw_value.length;
     },
     subscribe(ctx: Subscriber<T[]>) {
-      deps.push(ctx);
+      const trackCtx = ctx as SubscriberWithId<T[]>;
+      deps.push(trackCtx);
       return function () {
-        deps.splice(deps.indexOf(ctx), 1);
+        const idx = deps.indexOf(trackCtx);
+        if (idx > -1) deps.splice(idx, 1);
       };
     },
     destroy() {
@@ -225,6 +226,21 @@ export function refArray<T>(
     },
     isStrictEqual(v: unknown) {
       return raw_value === v;
+    },
+    getDeps(): DepInfo[] {
+      return deps.map((ctx) => ({
+        trackId: ctx.__trackId || "unknown",
+        trackInfo: ctx.__trackInfo,
+      }));
+    },
+    dump() {
+      console.log("[reactive.dump] refArray subscribers:", deps.length);
+      deps.forEach((ctx, i) => {
+        console.log(
+          `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
+          ctx.__trackInfo || "",
+        );
+      });
     },
     get(idx: number) {
       const vv = raw_value[idx];

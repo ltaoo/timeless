@@ -1,10 +1,16 @@
 import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
-import { TimelessElement, ViewChildren, isElement } from "@/content/type";
+import {
+  TimelessElement,
+  ViewChildren,
+  isElement,
+  resolve_children,
+} from "@/content/type";
 import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
+import { getOwner, runWithOwner } from "@/context";
 
 const logger = Logger({ prefix: "primitive", scope: "reactive/show" });
 
@@ -23,6 +29,7 @@ type ShowState = { value: boolean; children: (TimelessElement | null)[] };
 
 export function Show(props: ShowProps) {
   const { when, onMounted, beforeUnmounted, onUnmounted } = props;
+  const _owner = getOwner();
   let $elm: any = null;
 
   const state: ShowState = {
@@ -37,19 +44,26 @@ export function Show(props: ShowProps) {
   const methods = {
     normalize_children(children?: ViewChildren) {
       if (children === null || children === undefined) return [];
-      if (Array.isArray(children)) {
-        return children;
+      const resolved = resolve_children(children);
+      if (!resolved) return [];
+      if (Array.isArray(resolved)) {
+        return resolved;
       }
-      return [children];
+      return [resolved];
     },
     build_children_with_condition(condition: boolean) {
       // console.log("build_children_with_condition", condition);
       const children: (TimelessElement | null)[] = [];
-      const next = condition
-        ? methods.normalize_children(props.ok())
-        : props.else
-          ? methods.normalize_children(props.else())
-          : [];
+      const evaluate = () => {
+        if (condition) {
+          return methods.normalize_children(props.ok());
+        }
+        if (props.else) {
+          return methods.normalize_children(props.else());
+        }
+        return [];
+      };
+      const next = _owner ? runWithOwner(_owner, evaluate) : evaluate();
       for (let i = 0; i < next.length; i += 1) {
         const node = next[i];
         (() => {
@@ -101,8 +115,11 @@ export function Show(props: ShowProps) {
               const target = methods.build_children_with_condition(condition);
               state.children = target;
               logger.log("before insert children", target.length);
+              logger.log("[Show.onChange] $elm=", $elm, "hasInsertChildren=", $elm && typeof $elm.insertChildren === "function");
               if ($elm && typeof $elm.insertChildren === "function") {
                 $elm.insertChildren(target);
+              } else {
+                logger.warn("[Show.onChange] SKIPPED insertChildren — $elm is", $elm);
               }
             }
           },

@@ -68,7 +68,7 @@ export function Root(
   props: ViewProps & { store: MenuCore },
   children?: ViewChildren,
 ) {
-  return MenuPrimitive.Root(props, children);
+  return MenuPrimitive.Root(props, children ?? []);
 }
 
 export function Trigger(
@@ -173,12 +173,10 @@ export function Trigger(
 
 export function Portal(
   props: ViewProps & {
-    store: MenuCore;
     animation?: { in: string; out: string };
   },
   children: ViewChildren = [],
 ) {
-  // Delegate to MenuPrimitive.Portal which uses Presence
   return MenuPrimitive.Portal(props, children);
 }
 

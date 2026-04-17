@@ -1,10 +1,10 @@
-import { computed, refobj } from "@timeless/timeless";
+import { computed, refobj, Show } from "@timeless/timeless";
 import { For, ViewChildren, ViewProps } from "@timeless/timeless";
 import { AccordionPrimitive } from "@timeless/ui-primitive";
 import { AccordionCore } from "@timeless/ui-vm";
 
 type AccordionItem = {
-  title: string | ViewChildren;
+  title: ViewChildren;
   content: ViewChildren;
 };
 
@@ -47,9 +47,15 @@ export function Accordion(
                     "flex w-full items-center justify-between py-4 font-medium transition-all cursor-pointer hover:underline",
                 },
                 [
-                  ...(typeof item.title === "string"
-                    ? [item.title]
-                    : item.title),
+                  Show({
+                    when: typeof item.title === "string",
+                    ok() {
+                      return item.title;
+                    },
+                    else() {
+                      return item.title || [];
+                    },
+                  }),
                   AccordionPrimitive.Chevron(
                     {
                       store,

@@ -1,11 +1,9 @@
-// console.log("reactive.version 1.4.0");
-
 import type {
   Subscriber,
+  SubscriberWithId,
+  DepInfo,
   Ref,
   DerivedRef,
-  // ClassNameRef,
-  // StyleRef,
   TimelessRefArray,
 } from "./types";
 import type { RefObject } from "./reactive-object";
@@ -32,11 +30,63 @@ import {
   getobj as registryGetObj,
   getarr as registryGetArr,
 } from "./registry";
-// import { classNames } from "./class-names";
-// import { styleNames } from "./style-names";
+
+let _trackIdCounter = 0;
+export function generateTrackId(prefix = "track"): string {
+  _trackIdCounter++;
+  return `${prefix}-${_trackIdCounter}-${Date.now()}`;
+}
+
+export function getDeps<T extends { getDeps?: () => any[] }>(ref: T): any[] {
+  return ref.getDeps?.() || [];
+}
+
+export function dumpDeps<T extends { dump?: () => void }>(ref: T): void {
+  ref.dump?.();
+}
+
+export interface DependencyDump {
+  ref: any;
+  deps: DepInfo[];
+  value: any;
+}
+
+export function dumpAll(refs: any[]): DependencyDump[] {
+  return refs.map((ref) => ({
+    ref,
+    deps: getDeps(ref),
+    value: ref.value,
+  }));
+}
+
+export function printDepTree(refs: any[]): void {
+  console.log("\n=== Reactive Dependency Tree ===");
+  refs.forEach((ref, i) => {
+    const deps = getDeps(ref);
+    console.log(`\n[${i}] ref:`, ref.value);
+    if (deps.length === 0) {
+      console.log("  └── (no subscribers)");
+    }
+    deps.forEach((dep, j) => {
+      const icon = j === deps.length - 1 ? "└──" : "├──";
+      console.log(`  ${icon} [${j}] ${dep.trackId}`, dep.trackInfo || "");
+    });
+  });
+  console.log("\n=================================\n");
+}
+
+export function findLeakedDeps(refs: any[]): DepInfo[] {
+  const allDeps: DepInfo[] = [];
+  refs.forEach((ref) => {
+    allDeps.push(...getDeps(ref));
+  });
+  return allDeps;
+}
 
 export {
   Subscriber,
+  SubscriberWithId,
+  DepInfo,
   Ref,
   DerivedRef,
   RefObject,

@@ -21,7 +21,12 @@
  */
 import { isRef } from "@timeless/reactive";
 
-import { TimelessElement, ViewChildren, isElement } from "@/content/type";
+import {
+  TimelessElement,
+  ViewChildren,
+  isElement,
+  resolve_children,
+} from "@/content/type";
 import { Text } from "@/content/text";
 import { MountedEvent } from "@/event";
 import { Logger } from "@/util/logger";
@@ -56,18 +61,19 @@ export function Portal(props: PortalProps, children?: ViewChildren) {
 
   const methods = {
     build_children(children?: ViewChildren) {
-      if (!children) {
+      const resolved = resolve_children(children);
+      if (!resolved) {
         return;
       }
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
+      for (let i = 0; i < resolved.length; i++) {
+        const child = resolved[i];
         // console.log("for children", child);
         (() => {
-          // if (typeof child === "function") {
-          //   const r = child();
-          //   state.children[i] = r;
-          //   return;
-          // }
+          if (typeof child === "function") {
+            const r = child();
+            state.children[i] = r;
+            return;
+          }
           if (isElement(child)) {
             state.children[i] = child;
             return;

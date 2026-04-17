@@ -37,6 +37,7 @@ import {
   TimelessElement,
   ViewAttributes,
   ViewChildren,
+  resolve_children,
 } from "./type";
 import { Text } from "./text";
 
@@ -275,15 +276,20 @@ export function Box<T>(props: BoxProps, extra_state: T) {
       }
     },
     build_children(children?: ViewChildren) {
-      if (!children) {
+      const resolved = resolve_children(children);
+      if (!resolved) {
         return;
       }
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
+      for (let i = 0; i < resolved.length; i++) {
+        const child = resolved[i];
         // console.log("for children", child);
         (() => {
           if (child === null) {
             state.children[i] = null;
+            return;
+          }
+          if (typeof child === "function") {
+            state.children[i] = child();
             return;
           }
           if (isElement(child)) {

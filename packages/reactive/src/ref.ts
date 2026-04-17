@@ -1,4 +1,12 @@
-import { DerivedRef, isRef, Ref, Subscriber, TimelessRef } from "./types";
+import {
+  DerivedRef,
+  isRef,
+  Ref,
+  Subscriber,
+  SubscriberWithId,
+  TimelessRef,
+  DepInfo,
+} from "./types";
 import { __hmr_get_hot } from "./hmr";
 
 export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
@@ -10,7 +18,8 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
 
   let raw_value = v;
   const _initial_value = v;
-  const deps: Subscriber<T>[] = [];
+  const deps: SubscriberWithId<any>[] = [];
+
   function notify(action: {
     type: string;
     index?: number;
@@ -20,33 +29,34 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
   }) {
     for (let i = 0; i < deps.length; i += 1) {
       const ctx = deps[i];
-      (() => {
-        if (action.type === "insert") {
-          if (ctx.onPatch) {
-            // @ts-ignore
-            ctx.onPatch(action);
-          }
-          return;
+      if (action.type === "insert") {
+        if (ctx.onPatch) {
+          ctx.onPatch(action as any);
         }
-        if (action.type === "update") {
-          if (ctx.onPatch) {
-            // @ts-ignore
-            ctx.onPatch(action);
-          }
-          return;
+        continue;
+      }
+      if (action.type === "update") {
+        if (ctx.onPatch) {
+          ctx.onPatch(action as any);
         }
-        if (ctx.onChange) {
-          ctx.onChange(raw_value);
-        }
-      })();
+        continue;
+      }
+      if (ctx.onChange) {
+        ctx.onChange(raw_value);
+      }
     }
   }
+
   const r = {
     __is_ref: true as const,
     subscribe(ctx: Subscriber<T>) {
-      deps.push(ctx);
+      const trackCtx: SubscriberWithId<T> = ctx as SubscriberWithId<T>;
+      deps.push(trackCtx);
       return function () {
-        deps.splice(deps.indexOf(ctx), 1);
+        const idx = deps.indexOf(trackCtx);
+        if (idx > -1) {
+          deps.splice(idx, 1);
+        }
       };
     },
     destroy() {
@@ -63,6 +73,21 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
     },
     isStrictEqual(v: unknown) {
       return raw_value === v;
+    },
+    getDeps(): DepInfo[] {
+      return deps.map((ctx) => ({
+        trackId: ctx.__trackId || "unknown",
+        trackInfo: ctx.__trackInfo,
+      }));
+    },
+    dump() {
+      console.log("[reactive.dump] ref subscribers:", deps.length);
+      deps.forEach((ctx, i) => {
+        console.log(
+          `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
+          ctx.__trackInfo || "",
+        );
+      });
     },
     as(value: T | ((cur: T) => T)) {
       if (typeof value === "function") {
@@ -144,8 +169,8 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
   };
 
   if (hot && __hmr_key) {
-    hot.data.__hmr_refs[__hmr_key] = r;
+    hot.data.__hmr_refs[__hmr_key] = r as any;
   }
 
-  return r;
+  return r as TimelessRef<T>;
 }

@@ -63,8 +63,8 @@ export default function OverlayView() {
     return request.get("/api/mock/downloads", params);
   }
 
-  const list$ = new Timeless.kit.ListCore(
-    new Timeless.kit.RequestCore(fetchDownloadList, { client: client$ }),
+  const list$ = new Timeless.ListCore(
+    new Timeless.RequestCore(fetchDownloadList, { client: client$ }),
     { pageSize: 10 },
   );
 

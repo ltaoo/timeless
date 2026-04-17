@@ -20,6 +20,7 @@ import {
   ViewChildren,
 } from "@/content/type";
 import { MountedEvent } from "@/event";
+import { ListenerManager } from "@/util/listener";
 
 import { Text } from "./text";
 import { Box, BoxProps } from "./box";
@@ -48,6 +49,7 @@ export function Label(props: LabelProps = {}, children?: ViewChildren) {
 
   let $elm: any = null;
   const box$ = Box<LabelState>(rest, {} as LabelState);
+  const listener$ = ListenerManager();
 
   const state = box$.state;
 
@@ -56,7 +58,7 @@ export function Label(props: LabelProps = {}, children?: ViewChildren) {
       box$.methods.subscribe_props();
       if (htmlFor !== undefined) {
         if (isRef(htmlFor)) {
-          htmlFor.subscribe({
+          const unsub = htmlFor.subscribe({
             onChange(v) {
               state.for = v as string;
               if ($elm) {
@@ -64,6 +66,7 @@ export function Label(props: LabelProps = {}, children?: ViewChildren) {
               }
             },
           });
+          listener$.push(unsub);
           state.for = htmlFor.value;
         } else {
           state.for = htmlFor;
@@ -97,6 +100,7 @@ export function Label(props: LabelProps = {}, children?: ViewChildren) {
       }
     },
     onUnmounted() {
+      // listener$.destroy();
       if (props.onUnmounted) {
         props.onUnmounted();
       }

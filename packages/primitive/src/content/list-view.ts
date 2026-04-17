@@ -37,6 +37,7 @@ import {
   TimelessElement,
   ViewAttributes,
   ViewChildren,
+  resolve_children,
 } from "./type";
 
 /** Props for ListView component */
@@ -103,7 +104,7 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
     onAnimationEnd,
   } = props;
 
-  const manager$ = ListenerManager();
+  const listener$ = ListenerManager();
 
   let $elm: any = null;
 
@@ -133,7 +134,7 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
       onDrop?: (e: DragEvent) => void;
       onAnimationEnd?: (e: AnimationEvent) => void;
     }>;
-    children: TimelessElement[];
+    children: (TimelessElement | null)[];
   } = {
     rendered: false,
     props: {
@@ -165,15 +166,15 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
   const methods = {
     // Helper: normalize children (convert functions, wrap refs)
     setup_children(children?: ViewChildren) {
-      if (!children) {
+      const resolved = resolve_children(children);
+      if (!resolved) {
         return;
       }
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
+      for (let i = 0; i < resolved.length; i++) {
+        const child = resolved[i];
         console.log("ListView children", child);
         (() => {
           if (typeof child === "function") {
-            // @ts-ignore
             const r = child();
             state.children[i] = r;
             return;
@@ -226,7 +227,7 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
     ) {
       // host.addEventListener(target, type, handler, options);
       target.addEventListener(type, handler, options);
-      manager$.push(() => {
+      listener$.push(() => {
         // host.removeEventListener(target, type, handler, options);
         target.removeEventListener(type, handler, options);
       });
@@ -238,13 +239,14 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
         Object.keys(attributes).forEach((k) => {
           const vv = attributes[k];
           if (isRef(vv)) {
-            vv.subscribe({
+            const unsub = vv.subscribe({
               onChange(v) {
                 if ($elm) {
                   methods.apply_attr(k, v);
                 }
               },
             });
+            listener$.push(unsub);
             methods.apply_attr(k, vv.value);
             return;
           }
@@ -256,13 +258,14 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
         const vv = dataset[k];
         const attrName = `data-${k}`;
         if (isRef(vv)) {
-          vv.subscribe({
+          const unsub = vv.subscribe({
             onChange(v) {
               if ($elm) {
                 methods.apply_attr(attrName, v);
               }
             },
           });
+          listener$.push(unsub);
           methods.apply_attr(attrName, vv.value);
           return;
         }
@@ -275,7 +278,7 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
           // $elm.setStyleSet(cls);
           state.props.styleSet = [cls];
         } else if (isRef(cls)) {
-          cls.subscribe({
+          const unsub = cls.subscribe({
             onChange(v: any) {
               if ($elm) {
                 // host.setClassName($elm, v);
@@ -283,11 +286,12 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
               }
             },
           });
+          listener$.push(unsub);
           // host.setClassName($elm, cls.value);
           // $elm.setStyleSet(cls.value);
           state.props.styleSet = [cls.value];
         } else if (isClassNameRef(cls)) {
-          cls.subscribe({
+          const unsub = cls.subscribe({
             onChange(v: any) {
               if ($elm) {
                 // host.setClassName($elm, v.join(" "));
@@ -295,6 +299,7 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
               }
             },
           });
+          listener$.push(unsub);
           // host.setClassName($elm, cls.toString());
           // $elm.setStyleSet(cls.toString());
           state.props.styleSet = cls.toString().split(" ");
@@ -306,7 +311,7 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
         (() => {
           if (isRef(style)) {
             state.props.style = (style.value || {}) as ViewStyleProperties;
-            style.subscribe({
+            const unsub = style.subscribe({
               onChange() {
                 state.props.style = {
                   ...state.props.style,
@@ -317,19 +322,21 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
                 }
               },
             });
+            listener$.push(unsub);
             return;
           }
           Object.keys(style).forEach((k) => {
             const v = style[k];
             if (isRef(v)) {
               state.props.style[k] = v.value;
-              v.subscribe({
+              const unsub = v.subscribe({
                 onChange(v) {
                   if ($elm) {
                     $elm.setStyleValue(k, v);
                   }
                 },
               });
+              listener$.push(unsub);
             } else {
               state.props.style[k] = v;
             }
@@ -582,7 +589,7 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
         }
       }
       if (onMounted) {
-        manager$.push(onMounted({ target: $elm }));
+        listener$.push(onMounted({ target: $elm }));
       }
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
@@ -624,26 +631,13 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
         // console.log("[View] calling props.onUnmounted");
         props.onUnmounted();
       }
-      manager$.clean();
+      // listener$.destroy();
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
         if (isElement(node)) {
-          // 如果是 Portal 组件，调用其 cleanup 方法
-          // if (node.t === "portal" && typeof node.cleanup === "function") {
-          //   // console.log("[View] calling cleanup on Portal child");
-          //   node.cleanup();
-          // } else if (node.onUnmounted) {
-          //   // 否则调用标准的 onUnmounted
-          //   // console.log("[View] calling onUnmounted on child:", node.t);
-          //   node.onUnmounted();
-          // }
         }
       }
-      // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
-      // host.clearChildren($elm);
       $elm.removeChildren();
-      // console.log("[View] onUnmounted completed");
-      // Reset state for potential re-render (e.g., when Show toggles when back to true)
       state.rendered = false;
       $elm = null;
     },

@@ -118,40 +118,19 @@ function ApplicationRootView() {
     console.error(err);
   });
 
-  // const elm = Select({
-  //   class: "w-[120px]",
-  //   store: new Timeless.ui.SelectCore({
-  //     defaultValue: "apple",
-  //     options: [
-  //       { value: "apple", label: "苹果" },
-  //       { value: "banana", label: "香蕉" },
-  //       { value: "orange", label: "橙子" },
-  //     ],
-  //   }),
-  // });
-  // console.log("elm", elm);
-  // return elm;
-  return Fragment(
-    {
-      // onMounted() {
-      //   console.log("root fragment mounted");
-      // },
-    },
-    [
-      StandardSubViews({
-        view: root_view$,
-        views,
-        history: history$,
-        app,
-        client: client$,
-        storage: storage$,
-        NotFound: NotFoundPageView,
-        ErrorFallback: ErrorFallbackView,
-      }),
-      Portal({}, [Toaster({ store: toaster$, position: "top-center" })]),
-      // HistoryPanel({ store: history }),
-    ],
-  );
+  return Fragment({}, [
+    StandardSubViews({
+      view: root_view$,
+      views,
+      history: history$,
+      app,
+      client: client$,
+      storage: storage$,
+      NotFound: NotFoundPageView,
+      ErrorFallback: ErrorFallbackView,
+    }),
+    Portal({}, [Toaster({ store: toaster$, position: "top-center" })]),
+  ]);
 }
 
 document.addEventListener("DOMContentLoaded", function () {

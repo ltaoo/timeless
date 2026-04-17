@@ -12,6 +12,7 @@
 import { isRef } from "@timeless/reactive";
 
 import { MountedEvent } from "@/event";
+import { ListenerManager } from "@/util/listener";
 
 import { Box, BoxProps, BoxState } from "./box";
 
@@ -40,6 +41,7 @@ type IconState = {
  */
 export function Icon(props: IconProps) {
   let $elm: any = null;
+  const listener$ = ListenerManager();
   const box$ = Box<IconState>(props, {
     name: "",
     size: 24,
@@ -52,9 +54,10 @@ export function Icon(props: IconProps) {
       box$.methods.subscribe_props();
       if (props.name !== undefined) {
         if (isRef(props.name)) {
-          props.name.subscribe({
+          const unsub_name = props.name.subscribe({
             onChange(v) {},
           });
+          listener$.push(unsub_name);
           state.name = props.name.value;
         } else {
           state.name = props.name;
@@ -62,9 +65,10 @@ export function Icon(props: IconProps) {
       }
       if (props.size !== undefined) {
         if (isRef(props.size)) {
-          props.size.subscribe({
+          const unsub_size = props.size.subscribe({
             onChange(v) {},
           });
+          listener$.push(unsub_size);
           state.size = props.size.value;
         } else {
           state.size = props.size;
@@ -72,9 +76,10 @@ export function Icon(props: IconProps) {
       }
       if (props.color !== undefined) {
         if (isRef(props.color)) {
-          props.color.subscribe({
+          const unsub_color = props.color.subscribe({
             onChange(v) {},
           });
+          listener$.push(unsub_color);
           state.color = props.color.value;
         } else {
           state.color = props.color;
@@ -101,6 +106,7 @@ export function Icon(props: IconProps) {
       }
     },
     onUnmounted() {
+      // listener$.destroy();
       if (props.onUnmounted) {
         props.onUnmounted();
       }

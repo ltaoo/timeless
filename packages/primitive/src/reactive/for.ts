@@ -13,6 +13,7 @@ import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
+import { getOwner, runWithOwner } from "@/context";
 
 export type ForProps<T> = {
   key?: string;
@@ -52,6 +53,7 @@ export function For<T>(
   }>,
 ) {
   let $elm: any = null;
+  const _owner = getOwner();
 
   const _key = props.key;
   const state: ForState<T> = {
@@ -151,7 +153,9 @@ export function For<T>(
       for (let i = 0; i < items.length; i += 1) {
         const item = items[i];
         const idx_computed = methods.create_idx(item);
-        const elm = props.render(item.v, idx_computed);
+        const elm = _owner
+          ? runWithOwner(_owner, () => props.render(item.v, idx_computed))
+          : props.render(item.v, idx_computed);
         state.items[i] = item.v;
         state.children.push(elm);
         state.idx_arr[i] = idx_computed;
@@ -177,7 +181,9 @@ export function For<T>(
         inserted_wrapped_items.push(wrapped_item);
         inserted_items.push(item);
         inserted_idx.push(idx);
-        const child_tmp = props.render(item, idx);
+        const child_tmp = _owner
+          ? runWithOwner(_owner, () => props.render(item, idx))
+          : props.render(item, idx);
         const child = (() => {
           if (isElement(child_tmp)) {
             return child_tmp;
@@ -406,7 +412,9 @@ export function For<T>(
           // Added (New) - create new computed index and render
           const idx_computed = methods.create_idx(new_item);
           new_index_computed[i] = idx_computed;
-          const res = props.render(new_item.v, idx_computed);
+          const res = _owner
+            ? runWithOwner(_owner, () => props.render(new_item.v, idx_computed))
+            : props.render(new_item.v, idx_computed);
           new_elements[i] = res;
           added_nodes.push({ idx: i, element: res });
         }
@@ -512,7 +520,6 @@ export function For<T>(
       }
     },
     onUnmounted() {
-      state.rendered = true;
       if (props.onUnmounted) {
         props.onUnmounted();
       }
@@ -521,6 +528,7 @@ export function For<T>(
       //   state.idx_arr[i].destroy();
       // }
       // state.rendered = false;
+      // state.subscribed = false;
       // state.items = [];
       // state.wrapped_items = [];
       // state.idx_arr = [];

@@ -53,11 +53,12 @@ export function Row(props: RowProps, children?: ViewChildren) {
       if (gap !== undefined) {
         if (isRef(gap)) {
           state.gap = gap.value;
-          gap.subscribe({
+          const unsub = gap.subscribe({
             onChange(v) {
               state.gap = v;
             },
           });
+          box$.methods.unsubscribe(unsub);
         } else {
           state.gap = gap;
         }
@@ -97,6 +98,7 @@ export function Row(props: RowProps, children?: ViewChildren) {
       }
     },
     onUnmounted() {
+      box$.methods.destroy();
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }

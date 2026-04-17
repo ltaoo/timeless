@@ -234,7 +234,7 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
     ),
     (() => {
       const inner$ = props.store.menu
-        ? MenuPrimitive.Portal({ store: props.store.menu }, [
+        ? MenuPrimitive.Portal({}, [
             MenuPrimitive.SubMenuContent(
               {
                 store: props.store.menu,

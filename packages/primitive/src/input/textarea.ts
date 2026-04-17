@@ -113,12 +113,13 @@ export function Textarea(props: TextareaProps) {
     setup_value_subscribe() {
       if (id !== undefined) {
         if (isRef(id)) {
-          id.subscribe({
+          const unsub = id.subscribe({
             onChange(v) {
               state.id = v as string;
               methods.setProp("id", String(v));
             },
           });
+          manager$.push(unsub);
           // methods.setProp("id", id.value);
           state.id = id.value;
         } else {
@@ -130,7 +131,7 @@ export function Textarea(props: TextareaProps) {
       // Handle value attribute
       if (value !== undefined) {
         if (isRef(value)) {
-          value.subscribe({
+          const unsub = value.subscribe({
             onChange(v) {
               state.value = v as string;
               if ($elm && typeof $elm.setValue === "function") {
@@ -139,6 +140,7 @@ export function Textarea(props: TextareaProps) {
               // methods.setProp("value", v);
             },
           });
+          manager$.push(unsub);
           state.value = value.value;
           // methods.setProp("value", value.value);
         } else {
@@ -150,12 +152,13 @@ export function Textarea(props: TextareaProps) {
       // Handle placeholder attribute
       if (placeholder !== undefined) {
         if (isRef(placeholder)) {
-          placeholder.subscribe({
+          const unsub = placeholder.subscribe({
             onChange(v) {
               state.placeholder = v as string;
               methods.setProp("placeholder", v);
             },
           });
+          manager$.push(unsub);
           // methods.setProp("placeholder", placeholder.value);
           state.placeholder = placeholder.value;
         } else {
@@ -167,7 +170,7 @@ export function Textarea(props: TextareaProps) {
       // Handle disabled attribute
       if (disabled !== undefined) {
         if (isRef(disabled)) {
-          disabled.subscribe({
+          const unsub = disabled.subscribe({
             onChange(v) {
               state.disabled = v as boolean;
               if (v) {
@@ -178,6 +181,7 @@ export function Textarea(props: TextareaProps) {
               // methods.setProp("disabled", v);
             },
           });
+          manager$.push(unsub);
           // methods.setProp("disabled", disabled.value);
           state.disabled = disabled.value;
         } else {
@@ -189,11 +193,12 @@ export function Textarea(props: TextareaProps) {
       // Handle readonly attribute
       if (readonly !== undefined) {
         if (isRef(readonly)) {
-          readonly.subscribe({
+          const unsub = readonly.subscribe({
             onChange(v) {
               methods.setProp("readOnly", v);
             },
           });
+          manager$.push(unsub);
           // methods.setProp("readOnly", readonly.value);
         } else {
           // methods.setProp("readOnly", readonly);
@@ -203,12 +208,13 @@ export function Textarea(props: TextareaProps) {
       // Handle maxLength attribute
       if (maxLength !== undefined) {
         if (isRef(maxLength)) {
-          maxLength.subscribe({
+          const unsub = maxLength.subscribe({
             onChange(v) {
               state.maxLength = v as number;
               methods.setProp("maxLength", v);
             },
           });
+          manager$.push(unsub);
           // methods.setProp("maxLength", maxLength.value);
           state.maxLength = maxLength.value;
         } else {
@@ -220,12 +226,13 @@ export function Textarea(props: TextareaProps) {
       // Handle minLength attribute
       if (minLength !== undefined) {
         if (isRef(minLength)) {
-          minLength.subscribe({
+          const unsub = minLength.subscribe({
             onChange(v) {
               state.minLength = v as number;
               methods.setProp("minLength", v);
             },
           });
+          manager$.push(unsub);
           state.minLength = minLength.value;
           // methods.setProp("minLength", minLength.value);
         } else {
@@ -237,11 +244,12 @@ export function Textarea(props: TextareaProps) {
       // Handle pattern attribute
       if (pattern !== undefined) {
         if (isRef(pattern)) {
-          pattern.subscribe({
+          const unsub = pattern.subscribe({
             onChange(v) {
               methods.setProp("pattern", v);
             },
           });
+          manager$.push(unsub);
           // methods.setProp("pattern", pattern.value);
         } else {
           // methods.setProp("pattern", pattern);
@@ -251,12 +259,13 @@ export function Textarea(props: TextareaProps) {
       // Handle required attribute
       if (required !== undefined) {
         if (isRef(required)) {
-          required.subscribe({
+          const unsub = required.subscribe({
             onChange(v) {
               state.required = v as boolean;
               methods.setProp("required", v);
             },
           });
+          manager$.push(unsub);
           // methods.setProp("required", required.value);
           state.required = required.value;
         } else {
@@ -268,11 +277,12 @@ export function Textarea(props: TextareaProps) {
       // Handle autocomplete attribute
       if (autocomplete !== undefined) {
         if (isRef(autocomplete)) {
-          autocomplete.subscribe({
+          const unsub = autocomplete.subscribe({
             onChange(v) {
               methods.setProp("autocomplete", v);
             },
           });
+          manager$.push(unsub);
           // methods.setProp("autocomplete", autocomplete.value);
         } else {
           // methods.setProp("autocomplete", autocomplete);
@@ -282,12 +292,13 @@ export function Textarea(props: TextareaProps) {
       // Handle name attribute
       if (name !== undefined) {
         if (isRef(name)) {
-          name.subscribe({
+          const unsub = name.subscribe({
             onChange(v) {
               state.name = v as string;
               methods.setProp("name", v);
             },
           });
+          manager$.push(unsub);
           // methods.setProp("name", name.value);
           state.name = name.value;
         } else {
@@ -306,11 +317,12 @@ export function Textarea(props: TextareaProps) {
         Object.keys(attributes).forEach((k) => {
           const vv = attributes[k];
           if (isRef(vv)) {
-            vv.subscribe({
+            const unsub = vv.subscribe({
               onChange(v: any) {
                 methods.applyAttr(k, v);
               },
             });
+            manager$.push(unsub);
             methods.applyAttr(k, vv.value);
             return;
           }
@@ -324,11 +336,12 @@ export function Textarea(props: TextareaProps) {
         const vv = dataset[k];
         const attrName = `data-${k}`;
         if (isRef(vv)) {
-          vv.subscribe({
+          const unsub = vv.subscribe({
             onChange(v: any) {
               methods.applyAttr(attrName, v);
             },
           });
+          manager$.push(unsub);
           // methods.applyAttr(attrName, vv.value);
           return;
         }
@@ -341,7 +354,7 @@ export function Textarea(props: TextareaProps) {
           state.styleSet = [cls];
           // host.setClassName($elm, cls);
         } else if (isRef(cls)) {
-          cls.subscribe({
+          const unsub = cls.subscribe({
             onChange(v: string) {
               state.styleSet = v.split(" ");
               if ($elm) {
@@ -349,10 +362,11 @@ export function Textarea(props: TextareaProps) {
               }
             },
           });
+          manager$.push(unsub);
           // host.setClassName($elm, String(cls.value));
           state.styleSet = cls.value.split(" ");
         } else if (isClassNameRef(cls)) {
-          cls.subscribe({
+          const unsub = cls.subscribe({
             onChange(v: string[]) {
               state.styleSet = v;
               if ($elm) {
@@ -360,6 +374,7 @@ export function Textarea(props: TextareaProps) {
               }
             },
           });
+          manager$.push(unsub);
           state.styleSet = cls.value;
         }
       }
@@ -368,7 +383,7 @@ export function Textarea(props: TextareaProps) {
       if (style) {
         if (isRef(style)) {
           const st = style;
-          st.subscribe({
+          const unsub = st.subscribe({
             onChange(v) {
               // host.setStyleText($elm, viewStyleToCssText(v ?? {}));
               state.style = v as any;
@@ -377,27 +392,30 @@ export function Textarea(props: TextareaProps) {
               }
             },
           });
+          manager$.push(unsub);
           // host.setStyleText($elm, viewStyleToCssText(st.value));
           state.style = st.value as RawViewStyleProperties;
         } else if (isStyleRef(style)) {
           const st = style;
-          st.subscribe({
+          const unsub = st.subscribe({
             onChange() {
               state.style = st.value as RawViewStyleProperties;
               $elm.setStyleSet(st.value || {});
             },
           });
+          manager$.push(unsub);
           state.style = st.value;
         } else {
           Object.keys(style as any).forEach((k) => {
             const vv = style[k];
             if (isRef(vv)) {
-              vv.subscribe({
+              const unsub = vv.subscribe({
                 onChange() {
                   state.style = style as any;
                   $elm.setStyleSet(style);
                 },
               });
+              manager$.push(unsub);
             }
           });
           state.style = style as any;
@@ -427,6 +445,7 @@ export function Textarea(props: TextareaProps) {
       if (props.beforeUnmounted) props.beforeUnmounted();
     },
     onUnmounted() {
+      manager$.destroy();
       if (props.onUnmounted) props.onUnmounted();
     },
   };

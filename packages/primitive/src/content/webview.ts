@@ -17,6 +17,7 @@
 import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
 import { MountedEvent } from "@/event/index";
+import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
 
 import { TimelessElement } from "./type";
@@ -46,6 +47,7 @@ export function Webview(props: WebviewProps): TimelessElement<WebviewState> {
   const { href, ...rest } = props;
 
   let $elm: any = null;
+  const listener$ = ListenerManager();
   const box$ = Box<WebviewState>(rest, {} as WebviewState);
   const state = box$.state;
   const events = box$.events;
@@ -57,11 +59,12 @@ export function Webview(props: WebviewProps): TimelessElement<WebviewState> {
       if (href !== undefined) {
         if (isRef(href)) {
           state.href = href.value;
-          href.subscribe({
+          const unsub = href.subscribe({
             onChange(v) {
               state.href = v;
             },
           });
+          listener$.push(unsub);
         } else {
           state.href = href;
         }
@@ -100,6 +103,7 @@ export function Webview(props: WebviewProps): TimelessElement<WebviewState> {
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }
+      listener$.destroy();
       box$.methods.destroy();
       state.rendered = false;
       $elm = null;

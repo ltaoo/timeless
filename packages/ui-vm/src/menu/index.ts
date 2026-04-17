@@ -53,6 +53,8 @@ type MenuCoreProps = {
   content?: unknown;
   offsetX?: number;
   offsetY?: number;
+  /** 默认是否展示菜单 */
+  defaultVisible?: boolean;
 };
 
 export class MenuCore extends BaseDomain<TheTypesOfEvents> {
@@ -90,6 +92,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       strategy = "fixed",
       offsetX = 0,
       offsetY = 0,
+      defaultVisible = false,
     } = options;
     if (_name) {
       this._name = _name;
@@ -115,7 +118,12 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       offsetY,
       _name: _name ? `${_name}__popper` : "menu__popper",
     });
-    this.presence = new PresenceCore();
+    this.presence = new PresenceCore(
+      defaultVisible ? { mounted: true, visible: true } : {},
+    );
+    if (defaultVisible) {
+      this.state.open = true;
+    }
     this.layer = new DismissableLayerCore();
 
     this.listen_items(items);

@@ -369,6 +369,7 @@ export function HostElement(props: {
     insertChildren(children: (TimelessElement | null)[]) {
       const r = methods.buildChildren(children);
       const $parent = methods.getParent();
+      console.log("[HostElement.insertChildren]", props.t, "$elm=", $elm, "$parent=", $parent, "fragment children=", r.$fragment.childNodes.length);
       if ($parent) {
         if ($elm && $elm instanceof Text) {
           $parent.insertBefore(r.$fragment, $elm);
@@ -385,7 +386,7 @@ export function HostElement(props: {
       }, 0);
     },
     removeChildren() {
-      if (child_host_nodes.length === 0) {
+      if (child_host_nodes.length === 0 && child_nodes.length === 0) {
         return;
       }
       const $parent = methods.getParent();

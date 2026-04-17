@@ -23,3 +23,6 @@ export * from "./show";
 export * from "./style";
 export * from "./textarea";
 export * from "./type";
+export * from "./split-view";
+export * from "./scroll-view";
+export * from "./tab-view";

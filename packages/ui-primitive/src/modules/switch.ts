@@ -1,4 +1,4 @@
-import { computed, refobj } from "@timeless/timeless";
+import { computed, Fragment, refobj } from "@timeless/timeless";
 import {
   View,
   ViewProps,
@@ -90,7 +90,7 @@ export function Root(
           store.handleChange(!!$input.checked);
         },
       }),
-      ...(children || []),
+      Fragment({}, children),
     ],
   );
 }

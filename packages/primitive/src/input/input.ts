@@ -2,6 +2,7 @@ import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
+import { ListenerManager } from "@/util/listener";
 
 export type InputProps = BoxProps & {
   id?: string | null;
@@ -55,6 +56,7 @@ export function Input(props: InputProps = {}) {
   const box$ = Box<InputState>(rest, {
     value: "",
   } as InputState);
+  const listener$ = ListenerManager();
 
   const state = box$.state;
   const events = box$.events;
@@ -97,12 +99,13 @@ export function Input(props: InputProps = {}) {
 
       if (id !== undefined && id !== null) {
         if (isRef(id)) {
-          id.subscribe({
+          const unsub_id = id.subscribe({
             onChange(v) {
               state.id = v as string;
               methods.setProp("id", String(v));
             },
           });
+          listener$.push(unsub_id);
           state.id = id.value;
         } else {
           state.id = id;
@@ -112,7 +115,7 @@ export function Input(props: InputProps = {}) {
       // Handle value attribute
       if (value !== undefined) {
         if (isRef(value)) {
-          value.subscribe({
+          const unsub_value = value.subscribe({
             onChange(v) {
               state.value = v;
               if ($elm && typeof $elm.setValue === "function") {
@@ -121,6 +124,7 @@ export function Input(props: InputProps = {}) {
               // methods.setProp("value", v);
             },
           });
+          listener$.push(unsub_value);
           state.value = value.value;
         } else {
           state.value = value;
@@ -130,12 +134,13 @@ export function Input(props: InputProps = {}) {
       // Handle placeholder attribute
       if (placeholder !== undefined) {
         if (isRef(placeholder)) {
-          placeholder.subscribe({
+          const unsub_placeholder = placeholder.subscribe({
             onChange(v) {
               state.placeholder = v;
               methods.setProp("placeholder", v);
             },
           });
+          listener$.push(unsub_placeholder);
           state.placeholder = placeholder.value;
         } else {
           state.placeholder = placeholder;
@@ -145,7 +150,7 @@ export function Input(props: InputProps = {}) {
       // Handle disabled attribute
       if (disabled !== undefined) {
         if (isRef(disabled)) {
-          disabled.subscribe({
+          const unsub_disabled = disabled.subscribe({
             onChange(v) {
               state.disabled = v;
               if (v) {
@@ -155,6 +160,7 @@ export function Input(props: InputProps = {}) {
               }
             },
           });
+          listener$.push(unsub_disabled);
           state.disabled = disabled.value;
         } else {
           state.disabled = disabled;
@@ -164,11 +170,12 @@ export function Input(props: InputProps = {}) {
       // Handle readonly attribute
       if (readonly !== undefined) {
         if (isRef(readonly)) {
-          readonly.subscribe({
+          const unsub_readonly = readonly.subscribe({
             onChange(v) {
               methods.setProp("readOnly", v);
             },
           });
+          listener$.push(unsub_readonly);
           // methods.setProp("readOnly", readonly.value);
         } else {
           // methods.setProp("readOnly", readonly);
@@ -179,12 +186,13 @@ export function Input(props: InputProps = {}) {
       if (maxLength !== undefined) {
         if (isRef(maxLength)) {
           state.maxLength = maxLength.value;
-          maxLength.subscribe({
+          const unsub_maxLength = maxLength.subscribe({
             onChange(v) {
               state.maxLength = v;
               methods.setProp("maxLength", v);
             },
           });
+          listener$.push(unsub_maxLength);
         } else {
           state.maxLength = maxLength;
         }
@@ -194,12 +202,13 @@ export function Input(props: InputProps = {}) {
       if (minLength !== undefined) {
         if (isRef(minLength)) {
           state.minLength = minLength.value;
-          minLength.subscribe({
+          const unsub_minLength = minLength.subscribe({
             onChange(v) {
               state.minLength = v;
               methods.setProp("minLength", v);
             },
           });
+          listener$.push(unsub_minLength);
         } else {
           state.minLength = minLength;
         }
@@ -208,11 +217,12 @@ export function Input(props: InputProps = {}) {
       // Handle pattern attribute
       if (pattern !== undefined) {
         if (isRef(pattern)) {
-          pattern.subscribe({
+          const unsub_pattern = pattern.subscribe({
             onChange(v) {
               methods.setProp("pattern", v);
             },
           });
+          listener$.push(unsub_pattern);
           // methods.setProp("pattern", pattern.value);
         } else {
           // methods.setProp("pattern", pattern);
@@ -223,12 +233,13 @@ export function Input(props: InputProps = {}) {
       if (required !== undefined) {
         if (isRef(required)) {
           state.required = required.value;
-          required.subscribe({
+          const unsub_required = required.subscribe({
             onChange(v) {
               state.required = v;
               methods.setProp("required", v);
             },
           });
+          listener$.push(unsub_required);
         } else {
           state.required = required;
         }
@@ -237,11 +248,12 @@ export function Input(props: InputProps = {}) {
       // Handle autocomplete attribute
       if (autocomplete !== undefined) {
         if (isRef(autocomplete)) {
-          autocomplete.subscribe({
+          const unsub_autocomplete = autocomplete.subscribe({
             onChange(v) {
               methods.setProp("autocomplete", v);
             },
           });
+          listener$.push(unsub_autocomplete);
           // methods.setProp("autocomplete", autocomplete.value);
         } else {
           // methods.setProp("autocomplete", autocomplete);
@@ -252,12 +264,13 @@ export function Input(props: InputProps = {}) {
       if (name !== undefined) {
         if (isRef(name)) {
           state.name = name.value;
-          name.subscribe({
+          const unsub_name = name.subscribe({
             onChange(v) {
               state.name = v;
               methods.setProp("name", v);
             },
           });
+          listener$.push(unsub_name);
         } else {
           state.name = name;
         }
@@ -289,6 +302,7 @@ export function Input(props: InputProps = {}) {
       }
     },
     onUnmounted() {
+      listener$.destroy();
       box$.methods.destroy();
       if (rest.onUnmounted) {
         rest.onUnmounted();

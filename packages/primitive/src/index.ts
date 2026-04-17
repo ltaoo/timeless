@@ -4,6 +4,15 @@ export * from "./reactive/for";
 export * from "./reactive/show";
 export * from "./reactive/match";
 export * from "./content/fragment";
+export {
+  createContext,
+  provide,
+  use,
+  Scope,
+  getOwner,
+  runWithOwner,
+} from "./context";
+export type { Context } from "./context";
 
 // Content
 export * from "./content/view";
@@ -29,6 +38,10 @@ export * from "./layout/flex";
 export * from "./layout/grid";
 export * from "./layout/row";
 export * from "./layout/column";
+export * from "./layout/split";
+export * from "./layout/scroll";
+export * from "./layout/window";
+export * from "./layout/tab";
 
 // Input
 export * from "./input/input";

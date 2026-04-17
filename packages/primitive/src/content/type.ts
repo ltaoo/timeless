@@ -107,11 +107,25 @@ export function isElement(v: any): v is TimelessElement {
   return false;
 }
 
-export type ViewChildren = (
+export type ViewChildrenArray = (
   | DerivedRef<string | number>
   | Ref<string | number>
   | TimelessElement
+  | (() => TimelessElement | null)
   | string
   | number
   | null
 )[];
+
+/** Children can be an eager array or a lazy callback returning one */
+export type ViewChildren = ViewChildrenArray | (() => ViewChildrenArray);
+
+/** Resolve ViewChildren to a concrete array */
+export function resolve_children(
+  children?: ViewChildren,
+): ViewChildrenArray | undefined {
+  if (typeof children === "function") {
+    return children();
+  }
+  return children;
+}

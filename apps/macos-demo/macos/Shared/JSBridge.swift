@@ -19,6 +19,11 @@ enum NativeNode {
     case select(items: [String], style: [String: String], jsValue: JSValue?)
     case icon(name: String, color: String, size: CGFloat, style: [String: String], jsValue: JSValue?)
     case aspectRatio(ratio: CGFloat, style: [String: String], children: [NativeNode], jsValue: JSValue?)
+    case splitView(direction: String, defaultSizes: [CGFloat], minSizes: [CGFloat], maxSizes: [CGFloat], dividerStyle: String, children: [NativeNode], jsValue: JSValue?)
+    case splitPane(size: CGFloat, minSize: CGFloat, maxSize: CGFloat, collapsible: Bool, collapsedSize: CGFloat, children: [NativeNode], jsValue: JSValue?)
+    case scrollView(horizontal: String, vertical: String, children: [NativeNode], jsValue: JSValue?)
+    case tabView(activeIndex: Int, position: String, children: [NativeNode], jsValue: JSValue?)
+    case tabPane(label: String, icon: String, children: [NativeNode], jsValue: JSValue?)
 }
 
 /// Bridge between JavaScriptCore and native rendering.
@@ -351,6 +356,70 @@ class JSBridge {
             }
             let children = parseChildren(value)
             return .aspectRatio(ratio: ratio, style: style, children: children, jsValue: value)
+        }
+
+        if type == "split-view" {
+            let style = dict["style"] as? [String: String] ?? [:]
+            let direction = dict["direction"] as? String ?? "horizontal"
+            let defaultSizes: [CGFloat]
+            if let sizes = dict["defaultSizes"] as? [Double] {
+                defaultSizes = sizes.map { CGFloat($0) }
+            } else if let sizes = dict["defaultSizes"] as? Double {
+                defaultSizes = [CGFloat(sizes), 100 - CGFloat(sizes)]
+            } else {
+                defaultSizes = [50, 50]
+            }
+            let minSizes: [CGFloat]
+            if let sizes = dict["minSizes"] as? [Double] {
+                minSizes = sizes.map { CGFloat($0) }
+            } else if let size = dict["minSize"] as? Double {
+                minSizes = [CGFloat(size), CGFloat(size)]
+            } else {
+                minSizes = [10, 10]
+            }
+            let maxSizes: [CGFloat]
+            if let sizes = dict["maxSizes"] as? [Double] {
+                maxSizes = sizes.map { CGFloat($0) }
+            } else if let size = dict["maxSize"] as? Double {
+                maxSizes = [CGFloat(size), CGFloat(size)]
+            } else {
+                maxSizes = [90, 90]
+            }
+            let dividerStyle = dict["dividerStyle"] as? String ?? "thin"
+            let children = parseChildren(value)
+            return .splitView(direction: direction, defaultSizes: defaultSizes, minSizes: minSizes, maxSizes: maxSizes, dividerStyle: dividerStyle, children: children, jsValue: value)
+        }
+
+        if type == "split-pane" {
+            let style = dict["style"] as? [String: String] ?? [:]
+            let size = dict["size"] as? CGFloat ?? 50
+            let minSize = dict["minSize"] as? CGFloat ?? 10
+            let maxSize = dict["maxSize"] as? CGFloat ?? 90
+            let collapsible = dict["collapsible"] as? Bool ?? false
+            let collapsedSize = dict["collapsedSize"] as? CGFloat ?? 0
+            let children = parseChildren(value)
+            return .splitPane(size: size, minSize: minSize, maxSize: maxSize, collapsible: collapsible, collapsedSize: collapsedSize, children: children, jsValue: value)
+        }
+
+        if type == "scroll-view" {
+            let horizontal = dict["horizontal"] as? String ?? "auto"
+            let vertical = dict["vertical"] as? String ?? "auto"
+            let children = parseChildren(value)
+            return .scrollView(horizontal: horizontal, vertical: vertical, children: children, jsValue: value)
+        }
+
+        if type == "tab-view" {
+            let activeIndex = dict["activeIndex"] as? Int ?? 0
+            let position = dict["position"] as? String ?? "top"
+            let children = parseChildren(value)
+            return .tabView(activeIndex: activeIndex, position: position, children: children, jsValue: value)
+        }
+
+        if type == "tab-pane" {
+            let label = dict["label"] as? String ?? ""
+            let icon = dict["icon"] as? String ?? ""
+            let children = parseChildren(value)
+            return .tabPane(label: label, icon: icon, children: children, jsValue: value)
         }
 
         return nil

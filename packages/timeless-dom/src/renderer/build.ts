@@ -25,8 +25,14 @@ import { DOMRow } from "@/host/row";
 import { DOMColumn, DOMCol } from "@/host/column";
 import { DOMLink, isDOMLink } from "@/host/link";
 import { DOMWebview } from "@/host/webview";
+import { DOMSplitView, DOMSplitPane } from "@/host/split-view";
+import { DOMScrollView } from "@/host/scroll-view";
+import { DOMTabView, DOMTabPane } from "@/host/tab-view";
 
-export function buildAndRender(elm: TimelessElement): { vnode: VNodeView<any>; dom: any } {
+export function buildAndRender(elm: TimelessElement): {
+  vnode: VNodeView<any>;
+  dom: any;
+} {
   const vnode = build(elm);
   const dom = vnode.render(elm);
   return { vnode, dom };
@@ -162,6 +168,31 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const for$ = DOMFor({ build });
     elm.$elm = for$;
     return for$;
+  }
+  if (elm.t === "split-view") {
+    const splitView$ = DOMSplitView({ build });
+    elm.$elm = splitView$;
+    return splitView$;
+  }
+  if (elm.t === "split-pane") {
+    const splitPane$ = DOMSplitPane({ build });
+    elm.$elm = splitPane$;
+    return splitPane$;
+  }
+  if (elm.t === "scroll-view") {
+    const scrollView$ = DOMScrollView({ build });
+    elm.$elm = scrollView$;
+    return scrollView$;
+  }
+  if (elm.t === "tab-view") {
+    const tabView$ = DOMTabView({ build });
+    elm.$elm = tabView$;
+    return tabView$;
+  }
+  if (elm.t === "tab-pane") {
+    const tabPane$ = DOMTabPane({ build });
+    elm.$elm = tabPane$;
+    return tabPane$;
   }
   return DOMView({ build });
 }

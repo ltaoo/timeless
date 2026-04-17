@@ -17,12 +17,27 @@ import { SSRInput } from "./host/input";
 import { SSRCheckbox } from "./host/checkbox";
 import { SSRRow } from "./host/row";
 import { SSRLink } from "./host/link";
+import { SSRPortal } from "./host/portal";
+
+// Portal collector — SSRPortal pushes rendered HTML here
+let _portalContents: string[] = [];
+
+export function _collectPortal(html: string) {
+  _portalContents.push(html);
+}
+
+export function getPortalContent(): string {
+  return _portalContents
+    .map((html, i) => `<div data-timeless-portal="${i}">${html}</div>`)
+    .join("");
+}
 
 function build(elm: TimelessElement): VNodeView<string> {
   if (elm.t === "show") return SSRShow({ build });
   if (elm.t === "match") return SSRMatch({ build });
   if (elm.t === "for") return SSRFor({ build });
   if (elm.t === "fragment") return SSRFragment({ build });
+  if (elm.t === "portal") return SSRPortal({ build });
   if (elm.t === "view") return SSRView({ build });
   if (elm.t === "text") return SSRText({ build });
   if (elm.t === "row") return SSRRow({ build });
@@ -36,6 +51,7 @@ function build(elm: TimelessElement): VNodeView<string> {
 }
 
 export function renderToString(elm: TimelessElement): string {
+  _portalContents = [];
   if (!elm) return "";
   if (!isElement(elm)) {
     console.error("[SSR] Root Element can't be lazy element");

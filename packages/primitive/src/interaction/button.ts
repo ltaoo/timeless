@@ -1,7 +1,7 @@
 import { isRef } from "@timeless/reactive";
 
 import { Text } from "@/content/text";
-import { isElement, ViewChildren } from "@/content/type";
+import { isElement, ViewChildren, resolve_children } from "@/content/type";
 import { MountedEvent } from "@/event/index";
 import { Box, BoxProps } from "@/content/box";
 import { ListenerManager } from "@/util/listener";
@@ -67,11 +67,12 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
   const methods = {
     // Helper: normalize children (convert functions, wrap refs)
     normalize_children(children?: ViewChildren) {
-      if (!children) {
+      const resolved = resolve_children(children);
+      if (!resolved) {
         return;
       }
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
+      for (let i = 0; i < resolved.length; i++) {
+        const child = resolved[i];
         // console.log("for children", child);
         (() => {
           // if (typeof child === "function") {

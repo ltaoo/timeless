@@ -5,6 +5,7 @@ import {
   Checkbox,
   Button,
   ButtonProps,
+  Fragment,
 } from "@timeless/timeless";
 import { SwitchCore } from "@timeless/ui-vm";
 
@@ -59,7 +60,7 @@ export function Root(
           // });
         },
       }),
-      ...(children || []),
+      Fragment({}, children),
     ],
   );
 }

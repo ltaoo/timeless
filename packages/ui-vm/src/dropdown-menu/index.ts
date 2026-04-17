@@ -21,6 +21,8 @@ type DropdownMenuProps = {
   submenuOffsetX?: number;
   submenuOffsetY?: number;
   trigger?: "click" | "hover" | "manual";
+  /** 默认是否展示下拉菜单 */
+  defaultVisible?: boolean;
   onHidden?: () => void;
 };
 type DropdownMenuState = {
@@ -71,6 +73,7 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
       submenuOffsetX = -2,
       submenuOffsetY = -4,
       trigger = "click",
+      defaultVisible = false,
       onHidden,
     } = props;
     this.trigger = trigger;
@@ -83,6 +86,7 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
       side,
       align,
       items,
+      defaultVisible,
       _name: _name ? `${_name}__menu` : "menu-in-dropdown",
       offsetX: this.offsetX,
       offsetY: this.offsetY,

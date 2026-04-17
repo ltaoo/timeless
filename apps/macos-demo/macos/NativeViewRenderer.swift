@@ -339,6 +339,134 @@ class NativeViewRenderer {
             }
             registerContainerCallbacks(jsValue: jsValue, view: container)
             return container
+
+        case .splitView(let direction, let defaultSizes, let minSizes, let maxSizes, let dividerStyle, let children, let jsValue):
+            let splitView = NSSplitView(frame: frame)
+            splitView.isVertical = direction == "horizontal"
+            splitView.dividerStyle = .thin
+            splitView.autoresizingMask = [.width, .height]
+            
+            // Build child views with Yoga layout
+            var childViews: [NSView] = []
+            for (i, child) in children.enumerated() {
+                guard let childYoga = YGNodeGetChild(yogaNode, i) else { continue }
+                if let childView = buildNSView(node: child, yogaNode: childYoga) {
+                    childViews.append(childView)
+                    splitView.addSubview(childView)
+                }
+            }
+            
+            // Set initial positions after all subviews are added
+            if childViews.count >= 2 {
+                let totalWidth = frame.width
+                if defaultSizes.count >= 1 {
+                    let firstWidth = totalWidth * CGFloat(defaultSizes[0]) / 100
+                    splitView.setPosition(firstWidth, ofDividerAt: 0)
+                }
+            }
+            
+            // Store min/max constraints via associated object
+            objc_setAssociatedObject(splitView, "minSizes", minSizes, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(splitView, "maxSizes", maxSizes, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(splitView, "defaultSizes", defaultSizes, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            
+            if let jsValue = jsValue {
+                let onResize: @convention(block) (JSValue) -> Void = { [weak splitView] sizesJS in
+                    guard let splitView = splitView else { return }
+                    guard let sizes = sizesJS.toArray() else { return }
+                    for (i, item) in sizes.enumerated() {
+                        if i == 0 {
+                            if let sizeValue = item as? NSNumber {
+                                let size = CGFloat(sizeValue.doubleValue)
+                                splitView.setPosition(splitView.bounds.width * size / 100, ofDividerAt: 0)
+                            }
+                        }
+                    }
+                }
+                jsValue.setValue(onResize, forProperty: "_onResize")
+            }
+            
+            return splitView
+
+        case .splitPane(let size, let minSize, let maxSize, let collapsible, let collapsedSize, let children, let jsValue):
+            let container = FlippedView(frame: frame)
+            container.wantsLayer = true
+            NativeViewRenderer.applyStyle(["width": "\(frame.width)px", "height": "\(frame.height)px"], to: container)
+            addChildren(children, to: container, yogaParent: yogaNode)
+            registerContainerCallbacks(jsValue: jsValue, view: container)
+            return container
+
+        case .scrollView(let horizontal, let vertical, let children, let jsValue):
+            let scrollView = NSScrollView(frame: frame)
+            scrollView.hasVerticalScroller = vertical != "hidden"
+            scrollView.hasHorizontalScroller = horizontal != "hidden"
+            scrollView.autohidesScrollers = true
+            scrollView.autoresizingMask = [.width, .height]
+            scrollView.drawsBackground = false
+            
+            let contentContainer = FlippedView(frame: NSRect(x: 0, y: 0, width: frame.width, height: frame.height))
+            addChildren(children, to: contentContainer, yogaParent: yogaNode)
+            scrollView.documentView = contentContainer
+            
+            registerContainerCallbacks(jsValue: jsValue, view: scrollView)
+            return scrollView
+
+        case .tabView(let activeIndex, let position, let children, let jsValue):
+            let container = FlippedView(frame: frame)
+            container.wantsLayer = true
+            
+            // Tab bar at top
+            let tabBar = NSTabView(frame: NSRect(x: 0, y: 0, width: frame.width, height: frame.height))
+            tabBar.tabViewType = .topTabsBezelBorder
+            tabBar.controlSize = .regular
+            
+            // Add tab view items for each child
+            for (i, child) in children.enumerated() {
+                let tabItem = NSTabViewItem(identifier: i)
+                let contentView = FlippedView(frame: NSRect(x: 0, y: 0, width: frame.width - 20, height: frame.height - 30))
+                
+                // Get child node for yoga layout
+                var childNode = child
+                if case .tabPane(_, _, let tabChildren, _) = child {
+                    if let firstChild = tabChildren.first {
+                        childNode = firstChild
+                    }
+                }
+                
+                if let childYoga = YGNodeGetChild(yogaNode, i) {
+                    addChildren([childNode], to: contentView, yogaParent: childYoga)
+                }
+                
+                tabItem.view = contentView
+                
+                // Get label from tab-pane child
+                if case .tabPane(let label, _, _, _) = child {
+                    tabItem.label = label
+                } else {
+                    tabItem.label = "Tab \(i + 1)"
+                }
+                
+                tabBar.addTabViewItem(tabItem)
+            }
+            
+            // Set active tab
+            if activeIndex < tabBar.numberOfTabViewItems {
+                tabBar.selectTabViewItem(at: activeIndex)
+            }
+            
+            container.addSubview(tabBar)
+            tabBar.frame = container.bounds
+            tabBar.autoresizingMask = [.width, .height]
+            
+            registerContainerCallbacks(jsValue: jsValue, view: container)
+            return container
+
+        case .tabPane(_, _, let children, let jsValue):
+            let container = FlippedView(frame: frame)
+            container.wantsLayer = true
+            addChildren(children, to: container, yogaParent: yogaNode)
+            registerContainerCallbacks(jsValue: jsValue, view: container)
+            return container
         }
     }
 

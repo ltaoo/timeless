@@ -26,6 +26,9 @@ import { NativeFilePicker } from "@/host/file-picker";
 import { NativeNumberInput } from "@/host/number-input";
 import { NativeSelect } from "@/host/select";
 import { NativeAspectRatio } from "@/host/aspect-ratio";
+import { NativeSplitView, NativeSplitPane } from "@/host/split-view";
+import { NativeScrollView } from "@/host/scroll-view";
+import { NativeTabView, NativeTabPane } from "@/host/tab-view";
 
 function build(elm: TimelessElement): any {
   console.log(
@@ -150,6 +153,31 @@ function build(elm: TimelessElement): any {
     const select$ = NativeSelect({ build });
     elm.$elm = select$;
     return select$;
+  }
+  if (elm.t === "split-view") {
+    const splitView$ = NativeSplitView({ build });
+    elm.$elm = splitView$;
+    return splitView$;
+  }
+  if (elm.t === "split-pane") {
+    const splitPane$ = NativeSplitPane({ build });
+    elm.$elm = splitPane$;
+    return splitPane$;
+  }
+  if (elm.t === "scroll-view") {
+    const scrollView$ = NativeScrollView({ build });
+    elm.$elm = scrollView$;
+    return scrollView$;
+  }
+  if (elm.t === "tab-view") {
+    const tabView$ = NativeTabView({ build });
+    elm.$elm = tabView$;
+    return tabView$;
+  }
+  if (elm.t === "tab-pane") {
+    const tabPane$ = NativeTabPane({ build });
+    elm.$elm = tabPane$;
+    return tabPane$;
   }
   return NativeView({ build });
 }

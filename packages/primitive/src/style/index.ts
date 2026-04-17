@@ -305,11 +305,12 @@ export function join(v: (string | Signal<string>)[]): Signal<string> {
 
   const r = ref(recompute());
   let destroyed = false;
+  const unsubs: (() => void)[] = [];
 
   for (let i = 0; i < sources.length; i += 1) {
     const item = sources[i];
     if (isRef(item)) {
-      item.subscribe({
+      const unsub = item.subscribe({
         onChange() {
           if (destroyed) return;
           const next = recompute();
@@ -318,12 +319,17 @@ export function join(v: (string | Signal<string>)[]): Signal<string> {
           }
         },
       });
+      unsubs.push(unsub);
     }
   }
 
   const origin_destroy = r.destroy;
   r.destroy = () => {
     destroyed = true;
+    for (const unsub of unsubs) {
+      unsub();
+    }
+    unsubs.length = 0;
     origin_destroy();
   };
 

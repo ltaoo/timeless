@@ -3,6 +3,7 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 import { hydrate_node } from "@/renderer/hydrate";
 
 import { HostElement } from "./box";
+import { countRenderedNodes } from "./fragment";
 
 export type DOMShow = VNodeView<Text> & {
   t: "show";
@@ -43,23 +44,48 @@ export function DOMShow(props: {
       $fragment.appendChild($anchor);
       return $fragment;
     },
-    hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
+    hydrate(
+      elm: TimelessElement,
+      $elm: HTMLElement | Text,
+      opt: Partial<{ $parent: HTMLElement }> = {},
+    ) {
       console.log("[timeless-dom] show hydrate", elm, $elm);
       const $anchor = document.createTextNode("");
       common$.methods.set$elm($anchor);
       if (elm.children) {
-        const count = elm.children.length;
-        const $parent = $elm.parentElement;
-        console.log("[]show check has $parent", $parent, count);
+        const totalNodes = countRenderedNodes(elm);
+        const $parent = $elm
+          ? $elm.parentElement
+          : opt.$parent || null;
+        console.log("[]show check has $parent", $parent, totalNodes);
+        if (totalNodes === 0) {
+          // All children produce 0 DOM nodes (e.g., portal only).
+          // Place anchor in the parent so insertChildren/removeChildren work later.
+          if ($parent) {
+            $parent.appendChild($anchor);
+          }
+          const child_nodes: VNodeView[] = [];
+          for (let i = 0; i < elm.children.length; i += 1) {
+            const child = elm.children[i];
+            if (child) {
+              const child$ = hydrate_node(child, null as any);
+              if (child$) {
+                child_nodes.push(child$);
+              }
+            }
+          }
+          common$.methods.setchildnode(child_nodes);
+          return;
+        }
         if ($parent) {
           const child_nodes: VNodeView[] = [];
           const $children = Array.from($parent.childNodes);
           const idx = $children.indexOf($elm);
-          const $children_belong_me = $children.slice(idx, idx + count);
+          const $children_belong_me = $children.slice(idx, idx + totalNodes);
           console.log("[]show $children belong me", idx, $children_belong_me);
           common$.methods.set$childrne($children_belong_me);
-          const $last = $children[idx + count];
-          console.log("[]show $children belong me", idx + count, $last);
+          const $last = $children[idx + totalNodes];
+          console.log("[]show $children belong me", idx + totalNodes, $last);
           if ($last) {
             console.log("[]show insert before ");
             $parent.insertBefore($anchor, $last);
@@ -67,15 +93,26 @@ export function DOMShow(props: {
             console.log("[]show append child");
             $parent.appendChild($anchor);
           }
+          let cursor = 0;
           for (let i = 0; i < elm.children.length; i += 1) {
             const child = elm.children[i];
             if (child) {
-              const child$ = hydrate_node(
-                child,
-                $children_belong_me[i] as HTMLElement | Text,
-              );
-              if (child$) {
-                child_nodes.push(child$);
+              const childNodeCount = countRenderedNodes(child);
+              if (childNodeCount === 0) {
+                // Child produces 0 DOM nodes (portal, etc.)
+                const child$ = hydrate_node(child, null as any);
+                if (child$) {
+                  child_nodes.push(child$);
+                }
+              } else {
+                const child$ = hydrate_node(
+                  child,
+                  $children_belong_me[cursor] as HTMLElement | Text,
+                );
+                cursor += childNodeCount;
+                if (child$) {
+                  child_nodes.push(child$);
+                }
               }
             }
           }
@@ -86,6 +123,14 @@ export function DOMShow(props: {
     getChildren: common$.methods.getChildren,
     buildChildren: common$.methods.buildChildren,
     insertChildren(children: TimelessElement[]) {
+      console.log(
+        "[DOMShow.insertChildren] called",
+        children.length,
+        "anchor in DOM=",
+        document.contains($anchor),
+        "parentElement=",
+        $anchor.parentElement,
+      );
       common$.methods.removeChildren();
       common$.methods.insertChildren(children);
     },

@@ -5,6 +5,7 @@ import { MountedEvent } from "@/event";
 import { For, ForProps } from "@/reactive/for";
 import { Box, BoxProps } from "@/content/box";
 import { View } from "@/content/view";
+import { ListenerManager } from "@/util/listener";
 
 type SelectValue = string[];
 
@@ -63,6 +64,7 @@ export function Select<T extends { value: any; label: string }>(
   } = props;
 
   let $elm: any = null;
+  const listener$ = ListenerManager();
   const box$ = Box<SelectState>(rest, {} as SelectState);
   const for$ = For({
     key,
@@ -76,49 +78,49 @@ export function Select<T extends { value: any; label: string }>(
       box$.methods.subscribe_props();
       if (id !== undefined) {
         if (isRef(id)) {
-          id.subscribe({
+          listener$.push(id.subscribe({
             onChange(v) {},
-          });
+          }));
         } else {
         }
       }
       if (value !== undefined) {
         if (isRef(value)) {
-          value.subscribe({
+          listener$.push(value.subscribe({
             onChange(v) {},
-          });
+          }));
         } else {
         }
       }
       if (placeholder !== undefined) {
         if (isRef(placeholder)) {
-          placeholder.subscribe({
+          listener$.push(placeholder.subscribe({
             onChange(v) {},
-          });
+          }));
         } else {
         }
       }
       if (disabled !== undefined) {
         if (isRef(disabled)) {
-          disabled.subscribe({
+          listener$.push(disabled.subscribe({
             onChange(v) {},
-          });
+          }));
         } else {
         }
       }
       if (readonly !== undefined) {
         if (isRef(readonly)) {
-          readonly.subscribe({
+          listener$.push(readonly.subscribe({
             onChange(v) {},
-          });
+          }));
         } else {
         }
       }
       if (required !== undefined) {
         if (isRef(required)) {
-          required.subscribe({
+          listener$.push(required.subscribe({
             onChange(v) {},
-          });
+          }));
         } else {
         }
       }
@@ -126,9 +128,9 @@ export function Select<T extends { value: any; label: string }>(
       // Handle name attribute
       if (name !== undefined) {
         if (isRef(name)) {
-          name.subscribe({
+          listener$.push(name.subscribe({
             onChange(v) {},
-          });
+          }));
         } else {
         }
       }
@@ -164,6 +166,7 @@ export function Select<T extends { value: any; label: string }>(
       }
     },
     onUnmounted() {
+      listener$.destroy();
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }

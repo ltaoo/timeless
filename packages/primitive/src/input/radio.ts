@@ -3,6 +3,7 @@ import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 import { ViewProps } from "@/content/view";
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
+import { ListenerManager } from "@/util/listener";
 
 export type RadioProps = BoxProps & {
   id?: string;
@@ -40,6 +41,7 @@ export function Radio(props: RadioProps) {
   } = props;
 
   let $elm: any = null;
+  const listener$ = ListenerManager();
   const box$ = Box<RadioState>(rest, {
     checked: false,
     disabled: false,
@@ -63,12 +65,13 @@ export function Radio(props: RadioProps) {
       if (id !== undefined) {
         if (isRef(id)) {
           state.id = id.value;
-          id.subscribe({
+          const unsub = id.subscribe({
             onChange(v) {
               state.id = v;
               methods.setProp("id", v);
             },
           });
+          listener$.push(unsub);
         } else {
           state.id = id;
         }
@@ -77,12 +80,13 @@ export function Radio(props: RadioProps) {
       if (name !== undefined) {
         if (isRef(name)) {
           state.name = name.value;
-          name.subscribe({
+          const unsub = name.subscribe({
             onChange(v) {
               state.name = v;
               methods.setProp("name", v);
             },
           });
+          listener$.push(unsub);
         } else {
           state.name = name;
         }
@@ -92,12 +96,13 @@ export function Radio(props: RadioProps) {
       if (checked !== undefined) {
         if (isRef(checked)) {
           state.checked = checked.value;
-          checked.subscribe({
+          const unsub = checked.subscribe({
             onChange(v) {
               state.checked = v;
               methods.setProp("checked", v);
             },
           });
+          listener$.push(unsub);
         } else {
           state.checked = checked;
         }
@@ -107,12 +112,13 @@ export function Radio(props: RadioProps) {
       if (disabled !== undefined) {
         if (isRef(disabled)) {
           state.disabled = disabled.value;
-          disabled.subscribe({
+          const unsub = disabled.subscribe({
             onChange(v) {
               state.disabled = v;
               methods.setProp("disabled", v);
             },
           });
+          listener$.push(unsub);
         } else {
           state.disabled = disabled;
         }
@@ -122,12 +128,13 @@ export function Radio(props: RadioProps) {
       if (readonly !== undefined) {
         if (isRef(readonly)) {
           state.readonly = readonly.value;
-          readonly.subscribe({
+          const unsub = readonly.subscribe({
             onChange(v) {
               state.readonly = v;
               methods.setProp("readOnly", v);
             },
           });
+          listener$.push(unsub);
         } else {
           state.readonly = readonly;
         }
@@ -137,12 +144,13 @@ export function Radio(props: RadioProps) {
       if (required !== undefined) {
         if (isRef(required)) {
           state.required = required.value;
-          required.subscribe({
+          const unsub = required.subscribe({
             onChange(v) {
               state.required = v;
               methods.setProp("required", v);
             },
           });
+          listener$.push(unsub);
         } else {
           state.required = required;
         }
@@ -170,6 +178,7 @@ export function Radio(props: RadioProps) {
       }
     },
     onUnmounted() {
+      listener$.destroy();
       if (props.onUnmounted) {
         props.onUnmounted();
       }

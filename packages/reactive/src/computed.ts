@@ -2,7 +2,13 @@ import { get, set } from "./registry";
 import { ref } from "./ref";
 import { refArray } from "./reactive-array";
 import { refObject } from "./reactive-object";
-import { Subscriber, Ref, DerivedRef, isRef } from "./types";
+import {
+  Subscriber,
+  SubscriberWithId,
+  DerivedRef,
+  isRef,
+  DepInfo,
+} from "./types";
 
 type RefValue<R> = R extends { __is_ref: true; value: infer T } ? T : R;
 
@@ -15,10 +21,6 @@ export function computed<T extends object, R>(
   fn: (val: T) => R,
 ): DerivedRef<R>;
 export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
-  // const dep = global_refs.get(deps);
-  // if (dep) {
-  //   return dep;
-  // }
   let raw_value = fn(
     (() => {
       if (isRef(deps)) {
@@ -28,9 +30,8 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
     })(),
   );
 
-  const _deps: Subscriber<T>[] = [];
+  const _deps: SubscriberWithId<any>[] = [];
   function notify(action: { type: string }) {
-    // console.log("computed notify", action, _deps);
     for (let i = 0; i < _deps.length; i += 1) {
       const ctx = _deps[i];
       if (ctx.onChange) {
@@ -62,7 +63,6 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
   const unsubscribe = _computed_ref.subscribe({
     onPatch() {
       const r = fn(_computed_ref.value);
-      // console.log("[reactive]computed - on patch", r, raw_value === r);
       if (r === raw_value) {
         return;
       }
@@ -71,7 +71,6 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
     },
     onChange() {
       const r = fn(_computed_ref.value);
-      // console.log("[reactive]computed - on change", r, raw_value === r);
       if (r === raw_value) {
         return;
       }
@@ -79,12 +78,16 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
       notify({ type: "refresh" });
     },
   });
-  const res = {
+  const res: DerivedRef<any> = {
     __is_ref: true as const,
     subscribe(ctx: Subscriber<T>) {
-      _deps.push(ctx);
+      const trackCtx: SubscriberWithId<T> = ctx as SubscriberWithId<T>;
+      _deps.push(trackCtx);
       return function () {
-        _deps.splice(_deps.indexOf(ctx), 1);
+        const idx = _deps.indexOf(trackCtx);
+        if (idx > -1) {
+          _deps.splice(idx, 1);
+        }
       };
     },
     destroy() {
@@ -100,7 +103,22 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
     isStrictEqual(v: unknown) {
       return raw_value === v;
     },
+    getDeps(): DepInfo[] {
+      return _deps.map((ctx) => ({
+        trackId: ctx.__trackId || "unknown",
+        trackInfo: ctx.__trackInfo,
+      }));
+    },
+    dump() {
+      console.log("[reactive.dump] computed subscribers:", _deps.length);
+      _deps.forEach((ctx, i) => {
+        console.log(
+          `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
+          ctx.__trackInfo || "",
+        );
+      });
+    },
   };
 
-  return res;
+  return res as DerivedRef<T>;
 }

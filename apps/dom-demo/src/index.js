@@ -26,755 +26,485 @@ import {
   Label,
   Row,
   Column,
+  SplitView,
+  SplitPane,
+  ScrollView,
+  TabView,
+  TabPane,
+  getDeps,
+  printDepTree,
+  findLeakedDeps,
 } from "@timeless/timeless";
 import { patch } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
 
 import Page from "./pages/index.js";
 
-const apps = [
-  { icon: "🎬", title: "Movies", subtitle: "Movies & Shows" },
-  { icon: "🎵", title: "Music", subtitle: "Your Favorites" },
-  { icon: "📷", title: "Photos", subtitle: "Photo Library" },
-  { icon: "📡", title: "Live TV", subtitle: "200+ Channels" },
-  { icon: "🎮", title: "Games", subtitle: "Play & Compete" },
-  { icon: "⚙️", title: "Settings", subtitle: "Preferences" },
-  { icon: "⛅", title: "Weather", subtitle: "5-Day Forecast" },
-  { icon: "🛒", title: "Store", subtitle: "Discover Apps" },
-  { icon: "💪", title: "Fitness", subtitle: "Track Workouts" },
-  { icon: "📰", title: "News", subtitle: "Headlines" },
-  { icon: "🧸", title: "Kids", subtitle: "Family Friendly" },
-  { icon: "🌐", title: "Browser", subtitle: "Surf the Web" },
-];
-
+/**
+ * 测试：组件销毁后是否正确清除对响应式数据的监听，避免内存泄漏
+ *
+ * 依赖链路说明：
+ *   ref/refarr/refobj  ←  computed(ref, fn)  ←  Text/View(style binding)
+ *                                                   ↑
+ *   For 内部会创建:
+ *     - subscribe(each)          → 监听 items_ 的 onChange/onPatch
+ *     - computed(each, fn) as idx → 每个 item 一个 idx，监听 items_
+ *   render 函数里:
+ *     - computed(item, fn)        → 在 registry 中为 item 创建 refObject，并 subscribe
+ *
+ * 预期：组件销毁后，上述所有 subscribe 都应被清除
+ */
 function ApplicationView() {
-  const page = ref("todo");
-  const count_ = ref(0);
+  // ========== 响应式数据 ==========
   const visible_ = ref(false);
-  const popper_ = refobj({
-    x: 0,
-    y: 0,
-    placed: false,
-  });
-  const columns = 4;
-  const focused = ref({ x: 0, y: 0 });
-  const keyword_ = ref("");
-  const todo_ = ref("");
-  const todos_ = refarr([
-    {
-      id: 1,
-      title: "Buy groceries",
-      completed: true,
-    },
-    {
-      id: 2,
-      title: "Study for exam exam exam",
-      completed: false,
-    },
-    {
-      id: 3,
-      title: "Read a book",
-      completed: false,
-    },
+  const count_ = ref(0);
+  const theme_ = refobj({ color: "red", size: 14 });
+  const items_ = refarr([
+    { id: 1, text: "Item A" },
+    { id: 2, text: "Item B" },
+    { id: 3, text: "Item C" },
   ]);
-  const selected_fruit_ = ref("apple");
-  const text = ["Hello", "Timeless"];
-  const icon_name_ = ref("info");
-  const toasts = refarr([View({}, ["Initial"])]);
 
-  const dissmissable$ = DismissableLayer();
+  // 收集所有中间产生的 computed ref，用于追踪
+  // key: 描述, value: DerivedRef
+  const trackedComputeds = [];
 
-  function handleSelectCard(idx) {
-    focused.set(xyFromIdx(idx));
+  // ========== 辅助函数 ==========
+  function logDeps(label) {
+    console.log(`\n===== ${label} =====`);
+    console.log("visible_ deps:", getDeps(visible_).length, getDeps(visible_));
+    console.log("count_ deps:", getDeps(count_).length, getDeps(count_));
+    console.log("theme_ deps:", getDeps(theme_).length, getDeps(theme_));
+    console.log("items_ deps:", getDeps(items_).length, getDeps(items_));
+
+    // 打印所有收集到的 computed 的 deps
+    if (trackedComputeds.length > 0) {
+      console.log("--- tracked computeds ---");
+      for (const { label: l, ref: r } of trackedComputeds) {
+        console.log(`  ${l}: value=${r.value}, deps=${getDeps(r).length}`, getDeps(r));
+      }
+    }
+
+    printDepTree([visible_, count_, theme_, items_]);
   }
-  function xyFromIdx(idx) {
-    return { x: idx % columns, y: Math.floor(idx / columns) };
-  }
 
-  function maxXAtRow(y) {
-    const maxY = Math.floor((apps.length - 1) / columns);
-    if (y === maxY) return (apps.length - 1) % columns;
-    return columns - 1;
-  }
-
-  function moveFocus(direction) {
-    focused.as((prev) => {
-      const maxY = Math.floor((apps.length - 1) / columns);
-      let { x, y } = prev;
-
-      if (direction === "left") {
-        if (x > 0) x -= 1;
-        else if (y > 0) {
-          y -= 1;
-          x = maxXAtRow(y);
-        }
-      }
-
-      if (direction === "right") {
-        const maxX = maxXAtRow(y);
-        if (x < maxX) x += 1;
-        else if (y < maxY) {
-          y += 1;
-          x = 0;
-        }
-      }
-
-      if (direction === "up") {
-        if (y > 0) {
-          y -= 1;
-          x = Math.min(x, maxXAtRow(y));
-        }
-      }
-
-      if (direction === "down") {
-        if (y < maxY) {
-          y += 1;
-          x = Math.min(x, maxXAtRow(y));
-        }
-      }
-
-      return { x, y };
+  function checkLeak(label) {
+    console.log(`\n[CHECK] ${label || ""}`);
+    const refs = [visible_, count_, theme_, items_];
+    const totalDeps = findLeakedDeps(refs);
+    console.log(`  主 ref 总 deps: ${totalDeps.length}`);
+    totalDeps.forEach((dep) => {
+      console.log(`    - ${dep.trackId}`, dep.trackInfo || "");
     });
-  }
 
-  /**
-   * @param {{ x: number, y: number }} pos
-   * @param {number} idx
-   * @returns
-   */
-  function isFocusedCell(pos, idx) {
-    const { x, y } = xyFromIdx(idx);
-    // console.log(`[${pos.x},${pos.y}] is ${idx}, ${x},${y}`);
-    return pos.x === x && pos.y === y;
-  }
+    // 检查 computed 上的 deps（这些是 computed → Text 的监听）
+    let computedLeaks = 0;
+    for (const { label: l, ref: r } of trackedComputeds) {
+      const deps = getDeps(r);
+      if (deps.length > 0) {
+        computedLeaks += deps.length;
+        console.warn(`  [LEAK?] computed "${l}" still has ${deps.length} deps:`, deps);
+      }
+    }
 
-  function handleClick(event) {
-    const { x, y } = event;
-    if (!popper_.value.placed) {
-      return;
-    }
-    const bingo = dissmissable$.isBingo({
-      x,
-      y,
-    });
-    console.log(x, y, popper_.value.placed, bingo);
-    if (!bingo) {
-      return;
-    }
-    visible_.as(false);
-    popper_.assign({
-      placed: false,
-    });
-  }
-
-  platform.addEventListener("keydown", handleKeydown);
-  platform.addEventListener("click", handleClick);
-
-  function handleKeydown(event) {
-    const { key } = event;
-    // console.log("handleKeydown", key);
-    if (key === "ArrowLeft") {
-      moveFocus("left");
-    }
-    if (key === "ArrowRight") {
-      moveFocus("right");
-    }
-    if (key === "ArrowUp") {
-      moveFocus("up");
-    }
-    if (key === "ArrowDown") {
-      moveFocus("down");
+    if (computedLeaks === 0 && totalDeps.length === 0) {
+      console.log("  ✓ 所有 deps 已清除，无泄漏");
     }
   }
 
+  // ========== 状态显示 ==========
+  const depsDisplay_ = ref("");
+
+  function refreshDepsDisplay() {
+    const lines = [
+      `visible_: ${getDeps(visible_).length}`,
+      `count_: ${getDeps(count_).length}`,
+      `theme_: ${getDeps(theme_).length}`,
+      `items_: ${getDeps(items_).length}`,
+      `computeds: ${trackedComputeds.length}`,
+      `total: ${findLeakedDeps([visible_, count_, theme_, items_]).length}`,
+    ];
+    depsDisplay_.as(lines.join(" | "));
+  }
+
+  // ========== 追踪 computed 工厂 ==========
+  // 包装 computed，同时收集到 trackedComputeds 数组中
+  function trackedComputed(deps, fn, label) {
+    const c = computed(deps, fn);
+    trackedComputeds.push({ label, ref: c });
+    return c;
+  }
+
+  // ========== UI ==========
   return View(
     {
       style: {
         color: "#fff",
+        padding: "20px",
+        "font-family": "monospace",
       },
-      class: classNames([
-        "page",
-        computed(keyword_, (t) => {
-          return t.includes("_new") ? "updated" : "origin";
-        }),
-      ]),
-      onMounted() {},
     },
     [
-      Page({ title: "A" }, [View({}, ["Page A"])]),
-      Page({ title: "B" }, [View({}, ["Page B"])]),
-      // Input({
-      //   value: "Hello Timeless",
-      //   onMounted(event) {
-      //     console.log("the input mounted", event.target.get$elm()?.value);
-      //   },
-      //   onInput(event) {
-      //     console.log("onInput", event.target.value);
-      //   }
-      // }),
-      // Column(
-      //   {
-      //     gap: 4,
-      //     style: {
-      //       padding: "16px",
-      //     },
-      //   },
-      //   [
-      //     Label({ for: "keyword" }, ["Keyword"]),
-      //     Row({ gap: 4 }, [
-      //       Input({
-      //         id: "keyword",
-      //         value: keyword_,
-      //         onInput(event) {
-      //           // console.log("input onChange", event.target.value);
-      //           keyword_.as(event.target.value);
-      //         },
-      //       }),
-      //       Button(
-      //         {
-      //           onClick() {
-      //             keyword_.as((prev) => prev + "_new");
-      //           },
-      //         },
-      //         ["Search"],
-      //       ),
-      //     ]),
-      //   ],
-      // ),
-      // Column(
-      //   {
-      //     style: {
-      //       padding: "16px",
-      //     },
-      //   },
-      //   [View({}, ["Search Result List"])],
-      // ),
-      // Show({
-      //   when: visible_,
-      //   ok() {
-      //     return [
-      //       For({
-      //         each: todos_,
-      //         render(fruit) {
-      //           return View(
-      //             {
-      //               class: "text-2xl font-medium",
-      //               style: {
-      //                 color: "#fff",
-      //               },
-      //               onMounted() {
-      //                 console.log("[fruit] onMounted");
-      //               },
-      //               onUnmounted() {
-      //                 console.log("[fruit] onUnmounted");
-      //               },
-      //             },
-      //             [fruit.title],
-      //           );
-      //         },
-      //       }),
-      //     ];
-      //   },
-      // }),
-      // View(
-      //   {
-      //     style: computed(visible_, (t) => {
-      //       return t ? { color: "red" } : {};
-      //     }),
-      //     onClick() {
-      //       visible_.as(!visible_.value);
-      //     },
-      //   },
-      //   ["Hello"],
-      // ),
-      // Select(
-      //   {
-      //     options: [
-      //       {
-      //         label: "Apple",
-      //         value: "apple",
-      //       },
-      //       {
-      //         label: "Banana",
-      //         value: "banana",
-      //       },
-      //       {
-      //         label: "Orange",
-      //         value: "orange",
-      //       },
-      //     ],
-      //     value: selected_fruit_,
-      //     placeholder: "Select an app",
-      //   },
-      //   [
-      //     View(
-      //       {
-      //         class: "text-2xl font-medium",
-      //         style: {
-      //           color: "#fff",
-      //         },
-      //       },
-      //       [selected_fruit_.value],
-      //     ),
-      //   ],
-      // ),
-      // FilePicker({
-      //   class: "w-full",
-      // }),
-      // NumberInput({
-      //   class: "w-full",
-      // }),
-      // Show({
-      //   when: visible_,
-      //   ok() {
-      //     return Fragment(
-      //       {
-      //         onMounted() {
-      //           console.log("[fragment] hello wrap onMounted");
-      //         },
-      //       },
-      //       [
-      //         View(
-      //           {
-      //             onMounted() {
-      //               console.log("[hello] onMounted");
-      //             },
-      //           },
-      //           ["Hello"],
-      //         ),
-      //       ],
-      //     );
-      //   },
-      // }),
-      // View(
-      //   {
-      //     style: styleNames([
-      //       {
-      //         color: "red",
-      //       },
-      //       computed(visible_, (t) => {
-      //         return t ? { display: "block" } : { display: "none" };
-      //       }),
-      //     ]),
-      //   },
-      //   ["Hello"],
-      // ),
-      // Input({
-      //   class: "w-full",
-      //   placeholder: "Add a todo todo",
-      //   value: todo_,
-      //   onMounted() {
-      //     console.log("[Input] onMounted");
-      //   },
-      //   onChange(event) {
-      //     todo_.as(event.target.value);
-      //   },
-      // }),
-      // Button(
-      //   {
-      //     onMounted() {
-      //       console.log("[Button] onMounted");
-      //     },
-      //     onClick() {
-      //       // visible_.as((prev) => {
-      //       //   return !prev;
-      //       // });
-      //       const v = todo_.value;
-      //       todo_.as("");
-      //       if (!v) {
-      //         alert("must input todo");
-      //         return;
-      //       }
-      //       todos_.push({
-      //         id: todos_.length,
-      //         completed: false,
-      //         title: v,
-      //       });
-      //     },
-      //   },
-      //   ["Add Todo"],
-      // ),
-      // Button(
-      //   {
-      //     onClick() {
-      //       const v = todo_.value;
-      //       if (!v) {
-      //         return;
-      //       }
-      //       todo_.as("");
-      //       todos_.unshift({
-      //         id: todos_.length,
-      //         completed: false,
-      //         title: v,
-      //       });
-      //     },
-      //   },
-      //   ["Unshift Todo"],
-      // ),
-      // Button(
-      //   {
-      //     onClick() {
-      //       todos_.as([
-      //         {
-      //           id: 2,
-      //           title: "Study for exam exam exam",
-      //           completed: false,
-      //         },
-      //         {
-      //           id: 1,
-      //           title: "Buy groceries_update",
-      //           completed: true,
-      //         },
-      //         {
-      //           id: 4,
-      //           title: "Sleep",
-      //           completed: false,
-      //         },
-      //       ]);
-      //     },
-      //   },
-      //   ["Refresh"],
-      // ),
-      // For({
-      //   key: "id",
-      //   each: todos_,
-      //   render(todo, idx) {
-      //     return View(
-      //       {
-      //         style: {
-      //           display: "flex",
-      //         },
-      //       },
-      //       [
-      //         Checkbox({
-      //           checked: computed(todo, (t) => t.completed),
-      //           onChange(event) {
-      //             const todo$ = getobj(todo);
-      //             if (todo$) {
-      //               todo$.set("completed", event.target.checked);
-      //             }
-      //           },
-      //         }),
-      //         View(
-      //           {
-      //             style: {
-      //               color: "#fff",
-      //               "text-decoration": computed(todo, (t) =>
-      //                 t.completed ? "line-through" : "none",
-      //               ),
-      //             },
-      //           },
-      //           [idx, " ", computed(todo, (t) => t.title)],
-      //         ),
-      //         View(
-      //           {
-      //             class: "icon",
-      //             style: {
-      //               color: "#fff",
-      //               cursor: "pointer",
-      //             },
-      //             onClick() {
-      //               todos_.remove(todo);
-      //             },
-      //           },
-      //           [Icon({ name: "trash", color: "#fff", size: 16 })],
-      //         ),
-      //         View(
-      //           {
-      //             class: "icon",
-      //             style: {
-      //               color: "#fff",
-      //               cursor: "pointer",
-      //             },
-      //             onClick() {
-      //               todos_.up(idx);
-      //             },
-      //           },
-      //           [Icon({ name: "chevron-up", color: "#fff", size: 16 })],
-      //         ),
-      //         View(
-      //           {
-      //             class: "icon",
-      //             style: {
-      //               color: "#fff",
-      //               cursor: "pointer",
-      //             },
-      //             onClick() {
-      //               todos_.down(idx);
-      //             },
-      //           },
-      //           [Icon({ name: "chevron-down", color: "#fff", size: 16 })],
-      //         ),
-      //       ],
-      //     );
-      //   },
-      //   onMounted() {
-      //     console.log("[Todo For] onMounted");
-      //   },
-      // }),
-      // Img({
-      //   src: "/public/avatar.jpeg",
-      //   style: {
-      //     width: "60px",
-      //     height: "60px",
-      //   },
-      // }),
-      // View(
-      //   {
-      //     style: {
-      //       padding: "20px",
-      //     },
-      //   },
-      //   [
-      //     Button(
-      //       {
-      //         onMounted(event) {
-      //           // console.log(event.target);
-      //           const { x, y, width, height } =
-      //             event.target.getBoundingClientRect();
-      //           dissmissable$.addIgnore({
-      //             x,
-      //             y,
-      //             width,
-      //             height,
-      //           });
-      //           popper_.as({
-      //             x: x,
-      //             y: y + height + 2,
-      //             placed: false,
-      //           });
-      //         },
-      //         onClick(event) {
-      //           // event.stopPropagation();
-      //           visible_.as((prev) => {
-      //             return !prev;
-      //           });
-      //           popper_.assign({
-      //             placed: true,
-      //           });
-      //         },
-      //       },
-      //       ["Click it"],
-      //     ),
-      //   ],
-      // ),
-      // Show({
-      //   when: visible_,
-      //   onMounted() {
-      //     console.log("[Show] onMounted");
-      //   },
-      //   onUnmounted() {
-      //     console.log("[Show] onUnmounted");
-      //   },
-      //   ok() {
-      //     return Portal(
-      //       {
-      //         onMounted() {
-      //           console.log("[Portal in Show] onMounted");
-      //         },
-      //         onUnmounted() {
-      //           console.log("[Portal in Show] onUnmounted");
-      //         },
-      //       },
-      //       [
-      //         Popper(
-      //           {
-      //             placement: "top",
-      //             strategy: "absolute",
-      //             x: computed(popper_, (t) => t.x),
-      //             y: computed(popper_, (t) => t.y),
-      //             placed: computed(popper_, (t) => t.placed),
-      //             onMounted(event) {
-      //               const rect = event.target.getBoundingClientRect();
-      //               console.log("[Popper in Portal] onMounted", rect);
-      //             },
-      //             onUnmounted() {
-      //               console.log("[Popper in Portal] onUnmounted");
-      //             },
-      //           },
-      //           [
-      //             View(
-      //               {
-      //                 style: {
-      //                   "background-color": "#fff",
-      //                 },
-      //                 onMounted(event) {
-      //                   const rect = event.target.getBoundingClientRect();
-      //                   console.log("[View in Popper] onMounted", rect);
-      //                   dissmissable$.addIgnore({
-      //                     x: rect.x,
-      //                     y: rect.y,
-      //                     width: rect.width,
-      //                     height: rect.height,
-      //                   });
-      //                 },
-      //                 onUnmounted() {
-      //                   console.log("[View in Popper] onUnmounted");
-      //                 },
-      //               },
-      //               [
-      //                 View(
-      //                   {
-      //                     onMounted() {
-      //                       console.log("text1 in View mounted");
-      //                     },
-      //                   },
-      //                   ["first content in body"],
-      //                 ),
-      //                 View(
-      //                   {
-      //                     onMounted(event) {
-      //                       console.log(
-      //                         "text2 in View mounted",
-      //                         event.target.getBoundingClientRect(),
-      //                       );
-      //                     },
-      //                   },
-      //                   ["second content in body"],
-      //                 ),
-      //               ],
-      //             ),
-      //           ],
-      //         ),
-      //       ],
-      //     );
-      //   },
-      // }),
-      // View(
-      //   {
-      //     style: {
-      //       color: "#fff",
-      //     },
-      //   },
-      //   [count_],
-      // ),
-      // Input({
-      //   placeholder: "Search",
-      //   value: keyword_,
-      //   onMounted(event) {
-      //     console.log("the input mounted", event.target);
-      //   },
-      // }),
-      // Button(
-      //   {
-      //     onClick() {
-      //       const v = keyword_.value;
-      //       console.log("click button", v);
-      //     },
-      //   },
-      //   ["Click it"],
-      // ),
-      // View(
-      //   {
-      //     class: "navigation",
-      //   },
-      //   [
-      //     View(
-      //       {
-      //         class: "navigate-to",
-      //         style: {
-      //           color: "white",
-      //         },
-      //         onClick() {
-      //           page.set("todo");
-      //         },
-      //       },
-      //       ["Goto Todo List"],
-      //     ),
-      //     View(
-      //       {
-      //         class: "navigate-to",
-      //         style: {
-      //           color: "white",
-      //         },
-      //         onClick() {
-      //           console.log("click app");
-      //           page.set("app");
-      //         },
-      //       },
-      //       ["Goto Application List"],
-      //     ),
-      //   ],
-      // ),
-      // Show({
-      //   when: computed(page, (t) => t === "todo"),
-      //   ok() {
-      //     return [
-      //       View(
-      //         {
-      //           class: "subpage-title",
-      //         },
-      //         ["Todo List Page"],
-      //       ),
-      //       For({
-      //         each: todos_,
-      //         render(todo) {
-      //           return View({}, [todo.title]);
-      //         },
-      //       }),
-      //     ];
-      //   },
-      // }),
-      // Show({
-      //   when: computed(page, (t) => t === "app"),
-      //   ok() {
-      //     return [
-      //       View(
-      //         {
-      //           class: "subpage-title",
-      //         },
-      //         ["Application List Page"],
-      //       ),
-      //       Grid(
-      //         { columns, gap: 16 },
-      //         apps.map((app, idx) => {
-      //           return View(
-      //             {
-      //               style: {
-      //                 "border-style": "solid",
-      //                 "border-width": "2px",
-      //                 "border-color": combine({ focused, idx }, (t) => {
-      //                   return isFocusedCell(t.focused, t.idx)
-      //                     ? "#007bff"
-      //                     : "rgba(255,255,255,0.18)";
-      //                 }),
-      //               },
-      //               onClick() {
-      //                 handleSelectCard(idx.value);
-      //               },
-      //             },
-      //             [
-      //               View(
-      //                 { style: { "text-align": "center", "font-size": 22 } },
-      //                 [app.icon],
-      //               ),
-      //               View(
-      //                 {
-      //                   style: {
-      //                     "text-align": "center",
-      //                     "font-weight": "bold",
-      //                     fontSize: 14,
-      //                   },
-      //                 },
-      //                 [app.title],
-      //               ),
-      //               View(
-      //                 {
-      //                   style: {
-      //                     "text-align": "center",
-      //                     "font-size": 12,
-      //                     color: "gray",
-      //                   },
-      //                 },
-      //                 [app.subtitle],
-      //               ),
-      //             ],
-      //           );
-      //         }),
-      //       ),
-      //     ];
-      //   },
-      // }),
+      // 标题
+      View(
+        { style: { "font-size": "18px", "font-weight": "bold", "margin-bottom": "16px" } },
+        ["Dep Leak Test - Reactive Cleanup Verification"],
+      ),
+
+      // 实时 deps 状态
+      View(
+        {
+          style: {
+            padding: "8px",
+            "background-color": "rgba(255,255,255,0.1)",
+            "margin-bottom": "16px",
+            "font-size": "12px",
+          },
+        },
+        [depsDisplay_],
+      ),
+
+      // ========== 操作按钮 ==========
+      Row({ gap: 8, style: { "margin-bottom": "16px", "flex-wrap": "wrap" } }, [
+        Button(
+          {
+            onClick() {
+              logDeps("Manual Print");
+              refreshDepsDisplay();
+            },
+          },
+          ["Print Deps"],
+        ),
+        Button(
+          {
+            onClick() {
+              visible_.as((prev) => !prev);
+              setTimeout(() => {
+                logDeps(`After Toggle Show (visible=${visible_.value})`);
+                refreshDepsDisplay();
+              }, 100);
+            },
+          },
+          ["Toggle Show"],
+        ),
+        Button(
+          {
+            onClick() {
+              count_.as((prev) => prev + 1);
+              setTimeout(() => {
+                logDeps(`After Increment count (count=${count_.value})`);
+                refreshDepsDisplay();
+              }, 100);
+            },
+          },
+          ["Increment Count"],
+        ),
+        Button(
+          {
+            onClick() {
+              items_.push({ id: Date.now(), text: `Item ${items_.value.length + 1}` });
+              setTimeout(() => {
+                logDeps(`After Add Item (length=${items_.value.length})`);
+                refreshDepsDisplay();
+              }, 100);
+            },
+          },
+          ["Add Item"],
+        ),
+        Button(
+          {
+            onClick() {
+              if (items_.value.length > 0) {
+                items_.remove(items_.value[items_.value.length - 1]);
+              }
+              setTimeout(() => {
+                logDeps(`After Remove Last (length=${items_.value.length})`);
+                refreshDepsDisplay();
+              }, 100);
+            },
+          },
+          ["Remove Last"],
+        ),
+        Button(
+          {
+            onClick() {
+              items_.as([]);
+              setTimeout(() => {
+                logDeps("After Clear Items");
+                refreshDepsDisplay();
+              }, 100);
+            },
+          },
+          ["Clear Items"],
+        ),
+        Button(
+          {
+            onClick() {
+              theme_.set("color", theme_.value.color === "red" ? "blue" : "red");
+              setTimeout(() => {
+                logDeps(`After Toggle Theme (color=${theme_.value.color})`);
+                refreshDepsDisplay();
+              }, 100);
+            },
+          },
+          ["Toggle Theme"],
+        ),
+        Button(
+          {
+            onClick() {
+              checkLeak("Manual Check");
+              refreshDepsDisplay();
+            },
+          },
+          ["Check Leak"],
+        ),
+      ]),
+
+      // ========== 测试1: ref + Show ==========
+      // Show subscribe visible_，隐藏后该 subscribe 应清除
+      View(
+        { style: { "margin-bottom": "12px", "border-bottom": "1px solid rgba(255,255,255,0.2)", "padding-bottom": "12px" } },
+        [
+          View({ style: { "font-weight": "bold", "margin-bottom": "4px" } }, [
+            "Test 1: ref + Show (visible_)",
+          ]),
+          View({ style: { "font-size": "12px", color: "gray" } }, [
+            "Show subscribe visible_。隐藏后 visible_ 的 deps 应减少",
+          ]),
+          Show({
+            when: visible_,
+            onMounted() {
+              console.log("[Test1 Show] onMounted");
+            },
+            onUnmounted() {
+              console.log("[Test1 Show] onUnmounted");
+            },
+            ok() {
+              return View(
+                {
+                  style: { padding: "8px", "background-color": "rgba(0,255,0,0.2)" },
+                },
+                ["Show is visible!"],
+              );
+            },
+          }),
+        ],
+      ),
+
+      // ========== 测试2: ref + computed style (始终存在) ==========
+      // computed(count_, fn) 会 subscribe count_
+      // View 的 style 绑定会 subscribe computed 的返回值
+      // 反复 increment 时这些 deps 数量不应增长
+      View(
+        { style: { "margin-bottom": "12px", "border-bottom": "1px solid rgba(255,255,255,0.2)", "padding-bottom": "12px" } },
+        [
+          View({ style: { "font-weight": "bold", "margin-bottom": "4px" } }, [
+            "Test 2: ref + computed style (count_) - always mounted",
+          ]),
+          View({ style: { "font-size": "12px", color: "gray" } }, [
+            "computed(count_) subscribe count_，反复 increment 时 deps 不应增长",
+          ]),
+          View(
+            {
+              style: trackedComputed(count_, (c) => ({
+                padding: "8px",
+                "background-color": c % 2 === 0 ? "rgba(0,0,255,0.2)" : "rgba(255,0,255,0.2)",
+              }), "test2:style(count_)"),
+            },
+            ["Count: ", count_],
+          ),
+        ],
+      ),
+
+      // ========== 测试3: refobj + computed 在 Show 内 ==========
+      // Show 内创建 computed(theme_, fn)，subscribe theme_
+      // 隐藏后 computed.destroy() 应 unsubscribe theme_
+      // computed 自身的 deps（Text 绑定）也应被清除
+      View(
+        { style: { "margin-bottom": "12px", "border-bottom": "1px solid rgba(255,255,255,0.2)", "padding-bottom": "12px" } },
+        [
+          View({ style: { "font-weight": "bold", "margin-bottom": "4px" } }, [
+            "Test 3: refobj + computed inside Show (theme_)",
+          ]),
+          View({ style: { "font-size": "12px", color: "gray" } }, [
+            "Show 隐藏后，computed(theme_) 应 destroy，theme_ deps 减少，computed 自身 deps 清零",
+          ]),
+          Show({
+            when: visible_,
+            ok() {
+              // 这里的 trackedComputed 会在每次 Show ok() 被调用时创建新的 computed
+              const styleComputed = trackedComputed(theme_, (t) => ({
+                padding: "8px",
+                color: t.color,
+                "font-size": t.size + "px",
+                "background-color": "rgba(255,255,0,0.2)",
+              }), "test3:style(theme_)");
+
+              const colorComputed = trackedComputed(theme_, (t) => t.color, "test3:color(theme_)");
+              const sizeComputed = trackedComputed(theme_, (t) => String(t.size), "test3:size(theme_)");
+
+              return View(
+                {
+                  style: styleComputed,
+                  onMounted() {
+                    console.log("[Test3] onMounted, theme_ deps:", getDeps(theme_).length);
+                  },
+                  onUnmounted() {
+                    console.log("[Test3] onUnmounted, theme_ deps:", getDeps(theme_).length);
+                  },
+                },
+                [
+                  "Theme color: ", colorComputed,
+                  " | size: ", sizeComputed,
+                ],
+              );
+            },
+          }),
+        ],
+      ),
+
+      // ========== 测试4: refarr + For + computed(item) ==========
+      // For subscribe items_ (onChange/onPatch)
+      // For 内部为每个 item 创建 idx = computed(items_, fn)，subscribe items_
+      // render 中 computed(item, fn) 在 registry 创建 refObject(item) 并 subscribe
+      // 删除 item 时:
+      //   - For.remove() 应调用 idx.destroy() → unsubscribe items_
+      //   - computed(item) 应被 destroy → unsubscribe refObject(item)
+      View(
+        { style: { "margin-bottom": "12px", "border-bottom": "1px solid rgba(255,255,255,0.2)", "padding-bottom": "12px" } },
+        [
+          View({ style: { "font-weight": "bold", "margin-bottom": "4px" } }, [
+            "Test 4: refarr + For + computed(item) (items_)",
+          ]),
+          View({ style: { "font-size": "12px", color: "gray" } }, [
+            "For subscribe items_; idx = computed(items_); computed(item, t=>t.text) subscribe refObject(item)",
+          ]),
+          View({ style: { "font-size": "12px", color: "gray" } }, [
+            "删除 item 后: idx.destroy() 应 unsub items_; computed(item).destroy() 应 unsub refObject(item)",
+          ]),
+          For({
+            key: "id",
+            each: items_,
+            render(item, idx) {
+              // computed(item, fn) 会:
+              // 1. 在 registry 查找或创建 refObject(item)
+              // 2. subscribe refObject(item)
+              // 3. 返回 DerivedRef，被 Text 消费时 Text 会 subscribe 这个 DerivedRef
+              const textComputed = trackedComputed(
+                item,
+                (t) => t.text,
+                `test4:text(item#${item.id})`,
+              );
+
+              return View(
+                {
+                  style: {
+                    padding: "4px 8px",
+                    "background-color": "rgba(255,255,255,0.1)",
+                    "margin-bottom": "2px",
+                    display: "flex",
+                    gap: "8px",
+                  },
+                },
+                [
+                  // idx 是 For 内部创建的 computed(items_, fn)
+                  // 它 subscribe items_，删除时应 idx.destroy()
+                  idx,
+                  " - ",
+                  // textComputed subscribe refObject(item)
+                  textComputed,
+                  View(
+                    {
+                      style: { cursor: "pointer", color: "red" },
+                      onClick() {
+                        console.log(`\n--- Before Remove item#${item.id} ---`);
+                        console.log(`items_ deps: ${getDeps(items_).length}`);
+                        console.log(`textComputed deps: ${getDeps(textComputed).length}`);
+
+                        items_.remove(item);
+
+                        setTimeout(() => {
+                          console.log(`--- After Remove item#${item.id} ---`);
+                          console.log(`items_ deps: ${getDeps(items_).length}`);
+                          console.log(`textComputed deps: ${getDeps(textComputed).length}`);
+                          logDeps(`After Remove item#${item.id}`);
+                          refreshDepsDisplay();
+                        }, 100);
+                      },
+                    },
+                    ["[x]"],
+                  ),
+                ],
+              );
+            },
+            onMounted() {
+              console.log("[Test4 For] onMounted");
+              logDeps("Test4 For Mounted");
+            },
+          }),
+        ],
+      ),
+
+      // ========== 测试5: refarr + For + computed(item) 在 Show 内 ==========
+      // 和测试4一样的 dep 链路，但包在 Show 内
+      // Show 隐藏后: For 对 items_ 的 subscribe、所有 idx computed、所有 computed(item) 都应清除
+      View(
+        { style: { "margin-bottom": "12px" } },
+        [
+          View({ style: { "font-weight": "bold", "margin-bottom": "4px" } }, [
+            "Test 5: refarr + For + computed(item) inside Show",
+          ]),
+          View({ style: { "font-size": "12px", color: "gray" } }, [
+            "Show 隐藏后: For.subscribe(items_) + 所有 idx + 所有 computed(item) 都应被清除",
+          ]),
+          Show({
+            when: visible_,
+            ok() {
+              return Column({ gap: 2 }, [
+                For({
+                  key: "id",
+                  each: items_,
+                  render(item, idx) {
+                    // 追踪这个 computed，Show 隐藏后它应该没有 deps
+                    const textComputed = trackedComputed(
+                      item,
+                      (t) => t.text,
+                      `test5:text(item#${item.id})`,
+                    );
+                    return View(
+                      {
+                        style: {
+                          padding: "4px 8px",
+                          "background-color": "rgba(0,255,255,0.2)",
+                        },
+                        onMounted() {
+                          console.log(`[Test5 item#${item.id}] onMounted`);
+                        },
+                        onUnmounted() {
+                          console.log(`[Test5 item#${item.id}] onUnmounted`);
+                        },
+                      },
+                      ["(in Show) ", idx, " - ", textComputed],
+                    );
+                  },
+                  onMounted() {
+                    console.log("[Test5 For] onMounted");
+                    logDeps("Test5 For in Show Mounted");
+                  },
+                  onUnmounted() {
+                    console.log("[Test5 For] onUnmounted");
+                    setTimeout(() => {
+                      logDeps("Test5 For in Show Unmounted (after tick)");
+                      checkLeak("Test5 After Show Hidden");
+                      refreshDepsDisplay();
+                    }, 100);
+                  },
+                }),
+              ]);
+            },
+          }),
+        ],
+      ),
     ],
   );
 }

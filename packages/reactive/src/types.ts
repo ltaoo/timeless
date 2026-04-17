@@ -10,6 +10,18 @@ export type Subscriber<T> = {
     to?: number;
   }) => void;
   ignore?: boolean;
+  __trackId?: string;
+  __trackInfo?: Record<string, unknown>;
+};
+
+export type SubscriberWithId<T> = Subscriber<T> & {
+  __trackId: string;
+  __trackInfo?: Record<string, unknown>;
+};
+
+export type DepInfo = {
+  trackId: string;
+  trackInfo?: Record<string, unknown>;
 };
 
 export type TimelessRef<T> = {
@@ -20,6 +32,8 @@ export type TimelessRef<T> = {
   eq: (v: T) => boolean;
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;
+  getDeps: () => DepInfo[];
+  dump: () => void;
   as: (value: T | ((cur: T) => T)) => void;
   set: (value: T) => void;
   update: (fn: (current: T) => T) => void;
@@ -272,6 +286,8 @@ export type DerivedRef<T> = {
   value: T;
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;
+  getDeps?: () => DepInfo[];
+  dump?: () => void;
 };
 
 export type Ref<T> = DerivedRef<T> & {

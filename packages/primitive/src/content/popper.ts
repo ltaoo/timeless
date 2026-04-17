@@ -25,10 +25,11 @@ import { DerivedRef, isRef, Ref, refobj } from "@timeless/reactive";
 
 import { styleNames } from "@/style";
 import { MountedEvent } from "@/event";
+import { ListenerManager } from "@/util/listener";
 
 import { Text } from "./text";
 import { View, ViewProps } from "./view";
-import { isElement, TimelessElement, ViewChildren } from "./type";
+import { isElement, TimelessElement, ViewChildren, resolve_children } from "./type";
 
 /** Props for Popper component */
 type PopperProps = ViewProps & {
@@ -79,14 +80,16 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
     y: 0,
   };
   const style_ = refobj({});
+  const listener$ = ListenerManager();
 
   const methods = {
     setup_children(children?: ViewChildren) {
-      if (!children) {
+      const resolved = resolve_children(children);
+      if (!resolved) {
         return;
       }
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
+      for (let i = 0; i < resolved.length; i++) {
+        const child = resolved[i];
         // console.log("for children", child);
         (() => {
           // if (typeof child === "function") {
@@ -112,7 +115,7 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
     },
     setup_value_subscribe() {
       if (isRef(props.x)) {
-        props.x.subscribe({
+        const unsub = props.x.subscribe({
           onChange(v) {
             state.x = v as number;
             //     if ($elm) {
@@ -122,9 +125,10 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
             //     }
           },
         });
+        listener$.push(unsub);
       }
       if (isRef(props.y)) {
-        props.y.subscribe({
+        const unsub = props.y.subscribe({
           onChange(v) {
             state.y = v as number;
             //     if ($elm) {
@@ -134,9 +138,10 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
             //     }
           },
         });
+        listener$.push(unsub);
       }
       if (isRef(props.placed)) {
-        props.placed.subscribe({
+        const unsub = props.placed.subscribe({
           onChange(v) {
             state.placed = v as boolean;
             style_.as({
@@ -153,6 +158,7 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
             // $elm.setStyle({});
           },
         });
+        listener$.push(unsub);
       }
     },
   };
@@ -160,7 +166,12 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
   // methods.setup_children(children);
   methods.setup_value_subscribe();
 
-  return View({ ...props, style: styleNames([props.style, style_]) }, children);
+  return View({ ...props, style: styleNames([props.style, style_]), onUnmounted() {
+    if (props.onUnmounted) {
+      props.onUnmounted();
+    }
+    listener$.destroy();
+  } }, children);
   // return {
   //   t: "popper",
   //   get $elm() {

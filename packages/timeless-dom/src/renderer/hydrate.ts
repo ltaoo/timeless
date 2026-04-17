@@ -1,5 +1,8 @@
 import { VNodeView, type TimelessElement } from "@timeless/timeless";
 
+import { resetPortalCounter } from "@/host/portal";
+import { countRenderedNodes } from "@/host/fragment";
+
 import { render } from "./index";
 import { build } from "./build";
 
@@ -22,6 +25,8 @@ export function hydrate(
     console.error("[Hydrate] Container element not found");
     return;
   }
+
+  resetPortalCounter();
 
   // const firstChild = container.firstChild;
 
@@ -48,10 +53,32 @@ export function hydrate_node(
   $elm: HTMLElement | Text,
   opt: Partial<{
     initial: boolean;
+    $parent: HTMLElement;
   }> = {},
 ): VNodeView<any> | null {
   // console.log("hydrate node", vnode.t, $elm);
-  if (!vnode || !$elm) {
+  if (!vnode) {
+    return null;
+  }
+  // Portal finds its own DOM container outside the root — handle before $elm null check
+  if (vnode.t === "portal") {
+    const portal$ = build(vnode);
+    vnode.$elm = portal$;
+    portal$.hydrate(vnode, $elm);
+    return portal$;
+  }
+  // Transparent components with 0 rendered nodes (e.g., Show wrapping only portals)
+  // can be hydrated without a DOM node — they'll hydrate their children independently
+  if (!$elm && countRenderedNodes(vnode) === 0) {
+    const t = vnode.t;
+    if (t === "show" || t === "fragment" || t === "for" || t === "match") {
+      const node$ = build(vnode);
+      vnode.$elm = node$;
+      node$.hydrate(vnode, $elm, { $parent: opt.$parent });
+      return node$;
+    }
+  }
+  if (!$elm) {
     return null;
   }
   if (vnode.t === "view") {

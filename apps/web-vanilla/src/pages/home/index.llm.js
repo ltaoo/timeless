@@ -5,6 +5,7 @@ export default function LLMPageView() {
 
   function ModelSelect(props) {
     const state_ = refobj(props.store.state);
+
     const select$ = new Timeless.ui.SelectCore({
       defaultValue: null,
       placeholder: "选择模型",
@@ -16,15 +17,15 @@ export default function LLMPageView() {
     const ProviderIcon = (provider) => {
       const name = String(provider?.name || "");
       const initial = name ? name.slice(0, 1).toUpperCase() : "?";
-      const logoUri = String(provider?.logo_uri || "");
+      const uri = String(provider?.logo_uri || "");
       const disabled = !provider?.enabled;
-      if (logoUri) {
+      if (uri) {
         return Img({
           class: classNames([
             "size-4 rounded-sm object-cover shrink-0",
             disabled ? "opacity-50" : "",
           ]),
-          src: logoUri,
+          src: uri,
           alt: name || "provider",
         });
       }
@@ -45,9 +46,10 @@ export default function LLMPageView() {
       const groups = providers.map((p) => {
         const label = View({ class: "flex items-center gap-2" }, [
           ProviderIcon(p),
-          View({ class: classNames(["truncate", !p.enabled ? "opacity-50" : ""]) }, [
-            p.name,
-          ]),
+          View(
+            { class: classNames(["truncate", !p.enabled ? "opacity-50" : ""]) },
+            [p.name],
+          ),
         ]);
         return new Timeless.ui.SelectGroupCore({
           label,
@@ -69,9 +71,7 @@ export default function LLMPageView() {
     });
     setOptionsFromState(state_.value);
 
-    return View({ class: "space-y-2 w-[280px]" }, [
-      Select({ store: select$ }),
-    ]);
+    return View({ class: "space-y-2 w-[280px]" }, [Select({ store: select$ })]);
   }
 
   const llm_provider_store$ = (() => {

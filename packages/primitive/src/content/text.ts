@@ -15,7 +15,9 @@
  * <Text>{messageRef}</Text>
  * ```
  */
-import { DerivedRef, isRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref, generateTrackId } from "@timeless/reactive";
+
+import { ListenerManager } from "@/util/listener";
 
 import { TimelessElement } from "./type";
 
@@ -29,6 +31,8 @@ export function Text(
   value: DerivedRef<string | number> | Ref<string | number> | string | number,
 ): TimelessElement {
   let $elm: any = null;
+  const textTrackId = generateTrackId("text");
+  const listener$ = ListenerManager();
   const state = {
     rendered: false,
     value: "",
@@ -38,21 +42,20 @@ export function Text(
     subscribe_props() {
       if (value !== undefined) {
         if (isRef(value)) {
-          value.subscribe({
+          const unsubscribe = value.subscribe({
+            __trackId: textTrackId,
+            __trackInfo: { type: "text" },
             onChange(v) {
-              // console.log("[]Text handle value changed", v === state.value, typeof $elm.setText);
               if (v === state.value) {
                 return;
               }
-              // Always update local value to stay in sync with ref
               state.value = String(v);
-              // Only update DOM if element exists (component is mounted)
               if ($elm && typeof $elm.setText === "function") {
-                // host.setTextContent($elm, _local_value);
                 $elm.setText(state.value);
               }
             },
           });
+          listener$.add(unsubscribe);
           state.value = String(value.value);
         } else {
           state.value = String(value);
@@ -78,7 +81,7 @@ export function Text(
     onMounted() {},
     beforeUnmounted() {},
     onUnmounted() {
-      // Reset state for potential re-render
+      listener$.destroy();
       state.rendered = false;
       $elm = null;
     },

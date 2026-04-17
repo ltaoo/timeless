@@ -3,10 +3,10 @@
  * 测试: 各种 shadcn 组件 SSR 渲染
  */
 import { View, Show, For, ref, computed } from "@timeless/timeless";
-import { Button } from "@timeless/shadcn/src/modules/button";
-import { Input } from "@timeless/shadcn/src/modules/input";
-import { Textarea } from "@timeless/shadcn/src/modules/textarea";
-import { Badge } from "@timeless/shadcn/src/modules/badge";
+import { Button } from "@timeless/shadcn";
+import { Input } from "@timeless/shadcn";
+import { Textarea } from "@timeless/shadcn";
+import { Badge } from "@timeless/shadcn";
 import {
   Card,
   CardHeader,
@@ -14,16 +14,16 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from "@timeless/shadcn/src/modules/card";
-import { Separator } from "@timeless/shadcn/src/modules/separator";
-import { Checkbox } from "@timeless/shadcn/src/modules/checkbox";
-import { Switch } from "@timeless/shadcn/src/modules/switch";
-import { Progress } from "@timeless/shadcn/src/modules/progress";
-import { Label } from "@timeless/shadcn/src/modules/label";
-import { Alert, AlertTitle, AlertDescription } from "@timeless/shadcn/src/modules/alert";
-import { Select } from "@timeless/shadcn/src/modules/select";
-import { Skeleton } from "@timeless/shadcn/src/modules/skeleton";
-import { Slider } from "@timeless/shadcn/src/modules/slider";
+} from "@timeless/shadcn";
+import { Separator } from "@timeless/shadcn";
+import { Checkbox } from "@timeless/shadcn";
+import { Switch } from "@timeless/shadcn";
+import { Progress } from "@timeless/shadcn";
+import { Label } from "@timeless/shadcn";
+import { Alert, AlertTitle, AlertDescription } from "@timeless/shadcn";
+import { Select } from "@timeless/shadcn";
+import { Skeleton } from "@timeless/shadcn";
+import { Slider } from "@timeless/shadcn";
 import {
   ButtonCore,
   InputCore,
@@ -33,6 +33,7 @@ import {
 } from "@timeless/ui-vm";
 import { SwitchCore } from "@timeless/ui-vm";
 import { Section, Item, NavBar } from "../components/index.js";
+
 import { client$ } from "../store/index.js";
 import { request } from "../biz/request.js";
 
@@ -154,7 +155,10 @@ export default function Page({ data }) {
       // Header
       View({ class: "space-y-2" }, [
         View(
-          { as: "h1", class: "text-2xl font-bold tracking-tight text-foreground" },
+          {
+            as: "h1",
+            class: "text-2xl font-bold tracking-tight text-foreground",
+          },
           ["Component Library"],
         ),
         View({ as: "p", class: "text-muted-foreground" }, [
@@ -170,17 +174,17 @@ export default function Page({ data }) {
           View(
             {
               as: "pre",
-              class: "text-xs font-mono bg-muted p-3 rounded-lg overflow-auto max-h-[150px] w-full",
+              class:
+                "text-xs font-mono bg-muted p-3 rounded-lg overflow-auto max-h-[150px] w-full",
             },
             [apiResult],
           ),
         ]),
         Item("Client-side request", [
           Button({ store: fetchBtn }, ["Fetch Mock API"]),
-          Badge(
-            { variant: "outline" },
-            [computed(requestStatus, (s) => `Status: ${s}`)],
-          ),
+          Badge({ variant: "outline" }, [
+            computed(requestStatus, (s) => `Status: ${s}`),
+          ]),
         ]),
       ]),
 
@@ -202,9 +206,7 @@ export default function Page({ data }) {
           Button({ store: new ButtonCore({}) }, ["Default"]),
           Button({ store: new ButtonCore({ size: "lg" }) }, ["LG"]),
         ]),
-        Item("Loading", [
-          Button({ store: loadingBtn }, ["Click to Load"]),
-        ]),
+        Item("Loading", [Button({ store: loadingBtn }, ["Click to Load"])]),
         Item("Disabled", [
           Button({ store: disabledBtn }, ["Disabled"]),
           Button(
@@ -234,39 +236,27 @@ export default function Page({ data }) {
 
       // ========== Input ==========
       Section("Input", [
-        Item("Default", [
-          Input({ store: textInput }),
-        ]),
-        Item("Disabled", [
-          Input({ store: disabledInput }),
-        ]),
+        Item("Default", [Input({ store: textInput })]),
+        Item("Disabled", [Input({ store: disabledInput })]),
       ]),
 
       Separator({}),
 
       // ========== Textarea ==========
       Section("Textarea", [
-        Item("Default", [
-          Textarea({ store: textareaStore }),
-        ]),
+        Item("Default", [Textarea({ store: textareaStore })]),
       ]),
 
       Separator({}),
 
       // ========== Select ==========
-      Section("Select", [
-        Item("Default", [
-          Select({ store: select1 }),
-        ]),
-      ]),
+      Section("Select", [Item("Default", [Select({ store: select1 })])]),
 
       Separator({}),
 
       // ========== Checkbox ==========
       Section("Checkbox", [
-        Item("Default", [
-          Checkbox({ store: checkbox1 }),
-        ]),
+        Item("Default", [Checkbox({ store: checkbox1 })]),
         Item("With Label", [
           View({ class: "flex items-center gap-2" }, [
             Checkbox({ id: "ssr_cb1", store: checkbox2 }),
@@ -299,12 +289,8 @@ export default function Page({ data }) {
 
       // ========== Progress ==========
       Section("Progress", [
-        Item("33%", [
-          Progress({ store: progress1, class: "w-full max-w-sm" }),
-        ]),
-        Item("66%", [
-          Progress({ store: progress2, class: "w-full max-w-sm" }),
-        ]),
+        Item("33%", [Progress({ store: progress1, class: "w-full max-w-sm" })]),
+        Item("66%", [Progress({ store: progress2, class: "w-full max-w-sm" })]),
         Item("100%", [
           Progress({ store: progress3, class: "w-full max-w-sm" }),
         ]),
@@ -336,15 +322,11 @@ export default function Page({ data }) {
       Section("Alert", [
         Alert({}, [
           AlertTitle({}, ["Heads up!"]),
-          AlertDescription({}, [
-            "This alert is server-rendered via SSR.",
-          ]),
+          AlertDescription({}, ["This alert is server-rendered via SSR."]),
         ]),
         Alert({ variant: "destructive" }, [
           AlertTitle({}, ["Error"]),
-          AlertDescription({}, [
-            "This destructive alert is server-rendered.",
-          ]),
+          AlertDescription({}, ["This destructive alert is server-rendered."]),
         ]),
       ]),
 
@@ -352,9 +334,7 @@ export default function Page({ data }) {
 
       // ========== Separator ==========
       Section("Separator", [
-        Item("Horizontal", [
-          View({ class: "w-full" }, [Separator({})]),
-        ]),
+        Item("Horizontal", [View({ class: "w-full" }, [Separator({})])]),
         Item("Vertical", [
           View({ class: "flex items-center h-6 gap-3" }, [
             "Left",
@@ -410,16 +390,18 @@ export default function Page({ data }) {
         Item("Fruits Table (from load())", [
           View({ class: "w-full max-w-md" }, [
             View(
-              { class: "grid grid-cols-3 gap-2 text-sm font-medium text-muted-foreground border-b border-border pb-2" },
-              [
-                View({}, ["Name"]),
-                View({}, ["Price"]),
-                View({}, ["Action"]),
-              ],
+              {
+                class:
+                  "grid grid-cols-3 gap-2 text-sm font-medium text-muted-foreground border-b border-border pb-2",
+              },
+              [View({}, ["Name"]), View({}, ["Price"]), View({}, ["Action"])],
             ),
             ...data.apiData.fruits.map((fruit) =>
               View(
-                { class: "grid grid-cols-3 gap-2 text-sm py-2 border-b border-border/50" },
+                {
+                  class:
+                    "grid grid-cols-3 gap-2 text-sm py-2 border-b border-border/50",
+                },
                 [
                   View({ class: "text-foreground" }, [fruit.name]),
                   View({ class: "text-foreground" }, [`$${fruit.price}`]),
@@ -438,7 +420,10 @@ export default function Page({ data }) {
     // Footer
     View({ as: "footer", class: "border-t border-border mt-12" }, [
       View(
-        { class: "max-w-4xl mx-auto px-6 py-8 text-center text-sm text-muted-foreground" },
+        {
+          class:
+            "max-w-4xl mx-auto px-6 py-8 text-center text-sm text-muted-foreground",
+        },
         ["Powered by Timeless Framework — SSR Shadcn Test"],
       ),
     ]),

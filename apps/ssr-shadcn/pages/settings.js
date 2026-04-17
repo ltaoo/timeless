@@ -3,8 +3,8 @@
  * 测试: localStorage 读写、theme 切换、用户信息展示
  */
 import { View, ref, computed, Show } from "@timeless/timeless";
-import { Button } from "@timeless/shadcn/src/modules/button";
-import { Badge } from "@timeless/shadcn/src/modules/badge";
+import { Button } from "@timeless/shadcn";
+import { Badge } from "@timeless/shadcn";
 import {
   Card,
   CardHeader,
@@ -12,11 +12,12 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from "@timeless/shadcn/src/modules/card";
-import { Separator } from "@timeless/shadcn/src/modules/separator";
-import { Label } from "@timeless/shadcn/src/modules/label";
-import { Alert, AlertTitle, AlertDescription } from "@timeless/shadcn/src/modules/alert";
+} from "@timeless/shadcn";
+import { Separator } from "@timeless/shadcn";
+import { Label } from "@timeless/shadcn";
+import { Alert, AlertTitle, AlertDescription } from "@timeless/shadcn";
 import { ButtonCore } from "@timeless/ui-vm";
+
 import { NavBar } from "../components/index.js";
 import { storage$, user$, client$ } from "../store/index.js";
 
@@ -27,7 +28,12 @@ export async function load() {
 export function head() {
   return {
     title: "Timeless SSR — Settings",
-    meta: [{ name: "description", content: "Settings page - test localStorage read/write" }],
+    meta: [
+      {
+        name: "description",
+        content: "Settings page - test localStorage read/write",
+      },
+    ],
     links: [{ rel: "stylesheet", href: "/styles.css" }],
   };
 }
@@ -44,12 +50,16 @@ export default function Page({ data }) {
       // Header
       View({ class: "space-y-2" }, [
         View(
-          { as: "h1", class: "text-3xl font-bold tracking-tight text-foreground" },
+          {
+            as: "h1",
+            class: "text-3xl font-bold tracking-tight text-foreground",
+          },
           ["Settings"],
         ),
-        View({ as: "p", class: "text-lg text-muted-foreground leading-relaxed" }, [
-          "测试 StorageCore 读写和用户状态管理",
-        ]),
+        View(
+          { as: "p", class: "text-lg text-muted-foreground leading-relaxed" },
+          ["测试 StorageCore 读写和用户状态管理"],
+        ),
       ]),
 
       Separator({}),
@@ -64,24 +74,31 @@ export default function Page({ data }) {
           View({ class: "space-y-3" }, [
             View({ class: "flex items-center gap-3" }, [
               Label({}, ["Status:"]),
-              Badge(
-                { variant: user$.isLogin ? "default" : "secondary" },
-                [user$.isLogin ? "Logged In" : "Not Logged In"],
-              ),
+              Badge({ variant: user$.isLogin ? "default" : "secondary" }, [
+                user$.isLogin ? "Logged In" : "Not Logged In",
+              ]),
             ]),
             View({ class: "flex items-center gap-3" }, [
               Label({}, ["Username:"]),
-              View({ class: "text-sm text-foreground" }, [profile.username || "—"]),
+              View({ class: "text-sm text-foreground" }, [
+                profile.username || "—",
+              ]),
             ]),
             View({ class: "flex items-center gap-3" }, [
               Label({}, ["Email:"]),
-              View({ class: "text-sm text-foreground" }, [profile.email || "—"]),
+              View({ class: "text-sm text-foreground" }, [
+                profile.email || "—",
+              ]),
             ]),
             View({ class: "flex items-center gap-3" }, [
               Label({}, ["Token:"]),
-              View({ class: "text-sm text-foreground font-mono truncate max-w-[300px]" }, [
-                profile.token || "—",
-              ]),
+              View(
+                {
+                  class:
+                    "text-sm text-foreground font-mono truncate max-w-[300px]",
+                },
+                [profile.token || "—"],
+              ),
             ]),
           ]),
         ]),
@@ -135,7 +152,9 @@ export default function Page({ data }) {
                 variant: "outline",
                 onClick() {
                   storage$.set("theme", "light");
-                  globalThis.document?.documentElement?.classList?.remove("dark");
+                  globalThis.document?.documentElement?.classList?.remove(
+                    "dark",
+                  );
                   globalThis.location.reload();
                 },
               }),

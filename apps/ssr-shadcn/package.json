@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "timeless dev",
+    "dev": "timeless dev --port 3001",
     "build": "timeless build",
     "start": "timeless start"
   },

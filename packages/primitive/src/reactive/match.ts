@@ -1,8 +1,9 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { TimelessElement, ViewChildren, isElement } from "@/content/type";
+import { TimelessElement, ViewChildren, ViewChildrenArray, isElement, resolve_children } from "@/content/type";
 import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
+import { ListenerManager } from "@/util/listener";
 
 type MatchProps = {
   when: Ref<any> | any;
@@ -24,6 +25,7 @@ export function Match(props: MatchProps) {
   const { when, cases, fallback, onMounted, beforeUnmounted, onUnmounted } =
     props;
   let $elm: any = null;
+  const listener$ = ListenerManager();
 
   const state: MatchState = {
     rendered: false,
@@ -33,12 +35,13 @@ export function Match(props: MatchProps) {
   };
 
   const methods = {
-    normalize(children: ViewChildren): ViewChildren {
-      if (children === null || children === undefined) return [];
-      if (Array.isArray(children)) {
-        return children;
+    normalize(children: ViewChildren): ViewChildrenArray {
+      const resolved = resolve_children(children);
+      if (!resolved) return [];
+      if (Array.isArray(resolved)) {
+        return resolved;
       }
-      return [children];
+      return [resolved];
     },
     build_children_with_value(value: any) {
       const result: TimelessElement[] = [];
@@ -94,7 +97,7 @@ export function Match(props: MatchProps) {
 
     setup_value_subscribe() {
       if (isRef(when)) {
-        when.subscribe({
+        const unsub = when.subscribe({
           onChange(value) {
             if (!$elm) {
               return;
@@ -125,6 +128,7 @@ export function Match(props: MatchProps) {
             }
           },
         });
+        listener$.push(unsub);
       }
     },
   };
@@ -205,6 +209,7 @@ export function Match(props: MatchProps) {
       methods.cleanup_old_children();
     },
     onUnmounted() {
+      listener$.destroy();
       if (onUnmounted) {
         onUnmounted();
       }

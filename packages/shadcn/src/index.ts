@@ -87,8 +87,12 @@ import {
 } from "./modules/sonner";
 import { Affix } from "./modules/affix";
 
-import "./index.css";
-import "./styles/globals.css";
+try {
+  if (typeof window !== "undefined") {
+    import("./index.css");
+    import("./styles/globals.css");
+  }
+} catch {}
 
 console.log("shadcn.version" + __Version);
 export const TimelessShadcnVersion = __Version;
