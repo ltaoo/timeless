@@ -6,3 +6,4 @@ export { SSRMatch } from "./match";
 export { SSRFor } from "./for";
 export { SSRImg } from "./img";
 export { SSRLabel } from "./label";
+export { SSRIcon } from "./icon";

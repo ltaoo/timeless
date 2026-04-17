@@ -131,28 +131,25 @@ export function DOMFragment(props: {
           }
         } else {
           // Child produced no DOM nodes (e.g., Show with when=false, or Portal).
-          // Build the host element and place its anchor so future
-          // insertChildren (when condition becomes true) can find a parent.
-          const child$ = props.build(child);
-          child.$elm = child$;
-          if (child.t === "portal") {
-            // Portal hydrates against its own SSR container in <body>, not inline
-            child$.hydrate(child, null);
-          } else {
-            const childAnchor = child$.get$elm();
-            const $insertBefore =
-              cursor < $ourNodes.length ? $ourNodes[cursor] : $anchor;
-            $parent.insertBefore(childAnchor, $insertBefore);
-            console.log(
-              "[fragment.hydrate] 0-node child placed anchor",
-              child.t,
-              "parentElement=",
-              childAnchor.parentElement,
-              "anchor in DOM=",
-              document.contains(childAnchor),
-            );
+          // Use hydrate_node which properly handles all types:
+          // - Portal: finds its own SSR container in <body>
+          // - Show/Fragment/For/Match with 0 nodes: recursively hydrates children
+          const child$ = hydrate_node(child, null as any, {
+            $parent,
+          });
+          if (child$) {
+            // For non-portal transparent components, place the anchor in DOM
+            // so future insertChildren can find a parent.
+            if (child.t !== "portal") {
+              const childAnchor = child$.get$elm();
+              if (childAnchor && !childAnchor.parentElement) {
+                const $insertBefore =
+                  cursor < $ourNodes.length ? $ourNodes[cursor] : $anchor;
+                $parent.insertBefore(childAnchor, $insertBefore);
+              }
+            }
+            child_nodes.push(child$);
           }
-          child_nodes.push(child$);
         }
       }
       common$.methods.setchildnode(child_nodes);

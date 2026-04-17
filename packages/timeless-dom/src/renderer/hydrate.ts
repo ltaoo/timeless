@@ -154,6 +154,12 @@ export function hydrate_node(
     button$.hydrate(vnode, $elm);
     return button$;
   }
+  if (vnode.t === "icon") {
+    const icon$ = build(vnode);
+    vnode.$elm = icon$;
+    icon$.hydrate(vnode, $elm);
+    return icon$;
+  }
   // if (vnode.t === "img") {
   //   return hydrateImg(vnode, domNode);
   // }
