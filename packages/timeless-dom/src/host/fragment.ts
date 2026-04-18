@@ -63,6 +63,7 @@ export function DOMFragment(props: {
         const total_nodes = countRenderedNodes(elm);
         const $children_belong_me = $children.slice(idx, idx + total_nodes);
         logger.log("[hydrate]$children", $children_belong_me);
+
         box$.methods.set$childrne($children_belong_me);
         const child_nodes: (VNodeView<any> | null)[] = [];
         const child_elements: (TimelessElement | null)[] = [];
@@ -72,7 +73,7 @@ export function DOMFragment(props: {
           let $child_offset = 0;
           for (let i = 0; i < elm.children.length; i += 1) {
             const child = elm.children[i];
-            const prev_child = elm.children[i - 1];
+            // const prev_child = elm.children[i - 1];
             const $child = $children_belong_me[$child_offset] as
               | HTMLElement
               | Text;

@@ -11,21 +11,22 @@ import {
   Link,
   Portal,
   Fragment,
-  Button,
 } from "@timeless/timeless";
-import { DropdownMenu, ui } from "@timeless/shadcn";
-import { Badge } from "@timeless/shadcn";
 import {
+  Button,
+  Badge,
+  DropdownMenu,
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
+  Separator,
+  ui,
 } from "@timeless/shadcn";
-import { Separator } from "@timeless/shadcn";
 
-// import { NavBar } from "../components/index.js";
-// import { history$, storage$, user$ } from "../store/index.js";
+import { NavBar } from "../components/index.js";
+import { history$, storage$, user$ } from "../store/index.js";
 
 export async function load() {
   return {
@@ -69,7 +70,7 @@ export function head() {
 export default function Page({ data }) {
   // ---- 测试 localStorage：读取 user 信息 ----
   const isLogin = ref(data.isLogin);
-  //   const username = user$.profile?.username || "anonymous";
+  const username = user$.profile?.username || "anonymous";
   const dropdown$ = new ui.DropdownMenuCore({
     defaultVisible: true,
     items: [
@@ -82,29 +83,38 @@ export default function Page({ data }) {
     ],
   });
 
-  const elm = DropdownMenu({ store: dropdown$ }, [
-    Button(
+  return View({ class: "flex items-center gap-3" }, [
+    Badge({ variant: isLogin ? "default" : "secondary" }, [
+      isLogin ? "已登录" : "未登录",
+    ]),
+    DropdownMenu(
       {
-        style: {
-          "margin-top": "120px",
-          "margin-left": "120px",
-        },
-        onClick() {
-          isLogin.as(false);
-          dropdown$.show();
-        },
-        onMounted(event) {
-          console.log("button mounted");
-          console.log(event.target.getBoundingClientRect());
-        },
+        store: new ui.DropdownMenuCore({
+          defaultVisible: true,
+          items: [
+            new ui.MenuItemCore({
+              label: isLogin ? "切换账号" : "去登录",
+              onClick() {
+                console.log("切换账号");
+              },
+            }),
+          ],
+        }),
       },
-      [isLogin ? "切换账号" : "去登录"],
+      [
+        View(
+          {
+            class:
+              "text-sm text-primary underline underline-offset-4 hover:opacity-80",
+            onClick() {
+              // dropdown$.toggle();
+            },
+          },
+          [isLogin ? username : "去登录"],
+        ),
+      ],
     ),
   ]);
-
-  console.log(elm);
-
-  return elm;
 
   // return View({ class: "min-h-screen bg-background" }, [
   //   NavBar({ current: "home" }),
@@ -139,7 +149,6 @@ export default function Page({ data }) {
   //           Badge({ variant: isLogin ? "default" : "secondary" }, [
   //             isLogin ? "已登录" : "未登录",
   //           ]),
-  //           Badge({ variant: "outline" }, [username]),
   //           DropdownMenu(
   //             {
   //               store: new ui.DropdownMenuCore({
@@ -157,12 +166,10 @@ export default function Page({ data }) {
   //             [
   //               View(
   //                 {
-  //                   as: "a",
-  //                   href: "/login",
   //                   class:
   //                     "text-sm text-primary underline underline-offset-4 hover:opacity-80",
   //                 },
-  //                 [isLogin ? "切换账号" : "去登录"],
+  //                 [isLogin ? username : "去登录"],
   //               ),
   //             ],
   //           ),
@@ -199,13 +206,13 @@ export default function Page({ data }) {
   //     View({ class: "flex flex-wrap gap-3" }, [
   //       Button(
   //         {
-  //           store: new ButtonCore({}),
+  //           store: new ui.ButtonCore({}),
   //         },
   //         [Link({}, ["组件库 →"])],
   //       ),
   //       Button(
   //         {
-  //           store: new ButtonCore({ variant: "secondary" }),
+  //           store: new ui.ButtonCore({ variant: "secondary" }),
   //           onClick() {
   //             globalThis.location.href = "/settings";
   //           },
@@ -214,7 +221,7 @@ export default function Page({ data }) {
   //       ),
   //       Button(
   //         {
-  //           store: new ButtonCore({ variant: "outline" }),
+  //           store: new ui.ButtonCore({ variant: "outline" }),
   //           onClick() {
   //             globalThis.location.href = "/login";
   //           },
@@ -223,7 +230,7 @@ export default function Page({ data }) {
   //       ),
   //       Button(
   //         {
-  //           store: new ButtonCore({ variant: "ghost" }),
+  //           store: new ui.ButtonCore({ variant: "ghost" }),
   //           onClick() {
   //             globalThis.location.href = "/nonexistent";
   //           },

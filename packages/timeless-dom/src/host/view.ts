@@ -2,7 +2,16 @@ import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { hydrate_node } from "@/renderer/hydrate";
 
-import { HostElement, countRenderedNodes } from "./box";
+import {
+  HostElement,
+  countRenderedNodes,
+  insertedAnchor,
+  isEmptyNode,
+  isFragment,
+} from "./box";
+import { Logger } from "@/util/logger";
+
+const logger = Logger({ prefix: "dom", scope: "view" });
 
 export type DOMView = VNodeView<HTMLDivElement> & {
   t: "view";
@@ -38,41 +47,40 @@ export function DOMView(props: {
       console.log("[dom]host/view - hydrate", $elm, elm.state);
       box$.methods.set$elm($elm);
       box$.methods.setupEventListener(elm.events);
-      if (elm.children) {
-        const child_nodes: VNodeView[] = [];
-        const child_elements: (TimelessElement | null)[] = [];
-        const $children = Array.from($elm.childNodes);
-        let cursor = 0;
+
+      const child_nodes: VNodeView[] = [];
+      const child_elements: (TimelessElement | null)[] = [];
+
+      if ($elm && elm.children) {
+        // const total_nodes = countRenderedNodes(elm);
+        const $children = Array.from($elm.childNodes) as (HTMLElement | Text)[];
+        let offset = 0;
         for (let i = 0; i < elm.children.length; i += 1) {
           const child = elm.children[i];
+          const $child = $children[offset] as HTMLElement | Text;
           child_elements.push(child);
+
+          logger.log("each child", i, child, $child, offset);
+
           if (child) {
-            const nodeCount = countRenderedNodes(child);
-            if (nodeCount === 0) {
-              // Child produces 0 inline DOM nodes (portal, or show/fragment with only portal children).
-              // Hydrate it without consuming DOM cursor, pass $parent so it can place its anchor.
-              const child$ = hydrate_node(child, null as any, {
-                $parent: $elm as HTMLElement,
-                offset: 0,
-                idx: i,
-              });
-              if (child$) {
-                child_nodes.push(child$);
+            const child$ = hydrate_node(child, $child, {
+              $parent: $elm as HTMLElement,
+              offset,
+              idx: i,
+            });
+            // cursor += total_nodes;
+            if (child$) {
+              if (isEmptyNode(child)) {
+              } else if (isFragment(child)) {
+                const count_$children = child$.get$children().length;
+                offset += count_$children;
+                offset += insertedAnchor(child) ? 1 : 0;
+                // $child_offset += count_$children;
+              } else {
+                offset += 1;
+                // $child_offset += 1;
               }
-            } else {
-              const child$ = hydrate_node(
-                child,
-                $children[cursor] as HTMLElement | Text,
-                {
-                  $parent: $elm as HTMLElement,
-                  offset: 0,
-                  idx: i,
-                },
-              );
-              cursor += nodeCount;
-              if (child$) {
-                child_nodes.push(child$);
-              }
+              child_nodes.push(child$);
             }
           }
         }

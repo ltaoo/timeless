@@ -1,6 +1,6 @@
 {
   "name": "@timeless/reactive",
-  "version": "0.20.4",
+  "version": "0.20.6",
   "main": "dist/index.js",
   "module": "dist/timeless.reactive.esm.js",
   "types": "dist/index.d.ts",

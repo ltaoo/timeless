@@ -117,6 +117,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       offsetX,
       offsetY,
       _name: _name ? `${_name}__popper` : "menu__popper",
+      defaultPlaced: defaultVisible,
     });
     this.presence = new PresenceCore(
       defaultVisible ? { mounted: true, visible: true } : {},

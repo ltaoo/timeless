@@ -25,7 +25,7 @@ export function hydrate(
     return;
   }
 
-  resetPortalCounter();
+  // resetPortalCounter();
 
   // const firstChild = container.firstChild;
 
@@ -35,30 +35,37 @@ export function hydrate(
       console.warn("[Hydrate] No SSR content found, falling back to render");
       render(vnode, container);
     }
-    hydrate_node(vnode, container as HTMLElement | Text, {
+    // 是 Show、For、Portal 等 透明组件
+    const view$ = hydrate_node(vnode, container as HTMLElement | Text, {
       initial: true,
       $parent: container,
       offset: 0,
       idx: 0,
     });
     if (vnode.onMounted) {
+      console.log("before onMounted", vnode.t, view$);
       vnode.onMounted({
-        target: container,
+        target: view$,
       });
     }
     return;
   }
 
   // Perform hydration
-  hydrate_node(vnode, container.firstChild as HTMLElement | Text, {
-    initial: true,
-    $parent: container,
-    offset: 0,
-    idx: 0,
-  });
+  const view$ = hydrate_node(
+    vnode,
+    container.firstChild as HTMLElement | Text,
+    {
+      initial: true,
+      $parent: container,
+      offset: 0,
+      idx: 0,
+    },
+  );
+  console.log("before onMounted", vnode.t, view$);
   if (vnode.onMounted) {
     vnode.onMounted({
-      target: container,
+      target: view$,
     });
   }
 }

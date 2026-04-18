@@ -26,7 +26,7 @@ export function SSRImg(props: {
       if (elm.state.alt) {
         attrs.push(`alt="${elm.state.alt}"`);
       }
-      return `<img${box$.stringifyAttrs(attrs)} />`;
+      return `<img${box$.stringifyAttrs(attrs)}/>`;
     },
     hydrate(elm: TimelessElement, $dom: any) {},
     setSrc() {},

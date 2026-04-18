@@ -56,7 +56,6 @@ export function DOMShow(props: {
           const total_nodes = countRenderedNodes(elm);
           // console.log("[]show totalNodes", total_nodes);
           const $children = Array.from($v.childNodes) as (HTMLElement | Text)[];
-          const is_container = total_nodes > $children.length;
 
           // const idx = $children.indexOf($elm);
           const $children_belong_me = $children.slice(idx, idx + total_nodes);
@@ -76,7 +75,6 @@ export function DOMShow(props: {
             const $child = $children_belong_me[$child_offset] as
               | HTMLElement
               | Text;
-
             logger.log("each child", i, child, $child, offset);
             if (child) {
               const child$ = hydrate_node(child, $child, {
@@ -97,84 +95,9 @@ export function DOMShow(props: {
                 }
                 child_nodes.push(child$);
               }
-              // const childNodeCount = countRenderedNodes(child);
-              // if (childNodeCount === 0) {
-              //   // Child produces 0 DOM nodes (portal, etc.)
-              //   const child$ = hydrate_node(child, null as any);
-              //   if (child$) {
-              //     child_nodes.push(child$);
-              //   }
-              // } else {
-              //   const child$ = hydrate_node(
-              //     child,
-              //     $children_belong_me[cursor] as HTMLElement | Text,
-              //     { $parent },
-              //   );
-              //   cursor += childNodeCount;
-              //   if (child$) {
-              //     child_nodes.push(child$);
-              //   }
-              // }
             }
           }
           box$.methods.setchildnode(child_nodes);
-
-          // if (total_nodes === 0) {
-          //   // All children produce 0 DOM nodes (e.g., portal only).
-          //   const $parent = $elm ? $elm.parentElement : opt.$parent || null;
-          //   if ($parent) {
-          //     $parent.appendChild($anchor);
-          //   }
-          //   const child_nodes: VNodeView[] = [];
-          //   for (let i = 0; i < elm.children.length; i += 1) {
-          //     const child = elm.children[i];
-          //     if (child) {
-          //       const child$ = hydrate_node(child, null as any);
-          //       if (child$) {
-          //         child_nodes.push(child$);
-          //       }
-          //     }
-          //   }
-          //   common$.methods.setchildnode(child_nodes);
-          //   return;
-          // }
-
-          // // Determine if $elm is a container or the actual child element
-          // const isContainer =
-          //   $elm &&
-          //   !($elm instanceof Text) &&
-          //   $elm.childNodes.length >= total_nodes;
-
-          // // Check if this show wraps exactly 1 child that produces 1 DOM node
-          // if (total_nodes === 1 && elm.children.length === 1) {
-          //   const child = elm.children[0];
-          //   if (child) {
-          //     // If $elm is a container, take its first child; otherwise $elm IS the child element
-          //     const $childElm = isContainer
-          //       ? ($elm.firstChild as HTMLElement)
-          //       : $elm;
-          //     const $parent = isContainer ? ($elm as HTMLElement) : opt.$parent;
-          //     const child$ = hydrate_node(child, $childElm, { $parent });
-          //     if (child$) {
-          //       common$.methods.setchildnode([child$]);
-          //     }
-          //     // Place anchor after the element
-          //     const $actualParent = $childElm ? $childElm.parentElement : null;
-          //     if ($actualParent && $childElm.nextSibling) {
-          //       $actualParent.insertBefore($anchor, $childElm.nextSibling);
-          //     } else if ($actualParent) {
-          //       $actualParent.appendChild($anchor);
-          //     }
-          //   }
-          //   return;
-          // }
-
-          // Multiple children - need to find which DOM nodes belong to this Show
-          // const $parent = $elm ? $elm.parentElement : opt.$parent || null;
-          // console.log("[]show check has $parent", $parent, total_nodes);
-          // if ($parent) {
-
-          // }
         }
       }
     },

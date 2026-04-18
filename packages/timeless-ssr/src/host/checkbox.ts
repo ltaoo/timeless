@@ -24,7 +24,7 @@ export function SSRCheckbox(props: {
       if (elm.state.checked) {
         attrs.push(`checked="checked"`);
       }
-      return `<input${box$.stringifyAttrs(attrs)} />`;
+      return `<input${box$.stringifyAttrs(attrs)}/>`;
     },
     hydrate(elm: TimelessElement, $dom: any) {},
   };

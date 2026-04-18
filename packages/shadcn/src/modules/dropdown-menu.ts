@@ -44,9 +44,7 @@ export function DropdownMenu(
     Show({
       when: !!children,
       ok() {
-        return [
-          DropdownMenuPrimitive.Trigger({ store: props.store }, children),
-        ];
+        return DropdownMenuPrimitive.Trigger({ store: props.store }, children);
       },
     }),
     DropdownMenuPrimitive.Content(

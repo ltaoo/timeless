@@ -24,7 +24,7 @@ export function SSRInput(props: {
       if (elm.state.value) {
         attrs.push(`value="${elm.state.value}"`);
       }
-      return `<input${box$.stringifyAttrs(attrs)} />`;
+      return `<input${box$.stringifyAttrs(attrs)}/>`;
     },
     hydrate(elm: TimelessElement, $dom: any) {},
   };

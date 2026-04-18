@@ -68,10 +68,10 @@ function render_asn_to_string(
 
   if (children && children.length > 0) {
     const inner = render_children_string(children, props);
-    return `<${tag} ${attrStr}>${inner}</${tag}>`;
+    return attrStr ? `<${tag} ${attrStr}>${inner}</${tag}>` : `<${tag}>${inner}</${tag}>`;
   }
 
-  return `<${tag} ${attrStr} />`;
+  return attrStr ? `<${tag} ${attrStr}/>` : `<${tag}/>`;
 }
 
 function render_children_string(

@@ -27,9 +27,7 @@ export function _collectPortal(html: string) {
 }
 
 export function getPortalContent(): string {
-  return _portalContents
-    .map((html, i) => `<div data-timeless-portal="${i}">${html}</div>`)
-    .join("");
+  return _portalContents.map((html, i) => html).join("");
 }
 
 function build(elm: TimelessElement): VNodeView<string> {

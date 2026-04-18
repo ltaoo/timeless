@@ -70,27 +70,28 @@ const DEFAULT_CACHE_VALUES = {
   theme: "system",
 };
 const key = "timeless_ssr";
-const isServer = typeof globalThis.localStorage === "undefined";
-const noopClient = {
-  getItem: () => null,
-  setItem: () => {},
-  removeItem: () => {},
-  clear: () => {},
-};
-const storageClient = isServer ? noopClient : globalThis.localStorage;
-const cached = storageClient.getItem(key);
+// const isServer = typeof window === "undefined";
+// const noopClient = {
+//   getItem: () => null,
+//   setItem: () => {},
+//   removeItem: () => {},
+//   clear: () => {},
+// };
+// const storageClient = isServer ? noopClient : globalThis.localStorage;
+// console.log("isServer:", isServer, storageClient);
+// const cached = storageClient.getItem(key);
 export const storage$ = new StorageCore({
   key,
   defaultValues: DEFAULT_CACHE_VALUES,
-  values: (() => {
-    try {
-      const prev = JSON.parse(cached || "{}");
-      return { ...prev };
-    } catch {
-      return {};
-    }
-  })(),
-  client: storageClient,
+  values: {},
+  // values: (() => {
+  //   try {
+  //     const prev = JSON.parse(cached || "{}");
+  //     return { ...prev };
+  //   } catch {
+  //     return {};
+  //   }
+  // })(),
 });
 
 // ============================================================

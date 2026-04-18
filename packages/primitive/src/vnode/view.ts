@@ -26,6 +26,7 @@ type VNodeViewType =
   | "button"
   | "input"
   | "fragment"
+  | "portal"
   | "reactive";
 
 export type VNodeView<HostElm = any> = {

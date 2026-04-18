@@ -55,6 +55,7 @@ export function head({ data }) {
  */
 export default function Page({ data }) {
   const visible_ = ref(true);
+  const t_ = ref(true);
   const category_ = refarr([
     {
       label: "计算机",
@@ -66,58 +67,35 @@ export default function Page({ data }) {
     },
   ]);
 
-  const elm = Fragment({}, [
+  const elm = View({}, [
+    View({}, ["Hello"]),
     Show({
       when: true,
       ok() {
-        return [
-          View(
-            {
-              onClick() {
-                visible_.as((prev) => {
-                  return !prev;
-                });
-              },
+        return Fragment(
+          {
+            onMounted(e) {
+              console.log(e.target.get$children());
             },
-            ["Click it"],
-          ),
-        ];
+          },
+          [
+            View(
+              {
+                onClick() {
+                  console.log("click timeless");
+                  // visible_.toggle();
+                },
+              },
+              ["Timeless"],
+            ),
+          ],
+        );
       },
     }),
     Show({
       when: visible_,
       ok() {
-        return [
-          Portal({}, [
-            View(
-              {
-                onMounted(event) {
-                  console.log("hhhh", event.target.getBoundingClientRect());
-                },
-              },
-              [
-                View(
-                  {
-                    onMounted(event) {
-                      console.log(
-                        "hhhh2",
-                        event.target.getBoundingClientRect(),
-                      );
-                    },
-                  },
-                  [
-                    For({
-                      each: category_,
-                      render(category) {
-                        return View({}, [computed(category, (t) => t.label)]);
-                      },
-                    }),
-                  ],
-                ),
-              ],
-            ),
-          ]),
-        ];
+        return Portal({}, [View({}, ["Content in Portal"])]);
       },
     }),
   ]);

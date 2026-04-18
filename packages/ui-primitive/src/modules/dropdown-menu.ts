@@ -90,15 +90,16 @@ export function Trigger(
           }),
         );
         const $elm = event.target;
-        const nodes = $elm.getChildren();
-        const $ref = nodes.find((n) => n && n.getType() === "view") || $elm;
+        const nodes = $elm.get$children();
+        const $ref = nodes[0] || $elm;
+        console.log("[DropdownMenu]find child $elm", nodes, $ref);
         // console.log(
         //   "[primitive]dropdownmenu - Trigger mounted",
         //   nodes,
         //   $ref.getBoundingClientRect(),
         // );
         setTimeout(() => {
-          props.store.menu.popper.setReference(
+          props.store.setReference(
             {
               $el: $ref,
               getRect() {
@@ -127,7 +128,7 @@ export function Trigger(
             store.show();
           };
           listener$.add(
-            $elm.addEventListener("pointerdown", handlePointerDown),
+            $ref.addEventListener("pointerdown", handlePointerDown),
           );
         }
         // Handle hover trigger
@@ -155,9 +156,9 @@ export function Trigger(
             e.stopPropagation();
           };
           listener$.append([
-            $elm.addEventListener("mouseenter", handleMouseEnter),
-            $elm.addEventListener("mouseleave", handleMouseLeave),
-            $elm.addEventListener("pointerdown", handlePointerDown),
+            $ref.addEventListener("mouseenter", handleMouseEnter),
+            $ref.addEventListener("mouseleave", handleMouseLeave),
+            $ref.addEventListener("pointerdown", handlePointerDown),
           ]);
         }
         if (props.onMounted) {

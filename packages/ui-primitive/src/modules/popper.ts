@@ -29,16 +29,16 @@ export function Anchor(
   children: ViewChildren,
 ) {
   const { store, ...rest } = props;
-  return View(
+  return Fragment(
     {
       ...rest,
       onMounted(event) {
-        const $el = event.target;
-        console.log("[primitive]popper Anchor mounted - ");
+        const $anchor = event.target.get$children()[0];
+        console.log("[primitive]popper Anchor mounted - ", $anchor);
         store.setReference({
-          $el,
+          $el: $anchor,
           getRect() {
-            return $el.getBoundingClientRect();
+            return $anchor.getBoundingClientRect();
           },
         });
         if (rest.onMounted) {

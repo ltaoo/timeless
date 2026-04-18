@@ -398,6 +398,7 @@ export function HostElement(props: {
       }, 0);
     },
     removeChildren() {
+      console.log(props.t + "[]removeChildren", $children, child_nodes);
       if ($children.length === 0 && child_nodes.length === 0) {
         return;
       }
@@ -644,7 +645,13 @@ export function HostElement(props: {
 export function countRenderedNodes(elm: TimelessElement | null): number {
   if (!elm) return 0;
   const t = elm.t;
-  if (t === "show" || t === "fragment" || t === "for" || t === "match") {
+  if (
+    t === "fragment" ||
+    t === "portal" ||
+    t === "show" ||
+    t === "for" ||
+    t === "match"
+  ) {
     if (!elm.children) return 0;
     let count = 0;
     for (const child of elm.children) {
@@ -652,7 +659,6 @@ export function countRenderedNodes(elm: TimelessElement | null): number {
     }
     return count;
   }
-  if (t === "portal") return 0;
   return 1;
 }
 

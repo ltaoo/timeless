@@ -57,6 +57,7 @@ type PopperProps = {
   strategy: "fixed" | "absolute";
   offsetX?: number;
   offsetY?: number;
+  defaultPlaced?: boolean;
 };
 type PopperState = {
   strategy: Strategy;
@@ -133,6 +134,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       strategy = "absolute",
       offsetX = 0,
       offsetY = 0,
+      defaultPlaced = false,
     } = options;
     if (_name) {
       this.unique_id = _name;
@@ -161,21 +163,19 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     reference: { $el?: unknown; getRect: () => Rect },
     opt: Partial<{ force: boolean }> = {},
   ) {
-    // console.log(
-    //   "[DEBUG-POPPER] setReference",
-    //   this.unique_id,
-    //   "has$el:",
-    //   !!(reference as any)?.$el,
-    //   "hasGetRect:",
-    //   !!reference?.getRect,
-    //   "prevRef:",
-    //   !!this.reference,
-    // );
+    console.log(
+      "[DEBUG-POPPER] setReference",
+      "$reference",
+      reference,
+      "floating:",
+      this.floating,
+    );
     if (!reference) {
       return;
     }
     this.reference = reference;
     this.state.reference = !!reference;
+    this.place();
     this.emit(Events.ReferenceMounted, reference);
     this.emit(Events.StateChange, { ...this.state });
   }

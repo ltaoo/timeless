@@ -102,24 +102,29 @@ export function Show(props: ShowProps) {
               if (props.else) {
                 const target = methods.build_children_with_condition(condition);
                 state.children = target;
+                logger.log("before insert", target, !!$elm?.insertChildren);
                 if ($elm && typeof $elm.insertChildren === "function") {
                   $elm.insertChildren(target);
                 }
                 return;
               }
               state.children = [];
+              logger.log("before remove", !!$elm?.insertChildren);
               if ($elm && typeof $elm.removeChildren === "function") {
                 $elm.removeChildren();
               }
             } else {
               const target = methods.build_children_with_condition(condition);
               state.children = target;
-              logger.log("before insert children", target.length);
-              logger.log("[Show.onChange] $elm=", $elm, "hasInsertChildren=", $elm && typeof $elm.insertChildren === "function");
+              // logger.log("before insert children", target.length);
+              logger.log("before insert", !!$elm?.insertChildren);
               if ($elm && typeof $elm.insertChildren === "function") {
                 $elm.insertChildren(target);
               } else {
-                logger.warn("[Show.onChange] SKIPPED insertChildren — $elm is", $elm);
+                logger.warn(
+                  "[Show.onChange] SKIPPED insertChildren — $elm is",
+                  $elm,
+                );
               }
             }
           },

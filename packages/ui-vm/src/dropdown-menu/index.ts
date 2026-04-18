@@ -3,7 +3,7 @@ import { BaseDomain, Handler } from "@timeless/base";
 import { MenuCore, MenuEntry } from "@/menu/index";
 import { MenuItemCore } from "@/menu/item";
 import { MenuGroupCore } from "@/menu/group";
-import { Side } from "@/popper/types";
+import { Rect, Side } from "@/popper/types";
 import { Align } from "@/popper/index";
 
 enum Events {
@@ -141,6 +141,17 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     matched.show();
+  }
+  setReference(
+    reference: {
+      $el?: unknown;
+      getRect: () => Rect;
+    },
+    opt?: Partial<{
+      force: boolean;
+    }>,
+  ) {
+    this.menu.popper.setReference(reference, opt);
   }
   toggle(
     position?: Partial<{ x: number; y: number; width: number; height: number }>,

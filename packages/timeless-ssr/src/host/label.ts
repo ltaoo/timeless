@@ -23,7 +23,7 @@ export function SSRLabel(props: {
       if (elm.state.for) {
         attrs.push(`for="${elm.state.for}"`);
       }
-      return `<label${box$.stringifyAttrs(attrs)} >${children}</label>`;
+      return `<label${box$.stringifyAttrs(attrs)}>${children}</label>`;
     },
     hydrate(elm: TimelessElement, $dom: any) {},
   };
