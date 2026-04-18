@@ -1,6 +1,6 @@
 {
   "name": "@timeless/timeless-canvas",
-  "version": "0.20.2",
+  "version": "0.20.4",
   "main": "dist/index.js",
   "module": "dist/timeless.canvas.esm.js",
   "types": "dist/index.d.ts",

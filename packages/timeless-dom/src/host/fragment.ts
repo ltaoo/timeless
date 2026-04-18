@@ -1,158 +1,164 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { HostElement } from "./box";
 import { hydrate_node } from "@/renderer/hydrate";
+import { Logger } from "@/util/logger";
+
+import {
+  countRenderedNodes,
+  HostElement,
+  insertedAnchor,
+  isEmptyNode,
+  isFragment,
+} from "./box";
+
+const logger = Logger({ prefix: "dom", scope: "fragment" });
 
 export type DOMFragment = VNodeView<Text> & {
   t: "fragment";
   render(elm: TimelessElement): DocumentFragment;
-  hydrate(elm: TimelessElement, $dom: Text): void;
+  hydrate(
+    elm: TimelessElement,
+    $dom: Text,
+    opt: { $parent: HTMLElement; offset: number; idx: number },
+  ): void;
 };
-
-/**
- * Count how many real DOM nodes an element produces when rendered.
- * Transparent components (show, fragment, for, match) don't produce wrapper nodes;
- * their children render directly into the parent.
- * Portal renders to document.body, not inline.
- * All other types produce exactly 1 DOM node.
- */
-export function countRenderedNodes(elm: TimelessElement | null): number {
-  if (!elm) return 0;
-  const t = elm.t;
-  if (t === "show" || t === "fragment" || t === "for" || t === "match") {
-    if (!elm.children) return 0;
-    let count = 0;
-    for (const child of elm.children) {
-      count += countRenderedNodes(child);
-    }
-    return count;
-  }
-  if (t === "portal") return 0;
-  return 1;
-}
 
 export function DOMFragment(props: {
   build: (elm: TimelessElement) => VNodeView<Text>;
 }): DOMFragment {
   const t = "fragment";
   let $anchor: Text;
-  const common$ = HostElement({ $elm: null, t, build: props.build });
+  const box$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
-    ...common$.methods,
+    ...box$.methods,
     t,
     getType() {
       return "view";
     },
-    get$elm: common$.methods.get$elm,
+    get$elm: box$.methods.get$elm,
     isDocumentFragment() {
       return true;
     },
     render(elm: TimelessElement) {
       $anchor = document.createTextNode("");
-      common$.methods.set$elm($anchor);
-      const $fragment = common$.methods.render(elm.children);
+      box$.methods.set$elm($anchor);
+      const $fragment = box$.methods.render(elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
     },
     hydrate(
       elm: TimelessElement,
       $elm: HTMLElement | Text,
-      opt: Partial<{ $parent: HTMLElement }> = {},
+      opt: { $parent: HTMLElement; offset: number; idx: number },
     ) {
+      logger.log("[hydrate]0", elm, $elm, opt.$parent, opt.offset);
       const $anchor = document.createTextNode("");
-      common$.methods.set$elm($anchor);
+      box$.methods.set$elm($anchor);
+      const $v = opt.$parent || $elm;
+      const idx = opt.offset;
 
-      if (!elm.children || elm.children.length === 0) {
-        return;
-      }
+      if ($v && $v instanceof HTMLElement && idx !== undefined) {
+        const $children = Array.from($v.childNodes) as (HTMLElement | Text)[];
+        const total_nodes = countRenderedNodes(elm);
+        const $children_belong_me = $children.slice(idx, idx + total_nodes);
+        logger.log("[hydrate]$children", $children_belong_me);
+        box$.methods.set$childrne($children_belong_me);
+        const child_nodes: (VNodeView<any> | null)[] = [];
+        const child_elements: (TimelessElement | null)[] = [];
 
-      const totalNodes = countRenderedNodes(elm);
-
-      // Use parent-sibling approach (like Show/For).
-      // Fragment has no wrapper DOM node — $elm is the first rendered
-      // child in the parent's childNode list, NOT a container.
-      const $parent = $elm ? $elm.parentElement : opt.$parent || null;
-      if (!$parent) return;
-
-      if (totalNodes === 0) {
-        // All children produce 0 DOM nodes (portals only). Place anchor in parent.
-        $parent.appendChild($anchor);
-        const child_nodes: VNodeView[] = [];
-        for (let i = 0; i < elm.children.length; i += 1) {
-          const child = elm.children[i];
-          if (!child) continue;
-          const child$ = props.build(child);
-          child.$elm = child$;
-          if (child.t === "portal") {
-            child$.hydrate(child, null);
-          }
-          child_nodes.push(child$);
-        }
-        common$.methods.setchildnode(child_nodes);
-        return;
-      }
-
-      // From here, totalNodes > 0 and $elm is guaranteed non-null.
-      const $allSiblings = Array.from($parent.childNodes);
-      const startIdx = $allSiblings.indexOf($elm);
-
-      // Claim the DOM nodes that belong to this Fragment
-      const $ourNodes = $allSiblings.slice(startIdx, startIdx + totalNodes);
-      common$.methods.set$childrne($ourNodes);
-
-      // Insert anchor after our nodes
-      const $nextSibling = $allSiblings[startIdx + totalNodes];
-      if ($nextSibling) {
-        $parent.insertBefore($anchor, $nextSibling);
-      } else {
-        $parent.appendChild($anchor);
-      }
-
-      // Hydrate children with cursor-based mapping.
-      // Each child may produce 0, 1, or N DOM nodes.
-      let cursor = 0;
-      const child_nodes: VNodeView[] = [];
-      for (let i = 0; i < elm.children.length; i += 1) {
-        const child = elm.children[i];
-        if (!child) continue;
-
-        const childNodeCount = countRenderedNodes(child);
-
-        if (childNodeCount > 0) {
-          // Child has rendered DOM nodes — hydrate normally
-          const child$ = hydrate_node(
-            child,
-            $ourNodes[cursor] as HTMLElement | Text,
-          );
-          cursor += childNodeCount;
-          if (child$) {
-            child_nodes.push(child$);
-          }
-        } else {
-          // Child produced no DOM nodes (e.g., Show with when=false, or Portal).
-          // Use hydrate_node which properly handles all types:
-          // - Portal: finds its own SSR container in <body>
-          // - Show/Fragment/For/Match with 0 nodes: recursively hydrates children
-          const child$ = hydrate_node(child, null as any, {
-            $parent,
-          });
-          if (child$) {
-            // For non-portal transparent components, place the anchor in DOM
-            // so future insertChildren can find a parent.
-            if (child.t !== "portal") {
-              const childAnchor = child$.get$elm();
-              if (childAnchor && !childAnchor.parentElement) {
-                const $insertBefore =
-                  cursor < $ourNodes.length ? $ourNodes[cursor] : $anchor;
-                $parent.insertBefore(childAnchor, $insertBefore);
+        if (elm.children) {
+          let offset = idx;
+          let $child_offset = 0;
+          for (let i = 0; i < elm.children.length; i += 1) {
+            const child = elm.children[i];
+            const prev_child = elm.children[i - 1];
+            const $child = $children_belong_me[$child_offset] as
+              | HTMLElement
+              | Text;
+            logger.log(
+              "[hydrate]each child",
+              i,
+              child,
+              $child,
+              offset,
+              $child_offset,
+            );
+            child_elements[i] = child;
+            if (child) {
+              const child$ = hydrate_node(child, $child, {
+                $parent: $v as any,
+                offset,
+                idx: i,
+              });
+              if (child$) {
+                if (isEmptyNode(child)) {
+                } else if (isFragment(child)) {
+                  const count_$children = child$.get$children().length;
+                  offset += count_$children;
+                  offset += insertedAnchor(child) ? 1 : 0;
+                  $child_offset += count_$children;
+                } else {
+                  offset += 1;
+                  $child_offset += 1;
+                }
               }
+              child_nodes[i] = child$;
             }
-            child_nodes.push(child$);
           }
         }
+
+        box$.methods.setchildnode(child_nodes);
+        box$.methods.setchildrenelement(child_elements);
       }
-      common$.methods.setchildnode(child_nodes);
+
+      // // Determine if $elm is a container or the actual child element
+      // // If $elm has childNodes matching our totalNodes, it's a container
+
+      // if (totalNodes === 1 && elm.children.length === 1) {
+      //   // Single child producing 1 DOM node
+      //   const child = elm.children[0];
+      //   if (child) {
+      //     // If $elm is a container, take its first child; otherwise $elm IS the child element
+      //     const $childElm = isContainer
+      //       ? ($elm.firstChild as HTMLElement)
+      //       : $elm;
+      //     const child$ = hydrate_node(child, $childElm, {
+      //       $parent: isContainer ? ($elm as HTMLElement) : opt.$parent,
+      //     });
+      //     if (child$) {
+      //       common$.methods.setchildnode([child$]);
+      //       common$.methods.setchildrenelement([child]);
+      //     }
+      //   }
+      //   return;
+      // }
+
+      // // Multiple children or transparent children - treat $elm as parent container
+      // const $parent = $elm || opt.$parent || null;
+      // if (!$parent || $parent instanceof Text) return;
+
+      // const $children = Array.from($parent.childNodes);
+      // const child_nodes: VNodeView<any>[] = [];
+      // const child_elements: (TimelessElement | null)[] = [];
+      // for (let i = 0; i < elm.children.length; i += 1) {
+      //   const child = elm.children[i];
+      //   child_elements[i] = child;
+      //   if (child) {
+      //     const child$ = hydrate_node(
+      //       child,
+      //       $children[i] as HTMLElement | Text,
+      //       {
+      //         $parent,
+      //       },
+      //     );
+      //     if (child$) {
+      //       child_nodes[i] = child$;
+      //     }
+      //   }
+      // }
+      // common$.methods.setchildnode(child_nodes);
+      // common$.methods.setchildrenelement(child_elements);
     },
   };
 }

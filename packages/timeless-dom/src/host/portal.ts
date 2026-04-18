@@ -73,7 +73,11 @@ export function DOMPortal(props: {
           if ($domNode) {
             child_elements.push(child);
             child_host_nodes.push($domNode);
-            const child$ = hydrate_node(child, $domNode as HTMLElement | Text);
+            const child$ = hydrate_node(child, $domNode as HTMLElement | Text, {
+              $parent: $container as HTMLElement,
+              offset: 0,
+              idx: i,
+            });
             cursor++;
             if (child$) {
               child_nodes.push(child$);

@@ -32,7 +32,7 @@ export type VNodeView<HostElm = any> = {
   // $elm: HostElm;
   getType(): VNodeViewType;
   isDocumentFragment(): boolean;
-  getChildren(): VNodeView<any>[];
+  getChildren(): (VNodeView<any> | null)[];
   setStyle(style: RawViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(set: string[]): void;
@@ -56,16 +56,27 @@ export type VNodeView<HostElm = any> = {
   hydrate(
     elm: TimelessElement,
     $dom: HostElm,
-    opt?: Partial<{ initial: boolean; $parent: any }>,
+    opt: {
+      initial?: boolean;
+      $parent: any;
+      /** 子节点的偏移量
+       * 比如 Fragment 嵌套 Show 再 嵌套 Fragment 再嵌套 View
+       * View 渲染的节点在 $parent 第二个，但是对于 Fragment 来说，它的子节点是 $parent 第一个
+       * 所以需要一个偏移量来调整索引
+       */
+      offset: number;
+      idx: number;
+    },
   ): any;
   /** 构建 */
   buildChildren(children: (TimelessElement | null)[]): {
     $fragment: any;
+    child_nodes: (VNodeView<any> | null)[];
     child_elements: (TimelessElement | null)[];
     child_host_nodes: HostElm[];
-    child_nodes: VNodeView<any>[];
   };
   insertChildren(children: (TimelessElement | null)[]): void;
+  get$children(): any[];
   removeChildren(): void;
   setupEventListener(events: any): void;
   teardownEventListener(events: any): void;

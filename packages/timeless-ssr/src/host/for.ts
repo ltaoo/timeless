@@ -1,4 +1,5 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
+
 import { SSRBox } from "./box";
 
 export type SSRFor = VNodeView<string> & {
@@ -21,6 +22,7 @@ export function SSRFor(props: {
       return "reactive";
     },
     render(elm: TimelessElement) {
+      // console.log("[ssr]for - render", elm.children);
       if (!elm.children) return "";
       let result = "";
       for (const child of elm.children) {
@@ -29,6 +31,7 @@ export function SSRFor(props: {
           result += child$.render(child);
         }
       }
+      // console.log("[ssr]for - render result", result);
       return result;
     },
     hydrate(elm: TimelessElement, $dom: any) {},

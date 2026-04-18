@@ -1,6 +1,6 @@
 {
   "name": "@timeless/cli",
-  "version": "0.20.2",
+  "version": "0.20.4",
   "description": "CLI for Timeless SSR framework",
   "type": "module",
   "bin": {

@@ -1,4 +1,4 @@
-import { refobj } from "@timeless/timeless";
+import { Fragment, refobj } from "@timeless/timeless";
 import {
   View,
   ViewProps,
@@ -80,9 +80,8 @@ export function Trigger(
   const state_ = refobj(store.state);
   const listener$ = ListenerManager([state_]);
 
-  return View(
+  return Fragment(
     {
-      class: "dropdown-menu-trigger",
       onMounted(event) {
         // console.log("before set referenece");
         listener$.add(
@@ -92,7 +91,7 @@ export function Trigger(
         );
         const $elm = event.target;
         const nodes = $elm.getChildren();
-        const $ref = nodes.find((n) => n.getType() === "view") || $elm;
+        const $ref = nodes.find((n) => n && n.getType() === "view") || $elm;
         // console.log(
         //   "[primitive]dropdownmenu - Trigger mounted",
         //   nodes,

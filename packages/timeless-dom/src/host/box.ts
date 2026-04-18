@@ -15,9 +15,9 @@ export function HostElement(props: {
   let $elm = props.$elm;
 
   /** 宿主平台的子节点列表 */
-  let child_host_nodes: any[] = [];
+  let $children: any[] = [];
   /** 对宿主平台抽象的子节点列表 */
-  let child_nodes: VNodeView<any>[] = [];
+  let child_nodes: (VNodeView<any> | null)[] = [];
   /** Timeless 子列表 */
   let child_elements: (TimelessElement | null)[] = [];
 
@@ -29,12 +29,12 @@ export function HostElement(props: {
       return $elm;
     },
     set$childrne(v: any[]) {
-      child_host_nodes = v;
+      $children = v;
     },
-    setchildrenelement(v: any[]) {
+    setchildrenelement(v: (TimelessElement | null)[]) {
       child_elements = v;
     },
-    setchildnode(v: any[]) {
+    setchildnode(v: (VNodeView<any> | null)[]) {
       child_nodes = v;
     },
     setStyle(
@@ -304,7 +304,7 @@ export function HostElement(props: {
           child_elements.push(child);
           child_nodes.push(child$);
           if ($child) {
-            child_host_nodes.push($child);
+            $children.push($child);
             $fragment.appendChild($child);
           }
         }
@@ -328,6 +328,9 @@ export function HostElement(props: {
           child.onUnmounted();
         }
       }
+    },
+    get$children() {
+      return $children;
     },
     getChildren() {
       return child_nodes;
@@ -369,7 +372,16 @@ export function HostElement(props: {
     insertChildren(children: (TimelessElement | null)[]) {
       const r = methods.buildChildren(children);
       const $parent = methods.getParent();
-      console.log("[HostElement.insertChildren]", props.t, "$elm=", $elm, "$parent=", $parent, "fragment children=", r.$fragment.childNodes.length);
+      console.log(
+        "[HostElement.insertChildren]",
+        props.t,
+        "$elm=",
+        $elm,
+        "$parent=",
+        $parent,
+        "fragment children=",
+        r.$fragment.childNodes.length,
+      );
       if ($parent) {
         if ($elm && $elm instanceof Text) {
           $parent.insertBefore(r.$fragment, $elm);
@@ -378,7 +390,7 @@ export function HostElement(props: {
         }
       }
       child_elements = r.child_elements as TimelessElement[];
-      child_host_nodes = r.child_host_nodes;
+      $children = r.child_host_nodes;
       child_nodes = r.child_nodes;
       setTimeout(() => {
         console.log(props.t + "[]invoke children onMounted function");
@@ -386,7 +398,7 @@ export function HostElement(props: {
       }, 0);
     },
     removeChildren() {
-      if (child_host_nodes.length === 0 && child_nodes.length === 0) {
+      if ($children.length === 0 && child_nodes.length === 0) {
         return;
       }
       const $parent = methods.getParent();
@@ -398,7 +410,7 @@ export function HostElement(props: {
         }
       }
       if ($parent) {
-        for (const $child of child_host_nodes) {
+        for (const $child of $children) {
           if ($child === $elm) {
             continue;
           }
@@ -413,14 +425,15 @@ export function HostElement(props: {
       // );
       methods.handleElementUnmounted();
       child_elements = [];
-      child_host_nodes = [];
+      $children = [];
       child_nodes = [];
     },
     insert(idx: number, children: (TimelessElement | null)[]) {
       const $parent = methods.getParent();
       const inserted_elements: TimelessElement[] = [];
       const inserted_child: VNodeView[] = [];
-      // console.log("[dom]insert child", idx, children, $parent);
+      const $reference = $children[idx] || $elm;
+      console.log("[dom]insert child", idx, children, $parent, $reference);
       if (!$parent) {
         return;
       }
@@ -428,16 +441,15 @@ export function HostElement(props: {
         if (child) {
           const child$ = props.build(child);
           inserted_child.push(child$);
-          const $reference = child_host_nodes[idx];
           // console.log("[dom]For - insert - $child", child$, idx, $reference);
           const $child = child$.render(child);
           if ($child) {
             if ($reference) {
-              child_host_nodes.splice(idx, 0, $child);
+              $children.splice(idx, 0, $child);
               inserted_elements.push(child);
               $parent.insertBefore($child, $reference);
             } else {
-              child_host_nodes.push($child);
+              $children.push($child);
               inserted_elements.push(child);
               $parent.appendChild($child);
             }
@@ -464,9 +476,9 @@ export function HostElement(props: {
       }
       const removed_elements: TimelessElement[] = [];
       for (let i = 0; i < count; i++) {
-        const $child = child_host_nodes[idx + i];
+        const $child = $children[idx + i];
         if ($child && $child.parentElement === $parent) {
-          child_host_nodes.splice(idx + i, 1);
+          $children.splice(idx + i, 1);
           const child_elm = child_elements[idx + i];
           if (child_elm) {
             removed_elements.push(child_elm);
@@ -495,22 +507,22 @@ export function HostElement(props: {
         console.warn("move parent not found");
         return;
       }
-      const $from = child_host_nodes[from];
+      const $from = $children[from];
       if (!$from) {
         console.warn("move node not found from", from);
         return;
       }
       console.log("[timeless-dom]move node", from, to, $from);
 
-      child_host_nodes.splice(from, 1);
-      child_host_nodes.splice(to, 0, $from);
+      $children.splice(from, 1);
+      $children.splice(to, 0, $from);
 
-      const $to = child_host_nodes[to + 1] || null;
+      const $to = $children[to + 1] || null;
       $parent.insertBefore($from, $to);
     },
     refresh(data: {
       children: (TimelessElement | null)[];
-      added: { idx: number; element: TimelessElement | null }[];
+      added: { idx: number; elements: (TimelessElement | null)[] }[];
       removed: { idx: number }[];
       moved: { from: number; to: number }[];
     }) {
@@ -523,11 +535,11 @@ export function HostElement(props: {
       // 1. Remove (descending order to keep indices stable)
       const sorted_removed = [...removed].sort((a, b) => b.idx - a.idx);
       for (const { idx } of sorted_removed) {
-        const $child = child_host_nodes[idx];
+        const $child = $children[idx];
         if ($child) {
           $parent.removeChild($child);
         }
-        child_host_nodes.splice(idx, 1);
+        $children.splice(idx, 1);
       }
 
       // 2. Move
@@ -544,13 +556,13 @@ export function HostElement(props: {
               if (ri < from) shift++;
               else break;
             }
-            return { $node: child_host_nodes[from - shift], to };
+            return { $node: $children[from - shift], to };
           })
           .sort((a, b) => a.to - b.to);
 
         for (const { $node, to } of entries) {
           if (!$node) continue;
-          const currentFrom = child_host_nodes.indexOf($node);
+          const currentFrom = $children.indexOf($node);
           if (currentFrom !== -1 && currentFrom !== to) {
             methods.move(currentFrom, to);
           }
@@ -558,24 +570,25 @@ export function HostElement(props: {
       }
 
       // 3. Insert added nodes
-      for (const { idx, element } of added) {
-        if (element) {
-          const child$ = props.build(element);
-          const $child = child$.render(element);
-          if ($child) {
-            const $reference = child_host_nodes[idx];
-            if ($reference) {
-              child_host_nodes.splice(idx, 0, $child);
-              const $parent = $reference.parentElement;
-              if ($parent) {
-                $parent.insertBefore($child, $reference);
-              }
-            } else {
-              child_host_nodes.push($child);
-              $parent.appendChild($child);
-            }
-          }
-        }
+      for (const { idx, elements } of added) {
+        methods.insert(idx, elements);
+        // if (element) {
+        //   const child$ = props.build(element);
+        //   const $child = child$.render(element);
+        //   if ($child) {
+        //     const $reference = $children[idx];
+        //     if ($reference) {
+        //       $children.splice(idx, 0, $child);
+        //       const $parent = $reference.parentElement;
+        //       if ($parent) {
+        //         $parent.insertBefore($child, $reference);
+        //       }
+        //     } else {
+        //       $children.push($child);
+        //       $parent.appendChild($child);
+        //     }
+        //   }
+        // }
       }
     },
     getParent() {
@@ -584,23 +597,33 @@ export function HostElement(props: {
       }
       return $elm.parentElement;
     },
-    trackChild(dom: any, element: TimelessElement, vnode: VNodeView<any>, index: number) {
-      child_host_nodes.splice(index, 0, dom);
+    trackChild(
+      dom: any,
+      element: TimelessElement,
+      vnode: VNodeView<any>,
+      index: number,
+    ) {
+      $children.splice(index, 0, dom);
       child_elements.splice(index, 0, element);
       child_nodes.splice(index, 0, vnode);
     },
     untrackChild(index: number) {
-      child_host_nodes.splice(index, 1);
+      $children.splice(index, 1);
       child_elements.splice(index, 1);
       child_nodes.splice(index, 1);
     },
-    replaceTrackedChild(index: number, dom: any, element: TimelessElement, vnode: VNodeView<any>) {
-      if (index < child_host_nodes.length) {
-        child_host_nodes[index] = dom;
+    replaceTrackedChild(
+      index: number,
+      dom: any,
+      element: TimelessElement,
+      vnode: VNodeView<any>,
+    ) {
+      if (index < $children.length) {
+        $children[index] = dom;
         child_elements[index] = element;
         child_nodes[index] = vnode;
       } else {
-        child_host_nodes.splice(index, 0, dom);
+        $children.splice(index, 0, dom);
         child_elements.splice(index, 0, element);
         child_nodes.splice(index, 0, vnode);
       }
@@ -609,4 +632,36 @@ export function HostElement(props: {
   return {
     methods,
   };
+}
+
+/**
+ * Count how many real DOM nodes an element produces when rendered.
+ * Transparent components (show, fragment, for, match) don't produce wrapper nodes;
+ * their children render directly into the parent.
+ * Portal renders to document.body, not inline.
+ * All other types produce exactly 1 DOM node.
+ */
+export function countRenderedNodes(elm: TimelessElement | null): number {
+  if (!elm) return 0;
+  const t = elm.t;
+  if (t === "show" || t === "fragment" || t === "for" || t === "match") {
+    if (!elm.children) return 0;
+    let count = 0;
+    for (const child of elm.children) {
+      count += countRenderedNodes(child);
+    }
+    return count;
+  }
+  if (t === "portal") return 0;
+  return 1;
+}
+
+export function isFragment(elm: TimelessElement) {
+  return ["fragment", "show", "for", "match"].includes(elm.t);
+}
+export function insertedAnchor(elm: TimelessElement) {
+  return ["show", "for", "match"].includes(elm.t);
+}
+export function isEmptyNode(elm: TimelessElement) {
+  return ["portal"].includes(elm.t);
 }

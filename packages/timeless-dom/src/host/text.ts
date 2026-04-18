@@ -13,15 +13,14 @@ export function DOMText(props: {
 }): DOMText {
   const t = "text";
   let $text: any = null;
-  const common$ = HostElement({ $elm: null, t, build: props.build });
+  const box$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
-    ...common$.methods,
+    ...box$.methods,
     t,
     getType() {
       return "text";
     },
-    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },
@@ -44,14 +43,14 @@ export function DOMText(props: {
           return "";
         })(),
       );
-      common$.methods.set$elm($text);
+      box$.methods.set$elm($text);
       return $text;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
       if ($elm instanceof Text) {
         $text = $elm;
-        common$.methods.set$elm($text);
-        common$.methods.setupEventListener(elm.events);
+        box$.methods.set$elm($text);
+        box$.methods.setupEventListener(elm.events);
       }
     },
   };

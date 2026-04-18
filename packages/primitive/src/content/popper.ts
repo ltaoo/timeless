@@ -149,8 +149,8 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
               position: "fixed",
               left: 0,
               top: 0,
+              'pointer-events': state.placed ? "initial" : "none",
               opacity: state.placed ? 1 : 0,
-              "pointer-event": state.placed ? "initial" : "none",
               transform: state.placed
                 ? `translate3d(${Math.round(state.x)}px, ${Math.round(state.y)}px, 0)`
                 : "translate3d(0, 0, 0)",

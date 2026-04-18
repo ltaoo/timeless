@@ -10,8 +10,10 @@ import {
   computed,
   Link,
   Portal,
+  Fragment,
+  Button,
 } from "@timeless/timeless";
-import { Button, DropdownMenu, ui } from "@timeless/shadcn";
+import { DropdownMenu, ui } from "@timeless/shadcn";
 import { Badge } from "@timeless/shadcn";
 import {
   Card,
@@ -21,10 +23,9 @@ import {
   CardContent,
 } from "@timeless/shadcn";
 import { Separator } from "@timeless/shadcn";
-import { ButtonCore } from "@timeless/ui-vm";
 
-import { NavBar } from "../components/index.js";
-import { history$, storage$, user$ } from "../store/index.js";
+// import { NavBar } from "../components/index.js";
+// import { history$, storage$, user$ } from "../store/index.js";
 
 export async function load() {
   return {
@@ -68,34 +69,42 @@ export function head() {
 export default function Page({ data }) {
   // ---- 测试 localStorage：读取 user 信息 ----
   const isLogin = ref(data.isLogin);
-  const username = user$.profile?.username || "anonymous";
-
-  return DropdownMenu(
-    {
-      store: new ui.DropdownMenuCore({
-        defaultVisible: true,
-        items: [
-          new ui.MenuItemCore({
-            label: isLogin ? "切换账号" : "去登录",
-            onClick() {
-              console.log("切换账号");
-            },
-          }),
-        ],
-      }),
-    },
-    [
-      View(
-        {
-          as: "a",
-          href: "/login",
-          class:
-            "text-sm text-primary underline underline-offset-4 hover:opacity-80",
+  //   const username = user$.profile?.username || "anonymous";
+  const dropdown$ = new ui.DropdownMenuCore({
+    defaultVisible: true,
+    items: [
+      new ui.MenuItemCore({
+        label: isLogin ? "切换账号" : "去登录",
+        onClick() {
+          console.log("切换账号");
         },
-        [isLogin ? "切换账号" : "去登录"],
-      ),
+      }),
     ],
-  );
+  });
+
+  const elm = DropdownMenu({ store: dropdown$ }, [
+    Button(
+      {
+        style: {
+          "margin-top": "120px",
+          "margin-left": "120px",
+        },
+        onClick() {
+          isLogin.as(false);
+          dropdown$.show();
+        },
+        onMounted(event) {
+          console.log("button mounted");
+          console.log(event.target.getBoundingClientRect());
+        },
+      },
+      [isLogin ? "切换账号" : "去登录"],
+    ),
+  ]);
+
+  console.log(elm);
+
+  return elm;
 
   // return View({ class: "min-h-screen bg-background" }, [
   //   NavBar({ current: "home" }),

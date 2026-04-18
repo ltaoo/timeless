@@ -89,7 +89,7 @@ export function Content(
           opacity: computed(state_, (t) => {
             return t.isPlaced ? 1 : 0;
           }),
-          "pointer-event": computed(state_, (t) => {
+          "pointer-events": computed(state_, (t) => {
             return t.isPlaced ? "initial" : "none";
           }),
           transform: computed(state_, (t) => {

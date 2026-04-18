@@ -8,7 +8,12 @@ import {
   isWriteableRef,
 } from "@timeless/reactive";
 
-import { TimelessElement, isElement } from "@/content/type";
+import {
+  TimelessElement,
+  ViewChildren,
+  isElement,
+  resolve_children,
+} from "@/content/type";
 import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
@@ -40,7 +45,7 @@ export function For<T>(
     onRefresh: (diff: {
       added: {
         idx: number;
-        element: TimelessElement<any, any> | null;
+        elements: (TimelessElement<any, any> | null)[];
       }[];
       removed: {
         idx: number;
@@ -148,6 +153,15 @@ export function For<T>(
         return r;
       });
     },
+    normalize_children(children?: ViewChildren) {
+      if (children === null || children === undefined) return [];
+      const resolved = resolve_children(children);
+      if (!resolved) return [];
+      if (Array.isArray(resolved)) {
+        return resolved;
+      }
+      return [resolved];
+    },
     build_children() {
       const items = state.wrapped_items;
       for (let i = 0; i < items.length; i += 1) {
@@ -157,7 +171,16 @@ export function For<T>(
           ? runWithOwner(_owner, () => props.render(item.v, idx_computed))
           : props.render(item.v, idx_computed);
         state.items[i] = item.v;
-        state.children.push(elm);
+        if (isElement(elm)) {
+          state.children[i] = elm;
+        } else if (isRef(elm)) {
+          state.children[i] = Text(elm);
+        } else if (elm) {
+          state.children[i] = Text(elm);
+        } else {
+          state.children[i] = null;
+        }
+
         state.idx_arr[i] = idx_computed;
       }
     },
@@ -367,8 +390,10 @@ export function For<T>(
       });
 
       // 3. Diff Phase: Identify operations
-      const added_nodes: { idx: number; element: TimelessElement | null }[] =
-        [];
+      const added_nodes: {
+        idx: number;
+        elements: (TimelessElement | null)[];
+      }[] = [];
       const removed_nodes: { idx: number }[] = [];
       const moved_nodes: { from: number; to: number }[] = [];
 
@@ -416,7 +441,7 @@ export function For<T>(
             ? runWithOwner(_owner, () => props.render(new_item.v, idx_computed))
             : props.render(new_item.v, idx_computed);
           new_elements[i] = res;
-          added_nodes.push({ idx: i, element: res });
+          added_nodes.push({ idx: i, elements: [res] });
         }
       }
 
@@ -452,24 +477,24 @@ export function For<T>(
         $elm.refresh(diff);
       }
       // 4.2 Trigger Lifecycle (Unmounted) for removed elements
-      for (const { idx } of removed_nodes) {
-        const element = prev_elements[idx];
-        if (element && isElement(element)) {
-          if (element.beforeUnmounted) {
-            element.beforeUnmounted();
-          }
-          if (element.onUnmounted) {
-            element.onUnmounted();
-          }
-        }
-      }
+      // for (const { idx } of removed_nodes) {
+      //   const element = prev_elements[idx];
+      //   if (element && isElement(element)) {
+      //     if (element.beforeUnmounted) {
+      //       element.beforeUnmounted();
+      //     }
+      //     if (element.onUnmounted) {
+      //       element.onUnmounted();
+      //     }
+      //   }
+      // }
 
       // 4.3 Trigger Lifecycle (Mounted) for newly added elements
-      for (const { element } of added_nodes) {
-        if (element && isElement(element) && element.onMounted) {
-          element.onMounted({ target: element.$elm });
-        }
-      }
+      // for (const { element } of added_nodes) {
+      //   if (element && isElement(element) && element.onMounted) {
+      //     element.onMounted({ target: element.$elm });
+      //   }
+      // }
 
       // 5. Update State
       // Use slice() to create a copy, preventing _values from referencing _local_value directly

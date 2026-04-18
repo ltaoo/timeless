@@ -1,8 +1,8 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { HostElement } from "./box";
-import { countRenderedNodes } from "./fragment";
 import { hydrate_node } from "@/renderer/hydrate";
+
+import { HostElement, countRenderedNodes } from "./box";
 
 export type DOMView = VNodeView<HTMLDivElement> & {
   t: "view";
@@ -53,6 +53,8 @@ export function DOMView(props: {
               // Hydrate it without consuming DOM cursor, pass $parent so it can place its anchor.
               const child$ = hydrate_node(child, null as any, {
                 $parent: $elm as HTMLElement,
+                offset: 0,
+                idx: i,
               });
               if (child$) {
                 child_nodes.push(child$);
@@ -61,6 +63,11 @@ export function DOMView(props: {
               const child$ = hydrate_node(
                 child,
                 $children[cursor] as HTMLElement | Text,
+                {
+                  $parent: $elm as HTMLElement,
+                  offset: 0,
+                  idx: i,
+                },
               );
               cursor += nodeCount;
               if (child$) {

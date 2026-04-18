@@ -75,49 +75,49 @@ export function DOMTabView(props: {
       const $content = document.createElement("div");
       $content.className = `${cls}-content`;
 
-      if (elm.children && elm.children.length > 0) {
-        elm.children.forEach((child: TimelessElement, i: number) => {
-          if (child?.t === "tab-pane") {
-            const label = child.state?.label ?? `Tab ${i + 1}`;
-            const $tab = document.createElement("button");
-            $tab.className = `${cls}-tab${i === activeIndex ? " active" : ""}`;
-            $tab.textContent = label;
-            $tab.onclick = () => {
-              document
-                .querySelectorAll(`.${cls}-tab`)
-                .forEach((t: any) => t.classList.remove("active"));
-              $tab.classList.add("active");
-              document
-                .querySelectorAll(`.${cls}-pane`)
-                .forEach((p: any) => p.classList.remove("active"));
-              $panes[i].classList.add("active");
-              if (s.onChange) s.onChange(i);
-            };
-            $bar.appendChild($tab);
+      // if (elm.children && elm.children.length > 0) {
+      //   elm.children.forEach((child: TimelessElement, i: number) => {
+      //     if (child?.t === "tab-pane") {
+      //       const label = child.state?.label ?? `Tab ${i + 1}`;
+      //       const $tab = document.createElement("button");
+      //       $tab.className = `${cls}-tab${i === activeIndex ? " active" : ""}`;
+      //       $tab.textContent = label;
+      //       $tab.onclick = () => {
+      //         document
+      //           .querySelectorAll(`.${cls}-tab`)
+      //           .forEach((t: any) => t.classList.remove("active"));
+      //         $tab.classList.add("active");
+      //         document
+      //           .querySelectorAll(`.${cls}-pane`)
+      //           .forEach((p: any) => p.classList.remove("active"));
+      //         $panes[i].classList.add("active");
+      //         if (s.onChange) s.onChange(i);
+      //       };
+      //       $bar.appendChild($tab);
 
-            const $pane = document.createElement("div");
-            $pane.className = `${cls}-pane${i === activeIndex ? " active" : ""}`;
-            const childFragment = box$.methods.render(child.children);
-            $pane.appendChild(childFragment);
-            $content.appendChild($pane);
-          }
-        });
+      //       const $pane = document.createElement("div");
+      //       $pane.className = `${cls}-pane${i === activeIndex ? " active" : ""}`;
+      //       const childFragment = box$.methods.render(child.children);
+      //       $pane.appendChild(childFragment);
+      //       $content.appendChild($pane);
+      //     }
+      //   });
 
-        const $panes = Array.from($content.querySelectorAll(`.${cls}-pane`));
+      //   const $panes = Array.from($content.querySelectorAll(`.${cls}-pane`));
 
-        $bar.addEventListener("click", (e) => {
-          const target = e.target as HTMLElement;
-          const tabs = Array.from($bar.querySelectorAll(`.${cls}-tab`));
-          const idx = tabs.indexOf(target);
-          if (idx >= 0) {
-            tabs.forEach((t: any) => t.classList.remove("active"));
-            target.classList.add("active");
-            $panes.forEach((p: any) => p.classList.remove("active"));
-            $panes[idx].classList.add("active");
-            if (s.onChange) s.onChange(idx);
-          }
-        });
-      }
+      //   $bar.addEventListener("click", (e) => {
+      //     const target = e.target as HTMLElement;
+      //     const tabs = Array.from($bar.querySelectorAll(`.${cls}-tab`));
+      //     const idx = tabs.indexOf(target);
+      //     if (idx >= 0) {
+      //       tabs.forEach((t: any) => t.classList.remove("active"));
+      //       target.classList.add("active");
+      //       $panes.forEach((p: any) => p.classList.remove("active"));
+      //       $panes[idx].classList.add("active");
+      //       if (s.onChange) s.onChange(idx);
+      //     }
+      //   });
+      // }
 
       $elm.appendChild($bar);
       $elm.appendChild($content);

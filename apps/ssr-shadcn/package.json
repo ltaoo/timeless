@@ -11,13 +11,12 @@
   "dependencies": {
     "@timeless/timeless": "workspace:^",
     "@timeless/timeless-dom": "workspace:^",
-    "@timeless/cli": "workspace:^",
-    "@timeless/shadcn": "workspace:^",
-    "@timeless/ui-vm": "workspace:^",
-    "@timeless/kit": "workspace:^"
+    "@timeless/kit": "workspace:^",
+    "@timeless/shadcn": "workspace:^"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.0",
+    "@timeless/cli": "workspace:^",
     "postcss": "^8.5.0",
     "tailwindcss": "^4.1.0"
   }

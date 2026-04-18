@@ -114,7 +114,7 @@ export function ContentImpl(
       // return listener$.destroy;
     },
     ok() {
-      logger.log("Content mounted");
+      // logger.log("Content mounted");
       return [
         NativePortal({}, [
           PopperPrimitive.Content(

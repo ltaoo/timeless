@@ -1,7 +1,8 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { HostElement } from "./box";
 import { hydrate_node } from "@/renderer/hydrate";
+
+import { HostElement } from "./box";
 
 export type DOMButton = VNodeView<HTMLButtonElement> & {
   t: "button";
@@ -20,7 +21,7 @@ export function DOMButton(props: {
     ...common$.methods,
     t,
     getType() {
-      return "button";
+      return "view";
     },
     get$elm: common$.methods.get$elm,
     isDocumentFragment() {
@@ -49,6 +50,11 @@ export function DOMButton(props: {
             const child$ = hydrate_node(
               child,
               $children[i] as HTMLElement | Text,
+              {
+                $parent: $elm as HTMLElement,
+                offset: 0,
+                idx: i,
+              },
             );
             if (child$) {
               child_nodes.push(child$);

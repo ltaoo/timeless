@@ -288,10 +288,10 @@ export function Box<T>(props: BoxProps, extra_state: T) {
             state.children[i] = null;
             return;
           }
-          if (typeof child === "function") {
-            state.children[i] = child();
-            return;
-          }
+          // if (typeof child === "function") {
+          //   state.children[i] = child();
+          //   return;
+          // }
           if (isElement(child)) {
             state.children[i] = child;
             return;

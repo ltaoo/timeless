@@ -40,8 +40,9 @@ function generateClientEntry(pagePath: string): string {
   const normalizedPath = pagePath === "/" ? "/index" : pagePath;
 
   return `
-import { hydrate } from "@timeless/timeless-dom";
-import "@timeless/provider-web";
+// import { hydrate } from "@timeless/timeless-dom";
+// import "@timeless/provider-web";
+var hydrate = Timeless.DOM.hydrate;
 
 async function main() {
   try {

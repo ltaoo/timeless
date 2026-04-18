@@ -43,71 +43,22 @@ import {
   ViewChildren,
   resolve_children,
 } from "./type";
+import { Box, BoxProps } from "./box";
 
 /** Props for View component */
-export type ViewProps = {
+export type ViewProps = BoxProps & {
   /** Element ID */
   id?: string;
   /** Unique key for list rendering */
   key?: string | number;
   /** HTML tag to render as */
   as?: string;
-  /** Inline styles */
-  style?: ViewStyle;
-  /** CSS class names */
-  class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
   /** Whether element is draggable */
   draggable?: boolean;
-  /** HTML attributes */
-  attributes?: ViewAttributes;
-  /** Data attributes (data-*) */
-  dataset?: Record<
-    string,
-    | undefined
-    | string
-    | number
-    | DerivedRef<string | number | boolean | undefined>
-    | Ref<string | number | boolean | undefined>
-  >;
-} & ViewEvents;
-
-/** Event handlers supported by View */
-type ViewEvents = Partial<{
-  onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
-  beforeUnmounted?: () => void;
-  onUnmounted?: () => void;
-  onClick?: (e: MouseEvent) => void;
-  onDoubleClick?: (e: MouseEvent) => void;
-  onMouseDown?: (e: MouseEvent) => void;
-  onMouseUp?: (e: MouseEvent) => void;
-  onMouseEnter?: (e: MouseEvent) => void;
-  onMouseLeave?: (e: MouseEvent) => void;
-  onLongPress?: (e: PointerEvent) => void;
-  onPointerDown?: (e: PointerEvent) => void;
-  onInput?: (e: Event) => void;
-  onChange?: (e: Event) => void;
-  onFocus?: (e: FocusEvent) => void;
-  onBlur?: (e: FocusEvent) => void;
-  onKeyDown?: (e: KeyboardEvent) => void;
-  onContextMenu?: (e: MouseEvent) => void;
-  onDragStart?: (e: DragEvent) => void;
-  onDrag?: (e: DragEvent) => void;
-  onDragEnd?: (e: DragEvent) => void;
-  onDragEnter?: (e: DragEvent) => void;
-  onDragOver?: (e: DragEvent) => void;
-  onDragLeave?: (e: DragEvent) => void;
-  onDrop?: (e: DragEvent) => void;
-  onAnimationEnd?: (e: AnimationEvent) => void;
-}>;
+};
 
 /** Internal state for View */
-type ViewState = {
-  rendered: boolean;
-  style: RawViewStyleProperties;
-  styleSet: string[];
-  attributes: Record<string, string | number | boolean | undefined>;
-  children: (TimelessElement | null)[];
-};
+type ViewState = {};
 
 /** Logger for debugging view operations */
 const logger = Logger({ prefix: "primitive", scope: "content/view" });
@@ -123,453 +74,25 @@ export function View(
   props: ViewProps = {},
   children?: ViewChildren,
 ): TimelessElement<ViewState> {
-  const {
-    style,
-    class: cls,
-    draggable,
-    attributes,
-    dataset = {},
-    onMounted,
-    onUnmounted,
-    beforeUnmounted,
-    onClick,
-    onDoubleClick,
-    onMouseDown,
-    onMouseUp,
-    onMouseEnter,
-    onMouseLeave,
-    onLongPress,
-    onFocus,
-    onBlur,
-    onPointerDown,
-    onKeyDown,
-    onContextMenu,
-    onDragStart,
-    onDrag,
-    onDragEnd,
-    onDragEnter,
-    onDragOver,
-    onDragLeave,
-    onDrop,
-    onAnimationEnd,
-  } = props;
+  const { ...rest } = props;
 
-  const viewTrackId = generateTrackId("view");
-  const listener$ = ListenerManager();
+  const box$ = Box(rest, {});
 
   let $elm: any = null;
 
-  const state: ViewState = {
-    rendered: false,
-    style: {},
-    styleSet: [],
-    attributes: {},
-    children: [],
-  };
-  const events = {
-    onClick,
-    onDoubleClick,
-    onMouseEnter,
-    onMouseLeave,
-    onMouseDown,
-    onMouseUp,
-    onLongPress,
-    onPointerDown,
-    onFocus,
-    onBlur,
-    onKeyDown,
-    onContextMenu,
-    onDragStart,
-    onDrag,
-    onDragEnd,
-    onDragEnter,
-    onDragOver,
-    onDragLeave,
-    onDrop,
-    onAnimationEnd,
-  };
+  const state = box$.state;
+  const events = box$.events;
 
   const methods = {
-    // Helper: normalize children (convert functions, wrap refs)
-    build_children(children?: ViewChildren) {
-      const resolved = resolve_children(children);
-      if (!resolved) {
-        return;
-      }
-      for (let i = 0; i < resolved.length; i++) {
-        const child = resolved[i];
-        // console.log("for children", child);
-        (() => {
-          if (typeof child === "function") {
-            state.children[i] = child();
-            return;
-          }
-          if (isElement(child)) {
-            state.children[i] = child;
-            return;
-          }
-          if (isRef(child)) {
-            state.children[i] = Text(child);
-            return;
-          }
-          if (child) {
-            state.children[i] = Text(String(child));
-            return;
-          }
-          // state.children[i] = null;
-        })();
-      }
-    },
-
-    // Helper: apply attribute
-    apply_attr(k: string, v: any) {
-      if (v === undefined || v === null || v === false) {
-        // host.removeAttribute($elm, k);
-        if ($elm && typeof $elm.removeAttribute === "function") {
-          $elm.removeAttribute(k);
-        }
-        return;
-      }
-      if (v === true) {
-        // host.setAttribute($elm, k, "");
-        if ($elm && typeof $elm.setAttribute === "function") {
-          $elm.setAttribute(k, "");
-        }
-        return;
-      }
-      // host.setAttribute($elm, k, String(v));
-      if ($elm && typeof $elm.setAttribute === "function") {
-        $elm.setAttribute(k, String(v));
-      }
-    },
-
-    // Helper: create event listener
-    listen(
-      target: any,
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      // host.addEventListener(target, type, handler, options);
-      target.addEventListener(type, handler, options);
-      listener$.push(() => {
-        // host.removeEventListener(target, type, handler, options);
-        target.removeEventListener(type, handler, options);
-      });
-    },
-
     // Helper: setup bindings (attributes, class, style, events)
     subscribe_props() {
-      if (attributes) {
-        Object.keys(attributes).forEach((k) => {
-          const vv = attributes[k];
-          if (isRef(vv)) {
-            const unsub = vv.subscribe({
-              __trackId: viewTrackId,
-              __trackInfo: { type: "props", key: k },
-              onChange(v) {
-                state.attributes[k] = v as string;
-                if ($elm) {
-                  methods.apply_attr(k, v);
-                }
-              },
-            });
-            listener$.push(unsub);
-            state.attributes[k] = vv.value;
-            return;
-          }
-          // methods.apply_attr(k, vv);
-          state.attributes[k] = vv;
-        });
-      }
-      Object.keys(dataset).forEach((k) => {
-        const vv = dataset[k];
-        const attr_name = `data-${k}`;
-        if (isRef(vv)) {
-          const unsub = vv.subscribe({
-            __trackId: viewTrackId,
-            __trackInfo: { type: "dataset", key: k },
-            onChange(v) {
-              state.attributes[attr_name] = v as string;
-              if ($elm) {
-                methods.apply_attr(attr_name, v);
-              }
-            },
-          });
-          listener$.push(unsub);
-          state.attributes[attr_name] = vv.value;
-          return;
-        }
-        state.attributes[attr_name] = vv;
-      });
-
-      if (cls !== undefined) {
-        if (typeof cls === "string") {
-          state.styleSet = cls.split(" ");
-        } else if (isRef(cls)) {
-          const unsub = cls.subscribe({
-            __trackId: viewTrackId,
-            __trackInfo: { type: "class" },
-            onChange(v: string) {
-              state.styleSet = v.split(" ");
-              if ($elm) {
-                $elm.setStyleSet(v.split(" "));
-              }
-            },
-          });
-          listener$.push(unsub);
-          state.styleSet = cls.value.split(" ");
-        } else if (isClassNameRef(cls)) {
-          state.styleSet = cls.toString().split(" ");
-          const unsub = cls.subscribe({
-            onChange(v) {
-              state.styleSet = v;
-              // console.log("[primitive]content/view - classNames notify", v);
-              if ($elm && typeof $elm.setStyleSet === "function") {
-                $elm.setStyleSet(v);
-              }
-            },
-          });
-          listener$.push(unsub);
-        } else {
-          state.styleSet = [];
-        }
-      }
-      if (style) {
-        if (isRef(style)) {
-          Object.keys(style.value || {}).forEach((k) => {
-            const sv = style.value[k];
-            if (isRef(sv)) {
-              const unsub = sv.subscribe({
-                __trackId: viewTrackId,
-                __trackInfo: { type: "style", key: k },
-                onChange(v) {
-                  state.style[k] = v;
-                  if ($elm) {
-                    $elm.setStyleValue(k, v);
-                  }
-                },
-              });
-              listener$.push(unsub);
-              state.style[k] = sv.value;
-            } else {
-              state.style[k] = sv;
-            }
-          });
-          const unsub = style.subscribe({
-            __trackId: viewTrackId,
-            __trackInfo: { type: "style" },
-            onChange(v) {
-              state.style = v as RawViewStyleProperties;
-              if ($elm && typeof $elm.setStyle === "function") {
-                $elm.setStyle(v);
-              }
-            },
-          });
-          listener$.push(unsub);
-          state.style = style.value;
-        } else {
-          Object.keys(style).forEach((k) => {
-            const v = style[k];
-            if (isRef(v)) {
-              state.style[k] = v.value;
-              const unsub = v.subscribe({
-                __trackId: viewTrackId,
-                __trackInfo: { type: "style", key: k },
-                onChange(v) {
-                  state.style[k] = v as any;
-                  if ($elm) {
-                    $elm.setStyleValue(k, v);
-                  }
-                },
-              });
-              listener$.push(unsub);
-            } else {
-              state.style[k] = v;
-            }
-          });
-        }
-      }
-
-      if (!$elm) {
-        return;
-      }
-
-      if (onClick) {
-        const handler = function (event: MouseEvent) {
-          if (onClick) {
-            onClick(event);
-          }
-        };
-        methods.listen($elm, "click", handler);
-      }
-
-      if (onDoubleClick) {
-        const handler = function (event: MouseEvent) {
-          if (onDoubleClick) {
-            onDoubleClick(event);
-          }
-        };
-        methods.listen($elm, "dblclick", handler);
-      }
-
-      if (onLongPress) {
-        let longPressTimer: any = null;
-        let startX = 0;
-        let startY = 0;
-        const longPressDuration = 500;
-        const moveThreshold = 10;
-
-        const handleStart = (event: PointerEvent) => {
-          startX = event.clientX;
-          startY = event.clientY;
-          longPressTimer = setTimeout(() => {
-            if (onLongPress) {
-              onLongPress(event);
-            }
-            longPressTimer = null;
-          }, longPressDuration);
-        };
-
-        const handleMove = (event: PointerEvent) => {
-          if (longPressTimer) {
-            const deltaX = Math.abs(event.clientX - startX);
-            const deltaY = Math.abs(event.clientY - startY);
-            if (deltaX > moveThreshold || deltaY > moveThreshold) {
-              clearTimeout(longPressTimer);
-              longPressTimer = null;
-            }
-          }
-        };
-
-        const handleEnd = () => {
-          if (longPressTimer) {
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
-          }
-        };
-
-        methods.listen($elm, "pointerdown", handleStart);
-        methods.listen($elm, "pointermove", handleMove);
-        methods.listen($elm, "pointerup", handleEnd);
-        methods.listen($elm, "pointercancel", handleEnd);
-      }
-
-      if (onPointerDown) {
-        const handler = function (event: PointerEvent) {
-          if (onPointerDown) onPointerDown(event);
-        };
-        methods.listen($elm, "pointerdown", handler);
-      }
-      if (onFocus) {
-        const handler = function (event: FocusEvent) {
-          onFocus(event);
-        };
-        methods.listen($elm, "focus", handler);
-      }
-      if (onBlur) {
-        const handler = function (event: FocusEvent) {
-          if (onBlur) onBlur(event);
-        };
-        methods.listen($elm, "blur", handler);
-      }
-      if (onKeyDown) {
-        const handler = function (event: KeyboardEvent) {
-          if (onKeyDown) onKeyDown(event);
-        };
-        methods.listen($elm, "keydown", handler);
-      }
-      if (onContextMenu) {
-        const handler = function (event: MouseEvent) {
-          if (onContextMenu) onContextMenu(event);
-        };
-        methods.listen($elm, "contextmenu", handler);
-      }
-      if (onMouseEnter) {
-        const handler = function (event: MouseEvent) {
-          onMouseEnter(event);
-        };
-        methods.listen($elm, "mouseenter", handler);
-      }
-      if (onMouseLeave) {
-        const handler = function (event: MouseEvent) {
-          onMouseLeave(event);
-        };
-        methods.listen($elm, "mouseleave", handler);
-      }
-
-      if (draggable !== undefined) {
-        // host.setAttribute($elm, "draggable", String(draggable));
-        $elm.setAttribute("draggable", String(draggable));
-      }
-
-      if (onDragStart) {
-        const handler = function (event: DragEvent) {
-          if (onDragStart) onDragStart(event);
-        };
-        methods.listen($elm, "dragstart", handler);
-      }
-
-      if (onDrag) {
-        const handler = function (event: DragEvent) {
-          if (onDrag) onDrag(event);
-        };
-        methods.listen($elm, "drag", handler);
-      }
-
-      if (onDragEnd) {
-        const handler = function (event: DragEvent) {
-          if (onDragEnd) onDragEnd(event);
-        };
-        methods.listen($elm, "dragend", handler);
-      }
-
-      if (onDragEnter) {
-        const handler = function (event: DragEvent) {
-          if (onDragEnter) onDragEnter(event);
-        };
-        methods.listen($elm, "dragenter", handler);
-      }
-
-      if (onDragOver) {
-        const handler = function (event: DragEvent) {
-          if (onDragOver) onDragOver(event);
-        };
-        methods.listen($elm, "dragover", handler);
-      }
-
-      if (onDragLeave) {
-        const handler = function (event: DragEvent) {
-          if (onDragLeave) onDragLeave(event);
-        };
-        methods.listen($elm, "dragleave", handler);
-      }
-
-      if (onDrop) {
-        const handler = function (event: DragEvent) {
-          if (onDrop) onDrop(event);
-        };
-        methods.listen($elm, "drop", handler);
-      }
-
-      if (onAnimationEnd) {
-        const handler = function (event: AnimationEvent) {
-          if (onAnimationEnd) {
-            onAnimationEnd(event);
-          }
-        };
-        methods.listen($elm, "animationend", handler);
-      }
+      box$.methods.subscribe_props();
     },
-  };
-  const lifecycle = {
-    handleMounted() {},
-    handleBeforeUnmount() {},
-    handleUnmounted() {},
   };
 
   methods.subscribe_props();
-  methods.build_children(children);
+  box$.methods.add_event();
+  box$.methods.build_children(children);
 
   return {
     t: "view",
@@ -577,16 +100,17 @@ export function View(
       return $elm;
     },
     set $elm(v) {
+      box$.methods.set$elm(v);
       $elm = v;
     },
     state,
     children: state.children,
     events,
     onMounted(event: MountedEvent) {
-      logger.log("onMounted", state.children.length);
+      // logger.log("onMounted", state.children.length);
       state.rendered = true;
-      if (onMounted) {
-        listener$.push(onMounted(event));
+      if (rest.onMounted) {
+        box$.methods.unsubscribe(rest.onMounted(event));
       }
       for (let i = 0; i < state.children.length; i += 1) {
         const child = state.children[i];
@@ -596,8 +120,8 @@ export function View(
       }
     },
     beforeUnmounted() {
-      if (beforeUnmounted) {
-        beforeUnmounted();
+      if (rest.beforeUnmounted) {
+        rest.beforeUnmounted();
       }
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
@@ -608,10 +132,10 @@ export function View(
     },
     onUnmounted() {
       // console.log("[primitive]view - onUnmounted", onUnmounted);
-      if (onUnmounted) {
-        onUnmounted();
+      if (rest.onUnmounted) {
+        rest.onUnmounted();
       }
-      listener$.destroy();
+      box$.methods.destroy();
       state.rendered = false;
       $elm = null;
     },

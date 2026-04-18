@@ -15,6 +15,7 @@ import { VNodeView } from "@/vnode/view";
 import { MountedEvent } from "@/event";
 
 import { TimelessLazyComponent } from "./lazy-view";
+import { BoxState } from "./box";
 
 /** Possible prop values */
 export type ViewPropValue = string | number | boolean | undefined | null;
@@ -55,7 +56,7 @@ export interface TimelessElement<T = any, Elm = any> {
   t: string;
   $elm: VNodeView<Elm>;
   /** 描述该元素的状态，用来替代 value */
-  state: T;
+  state: T & BoxState;
   children?: (TimelessElement | null)[];
   events?: {
     onMounted?: (e: MountedEvent<VNodeView<Elm>>) => void;
@@ -107,25 +108,35 @@ export function isElement(v: any): v is TimelessElement {
   return false;
 }
 
-export type ViewChildrenArray = (
-  | DerivedRef<string | number>
-  | Ref<string | number>
-  | TimelessElement
-  | (() => TimelessElement | null)
-  | string
+type ViewChild =
   | number
-  | null
-)[];
+  | string
+  | Ref<string | number>
+  | DerivedRef<string | number>
+  | TimelessElement
+  | null;
+
+export type ViewChildrenArray = ViewChild[];
 
 /** Children can be an eager array or a lazy callback returning one */
-export type ViewChildren = ViewChildrenArray | (() => ViewChildrenArray);
+export type ViewChildren =
+  | ViewChild
+  | ViewChildrenArray
+  | (() => ViewChildrenArray | ViewChild);
 
 /** Resolve ViewChildren to a concrete array */
 export function resolve_children(
   children?: ViewChildren,
 ): ViewChildrenArray | undefined {
   if (typeof children === "function") {
-    return children();
+    const r = children();
+    if (!Array.isArray(r)) {
+      return [r];
+    }
+    return r;
+  }
+  if (!Array.isArray(children)) {
+    return [children as ViewChild];
   }
   return children;
 }

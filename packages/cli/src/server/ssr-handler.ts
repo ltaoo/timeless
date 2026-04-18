@@ -300,6 +300,8 @@ function generateHTML(options: {
 <body>
   <div id="root">${content}</div>
   ${portalContent}
+  <script type="module" src="/public/timeless/${VERSION}/timeless.umd.min.js"></script>
+  <script type="module" src="/public/timeless/${VERSION}/timeless.dom.umd.min.js"></script>
   <script>window.__TIMELESS_DATA__ = ${serializedData};</script>
   <script type="module" src="/@timeless/client${pagePath}"></script>
 </body>

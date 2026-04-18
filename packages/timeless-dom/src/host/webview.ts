@@ -1,7 +1,6 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement } from "./box";
-import { hydrate_node } from "@/renderer/hydrate";
 
 export type DOMWebview = VNodeView<HTMLDivElement> & {
   t: "webview";

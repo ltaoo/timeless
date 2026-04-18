@@ -37,7 +37,7 @@ export function DOMPopper(props: {
           left: 0,
           top: 0,
           opacity: elm.state.placed ? 1 : 0,
-          "pointer-event": elm.state.placed ? "initial" : "none",
+          "pointer-events": elm.state.placed ? "initial" : "none",
           transform: elm.state.placed
             ? `translate3d(${Math.round(elm.state.x)}px, ${Math.round(elm.state.y)}px, 0)`
             : "translate3d(0, 0, 0)",
