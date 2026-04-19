@@ -102,10 +102,10 @@ export function ContentImpl(
             {
               store: props.store.popper,
               onDismiss() {
-                props.store.hide();
+                props.store.hide({ reason: "popper dismiss callback" });
               },
               onReferenceOutOfView() {
-                props.store.hide();
+                props.store.hide({ reason: "reference out of view callback" });
               },
               onMouseEnter(event) {
                 props.store.handleEnter();
@@ -329,13 +329,6 @@ export function SubMenuContent(
     {
       ...rest,
       store,
-      onMouseEnter() {
-        // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
-        if (store.parent_menu && store.parent_menu.hide_sub_timer !== null) {
-          clearTimeout(store.parent_menu.hide_sub_timer);
-          store.parent_menu.hide_sub_timer = null;
-        }
-      },
     },
     children,
   );

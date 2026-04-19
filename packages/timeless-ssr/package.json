@@ -1,6 +1,6 @@
 {
   "name": "@timeless/timeless-ssr",
-  "version": "0.20.6",
+  "version": "0.21.0",
   "main": "dist/timeless.ssr.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {

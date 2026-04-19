@@ -1,4 +1,4 @@
-import { refobj, computed, isRef } from "@timeless/timeless";
+import { refobj, computed, isRef, getPlatform } from "@timeless/timeless";
 import {
   styleNames,
   classNames,
@@ -102,39 +102,32 @@ export function Content(
       onMounted(event) {
         const $elm = event.target;
         const layer_id = `popper-${++layer_id_counter}`;
-        console.log("the floating mounted", $elm.getBoundingClientRect());
+        const layer$ = getGlobalLayerManager();
+        const platform = getPlatform();
+        // console.log("the floating mounted", $elm.getBoundingClientRect());
         store.setFloating({
           $el: $elm,
-          getRect() {
-            // return host.getBoundingClientRect?.($e) as any;
-            return $elm.getBoundingClientRect();
-          },
+          getRect: $elm.getBoundingClientRect,
         });
         listener$.add(
           store.onStateChange((v) => {
             state_.as(v);
           }),
         );
-
-        // 滚动监听
-        function handleScroll() {
-          if (store.reference) {
-            const ref_rect = store.reference.getRect();
-            const $ref_el = store.reference.$el;
-            const is_virtual_element =
-              !$ref_el ||
-              typeof ($ref_el as any).getBoundingClientRect !== "function";
-            // 虚拟元素（如右键菜单），滚动时关闭
-            if (is_virtual_element && onReferenceOutOfView) {
-              onReferenceOutOfView();
+        // 监听滚动：优先使用 ScrollViewCore，否则使用 window
+        if (store.view$) {
+          // 滚动监听
+          function handleScroll() {
+            if (
+              !store.reference ||
+              !store.floating ||
+              store.state.isPlaced === false
+            ) {
               return;
             }
+            const ref_rect = store.reference.getRect();
             // 检查参考元素是否在视口内
-            // const viewport = host.getViewportSize?.() ?? {
-            //   width: 0,
-            //   height: 0,
-            // };
-            const viewport = { width: 0, height: 0 };
+            const viewport = platform.getViewportSize();
             const is_in_viewport =
               ref_rect.top < viewport.height &&
               ref_rect.bottom > 0 &&
@@ -144,13 +137,16 @@ export function Content(
               onReferenceOutOfView();
               return;
             }
+            store.place();
           }
-          store.place();
+          listener$.add(
+            store.view$.onScroll(() => {
+              handleScroll();
+            }),
+          );
         }
-        // host.addDocumentEventListener?.("scroll", handleScroll, true);
         // 注册到 LayerManager
         if (onDismiss) {
-          const layer_manager = getGlobalLayerManager();
           const layer: Layer = {
             id: layer_id,
             containsPoint(x: number, y: number) {
@@ -160,13 +156,10 @@ export function Content(
               // const rect = host.getBoundingClientRect?.($element) as any;
               const rect = $elm.getBoundingClientRect();
               // 同时检查 anchor 元素
-              const $anchor_el = (store.reference as any)?.$el as
+              const $anchor_el = store.reference?.$el as
                 | HTMLElement
                 | undefined;
               if ($anchor_el) {
-                // const anchor_rect = host.getBoundingClientRect?.(
-                //   $anchor_el,
-                // ) as any;
                 const anchor_rect = $anchor_el.getBoundingClientRect();
                 const in_anchor =
                   x >= anchor_rect.left &&
@@ -188,20 +181,15 @@ export function Content(
               onDismiss();
             },
           };
-          layer_manager.register(layer);
+          layer$.register(layer);
         }
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
         return () => {
-          listener$.clean();
+          listener$.destroy();
           store.setFloating(null);
-          // host.removeDocumentEventListener?.("scroll", handleScroll, true);
-          // 从 LayerManager 注销
-          if (layer_id) {
-            const layerManager = getGlobalLayerManager();
-            layerManager.unregister(layer_id);
-          }
+          layer$.unregister(layer_id);
         };
       },
     },

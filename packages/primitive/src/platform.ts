@@ -8,6 +8,9 @@ export interface Platform {
 
   /** 批量设置 document.body 样式（传空字符串可清除） */
   patchBodyStyle(style: Record<string, string>): void;
+
+  /** 获取视口大小 */
+  getViewportSize(): { width: number; height: number };
 }
 
 const noop = () => {};
@@ -15,6 +18,7 @@ const noop = () => {};
 let _platform: Platform = {
   addEventListener: () => noop,
   patchBodyStyle: noop,
+  getViewportSize: () => ({ width: 0, height: 0 }),
 };
 
 export function setPlatform(p: Platform) {

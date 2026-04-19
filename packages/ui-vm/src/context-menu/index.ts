@@ -3,6 +3,7 @@ import { BaseDomain, Handler } from "@timeless/base";
 import { MenuCore } from "@/menu/index";
 import { MenuItemCore } from "@/menu/item";
 import { Rect, Side, Align } from "@/popper/types";
+import { ScrollViewCore } from "@/scroll-view/index";
 
 enum Events {
   StateChange,
@@ -23,14 +24,15 @@ type ContextMenuProps = {
   offsetY?: number;
   submenuOffsetX?: number;
   submenuOffsetY?: number;
-  trigger?: "contextmenu" | "hover" | "manual";
+  // trigger?: "contextmenu" | "hover" | "click";
   side?: Side;
   align?: Align;
+  view$?: ScrollViewCore;
 };
 export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
   menu: MenuCore;
   disabled = false;
-  trigger: "contextmenu" | "hover" | "manual" = "contextmenu";
+  // trigger: "contextmenu" | "hover" | "click" = "contextmenu";
 
   state: ContextMenuState = {
     items: [],
@@ -49,12 +51,12 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
       left: 0,
     }),
   };
-  private initialScrollX = 0;
-  private initialScrollY = 0;
+  private initialScrollTop = 0;
   private clickX = 0;
   private clickY = 0;
   private offsetX = 0;
   private offsetY = 0;
+  private view$?: ScrollViewCore;
 
   constructor(
     options: Partial<
@@ -71,22 +73,25 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
       offsetY = 0,
       submenuOffsetX = -2,
       submenuOffsetY = -4,
-      trigger = "contextmenu",
       side = "bottom",
       align = "start",
+      view$,
     } = options;
     this.state.items = items;
-    this.trigger = trigger;
     this.offsetX = offsetX;
     this.offsetY = offsetY;
+    this.view$ = view$;
     this.menu = new MenuCore({
       ...options,
       _name: _name ? `${_name}__menu` : "menu-in-context-menu",
+      trigger: "contextmenu",
+      root: true,
       side,
       align,
+      view$,
     });
     // Store reference to parent context menu in menu for hover handling
-    (this.menu as any).parentContextMenu = this;
+    // this.menu as any).parentContextMenu = this;
 
     // Set initial virtual reference
     console.log("[ContextMenuCore] constructor - setting initial reference");
@@ -121,15 +126,17 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
     });
 
     // Store initial scroll position and click position
-    this.initialScrollX = window.scrollX || window.pageXOffset;
-    this.initialScrollY = window.scrollY || window.pageYOffset;
+    this.initialScrollTop = this.view$?.getScrollTop() || 0;
     this.clickX = x;
     this.clickY = y;
 
-    // Update virtual element position to adjust for scroll
+    // Update virtual element to dynamically calculate position based on scroll
     this.virtualElement.getBoundingClientRect = () => {
+      const currentScrollTop = this.view$?.getScrollTop() || 0;
+      const scrollDelta = currentScrollTop - this.initialScrollTop;
+
       const adjustedX = this.clickX + this.offsetX;
-      const adjustedY = this.clickY + this.offsetY;
+      const adjustedY = this.clickY + this.offsetY - scrollDelta;
 
       return {
         width: 0,
@@ -162,10 +169,9 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
     console.log("[ContextMenuCore] calling menu.popper.place()");
     this.menu.popper.place();
   }
-  hide() {
+  hide(opt: { reason: string }) {
     console.log("[]ContextMenuCore - hide");
-    // this._original = null;
-    this.menu.hide();
+    this.menu.hide(opt);
   }
   setReference(reference: { $el?: unknown; getRect: () => Rect }) {
     // console.log("[ContextMenuCore]setReference", reference.getRect());

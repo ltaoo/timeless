@@ -2,6 +2,7 @@ import { Section, Item } from "@/components/index.js";
 
 export default function OverlayView() {
   const view$ = new Timeless.ui.ScrollViewCore({});
+
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
       Section("Dropdown Menu", [
@@ -9,6 +10,7 @@ export default function OverlayView() {
           DropdownMenu(
             {
               store: new Timeless.ui.DropdownMenuCore({
+                view$,
                 items: [
                   new Timeless.ui.MenuItemCore({
                     label: "Edit",
@@ -50,6 +52,7 @@ export default function OverlayView() {
           DropdownMenu(
             {
               store: new Timeless.ui.DropdownMenuCore({
+                view$,
                 items: [
                   new Timeless.ui.MenuItemCore({
                     label: "Cut",
@@ -100,6 +103,7 @@ export default function OverlayView() {
           DropdownMenu(
             {
               store: new Timeless.ui.DropdownMenuCore({
+                view$,
                 items: [
                   new Timeless.ui.MenuItemCore({
                     label: "Cut",
@@ -166,6 +170,7 @@ export default function OverlayView() {
             return DropdownMenu(
               {
                 store: new Timeless.ui.DropdownMenuCore({
+                  view$,
                   items: [
                     new Timeless.ui.MenuItemCore({
                       label: "Cut",
@@ -206,6 +211,7 @@ export default function OverlayView() {
           DropdownMenu(
             {
               store: new Timeless.ui.DropdownMenuCore({
+                view$,
                 items: [
                   new Timeless.ui.MenuItemCore({
                     label: "Undo",
@@ -276,6 +282,7 @@ export default function OverlayView() {
             return DropdownMenu(
               {
                 store: new ui.DropdownMenuCore({
+                  view$,
                   items: [
                     new ui.MenuGroupCore({
                       label: "Styles",
@@ -357,6 +364,7 @@ export default function OverlayView() {
           DropdownMenu(
             {
               store: new Timeless.ui.DropdownMenuCore({
+                view$,
                 items: [
                   new Timeless.ui.MenuItemCore({
                     label: "Edit",
@@ -430,6 +438,7 @@ export default function OverlayView() {
           DropdownMenu(
             {
               store: new Timeless.ui.DropdownMenuCore({
+                view$,
                 items: [
                   new Timeless.ui.MenuItemCore({
                     label: "Cut",
@@ -487,6 +496,7 @@ export default function OverlayView() {
         Item("Dynamic Submenu", [
           (() => {
             const shareMenu = new Timeless.ui.MenuCore({
+              view$,
               items: [
                 new Timeless.ui.MenuItemCore({
                   label: "February",
@@ -526,6 +536,7 @@ export default function OverlayView() {
               }, 1000);
             });
             const dm$ = new Timeless.ui.DropdownMenuCore({
+              view$,
               items: [
                 new Timeless.ui.MenuItemCore({
                   label: "Year 2025",
@@ -544,11 +555,12 @@ export default function OverlayView() {
             ]);
           })(),
         ]),
-        Item("Hover Trigger", [
+        Item("Click Trigger", [
           DropdownMenu(
             {
               store: new Timeless.ui.DropdownMenuCore({
-                trigger: "hover",
+                view$,
+                trigger: "click",
                 items: [
                   new Timeless.ui.MenuItemCore({
                     label: "Profile",
@@ -574,7 +586,7 @@ export default function OverlayView() {
             [
               Button(
                 { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
-                ["Hover Me"],
+                ["Click Me"],
               ),
             ],
           ),
@@ -583,6 +595,7 @@ export default function OverlayView() {
           DropdownMenu(
             {
               store: new Timeless.ui.DropdownMenuCore({
+                view$,
                 items: [
                   new Timeless.ui.MenuGroupCore({
                     label: "Edit",
@@ -731,6 +744,7 @@ export default function OverlayView() {
         Item("Context Menu", [
           (() => {
             const menu$ = new Timeless.ui.ContextMenuCore({
+              view$,
               items: [
                 new Timeless.ui.MenuItemCore({
                   label: "Cut",

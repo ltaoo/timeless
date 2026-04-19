@@ -8,12 +8,15 @@ import { DismissableLayerCore } from "@/dismissable-layer/index";
 import { PresenceCore } from "@/presence/index";
 import { Direction } from "@/direction/index";
 import { Logger } from "@/util";
+import { ScrollViewCore } from "@/scroll-view/index";
 
 import { MenuItemCore } from "./item";
 import { MenuSeparatorCore } from "./separator";
 import { MenuGroupCore } from "./group";
 
 const logger = Logger({ prefix: "vm", scope: "menu" });
+
+type StartHideEvent = { reason: string };
 
 enum Events {
   Show,
@@ -29,7 +32,7 @@ enum Events {
 type TheTypesOfEvents = {
   [Events.Show]: void;
   [Events.PrepareHide]: void;
-  [Events.StartHide]: void;
+  [Events.StartHide]: StartHideEvent;
   [Events.Hidden]: void;
   [Events.EnterItem]: MenuItemCore;
   [Events.LeaveItem]: MenuItemCore;
@@ -53,13 +56,19 @@ type MenuCoreProps = {
   side: Side;
   align: Align;
   strategy: "fixed" | "absolute";
+  /** 默认是否展示菜单 */
+  defaultVisible?: boolean;
+  /** 触发模式 */
+  trigger?: "click" | "hover" | "contextmenu";
+  /** 是否为一级菜单 */
+  root?: boolean;
   items: MenuEntry[];
   /** 自定义内容，设置后渲染层显示该内容而非迭代 items */
   content?: unknown;
   offsetX?: number;
   offsetY?: number;
-  /** 默认是否展示菜单 */
-  defaultVisible?: boolean;
+  /** 滚动容器 */
+  view$?: ScrollViewCore;
 };
 
 export class MenuCore extends BaseDomain<TheTypesOfEvents> {
@@ -70,23 +79,22 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   presence: PresenceCore;
   layer: DismissableLayerCore;
 
+  /** 菜单内容，用于自定义渲染菜单的内容，当设置后，渲染层会显示该内容而非迭代 items */
+  content: unknown = null;
+  /** 菜单项 */
+  items: MenuEntry[] = [];
+  is_root = false;
+  trigger: "click" | "hover" | "contextmenu" = "click";
+
   open_timer: NodeJS.Timeout | null = null;
+  /** prepareHide 时会设置定时器，用于延迟隐藏菜单，可以在 cancelHide 中清除 */
   hide_timer: NodeJS.Timeout | null = null;
   /** 鼠标离开 item 时，可能要隐藏子菜单，但是如果从有子菜单的 item 离开前往子菜单，就不用隐藏 */
-  maybe_hide_sub = false;
-  hide_sub_timer: NodeJS.Timeout | null = null;
-
-  content: unknown = null;
-
-  items: MenuEntry[] = [];
-  cur_sub: MenuCore | null = null;
+  // maybe_hide_sub = false;
+  // hide_sub_timer: NodeJS.Timeout | null = null;
   cur_item: MenuItemCore | null = null;
-  /** 父菜单引用，用于子菜单清除父菜单的定时器 */
-  parent_menu: MenuCore | null = null;
   /** 鼠标是否处于菜单中 */
   inside = false;
-  /** 鼠标是否处于子菜单中 */
-  in_sub_menu = false;
 
   state: MenuCoreState = {
     open: false,
@@ -100,21 +108,26 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     const {
       _name,
       items = [],
+      defaultVisible = false,
+      trigger,
       content,
+      root = false,
       side,
       align,
       strategy = "fixed",
       offsetX = 0,
       offsetY = 0,
-      defaultVisible = false,
+      view$,
     } = options;
     if (_name) {
       this._name = _name;
     }
-    this.state.items = items;
+    this.is_root = root;
+    this.trigger = trigger ?? "click";
     this.items = items;
     this.content = content ?? null;
     this.state.content = this.content;
+    this.state.items = items;
 
     // console.log("[DOMAIN]ui/menu/index - constructor", {
     //   name: this._name,
@@ -130,6 +143,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       strategy,
       offsetX,
       offsetY,
+      view$,
       _name: _name ? `${_name}__popper` : "menu__popper",
       defaultPlaced: defaultVisible,
     });
@@ -159,8 +173,8 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     //   this.emit(Events.LeaveMenu);
     // });
     this.layer.onDismiss(() => {
-      console.log("[DOMAIN]ui/menu/index - layer.onDismiss", this._name);
-      this.hide();
+      // console.log("[DOMAIN]ui/menu/index - layer.onDismiss", this._name);
+      this.hide({ reason: "click outside" });
     });
     this.presence.onStateChange(() => {
       // During exit animation, mounted is still true but we should treat the menu as closed
@@ -171,18 +185,18 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.emit(Events.StateChange, { ...this.state });
     });
     this.presence.onHidden(() => {
-      console.log(
-        "[DOMAIN]ui/menu/index - presence.onHidden",
-        this._name,
-        this.cur_item?.label,
-        this.cur_sub?._name,
-        this.state.open,
-      );
+      // console.log(
+      //   "[DOMAIN]ui/menu/index - presence.onHidden",
+      //   this._name,
+      //   this.cur_item?.label,
+      //   this.cur_sub?._name,
+      //   this.state.open,
+      // );
       if (this.state.open) {
-        console.log(
-          "[DOMAIN]ui/menu/index - presence.onHidden ignored because open",
-          this._name,
-        );
+        // console.log(
+        //   "[DOMAIN]ui/menu/index - presence.onHidden ignored because open",
+        //   this._name,
+        // );
         return;
       }
       this.reset();
@@ -192,34 +206,24 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
 
   toggle() {
     const { open } = this.state;
-    console.log("[DOMAIN]ui/menu/index - toggle", this._name, open);
-    // this.log("toggle", open);
+    // console.log("[DOMAIN]ui/menu/index - toggle", this._name, open);
     if (open) {
-      this.hide();
+      this.hide({ reason: "manual" });
       return;
     }
     this.show();
+  }
+  prepareShow(opt: { reason: string }) {
+    this.cancelHide();
+    this.open_timer = setTimeout(() => {
+      logger.log("[]invoke show in prepareShow timer", this._name);
+      this.show();
+    }, 80);
   }
   show() {
     if (this.state.open) {
       return;
     }
-    // console.log("[DEBUG-MENU] show()", this._name);
-    // 当子菜单显示时，清除父菜单的定时器
-    // 这是必要的，因为 mouseenter 事件可能不会在 DOM 动态挂载时触发
-    // if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
-    //   clearTimeout(this.parent_menu.hide_sub_timer);
-    //   this.parent_menu.hide_sub_timer = null;
-    // }
-    // Close other open root menus when opening this one
-    // if (this._is_root_menu) {
-    //   for (const menu of MenuCore.openRootMenus) {
-    //     if (menu !== this && menu.state.open) {
-    //       menu.hide();
-    //     }
-    //   }
-    //   MenuCore.openRootMenus.add(this);
-    // }
     this.presence.show();
     this.popper.place();
     this.emit(Events.Show);
@@ -228,16 +232,23 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   isPrepareHide() {
     return this.hide_timer !== null;
   }
-  prepareHide() {
+  prepareHide(opt: { reason: string }) {
     logger.log("[]prepare hide the menu", this._name);
+    this.cancelShow();
     if (this.state.open === false) {
       return;
     }
     this.hide_timer = setTimeout(() => {
       logger.log("[]invoke hide in prepareHide timer", this._name);
-      this.hide();
+      this.hide(opt);
     }, 80);
     this.emit(Events.PrepareHide);
+  }
+  cancelShow() {
+    if (this.open_timer !== null) {
+      clearTimeout(this.open_timer);
+      this.open_timer = null;
+    }
   }
   cancelHide() {
     if (this.hide_timer !== null) {
@@ -245,7 +256,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.hide_timer = null;
     }
   }
-  hide() {
+  hide(opt: { reason: string }) {
     if (this.state.open === false) {
       return;
     }
@@ -256,7 +267,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     });
 
     // Emit Hiding event immediately so menu items can update their state
-    this.emit(Events.StartHide);
+    this.emit(Events.StartHide, opt);
 
     // Remove from global registry
     // MenuCore.openRootMenus.delete(this);
@@ -294,15 +305,10 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   listen_item(item: MenuItemCore) {
     //  const item = items[i];
     item.onEnter(() => {
-      console.log(
-        "[DOMAIN]ui/menu/index - item.onEnter",
-        this._name,
-        item.label,
-        {
-          hasMenu: !!item.menu,
-          curItem: this.cur_item?.label,
-        },
-      );
+      logger.log("item.onEnter", this._name, item.label, {
+        hasMenu: !!item.menu,
+        curItem: this.cur_item?.label,
+      });
       // if (this.hide_sub_timer !== null) {
       //   clearTimeout(this.hide_sub_timer);
       //   this.hide_sub_timer = null;
@@ -318,18 +324,16 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         this.cur_item.blur();
         // 立即关闭之前菜单项的子菜单，保持快速响应
         if (this.cur_item.menu) {
-          this.cur_item.menu.hide();
+          this.cur_item.menu.hide({ reason: "enter sibling item" });
         }
       }
       this.cur_item = item;
     });
     item.onLeave(() => {
-      console.log("[DOMAIN]ui/menu/index - item.onLeave", this._name, {
+      logger.log("item.onLeave", this._name, {
         label: item.label,
         open: item._open,
         focused: item._focused,
-        hasMenu: !!item.menu,
-        itemState: item.menu?.state,
       });
       if (this.cur_item) {
         this.cur_item.blur();
@@ -340,10 +344,10 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
           // 从菜单项移动到菜单外部，需要延迟关闭子菜单，因为可能是移动回 菜单项
           // 比如 1 -> 1-1 例子，从 1-1 移动回 1 时，要给时间让 1 移除延迟关闭定时器
           // 从 1-1 移动到外部，延迟定时器就能正确关闭 1-1
-          this.cur_item.menu.prepareHide();
+          this.cur_item.menu.prepareHide({ reason: "leave parent item" });
         }
       }
-      // this.emit(Events.LeaveItem, item);
+      this.emit(Events.LeaveItem, item);
       // Don't blur if the item has an open submenu
       // if (!item._open) {
       //   item.blur();
@@ -363,23 +367,26 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         "[]enter the menu belong items, so prevent hide timer",
         this._name,
       );
-      this.in_sub_menu = true;
+      // this.in_sub_menu = true;
       this.cancelHide();
     });
-    item.menu.onLeave(() => {
-      this.in_sub_menu = false;
-      //   logger.log("[]leave the menu belong items, so prepare hide", this._name);
-      //   this.prepareHide();
-    });
-    item.menu.onStartHide(() => {
+    item.menu.onStartHide((event) => {
       logger.log(
         "[]the menu belong to items hide, so prepare hide",
         this._name,
+        event.reason,
       );
       if (this.inside) {
         return;
       }
-      this.hide();
+      if (
+        this.is_root &&
+        (this.trigger === "click" || this.trigger === "contextmenu") &&
+        event.reason === "leave parent item"
+      ) {
+        return;
+      }
+      this.hide({ reason: "menu of item start hide" });
     });
     // if (this.subs.includes(subMenu)) {
     //   return;
@@ -429,14 +436,14 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     // console.log("[]MenuCore - reset", this.items);
     this.state.open = false;
     this.hide_timer = null;
-    this.in_sub_menu = false;
+    // this.in_sub_menu = false;
     this.cur_item = null;
-    this.cur_sub = null;
-    this.maybe_hide_sub = false;
-    if (this.hide_sub_timer !== null) {
-      clearTimeout(this.hide_sub_timer);
-      this.hide_sub_timer = null;
-    }
+    // this.cur_sub = null;
+    // this.maybe_hide_sub = false;
+    // if (this.hide_sub_timer !== null) {
+    //   clearTimeout(this.hide_sub_timer);
+    //   this.hide_sub_timer = null;
+    // }
     this.presence.reset();
     this.popper.reset();
     for (let i = 0; i < this.items.length; i += 1) {
@@ -467,12 +474,18 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   }
   handleLeave() {
     this.inside = false;
-    console.log("[MenuCore] handleLeave", this._name, {
+    logger.log("handleLeave", this._name, {
       curItem: this.cur_item?.label,
       curItemOpen: this.cur_item?._open,
       hasMenu: !!this.cur_item?.menu,
     });
-    this.prepareHide();
+    if (
+      this.is_root &&
+      (this.trigger === "click" || this.trigger === "contextmenu")
+    ) {
+      return;
+    }
+    this.prepareHide({ reason: "leave menu" });
     this.emit(Events.LeaveMenu);
     // this.hide();
     // 使用 cur_item 而不是查找 focused 状态的 item

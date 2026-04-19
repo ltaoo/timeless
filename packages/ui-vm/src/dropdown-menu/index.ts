@@ -5,6 +5,7 @@ import { MenuItemCore } from "@/menu/item";
 import { MenuGroupCore } from "@/menu/group";
 import { Rect, Side } from "@/popper/types";
 import { Align } from "@/popper/index";
+import { ScrollViewCore } from "@/scroll-view/index";
 
 enum Events {
   StateChange,
@@ -20,9 +21,12 @@ type DropdownMenuProps = {
   offsetY?: number;
   submenuOffsetX?: number;
   submenuOffsetY?: number;
-  trigger?: "click" | "hover" | "manual";
+  /** 触发模式 */
+  trigger?: "click" | "hover";
   /** 默认是否展示下拉菜单 */
   defaultVisible?: boolean;
+  /** 滚动容器 */
+  view$?: ScrollViewCore;
   onHidden?: () => void;
 };
 type DropdownMenuState = {
@@ -56,7 +60,8 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
   menu: MenuCore;
   subs: MenuCore[] = [];
   items: MenuItemCore[] = [];
-  trigger: "click" | "hover" | "manual" = "click";
+  trigger: "click" | "hover" = "click";
+  view$?: ScrollViewCore;
 
   constructor(props: { _name?: string } & DropdownMenuProps = {}) {
     super(props);
@@ -72,8 +77,9 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
       offsetY = 0,
       submenuOffsetX = -2,
       submenuOffsetY = -4,
-      trigger = "click",
+      trigger = "hover",
       defaultVisible = false,
+      view$: view$,
       onHidden,
     } = props;
     this.trigger = trigger;
@@ -82,14 +88,18 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
     this.submenuOffsetX = submenuOffsetX;
     this.submenuOffsetY = submenuOffsetY;
     this.items = items;
+    this.view$ = view$;
     this.menu = new MenuCore({
+      _name: _name ? `${_name}__menu` : "menu-in-dropdown",
       side,
       align,
-      items,
       defaultVisible,
-      _name: _name ? `${_name}__menu` : "menu-in-dropdown",
+      root: true,
+      trigger,
+      items,
       offsetX: this.offsetX,
       offsetY: this.offsetY,
+      view$,
     });
     // Store reference to parent dropdown in menu for hover handling
     (this.menu as any).parentDropdown = this;
@@ -198,13 +208,39 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
     }
     this.menu.show();
   }
-  hide() {
+  hide(opt: { reason: string }) {
     // console.log("[DOMAIN/ui]dropdown-menu/index - hide");
-    this.menu.hide();
+    this.menu.hide(opt);
   }
   unmount() {
     super.destroy();
     this.menu.unmount();
+  }
+
+  handleClickTrigger(event) {
+    if (this.disabled) {
+      return;
+    }
+    if (this.menu.presence?.state.exit) {
+      return;
+    }
+    if (this.menu.state.open) {
+      this.hide({ reason: "click event" });
+      return;
+    }
+    this.show();
+  }
+  handleEnterTrigger() {
+    if (this.disabled || this.menu.presence?.state.exit) {
+      return;
+    }
+    this.menu.prepareShow({ reason: "enter trigger" });
+  }
+  handleLeaveTrigger() {
+    if (this.disabled) {
+      return;
+    }
+    this.menu.prepareHide({ reason: "leave trigger" });
   }
 
   onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {

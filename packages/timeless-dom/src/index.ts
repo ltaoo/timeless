@@ -23,4 +23,13 @@ export const platform = setPlatform({
       Object.assign(document.body.style, style);
     }
   },
+  getViewportSize() {
+    if (typeof window !== "undefined") {
+      return {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      };
+    }
+    return { width: 0, height: 0 };
+  },
 });

@@ -9,6 +9,7 @@ import {
   getDOMPlatform,
 } from "./floating";
 import type { Rect, Placement, Strategy, MiddlewareData } from "./types";
+import { ScrollViewCore } from "@/scroll-view/index";
 
 const SIDE_OPTIONS = ["top", "right", "bottom", "left"] as const;
 const ALIGN_OPTIONS = ["start", "center", "end"] as const;
@@ -58,6 +59,7 @@ type PopperProps = {
   offsetX?: number;
   offsetY?: number;
   defaultPlaced?: boolean;
+  view$?: ScrollViewCore;
 };
 type PopperState = {
   strategy: Strategy;
@@ -85,6 +87,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   strategy: Strategy = "absolute";
   offsetX = 0;
   offsetY = 0;
+  view$?: ScrollViewCore;
   reference: {
     getRect: () => Rect;
     $el?: unknown;
@@ -135,6 +138,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       offsetX = 0,
       offsetY = 0,
       defaultPlaced = false,
+      view$,
     } = options;
     if (_name) {
       this.unique_id = _name;
@@ -144,6 +148,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       (align !== "center" ? "-" + align : "")) as Placement;
     this.offsetX = offsetX;
     this.offsetY = offsetY;
+    this.view$ = view$;
   }
 
   checkIsClickAnchor: (target: any) => boolean = (target: any) => {

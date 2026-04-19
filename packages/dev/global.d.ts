@@ -14,6 +14,16 @@ declare module "packages/reactive/src/types" {
             to?: number;
         }) => void;
         ignore?: boolean;
+        __trackId?: string;
+        __trackInfo?: Record<string, unknown>;
+    };
+    export type SubscriberWithId<T> = Subscriber<T> & {
+        __trackId: string;
+        __trackInfo?: Record<string, unknown>;
+    };
+    export type DepInfo = {
+        trackId: string;
+        trackInfo?: Record<string, unknown>;
     };
     export type TimelessRef<T> = {
         __is_ref: true;
@@ -23,6 +33,8 @@ declare module "packages/reactive/src/types" {
         eq: (v: T) => boolean;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
+        getDeps: () => DepInfo[];
+        dump: () => void;
         as: (value: T | ((cur: T) => T)) => void;
         set: (value: T) => void;
         update: (fn: (current: T) => T) => void;
@@ -203,6 +215,8 @@ declare module "packages/reactive/src/types" {
         value: T;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
+        getDeps?: () => DepInfo[];
+        dump?: () => void;
     };
     export type Ref<T> = DerivedRef<T> & {
         as: (value: T | ((cur: T | null) => T)) => void;
@@ -212,6 +226,10 @@ declare module "packages/reactive/src/types" {
     export function isRef(v: unknown): v is DerivedRef<any>;
     export function isArrayRef<T>(v: T[] | TimelessRefArray<T>): v is TimelessRefArray<T>;
     export function isArrayRef<T>(v: unknown): v is TimelessRefArray<T>;
+}
+declare module "packages/reactive/src/hmr" {
+    export function hmrScope(hot: any): void;
+    export function __hmr_get_hot(): any;
 }
 declare module "packages/reactive/src/reactive-array" {
     import { Ref, TimelessRefArray } from "packages/reactive/src/types";
@@ -299,9 +317,9 @@ declare module "packages/reactive/src/reactive-array" {
         at(index: number): T | undefined;
         toArray(): T[];
     }
-    export function refArray<T>(items: T[], opt?: Partial<{
+    export function refArray<T>(items: T[], optOrHmrKey?: Partial<{
         key: any;
-    }>): TimelessRefArray<T>;
+    }> | string, __hmr_key?: string): TimelessRefArray<T>;
 }
 declare module "packages/reactive/src/registry" {
     import { DerivedRef, Ref } from "packages/reactive/src/types";
@@ -373,12 +391,12 @@ declare module "packages/reactive/src/reactive-object" {
         hasIn(path: string): boolean;
         update(key: keyof T, fn: (current: T[keyof T]) => T[keyof T]): void;
     }
-    export function refObject<T extends Record<string, any>>(obj: T): TimelessRefObject<T>;
-    export function refObject<T extends Record<string, any>>(obj: T | null): TimelessRefObjectNullable<T>;
+    export function refObject<T extends Record<string, any>>(obj: T, __hmr_key?: string): TimelessRefObject<T>;
+    export function refObject<T extends Record<string, any>>(obj: T | null, __hmr_key?: string): TimelessRefObjectNullable<T>;
 }
 declare module "packages/reactive/src/ref" {
     import { TimelessRef } from "packages/reactive/src/types";
-    export function ref<T = any>(v: T): TimelessRef<T>;
+    export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T>;
 }
 declare module "packages/reactive/src/signal" {
     import type { RefArray } from "packages/reactive/src/reactive-array";
@@ -448,11 +466,12 @@ declare module "packages/reactive/src/derive" {
     }) => R): DerivedRef<R>;
 }
 declare module "packages/reactive/src/index" {
-    import type { Subscriber, Ref, DerivedRef, TimelessRefArray } from "packages/reactive/src/types";
+    import type { Subscriber, SubscriberWithId, DepInfo, Ref, DerivedRef, TimelessRefArray } from "packages/reactive/src/types";
     import type { RefObject } from "packages/reactive/src/reactive-object";
     import type { RefArray } from "packages/reactive/src/reactive-array";
     import type { ArraySignal, ObjectSignal, PrimitiveSignal, Signal } from "packages/reactive/src/signal";
     import { isRef, isWriteableRef, isArrayRef } from "packages/reactive/src/types";
+    import { hmrScope } from "packages/reactive/src/hmr";
     import { ref } from "packages/reactive/src/ref";
     import { refArray } from "packages/reactive/src/reactive-array";
     import { refObject } from "packages/reactive/src/reactive-object";
@@ -461,7 +480,22 @@ declare module "packages/reactive/src/index" {
     import { computed } from "packages/reactive/src/computed";
     import { derive } from "packages/reactive/src/derive";
     import { release, get as registryGet, set as registrySet, getobj as registryGetObj, getarr as registryGetArr } from "packages/reactive/src/registry";
-    export { Subscriber, Ref, DerivedRef, RefObject, RefArray, TimelessRefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, isWriteableRef, isArrayRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, };
+    export function generateTrackId(prefix?: string): string;
+    export function getDeps<T extends {
+        getDeps?: () => any[];
+    }>(ref: T): any[];
+    export function dumpDeps<T extends {
+        dump?: () => void;
+    }>(ref: T): void;
+    export interface DependencyDump {
+        ref: any;
+        deps: DepInfo[];
+        value: any;
+    }
+    export function dumpAll(refs: any[]): DependencyDump[];
+    export function printDepTree(refs: any[]): void;
+    export function findLeakedDeps(refs: any[]): DepInfo[];
+    export { Subscriber, SubscriberWithId, DepInfo, Ref, DerivedRef, RefObject, RefArray, TimelessRefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, isWriteableRef, isArrayRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, hmrScope, };
 }
 declare module "packages/primitive/src/reactive/for" {
     import { Ref, DerivedRef } from "packages/reactive/src/index";
@@ -490,7 +524,7 @@ declare module "packages/primitive/src/reactive/for" {
         onRefresh: (diff: {
             added: {
                 idx: number;
-                element: TimelessElement<any, any> | null;
+                elements: (TimelessElement<any, any> | null)[];
             }[];
             removed: {
                 idx: number;
@@ -510,6 +544,7 @@ declare module "packages/primitive/src/reactive/for" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
 }
 declare module "packages/primitive/src/reactive/show" {
@@ -518,8 +553,8 @@ declare module "packages/primitive/src/reactive/show" {
     import { MountedEvent } from "@/event";
     export type ShowProps = {
         when: DerivedRef<boolean | undefined | null> | Ref<boolean | undefined | null> | boolean;
-        ok: () => ViewChildren;
-        else?: () => ViewChildren;
+        ok: () => ViewChildren | undefined;
+        else?: () => ViewChildren | undefined;
         onMounted?: ($fg: any) => void;
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
@@ -534,6 +569,7 @@ declare module "packages/primitive/src/reactive/show" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
 }
 declare module "packages/primitive/src/reactive/match" {
@@ -563,12 +599,207 @@ declare module "packages/primitive/src/reactive/match" {
         onUnmounted(): void;
     };
 }
+declare module "packages/primitive/src/content/text" {
+    /**
+     * Text - A component for rendering text content.
+     *
+     * Text wraps string/number values and provides:
+     * - Reactive value support (auto-updates when value changes)
+     * - DOM text node management
+     * - Lifecycle cleanup
+     *
+     * This is the basic text node component used throughout Timeless.
+     *
+     * @example
+     * ```tsx
+     * <Text>Hello World</Text>
+     * // or with reactive value
+     * <Text>{messageRef}</Text>
+     * ```
+     */
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { TimelessElement } from "packages/primitive/src/content/type";
+    /**
+     * Creates a Text component.
+     *
+     * @param value - The text value (string, number, or reactive ref)
+     * @returns A TimelessElement representing a text node
+     */
+    export function Text(value: DerivedRef<string | number> | Ref<string | number> | string | number): TimelessElement;
+}
+declare module "packages/primitive/src/content/box" {
+    /**
+     * Box - The base component for all box-like elements in Timeless.
+     *
+     * Box is the foundational component that provides:
+     * - Style support (inline styles, class names)
+     * - Event handling (click, mouse, keyboard, drag events)
+     * - Attribute and dataset management
+     * - Child element rendering
+     *
+     * Most UI components (View, Text, etc.) are built on top of Box.
+     *
+     * @example
+     * ```tsx
+     * <Box
+     *   style={{ padding: 12 }}
+     *   class="container"
+     *   onClick={() => console.log('clicked')}
+     * >
+     *   <Text>Hello</Text>
+     * </Box>
+     * ```
+     */
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { ClassNameRef, RawViewStyleProperties, ViewStyle } from "@/style";
+    import { MountedEvent } from "@/event";
+    import { VNodeView } from "@/vnode/view";
+    import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
+    /** Props for Box component - common to all box-like elements */
+    export type BoxProps = {
+        /** Unique key for list rendering */
+        key?: string | number;
+        /** HTML tag to render as */
+        as?: string;
+        /** Inline styles */
+        style?: ViewStyle;
+        /** CSS class names */
+        class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
+        /** Whether element is draggable */
+        draggable?: boolean;
+        /** HTML attributes */
+        attributes?: ViewAttributes;
+        /** Data attributes (data-*) */
+        dataset?: Record<string, undefined | string | number | DerivedRef<string | number | boolean | undefined> | Ref<string | number | boolean | undefined>>;
+    } & BoxEvents;
+    /** Event handlers supported by Box */
+    export type BoxEvents = Partial<{
+        onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+        beforeUnmounted?: () => void;
+        onUnmounted?: () => void;
+        onClick?: (e: MouseEvent) => void;
+        onDoubleClick?: (e: MouseEvent) => void;
+        onMouseDown?: (e: MouseEvent) => void;
+        onMouseUp?: (e: MouseEvent) => void;
+        onMouseEnter?: (e: MouseEvent) => void;
+        onMouseLeave?: (e: MouseEvent) => void;
+        onLongPress?: (e: PointerEvent) => void;
+        onPointerDown?: (e: PointerEvent) => void;
+        onPointerUp?: (e: PointerEvent) => void;
+        onInput?: (e: Event) => void;
+        onChange?: (e: Event) => void;
+        onFocus?: (e: FocusEvent) => void;
+        onBlur?: (e: FocusEvent) => void;
+        onKeyDown?: (e: KeyboardEvent) => void;
+        onKeyUp?: (e: KeyboardEvent) => void;
+        onContextMenu?: (e: MouseEvent) => void;
+        onDragStart?: (e: DragEvent) => void;
+        onDrag?: (e: DragEvent) => void;
+        onDragEnd?: (e: DragEvent) => void;
+        onDragEnter?: (e: DragEvent) => void;
+        onDragOver?: (e: DragEvent) => void;
+        onDragLeave?: (e: DragEvent) => void;
+        onDrop?: (e: DragEvent) => void;
+        onAnimationEnd?: (e: AnimationEvent) => void;
+    }>;
+    /** Internal state structure for Box */
+    export type BoxState = {
+        rendered: boolean;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
+        dataset: Record<string, string | number | boolean | undefined>;
+        children: (TimelessElement | null)[];
+    };
+    /**
+     * Creates a Box component - the base for all box-like elements.
+     *
+     * @param props - Component props including style, class, events, etc.
+     * @param extra_state - Additional state to merge into internal state
+     * @returns Object with state, events, and methods for the component
+     */
+    export function Box<T>(props: BoxProps, extra_state: T): {
+        listener$: any;
+        state: BoxState & T;
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        methods: {
+            set$elm(elm: any): void;
+            apply_attr(k: string, v: any): void;
+            subscribe_props(): void;
+            build_children(children?: ViewChildren): void;
+            add_event(): void;
+            unsubscribe: any;
+            destroy(): void;
+        };
+    };
+}
+declare module "packages/primitive/src/content/view" {
+    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
+    import { BoxProps } from "packages/primitive/src/content/box";
+    /** Props for View component */
+    export type ViewProps = BoxProps & {
+        /** Element ID */
+        id?: string;
+        /** Unique key for list rendering */
+        key?: string | number;
+        /** HTML tag to render as */
+        as?: string;
+        /** Whether element is draggable */
+        draggable?: boolean;
+    };
+    /** Internal state for View */
+    type ViewState = {};
+    /**
+     * Creates a View component - the primary container.
+     *
+     * @param props - View props (style, class, events, etc.)
+     * @param children - Child elements
+     * @returns A TimelessElement representing a view/container
+     */
+    export function View(props?: ViewProps, children?: ViewChildren): TimelessElement<ViewState>;
+}
 declare module "packages/primitive/src/content/lazy-view" {
     import { ViewProps } from "packages/primitive/src/content/view";
     import { TimelessElement, ViewChildren, TimelessComponent } from "packages/primitive/src/content/type";
+    /** Props for LazyView component */
     type LazyViewProps = ViewProps & {
         placeholder?: ViewChildren;
     } & Record<string, any>;
+    /**
+     * Creates a LazyView component that loads content dynamically.
+     *
+     * @param props - View props including the component factory
+     * @param children - Component factory (can be async/ES module)
+     * @returns A TimelessElement with lazy-loaded content
+     */
     export function LazyView(props: LazyViewProps, children: TimelessComponent): TimelessElement;
     export type TimelessLazyComponent = () => Promise<{
         default: TimelessComponent;
@@ -576,19 +807,58 @@ declare module "packages/primitive/src/content/lazy-view" {
     export function isLazyElement(v: unknown): v is TimelessLazyComponent;
 }
 declare module "packages/primitive/src/content/type" {
+    /**
+     * Type definitions for Timeless content components.
+     *
+     * This module exports:
+     * - TimelessElement: Core component interface
+     * - TimelessComponent: Component factory type
+     * - ViewChildren: Array of possible child types
+     * - Helper functions: isElement type guard
+     *
+     * These types form the foundation of the Timeless component system.
+     */
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { VNodeView } from "@/vnode/view";
     import { MountedEvent } from "@/event";
     import { TimelessLazyComponent } from "packages/primitive/src/content/lazy-view";
+    import { BoxState } from "packages/primitive/src/content/box";
+    /** Possible prop values */
     export type ViewPropValue = string | number | boolean | undefined | null;
+    /** HTML attributes record */
     export type ViewAttributes = Record<string, any>;
+    /** Standard synchronous component function */
     export type TimelessNormalComponent = (...args: unknown[]) => TimelessElement;
+    /** Component - can be sync or lazy (async import) */
     export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
+    /**
+     * TimelessElement - Core interface for all Timeless components.
+     *
+     * Every component returns this structure containing:
+     * - t: Type identifier (e.g., "view", "text", "box")
+     * - $elm: Reference to the actual DOM/VM element
+     * - state: Component-specific state
+     * - children: Child elements
+     * - onMounted: Lifecycle called when mounted
+     * - onUnmounted: Lifecycle called when unmounted
+     *
+     * @example
+     * ```typescript
+     * interface TimelessElement<T = any, Elm = any> {
+     *   t: string;
+     *   $elm: VNodeView<Elm>;
+     *   state: T;
+     *   children?: TimelessElement[];
+     *   onMounted(event: MountedEvent): void;
+     *   onUnmounted(): void;
+     * }
+     * ```
+     */
     export interface TimelessElement<T = any, Elm = any> {
         t: string;
         $elm: VNodeView<Elm>;
         /** 描述该元素的状态，用来替代 value */
-        state: T;
+        state: T & BoxState;
         children?: (TimelessElement | null)[];
         events?: {
             onMounted?: (e: MountedEvent<VNodeView<Elm>>) => void;
@@ -614,9 +884,9 @@ declare module "packages/primitive/src/content/type" {
             onAnimationEnd?: (e: AnimationEvent) => void;
         };
         a11y?: VNodeA11y;
-        onMounted?(event: MountedEvent): void;
+        onMounted(event: MountedEvent): void;
         beforeUnmounted?(): void;
-        onUnmounted?(): void;
+        onUnmounted(): void;
     }
     export interface VNodeA11y {
         label?: string;
@@ -627,168 +897,57 @@ declare module "packages/primitive/src/content/type" {
         live?: "polite" | "assertive";
     }
     export function isElement(v: any): v is TimelessElement;
-    export type ViewChildren = (DerivedRef<string | number> | Ref<string | number> | TimelessElement | string | number | null)[];
-}
-declare module "packages/primitive/src/content/text" {
-    import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { TimelessElement } from "packages/primitive/src/content/type";
-    export function Text(value: DerivedRef<string | number> | Ref<string | number> | string | number): TimelessElement;
-}
-declare module "packages/primitive/src/content/view" {
-    import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { VNodeView } from "@/vnode/view";
-    import { ViewStyle, ClassNameRef, RawViewStyleProperties } from "@/style/index";
-    import { MountedEvent } from "@/event/index";
-    import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
-    export type ViewProps = {
-        id?: string;
-        key?: string | number;
-        as?: string;
-        style?: ViewStyle;
-        class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
-        draggable?: boolean;
-        attributes?: ViewAttributes;
-        dataset?: Record<string, undefined | string | number | DerivedRef<string | number | boolean | undefined> | Ref<string | number | boolean | undefined>>;
-    } & ViewEvents;
-    type ViewEvents = Partial<{
-        onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
-        beforeUnmounted?: () => void;
-        onUnmounted?: () => void;
-        onClick?: (e: MouseEvent) => void;
-        onDoubleClick?: (e: MouseEvent) => void;
-        onMouseDown?: (e: MouseEvent) => void;
-        onMouseUp?: (e: MouseEvent) => void;
-        onMouseEnter?: (e: MouseEvent) => void;
-        onMouseLeave?: (e: MouseEvent) => void;
-        onLongPress?: (e: PointerEvent) => void;
-        onPointerDown?: (e: PointerEvent) => void;
-        onInput?: (e: Event) => void;
-        onChange?: (e: Event) => void;
-        onFocus?: (e: FocusEvent) => void;
-        onBlur?: (e: FocusEvent) => void;
-        onKeyDown?: (e: KeyboardEvent) => void;
-        onContextMenu?: (e: MouseEvent) => void;
-        onDragStart?: (e: DragEvent) => void;
-        onDrag?: (e: DragEvent) => void;
-        onDragEnd?: (e: DragEvent) => void;
-        onDragEnter?: (e: DragEvent) => void;
-        onDragOver?: (e: DragEvent) => void;
-        onDragLeave?: (e: DragEvent) => void;
-        onDrop?: (e: DragEvent) => void;
-        onAnimationEnd?: (e: AnimationEvent) => void;
-    }>;
-    type ViewState = {
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    };
-    export function View(props?: ViewProps, children?: ViewChildren): TimelessElement<ViewState>;
-}
-declare module "packages/primitive/src/content/box" {
-    import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { ClassNameRef, RawViewStyleProperties, ViewStyle } from "@/style";
-    import { MountedEvent } from "@/event";
-    import { VNodeView } from "@/vnode/view";
-    import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
-    export type BoxProps = {
-        key?: string | number;
-        as?: string;
-        style?: ViewStyle;
-        class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
-        draggable?: boolean;
-        attributes?: ViewAttributes;
-        dataset?: Record<string, undefined | string | number | DerivedRef<string | number | boolean | undefined> | Ref<string | number | boolean | undefined>>;
-    } & BoxEvents;
-    export type BoxEvents = Partial<{
-        onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
-        beforeUnmounted?: () => void;
-        onUnmounted?: () => void;
-        onClick?: (e: MouseEvent) => void;
-        onDoubleClick?: (e: MouseEvent) => void;
-        onMouseDown?: (e: MouseEvent) => void;
-        onMouseUp?: (e: MouseEvent) => void;
-        onMouseEnter?: (e: MouseEvent) => void;
-        onMouseLeave?: (e: MouseEvent) => void;
-        onLongPress?: (e: PointerEvent) => void;
-        onPointerDown?: (e: PointerEvent) => void;
-        onInput?: (e: Event) => void;
-        onChange?: (e: Event) => void;
-        onFocus?: (e: FocusEvent) => void;
-        onBlur?: (e: FocusEvent) => void;
-        onKeyDown?: (e: KeyboardEvent) => void;
-        onContextMenu?: (e: MouseEvent) => void;
-        onDragStart?: (e: DragEvent) => void;
-        onDrag?: (e: DragEvent) => void;
-        onDragEnd?: (e: DragEvent) => void;
-        onDragEnter?: (e: DragEvent) => void;
-        onDragOver?: (e: DragEvent) => void;
-        onDragLeave?: (e: DragEvent) => void;
-        onDrop?: (e: DragEvent) => void;
-        onAnimationEnd?: (e: AnimationEvent) => void;
-    }>;
-    export type BoxState = {
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        dataset: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    };
-    export function Box<T>(props: BoxProps, extra_state: T): {
-        state: BoxState & T;
-        events: Partial<{
-            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
-            beforeUnmounted?: () => void;
-            onUnmounted?: () => void;
-            onClick?: (e: MouseEvent) => void;
-            onDoubleClick?: (e: MouseEvent) => void;
-            onMouseDown?: (e: MouseEvent) => void;
-            onMouseUp?: (e: MouseEvent) => void;
-            onMouseEnter?: (e: MouseEvent) => void;
-            onMouseLeave?: (e: MouseEvent) => void;
-            onLongPress?: (e: PointerEvent) => void;
-            onPointerDown?: (e: PointerEvent) => void;
-            onInput?: (e: Event) => void;
-            onChange?: (e: Event) => void;
-            onFocus?: (e: FocusEvent) => void;
-            onBlur?: (e: FocusEvent) => void;
-            onKeyDown?: (e: KeyboardEvent) => void;
-            onContextMenu?: (e: MouseEvent) => void;
-            onDragStart?: (e: DragEvent) => void;
-            onDrag?: (e: DragEvent) => void;
-            onDragEnd?: (e: DragEvent) => void;
-            onDragEnter?: (e: DragEvent) => void;
-            onDragOver?: (e: DragEvent) => void;
-            onDragLeave?: (e: DragEvent) => void;
-            onDrop?: (e: DragEvent) => void;
-            onAnimationEnd?: (e: AnimationEvent) => void;
-        }>;
-        methods: {
-            set$elm(elm: any): void;
-            apply_attr(k: string, v: any): void;
-            subscribe_props(): void;
-            build_children(children?: ViewChildren): void;
-            add_event(): void;
-            unsubscribe: any;
-            destroy(): void;
-        };
-    };
+    type ViewChild = number | string | Ref<string | number> | DerivedRef<string | number> | TimelessElement | null;
+    export type ViewChildrenArray = ViewChild[];
+    /** Children can be an eager array or a lazy callback returning one */
+    export type ViewChildren = ViewChild | ViewChildrenArray | (() => ViewChildrenArray | ViewChild);
+    /** Resolve ViewChildren to a concrete array */
+    export function resolve_children(children?: ViewChildren): ViewChildrenArray | undefined;
 }
 declare module "packages/primitive/src/content/fragment" {
+    /**
+     * Fragment - A component that groups children without rendering a DOM wrapper.
+     *
+     * Fragment allows grouping multiple children without adding extra DOM nodes.
+     * Unlike View/Box, Fragment doesn't render an actual element -
+     * it just manages its children and their lifecycles.
+     *
+     * Use case: When you need to return multiple elements from a component
+     * but don't want a wrapper div in the DOM.
+     *
+     * @example
+     * ```tsx
+     * function MyComponent() {
+     *   return (
+     *     <Fragment>
+     *       <Text>Item 1</Text>
+     *       <Text>Item 2</Text>
+     *     </Fragment>
+     *   )
+     * }
+     * ```
+     */
     import { MountedEvent } from "@/event";
     import { VNodeView } from "@/vnode/view";
     import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
+    /** Props for Fragment component */
     export type FragmentProps = {
         onMounted?: (event: MountedEvent<VNodeView<any>>) => void;
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
     };
+    /** Internal state for Fragment */
     type FragmentState = {
         rendered: boolean;
         children: TimelessElement[];
     };
+    /**
+     * Creates a Fragment - groups children without a wrapper element.
+     *
+     * @param props - Fragment lifecycle props
+     * @param children - Children to group
+     * @returns A TimelessElement representing a fragment
+     */
     export function Fragment(props: FragmentProps, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -802,123 +961,45 @@ declare module "packages/primitive/src/content/fragment" {
     type Fragment = ReturnType<typeof Fragment>;
     export function isFragment(v: any): v is Fragment;
 }
-declare module "packages/primitive/src/content/icon" {
-    import { MountedEvent } from "@/event";
-    import { BoxProps, BoxState } from "packages/primitive/src/content/box";
-    type IconProps = BoxProps & {
-        name: string;
-        color?: string;
-        size?: number;
-    };
-    type IconState = {
-        name: string;
-        size: number;
-        color: string;
-    };
-    export function Icon(props: IconProps): {
-        t: string;
-        $elm: any;
-        state: BoxState & IconState;
-        onMounted(event: MountedEvent): void;
-    };
-    export function isIcon(v: any): boolean;
-}
-declare module "packages/primitive/src/content/popper" {
-    import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { styleNames } from "@/style";
-    import { MountedEvent } from "@/event";
-    import { ViewProps } from "packages/primitive/src/content/view";
-    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
-    type PopperProps = ViewProps & {
-        x: number | DerivedRef<number> | Ref<number>;
-        y: number | DerivedRef<number> | Ref<number>;
-        placed: boolean | DerivedRef<boolean> | Ref<boolean>;
-        onMounted?: (event: MountedEvent) => void;
-    };
-    export function Popper(props: PopperProps, children?: ViewChildren): TimelessElement<{
-        rendered: boolean;
-        style: styleNames;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
-}
-declare module "packages/primitive/src/content/list-view" {
-    import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { ViewStyle, ClassNameRef } from "@/style/index";
-    import { MountedEvent } from "@/event/index";
-    import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
-    export interface ListViewProps {
-        key?: string | number;
-        style?: ViewStyle;
-        class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
-        draggable?: boolean;
-        attributes?: ViewAttributes;
-        dataset?: Record<string, string | number | DerivedRef<string> | Ref<string | number>>;
-        onMounted?(event: MountedEvent): void | (() => void);
-        beforeUnmounted?(): void;
-        onUnmounted?(): void;
-        onClick?(e: MouseEvent): void;
-        onDoubleClick?(e: MouseEvent): void;
-        onLongPress?(e: PointerEvent): void;
-        onPointerDown?: (e: PointerEvent) => void;
-        onFocus?(e: FocusEvent): void;
-        onBlur?(e: FocusEvent): void;
-        onKeyDown?: (e: KeyboardEvent) => void;
-        onContextMenu?: (e: MouseEvent) => void;
-        onMouseEnter?: (e: MouseEvent) => void;
-        onMouseLeave?: (e: MouseEvent) => void;
-        onDragStart?: (e: DragEvent) => void;
-        onDrag?: (e: DragEvent) => void;
-        onDragEnd?: (e: DragEvent) => void;
-        onDragEnter?: (e: DragEvent) => void;
-        onDragOver?: (e: DragEvent) => void;
-        onDragLeave?: (e: DragEvent) => void;
-        onDrop?: (e: DragEvent) => void;
-        onAnimationEnd?: (e: AnimationEvent) => void;
+declare module "packages/primitive/src/context" {
+    import { TimelessElement, ViewChildren } from "@/content/type";
+    interface Owner {
+        parent: Owner | null;
+        context: Map<symbol, any>;
     }
-    export function ListView(props?: ListViewProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: {};
-        children: TimelessElement<any, any>[];
-        events: Partial<{
-            onClick?: (e: MouseEvent) => void;
-            onDoubleClick?: (e: MouseEvent) => void;
-            onLongPress?: (e: PointerEvent) => void;
-            onPointerDown?: (e: PointerEvent) => void;
-            onFocus?: (e: FocusEvent) => void;
-            onBlur?: (e: FocusEvent) => void;
-            onKeyDown?: (e: KeyboardEvent) => void;
-            onContextMenu?: (e: MouseEvent) => void;
-            onMouseEnter?: (e: MouseEvent) => void;
-            onMouseLeave?: (e: MouseEvent) => void;
-            onDragStart?: (e: DragEvent) => void;
-            onDrag?: (e: DragEvent) => void;
-            onDragEnd?: (e: DragEvent) => void;
-            onDragEnter?: (e: DragEvent) => void;
-            onDragOver?: (e: DragEvent) => void;
-            onDragLeave?: (e: DragEvent) => void;
-            onDrop?: (e: DragEvent) => void;
-            onAnimationEnd?: (e: AnimationEvent) => void;
-        }>;
-        hydrate(existing_dom: any): any;
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
+    export function createOwner(parent?: Owner | null): Owner;
+    export function runWithOwner<T>(owner: Owner, fn: () => T): T;
+    export function getOwner(): Owner | null;
+    export type Context<T> = {
+        key: symbol;
+        name?: string;
+        defaultValue?: T;
     };
+    export function createContext<T>(name?: string, defaultValue?: T): Context<T>;
+    export function provide<T>(ctx: Context<T>, value: T): void;
+    export function use<T>(ctx: Context<T>): T;
+    export function Scope(setup: () => void, children: ViewChildren): TimelessElement;
 }
 declare module "packages/primitive/src/content/portal" {
     import { TimelessElement, ViewChildren } from "@/content/type";
     import { MountedEvent } from "@/event";
+    /** Props for Portal component */
     type PortalProps = {
         onMounted?: (e: MountedEvent) => void;
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
     };
+    /** Internal state for Portal */
     type PortalState = {
         children: (TimelessElement | null)[];
     };
+    /**
+     * Creates a Portal that renders children at document body.
+     *
+     * @param props - Portal lifecycle props
+     * @param children - Content to render in portal
+     * @returns A TimelessElement representing a portal
+     */
     export function Portal(props: PortalProps, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -929,9 +1010,29 @@ declare module "packages/primitive/src/content/portal" {
     };
 }
 declare module "packages/primitive/src/content/svg" {
+    /**
+     * SVG - Factory for creating SVG element components.
+     *
+     * This module provides constructors for all SVG elements:
+     * - Container elements: SVG, G, Defs, Symbol, Use
+     * - Shapes: Circle, Rect, Line, Polyline, Polygon, Ellipse, Path
+     * - Gradients: LinearGradient, RadialGradient
+     * - Filters: Stop, Mask, ClipPath
+     * - Text: Text
+     *
+     * Each returns a TimelessElement representing that SVG type.
+     *
+     * @example
+     * ```tsx
+     * <SVG viewBox="0 0 100 100">
+     *   <Circle cx={50} cy={50} r={40} fill="blue" />
+     * </SVG>
+     * ```
+     */
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewStyle, ClassNameRef } from "@/style/index";
     import { MountedEvent } from "@/event/index";
+    /** Type for attribute values - supports static or reactive values */
     type AttrValue = string | number | DerivedRef<string | number> | Ref<string | number>;
     /** Props shared by all SVG elements (lifecycle, events, style, class) */
     interface SVGBaseProps {
@@ -1221,66 +1322,112 @@ declare module "packages/primitive/src/content/svg" {
     };
 }
 declare module "packages/primitive/src/content/img" {
+    /**
+     * Img - A component for rendering image elements.
+     *
+     * Native image component with support for:
+     * - Reactive src/alt for dynamic image changes
+     * - Loading states (lazy/eager)
+     * - srcset for responsive images
+     * - All standard img attributes
+     *
+     * @example
+     * ```tsx
+     * <Img
+     *   src={imageUrl}
+     *   alt="Description"
+     *   loading="lazy"
+     *   onLoad={() => console.log('loaded')}
+     * />
+     * ```
+     */
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { RawViewStyleProperties } from "@/style";
     import { MountedEvent } from "@/event/index";
     import { VNodeView } from "@/vnode/view";
     import { BoxProps } from "packages/primitive/src/content/box";
+    /** Props for Img component */
     export type ImgProps = BoxProps & {
+        /** Image source URL */
         src?: string | DerivedRef<string> | Ref<string>;
+        /** Alternative text for accessibility */
         alt?: string | DerivedRef<string> | Ref<string>;
+        /** Image width */
         width?: number | string | DerivedRef<number | string> | Ref<number | string>;
+        /** Image height */
         height?: number | string | DerivedRef<number | string> | Ref<number | string>;
+        /** Loading strategy: "lazy" or "eager" */
         loading?: "lazy" | "eager" | DerivedRef<string> | Ref<string>;
+        /** Decoding strategy */
         decoding?: "async" | "sync" | "auto" | DerivedRef<string> | Ref<string>;
+        /** Cross-origin attribute */
         crossOrigin?: "anonymous" | "use-credentials" | "" | DerivedRef<string> | Ref<string>;
+        /** Source set for responsive images */
         srcset?: string | Ref<string>;
+        /** Sizes descriptor */
         sizes?: string | Ref<string>;
+        /** Referrer policy */
         referrerPolicy?: ReferrerPolicy | Ref<string>;
+        /** Fetch priority */
         fetchPriority?: "high" | "low" | "auto" | DerivedRef<string> | Ref<string>;
+        /** USEMap attribute */
         useMap?: string | DerivedRef<string> | Ref<string>;
+        /** IsMap attribute */
         isMap?: boolean;
+        /** Load event handler */
         onLoad?(e: Event): void;
+        /** Error event handler */
         onError?(e: Event): void;
         onMounted?(event: MountedEvent<VNodeView<HTMLImageElement>>): void | (() => void);
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
     };
+    /** Internal state for Img */
     type ImgState = {
         rendered: boolean;
         src: string | null;
         style: RawViewStyleProperties;
         styleSet: string[];
     };
+    /**
+     * Creates an Img component.
+     *
+     * @param props - Image component props
+     * @returns A TimelessElement representing an image
+     */
     export function Img(props: ImgProps): {
         t: string;
         $elm: any;
-        state: ImgState;
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            draggable: boolean;
-            isMap: boolean;
-            onLoad: (e: Event) => void;
-            onError: (e: Event) => void;
-            onMounted: ((event: MountedEvent<VNodeView>) => void | (() => void)) & ((event: MountedEvent<VNodeView<HTMLImageElement>>) => void | (() => void));
-            onUnmounted: (() => void) & (() => void);
-            beforeUnmounted: (() => void) & (() => void);
-        };
+        state: import("packages/primitive/src/content/box").BoxState & ImgState;
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -1289,17 +1436,39 @@ declare module "packages/primitive/src/content/img" {
     export function isImg(v: any): boolean;
 }
 declare module "packages/primitive/src/content/label" {
+    /**
+     * Label - A component for rendering HTML label elements.
+     *
+     * Label associates itself with a form input via the "for" attribute.
+     * Supports reactive htmlFor for dynamic input associations.
+     *
+     * @example
+     * ```tsx
+     * <Label for="username">Username</Label>
+     * <Input id="username" />
+     * ```
+     */
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { TimelessElement, ViewChildren } from "@/content/type";
     import { MountedEvent } from "@/event";
     import { BoxProps } from "packages/primitive/src/content/box";
+    /** Props for Label component */
     export type LabelProps = BoxProps & {
+        /** ID of the associated input element */
         for?: string | DerivedRef<string> | Ref<string>;
     };
+    /** Internal state for Label */
     export interface LabelState {
         for?: string;
         children: TimelessElement[];
     }
+    /**
+     * Creates a Label component.
+     *
+     * @param props - Label props including optional htmlFor
+     * @param children - Label text/content
+     * @returns A TimelessElement representing a label
+     */
     export function Label(props?: LabelProps, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -1307,25 +1476,41 @@ declare module "packages/primitive/src/content/label" {
         readonly children: import("@timeless/primitive").TimelessElement<any, any>[] & TimelessElement[];
         render(): any;
         onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
 }
-declare module "packages/primitive/src/content/style" {
-    import { ViewProps } from "@/content/view";
-    import { ViewChildren } from "@/content/type";
-    export interface NativeStyleProps extends Omit<ViewProps, "as"> {
-    }
-    export function NativeStyle(props?: NativeStyleProps, children?: ViewChildren): any;
-}
 declare module "packages/primitive/src/content/rich-text" {
+    /**
+     * RichText - A component for rendering HTML content.
+     *
+     * RichText displays HTML/Rich text content inside a component.
+     * Supports reactive content for dynamic HTML updates.
+     *
+     * Use case: When you need to render HTML from a CMS or user input.
+     *
+     * @example
+     * ```tsx
+     * <RichText content={htmlString} />
+     * ```
+     */
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { MountedEvent } from "@/event";
     import { BoxProps } from "packages/primitive/src/content/box";
+    /** Props for RichText component */
     export type RichTextProps = BoxProps & {
+        /** HTML content string */
         content: string | DerivedRef<string> | Ref<string>;
     };
+    /** Internal state for RichText */
     type RichTextState = {
         content: string;
     };
+    /**
+     * Creates a RichText component.
+     *
+     * @param props - Props including content
+     * @returns A TimelessElement representing rich text content
+     */
     export function RichText(props: RichTextProps): {
         t: string;
         $elm: any;
@@ -1335,17 +1520,273 @@ declare module "packages/primitive/src/content/rich-text" {
         onUnmounted(): void;
     };
 }
+declare module "packages/primitive/src/content/webview" {
+    /**
+     * Webview - A component for embedding external web content.
+     *
+     * Webview loads and displays external URLs/HTML content.
+     * It's used for:
+     * - Embedding external websites
+     * - Loading remote HTML content
+     * - Web-based content in the app
+     *
+     * Note: This is different from an iframe - it's a native webview.
+     *
+     * @example
+     * ```tsx
+     * <Webview href="https://example.com" />
+     * ```
+     */
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { TimelessElement } from "packages/primitive/src/content/type";
+    import { BoxEvents, BoxProps } from "packages/primitive/src/content/box";
+    /** Props for Webview component */
+    export type WebviewProps = BoxProps & {
+        /** URL to load */
+        href: string | DerivedRef<string> | Ref<string>;
+    } & BoxEvents;
+    /** Internal state for Webview */
+    type WebviewState = {
+        href: string;
+    };
+    /**
+     * Creates a Webview component.
+     *
+     * @param props - Webview props including href
+     * @returns A TimelessElement representing a webview
+     */
+    export function Webview(props: WebviewProps): TimelessElement<WebviewState>;
+}
+declare module "packages/primitive/src/content/style" {
+    /**
+     * NativeStyle - A wrapper for rendering native HTML style elements.
+     *
+     * NativeStyle renders a <style> element with CSS content.
+     * It wraps the View component with "style" as the element type.
+     *
+     * @example
+     * ```tsx
+     * <NativeStyle>
+     *   {`body { margin: 0 }`}
+     * </NativeStyle>
+     * ```
+     */
+    import { ViewProps } from "@/content/view";
+    import { ViewChildren } from "@/content/type";
+    /** Props for NativeStyle - same as ViewProps but without 'as' */
+    export interface NativeStyleProps extends Omit<ViewProps, "as"> {
+    }
+    /**
+     * Creates a native HTML style element.
+     *
+     * @param props - Style element props
+     * @param children - CSS content (string or CSS text elements)
+     * @returns A TimelessElement representing a style element
+     */
+    export function NativeStyle(props?: NativeStyleProps, children?: ViewChildren): any;
+}
+declare module "packages/primitive/src/content/popper" {
+    /**
+     * Popper - A positioned floating element component.
+     *
+     * Popper renders content at a specific screen position (x, y).
+     * It's commonly used for:
+     * - Tooltips
+     * - Dropdown menus
+     * - Floating action buttons
+     * - Modal dialogs
+     *
+     * Supports reactive x, y, and placed props for dynamic positioning.
+     *
+     * @example
+     * ```tsx
+     * <Popper
+     *   x={popperX}
+     *   y={popperY}
+     *   placed={isOpen}
+     * >
+     *   <Box>Popover Content</Box>
+     * </Popper>
+     * ```
+     */
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { MountedEvent } from "@/event";
+    import { ViewProps } from "packages/primitive/src/content/view";
+    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
+    /** Props for Popper component */
+    type PopperProps = ViewProps & {
+        /** X position in pixels */
+        x: number | DerivedRef<number> | Ref<number>;
+        /** Y position in pixels */
+        y: number | DerivedRef<number> | Ref<number>;
+        /** Whether the popper is visible */
+        placed: boolean | DerivedRef<boolean> | Ref<boolean>;
+        onMounted?: (event: MountedEvent) => void;
+    };
+    /**
+     * Creates a Popper component at a specific position.
+     *
+     * @param props - Position and placement props
+     * @param children - Content to render
+     * @returns A TimelessElement representing a positioned element
+     */
+    export function Popper(props: PopperProps, children?: ViewChildren): TimelessElement<{}, any>;
+}
+declare module "packages/primitive/src/content/list-view" {
+    /**
+     * ListView - A scrollable list container component.
+     *
+     * ListView is designed for rendering lists of items with virtual scrolling.
+     * It supports:
+     * - Child element rendering
+     * - Reactive style/class updates
+     * - Full event handling (click, drag, keyboard)
+     * - Hydration for SSR/SSG
+     *
+     * This is the main scrollable container used in Timeless apps.
+     *
+     * @example
+     * ```tsx
+     * <ListView
+     *   style={{ height: 300 }}
+     *   onScroll={(e) => console.log('scroll', e)}
+     * >
+     *   {items.map(item => <Text>{item}</Text>)}
+     * </ListView>
+     * ```
+     */
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { ViewStyle, ClassNameRef } from "@/style/index";
+    import { MountedEvent } from "@/event/index";
+    import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
+    /** Props for ListView component */
+    export interface ListViewProps {
+        key?: string | number;
+        style?: ViewStyle;
+        class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
+        draggable?: boolean;
+        attributes?: ViewAttributes;
+        dataset?: Record<string, string | number | DerivedRef<string> | Ref<string | number>>;
+        onMounted?(event: MountedEvent): void | (() => void);
+        beforeUnmounted?(): void;
+        onUnmounted?(): void;
+        onClick?(e: MouseEvent): void;
+        onDoubleClick?(e: MouseEvent): void;
+        onLongPress?(e: PointerEvent): void;
+        onPointerDown?: (e: PointerEvent) => void;
+        onFocus?(e: FocusEvent): void;
+        onBlur?(e: FocusEvent): void;
+        onKeyDown?: (e: KeyboardEvent) => void;
+        onContextMenu?: (e: MouseEvent) => void;
+        onMouseEnter?: (e: MouseEvent) => void;
+        onMouseLeave?: (e: MouseEvent) => void;
+        onDragStart?: (e: DragEvent) => void;
+        onDrag?: (e: DragEvent) => void;
+        onDragEnd?: (e: DragEvent) => void;
+        onDragEnter?: (e: DragEvent) => void;
+        onDragOver?: (e: DragEvent) => void;
+        onDragLeave?: (e: DragEvent) => void;
+        onDrop?: (e: DragEvent) => void;
+        onAnimationEnd?: (e: AnimationEvent) => void;
+    }
+    export function ListView(props?: ListViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: {};
+        children: TimelessElement<any, any>[];
+        events: Partial<{
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        hydrate(existing_dom: any): any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/content/icon" {
+    import { MountedEvent } from "@/event";
+    import { BoxProps, BoxState } from "packages/primitive/src/content/box";
+    /** Props for Icon component */
+    type IconProps = BoxProps & {
+        /** Icon name from the icon library */
+        name: string;
+        /** Icon color - defaults to "currentColor" */
+        color?: string;
+        /** Icon size in pixels - defaults to 24 */
+        size?: number;
+    };
+    /** Internal state for Icon */
+    type IconState = {
+        name: string;
+        size: number;
+        color: string;
+    };
+    /**
+     * Creates an Icon component.
+     *
+     * @param props - Icon props (name, color, size)
+     * @returns A TimelessElement representing an icon
+     */
+    export function Icon(props: IconProps): {
+        t: string;
+        $elm: any;
+        state: BoxState & IconState;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function isIcon(v: any): boolean;
+}
 declare module "packages/primitive/src/content/aspect-ratio" {
+    /**
+     * AspectRatio - A component that enforces a specific aspect ratio on its content.
+     *
+     * This is used to create responsive containers that maintain a fixed width-to-height ratio,
+     * commonly used for images, videos, or any content that should scale proportionally.
+     *
+     * @example
+     * ```tsx
+     * <AspectRatio ratio={16/9}>
+     *   <Img src="poster.jpg" />
+     * </AspectRatio>
+     * ```
+     */
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { BoxProps } from "packages/primitive/src/content/box";
     import { ViewChildren } from "packages/primitive/src/content/type";
     import { MountedEvent } from "@/event";
+    /** Props for AspectRatio component */
     type AspectRatioProps = BoxProps & {
+        /** The aspect ratio to maintain (width/height). Defaults to 16:9 */
         ratio?: number | DerivedRef<number> | Ref<number>;
     };
+    /** Internal state for AspectRatio */
     type AspectRatioState = {
         ratio: number;
     };
+    /**
+     * Creates an AspectRatio container that maintains a fixed aspect ratio.
+     *
+     * @param props - Component props including optional ratio
+     * @param children - Child elements to render inside the container
+     * @returns A TimelessElement that enforces the given aspect ratio
+     */
     export function AspectRatio(props: AspectRatioProps, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -1371,49 +1812,85 @@ declare module "packages/primitive/src/layout/flex" {
         class?: string | Ref<string> | ClassNameRef;
     } & ViewProps, children?: ViewChildren): any;
 }
-declare module "packages/primitive/src/layout/grid" {
-    import { Ref } from "packages/reactive/src/index";
+declare module "packages/primitive/src/layout/row" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
-    import { ClassNameRef } from "@/style";
+    import { MountedEvent } from "@/event";
+    import { FlexJustify } from "packages/primitive/src/layout/flex";
+    export type Breakpoint = "xs" | "sm" | "md" | "lg" | "xl";
+    export type RowDirection = "row" | "column" | "row-reverse" | "column-reverse";
+    export type FlexAlign = "start" | "end" | "center" | "stretch" | "baseline";
+    export type RowBreakpointConfig = {
+        direction?: RowDirection;
+        gap?: number;
+        wrap?: boolean;
+        align?: FlexAlign;
+        justify?: FlexJustify;
+    };
+    export type RowProps = ViewProps & {
+        gap?: number | Ref<number> | DerivedRef<number>;
+        wrap?: boolean;
+        direction?: RowDirection;
+        align?: FlexAlign;
+        justify?: FlexJustify;
+        breakpoints?: Partial<Record<Breakpoint, RowBreakpointConfig>>;
+    };
+    export function Row(props: RowProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        events: any;
+        children: any;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/layout/grid" {
+    import { ViewProps } from "@/content/view";
+    import { ViewChildren } from "@/content/type";
+    import { MountedEvent } from "@/event";
+    import { Breakpoint } from "packages/primitive/src/layout/row";
     export type GridAlign = "start" | "end" | "center" | "stretch" | "baseline";
     export type GridJustify = GridAlign | "between" | "around" | "evenly";
     export type GridAutoFlow = "row" | "col" | "dense" | "row-dense" | "col-dense";
-    type GridProps = {
-        columns?: number | string;
+    /**
+     * Responsive column count.
+     * - number → same count at all breakpoints
+     * - object → per-breakpoint counts, e.g. { xs: 1, sm: 2, lg: 4 }
+     */
+    export type GridCols = number | Partial<Record<Breakpoint, number>>;
+    export type GridProps = ViewProps & {
+        /** Column count – supports responsive object */
+        cols?: GridCols;
+        /** Row template */
         rows?: number | string;
+        /** grid-auto-rows */
         autoRows?: string;
+        /** grid-auto-columns */
         autoCols?: string;
+        /** grid-auto-flow */
         flow?: GridAutoFlow;
-        gap?: string;
-        gapX?: string;
-        gapY?: string;
+        /** Uniform gap (px) */
+        gap?: number;
+        /** Column gap (px) */
+        gapX?: number;
+        /** Row gap (px) */
+        gapY?: number;
         alignItems?: GridAlign;
         justifyItems?: GridAlign;
         alignContent?: GridJustify;
         justifyContent?: GridJustify;
         placeItems?: string;
         placeContent?: string;
-        class?: string | Ref<string> | ClassNameRef;
-    } & ViewProps;
-    export function Grid(props: GridProps, children?: ViewChildren): any;
-}
-declare module "packages/primitive/src/layout/row" {
-    import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { ViewProps } from "@/content/view";
-    import { ViewChildren } from "@/content/type";
-    import { MountedEvent } from "@/event";
-    export type RowProps = ViewProps & {
-        gap?: number | DerivedRef<number> | Ref<number>;
-        span?: number;
-        start?: number;
-        end?: number;
-        offset?: number;
-        rowSpan?: number;
-        rowStart?: number;
-        rowEnd?: number;
+        /** Shorthand spacing (px) */
+        marginBottom?: number;
+        marginTop?: number;
+        marginLeft?: number;
+        marginRight?: number;
+        padding?: number;
     };
-    export function Row(props: RowProps, children?: ViewChildren): {
+    export function Grid(props: GridProps, children?: ViewChildren): {
         t: string;
         $elm: any;
         state: any;
@@ -1428,15 +1905,43 @@ declare module "packages/primitive/src/layout/column" {
     import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
     import { MountedEvent } from "@/event";
+    import { Breakpoint, FlexAlign } from "packages/primitive/src/layout/row";
+    import { FlexJustify } from "packages/primitive/src/layout/flex";
+    export type ColProps = ViewProps & {
+        /** Flex grow ratio.  Supports responsive object: { xs: 1, md: 2 } */
+        flex?: number | string | Partial<Record<Breakpoint, number | string>>;
+        /** Fixed width (px) */
+        width?: number | string;
+        /** Grid column span */
+        span?: number;
+        /** grid-column-start */
+        start?: number;
+        /** grid-column-end */
+        end?: number;
+        /** offset columns (grid) */
+        offset?: number;
+        /** Grid row span */
+        rowSpan?: number;
+        /** grid-row-start */
+        rowStart?: number;
+        /** grid-row-end */
+        rowEnd?: number;
+        /** Padding shorthand (px) */
+        padding?: number | string;
+    };
+    export function Col(props: ColProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        events: any;
+        children: any;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
     export type ColumnProps = ViewProps & {
         gap?: number | DerivedRef<number> | Ref<number>;
-        span?: number;
-        start?: number;
-        end?: number;
-        offset?: number;
-        rowSpan?: number;
-        rowStart?: number;
-        rowEnd?: number;
+        align?: FlexAlign;
+        justify?: FlexJustify;
     };
     export function Column(props: ColumnProps, children?: ViewChildren): {
         t: string;
@@ -1448,161 +1953,125 @@ declare module "packages/primitive/src/layout/column" {
         onUnmounted(): void;
     };
 }
-declare module "packages/primitive/src/style/index" {
-    import { Ref, Subscriber, Signal, DerivedRef } from "packages/reactive/src/index";
-    type ViewStylePropValue = DerivedRef<string | number | boolean | null | undefined> | Ref<string | number | boolean | null | undefined> | string | number | boolean | undefined | null;
-    export type ViewStyleProperties = {
-        [k: string]: ViewStylePropValue;
+declare module "packages/primitive/src/layout/split" {
+    import { ViewProps } from "@/content/view";
+    import { ViewChildren } from "@/content/type";
+    export type SplitDirection = "horizontal" | "vertical";
+    export type SplitViewProps = ViewProps & {
+        direction?: SplitDirection;
+        defaultSizes?: number | number[];
+        minSizes?: number | number[];
+        maxSizes?: number | number[];
+        dividerStyle?: "thin" | "light" | "dark" | "none";
+        onResize?: (sizes: number[]) => void;
     };
-    export type ViewStyle = ViewStyleProperties | DerivedRef<ViewStyleProperties> | Ref<ViewStyleProperties>;
-    export interface RawViewStyleProperties {
-        width?: number | string;
-        height?: number | string;
-        minWidth?: number | string;
-        minHeight?: number | string;
-        maxWidth?: number | string;
-        maxHeight?: number | string;
-        margin?: number | string;
-        marginTop?: number | string;
-        marginRight?: number | string;
-        marginBottom?: number | string;
-        marginLeft?: number | string;
-        padding?: number | string;
-        paddingTop?: number | string;
-        paddingRight?: number | string;
-        paddingBottom?: number | string;
-        paddingLeft?: number | string;
-        position?: "static" | "relative" | "absolute" | "fixed" | "sticky";
-        top?: number | string;
-        right?: number | string;
-        bottom?: number | string;
-        left?: number | string;
-        zIndex?: number;
-        color?: string;
-        backgroundColor?: string;
-        opacity?: number;
-        borderWidth?: number;
-        borderStyle?: "none" | "solid" | "dashed" | "dotted";
-        borderColor?: string;
-        borderRadius?: number;
-        borderTopWidth?: number;
-        borderRightWidth?: number;
-        borderBottomWidth?: number;
-        borderLeftWidth?: number;
-        borderTopLeftRadius?: number;
-        borderTopRightRadius?: number;
-        borderBottomLeftRadius?: number;
-        borderBottomRightRadius?: number;
-        fontSize?: number;
-        fontWeight?: number | "bold" | "normal";
-        fontFamily?: string;
-        fontStyle?: "normal" | "italic";
-        lineHeight?: number;
-        letterSpacing?: number;
-        textAlign?: "left" | "center" | "right" | "justify";
-        textDecoration?: "none" | "underline" | "line-through";
-        textTransform?: "none" | "capitalize" | "uppercase" | "lowercase";
-        maxLines?: number;
-        overflow?: "visible" | "hidden";
-        pointerEvents?: "auto" | "none";
-        transforms?: VNodeTransform[];
-        shadows?: VNodeShadow[];
-        [key: string]: any;
-    }
-    export interface VNodeTransform {
-        translate?: {
-            x?: number;
-            y?: number;
-            z?: number;
+    export function SplitView(props: SplitViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        methods: {
+            subscribe_props(): void;
+            setSize(index: number, size: number): void;
+            startResize(dividerIndex: number): void;
+            endResize(): void;
         };
-        rotate?: number;
-        rotateX?: number;
-        rotateY?: number;
-        rotateZ?: number;
-        scale?: number | {
-            x?: number;
-            y?: number;
+    };
+    export type SplitPaneProps = ViewProps & {
+        size?: number;
+        minSize?: number;
+        maxSize?: number;
+        collapsible?: boolean;
+        collapsedSize?: number;
+    };
+    export function SplitPane(props: SplitPaneProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        methods: {
+            subscribe_props(): void;
+            setSize(newSize: number): void;
+            collapse(): void;
+            expand(): void;
         };
-        skew?: {
-            x?: number;
-            y?: number;
+    };
+}
+declare module "packages/primitive/src/layout/scroll" {
+    import { ViewProps } from "@/content/view";
+    import { ViewChildren } from "@/content/type";
+    export type ScrollBarVisibility = "auto" | "hidden" | "visible" | "scroll";
+    export type ScrollViewProps = ViewProps & {
+        horizontal?: ScrollBarVisibility;
+        vertical?: ScrollBarVisibility;
+        contentWidth?: number | string;
+        contentHeight?: number | string;
+    };
+    export function ScrollView(props: ScrollViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        methods: {
+            subscribe_props(): void;
+            scrollTo(x?: number, y?: number): void;
+            scrollToTop(): void;
+            scrollToBottom(): void;
         };
-    }
-    export interface VNodeShadow {
-        color: string;
-        offsetX: number;
-        offsetY: number;
-        blurRadius: number;
-        spreadRadius?: number;
-    }
-    export type ClassNameRef = {
-        __cn_ref: true;
-        value: string[];
-        subscribe(ctx: Subscriber<string[]>): () => void;
-        destroy(): void;
-        as(v: string): void;
-        del(v: string): void;
-        add(v: string): void;
-        append(c: string): void;
-        toString(): string;
-    };
-    export function isClassNameRef(v: any): v is ClassNameRef;
-    export function classNames(items: (string | DerivedRef<string> | Ref<string> | ClassNameRef | undefined)[]): ClassNameRef;
-    export function join(v: (string | Signal<string>)[]): Signal<string>;
-    export type StyleObject = Record<string, any>;
-    export interface StyleRef {
-        __style_ref: true;
-        value: StyleObject;
-        subscribe(ctx: Subscriber<StyleObject>): () => void;
-        toString(): string;
-    }
-    export function isStyleRef(v: any): v is StyleRef;
-    export function styleNames(items: (ViewStyleProperties | DerivedRef<StyleRef | ViewStyleProperties> | Ref<StyleRef | ViewStyleProperties> | StyleRef | undefined)[]): DerivedRef<ViewStyleProperties>;
-}
-declare module "packages/primitive/src/util/lazy" {
-    export function lazy(path: string): () => Promise<any>;
-}
-declare module "packages/primitive/src/util/h" {
-    import { TimelessElement, ViewChildren } from "@/content/type";
-    export function h<P, R extends TimelessElement>(component: (props: P, children?: any) => R, props: P, children?: ViewChildren): () => R;
-}
-declare module "packages/primitive/src/util/listener" {
-    import { DerivedRef, Ref } from "packages/reactive/src/index";
-    export function ListenerManager(fns?: (DerivedRef<any> | Ref<any> | any | (() => void))[]): {
-        add: (clean?: void | (() => void) | DerivedRef<any> | Ref<any> | any) => any;
-        push: (clean?: void | (() => void) | DerivedRef<any> | Ref<any> | any) => any;
-        append: (arr: (Ref<any> | DerivedRef<any> | any | void | (() => void))[]) => void;
-        clean: () => void;
-        clear: () => void;
-        destroy: () => void;
     };
 }
-declare module "packages/primitive/src/interaction/dismissable" {
-    type Box = {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
+declare module "packages/primitive/src/layout/window" {
+    import { ViewProps } from "@/content/view";
+    import { ViewChildren } from "@/content/type";
+    export type WindowViewProps = ViewProps & {
+        width?: number | "100%";
+        height?: number | "100%";
     };
-    export function DismissableLayer(): {
-        addIgnore(box: Box): void;
-        /** 坐标点是否在 boxes 中，即 是否点击了 boxes 内部 */
-        isBingo(pos: {
-            x: number;
-            y: number;
-        }): boolean;
-        clear(): void;
+    export function WindowView(props: WindowViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        methods: {
+            subscribe_props(): void;
+        };
     };
 }
-declare module "packages/primitive/src/event/index" {
-    export type MouseEvent<T = any> = {
-        target: T;
+declare module "packages/primitive/src/layout/tab" {
+    import { ViewProps } from "@/content/view";
+    import { ViewChildren } from "@/content/type";
+    export type TabPosition = "top" | "bottom" | "left" | "right";
+    export type TabViewProps = ViewProps & {
+        activeIndex?: number;
+        position?: TabPosition;
+        onChange?: (index: number) => void;
     };
-    export interface MountedEvent<T = any> {
-        reason?: string;
-        target: T;
-        error?: Error;
-    }
+    type TabViewState = {
+        activeIndex: number;
+        position: TabPosition;
+        children: any[];
+    };
+    export function TabView(props: TabViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: TabViewState;
+        children: any[];
+    };
+    export type TabPaneProps = ViewProps & {
+        label?: string;
+        icon?: string;
+    };
+    type TabPaneState = {
+        label: string;
+        icon?: string;
+        children: any[];
+    };
+    export function TabPane(props: TabPaneProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: TabPaneState;
+        children: any[];
+    };
 }
 declare module "packages/primitive/src/input/input" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
@@ -1852,6 +2321,33 @@ declare module "packages/primitive/src/input/radio" {
         onUnmounted(): void;
     };
 }
+declare module "packages/primitive/src/interaction/dismissable" {
+    type Box = {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
+    export function DismissableLayer(): {
+        addIgnore(box: Box): void;
+        /** 坐标点是否在 boxes 中，即 是否点击了 boxes 内部 */
+        isBingo(pos: {
+            x: number;
+            y: number;
+        }): boolean;
+        clear(): void;
+    };
+}
+declare module "packages/primitive/src/event/index" {
+    export type MouseEvent<T = any> = {
+        target: T;
+    };
+    export interface MountedEvent<T = any> {
+        reason?: string;
+        target: T;
+        error?: Error;
+    }
+}
 declare module "packages/primitive/src/interaction/link" {
     import { Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
@@ -1906,6 +2402,132 @@ declare module "packages/primitive/src/interaction/button" {
         onUnmounted(): void;
     };
 }
+declare module "packages/primitive/src/style/index" {
+    import { Ref, Subscriber, Signal, DerivedRef } from "packages/reactive/src/index";
+    type ViewStylePropValue = DerivedRef<string | number | boolean | null | undefined> | Ref<string | number | boolean | null | undefined> | string | number | boolean | undefined | null;
+    export type ViewStyleProperties = {
+        [k: string]: ViewStylePropValue;
+    };
+    export type ViewStyle = ViewStyleProperties | DerivedRef<ViewStyleProperties> | Ref<ViewStyleProperties>;
+    export interface RawViewStyleProperties {
+        width?: number | string;
+        height?: number | string;
+        minWidth?: number | string;
+        minHeight?: number | string;
+        maxWidth?: number | string;
+        maxHeight?: number | string;
+        margin?: number | string;
+        marginTop?: number | string;
+        marginRight?: number | string;
+        marginBottom?: number | string;
+        marginLeft?: number | string;
+        padding?: number | string;
+        paddingTop?: number | string;
+        paddingRight?: number | string;
+        paddingBottom?: number | string;
+        paddingLeft?: number | string;
+        position?: "static" | "relative" | "absolute" | "fixed" | "sticky";
+        top?: number | string;
+        right?: number | string;
+        bottom?: number | string;
+        left?: number | string;
+        zIndex?: number;
+        color?: string;
+        backgroundColor?: string;
+        opacity?: number;
+        borderWidth?: number;
+        borderStyle?: "none" | "solid" | "dashed" | "dotted";
+        borderColor?: string;
+        borderRadius?: number;
+        borderTopWidth?: number;
+        borderRightWidth?: number;
+        borderBottomWidth?: number;
+        borderLeftWidth?: number;
+        borderTopLeftRadius?: number;
+        borderTopRightRadius?: number;
+        borderBottomLeftRadius?: number;
+        borderBottomRightRadius?: number;
+        fontSize?: number;
+        fontWeight?: number | "bold" | "normal";
+        fontFamily?: string;
+        fontStyle?: "normal" | "italic";
+        lineHeight?: number;
+        letterSpacing?: number;
+        textAlign?: "left" | "center" | "right" | "justify";
+        textDecoration?: "none" | "underline" | "line-through";
+        textTransform?: "none" | "capitalize" | "uppercase" | "lowercase";
+        maxLines?: number;
+        overflow?: "visible" | "hidden";
+        pointerEvents?: "auto" | "none";
+        transforms?: VNodeTransform[];
+        shadows?: VNodeShadow[];
+        [key: string]: any;
+    }
+    export interface VNodeTransform {
+        translate?: {
+            x?: number;
+            y?: number;
+            z?: number;
+        };
+        rotate?: number;
+        rotateX?: number;
+        rotateY?: number;
+        rotateZ?: number;
+        scale?: number | {
+            x?: number;
+            y?: number;
+        };
+        skew?: {
+            x?: number;
+            y?: number;
+        };
+    }
+    export interface VNodeShadow {
+        color: string;
+        offsetX: number;
+        offsetY: number;
+        blurRadius: number;
+        spreadRadius?: number;
+    }
+    export type ClassNameRef = {
+        __cn_ref: true;
+        value: string[];
+        subscribe(ctx: Subscriber<string[]>): () => void;
+        destroy(): void;
+        as(v: string): void;
+        del(v: string): void;
+        add(v: string): void;
+        append(c: string): void;
+        toString(): string;
+    };
+    export function isClassNameRef(v: any): v is ClassNameRef;
+    export function classNames(items: (string | DerivedRef<string> | Ref<string> | ClassNameRef | undefined)[]): ClassNameRef;
+    export function join(v: (string | Signal<string>)[]): Signal<string>;
+    export type StyleObject = Record<string, any>;
+    export interface StyleRef {
+        __style_ref: true;
+        value: StyleObject;
+        subscribe(ctx: Subscriber<StyleObject>): () => void;
+        toString(): string;
+    }
+    export function isStyleRef(v: any): v is StyleRef;
+    export function styleNames(items: (ViewStyleProperties | DerivedRef<StyleRef | ViewStyleProperties> | Ref<StyleRef | ViewStyleProperties> | StyleRef | undefined)[]): DerivedRef<ViewStyleProperties>;
+}
+declare module "packages/primitive/src/util/lazy" {
+    export function lazy(path: string): () => Promise<any>;
+}
+declare module "packages/primitive/src/util/listener" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    export function ListenerManager(fns?: (DerivedRef<any> | Ref<any> | any | (() => void))[]): {
+        add: (clean?: void | (() => void) | DerivedRef<any> | Ref<any> | any) => any;
+        push: (clean?: void | (() => void) | DerivedRef<any> | Ref<any> | any) => any;
+        append: (arr: (Ref<any> | DerivedRef<any> | any | void | (() => void))[]) => void;
+        clean: () => void;
+        clear: () => void;
+        destroy: () => void;
+        readonly length: number;
+    };
+}
 declare module "packages/primitive/src/vnode/view" {
     /**
      * @file 宿主平台抽象节点
@@ -1927,11 +2549,11 @@ declare module "packages/primitive/src/vnode/view" {
         stopPropagation(): void;
         preventDefault(): void;
     };
-    type VNodeViewType = "view" | "text" | "button" | "input" | "fragment" | "reactive";
+    type VNodeViewType = "view" | "text" | "button" | "input" | "fragment" | "portal" | "reactive";
     export type VNodeView<HostElm = any> = {
         getType(): VNodeViewType;
         isDocumentFragment(): boolean;
-        getChildren(): VNodeView<any>[];
+        getChildren(): (VNodeView<any> | null)[];
         setStyle(style: RawViewStyleProperties): void;
         setStyleValue(key: string, value: string): void;
         setStyleSet(set: string[]): void;
@@ -1944,16 +2566,35 @@ declare module "packages/primitive/src/vnode/view" {
         /** 构建宿主 node tree */
         render(elm: TimelessElement): any;
         /** 水合 */
-        hydrate(elm: TimelessElement, $dom: HostElm): any;
+        hydrate(elm: TimelessElement, $dom: HostElm, opt: {
+            initial?: boolean;
+            $parent: any;
+            /** 子节点的偏移量
+             * 比如 Fragment 嵌套 Show 再 嵌套 Fragment 再嵌套 View
+             * View 渲染的节点在 $parent 第二个，但是对于 Fragment 来说，它的子节点是 $parent 第一个
+             * 所以需要一个偏移量来调整索引
+             */
+            offset: number;
+            idx: number;
+        }): any;
         /** 构建 */
         buildChildren(children: (TimelessElement | null)[]): {
             $fragment: any;
+            child_nodes: (VNodeView<any> | null)[];
             child_elements: (TimelessElement | null)[];
             child_host_nodes: HostElm[];
-            child_nodes: VNodeView<any>[];
         };
         insertChildren(children: (TimelessElement | null)[]): void;
+        get$children(): any[];
         removeChildren(): void;
+        setupEventListener(events: any): void;
+        teardownEventListener(events: any): void;
+        /** Sync internal tracking after HMR patch inserts a child */
+        trackChild(dom: any, element: TimelessElement, vnode: VNodeView<any>, index: number): void;
+        /** Sync internal tracking after HMR patch removes a child */
+        untrackChild(index: number): void;
+        /** Replace internal tracking entry in-place (no array length change) */
+        replaceTrackedChild?(index: number, dom: any, element: TimelessElement, vnode: VNodeView<any>): void;
         getParent(): any;
         get$elm(): HostElm;
     };
@@ -1964,9 +2605,170 @@ declare module "packages/primitive/src/platform" {
         addEventListener(type: string, handler: EventListener, options?: AddEventListenerOptions): () => void;
         /** 批量设置 document.body 样式（传空字符串可清除） */
         patchBodyStyle(style: Record<string, string>): void;
+        /** 获取视口大小 */
+        getViewportSize(): {
+            width: number;
+            height: number;
+        };
     }
     export function setPlatform(p: Platform): Platform;
     export function getPlatform(): Platform;
+}
+declare module "packages/primitive/src/hmr/patch" {
+    import { TimelessElement } from "@/content/type";
+    export type SetTextAction = {
+        type: "set_text";
+        elm: any;
+        value: string;
+    };
+    export type SetStyleAction = {
+        type: "set_style";
+        elm: any;
+        style: Record<string, any>;
+    };
+    export type SetStyleSetAction = {
+        type: "set_style_set";
+        elm: any;
+        styleSet: string[];
+    };
+    export type SetAttributeAction = {
+        type: "set_attribute";
+        elm: any;
+        key: string;
+        value: string;
+    };
+    export type RemoveAttributeAction = {
+        type: "remove_attribute";
+        elm: any;
+        key: string;
+    };
+    export type ReplaceAction = {
+        type: "replace";
+        parent: TimelessElement | null;
+        index: number;
+        old_element: TimelessElement;
+        new_element: TimelessElement;
+    };
+    export type InsertChildAction = {
+        type: "insert_child";
+        parent: TimelessElement;
+        element: TimelessElement;
+        index: number;
+    };
+    export type RemoveChildAction = {
+        type: "remove_child";
+        parent: TimelessElement;
+        element: TimelessElement;
+        index: number;
+    };
+    export type SwapEventsAction = {
+        type: "swap_events";
+        /** VNodeView that owns the DOM node */
+        elm: any;
+        old_events: any;
+        new_events: any;
+    };
+    export type PatchAction = SetTextAction | SetStyleAction | SetStyleSetAction | SetAttributeAction | RemoveAttributeAction | ReplaceAction | InsertChildAction | RemoveChildAction | SwapEventsAction;
+    export type PatchOptions = {
+        buildAndRender: (elm: TimelessElement) => {
+            vnode: any;
+            dom: any;
+        };
+        platform?: {
+            hasParent(dom: any): boolean;
+            replaceChild(oldDom: any, newDom: any): void;
+            removeChild(dom: any): void;
+            insertChild(parentDom: any, childDom: any, index: number): void;
+            insertBeforeAnchor(anchorDom: any, childDom: any): void;
+        };
+    };
+    /**
+     * Public entry point for diffing two element trees.
+     */
+    export function diff_element(old_element: TimelessElement, new_element: TimelessElement): PatchAction[];
+    export function patch(old_element: TimelessElement, new_element: TimelessElement, options: PatchOptions): PatchAction[];
+}
+declare module "packages/primitive/src/hmr/state" {
+    /**
+     * Per-instance HMR state preservation.
+     *
+     * Call this INSIDE the component function to get-or-create state that survives
+     * HMR reloads. Works correctly when multiple instances of the same component
+     * exist — each instance keeps its own state.
+     *
+     * Typical usage:
+     *
+     *   export default function Page() {
+     *     const { visible_, count_ } = hmrState(import.meta.hot, () => ({
+     *       visible_: ref(false),
+     *       count_: ref(0),
+     *     }));
+     *
+     *     const element = View({}, [...]);
+     *
+     *     // Attach state to the element so HMR can inject it back next reload
+     *     if (import.meta.hot) {
+     *       element._hmr_state = { visible_, count_ };
+     *       if (!import.meta.hot.data.elements) import.meta.hot.data.elements = [];
+     *       import.meta.hot.data.elements.push(element);
+     *     }
+     *     return element;
+     *   }
+     *
+     *   if (import.meta.hot) {
+     *     import.meta.hot.accept((new_mod) => {
+     *       const elements = import.meta.hot.data.elements ?? [];
+     *       if (!new_mod || !elements.length) return;
+     *       import.meta.hot.data.elements = [];
+     *       elements.forEach((old_element) => {
+     *         // Inject this instance's state before calling the new factory
+     *         import.meta.hot.data._hmr_inject = old_element._hmr_state;
+     *         const new_element = new_mod.default();
+     *         import.meta.hot.data._hmr_inject = null;
+     *         patch(old_element, new_element);
+     *       });
+     *       import.meta.hot.data.elements = elements;
+     *     });
+     *   }
+     *
+     * How it works:
+     *   - On the very first render: factory() runs, fresh refs are created.
+     *   - On HMR reload: the accept handler sets hot.data._hmr_inject to the
+     *     old element's saved state, then calls new_mod.default(). hmrState()
+     *     detects the injection and returns the existing refs instead of
+     *     creating new ones. The factory is never called again for that instance.
+     *   - After new_mod.default() returns, _hmr_inject is cleared so the next
+     *     instance gets a clean slate.
+     */
+    export function hmrState<T extends Record<string, any>>(hot: {
+        data: Record<string, any>;
+    } | undefined | null, factory: () => T): T;
+    /**
+     * Low-intrusion HMR state restoration.
+     *
+     * Unlike hmrState() which wraps ref declarations in a factory, hmrRestore()
+     * leaves the original code untouched and restores values with a single line
+     * that a Vite plugin can auto-inject.
+     *
+     * Usage — original code stays unchanged:
+     *
+     *   const visible_ = ref(false);
+     *   const popper_ = refobj({ x: 0, y: 0, placed: false });
+     *   hmrRestore(import.meta.hot, { visible_, popper_ });
+     *
+     * How it works:
+     *   - On the very first render: refs are created normally, hmrRestore() is a
+     *     no-op (no saved state exists).
+     *   - On HMR reload: the accept handler sets hot.data._hmr_inject to the old
+     *     element's saved state. hmrRestore() reads old ref values and copies them
+     *     into the freshly-created refs via .as(). Since this runs before any
+     *     component subscribes, the value update is silent — no flicker.
+     *   - After the component tree is built, subscribers see the correct
+     *     (preserved) values from the start.
+     */
+    export function hmrRestore(hot: {
+        data: Record<string, any>;
+    } | undefined | null, refs: Record<string, any>): void;
 }
 declare module "packages/base/src/base" {
     /**
@@ -2062,31 +2864,32 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/reactive/for";
     export * from "packages/primitive/src/reactive/show";
     export * from "packages/primitive/src/reactive/match";
-    export * from "packages/primitive/src/content/view";
     export * from "packages/primitive/src/content/fragment";
-    export * from "packages/primitive/src/content/icon";
-    export * from "packages/primitive/src/content/popper";
-    export * from "packages/primitive/src/content/list-view";
+    export { createContext, provide, use, Scope, getOwner, runWithOwner, } from "packages/primitive/src/context";
+    export type { Context } from "packages/primitive/src/context";
+    export * from "packages/primitive/src/content/view";
+    export * from "packages/primitive/src/content/text";
     export * from "packages/primitive/src/content/portal";
-    export * from "packages/primitive/src/content/lazy-view";
-    export * from "packages/primitive/src/content/type";
     export * as SVG from "packages/primitive/src/content/svg";
     export * from "packages/primitive/src/content/img";
     export * from "packages/primitive/src/content/label";
-    export * from "packages/primitive/src/content/style";
     export * from "packages/primitive/src/content/rich-text";
+    export * from "packages/primitive/src/content/webview";
+    export * from "packages/primitive/src/content/style";
+    export * from "packages/primitive/src/content/lazy-view";
+    export * from "packages/primitive/src/content/popper";
+    export * from "packages/primitive/src/content/list-view";
+    export * from "packages/primitive/src/content/icon";
     export * from "packages/primitive/src/content/aspect-ratio";
-    export * from "packages/primitive/src/content/text";
+    export * from "packages/primitive/src/content/type";
     export * from "packages/primitive/src/layout/flex";
     export * from "packages/primitive/src/layout/grid";
     export * from "packages/primitive/src/layout/row";
     export * from "packages/primitive/src/layout/column";
-    export * from "packages/primitive/src/style/index";
-    export * from "packages/primitive/src/util/lazy";
-    export * from "packages/primitive/src/util/h";
-    export * from "packages/primitive/src/util/listener";
-    export * from "packages/primitive/src/interaction/dismissable";
-    export * from "packages/primitive/src/event/index";
+    export * from "packages/primitive/src/layout/split";
+    export * from "packages/primitive/src/layout/scroll";
+    export * from "packages/primitive/src/layout/window";
+    export * from "packages/primitive/src/layout/tab";
     export * from "packages/primitive/src/input/input";
     export * from "packages/primitive/src/input/number-input";
     export * from "packages/primitive/src/input/password-input";
@@ -2096,12 +2899,20 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/input/file-picker";
     export * from "packages/primitive/src/input/textarea";
     export * from "packages/primitive/src/input/radio";
+    export * from "packages/primitive/src/interaction/dismissable";
+    export * from "packages/primitive/src/event/index";
     export * from "packages/primitive/src/interaction/link";
     export * from "packages/primitive/src/interaction/button";
+    export * from "packages/primitive/src/style/index";
+    export * from "packages/primitive/src/util/lazy";
+    export * from "packages/primitive/src/util/listener";
     export * from "packages/primitive/src/vnode/view";
     export { setPlatform } from "packages/primitive/src/platform";
     export type { Platform } from "packages/primitive/src/platform";
     export { getPlatform } from "packages/primitive/src/platform";
+    export { patch } from "packages/primitive/src/hmr/patch";
+    export type { PatchOptions } from "packages/primitive/src/hmr/patch";
+    export { hmrState, hmrRestore } from "packages/primitive/src/hmr/state";
     export { Logger, Result, base } from "packages/base/src/index";
     export type { Handler } from "packages/base/src/index";
 }
@@ -2175,7 +2986,7 @@ declare module "packages/kit/src/app/utils" {
         /** 特大设备宽度阈值 */
         "2xl": number;
     };
-    export function getCurrentDeviceSize(width: number): "2xl" | "xl" | "lg" | "md" | "sm";
+    export function getCurrentDeviceSize(width: number): "sm" | "md" | "lg" | "xl" | "2xl";
     export type DeviceSizeTypes = keyof typeof mediaSizes;
     export function listenMultiEvent(events: (() => void)[]): () => void;
 }
@@ -2924,7 +3735,7 @@ declare module "packages/ui-vm/src/menu/item" {
         Focus = 2,
         Blur = 3,
         Click = 4,
-        Change = 5
+        StateChange = 5
     }
     type TheTypesOfEvents = {
         [Events.Enter]: void;
@@ -2932,7 +3743,7 @@ declare module "packages/ui-vm/src/menu/item" {
         [Events.Focus]: void;
         [Events.Blur]: void;
         [Events.Click]: void;
-        [Events.Change]: MenuItemCoreState;
+        [Events.StateChange]: MenuItemCoreState;
     };
     type MenuItemCoreProps = {
         /** 菜单文案 */
@@ -2988,6 +3799,11 @@ declare module "packages/ui-vm/src/menu/item" {
         disable(): void;
         /** 启用指定菜单项 */
         enable(): void;
+        blur(): void;
+        reset(): void;
+        hide(): void;
+        show(): void;
+        unmount(): void;
         /** 鼠标进入菜单项 */
         handlePointerEnter(): void;
         handlePointerMove(): void;
@@ -2996,17 +3812,12 @@ declare module "packages/ui-vm/src/menu/item" {
         handleFocus(): void;
         handleBlur(): void;
         handleClick(): void;
-        blur(): void;
-        reset(): void;
-        hide(): void;
-        show(): void;
-        unmount(): void;
         onEnter(handler: Handler<TheTypesOfEvents[Events.Enter]>): () => void;
         onLeave(handler: Handler<TheTypesOfEvents[Events.Leave]>): () => void;
         onFocus(handler: Handler<TheTypesOfEvents[Events.Focus]>): () => void;
         onBlur(handler: Handler<TheTypesOfEvents[Events.Blur]>): () => void;
         onClick(handler: Handler<TheTypesOfEvents[Events.Click]>): () => void;
-        onStateChange(handler: Handler<TheTypesOfEvents[Events.Change]>): () => void;
+        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
         get [Symbol.toStringTag](): string;
     }
     export type MenuItemCheckedState = boolean | "indeterminate";
@@ -3203,22 +4014,28 @@ declare module "packages/ui-vm/src/menu/index" {
     import { PopperCore, Side, Align } from "@/popper/index";
     import { DismissableLayerCore } from "@/dismissable-layer/index";
     import { PresenceCore } from "@/presence/index";
+    import { ScrollViewCore } from "@/scroll-view/index";
     import { MenuItemCore } from "packages/ui-vm/src/menu/item";
     import { MenuSeparatorCore } from "packages/ui-vm/src/menu/separator";
     import { MenuGroupCore } from "packages/ui-vm/src/menu/group";
+    type StartHideEvent = {
+        reason: string;
+    };
     enum Events {
         Show = 0,
-        Hiding = 1,
-        Hidden = 2,
-        EnterItem = 3,
-        LeaveItem = 4,
-        EnterMenu = 5,
-        LeaveMenu = 6,
-        StateChange = 7
+        PrepareHide = 1,
+        StartHide = 2,
+        Hidden = 3,
+        EnterItem = 4,
+        LeaveItem = 5,
+        EnterMenu = 6,
+        LeaveMenu = 7,
+        StateChange = 8
     }
     type TheTypesOfEvents = {
         [Events.Show]: void;
-        [Events.Hiding]: void;
+        [Events.PrepareHide]: void;
+        [Events.StartHide]: StartHideEvent;
         [Events.Hidden]: void;
         [Events.EnterItem]: MenuItemCore;
         [Events.LeaveItem]: MenuItemCore;
@@ -3242,11 +4059,19 @@ declare module "packages/ui-vm/src/menu/index" {
         side: Side;
         align: Align;
         strategy: "fixed" | "absolute";
+        /** 默认是否展示菜单 */
+        defaultVisible?: boolean;
+        /** 触发模式 */
+        trigger?: "click" | "hover" | "contextmenu";
+        /** 是否为一级菜单 */
+        root?: boolean;
         items: MenuEntry[];
         /** 自定义内容，设置后渲染层显示该内容而非迭代 items */
         content?: unknown;
         offsetX?: number;
         offsetY?: number;
+        /** 滚动容器 */
+        view$?: ScrollViewCore;
     };
     export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         _name: string;
@@ -3254,30 +4079,37 @@ declare module "packages/ui-vm/src/menu/index" {
         popper: PopperCore;
         presence: PresenceCore;
         layer: DismissableLayerCore;
-        open_timer: NodeJS.Timeout | null;
-        /** Global registry of open root menus (excludes submenus) */
-        private static openRootMenus;
-        /** Whether this menu is registered as a root menu (not a submenu) */
-        private _is_root_menu;
+        /** 菜单内容，用于自定义渲染菜单的内容，当设置后，渲染层会显示该内容而非迭代 items */
         content: unknown;
+        /** 菜单项 */
+        items: MenuEntry[];
+        is_root: boolean;
+        trigger: "click" | "hover" | "contextmenu";
+        open_timer: NodeJS.Timeout | null;
+        /** prepareHide 时会设置定时器，用于延迟隐藏菜单，可以在 cancelHide 中清除 */
+        hide_timer: NodeJS.Timeout | null;
+        /** 鼠标离开 item 时，可能要隐藏子菜单，但是如果从有子菜单的 item 离开前往子菜单，就不用隐藏 */
+        cur_item: MenuItemCore | null;
+        /** 鼠标是否处于菜单中 */
+        inside: boolean;
         state: MenuCoreState;
         constructor(options?: Partial<{
             _name: string;
         } & MenuCoreProps>);
-        items: MenuEntry[];
-        cur_sub: MenuCore | null;
-        cur_item: MenuItemCore | null;
-        /** 父菜单引用，用于子菜单清除父菜单的定时器 */
-        parent_menu: MenuCore | null;
-        inside: boolean;
-        /** 鼠标是否处于子菜单中 */
-        in_sub_menu: boolean;
-        /** 鼠标离开 item 时，可能要隐藏子菜单，但是如果从有子菜单的 item 离开前往子菜单，就不用隐藏 */
-        maybe_hide_sub: boolean;
-        hide_sub_timer: NodeJS.Timeout | null;
         toggle(): void;
+        prepareShow(opt: {
+            reason: string;
+        }): void;
         show(): void;
-        hide(): void;
+        isPrepareHide(): boolean;
+        prepareHide(opt: {
+            reason: string;
+        }): void;
+        cancelShow(): void;
+        cancelHide(): void;
+        hide(opt: {
+            reason: string;
+        }): void;
         /** 处理选项 */
         listen_item(item: MenuItemCore): void;
         listen_items(items: MenuEntry[]): void;
@@ -3289,11 +4121,16 @@ declare module "packages/ui-vm/src/menu/index" {
         checkNeedHideSubMenu(item: MenuItemCore): void;
         reset(): void;
         refresh(): void;
+        handleEnter(): void;
         handleLeave(): void;
         unmount(): void;
         onShow(handler: Handler<TheTypesOfEvents[Events.Show]>): () => void;
-        onHiding(handler: Handler<TheTypesOfEvents[Events.Hiding]>): () => void;
-        onHide(handler: Handler<TheTypesOfEvents[Events.Hidden]>): () => void;
+        onPrepareHide(handler: Handler<TheTypesOfEvents[Events.PrepareHide]>): () => void;
+        onStartHide(handler: Handler<TheTypesOfEvents[Events.StartHide]>): () => void;
+        /**
+         * 监听菜单已关闭事件
+         */
+        onHidden(handler: Handler<TheTypesOfEvents[Events.Hidden]>): () => void;
         onEnterItem(handler: Handler<TheTypesOfEvents[Events.EnterItem]>): () => void;
         onLeaveItem(handler: Handler<TheTypesOfEvents[Events.LeaveItem]>): () => void;
         onEnter(handler: Handler<TheTypesOfEvents[Events.EnterMenu]>): () => void;
@@ -3424,6 +4261,7 @@ declare module "packages/ui-vm/src/context-menu/index" {
     import { MenuCore } from "@/menu/index";
     import { MenuItemCore } from "@/menu/item";
     import { Rect, Side, Align } from "@/popper/types";
+    import { ScrollViewCore } from "@/scroll-view/index";
     enum Events {
         StateChange = 0,
         Show = 1,
@@ -3443,14 +4281,13 @@ declare module "packages/ui-vm/src/context-menu/index" {
         offsetY?: number;
         submenuOffsetX?: number;
         submenuOffsetY?: number;
-        trigger?: "contextmenu" | "hover" | "manual";
         side?: Side;
         align?: Align;
+        view$?: ScrollViewCore;
     };
     export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
         menu: MenuCore;
         disabled: boolean;
-        trigger: "contextmenu" | "hover" | "manual";
         state: ContextMenuState;
         private virtualElement;
         private initialScrollX;
@@ -3466,7 +4303,9 @@ declare module "packages/ui-vm/src/context-menu/index" {
             x: number;
             y: number;
         }>): void;
-        hide(): void;
+        hide(opt: {
+            reason: string;
+        }): void;
         setReference(reference: {
             $el?: unknown;
             getRect: () => Rect;
@@ -3722,8 +4561,9 @@ declare module "packages/ui-vm/src/dropdown-menu/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
     import { MenuCore } from "@/menu/index";
     import { MenuItemCore } from "@/menu/item";
-    import { Side } from "@/popper/types";
+    import { Rect, Side } from "@/popper/types";
     import { Align } from "@/popper/index";
+    import { ScrollViewCore } from "@/scroll-view/index";
     enum Events {
         StateChange = 0
     }
@@ -3738,7 +4578,12 @@ declare module "packages/ui-vm/src/dropdown-menu/index" {
         offsetY?: number;
         submenuOffsetX?: number;
         submenuOffsetY?: number;
-        trigger?: "click" | "hover" | "manual";
+        /** 触发模式 */
+        trigger?: "click" | "hover";
+        /** 默认是否展示下拉菜单 */
+        defaultVisible?: boolean;
+        /** 滚动容器 */
+        view$?: ScrollViewCore;
         onHidden?: () => void;
     };
     type DropdownMenuState = {
@@ -3760,7 +4605,8 @@ declare module "packages/ui-vm/src/dropdown-menu/index" {
         menu: MenuCore;
         subs: MenuCore[];
         items: MenuItemCore[];
-        trigger: "click" | "hover" | "manual";
+        trigger: "click" | "hover";
+        view$?: ScrollViewCore;
         constructor(props?: {
             _name?: string;
         } & DropdownMenuProps);
@@ -3768,6 +4614,12 @@ declare module "packages/ui-vm/src/dropdown-menu/index" {
         private _configure_sub_menus;
         setItems(items: MenuItemCore[]): void;
         showMenuItem(label: string): void;
+        setReference(reference: {
+            $el?: unknown;
+            getRect: () => Rect;
+        }, opt?: Partial<{
+            force: boolean;
+        }>): void;
         toggle(position?: Partial<{
             x: number;
             y: number;
@@ -3780,8 +4632,13 @@ declare module "packages/ui-vm/src/dropdown-menu/index" {
             width: number;
             height: number;
         }>): void;
-        hide(): void;
+        hide(opt: {
+            reason: string;
+        }): void;
         unmount(): void;
+        handleClickTrigger(event: any): void;
+        handleEnterTrigger(): void;
+        handleLeaveTrigger(): void;
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): void;
     }
 }
@@ -5474,6 +6331,7 @@ declare module "packages/ui-vm/src/popper/types" {
 declare module "packages/ui-vm/src/popper/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
     import type { Rect, Placement, Strategy, MiddlewareData } from "packages/ui-vm/src/popper/types";
+    import { ScrollViewCore } from "@/scroll-view/index";
     const SIDE_OPTIONS: readonly ["top", "right", "bottom", "left"];
     const ALIGN_OPTIONS: readonly ["start", "center", "end"];
     export type Side = (typeof SIDE_OPTIONS)[number];
@@ -5512,6 +6370,8 @@ declare module "packages/ui-vm/src/popper/index" {
         strategy: "fixed" | "absolute";
         offsetX?: number;
         offsetY?: number;
+        defaultPlaced?: boolean;
+        view$?: ScrollViewCore;
     };
     type PopperState = {
         strategy: Strategy;
@@ -5536,6 +6396,7 @@ declare module "packages/ui-vm/src/popper/index" {
         strategy: Strategy;
         offsetX: number;
         offsetY: number;
+        view$?: ScrollViewCore;
         reference: {
             getRect: () => Rect;
             $el?: unknown;
@@ -10701,6 +11562,7 @@ declare module "packages/ui-primitive/src/modules/presence" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
 }
 declare module "packages/ui-primitive/src/modules/transition" {
@@ -10722,6 +11584,7 @@ declare module "packages/ui-primitive/src/modules/transition" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
 }
 declare module "packages/ui-primitive/src/modules/popper" {
@@ -10744,13 +11607,19 @@ declare module "packages/ui-primitive/src/modules/popper" {
     };
     export function Anchor(props: ViewProps & {
         store: PopperCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function Content(props: ViewProps & {
         zIndex?: number;
         store: PopperCore;
@@ -10758,37 +11627,13 @@ declare module "packages/ui-primitive/src/modules/popper" {
         onDismiss?: () => void;
         /** 参考元素离开视口时的回调 */
         onReferenceOutOfView?: () => void;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/head" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Head1(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Head2(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Head3(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function Head1(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Head2(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Head3(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/paragraph" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -10815,224 +11660,102 @@ declare module "packages/ui-primitive/src/modules/image" {
 }
 declare module "packages/ui-primitive/src/modules/table" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/card" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/badge" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Badge(props: ViewProps & {
         variant?: "default" | "secondary" | "outline" | "destructive";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/separator" {
     import { ViewProps } from "packages/timeless/src/index";
     export function Separator(props: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/skeleton" {
     import { ViewProps } from "packages/timeless/src/index";
-    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/alert" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Alert(props: ViewProps & {
         variant?: "default" | "destructive";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/avatar" {
     import { ViewProps, ViewChildren, ImgProps } from "packages/timeless/src/index";
     export function Root(props: ViewProps & {
         size?: "default" | "large";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Image(props: ImgProps & {
         alt?: string;
         onLoadingStatusChange?: (status: "loading" | "loaded" | "error") => void;
     }): {
         t: string;
         $elm: any;
-        state: {
+        state: import("packages/primitive/src/content/box").BoxState & {
             rendered: boolean;
             src: string | null;
             style: RawViewStyleProperties;
             styleSet: string[];
         };
-        events: {
-            onClick: (e: MouseEvent) => void;
-            onDoubleClick: (e: MouseEvent) => void;
-            onLongPress: (e: PointerEvent) => void;
-            onFocus: (e: FocusEvent) => void;
-            onBlur: (e: FocusEvent) => void;
-            onPointerDown: (e: PointerEvent) => void;
-            onKeyDown: (e: KeyboardEvent) => void;
-            onMouseEnter: (e: MouseEvent) => void;
-            onMouseLeave: (e: MouseEvent) => void;
-            onDragStart: (e: DragEvent) => void;
-            onDrag: (e: DragEvent) => void;
-            onDragEnd: (e: DragEvent) => void;
-            onDragEnter: (e: DragEvent) => void;
-            onDragOver: (e: DragEvent) => void;
-            onDragLeave: (e: DragEvent) => void;
-            onDrop: (e: DragEvent) => void;
-            draggable: boolean;
-            isMap: boolean;
-            onLoad: (e: Event) => void;
-            onError: (e: Event) => void;
-            onMounted: ((event: MountedEvent<VNodeView>) => void | (() => void)) & ((event: MountedEvent<VNodeView<HTMLImageElement>>) => void | (() => void));
-            onUnmounted: (() => void) & (() => void);
-            beforeUnmounted: (() => void) & (() => void);
-        };
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
-    export function Fallback(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function Fallback(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Avatar(props: Omit<ViewProps, "onMounted"> & ImgProps & {
         alt?: string;
         size?: "default" | "large";
         fallback?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/progress" {
     import { Ref } from "packages/timeless/src/index";
@@ -11042,24 +11765,12 @@ declare module "packages/ui-primitive/src/modules/progress" {
         store?: ProgressCore;
         value?: Ref<number> | number;
         max?: number;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Indicator(props: ViewProps & {
         store?: ProgressCore;
         value: Ref<number>;
         max?: number;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/button" {
     import { ViewChildren, FragmentProps, ButtonProps } from "packages/timeless/src/index";
@@ -11107,6 +11818,7 @@ declare module "packages/ui-primitive/src/modules/button" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Prefix(props: FragmentProps, children?: ViewChildren): {
         t: string;
@@ -11140,13 +11852,7 @@ declare module "packages/ui-primitive/src/modules/arrow" {
     import { PopperCore } from "packages/ui-vm/src/index";
     export function Arrow(props: ViewProps & {
         store: PopperCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/menu" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -11168,15 +11874,20 @@ declare module "packages/ui-primitive/src/modules/menu" {
     };
     export function Anchor(props: ViewProps & {
         store: MenuCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function Portal(props: ViewProps & {
-        store: MenuCore;
         animation?: {
             in: string;
             out: string;
@@ -11207,6 +11918,7 @@ declare module "packages/ui-primitive/src/modules/menu" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function ContentNonModal(props: ViewProps & {
         store: MenuCore;
@@ -11224,6 +11936,7 @@ declare module "packages/ui-primitive/src/modules/menu" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function ContentImpl(props: ViewProps & {
         store: MenuCore;
@@ -11241,82 +11954,41 @@ declare module "packages/ui-primitive/src/modules/menu" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Group(props: ViewProps & {
         store?: MenuGroupCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function GroupLabel(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Label(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function GroupLabel(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Label(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Item(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ItemImpl(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Separator(props: ViewProps): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Separator(props: ViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Arrow(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function SubMenu(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function SubMenuTrigger(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function SubMenuContent(props: ViewProps & {
         store: MenuCore;
         animation?: {
@@ -11333,6 +12005,7 @@ declare module "packages/ui-primitive/src/modules/menu" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
 }
 declare module "packages/ui-primitive/src/modules/dropdown-menu" {
@@ -11355,15 +12028,20 @@ declare module "packages/ui-primitive/src/modules/dropdown-menu" {
     };
     export function Trigger(props: ViewProps & {
         store: DropdownMenuCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function Portal(props: ViewProps & {
-        store: MenuCore;
         animation?: {
             in: string;
             out: string;
@@ -11394,66 +12072,37 @@ declare module "packages/ui-primitive/src/modules/dropdown-menu" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Group(props: ViewProps & {
         store?: MenuGroupCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Label(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Label(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Item(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Separator(props: ViewProps): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Separator(props: ViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Arrow(props: ViewProps & {
         store: DropdownMenuCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function SubMenu(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function SubMenuTrigger(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function SubMenuContent(props: ViewProps & {
         store: MenuCore;
         animation?: {
@@ -11470,6 +12119,7 @@ declare module "packages/ui-primitive/src/modules/dropdown-menu" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
 }
 declare module "packages/ui-primitive/src/modules/context-menu" {
@@ -11492,16 +12142,8 @@ declare module "packages/ui-primitive/src/modules/context-menu" {
     };
     export function Trigger(props: ViewProps & {
         store: ContextMenuCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Portal(props: ViewProps & {
-        store: MenuCore;
-    }, children?: ViewChildren): {
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Portal(props: ViewProps & {}, children?: ViewChildren): {
         t: string;
         $elm: any;
         state: {
@@ -11527,66 +12169,37 @@ declare module "packages/ui-primitive/src/modules/context-menu" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Group(props: ViewProps & {
         store?: MenuGroupCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Label(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Label(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Item(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Separator(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Separator(props: ViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Arrow(props: ViewProps & {
         store: ContextMenuCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function SubMenu(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function SubMenuTrigger(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function SubMenuContent(props: ViewProps & {
         store: MenuCore;
         animation?: {
@@ -11603,6 +12216,7 @@ declare module "packages/ui-primitive/src/modules/context-menu" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
 }
 declare module "packages/ui-primitive/src/modules/resizable-panels" {
@@ -11611,56 +12225,26 @@ declare module "packages/ui-primitive/src/modules/resizable-panels" {
     export function Group(props: ViewProps & {
         store: ResizablePanelsCore;
         direction?: "horizontal" | "vertical";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Panel(props: ViewProps & {
         store: ResizablePanelCore;
         group?: ResizablePanelsCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Handle(props: ViewProps & {
         store: ResizablePanelsCore;
         panelBefore: ResizablePanelCore;
         panelAfter: ResizablePanelCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/tabs" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/timeless/src/index";
     import { TabHeaderCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: TabHeaderCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function List(props: ViewProps & {
         store: TabHeaderCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Tab(props: ButtonProps & {
         store: TabHeaderCore<any>;
         value: string;
@@ -11697,76 +12281,34 @@ declare module "packages/ui-primitive/src/modules/tabs" {
     export function Indicator(props: ViewProps & {
         store: TabHeaderCore<any>;
         value: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Content(props: ViewProps & {
         store: TabHeaderCore<any>;
         value: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/accordion" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { AccordionCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: AccordionCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Item(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Trigger(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Chevron(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Content(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/input" {
     import { ViewProps, ViewChildren, InputProps } from "packages/timeless/src/index";
@@ -11777,13 +12319,7 @@ declare module "packages/ui-primitive/src/modules/input" {
     export function setInputProvider(provider: Provider): void;
     export function Root(props: ViewProps & {
         store?: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Input(props: InputProps & {
         store: InputCore<any>;
         id?: string;
@@ -11798,53 +12334,23 @@ declare module "packages/ui-primitive/src/modules/input" {
     };
     export function Value(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Clear(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Loading(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Disabled(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/file-picker" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { FilePickerCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store?: FilePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Input(props: ViewProps & {
         store: FilePickerCore;
         id?: string;
@@ -11859,44 +12365,20 @@ declare module "packages/ui-primitive/src/modules/file-picker" {
     };
     export function Clear(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Loading(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Disabled(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/number-input" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { NumberInputCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store?: NumberInputCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Input(props: ViewProps & {
         store: NumberInputCore;
     }): {
@@ -11910,40 +12392,16 @@ declare module "packages/ui-primitive/src/modules/number-input" {
     };
     export function IncreaseButton(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function DecreaseButton(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Value(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Disabled(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/textarea" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -11954,13 +12412,7 @@ declare module "packages/ui-primitive/src/modules/textarea" {
     export function setTextareaProvider(provider: Provider): void;
     export function Root(props: ViewProps & {
         store?: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Textarea(props: ViewProps & {
         id?: string | undefined;
         store: InputCore<any>;
@@ -11987,49 +12439,19 @@ declare module "packages/ui-primitive/src/modules/textarea" {
     };
     export function Value(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Clear(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Loading(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Count(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Disabled(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/select" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -12052,40 +12474,16 @@ declare module "packages/ui-primitive/src/modules/select" {
     export function Trigger(props: ViewProps & {
         store: SelectCore<any>;
         id?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Value(props: ViewProps & {
         store: SelectCore<any>;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Icon(props: ViewProps & {
         store?: SelectCore<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Clear(props: ViewProps & {
         store: SelectCore<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Portal(props: ViewProps & {
         store: SelectCore<any>;
         animation?: {
@@ -12118,16 +12516,11 @@ declare module "packages/ui-primitive/src/modules/select" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Viewport(props: ViewProps & {
         store: SelectCore<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Search(props: ViewProps & {
         store: SelectCore<any>;
     }, children?: ViewChildren): {
@@ -12140,35 +12533,18 @@ declare module "packages/ui-primitive/src/modules/select" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Item(props: ViewProps & {
         store: SelectCore<any>;
         value: any;
         disabled?: boolean;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ItemIndicator(props: ViewProps & {
         store: SelectCore<any>;
         value: any;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/cascader" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -12191,40 +12567,16 @@ declare module "packages/ui-primitive/src/modules/cascader" {
     export function Trigger(props: ViewProps & {
         store: CascaderCore<any>;
         id?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Value(props: ViewProps & {
         store: CascaderCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Icon(props: ViewProps & {
         store?: CascaderCore<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Clear(props: ViewProps & {
         store: CascaderCore<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Content(props: ViewProps & {
         store: CascaderCore<any>;
         animation?: {
@@ -12241,16 +12593,11 @@ declare module "packages/ui-primitive/src/modules/cascader" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Panels(props: ViewProps & {
         store: CascaderCore<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Panel(props: ViewProps & {
         store: CascaderCore<any>;
         panelIndex: number;
@@ -12258,31 +12605,13 @@ declare module "packages/ui-primitive/src/modules/cascader" {
             selected: boolean;
             focused: boolean;
         })[];
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Item(props: ViewProps & {
         store: CascaderCore<any>;
         panelIndex: number;
         option: CascaderOption<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ItemIndicator(props: ViewProps & {
         store: CascaderCore<any>;
         hasChildren: boolean;
@@ -12296,6 +12625,7 @@ declare module "packages/ui-primitive/src/modules/cascader" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Search(props: ViewProps & {
         store: CascaderCore<any>;
@@ -12309,6 +12639,7 @@ declare module "packages/ui-primitive/src/modules/cascader" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function SearchResults(props: ViewProps & {
         store: CascaderCore<any>;
@@ -12322,6 +12653,7 @@ declare module "packages/ui-primitive/src/modules/cascader" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function SearchResultItem(props: ViewProps & {
         store: CascaderCore<any>;
@@ -12329,13 +12661,7 @@ declare module "packages/ui-primitive/src/modules/cascader" {
             path: CascaderOption<any>[];
             value: any[];
         };
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/tag-select" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -12358,58 +12684,22 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
     export function Trigger(props: ViewProps & {
         store: TagSelectCore<any>;
         id?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Value(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function TagList(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Tag(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function TagRemove(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Icon(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Portal(props: ViewProps & {
         store: TagSelectCore<any>;
         animation?: {
@@ -12442,16 +12732,11 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Viewport(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function FilteredList(props: ViewProps & {
         store: TagSelectCore<any>;
         each: (option: {
@@ -12460,13 +12745,7 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
             selected: boolean;
             focused: boolean;
         }, index: number) => ViewChildren;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Empty(props: ViewProps & {
         store: TagSelectCore<any>;
     }, children: ViewChildren): {
@@ -12479,43 +12758,20 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Item(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ItemIndicator(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Clear(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Search(props: ViewProps & {
         store: TagSelectCore<any>;
         placeholder?: string;
@@ -12550,39 +12806,15 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
     export function Trigger(props: ViewProps & {
         store: DatePickerCore;
         id?: string;
-    }, children?: ViewChildren): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): TimelessElement<{}, any>;
     export function Value(props: ViewProps & {
         store: DatePickerCore;
         placeholder?: string;
-    }, children?: ViewChildren): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
-    export function Icon(props: ViewProps, children: ViewChildren): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): TimelessElement<{}, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): TimelessElement<{}, any>;
     export function Clear(props: ViewProps & {
         store: DatePickerCore;
-    }, children: ViewChildren): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): TimelessElement<{}, any>;
     export function Portal(props: ViewProps & {
         store: DatePickerCore;
     }, children?: ViewChildren): {
@@ -12611,25 +12843,14 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Calendar(props: ViewProps & {
         store: DatePickerCore;
-    }, children: ViewChildren): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): TimelessElement<{}, any>;
     export function CalendarHeader(props: ViewProps & {
         store: DatePickerCore;
-    }, children?: ViewChildren): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): TimelessElement<{}, any>;
     export function CalendarPrevButton(props: ButtonProps & {
         store: DatePickerCore;
     }, children?: ViewChildren): {
@@ -12694,22 +12915,10 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
     };
     export function CalendarGrid(props: ViewProps & {
         store: DatePickerCore;
-    }, children: ViewChildren): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): TimelessElement<{}, any>;
     export function CalendarGridHeader(props: ViewProps & {
         store: DatePickerCore;
-    }, children?: ViewChildren): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): TimelessElement<{}, any>;
     export function CalendarGridBody(props: ViewProps & {
         store: DatePickerCore;
         renderCell?: (cell: {
@@ -12719,13 +12928,7 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
             is_prev_month: boolean;
             is_next_month: boolean;
         }) => TimelessElement | null;
-    }, children?: ViewChildren): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): TimelessElement<{}, any>;
     export function CalendarCell(props: ButtonProps & {
         store: DatePickerCore;
         value: Date;
@@ -12783,30 +12986,12 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
     export function Trigger(props: ViewProps & {
         store: DateRangePickerCore;
         id?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Value(props: ViewProps & {
         store: DateRangePickerCore;
         placeholder?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Icon(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Portal(props: ViewProps & {
         store: DateRangePickerCore;
     }, children?: ViewChildren): {
@@ -12835,52 +13020,23 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Calendars(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function LeftCalendar(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function RightCalendar(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function LeftCalendarHeader(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function RightCalendarHeader(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function LeftPrevButton(props: ButtonProps & {
         store: DateRangePickerCore;
     }, children?: ViewChildren): {
@@ -13007,40 +13163,16 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
     };
     export function CalendarGrid(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function CalendarGridHeader(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function LeftCalendarGridBody(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function RightCalendarGridBody(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function CalendarCell(props: ButtonProps & {
         store: DateRangePickerCore;
         value: Date;
@@ -13098,39 +13230,15 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     export function Trigger(props: ViewProps & {
         store: TimePickerCore;
         id?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Value(props: ViewProps & {
         store: TimePickerCore;
         placeholder?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Icon(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Clear(props: ViewProps & {
         store: TimePickerCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Portal(props: ViewProps & {
         store: TimePickerCore;
     }, children?: ViewChildren): {
@@ -13159,25 +13267,14 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function TimePanel(props: ViewProps & {
         store: TimePickerCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function HourColumn(props: ViewProps & {
         store: TimePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function HourItem(props: ButtonProps & {
         store: TimePickerCore;
         value: number;
@@ -13212,13 +13309,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     };
     export function MinuteColumn(props: ViewProps & {
         store: TimePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function MinuteItem(props: ButtonProps & {
         store: TimePickerCore;
         value: number;
@@ -13253,13 +13344,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     };
     export function SecondColumn(props: ViewProps & {
         store: TimePickerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function SecondItem(props: ButtonProps & {
         store: TimePickerCore;
         value: number;
@@ -13417,6 +13502,7 @@ declare module "packages/ui-primitive/src/modules/checkbox" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Input(props: CheckboxProps & {
         store: CheckboxCore;
@@ -13452,16 +13538,11 @@ declare module "packages/ui-primitive/src/modules/checkbox" {
         readonly children: import("@timeless/timeless").TimelessElement<any, any>[] & TimelessElement[];
         render(): any;
         onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
     export function Group(props: ViewProps & {
         store: CheckboxGroupCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function GroupItem(props: ViewProps & {
         store: CheckboxGroupCore<any>;
         item: {
@@ -13471,13 +13552,7 @@ declare module "packages/ui-primitive/src/modules/checkbox" {
         };
         renderCheckbox?: (core: CheckboxCore) => ViewChildren;
         renderLabel?: (label: string) => ViewChildren;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/radio" {
     import { RadioProps } from "packages/timeless/src/index";
@@ -13542,6 +13617,7 @@ declare module "packages/ui-primitive/src/modules/radio" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Input(props: RadioProps & {
         store: RadioCore;
@@ -13565,16 +13641,11 @@ declare module "packages/ui-primitive/src/modules/radio" {
         readonly children: import("@timeless/timeless").TimelessElement<any, any>[] & TimelessElement[];
         render(): any;
         onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
     export function Group(props: ViewProps & {
         store: RadioGroupCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function GroupItem(props: ViewProps & {
         store: RadioGroupCore<any>;
         item: {
@@ -13582,13 +13653,7 @@ declare module "packages/ui-primitive/src/modules/radio" {
             value: any;
             core: RadioCore;
         };
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/slider" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -13599,38 +13664,14 @@ declare module "packages/ui-primitive/src/modules/slider" {
         step?: number;
         disabled?: boolean;
         onChange?: (v: number) => void;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Track(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Track(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Range(props: ViewProps & {
         percentage: any;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Thumb(props: ViewProps & {
         percentage: any;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/toggle" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/timeless/src/index";
@@ -13669,13 +13710,7 @@ declare module "packages/ui-primitive/src/modules/toggle" {
     };
     export function Thumb(props: ViewProps & {
         store: SwitchCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/switch" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/timeless/src/index";
@@ -13714,35 +13749,17 @@ declare module "packages/ui-primitive/src/modules/switch" {
     };
     export function Thumb(props: ViewProps & {
         store: SwitchCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/field" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { SingleFieldCore } from "packages/ui-vm/src/index";
     export function Label(props: ViewProps & {
         store: SingleFieldCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Control(props: ViewProps & {
         store: SingleFieldCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Error(props: ViewProps & {
         store: SingleFieldCore<any>;
         fallback?: ViewChildren;
@@ -13756,16 +13773,11 @@ declare module "packages/ui-primitive/src/modules/field" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
     export function Help(props: ViewProps & {
         store: SingleFieldCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/popover" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/timeless/src/index";
@@ -13789,13 +13801,7 @@ declare module "packages/ui-primitive/src/modules/popover" {
     };
     export function Content(props: ViewProps & {
         store: PopoverCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Trigger(props: ViewProps & {
         store: PopoverCore;
     }, children?: ViewChildren): {
@@ -13873,22 +13879,10 @@ declare module "packages/ui-primitive/src/modules/popconfirm" {
     };
     export function Content(props: ViewProps & {
         store: PopconfirmCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Trigger(props: ViewProps & {
         store: PopconfirmCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Portal(props: ViewProps & {
         store: PopconfirmCore;
     }, children?: ViewChildren): {
@@ -14017,24 +14011,12 @@ declare module "packages/ui-primitive/src/modules/tooltip" {
     };
     export function Content(props: ViewProps & {
         store?: TooltipCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Trigger(props: ViewProps & {
         content?: ViewChildren;
         side?: Side;
         align?: Align;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Portal(props: ViewProps & {
         store?: TooltipCore;
     }, children?: ViewChildren): {
@@ -14065,59 +14047,23 @@ declare module "packages/ui-primitive/src/modules/sheet" {
     };
     export function Overlay(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Content(props: ViewProps & {
         store: DialogCore;
         side?: "right" | "top" | "bottom" | "left";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Header(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Title(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Description(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Close(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/dialog" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -14136,85 +14082,31 @@ declare module "packages/ui-primitive/src/modules/dialog" {
     };
     export function Overlay(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Content(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Header(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Title(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Body(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Footer(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Close(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Cancel(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function OK(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/toast" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -14224,59 +14116,23 @@ declare module "packages/ui-primitive/src/modules/toast" {
     }, children?: ViewChildren): any[];
     export function Mask(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Viewport(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Item(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Icon(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Text(props: ViewProps & {
         store: ToastCore;
         text: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Close(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/steps" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -14288,68 +14144,26 @@ declare module "packages/ui-primitive/src/modules/steps" {
     export function Root(props: ViewProps & {
         store: StepCore;
         items: StepItem[];
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function List(props: ViewProps & {
         store: StepCore;
         items: StepItem[];
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Item(props: ViewProps & {
         store: StepCore;
         index: number;
         item?: StepItem;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Indicator(props: ViewProps & {
         store: StepCore;
         index: number;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Connector(props: ViewProps & {
         store: StepCore;
         index: number;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Title(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function Description(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Title(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Description(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/scroll-view" {
     import { ViewProps, ViewChildren, TimelessElement } from "packages/timeless/src/index";
@@ -14399,31 +14213,13 @@ declare module "packages/ui-primitive/src/modules/sonner" {
     import { SonnerCore } from "packages/ui-vm/src/index";
     export function Toast(props: {
         store: SonnerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Content(props: {
         store: SonnerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Close(props: {
         store: SonnerCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/error-boundary" {
     import { TimelessElement } from "packages/timeless/src/index";
@@ -14463,6 +14259,7 @@ declare module "packages/ui-primitive/src/modules/keep-alive-sub-views" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
 }
 declare module "packages/ui-primitive/src/modules/standard-sub-views" {
@@ -14494,6 +14291,7 @@ declare module "packages/ui-primitive/src/modules/standard-sub-views" {
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
+        _hmr_dispose(): void;
     };
 }
 declare module "packages/ui-primitive/src/index" {
@@ -14557,13 +14355,7 @@ declare module "packages/shadcn/src/modules/input" {
     export function Input(props: ViewProps & {
         store: InputCore<any>;
         id?: string;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/file-picker" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -14571,13 +14363,7 @@ declare module "packages/shadcn/src/modules/file-picker" {
     export function FileInput(props: ViewProps & {
         store: FilePickerCore;
         id?: string;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/number-input" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -14586,13 +14372,7 @@ declare module "packages/shadcn/src/modules/number-input" {
         store: NumberInputCore;
         id?: string;
         showControls?: boolean;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/textarea" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -14603,13 +14383,7 @@ declare module "packages/shadcn/src/modules/textarea" {
         showClear?: boolean;
         showLoading?: boolean;
         showCount?: boolean;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/label" {
     import { ViewChildren, LabelProps } from "packages/timeless/src/index";
@@ -14620,6 +14394,7 @@ declare module "packages/shadcn/src/modules/label" {
         readonly children: import("@timeless/timeless").TimelessElement<any, any>[] & TimelessElement[];
         render(): any;
         onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
 }
 declare module "packages/shadcn/src/modules/checkbox" {
@@ -14649,13 +14424,7 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
         class?: string;
         itemClass?: string;
         direction?: "horizontal" | "vertical";
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
     export function CheckboxGroupItem(props: {
         store: CheckboxGroupCore<any>;
         item: {
@@ -14664,13 +14433,7 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
             core: CheckboxCore;
         };
         class?: string;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/radio" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -14696,13 +14459,7 @@ declare module "packages/shadcn/src/modules/radio" {
         class?: string;
         itemClass?: string;
         direction?: "horizontal" | "vertical";
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
     export function RadioGroupItem(props: {
         store: RadioGroupCore<any>;
         item: {
@@ -14711,13 +14468,7 @@ declare module "packages/shadcn/src/modules/radio" {
             core: RadioCore;
         };
         class?: string;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/select" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -14814,13 +14565,7 @@ declare module "packages/shadcn/src/modules/tooltip" {
         content?: ViewChildren;
         side?: Side;
         align?: Align;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function TooltipProvider(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -15031,13 +14776,7 @@ declare module "packages/shadcn/src/modules/slider" {
         step?: number;
         disabled?: boolean;
         onChange?: (v: number) => void;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/progress" {
     import { Ref } from "packages/timeless/src/index";
@@ -15047,13 +14786,7 @@ declare module "packages/shadcn/src/modules/progress" {
         store?: ProgressCore;
         value?: Ref<number> | number;
         max?: number;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/button" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
@@ -15112,13 +14845,7 @@ declare module "packages/shadcn/src/modules/menu" {
     import { MenuCore } from "packages/ui-vm/src/index";
     export function Menu(props: ViewProps & {
         store: MenuCore;
-    }): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    }): TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/dropdown-menu" {
     import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
@@ -15169,13 +14896,7 @@ declare module "packages/shadcn/src/modules/tabs" {
     export function Tabs(props: ViewProps & {
         store: TabHeaderCore<any>;
         items?: TabItem[];
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/steps" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -15187,13 +14908,7 @@ declare module "packages/shadcn/src/modules/steps" {
     export function Steps(props: ViewProps & {
         store: StepCore;
         items: StepItem[];
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/scroll-view" {
     import { ViewChildren, type ViewProps } from "packages/timeless/src/index";
@@ -15206,70 +14921,22 @@ declare module "packages/shadcn/src/modules/badge" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Badge(props: ViewProps & {
         variant?: "default" | "secondary" | "outline" | "destructive";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/separator" {
     import { ViewProps } from "packages/timeless/src/index";
     export function Separator(props: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/card" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/avatar" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -15280,58 +14947,22 @@ declare module "packages/shadcn/src/modules/avatar" {
         alt?: string;
         size?: Parameters<typeof AvatarPrimitive.Root>[0]["size"];
         fallback?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/skeleton" {
     import { ViewProps } from "packages/timeless/src/index";
-    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/alert" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Alert(props: ViewProps & {
         variant?: "default" | "destructive";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/scroll-area" {
-    export function ScrollArea(props: any, children: any): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function ScrollArea(props: any, children: any): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/sheet" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
@@ -15351,147 +14982,51 @@ declare module "packages/shadcn/src/modules/sheet" {
     };
 }
 declare module "packages/shadcn/src/modules/aspect-ratio" {
-    export function AspectRatio(props: any, children: any): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function AspectRatio(props: any, children: any): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/accordion" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
     import { AccordionCore } from "packages/ui-vm/src/index";
     type AccordionItem = {
-        title: string | ViewChildren;
+        title: ViewChildren;
         content: ViewChildren;
     };
     export function Accordion(props: ViewProps & {
         store: AccordionCore;
         items: AccordionItem[];
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/kbd" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    export function Kbd(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function KbdGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function Kbd(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function KbdGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/table" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/form" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { ObjectFieldCore, ArrayFieldCore } from "packages/ui-vm/src/index";
     export function Form(props: ViewProps & {
         store: ObjectFieldCore<any> | ArrayFieldCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/field" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { SingleFieldCore } from "packages/ui-vm/src/index";
-    export function FieldGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function FieldSet(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function FieldLegend(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function FieldDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function FieldGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FieldSet(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FieldLegend(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FieldDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function FieldSeparator(props?: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
     export function FieldLabel(props: ViewProps & {
         store?: SingleFieldCore<any>;
         for?: string;
@@ -15504,6 +15039,7 @@ declare module "packages/shadcn/src/modules/field" {
         readonly children: import("@timeless/timeless").TimelessElement<any, any>[] & TimelessElement[];
         render(): any;
         onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
     export function FieldInlineLabel(props: ViewProps & {
         store?: SingleFieldCore<any>;
@@ -15515,33 +15051,16 @@ declare module "packages/shadcn/src/modules/field" {
         readonly children: import("@timeless/timeless").TimelessElement<any, any>[] & TimelessElement[];
         render(): any;
         onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
-    export function FieldHelp(props: {}, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
-    export function FieldError(props: {}, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    export function FieldHelp(props: {}, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FieldError(props: {}, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Field(props: ViewProps & {
         store: SingleFieldCore<any>;
         id?: string;
         orientation?: "vertical" | "horizontal";
         inline?: boolean;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/resizable-panels" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
@@ -15549,35 +15068,17 @@ declare module "packages/shadcn/src/modules/resizable-panels" {
     export function ResizablePanels(props: ViewProps & {
         store: ResizablePanelsCore;
         direction?: "horizontal" | "vertical";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ResizablePanel(props: ViewProps & {
         store: ResizablePanelCore;
         group: ResizablePanelsCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ResizableHandle(props: ViewProps & {
         store: ResizablePanelsCore;
         panelBefore: ResizablePanelCore;
         panelAfter: ResizablePanelCore;
         withHandle?: boolean;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/waterfall" {
     import { type ViewProps, type TimelessElement } from "packages/timeless/src/index";
@@ -15592,13 +15093,7 @@ declare module "packages/shadcn/src/modules/history-panel" {
     import { HistoryCore } from "packages/kit/src/index";
     export function HistoryPanel(props: ViewProps & {
         store: HistoryCore<string, any>;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/llm-provider-form" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -15651,13 +15146,7 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
     };
     export function LLMProviderForm(props: ViewProps & {
         store: LLMProviderFormStore;
-    }): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/sonner" {
     import { DerivedRef, Ref, TimelessElement } from "packages/timeless/src/index";
@@ -15685,13 +15174,7 @@ declare module "packages/shadcn/src/modules/sonner" {
         /** 默认是否展开，false 时 toast 缩小层叠，hover 时展开 */
         expand?: boolean;
     };
-    export function Toaster(props: ToasterProps): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    export function Toaster(props: ToasterProps): TimelessElement<{}, any>;
     export function Toast(props: {
         store: ToastModel;
         position: string;
@@ -15702,13 +15185,7 @@ declare module "packages/shadcn/src/modules/sonner" {
         toastCount: DerivedRef<number>;
         /** For 组件提供的当前列表位置索引（响应式） */
         idx: DerivedRef<number>;
-    }): TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (TimelessElement | null)[];
-    }, any>;
+    }): TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/affix" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
@@ -15717,13 +15194,7 @@ declare module "packages/shadcn/src/modules/affix" {
         store: AffixCore;
         offsetTop?: number;
         target?: () => HTMLElement | Window;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
-        rendered: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
-        attributes: Record<string, string | number | boolean | undefined>;
-        children: (import("@timeless/timeless").TimelessElement | null)[];
-    }, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/index" {
     import { Input } from "packages/shadcn/src/modules/input";
@@ -15778,8 +15249,6 @@ declare module "packages/shadcn/src/index" {
     import { LLMProviderForm } from "packages/shadcn/src/modules/llm-provider-form";
     import { Toaster } from "packages/shadcn/src/modules/sonner";
     import { Affix } from "packages/shadcn/src/modules/affix";
-    import "./index.css";
-    import "./styles/globals.css";
     export const TimelessShadcnVersion: any;
     export * from "packages/ui-primitive/src/index";
     export * as ui from "packages/ui-vm/src/index";
@@ -16010,7 +15479,9 @@ declare const Timeless: {
 
 // @timeless/timeless
 declare const ArraySignal: typeof import("@timeless/timeless").ArraySignal;
+declare const Col: typeof import("@timeless/timeless").Col;
 declare const Column: typeof import("@timeless/timeless").Column;
+declare const DepInfo: typeof import("@timeless/timeless").DepInfo;
 declare const DerivedRef: typeof import("@timeless/timeless").DerivedRef;
 declare const DismissableLayer: typeof import("@timeless/timeless").DismissableLayer;
 declare const FilePicker: typeof import("@timeless/timeless").FilePicker;
@@ -16037,21 +15508,38 @@ declare const RefObject: typeof import("@timeless/timeless").RefObject;
 declare const RichText: typeof import("@timeless/timeless").RichText;
 declare const Row: typeof import("@timeless/timeless").Row;
 declare const SVG: typeof import("@timeless/timeless").SVG;
+declare const Scope: typeof import("@timeless/timeless").Scope;
 declare const Show: typeof import("@timeless/timeless").Show;
 declare const Signal: typeof import("@timeless/timeless").Signal;
+declare const SplitPane: typeof import("@timeless/timeless").SplitPane;
+declare const SplitView: typeof import("@timeless/timeless").SplitView;
 declare const Subscriber: typeof import("@timeless/timeless").Subscriber;
+declare const SubscriberWithId: typeof import("@timeless/timeless").SubscriberWithId;
+declare const TabPane: typeof import("@timeless/timeless").TabPane;
+declare const TabView: typeof import("@timeless/timeless").TabView;
 declare const Text: typeof import("@timeless/timeless").Text;
 declare const TimelessRefArray: typeof import("@timeless/timeless").TimelessRefArray;
 declare const View: typeof import("@timeless/timeless").View;
+declare const Webview: typeof import("@timeless/timeless").Webview;
+declare const WindowView: typeof import("@timeless/timeless").WindowView;
 declare const classNames: typeof import("@timeless/timeless").classNames;
 declare const combine: typeof import("@timeless/timeless").combine;
 declare const computed: typeof import("@timeless/timeless").computed;
+declare const createContext: typeof import("@timeless/timeless").createContext;
 declare const defineModel: typeof import("@timeless/timeless").defineModel;
 declare const derive: typeof import("@timeless/timeless").derive;
+declare const dumpAll: typeof import("@timeless/timeless").dumpAll;
+declare const dumpDeps: typeof import("@timeless/timeless").dumpDeps;
+declare const findLeakedDeps: typeof import("@timeless/timeless").findLeakedDeps;
+declare const generateTrackId: typeof import("@timeless/timeless").generateTrackId;
+declare const getDeps: typeof import("@timeless/timeless").getDeps;
+declare const getOwner: typeof import("@timeless/timeless").getOwner;
 declare const getPlatform: typeof import("@timeless/timeless").getPlatform;
 declare const getarr: typeof import("@timeless/timeless").getarr;
 declare const getobj: typeof import("@timeless/timeless").getobj;
-declare const h: typeof import("@timeless/timeless").h;
+declare const hmrRestore: typeof import("@timeless/timeless").hmrRestore;
+declare const hmrScope: typeof import("@timeless/timeless").hmrScope;
+declare const hmrState: typeof import("@timeless/timeless").hmrState;
 declare const isArrayRef: typeof import("@timeless/timeless").isArrayRef;
 declare const isClassNameRef: typeof import("@timeless/timeless").isClassNameRef;
 declare const isElement: typeof import("@timeless/timeless").isElement;
@@ -16064,6 +15552,9 @@ declare const isStyleRef: typeof import("@timeless/timeless").isStyleRef;
 declare const isWriteableRef: typeof import("@timeless/timeless").isWriteableRef;
 declare const join: typeof import("@timeless/timeless").join;
 declare const lazy: typeof import("@timeless/timeless").lazy;
+declare const patch: typeof import("@timeless/timeless").patch;
+declare const printDepTree: typeof import("@timeless/timeless").printDepTree;
+declare const provide: typeof import("@timeless/timeless").provide;
 declare const reactiveArray: typeof import("@timeless/timeless").reactiveArray;
 declare const reactiveObject: typeof import("@timeless/timeless").reactiveObject;
 declare const ref: typeof import("@timeless/timeless").ref;
@@ -16074,10 +15565,13 @@ declare const registryGetArr: typeof import("@timeless/timeless").registryGetArr
 declare const registryGetObj: typeof import("@timeless/timeless").registryGetObj;
 declare const registrySet: typeof import("@timeless/timeless").registrySet;
 declare const release: typeof import("@timeless/timeless").release;
+declare const resolve_children: typeof import("@timeless/timeless").resolve_children;
+declare const runWithOwner: typeof import("@timeless/timeless").runWithOwner;
 declare const setPlatform: typeof import("@timeless/timeless").setPlatform;
 declare const signal: typeof import("@timeless/timeless").signal;
 declare const styleNames: typeof import("@timeless/timeless").styleNames;
 declare const uncomputed: typeof import("@timeless/timeless").uncomputed;
+declare const use: typeof import("@timeless/timeless").use;
 
 // @timeless/kit
 declare const ApplicationModel: typeof import("@timeless/kit").ApplicationModel;

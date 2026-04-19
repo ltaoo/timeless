@@ -63,19 +63,9 @@ export function Trigger(
         if (store.trigger === "click") {
           const handlePointerDown = (e: any) => {
             // console.log("handle pointer down");
-            if (store.disabled) {
-              return;
-            }
             e.preventDefault();
             e.stopPropagation();
-            if (store.menu.presence?.state.exit) {
-              return;
-            }
-            if (store.menu.state.open) {
-              store.hide();
-              return;
-            }
-            store.show();
+            store.handleClickTrigger(e);
           };
           listener$.add(
             $ref.addEventListener("pointerdown", handlePointerDown),
@@ -84,21 +74,11 @@ export function Trigger(
         // Handle hover trigger
         if (store.trigger === "hover") {
           const handleMouseEnter = () => {
-            if (store.disabled) {
-              return;
-            }
-            if (store.menu.presence?.state.exit) {
-              return;
-            }
-            // _hoverClearHide(store);
-            store.show();
+            store.handleEnterTrigger();
           };
 
           const handleMouseLeave = () => {
-            if (store.disabled) {
-              return;
-            }
-            // _hoverScheduleHide(store);
+            store.handleLeaveTrigger();
           };
 
           // Prevent click from closing the menu in hover mode
