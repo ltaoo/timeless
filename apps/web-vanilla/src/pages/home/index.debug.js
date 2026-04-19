@@ -121,7 +121,7 @@ export default function OverlayView() {
   const state_ = refobj({
     open: false,
   });
-  const checked_ = ref(false);
+  const checked_ = ref(true);
 
   return ScrollView(
     {
@@ -129,435 +129,44 @@ export default function OverlayView() {
       store: ui.view$,
     },
     [
-      // Icon({
-      //   name: "chevron-up",
-      //   class: classNames([
-      //     computed(state_, (t) => {
-      //       console.log("open changed", t.open);
-      //       return t.open ? "" : "rotate-180";
-      //     }),
-      //   ]),
-      // }),
-      // Button(
-      //   {
-      //     store: new Timeless.ui.ButtonCore({
-      //       onClick() {
-      //         state_.as((prev) => {
-      //           return {
-      //             ...prev,
-      //             open: !prev.open,
-      //           };
-      //         });
-      //       },
-      //     }),
-      //   },
-      //   ["Click it"],
-      // ),
-      // DropdownMenu(
-      //   {
-      //     store: new Timeless.ui.DropdownMenuCore({
-      //       items: [
-      //         new Timeless.ui.MenuItemCore({
-      //           label: "Edit",
-      //           onClick() {
-      //             console.log("edit");
-      //           },
-      //         }),
-      //         new Timeless.ui.MenuItemCore({
-      //           label: "Duplicate",
-      //           onClick() {
-      //             console.log("duplicate");
-      //           },
-      //         }),
-      //         new Timeless.ui.MenuItemCore({
-      //           label: "Delete",
-      //           onClick() {
-      //             console.log("delete");
-      //           },
-      //         }),
-      //       ],
-      //     }),
-      //   },
-      //   [
-      //     Button(
-      //       {
-      //         store: new Timeless.ui.ButtonCore({
-      //           variant: "outline",
-      //           onClick() {
-      //             console.log("click Open Menu");
-      //           },
-      //         }),
-      //       },
-      //       ["Open Menu"],
-      //     ),
-      //   ],
-      // ),
-      View({ class: "space-y-8" }, [
-        // Cascader({
-        //   store: new Timeless.ui.CascaderCore({
-        //     placeholder: "请选择地区",
-        //     options: [
-        //       {
-        //         value: "zhejiang",
-        //         label: "浙江",
-        //         children: [
-        //           {
-        //             value: "hangzhou",
-        //             label: "杭州",
-        //             children: [
-        //               { value: "xihu", label: "西湖区" },
-        //               { value: "binjiang", label: "滨江区" },
-        //             ],
-        //           },
-        //           {
-        //             value: "ningbo",
-        //             label: "宁波",
-        //             children: [
-        //               { value: "haishu", label: "海曙区" },
-        //               { value: "jiangbei", label: "江北区" },
-        //               { value: "xian", label: "下城区" },
-        //             ],
-        //           },
-        //           {
-        //             label: "绍兴",
-        //             value: "shaoxing",
-        //             children: [{ value: "wuxi", label: "吴市" }],
-        //           },
-        //         ],
-        //       },
-        //       {
-        //         value: "jiangsu",
-        //         label: "江苏",
-        //         children: [
-        //           {
-        //             value: "nanjing",
-        //             label: "南京",
-        //             children: [
-        //               { value: "xuanwu", label: "玄武区" },
-        //               { value: "qinhuai", label: "秦淮区" },
-        //             ],
-        //           },
-        //           {
-        //             value: "suzhou",
-        //             label: "苏州",
-        //             children: [
-        //               { value: "gusu", label: "姑苏区" },
-        //               { value: "wuzhong", label: "吴中区" },
-        //             ],
-        //           },
-        //           {
-        //             value: "wuxi",
-        //             label: "吴",
-        //             children: [{ value: "wuxi", label: "吴市" }],
-        //           },
-        //         ],
-        //       },
-        //     ],
-        //   }),
-        // }),
-        // DateTimePicker({
-        //   date: Timeless.ui.DatePickerCore({ today: new Date() }),
-        //   time: Timeless.ui.TimePickerCore({}),
-        //   placeholder: "选择日期时间",
-        // }),
-        View({ class: "flex items-center gap-2" }, [
-          Checkbox({
-            id: "checkbox_with_label1",
-            store: new Timeless.ui.CheckboxCore({}),
+      Button(
+        {
+          store: new Timeless.ui.ButtonCore({
+            onClick() {
+              console.log("123");
+              checked_.toggle();
+            },
           }),
-          Label({ for: "checkbox_with_label1", class: "text-sm" }, [
-            "Accept terms and conditions",
-          ]),
-        ]),
-        // Select({
-        //   class: "w-[120px]",
-        //   store: new Timeless.ui.SelectCore({
-        //     defaultValue: "apple",
-        //     options: [
-        //       { value: "apple", label: "苹果" },
-        //       { value: "banana", label: "香蕉" },
-        //       { value: "orange", label: "橙子" },
-        //     ],
-        //   }),
-        // }),
-        // DropdownMenu(
-        //   {
-        //     store: new Timeless.ui.DropdownMenuCore({
-        //       items: [
-        //         new Timeless.ui.MenuItemCore({
-        //           label: "Cut",
-        //           onClick() {
-        //             console.log("cut");
-        //           },
-        //         }),
-        //         new Timeless.ui.MenuItemCore({
-        //           label: "Copy",
-        //           onClick() {
-        //             console.log("copy");
-        //           },
-        //         }),
-        //         new Timeless.ui.MenuItemCore({
-        //           label: "Share",
-        //           menu: new Timeless.ui.MenuCore({
-        //             items: [
-        //               new Timeless.ui.MenuItemCore({
-        //                 label: "Email",
-        //                 onClick() {
-        //                   console.log("email");
-        //                 },
-        //               }),
-        //               new Timeless.ui.MenuItemCore({
-        //                 label: "Message",
-        //                 onClick() {
-        //                   console.log("message");
-        //                 },
-        //               }),
-        //               new Timeless.ui.MenuItemCore({
-        //                 label: "AirDrop",
-        //                 onClick() {
-        //                   console.log("airdrop");
-        //                 },
-        //               }),
-        //             ],
-        //           }),
-        //         }),
-        //         new Timeless.ui.MenuItemCore({
-        //           label: "Delete",
-        //           onClick() {
-        //             console.log("delete");
-        //           },
-        //         }),
-        //       ],
-        //     }),
-        //   },
-        //   [Button({ store: new Timeless.ui.ButtonCore({}) }, ["With Submenu"])],
-        // ),
-        // Section("Popover", [
-        //   Item("Default", [
-        //     Popover(
-        //       {
-        //         store: new Timeless.ui.PopoverCore({
-        //           align: "middle",
-        //         }),
-        //         title: [
-        //           View(
-        //             {
-        //               class:
-        //                 "w-[200px] h-[30px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
-        //             },
-        //             [Txt("Popover Title")],
-        //           ),
-        //         ],
-        //         content: [
-        //           View(
-        //             {
-        //               class:
-        //                 "w-[200px] h-[100px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
-        //             },
-        //             [Txt("Popover Content")],
-        //           ),
-        //         ],
-        //       },
-        //       [
-        //         Button(
-        //           {
-        //             variant: "outline",
-        //             store: new Timeless.ui.ButtonCore({}),
-        //           },
-        //           ["Open Popover"],
-        //         ),
-        //       ],
-        //     ),
-        //   ]),
-        //   Item("Left Side", [
-        //     Popover(
-        //       {
-        //         store: new Timeless.ui.PopoverCore({
-        //           side: "right",
-        //           align: "start",
-        //         }),
-        //         title: [
-        //           View(
-        //             {
-        //               class:
-        //                 "w-[200px] h-[30px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
-        //             },
-        //             [Txt("Popover Title")],
-        //           ),
-        //         ],
-        //         content: [
-        //           View(
-        //             {
-        //               class:
-        //                 "w-[200px] h-[100px] bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-500 select-none",
-        //             },
-        //             [Txt("Popover Content")],
-        //           ),
-        //         ],
-        //       },
-        //       [
-        //         Button(
-        //           {
-        //             variant: "outline",
-        //             store: new Timeless.ui.ButtonCore({}),
-        //           },
-        //           ["Open Popover"],
-        //         ),
-        //       ],
-        //     ),
-        //   ]),
-        // ]),
-        // Section("Dropdown Menu", [
-        //   Item("Default", [
-        //     DropdownMenu(
-        //       {
-        //         store: new Timeless.ui.DropdownMenuCore({
-        //           items: [
-        //             new Timeless.ui.MenuItemCore({
-        //               label: "Edit",
-        //               onClick() {
-        //                 console.log("edit");
-        //               },
-        //             }),
-        //             new Timeless.ui.MenuItemCore({
-        //               label: "More",
-        //               menu: new Timeless.ui.MenuCore({
-        //                 items: [
-        //                   new Timeless.ui.MenuItemCore({
-        //                     label: "Duplicated",
-        //                     onClick() {
-        //                       console.log("duplicated");
-        //                     },
-        //                   }),
-        //                   new Timeless.ui.MenuItemCore({
-        //                     label: "Duplicated2",
-        //                     menu: new Timeless.ui.MenuCore({
-        //                       items: [
-        //                         new Timeless.ui.MenuItemCore({
-        //                           label: "click it",
-        //                           onClick() {
-        //                             console.log("123");
-        //                           },
-        //                         }),
-        //                       ],
-        //                     }),
-        //                     onClick() {
-        //                       console.log("duplicated");
-        //                     },
-        //                   }),
-        //                 ],
-        //               }),
-        //               onClick() {
-        //                 console.log("more");
-        //               },
-        //             }),
-        //             new Timeless.ui.MenuItemCore({
-        //               label: "Delete",
-        //               onClick() {
-        //                 console.log("delete");
-        //               },
-        //             }),
-        //           ],
-        //         }),
-        //       },
-        //       [
-        //         Button(
-        //           {
-        //             variant: "outline",
-        //             store: new Timeless.ui.ButtonCore({
-        //               onClick() {
-        //                 console.log("click Open Menu");
-        //               },
-        //             }),
-        //           },
-        //           ["Open Menu"],
-        //         ),
-        //       ],
-        //     ),
-        //   ]),
-        // ]),
-        // View({ class: "h-[300px]" }, [
-        //   ScrollView({ store: ui.view$ }, [
-        //     ContextMenu({ store: ui.contextMenu$ }, [
-        //       Waterfall({
-        //         store: ui.waterfall$,
-        //         class: "!overflow-visible !h-auto",
-        //         /** @param {{ id: number; name: string; size: number}} task  */
-        //         render(task) {
-        //           return View(
-        //             {
-        //               // "data-context-id": task.id,
-        //               class: classNames([
-        //                 "flex items-center gap-3 px-3 py-2.5",
-        //                 "border-b border-zinc-100 dark:border-zinc-800",
-        //                 "transition-colors",
-        //                 computed(contextFocusedRecord_, (t) => {
-        //                   return t && t.id === task.id
-        //                     ? "bg-blue-50 dark:bg-blue-950/30"
-        //                     : "";
-        //                 }),
-        //               ]),
-        //               onContextMenu(event) {
-        //                 contextFocusedRecord_.as(task);
-        //               },
-        //             },
-        //             [
-        //               View(
-        //                 {
-        //                   class: classNames([
-        //                     "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-        //                     "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
-        //                   ]),
-        //                 },
-        //                 [
-        //                   (() => {
-        //                     if (task.name) {
-        //                       const ext = task.name
-        //                         .split(".")
-        //                         .pop()
-        //                         .toUpperCase();
-        //                       return ext.length <= 4 ? ext : "FILE";
-        //                     }
-        //                     return "FILE";
-        //                   })(),
-        //                 ],
-        //               ),
-        //               View({ class: "flex-1 min-w-0" }, [
-        //                 View(
-        //                   {
-        //                     class:
-        //                       "text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate",
-        //                   },
-        //                   [task.name],
-        //                 ),
-        //                 View(
-        //                   {
-        //                     class: "mt-0.5 text-xs text-emerald-500",
-        //                   },
-        //                   [task.size],
-        //                 ),
-        //               ]),
-        //               View(
-        //                 {
-        //                   class:
-        //                     "flex-shrink-0 text-xs text-emerald-500 font-medium",
-        //                 },
-        //                 ["Done"],
-        //               ),
-        //             ],
-        //           );
-        //         },
-        //       }),
-        //     ]),
-        //     View(
-        //       {
-        //         class: classNames(["py-3 text-center text-xs text-zinc-400"]),
-        //       },
-        //       [Txt("Scroll to bottom to load more")],
-        //     ),
-        //   ]),
-        // ]),
-      ]),
+        },
+        ["Click it"],
+      ),
+      Show({
+        when: checked_,
+        ok() {
+          return Portal({}, [
+            View(
+              {
+                style: {
+                  "z-index": 300,
+                  position: "fixed",
+                  top: "120px",
+                  right: "120px",
+                  width: "200px",
+                  height: "120px",
+                  border: "1px solid #ccc",
+                },
+                onMouseEnter() {
+                  console.log("enter");
+                },
+                onMouseLeave() {
+                  console.log("leave");
+                },
+              },
+              ["Checked!"],
+            ),
+          ]);
+        },
+      }),
     ],
   );
 }

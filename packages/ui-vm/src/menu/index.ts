@@ -7,14 +7,18 @@ import { PopperCore, Side, Align } from "@/popper/index";
 import { DismissableLayerCore } from "@/dismissable-layer/index";
 import { PresenceCore } from "@/presence/index";
 import { Direction } from "@/direction/index";
+import { Logger } from "@/util";
 
 import { MenuItemCore } from "./item";
 import { MenuSeparatorCore } from "./separator";
 import { MenuGroupCore } from "./group";
 
+const logger = Logger({ prefix: "vm", scope: "menu" });
+
 enum Events {
   Show,
-  Hiding,
+  PrepareHide,
+  StartHide,
   Hidden,
   EnterItem,
   LeaveItem,
@@ -24,7 +28,8 @@ enum Events {
 }
 type TheTypesOfEvents = {
   [Events.Show]: void;
-  [Events.Hiding]: void;
+  [Events.PrepareHide]: void;
+  [Events.StartHide]: void;
   [Events.Hidden]: void;
   [Events.EnterItem]: MenuItemCore;
   [Events.LeaveItem]: MenuItemCore;
@@ -66,13 +71,22 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   layer: DismissableLayerCore;
 
   open_timer: NodeJS.Timeout | null = null;
-
-  /** Global registry of open root menus (excludes submenus) */
-  private static openRootMenus = new Set<MenuCore>();
-  /** Whether this menu is registered as a root menu (not a submenu) */
-  private _is_root_menu = true;
+  hide_timer: NodeJS.Timeout | null = null;
+  /** 鼠标离开 item 时，可能要隐藏子菜单，但是如果从有子菜单的 item 离开前往子菜单，就不用隐藏 */
+  maybe_hide_sub = false;
+  hide_sub_timer: NodeJS.Timeout | null = null;
 
   content: unknown = null;
+
+  items: MenuEntry[] = [];
+  cur_sub: MenuCore | null = null;
+  cur_item: MenuItemCore | null = null;
+  /** 父菜单引用，用于子菜单清除父菜单的定时器 */
+  parent_menu: MenuCore | null = null;
+  /** 鼠标是否处于菜单中 */
+  inside = false;
+  /** 鼠标是否处于子菜单中 */
+  in_sub_menu = false;
 
   state: MenuCoreState = {
     open: false,
@@ -129,21 +143,21 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
 
     this.listen_items(items);
 
-    this.popper.onEnter(() => {
-      console.log("[DOMAIN]ui/menu/index - popper.onEnter", this._name);
-      this.state.hover = true;
-      // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
-      if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
-        clearTimeout(this.parent_menu.hide_sub_timer);
-        this.parent_menu.hide_sub_timer = null;
-      }
-      this.emit(Events.EnterMenu);
-    });
-    this.popper.onLeave(() => {
-      console.log("[DOMAIN]ui/menu/index - popper.onLeave", this._name);
-      this.state.hover = false;
-      this.emit(Events.LeaveMenu);
-    });
+    // this.popper.onEnter(() => {
+    //   console.log("[DOMAIN]ui/menu/index - popper.onEnter", this._name);
+    //   this.state.hover = true;
+    //   // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
+    //   if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
+    //     clearTimeout(this.parent_menu.hide_sub_timer);
+    //     this.parent_menu.hide_sub_timer = null;
+    //   }
+    //   this.emit(Events.EnterMenu);
+    // });
+    // this.popper.onLeave(() => {
+    //   console.log("[DOMAIN]ui/menu/index - popper.onLeave", this._name);
+    //   this.state.hover = false;
+    //   this.emit(Events.LeaveMenu);
+    // });
     this.layer.onDismiss(() => {
       console.log("[DOMAIN]ui/menu/index - layer.onDismiss", this._name);
       this.hide();
@@ -172,45 +186,9 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         return;
       }
       this.reset();
-      this.in_sub_menu = false;
-      this.maybe_hide_sub = false;
-      if (this.hide_sub_timer !== null) {
-        clearTimeout(this.hide_sub_timer);
-        this.hide_sub_timer = null;
-      }
-      this.state.open = false;
-      this.popper.reset();
-      for (let i = 0; i < this.items.length; i += 1) {
-        const item = this.items[i];
-        if (item instanceof MenuItemCore) {
-          item.reset();
-        } else if (item instanceof MenuGroupCore) {
-          item.reset();
-        }
-      }
-      if (this.cur_item) {
-        this.cur_item.blur();
-      }
-      if (this.cur_sub) {
-        this.cur_sub.hide();
-        this.cur_sub = null;
-      }
       this.emit(Events.Hidden);
     });
   }
-
-  // subs: MenuCore[] = [];
-  items: MenuEntry[] = [];
-  cur_sub: MenuCore | null = null;
-  cur_item: MenuItemCore | null = null;
-  /** 父菜单引用，用于子菜单清除父菜单的定时器 */
-  parent_menu: MenuCore | null = null;
-  inside = false;
-  /** 鼠标是否处于子菜单中 */
-  in_sub_menu = false;
-  /** 鼠标离开 item 时，可能要隐藏子菜单，但是如果从有子菜单的 item 离开前往子菜单，就不用隐藏 */
-  maybe_hide_sub = false;
-  hide_sub_timer: NodeJS.Timeout | null = null;
 
   toggle() {
     const { open } = this.state;
@@ -226,55 +204,71 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     if (this.state.open) {
       return;
     }
-    console.log("[DEBUG-MENU] show()", this._name);
+    // console.log("[DEBUG-MENU] show()", this._name);
     // 当子菜单显示时，清除父菜单的定时器
     // 这是必要的，因为 mouseenter 事件可能不会在 DOM 动态挂载时触发
-    if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
-      console.log(
-        "[DEBUG-MENU] show() clearing parent hide_sub_timer",
-        this._name,
-      );
-      clearTimeout(this.parent_menu.hide_sub_timer);
-      this.parent_menu.hide_sub_timer = null;
-    }
+    // if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
+    //   clearTimeout(this.parent_menu.hide_sub_timer);
+    //   this.parent_menu.hide_sub_timer = null;
+    // }
     // Close other open root menus when opening this one
-    if (this._is_root_menu) {
-      for (const menu of MenuCore.openRootMenus) {
-        if (menu !== this && menu.state.open) {
-          menu.hide();
-        }
-      }
-      MenuCore.openRootMenus.add(this);
-    }
+    // if (this._is_root_menu) {
+    //   for (const menu of MenuCore.openRootMenus) {
+    //     if (menu !== this && menu.state.open) {
+    //       menu.hide();
+    //     }
+    //   }
+    //   MenuCore.openRootMenus.add(this);
+    // }
     this.presence.show();
     this.popper.place();
     this.emit(Events.Show);
     this.emit(Events.StateChange, { ...this.state });
   }
+  isPrepareHide() {
+    return this.hide_timer !== null;
+  }
+  prepareHide() {
+    logger.log("[]prepare hide the menu", this._name);
+    if (this.state.open === false) {
+      return;
+    }
+    this.hide_timer = setTimeout(() => {
+      logger.log("[]invoke hide in prepareHide timer", this._name);
+      this.hide();
+    }, 80);
+    this.emit(Events.PrepareHide);
+  }
+  cancelHide() {
+    if (this.hide_timer !== null) {
+      clearTimeout(this.hide_timer);
+      this.hide_timer = null;
+    }
+  }
   hide() {
     if (this.state.open === false) {
       return;
     }
-    console.log("[DOMAIN]ui/menu/index - hide START", this._name, {
+    console.log("[DOMAIN]ui/menu/index - hide", this._name, {
       open: this.state.open,
       exit: this.presence.exit,
       enter: this.presence.enter,
     });
 
     // Emit Hiding event immediately so menu items can update their state
-    this.emit(Events.Hiding);
+    this.emit(Events.StartHide);
 
     // Remove from global registry
-    MenuCore.openRootMenus.delete(this);
+    // MenuCore.openRootMenus.delete(this);
 
     // Close all open submenus immediately
-    if (this.cur_item && this.cur_item.menu && this.cur_item.menu.state.open) {
-      console.log(
-        "[DOMAIN]ui/menu/index - closing submenu",
-        this.cur_item.menu._name,
-      );
-      this.cur_item.menu.hide();
-    }
+    // if (this.cur_item && this.cur_item.menu && this.cur_item.menu.state.open) {
+    //   console.log(
+    //     "[DOMAIN]ui/menu/index - closing submenu",
+    //     this.cur_item.menu._name,
+    //   );
+    //   this.cur_item.menu.hide();
+    // }
 
     // this.log("hide");
     this.presence.hide();
@@ -309,20 +303,14 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
           curItem: this.cur_item?.label,
         },
       );
-      if (this.hide_sub_timer !== null) {
-        clearTimeout(this.hide_sub_timer);
-        this.hide_sub_timer = null;
-      }
-      if (item.menu && item.menu.hide_sub_timer !== null) {
-        clearTimeout(item.menu.hide_sub_timer);
-        item.menu.hide_sub_timer = null;
-      }
-      // 如果当前菜单有父菜单，清除父菜单的定时器
-      if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
-        clearTimeout(this.parent_menu.hide_sub_timer);
-        this.parent_menu.hide_sub_timer = null;
-      }
+      // if (this.hide_sub_timer !== null) {
+      //   clearTimeout(this.hide_sub_timer);
+      //   this.hide_sub_timer = null;
+      // }
       this.emit(Events.EnterItem, item);
+      if (item.menu && item.menu.isPrepareHide()) {
+        item.menu.cancelHide();
+      }
       if (item.menu) {
         item.menu.show();
       }
@@ -343,6 +331,18 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
         hasMenu: !!item.menu,
         itemState: item.menu?.state,
       });
+      if (this.cur_item) {
+        this.cur_item.blur();
+        if (this.cur_item.menu) {
+          logger.log(
+            "[]leave item, so prepare hide the menu belong this menu item",
+          );
+          // 从菜单项移动到菜单外部，需要延迟关闭子菜单，因为可能是移动回 菜单项
+          // 比如 1 -> 1-1 例子，从 1-1 移动回 1 时，要给时间让 1 移除延迟关闭定时器
+          // 从 1-1 移动到外部，延迟定时器就能正确关闭 1-1
+          this.cur_item.menu.prepareHide();
+        }
+      }
       // this.emit(Events.LeaveItem, item);
       // Don't blur if the item has an open submenu
       // if (!item._open) {
@@ -352,25 +352,35 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     if (!item.menu) {
       return;
     }
-    const sub_menu = item.menu;
     // 设置子菜单的父菜单引用
-    sub_menu.parent_menu = this;
+    // item.menu.parent_menu = this;
     // sub_menu.onShow(() => {
     //   this.log("sub.onShow");
     //   this.cur_sub = sub_menu;
     // });
-    // sub_menu.onEnter(() => {
-    //   this.log("sub.onEnter");
-    //   this.in_sub_menu = true;
-    // });
-    // sub_menu.onLeave(() => {
-    //   this.log("sub.onLeave");
-    //   this.in_sub_menu = false;
-    // });
-    // sub_menu.onHide(() => {
-    //   this.log("sub.onHide");
-    //   this.cur_sub = null;
-    // });
+    item.menu.onEnter(() => {
+      logger.log(
+        "[]enter the menu belong items, so prevent hide timer",
+        this._name,
+      );
+      this.in_sub_menu = true;
+      this.cancelHide();
+    });
+    item.menu.onLeave(() => {
+      this.in_sub_menu = false;
+      //   logger.log("[]leave the menu belong items, so prepare hide", this._name);
+      //   this.prepareHide();
+    });
+    item.menu.onStartHide(() => {
+      logger.log(
+        "[]the menu belong to items hide, so prepare hide",
+        this._name,
+      );
+      if (this.inside) {
+        return;
+      }
+      this.hide();
+    });
     // if (this.subs.includes(subMenu)) {
     //   return;
     // }
@@ -417,6 +427,8 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   }
   reset() {
     // console.log("[]MenuCore - reset", this.items);
+    this.state.open = false;
+    this.hide_timer = null;
     this.in_sub_menu = false;
     this.cur_item = null;
     this.cur_sub = null;
@@ -425,7 +437,6 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       clearTimeout(this.hide_sub_timer);
       this.hide_sub_timer = null;
     }
-    this.state.open = false;
     this.presence.reset();
     this.popper.reset();
     for (let i = 0; i < this.items.length; i += 1) {
@@ -441,32 +452,49 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, { ...this.state });
   }
 
+  handleEnter() {
+    this.inside = true;
+    if (this.hide_timer) {
+      clearTimeout(this.hide_timer);
+      this.hide_timer = null;
+    }
+    // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
+    // if (this.parent_menu && this.parent_menu.hide_sub_timer !== null) {
+    //   clearTimeout(this.parent_menu.hide_sub_timer);
+    //   this.parent_menu.hide_sub_timer = null;
+    // }
+    this.emit(Events.EnterMenu);
+  }
   handleLeave() {
+    this.inside = false;
     console.log("[MenuCore] handleLeave", this._name, {
       curItem: this.cur_item?.label,
       curItemOpen: this.cur_item?._open,
       hasMenu: !!this.cur_item?.menu,
     });
+    this.prepareHide();
+    this.emit(Events.LeaveMenu);
+    // this.hide();
     // 使用 cur_item 而不是查找 focused 状态的 item
     // 因为 item 的 handlePointerLeave 会先触发，将 _focused 设置为 false
-    if (!this.cur_item) {
-      return;
-    }
-    // 如果当前菜单项有子菜单且子菜单是打开的，延迟关闭它
-    // 使用 300ms 延迟，让用户有时间移动到子菜单，同时保持快速响应
-    if (this.cur_item.menu && this.cur_item._open) {
-      console.log("[MenuCore] setting hide_sub_timer", this._name);
-      this.hide_sub_timer = setTimeout(() => {
-        console.log("[MenuCore] hide_sub_timer fired", this._name, {
-          curItem: this.cur_item?.label,
-          timerStillSet: this.hide_sub_timer !== null,
-        });
-        this.hide_sub_timer = null;
-        // if (this.cur_item && this.cur_item.menu) {
-        //   this.cur_item.menu.hide();
-        // }
-      }, 300);
-    }
+    // if (!this.cur_item) {
+    //   return;
+    // }
+    // // 如果当前菜单项有子菜单且子菜单是打开的，延迟关闭它
+    // // 使用 300ms 延迟，让用户有时间移动到子菜单，同时保持快速响应
+    // if (this.cur_item.menu && this.cur_item._open) {
+    //   console.log("[MenuCore] setting hide_sub_timer", this._name);
+    //   this.hide_sub_timer = setTimeout(() => {
+    //     console.log("[MenuCore] hide_sub_timer fired", this._name, {
+    //       curItem: this.cur_item?.label,
+    //       timerStillSet: this.hide_sub_timer !== null,
+    //     });
+    //     this.hide_sub_timer = null;
+    //     // if (this.cur_item && this.cur_item.menu) {
+    //     //   this.cur_item.menu.hide();
+    //     // }
+    //   }, 300);
+    // }
   }
 
   unmount() {
@@ -492,10 +520,16 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   onShow(handler: Handler<TheTypesOfEvents[Events.Show]>) {
     return this.on(Events.Show, handler);
   }
-  onHiding(handler: Handler<TheTypesOfEvents[Events.Hiding]>) {
-    return this.on(Events.Hiding, handler);
+  onPrepareHide(handler: Handler<TheTypesOfEvents[Events.PrepareHide]>) {
+    return this.on(Events.PrepareHide, handler);
   }
-  onHide(handler: Handler<TheTypesOfEvents[Events.Hidden]>) {
+  onStartHide(handler: Handler<TheTypesOfEvents[Events.StartHide]>) {
+    return this.on(Events.StartHide, handler);
+  }
+  /**
+   * 监听菜单已关闭事件
+   */
+  onHidden(handler: Handler<TheTypesOfEvents[Events.Hidden]>) {
     return this.on(Events.Hidden, handler);
   }
   onEnterItem(handler: Handler<TheTypesOfEvents[Events.EnterItem]>) {

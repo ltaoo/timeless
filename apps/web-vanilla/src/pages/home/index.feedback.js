@@ -21,36 +21,36 @@ export default function FeedbackView() {
     View({ class: "space-y-8" }, [
       Section("Menu", [
         Item("Default", [
-          Menu({
-            store: new Timeless.ui.MenuCore({
-              items: [
-                new Timeless.ui.MenuItemCore({
-                  label: "Edit",
-                  icon: View(
-                    {
-                      class: "icon icon--play",
-                    },
-                    [Icon({ name: "play" })],
-                  ),
-                  onClick() {
-                    console.log("edit");
-                  },
-                }),
-                new Timeless.ui.MenuItemCore({
-                  label: "Duplicate",
-                  onClick() {
-                    console.log("duplicate");
-                  },
-                }),
-                new Timeless.ui.MenuItemCore({
-                  label: "Delete",
-                  onClick() {
-                    console.log("delete");
-                  },
-                }),
-              ],
-            }),
-          }),
+          // Menu({
+          //   store: new Timeless.ui.MenuCore({
+          //     items: [
+          //       new Timeless.ui.MenuItemCore({
+          //         label: "Edit",
+          //         icon: View(
+          //           {
+          //             class: "icon icon--play",
+          //           },
+          //           [Icon({ name: "play" })],
+          //         ),
+          //         onClick() {
+          //           console.log("edit");
+          //         },
+          //       }),
+          //       new Timeless.ui.MenuItemCore({
+          //         label: "Duplicate",
+          //         onClick() {
+          //           console.log("duplicate");
+          //         },
+          //       }),
+          //       new Timeless.ui.MenuItemCore({
+          //         label: "Delete",
+          //         onClick() {
+          //           console.log("delete");
+          //         },
+          //       }),
+          //     ],
+          //   }),
+          // }),
         ]),
         Item("With Submenu", [
           Menu({

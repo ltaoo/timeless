@@ -14,7 +14,10 @@ const {
   refarr,
   refobj,
   combine,
+  tryget,
+  classNames,
 } = window.Timeless;
+// const {} = window.Timeless.DOM;
 
 /**
  * load() - Server-side data fetching
@@ -56,46 +59,92 @@ export function head({ data }) {
 export default function Page({ data }) {
   const visible_ = ref(true);
   const t_ = ref(true);
+  const background_ = ref("#ccc");
   const category_ = refarr([
     {
+      id: 1,
       label: "计算机",
       selected: true,
     },
     {
+      id: 2,
       label: "数学",
       selected: false,
     },
   ]);
+  const cur_ = ref(null);
 
   const elm = View({}, [
-    View({}, ["Hello"]),
-    Show({
-      when: true,
-      ok() {
-        return Fragment(
-          {
-            onMounted(e) {
-              console.log(e.target.get$children());
-            },
-          },
-          [
-            View(
-              {
-                onClick() {
-                  console.log("click timeless");
-                  // visible_.toggle();
-                },
-              },
-              ["Timeless"],
-            ),
-          ],
-        );
+    View(
+      {
+        onClick() {
+          visible_.toggle();
+        },
       },
-    }),
+      ["Hello"],
+    ),
+    View(
+      {
+        onClick() {
+          t_.toggle();
+        },
+      },
+      ["Test"],
+    ),
+    cur_,
     Show({
       when: visible_,
       ok() {
-        return Portal({}, [View({}, ["Content in Portal"])]);
+        return Portal({}, [
+          View({}, [
+            For({
+              each: category_,
+              render(cate) {
+                // const cate_ = refobj(cate);
+                return View(
+                  {
+                    class: classNames([
+                      computed(cur_, (t) => {
+                        return t === cate.id
+                          ? "bg-accent text-accent-foreground"
+                          : "";
+                      }),
+                    ]),
+                    onMouseEnter() {
+                      console.log("hhhhh");
+                      cur_.as(cate.id);
+                    },
+                    onMouseLeave() {
+                      cur_.as(null);
+                    },
+                  },
+                  [cate.label],
+                );
+              },
+            }),
+          ]),
+        ]);
+        // return For({
+        //   each: category_,
+        //   render(cate) {
+        //     return View(
+        //       {
+        //         style: {
+        //           "margin-bottom": computed(cate, (t) => {
+        //             return t.selected ? "0" : "12px";
+        //           }),
+        //         },
+        //         onMounted() {
+        //           console.log("view onMounted");
+        //         },
+        //         onUnmounted() {
+        //           console.log("view onUnmounted");
+        //         },
+        //       },
+        //       [computed(cate, (t) => t.label)],
+        //     );
+        //   },
+        // });
       },
     }),
   ]);

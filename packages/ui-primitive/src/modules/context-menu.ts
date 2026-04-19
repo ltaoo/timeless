@@ -112,10 +112,7 @@ export function Trigger(
   );
 }
 
-export function Portal(
-  props: ViewProps & {},
-  children: ViewChildren = [],
-) {
+export function Portal(props: ViewProps & {}, children: ViewChildren = []) {
   return MenuPrimitive.Portal(props, children);
 }
 
@@ -168,7 +165,7 @@ export function Item(
   return MenuPrimitive.Item(props, children);
 }
 
-export function Separator(props: ViewProps, children: ViewChildren) {
+export function Separator(props: ViewProps) {
   return MenuPrimitive.Separator(props);
 }
 

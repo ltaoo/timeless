@@ -1,6 +1,5 @@
 import { Fragment, refobj } from "@timeless/timeless";
 import {
-  View,
   ViewProps,
   ViewChildren,
   ListenerManager,
@@ -15,60 +14,11 @@ import {
 
 import * as MenuPrimitive from "./menu";
 
-// Shared hover timer state to coordinate between Trigger and Content
-const hoverTimers = new WeakMap<DropdownMenuCore, { timer: any }>();
-
-function getHoverTimer(store: DropdownMenuCore) {
-  let state = hoverTimers.get(store);
-  if (!state) {
-    state = { timer: null };
-    hoverTimers.set(store, state);
-  }
-  return state;
-}
-
-function _hoverClearHide(store: DropdownMenuCore) {
-  // const host = getHost();
-  const state = getHoverTimer(store);
-  if (state.timer) {
-    clearTimeout(state.timer);
-    state.timer = null;
-  }
-}
-
-function _hoverScheduleHide(store: DropdownMenuCore) {
-  // const host = getHost();
-  _hoverClearHide(store);
-
-  // Clear all submenu hide timers to ensure they close together
-  const clearAllSubTimers = (menu: any) => {
-    if (menu.hide_sub_timer) {
-      clearTimeout(menu.hide_sub_timer);
-      menu.hide_sub_timer = null;
-    }
-    // Clear timers for all items with submenus
-    if (menu.items) {
-      for (const item of menu.items) {
-        if (item.menu) {
-          clearAllSubTimers(item.menu);
-        }
-      }
-    }
-  };
-  clearAllSubTimers(store.menu);
-
-  const state = getHoverTimer(store);
-  state.timer = setTimeout(() => {
-    store.hide();
-    state.timer = null;
-  }, 100);
-}
-
 export function Root(
   props: ViewProps & { store: MenuCore },
   children?: ViewChildren,
 ) {
-  return MenuPrimitive.Root(props, children ?? []);
+  return MenuPrimitive.Root(props, children);
 }
 
 export function Trigger(
@@ -92,7 +42,7 @@ export function Trigger(
         const $elm = event.target;
         const nodes = $elm.get$children();
         const $ref = nodes[0] || $elm;
-        console.log("[DropdownMenu]find child $elm", nodes, $ref);
+        // console.log("[DropdownMenu]find child $elm", nodes, $ref);
         // console.log(
         //   "[primitive]dropdownmenu - Trigger mounted",
         //   nodes,
@@ -140,7 +90,7 @@ export function Trigger(
             if (store.menu.presence?.state.exit) {
               return;
             }
-            _hoverClearHide(store);
+            // _hoverClearHide(store);
             store.show();
           };
 
@@ -148,7 +98,7 @@ export function Trigger(
             if (store.disabled) {
               return;
             }
-            _hoverScheduleHide(store);
+            // _hoverScheduleHide(store);
           };
 
           // Prevent click from closing the menu in hover mode
@@ -164,7 +114,7 @@ export function Trigger(
         if (props.onMounted) {
           listener$.add(props.onMounted(event));
         }
-        // return listener$.destroy;
+        return listener$.destroy;
       },
     },
     children,
@@ -190,22 +140,8 @@ export function Content(
   const { store, ...rest } = props;
 
   // Add hover event handlers for hover trigger mode
-  const hoverHandlers =
-    store.trigger === "hover"
-      ? {
-          onMouseEnter() {
-            _hoverClearHide(store);
-          },
-          onMouseLeave() {
-            _hoverScheduleHide(store);
-          },
-        }
-      : {};
 
-  return MenuPrimitive.Content(
-    { ...rest, ...hoverHandlers, store: props.store.menu },
-    children,
-  );
+  return MenuPrimitive.Content({ ...rest, store: props.store.menu }, children);
 }
 
 export function Group(
@@ -258,44 +194,5 @@ export function SubMenuContent(
   },
   children: ViewChildren,
 ) {
-  // const host = getHost();
-  // Get the parent DropdownMenuCore from the menu's parent
-  const parent_dropdown$ = (props.store as any).parentDropdown as
-    | DropdownMenuCore
-    | undefined;
-
-  const mergedHandlers: Record<string, any> = {
-    onMouseEnter(event: MouseEvent) {
-      // Clear parent menu's hide timer when entering submenu
-      if (
-        props.store.parent_menu &&
-        props.store.parent_menu.hide_sub_timer !== null
-      ) {
-        clearTimeout(props.store.parent_menu.hide_sub_timer);
-        props.store.parent_menu.hide_sub_timer = null;
-      }
-      if (parent_dropdown$ && parent_dropdown$.trigger === "hover") {
-        _hoverClearHide(parent_dropdown$);
-      }
-      if (props.onMouseEnter) {
-        props.onMouseEnter(event);
-      }
-    },
-    onMouseLeave(event: MouseEvent) {
-      if (parent_dropdown$ && parent_dropdown$.trigger === "hover") {
-        _hoverScheduleHide(parent_dropdown$);
-      }
-      if (props.onMouseLeave) {
-        props.onMouseLeave(event);
-      }
-    },
-  };
-
-  return MenuPrimitive.Content(
-    {
-      ...props,
-      ...mergedHandlers,
-    },
-    children,
-  );
+  return MenuPrimitive.Content(props, children);
 }

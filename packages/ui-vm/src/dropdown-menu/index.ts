@@ -94,7 +94,7 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
     // Store reference to parent dropdown in menu for hover handling
     (this.menu as any).parentDropdown = this;
     this._configure_sub_menus(items);
-    this.menu.onHide(() => {
+    this.menu.onHidden(() => {
       this.menu.reset();
       if (onHidden) {
         onHidden();

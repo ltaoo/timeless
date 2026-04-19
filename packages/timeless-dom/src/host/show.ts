@@ -51,6 +51,10 @@ export function DOMShow(props: {
 
       const $v = opt.$parent || $elm;
       const idx = opt.offset;
+
+      const hydrated_child_nodes: (VNodeView | null)[] = [];
+      const hydrated_child_elements: (TimelessElement | null)[] = [];
+
       if ($v && $v instanceof HTMLElement && idx !== undefined) {
         if (elm.children) {
           const total_nodes = countRenderedNodes(elm);
@@ -60,6 +64,7 @@ export function DOMShow(props: {
           // const idx = $children.indexOf($elm);
           const $children_belong_me = $children.slice(idx, idx + total_nodes);
           box$.methods.set$childrne($children_belong_me);
+
           const $last = $children[idx + total_nodes];
           logger.log("find my $children", idx, $children_belong_me, $last);
           if ($last) {
@@ -67,7 +72,6 @@ export function DOMShow(props: {
           } else {
             $v.appendChild($anchor);
           }
-          const child_nodes: VNodeView[] = [];
           let offset = idx;
           let $child_offset = 0;
           for (let i = 0; i < elm.children.length; i += 1) {
@@ -77,6 +81,7 @@ export function DOMShow(props: {
               | Text;
             logger.log("each child", i, child, $child, offset);
             if (child) {
+              hydrated_child_elements.push(child);
               const child$ = hydrate_node(child, $child, {
                 $parent: $v,
                 offset,
@@ -93,11 +98,12 @@ export function DOMShow(props: {
                   offset += 1;
                   $child_offset += 1;
                 }
-                child_nodes.push(child$);
+                hydrated_child_nodes.push(child$);
               }
             }
           }
-          box$.methods.setchildnode(child_nodes);
+          box$.methods.setchildnode(hydrated_child_nodes);
+          box$.methods.setchildrenelement(hydrated_child_elements);
         }
       }
     },

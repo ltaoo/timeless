@@ -49,6 +49,9 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
 
   const r = {
     __is_ref: true as const,
+    get _deps() {
+      return deps;
+    },
     subscribe(ctx: Subscriber<T>) {
       const trackCtx: SubscriberWithId<T> = ctx as SubscriberWithId<T>;
       deps.push(trackCtx);

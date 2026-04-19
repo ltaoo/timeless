@@ -398,7 +398,12 @@ export function HostElement(props: {
       }, 0);
     },
     removeChildren() {
-      console.log(props.t + "[]removeChildren", $children, child_nodes);
+      // console.log(
+      //   props.t + "[]removeChildren",
+      //   $children,
+      //   child_nodes,
+      //   child_elements,
+      // );
       if ($children.length === 0 && child_nodes.length === 0) {
         return;
       }
@@ -424,7 +429,11 @@ export function HostElement(props: {
       //   props.t + "[]removeChildren invoke onUnmounted",
       //   child_elements,
       // );
-      methods.handleElementUnmounted();
+      for (const child of child_elements) {
+        if (child && child.onUnmounted) {
+          child.onUnmounted();
+        }
+      }
       child_elements = [];
       $children = [];
       child_nodes = [];
@@ -535,12 +544,25 @@ export function HostElement(props: {
       }
       // 1. Remove (descending order to keep indices stable)
       const sorted_removed = [...removed].sort((a, b) => b.idx - a.idx);
+      const removed_elements: TimelessElement[] = [];
       for (const { idx } of sorted_removed) {
         const $child = $children[idx];
         if ($child) {
           $parent.removeChild($child);
         }
         $children.splice(idx, 1);
+        const child_elm = child_elements[idx];
+        if (child_elm) {
+          removed_elements.push(child_elm);
+        }
+        child_elements.splice(idx, 1);
+        child_nodes.splice(idx, 1);
+      }
+      // Call onUnmounted for removed elements
+      for (const child of removed_elements) {
+        if (child && child.onUnmounted) {
+          child.onUnmounted();
+        }
       }
 
       // 2. Move

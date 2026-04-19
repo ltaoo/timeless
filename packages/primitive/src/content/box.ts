@@ -79,11 +79,13 @@ export type BoxEvents = Partial<{
   onMouseLeave?: (e: MouseEvent) => void;
   onLongPress?: (e: PointerEvent) => void;
   onPointerDown?: (e: PointerEvent) => void;
+  onPointerUp?: (e: PointerEvent) => void;
   onInput?: (e: Event) => void;
   onChange?: (e: Event) => void;
   onFocus?: (e: FocusEvent) => void;
   onBlur?: (e: FocusEvent) => void;
   onKeyDown?: (e: KeyboardEvent) => void;
+  onKeyUp?: (e: KeyboardEvent) => void;
   onContextMenu?: (e: MouseEvent) => void;
   onDragStart?: (e: DragEvent) => void;
   onDrag?: (e: DragEvent) => void;
@@ -163,8 +165,9 @@ export function Box<T>(props: BoxProps, extra_state: T) {
           const unsubscribe = cls.subscribe({
             onChange(v: string) {
               state.styleSet = v.split(" ");
+              // console.log("the className is Ref", v);
               if ($elm && typeof $elm.setStyleSet === "function") {
-                console.log("[primitive]before invoke setStyle1");
+                // console.log("[primitive]before invoke setStyle1");
                 $elm.setStyleSet(v.split(" "));
               }
             },
@@ -175,7 +178,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
           const unsubscribe = cls.subscribe({
             onChange(v) {
               state.styleSet = v;
-              // console.log("the className is ClassNameRef", v, $elm);
+              // console.log("the className is ClassNameRef", v);
               if ($elm && typeof $elm.setStyleSet === "function") {
                 // console.log("[primitive]before invoke setStyle2");
                 $elm.setStyleSet(v);
@@ -190,7 +193,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
       const style = props.style;
       if (style !== undefined) {
         if (isRef(style)) {
-          Object.keys(style.value || {}).forEach((k) => {
+          Object.keys(style.value).forEach((k) => {
             const sv = style.value[k];
             if (isRef(sv)) {
               state.style[k] = sv.value;
@@ -223,6 +226,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
               state.style[k] = v.value;
               const unsubscribe = v.subscribe({
                 onChange(v) {
+                  state.style[k] = v;
                   if ($elm) {
                     $elm.setStyleValue(k, v);
                   }
@@ -318,6 +322,9 @@ export function Box<T>(props: BoxProps, extra_state: T) {
       if (props.onMouseEnter) {
         events.onMouseEnter = props.onMouseEnter;
       }
+      if (props.onMouseLeave) {
+        events.onMouseLeave = props.onMouseLeave;
+      }
       if (props.onMouseDown) {
         events.onMouseDown = props.onMouseDown;
       }
@@ -330,17 +337,32 @@ export function Box<T>(props: BoxProps, extra_state: T) {
       if (props.onPointerDown) {
         events.onPointerDown = props.onPointerDown;
       }
-      if (props.onInput) {
-        events.onInput = props.onInput;
+      if (props.onPointerUp) {
+        events.onPointerUp = props.onPointerUp;
       }
-      if (props.onChange) {
-        events.onChange = props.onChange;
+      if (props.onContextMenu) {
+        events.onContextMenu = props.onContextMenu;
+      }
+      // if (props.onInput) {
+      //   events.onInput = props.onInput;
+      // }
+      // if (props.onChange) {
+      //   events.onChange = props.onChange;
+      // }
+      if (props.onFocus) {
+        events.onFocus = props.onFocus;
       }
       if (props.onBlur) {
         events.onBlur = props.onBlur;
       }
       if (props.onKeyDown) {
-        events.onDragEnd = props.onDragEnd;
+        events.onKeyDown = props.onKeyDown;
+      }
+      if (props.onKeyUp) {
+        events.onKeyUp = props.onKeyUp;
+      }
+      if (props.onDrag) {
+        events.onDrag = props.onDrag;
       }
       if (props.onDragEnter) {
         events.onDragEnter = props.onDragEnter;
@@ -360,10 +382,11 @@ export function Box<T>(props: BoxProps, extra_state: T) {
     },
     unsubscribe: listener$.add,
     destroy() {
-      listener$.clean();
+      listener$.destroy();
     },
   };
   return {
+    listener$,
     state,
     events,
     methods,

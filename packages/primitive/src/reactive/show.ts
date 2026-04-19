@@ -182,6 +182,7 @@ export function Show(props: ShowProps) {
       if (onUnmounted) {
         onUnmounted();
       }
+      listener$.destroy();
       // Don't clear state.children here — they are needed if this Show
       // is re-mounted by a parent (e.g. Presence show/hide cycle).
       // When Show's own condition flips false, onChange already clears children.

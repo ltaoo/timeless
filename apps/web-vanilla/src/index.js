@@ -118,19 +118,110 @@ function ApplicationRootView() {
     console.error(err);
   });
 
-  return Fragment({}, [
-    StandardSubViews({
-      view: root_view$,
-      views,
-      history: history$,
-      app,
-      client: client$,
-      storage: storage$,
-      NotFound: NotFoundPageView,
-      ErrorFallback: ErrorFallbackView,
-    }),
-    Portal({}, [Toaster({ store: toaster$, position: "top-center" })]),
-  ]);
+  return View(
+    {
+      style: {
+        width: "320px",
+      },
+    },
+    [
+      ContextMenu(
+        {
+          store: new Timeless.ui.ContextMenuCore({
+            items: [
+              new Timeless.ui.MenuItemCore({
+                label: "Cut",
+                onClick() {
+                  console.log("cut");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Copy",
+                menu: new Timeless.ui.MenuCore({
+                  items: [
+                    new Timeless.ui.MenuItemCore({
+                      label: "CopySubMenu",
+                      onClick() {
+                        console.log("CopySubMenu");
+                      },
+                    }),
+                  ],
+                }),
+                onClick() {
+                  console.log("copy");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Share",
+                menu: new Timeless.ui.MenuCore({
+                  _name: "3",
+                  items: [
+                    new Timeless.ui.MenuItemCore({
+                      label: "Email",
+                      onClick() {
+                        console.log("email");
+                      },
+                    }),
+                    new Timeless.ui.MenuItemCore({
+                      label: "Message",
+                      menu: new Timeless.ui.MenuCore({
+                        _name: "3-2",
+                        items: [
+                          new Timeless.ui.MenuItemCore({
+                            label: "Wechat",
+                            onClick() {
+                              console.log("wechat message");
+                            },
+                          }),
+                          new Timeless.ui.MenuItemCore({
+                            label: "QQ",
+                            onClick() {
+                              console.log("QQ message");
+                            },
+                          }),
+                          new Timeless.ui.MenuItemCore({
+                            label: "Telegram",
+                            onClick() {
+                              console.log("Telegram message");
+                            },
+                          }),
+                        ],
+                      }),
+                      onClick() {
+                        console.log("message");
+                      },
+                    }),
+                  ],
+                }),
+              }),
+            ],
+          }),
+        },
+        [
+          Button(
+            {
+              store: new Timeless.ui.ButtonCore({}),
+            },
+            ["Click it"],
+          ),
+        ],
+      ),
+    ],
+  );
+
+  // return Fragment({}, [
+  //   StandardSubViews({
+  //     view: root_view$,
+  //     views,
+  //     history: history$,
+  //     app,
+  //     client: client$,
+  //     storage: storage$,
+  //     NotFound: NotFoundPageView,
+  //     ErrorFallback: ErrorFallbackView,
+  //   }),
+  //   Portal({}, [Toaster({ store: toaster$, position: "top-center" })]),
+  // ]);
 }
 
 document.addEventListener("DOMContentLoaded", function () {

@@ -5,15 +5,15 @@ function noop() {}
 export function ListenerManager(
   fns?: (DerivedRef<any> | Ref<any> | any | (() => void))[],
 ) {
-  const cleanups: (() => void)[] = [];
+  const subscribers: (() => void)[] = [];
 
   if (fns) {
     for (let i = 0; i < fns?.length; i++) {
       const item = fns[i];
       if (isRef(item)) {
-        cleanups.push(item.destroy);
+        subscribers.push(item.destroy);
       } else if (typeof item === "function") {
-        cleanups.push(item);
+        subscribers.push(item);
       }
     }
   }
@@ -22,9 +22,9 @@ export function ListenerManager(
     add(clean?: void | (() => void) | DerivedRef<any> | Ref<any> | any) {
       if (clean) {
         if (isRef(clean)) {
-          cleanups.push(clean.destroy);
+          subscribers.push(clean.destroy);
         } else if (typeof clean === "function") {
-          cleanups.push(clean);
+          subscribers.push(clean);
         }
       }
       return clean || noop;
@@ -33,16 +33,16 @@ export function ListenerManager(
       for (const item of arr) {
         if (item) {
           if (isRef(item)) {
-            cleanups.push(item.destroy);
+            subscribers.push(item.destroy);
           } else if (typeof item === "function") {
-            cleanups.push(item);
+            subscribers.push(item);
           }
         }
       }
     },
     clean() {
-      cleanups.forEach((clean) => clean());
-      cleanups.length = 0;
+      subscribers.forEach((clean) => clean());
+      subscribers.length = 0;
     },
   };
 
@@ -53,5 +53,8 @@ export function ListenerManager(
     clean: methods.clean,
     clear: methods.clean,
     destroy: methods.clean,
+    get length() {
+      return subscribers.length;
+    },
   };
 }

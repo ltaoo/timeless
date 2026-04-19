@@ -460,6 +460,13 @@ export function For<T>(
         moved_nodes.length,
       );
 
+      // Destroy idx_computed for removed items
+      for (const { idx } of removed_nodes) {
+        if (prev_index_computed[idx]) {
+          prev_index_computed[idx].destroy();
+        }
+      }
+
       const diff = {
         children: new_elements,
         added: added_nodes,
@@ -548,15 +555,15 @@ export function For<T>(
       if (props.onUnmounted) {
         props.onUnmounted();
       }
-      // listener$.destroy();
-      // for (let i = 0; i < state.idx_arr.length; i += 1) {
-      //   state.idx_arr[i].destroy();
-      // }
-      // state.rendered = false;
-      // state.subscribed = false;
+      listener$.destroy();
+      for (let i = 0; i < state.idx_arr.length; i += 1) {
+        state.idx_arr[i].destroy();
+      }
+      state.rendered = false;
+      state.subscribed = false;
       // state.items = [];
       // state.wrapped_items = [];
-      // state.idx_arr = [];
+      state.idx_arr = [];
       // state.children = [];
     },
     _hmr_dispose() {

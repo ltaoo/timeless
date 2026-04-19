@@ -45,6 +45,8 @@ import {
 } from "./type";
 import { Box, BoxProps } from "./box";
 
+const logger = Logger({ prefix: "primitive", scope: "content/view" });
+
 /** Props for View component */
 export type ViewProps = BoxProps & {
   /** Element ID */
@@ -59,9 +61,6 @@ export type ViewProps = BoxProps & {
 
 /** Internal state for View */
 type ViewState = {};
-
-/** Logger for debugging view operations */
-const logger = Logger({ prefix: "primitive", scope: "content/view" });
 
 /**
  * Creates a View component - the primary container.
@@ -131,11 +130,11 @@ export function View(
       }
     },
     onUnmounted() {
-      // console.log("[primitive]view - onUnmounted", onUnmounted);
+      // logger.log("onUnmounted", box$.listener$.length);
+      box$.methods.destroy();
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }
-      box$.methods.destroy();
       state.rendered = false;
       $elm = null;
     },

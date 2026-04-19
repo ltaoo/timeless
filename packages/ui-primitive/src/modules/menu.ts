@@ -8,9 +8,6 @@ import {
   Show,
   ListenerManager,
   createContext,
-  provide,
-  use,
-  Scope,
 } from "@timeless/timeless";
 import { MenuCore, MenuItemCore, MenuGroupCore } from "@timeless/ui-vm";
 
@@ -19,34 +16,22 @@ import * as PopperPrimitive from "./popper";
 
 const logger = Logger({ prefix: "primitive", scope: "menu.ts" });
 
-const MenuCtx = createContext<MenuCore>("Menu");
-
-export { MenuCtx };
-
 export function Root(
   props: ViewProps & { store: MenuCore },
-  children: ViewChildren,
+  children?: ViewChildren,
 ) {
-  return Scope(
-    () => provide(MenuCtx, props.store),
-    () => [
-      PopperPrimitive.Root(
-        { ...props, store: props.store.popper },
-        children,
-      ),
-    ],
+  return PopperPrimitive.Root(
+    { ...props, store: props.store.popper },
+    children,
   );
 }
 
 export function Anchor(
-  props: ViewProps & { store?: MenuCore },
+  props: ViewProps & { store: MenuCore },
   children: ViewChildren = [],
 ) {
-  const store = props.store ?? use(MenuCtx);
-  return PopperPrimitive.Anchor(
-    { ...props, store: store.popper },
-    children,
-  );
+  const store = props.store;
+  return PopperPrimitive.Anchor({ ...props, store: store.popper }, children);
 }
 
 export function Portal(
@@ -60,12 +45,12 @@ export function Portal(
 
 export function Content(
   props: ViewProps & {
-    store?: MenuCore;
+    store: MenuCore;
     animation?: { in: string; out: string };
   },
   children: ViewChildren,
 ) {
-  const store = props.store ?? use(MenuCtx);
+  const store = props.store;
   return ContentNonModal({ ...props, store }, children);
 }
 
@@ -91,6 +76,7 @@ export function ContentImpl(
   let _was_exiting = false;
   const state_ = refobj(props.store.state);
   const presence_ = refobj(props.store.presence.state);
+
   const listener$ = ListenerManager([state_, presence_]);
 
   return Show({
@@ -103,15 +89,10 @@ export function ContentImpl(
           state_.as(v);
         }),
         props.store.presence.onStateChange((v) => {
-          console.log(
-            "[Menu Content] presence change",
-            v.mounted,
-            presence_.value.mounted,
-          );
           presence_.as(v);
         }),
       ]);
-      // return listener$.destroy;
+      return listener$.destroy;
     },
     ok() {
       // logger.log("Content mounted");
@@ -127,14 +108,7 @@ export function ContentImpl(
                 props.store.hide();
               },
               onMouseEnter(event) {
-                // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
-                if (
-                  props.store.parent_menu &&
-                  props.store.parent_menu.hide_sub_timer !== null
-                ) {
-                  clearTimeout(props.store.parent_menu.hide_sub_timer);
-                  props.store.parent_menu.hide_sub_timer = null;
-                }
+                props.store.handleEnter();
                 if (rest.onMouseEnter) {
                   rest.onMouseEnter(event);
                 }
@@ -220,7 +194,6 @@ export function ItemImpl(
   return View(
     {
       ...rest,
-      class: props.class,
       attributes: {
         ...(rest.attributes || {}),
         "tab-index": computed(state_, (t) => {
@@ -228,11 +201,11 @@ export function ItemImpl(
         }),
       },
       onMounted(event) {
-        logger.log(
-          "[ItemImpl] onMounted",
-          props.store.label,
-          !!props.store.menu,
-        );
+        // logger.log(
+        //   "[ItemImpl] onMounted",
+        //   props.store.label,
+        //   !!props.store.menu,
+        // );
         props.store.onStateChange((v) => {
           // console.log("[ItemImpl] handle store.onStateChange", v.focused);
           state_.as(v);
@@ -259,12 +232,6 @@ export function ItemImpl(
           return rest.onMounted(event);
         }
       },
-      onUnmounted() {
-        logger.log("[ItemImpl] unmounted", props.store.label);
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
-        }
-      },
       onClick() {
         props.store.handleClick();
       },
@@ -289,10 +256,10 @@ export function Separator(props: ViewProps) {
   return View(props);
 }
 export function Arrow(
-  props: ViewProps & { store?: MenuCore },
+  props: ViewProps & { store: MenuCore },
   children: ViewChildren,
 ) {
-  const store = props.store ?? use(MenuCtx);
+  const store = props.store;
   return NativeArrow(
     {
       ...props,
@@ -318,7 +285,7 @@ export function SubMenuTrigger(
 ) {
   return Anchor(
     {
-      class: "menu-item-with-sub-menu",
+      // class: "menu-item-with-sub-menu",
       store: props.store.menu!,
       onMounted(event) {
         console.log(
@@ -358,26 +325,18 @@ export function SubMenuContent(
   children: ViewChildren,
 ) {
   const { store, ...rest } = props;
-  return Scope(
-    () => provide(MenuCtx, store),
-    () => [
-      ContentImpl(
-        {
-          ...rest,
-          store,
-          onMouseEnter() {
-            // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
-            if (
-              store.parent_menu &&
-              store.parent_menu.hide_sub_timer !== null
-            ) {
-              clearTimeout(store.parent_menu.hide_sub_timer);
-              store.parent_menu.hide_sub_timer = null;
-            }
-          },
-        },
-        children,
-      ),
-    ],
+  return ContentImpl(
+    {
+      ...rest,
+      store,
+      onMouseEnter() {
+        // 清除父菜单的定时器，防止从菜单项移动到子菜单时子菜单被关闭
+        if (store.parent_menu && store.parent_menu.hide_sub_timer !== null) {
+          clearTimeout(store.parent_menu.hide_sub_timer);
+          store.parent_menu.hide_sub_timer = null;
+        }
+      },
+    },
+    children,
   );
 }

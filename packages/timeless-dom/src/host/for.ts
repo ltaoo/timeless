@@ -73,8 +73,10 @@ export function DOMFor(props: {
 
       const $v = opt.$parent || $elm;
       const idx = opt.offset;
-      // const hydrated_elements: (TimelessElement | null)[] = [];
-      // const hydrated_child_nodes: VNodeView[] = [];
+
+      const hydrated_elements: (TimelessElement | null)[] = [];
+      const hydrated_child_nodes: VNodeView[] = [];
+
       if ($v && $v instanceof HTMLElement) {
         if (elm.children) {
           // common$.methods.setchildrenelement([...elm.children]);
@@ -86,13 +88,16 @@ export function DOMFor(props: {
           // const idx = $children.indexOf($elm);
           const $children_belong_me = $children.slice(idx, idx + total_nodes);
           box$.methods.set$childrne($children_belong_me);
+
           const $last = $children[idx + total_nodes];
           logger.log("$children belong me", idx, $children_belong_me, $last);
-          const child_nodes: VNodeView[] = [];
+
           let offset = idx;
           let $child_offset = 0;
           for (let i = 0; i < elm.children.length; i += 1) {
             const child = elm.children[i];
+            hydrated_elements.push(child);
+
             const prev_child = elm.children[i - 1];
             const $child = $children_belong_me[$child_offset] as
               | HTMLElement
@@ -117,10 +122,12 @@ export function DOMFor(props: {
                   offset += 1;
                   $child_offset += 1;
                 }
+                hydrated_child_nodes.push(child$);
               }
             }
           }
-          box$.methods.setchildnode(child_nodes);
+          box$.methods.setchildnode(hydrated_child_nodes);
+          box$.methods.setchildrenelement(hydrated_elements);
 
           if ($last) {
             $v.insertBefore($anchor, $last);

@@ -83,172 +83,139 @@ export default function Page({ data }) {
     ],
   });
 
-  return View({ class: "flex items-center gap-3" }, [
-    Badge({ variant: isLogin ? "default" : "secondary" }, [
-      isLogin ? "已登录" : "未登录",
-    ]),
-    DropdownMenu(
-      {
-        store: new ui.DropdownMenuCore({
-          defaultVisible: true,
-          items: [
-            new ui.MenuItemCore({
-              label: isLogin ? "切换账号" : "去登录",
-              onClick() {
-                console.log("切换账号");
-              },
-            }),
-          ],
-        }),
-      },
-      [
+  return View({ class: "min-h-screen bg-background" }, [
+    NavBar({ current: "home" }),
+
+    View({ as: "main", class: "max-w-4xl mx-auto px-6 py-10 space-y-10" }, [
+      // Hero
+      View({ class: "space-y-3" }, [
         View(
           {
-            class:
-              "text-sm text-primary underline underline-offset-4 hover:opacity-80",
+            as: "h1",
+            class: "text-3xl font-bold tracking-tight text-foreground",
+          },
+          [data.greeting],
+        ),
+        View({ as: "p", class: "text-muted-foreground text-lg" }, [
+          "复刻 web-vanilla 核心功能，验证 SSR 兼容性",
+        ]),
+      ]),
+
+      // User Status Card (测试 localStorage)
+      Card({}, [
+        CardHeader({}, [
+          CardTitle({}, ["用户状态（localStorage）"]),
+          CardDescription({}, [
+            isLogin
+              ? `已登录: ${username}`
+              : "未登录 - 前往登录页测试 localStorage 持久化",
+          ]),
+        ]),
+        CardContent({}, [
+          View({ class: "flex items-center gap-3" }, [
+            Badge({ variant: isLogin ? "default" : "secondary" }, [
+              isLogin ? "已登录" : "未登录",
+            ]),
+            DropdownMenu(
+              {
+                store: new ui.DropdownMenuCore({
+                  defaultVisible: true,
+                  items: [
+                    new ui.MenuItemCore({
+                      label: isLogin ? "切换账号" : "去登录",
+                      onClick() {
+                        console.log("切换账号");
+                      },
+                    }),
+                  ],
+                }),
+              },
+              [
+                View(
+                  {
+                    class:
+                      "text-sm text-primary underline underline-offset-4 hover:opacity-80",
+                  },
+                  [isLogin ? username : "去登录"],
+                ),
+              ],
+            ),
+          ]),
+        ]),
+      ]),
+
+      Separator({}),
+
+      // Feature Cards
+      View({ as: "h2", class: "text-xl font-semibold text-foreground" }, [
+        "核心功能",
+      ]),
+      View({ class: "grid grid-cols-1 md:grid-cols-2 gap-4" }, [
+        For({
+          each: data.features,
+          render(f) {
+            return Card({}, [
+              CardHeader({}, [
+                CardTitle({}, [`${f.icon} ${f.title}`]),
+                CardDescription({}, [f.desc]),
+              ]),
+            ]);
+          },
+        }),
+      ]),
+
+      Separator({}),
+
+      // Navigation Links
+      View({ as: "h2", class: "text-xl font-semibold text-foreground" }, [
+        "页面导航（测试路由）",
+      ]),
+      View({ class: "flex flex-wrap gap-3" }, [
+        Button(
+          {
+            store: new ui.ButtonCore({}),
+          },
+          [Link({}, ["组件库 →"])],
+        ),
+        Button(
+          {
+            store: new ui.ButtonCore({ variant: "secondary" }),
             onClick() {
-              // dropdown$.toggle();
+              globalThis.location.href = "/settings";
             },
           },
-          [isLogin ? username : "去登录"],
+          ["设置 →"],
         ),
-      ],
-    ),
+        Button(
+          {
+            store: new ui.ButtonCore({ variant: "outline" }),
+            onClick() {
+              globalThis.location.href = "/login";
+            },
+          },
+          ["登录 →"],
+        ),
+        Button(
+          {
+            store: new ui.ButtonCore({ variant: "ghost" }),
+            onClick() {
+              globalThis.location.href = "/nonexistent";
+            },
+          },
+          ["404 测试 →"],
+        ),
+      ]),
+    ]),
+
+    // Footer
+    View({ as: "footer", class: "border-t border-border mt-12" }, [
+      View(
+        {
+          class:
+            "max-w-4xl mx-auto px-6 py-8 text-center text-sm text-muted-foreground",
+        },
+        ["Powered by Timeless Framework — SSR Shadcn Test"],
+      ),
+    ]),
   ]);
-
-  // return View({ class: "min-h-screen bg-background" }, [
-  //   NavBar({ current: "home" }),
-
-  //   View({ as: "main", class: "max-w-4xl mx-auto px-6 py-10 space-y-10" }, [
-  //     // Hero
-  //     View({ class: "space-y-3" }, [
-  //       View(
-  //         {
-  //           as: "h1",
-  //           class: "text-3xl font-bold tracking-tight text-foreground",
-  //         },
-  //         [data.greeting],
-  //       ),
-  //       View({ as: "p", class: "text-muted-foreground text-lg" }, [
-  //         "复刻 web-vanilla 核心功能，验证 SSR 兼容性",
-  //       ]),
-  //     ]),
-
-  //     // User Status Card (测试 localStorage)
-  //     Card({}, [
-  //       CardHeader({}, [
-  //         CardTitle({}, ["用户状态（localStorage）"]),
-  //         CardDescription({}, [
-  //           isLogin
-  //             ? `已登录: ${username}`
-  //             : "未登录 - 前往登录页测试 localStorage 持久化",
-  //         ]),
-  //       ]),
-  //       CardContent({}, [
-  //         View({ class: "flex items-center gap-3" }, [
-  //           Badge({ variant: isLogin ? "default" : "secondary" }, [
-  //             isLogin ? "已登录" : "未登录",
-  //           ]),
-  //           DropdownMenu(
-  //             {
-  //               store: new ui.DropdownMenuCore({
-  //                 defaultVisible: true,
-  //                 items: [
-  //                   new ui.MenuItemCore({
-  //                     label: isLogin ? "切换账号" : "去登录",
-  //                     onClick() {
-  //                       console.log("切换账号");
-  //                     },
-  //                   }),
-  //                 ],
-  //               }),
-  //             },
-  //             [
-  //               View(
-  //                 {
-  //                   class:
-  //                     "text-sm text-primary underline underline-offset-4 hover:opacity-80",
-  //                 },
-  //                 [isLogin ? username : "去登录"],
-  //               ),
-  //             ],
-  //           ),
-  //         ]),
-  //       ]),
-  //     ]),
-
-  //     Separator({}),
-
-  //     // Feature Cards
-  //     View({ as: "h2", class: "text-xl font-semibold text-foreground" }, [
-  //       "核心功能",
-  //     ]),
-  //     View({ class: "grid grid-cols-1 md:grid-cols-2 gap-4" }, [
-  //       For({
-  //         each: data.features,
-  //         render(f) {
-  //           return Card({}, [
-  //             CardHeader({}, [
-  //               CardTitle({}, [`${f.icon} ${f.title}`]),
-  //               CardDescription({}, [f.desc]),
-  //             ]),
-  //           ]);
-  //         },
-  //       }),
-  //     ]),
-
-  //     Separator({}),
-
-  //     // Navigation Links
-  //     View({ as: "h2", class: "text-xl font-semibold text-foreground" }, [
-  //       "页面导航（测试路由）",
-  //     ]),
-  //     View({ class: "flex flex-wrap gap-3" }, [
-  //       Button(
-  //         {
-  //           store: new ui.ButtonCore({}),
-  //         },
-  //         [Link({}, ["组件库 →"])],
-  //       ),
-  //       Button(
-  //         {
-  //           store: new ui.ButtonCore({ variant: "secondary" }),
-  //           onClick() {
-  //             globalThis.location.href = "/settings";
-  //           },
-  //         },
-  //         ["设置 →"],
-  //       ),
-  //       Button(
-  //         {
-  //           store: new ui.ButtonCore({ variant: "outline" }),
-  //           onClick() {
-  //             globalThis.location.href = "/login";
-  //           },
-  //         },
-  //         ["登录 →"],
-  //       ),
-  //       Button(
-  //         {
-  //           store: new ui.ButtonCore({ variant: "ghost" }),
-  //           onClick() {
-  //             globalThis.location.href = "/nonexistent";
-  //           },
-  //         },
-  //         ["404 测试 →"],
-  //       ),
-  //     ]),
-  //   ]),
-
-  //   // Footer
-  //   View({ as: "footer", class: "border-t border-border mt-12" }, [
-  //     View(
-  //       {
-  //         class:
-  //           "max-w-4xl mx-auto px-6 py-8 text-center text-sm text-muted-foreground",
-  //       },
-  //       ["Powered by Timeless Framework — SSR Shadcn Test"],
-  //     ),
-  //   ]),
-  // ]);
 }
