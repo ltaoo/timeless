@@ -107,7 +107,9 @@ export function Content(
         // console.log("the floating mounted", $elm.getBoundingClientRect());
         store.setFloating({
           $el: $elm,
-          getRect: $elm.getBoundingClientRect,
+          getRect() {
+            return $elm.getBoundingClientRect();
+          },
         });
         listener$.add(
           store.onStateChange((v) => {

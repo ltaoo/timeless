@@ -148,6 +148,18 @@ export default function FormView() {
             }),
           ]),
         ]),
+        Item("Scrollable (100 options)", [
+          Select({
+            store: new Timeless.ui.SelectCore({
+              defaultValue: null,
+              placeholder: "从 100 个选项中选择",
+              options: Array.from({ length: 100 }, (_, i) => ({
+                value: `option_${i + 1}`,
+                label: `选项 ${i + 1}`,
+              })),
+            }),
+          }),
+        ]),
       ]),
       Section("Cascader", [
         Item("Default", [

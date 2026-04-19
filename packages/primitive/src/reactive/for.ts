@@ -557,7 +557,10 @@ export function For<T>(
       }
       listener$.destroy();
       for (let i = 0; i < state.idx_arr.length; i += 1) {
-        state.idx_arr[i].destroy();
+        const v = state.idx_arr[i];
+        if (v) {
+          v.destroy();
+        }
       }
       state.rendered = false;
       state.subscribed = false;

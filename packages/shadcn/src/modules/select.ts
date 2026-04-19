@@ -38,6 +38,9 @@ export function Select(
       );
     },
   );
+  const can_scroll_up_ = ref(false);
+  const can_scroll_down_ = ref(false);
+
   const listener$ = ListenerManager([
     state_,
     show_clear_,
@@ -46,6 +49,8 @@ export function Select(
     has_value_,
     is_loading_,
     is_disabled_,
+    can_scroll_up_,
+    can_scroll_down_,
   ]);
 
   const SelectOptionClassName =
@@ -249,7 +254,7 @@ export function Select(
           },
           store,
           class:
-            "cn-menu-target cn-menu-translucent select__content relative z-50 max-h-96 min-w-36 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
+            "cn-menu-target cn-menu-translucent select__content relative z-50 min-w-36 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none flex flex-col",
           style: computed(state_, () => {
             const width = store.reference?.width || 0;
             return width > 0
@@ -260,56 +265,108 @@ export function Select(
           }),
         },
         [
-          SelectPrimitive.Viewport({ store, class: "p-1" }, [
-            Show({
-              when: computed(state_, (t) => t.search),
-              ok() {
-                return [
-                  View(
-                    {
-                      class:
-                        "sticky top-0 z-10 -mx-1 mb-1 bg-popover px-1 pb-1 pt-0.5",
-                    },
-                    [
-                      SelectPrimitive.Search({
-                        store,
+          SelectPrimitive.ScrollUpButton(
+            {
+              visible: can_scroll_up_,
+              class:
+                "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
+            },
+            [Icon({ name: "chevron-up", size: 16 })],
+          ),
+          SelectPrimitive.Viewport(
+            {
+              store,
+              class: "p-1 overflow-y-auto",
+              onMounted(event: any) {
+                const $elm = event.target;
+
+                const computeMaxHeight = () => {
+                  const triggerRect = store.popper.reference?.getRect();
+                  if (triggerRect) {
+                    const spaceBelow =
+                      window.innerHeight - triggerRect.bottom - 8;
+                    const spaceAbove = triggerRect.top - 8;
+                    return Math.min(Math.max(spaceBelow, spaceAbove, 100), 384);
+                  }
+                  return Math.min(window.innerHeight * 0.6, 384);
+                };
+
+                const updateScroll = () => {
+                  can_scroll_up_.as($elm.scrollTop > 0);
+                  can_scroll_down_.as(
+                    Math.ceil($elm.scrollTop + $elm.clientHeight) <
+                      $elm.scrollHeight,
+                  );
+                };
+
+                requestAnimationFrame(() => {
+                  $elm.setStyleValue("max-height", `${computeMaxHeight()}px`);
+                  updateScroll();
+                });
+
+                $elm.addEventListener("scroll", updateScroll);
+                return () => $elm.removeEventListener("scroll", updateScroll);
+              },
+            },
+            [
+              Show({
+                when: computed(state_, (t) => t.search),
+                ok() {
+                  return [
+                    View(
+                      {
                         class:
-                          "h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30",
-                      }),
-                    ],
-                  ),
-                ];
-              },
-            }),
-            Show({
-              when: computed(filtered_entries_, (list) => list.length > 0),
-              ok() {
-                console.log("render options", filtered_entries_.value);
-                return [
-                  For({
-                    key: "value",
-                    each: filtered_entries_,
-                    render: methods.render_entry,
-                  }),
-                ];
-              },
-              else() {
-                return [
-                  View(
-                    {
-                      class:
-                        "py-6 text-center text-sm text-muted-foreground select-none",
-                    },
-                    [
-                      computed(state_, (t) => {
-                        return t.loading ? "加载中..." : "暂无数据";
-                      }),
-                    ],
-                  ),
-                ];
-              },
-            }),
-          ]),
+                          "sticky top-0 z-10 -mx-1 mb-1 bg-popover px-1 pb-1 pt-0.5",
+                      },
+                      [
+                        SelectPrimitive.Search({
+                          store,
+                          class:
+                            "h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30",
+                        }),
+                      ],
+                    ),
+                  ];
+                },
+              }),
+              Show({
+                when: computed(filtered_entries_, (list) => list.length > 0),
+                ok() {
+                  console.log("render options", filtered_entries_.value);
+                  return [
+                    For({
+                      key: "value",
+                      each: filtered_entries_,
+                      render: methods.render_entry,
+                    }),
+                  ];
+                },
+                else() {
+                  return [
+                    View(
+                      {
+                        class:
+                          "py-6 text-center text-sm text-muted-foreground select-none",
+                      },
+                      [
+                        computed(state_, (t) => {
+                          return t.loading ? "加载中..." : "暂无数据";
+                        }),
+                      ],
+                    ),
+                  ];
+                },
+              }),
+            ],
+          ),
+          SelectPrimitive.ScrollDownButton(
+            {
+              visible: can_scroll_down_,
+              class:
+                "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
+            },
+            [Icon({ name: "chevron-down", size: 16 })],
+          ),
         ],
       ),
     ],

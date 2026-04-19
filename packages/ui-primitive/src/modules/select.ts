@@ -307,6 +307,32 @@ export function Viewport(
   return View(props, children);
 }
 
+export function ScrollUpButton(
+  props: ViewProps & { visible?: any },
+  children: ViewChildren,
+) {
+  const { visible, ...rest } = props as any;
+  return Show({
+    when: visible,
+    ok() {
+      return [View(rest, children)];
+    },
+  });
+}
+
+export function ScrollDownButton(
+  props: ViewProps & { visible?: any },
+  children: ViewChildren,
+) {
+  const { visible, ...rest } = props as any;
+  return Show({
+    when: visible,
+    ok() {
+      return [View(rest, children)];
+    },
+  });
+}
+
 export function Search(
   props: ViewProps & { store: SelectCore<any> },
   children?: ViewChildren,
