@@ -899,6 +899,37 @@ export default function OverlayView() {
             ],
           ),
         ]),
+        Item("Many Items (100+)", [
+          DropdownMenu(
+            {
+              store: new Timeless.ui.DropdownMenuCore({
+                trigger: "click",
+                view$,
+                items: Array.from({ length: 100 }, (_, i) => {
+                  return new Timeless.ui.MenuItemCore({
+                    label: `Menu Item ${i + 1}`,
+                    shortcut: i % 5 === 0 ? `⌘${i}` : undefined,
+                    icon:
+                      i % 3 === 0
+                        ? Icon({ name: "circle", size: 16 })
+                        : undefined,
+                    onClick() {
+                      console.log(`Item ${i + 1} clicked`);
+                    },
+                  });
+                }),
+              }),
+            },
+            [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                },
+                ["100 Items"],
+              ),
+            ],
+          ),
+        ]),
         Item("Tooltip", [
           View({ class: classNames(["flex gap-2"]) }, [
             Tooltip({ content: ["Top tooltip"] }, [
