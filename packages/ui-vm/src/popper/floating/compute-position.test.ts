@@ -5,6 +5,14 @@ import { getMockPlatform } from "./platform/mock";
 import { detect_overflow } from "./detect-overflow";
 import type { Platform, ComputePositionConfig, MiddlewareState } from "./types";
 import type { Placement, Rect } from "./utils";
+import {
+  computePositionInItemAlignedMode,
+  type ItemAlignedRect,
+  type ItemAlignedContentMeasurement,
+  type ItemAlignedViewportMeasurement,
+  type ItemAlignedSelectedItemMeasurement,
+  type ComputePositionItemAlignedInput,
+} from "../index";
 
 const VIEWPORT_WIDTH = 1200;
 const VIEWPORT_HEIGHT = 800;
@@ -476,6 +484,305 @@ describe("computePosition", () => {
         expect(isFinite(result.x)).toBe(true);
         expect(isFinite(result.y)).toBe(true);
       });
+    });
+  });
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * computePositionInItemAlignedMode
+ * -----------------------------------------------------------------------------------------------*/
+
+/** 从 top/left/width/height 构造 ItemAlignedRect */
+function build_ia_rect(
+  top: number,
+  left: number,
+  width: number,
+  height: number,
+): ItemAlignedRect {
+  return { top, left, right: left + width, width, height };
+}
+
+/** 默认 content 测量值 */
+function build_content(
+  rect: ItemAlignedRect,
+  overrides: Partial<Omit<ItemAlignedContentMeasurement, "rect">> = {},
+): ItemAlignedContentMeasurement {
+  return {
+    rect,
+    borderTopWidth: 1,
+    paddingTop: 8,
+    borderBottomWidth: 1,
+    paddingBottom: 8,
+    clientHeight: 200,
+    ...overrides,
+  };
+}
+
+/** 默认 viewport 测量值 */
+function build_viewport(
+  scrollHeight: number,
+  overrides: Partial<ItemAlignedViewportMeasurement> = {},
+): ItemAlignedViewportMeasurement {
+  return {
+    scrollHeight,
+    offsetTop: 9,
+    offsetHeight: 182,
+    paddingTop: 4,
+    paddingBottom: 4,
+    ...overrides,
+  };
+}
+
+/** 默认 selectedItem 测量值 */
+function build_item(
+  offsetTop: number,
+  offsetHeight: number,
+  overrides: Partial<ItemAlignedSelectedItemMeasurement> = {},
+): ItemAlignedSelectedItemMeasurement {
+  return { offsetTop, offsetHeight, isFirst: false, isLast: false, ...overrides };
+}
+
+describe("computePositionInItemAlignedMode", () => {
+  const WINDOW = { width: 1280, height: 800 };
+
+  // ─── 水平定位 ────────────────────────────────────────────────────────────
+
+  describe("水平定位 (LTR)", () => {
+    it("valueNode 与 itemText 左边界正确对齐", () => {
+      // itemTextOffset = itemTextRect.left - content.rect.left = 70 - 50 = 20
+      // desiredLeft = valueNodeRect.left - itemTextOffset = 110 - 20 = 90
+      // leftDelta = triggerRect.left - desiredLeft = 100 - 90 = 10
+      // minWidth = triggerWidth + leftDelta = 200 + 10 = 210
+      const result = computePositionInItemAlignedMode({
+        dir: "ltr",
+        triggerRect: build_ia_rect(0, 100, 200, 0),
+        valueNodeRect: build_ia_rect(0, 110, 180, 0),
+        content: build_content(build_ia_rect(0, 50, 300, 0)),
+        itemTextRect: build_ia_rect(0, 70, 200, 0),
+        selectedItem: build_item(0, 36),
+        viewport: build_viewport(300),
+        windowSize: WINDOW,
+      });
+
+      expect(result.contentWrapperStyle.left).toBe(90);
+      expect(result.contentWrapperStyle.minWidth).toBe(210);
+      expect(result.contentWrapperStyle.right).toBeUndefined();
+    });
+
+    it("content 接近视口右边界时 left 被 clamp", () => {
+      // desiredLeft = 210 - (160-150) = 200
+      // clampMax = rightEdge - contentWidth = (400-10) - max(180, 200) = 390 - 200 = 190
+      // clampToRange(200, [10, 190]) → 190
+      const result = computePositionInItemAlignedMode({
+        dir: "ltr",
+        triggerRect: build_ia_rect(0, 200, 180, 0),
+        valueNodeRect: build_ia_rect(0, 210, 160, 0),
+        content: build_content(build_ia_rect(0, 150, 200, 0)),
+        itemTextRect: build_ia_rect(0, 160, 180, 0),
+        selectedItem: build_item(0, 36),
+        viewport: build_viewport(300),
+        windowSize: { width: 400, height: 800 },
+      });
+
+      expect(result.contentWrapperStyle.left).toBe(190);
+      expect(result.contentWrapperStyle.minWidth).toBe(180);
+    });
+  });
+
+  describe("水平定位 (RTL)", () => {
+    it("right 值根据 itemText 与 valueNode 右边界对齐计算", () => {
+      // itemTextOffset = content.rect.right - itemTextRect.right = 1230 - 1210 = 20
+      // desiredRight = windowWidth - valueNodeRect.right - itemTextOffset = 1280 - 1070 - 20 = 190
+      // rightDelta = windowWidth - triggerRect.right - desiredRight = 1280 - 1080 - 190 = 10
+      // minWidth = 200 + 10 = 210
+      // clampToRange(190, [10, 920]) = 190
+      const result = computePositionInItemAlignedMode({
+        dir: "rtl",
+        triggerRect: build_ia_rect(0, 880, 200, 0),
+        valueNodeRect: build_ia_rect(0, 890, 180, 0),
+        content: build_content(build_ia_rect(0, 880, 350, 0)),
+        itemTextRect: build_ia_rect(0, 900, 310, 0),
+        selectedItem: build_item(0, 36),
+        viewport: build_viewport(300),
+        windowSize: WINDOW,
+      });
+
+      expect(result.contentWrapperStyle.right).toBe(190);
+      expect(result.contentWrapperStyle.minWidth).toBe(210);
+      expect(result.contentWrapperStyle.left).toBeUndefined();
+    });
+  });
+
+  // ─── 垂直定位 ────────────────────────────────────────────────────────────
+
+  describe("垂直定位 - bottom-anchor（不超出顶部）", () => {
+    it("selected item 在中间：使用 bottom=0 定位，height 正确", () => {
+      // topEdgeToTriggerMiddle = 400 + 20 - 10 = 410
+      // contentTopToItemMiddle = 1 + 8 + (100+18) = 127
+      // 127 <= 410 → bottom-anchor
+      // viewportOffsetBottom = 200 - 9 - 182 = 9
+      // clampedBottom = max(780-410, 18+0+9+1) = max(370, 28) = 370
+      // height = 127 + 370 = 497
+      const result = computePositionInItemAlignedMode({
+        dir: "ltr",
+        triggerRect: build_ia_rect(400, 0, 200, 40),
+        valueNodeRect: build_ia_rect(0, 0, 0, 0),
+        content: build_content(build_ia_rect(0, 0, 200, 0)),
+        itemTextRect: build_ia_rect(0, 0, 0, 0),
+        selectedItem: build_item(100, 36),
+        viewport: build_viewport(300),
+        windowSize: WINDOW,
+      });
+
+      expect(result.contentWrapperStyle.bottom).toBe(0);
+      expect(result.contentWrapperStyle.top).toBeUndefined();
+      expect(result.contentWrapperStyle.height).toBe(497);
+      expect(result.viewportScrollTop).toBeUndefined();
+    });
+
+    it("minHeight = min(offsetHeight*5, fullContentHeight)", () => {
+      // fullContentHeight = 1+8+300+8+1 = 318, offsetHeight*5 = 180 → minHeight = 180
+      const result = computePositionInItemAlignedMode({
+        dir: "ltr",
+        triggerRect: build_ia_rect(400, 0, 200, 40),
+        valueNodeRect: build_ia_rect(0, 0, 0, 0),
+        content: build_content(build_ia_rect(0, 0, 200, 0)),
+        itemTextRect: build_ia_rect(0, 0, 0, 0),
+        selectedItem: build_item(100, 36),
+        viewport: build_viewport(300),
+        windowSize: WINDOW,
+      });
+
+      expect(result.contentWrapperStyle.minHeight).toBe(180);
+      expect(result.contentWrapperStyle.maxHeight).toBe(780);
+      expect(result.contentWrapperStyle.margin).toBe("10px 0");
+    });
+
+    it("isLast=true 使 clampedTriggerMiddleToBottomEdge 增大", () => {
+      // trigger 接近底部：triggerMiddleToBottomEdge = 90
+      // viewportOffsetBottom = 200 - 9 - 82 = 109
+      // Without isLast: max(90, 18+0+109+1) = 128 → height = 91 + 128 = 219
+      // With isLast:    max(90, 18+4+109+1) = 132 → height = 91 + 132 = 223
+      const base: ComputePositionItemAlignedInput = {
+        dir: "ltr",
+        triggerRect: build_ia_rect(680, 0, 200, 40),
+        valueNodeRect: build_ia_rect(0, 0, 0, 0),
+        content: build_content(build_ia_rect(0, 0, 200, 0), { clientHeight: 200 }),
+        itemTextRect: build_ia_rect(0, 0, 0, 0),
+        selectedItem: build_item(64, 36),
+        viewport: build_viewport(100, { offsetHeight: 82, paddingBottom: 4 }),
+        windowSize: WINDOW,
+      };
+
+      const without_isLast = computePositionInItemAlignedMode(base);
+      const with_isLast = computePositionInItemAlignedMode({
+        ...base,
+        selectedItem: build_item(64, 36, { isLast: true }),
+      });
+
+      expect(without_isLast.contentWrapperStyle.height).toBe(219);
+      expect(with_isLast.contentWrapperStyle.height).toBe(223);
+    });
+  });
+
+  describe("垂直定位 - top-anchor（超出顶部）", () => {
+    it("selected item 较深：使用 top=0，返回 viewportScrollTop", () => {
+      // topEdgeToTriggerMiddle = 100 + 20 - 10 = 110
+      // contentTopToItemMiddle = 1 + 8 + (200+18) = 227
+      // 227 > 110 → top-anchor
+      // clampedTop = max(110, 1+9+0+18) = max(110, 28) = 110
+      // itemMiddleToContentBottom = 418 - 227 = 191
+      // height = 110 + 191 = 301
+      // viewportScrollTop = 227 - 110 + 9 = 126
+      const result = computePositionInItemAlignedMode({
+        dir: "ltr",
+        triggerRect: build_ia_rect(100, 0, 200, 40),
+        valueNodeRect: build_ia_rect(0, 0, 0, 0),
+        content: build_content(build_ia_rect(0, 0, 200, 0)),
+        itemTextRect: build_ia_rect(0, 0, 0, 0),
+        selectedItem: build_item(200, 36),
+        viewport: build_viewport(400),
+        windowSize: WINDOW,
+      });
+
+      expect(result.contentWrapperStyle.top).toBe(0);
+      expect(result.contentWrapperStyle.bottom).toBeUndefined();
+      expect(result.contentWrapperStyle.height).toBe(301);
+      expect(result.viewportScrollTop).toBe(126);
+    });
+
+    it("isFirst=true 使 clampedTopEdgeToTriggerMiddle 增大", () => {
+      // trigger 接近顶部：topEdgeToTriggerMiddle = 15 + 20 - 10 = 25
+      // Without isFirst: max(25, 1+9+0+18) = max(25, 28) = 28 → height = 28 + 191 = 219
+      // With isFirst:    max(25, 1+9+4+18) = max(25, 32) = 32 → height = 32 + 191 = 223
+      const base: ComputePositionItemAlignedInput = {
+        dir: "ltr",
+        triggerRect: build_ia_rect(15, 0, 200, 40),
+        valueNodeRect: build_ia_rect(0, 0, 0, 0),
+        content: build_content(build_ia_rect(0, 0, 200, 0)),
+        itemTextRect: build_ia_rect(0, 0, 0, 0),
+        selectedItem: build_item(200, 36),
+        viewport: build_viewport(400, { paddingTop: 4 }),
+        windowSize: WINDOW,
+      };
+
+      const without_isFirst = computePositionInItemAlignedMode(base);
+      const with_isFirst = computePositionInItemAlignedMode({
+        ...base,
+        selectedItem: build_item(200, 36, { isFirst: true }),
+      });
+
+      expect(without_isFirst.contentWrapperStyle.height).toBe(219);
+      expect(with_isFirst.contentWrapperStyle.height).toBe(223);
+      // viewportScrollTop 不受 isFirst 影响
+      expect(without_isFirst.viewportScrollTop).toBe(
+        with_isFirst.viewportScrollTop,
+      );
+    });
+  });
+
+  // ─── contentMargin ───────────────────────────────────────────────────────
+
+  describe("contentMargin", () => {
+    it("默认 contentMargin 为 10，体现在 maxHeight 和 margin 字段", () => {
+      const result = computePositionInItemAlignedMode({
+        dir: "ltr",
+        triggerRect: build_ia_rect(400, 0, 200, 40),
+        valueNodeRect: build_ia_rect(0, 0, 0, 0),
+        content: build_content(build_ia_rect(0, 0, 200, 0)),
+        itemTextRect: build_ia_rect(0, 0, 0, 0),
+        selectedItem: build_item(100, 36),
+        viewport: build_viewport(300),
+        windowSize: { width: 1280, height: 800 },
+      });
+
+      // maxHeight = 800 - 10*2 = 780
+      expect(result.contentWrapperStyle.maxHeight).toBe(780);
+      expect(result.contentWrapperStyle.margin).toBe("10px 0");
+    });
+
+    it("自定义 contentMargin=20 影响 maxHeight、topEdgeToTriggerMiddle 和 margin", () => {
+      // topEdgeToTriggerMiddle = 400 + 20 - 20 = 400
+      // availableHeight = 800 - 40 = 760
+      // triggerMiddleToBottomEdge = 760 - 400 = 360
+      // contentTopToItemMiddle = 127（不变）→ bottom-anchor
+      // clampedBottom = max(360, 28) = 360
+      // height = 127 + 360 = 487
+      const result = computePositionInItemAlignedMode({
+        dir: "ltr",
+        triggerRect: build_ia_rect(400, 0, 200, 40),
+        valueNodeRect: build_ia_rect(0, 0, 0, 0),
+        content: build_content(build_ia_rect(0, 0, 200, 0)),
+        itemTextRect: build_ia_rect(0, 0, 0, 0),
+        selectedItem: build_item(100, 36),
+        viewport: build_viewport(300),
+        windowSize: { width: 1280, height: 800 },
+        contentMargin: 20,
+      });
+
+      expect(result.contentWrapperStyle.maxHeight).toBe(760);
+      expect(result.contentWrapperStyle.height).toBe(487);
+      expect(result.contentWrapperStyle.margin).toBe("20px 0");
     });
   });
 });

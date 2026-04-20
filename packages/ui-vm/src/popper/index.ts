@@ -73,17 +73,18 @@ type PopperState = {
   strategy: Strategy;
   x: number;
   y: number;
+  top?: number;
+  bottom?: number;
   placement: Placement;
   isPlaced: boolean;
-  placedSide: Side;
-  placedAlign: Align;
+  /** PopperContent height */
+  height: number;
   /** 是否设置了参考DOM */
   reference: boolean;
   arrow: {
     x?: number;
     y?: number;
   } | null;
-  middlewareData: MiddlewareData;
   /** 浮动元素在放置方向上的可用高度（px） */
   availableHeight: number;
   /** 浮动元素在交叉轴上的可用宽度（px） */
@@ -109,19 +110,18 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
    * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
    */
   mode: "popper" | "item-aligned" = "popper";
-  /** item-aligned 模式：选中项在列表中的垂直偏移量，用于将面板对齐到选中项 */
-  itemOffset = 0;
-  /** item-aligned 模式：获取位置状态的回调 */
-  // getItemAlignedPosition?: () => any;
   view$?: ScrollViewCore;
   reference: {
     getRect: () => Rect;
     $el?: unknown;
-    // x: number;
-    // y: number;
-    // width: number;
-    // height: number;
   } | null = null;
+  floating: {
+    getRect: () => Rect;
+    $el?: {};
+  } | null = null;
+
+  /** item-aligned 模式：选中项在列表中的垂直偏移量，用于将面板对齐到选中项 */
+  itemOffset = 0;
   /** item-aligned 模式：trigger 中的 value 节点 */
   valueNode: { getBoundingClientRect: () => DOMRect } | null = null;
   /** item-aligned 模式：content wrapper 元素（用于设置 fixed 定位） */
@@ -136,18 +136,18 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   } | null = null;
   /** item-aligned 模式：选中的 item 文本元素 */
   selectedItemText: { getBoundingClientRect: () => DOMRect } | null = null;
+  /** item-aligned 模式：content 元素的测量数据（用于计算定位） */
+  _contentMeasurement: ItemAlignedContentMeasurement | null = null;
+  /** item-aligned 模式：viewport 元素的测量数据（用于计算定位） */
+  _viewportMeasurement: ItemAlignedViewportMeasurement | null = null;
+  /** item-aligned 模式：计算好的容器样式 */
+  _itemAlignedStyle: ItemAlignedContentWrapperStyle | null = null;
   _item: {
+    offsetTop: number;
+    offsetHeight: number;
     x: number;
     y: number;
   };
-  floating: {
-    getRect: () => Rect;
-    $el?: {};
-    // x: number;
-    // y: number;
-    // width: number;
-    // height: number;
-  } | null = null;
   container: Node | null = null;
   arrow: {
     width: number;
@@ -161,11 +161,9 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     y: 0,
     placement: "bottom",
     isPlaced: false,
-    placedSide: "bottom",
-    placedAlign: "center",
+    height: 0,
     reference: false,
     arrow: null,
-    middlewareData: {},
     availableHeight: 0,
     availableWidth: 0,
     canScrollUp: false,
@@ -367,8 +365,105 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.offsetY = offset.y;
   }
   /** 设置 item-aligned 模式下选中项的偏移量 */
-  setItemOffset(data: { x: number; y: number; height: number; bottom: number }) {
-    this._item = data;
+  setItemOffset(rect: {
+    offsetTop: number;
+    offsetHeight: number;
+    bottom: number;
+  }) {
+    const { offsetHeight, offsetTop, bottom } = rect;
+    const item_offset_middle = offsetTop + offsetHeight / 2;
+    const content_top_top_item_middle = item_offset_middle + bottom;
+
+    const reference_rect = this.reference.getRect();
+    const viewport = this.platform.getViewportSize();
+
+    logger.log({
+      reference: {
+        top: reference_rect.top,
+        height: reference_rect.height,
+      },
+      viewport,
+    });
+
+    this.state.x = reference_rect.left + 1;
+    const contentMargin = 0;
+    const borderTopWidth = 0;
+    const paddingTop = offsetTop;
+    const viewportPaddingTop = 0;
+    const viewportOffsetTop = 0;
+    const isFirst = false;
+
+    // trigger 中心距视口上边缘的距离（减去 margin）
+    const top_edge_to_reference_middle =
+      reference_rect.top + reference_rect.height / 2 - contentMargin;
+    // const triggerMiddleToBottomEdge = availableHeight - topEdgeToTriggerMiddle;
+    // const selectedItemHalfHeight = selectedItem.offsetHeight / 2;
+    const itemOffsetMiddle = offsetTop + offsetHeight;
+    // content 顶部到选中项中心的距离
+    const content_top_to_item_middle =
+      borderTopWidth + paddingTop + itemOffsetMiddle;
+    // const itemMiddleToContentBottom = fullContentHeight - contentTopToItemMiddle;
+
+    // 若 content 顶部到选中项中心 <= trigger 中心到视口顶部，则可以直接 bottom-anchor
+    const align_without_top =
+      content_top_to_item_middle <= top_edge_to_reference_middle;
+    if (align_without_top) {
+      this.state.bottom = 0;
+      this.state.height = (() => {
+        // Reference 的垂直中点位置
+        // const middle_y = reference_rect.top + reference_rect.height / 2;
+        // 从 reference 垂直中点到 viewport 底部的高度
+        const height_from_middle_y_to_bottom =
+          viewport.height - top_edge_to_reference_middle;
+        const item_middle_y = offsetTop + offsetHeight / 2;
+        return height_from_middle_y_to_bottom + item_middle_y;
+      })();
+    } else {
+      this.state.top = 0;
+      this.state.height = (() => {
+        const contentTopToItemMiddle =
+          borderTopWidth + paddingTop + itemOffsetMiddle;
+        const itemMiddleToContentBottom =
+          viewport.height - contentTopToItemMiddle;
+        const clampedTopEdgeToTriggerMiddle = Math.max(
+          top_edge_to_reference_middle,
+          borderTopWidth +
+            viewportOffsetTop +
+            (isFirst ? viewportPaddingTop : 0) +
+            offsetHeight / 2,
+        );
+        return clampedTopEdgeToTriggerMiddle + itemMiddleToContentBottom;
+      })();
+    }
+
+    this.state.isPlaced = true;
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */
+  setItemAlignedElements(data: {
+    valueNode: { getBoundingClientRect: () => DOMRect };
+    contentWrapper: { $el?: HTMLElement };
+    viewport: { $el?: HTMLElement };
+    selectedItem: {
+      $el?: HTMLElement;
+      offsetTop: number;
+      offsetHeight: number;
+    };
+    selectedItemText: { getBoundingClientRect: () => DOMRect };
+  }) {
+    this.valueNode = data.valueNode;
+    this.contentWrapper = data.contentWrapper;
+    this.viewport = data.viewport;
+    this.selectedItem = data.selectedItem;
+    this.selectedItemText = data.selectedItemText;
+  }
+  /** 设置 item-aligned 模式下的测量数据 */
+  setItemAlignedMeasurements(
+    content: ItemAlignedContentMeasurement,
+    viewport: ItemAlignedViewportMeasurement,
+  ) {
+    this._contentMeasurement = content;
+    this._viewportMeasurement = viewport;
   }
   /** 计算浮动元素位置 */
   async place() {
@@ -388,6 +483,12 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       );
       return;
     }
+
+    if (this.mode === "item-aligned" && this.reference && this.floating) {
+      this.placeInItemAlignedMode();
+      return;
+    }
+
     const coords = await this.computePosition();
     // const { x, y, width, height } = this.reference.getRect();
     const { x, y, middleware_data } = coords;
@@ -452,11 +553,9 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       strategy: this.strategy,
       placement: coords.placement,
       isPlaced: true,
-      placedSide: placed_side,
-      placedAlign: placed_align,
+      height: 0,
       reference: true,
       arrow: middleware_data.arrow || null,
-      middlewareData: middleware_data,
       availableHeight: available_height,
       availableWidth: available_width,
       canScrollUp: false,
@@ -545,13 +644,77 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  getItemAlignedPosition() {
-    return {
-      ...this._item,
-      bottom: 0,
-      x: this.state.x,
-      y: this.state.y,
-    };
+  getItemAlignedPosition(): ItemAlignedContentWrapperStyle | null {
+    return this._itemAlignedStyle;
+  }
+
+  placeInItemAlignedMode() {
+    if (!this.reference || !this.floating) {
+      return;
+    }
+    // if (
+    //   !this.valueNode ||
+    //   !this.selectedItemText ||
+    //   !this._contentMeasurement ||
+    //   !this._viewportMeasurement
+    // ) {
+    //   logger.warn("placeInItemAlignedMode missing measurements", {
+    //     valueNode: !!this.valueNode,
+    //     selectedItemText: !!this.selectedItemText,
+    //     contentMeasurement: !!this._contentMeasurement,
+    //     viewportMeasurement: !!this._viewportMeasurement,
+    //   });
+    //   return;
+    // }
+    const reference_rect = this.reference.getRect();
+    // const valueNodeRect = this.valueNode.getBoundingClientRect();
+    // const itemTextRect = this.selectedItemText.getBoundingClientRect();
+    // const selectedItem: ItemAlignedSelectedItemMeasurement = {
+    //   offsetTop: this.selectedItem?.offsetTop ?? 0,
+    //   offsetHeight: this.selectedItem?.offsetHeight ?? 0,
+    //   isFirst: false,
+    //   isLast: false,
+    // };
+    // const input: ComputePositionItemAlignedInput = {
+    //   triggerRect: reference_rect,
+    //   valueNodeRect,
+    //   content: this._contentMeasurement!,
+    //   itemTextRect,
+    //   selectedItem,
+    //   viewport: this._viewportMeasurement!,
+    //   windowSize: {
+    //     width: window?.innerWidth ?? 0,
+    //     height: window?.innerHeight ?? 0,
+    //   },
+    // };
+    // const result = computePositionInItemAlignedMode(input);
+    // const { contentWrapperStyle, viewportScrollTop } = result;
+    // this._itemAlignedStyle = contentWrapperStyle;
+
+    // this.state = {
+    //   ...this.state,
+    //   x: contentWrapperStyle.left ?? 0,
+    //   y: contentWrapperStyle.top ?? 0,
+    //   strategy: "fixed",
+    //   placement: contentWrapperStyle.bottom !== undefined ? "bottom" : "top",
+    //   isPlaced: true,
+    //   placedSide: contentWrapperStyle.bottom !== undefined ? "bottom" : "top",
+    //   placedAlign: "start",
+    //   reference: true,
+    //   arrow: null,
+    //   middlewareData: {},
+    //   availableHeight: contentWrapperStyle.maxHeight,
+    //   availableWidth: 0,
+    //   canScrollUp: false,
+    //   canScrollDown: false,
+    // };
+    // this._item = {
+    //   x: contentWrapperStyle.left ?? 0,
+    //   y: contentWrapperStyle.top ?? 0,
+    // };
+    // this.state.x = contentWrapperStyle.left ?? 0;
+    // this.state.y = contentWrapperStyle.top ?? 0;
+    // this.emit(Events.StateChange, { ...this.state });
   }
 
   handleEnter() {
@@ -610,6 +773,229 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   get [Symbol.toStringTag]() {
     return "PopperCore";
   }
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * computePositionInItemAlignedMode
+ * 纯函数：从 DOM 预先读取的测量值计算 item-aligned 模式下 contentWrapper 的样式
+ * 对应 select.tsx SelectItemAlignedPosition 中的 position() 回调
+ * -----------------------------------------------------------------------------------------------*/
+
+/** 仅含定位所需字段的矩形描述 */
+export interface ItemAlignedRect {
+  top: number;
+  left: number;
+  right: number;
+  width: number;
+  height: number;
+}
+
+/** content 元素的测量值 */
+export interface ItemAlignedContentMeasurement {
+  rect: ItemAlignedRect;
+  borderTopWidth: number;
+  paddingTop: number;
+  borderBottomWidth: number;
+  paddingBottom: number;
+  /** content.clientHeight，用于计算 viewportOffsetBottom */
+  clientHeight: number;
+}
+
+/** viewport 元素的测量值 */
+export interface ItemAlignedViewportMeasurement {
+  /** viewport.scrollHeight，即所有 item 的总高度 */
+  scrollHeight: number;
+  /** viewport.offsetTop，相对于 content 的偏移 */
+  offsetTop: number;
+  /** viewport.offsetHeight */
+  offsetHeight: number;
+  paddingTop: number;
+  paddingBottom: number;
+}
+
+/** 选中项的测量值 */
+export interface ItemAlignedSelectedItemMeasurement {
+  /** selectedItem.offsetTop，相对于 viewport */
+  offsetTop: number;
+  /** selectedItem.offsetHeight */
+  offsetHeight: number;
+  /** 是否为列表第一项，影响 top-anchor 时的 clamp 下限 */
+  isFirst: boolean;
+  /** 是否为列表最后一项，影响 bottom-anchor 时的 clamp 下限 */
+  isLast: boolean;
+}
+
+export interface ComputePositionItemAlignedInput {
+  dir?: "ltr" | "rtl";
+  triggerRect: ItemAlignedRect;
+  /** trigger 内部展示当前值的 span */
+  valueNodeRect: ItemAlignedRect;
+  content: ItemAlignedContentMeasurement;
+  /** content 内选中项文本节点的 rect */
+  itemTextRect: ItemAlignedRect;
+  selectedItem: ItemAlignedSelectedItemMeasurement;
+  viewport: ItemAlignedViewportMeasurement;
+  windowSize: { width: number; height: number };
+  /** 视口边距，默认 10 */
+  contentMargin?: number;
+}
+
+export interface ItemAlignedContentWrapperStyle {
+  /** ltr 时有值 */
+  left?: number;
+  /** rtl 时有值 */
+  right?: number;
+  minWidth: number;
+  /** top-anchor 时为 0 */
+  top?: number;
+  /** bottom-anchor 时为 0 */
+  bottom?: number;
+  height: number;
+  minHeight: number;
+  maxHeight: number;
+  /** 例如 "10px 0" */
+  margin: string;
+}
+
+export interface ComputePositionItemAlignedResult {
+  contentWrapperStyle: ItemAlignedContentWrapperStyle;
+  /** 仅 top-anchor 时存在，需写入 viewport.scrollTop */
+  viewportScrollTop?: number;
+}
+
+function clampToRange(value: number, [min, max]: [number, number]): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+export function computePositionInItemAlignedMode(
+  input: ComputePositionItemAlignedInput,
+): ComputePositionItemAlignedResult {
+  const {
+    dir = "ltr",
+    triggerRect,
+    valueNodeRect,
+    content,
+    itemTextRect,
+    selectedItem,
+    viewport,
+    windowSize,
+    contentMargin = 10,
+  } = input;
+
+  // ─── 水平 ────────────────────────────────────────────────────────────────
+
+  let left: number | undefined;
+  let right: number | undefined;
+  let minWidth: number;
+
+  if (dir !== "rtl") {
+    // itemText 在 content 内部的水平偏移（与 content 绝对位置无关的布局常量）
+    const itemTextOffset = itemTextRect.left - content.rect.left;
+    const desiredLeft = valueNodeRect.left - itemTextOffset;
+    const leftDelta = triggerRect.left - desiredLeft;
+    minWidth = triggerRect.width + leftDelta;
+    const contentWidth = Math.max(minWidth, content.rect.width);
+    const rightEdge = windowSize.width - contentMargin;
+    left = clampToRange(desiredLeft, [
+      contentMargin,
+      Math.max(contentMargin, rightEdge - contentWidth),
+    ]);
+  } else {
+    const itemTextOffset = content.rect.right - itemTextRect.right;
+    const desiredRight =
+      windowSize.width - valueNodeRect.right - itemTextOffset;
+    const rightDelta = windowSize.width - triggerRect.right - desiredRight;
+    minWidth = triggerRect.width + rightDelta;
+    const contentWidth = Math.max(minWidth, content.rect.width);
+    const leftEdge = windowSize.width - contentMargin;
+    right = clampToRange(desiredRight, [
+      contentMargin,
+      Math.max(contentMargin, leftEdge - contentWidth),
+    ]);
+  }
+
+  // ─── 垂直 ────────────────────────────────────────────────────────────────
+
+  const availableHeight = windowSize.height - contentMargin * 2;
+  const {
+    borderTopWidth,
+    paddingTop,
+    borderBottomWidth,
+    paddingBottom,
+    clientHeight,
+  } = content;
+
+  const fullContentHeight =
+    borderTopWidth +
+    paddingTop +
+    viewport.scrollHeight +
+    paddingBottom +
+    borderBottomWidth;
+  const minContentHeight = Math.min(
+    selectedItem.offsetHeight * 5,
+    fullContentHeight,
+  );
+
+  // trigger 中心距视口上边缘的距离（减去 margin）
+  const topEdgeToTriggerMiddle =
+    triggerRect.top + triggerRect.height / 2 - contentMargin;
+  const triggerMiddleToBottomEdge = availableHeight - topEdgeToTriggerMiddle;
+
+  const selectedItemHalfHeight = selectedItem.offsetHeight / 2;
+  const itemOffsetMiddle = selectedItem.offsetTop + selectedItemHalfHeight;
+  // content 顶部到选中项中心的距离
+  const contentTopToItemMiddle = borderTopWidth + paddingTop + itemOffsetMiddle;
+  const itemMiddleToContentBottom = fullContentHeight - contentTopToItemMiddle;
+
+  // 若 content 顶部到选中项中心 <= trigger 中心到视口顶部，则可以直接 bottom-anchor
+  const willAlignWithoutTopOverflow =
+    contentTopToItemMiddle <= topEdgeToTriggerMiddle;
+
+  let top: number | undefined;
+  let bottom: number | undefined;
+  let height: number;
+  let viewportScrollTop: number | undefined;
+
+  if (willAlignWithoutTopOverflow) {
+    // bottom-anchor：固定底部，向上延伸
+    bottom = 0;
+    const viewportOffsetBottom =
+      clientHeight - viewport.offsetTop - viewport.offsetHeight;
+    const clampedTriggerMiddleToBottomEdge = Math.max(
+      triggerMiddleToBottomEdge,
+      selectedItemHalfHeight +
+        (selectedItem.isLast ? viewport.paddingBottom : 0) +
+        viewportOffsetBottom +
+        borderBottomWidth,
+    );
+    height = contentTopToItemMiddle + clampedTriggerMiddleToBottomEdge;
+  } else {
+    // top-anchor：固定顶部，向下延伸，并调整 viewport 的 scrollTop 使选中项可见
+    top = 0;
+    const clampedTopEdgeToTriggerMiddle = Math.max(
+      topEdgeToTriggerMiddle,
+      borderTopWidth +
+        viewport.offsetTop +
+        (selectedItem.isFirst ? viewport.paddingTop : 0) +
+        selectedItemHalfHeight,
+    );
+    height = clampedTopEdgeToTriggerMiddle + itemMiddleToContentBottom;
+    viewportScrollTop =
+      contentTopToItemMiddle - topEdgeToTriggerMiddle + viewport.offsetTop;
+  }
+
+  return {
+    contentWrapperStyle: {
+      ...(left !== undefined ? { left } : { right }),
+      minWidth,
+      ...(bottom !== undefined ? { bottom } : { top }),
+      height,
+      minHeight: minContentHeight,
+      maxHeight: availableHeight,
+      margin: `${contentMargin}px 0`,
+    },
+    viewportScrollTop,
+  };
 }
 
 /* -----------------------------------------------------------------------------------------------*/

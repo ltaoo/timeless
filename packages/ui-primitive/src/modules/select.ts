@@ -60,9 +60,18 @@ export function Trigger(
     },
   });
 
-  return View(
+  return Button(
     {
       ...rest,
+      attributes: {
+        role: "combobox",
+        "aria-expanded": computed(state_, (t) => (t.open ? "true" : "false")),
+        "aria-haspopup": "listbox",
+        // 'aria-controls': computed(state_, (t) => t.open ? t.id : undefined),
+        // 'aria-labelledby': computed(state_, (t) => t.id),
+        // 'aria-readonly': computed(state_, (t) => t.readOnly || undefined),
+        "aria-required": computed(state_, (t) => t.required || undefined),
+      },
       onMounted(event) {
         listener$.add(
           store.onStateChange((v) => {
@@ -117,25 +126,28 @@ export function Trigger(
 
 export function Value(props: ViewProps & { store: SelectCore<any> }) {
   const { store, ...rest } = props;
-  const state_ = refobj(store.state);
 
+  const state_ = refobj(store.state);
   const listener$ = ListenerManager([state_]);
 
   return View(
     {
       ...rest,
+      style: {
+        "pointer-events": "none",
+      },
       onMounted(event) {
         listener$.add(
           store.onStateChange((v) => {
             state_.as(v);
           }),
         );
-        if (store.position === "item-aligned") {
-          const el = event.target.get$elm();
-          if (el instanceof HTMLElement) {
-            store.setItemAlignedElements({ valueEl: el });
-          }
-        }
+        // if (store.position === "item-aligned") {
+        //   const el = event.target.get$elm();
+        //   if (el instanceof HTMLElement) {
+        //     store.setItemAlignedElements({ valueEl: el });
+        //   }
+        // }
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
@@ -205,7 +217,6 @@ export function Content(
 ) {
   const { store, animation, onMounted, ...rest } = props;
 
-  let _was_exiting = false;
   const presence_ = refobj(store.presence.state);
 
   const listener$ = ListenerManager([presence_]);
@@ -255,60 +266,94 @@ export function Content(
     ok() {
       return [
         NativePortal({}, [
-          PopperPrimitive.Content(
-            {
-              store: store.popper,
-              onDismiss() {
-                store.hide();
-              },
-            },
-            [
-              View(
-                {
-                  ...rest,
-                  attributes: {
-                    ...(rest.attributes || {}),
-                    tabindex: 0,
-                  },
-                  class: classNames([
-                    rest.class,
-                    computed(presence_, (t) => {
-                      if (t.exit) {
-                        _was_exiting = true;
-                      }
-                      if (!t.mounted && _was_exiting) {
-                        _was_exiting = false;
-                        return animation?.out || "";
-                      }
-                      if (t.mounted) {
-                        _was_exiting = false;
-                      }
-                      return [
-                        t.enter && animation?.in ? animation.in : "",
-                        t.exit && animation?.out ? animation.out : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ");
-                    }),
-                  ]),
-                  onKeyDown: handleKeyDown,
-                  onAnimationEnd(e: AnimationEvent) {
-                    if (e.target === e.currentTarget) {
-                      store.presence.handleAnimationEnd();
-                    }
-                    if (rest.onAnimationEnd) {
-                      rest.onAnimationEnd(e);
-                    }
-                  },
-                },
-                children,
-              ),
-            ],
+          PopperPositionContent(
+            { ...rest, store, animation, onKeyDown: handleKeyDown },
+            children,
           ),
         ]),
       ];
     },
   });
+}
+
+export function PopperPositionContent(
+  props: ViewProps & {
+    store: SelectCore<any>;
+    animation?: { in: string; out: string };
+  },
+  children?: ViewChildren,
+) {
+  const { store, animation, ...rest } = props;
+
+  let _was_exiting = false;
+  const presence_ = refobj(store.presence.state);
+
+  return PopperPrimitive.Content(
+    {
+      store: store.popper,
+      onDismiss() {
+        store.hide();
+      },
+    },
+    [
+      View(
+        {
+          ...rest,
+          attributes: {
+            ...(rest.attributes || {}),
+            tabindex: 0,
+          },
+          class: classNames([
+            rest.class,
+            computed(presence_, (t) => {
+              if (t.exit) {
+                _was_exiting = true;
+              }
+              if (!t.mounted && _was_exiting) {
+                _was_exiting = false;
+                return animation?.out || "";
+              }
+              if (t.mounted) {
+                _was_exiting = false;
+              }
+              return [
+                t.enter && animation?.in ? animation.in : "",
+                t.exit && animation?.out ? animation.out : "",
+              ]
+                .filter(Boolean)
+                .join(" ");
+            }),
+          ]),
+          // onKeyDown: handleKeyDown,
+          onAnimationEnd(e: AnimationEvent) {
+            if (e.target === e.currentTarget) {
+              store.presence.handleAnimationEnd();
+            }
+            if (rest.onAnimationEnd) {
+              rest.onAnimationEnd(e);
+            }
+          },
+        },
+        children,
+      ),
+    ],
+  );
+}
+
+export function AlignedPositionContent(
+  props: ViewProps & { store: SelectCore<any> },
+  children?: ViewChildren,
+) {
+  return View(
+    {
+      style: {
+        display: "flex",
+        "flex-direction": "column",
+        position: "fixed",
+      },
+    },
+    children,
+  );
 }
 
 export function Viewport(
@@ -320,13 +365,13 @@ export function Viewport(
     {
       ...rest,
       store: store.popper,
-      onMounted(event: any) {
-        if (store.position === "item-aligned") {
-          const el = event.target.get$elm();
-          if (el instanceof HTMLElement) {
-            store.setItemAlignedElements({ viewportEl: el });
-          }
-        }
+      onMounted(event) {
+        // if (store.position === "item-aligned") {
+        //   const el = event.target.get$elm();
+        //   if (el instanceof HTMLElement) {
+        //     store.setItemAlignedElements({ viewportEl: el });
+        //   }
+        // }
         if (rest.onMounted) {
           rest.onMounted(event);
         }
@@ -378,14 +423,19 @@ export function Item(
         );
         // Initial offset update when item is selected on mount
         if (store.position === "item-aligned") {
-          const cur_state = state_.value;
-          const is_selected = cur_state?.value === value;
-          const is_focused = (cur_state?.options || []).some(
+          const state = state_.value;
+          const is_selected = state.value === value;
+          const is_focused = (state.options || []).some(
             (o) => o.value === value && o.focused,
           );
           if (is_selected || is_focused) {
             const offset_top = $elm.offsetTop;
             const offset_height = $elm.offsetHeight;
+            // console.log(
+            //   "[ui-primitive]Select - find selected item",
+            //   offset_top,
+            //   offset_height,
+            // );
             store.setSelectedItemOffset(offset_top, offset_height);
           }
         }
@@ -419,7 +469,18 @@ export function Item(
 }
 
 export function ItemText(props: ViewProps, children: ViewChildren) {
-  return View({ ...props, as: "span" }, children);
+  return View(
+    {
+      ...props,
+      style: styleNames([
+        props.style,
+        {
+          "font-weight": "400",
+        },
+      ]),
+    },
+    children,
+  );
 }
 
 export function ItemIndicator(

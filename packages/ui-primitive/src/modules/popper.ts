@@ -84,31 +84,35 @@ export function Content(
         props.style,
         computed(state_, (t) => {
           if (store.mode === "item-aligned") {
-            const pos = store.getItemAlignedPosition?.();
-            if (pos) {
-              return {
-                "z-index": zIndex,
-                display: "flex",
-                "flex-direction": "column",
-                position: "fixed",
-                "box-sizing": "border-box",
-                left: `${pos.x}px`,
-                // right: pos.right ? `${pos.right}px` : undefined,
-                // top: pos.top ? `${pos.top}px` : undefined,
-                bottom: pos.bottom ? `${pos.bottom}px` : undefined,
-                // height: pos.height,
-                // "min-width": `${pos.minWidth}px`,
-                // "max-height": `${pos.maxHeight}px`,
-                // "min-height": `${pos.minHeight}px`,
-                // margin: pos.margin,
-              };
-            }
             return {
               "z-index": zIndex,
               display: "flex",
               "flex-direction": "column",
               position: "fixed",
               "box-sizing": "border-box",
+              opacity: t.isPlaced ? 1 : 0,
+              "pointer-events": t.isPlaced ? "initial" : "none",
+              // transform: t.isPlaced
+              //   ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
+              //   : "translate3d(0, 0, 0)",
+              left: t.x !== undefined ? `${t.x}px` : undefined,
+              // right: pos.right !== undefined ? `${pos.right}px` : undefined,
+              top: t.top !== undefined ? `${t.top}px` : undefined,
+              // bottom:
+              //   pos.bottom !== undefined ? `${pos.bottom}px` : undefined,
+              bottom: t.bottom !== undefined ? `${t.bottom}px` : undefined,
+              height: t.height !== undefined ? `${t.height}px` : undefined,
+              // "min-width":
+              //   pos.minWidth !== undefined ? `${pos.minWidth}px` : undefined,
+              // "max-height":
+              //   pos.maxHeight !== undefined
+              //     ? `${pos.maxHeight}px`
+              //     : undefined,
+              // "min-height":
+              //   pos.minHeight !== undefined
+              //     ? `${pos.minHeight}px`
+              //     : undefined,
+              // margin: pos.margin,
             };
           }
           return {

@@ -15,16 +15,20 @@ export default function FormView() {
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
       Section("Input", [
-        Item("Default", [
+        View({ class: "w-full" }, [
           Select({
             store: new Timeless.ui.SelectCore({
               defaultValue: "apple",
               platform,
               position: "item-aligned",
               options: [
-                { value: "apple", label: "苹果" },
-                { value: "banana", label: "香蕉" },
-                { value: "orange", label: "橙子" },
+                new Timeless.ui.SelectGroupCore({
+                  items: [
+                    { value: "apple", label: "苹果" },
+                    { value: "banana", label: "香蕉" },
+                    { value: "orange", label: "橙子" },
+                  ],
+                }),
               ],
             }),
           }),
@@ -147,14 +151,18 @@ export default function FormView() {
         Item("Scrollable (100 options)", [
           Select({
             store: new Timeless.ui.SelectCore({
-              defaultValue: null,
+              defaultValue: "option_1",
               platform,
               position: "item-aligned",
               placeholder: "从 100 个选项中选择",
-              options: Array.from({ length: 100 }, (_, i) => ({
-                value: `option_${i + 1}`,
-                label: `选项 ${i + 1}`,
-              })),
+              options: [
+                new Timeless.ui.SelectGroupCore({
+                  items: Array.from({ length: 100 }, (_, i) => ({
+                    value: `option_${i + 1}`,
+                    label: `选项 ${i + 1}`,
+                  })),
+                }),
+              ],
             }),
           }),
         ]),

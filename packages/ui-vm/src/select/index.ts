@@ -1,7 +1,14 @@
 import { BaseDomain, Handler, Platform } from "@timeless/base";
 
 import { InputCore } from "@/input/index";
-import { PopperCore } from "@/popper/index";
+import {
+  PopperCore,
+  computePositionInItemAlignedMode,
+  ItemAlignedRect,
+  ItemAlignedContentMeasurement,
+  ItemAlignedViewportMeasurement,
+  ItemAlignedSelectedItemMeasurement,
+} from "@/popper/index";
 import { Rect } from "@/popper/types";
 import { DismissableLayerCore } from "@/dismissable-layer/index";
 import { Direction } from "@/direction/index";
@@ -95,17 +102,7 @@ type SelectState<T> = {
   /** 搜索框占位符 */
   searchPlaceholder: string;
   /** item-aligned 定位状态 */
-  itemAlignedPosition?: {
-    left: number;
-    right: number;
-    top: number;
-    bottom: number;
-    height: string;
-    minWidth: number;
-    maxHeight: number;
-    minHeight: number;
-    margin: string;
-  };
+  itemAlignedPosition?: import("../popper/index").ItemAlignedContentWrapperStyle;
 };
 
 function flattenEntries<T>(entries: SelectEntry<T>[]): SelectOption<T>[] {
@@ -192,23 +189,17 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   private _selected_item: {
     offsetTop: number;
     offsetHeight: number;
+    isFirst?: boolean;
+    isLast?: boolean;
   } | null = null;
   /** item-aligned 定位所需的 DOM 元素引用 */
   private _content_el: HTMLElement | null = null;
   private _viewport_el: HTMLElement | null = null;
   private _value_el: HTMLElement | null = null;
   /** item-aligned 定位状态 */
-  private _item_aligned_position: {
-    left: number;
-    right: number;
-    top: number;
-    bottom: number;
-    height: string;
-    minWidth: number;
-    maxHeight: number;
-    minHeight: number;
-    margin: string;
-  } | null = null;
+  private _item_aligned_position:
+    | import("../popper/index").ItemAlignedContentWrapperStyle
+    | null = null;
 
   /** 参考点位置 */
   triggerPos: {
@@ -383,26 +374,27 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     offsetHeight: number,
     contentPaddingTop: number = 0,
   ) {
-    const itemOffsetMiddle = offsetTop + offsetHeight;
-    const contentTopToItemMiddle = itemOffsetMiddle + contentPaddingTop;
+    const item_offset_middle = offsetTop + offsetHeight / 2;
+    const content_top_top_item_middle = item_offset_middle + contentPaddingTop;
     this._selected_item = { offsetTop, offsetHeight };
-    logger.log(
-      "setSelectedItemOffset",
-      this.position,
-      this.open,
-      this._selected_item,
-      itemOffsetMiddle,
-      contentPaddingTop,
-      contentTopToItemMiddle,
-    );
+    // logger.log(
+    //   "setSelectedItemOffset",
+    //   this.position,
+    //   this.open,
+    //   this._selected_item,
+    //   item_offset_middle,
+    //   contentPaddingTop,
+    //   contentTopToItemMiddle,
+    // );
     if (this.position === "item-aligned" && this.open) {
       this.popper.setItemOffset({
-        x: this.triggerPos.x,
-        y: this.triggerPos.y,
-        height: offsetHeight,
-        bottom: contentTopToItemMiddle,
+        offsetTop,
+        offsetHeight,
+        // x: this.triggerPos.x,
+        // y: this.triggerPos.y,
+        // height: offsetHeight,
+        bottom: content_top_top_item_middle,
       });
-      this.popper.place();
     }
   }
   /** 清除选中项偏移（关闭时调用） */
@@ -437,7 +429,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       this.placeItemAligned();
     }
   }
-  /** 执行 item-aligned 定位（参考 Radix 原版实现） */
+  /** 执行 item-aligned 定位（使用 computePositionInItemAlignedMode） */
   placeItemAligned() {
     if (
       !this.reference ||
@@ -462,8 +454,6 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     const dir = this.state.dir || "ltr";
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
-    const availableHeight = windowHeight - CONTENT_MARGIN * 2;
-    const itemsHeight = viewportEl.scrollHeight;
     const contentStyles = window.getComputedStyle(contentEl);
     const contentBorderTopWidth =
       parseInt(contentStyles.borderTopWidth, 10) || 0;
@@ -471,96 +461,84 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     const contentBorderBottomWidth =
       parseInt(contentStyles.borderBottomWidth, 10) || 0;
     const contentPaddingBottom = parseInt(contentStyles.paddingBottom, 10) || 0;
-    const fullContentHeight =
-      contentBorderTopWidth +
-      contentPaddingTop +
-      itemsHeight +
-      contentPaddingBottom +
-      contentBorderBottomWidth;
-    const minContentHeight = Math.min(
-      selectedItemOffsetHeight * 5,
-      fullContentHeight,
-    );
     const viewportStyles = window.getComputedStyle(viewportEl);
     const viewportPaddingTop = parseInt(viewportStyles.paddingTop, 10) || 0;
-    const viewportPaddingBottom = parseInt(viewportStyles.paddingTop, 10) || 0;
-    const topEdgeToTriggerMiddle =
-      triggerRect.top + triggerRect.height / 2 - CONTENT_MARGIN;
-    const triggerMiddleToBottomEdge = availableHeight - topEdgeToTriggerMiddle;
-    const selectedItemHalfHeight = selectedItemOffsetHeight / 2;
-    const itemOffsetMiddle = selectedItemOffsetTop + selectedItemHalfHeight;
-    const contentTopToItemMiddle =
-      contentBorderTopWidth + contentPaddingTop + itemOffsetMiddle;
-    const itemMiddleToContentBottom =
-      fullContentHeight - contentTopToItemMiddle;
-    const willAlignWithoutTopOverflow =
-      contentTopToItemMiddle <= topEdgeToTriggerMiddle;
-    let clampedLeft = 0;
-    let clampedRight = 0;
-    let minContentWidth = 0;
-    if (dir !== "rtl") {
-      const itemTextOffset = itemTextRect.left - contentRect.left;
-      let left = valueNodeRect.left - itemTextOffset;
-      const leftDelta = triggerRect.left - left;
-      minContentWidth = triggerRect.width + leftDelta;
-      const rightEdge = windowWidth - CONTENT_MARGIN;
-      clampedLeft = Math.max(
-        CONTENT_MARGIN,
-        Math.min(left, rightEdge - contentRect.width),
-      );
-      contentEl.style.minWidth = minContentWidth + "px";
-      contentEl.style.left = clampedLeft + "px";
-      contentEl.style.right = "auto";
-    } else {
-      const itemTextOffset = contentRect.right - itemTextRect.right;
-      let right = windowWidth - valueNodeRect.right - itemTextOffset;
-      const rightDelta = windowWidth - triggerRect.right - right;
-      minContentWidth = triggerRect.width + rightDelta;
-      const leftEdge = windowWidth - CONTENT_MARGIN;
-      clampedRight = Math.max(
-        CONTENT_MARGIN,
-        Math.min(right, leftEdge - contentRect.width),
-      );
-      contentEl.style.minWidth = minContentWidth + "px";
-      contentEl.style.right = clampedRight + "px";
-      contentEl.style.left = "auto";
-    }
-    if (willAlignWithoutTopOverflow) {
-      contentEl.style.bottom = "0";
-      contentEl.style.top = "auto";
-      contentEl.style.height =
-        contentTopToItemMiddle + triggerMiddleToBottomEdge + "px";
-    } else {
-      contentEl.style.top = "0";
-      contentEl.style.bottom = "auto";
-      const clampedTopEdgeToTriggerMiddle = Math.max(
-        topEdgeToTriggerMiddle,
-        contentBorderTopWidth +
-          viewportEl.offsetTop +
-          viewportPaddingTop +
-          selectedItemHalfHeight,
-      );
-      contentEl.style.height =
-        clampedTopEdgeToTriggerMiddle + itemMiddleToContentBottom + "px";
-      viewportEl.scrollTop =
-        contentTopToItemMiddle - topEdgeToTriggerMiddle + viewportEl.offsetTop;
-    }
-    const position = {
-      left: dir !== "rtl" ? clampedLeft : 0,
-      right: dir === "rtl" ? clampedRight! : 0,
-      top: willAlignWithoutTopOverflow
-        ? 0
-        : parseInt(contentEl.style.top, 10) || 0,
-      bottom: willAlignWithoutTopOverflow ? 0 : 0,
-      height: contentEl.style.height,
-      minWidth: minContentWidth,
-      maxHeight: availableHeight,
-      minHeight: minContentHeight,
-      margin: `${CONTENT_MARGIN}px 0`,
+    const viewportPaddingBottom =
+      parseInt(viewportStyles.paddingBottom, 10) || 0;
+
+    const triggerRectData: ItemAlignedRect = {
+      top: triggerRect.top,
+      left: triggerRect.left,
+      right: triggerRect.right,
+      width: triggerRect.width,
+      height: triggerRect.height,
     };
-    this._item_aligned_position = position;
+    const valueNodeRectData: ItemAlignedRect = {
+      top: valueNodeRect.top,
+      left: valueNodeRect.left,
+      right: valueNodeRect.right,
+      width: valueNodeRect.width,
+      height: valueNodeRect.height,
+    };
+    const contentMeasurement: ItemAlignedContentMeasurement = {
+      rect: {
+        top: contentRect.top,
+        left: contentRect.left,
+        right: contentRect.right,
+        width: contentRect.width,
+        height: contentRect.height,
+      },
+      borderTopWidth: contentBorderTopWidth,
+      paddingTop: contentPaddingTop,
+      borderBottomWidth: contentBorderBottomWidth,
+      paddingBottom: contentPaddingBottom,
+      clientHeight: contentEl.clientHeight,
+    };
+    const itemTextRectData: ItemAlignedRect = {
+      top: itemTextRect.top,
+      left: itemTextRect.left,
+      right: itemTextRect.right,
+      width: itemTextRect.width,
+      height: itemTextRect.height,
+    };
+    const selectedItemData: ItemAlignedSelectedItemMeasurement = {
+      offsetTop: selectedItemOffsetTop,
+      offsetHeight: selectedItemOffsetHeight,
+      isFirst: selectedItem.isFirst ?? false,
+      isLast: selectedItem.isLast ?? false,
+    };
+    const viewportMeasurement: ItemAlignedViewportMeasurement = {
+      scrollHeight: viewportEl.scrollHeight,
+      offsetTop: viewportEl.offsetTop,
+      offsetHeight: viewportEl.offsetHeight,
+      paddingTop: viewportPaddingTop,
+      paddingBottom: viewportPaddingBottom,
+    };
+
+    const input = {
+      dir: dir as "ltr" | "rtl",
+      triggerRect: triggerRectData,
+      valueNodeRect: valueNodeRectData,
+      content: contentMeasurement,
+      itemTextRect: itemTextRectData,
+      selectedItem: selectedItemData,
+      viewport: viewportMeasurement,
+      windowSize: { width: windowWidth, height: windowHeight },
+      contentMargin: CONTENT_MARGIN,
+    };
+
+    const result = computePositionInItemAlignedMode(input);
+    const { contentWrapperStyle, viewportScrollTop } = result;
+
+    if (viewportScrollTop !== undefined) {
+      viewportEl.scrollTop = viewportScrollTop;
+    }
+
+    this._item_aligned_position = contentWrapperStyle;
+    this.popper._itemAlignedStyle = contentWrapperStyle;
+    this.popper.place();
     this.emit(Events.StateChange, { ...this.state });
-    logger.log("placeItemAligned done", position);
+    // logger.log("placeItemAligned done", contentWrapperStyle);
   }
   async show() {
     // console.log(...this.log("show", this.state));
