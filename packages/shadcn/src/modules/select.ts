@@ -10,6 +10,12 @@ import { For, ViewProps, Show, View, Icon } from "@timeless/timeless";
 import { SelectPrimitive } from "@timeless/ui-primitive";
 import { SelectCore } from "@timeless/ui-vm";
 
+const SelectOptionClassName =
+  "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2";
+const SelectGroupClassName = "scroll-my-1 p-1";
+const SelectGroupLabelClassName =
+  "px-1.5 py-1.5 text-xs font-medium text-muted-foreground select-none";
+
 export function Select(
   props: ViewProps & { store: SelectCore<any>; id?: string },
 ) {
@@ -38,9 +44,6 @@ export function Select(
       );
     },
   );
-  const can_scroll_up_ = ref(false);
-  const can_scroll_down_ = ref(false);
-
   const listener$ = ListenerManager([
     state_,
     show_clear_,
@@ -49,15 +52,7 @@ export function Select(
     has_value_,
     is_loading_,
     is_disabled_,
-    can_scroll_up_,
-    can_scroll_down_,
   ]);
-
-  const SelectOptionClassName =
-    "relative flex w-full cursor-default select-none items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2";
-  const SelectGroupClassName = "py-1";
-  const SelectGroupLabelClassName =
-    "px-1.5 py-1.5 text-xs font-medium text-muted-foreground select-none";
 
   const methods = {
     filter_entries(entries: any[], keyword: string): any[] {
@@ -174,7 +169,7 @@ export function Select(
             state_.as(v);
           }),
         );
-        return listener$.clean;
+        return listener$.destroy;
       },
     },
     [
@@ -184,11 +179,9 @@ export function Select(
           store,
           class: classNames([
             cls,
-            "flex h-8 min-w-[120px] items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+            "flex h-8 w-fit items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
             computed(state_, (t) => {
-              return t.open
-                ? "border-ring ring-3 ring-ring/50"
-                : "dark:hover:bg-input/50";
+              return t.open ? "border-ring ring-3 ring-ring/50" : "";
             }),
           ]),
           onMouseEnter() {
@@ -254,7 +247,7 @@ export function Select(
           },
           store,
           class:
-            "cn-menu-target cn-menu-translucent select__content relative z-50 min-w-36 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none flex flex-col",
+            "cn-menu-target cn-menu-translucent select__content relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-36 origin-[var(--radix-select-content-transform-origin)] overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none flex flex-col data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           style: computed(state_, () => {
             const width = store.reference?.width || 0;
             return width > 0
@@ -264,49 +257,19 @@ export function Select(
               : {};
           }),
         },
-        [
-          SelectPrimitive.ScrollUpButton(
-            {
-              visible: can_scroll_up_,
-              class:
-                "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
-            },
-            [Icon({ name: "chevron-up", size: 16 })],
-          ),
+        () => [
+          // SelectPrimitive.ScrollUpButton(
+          //   {
+          //     store: store,
+          //     class:
+          //       "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
+          //   },
+          //   [Icon({ name: "chevron-up", size: 16 })],
+          // ),
           SelectPrimitive.Viewport(
             {
               store,
-              class: "p-1 overflow-y-auto",
-              onMounted(event: any) {
-                const $elm = event.target;
-
-                const computeMaxHeight = () => {
-                  const triggerRect = store.popper.reference?.getRect();
-                  if (triggerRect) {
-                    const spaceBelow =
-                      window.innerHeight - triggerRect.bottom - 8;
-                    const spaceAbove = triggerRect.top - 8;
-                    return Math.min(Math.max(spaceBelow, spaceAbove, 100), 384);
-                  }
-                  return Math.min(window.innerHeight * 0.6, 384);
-                };
-
-                const updateScroll = () => {
-                  can_scroll_up_.as($elm.scrollTop > 0);
-                  can_scroll_down_.as(
-                    Math.ceil($elm.scrollTop + $elm.clientHeight) <
-                      $elm.scrollHeight,
-                  );
-                };
-
-                requestAnimationFrame(() => {
-                  $elm.setStyleValue("max-height", `${computeMaxHeight()}px`);
-                  updateScroll();
-                });
-
-                $elm.addEventListener("scroll", updateScroll);
-                return () => $elm.removeEventListener("scroll", updateScroll);
-              },
+              class: "overflow-y-auto",
             },
             [
               Show({
@@ -332,7 +295,6 @@ export function Select(
               Show({
                 when: computed(filtered_entries_, (list) => list.length > 0),
                 ok() {
-                  console.log("render options", filtered_entries_.value);
                   return [
                     For({
                       key: "value",
@@ -359,14 +321,14 @@ export function Select(
               }),
             ],
           ),
-          SelectPrimitive.ScrollDownButton(
-            {
-              visible: can_scroll_down_,
-              class:
-                "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
-            },
-            [Icon({ name: "chevron-down", size: 16 })],
-          ),
+          // SelectPrimitive.ScrollDownButton(
+          //   {
+          //     store,
+          //     class:
+          //       "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
+          //   },
+          //   [Icon({ name: "chevron-down", size: 16 })],
+          // ),
         ],
       ),
     ],

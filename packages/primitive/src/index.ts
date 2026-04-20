@@ -65,7 +65,6 @@ export * from "./util/listener";
 
 export * from "./vnode/view";
 export { setPlatform } from "./platform";
-export type { Platform } from "./platform";
 export { getPlatform } from "./platform";
 
 export { patch } from "./hmr/patch";
@@ -73,4 +72,4 @@ export type { PatchOptions } from "./hmr/patch";
 export { hmrState, hmrRestore } from "./hmr/state";
 
 export { Logger, Result, base } from "@timeless/base";
-export type { Handler } from "@timeless/base";
+export type { Handler, Platform } from "@timeless/base";

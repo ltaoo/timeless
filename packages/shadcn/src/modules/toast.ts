@@ -1,5 +1,4 @@
-import { computed, Fragment, refobj } from "@timeless/timeless";
-import { For, Show, ViewChildren, ViewProps } from "@timeless/timeless";
+import { ViewChildren, ViewProps, View } from "@timeless/timeless";
 import { ToastPrimitive } from "@timeless/ui-primitive";
 import { ToastCore } from "@timeless/ui-vm";
 
@@ -7,14 +6,15 @@ export function Toast(
   props: ViewProps & { store: ToastCore },
   children: ViewChildren = [],
 ) {
-  const { store, ...rest } = props;
-  const state_ = refobj({});
+  const { store } = props;
+  // const state_ = refobj({});
 
   // store.onStateChange((v) => {
   //   state_.as(v);
   // });
 
   return ToastPrimitive.Root({ store }, [
+    View({}, children),
     // Show({
     //   when: computed(state_, (d) => !!d.mask),
     //   ok() {

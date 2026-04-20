@@ -1,4 +1,4 @@
-import { refobj, computed } from "@timeless/timeless";
+import { refobj, computed, Button } from "@timeless/timeless";
 import {
   View,
   ViewProps,
@@ -35,7 +35,7 @@ export function Trigger(
   const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
-  const listener$ = ListenerManager();
+  const listener$ = ListenerManager([state_]);
 
   // 创建隐藏的 input 用于可访问性
   const _input$ = NativeInput({
@@ -64,14 +64,13 @@ export function Trigger(
     {
       ...rest,
       onMounted(event) {
-        const $elm = event.target;
-
         listener$.add(
           store.onStateChange((v) => {
             state_.as(v);
           }),
         );
 
+        const $elm = event.target;
         // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
         store.popper.setReference(
           {
@@ -109,7 +108,7 @@ export function Trigger(
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
-        return listener$.clean;
+        return listener$.destroy;
       },
     },
     [_input$, Fragment({}, children)],
@@ -120,7 +119,7 @@ export function Value(props: ViewProps & { store: SelectCore<any> }) {
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
-  const listener$ = ListenerManager([]);
+  const listener$ = ListenerManager([state_]);
 
   return View(
     {
@@ -131,10 +130,16 @@ export function Value(props: ViewProps & { store: SelectCore<any> }) {
             state_.as(v);
           }),
         );
+        if (store.position === "item-aligned") {
+          const el = event.target.get$elm();
+          if (el instanceof HTMLElement) {
+            store.setItemAlignedElements({ valueEl: el });
+          }
+        }
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
-        return listener$.clean;
+        return listener$.destroy;
       },
     },
     [
@@ -182,7 +187,7 @@ export function Clear(
 }
 
 export function Portal(
-  props: ViewProps & {
+  props: {
     store: SelectCore<any>;
     animation?: { in: string; out: string };
   },
@@ -202,6 +207,7 @@ export function Content(
 
   let _was_exiting = false;
   const presence_ = refobj(store.presence.state);
+
   const listener$ = ListenerManager([presence_]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -235,10 +241,16 @@ export function Content(
           presence_.as(v);
         }),
       );
+      if (store.position === "item-aligned") {
+        const el = event.target.get$elm();
+        if (el instanceof HTMLElement) {
+          store.setItemAlignedElements({ contentEl: el });
+        }
+      }
       if (onMounted) {
         listener$.add(onMounted(event));
       }
-      return listener$.clean;
+      return listener$.destroy;
     },
     ok() {
       return [
@@ -285,7 +297,6 @@ export function Content(
                       store.presence.handleAnimationEnd();
                     }
                     if (rest.onAnimationEnd) {
-                      // @ts-ignore
                       rest.onAnimationEnd(e);
                     }
                   },
@@ -304,100 +315,84 @@ export function Viewport(
   props: ViewProps & { store: SelectCore<any> },
   children: ViewChildren,
 ) {
-  return View(props, children);
-}
-
-export function ScrollUpButton(
-  props: ViewProps & { visible?: any },
-  children: ViewChildren,
-) {
-  const { visible, ...rest } = props as any;
-  return Show({
-    when: visible,
-    ok() {
-      return [View(rest, children)];
-    },
-  });
-}
-
-export function ScrollDownButton(
-  props: ViewProps & { visible?: any },
-  children: ViewChildren,
-) {
-  const { visible, ...rest } = props as any;
-  return Show({
-    when: visible,
-    ok() {
-      return [View(rest, children)];
-    },
-  });
-}
-
-export function Search(
-  props: ViewProps & { store: SelectCore<any> },
-  children?: ViewChildren,
-) {
   const { store, ...rest } = props;
-  const state_ = refobj(store.state);
-  const listener$ = ListenerManager();
-
-  return Show({
-    when: computed(state_, (s) => s.search),
-    onMounted() {
-      listener$.add(
-        store.onStateChange((v) => {
-          state_.as(v);
-        }),
-      );
+  return PopperPrimitive.Viewport(
+    {
+      ...rest,
+      store: store.popper,
+      onMounted(event: any) {
+        if (store.position === "item-aligned") {
+          const el = event.target.get$elm();
+          if (el instanceof HTMLElement) {
+            store.setItemAlignedElements({ viewportEl: el });
+          }
+        }
+        if (rest.onMounted) {
+          rest.onMounted(event);
+        }
+      },
     },
-    ok() {
-      return [
-        NativeInput({
-          ...rest,
-          placeholder: computed(state_, (s) => s.searchPlaceholder),
-          value: computed(state_, (s) => s.searchKeyword),
-          onInput(e: Event) {
-            const target = e.target;
-            // @ts-ignore
-            store.setSearchKeyword(target.value);
-          },
-          onMounted(event) {
-            const $elm = event.target;
-            // 自动聚焦搜索框
-            setTimeout(() => {
-              // @ts-ignore
-              $elm.focus();
-            }, 0);
-            if (rest.onMounted) {
-              listener$.add(rest.onMounted(event));
-            }
-            return listener$.clean;
-          },
-          onClick(e: Event) {
-            // 阻止点击搜索框时关闭下拉菜单
-            e.stopPropagation();
-          },
-          onKeyDown(e: KeyboardEvent) {
-            // 阻止按键事件冒泡，避免影响 Select 的键盘导航
-            e.stopPropagation();
-          },
-        }),
-      ];
-    },
-  });
+    children,
+  );
 }
 
 export function Item(
   props: ViewProps & { store: SelectCore<any>; value: any; disabled?: boolean },
   children: ViewChildren,
 ) {
-  const { store, value, disabled = false, ...rest } = props as any;
+  const { store, value, disabled = false, ...rest } = props;
 
-  return View(
+  const state_ = refobj(store.state);
+  const listener$ = ListenerManager([state_]);
+
+  return Button(
     {
       ...rest,
       dataset: {
-        disabled: computed(disabled, (d) => (d ? "" : undefined)),
+        // disabled: computed(disabled, (d) => (d ? "" : undefined)),
+        // disabled,
+      },
+      onMounted(event) {
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
+        const $elm = event.target.get$elm();
+        listener$.add(
+          store.onStateChange(() => {
+            if (store.position !== "item-aligned") {
+              return;
+            }
+            // Update offset when this item is selected OR focused
+            // const isSelected = s.value === value;
+            // const isFocused = (s.options || []).some(
+            //   (o: any) => o.value === value && o.focused,
+            // );
+            // if (isSelected || isFocused) {
+            //   const offsetTop = $elm.offsetTop;
+            //   const offsetHeight = $elm.offsetHeight;
+            //   store.setSelectedItemOffset(offsetTop, offsetHeight);
+            // }
+          }),
+        );
+        // Initial offset update when item is selected on mount
+        if (store.position === "item-aligned") {
+          const cur_state = state_.value;
+          const is_selected = cur_state?.value === value;
+          const is_focused = (cur_state?.options || []).some(
+            (o) => o.value === value && o.focused,
+          );
+          if (is_selected || is_focused) {
+            const offset_top = $elm.offsetTop;
+            const offset_height = $elm.offsetHeight;
+            store.setSelectedItemOffset(offset_top, offset_height);
+          }
+        }
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.destroy;
       },
       onClick() {
         if (disabled) {
@@ -407,7 +402,6 @@ export function Item(
         store.hide();
       },
       onMouseEnter() {
-        console.log("[select] - onMouseEnter", value);
         if (disabled) {
           return;
         }
@@ -448,7 +442,6 @@ export function ItemIndicator(
         },
       ]),
       onMounted(event) {
-        console.log("[primitive]Select - item indicator mounted", value);
         listener$.add(
           store.onStateChange((v) => {
             state_.as(v);
@@ -457,10 +450,9 @@ export function ItemIndicator(
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
-        // return listener$.clean;
+        return listener$.destroy;
       },
       onUnmounted() {
-        console.log("[primitive]Select - item indicator unmounted", value);
         if (rest.onUnmounted) {
           rest.onUnmounted();
         }
@@ -468,4 +460,82 @@ export function ItemIndicator(
     },
     children,
   );
+}
+
+export function ScrollUpButton(
+  props: ViewProps & { store: SelectCore<any> },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return PopperPrimitive.ScrollUpButton(
+    { ...rest, store: store.popper },
+    children,
+  );
+}
+
+export function ScrollDownButton(
+  props: ViewProps & { store: SelectCore<any> },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return PopperPrimitive.ScrollDownButton(
+    { ...rest, store: store.popper },
+    children,
+  );
+}
+
+export function Search(
+  props: ViewProps & { store: SelectCore<any> },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  const state_ = refobj(store.state);
+
+  const listener$ = ListenerManager([state_]);
+
+  return Show({
+    when: computed(state_, (s) => s.search),
+    onMounted() {
+      listener$.add(
+        store.onStateChange((v) => {
+          state_.as(v);
+        }),
+      );
+      return listener$.destroy;
+    },
+    ok() {
+      return [
+        NativeInput({
+          ...rest,
+          placeholder: computed(state_, (s) => s.searchPlaceholder),
+          value: computed(state_, (s) => s.searchKeyword),
+          onInput(e: Event) {
+            const target = e.target;
+            // @ts-ignore
+            store.setSearchKeyword(target.value);
+          },
+          onMounted(event) {
+            const $elm = event.target;
+            // 自动聚焦搜索框
+            setTimeout(() => {
+              // @ts-ignore
+              $elm.focus();
+            }, 0);
+            if (rest.onMounted) {
+              listener$.add(rest.onMounted(event));
+            }
+            return listener$.destroy;
+          },
+          onClick(e: Event) {
+            // 阻止点击搜索框时关闭下拉菜单
+            e.stopPropagation();
+          },
+          onKeyDown(e: KeyboardEvent) {
+            // 阻止按键事件冒泡，避免影响 Select 的键盘导航
+            e.stopPropagation();
+          },
+        }),
+      ];
+    },
+  });
 }

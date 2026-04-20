@@ -1,5 +1,5 @@
 import { computeCoordsFromPlacement } from "./compute-coords";
-import { detectOverflow } from "./detect-overflow";
+import { detect_overflow } from "./detect-overflow";
 import type {
   ComputePosition,
   Middleware,
@@ -18,7 +18,7 @@ const MAX_RESET_COUNT = 50;
  * This export does not have any `platform` interface logic. You will need to
  * write one for the platform you are using Floating UI with.
  */
-export const computePosition: ComputePosition = async (
+export const compute_position: ComputePosition = async (
   reference: {
     getRect: () => Rect;
   },
@@ -35,8 +35,8 @@ export const computePosition: ComputePosition = async (
   } = config;
 
   const platformWithDetectOverflow = (
-    platform.detectOverflow ? platform : { ...platform, detectOverflow }
-  ) as Platform & { detectOverflow: typeof detectOverflow };
+    platform.detectOverflow ? platform : { ...platform, detectOverflow: detect_overflow }
+  ) as Platform & { detectOverflow: typeof detect_overflow };
   const rtl = await platform.isRTL?.(floating);
 
   let rects = {

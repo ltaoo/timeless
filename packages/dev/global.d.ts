@@ -2599,19 +2599,148 @@ declare module "packages/primitive/src/vnode/view" {
         get$elm(): HostElm;
     };
 }
-declare module "packages/primitive/src/platform" {
+declare module "packages/base/src/base" {
+    /**
+     * 注册的监听器
+     */
+    import { EventType, Handler } from "mitt";
+    export type { Handler, EventType };
+    export enum BaseEvents {
+        Loading = "__loading",
+        Destroy = "__destroy"
+    }
+    type TheTypesOfBaseEvents = {
+        [BaseEvents.Destroy]: void;
+    };
+    type BaseDomainEvents<E> = TheTypesOfBaseEvents & E;
+    export function base<Events extends Record<EventType, unknown>>(): {
+        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
+        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
+        uid: () => number;
+        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
+        destroy(): void;
+    };
+    export class BaseDomain<Events extends Record<EventType, unknown>> {
+        /** 用于自己区别同名 Domain 不同实例的标志 */
+        unique_id: string;
+        debug: boolean;
+        _emitter: import("mitt").Emitter<BaseDomainEvents<Events>>;
+        listeners: Record<keyof BaseDomainEvents<Events>, (() => void)[]>;
+        constructor(props?: {});
+        uid(): number;
+        log(...args: unknown[]): unknown[];
+        errorTip(...args: unknown[]): void;
+        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
+        offEvent<Key extends keyof BaseDomainEvents<Events>>(k: Key): void;
+        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
+        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
+        /** 主动销毁所有的监听事件 */
+        destroy(): void;
+        onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
+        get [Symbol.toStringTag](): string;
+    }
+    export type LogLevel = "info" | "debug" | "warn" | "error";
+    export interface LoggerProps {
+        prefix?: string;
+        scope?: string;
+        time?: boolean;
+        level?: LogLevel;
+        mode?: "minimal" | "classic" | "verbose";
+        color?: string;
+    }
+    export function Logger(props?: LoggerProps): {
+        log: (...args: unknown[]) => void;
+        debug: (...args: unknown[]) => void;
+        info: (...args: unknown[]) => void;
+        warn: (...args: unknown[]) => void;
+        error: (...args: unknown[]) => void;
+        scope: string;
+        color: string;
+        setColor(value: string): void;
+    };
+    export function applyMixins(derivedCtor: any, constructors: any[]): void;
+}
+declare module "packages/base/src/result/index" {
+    import { BizError } from "@/error";
+    export type Resp<T> = {
+        data: T extends null ? null : T;
+        error: T extends null ? BizError : null;
+    };
+    export type Result<T> = Resp<T> | Resp<null>;
+    export type UnpackedResult<T> = NonNullable<T extends Resp<infer U> ? (U extends null ? U : U) : T>;
+    /** 构造一个结果对象 */
+    export const Result: {
+        /** 构造成功结果 */
+        Ok: <T>(value: T) => Result<T>;
+        /** 构造失败结果 */
+        Err: <T>(message: string | string[] | BizError | Error | Result<null>, code?: string | number, data?: unknown) => Resp<null>;
+    };
+}
+declare module "packages/base/src/error/index" {
+    export class BizError extends Error {
+        messages: string[];
+        code?: string | number;
+        data: unknown | null;
+        constructor(msg: string[], code?: string | number, data?: unknown);
+    }
+}
+declare module "packages/base/src/platform" {
+    export interface Rect {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+    export interface Dimensions {
+        width: number;
+        height: number;
+    }
+    export interface ElementRects {
+        reference: Rect;
+        floating: Rect;
+    }
+    export type Strategy = "absolute" | "fixed";
     export interface Platform {
-        /** 监听全局事件，返回取消监听的 cleanup 函数 */
         addEventListener(type: string, handler: EventListener, options?: AddEventListenerOptions): () => void;
-        /** 批量设置 document.body 样式（传空字符串可清除） */
         patchBodyStyle(style: Record<string, string>): void;
-        /** 获取视口大小 */
         getViewportSize(): {
             width: number;
             height: number;
         };
+        isBrowser(): boolean;
+        isElement(value: unknown): boolean;
+        isHTMLElement(value: unknown): boolean;
+        getBoundingClientRect(element: unknown): Rect;
+        getDimensions(element: unknown): Dimensions;
+        getElementRects(args: {
+            reference: unknown;
+            floating: unknown;
+            strategy: Strategy;
+        }): ElementRects;
+        getClippingRect(args: {
+            element: unknown;
+            boundary: unknown;
+            rootBoundary: unknown;
+            strategy: Strategy;
+        }): Rect;
+        getOffsetParent(element: unknown): unknown;
+        isRTL(element: unknown): boolean;
+        getScale(element: unknown): {
+            x: number;
+            y: number;
+        };
+        getDocumentElement(element?: unknown): unknown;
     }
-    export function setPlatform(p: Platform): Platform;
+}
+declare module "packages/base/src/index" {
+    export * from "packages/base/src/base";
+    export * from "packages/base/src/result/index";
+    export * from "packages/base/src/error/index";
+    export * from "packages/base/src/platform";
+}
+declare module "packages/primitive/src/platform" {
+    import { Platform } from "packages/base/src/index";
+    export function setPlatform<T extends Platform = Platform>(p: T): T;
     export function getPlatform(): Platform;
 }
 declare module "packages/primitive/src/hmr/patch" {
@@ -2770,96 +2899,6 @@ declare module "packages/primitive/src/hmr/state" {
         data: Record<string, any>;
     } | undefined | null, refs: Record<string, any>): void;
 }
-declare module "packages/base/src/base" {
-    /**
-     * 注册的监听器
-     */
-    import { EventType, Handler } from "mitt";
-    export type { Handler, EventType };
-    export enum BaseEvents {
-        Loading = "__loading",
-        Destroy = "__destroy"
-    }
-    type TheTypesOfBaseEvents = {
-        [BaseEvents.Destroy]: void;
-    };
-    type BaseDomainEvents<E> = TheTypesOfBaseEvents & E;
-    export function base<Events extends Record<EventType, unknown>>(): {
-        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
-        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
-        uid: () => number;
-        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
-        destroy(): void;
-    };
-    export class BaseDomain<Events extends Record<EventType, unknown>> {
-        /** 用于自己区别同名 Domain 不同实例的标志 */
-        unique_id: string;
-        debug: boolean;
-        _emitter: import("mitt").Emitter<BaseDomainEvents<Events>>;
-        listeners: Record<keyof BaseDomainEvents<Events>, (() => void)[]>;
-        constructor(props?: {});
-        uid(): number;
-        log(...args: unknown[]): unknown[];
-        errorTip(...args: unknown[]): void;
-        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
-        offEvent<Key extends keyof BaseDomainEvents<Events>>(k: Key): void;
-        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
-        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
-        /** 主动销毁所有的监听事件 */
-        destroy(): void;
-        onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
-        get [Symbol.toStringTag](): string;
-    }
-    export type LogLevel = "info" | "debug" | "warn" | "error";
-    export interface LoggerProps {
-        prefix?: string;
-        scope?: string;
-        time?: boolean;
-        level?: LogLevel;
-        mode?: "minimal" | "classic" | "verbose";
-        color?: string;
-    }
-    export function Logger(props?: LoggerProps): {
-        log: (...args: unknown[]) => void;
-        debug: (...args: unknown[]) => void;
-        info: (...args: unknown[]) => void;
-        warn: (...args: unknown[]) => void;
-        error: (...args: unknown[]) => void;
-        scope: string;
-        color: string;
-        setColor(value: string): void;
-    };
-    export function applyMixins(derivedCtor: any, constructors: any[]): void;
-}
-declare module "packages/base/src/result/index" {
-    import { BizError } from "@/error";
-    export type Resp<T> = {
-        data: T extends null ? null : T;
-        error: T extends null ? BizError : null;
-    };
-    export type Result<T> = Resp<T> | Resp<null>;
-    export type UnpackedResult<T> = NonNullable<T extends Resp<infer U> ? (U extends null ? U : U) : T>;
-    /** 构造一个结果对象 */
-    export const Result: {
-        /** 构造成功结果 */
-        Ok: <T>(value: T) => Result<T>;
-        /** 构造失败结果 */
-        Err: <T>(message: string | string[] | BizError | Error | Result<null>, code?: string | number, data?: unknown) => Resp<null>;
-    };
-}
-declare module "packages/base/src/error/index" {
-    export class BizError extends Error {
-        messages: string[];
-        code?: string | number;
-        data: unknown | null;
-        constructor(msg: string[], code?: string | number, data?: unknown);
-    }
-}
-declare module "packages/base/src/index" {
-    export * from "packages/base/src/base";
-    export * from "packages/base/src/result/index";
-    export * from "packages/base/src/error/index";
-}
 declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/reactive/for";
     export * from "packages/primitive/src/reactive/show";
@@ -2908,13 +2947,12 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/util/listener";
     export * from "packages/primitive/src/vnode/view";
     export { setPlatform } from "packages/primitive/src/platform";
-    export type { Platform } from "packages/primitive/src/platform";
     export { getPlatform } from "packages/primitive/src/platform";
     export { patch } from "packages/primitive/src/hmr/patch";
     export type { PatchOptions } from "packages/primitive/src/hmr/patch";
     export { hmrState, hmrRestore } from "packages/primitive/src/hmr/state";
     export { Logger, Result, base } from "packages/base/src/index";
-    export type { Handler } from "packages/base/src/index";
+    export type { Handler, Platform } from "packages/base/src/index";
 }
 declare module "packages/timeless/src/index" {
     export * from "packages/reactive/src/index";
@@ -4290,12 +4328,12 @@ declare module "packages/ui-vm/src/context-menu/index" {
         disabled: boolean;
         state: ContextMenuState;
         private virtualElement;
-        private initialScrollX;
-        private initialScrollY;
+        private initialScrollTop;
         private clickX;
         private clickY;
         private offsetX;
         private offsetY;
+        private view$?;
         constructor(options: Partial<{
             _name: string;
         } & ContextMenuProps>);
@@ -5798,7 +5836,7 @@ declare module "packages/ui-vm/src/popper/floating/compute-coords" {
 }
 declare module "packages/ui-vm/src/popper/floating/types" {
     import type { Axis, ClientRectObject, Coords, Dimensions, ElementRects, Placement, Rect, SideObject, Strategy } from "packages/ui-vm/src/popper/floating/utils";
-    import type { detectOverflow } from "packages/ui-vm/src/popper/floating/detect-overflow";
+    import type { detect_overflow } from "packages/ui-vm/src/popper/floating/detect-overflow";
     type Promisable<T> = T | Promise<T>;
     /**
      * Function option to derive middleware options from state.
@@ -5836,7 +5874,7 @@ declare module "packages/ui-vm/src/popper/floating/types" {
             x: number;
             y: number;
         }>;
-        detectOverflow?: typeof detectOverflow;
+        detectOverflow?: typeof detect_overflow;
     }
     export interface MiddlewareData {
         [key: string]: any;
@@ -5935,7 +5973,7 @@ declare module "packages/ui-vm/src/popper/floating/types" {
         elements: Elements;
         rects: ElementRects;
         platform: {
-            detectOverflow: typeof detectOverflow;
+            detectOverflow: typeof detect_overflow;
         } & Platform;
     }
     /**
@@ -5985,7 +6023,7 @@ declare module "packages/ui-vm/src/popper/floating/detect-overflow" {
      * - 0 = lies flush with the boundary
      * @see https://floating-ui.com/docs/detectOverflow
      */
-    export function detectOverflow(state: MiddlewareState, options?: DetectOverflowOptions | Derivable<DetectOverflowOptions>): Promise<SideObject>;
+    export function detect_overflow(state: MiddlewareState, options?: DetectOverflowOptions | Derivable<DetectOverflowOptions>): Promise<SideObject>;
 }
 declare module "packages/ui-vm/src/popper/floating/compute-position" {
     import type { ComputePosition } from "packages/ui-vm/src/popper/floating/types";
@@ -5996,19 +6034,7 @@ declare module "packages/ui-vm/src/popper/floating/compute-position" {
      * This export does not have any `platform` interface logic. You will need to
      * write one for the platform you are using Floating UI with.
      */
-    export const computePosition: ComputePosition;
-}
-declare module "packages/ui-vm/src/popper/floating/platform/dom" {
-    import type { Platform } from "packages/ui-vm/src/popper/floating/types";
-    /**
-     * Create a DOM platform implementation
-     * This is a factory function to avoid accessing DOM APIs at module level
-     */
-    export function getDOMPlatform(): Platform;
-}
-declare module "packages/ui-vm/src/popper/floating/platform/index" {
-    export { getDOMPlatform } from "packages/ui-vm/src/popper/floating/platform/dom";
-    export type { Platform } from "packages/ui-vm/src/popper/floating/types";
+    export const compute_position: ComputePosition;
 }
 declare module "packages/ui-vm/src/popper/floating/constants" {
     export const originSides: Set<string>;
@@ -6197,6 +6223,31 @@ declare module "packages/ui-vm/src/popper/floating/middleware/arrow" {
      */
     export const arrow: (options: ArrowOptions | Derivable<ArrowOptions>) => Middleware;
 }
+declare module "packages/ui-vm/src/popper/floating/middleware/size" {
+    import type { DetectOverflowOptions } from "packages/ui-vm/src/popper/floating/detect-overflow";
+    import type { Middleware, Derivable, MiddlewareState } from "packages/ui-vm/src/popper/floating/types";
+    export interface SizeOptions extends DetectOverflowOptions {
+        /**
+         * Function that is called with the available width and height.
+         */
+        apply?: (state: MiddlewareState & {
+            availableWidth: number;
+            availableHeight: number;
+        }) => void | Promise<void>;
+    }
+    /**
+     * Provides data to constrain the floating element's size so that it
+     * does not overflow the clipping boundary.
+     *
+     * In `popper` mode (default), available height is based on the placed side:
+     *   - bottom → space from floating top to viewport bottom
+     *   - top    → space from viewport top to floating bottom
+     *
+     * In `item-aligned` mode, available height is the full viewport minus margins,
+     * since the content can extend both above and below the reference.
+     */
+    export function size(options?: SizeOptions | Derivable<SizeOptions>): Middleware;
+}
 declare module "packages/ui-vm/src/popper/floating/middleware/index" {
     export { offset } from "packages/ui-vm/src/popper/floating/middleware/offset";
     export type { OffsetOptions } from "packages/ui-vm/src/popper/floating/middleware/offset";
@@ -6206,15 +6257,16 @@ declare module "packages/ui-vm/src/popper/floating/middleware/index" {
     export type { ShiftOptions, LimitShiftOptions } from "packages/ui-vm/src/popper/floating/middleware/shift";
     export { arrow } from "packages/ui-vm/src/popper/floating/middleware/arrow";
     export type { ArrowOptions } from "packages/ui-vm/src/popper/floating/middleware/arrow";
+    export { size } from "packages/ui-vm/src/popper/floating/middleware/size";
+    export type { SizeOptions } from "packages/ui-vm/src/popper/floating/middleware/size";
 }
 declare module "packages/ui-vm/src/popper/floating/index" {
-    export { computePosition } from "packages/ui-vm/src/popper/floating/compute-position";
-    export { detectOverflow } from "packages/ui-vm/src/popper/floating/detect-overflow";
+    export { compute_position } from "packages/ui-vm/src/popper/floating/compute-position";
+    export { detect_overflow } from "packages/ui-vm/src/popper/floating/detect-overflow";
     export type { DetectOverflowOptions } from "packages/ui-vm/src/popper/floating/detect-overflow";
-    export { getDOMPlatform } from "packages/ui-vm/src/popper/floating/platform/index";
     export type { Platform } from "packages/ui-vm/src/popper/floating/types";
-    export { offset, flip, shift, limitShift, arrow } from "packages/ui-vm/src/popper/floating/middleware/index";
-    export type { OffsetOptions, FlipOptions, ShiftOptions, LimitShiftOptions, ArrowOptions, } from "packages/ui-vm/src/popper/floating/middleware/index";
+    export { offset, flip, shift, limitShift, arrow, size } from "packages/ui-vm/src/popper/floating/middleware/index";
+    export type { OffsetOptions, FlipOptions, ShiftOptions, LimitShiftOptions, ArrowOptions, SizeOptions, } from "packages/ui-vm/src/popper/floating/middleware/index";
     export type { Middleware, MiddlewareData, MiddlewareReturn, MiddlewareState, ComputePositionConfig, ComputePositionReturn, Elements, Boundary, RootBoundary, ElementContext, Derivable, } from "packages/ui-vm/src/popper/floating/types";
     export type { Alignment, Side, AlignedPlacement, Placement, Strategy, Axis, Coords, Length, Dimensions, SideObject, Rect, Padding, ClientRectObject, ElementRects, VirtualElement, } from "packages/ui-vm/src/popper/floating/utils";
     export { sides, alignments, placements, getSide, getAlignment, getSideAxis, getAlignmentAxis, getAxisLength, getOppositeAxis, getOppositePlacement, getExpandedPlacements, getOppositeAxisPlacements, getAlignmentSides, clamp, evaluate, getPaddingObject, rectToClientRect, } from "packages/ui-vm/src/popper/floating/utils";
@@ -6329,9 +6381,9 @@ declare module "packages/ui-vm/src/popper/types" {
     export type ElementContext = "reference" | "floating";
 }
 declare module "packages/ui-vm/src/popper/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
-    import type { Rect, Placement, Strategy, MiddlewareData } from "packages/ui-vm/src/popper/types";
+    import { BaseDomain, Handler, Platform } from "packages/base/src/index";
     import { ScrollViewCore } from "@/scroll-view/index";
+    import type { Rect, Placement, Strategy, MiddlewareData } from "packages/ui-vm/src/popper/types";
     const SIDE_OPTIONS: readonly ["top", "right", "bottom", "left"];
     const ALIGN_OPTIONS: readonly ["start", "center", "end"];
     export type Side = (typeof SIDE_OPTIONS)[number];
@@ -6372,6 +6424,13 @@ declare module "packages/ui-vm/src/popper/index" {
         offsetY?: number;
         defaultPlaced?: boolean;
         view$?: ScrollViewCore;
+        /**
+         * 可用空间计算模式
+         * - "popper": 根据放置侧计算（底部放置时取下方空间，顶部放置时取上方空间）
+         * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
+         */
+        mode?: "popper" | "item-aligned";
+        platform?: Platform;
     };
     type PopperState = {
         strategy: Strategy;
@@ -6388,14 +6447,30 @@ declare module "packages/ui-vm/src/popper/index" {
             y?: number;
         } | null;
         middlewareData: MiddlewareData;
+        /** 浮动元素在放置方向上的可用高度（px） */
+        availableHeight: number;
+        /** 浮动元素在交叉轴上的可用宽度（px） */
+        availableWidth: number;
+        /** viewport 可以向上滚动 */
+        canScrollUp: boolean;
+        /** viewport 可以向下滚动 */
+        canScrollDown: boolean;
     };
     export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         unique_id: string;
         debug: boolean;
+        platform: Platform;
         placement: Placement;
         strategy: Strategy;
         offsetX: number;
         offsetY: number;
+        /** 可用空间计算模式
+         * - "popper": 根据放置侧计算（底部放置时取下方空间，顶部放置时取上方空间）
+         * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
+         */
+        mode: "popper" | "item-aligned";
+        /** item-aligned 模式：选中项在列表中的垂直偏移量，用于将面板对齐到选中项 */
+        itemOffset: number;
         view$?: ScrollViewCore;
         reference: {
             getRect: () => Rect;
@@ -6410,7 +6485,7 @@ declare module "packages/ui-vm/src/popper/index" {
             width: number;
             height: number;
         } | null;
-        arrowElement: HTMLElement | null;
+        $arrow: any | null;
         state: PopperState;
         _enter: boolean;
         _focus: boolean;
@@ -6435,8 +6510,10 @@ declare module "packages/ui-vm/src/popper/index" {
         setFloating(floating: PopperCore["floating"]): void;
         /** 箭头加载完成 */
         setArrow(arrow: PopperCore["arrow"]): void;
-        setArrowElement(arrowElement: HTMLElement | null): void;
+        setArrowElement($arrow: any | null): void;
         setContainer(container: Node): void;
+        /** viewport 滚动时由 primitive 调用，更新滚动按钮可见性 */
+        handleViewportScroll(scrollTop: number, clientHeight: number, scrollHeight: number): void;
         setConfig(config: {
             placement?: Placement;
             strategy?: Strategy;
@@ -6449,6 +6526,8 @@ declare module "packages/ui-vm/src/popper/index" {
             x: number;
             y: number;
         }): void;
+        /** 设置 item-aligned 模式下选中项的偏移量 */
+        setItemOffset(offset: number): void;
         /** 计算浮动元素位置 */
         place(): Promise<void>;
         computePosition(): Promise<{
@@ -6456,7 +6535,7 @@ declare module "packages/ui-vm/src/popper/index" {
             y: number;
             placement: Placement;
             strategy: Strategy;
-            middlewareData: MiddlewareData;
+            middleware_data: MiddlewareData;
         }>;
         handleEnter(): void;
         handleLeave(): void;
@@ -7047,7 +7126,7 @@ declare module "packages/ui-vm/src/select/utils" {
     export function clamp(value: number, [min, max]: [number, number]): number;
 }
 declare module "packages/ui-vm/src/select/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler, Platform } from "packages/base/src/index";
     import { PopperCore } from "@/popper/index";
     import { Rect } from "@/popper/types";
     import { DismissableLayerCore } from "@/dismissable-layer/index";
@@ -7100,16 +7179,18 @@ declare module "packages/ui-vm/src/select/index" {
         placeholder?: string;
         allowClear?: boolean;
         options?: SelectEntry<T>[];
-        onChange?: (v: T | null) => void;
+        platform?: Platform;
         /** 是否支持搜索过滤 */
         search?: boolean;
         /** 搜索框占位符 */
         searchPlaceholder?: string;
+        /** 定位模式 */
+        position?: "popper" | "item-aligned";
+        onChange?: (v: T | null) => void;
     };
     type SelectState<T> = {
         options: SelectOptionState<T>[];
         entries: SelectEntryState<T>[];
-        /** 过滤后的选项列表 */
         value: T | null;
         value2: SelectOption<T> | null;
         /** 菜单是否展开 */
@@ -7157,6 +7238,8 @@ declare module "packages/ui-vm/src/select/index" {
         layer: DismissableLayerCore;
         input: any;
         position: "popper" | "item-aligned";
+        /** 选中项的 DOM 节点引用（用于 item-aligned 模式计算偏移） */
+        private _selectedItemNode;
         /** 参考点位置 */
         triggerPos: {
             x: number;
@@ -7189,6 +7272,10 @@ declare module "packages/ui-vm/src/select/index" {
         setContent(content: SelectContentCore): void;
         setViewport(viewport: SelectViewportCore): void;
         setSelectedItem(item: SelectItemCore<T>): void;
+        /** 设置选中项的 DOM 节点偏移（用于 item-aligned 模式） */
+        setSelectedItemOffset(offsetTop: number, offsetHeight: number): void;
+        /** 清除选中项偏移（关闭时调用） */
+        clearSelectedItemOffset(): void;
         show(): Promise<void>;
         hide(): void;
         addNativeOption(): void;
@@ -11628,6 +11715,37 @@ declare module "packages/ui-primitive/src/modules/popper" {
         /** 参考元素离开视口时的回调 */
         onReferenceOutOfView?: () => void;
     }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Viewport(props: ViewProps & {
+        store: PopperCore;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function ScrollUpButton(props: ViewProps & {
+        store: PopperCore;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: {
+            value: boolean;
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        _hmr_dispose(): void;
+    };
+    export function ScrollDownButton(props: ViewProps & {
+        store: PopperCore;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: {
+            value: boolean;
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        _hmr_dispose(): void;
+    };
 }
 declare module "packages/ui-primitive/src/modules/head" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -12484,7 +12602,7 @@ declare module "packages/ui-primitive/src/modules/select" {
     export function Clear(props: ViewProps & {
         store: SelectCore<any>;
     }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function Portal(props: ViewProps & {
+    export function Portal(props: {
         store: SelectCore<any>;
         animation?: {
             in: string;
@@ -12521,6 +12639,44 @@ declare module "packages/ui-primitive/src/modules/select" {
     export function Viewport(props: ViewProps & {
         store: SelectCore<any>;
     }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Item(props: ViewProps & {
+        store: SelectCore<any>;
+        value: any;
+        disabled?: boolean;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function ItemIndicator(props: ViewProps & {
+        store: SelectCore<any>;
+        value: any;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function ScrollUpButton(props: ViewProps & {
+        store: SelectCore<any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: {
+            value: boolean;
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        _hmr_dispose(): void;
+    };
+    export function ScrollDownButton(props: ViewProps & {
+        store: SelectCore<any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: {
+            value: boolean;
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        _hmr_dispose(): void;
+    };
     export function Search(props: ViewProps & {
         store: SelectCore<any>;
     }, children?: ViewChildren): {
@@ -12535,16 +12691,6 @@ declare module "packages/ui-primitive/src/modules/select" {
         onUnmounted(): void;
         _hmr_dispose(): void;
     };
-    export function Item(props: ViewProps & {
-        store: SelectCore<any>;
-        value: any;
-        disabled?: boolean;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function ItemIndicator(props: ViewProps & {
-        store: SelectCore<any>;
-        value: any;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/ui-primitive/src/modules/cascader" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -14113,7 +14259,7 @@ declare module "packages/ui-primitive/src/modules/toast" {
     import { ToastCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): any[];
+    }, children?: ViewChildren): ViewChildren;
     export function Mask(props: ViewProps & {
         store: ToastCore;
     }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
@@ -14693,7 +14839,7 @@ declare module "packages/shadcn/src/modules/toast" {
     import { ToastCore } from "packages/ui-vm/src/index";
     export function Toast(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): any[];
+    }, children?: ViewChildren): ViewChildren;
 }
 declare module "packages/shadcn/src/modules/toggle" {
     import { ViewProps } from "packages/timeless/src/index";

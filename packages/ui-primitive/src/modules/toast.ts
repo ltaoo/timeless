@@ -2,11 +2,11 @@ import {
   View,
   ViewProps,
   ViewChildren,
-  Icon as NativeIcon,
+  // Icon as NativeIcon,
 } from "@timeless/timeless";
 import { ToastCore } from "@timeless/ui-vm";
 
-import { Presence } from "./presence";
+// import { Presence } from "./presence";
 
 // const sonner = SonnerCore.getInstance();
 
@@ -14,10 +14,10 @@ export function Root(
   props: ViewProps & { store: ToastCore },
   children?: ViewChildren,
 ) {
-  const { store, ...rest } = props;
+  const { store } = props;
 
   // return NativePortal(rest, [Presence({ store: store.presence }, children)]);
-  return [];
+  return children;
 }
 
 export function Mask(

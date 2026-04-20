@@ -6,6 +6,7 @@ import {
   ViewProps,
   ViewChildren,
   Fragment,
+  Show,
   ListenerManager,
 } from "@timeless/timeless";
 import {
@@ -81,23 +82,47 @@ export function Content(
       class: classNames(["t1-popper", rest.class]),
       style: styleNames([
         props.style,
-        {
-          "z-index": zIndex,
-          position: "fixed",
-          left: 0,
-          top: 0,
-          opacity: computed(state_, (t) => {
-            return t.isPlaced ? 1 : 0;
-          }),
-          "pointer-events": computed(state_, (t) => {
-            return t.isPlaced ? "initial" : "none";
-          }),
-          transform: computed(state_, (t) => {
-            return t.isPlaced
+        computed(state_, (t) => {
+          if (store.mode === "item-aligned") {
+            const pos = store.getItemAlignedPosition?.();
+            if (pos) {
+              return {
+                "z-index": zIndex,
+                display: "flex",
+                "flex-direction": "column",
+                position: "fixed",
+                "box-sizing": "border-box",
+                left: `${pos.x}px`,
+                // right: pos.right ? `${pos.right}px` : undefined,
+                // top: pos.top ? `${pos.top}px` : undefined,
+                bottom: pos.bottom ? `${pos.bottom}px` : undefined,
+                // height: pos.height,
+                // "min-width": `${pos.minWidth}px`,
+                // "max-height": `${pos.maxHeight}px`,
+                // "min-height": `${pos.minHeight}px`,
+                // margin: pos.margin,
+              };
+            }
+            return {
+              "z-index": zIndex,
+              display: "flex",
+              "flex-direction": "column",
+              position: "fixed",
+              "box-sizing": "border-box",
+            };
+          }
+          return {
+            "z-index": zIndex,
+            position: "fixed",
+            left: 0,
+            top: 0,
+            opacity: t.isPlaced ? 1 : 0,
+            "pointer-events": t.isPlaced ? "initial" : "none",
+            transform: t.isPlaced
               ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
-              : "translate3d(0, 0, 0)";
-          }),
-        },
+              : "translate3d(0, 0, 0)",
+          };
+        }),
       ]),
       onMounted(event) {
         const $elm = event.target;
@@ -197,4 +222,110 @@ export function Content(
     },
     children,
   );
+}
+
+export function Viewport(
+  props: ViewProps & { store: PopperCore },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+
+  const state_ = refobj(store.state);
+  const style_ = computed(state_, (t) => {
+    const ah = t.availableHeight;
+    if (ah > 0) {
+      return { "max-height": `${Math.min(ah)}px` };
+    }
+    return {};
+  });
+
+  const listener$ = ListenerManager([state_, style_]);
+
+  return View(
+    {
+      ...rest,
+      style: style_,
+      onMounted(event) {
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
+
+        // const $elm = event.target.get$elm();
+        // if ($elm) {
+        //   const handleScroll = () => {
+        //     store.handleViewportScroll(
+        //       $elm.scrollTop,
+        //       $elm.clientHeight,
+        //       $elm.scrollHeight,
+        //     );
+        //   };
+        //   listener$.add($elm.addEventListener("scroll", handleScroll));
+        //   requestAnimationFrame(handleScroll);
+        // }
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.destroy;
+      },
+    },
+    children,
+  );
+}
+
+export function ScrollUpButton(
+  props: ViewProps & { store: PopperCore },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  const state_ = refobj(store.state);
+
+  const listener$ = ListenerManager();
+
+  return Show({
+    when: computed(state_, (s) => s.canScrollUp),
+    onMounted(event) {
+      listener$.add(
+        store.onStateChange((v) => {
+          state_.as(v);
+        }),
+      );
+      if (rest.onMounted) {
+        listener$.add(rest.onMounted(event));
+      }
+      return listener$.destroy;
+    },
+    ok() {
+      return [View(rest, children)];
+    },
+  });
+}
+
+export function ScrollDownButton(
+  props: ViewProps & { store: PopperCore },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  const state_ = refobj(store.state);
+
+  const listener$ = ListenerManager();
+
+  return Show({
+    when: computed(state_, (s) => s.canScrollDown),
+    onMounted(event) {
+      listener$.add(
+        store.onStateChange((v) => {
+          state_.as(v);
+        }),
+      );
+      if (rest.onMounted) {
+        listener$.add(rest.onMounted(event));
+      }
+      return listener$.destroy;
+    },
+    ok() {
+      return [View(rest, children)];
+    },
+  });
 }

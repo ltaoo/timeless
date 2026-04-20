@@ -1,4 +1,4 @@
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler, Platform } from "@timeless/base";
 
 import { InputCore } from "@/input/index";
 import { PopperCore } from "@/popper/index";
@@ -6,6 +6,7 @@ import { Rect } from "@/popper/types";
 import { DismissableLayerCore } from "@/dismissable-layer/index";
 import { Direction } from "@/direction/index";
 import { PresenceCore } from "@/presence/index";
+import { Logger } from "@/util";
 
 import { SelectContentCore } from "./content";
 import { SelectViewportCore } from "./viewport";
@@ -14,7 +15,8 @@ import { SelectWrapCore } from "./wrap";
 import { SelectItemCore } from "./item";
 import { SelectGroupCore } from "./group";
 
-const CONTENT_MARGIN = 10;
+const logger = Logger({ prefix: "vm", scope: "select/index" });
+
 enum Events {
   StateChange,
   Change,
@@ -56,22 +58,18 @@ type SelectProps<T> = {
   allowClear?: boolean;
   // options: SelectItemCore<T>[];
   options?: SelectEntry<T>[];
-  onChange?: (v: T | null) => void;
+  platform?: Platform;
   /** 是否支持搜索过滤 */
   search?: boolean;
   /** 搜索框占位符 */
   searchPlaceholder?: string;
+  /** 定位模式 */
+  position?: "popper" | "item-aligned";
+  onChange?: (v: T | null) => void;
 };
 type SelectState<T> = {
   options: SelectOptionState<T>[];
   entries: SelectEntryState<T>[];
-  /** 过滤后的选项列表 */
-  // filteredOptions: {
-  //   value: T;
-  //   label: string;
-  //   selected: boolean;
-  //   focused: boolean;
-  // }[];
   value: T | null;
   value2: SelectOption<T> | null;
   /** 菜单是否展开 */
@@ -96,6 +94,18 @@ type SelectState<T> = {
   searchKeyword: string;
   /** 搜索框占位符 */
   searchPlaceholder: string;
+  /** item-aligned 定位状态 */
+  itemAlignedPosition?: {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+    height: string;
+    minWidth: number;
+    maxHeight: number;
+    minHeight: number;
+    margin: string;
+  };
 };
 
 function flattenEntries<T>(entries: SelectEntry<T>[]): SelectOption<T>[] {
@@ -178,6 +188,27 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   input = new InputCore({ defaultValue: "", placeholder: "搜索" });
 
   position: "popper" | "item-aligned" = "popper";
+  /** 选中项的 DOM 节点引用（用于 item-aligned 模式计算偏移） */
+  private _selected_item: {
+    offsetTop: number;
+    offsetHeight: number;
+  } | null = null;
+  /** item-aligned 定位所需的 DOM 元素引用 */
+  private _content_el: HTMLElement | null = null;
+  private _viewport_el: HTMLElement | null = null;
+  private _value_el: HTMLElement | null = null;
+  /** item-aligned 定位状态 */
+  private _item_aligned_position: {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+    height: string;
+    minWidth: number;
+    maxHeight: number;
+    minHeight: number;
+    margin: string;
+  } | null = null;
 
   /** 参考点位置 */
   triggerPos: {
@@ -242,6 +273,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       allowClear: this.allowClear,
       searchKeyword: this.input.value,
       searchPlaceholder: this.input.placeholder,
+      itemAlignedPosition: this._item_aligned_position ?? undefined,
     };
   }
 
@@ -255,10 +287,13 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       placeholder = "点击选择",
       allowClear = false,
       options = [],
-      onChange,
+      platform,
       search = false,
       searchPlaceholder = "搜索...",
+      position = "popper",
+      onChange,
     } = props;
+    this.position = position;
     // console.log("[DOMAIN]ui/select/index - constructor", defaultValue);
     this.search = search;
     this.input.setPlaceholder(searchPlaceholder);
@@ -288,6 +323,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     }
     this.popper = new PopperCore({
       align: "start",
+      platform,
+      mode: this.position,
     });
     this.layer = new DismissableLayerCore();
     // this.collection = new CollectionCore();
@@ -340,6 +377,191 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   setSelectedItem(item: SelectItemCore<T>) {
     this.selectedItem = item;
   }
+  /** 设置选中项的 DOM 节点偏移（用于 item-aligned 模式） */
+  setSelectedItemOffset(
+    offsetTop: number,
+    offsetHeight: number,
+    contentPaddingTop: number = 0,
+  ) {
+    const itemOffsetMiddle = offsetTop + offsetHeight;
+    const contentTopToItemMiddle = itemOffsetMiddle + contentPaddingTop;
+    this._selected_item = { offsetTop, offsetHeight };
+    logger.log(
+      "setSelectedItemOffset",
+      this.position,
+      this.open,
+      this._selected_item,
+      itemOffsetMiddle,
+      contentPaddingTop,
+      contentTopToItemMiddle,
+    );
+    if (this.position === "item-aligned" && this.open) {
+      this.popper.setItemOffset({
+        x: this.triggerPos.x,
+        y: this.triggerPos.y,
+        height: offsetHeight,
+        bottom: contentTopToItemMiddle,
+      });
+      this.popper.place();
+    }
+  }
+  /** 清除选中项偏移（关闭时调用） */
+  clearSelectedItemOffset() {
+    this._selected_item = null;
+    // this.popper.setItemOffset();
+  }
+  /** 设置 item-aligned 定位所需的 DOM 元素（分别设置） */
+  setItemAlignedElements(elements: {
+    contentEl?: HTMLElement;
+    viewportEl?: HTMLElement;
+    valueEl?: HTMLElement;
+  }) {
+    if (elements.contentEl) {
+      this._content_el = elements.contentEl;
+    }
+    if (elements.viewportEl) {
+      this._viewport_el = elements.viewportEl;
+    }
+    if (elements.valueEl) {
+      this._value_el = elements.valueEl;
+    }
+    logger.log(
+      "setItemAlignedElements",
+      this.position,
+      this.open,
+      !!this._content_el,
+      !!this._viewport_el,
+      !!this._value_el,
+    );
+    if (this.position === "item-aligned" && this.open) {
+      this.placeItemAligned();
+    }
+  }
+  /** 执行 item-aligned 定位（参考 Radix 原版实现） */
+  placeItemAligned() {
+    if (
+      !this.reference ||
+      !this._content_el ||
+      !this._viewport_el ||
+      !this._value_el ||
+      !this._selected_item
+    ) {
+      return;
+    }
+    const CONTENT_MARGIN = 10;
+    const triggerRect = this.reference;
+    const contentEl = this._content_el;
+    const viewportEl = this._viewport_el;
+    const valueEl = this._value_el;
+    const selectedItem = this._selected_item;
+    const selectedItemOffsetTop = selectedItem.offsetTop;
+    const selectedItemOffsetHeight = selectedItem.offsetHeight;
+    const contentRect = contentEl.getBoundingClientRect();
+    const valueNodeRect = valueEl.getBoundingClientRect();
+    const itemTextRect = valueNodeRect;
+    const dir = this.state.dir || "ltr";
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const availableHeight = windowHeight - CONTENT_MARGIN * 2;
+    const itemsHeight = viewportEl.scrollHeight;
+    const contentStyles = window.getComputedStyle(contentEl);
+    const contentBorderTopWidth =
+      parseInt(contentStyles.borderTopWidth, 10) || 0;
+    const contentPaddingTop = parseInt(contentStyles.paddingTop, 10) || 0;
+    const contentBorderBottomWidth =
+      parseInt(contentStyles.borderBottomWidth, 10) || 0;
+    const contentPaddingBottom = parseInt(contentStyles.paddingBottom, 10) || 0;
+    const fullContentHeight =
+      contentBorderTopWidth +
+      contentPaddingTop +
+      itemsHeight +
+      contentPaddingBottom +
+      contentBorderBottomWidth;
+    const minContentHeight = Math.min(
+      selectedItemOffsetHeight * 5,
+      fullContentHeight,
+    );
+    const viewportStyles = window.getComputedStyle(viewportEl);
+    const viewportPaddingTop = parseInt(viewportStyles.paddingTop, 10) || 0;
+    const viewportPaddingBottom = parseInt(viewportStyles.paddingTop, 10) || 0;
+    const topEdgeToTriggerMiddle =
+      triggerRect.top + triggerRect.height / 2 - CONTENT_MARGIN;
+    const triggerMiddleToBottomEdge = availableHeight - topEdgeToTriggerMiddle;
+    const selectedItemHalfHeight = selectedItemOffsetHeight / 2;
+    const itemOffsetMiddle = selectedItemOffsetTop + selectedItemHalfHeight;
+    const contentTopToItemMiddle =
+      contentBorderTopWidth + contentPaddingTop + itemOffsetMiddle;
+    const itemMiddleToContentBottom =
+      fullContentHeight - contentTopToItemMiddle;
+    const willAlignWithoutTopOverflow =
+      contentTopToItemMiddle <= topEdgeToTriggerMiddle;
+    let clampedLeft = 0;
+    let clampedRight = 0;
+    let minContentWidth = 0;
+    if (dir !== "rtl") {
+      const itemTextOffset = itemTextRect.left - contentRect.left;
+      let left = valueNodeRect.left - itemTextOffset;
+      const leftDelta = triggerRect.left - left;
+      minContentWidth = triggerRect.width + leftDelta;
+      const rightEdge = windowWidth - CONTENT_MARGIN;
+      clampedLeft = Math.max(
+        CONTENT_MARGIN,
+        Math.min(left, rightEdge - contentRect.width),
+      );
+      contentEl.style.minWidth = minContentWidth + "px";
+      contentEl.style.left = clampedLeft + "px";
+      contentEl.style.right = "auto";
+    } else {
+      const itemTextOffset = contentRect.right - itemTextRect.right;
+      let right = windowWidth - valueNodeRect.right - itemTextOffset;
+      const rightDelta = windowWidth - triggerRect.right - right;
+      minContentWidth = triggerRect.width + rightDelta;
+      const leftEdge = windowWidth - CONTENT_MARGIN;
+      clampedRight = Math.max(
+        CONTENT_MARGIN,
+        Math.min(right, leftEdge - contentRect.width),
+      );
+      contentEl.style.minWidth = minContentWidth + "px";
+      contentEl.style.right = clampedRight + "px";
+      contentEl.style.left = "auto";
+    }
+    if (willAlignWithoutTopOverflow) {
+      contentEl.style.bottom = "0";
+      contentEl.style.top = "auto";
+      contentEl.style.height =
+        contentTopToItemMiddle + triggerMiddleToBottomEdge + "px";
+    } else {
+      contentEl.style.top = "0";
+      contentEl.style.bottom = "auto";
+      const clampedTopEdgeToTriggerMiddle = Math.max(
+        topEdgeToTriggerMiddle,
+        contentBorderTopWidth +
+          viewportEl.offsetTop +
+          viewportPaddingTop +
+          selectedItemHalfHeight,
+      );
+      contentEl.style.height =
+        clampedTopEdgeToTriggerMiddle + itemMiddleToContentBottom + "px";
+      viewportEl.scrollTop =
+        contentTopToItemMiddle - topEdgeToTriggerMiddle + viewportEl.offsetTop;
+    }
+    const position = {
+      left: dir !== "rtl" ? clampedLeft : 0,
+      right: dir === "rtl" ? clampedRight! : 0,
+      top: willAlignWithoutTopOverflow
+        ? 0
+        : parseInt(contentEl.style.top, 10) || 0,
+      bottom: willAlignWithoutTopOverflow ? 0 : 0,
+      height: contentEl.style.height,
+      minWidth: minContentWidth,
+      maxHeight: availableHeight,
+      minHeight: minContentHeight,
+      margin: `${CONTENT_MARGIN}px 0`,
+    };
+    this._item_aligned_position = position;
+    this.emit(Events.StateChange, { ...this.state });
+    logger.log("placeItemAligned done", position);
+  }
   async show() {
     // console.log(...this.log("show", this.state));
     if (this.disabled) {
@@ -351,7 +573,11 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     if (this.value !== null) {
       if (this._isDisabledValue(this.value)) {
         this.presence.show();
-        this.popper.place();
+        if (this.position === "item-aligned") {
+          this.placeItemAligned();
+        } else {
+          this.popper.place();
+        }
         this.open = true;
         this.emit(Events.StateChange, { ...this.state });
         return;
@@ -370,7 +596,11 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       }
     }
     this.presence.show();
-    this.popper.place();
+    if (this.position === "item-aligned") {
+      this.placeItemAligned();
+    } else {
+      this.popper.place();
+    }
     // await sleep(800);
     this.open = true;
     // this.position();
@@ -385,6 +615,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.open = false;
     // 关闭时清空搜索关键字
     this.input.setValue("");
+    this.clearSelectedItemOffset();
     this.emit(Events.StateChange, { ...this.state });
   }
   addNativeOption() {}

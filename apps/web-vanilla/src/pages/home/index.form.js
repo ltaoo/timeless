@@ -1,7 +1,9 @@
 import { Section, Item } from "@/components/index.js";
 
 export default function FormView() {
+  const platform = getPlatform();
   const view$ = new Timeless.ui.ScrollViewCore({});
+
   const search_select$ = new Timeless.ui.SelectCore({
     defaultValue: null,
     placeholder: "输入关键词搜索",
@@ -13,6 +15,21 @@ export default function FormView() {
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
       Section("Input", [
+        Item("Default", [
+          Select({
+            store: new Timeless.ui.SelectCore({
+              defaultValue: "apple",
+              platform,
+              position: "item-aligned",
+              options: [
+                { value: "apple", label: "苹果" },
+                { value: "banana", label: "香蕉" },
+                { value: "orange", label: "橙子" },
+              ],
+            }),
+          }),
+        ]),
+
         Item("Default", [
           Flex({ direction: "col", gap: "4px" }, [
             Input({
@@ -127,15 +144,17 @@ export default function FormView() {
         ]),
       ]),
       Section("Select", [
-        Item("Default", [
+        Item("Scrollable (100 options)", [
           Select({
             store: new Timeless.ui.SelectCore({
-              defaultValue: "apple",
-              options: [
-                { value: "apple", label: "苹果" },
-                { value: "banana", label: "香蕉" },
-                { value: "orange", label: "橙子" },
-              ],
+              defaultValue: null,
+              platform,
+              position: "item-aligned",
+              placeholder: "从 100 个选项中选择",
+              options: Array.from({ length: 100 }, (_, i) => ({
+                value: `option_${i + 1}`,
+                label: `选项 ${i + 1}`,
+              })),
             }),
           }),
         ]),
@@ -147,18 +166,6 @@ export default function FormView() {
               debounce: 300,
             }),
           ]),
-        ]),
-        Item("Scrollable (100 options)", [
-          Select({
-            store: new Timeless.ui.SelectCore({
-              defaultValue: null,
-              placeholder: "从 100 个选项中选择",
-              options: Array.from({ length: 100 }, (_, i) => ({
-                value: `option_${i + 1}`,
-                label: `选项 ${i + 1}`,
-              })),
-            }),
-          }),
         ]),
       ]),
       Section("Cascader", [

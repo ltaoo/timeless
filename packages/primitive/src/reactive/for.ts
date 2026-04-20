@@ -534,7 +534,7 @@ export function For<T>(
       return [...state.children];
     },
     onMounted(event: MountedEvent) {
-      logger.log("onMounted", state.children);
+      // logger.log("onMounted", state.children);
       methods.subscribe_props();
       state.rendered = true;
       if (props.onMounted) {

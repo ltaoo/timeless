@@ -174,11 +174,11 @@ export function ListView(props: ListViewProps = {}, children?: ViewChildren) {
         const child = resolved[i];
         console.log("ListView children", child);
         (() => {
-          if (typeof child === "function") {
-            const r = child();
-            state.children[i] = r;
-            return;
-          }
+          // if (typeof child === "function") {
+          //   const r = child();
+          //   state.children[i] = r;
+          //   return;
+          // }
           if (isElement(child)) {
             state.children[i] = child;
             return;

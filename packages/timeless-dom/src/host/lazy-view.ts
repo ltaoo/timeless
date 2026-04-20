@@ -1,4 +1,4 @@
-import { isElement, TimelessElement, VNodeView } from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement } from "./box";
 
@@ -17,27 +17,18 @@ export function DOMLazyView(props: {
   const common$ = HostElement({ $elm: $anchor, t, build: props.build });
 
   return {
+    ...common$.methods,
     t,
     getType() {
       return "view";
     },
-    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return true;
     },
-    setStyle: common$.methods.setStyle,
-    setStyleValue: common$.methods.setStyleValue,
-    setStyleSet: common$.methods.setStyleSet,
-    setAttribute: common$.methods.setAttribute,
-    removeAttribute: common$.methods.removeAttribute,
-    addEventListener: common$.methods.addEventListener,
-    removeEventListener: common$.methods.removeEventListener,
     setupEventListener() {},
     teardownEventListener() {},
-    trackChild: common$.methods.trackChild,
-    untrackChild: common$.methods.untrackChild,
-    getBoundingClientRect: common$.methods.getBoundingClientRect,
     render(elm: TimelessElement) {
+      common$.methods.set$elm($anchor);
       const $fragment = common$.methods.render(elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
@@ -66,13 +57,6 @@ export function DOMLazyView(props: {
       setTimeout(() => {
         common$.methods.handleElementsMounted();
       }, 0);
-    },
-    getChildren: common$.methods.getChildren,
-    buildChildren: common$.methods.buildChildren,
-    insertChildren: common$.methods.insertChildren,
-    removeChildren: common$.methods.removeChildren,
-    getParent() {
-      return $anchor.parentElement;
     },
   };
 }
