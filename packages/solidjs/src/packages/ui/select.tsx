@@ -1,4 +1,11 @@
-import { JSX, Show, createContext, createSignal, onMount, useContext } from "solid-js";
+import {
+  JSX,
+  Show,
+  createContext,
+  createSignal,
+  onMount,
+  useContext,
+} from "solid-js";
 import { Portal as PortalPrimitive } from "solid-js/web";
 
 import { SelectCore } from "@/domains/ui/select";
@@ -14,12 +21,20 @@ const SELECTION_KEYS = [" ", "Enter"];
 // const SelectContext = createContext<SelectCore>();
 // const SelectContentContext = createContext<SelectCore>();
 // const SelectNativeOptionContext = createContext<SelectCore>();
-const Root = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLElement>) => {
+const Root = (
+  props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
-  return <PopperPrimitive.Root store={store.popper}>{props.children}</PopperPrimitive.Root>;
+  return (
+    <PopperPrimitive.Root store={store.popper}>
+      {props.children}
+    </PopperPrimitive.Root>
+  );
 };
 
-const Trigger = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLElement>) => {
+const Trigger = (
+  props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
 
   let $button: HTMLButtonElement;
@@ -88,7 +103,9 @@ const Trigger = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLElem
   );
 };
 
-const Value = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLElement>) => {
+const Value = (
+  props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
 
   let $value: HTMLSpanElement | undefined;
@@ -130,7 +147,8 @@ const Value = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLElemen
   // });
   //   store.setValue(valueCore);
 
-  const show_placeholder = () => state().value === undefined && state().placeholder !== undefined;
+  const show_placeholder = () =>
+    state().value === undefined && state().placeholder !== undefined;
 
   return (
     <span style={{ "pointer-events": "none" }}>
@@ -153,7 +171,9 @@ const Portal = (props: { children: JSX.Element }) => {
   return <PortalPrimitive>{props.children}</PortalPrimitive>;
 };
 
-const Content = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLDivElement>) => {
+const Content = (
+  props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLDivElement>,
+) => {
   const { store } = props;
   //   const store = useContext(SelectContext);
   const [state, setState] = createSignal(store.state);
@@ -165,7 +185,11 @@ const Content = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLDivE
   return (
     <PopoverPrimitive.Portal store={store.popover}>
       <PopoverPrimitive.Content store={store.popover}>
-        <ContentImpl store={store} class={props.class} classList={props.classList}>
+        <ContentImpl
+          store={store}
+          class={props.class}
+          classList={props.classList}
+        >
           {props.children}
         </ContentImpl>
       </PopoverPrimitive.Content>
@@ -173,7 +197,9 @@ const Content = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLDivE
   );
 };
 
-const ContentImpl = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLDivElement>) => {
+const ContentImpl = (
+  props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLDivElement>,
+) => {
   const { store } = props;
 
   let $content: HTMLDivElement;
@@ -205,7 +231,8 @@ const ContentImpl = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTML
   //   store.setContent(content);
   // });
 
-  const SelectPosition = store.position === "popper" ? PopperPosition : ItemAlignedPosition;
+  const SelectPosition =
+    store.position === "popper" ? PopperPosition : ItemAlignedPosition;
 
   return (
     <DismissableLayer asChild store={store.layer}>
@@ -228,6 +255,25 @@ const ContentImpl = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTML
   );
 };
 
+const ScrollUpButton = (props: { class?: string; children?: JSX.Element }) => {
+  return (
+    <div data-select-scroll-up-button class={props.class}>
+      {props.children || "▲"}
+    </div>
+  );
+};
+
+const ScrollDownButton = (props: {
+  class?: string;
+  children?: JSX.Element;
+}) => {
+  return (
+    <div data-select-scroll-down-button class={props.class}>
+      {props.children || "▼"}
+    </div>
+  );
+};
+
 const ItemAlignedPosition = (
   props: {
     store: SelectCore<any>;
@@ -236,7 +282,7 @@ const ItemAlignedPosition = (
   } & {
     class?: string;
     style?: JSX.CSSProperties;
-  } & JSX.AriaAttributes
+  } & JSX.AriaAttributes,
 ) => {
   const { store } = props;
 
@@ -283,6 +329,7 @@ const ItemAlignedPosition = (
         "z-index": 999,
       }}
     >
+      <ScrollUpButton />
       <div
         ref={(el) => {
           $content = el;
@@ -307,6 +354,7 @@ const ItemAlignedPosition = (
       >
         {props.children}
       </div>
+      <ScrollDownButton />
     </div>
   );
 };
@@ -316,7 +364,7 @@ const PopperPosition = (
     ref?: ((el: HTMLDivElement) => void) | HTMLDivElement;
     store: SelectCore<any>;
   } & JSX.HTMLAttributes<HTMLDivElement> &
-    JSX.AriaAttributes
+    JSX.AriaAttributes,
 ) => {
   const { store } = props;
 
@@ -332,12 +380,16 @@ const PopperPosition = (
       }}
       store={store.popper}
     >
+      <ScrollUpButton />
       {props.children}
+      <ScrollDownButton />
     </PopperPrimitive.Content>
   );
 };
 
-const Viewport = (props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLDivElement>) => {
+const Viewport = (
+  props: { store: SelectCore<any> } & JSX.HTMLAttributes<HTMLDivElement>,
+) => {
   const style = `[data-radix-select-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-select-viewport]::-webkit-scrollbar{display:none}`;
 
   const { store } = props;
@@ -397,7 +449,7 @@ const Option = (
     parent: SelectCore<any>;
     store: SelectOptionCore<any>;
     value?: string;
-  } & JSX.HTMLAttributes<HTMLDivElement>
+  } & JSX.HTMLAttributes<HTMLDivElement>,
 ) => {
   const { parent, store } = props;
 
@@ -469,7 +521,10 @@ const Option = (
   );
 };
 
-const OptionText = (props: { store: SelectOptionCore<any>; children: JSX.Element }) => {
+const OptionText = (props: {
+  store: SelectOptionCore<any>;
+  children: JSX.Element;
+}) => {
   const { store } = props;
   //   const store = useContext(SelectContext);
   //   const item = useContext(SelectItemContext);
@@ -514,7 +569,9 @@ const OptionText = (props: { store: SelectOptionCore<any>; children: JSX.Element
   );
 };
 
-const ItemIndicator = (props: { store: SelectOptionCore<any> } & JSX.HTMLAttributes<HTMLElement>) => {
+const ItemIndicator = (
+  props: { store: SelectOptionCore<any> } & JSX.HTMLAttributes<HTMLElement>,
+) => {
   const { store } = props;
 
   const [state, setState] = createSignal(store.state);
@@ -593,8 +650,8 @@ export {
   Option,
   OptionText,
   ItemIndicator,
-  //   ScrollUpButton,
-  //   ScrollDownButton,
+  ScrollUpButton,
+  ScrollDownButton,
   //   Separator,
   //   Arrow,
 };

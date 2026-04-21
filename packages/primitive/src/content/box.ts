@@ -261,22 +261,41 @@ export function Box<T>(props: BoxProps, extra_state: T) {
       }
       const dataset = props.dataset;
       if (dataset) {
-        Object.keys(dataset).forEach((k) => {
-          const vv = dataset[k];
-          if (isRef(vv)) {
-            state.dataset[k] = vv.value;
-            const unsubscribe = vv.subscribe({
-              onChange(v) {
-                if ($elm) {
-                  methods.apply_attr(k, v);
-                }
-              },
-            });
-            listener$.add(unsubscribe);
-          } else {
-            state.dataset[k] = vv;
-          }
-        });
+        if (isRef(dataset)) {
+          Object.keys(dataset.value).forEach((k) => {
+            const vv = dataset.value[k];
+            if (isRef(vv)) {
+              state.dataset[k] = vv.value;
+              const unsubscribe = vv.subscribe({
+                onChange(v) {
+                  if ($elm) {
+                    methods.apply_attr(k, v);
+                  }
+                },
+              });
+              listener$.add(unsubscribe);
+            } else {
+              state.dataset[k] = vv;
+            }
+          });
+        } else {
+          Object.keys(dataset).forEach((k) => {
+            const vv = dataset[k];
+            if (isRef(vv)) {
+              state.dataset[k] = vv.value;
+              const unsubscribe = vv.subscribe({
+                onChange(v) {
+                  if ($elm) {
+                    methods.apply_attr(k, v);
+                  }
+                },
+              });
+              listener$.add(unsubscribe);
+            } else {
+              state.dataset[k] = vv;
+            }
+          });
+        }
       }
     },
     build_children(children?: ViewChildren) {
@@ -292,10 +311,6 @@ export function Box<T>(props: BoxProps, extra_state: T) {
             state.children[i] = null;
             return;
           }
-          // if (typeof child === "function") {
-          //   state.children[i] = child();
-          //   return;
-          // }
           if (isElement(child)) {
             state.children[i] = child;
             return;

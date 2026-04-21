@@ -542,6 +542,8 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.state.placement = bottomVal === 0 ? "bottom" : "top";
     this.state.strategy = "fixed";
     this.state.maxHeight = availableHeight;
+    this.state.canScrollDown = true;
+    this.state.canScrollUp = true;
 
     if (viewportScrollTop !== undefined) {
       viewport$.setScrollTop(viewportScrollTop);

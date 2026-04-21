@@ -115,15 +115,6 @@ export function Indicator(
         props.onUnmounted();
       }
     },
-    // render() {
-    //   const $elm = indicator$.render();
-    //   const provide = global_provider?.provide_ui_scroll_view_indicator;
-    //   if (typeof provide === "function") provide(store, indicator$.$elm);
-    //   if (props.onMounted) {
-    //     props.onMounted({ target: $elm });
-    //   }
-    //   return $elm;
-    // },
   };
 }
 
@@ -148,7 +139,6 @@ export function Progress(
   const progress$ = View(
     {
       ...rest,
-      // "data-scroll-view-progress": "",
       style: { display: computed(visible, (v) => (v ? "block" : "none")) },
     },
     [
@@ -170,13 +160,6 @@ export function Progress(
     t: "view",
     $elm: progress$.$elm,
     state: {},
-    // render() {
-    //   const $elm = progress$.render();
-    //   if (props.onMounted) {
-    //     props.onMounted({ target: $elm });
-    //   }
-    //   return $elm;
-    // },
     onMounted(event) {
       if (props.onMounted) {
         return props.onMounted(event);

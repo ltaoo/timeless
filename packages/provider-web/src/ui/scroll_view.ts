@@ -7,12 +7,10 @@ export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
     store.handlePointDown(e);
     const scrollTop = store.getScrollTop();
     if (store.os.pc && scrollTop <= 0) {
-      // 在顶部给PC端添加move事件
       $scroll.addEventListener("mousemove", store.handleMouseMove, {
         passive: false,
       });
       document.ondragstart = function () {
-        // 在顶部禁止PC端拖拽图片,避免与下拉刷新冲突
         return false;
       };
     }
@@ -26,6 +24,17 @@ export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
       };
     }
   }
+  function handleScroll() {
+    const scrollTop = store.getScrollTop();
+    const clientHeight = store.getScrollClientHeight();
+    const scrollHeight = store.getScrollHeight();
+
+    if (store.popper$) {
+      store.popper$.handleViewportScroll(scrollTop, clientHeight, scrollHeight);
+    }
+  }
+  store.handleScrolling = handleScroll;
+
   $scroll.addEventListener("touchstart", handlePointerDown);
   $scroll.addEventListener("touchmove", store.handleTouchMove, {
     passive: false,
@@ -35,7 +44,7 @@ export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
   $scroll.addEventListener("mousedown", handlePointerDown);
   $scroll.addEventListener("mouseup", handleTouchEnd);
   $scroll.addEventListener("mouseleave", handleTouchEnd);
-  $scroll.addEventListener("scroll", store.handleScrolling);
+  $scroll.addEventListener("scroll", handleScroll);
 
   let isSetScrollAuto = false;
   store.optimizeScroll = (needOptimize) => {

@@ -293,10 +293,22 @@ export function HostElement(props: {
           }
         }
       }
+      const dataset = state.dataset;
+      if (dataset) {
+        for (const [key, value] of Object.entries(dataset)) {
+          const k = `data-${key}`
+          if (value !== undefined) {
+            methods.setAttribute(k, String(value));
+          } else {
+            methods.removeAttribute(k);
+          }
+        }
+      }
     },
     render(children: (TimelessElement | null)[] = []) {
       child_elements = [];
       const $fragment = document.createDocumentFragment();
+
       for (const child of children) {
         if (isElement(child)) {
           const child$ = props.build(child);

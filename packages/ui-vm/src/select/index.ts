@@ -380,6 +380,15 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     const contentEl = this._content_el;
     const viewportEl = this._viewport_el;
 
+    // const scrollUpButton = contentEl.querySelector(
+    //   "[data-select-scroll-up-button]",
+    // ) as HTMLElement | null;
+    // const scrollDownButton = contentEl.querySelector(
+    //   "[data-select-scroll-down-button]",
+    // ) as HTMLElement | null;
+    // const scrollButtonHeight = scrollUpButton?.offsetHeight ?? 0;
+    const scrollButtonHeight = 24;
+
     const contentStyles = window.getComputedStyle(contentEl);
     const contentBorderTopWidth =
       parseInt(contentStyles.borderTopWidth, 10) || 0;
@@ -403,14 +412,14 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       },
       content: {
         borderTopWidth: contentBorderTopWidth,
-        paddingTop: contentPaddingTop,
+        paddingTop: contentPaddingTop + scrollButtonHeight,
         borderBottomWidth: contentBorderBottomWidth,
-        paddingBottom: contentPaddingBottom,
+        paddingBottom: contentPaddingBottom + scrollButtonHeight,
         clientHeight: contentEl.clientHeight,
       },
       viewport: {
         scrollHeight: viewportEl.scrollHeight,
-        offsetTop: viewportEl.offsetTop,
+        offsetTop: scrollButtonHeight,
         offsetHeight: viewportEl.offsetHeight,
         paddingTop: viewportPaddingTop,
         paddingBottom: viewportPaddingBottom,

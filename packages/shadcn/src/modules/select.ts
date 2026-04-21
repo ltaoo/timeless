@@ -299,15 +299,17 @@ export function Select(
           },
         },
         () => [
-          // SelectPrimitive.ScrollUpButton(
-          //   {
-          //     store: store,
-          //     class:
-          //       "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
-          //   },
-          //   [Icon({ name: "chevron-up", size: 16 })],
-          // ),
-          // View({ class: "h-[10px]" }, []),
+          SelectPrimitive.ScrollUpButton(
+            {
+              store,
+              dataset: {
+                "scroll-up-button": "",
+              },
+              class:
+                "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
+            },
+            [Icon({ name: "chevron-up", size: 16 })],
+          ),
           SelectPrimitive.Viewport(
             {
               store,
@@ -366,15 +368,17 @@ export function Select(
               }),
             ],
           ),
-          // View({ class: "h-[10px]" }, []),
-          // SelectPrimitive.ScrollDownButton(
-          //   {
-          //     store,
-          //     class:
-          //       "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
-          //   },
-          //   [Icon({ name: "chevron-down", size: 16 })],
-          // ),
+          SelectPrimitive.ScrollDownButton(
+            {
+              store,
+              dataset: {
+                "scroll-down-button": "",
+              },
+              class:
+                "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
+            },
+            [Icon({ name: "chevron-down", size: 16 })],
+          ),
         ],
       ),
     ],

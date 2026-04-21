@@ -372,17 +372,6 @@ export function Viewport(
           overflow: "hidden auto",
         },
         store: store.popper$,
-        onMounted(event) {
-          // if (store.position === "item-aligned") {
-          //   const el = event.target.get$elm();
-          //   if (el instanceof HTMLElement) {
-          //     store.setItemAlignedElements({ viewportEl: el });
-          //   }
-          // }
-          if (rest.onMounted) {
-            return rest.onMounted(event);
-          }
-        },
       },
       children,
     ),

@@ -269,25 +269,33 @@ export function ScrollUpButton(
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
-  const listener$ = ListenerManager();
+  const listener$ = ListenerManager([state_]);
+  listener$.add(
+    store.onStateChange((v) => {
+      state_.as(v);
+    }),
+  );
 
-  return Show({
-    when: computed(state_, (s) => s.canScrollUp),
-    onMounted(event) {
-      listener$.add(
-        store.onStateChange((v) => {
-          state_.as(v);
-        }),
-      );
-      if (rest.onMounted) {
-        listener$.add(rest.onMounted(event));
-      }
-      return listener$.destroy;
+  return View(
+    {
+      ...rest,
+      style: styleNames([
+        rest.style,
+        {
+          display: computed(state_, (s) =>
+            s.canScrollUp ? undefined : "none",
+          ),
+        },
+      ]),
+      onMounted(event) {
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.destroy;
+      },
     },
-    ok() {
-      return [View(rest, children)];
-    },
-  });
+    children,
+  );
 }
 
 export function ScrollDownButton(
@@ -298,22 +306,30 @@ export function ScrollDownButton(
   const state_ = refobj(store.state);
 
   const listener$ = ListenerManager();
+  listener$.add(
+    store.onStateChange((v) => {
+      state_.as(v);
+    }),
+  );
 
-  return Show({
-    when: computed(state_, (s) => s.canScrollDown),
-    onMounted(event) {
-      listener$.add(
-        store.onStateChange((v) => {
-          state_.as(v);
-        }),
-      );
-      if (rest.onMounted) {
-        listener$.add(rest.onMounted(event));
-      }
-      return listener$.destroy;
+  return View(
+    {
+      ...rest,
+      style: styleNames([
+        rest.style,
+        {
+          display: computed(state_, (s) =>
+            s.canScrollDown ? undefined : "none",
+          ),
+        },
+      ]),
+      onMounted(event) {
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.destroy;
+      },
     },
-    ok() {
-      return [View(rest, children)];
-    },
-  });
+    children,
+  );
 }
