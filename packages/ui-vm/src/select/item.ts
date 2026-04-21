@@ -49,6 +49,8 @@ export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   focused: boolean = false;
   disabled: boolean = false;
 
+  offsetTop: number = 0;
+  offsetHeight: number = 0;
   // text: {
   //   $node: () => HTMLElement;
   //   getRect: () => DOMRect;
@@ -94,12 +96,6 @@ export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   }
   getStyles() {
     return {} as CSSStyleDeclaration;
-  }
-  get offsetHeight() {
-    return this.$node()?.offsetHeight ?? 0;
-  }
-  get offsetTop() {
-    return this.$node()?.offsetTop ?? 0;
   }
   setLabel(label: string) {
     if (this.label === label) {
@@ -175,6 +171,12 @@ export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     }
     this._enter = true;
     this.emit(Events.Enter);
+  }
+
+  handleMounted(rect: { offsetTop: number; offsetHeight: number }) {
+    const { offsetHeight, offsetTop } = rect;
+    this.offsetTop = offsetTop;
+    this.offsetHeight = offsetHeight;
   }
 
   onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) {

@@ -210,7 +210,10 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.view$ = view$;
     this.platform = platform;
 
-    this.viewport$ = new ScrollViewCore();
+    const handleScroll = this.handleViewportScroll.bind(this);
+    this.viewport$ = new ScrollViewCore({
+      onScroll: handleScroll,
+    });
   }
 
   checkIsClickAnchor: (target: any) => boolean = (target: any) => {
@@ -289,39 +292,35 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     }
     this.floating = floating;
     this.emit(Events.FloatingMounted, floating);
-    const tryPlace = () => {
-      if (this.floating !== floating) {
-        console.log(
-          "[DEBUG-POPPER] tryPlace - floating mismatch",
-          this.unique_id,
-          "this.floating:",
-          !!this.floating,
-          "floating:",
-          !!floating,
-        );
-        return;
-      }
-      const el = floating.getRect();
-      console.log(
-        "[DEBUG-POPPER] tryPlace - checking element",
-        this.unique_id,
-        {
-          hasEl: !!el,
-          // offsetWidth: el?.offsetWidth,
-          // offsetHeight: el?.offsetHeight,
-          // isConnected: el?.isConnected,
-        },
-      );
-      this.place();
-      // if (el && (el.offsetWidth > 0 || el.offsetHeight > 0)) {
-      //   console.log("[DEBUG-POPPER] tryPlace - calling place()", this.unique_id);
-      //   this.place();
-      // } else {
-      //   console.log("[DEBUG-POPPER] tryPlace - retrying", this.unique_id);
-      //   requestAnimationFrame(tryPlace);
-      // }
-    };
-    requestAnimationFrame(tryPlace);
+    // const tryPlace = () => {
+    //   if (this.floating !== floating) {
+    //     console.log(
+    //       "[DEBUG-POPPER] tryPlace - floating mismatch",
+    //       this.unique_id,
+    //       "this.floating:",
+    //       !!this.floating,
+    //       "floating:",
+    //       !!floating,
+    //     );
+    //     return;
+    //   }
+    //   const el = floating.getRect();
+    //   logger.log("tryPlace - checking element", this.unique_id, {
+    //     hasEl: !!el,
+    //     // offsetWidth: el?.offsetWidth,
+    //     // offsetHeight: el?.offsetHeight,
+    //     // isConnected: el?.isConnected,
+    //   });
+    //   this.place();
+    //   // if (el && (el.offsetWidth > 0 || el.offsetHeight > 0)) {
+    //   //   console.log("[DEBUG-POPPER] tryPlace - calling place()", this.unique_id);
+    //   //   this.place();
+    //   // } else {
+    //   //   console.log("[DEBUG-POPPER] tryPlace - retrying", this.unique_id);
+    //   //   requestAnimationFrame(tryPlace);
+    //   // }
+    // };
+    // requestAnimationFrame(tryPlace);
   }
   /** 箭头加载完成 */
   setArrow(arrow: PopperCore["arrow"]) {
@@ -339,11 +338,12 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     // this.emit(Events.ContainerChange, container);
   }
   /** viewport 滚动时由 primitive 调用，更新滚动按钮可见性 */
-  handleViewportScroll(
-    scrollTop: number,
-    clientHeight: number,
-    scrollHeight: number,
-  ) {
+  handleViewportScroll(event: {
+    scrollTop: number;
+    clientHeight: number;
+    scrollHeight: number;
+  }) {
+    const { scrollTop, clientHeight, scrollHeight } = event;
     const canScrollUp = scrollTop > 0;
     const canScrollDown = scrollTop + clientHeight < scrollHeight - 1;
     if (
@@ -399,22 +399,15 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       paddingTop: number;
       paddingBottom: number;
     };
-    valueNodeRect?: {
-      top: number;
-      left: number;
-      right: number;
-      width: number;
-      height: number;
-    };
-    itemTextRect?: {
-      top: number;
-      left: number;
-      right: number;
-      width: number;
-      height: number;
-    };
+    scrollButtonHeight?: number;
   }) {
-    logger.log("adjustContentPositonWithOffsetTop", data);
+    logger.log(
+      "adjustContentPositonWithOffsetTop",
+      this.viewport$,
+      this.reference,
+      this.floating,
+    );
+    const scrollButtonHeight = data.scrollButtonHeight ?? 0;
 
     if (!this.viewport$ || !this.reference || !this.floating) {
       return;
@@ -544,6 +537,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.state.maxHeight = availableHeight;
     this.state.canScrollDown = true;
     this.state.canScrollUp = true;
+    // this.state.viewportOffsetTop = viewportScrollTop;
 
     if (viewportScrollTop !== undefined) {
       viewport$.setScrollTop(viewportScrollTop);
@@ -593,11 +587,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
           return "floating and reference";
         })(),
       );
-      return;
-    }
-
-    if (this.mode === "item-aligned" && this.reference && this.floating) {
-      this.placeInItemAlignedMode();
       return;
     }
 
@@ -758,75 +747,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
 
   getItemAlignedPosition(): ItemAlignedContentWrapperStyle | null {
     return this._itemAlignedStyle;
-  }
-
-  placeInItemAlignedMode() {
-    if (!this.reference || !this.floating) {
-      return;
-    }
-    // if (
-    //   !this.valueNode ||
-    //   !this.selectedItemText ||
-    //   !this._contentMeasurement ||
-    //   !this._viewportMeasurement
-    // ) {
-    //   logger.warn("placeInItemAlignedMode missing measurements", {
-    //     valueNode: !!this.valueNode,
-    //     selectedItemText: !!this.selectedItemText,
-    //     contentMeasurement: !!this._contentMeasurement,
-    //     viewportMeasurement: !!this._viewportMeasurement,
-    //   });
-    //   return;
-    // }
-    const reference_rect = this.reference.getRect();
-    // const valueNodeRect = this.valueNode.getBoundingClientRect();
-    // const itemTextRect = this.selectedItemText.getBoundingClientRect();
-    // const selectedItem: ItemAlignedSelectedItemMeasurement = {
-    //   offsetTop: this.selectedItem?.offsetTop ?? 0,
-    //   offsetHeight: this.selectedItem?.offsetHeight ?? 0,
-    //   isFirst: false,
-    //   isLast: false,
-    // };
-    // const input: ComputePositionItemAlignedInput = {
-    //   triggerRect: reference_rect,
-    //   valueNodeRect,
-    //   content: this._contentMeasurement!,
-    //   itemTextRect,
-    //   selectedItem,
-    //   viewport: this._viewportMeasurement!,
-    //   windowSize: {
-    //     width: window?.innerWidth ?? 0,
-    //     height: window?.innerHeight ?? 0,
-    //   },
-    // };
-    // const result = computePositionInItemAlignedMode(input);
-    // const { contentWrapperStyle, viewportScrollTop } = result;
-    // this._itemAlignedStyle = contentWrapperStyle;
-
-    // this.state = {
-    //   ...this.state,
-    //   x: contentWrapperStyle.left ?? 0,
-    //   y: contentWrapperStyle.top ?? 0,
-    //   strategy: "fixed",
-    //   placement: contentWrapperStyle.bottom !== undefined ? "bottom" : "top",
-    //   isPlaced: true,
-    //   placedSide: contentWrapperStyle.bottom !== undefined ? "bottom" : "top",
-    //   placedAlign: "start",
-    //   reference: true,
-    //   arrow: null,
-    //   middlewareData: {},
-    //   availableHeight: contentWrapperStyle.maxHeight,
-    //   availableWidth: 0,
-    //   canScrollUp: false,
-    //   canScrollDown: false,
-    // };
-    // this._item = {
-    //   x: contentWrapperStyle.left ?? 0,
-    //   y: contentWrapperStyle.top ?? 0,
-    // };
-    // this.state.x = contentWrapperStyle.left ?? 0;
-    // this.state.y = contentWrapperStyle.top ?? 0;
-    // this.emit(Events.StateChange, { ...this.state });
   }
 
   handleEnter() {

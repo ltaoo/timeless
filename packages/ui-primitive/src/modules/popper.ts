@@ -247,6 +247,9 @@ export function Viewport(
       ...rest,
       store: store.viewport$,
       onMounted(event) {
+        // if (store.state.viewportOffsetTop !== undefined) {
+        //   store.viewport$.setScrollTop(store.state.viewportOffsetTop);
+        // }
         listener$.add(
           store.onStateChange((v) => {
             state_.as(v);
@@ -282,8 +285,8 @@ export function ScrollUpButton(
       style: styleNames([
         rest.style,
         {
-          display: computed(state_, (s) =>
-            s.canScrollUp ? undefined : "none",
+          opacity: computed(state_, (s) =>
+            s.canScrollUp ? 1 : 0,
           ),
         },
       ]),
@@ -318,8 +321,8 @@ export function ScrollDownButton(
       style: styleNames([
         rest.style,
         {
-          display: computed(state_, (s) =>
-            s.canScrollDown ? undefined : "none",
+          opacity: computed(state_, (s) =>
+            s.canScrollDown ? 1 : 0,
           ),
         },
       ]),

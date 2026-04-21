@@ -353,17 +353,17 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     if (elements.valueEl) {
       this._value_el = elements.valueEl;
     }
-    logger.log(
-      "setItemAlignedElements",
-      this.position,
-      this.open,
-      !!this._content_el,
-      !!this._viewport_el,
-      !!this._value_el,
-    );
-    if (this.position === "item-aligned" && this.open) {
-      this.placeItemAligned();
-    }
+    // logger.log(
+    //   "setItemAlignedElements",
+    //   this.position,
+    //   this.open,
+    //   !!this._content_el,
+    //   !!this._viewport_el,
+    //   !!this._value_el,
+    // );
+    // if (this.position === "item-aligned" && this.open) {
+    //   this.placeItemAligned();
+    // }
   }
   /** 执行 item-aligned 定位（使用 adjustContentPositonWithOffsetTop） */
   placeItemAligned() {
@@ -426,8 +426,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       },
     });
 
-    this.popper$.place();
-    this.emit(Events.StateChange, { ...this.state });
+    // this.popper$.place();
+    // this.emit(Events.StateChange, { ...this.state });
   }
   async show() {
     // console.log(...this.log("show", this.state));
@@ -449,11 +449,11 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       }
     }
     this.presence$.show();
-    if (this.position === "item-aligned") {
-      this.placeItemAligned();
-    } else {
-      this.popper$.place();
-    }
+    // if (this.position === "item-aligned") {
+    //   this.placeItemAligned();
+    // } else {
+    //   this.popper$.place();
+    // }
     // await sleep(800);
     this.open = true;
     // this.position();
@@ -713,7 +713,16 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     offset_height: number;
     store: SelectItemCore<T>;
   }) {
-    logger.log("[]handle item mounted", data.offset_top, data.store.label);
+    logger.log(
+      "[]handle item mounted",
+      data.store.label,
+      this.aligned,
+      this.position,
+    );
+    data.store.handleMounted({
+      offsetTop: data.offset_top,
+      offsetHeight: data.offset_height,
+    });
     if (this.aligned) {
       return;
     }

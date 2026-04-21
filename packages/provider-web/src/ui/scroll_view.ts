@@ -24,16 +24,6 @@ export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
       };
     }
   }
-  function handleScroll() {
-    const scrollTop = store.getScrollTop();
-    const clientHeight = store.getScrollClientHeight();
-    const scrollHeight = store.getScrollHeight();
-
-    if (store.popper$) {
-      store.popper$.handleViewportScroll(scrollTop, clientHeight, scrollHeight);
-    }
-  }
-  store.handleScrolling = handleScroll;
 
   $scroll.addEventListener("touchstart", handlePointerDown);
   $scroll.addEventListener("touchmove", store.handleTouchMove, {
@@ -44,7 +34,7 @@ export function connectScroll(store: ScrollViewCore, $scroll: HTMLDivElement) {
   $scroll.addEventListener("mousedown", handlePointerDown);
   $scroll.addEventListener("mouseup", handleTouchEnd);
   $scroll.addEventListener("mouseleave", handleTouchEnd);
-  $scroll.addEventListener("scroll", handleScroll);
+  $scroll.addEventListener("scroll", store.handleScrolling);
 
   let isSetScrollAuto = false;
   store.optimizeScroll = (needOptimize) => {

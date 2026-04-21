@@ -54,7 +54,11 @@ type TheTypesOfEvents = {
   [Events.PullToRefreshFinished]: void;
   [Events.InUpOffset]: void;
   [Events.OutUpOffset]: void;
-  [Events.Scrolling]: { scrollTop: number };
+  [Events.Scrolling]: {
+    scrollTop: number;
+    scrollHeight: number;
+    clientHeight: number;
+  };
   [Events.ReachBottom]: void;
   [Events.Mounted]: void;
 };
@@ -535,9 +539,10 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
   handleScrolling = () => {
     const scrollTop = this.getScrollTop();
     const isUp = scrollTop - this.preScrollY > 0;
+    const scrollHeight = this.getScrollHeight();
+    const clientHeight = this.getScrollClientHeight();
     if (!this.isLoadingMore) {
-      const toBottom =
-        this.getScrollHeight() - this.getScrollClientHeight() - scrollTop;
+      const toBottom = scrollHeight - clientHeight - scrollTop;
       if (toBottom <= this.threshold && isUp) {
         // 如果滚动条距离底部指定范围内且向上滑,则执行上拉加载回调
         // this.startReachBottom();
@@ -545,7 +550,7 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
         this.emit(Events.ReachBottom);
       }
     }
-    this.emit(Events.Scrolling, { scrollTop });
+    this.emit(Events.Scrolling, { scrollTop, scrollHeight, clientHeight });
   };
 
   onPulling(handler: Handler<TheTypesOfEvents[Events.Pulling]>) {

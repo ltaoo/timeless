@@ -158,7 +158,8 @@ export default function FormView() {
         Item("Scrollable (100 options)", [
           Select({
             store: new Timeless.ui.SelectCore({
-              defaultValue: null,
+              // defaultValue: null,
+              defaultValue: "option_78",
               platform,
               position: "item-aligned",
               placeholder: "从 100 个选项中选择",
