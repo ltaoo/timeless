@@ -38,15 +38,37 @@ export function Root(
         scrollview: "",
       },
       onMounted(event) {
-        const $elm = event.target;
+        const $elm = event.target.get$elm() as HTMLDivElement;
         const { width, height } = $elm.getBoundingClientRect();
-        store.setRect({
+
+        const scrollWidth = $elm.scrollWidth;
+        const scrollHeight = $elm.scrollHeight;
+        const clientWidth = $elm.clientWidth;
+        const clientHeight = $elm.clientHeight;
+        const offsetWidth = $elm.offsetWidth;
+        const offsetHeight = $elm.offsetHeight;
+        const offsetTop = $elm.offsetTop;
+        const offsetLeft = $elm.offsetLeft;
+        const scrollTop = $elm.scrollTop;
+        const scrollLeft = $elm.scrollLeft;
+
+        store.handleMounted({
           width,
           height,
+          scrollWidth,
+          scrollHeight,
+          clientWidth,
+          clientHeight,
+          offsetWidth,
+          offsetHeight,
+          offsetTop,
+          offsetLeft,
+          scrollTop,
+          scrollLeft,
         });
         const provide = global_provider?.provide_ui_scroll_view_scroll;
         if (typeof provide === "function") {
-          provide(store, $elm.get$elm());
+          provide(store, $elm);
         }
         if (props.onMounted) {
           return props.onMounted(event);

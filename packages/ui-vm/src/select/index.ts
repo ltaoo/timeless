@@ -203,7 +203,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       options: this.options,
       placeholder: this.placeholder,
       value: this.value,
-      selectedOption: null,
+      selectedOption: this.selected_item$,
       allowClear: this.allowClear,
       open: this.open,
       loading: this.loading,
@@ -242,6 +242,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     if (id !== undefined) {
       this.id = id;
     }
+    this.selected_item$ = this.options.find((opt) => opt.selected) ?? null;
     this.disabled = disabled;
     this.allowClear = allowClear;
     this.value = defaultValue;
@@ -316,28 +317,19 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   alignSpecialItem(
     offsetTop: number,
     offsetHeight: number,
-    contentPaddingTop: number = 0,
+    isFirst: boolean = false,
+    isLast: boolean = false,
   ) {
-    const item_offset_middle = offsetTop + offsetHeight / 2;
-    const content_top_top_item_middle = item_offset_middle + contentPaddingTop;
-    this._selected_item = { offsetTop, offsetHeight };
-    // logger.log(
-    //   "setSelectedItemOffset",
-    //   this.position,
-    //   this.open,
-    //   this._selected_item,
-    //   item_offset_middle,
-    //   contentPaddingTop,
-    //   contentTopToItemMiddle,
-    // );
+    this._selected_item = { offsetTop, offsetHeight, isFirst, isLast };
     if (this.position === "item-aligned" && this.open) {
-      this.popper$.setItemOffset({
-        offsetTop,
-        offsetHeight,
-        // x: this.triggerPos.x,
-        // y: this.triggerPos.y,
-        // height: offsetHeight,
-        bottom: content_top_top_item_middle,
+      this.popper$.adjustContentPositonWithOffsetTop({
+        selectedItem: {
+          offsetTop,
+          offsetHeight,
+          bottom: offsetTop + offsetHeight,
+          isFirst,
+          isLast,
+        },
       });
     }
   }
@@ -373,31 +365,21 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       this.placeItemAligned();
     }
   }
-  /** 执行 item-aligned 定位（使用 computePositionInItemAlignedMode） */
+  /** 执行 item-aligned 定位（使用 adjustContentPositonWithOffsetTop） */
   placeItemAligned() {
     if (
       !this.reference ||
       !this._content_el ||
       !this._viewport_el ||
-      !this._value_el ||
       !this._selected_item
     ) {
       return;
     }
-    const CONTENT_MARGIN = 10;
-    const triggerRect = this.reference;
+
+    const selectedItem = this._selected_item;
     const contentEl = this._content_el;
     const viewportEl = this._viewport_el;
-    const valueEl = this._value_el;
-    const selectedItem = this._selected_item;
-    const selectedItemOffsetTop = selectedItem.offsetTop;
-    const selectedItemOffsetHeight = selectedItem.offsetHeight;
-    const contentRect = contentEl.getBoundingClientRect();
-    const valueNodeRect = valueEl.getBoundingClientRect();
-    const itemTextRect = valueNodeRect;
-    const dir = this.state.dir || "ltr";
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+
     const contentStyles = window.getComputedStyle(contentEl);
     const contentBorderTopWidth =
       parseInt(contentStyles.borderTopWidth, 10) || 0;
@@ -405,82 +387,38 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     const contentBorderBottomWidth =
       parseInt(contentStyles.borderBottomWidth, 10) || 0;
     const contentPaddingBottom = parseInt(contentStyles.paddingBottom, 10) || 0;
+
     const viewportStyles = window.getComputedStyle(viewportEl);
     const viewportPaddingTop = parseInt(viewportStyles.paddingTop, 10) || 0;
     const viewportPaddingBottom =
       parseInt(viewportStyles.paddingBottom, 10) || 0;
 
-    const triggerRectData: ItemAlignedRect = {
-      top: triggerRect.top,
-      left: triggerRect.left,
-      right: triggerRect.right,
-      width: triggerRect.width,
-      height: triggerRect.height,
-    };
-    const valueNodeRectData: ItemAlignedRect = {
-      top: valueNodeRect.top,
-      left: valueNodeRect.left,
-      right: valueNodeRect.right,
-      width: valueNodeRect.width,
-      height: valueNodeRect.height,
-    };
-    const contentMeasurement: ItemAlignedContentMeasurement = {
-      rect: {
-        top: contentRect.top,
-        left: contentRect.left,
-        right: contentRect.right,
-        width: contentRect.width,
-        height: contentRect.height,
+    this.popper$.adjustContentPositonWithOffsetTop({
+      selectedItem: {
+        offsetTop: selectedItem.offsetTop,
+        offsetHeight: selectedItem.offsetHeight,
+        bottom: selectedItem.offsetTop + selectedItem.offsetHeight,
+        isFirst: selectedItem.isFirst ?? false,
+        isLast: selectedItem.isLast ?? false,
       },
-      borderTopWidth: contentBorderTopWidth,
-      paddingTop: contentPaddingTop,
-      borderBottomWidth: contentBorderBottomWidth,
-      paddingBottom: contentPaddingBottom,
-      clientHeight: contentEl.clientHeight,
-    };
-    const itemTextRectData: ItemAlignedRect = {
-      top: itemTextRect.top,
-      left: itemTextRect.left,
-      right: itemTextRect.right,
-      width: itemTextRect.width,
-      height: itemTextRect.height,
-    };
-    const selectedItemData: ItemAlignedSelectedItemMeasurement = {
-      offsetTop: selectedItemOffsetTop,
-      offsetHeight: selectedItemOffsetHeight,
-      isFirst: selectedItem.isFirst ?? false,
-      isLast: selectedItem.isLast ?? false,
-    };
-    const viewportMeasurement: ItemAlignedViewportMeasurement = {
-      scrollHeight: viewportEl.scrollHeight,
-      offsetTop: viewportEl.offsetTop,
-      offsetHeight: viewportEl.offsetHeight,
-      paddingTop: viewportPaddingTop,
-      paddingBottom: viewportPaddingBottom,
-    };
-
-    const input = {
-      dir: dir as "ltr" | "rtl",
-      triggerRect: triggerRectData,
-      valueNodeRect: valueNodeRectData,
-      content: contentMeasurement,
-      itemTextRect: itemTextRectData,
-      selectedItem: selectedItemData,
-      viewport: viewportMeasurement,
-      windowSize: { width: windowWidth, height: windowHeight },
-      contentMargin: CONTENT_MARGIN,
-    };
-
-    const result = computePositionInItemAlignedMode(input);
-    const { contentWrapperStyle, viewportScrollTop } = result;
-
-    if (viewportScrollTop !== undefined) {
-      viewportEl.scrollTop = viewportScrollTop;
-    }
+      content: {
+        borderTopWidth: contentBorderTopWidth,
+        paddingTop: contentPaddingTop,
+        borderBottomWidth: contentBorderBottomWidth,
+        paddingBottom: contentPaddingBottom,
+        clientHeight: contentEl.clientHeight,
+      },
+      viewport: {
+        scrollHeight: viewportEl.scrollHeight,
+        offsetTop: viewportEl.offsetTop,
+        offsetHeight: viewportEl.offsetHeight,
+        paddingTop: viewportPaddingTop,
+        paddingBottom: viewportPaddingBottom,
+      },
+    });
 
     this.popper$.place();
     this.emit(Events.StateChange, { ...this.state });
-    // logger.log("placeItemAligned done", contentWrapperStyle);
   }
   async show() {
     // console.log(...this.log("show", this.state));
@@ -519,6 +457,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       return;
     }
     this.open = false;
+    this.aligned = false;
     // 关闭时清空搜索关键字
     this.input$.setValue("");
     this.clearSelectedItemOffset();
@@ -641,7 +580,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   focusOption(value: T) {
     const foucse_cur_focused_item =
       this.focused_item$ && this.focused_item$.value === value;
-    // logger.log("focus option", value, foucse_cur_focused_item);
+    logger.log("focus option", value, foucse_cur_focused_item);
     if (foucse_cur_focused_item) {
       return;
     }
@@ -650,6 +589,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     if (matched) {
       if (this.focused_item$) {
         this.focused_item$.blur();
+      }
+      if (this.selected_item$) {
+        this.selected_item$.setFocused(false);
       }
       this.focused_item$ = matched;
       this.focused_item$.setFocused(true);
@@ -762,18 +704,31 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     offset_height: number;
     store: SelectItemCore<T>;
   }) {
+    logger.log("[]handle item mounted", data.offset_top, data.store.label);
     if (this.aligned) {
       return;
     }
-    // Initial offset update when item is selected on mount
     if (this.position === "item-aligned") {
-      if (this.value === null) {
-        this.alignSpecialItem(data.offset_top, data.offset_height);
+      const idx = this.options.findIndex((opt) => opt === data.store);
+      const isFirst = idx === 0;
+      const isLast = idx === this.options.length - 1;
+      if (this.value === null && isFirst) {
+        this.alignSpecialItem(
+          data.offset_top,
+          data.offset_height,
+          isFirst,
+          isLast,
+        );
         this.aligned = true;
         return;
       }
       if (data.store.selected) {
-        this.alignSpecialItem(data.offset_top, data.offset_height);
+        this.alignSpecialItem(
+          data.offset_top,
+          data.offset_height,
+          isFirst,
+          isLast,
+        );
         this.aligned = true;
       }
     }

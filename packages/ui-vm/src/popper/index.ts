@@ -83,6 +83,7 @@ type PopperState = {
   isPlaced: boolean;
   /** PopperContent height */
   height: number;
+  maxHeight?: number;
   minWidth?: number;
   margin?: number;
   viewportOffsetTop?: number;
@@ -170,6 +171,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     placement: "bottom",
     isPlaced: false,
     height: 0,
+    maxHeight: 0,
     reference: false,
     arrow: null,
     availableHeight: 0,
@@ -281,7 +283,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     );
     if (!floating) {
       this.floating = null;
-      this.state.isPlaced = false;
+      // this.state.isPlaced = false;
       this.emit(Events.StateChange, { ...this.state });
       return;
     }
@@ -375,83 +377,176 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.offsetY = offset.y;
   }
   /** 设置 item-aligned 模式下选中项的偏移量 */
-  setItemOffset(rect: {
-    offsetTop: number;
-    offsetHeight: number;
-    bottom: number;
+  adjustContentPositonWithOffsetTop(data: {
+    selectedItem: {
+      offsetTop: number;
+      offsetHeight: number;
+      bottom: number;
+      isFirst?: boolean;
+      isLast?: boolean;
+    };
+    content?: {
+      borderTopWidth: number;
+      paddingTop: number;
+      borderBottomWidth: number;
+      paddingBottom: number;
+      clientHeight: number;
+    };
+    viewport?: {
+      scrollHeight: number;
+      offsetTop: number;
+      offsetHeight: number;
+      paddingTop: number;
+      paddingBottom: number;
+    };
+    valueNodeRect?: {
+      top: number;
+      left: number;
+      right: number;
+      width: number;
+      height: number;
+    };
+    itemTextRect?: {
+      top: number;
+      left: number;
+      right: number;
+      width: number;
+      height: number;
+    };
   }) {
-    const { offsetHeight, offsetTop, bottom } = rect;
-    const item_offset_middle = offsetTop + offsetHeight / 2;
-    const content_top_top_item_middle = item_offset_middle + bottom;
+    logger.log("adjustContentPositonWithOffsetTop", data);
 
-    const reference_rect = this.reference.getRect();
-    const viewport = this.platform.getViewportSize();
-
-    logger.log({
-      reference: {
-        top: reference_rect.top,
-        height: reference_rect.height,
-      },
-      viewport,
-    });
-
-    this.state.x = reference_rect.left + 1;
-    const contentMargin = 10;
-    const borderTopWidth = 0;
-    const paddingTop = offsetTop;
-    const viewportPaddingTop = 0;
-    const viewportOffsetTop = 0;
-    const isFirst = false;
-
-    // trigger 中心距视口上边缘的距离（减去 margin）
-    const top_edge_to_reference_middle =
-      reference_rect.top + reference_rect.height / 2 - contentMargin;
-    // const triggerMiddleToBottomEdge = availableHeight - topEdgeToTriggerMiddle;
-    // const selectedItemHalfHeight = selectedItem.offsetHeight / 2;
-    const itemOffsetMiddle = offsetTop + offsetHeight;
-    // content 顶部到选中项中心的距离
-    const content_top_to_item_middle =
-      borderTopWidth + paddingTop + itemOffsetMiddle;
-    // const itemMiddleToContentBottom = fullContentHeight - contentTopToItemMiddle;
-
-    // 若 content 顶部到选中项中心 <= trigger 中心到视口顶部，则可以直接 bottom-anchor
-    const align_without_top =
-      content_top_to_item_middle <= top_edge_to_reference_middle;
-    if (align_without_top) {
-      this.state.bottom = 0;
-      this.state.height = (() => {
-        // Reference 的垂直中点位置
-        // const middle_y = reference_rect.top + reference_rect.height / 2;
-        // 从 reference 垂直中点到 viewport 底部的高度
-        const height_from_middle_y_to_bottom =
-          viewport.height - top_edge_to_reference_middle;
-        const item_middle_y = offsetTop + offsetHeight / 2;
-        return (
-          height_from_middle_y_to_bottom + item_middle_y - contentMargin * 2
-        );
-      })();
-    } else {
-      this.state.top = 0;
-      this.state.height = (() => {
-        const contentTopToItemMiddle =
-          borderTopWidth + paddingTop + itemOffsetMiddle;
-        const itemMiddleToContentBottom =
-          viewport.height - contentTopToItemMiddle;
-        const clampedTopEdgeToTriggerMiddle = Math.max(
-          top_edge_to_reference_middle,
-          borderTopWidth +
-            viewportOffsetTop +
-            (isFirst ? viewportPaddingTop : 0) +
-            offsetHeight / 2,
-        );
-        return clampedTopEdgeToTriggerMiddle + itemMiddleToContentBottom;
-      })();
+    if (!this.viewport$ || !this.reference || !this.floating) {
+      return;
     }
-    this.state.minWidth = reference_rect.width - 1;
+
+    const viewport$ = this.viewport$;
+    const reference_rect = this.reference.getRect();
+    const floating_rect = this.floating.getRect();
+    const windowSize = this.platform.getViewportSize();
+
+    const {
+      offsetHeight,
+      offsetTop: selectedItemOffsetTop,
+      bottom,
+      isFirst = false,
+      isLast = false,
+    } = data.selectedItem;
+
+    const content = data.content ?? {
+      borderTopWidth: 0,
+      paddingTop: 0,
+      borderBottomWidth: 0,
+      paddingBottom: 0,
+      clientHeight: floating_rect.height,
+    };
+
+    const viewportData = data.viewport ?? {
+      scrollHeight: viewport$.rect.contentHeight ?? 0,
+      offsetTop: 0,
+      offsetHeight: viewport$.rect.height ?? 0,
+      paddingTop: 0,
+      paddingBottom: 0,
+    };
+
+    const contentMargin = 10;
+
+    const availableHeight = windowSize.height - contentMargin * 2;
+    const {
+      borderTopWidth,
+      paddingTop,
+      borderBottomWidth,
+      paddingBottom,
+      clientHeight: contentClientHeight,
+    } = content;
+
+    const fullContentHeight =
+      borderTopWidth +
+      paddingTop +
+      viewportData.scrollHeight +
+      paddingBottom +
+      borderBottomWidth;
+    const minContentHeight = Math.min(offsetHeight * 5, fullContentHeight);
+
+    const topEdgeToTriggerMiddle =
+      reference_rect.top + reference_rect.height / 2 - contentMargin;
+    const triggerMiddleToBottomEdge = availableHeight - topEdgeToTriggerMiddle;
+
+    const selectedItemHalfHeight = offsetHeight / 2;
+    const itemOffsetMiddle = selectedItemOffsetTop + selectedItemHalfHeight;
+    const contentTopToItemMiddle =
+      borderTopWidth + paddingTop + itemOffsetMiddle;
+    const itemMiddleToContentBottom =
+      fullContentHeight - contentTopToItemMiddle;
+
+    const willAlignWithoutTopOverflow =
+      contentTopToItemMiddle <= topEdgeToTriggerMiddle;
+
+    let left: number | undefined;
+    let right: number | undefined;
+    let minWidth: number;
+    let top: number | undefined;
+    let bottomVal: number | undefined;
+    let height: number;
+    let viewportScrollTop: number | undefined;
+
+    // 水平方向计算 (简化版，始终 left 对齐)
+    left = reference_rect.left + 1;
+    minWidth = reference_rect.width - 1;
+
+    // 垂直方向计算
+    if (willAlignWithoutTopOverflow) {
+      bottomVal = 0;
+      const viewportOffsetBottom =
+        contentClientHeight -
+        viewportData.offsetTop -
+        viewportData.offsetHeight;
+      const clampedTriggerMiddleToBottomEdge = Math.max(
+        triggerMiddleToBottomEdge,
+        selectedItemHalfHeight +
+          (isLast ? viewportData.paddingBottom : 0) +
+          viewportOffsetBottom +
+          borderBottomWidth,
+      );
+      height = Math.min(
+        contentTopToItemMiddle + clampedTriggerMiddleToBottomEdge,
+        availableHeight,
+      );
+    } else {
+      top = 0;
+      const clampedTopEdgeToTriggerMiddle = Math.max(
+        topEdgeToTriggerMiddle,
+        borderTopWidth +
+          viewportData.offsetTop +
+          (isFirst ? viewportData.paddingTop : 0) +
+          selectedItemHalfHeight,
+      );
+      height = Math.min(
+        clampedTopEdgeToTriggerMiddle + itemMiddleToContentBottom,
+        availableHeight,
+      );
+      viewportScrollTop =
+        contentTopToItemMiddle -
+        topEdgeToTriggerMiddle +
+        viewportData.offsetTop;
+    }
+
+    this.state.x = left ?? 0;
+    this.state.y = 0;
+    this.state.top = top;
+    this.state.bottom = bottomVal;
+    this.state.height = height;
+    this.state.minWidth = minWidth;
     this.state.isPlaced = true;
     this.state.margin = contentMargin;
-    // this.state.viewportOffsetTop = offsetTop;
-    this.viewport$.setScrollTop(offsetTop);
+    this.state.placement = bottomVal === 0 ? "bottom" : "top";
+    this.state.strategy = "fixed";
+    this.state.maxHeight = availableHeight;
+
+    if (viewportScrollTop !== undefined) {
+      viewport$.setScrollTop(viewportScrollTop);
+    }
+
     this.emit(Events.StateChange, { ...this.state });
   }
   /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */

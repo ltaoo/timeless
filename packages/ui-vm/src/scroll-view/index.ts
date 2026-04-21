@@ -275,6 +275,126 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
   enablePullToRefresh = () => {
     this.pullToRefreshOptions.isLock = false;
   };
+  finishLoadingMore() {
+    this.isLoadingMore = false;
+  }
+  setMounted() {
+    this.emit(Events.Mounted);
+  }
+  refreshRect() {
+    console.log("请在 connect 中实现 refreshRect 方法");
+  }
+  setBounce = (isBounce: boolean) => {
+    console.log("请在 connect 中实现 setBounce 方法");
+  };
+  changeIndicatorHeight(height: number) {
+    console.log("请在 connect 中实现 changeDownIndicatorHeight 方法");
+  }
+  setIndicatorHeightTransition(set: boolean) {
+    console.log("请在 connect 中实现 addDownIndicatorHeightTransition 方法");
+  }
+  optimizeScroll(optimize: boolean) {
+    console.log("请在 connect 中实现 optimizeScroll 方法");
+  }
+  hideIndicator = () => {
+    console.log("请在 connect 中实现 hideIndicator 方法");
+  };
+  /**
+   * 滑动列表到指定位置
+   * 带缓冲效果 (y=0 回到顶部；如果要滚动到底部可以传一个较大的值，比如 99999)
+   */
+  scrollTo = (
+    position: Partial<{ left: number; top: number }>,
+    duration = 300,
+  ) => {
+    console.log("请在 connect 中实现 scrollTo 方法");
+  };
+  /* 滚动条到底部的距离 */
+  getToBottom() {
+    return (
+      this.getScrollHeight() -
+      this.getScrollClientHeight() -
+      this.getScrollTop()
+    );
+  }
+  /* 获取元素到 mescroll 滚动列表顶部的距离 */
+  getOffsetTop(dom: unknown) {
+    console.log("请在 connect 中实现 getScrollHeight 方法");
+    return 0;
+  }
+  /* 滚动内容的高度 */
+  getScrollHeight() {
+    console.log("请在 connect 中实现 getScrollHeight 方法");
+    return 0;
+  }
+  /** 获取滚动容器的高度 */
+  getScrollClientHeight() {
+    console.log("请在 connect 中实现 getClientHeight 方法");
+    return 0;
+  }
+  /* 滚动条的位置 */
+  getScrollTop() {
+    console.log("请在 connect 中实现 getScrollTop 方法");
+    return 0;
+  }
+  addScrollTop(difference: number) {
+    this.setScrollTop(this.getScrollTop() + difference);
+  }
+  /* 设置滚动条的位置 */
+  setScrollTop(y: number) {
+    console.log("请在 connect 中实现 setScrollTop 方法");
+  }
+  /* body的高度 */
+  getBodyHeight() {
+    console.log("请在 connect 中实现 getBodyHeight 方法");
+    return 0;
+  }
+  /* 销毁mescroll */
+  destroy = () => {
+    console.error("请在 connect 中实现 destroy 方法");
+  };
+
+  inDownOffset(handler: Handler<TheTypesOfEvents[Events.InDownOffset]>) {
+    return this.on(Events.InDownOffset, handler);
+  }
+  outDownOffset(handler: Handler<TheTypesOfEvents[Events.OutDownOffset]>) {
+    return this.on(Events.OutDownOffset, handler);
+  }
+
+  handleMounted(data: {
+    width: number;
+    height: number;
+    scrollWidth?: number;
+    scrollHeight?: number;
+    clientWidth?: number;
+    clientHeight?: number;
+    offsetWidth?: number;
+    offsetHeight?: number;
+    offsetTop?: number;
+    offsetLeft?: number;
+    scrollTop?: number;
+    scrollLeft?: number;
+  }) {
+    const {
+      width,
+      height,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+      offsetWidth,
+      offsetHeight,
+      offsetTop,
+      offsetLeft,
+      scrollTop,
+      scrollLeft,
+    } = data;
+    this.setRect({
+      width,
+      height,
+      contentHeight: scrollHeight ?? 0,
+    });
+  }
   handleMouseDown = (event: MouseEvent) => {
     this.handlePointDown(event);
   };
@@ -427,91 +547,7 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     }
     this.emit(Events.Scrolling, { scrollTop });
   };
-  finishLoadingMore() {
-    this.isLoadingMore = false;
-  }
-  setMounted() {
-    this.emit(Events.Mounted);
-  }
-  refreshRect() {
-    console.log("请在 connect 中实现 refreshRect 方法");
-  }
-  setBounce = (isBounce: boolean) => {
-    console.log("请在 connect 中实现 setBounce 方法");
-  };
-  changeIndicatorHeight(height: number) {
-    console.log("请在 connect 中实现 changeDownIndicatorHeight 方法");
-  }
-  setIndicatorHeightTransition(set: boolean) {
-    console.log("请在 connect 中实现 addDownIndicatorHeightTransition 方法");
-  }
-  optimizeScroll(optimize: boolean) {
-    console.log("请在 connect 中实现 optimizeScroll 方法");
-  }
-  hideIndicator = () => {
-    console.log("请在 connect 中实现 hideIndicator 方法");
-  };
-  /**
-   * 滑动列表到指定位置
-   * 带缓冲效果 (y=0 回到顶部；如果要滚动到底部可以传一个较大的值，比如 99999)
-   */
-  scrollTo = (
-    position: Partial<{ left: number; top: number }>,
-    duration = 300,
-  ) => {
-    console.log("请在 connect 中实现 scrollTo 方法");
-  };
-  /* 滚动条到底部的距离 */
-  getToBottom() {
-    return (
-      this.getScrollHeight() -
-      this.getScrollClientHeight() -
-      this.getScrollTop()
-    );
-  }
-  /* 获取元素到 mescroll 滚动列表顶部的距离 */
-  getOffsetTop(dom: unknown) {
-    console.log("请在 connect 中实现 getScrollHeight 方法");
-    return 0;
-  }
-  /* 滚动内容的高度 */
-  getScrollHeight() {
-    console.log("请在 connect 中实现 getScrollHeight 方法");
-    return 0;
-  }
-  /** 获取滚动容器的高度 */
-  getScrollClientHeight() {
-    console.log("请在 connect 中实现 getClientHeight 方法");
-    return 0;
-  }
-  /* 滚动条的位置 */
-  getScrollTop() {
-    console.log("请在 connect 中实现 getScrollTop 方法");
-    return 0;
-  }
-  addScrollTop(difference: number) {
-    this.setScrollTop(this.getScrollTop() + difference);
-  }
-  /* 设置滚动条的位置 */
-  setScrollTop(y: number) {
-    console.log("请在 connect 中实现 setScrollTop 方法");
-  }
-  /* body的高度 */
-  getBodyHeight() {
-    console.log("请在 connect 中实现 getBodyHeight 方法");
-    return 0;
-  }
-  /* 销毁mescroll */
-  destroy = () => {
-    console.error("请在 connect 中实现 destroy 方法");
-  };
 
-  inDownOffset(handler: Handler<TheTypesOfEvents[Events.InDownOffset]>) {
-    return this.on(Events.InDownOffset, handler);
-  }
-  outDownOffset(handler: Handler<TheTypesOfEvents[Events.OutDownOffset]>) {
-    return this.on(Events.OutDownOffset, handler);
-  }
   onPulling(handler: Handler<TheTypesOfEvents[Events.Pulling]>) {
     return this.on(Events.Pulling, handler);
   }

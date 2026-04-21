@@ -295,7 +295,7 @@ export function Input(props: InputProps = {}) {
     children: [],
     events,
     onMounted(event: MountedEvent) {
-      console.log("[]input onMounted", $elm);
+      // console.log("[]input onMounted", $elm);
       state.rendered = true;
       if (rest.onMounted) {
         rest.onMounted(event);
