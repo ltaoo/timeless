@@ -1,6 +1,6 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
-import type { SelectEntry } from "./index";
+import { SelectItemCore } from "./item";
 
 enum Events {
   Change,
@@ -10,13 +10,13 @@ type TheTypesOfEvents<T> = {
 };
 
 type SelectGroupCoreProps<T> = {
-  label?: unknown;
-  items: SelectEntry<T>[];
+  label?: string;
+  options: SelectItemCore<T>[];
 };
 
 type SelectGroupCoreState<T> = {
-  label?: unknown;
-  items: SelectEntry<T>[];
+  label?: string;
+  options: SelectItemCore<T>[];
 };
 
 export class SelectGroupCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
@@ -25,37 +25,37 @@ export class SelectGroupCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
   readonly type = "group" as const;
 
-  label?: unknown;
-  items: SelectEntry<T>[];
+  label?: string;
+  options: SelectItemCore<T>[];
 
   get state(): SelectGroupCoreState<T> {
     return {
       label: this.label,
-      items: this.items,
+      options: this.options,
     };
   }
 
   constructor(options: Partial<{ _name: string }> & SelectGroupCoreProps<T>) {
     super(options);
 
-    const { _name, label, items = [] } = options;
+    const { _name, label, options: items = [] } = options;
 
     this.label = label;
-    this.items = items;
+    this.options = items;
 
     if (_name) {
       this._name = _name;
     }
   }
 
-  setItems(items: SelectEntry<T>[]) {
-    this.items = items;
+  setItems(items: SelectItemCore<T>[]) {
+    this.options = items;
     this.emit(Events.Change, { ...this.state });
   }
 
   reset() {
-    for (let i = 0; i < this.items.length; i += 1) {
-      const item = this.items[i] as any;
+    for (let i = 0; i < this.options.length; i += 1) {
+      const item = this.options[i] as any;
       if (item && typeof item.reset === "function") {
         item.reset();
       }
@@ -64,8 +64,8 @@ export class SelectGroupCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
   unmount() {
     super.destroy();
-    for (let i = 0; i < this.items.length; i += 1) {
-      const item = this.items[i] as any;
+    for (let i = 0; i < this.options.length; i += 1) {
+      const item = this.options[i] as any;
       if (item && typeof item.unmount === "function") {
         item.unmount();
       }

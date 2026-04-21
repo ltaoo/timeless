@@ -1,4 +1,4 @@
-import { refobj, computed, Button } from "@timeless/timeless";
+import { refobj, computed, Button, Style } from "@timeless/timeless";
 import {
   View,
   ViewProps,
@@ -11,7 +11,7 @@ import {
   styleNames,
   ListenerManager,
 } from "@timeless/timeless";
-import { SelectCore } from "@timeless/ui-vm";
+import { SelectCore, SelectItemCore } from "@timeless/ui-vm";
 
 import * as PopperPrimitive from "./popper";
 
@@ -22,7 +22,7 @@ export function Root(
   return PopperPrimitive.Root(
     {
       ...props,
-      store: props.store.popper,
+      store: props.store.popper$,
     },
     children,
   );
@@ -53,7 +53,7 @@ export function Trigger(
       "border-width": 0,
     },
     onFocus() {
-      if (props.store.presence.state.visible) {
+      if (props.store.presence$.state.visible) {
         return;
       }
       props.store.show();
@@ -73,15 +73,9 @@ export function Trigger(
         "aria-required": computed(state_, (t) => t.required || undefined),
       },
       onMounted(event) {
-        listener$.add(
-          store.onStateChange((v) => {
-            state_.as(v);
-          }),
-        );
-
         const $elm = event.target;
         // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
-        store.popper.setReference(
+        store.popper$.setReference(
           {
             $el: $elm,
             getRect() {
@@ -97,23 +91,14 @@ export function Trigger(
           if (e.target.tagName === "INPUT") {
             return;
           }
-          if (store.disabled) {
-            return;
-          }
-          // 阻止事件冒泡到 document，避免 LayerManager 立即关闭
-          // e.stopPropagation();
-          // if (store.open) {
-          //   props.store.blur();
-          // } else {
-          //   props.store.focus();
-          // }
-          if (props.store.presence.state.visible) {
-            props.store.hide();
-            return;
-          }
-          props.store.show();
+          store.handleClickTrigger();
         };
         listener$.add($elm.addEventListener("pointerdown", handlePointerDown));
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
@@ -156,9 +141,9 @@ export function Value(props: ViewProps & { store: SelectCore<any> }) {
     },
     [
       computed(state_, (d) => {
-        const opt = (d.options || []).find((o) => o.value === d.value);
-        if (opt) {
-          return opt.label;
+        const opt = d.selectedOption;
+        if (opt && opt instanceof SelectItemCore) {
+          return opt.label ?? opt.value ?? "Select...";
         }
         return d.placeholder || "Select...";
       }),
@@ -217,7 +202,7 @@ export function Content(
 ) {
   const { store, animation, onMounted, ...rest } = props;
 
-  const presence_ = refobj(store.presence.state);
+  const presence_ = refobj(store.presence$.state);
 
   const listener$ = ListenerManager([presence_]);
 
@@ -248,7 +233,7 @@ export function Content(
     }),
     onMounted(event) {
       listener$.add(
-        store.presence.onStateChange((v) => {
+        store.presence$.onStateChange((v) => {
           presence_.as(v);
         }),
       );
@@ -286,11 +271,11 @@ export function PopperPositionContent(
   const { store, animation, ...rest } = props;
 
   let _was_exiting = false;
-  const presence_ = refobj(store.presence.state);
+  const presence_ = refobj(store.presence$.state);
 
   return PopperPrimitive.Content(
     {
-      store: store.popper,
+      store: store.popper$,
       onDismiss() {
         store.hide();
       },
@@ -327,7 +312,7 @@ export function PopperPositionContent(
           // onKeyDown: handleKeyDown,
           onAnimationEnd(e: AnimationEvent) {
             if (e.target === e.currentTarget) {
-              store.presence.handleAnimationEnd();
+              store.presence$.handleAnimationEnd();
             }
             if (rest.onAnimationEnd) {
               rest.onAnimationEnd(e);
@@ -361,31 +346,57 @@ export function Viewport(
   children: ViewChildren,
 ) {
   const { store, ...rest } = props;
-  return PopperPrimitive.Viewport(
-    {
-      ...rest,
-      store: store.popper,
-      onMounted(event) {
-        // if (store.position === "item-aligned") {
-        //   const el = event.target.get$elm();
-        //   if (el instanceof HTMLElement) {
-        //     store.setItemAlignedElements({ viewportEl: el });
-        //   }
-        // }
-        if (rest.onMounted) {
-          rest.onMounted(event);
-        }
+
+  return Fragment({}, [
+    Style(
+      {},
+      `.__t_no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.__t_no-scrollbar::-webkit-scrollbar{
+  display: none;
+}`,
+    ),
+    PopperPrimitive.Viewport(
+      {
+        ...rest,
+        dataset: {
+          "radix-select-viewport": "",
+        },
+        class: classNames([rest.class, "__t_no-scrollbar"]),
+        style: {
+          position: "relative",
+          flex: "1 1 0%",
+          overflow: "hidden auto",
+        },
+        store: store.popper$,
+        onMounted(event) {
+          // if (store.position === "item-aligned") {
+          //   const el = event.target.get$elm();
+          //   if (el instanceof HTMLElement) {
+          //     store.setItemAlignedElements({ viewportEl: el });
+          //   }
+          // }
+          if (rest.onMounted) {
+            return rest.onMounted(event);
+          }
+        },
       },
-    },
-    children,
-  );
+      children,
+    ),
+  ]);
 }
 
 export function Item(
-  props: ViewProps & { store: SelectCore<any>; value: any; disabled?: boolean },
+  props: ViewProps & {
+    select$: SelectCore<any>;
+    store: SelectItemCore<any>;
+  },
   children: ViewChildren,
 ) {
-  const { store, value, disabled = false, ...rest } = props;
+  const { select$, store, ...rest } = props;
 
   const state_ = refobj(store.state);
   const listener$ = ListenerManager([state_]);
@@ -393,75 +404,33 @@ export function Item(
   return Button(
     {
       ...rest,
-      dataset: {
-        // disabled: computed(disabled, (d) => (d ? "" : undefined)),
-        // disabled,
-      },
       onMounted(event) {
+        const $elm = event.target.get$elm();
+        const offset_top = $elm.offsetTop;
+        const offset_height = $elm.offsetHeight;
+        select$.handleItemMounted({
+          offset_top,
+          offset_height,
+          store,
+        });
         listener$.add(
           store.onStateChange((v) => {
             state_.as(v);
           }),
         );
-        const $elm = event.target.get$elm();
-        listener$.add(
-          store.onStateChange(() => {
-            if (store.position !== "item-aligned") {
-              return;
-            }
-            // Update offset when this item is selected OR focused
-            // const isSelected = s.value === value;
-            // const isFocused = (s.options || []).some(
-            //   (o: any) => o.value === value && o.focused,
-            // );
-            // if (isSelected || isFocused) {
-            //   const offsetTop = $elm.offsetTop;
-            //   const offsetHeight = $elm.offsetHeight;
-            //   store.setSelectedItemOffset(offsetTop, offsetHeight);
-            // }
-          }),
-        );
-        // Initial offset update when item is selected on mount
-        if (store.position === "item-aligned") {
-          const state = state_.value;
-          const is_selected = state.value === value;
-          const is_focused = (state.options || []).some(
-            (o) => o.value === value && o.focused,
-          );
-          if (is_selected || is_focused) {
-            const offset_top = $elm.offsetTop;
-            const offset_height = $elm.offsetHeight;
-            // console.log(
-            //   "[ui-primitive]Select - find selected item",
-            //   offset_top,
-            //   offset_height,
-            // );
-            store.setSelectedItemOffset(offset_top, offset_height);
-          }
-        }
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
         return listener$.destroy;
       },
       onClick() {
-        if (disabled) {
-          return;
-        }
-        store.select(value);
-        store.hide();
+        select$.handleClickItem(store);
       },
       onMouseEnter() {
-        if (disabled) {
-          return;
-        }
-        store.focusOption(value);
+        select$.handleMouseEnterItem(store);
       },
       onMouseLeave() {
-        if (disabled) {
-          return;
-        }
-        store.blurOption(value);
+        select$.handleMouseLeaveItem(store);
       },
     },
     children,
@@ -484,13 +453,13 @@ export function ItemText(props: ViewProps, children: ViewChildren) {
 }
 
 export function ItemIndicator(
-  props: ViewProps & { store: SelectCore<any>; value: any },
+  props: ViewProps & { store: SelectItemCore<any> },
   children: ViewChildren,
 ) {
-  const { store, value, ...rest } = props;
+  const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
-  const selected_ = computed(state_, (d) => d.value === value);
+  const selected_ = computed(state_, (t) => t.selected);
   const listener$ = ListenerManager([state_, selected_]);
 
   return View(
@@ -513,11 +482,6 @@ export function ItemIndicator(
         }
         return listener$.destroy;
       },
-      onUnmounted() {
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
-        }
-      },
     },
     children,
   );
@@ -529,7 +493,7 @@ export function ScrollUpButton(
 ) {
   const { store, ...rest } = props;
   return PopperPrimitive.ScrollUpButton(
-    { ...rest, store: store.popper },
+    { ...rest, store: store.popper$ },
     children,
   );
 }
@@ -540,7 +504,7 @@ export function ScrollDownButton(
 ) {
   const { store, ...rest } = props;
   return PopperPrimitive.ScrollDownButton(
-    { ...rest, store: store.popper },
+    { ...rest, store: store.popper$ },
     children,
   );
 }
@@ -568,8 +532,8 @@ export function Search(
       return [
         NativeInput({
           ...rest,
-          placeholder: computed(state_, (s) => s.searchPlaceholder),
-          value: computed(state_, (s) => s.searchKeyword),
+          // placeholder: computed(state_, (s) => s.searchPlaceholder),
+          // value: computed(state_, (s) => s.searchKeyword),
           onInput(e: Event) {
             const target = e.target;
             // @ts-ignore

@@ -56,6 +56,10 @@ type PopperProps = {
   offsetX?: number;
   offsetY?: number;
   defaultPlaced?: boolean;
+  /**
+   * Popper 关心的，可滚动容器
+   * 当容器滚动时，可以更新 Popper 的位置
+   */
   view$?: ScrollViewCore;
   /**
    * 可用空间计算模式
@@ -79,6 +83,9 @@ type PopperState = {
   isPlaced: boolean;
   /** PopperContent height */
   height: number;
+  minWidth?: number;
+  margin?: number;
+  viewportOffsetTop?: number;
   /** 是否设置了参考DOM */
   reference: boolean;
   arrow: {
@@ -154,6 +161,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     height: number;
   } | null = null;
   $arrow: any | null = null;
+  viewport$: ScrollViewCore;
 
   state: PopperState = {
     strategy: "absolute",
@@ -199,6 +207,8 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.mode = mode;
     this.view$ = view$;
     this.platform = platform;
+
+    this.viewport$ = new ScrollViewCore();
   }
 
   checkIsClickAnchor: (target: any) => boolean = (target: any) => {
@@ -386,7 +396,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     });
 
     this.state.x = reference_rect.left + 1;
-    const contentMargin = 0;
+    const contentMargin = 10;
     const borderTopWidth = 0;
     const paddingTop = offsetTop;
     const viewportPaddingTop = 0;
@@ -416,7 +426,9 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         const height_from_middle_y_to_bottom =
           viewport.height - top_edge_to_reference_middle;
         const item_middle_y = offsetTop + offsetHeight / 2;
-        return height_from_middle_y_to_bottom + item_middle_y;
+        return (
+          height_from_middle_y_to_bottom + item_middle_y - contentMargin * 2
+        );
       })();
     } else {
       this.state.top = 0;
@@ -435,8 +447,11 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         return clampedTopEdgeToTriggerMiddle + itemMiddleToContentBottom;
       })();
     }
-
+    this.state.minWidth = reference_rect.width - 1;
     this.state.isPlaced = true;
+    this.state.margin = contentMargin;
+    // this.state.viewportOffsetTop = offsetTop;
+    this.viewport$.setScrollTop(offsetTop);
     this.emit(Events.StateChange, { ...this.state });
   }
   /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */

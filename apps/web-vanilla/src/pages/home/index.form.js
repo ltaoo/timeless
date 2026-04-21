@@ -8,8 +8,10 @@ export default function FormView() {
     defaultValue: null,
     placeholder: "输入关键词搜索",
     options: [],
-    search: false,
-    searchPlaceholder: "输入水果名...",
+    search: new Timeless.ui.InputCore({
+      defaultValue: "",
+      placeholder: "输入水果名...",
+    }),
   });
 
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
@@ -22,12 +24,17 @@ export default function FormView() {
               platform,
               position: "item-aligned",
               options: [
-                new Timeless.ui.SelectGroupCore({
-                  items: [
-                    { value: "apple", label: "苹果" },
-                    { value: "banana", label: "香蕉" },
-                    { value: "orange", label: "橙子" },
-                  ],
+                new Timeless.ui.SelectItemCore({
+                  value: "apple",
+                  label: "苹果",
+                }),
+                new Timeless.ui.SelectItemCore({
+                  value: "banana",
+                  label: "香蕉",
+                }),
+                new Timeless.ui.SelectItemCore({
+                  value: "orange",
+                  label: "橙子",
                 }),
               ],
             }),
@@ -151,18 +158,16 @@ export default function FormView() {
         Item("Scrollable (100 options)", [
           Select({
             store: new Timeless.ui.SelectCore({
-              defaultValue: "option_1",
+              defaultValue: null,
               platform,
               position: "item-aligned",
               placeholder: "从 100 个选项中选择",
-              options: [
-                new Timeless.ui.SelectGroupCore({
-                  items: Array.from({ length: 100 }, (_, i) => ({
-                    value: `option_${i + 1}`,
-                    label: `选项 ${i + 1}`,
-                  })),
-                }),
-              ],
+              options: Array.from({ length: 100 }, (_, i) => {
+                return new Timeless.ui.SelectItemCore({
+                  value: `option_${i + 1}`,
+                  label: `选项 ${i + 1}`,
+                });
+              }),
             }),
           }),
         ]),

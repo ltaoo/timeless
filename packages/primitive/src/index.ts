@@ -72,4 +72,11 @@ export type { PatchOptions } from "./hmr/patch";
 export { hmrState, hmrRestore } from "./hmr/state";
 
 export { Logger, Result, base } from "@timeless/base";
-export type { Handler, Platform } from "@timeless/base";
+export type {
+  Handler,
+  Platform,
+  MutableRecord2,
+  MutableRecord,
+  Unpacked,
+  UnpackedResult,
+} from "@timeless/base";

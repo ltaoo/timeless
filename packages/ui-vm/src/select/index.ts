@@ -21,6 +21,7 @@ import { SelectTriggerCore } from "./trigger";
 import { SelectWrapCore } from "./wrap";
 import { SelectItemCore } from "./item";
 import { SelectGroupCore } from "./group";
+import { timeStamp } from "node:console";
 
 const logger = Logger({ prefix: "vm", scope: "select/index" });
 
@@ -39,23 +40,33 @@ type TheTypesOfEvents<T> = {
   [Events.Placed]: void;
 };
 
-export type SelectOption<T> = { value: T; label: string; disabled?: boolean };
-export type SelectEntry<T> = SelectOption<T> | SelectGroupCore<T>;
-type SelectOptionState<T> = {
-  value: T;
-  label: string;
-  selected: boolean;
-  focused: boolean;
-  disabled: boolean;
-  key?: any;
-};
-type SelectGroupState<T> = {
-  type: "group";
-  label?: unknown;
-  key: any;
-  items: SelectEntryState<T>[];
-};
-type SelectEntryState<T> = SelectOptionState<T> | SelectGroupState<T>;
+// export type SelectOption<T> = { value: T; label: string; disabled?: boolean };
+// enum SelectEntryType {
+//   Group = "group",
+//   Option = "option",
+// }
+// export type SelectEntry<T> = MutableRecord2<{
+//   [SelectEntryType.Option]: SelectItemCore<T>;
+//   [SelectEntryType.Group]: SelectGroupCore<T>;
+// }>;
+// type SelectOptionState<T> = {
+//   type: SelectEntryType.Option;
+//   idx: number;
+//   value: T;
+//   label: string;
+//   selected: boolean;
+//   focused: boolean;
+//   disabled: boolean;
+//   key?: any;
+// };
+// type SelectGroupState<T> = {
+//   type: SelectEntryType.Group;
+//   idx: number;
+//   label?: unknown;
+//   key: any;
+//   items: SelectEntryState<T>[];
+// };
+// type SelectEntryState<T> = SelectOptionState<T> | SelectGroupState<T>;
 
 type SelectProps<T> = {
   id?: string;
@@ -64,21 +75,23 @@ type SelectProps<T> = {
   placeholder?: string;
   allowClear?: boolean;
   // options: SelectItemCore<T>[];
-  options?: SelectEntry<T>[];
+  options?: (SelectGroupCore<T> | SelectItemCore<T>)[];
   platform?: Platform;
   /** 是否支持搜索过滤 */
-  search?: boolean;
+  search?: InputCore<any>;
   /** 搜索框占位符 */
-  searchPlaceholder?: string;
+  // searchPlaceholder?: string;
   /** 定位模式 */
   position?: "popper" | "item-aligned";
   onChange?: (v: T | null) => void;
 };
 type SelectState<T> = {
-  options: SelectOptionState<T>[];
-  entries: SelectEntryState<T>[];
+  options: (SelectGroupCore<T> | SelectItemCore<T>)[];
+  // entries: SelectEntryState<T>[];
   value: T | null;
-  value2: SelectOption<T> | null;
+  // value2: SelectOption<T> | null;
+  selectedOption: SelectItemCore<T> | null;
+  allowClear: boolean;
   /** 菜单是否展开 */
   open: boolean;
   /** 加载中 */
@@ -90,69 +103,13 @@ type SelectState<T> = {
   /** 是否必填 */
   required: boolean;
   dir: Direction;
-  styles: Partial<CSSStyleDeclaration>;
+  // styles: Partial<CSSStyleDeclaration>;
   enter: boolean;
   visible: boolean;
   exit: boolean;
   /** 是否启用搜索 */
   search: boolean;
-  allowClear: boolean;
-  /** 搜索关键字 */
-  searchKeyword: string;
-  /** 搜索框占位符 */
-  searchPlaceholder: string;
-  /** item-aligned 定位状态 */
-  itemAlignedPosition?: import("../popper/index").ItemAlignedContentWrapperStyle;
 };
-
-function flattenEntries<T>(entries: SelectEntry<T>[]): SelectOption<T>[] {
-  const result: SelectOption<T>[] = [];
-  for (let i = 0; i < entries.length; i += 1) {
-    const entry = entries[i];
-    if (entry instanceof SelectGroupCore) {
-      result.push(...flattenEntries(entry.items));
-      continue;
-    }
-    result.push(entry);
-  }
-  return result;
-}
-
-function buildEntriesState<T>(
-  entries: SelectEntry<T>[],
-  optionByValue: Map<any, SelectOptionState<T>>,
-  prefix = "",
-): SelectEntryState<T>[] {
-  const result: SelectEntryState<T>[] = [];
-  for (let i = 0; i < entries.length; i += 1) {
-    const entry = entries[i];
-    if (entry instanceof SelectGroupCore) {
-      const groupKey = `${prefix}g:${entry.label ?? ""}:${i}`;
-      result.push({
-        type: "group",
-        label: entry.label,
-        key: groupKey,
-        items: buildEntriesState(entry.items, optionByValue, `${groupKey}/`),
-      });
-      continue;
-    }
-    const optionKey = `${prefix}o:${String(entry.value)}`;
-    const matched = optionByValue.get(entry.value);
-    result.push(
-      matched
-        ? { ...matched, key: optionKey }
-        : {
-            value: entry.value,
-            label: entry.label,
-            selected: false,
-            focused: false,
-            disabled: !!(entry as any).disabled,
-            key: optionKey,
-          },
-    );
-  }
-  return result;
-}
 
 export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   shape = "select" as const;
@@ -162,8 +119,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   // options: { text: string; store: SelectItemCore<T> }[] = [];
   id = null;
   placeholder: string;
-  entries: SelectEntry<T>[] = [];
-  options: SelectOptionState<T>[] = [];
+  // entries: SelectEntry<T>[] = [];
+  options: SelectItemCore<T>[] = [];
   defaultValue: T | null = null;
   value: T | null = null;
   disabled: boolean = false;
@@ -177,12 +134,13 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   // searchKeyword: string = "";
   // /** 搜索框占位符 */
   // searchPlaceholder: string = "搜索...";
+  aligned?: boolean;
 
-  popper: PopperCore;
-  presence = new PresenceCore();
+  popper$: PopperCore;
+  presence$ = new PresenceCore();
+  layer$: DismissableLayerCore;
+  input$ = new InputCore({ defaultValue: "", placeholder: "搜索" });
   // collection: CollectionCore;
-  layer: DismissableLayerCore;
-  input = new InputCore({ defaultValue: "", placeholder: "搜索" });
 
   position: "popper" | "item-aligned" = "popper";
   /** 选中项的 DOM 节点引用（用于 item-aligned 模式计算偏移） */
@@ -196,10 +154,6 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   private _content_el: HTMLElement | null = null;
   private _viewport_el: HTMLElement | null = null;
   private _value_el: HTMLElement | null = null;
-  /** item-aligned 定位状态 */
-  private _item_aligned_position:
-    | import("../popper/index").ItemAlignedContentWrapperStyle
-    | null = null;
 
   /** 参考点位置 */
   triggerPos: {
@@ -218,14 +172,15 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   /** 下拉列表容器 */
   viewport: SelectViewportCore | null = null;
   /** 选中的 item */
-  selectedItem: SelectItemCore<T> | null = null;
+  selected_item$: SelectItemCore<T> | null = null;
+  focused_item$: SelectItemCore<T> | null = null;
 
-  _findFirstValidItem = false;
+  // _findFirstValidItem = false;
 
-  private _isDisabledValue(value: T) {
-    const matched = this.options.find((o) => o.value === value);
-    return Boolean(matched?.disabled);
-  }
+  // private _isDisabledValue(value: T) {
+  //   const matched = this.options.find((o) => o.value === value);
+  //   return Boolean(matched?.disabled);
+  // }
 
   /** 获取过滤后的选项 */
   // get filteredOptions() {
@@ -239,32 +194,26 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   // }
 
   get state(): SelectState<T> {
-    const optionByValue = new Map<any, SelectOptionState<T>>();
-    for (let i = 0; i < this.options.length; i += 1) {
-      const opt = this.options[i];
-      optionByValue.set(opt.value, opt);
-    }
+    // const optionByValue = new Map<any, SelectOptionState<T>>();
+    // for (let i = 0; i < this.options.length; i += 1) {
+    //   const opt = this.options[i];
+    //   optionByValue.set(opt.value, opt);
+    // }
     return {
       options: this.options,
-      entries: buildEntriesState(this.entries, optionByValue),
-      // filteredOptions: this.filteredOptions,
+      placeholder: this.placeholder,
       value: this.value,
-      value2: this.options.find((opt) => opt.value === this.value) ?? null,
+      selectedOption: null,
+      allowClear: this.allowClear,
       open: this.open,
       loading: this.loading,
       disabled: this.disabled,
-      placeholder: this.placeholder,
       required: false,
       dir: "ltr",
-      styles: {},
-      enter: this.presence.state.enter,
-      visible: this.presence.state.visible,
-      exit: this.presence.state.exit,
+      enter: this.presence$.state.enter,
+      visible: this.presence$.state.visible,
+      exit: this.presence$.state.exit,
       search: this.search,
-      allowClear: this.allowClear,
-      searchKeyword: this.input.value,
-      searchPlaceholder: this.input.placeholder,
-      itemAlignedPosition: this._item_aligned_position ?? undefined,
     };
   }
 
@@ -279,26 +228,17 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       allowClear = false,
       options = [],
       platform,
-      search = false,
-      searchPlaceholder = "搜索...",
+      // search = false,
+      // searchPlaceholder = "搜索...",
       position = "popper",
       onChange,
     } = props;
     this.position = position;
     // console.log("[DOMAIN]ui/select/index - constructor", defaultValue);
-    this.search = search;
-    this.input.setPlaceholder(searchPlaceholder);
-    this.entries = options;
-    const flatOptions = flattenEntries(options);
-    this.options = flatOptions.map((opt, i) => {
-      return {
-        label: opt.label,
-        value: opt.value,
-        selected: opt.value === defaultValue,
-        focused: i === 0,
-        disabled: !!opt.disabled,
-      };
-    });
+    // this.search = search;
+    // this.input$.setPlaceholder(searchPlaceholder);
+    // this.entries = options;
+    this.options = flatten_entries(options, { value: defaultValue });
     if (id !== undefined) {
       this.id = id;
     }
@@ -307,19 +247,19 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.value = defaultValue;
     this.defaultValue = defaultValue;
     this.placeholder = placeholder;
-    const matched = this.options.find((opt) => opt.value === defaultValue);
-    if (matched) {
-      this.emit(Events.StateChange, { ...this.state });
-      this.emit(Events.Change, defaultValue);
-    }
-    this.popper = new PopperCore({
+    // const matched = this.options.find((opt) => opt.value === defaultValue);
+    // if (matched) {
+    //   this.emit(Events.StateChange, { ...this.state });
+    //   this.emit(Events.Change, defaultValue);
+    // }
+    this.popper$ = new PopperCore({
       align: "start",
       platform,
       mode: this.position,
     });
-    this.layer = new DismissableLayerCore();
+    this.layer$ = new DismissableLayerCore();
     // this.collection = new CollectionCore();
-    this.popper.onReferenceMounted((reference) => {
+    this.popper$.onReferenceMounted((reference) => {
       const { x, y, width, height } = reference.getRect();
       this.reference = {
         width,
@@ -332,17 +272,18 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         bottom: y + height,
       };
     });
-    this.layer.onDismiss(() => {
+    this.layer$.onDismiss(() => {
       console.log(...this.log("this.layer.onDismiss"));
       this.hide();
     });
-    this.presence.onStateChange(() =>
+    this.presence$.onStateChange(() =>
       this.emit(Events.StateChange, { ...this.state }),
     );
     if (onChange) {
       this.onChange(onChange);
     }
   }
+
   mapViewModelWithIndex(index: number) {
     return this.options[index];
   }
@@ -366,10 +307,13 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   //   this.value = value;
   // }
   setSelectedItem(item: SelectItemCore<T>) {
-    this.selectedItem = item;
+    this.selected_item$ = item;
   }
-  /** 设置选中项的 DOM 节点偏移（用于 item-aligned 模式） */
-  setSelectedItemOffset(
+  /**
+   * 将 Select 对齐 下拉项列表 中的 选中项
+   * 模拟原生 select 交互
+   */
+  alignSpecialItem(
     offsetTop: number,
     offsetHeight: number,
     contentPaddingTop: number = 0,
@@ -387,7 +331,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     //   contentTopToItemMiddle,
     // );
     if (this.position === "item-aligned" && this.open) {
-      this.popper.setItemOffset({
+      this.popper$.setItemOffset({
         offsetTop,
         offsetHeight,
         // x: this.triggerPos.x,
@@ -534,9 +478,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       viewportEl.scrollTop = viewportScrollTop;
     }
 
-    this._item_aligned_position = contentWrapperStyle;
-    this.popper._itemAlignedStyle = contentWrapperStyle;
-    this.popper.place();
+    this.popper$.place();
     this.emit(Events.StateChange, { ...this.state });
     // logger.log("placeItemAligned done", contentWrapperStyle);
   }
@@ -549,35 +491,21 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     //   return;
     // }
     if (this.value !== null) {
-      if (this._isDisabledValue(this.value)) {
-        this.presence.show();
-        if (this.position === "item-aligned") {
-          this.placeItemAligned();
-        } else {
-          this.popper.place();
+      const focused_item$ = this.options.find((opt) => opt.focused);
+      if (!focused_item$ || focused_item$.value !== this.value) {
+        const matched_item$ = this.options.find(
+          (opt) => opt.value === this.value,
+        );
+        if (matched_item$) {
+          matched_item$.focus();
         }
-        this.open = true;
-        this.emit(Events.StateChange, { ...this.state });
-        return;
-      }
-      const focused = this.options.find((opt) => opt.focused);
-      if (!focused || focused.value !== this.value) {
-        this.options = this.options.map((opt) => {
-          return {
-            label: opt.label,
-            value: opt.value,
-            selected: opt.selected,
-            focused: opt.value === this.value,
-            disabled: opt.disabled,
-          };
-        });
       }
     }
-    this.presence.show();
+    this.presence$.show();
     if (this.position === "item-aligned") {
       this.placeItemAligned();
     } else {
-      this.popper.place();
+      this.popper$.place();
     }
     // await sleep(800);
     this.open = true;
@@ -585,14 +513,14 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.emit(Events.StateChange, { ...this.state });
   }
   hide() {
-    this.presence.hide();
+    this.presence$.hide();
     // console.log(...this.log("hide", this));
     if (this.open === false) {
       return;
     }
     this.open = false;
     // 关闭时清空搜索关键字
-    this.input.setValue("");
+    this.input$.setValue("");
     this.clearSelectedItemOffset();
     this.emit(Events.StateChange, { ...this.state });
   }
@@ -623,30 +551,24 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   // }
   /** 选择 item */
   select(value: T) {
-    if (this._isDisabledValue(value)) {
-      return;
-    }
-    // if (item.state.selected) {
-    //   this.hide();
-    //   return;
-    // }
     if (this.value === value) {
       this.hide();
       return;
     }
     this.value = value;
-    this.options = this.options.map((opt) => {
-      return {
-        label: opt.label,
-        value: opt.value,
-        selected: opt.value === value,
-        focused: opt.focused,
-        disabled: opt.disabled,
-      };
-    });
+    const matched = this.options.find((opt) => opt.value === value);
+    if (matched) {
+      if (this.selected_item$) {
+        this.selected_item$.setSelected(false);
+        this.selected_item$.setFocused(false);
+      }
+      matched.setSelected(true);
+      matched.setFocused(true);
+      this.selected_item$ = matched;
+    }
+    this.hide();
     this.emit(Events.Change, value);
     this.emit(Events.StateChange, { ...this.state });
-    this.hide();
   }
   focus() {
     this.emit(Events.Focus);
@@ -655,17 +577,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.emit(Events.Blur);
   }
   setOptions(options: NonNullable<SelectProps<T>["options"]>) {
-    this.entries = options;
-    const flatOptions = flattenEntries(options);
-    this.options = flatOptions.map((opt) => {
-      return {
-        label: opt.label,
-        value: opt.value,
-        selected: opt.value === this.value,
-        focused: false,
-        disabled: !!opt.disabled,
-      };
-    });
+    this.options = flatten_entries(options, { value: this.value });
     // console.log("[DOMAIN]ui/select - setOptions", this.unique_id, this.value, options);
     if (this.value === null) {
       return;
@@ -684,27 +596,21 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   setValue(v: T | null) {
     if (v === null) {
       this.value = null;
+      this.selected_item$ = null;
       this.emit(Events.StateChange, { ...this.state });
       this.emit(Events.Change, v);
       return;
     }
     // const matched = this.options.find((opt) => opt.value === v);
     // console.log("[DOMAIN]ui/select - setValue", v, matched, this.options);
-    this.value = v;
-    this.options = this.options.map((opt) => {
-      return {
-        label: opt.label,
-        value: opt.value,
-        selected: opt.value === this.value,
-        focused: opt.focused,
-        disabled: opt.disabled,
-      };
-    });
-    this.emit(Events.Change, v);
-    this.emit(Events.StateChange, { ...this.state });
+    // this.value = v;
+    this.select(v);
+    // this.emit(Events.Change, v);
+    // this.emit(Events.StateChange, { ...this.state });
   }
   clear() {
     this.value = null;
+    this.selected_item$ = null;
     this.emit(Events.StateChange, { ...this.state });
     this.emit(Events.Change, this.value);
   }
@@ -718,62 +624,44 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   }
   /** 设置搜索关键字 */
   setSearchKeyword(keyword: string) {
-    if (this.input.value === keyword) {
+    if (this.input$.value === keyword) {
       return;
     }
-    this.input.setValue(keyword);
+    this.input$.setValue(keyword);
     this.emit(Events.StateChange, { ...this.state });
   }
   /** 清空搜索关键字 */
   clearSearch() {
-    if (this.input.value === "") {
+    if (this.input$.value === "") {
       return;
     }
-    this.input.setValue("");
+    this.input$.setValue("");
     this.emit(Events.StateChange, { ...this.state });
   }
   focusOption(value: T) {
-    if (this._isDisabledValue(value)) {
+    const foucse_cur_focused_item =
+      this.focused_item$ && this.focused_item$.value === value;
+    // logger.log("focus option", value, foucse_cur_focused_item);
+    if (foucse_cur_focused_item) {
       return;
     }
-    // 检查是否需要更新
-    const needsUpdate = this.options.some(
-      (opt) =>
-        (opt.value === value && !opt.focused) ||
-        (opt.value !== value && opt.focused),
-    );
-    if (!needsUpdate) {
-      return;
+    const matched = this.options.find((opt) => opt.value === value);
+    // logger.log("prepare focus option", value, matched);
+    if (matched) {
+      if (this.focused_item$) {
+        this.focused_item$.blur();
+      }
+      this.focused_item$ = matched;
+      this.focused_item$.setFocused(true);
     }
-    this.options = this.options.map((opt) => {
-      return {
-        label: opt.label,
-        value: opt.value,
-        selected: opt.selected,
-        focused: opt.value === value,
-        disabled: opt.disabled,
-      };
-    });
-    this.emit(Events.StateChange, { ...this.state });
+    // this.emit(Events.StateChange, { ...this.state });
   }
   blurOption(value: T) {
-    // 检查是否需要更新
-    const needsUpdate = this.options.some(
-      (opt) => opt.value === value && opt.focused,
-    );
-    if (!needsUpdate) {
-      return;
+    // logger.log("prepare blur option", value, this.focused_item$);
+    if (this.focused_item$ && this.focused_item$.value === value) {
+      this.focused_item$.setFocused(false);
+      this.focused_item$ = null;
     }
-    this.options = this.options.map((opt) => {
-      return {
-        label: opt.label,
-        value: opt.value,
-        selected: opt.selected,
-        focused: opt.value === value ? false : opt.focused,
-        disabled: opt.disabled,
-      };
-    });
-    this.emit(Events.StateChange, { ...this.state });
   }
   /** 获取当前焦点选项的索引 */
   getFocusedIndex(): number {
@@ -831,6 +719,64 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   }
   refresh() {
     this.emit(Events.StateChange, { ...this.state });
+  }
+
+  handleClickTrigger() {
+    if (this.disabled) {
+      return;
+    }
+    // 阻止事件冒泡到 document，避免 LayerManager 立即关闭
+    // e.stopPropagation();
+    // if (store.open) {
+    //   props.store.blur();
+    // } else {
+    //   props.store.focus();
+    // }
+    if (this.open) {
+      this.hide();
+      return;
+    }
+    this.show();
+  }
+  handleClickItem(item$: SelectItemCore<T>) {
+    if (item$.disabled) {
+      return;
+    }
+    this.select(item$.value);
+    this.hide();
+  }
+  handleMouseEnterItem(item$: SelectItemCore<T>) {
+    if (item$.disabled) {
+      return;
+    }
+    this.focusOption(item$.value);
+  }
+  handleMouseLeaveItem(item$: SelectItemCore<T>) {
+    if (item$.disabled) {
+      return;
+    }
+    this.blurOption(item$.value);
+  }
+  handleItemMounted(data: {
+    offset_top: number;
+    offset_height: number;
+    store: SelectItemCore<T>;
+  }) {
+    if (this.aligned) {
+      return;
+    }
+    // Initial offset update when item is selected on mount
+    if (this.position === "item-aligned") {
+      if (this.value === null) {
+        this.alignSpecialItem(data.offset_top, data.offset_height);
+        this.aligned = true;
+        return;
+      }
+      if (data.store.selected) {
+        this.alignSpecialItem(data.offset_top, data.offset_height);
+        this.aligned = true;
+      }
+    }
   }
 
   onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) {
@@ -948,3 +894,66 @@ export class SelectInListCore<K extends string, T> extends BaseDomain<
 
 export { SelectGroupCore };
 export { clamp } from "./utils";
+
+function flatten_entries<T>(
+  entries: (SelectGroupCore<T> | SelectItemCore<T>)[],
+  extra: { value: T | null },
+): SelectItemCore<T>[] {
+  const result: SelectItemCore<T>[] = [];
+  for (let i = 0; i < entries.length; i += 1) {
+    const entry = entries[i];
+    if (entry instanceof SelectGroupCore) {
+      const items_in_group = entry.options;
+      result.push(...flatten_entries(items_in_group, extra));
+      continue;
+    }
+    if (entry.value === extra.value) {
+      entry.setSelected(true);
+    }
+    result.push(entry);
+  }
+  return result;
+}
+
+// function build_entries_state<T>(
+//   entries: SelectEntry<T>[],
+//   option_by_value: Map<any, SelectOptionState<T>>,
+//   prefix = "",
+// ): SelectEntryState<T>[] {
+//   const result: SelectEntryState<T>[] = [];
+//   for (let i = 0; i < entries.length; i += 1) {
+//     const entry = entries[i];
+//     if (entry.type === SelectEntryType.Group) {
+//       const group_key = `${prefix}g:${entry.label ?? ""}:${i}`;
+//       result.push({
+//         type: SelectEntryType.Group,
+//         idx: i,
+//         label: entry.label,
+//         key: group_key,
+//         items: build_entries_state(
+//           entry.items,
+//           option_by_value,
+//           `${group_key}/`,
+//         ),
+//       });
+//       continue;
+//     }
+//     const option_key = `${prefix}o:${String(entry.value)}`;
+//     const matched = option_by_value.get(entry.value);
+//     result.push(
+//       matched
+//         ? { ...matched, key: option_key }
+//         : {
+//             type: SelectEntryType.Option,
+//             idx: i,
+//             value: entry.value,
+//             label: entry.label,
+//             selected: false,
+//             focused: false,
+//             disabled: !!(entry as any).disabled,
+//             key: option_key,
+//           },
+//     );
+//   }
+//   return result;
+// }

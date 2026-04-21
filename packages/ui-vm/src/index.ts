@@ -47,6 +47,7 @@ export * from "./roving-focus";
 export * from "./scroll-view";
 export * from "./select";
 export * from "./select/group";
+export * from "./select/item";
 export * from "./cascader";
 export * from "./tabs";
 export * from "./toast";

@@ -1566,16 +1566,18 @@ declare module "packages/primitive/src/content/style" {
      *
      * @example
      * ```tsx
-     * <NativeStyle>
+     * <Style>
      *   {`body { margin: 0 }`}
-     * </NativeStyle>
+     * </Style>
      * ```
      */
-    import { ViewProps } from "@/content/view";
-    import { ViewChildren } from "@/content/type";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { MountedEvent } from "@/event";
     /** Props for NativeStyle - same as ViewProps but without 'as' */
-    export interface NativeStyleProps extends Omit<ViewProps, "as"> {
-    }
+    export type StyleProps = {
+        onMounted?: (event: MountedEvent) => void;
+        onUnmounted?: () => void;
+    };
     /**
      * Creates a native HTML style element.
      *
@@ -1583,7 +1585,16 @@ declare module "packages/primitive/src/content/style" {
      * @param children - CSS content (string or CSS text elements)
      * @returns A TimelessElement representing a style element
      */
-    export function NativeStyle(props?: NativeStyleProps, children?: ViewChildren): any;
+    export function Style(props: StyleProps, children: string | Ref<string> | DerivedRef<string>): {
+        t: string;
+        $elm: any;
+        state: {
+            rendered: boolean;
+            content: string;
+        };
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/primitive/src/content/popper" {
     /**
@@ -2732,11 +2743,41 @@ declare module "packages/base/src/platform" {
         getDocumentElement(element?: unknown): unknown;
     }
 }
+declare module "packages/base/src/type" {
+    export type Unpacked<T> = T extends (infer U)[] ? U : T extends (...args: any[]) => infer U ? U : T extends Promise<infer U> ? U : T;
+    export type MutableRecord<U> = {
+        [SubType in keyof U]: {
+            type: SubType;
+            data: U[SubType];
+        };
+    }[keyof U];
+    export type MutableRecord2<U> = {
+        [SubType in keyof U]: {
+            type: SubType;
+            data: U[SubType];
+        } & U[SubType];
+    }[keyof U];
+    export type Shift<T extends any[]> = ((...args: T) => void) extends (arg1: any, ...rest: infer R) => void ? R : never;
+    export interface JSONArray extends Array<JSONValue> {
+    }
+    export type JSONValue = string | number | boolean | JSONObject | JSONArray | null;
+    export type JSONObject = {
+        [Key in string]?: JSONValue;
+    };
+    /**
+     * type UserID = Brand<string, "UserID">;
+     */
+    const __brand: unique symbol;
+    export type Brand<T, B> = T & {
+        readonly [__brand]: B;
+    };
+}
 declare module "packages/base/src/index" {
     export * from "packages/base/src/base";
     export * from "packages/base/src/result/index";
     export * from "packages/base/src/error/index";
     export * from "packages/base/src/platform";
+    export * from "packages/base/src/type";
 }
 declare module "packages/primitive/src/platform" {
     import { Platform } from "packages/base/src/index";
@@ -2952,7 +2993,7 @@ declare module "packages/primitive/src/index" {
     export type { PatchOptions } from "packages/primitive/src/hmr/patch";
     export { hmrState, hmrRestore } from "packages/primitive/src/hmr/state";
     export { Logger, Result, base } from "packages/base/src/index";
-    export type { Handler, Platform } from "packages/base/src/index";
+    export type { Handler, Platform, MutableRecord2, MutableRecord, Unpacked, UnpackedResult, } from "packages/base/src/index";
 }
 declare module "packages/timeless/src/index" {
     export * from "packages/reactive/src/index";
@@ -6423,6 +6464,10 @@ declare module "packages/ui-vm/src/popper/index" {
         offsetX?: number;
         offsetY?: number;
         defaultPlaced?: boolean;
+        /**
+         * Popper 关心的，可滚动容器
+         * 当容器滚动时，可以更新 Popper 的位置
+         */
         view$?: ScrollViewCore;
         /**
          * 可用空间计算模式
@@ -6430,23 +6475,30 @@ declare module "packages/ui-vm/src/popper/index" {
          * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
          */
         mode?: "popper" | "item-aligned";
+        /**
+         * item-aligned 模式：获取位置状态的回调
+         */
         platform?: Platform;
     };
     type PopperState = {
         strategy: Strategy;
         x: number;
         y: number;
+        top?: number;
+        bottom?: number;
         placement: Placement;
         isPlaced: boolean;
-        placedSide: Side;
-        placedAlign: Align;
+        /** PopperContent height */
+        height: number;
+        minWidth?: number;
+        margin?: number;
+        viewportOffsetTop?: number;
         /** 是否设置了参考DOM */
         reference: boolean;
         arrow: {
             x?: number;
             y?: number;
         } | null;
-        middlewareData: MiddlewareData;
         /** 浮动元素在放置方向上的可用高度（px） */
         availableHeight: number;
         /** 浮动元素在交叉轴上的可用宽度（px） */
@@ -6469,8 +6521,6 @@ declare module "packages/ui-vm/src/popper/index" {
          * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
          */
         mode: "popper" | "item-aligned";
-        /** item-aligned 模式：选中项在列表中的垂直偏移量，用于将面板对齐到选中项 */
-        itemOffset: number;
         view$?: ScrollViewCore;
         reference: {
             getRect: () => Rect;
@@ -6480,12 +6530,49 @@ declare module "packages/ui-vm/src/popper/index" {
             getRect: () => Rect;
             $el?: {};
         } | null;
+        /** item-aligned 模式：选中项在列表中的垂直偏移量，用于将面板对齐到选中项 */
+        itemOffset: number;
+        /** item-aligned 模式：trigger 中的 value 节点 */
+        valueNode: {
+            getBoundingClientRect: () => DOMRect;
+        } | null;
+        /** item-aligned 模式：content wrapper 元素（用于设置 fixed 定位） */
+        contentWrapper: {
+            $el?: HTMLElement;
+        } | null;
+        /** item-aligned 模式：viewport 元素（用于 scroll） */
+        viewport: {
+            $el?: HTMLElement;
+        } | null;
+        /** item-aligned 模式：选中的 item 元素 */
+        selectedItem: {
+            $el?: HTMLElement;
+            offsetTop: number;
+            offsetHeight: number;
+        } | null;
+        /** item-aligned 模式：选中的 item 文本元素 */
+        selectedItemText: {
+            getBoundingClientRect: () => DOMRect;
+        } | null;
+        /** item-aligned 模式：content 元素的测量数据（用于计算定位） */
+        _contentMeasurement: ItemAlignedContentMeasurement | null;
+        /** item-aligned 模式：viewport 元素的测量数据（用于计算定位） */
+        _viewportMeasurement: ItemAlignedViewportMeasurement | null;
+        /** item-aligned 模式：计算好的容器样式 */
+        _itemAlignedStyle: ItemAlignedContentWrapperStyle | null;
+        _item: {
+            offsetTop: number;
+            offsetHeight: number;
+            x: number;
+            y: number;
+        };
         container: Node | null;
         arrow: {
             width: number;
             height: number;
         } | null;
         $arrow: any | null;
+        viewport$: ScrollViewCore;
         state: PopperState;
         _enter: boolean;
         _focus: boolean;
@@ -6527,7 +6614,33 @@ declare module "packages/ui-vm/src/popper/index" {
             y: number;
         }): void;
         /** 设置 item-aligned 模式下选中项的偏移量 */
-        setItemOffset(offset: number): void;
+        setItemOffset(rect: {
+            offsetTop: number;
+            offsetHeight: number;
+            bottom: number;
+        }): void;
+        /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */
+        setItemAlignedElements(data: {
+            valueNode: {
+                getBoundingClientRect: () => DOMRect;
+            };
+            contentWrapper: {
+                $el?: HTMLElement;
+            };
+            viewport: {
+                $el?: HTMLElement;
+            };
+            selectedItem: {
+                $el?: HTMLElement;
+                offsetTop: number;
+                offsetHeight: number;
+            };
+            selectedItemText: {
+                getBoundingClientRect: () => DOMRect;
+            };
+        }): void;
+        /** 设置 item-aligned 模式下的测量数据 */
+        setItemAlignedMeasurements(content: ItemAlignedContentMeasurement, viewport: ItemAlignedViewportMeasurement): void;
         /** 计算浮动元素位置 */
         place(): Promise<void>;
         computePosition(): Promise<{
@@ -6537,6 +6650,8 @@ declare module "packages/ui-vm/src/popper/index" {
             strategy: Strategy;
             middleware_data: MiddlewareData;
         }>;
+        getItemAlignedPosition(): ItemAlignedContentWrapperStyle | null;
+        placeInItemAlignedMode(): void;
         handleEnter(): void;
         handleLeave(): void;
         reset(): void;
@@ -6549,6 +6664,85 @@ declare module "packages/ui-vm/src/popper/index" {
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
         get [Symbol.toStringTag](): string;
     }
+    /** 仅含定位所需字段的矩形描述 */
+    export interface ItemAlignedRect {
+        top: number;
+        left: number;
+        right: number;
+        width: number;
+        height: number;
+    }
+    /** content 元素的测量值 */
+    export interface ItemAlignedContentMeasurement {
+        rect: ItemAlignedRect;
+        borderTopWidth: number;
+        paddingTop: number;
+        borderBottomWidth: number;
+        paddingBottom: number;
+        /** content.clientHeight，用于计算 viewportOffsetBottom */
+        clientHeight: number;
+    }
+    /** viewport 元素的测量值 */
+    export interface ItemAlignedViewportMeasurement {
+        /** viewport.scrollHeight，即所有 item 的总高度 */
+        scrollHeight: number;
+        /** viewport.offsetTop，相对于 content 的偏移 */
+        offsetTop: number;
+        /** viewport.offsetHeight */
+        offsetHeight: number;
+        paddingTop: number;
+        paddingBottom: number;
+    }
+    /** 选中项的测量值 */
+    export interface ItemAlignedSelectedItemMeasurement {
+        /** selectedItem.offsetTop，相对于 viewport */
+        offsetTop: number;
+        /** selectedItem.offsetHeight */
+        offsetHeight: number;
+        /** 是否为列表第一项，影响 top-anchor 时的 clamp 下限 */
+        isFirst: boolean;
+        /** 是否为列表最后一项，影响 bottom-anchor 时的 clamp 下限 */
+        isLast: boolean;
+    }
+    export interface ComputePositionItemAlignedInput {
+        dir?: "ltr" | "rtl";
+        triggerRect: ItemAlignedRect;
+        /** trigger 内部展示当前值的 span */
+        valueNodeRect: ItemAlignedRect;
+        content: ItemAlignedContentMeasurement;
+        /** content 内选中项文本节点的 rect */
+        itemTextRect: ItemAlignedRect;
+        selectedItem: ItemAlignedSelectedItemMeasurement;
+        viewport: ItemAlignedViewportMeasurement;
+        windowSize: {
+            width: number;
+            height: number;
+        };
+        /** 视口边距，默认 10 */
+        contentMargin?: number;
+    }
+    export interface ItemAlignedContentWrapperStyle {
+        /** ltr 时有值 */
+        left?: number;
+        /** rtl 时有值 */
+        right?: number;
+        minWidth: number;
+        /** top-anchor 时为 0 */
+        top?: number;
+        /** bottom-anchor 时为 0 */
+        bottom?: number;
+        height: number;
+        minHeight: number;
+        maxHeight: number;
+        /** 例如 "10px 0" */
+        margin: string;
+    }
+    export interface ComputePositionItemAlignedResult {
+        contentWrapperStyle: ItemAlignedContentWrapperStyle;
+        /** 仅 top-anchor 时存在，需写入 viewport.scrollTop */
+        viewportScrollTop?: number;
+    }
+    export function computePositionInItemAlignedMode(input: ComputePositionItemAlignedInput): ComputePositionItemAlignedResult;
 }
 declare module "packages/ui-vm/src/presence/index" {
     /**
@@ -7054,8 +7248,8 @@ declare module "packages/ui-vm/src/select/item" {
     export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         name: string;
         debug: boolean;
-        text: string;
         value: T | null;
+        label: string;
         selected: boolean;
         focused: boolean;
         disabled: boolean;
@@ -7070,7 +7264,9 @@ declare module "packages/ui-vm/src/select/item" {
         getStyles(): CSSStyleDeclaration;
         get offsetHeight(): number;
         get offsetTop(): number;
-        setText(text: SelectItemCore<T>["text"]): void;
+        setLabel(label: string): void;
+        setSelected(selected: boolean): void;
+        setFocused(focused: boolean): void;
         select(): void;
         unselect(): void;
         focus(): void;
@@ -7090,7 +7286,7 @@ declare module "packages/ui-vm/src/select/item" {
 }
 declare module "packages/ui-vm/src/select/group" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import type { SelectEntry } from "packages/ui-vm/src/select/index";
+    import { SelectItemCore } from "packages/ui-vm/src/select/item";
     enum Events {
         Change = 0
     }
@@ -7098,24 +7294,24 @@ declare module "packages/ui-vm/src/select/group" {
         [Events.Change]: SelectGroupCoreState<T>;
     };
     type SelectGroupCoreProps<T> = {
-        label?: unknown;
-        items: SelectEntry<T>[];
+        label?: string;
+        options: SelectItemCore<T>[];
     };
     type SelectGroupCoreState<T> = {
-        label?: unknown;
-        items: SelectEntry<T>[];
+        label?: string;
+        options: SelectItemCore<T>[];
     };
     export class SelectGroupCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         _name: string;
         debug: boolean;
         readonly type: "group";
-        label?: unknown;
-        items: SelectEntry<T>[];
+        label?: string;
+        options: SelectItemCore<T>[];
         get state(): SelectGroupCoreState<T>;
         constructor(options: Partial<{
             _name: string;
         }> & SelectGroupCoreProps<T>);
-        setItems(items: SelectEntry<T>[]): void;
+        setItems(items: SelectItemCore<T>[]): void;
         reset(): void;
         unmount(): void;
         onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
@@ -7127,6 +7323,7 @@ declare module "packages/ui-vm/src/select/utils" {
 }
 declare module "packages/ui-vm/src/select/index" {
     import { BaseDomain, Handler, Platform } from "packages/base/src/index";
+    import { InputCore } from "@/input/index";
     import { PopperCore } from "@/popper/index";
     import { Rect } from "@/popper/types";
     import { DismissableLayerCore } from "@/dismissable-layer/index";
@@ -7151,48 +7348,25 @@ declare module "packages/ui-vm/src/select/index" {
         [Events.Blur]: void;
         [Events.Placed]: void;
     };
-    export type SelectOption<T> = {
-        value: T;
-        label: string;
-        disabled?: boolean;
-    };
-    export type SelectEntry<T> = SelectOption<T> | SelectGroupCore<T>;
-    type SelectOptionState<T> = {
-        value: T;
-        label: string;
-        selected: boolean;
-        focused: boolean;
-        disabled: boolean;
-        key?: any;
-    };
-    type SelectGroupState<T> = {
-        type: "group";
-        label?: unknown;
-        key: any;
-        items: SelectEntryState<T>[];
-    };
-    type SelectEntryState<T> = SelectOptionState<T> | SelectGroupState<T>;
     type SelectProps<T> = {
         id?: string;
         defaultValue: T | null;
         disabled?: boolean;
         placeholder?: string;
         allowClear?: boolean;
-        options?: SelectEntry<T>[];
+        options?: (SelectGroupCore<T> | SelectItemCore<T>)[];
         platform?: Platform;
         /** 是否支持搜索过滤 */
-        search?: boolean;
+        search?: InputCore<any>;
         /** 搜索框占位符 */
-        searchPlaceholder?: string;
         /** 定位模式 */
         position?: "popper" | "item-aligned";
         onChange?: (v: T | null) => void;
     };
     type SelectState<T> = {
-        options: SelectOptionState<T>[];
-        entries: SelectEntryState<T>[];
+        options: (SelectGroupCore<T> | SelectItemCore<T>)[];
         value: T | null;
-        value2: SelectOption<T> | null;
+        allowClear: boolean;
         /** 菜单是否展开 */
         open: boolean;
         /** 加载中 */
@@ -7204,17 +7378,11 @@ declare module "packages/ui-vm/src/select/index" {
         /** 是否必填 */
         required: boolean;
         dir: Direction;
-        styles: Partial<CSSStyleDeclaration>;
         enter: boolean;
         visible: boolean;
         exit: boolean;
         /** 是否启用搜索 */
         search: boolean;
-        allowClear: boolean;
-        /** 搜索关键字 */
-        searchKeyword: string;
-        /** 搜索框占位符 */
-        searchPlaceholder: string;
     };
     export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         shape: "select";
@@ -7222,8 +7390,7 @@ declare module "packages/ui-vm/src/select/index" {
         debug: boolean;
         id: any;
         placeholder: string;
-        entries: SelectEntry<T>[];
-        options: SelectOptionState<T>[];
+        options: SelectItemCore<T>[];
         defaultValue: T | null;
         value: T | null;
         disabled: boolean;
@@ -7233,13 +7400,18 @@ declare module "packages/ui-vm/src/select/index" {
         loading: boolean;
         /** 是否启用搜索 */
         search: boolean;
-        popper: PopperCore;
-        presence: any;
-        layer: DismissableLayerCore;
-        input: any;
+        aligned?: boolean;
+        popper$: PopperCore;
+        presence$: any;
+        layer$: DismissableLayerCore;
+        input$: any;
         position: "popper" | "item-aligned";
         /** 选中项的 DOM 节点引用（用于 item-aligned 模式计算偏移） */
-        private _selectedItemNode;
+        private _selected_item;
+        /** item-aligned 定位所需的 DOM 元素引用 */
+        private _content_el;
+        private _viewport_el;
+        private _value_el;
         /** 参考点位置 */
         triggerPos: {
             x: number;
@@ -7254,15 +7426,13 @@ declare module "packages/ui-vm/src/select/index" {
         /** 下拉列表容器 */
         viewport: SelectViewportCore | null;
         /** 选中的 item */
-        selectedItem: SelectItemCore<T> | null;
-        _findFirstValidItem: boolean;
-        private _isDisabledValue;
+        selected_item$: SelectItemCore<T> | null;
         /** 获取过滤后的选项 */
         get state(): SelectState<T>;
         constructor(props: Partial<{
             _name: string;
         }> & SelectProps<T>);
-        mapViewModelWithIndex(index: number): SelectOptionState<T>;
+        mapViewModelWithIndex(index: number): SelectItemCore<T>;
         setTriggerPointerDownPos(pos: {
             x: number;
             y: number;
@@ -7272,10 +7442,21 @@ declare module "packages/ui-vm/src/select/index" {
         setContent(content: SelectContentCore): void;
         setViewport(viewport: SelectViewportCore): void;
         setSelectedItem(item: SelectItemCore<T>): void;
-        /** 设置选中项的 DOM 节点偏移（用于 item-aligned 模式） */
-        setSelectedItemOffset(offsetTop: number, offsetHeight: number): void;
+        /**
+         * 将 Select 对齐 下拉项列表 中的 选中项
+         * 模拟原生 select 交互
+         */
+        alignSpecialItem(offsetTop: number, offsetHeight: number, contentPaddingTop?: number): void;
         /** 清除选中项偏移（关闭时调用） */
         clearSelectedItemOffset(): void;
+        /** 设置 item-aligned 定位所需的 DOM 元素（分别设置） */
+        setItemAlignedElements(elements: {
+            contentEl?: HTMLElement;
+            viewportEl?: HTMLElement;
+            valueEl?: HTMLElement;
+        }): void;
+        /** 执行 item-aligned 定位（使用 computePositionInItemAlignedMode） */
+        placeItemAligned(): void;
         show(): Promise<void>;
         hide(): void;
         addNativeOption(): void;
@@ -7306,6 +7487,14 @@ declare module "packages/ui-vm/src/select/index" {
         selectFocusedOption(): void;
         setPosition(rect: any): void;
         refresh(): void;
+        handleClickItem(item$: SelectItemCore<T>): void;
+        handleMouseEnterItem(item$: SelectItemCore<T>): void;
+        handleMouseLeaveItem(item$: SelectItemCore<T>): void;
+        handleItemMounted(data: {
+            offset_top: number;
+            offset_height: number;
+            store: SelectItemCore<T>;
+        }): void;
         onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
         onValueChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
         onChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
@@ -10635,6 +10824,7 @@ declare module "packages/ui-vm/src/index" {
     export * from "packages/ui-vm/src/scroll-view/index";
     export * from "packages/ui-vm/src/select/index";
     export * from "packages/ui-vm/src/select/group";
+    export * from "packages/ui-vm/src/select/item";
     export * from "packages/ui-vm/src/cascader/index";
     export * from "packages/ui-vm/src/tabs/index";
     export * from "packages/ui-vm/src/toast/index";
@@ -11677,6 +11867,7 @@ declare module "packages/ui-primitive/src/modules/transition" {
 declare module "packages/ui-primitive/src/modules/popper" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { PopperCore } from "packages/ui-vm/src/index";
+    import * as ScrollViewPrimitive from "@/modules/scroll-view";
     export function Root(props: ViewProps & {
         store: PopperCore;
     }, children?: ViewChildren): {
@@ -11688,7 +11879,7 @@ declare module "packages/ui-primitive/src/modules/popper" {
         };
         children: import("@timeless/timeless").TimelessElement<any, any>[];
         append(node: any): void;
-        onMounted(event: MountedEvent): void;
+        onMounted(event: ScrollViewPrimitive): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11703,7 +11894,7 @@ declare module "packages/ui-primitive/src/modules/popper" {
         };
         children: import("@timeless/timeless").TimelessElement<any, any>[];
         append(node: any): void;
-        onMounted(event: MountedEvent): void;
+        onMounted(event: ScrollViewPrimitive): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11717,7 +11908,7 @@ declare module "packages/ui-primitive/src/modules/popper" {
     }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Viewport(props: ViewProps & {
         store: PopperCore;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children: ViewChildren): any;
     export function ScrollUpButton(props: ViewProps & {
         store: PopperCore;
     }, children: ViewChildren): {
@@ -11727,7 +11918,7 @@ declare module "packages/ui-primitive/src/modules/popper" {
             value: boolean;
         };
         children: any[];
-        onMounted(event: MountedEvent): void;
+        onMounted(event: ScrollViewPrimitive): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
         _hmr_dispose(): void;
@@ -11741,7 +11932,7 @@ declare module "packages/ui-primitive/src/modules/popper" {
             value: boolean;
         };
         children: any[];
-        onMounted(event: MountedEvent): void;
+        onMounted(event: ScrollViewPrimitive): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
         _hmr_dispose(): void;
@@ -12573,7 +12764,7 @@ declare module "packages/ui-primitive/src/modules/textarea" {
 }
 declare module "packages/ui-primitive/src/modules/select" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    import { SelectCore } from "packages/ui-vm/src/index";
+    import { SelectCore, SelectItemCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: SelectCore<any>;
     }, children?: ViewChildren): {
@@ -12592,7 +12783,35 @@ declare module "packages/ui-primitive/src/modules/select" {
     export function Trigger(props: ViewProps & {
         store: SelectCore<any>;
         id?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: {
+            onClick: any;
+            onDoubleClick: any;
+            onLongPress: any;
+            onPointerDown: any;
+            onFocus: any;
+            onBlur: any;
+            onKeyDown: any;
+            onContextMenu: any;
+            onMouseEnter: any;
+            onMouseLeave: any;
+            onDragStart: any;
+            onDrag: any;
+            onDragEnd: any;
+            onDragEnter: any;
+            onDragOver: any;
+            onDragLeave: any;
+            onDrop: any;
+            onAnimationEnd: any;
+        };
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function Value(props: ViewProps & {
         store: SelectCore<any>;
     }): import("@timeless/timeless").TimelessElement<{}, any>;
@@ -12636,14 +12855,63 @@ declare module "packages/ui-primitive/src/modules/select" {
         onUnmounted(): void;
         _hmr_dispose(): void;
     };
+    export function PopperPositionContent(props: ViewProps & {
+        store: SelectCore<any>;
+        animation?: {
+            in: string;
+            out: string;
+        };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function AlignedPositionContent(props: ViewProps & {
+        store: SelectCore<any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Viewport(props: ViewProps & {
         store: SelectCore<any>;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function Item(props: ViewProps & {
-        store: SelectCore<any>;
-        value: any;
-        disabled?: boolean;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+        select$: SelectCore<any>;
+        store: SelectItemCore<any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: {
+            onClick: any;
+            onDoubleClick: any;
+            onLongPress: any;
+            onPointerDown: any;
+            onFocus: any;
+            onBlur: any;
+            onKeyDown: any;
+            onContextMenu: any;
+            onMouseEnter: any;
+            onMouseLeave: any;
+            onDragStart: any;
+            onDrag: any;
+            onDragEnd: any;
+            onDragEnter: any;
+            onDragOver: any;
+            onDragLeave: any;
+            onDrop: any;
+            onAnimationEnd: any;
+        };
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ItemIndicator(props: ViewProps & {
         store: SelectCore<any>;
@@ -15642,7 +15910,6 @@ declare const ListView: typeof import("@timeless/timeless").ListView;
 declare const ListenerManager: typeof import("@timeless/timeless").ListenerManager;
 declare const Logger: typeof import("@timeless/timeless").Logger;
 declare const Match: typeof import("@timeless/timeless").Match;
-declare const NativeStyle: typeof import("@timeless/timeless").NativeStyle;
 declare const ObjectSignal: typeof import("@timeless/timeless").ObjectSignal;
 declare const PasswordInput: typeof import("@timeless/timeless").PasswordInput;
 declare const Popper: typeof import("@timeless/timeless").Popper;
@@ -15659,6 +15926,7 @@ declare const Show: typeof import("@timeless/timeless").Show;
 declare const Signal: typeof import("@timeless/timeless").Signal;
 declare const SplitPane: typeof import("@timeless/timeless").SplitPane;
 declare const SplitView: typeof import("@timeless/timeless").SplitView;
+declare const Style: typeof import("@timeless/timeless").Style;
 declare const Subscriber: typeof import("@timeless/timeless").Subscriber;
 declare const SubscriberWithId: typeof import("@timeless/timeless").SubscriberWithId;
 declare const TabPane: typeof import("@timeless/timeless").TabPane;
@@ -15983,6 +16251,7 @@ declare const ScrollViewCore: typeof import("@timeless/ui-vm").ScrollViewCore;
 declare const SelectCore: typeof import("@timeless/ui-vm").SelectCore;
 declare const SelectGroupCore: typeof import("@timeless/ui-vm").SelectGroupCore;
 declare const SelectInListCore: typeof import("@timeless/ui-vm").SelectInListCore;
+declare const SelectItemCore: typeof import("@timeless/ui-vm").SelectItemCore;
 declare const ShortcutModel: typeof import("@timeless/ui-vm").ShortcutModel;
 declare const SimpleSelectCore: typeof import("@timeless/ui-vm").SimpleSelectCore;
 declare const SingleFieldCore: typeof import("@timeless/ui-vm").SingleFieldCore;
@@ -16010,6 +16279,7 @@ declare const WaterfallColumnModel: typeof import("@timeless/ui-vm").WaterfallCo
 declare const WaterfallModel: typeof import("@timeless/ui-vm").WaterfallModel;
 declare const base: typeof import("@timeless/ui-vm").base;
 declare const clamp: typeof import("@timeless/ui-vm").clamp;
+declare const computePositionInItemAlignedMode: typeof import("@timeless/ui-vm").computePositionInItemAlignedMode;
 declare const damping: typeof import("@timeless/ui-vm").damping;
 declare const getAngleByPoints: typeof import("@timeless/ui-vm").getAngleByPoints;
 declare const getGlobalLayerManager: typeof import("@timeless/ui-vm").getGlobalLayerManager;

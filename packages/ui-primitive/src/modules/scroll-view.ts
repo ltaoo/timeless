@@ -34,6 +34,9 @@ export function Root(
   return View(
     {
       ...rest,
+      dataset: {
+        scrollview: "",
+      },
       onMounted(event) {
         const $elm = event.target;
         const { width, height } = $elm.getBoundingClientRect();
@@ -46,7 +49,7 @@ export function Root(
           provide(store, $elm.get$elm());
         }
         if (props.onMounted) {
-          props.onMounted(event);
+          return props.onMounted(event);
         }
       },
     },
@@ -154,7 +157,7 @@ export function Progress(
     // },
     onMounted(event) {
       if (props.onMounted) {
-        props.onMounted(event);
+        return props.onMounted(event);
       }
     },
     beforeUnmounted() {

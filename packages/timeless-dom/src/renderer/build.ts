@@ -1,12 +1,12 @@
-import { type TimelessElement, VNodeView, isElement } from "@timeless/timeless";
+import { type TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { DOMView, isDOMView } from "@/host/view";
+import { DOMView } from "@/host/view";
 import { DOMGrid } from "@/host/grid";
 import { DOMText } from "@/host/text";
 import { DOMShow } from "@/host/show";
 import { DOMMatch } from "@/host/match";
 import { DOMFor } from "@/host/for";
-import { DOMFragment, isDOMFragment } from "@/host/fragment";
+import { DOMFragment } from "@/host/fragment";
 import { DOMLazyView } from "@/host/lazy-view";
 import { DOMImg } from "@/host/img";
 import { DOMIcon } from "@/host/icon";
@@ -23,11 +23,12 @@ import { DOMNumberInput } from "@/host/number-input";
 import { DOMSelect } from "@/host/select";
 import { DOMRow } from "@/host/row";
 import { DOMColumn, DOMCol } from "@/host/column";
-import { DOMLink, isDOMLink } from "@/host/link";
+import { DOMLink } from "@/host/link";
 import { DOMWebview } from "@/host/webview";
 import { DOMSplitView, DOMSplitPane } from "@/host/split-view";
 import { DOMScrollView } from "@/host/scroll-view";
 import { DOMTabView, DOMTabPane } from "@/host/tab-view";
+import { DOMStyle } from "@/host/style";
 
 export function buildAndRender(elm: TimelessElement): {
   vnode: VNodeView<any>;
@@ -68,6 +69,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const popper$ = DOMPopper({ build });
     elm.$elm = popper$;
     return popper$;
+  }
+  if (elm.t === "style") {
+    const style$ = DOMStyle({ build });
+    elm.$elm = style$;
+    return style$;
   }
   if (elm.t === "icon") {
     const icon$ = DOMIcon({ build });

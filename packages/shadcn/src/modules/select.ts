@@ -2,13 +2,14 @@ import {
   classNames,
   combine,
   computed,
+  Fragment,
   ListenerManager,
   ref,
   refobj,
 } from "@timeless/timeless";
 import { For, ViewProps, Show, View, Icon } from "@timeless/timeless";
 import { SelectPrimitive } from "@timeless/ui-primitive";
-import { SelectCore } from "@timeless/ui-vm";
+import { SelectCore, SelectItemCore, SelectGroupCore } from "@timeless/ui-vm";
 
 const SelectOptionClassName =
   "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2";
@@ -23,7 +24,7 @@ export function Select(
   const state_ = refobj(store.state);
   const hovering_ = ref(false);
   const allow_clear_ = computed(state_, (d) => d.allowClear);
-  const has_value_ = computed(state_, (d) => d.value2 != null);
+  const has_value_ = computed(state_, (d) => d.value != null);
   const is_loading_ = computed(state_, (d) => d.loading || false);
   const is_disabled_ = computed(state_, (d) => d.disabled || false);
   const show_clear_ = combine(
@@ -78,47 +79,44 @@ export function Select(
       }
       return result;
     },
-    render_opt(option: {
-      type: "group" | "option";
-      value: any;
-      label?: string;
-      focused?: boolean;
-      selected?: boolean;
-      disabled?: boolean;
-      items?: {}[];
-    }) {
+    render_opt(option: SelectItemCore<any>) {
+      const item_ = refobj(option.state);
+      const cls_ = computed(item_, (t) => {
+        const is_focused = t.focused;
+        const is_selected = t.selected;
+        const is_disabled = t.disabled;
+        return [
+          is_selected ? "font-medium" : "",
+          !is_disabled && is_focused ? "bg-accent text-accent-foreground" : "",
+          is_disabled ? "text-muted-foreground" : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+      });
+      const listener$ = ListenerManager([item_, cls_]);
+      listener$.add(
+        option.onStateChange((v) => {
+          item_.as(v);
+        }),
+      );
       return SelectPrimitive.Item(
         {
-          store,
-          value: option.value,
-          disabled: !!option.disabled,
+          select$: store,
+          store: option,
           class: classNames([
-            // SelectOptionClassName,
             "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
             "focus:bg-accent focus:text-accent-foreground",
             "not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50",
-            computed(state_, (t) => {
-              const matched = t.options.find((o) => o.value === option.value);
-              const is_focused = Boolean(matched.focused);
-              const is_selected = Boolean(matched.selected);
-              const is_disabled = Boolean(matched.disabled);
-              return [
-                is_selected ? "font-medium" : "",
-                !is_disabled && is_focused
-                  ? "bg-accent text-accent-foreground"
-                  : "",
-                is_disabled ? "text-muted-foreground" : "",
-              ]
-                .filter(Boolean)
-                .join(" ");
-            }),
+            cls_,
           ]),
+          onUnmounted() {
+            listener$.destroy();
+          },
         },
         [
           SelectPrimitive.ItemIndicator(
             {
-              store,
-              value: option.value,
+              store: option,
               class:
                 "pointer-events-none absolute right-2 flex size-4 items-center justify-center",
             },
@@ -128,14 +126,9 @@ export function Select(
         ],
       );
     },
-    render_entry(entry: {
-      type: "group";
-      value: any;
-      label?: string;
-      items?: {}[];
-    }) {
-      if (entry && entry.type === "group") {
-        return View({ class: SelectGroupClassName }, [
+    render_entry(entry: SelectItemCore<any> | SelectGroupCore<any>) {
+      if (entry && entry instanceof SelectGroupCore) {
+        return Fragment({}, [
           Show({
             when: !!entry.label,
             ok() {
@@ -147,18 +140,19 @@ export function Select(
             },
           }),
           For({
-            key: "key",
-            each: entry.items || [],
+            key: "value",
+            each: entry.options || [],
             render: methods.render_entry,
           }),
         ]);
       }
-      return methods.render_opt(entry);
+      return methods.render_opt(entry as SelectItemCore<any>);
     },
   };
 
   const filtered_entries_ = computed(state_, (t) => {
-    return methods.filter_entries(t.entries || [], t.searchKeyword || "");
+    return t.options;
+    // return methods.filter_entries(t.entries || [], t.searchKeyword || "");
   });
   listener$.add(filtered_entries_);
 
@@ -224,7 +218,9 @@ export function Select(
               computed(state_, (t) => {
                 const has_selected =
                   t.value != null &&
-                  (t.options || []).some((o) => o.value === t.value);
+                  (t.options || []).some((o) => {
+                    return o instanceof SelectItemCore && o.value === t.value;
+                  });
                 return has_selected
                   ? "text-foreground"
                   : "text-muted-foreground";
@@ -275,13 +271,15 @@ export function Select(
             slot: "select-content",
             "align-trigger": store.position === "item-aligned" ? "" : undefined,
           },
+          attributes: {
+            role: "listbox",
+          },
           animation: {
             in: "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2",
             out: "animate-out fade-out-0 zoom-out-95 slide-out-to-top-2",
           },
           store,
           class: classNames([
-            // "cn-menu-target cn-menu-translucent relative z-50 min-w-36 overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 ",
             "cn-menu-target cn-menu-translucent relative z-50 min-w-36 overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none flex flex-col",
             "max-h-(--radix-select-content-available-height) origin-(--radix-select-content-transform-origin) ",
             "max-h-[var(--radix-select-content-available-height)] origin-[var(--radix-select-content-transform-origin)] ",
@@ -291,14 +289,14 @@ export function Select(
               ? "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1"
               : "",
           ]),
-          style: computed(state_, () => {
-            const width = store.reference ? store.reference.width - 1 : 0;
-            return width > 0
-              ? {
-                  "min-width": `${width}px`,
-                }
-              : {};
-          }),
+          style: {
+            "box-sizing": "border-box",
+            "max-height": "100%",
+            display: "flex",
+            "flex-direction": "column",
+            outline: "none",
+            "pointer-events": "auto",
+          },
         },
         () => [
           // SelectPrimitive.ScrollUpButton(
@@ -309,10 +307,12 @@ export function Select(
           //   },
           //   [Icon({ name: "chevron-up", size: 16 })],
           // ),
+          // View({ class: "h-[10px]" }, []),
           SelectPrimitive.Viewport(
             {
               store,
               class: classNames([
+                SelectGroupClassName,
                 "data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
               ]),
             },
@@ -366,6 +366,7 @@ export function Select(
               }),
             ],
           ),
+          // View({ class: "h-[10px]" }, []),
           // SelectPrimitive.ScrollDownButton(
           //   {
           //     store,

@@ -1,4 +1,4 @@
-import { refobj, computed, isRef, getPlatform } from "@timeless/timeless";
+import { refobj, computed, getPlatform } from "@timeless/timeless";
 import {
   styleNames,
   classNames,
@@ -16,6 +16,9 @@ import {
   Layer,
 } from "@timeless/ui-vm";
 
+import * as ScrollViewPrimitive from "@/modules/scroll-view";
+
+const platform = getPlatform();
 let layer_id_counter = 0;
 
 export function Root(
@@ -102,8 +105,8 @@ export function Content(
               //   pos.bottom !== undefined ? `${pos.bottom}px` : undefined,
               bottom: t.bottom !== undefined ? `${t.bottom}px` : undefined,
               height: t.height !== undefined ? `${t.height}px` : undefined,
-              // "min-width":
-              //   pos.minWidth !== undefined ? `${pos.minWidth}px` : undefined,
+              "min-width":
+                t.minWidth !== undefined ? `${t.minWidth}px` : undefined,
               // "max-height":
               //   pos.maxHeight !== undefined
               //     ? `${pos.maxHeight}px`
@@ -112,7 +115,7 @@ export function Content(
               //   pos.minHeight !== undefined
               //     ? `${pos.minHeight}px`
               //     : undefined,
-              // margin: pos.margin,
+              margin: t.margin !== undefined ? `${t.margin}px 0` : undefined,
             };
           }
           return {
@@ -129,10 +132,11 @@ export function Content(
         }),
       ]),
       onMounted(event) {
+        console.log("-------- POPPER content mounted -------------");
+
         const $elm = event.target;
         const layer_id = `popper-${++layer_id_counter}`;
         const layer$ = getGlobalLayerManager();
-        const platform = getPlatform();
         // console.log("the floating mounted", $elm.getBoundingClientRect());
         store.setFloating({
           $el: $elm,
@@ -235,39 +239,19 @@ export function Viewport(
   const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
-  const style_ = computed(state_, (t) => {
-    const ah = t.availableHeight;
-    if (ah > 0) {
-      return { "max-height": `${Math.min(ah)}px` };
-    }
-    return {};
-  });
 
-  const listener$ = ListenerManager([state_, style_]);
+  const listener$ = ListenerManager([state_]);
 
-  return View(
+  return ScrollViewPrimitive.Root(
     {
       ...rest,
-      style: style_,
+      store: store.viewport$,
       onMounted(event) {
         listener$.add(
           store.onStateChange((v) => {
             state_.as(v);
           }),
         );
-
-        // const $elm = event.target.get$elm();
-        // if ($elm) {
-        //   const handleScroll = () => {
-        //     store.handleViewportScroll(
-        //       $elm.scrollTop,
-        //       $elm.clientHeight,
-        //       $elm.scrollHeight,
-        //     );
-        //   };
-        //   listener$.add($elm.addEventListener("scroll", handleScroll));
-        //   requestAnimationFrame(handleScroll);
-        // }
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }

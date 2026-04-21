@@ -6,16 +6,20 @@
  *
  * @example
  * ```tsx
- * <NativeStyle>
+ * <Style>
  *   {`body { margin: 0 }`}
- * </NativeStyle>
+ * </Style>
  * ```
  */
-import { View, ViewProps } from "@/content/view";
-import { ViewChildren } from "@/content/type";
+import { DerivedRef, isRef, Ref } from "@timeless/reactive";
+
+import { MountedEvent } from "@/event";
 
 /** Props for NativeStyle - same as ViewProps but without 'as' */
-export interface NativeStyleProps extends Omit<ViewProps, "as"> {}
+export type StyleProps = {
+  onMounted?: (event: MountedEvent) => void;
+  onUnmounted?: () => void;
+};
 
 /**
  * Creates a native HTML style element.
@@ -24,9 +28,53 @@ export interface NativeStyleProps extends Omit<ViewProps, "as"> {}
  * @param children - CSS content (string or CSS text elements)
  * @returns A TimelessElement representing a style element
  */
-export function NativeStyle(
-  props: NativeStyleProps = {},
-  children?: ViewChildren,
+export function Style(
+  props: StyleProps,
+  children: string | Ref<string> | DerivedRef<string>,
 ) {
-  return View({ ...props, as: "style" }, children);
+  let $elm: any = null;
+  const state = {
+    rendered: false,
+    content: "",
+  };
+
+  const methods = {
+    subscribe_props() {
+      if (isRef(children)) {
+        state.content = children.value;
+        children.subscribe({
+          onChange(v) {
+            state.content = v;
+          },
+        });
+      } else {
+        state.content = children;
+      }
+    },
+  };
+
+  methods.subscribe_props();
+
+  return {
+    t: "style",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      $elm = v;
+    },
+    state,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+    },
+    onUnmounted() {
+      state.rendered = false;
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+    },
+  };
 }
