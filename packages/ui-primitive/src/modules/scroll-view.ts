@@ -51,6 +51,12 @@ export function Root(
         const offsetLeft = $elm.offsetLeft;
         const scrollTop = $elm.scrollTop;
         const scrollLeft = $elm.scrollLeft;
+        const paddingTop = Number(
+          getComputedStyle($elm).paddingTop.replace("px", ""),
+        );
+        const paddingBottom = Number(
+          getComputedStyle($elm).paddingBottom.replace("px", ""),
+        );
 
         store.handleMounted({
           width,
@@ -65,6 +71,8 @@ export function Root(
           offsetLeft,
           scrollTop,
           scrollLeft,
+          paddingTop,
+          paddingBottom,
         });
         const provide = global_provider?.provide_ui_scroll_view_scroll;
         if (typeof provide === "function") {

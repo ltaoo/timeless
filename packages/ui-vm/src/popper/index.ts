@@ -401,13 +401,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     };
     scrollButtonHeight?: number;
   }) {
-    logger.log(
-      "adjustContentPositonWithOffsetTop",
-      this.viewport$,
-      this.reference,
-      this.floating,
-    );
-    const scrollButtonHeight = data.scrollButtonHeight ?? 0;
+    // const scrollButtonHeight = data.scrollButtonHeight ?? 0;
 
     if (!this.viewport$ || !this.reference || !this.floating) {
       return;
@@ -416,11 +410,11 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     const viewport$ = this.viewport$;
     const reference_rect = this.reference.getRect();
     const floating_rect = this.floating.getRect();
-    const windowSize = this.platform.getViewportSize();
+    const window_size = this.platform.getViewportSize();
 
     const {
       offsetHeight,
-      offsetTop: selectedItemOffsetTop,
+      offsetTop: item_offset_top,
       bottom,
       isFirst = false,
       isLast = false,
@@ -434,17 +428,30 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       clientHeight: floating_rect.height,
     };
 
-    const viewportData = data.viewport ?? {
+    // const viewport_data = data.viewport ?? {
+    //   scrollHeight: viewport$.rect.contentHeight ?? 0,
+    //   offsetTop: 0,
+    //   offsetHeight: viewport$.rect.height ?? 0,
+    //   paddingTop: 0,
+    //   paddingBottom: 0,
+    // };
+    const viewport_data = {
       scrollHeight: viewport$.rect.contentHeight ?? 0,
-      offsetTop: 0,
+      offsetTop: viewport$.rect.offsetTop ?? 0,
       offsetHeight: viewport$.rect.height ?? 0,
-      paddingTop: 0,
-      paddingBottom: 0,
+      paddingTop: viewport$.rect.paddingTop ?? 0,
+      paddingBottom: viewport$.rect.paddingBottom ?? 0,
     };
 
-    const contentMargin = 10;
+    logger.log(
+      "adjustContentPositonWithOffsetTop",
+      data.viewport,
+      viewport_data.offsetTop,
+    );
 
-    const availableHeight = windowSize.height - contentMargin * 2;
+    const content_margin = 10;
+
+    const available_height = window_size.height - content_margin * 2;
     const {
       borderTopWidth,
       paddingTop,
@@ -453,98 +460,110 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       clientHeight: contentClientHeight,
     } = content;
 
-    const fullContentHeight =
+    const full_content_height =
       borderTopWidth +
       paddingTop +
-      viewportData.scrollHeight +
+      viewport_data.scrollHeight +
       paddingBottom +
       borderBottomWidth;
-    const minContentHeight = Math.min(offsetHeight * 5, fullContentHeight);
+    const minContentHeight = Math.min(offsetHeight * 5, full_content_height);
 
-    const topEdgeToTriggerMiddle =
-      reference_rect.top + reference_rect.height / 2 - contentMargin;
-    const triggerMiddleToBottomEdge = availableHeight - topEdgeToTriggerMiddle;
+    const top_edge_to_trigger_middle =
+      reference_rect.top + reference_rect.height / 2 - content_margin;
+    const trigger_middle_to_bottom_edge =
+      available_height - top_edge_to_trigger_middle;
 
-    const selectedItemHalfHeight = offsetHeight / 2;
-    const itemOffsetMiddle = selectedItemOffsetTop + selectedItemHalfHeight;
-    const contentTopToItemMiddle =
-      borderTopWidth + paddingTop + itemOffsetMiddle;
-    const itemMiddleToContentBottom =
-      fullContentHeight - contentTopToItemMiddle;
+    const selected_item_half_height = offsetHeight / 2;
+    const item_offset_middle = item_offset_top + selected_item_half_height;
+    const content_top_to_item_middle =
+      borderTopWidth + paddingTop + item_offset_middle;
+    const item_middle_to_content_bottom =
+      full_content_height - content_top_to_item_middle;
 
     const willAlignWithoutTopOverflow =
-      contentTopToItemMiddle <= topEdgeToTriggerMiddle;
+      content_top_to_item_middle <= top_edge_to_trigger_middle;
 
     let left: number | undefined;
     let right: number | undefined;
-    let minWidth: number;
+    let min_width: number;
     let top: number | undefined;
-    let bottomVal: number | undefined;
+    let bottom_val: number | undefined;
     let height: number;
-    let viewportScrollTop: number | undefined;
+    let viewport_scroll_top: number | undefined;
 
     // 水平方向计算 (简化版，始终 left 对齐)
     left = reference_rect.left + 1;
-    minWidth = reference_rect.width - 1;
+    min_width = reference_rect.width - 1;
 
     // 垂直方向计算
     if (willAlignWithoutTopOverflow) {
-      bottomVal = 0;
-      const viewportOffsetBottom =
+      // 放在 trigger 下方
+      bottom_val = 0;
+      const viewport_offset_bottom =
         contentClientHeight -
-        viewportData.offsetTop -
-        viewportData.offsetHeight;
+        viewport_data.offsetTop -
+        viewport_data.offsetHeight;
       const clampedTriggerMiddleToBottomEdge = Math.max(
-        triggerMiddleToBottomEdge,
-        selectedItemHalfHeight +
-          (isLast ? viewportData.paddingBottom : 0) +
-          viewportOffsetBottom +
+        trigger_middle_to_bottom_edge,
+        selected_item_half_height +
+          (isLast ? viewport_data.paddingBottom : 0) +
+          viewport_offset_bottom +
           borderBottomWidth,
       );
       height = Math.min(
-        contentTopToItemMiddle + clampedTriggerMiddleToBottomEdge,
-        availableHeight,
+        content_top_to_item_middle + clampedTriggerMiddleToBottomEdge,
+        available_height,
       );
     } else {
+      // 放在 trigger 上部分
       top = 0;
+      // 放在上部，上部分的高度分为两种情况
+      // 1、上部空间不足，那么高度就是 顶部到trigger垂直中点的距离
+      // 2、上部空间足够，那么高度就是 顶部到trigger垂直中点的距离 + 选中项一半高度
       const clampedTopEdgeToTriggerMiddle = Math.max(
-        topEdgeToTriggerMiddle,
+        top_edge_to_trigger_middle,
         borderTopWidth +
-          viewportData.offsetTop +
-          (isFirst ? viewportData.paddingTop : 0) +
-          selectedItemHalfHeight,
+          viewport_data.offsetTop +
+          (isFirst ? viewport_data.paddingTop : 0) +
+          selected_item_half_height,
+      );
+      logger.log(
+        "place to bottom",
+        clampedTopEdgeToTriggerMiddle,
+        item_middle_to_content_bottom,
+        full_content_height,
+        content_top_to_item_middle,
       );
       height = Math.min(
-        clampedTopEdgeToTriggerMiddle + itemMiddleToContentBottom,
-        availableHeight,
+        clampedTopEdgeToTriggerMiddle + item_middle_to_content_bottom,
+        available_height,
       );
-      viewportScrollTop =
-        contentTopToItemMiddle -
-        topEdgeToTriggerMiddle +
-        viewportData.offsetTop;
+      viewport_scroll_top =
+        content_top_to_item_middle -
+        top_edge_to_trigger_middle +
+        viewport_data.offsetTop;
     }
 
     this.state.x = left ?? 0;
     this.state.y = 0;
     this.state.top = top;
-    this.state.bottom = bottomVal;
+    this.state.bottom = bottom_val;
     this.state.height = height;
-    this.state.minWidth = minWidth;
+    this.state.minWidth = min_width;
     this.state.isPlaced = true;
-    this.state.margin = contentMargin;
-    this.state.placement = bottomVal === 0 ? "bottom" : "top";
+    this.state.margin = content_margin;
+    this.state.placement = bottom_val === 0 ? "bottom" : "top";
     this.state.strategy = "fixed";
-    this.state.maxHeight = availableHeight;
-    this.state.canScrollDown = true;
-    this.state.canScrollUp = true;
+    this.state.maxHeight = available_height;
     // this.state.viewportOffsetTop = viewportScrollTop;
 
-    if (viewportScrollTop !== undefined) {
-      viewport$.setScrollTop(viewportScrollTop);
+    if (viewport_scroll_top !== undefined) {
+      viewport$.setScrollTop(viewport_scroll_top);
     }
 
     this.emit(Events.StateChange, { ...this.state });
   }
+  realignImmediate() {}
   /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */
   setItemAlignedElements(data: {
     valueNode: { getBoundingClientRect: () => DOMRect };

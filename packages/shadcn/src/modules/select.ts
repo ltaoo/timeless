@@ -11,8 +11,8 @@ import { For, ViewProps, Show, View, Icon } from "@timeless/timeless";
 import { SelectPrimitive } from "@timeless/ui-primitive";
 import { SelectCore, SelectItemCore, SelectGroupCore } from "@timeless/ui-vm";
 
-const SelectOptionClassName =
-  "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2";
+// const SelectOptionClassName =
+//   "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2";
 const SelectGroupClassName = "scroll-my-1 p-1";
 const SelectGroupLabelClassName =
   "px-1.5 py-1.5 text-xs font-medium text-muted-foreground select-none";
@@ -314,8 +314,9 @@ export function Select(
             {
               store,
               class: classNames([
-                SelectGroupClassName,
-                "data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
+                "scroll-my-1 p-1",
+                // SelectGroupClassName,
+                // "data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
               ]),
             },
             [

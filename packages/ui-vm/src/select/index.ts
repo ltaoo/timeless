@@ -134,7 +134,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   // searchKeyword: string = "";
   // /** 搜索框占位符 */
   // searchPlaceholder: string = "搜索...";
-  aligned?: boolean;
+  aligned: boolean = false;
 
   popper$: PopperCore;
   presence$ = new PresenceCore();
@@ -717,7 +717,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       "[]handle item mounted",
       data.store.label,
       this.aligned,
-      this.position,
+      data.offset_top,
     );
     data.store.handleMounted({
       offsetTop: data.offset_top,

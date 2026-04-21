@@ -114,11 +114,20 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     scrollTop: number;
     /** 内容高度 */
     contentHeight: number;
+    /** 顶部偏移量 */
+    offsetTop: number;
+    /** 顶部内边距 */
+    paddingTop: number;
+    /** 底部内边距 */
+    paddingBottom: number;
   }> = {
     width: 0,
     height: 0,
     scrollTop: 0,
     contentHeight: 0,
+    offsetTop: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
   };
   disabled = false;
   canPullToRefresh: boolean;
@@ -378,6 +387,8 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     offsetLeft?: number;
     scrollTop?: number;
     scrollLeft?: number;
+    paddingTop?: number;
+    paddingBottom?: number;
   }) {
     const {
       width,
@@ -392,12 +403,26 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
       offsetLeft,
       scrollTop,
       scrollLeft,
+      paddingTop,
+      paddingBottom,
     } = data;
-    this.setRect({
-      width,
-      height,
-      contentHeight: scrollHeight ?? 0,
-    });
+    this.rect.width = width;
+    this.rect.height = height;
+    this.rect.offsetTop = offsetTop ?? 0;
+    this.rect.paddingTop = paddingTop ?? 0;
+    this.rect.paddingBottom = paddingBottom ?? 0;
+    this.rect.contentHeight = scrollHeight ?? 0;
+    this.rect.scrollTop = scrollTop ?? 0;
+    // this.rect.scrollLeft = scrollLeft ?? 0;
+
+    // this.setRect({
+    //   width,
+    //   height,
+    //   contentHeight: scrollHeight ?? 0,
+    //   offsetTop,
+    //   paddingTop,
+    //   paddingBottom,
+    // });
   }
   handleMouseDown = (event: MouseEvent) => {
     this.handlePointDown(event);

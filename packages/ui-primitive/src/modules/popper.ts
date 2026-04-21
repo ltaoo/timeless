@@ -93,7 +93,7 @@ export function Content(
               "flex-direction": "column",
               position: "fixed",
               "box-sizing": "border-box",
-              opacity: t.isPlaced ? 1 : 0,
+              // opacity: t.isPlaced ? 1 : 0,
               "pointer-events": t.isPlaced ? "initial" : "none",
               // transform: t.isPlaced
               //   ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
@@ -123,7 +123,7 @@ export function Content(
             position: "fixed",
             left: 0,
             top: 0,
-            opacity: t.isPlaced ? 1 : 0,
+            // opacity: t.isPlaced ? 1 : 0,
             "pointer-events": t.isPlaced ? "initial" : "none",
             transform: t.isPlaced
               ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
@@ -279,26 +279,26 @@ export function ScrollUpButton(
     }),
   );
 
-  return View(
-    {
-      ...rest,
-      style: styleNames([
-        rest.style,
-        {
-          opacity: computed(state_, (s) =>
-            s.canScrollUp ? 1 : 0,
-          ),
-        },
-      ]),
-      onMounted(event) {
-        if (rest.onMounted) {
-          listener$.add(rest.onMounted(event));
-        }
-        return listener$.destroy;
-      },
+  return Show({
+    // ...rest,
+    when: computed(state_, (s) => s.canScrollUp),
+    // style: styleNames([
+    //   rest.style,
+    //   {
+    //     // opacity: computed(state_, (s) => (s.canScrollUp ? 1 : 0)),
+    //     display: computed(state_, (s) => (s.canScrollUp ? "block" : "none")),
+    //   },
+    // ]),
+    onMounted(event) {
+      if (rest.onMounted) {
+        listener$.add(rest.onMounted(event));
+      }
+      return listener$.destroy;
     },
-    children,
-  );
+    ok() {
+      return [View(rest, children)];
+    },
+  });
 }
 
 export function ScrollDownButton(
@@ -315,24 +315,27 @@ export function ScrollDownButton(
     }),
   );
 
-  return View(
-    {
-      ...rest,
-      style: styleNames([
-        rest.style,
-        {
-          opacity: computed(state_, (s) =>
-            s.canScrollDown ? 1 : 0,
-          ),
-        },
-      ]),
-      onMounted(event) {
-        if (rest.onMounted) {
-          listener$.add(rest.onMounted(event));
-        }
-        return listener$.destroy;
-      },
+  return Show({
+    // ...rest,
+    // style: styleNames([
+    //   rest.style,
+    //   {
+    //     // opacity: computed(state_, (s) => (s.canScrollDown ? 1 : 0)),
+    //     display: computed(state_, (s) =>
+    //       s.canScrollDown ? "block" : "none",
+    //     ),
+    //   },
+    // ]),
+    when: computed(state_, (s) => s.canScrollDown),
+    onMounted(event) {
+      store.realignImmediate();
+      if (rest.onMounted) {
+        listener$.add(rest.onMounted(event));
+      }
+      return listener$.destroy;
     },
-    children,
-  );
+    ok() {
+      return View(rest, children);
+    },
+  });
 }

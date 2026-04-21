@@ -296,7 +296,7 @@ export function HostElement(props: {
       const dataset = state.dataset;
       if (dataset) {
         for (const [key, value] of Object.entries(dataset)) {
-          const k = `data-${key}`
+          const k = `data-${key}`;
           if (value !== undefined) {
             methods.setAttribute(k, String(value));
           } else {
@@ -548,7 +548,7 @@ export function HostElement(props: {
       removed: { idx: number }[];
       moved: { from: number; to: number }[];
     }) {
-      const { added, removed, moved } = data;
+      const { added = [], removed = [], moved = [] } = data;
       const $parent = methods.getParent();
       if (!$parent) {
         console.warn("refresh parent not found");
