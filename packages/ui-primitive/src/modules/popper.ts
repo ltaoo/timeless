@@ -125,11 +125,15 @@ export function Content(
             position: "fixed",
             left: 0,
             top: 0,
-            // opacity: t.isPlaced ? 1 : 0,
+            opacity: t.isPlaced ? 1 : 0,
             "pointer-events": t.isPlaced ? "initial" : "none",
             transform: t.isPlaced
               ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
               : "translate3d(0, 0, 0)",
+            // height: t.height !== undefined ? `${t.height}px` : undefined,
+            // "max-height":
+            //   t.maxHeight != undefined ? `${t.maxHeight}px` : undefined,
+            // overflow: t.height !== undefined ? "auto" : undefined,
           };
         }),
       ]),
@@ -137,7 +141,7 @@ export function Content(
         const $elm = event.target;
         const layer_id = `popper-${++layer_id_counter}`;
         const layer$ = getGlobalLayerManager();
-        // console.log("the floating mounted", $elm.getBoundingClientRect());
+        // logger.log("the floating mounted", $elm.getBoundingClientRect());
         store.setFloating({
           $el: $elm,
           getRect() {

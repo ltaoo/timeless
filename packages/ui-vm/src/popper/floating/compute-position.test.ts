@@ -229,6 +229,29 @@ describe("computePosition", () => {
     });
   });
 
+  it("当底部空间不足时应翻转到顶部，但是顶部空间也不够", async () => {
+    const reference = {
+      getRect() {
+        return { x: 300, y: 690, width: 643, height: 32 };
+      },
+    };
+    const floating = {
+      getRect() {
+        return { x: 0, y: 0, width: 186, height: 1688 };
+      },
+    };
+    const platform = create_test_platform();
+
+    const result = await compute_position(reference, floating, {
+      platform,
+      placement: "bottom",
+      middleware: [flip()],
+    });
+
+    expect(result.placement).toBe("top");
+    expect(result.y).toBe(VIEWPORT_HEIGHT - 100 - 150); // ref.y - floating.height
+  });
+
   describe("offset + flip + shift 完整管线", () => {
     it("正常场景：reference 在视口中部，floating 尺寸适中", async () => {
       // 模拟 Select trigger 在页面中部
@@ -539,7 +562,13 @@ function build_item(
   offsetHeight: number,
   overrides: Partial<ItemAlignedSelectedItemMeasurement> = {},
 ): ItemAlignedSelectedItemMeasurement {
-  return { offsetTop, offsetHeight, isFirst: false, isLast: false, ...overrides };
+  return {
+    offsetTop,
+    offsetHeight,
+    isFirst: false,
+    isLast: false,
+    ...overrides,
+  };
 }
 
 describe("computePositionInItemAlignedMode", () => {
@@ -667,7 +696,9 @@ describe("computePositionInItemAlignedMode", () => {
         dir: "ltr",
         triggerRect: build_ia_rect(680, 0, 200, 40),
         valueNodeRect: build_ia_rect(0, 0, 0, 0),
-        content: build_content(build_ia_rect(0, 0, 200, 0), { clientHeight: 200 }),
+        content: build_content(build_ia_rect(0, 0, 200, 0), {
+          clientHeight: 200,
+        }),
         itemTextRect: build_ia_rect(0, 0, 0, 0),
         selectedItem: build_item(64, 36),
         viewport: build_viewport(100, { offsetHeight: 82, paddingBottom: 4 }),

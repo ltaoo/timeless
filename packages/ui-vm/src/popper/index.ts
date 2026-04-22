@@ -80,13 +80,14 @@ type PopperState = {
   /** PopperContent height */
   height?: number;
   maxHeight?: number;
+  maxWidth?: number;
   minWidth?: number;
   margin?: number;
   viewportOffsetTop?: number;
   /** 浮动元素在放置方向上的可用高度（px） */
-  availableHeight: number;
+  availableHeight?: number;
   /** 浮动元素在交叉轴上的可用宽度（px） */
-  availableWidth: number;
+  availableWidth?: number;
   /** viewport 可以向上滚动 */
   canScrollUp: boolean;
   hideScrollUp?: boolean;
@@ -341,7 +342,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.offsetY = offset.y;
   }
   /** 设置 item-aligned 模式下选中项的偏移量 */
-  adjustContentPositonWithOffsetTop(data: {
+  adjustContentPositionWithOffsetTop(data: {
     selectedItem: {
       offsetTop: number;
       offsetHeight: number;
@@ -623,10 +624,16 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     let available_height = 0;
     let available_width = 0;
     if (middleware_data.size) {
-      // popper mode: use the side-aware values from size middleware
       available_height = middleware_data.size.availableHeight ?? 0;
       available_width = middleware_data.size.availableWidth ?? 0;
     }
+    const floating_rect = this.floating.getRect();
+    const viewport = this.platform.getViewportSize();
+    available_height = viewport.height - y - 10;
+    const content_height = floating_rect.height;
+    // const height = Math.min(content_height, available_height);
+    // const should_scroll =
+    //   content_height > available_height && available_height > 0;
     this.state = {
       x: x_with_offset,
       y: y_with_offset,
@@ -635,8 +642,8 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       isPlaced: true,
       reference: true,
       arrow: middleware_data.arrow || null,
-      availableHeight: available_height,
-      availableWidth: available_width,
+      // maxHeight: available_height,
+      // height: available_height,
       canScrollUp: false,
       canScrollDown: false,
     };
@@ -644,7 +651,9 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       x,
       y,
       offsetX: this.offsetX,
-      arrow: middleware_data.arrow,
+      height: this.state.height,
+      available_height,
+      content_height,
     });
     this.emit(Events.StateChange, { ...this.state });
   }
@@ -677,10 +686,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       middleware.push(arrow({ element: this.$arrow, padding: 12 }));
     }
 
-    // Reset floating element position and force reflow before computing
-    // (floatingEl as HTMLElement).style.transform = "translate3d(0, 0, 0)";
-    // void (floatingEl as HTMLElement).offsetHeight;
-
     // Manual test: compute position without floating-ui
     const reference_rect = reference$.getRect();
     const floating_rect = floating$.getRect();
@@ -705,8 +710,8 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     const result = await compute_position(reference$, floating$, {
       placement: this.placement,
       strategy: this.strategy,
-      middleware,
       platform: this.platform,
+      middleware,
     });
     logger.log("computePosition result", this.unique_id, {
       x: result.x,

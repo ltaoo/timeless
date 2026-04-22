@@ -301,7 +301,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     if (this.position !== "item-aligned" || !this.open) {
       return;
     }
-    this.popper$.adjustContentPositonWithOffsetTop({
+    this.popper$.adjustContentPositionWithOffsetTop({
       selectedItem: {
         offsetTop,
         offsetHeight: height,
@@ -688,6 +688,12 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         is_last,
       );
       this.alignSpecialItem(offset_top, data.height, is_first, is_last);
+      this.aligned = true;
+    } else {
+      if (this.aligned) {
+        return;
+      }
+      this.popper$.place();
       this.aligned = true;
     }
   }

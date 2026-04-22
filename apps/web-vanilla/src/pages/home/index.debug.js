@@ -77,7 +77,7 @@ export default function OverlayView() {
       },
       client: client$,
     }),
-    { pageSize: 10 },
+    { pageSize: 60 },
   );
 
   const ui = {
@@ -176,9 +176,25 @@ export default function OverlayView() {
       store: ui.view$,
     },
     [
+      View(
+        {
+          style: {
+            height: "1200px",
+          },
+        },
+        [],
+      ),
       Select({
         store: search_select$,
       }),
+      View(
+        {
+          style: {
+            height: "1200px",
+          },
+        },
+        [],
+      ),
       // Button(
       //   {
       //     store: new Timeless.ui.ButtonCore({
