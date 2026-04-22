@@ -53,54 +53,52 @@ type PopperProps = {
   side: Side;
   align: Align;
   strategy: "fixed" | "absolute";
+  defaultPlaced?: boolean;
   offsetX?: number;
   offsetY?: number;
-  defaultPlaced?: boolean;
   /**
-   * Popper 关心的，可滚动容器
-   * 当容器滚动时，可以更新 Popper 的位置
+   * Popper 关心的可滚动容器
+   * 当容器滚动时，可以用来更新 Popper 的位置
    */
   view$?: ScrollViewCore;
   /**
    * 可用空间计算模式
-   * - "popper": 根据放置侧计算（底部放置时取下方空间，顶部放置时取上方空间）
+   * - "popper": 根据放置侧计算（底部放置时取上方空间，顶部放置时取下方空间）
    * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
    */
   mode?: "popper" | "item-aligned";
-  /**
-   * item-aligned 模式：获取位置状态的回调
-   */
-  // getItemAlignedPosition?: () => any;
   platform?: Platform;
 };
 type PopperState = {
   strategy: Strategy;
   x: number;
   y: number;
-  top?: number;
-  bottom?: number;
   placement: Placement;
   isPlaced: boolean;
+  top?: number;
+  bottom?: number;
   /** PopperContent height */
-  height: number;
+  height?: number;
   maxHeight?: number;
   minWidth?: number;
   margin?: number;
   viewportOffsetTop?: number;
-  /** 是否设置了参考DOM */
-  reference: boolean;
-  arrow: {
-    x?: number;
-    y?: number;
-  } | null;
   /** 浮动元素在放置方向上的可用高度（px） */
   availableHeight: number;
   /** 浮动元素在交叉轴上的可用宽度（px） */
   availableWidth: number;
   /** viewport 可以向上滚动 */
   canScrollUp: boolean;
+  hideScrollUp?: boolean;
   /** viewport 可以向下滚动 */
   canScrollDown: boolean;
+  hideScrollDown?: boolean;
+  /** 是否设置了参考DOM */
+  reference: boolean;
+  arrow: {
+    x?: number;
+    y?: number;
+  } | null;
 };
 export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   unique_id = "PopperCore";
@@ -108,17 +106,19 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
 
   // side: Side = "bottom";
   // align: Align = "center";
-  platform: Platform;
-  placement: Placement = "bottom";
   strategy: Strategy = "absolute";
   offsetX = 0;
   offsetY = 0;
+  placement: Placement = "bottom";
   /** 可用空间计算模式
    * - "popper": 根据放置侧计算（底部放置时取下方空间，顶部放置时取上方空间）
    * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
    */
   mode: "popper" | "item-aligned" = "popper";
   view$?: ScrollViewCore;
+  /** Popper 内部的可滚动容器 */
+  viewport$: ScrollViewCore;
+  platform: Platform;
   reference: {
     getRect: () => Rect;
     $el?: unknown;
@@ -128,12 +128,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     $el?: {};
   } | null = null;
 
-  /** item-aligned 模式：选中项在列表中的垂直偏移量，用于将面板对齐到选中项 */
-  itemOffset = 0;
-  /** item-aligned 模式：trigger 中的 value 节点 */
-  valueNode: { getBoundingClientRect: () => DOMRect } | null = null;
-  /** item-aligned 模式：content wrapper 元素（用于设置 fixed 定位） */
-  contentWrapper: { $el?: HTMLElement } | null = null;
   /** item-aligned 模式：viewport 元素（用于 scroll） */
   viewport: { $el?: HTMLElement } | null = null;
   /** item-aligned 模式：选中的 item 元素 */
@@ -142,8 +136,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     offsetTop: number;
     offsetHeight: number;
   } | null = null;
-  /** item-aligned 模式：选中的 item 文本元素 */
-  selectedItemText: { getBoundingClientRect: () => DOMRect } | null = null;
   /** item-aligned 模式：content 元素的测量数据（用于计算定位） */
   _contentMeasurement: ItemAlignedContentMeasurement | null = null;
   /** item-aligned 模式：viewport 元素的测量数据（用于计算定位） */
@@ -162,7 +154,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     height: number;
   } | null = null;
   $arrow: any | null = null;
-  viewport$: ScrollViewCore;
 
   state: PopperState = {
     strategy: "absolute",
@@ -347,13 +338,13 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     const canScrollUp = scrollTop > 0;
     const canScrollDown = scrollTop + clientHeight < scrollHeight - 1;
     if (
-      this.state.canScrollUp === canScrollUp &&
-      this.state.canScrollDown === canScrollDown
+      this.state.hideScrollUp === !canScrollUp &&
+      this.state.hideScrollDown === !canScrollDown
     ) {
       return;
     }
-    this.state.canScrollUp = canScrollUp;
-    this.state.canScrollDown = canScrollDown;
+    this.state.hideScrollUp = !canScrollUp;
+    this.state.hideScrollDown = !canScrollDown;
     this.emit(Events.StateChange, { ...this.state });
   }
   setConfig(config: { placement?: Placement; strategy?: Strategy }) {
@@ -392,25 +383,15 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       paddingBottom: number;
       clientHeight: number;
     };
-    viewport?: {
-      scrollHeight: number;
-      offsetTop: number;
-      offsetHeight: number;
-      paddingTop: number;
-      paddingBottom: number;
-    };
-    scrollButtonHeight?: number;
   }) {
-    // const scrollButtonHeight = data.scrollButtonHeight ?? 0;
-
     if (!this.viewport$ || !this.reference || !this.floating) {
       return;
     }
 
-    const viewport$ = this.viewport$;
     const reference_rect = this.reference.getRect();
     const floating_rect = this.floating.getRect();
     const window_size = this.platform.getViewportSize();
+    const viewport$ = this.viewport$;
 
     const {
       offsetHeight,
@@ -427,14 +408,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       paddingBottom: 0,
       clientHeight: floating_rect.height,
     };
-
-    // const viewport_data = data.viewport ?? {
-    //   scrollHeight: viewport$.rect.contentHeight ?? 0,
-    //   offsetTop: 0,
-    //   offsetHeight: viewport$.rect.height ?? 0,
-    //   paddingTop: 0,
-    //   paddingBottom: 0,
-    // };
     const viewport_data = {
       scrollHeight: viewport$.rect.contentHeight ?? 0,
       offsetTop: viewport$.rect.offsetTop ?? 0,
@@ -443,29 +416,25 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       paddingBottom: viewport$.rect.paddingBottom ?? 0,
     };
 
-    logger.log(
-      "adjustContentPositonWithOffsetTop",
-      data.viewport,
-      viewport_data.offsetTop,
-    );
+    logger.log("adjustContentPositonWithOffsetTop", viewport_data.offsetTop);
 
     const content_margin = 10;
 
     const available_height = window_size.height - content_margin * 2;
     const {
-      borderTopWidth,
-      paddingTop,
-      borderBottomWidth,
-      paddingBottom,
+      borderTopWidth: contentBorderTopWidth,
+      paddingTop: contentPaddingTop,
+      borderBottomWidth: contentBorderBottomWidth,
+      paddingBottom: contentPaddingBottom,
       clientHeight: contentClientHeight,
     } = content;
 
     const full_content_height =
-      borderTopWidth +
-      paddingTop +
+      contentBorderTopWidth +
+      contentPaddingTop +
       viewport_data.scrollHeight +
-      paddingBottom +
-      borderBottomWidth;
+      contentPaddingBottom +
+      contentBorderBottomWidth;
     const minContentHeight = Math.min(offsetHeight * 5, full_content_height);
 
     const top_edge_to_trigger_middle =
@@ -476,7 +445,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     const selected_item_half_height = offsetHeight / 2;
     const item_offset_middle = item_offset_top + selected_item_half_height;
     const content_top_to_item_middle =
-      borderTopWidth + paddingTop + item_offset_middle;
+      contentBorderTopWidth + contentPaddingTop + item_offset_middle;
     const item_middle_to_content_bottom =
       full_content_height - content_top_to_item_middle;
 
@@ -495,6 +464,9 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     left = reference_rect.left + 1;
     min_width = reference_rect.width - 1;
 
+    this.state.canScrollUp = false;
+    this.state.canScrollDown = false;
+
     // 垂直方向计算
     if (willAlignWithoutTopOverflow) {
       // 放在 trigger 下方
@@ -503,13 +475,20 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         contentClientHeight -
         viewport_data.offsetTop -
         viewport_data.offsetHeight;
+      const a =
+        selected_item_half_height +
+        (isLast ? viewport_data.paddingBottom : 0) +
+        viewport_offset_bottom +
+        contentBorderBottomWidth;
       const clampedTriggerMiddleToBottomEdge = Math.max(
         trigger_middle_to_bottom_edge,
-        selected_item_half_height +
-          (isLast ? viewport_data.paddingBottom : 0) +
-          viewport_offset_bottom +
-          borderBottomWidth,
+        a,
       );
+      const hasAmpleSpace =
+        item_middle_to_content_bottom <= trigger_middle_to_bottom_edge;
+      if (!hasAmpleSpace) {
+        this.state.canScrollDown = true;
+      }
       height = Math.min(
         content_top_to_item_middle + clampedTriggerMiddleToBottomEdge,
         available_height,
@@ -517,19 +496,28 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     } else {
       // 放在 trigger 上部分
       top = 0;
+      const content_top_edge_to_trigger_middle =
+        contentBorderTopWidth +
+        viewport_data.offsetTop +
+        (isFirst ? viewport_data.paddingTop : 0) +
+        selected_item_half_height;
       // 放在上部，上部分的高度分为两种情况
       // 1、上部空间不足，那么高度就是 顶部到trigger垂直中点的距离
       // 2、上部空间足够，那么高度就是 顶部到trigger垂直中点的距离 + 选中项一半高度
+      const hasAmpleSpace =
+        content_top_to_item_middle <= top_edge_to_trigger_middle;
       const clampedTopEdgeToTriggerMiddle = Math.max(
         top_edge_to_trigger_middle,
-        borderTopWidth +
-          viewport_data.offsetTop +
-          (isFirst ? viewport_data.paddingTop : 0) +
-          selected_item_half_height,
+        content_top_edge_to_trigger_middle,
       );
+      if (!hasAmpleSpace) {
+        this.state.canScrollUp = true;
+      }
       logger.log(
         "place to bottom",
-        clampedTopEdgeToTriggerMiddle,
+        top_edge_to_trigger_middle,
+        content_top_edge_to_trigger_middle,
+        hasAmpleSpace,
         item_middle_to_content_bottom,
         full_content_height,
         content_top_to_item_middle,
@@ -566,21 +554,19 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   realignImmediate() {}
   /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */
   setItemAlignedElements(data: {
-    valueNode: { getBoundingClientRect: () => DOMRect };
-    contentWrapper: { $el?: HTMLElement };
-    viewport: { $el?: HTMLElement };
+    // valueNode: { getBoundingClientRect: () => DOMRect };
+    // contentWrapper: { $el?: HTMLElement };
+    // viewport: { $el?: HTMLElement };
     selectedItem: {
       $el?: HTMLElement;
       offsetTop: number;
       offsetHeight: number;
     };
-    selectedItemText: { getBoundingClientRect: () => DOMRect };
+    // selectedItemText: { getBoundingClientRect: () => DOMRect };
   }) {
-    this.valueNode = data.valueNode;
-    this.contentWrapper = data.contentWrapper;
-    this.viewport = data.viewport;
+    // this.viewport = data.viewport;
     this.selectedItem = data.selectedItem;
-    this.selectedItemText = data.selectedItemText;
+    // this.selectedItemText = data.selectedItemText;
   }
   /** 设置 item-aligned 模式下的测量数据 */
   setItemAlignedMeasurements(
@@ -614,11 +600,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     const { x, y, middleware_data } = coords;
     let x_with_offset = x + this.offsetX;
     let y_with_offset = y + this.offsetY;
-    // In item-aligned mode, offset the floating panel by the selected item's offset
-    // This makes the selected item align with the trigger button
-    if (this.mode === "item-aligned" && this.itemOffset !== 0) {
-      y_with_offset -= this.itemOffset;
-    }
     const [placed_side, placed_align] = getSideAndAlignFromPlacement(
       coords.placement,
     );
@@ -654,15 +635,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     // Extract available dimensions from size middleware
     let available_height = 0;
     let available_width = 0;
-    if (this.mode === "item-aligned") {
-      // item-aligned mode: content can extend both above and below the reference,
-      // so available height is the full viewport minus margins
-      const CONTENT_MARGIN = 10;
-      if (typeof window !== "undefined") {
-        available_height = window.innerHeight - CONTENT_MARGIN * 2;
-        available_width = window.innerWidth - CONTENT_MARGIN * 2;
-      }
-    } else if (middleware_data.size) {
+    if (middleware_data.size) {
       // popper mode: use the side-aware values from size middleware
       available_height = middleware_data.size.availableHeight ?? 0;
       available_width = middleware_data.size.availableWidth ?? 0;
@@ -673,7 +646,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       strategy: this.strategy,
       placement: coords.placement,
       isPlaced: true,
-      height: 0,
       reference: true,
       arrow: middleware_data.arrow || null,
       availableHeight: available_height,
@@ -764,8 +736,13 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  getItemAlignedPosition(): ItemAlignedContentWrapperStyle | null {
-    return this._itemAlignedStyle;
+  reset() {
+    this._enter = false;
+    this._focus = false;
+    this.state.isPlaced = false;
+    this.state.x = 0;
+    this.state.y = 0;
+    this.emit(Events.StateChange, { ...this.state });
   }
 
   handleEnter() {
@@ -783,14 +760,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     }
     this._enter = false;
     this.emit(Events.Leave);
-  }
-  reset() {
-    this._enter = false;
-    this._focus = false;
-    this.state.isPlaced = false;
-    this.state.x = 0;
-    this.state.y = 0;
-    this.emit(Events.StateChange, { ...this.state });
   }
 
   onReferenceMounted(

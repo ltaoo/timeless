@@ -159,7 +159,7 @@ export default function FormView() {
           Select({
             store: new Timeless.ui.SelectCore({
               // defaultValue: null,
-              defaultValue: "option_78",
+              defaultValue: "option_88",
               platform,
               position: "item-aligned",
               placeholder: "从 100 个选项中选择",

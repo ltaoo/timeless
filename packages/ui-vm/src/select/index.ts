@@ -135,6 +135,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   // /** 搜索框占位符 */
   // searchPlaceholder: string = "搜索...";
   aligned: boolean = false;
+  hasItemMounted = false;
 
   popper$: PopperCore;
   presence$ = new PresenceCore();
@@ -143,26 +144,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   // collection: CollectionCore;
 
   position: "popper" | "item-aligned" = "popper";
-  /** 选中项的 DOM 节点引用（用于 item-aligned 模式计算偏移） */
-  private _selected_item: {
-    offsetTop: number;
-    offsetHeight: number;
-    isFirst?: boolean;
-    isLast?: boolean;
-  } | null = null;
-  /** item-aligned 定位所需的 DOM 元素引用 */
-  private _content_el: HTMLElement | null = null;
-  private _viewport_el: HTMLElement | null = null;
-  private _value_el: HTMLElement | null = null;
 
-  /** 参考点位置 */
-  triggerPos: {
-    x: number;
-    y: number;
-  } = {
-    x: 0,
-    y: 0,
-  };
   reference: Rect | null = null;
   /** 触发按钮 */
   trigger: SelectTriggerCore | null = null;
@@ -289,9 +271,6 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     return this.options[index];
   }
 
-  setTriggerPointerDownPos(pos: { x: number; y: number }) {
-    this.triggerPos = pos;
-  }
   setTrigger(trigger: SelectTriggerCore) {
     this.trigger = trigger;
   }
@@ -316,118 +295,23 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
    */
   alignSpecialItem(
     offsetTop: number,
-    offsetHeight: number,
-    isFirst: boolean = false,
-    isLast: boolean = false,
+    height: number,
+    isFirst = false,
+    isLast = false,
   ) {
-    this._selected_item = { offsetTop, offsetHeight, isFirst, isLast };
-    if (this.position === "item-aligned" && this.open) {
-      this.popper$.adjustContentPositonWithOffsetTop({
-        selectedItem: {
-          offsetTop,
-          offsetHeight,
-          bottom: offsetTop + offsetHeight,
-          isFirst,
-          isLast,
-        },
-      });
-    }
-  }
-  /** 清除选中项偏移（关闭时调用） */
-  clearSelectedItemOffset() {
-    this._selected_item = null;
-    // this.popper.setItemOffset();
-  }
-  /** 设置 item-aligned 定位所需的 DOM 元素（分别设置） */
-  setItemAlignedElements(elements: {
-    contentEl?: HTMLElement;
-    viewportEl?: HTMLElement;
-    valueEl?: HTMLElement;
-  }) {
-    if (elements.contentEl) {
-      this._content_el = elements.contentEl;
-    }
-    if (elements.viewportEl) {
-      this._viewport_el = elements.viewportEl;
-    }
-    if (elements.valueEl) {
-      this._value_el = elements.valueEl;
-    }
-    // logger.log(
-    //   "setItemAlignedElements",
-    //   this.position,
-    //   this.open,
-    //   !!this._content_el,
-    //   !!this._viewport_el,
-    //   !!this._value_el,
-    // );
-    // if (this.position === "item-aligned" && this.open) {
-    //   this.placeItemAligned();
-    // }
-  }
-  /** 执行 item-aligned 定位（使用 adjustContentPositonWithOffsetTop） */
-  placeItemAligned() {
-    if (
-      !this.reference ||
-      !this._content_el ||
-      !this._viewport_el ||
-      !this._selected_item
-    ) {
+    // this._selected_item = { offsetTop, height, isFirst, isLast };
+    if (this.position !== "item-aligned" || !this.open) {
       return;
     }
-
-    const selectedItem = this._selected_item;
-    const contentEl = this._content_el;
-    const viewportEl = this._viewport_el;
-
-    // const scrollUpButton = contentEl.querySelector(
-    //   "[data-select-scroll-up-button]",
-    // ) as HTMLElement | null;
-    // const scrollDownButton = contentEl.querySelector(
-    //   "[data-select-scroll-down-button]",
-    // ) as HTMLElement | null;
-    // const scrollButtonHeight = scrollUpButton?.offsetHeight ?? 0;
-    const scrollButtonHeight = 24;
-
-    const contentStyles = window.getComputedStyle(contentEl);
-    const contentBorderTopWidth =
-      parseInt(contentStyles.borderTopWidth, 10) || 0;
-    const contentPaddingTop = parseInt(contentStyles.paddingTop, 10) || 0;
-    const contentBorderBottomWidth =
-      parseInt(contentStyles.borderBottomWidth, 10) || 0;
-    const contentPaddingBottom = parseInt(contentStyles.paddingBottom, 10) || 0;
-
-    const viewportStyles = window.getComputedStyle(viewportEl);
-    const viewportPaddingTop = parseInt(viewportStyles.paddingTop, 10) || 0;
-    const viewportPaddingBottom =
-      parseInt(viewportStyles.paddingBottom, 10) || 0;
-
     this.popper$.adjustContentPositonWithOffsetTop({
       selectedItem: {
-        offsetTop: selectedItem.offsetTop,
-        offsetHeight: selectedItem.offsetHeight,
-        bottom: selectedItem.offsetTop + selectedItem.offsetHeight,
-        isFirst: selectedItem.isFirst ?? false,
-        isLast: selectedItem.isLast ?? false,
-      },
-      content: {
-        borderTopWidth: contentBorderTopWidth,
-        paddingTop: contentPaddingTop + scrollButtonHeight,
-        borderBottomWidth: contentBorderBottomWidth,
-        paddingBottom: contentPaddingBottom + scrollButtonHeight,
-        clientHeight: contentEl.clientHeight,
-      },
-      viewport: {
-        scrollHeight: viewportEl.scrollHeight,
-        offsetTop: scrollButtonHeight,
-        offsetHeight: viewportEl.offsetHeight,
-        paddingTop: viewportPaddingTop,
-        paddingBottom: viewportPaddingBottom,
+        offsetTop,
+        offsetHeight: height,
+        bottom: offsetTop + height,
+        isFirst,
+        isLast,
       },
     });
-
-    // this.popper$.place();
-    // this.emit(Events.StateChange, { ...this.state });
   }
   async show() {
     // console.log(...this.log("show", this.state));
@@ -467,9 +351,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     }
     this.open = false;
     this.aligned = false;
-    // 关闭时清空搜索关键字
+    this.hasItemMounted = false;
     this.input$.setValue("");
-    this.clearSelectedItemOffset();
     this.emit(Events.StateChange, { ...this.state });
   }
   addNativeOption() {}
@@ -709,46 +592,44 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.blurOption(item$.value);
   }
   handleItemMounted(data: {
-    offset_top: number;
-    offset_height: number;
+    offsetTop: number;
+    height: number;
     store: SelectItemCore<T>;
   }) {
+    data.store.handleMounted({
+      offsetTop: data.offsetTop,
+      height: data.height,
+    });
+    if (this.hasItemMounted) {
+      return;
+    }
     logger.log(
       "[]handle item mounted",
       data.store.label,
-      this.aligned,
-      data.offset_top,
+      data.offsetTop,
+      data.height,
+      this.selected_item$?.label,
     );
-    data.store.handleMounted({
-      offsetTop: data.offset_top,
-      offsetHeight: data.offset_height,
-    });
-    if (this.aligned) {
-      return;
-    }
+    this.hasItemMounted = true;
     if (this.position === "item-aligned") {
-      const idx = this.options.findIndex((opt) => opt === data.store);
-      const isFirst = idx === 0;
-      const isLast = idx === this.options.length - 1;
-      if (this.value === null && isFirst) {
-        this.alignSpecialItem(
-          data.offset_top,
-          data.offset_height,
-          isFirst,
-          isLast,
-        );
-        this.aligned = true;
+      const selected_item$ = this.selected_item$ || this.options[0];
+      if (!selected_item$) {
         return;
       }
-      if (data.store.selected) {
-        this.alignSpecialItem(
-          data.offset_top,
-          data.offset_height,
-          isFirst,
-          isLast,
-        );
-        this.aligned = true;
-      }
+      const idx = this.options.findIndex((opt) => opt === selected_item$);
+      const is_first = idx === 0;
+      const is_last = idx === this.options.length - 1;
+      const offset_top = idx * data.height + data.offsetTop;
+      logger.log(
+        "[]before alignSpecialItem",
+        selected_item$.label,
+        offset_top,
+        data.height,
+        is_first,
+        is_last,
+      );
+      this.alignSpecialItem(offset_top, data.height, is_first, is_last);
+      this.aligned = true;
     }
   }
 

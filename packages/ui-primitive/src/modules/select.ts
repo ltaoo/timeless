@@ -127,12 +127,6 @@ export function Value(props: ViewProps & { store: SelectCore<any> }) {
             state_.as(v);
           }),
         );
-        // if (store.position === "item-aligned") {
-        //   const el = event.target.get$elm();
-        //   if (el instanceof HTMLElement) {
-        //     store.setItemAlignedElements({ valueEl: el });
-        //   }
-        // }
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
@@ -237,12 +231,6 @@ export function Content(
           presence_.as(v);
         }),
       );
-      if (store.position === "item-aligned") {
-        const el = event.target.get$elm();
-        if (el instanceof HTMLElement) {
-          store.setItemAlignedElements({ contentEl: el });
-        }
-      }
       if (onMounted) {
         listener$.add(onMounted(event));
       }
@@ -381,11 +369,11 @@ export function Viewport(
 export function Item(
   props: ViewProps & {
     select$: SelectCore<any>;
-    store: SelectItemCore<any>;
+    item$: SelectItemCore<any>;
   },
   children: ViewChildren,
 ) {
-  const { select$, store, ...rest } = props;
+  const { select$, item$: store, ...rest } = props;
 
   const state_ = refobj(store.state);
   const listener$ = ListenerManager([state_]);
@@ -395,11 +383,9 @@ export function Item(
       ...rest,
       onMounted(event) {
         const $elm = event.target.get$elm();
-        const offset_top = $elm.offsetTop;
-        const offset_height = $elm.offsetHeight;
         select$.handleItemMounted({
-          offset_top,
-          offset_height,
+          offsetTop: $elm.offsetTop,
+          height: $elm.offsetHeight,
           store,
         });
         listener$.add(

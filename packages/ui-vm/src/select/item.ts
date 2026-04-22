@@ -50,7 +50,7 @@ export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   disabled: boolean = false;
 
   offsetTop: number = 0;
-  offsetHeight: number = 0;
+  height: number = 0;
   // text: {
   //   $node: () => HTMLElement;
   //   getRect: () => DOMRect;
@@ -173,10 +173,10 @@ export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.emit(Events.Enter);
   }
 
-  handleMounted(rect: { offsetTop: number; offsetHeight: number }) {
-    const { offsetHeight, offsetTop } = rect;
+  handleMounted(rect: { offsetTop: number; height: number }) {
+    const { height, offsetTop } = rect;
     this.offsetTop = offsetTop;
-    this.offsetHeight = offsetHeight;
+    this.height = height;
   }
 
   onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) {

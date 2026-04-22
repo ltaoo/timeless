@@ -282,13 +282,7 @@ export function ScrollUpButton(
   return Show({
     // ...rest,
     when: computed(state_, (s) => s.canScrollUp),
-    // style: styleNames([
-    //   rest.style,
-    //   {
-    //     // opacity: computed(state_, (s) => (s.canScrollUp ? 1 : 0)),
-    //     display: computed(state_, (s) => (s.canScrollUp ? "block" : "none")),
-    //   },
-    // ]),
+
     onMounted(event) {
       if (rest.onMounted) {
         listener$.add(rest.onMounted(event));
@@ -296,7 +290,20 @@ export function ScrollUpButton(
       return listener$.destroy;
     },
     ok() {
-      return [View(rest, children)];
+      return [
+        View(
+          {
+            ...rest,
+            style: styleNames([
+              rest.style,
+              {
+                opacity: computed(state_, (s) => (s.hideScrollUp ? 0 : 1)),
+              },
+            ]),
+          },
+          children,
+        ),
+      ];
     },
   });
 }
@@ -316,16 +323,6 @@ export function ScrollDownButton(
   );
 
   return Show({
-    // ...rest,
-    // style: styleNames([
-    //   rest.style,
-    //   {
-    //     // opacity: computed(state_, (s) => (s.canScrollDown ? 1 : 0)),
-    //     display: computed(state_, (s) =>
-    //       s.canScrollDown ? "block" : "none",
-    //     ),
-    //   },
-    // ]),
     when: computed(state_, (s) => s.canScrollDown),
     onMounted(event) {
       store.realignImmediate();
@@ -335,7 +332,18 @@ export function ScrollDownButton(
       return listener$.destroy;
     },
     ok() {
-      return View(rest, children);
+      return View(
+        {
+          ...rest,
+          style: styleNames([
+            rest.style,
+            {
+              opacity: computed(state_, (s) => (s.hideScrollDown ? 0 : 1)),
+            },
+          ]),
+        },
+        children,
+      );
     },
   });
 }
