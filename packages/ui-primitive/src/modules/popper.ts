@@ -1,4 +1,4 @@
-import { refobj, computed, getPlatform } from "@timeless/timeless";
+import { refobj, computed, getPlatform, Logger } from "@timeless/timeless";
 import {
   styleNames,
   classNames,
@@ -17,6 +17,8 @@ import {
 } from "@timeless/ui-vm";
 
 import * as ScrollViewPrimitive from "@/modules/scroll-view";
+
+const logger = Logger({ prefix: "ui-primitive", scope: "popper" });
 
 const platform = getPlatform();
 let layer_id_counter = 0;
@@ -211,6 +213,7 @@ export function Content(
               );
             },
             dismiss() {
+              logger.log("dismiss popper with layer click");
               onDismiss();
             },
           };

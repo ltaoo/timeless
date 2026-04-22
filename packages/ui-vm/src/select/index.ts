@@ -21,7 +21,6 @@ import { SelectTriggerCore } from "./trigger";
 import { SelectWrapCore } from "./wrap";
 import { SelectItemCore } from "./item";
 import { SelectGroupCore } from "./group";
-import { timeStamp } from "node:console";
 
 const logger = Logger({ prefix: "vm", scope: "select/index" });
 
@@ -159,6 +158,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   selected_item$: SelectItemCore<T> | null = null;
   focused_item$: SelectItemCore<T> | null = null;
 
+  _tmp_options: null | SelectItemCore<T>[] = null;
   input_dirty = false;
   can_search = true;
 
@@ -363,6 +363,12 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       this.input_dirty = false;
       this.disableSearch();
       if (this.selected_item$) {
+        setTimeout(() => {
+          if (this._tmp_options) {
+            this.options = this._tmp_options;
+            this._tmp_options = null;
+          }
+        }, 800);
         this.input$.setValue(this.selected_item$.label);
         this.input$.setPlaceholder(this.selected_item$.label);
       }
@@ -432,6 +438,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       return;
     }
     this.value = null;
+    // this.selected_item$ = null;
     this.emit(Events.StateChange, { ...this.state });
     this.emit(Events.Change, this.value);
   }
@@ -497,6 +504,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       return;
     }
     this.loading = true;
+    this._tmp_options = this.options;
     // this.value = null;
     // this.selected_item$ = null;
     this.emit(Events.StateChange, { ...this.state });
