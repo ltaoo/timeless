@@ -174,10 +174,8 @@ export default function FormView() {
         ]),
         Item("Search Remote", [
           View({ class: "space-y-2 w-[240px]" }, [
-            SearchSelect({
+            Select({
               store: search_select$,
-              minLength: 1,
-              debounce: 300,
             }),
           ]),
         ]),

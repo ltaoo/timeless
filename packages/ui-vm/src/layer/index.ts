@@ -201,10 +201,10 @@ export function initGlobalPointerListener() {
   globalListenerInitialized = true;
   // console.log("[LayerManager] initGlobalPointerListener");
 
-  const layerManager = getGlobalLayerManager();
+  const layer$ = getGlobalLayerManager();
 
   document.addEventListener("pointerdown", (e) => {
-    layerManager.handlePointerDown(e.clientX, e.clientY);
+    layer$.handlePointerDown(e.clientX, e.clientY);
   });
 }
 

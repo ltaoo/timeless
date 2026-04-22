@@ -100,6 +100,7 @@ type SelectState<T> = {
   placeholder: string;
   /** 禁用 */
   disabled: boolean;
+  focused: boolean;
   /** 是否必填 */
   required: boolean;
   dir: Direction;
@@ -124,6 +125,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   defaultValue: T | null = null;
   value: T | null = null;
   disabled: boolean = false;
+  focused = false;
   open: boolean = false;
   allowClear: boolean = false;
   /** 加载中 */
@@ -157,6 +159,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   selected_item$: SelectItemCore<T> | null = null;
   focused_item$: SelectItemCore<T> | null = null;
 
+  input_dirty = false;
+  can_search = true;
+
   // _findFirstValidItem = false;
 
   // private _isDisabledValue(value: T) {
@@ -187,6 +192,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       value: this.value,
       selectedOption: this.selected_item$,
       allowClear: this.allowClear,
+      focused: this.focused,
       open: this.open,
       loading: this.loading,
       disabled: this.disabled,
@@ -210,16 +216,16 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       allowClear = false,
       options = [],
       platform,
-      // search = false,
-      // searchPlaceholder = "搜索...",
+      search,
       position = "popper",
       onChange,
     } = props;
     this.position = position;
-    // console.log("[DOMAIN]ui/select/index - constructor", defaultValue);
-    // this.search = search;
-    // this.input$.setPlaceholder(searchPlaceholder);
-    // this.entries = options;
+    this.search = !!search;
+    if (this.search) {
+      this.position = "popper";
+      this.input$ = search;
+    }
     this.options = flatten_entries(options, { value: defaultValue });
     if (id !== undefined) {
       this.id = id;
@@ -230,11 +236,6 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.value = defaultValue;
     this.defaultValue = defaultValue;
     this.placeholder = placeholder;
-    // const matched = this.options.find((opt) => opt.value === defaultValue);
-    // if (matched) {
-    //   this.emit(Events.StateChange, { ...this.state });
-    //   this.emit(Events.Change, defaultValue);
-    // }
     this.popper$ = new PopperCore({
       align: "start",
       platform,
@@ -262,6 +263,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.presence$.onStateChange(() =>
       this.emit(Events.StateChange, { ...this.state }),
     );
+    this.input$.onChange(() => {
+      this.input_dirty = true;
+    });
     if (onChange) {
       this.onChange(onChange);
     }
@@ -340,6 +344,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     // }
     // await sleep(800);
     this.open = true;
+    this.focused = true;
     // this.position();
     this.emit(Events.StateChange, { ...this.state });
   }
@@ -349,10 +354,19 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     if (this.open === false) {
       return;
     }
+    this.loading = false;
     this.open = false;
+    this.focused = false;
     this.aligned = false;
     this.hasItemMounted = false;
-    this.input$.setValue("");
+    if (this.input_dirty) {
+      this.input_dirty = false;
+      this.disableSearch();
+      if (this.selected_item$) {
+        this.input$.setValue(this.selected_item$.label);
+        this.input$.setPlaceholder(this.selected_item$.label);
+      }
+    }
     this.emit(Events.StateChange, { ...this.state });
   }
   addNativeOption() {}
@@ -469,6 +483,28 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.input$.setValue("");
     this.emit(Events.StateChange, { ...this.state });
   }
+  enableSearch() {
+    this.can_search = true;
+  }
+  disableSearch() {
+    this.can_search = false;
+  }
+  canSearch() {
+    return this.can_search;
+  }
+  startSearch() {
+    if (this.loading) {
+      return;
+    }
+    this.loading = true;
+    // this.value = null;
+    // this.selected_item$ = null;
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  finishSearch() {
+    this.loading = false;
+    this.emit(Events.StateChange, { ...this.state });
+  }
   focusOption(value: T) {
     const foucse_cur_focused_item =
       this.focused_item$ && this.focused_item$.value === value;
@@ -555,6 +591,16 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.emit(Events.StateChange, { ...this.state });
   }
 
+  handleFocus() {
+    if (this.presence$.state.visible) {
+      return;
+    }
+    this.show();
+  }
+  handleBlur() {
+    this.focused = false;
+    this.emit(Events.StateChange, { ...this.state });
+  }
   handleClickTrigger() {
     if (this.disabled) {
       return;
@@ -576,7 +622,13 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     if (item$.disabled) {
       return;
     }
+    this.input_dirty = false;
     this.select(item$.value);
+    if (this.search) {
+      this.disableSearch();
+      this.input$.setValue(item$.label);
+      this.input$.setPlaceholder(item$.label);
+    }
     this.hide();
   }
   handleMouseEnterItem(item$: SelectItemCore<T>) {

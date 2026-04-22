@@ -210,8 +210,8 @@ export class InputCore<T>
     // console.log("[DOMAIN]ui/input - setValue before extra.silence", extra.silence);
     if (!extra.silence) {
       this.emit(Events.Change, value);
-      this.emit(Events.StateChange, { ...this.state });
     }
+    this.emit(Events.StateChange, { ...this.state });
   }
   setPlaceholder(v: string) {
     this.placeholder = v;

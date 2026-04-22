@@ -258,15 +258,12 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 内容元素加载完成 */
   setFloating(floating: PopperCore["floating"]) {
-    console.log(
-      "[DEBUG-POPPER] setFloating",
-      this.unique_id,
+    logger.log(
+      "setFloating",
       "floating:",
       !!floating,
       "hasRef:",
       !!this.reference,
-      "has$el:",
-      !!(this.reference as any)?.$el,
     );
     if (!floating) {
       this.floating = null;
@@ -305,6 +302,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     //   // }
     // };
     // requestAnimationFrame(tryPlace);
+    this.place();
   }
   /** 箭头加载完成 */
   setArrow(arrow: PopperCore["arrow"]) {
@@ -502,9 +500,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         available_height,
       );
       viewport_scroll_top =
-        content_top_to_item_middle -
-        top_edge_to_trigger_middle +
-        viewport_data.offsetTop;
+        content_top_to_item_middle - top_edge_to_trigger_middle;
       // if (hasAmpleSpace) {
       //   viewport_scroll_top += 24;
       // }
@@ -528,15 +524,27 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.state.maxHeight = available_height;
     this.state.viewportOffsetTop = viewport_scroll_top;
     this._prev_scroll_top = viewport_scroll_top ?? 0;
+
+    // 先出现
+    this.state.isPlaced = true;
+    this.emit(Events.StateChange, { ...this.state });
+
+    // 1s 后滚动到正确的位置
     if (viewport_scroll_top !== undefined) {
       viewport$.setScrollTopSilent(viewport_scroll_top);
     }
     setTimeout(() => {
-      this.state.isPlaced = true;
+      // 然后监听滚动，避免设置 scrollTop 触发了 onScroll 事件
       const handleScroll = this.handleViewportScroll.bind(this);
       this._scrolling_subscriber = this.viewport$.onScroll(handleScroll);
-      this.emit(Events.StateChange, { ...this.state });
-    }, 800);
+    }, 200);
+
+    // setTimeout(() => {
+    //   this.state.isPlaced = true;
+    //   const handleScroll = this.handleViewportScroll.bind(this);
+    //   this._scrolling_subscriber = this.viewport$.onScroll(handleScroll);
+    //   this.emit(Events.StateChange, { ...this.state });
+    // }, 800);
   }
   realignImmediate() {}
   /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */

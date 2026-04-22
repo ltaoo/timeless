@@ -1,4 +1,4 @@
-import { refobj, computed, Button, Style } from "@timeless/timeless";
+import { refobj, computed, Button, Style, Logger } from "@timeless/timeless";
 import {
   View,
   ViewProps,
@@ -14,6 +14,8 @@ import {
 import { SelectCore, SelectItemCore } from "@timeless/ui-vm";
 
 import * as PopperPrimitive from "./popper";
+
+const logger = Logger({ prefix: "ui-primitive", scope: "select" });
 
 export function Root(
   props: ViewProps & { store: SelectCore<any> },
@@ -41,6 +43,7 @@ export function Trigger(
   const _input$ = NativeInput({
     id: props.id || props.store.id,
     attributes: rest.attributes,
+    // focused: computed(state_, (t) => t.focused),
     style: {
       position: "absolute",
       width: "1px",
@@ -53,10 +56,10 @@ export function Trigger(
       "border-width": 0,
     },
     onFocus() {
-      if (props.store.presence$.state.visible) {
-        return;
-      }
-      props.store.show();
+      props.store.handleFocus();
+    },
+    onBlur() {
+      props.store.handleBlur();
     },
   });
 
@@ -75,6 +78,7 @@ export function Trigger(
       onMounted(event) {
         const $elm = event.target;
         // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
+        // logger.log("Trigger Mounted", $elm.getBoundingClientRect());
         store.popper$.setReference(
           {
             $el: $elm,
@@ -85,12 +89,17 @@ export function Trigger(
           { force: true },
         );
         const handlePointerDown = (e: any) => {
-          e.preventDefault();
-          e.stopPropagation();
-          // 如果点击的是隐藏的 input，不要再次触发
-          if (e.target.tagName === "INPUT") {
+          const target = e.target as HTMLElement | null;
+          if (
+            target &&
+            (target.tagName === "INPUT" ||
+              target.tagName === "TEXTAREA" ||
+              target.isContentEditable)
+          ) {
             return;
           }
+          e.preventDefault();
+          e.stopPropagation();
           store.handleClickTrigger();
         };
         listener$.add($elm.addEventListener("pointerdown", handlePointerDown));
@@ -484,14 +493,13 @@ export function ScrollDownButton(
   );
 }
 
-export function Search(
-  props: ViewProps & { store: SelectCore<any> },
-  children?: ViewChildren,
-) {
+export function Search(props: ViewProps & { store: SelectCore<any> }) {
   const { store, ...rest } = props;
-  const state_ = refobj(store.state);
 
-  const listener$ = ListenerManager([state_]);
+  const state_ = refobj(store.state);
+  const input_ = refobj(store.input$.state);
+
+  const listener$ = ListenerManager([state_, input_]);
 
   return Show({
     when: computed(state_, (s) => s.search),
@@ -501,38 +509,73 @@ export function Search(
           state_.as(v);
         }),
       );
+      listener$.add(
+        store.input$.onStateChange((v) => {
+          input_.as(v);
+        }),
+      );
       return listener$.destroy;
     },
     ok() {
       return [
         NativeInput({
           ...rest,
-          // placeholder: computed(state_, (s) => s.searchPlaceholder),
-          // value: computed(state_, (s) => s.searchKeyword),
-          onInput(e: Event) {
+          placeholder: computed(input_, (t) => t.placeholder),
+          disabled: computed(input_, (t) => t.disabled),
+          value: computed(input_, (t) => {
+            // return t.value2?.label || "";
+            return t.value;
+          }),
+          onPointerDown(e) {
+            store.enableSearch();
+            if (store.selected_item$) {
+              store.input$.setValue("", { silence: true });
+            }
+            // logger.log("onPointerDown", store.disabled, store.open);
+            if (!store.disabled && !store.open) {
+              store.show();
+            }
+            e.stopPropagation();
+          },
+          onFocus() {
+            if (store.disabled) {
+              return;
+            }
+            store.show();
+          },
+          onInput(e) {
             const target = e.target;
             // @ts-ignore
-            store.setSearchKeyword(target.value);
+            logger.log("onInput", e.target?.value);
+            const value =
+              target && typeof target === "object" && "value" in target
+                ? target.value
+                : "";
+            store.input$.setValue(String(value));
+            // if (!store.open) {
+            //   store.show();
+            // }
           },
-          onMounted(event) {
-            const $elm = event.target;
-            // 自动聚焦搜索框
-            setTimeout(() => {
-              // @ts-ignore
-              $elm.focus();
-            }, 0);
-            if (rest.onMounted) {
-              listener$.add(rest.onMounted(event));
+          onKeyDown(e) {
+            e.stopPropagation();
+            switch (e.key) {
+              case "ArrowDown":
+                e.preventDefault();
+                store.focusNextOption();
+                break;
+              case "ArrowUp":
+                e.preventDefault();
+                store.focusPrevOption();
+                break;
+              case "Enter":
+                e.preventDefault();
+                store.selectFocusedOption();
+                break;
+              case "Escape":
+                e.preventDefault();
+                store.hide();
+                break;
             }
-            return listener$.destroy;
-          },
-          onClick(e: Event) {
-            // 阻止点击搜索框时关闭下拉菜单
-            e.stopPropagation();
-          },
-          onKeyDown(e: KeyboardEvent) {
-            // 阻止按键事件冒泡，避免影响 Select 的键盘导航
-            e.stopPropagation();
           },
         }),
       ];

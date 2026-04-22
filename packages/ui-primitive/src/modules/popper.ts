@@ -132,8 +132,6 @@ export function Content(
         }),
       ]),
       onMounted(event) {
-        console.log("-------- POPPER content mounted -------------");
-
         const $elm = event.target;
         const layer_id = `popper-${++layer_id_counter}`;
         const layer$ = getGlobalLayerManager();

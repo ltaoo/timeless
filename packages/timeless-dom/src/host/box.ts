@@ -165,6 +165,9 @@ export function HostElement(props: {
       if (events.onPointerDown) {
         $elm.addEventListener("pointerdown", events.onPointerDown);
       }
+      if (events.onPointerUp) {
+        $elm.addEventListener("pointerup", events.onPointerUp);
+      }
       if (events.onFocus) {
         $elm.addEventListener("focus", events.onFocus);
       }

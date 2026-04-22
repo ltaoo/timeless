@@ -3,11 +3,15 @@ import { DerivedRef, Ref, isRef } from "@timeless/reactive";
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
 import { ListenerManager } from "@/util/listener";
+import { Logger } from "@/util/logger";
+
+const logger = Logger({ prefix: "primitive", scope: "input/input" });
 
 export type InputProps = BoxProps & {
   id?: string | null;
   name?: string | DerivedRef<string> | Ref<string>;
   value?: DerivedRef<string> | Ref<string>;
+  focused?: boolean | DerivedRef<boolean> | Ref<boolean>;
   placeholder?: string | DerivedRef<string> | Ref<string>;
   disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
   readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
@@ -60,6 +64,12 @@ export function Input(props: InputProps = {}) {
 
   const state = box$.state;
   const events = box$.events;
+  if (onInput) {
+    events.onInput = onInput;
+  }
+  if (onChange) {
+    events.onChange = onChange;
+  }
 
   const methods = {
     listen(type: string, handler: (event: any) => void, options?: any) {
@@ -279,8 +289,7 @@ export function Input(props: InputProps = {}) {
   };
 
   methods.subscribe_props();
-  events.onInput = onInput
-  events.onChange = onChange
+  box$.methods.add_event();
 
   return {
     t: "input",

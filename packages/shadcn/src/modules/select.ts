@@ -183,7 +183,7 @@ export function Select(
             computed(state_, (t) => {
               return [
                 // "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 ",
-                t.open && store.position !== "item-aligned"
+                t.focused && store.position !== "item-aligned"
                   ? "border-ring ring-3 ring-ring/50"
                   : "",
                 // "disabled:cursor-not-allowed disabled:opacity-50 ",
@@ -204,28 +204,62 @@ export function Select(
             hovering_.as(false);
           },
           onMouseDown(e) {
+            if (store.search) {
+              return;
+            }
             e.stopPropagation();
+          },
+          onPointerDown(e) {
+            if (!store.search) {
+              return;
+            }
+            const target = e.target;
+            // @ts-ignore
+            if (target && target.tagName === "INPUT") {
+              return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            if (!store.open && !store.disabled) {
+              store.show();
+            }
           },
         },
         [
-          SelectPrimitive.Value({
-            dataset: {
-              slot: "select-value",
+          Show({
+            when: computed(state_, (t) => t.search),
+            ok() {
+              return [
+                SelectPrimitive.Search({
+                  store,
+                  class:
+                    "w-full bg-transparent outline-none placeholder:text-muted-foreground",
+                }),
+              ];
             },
-            store,
-            class: classNames([
-              "flex items-center gap-1.5 line-clamp-1",
-              computed(state_, (t) => {
-                const has_selected =
-                  t.value != null &&
-                  (t.options || []).some((o) => {
-                    return o instanceof SelectItemCore && o.value === t.value;
-                  });
-                return has_selected
-                  ? "text-foreground"
-                  : "text-muted-foreground";
-              }),
-            ]),
+            else() {
+              return SelectPrimitive.Value({
+                dataset: {
+                  slot: "select-value",
+                },
+                store,
+                class: classNames([
+                  "flex items-center gap-1.5 line-clamp-1",
+                  computed(state_, (t) => {
+                    const has_selected =
+                      t.value != null &&
+                      (t.options || []).some((o) => {
+                        return (
+                          o instanceof SelectItemCore && o.value === t.value
+                        );
+                      });
+                    return has_selected
+                      ? "text-foreground"
+                      : "text-muted-foreground";
+                  }),
+                ]),
+              });
+            },
           }),
           Show({
             when: show_clear_,
@@ -299,19 +333,19 @@ export function Select(
           },
         },
         () => [
-          View({}, [
-            SelectPrimitive.ScrollUpButton(
-              {
-                store,
-                dataset: {
-                  "scroll-up-button": "",
-                },
-                class:
-                  "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
-              },
-              [Icon({ name: "chevron-up", size: 16 })],
-            ),
-          ]),
+          // View({}, [
+          //   SelectPrimitive.ScrollUpButton(
+          //     {
+          //       store,
+          //       dataset: {
+          //         "scroll-up-button": "",
+          //       },
+          //       class:
+          //         "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
+          //     },
+          //     [Icon({ name: "chevron-up", size: 16 })],
+          //   ),
+          // ]),
           SelectPrimitive.Viewport(
             {
               store,
@@ -323,67 +357,60 @@ export function Select(
             },
             [
               Show({
-                when: computed(state_, (t) => t.search),
+                when: computed(state_, (t) => t.loading),
                 ok() {
-                  return [
-                    View(
-                      {
-                        class:
-                          "sticky top-0 z-10 -mx-1 mb-1 bg-popover px-1 pb-1 pt-0.5",
-                      },
-                      [
-                        SelectPrimitive.Search({
-                          store,
-                          class:
-                            "h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30",
-                        }),
-                      ],
-                    ),
-                  ];
-                },
-              }),
-              Show({
-                when: computed(filtered_entries_, (list) => list.length > 0),
-                ok() {
-                  return [
-                    For({
-                      key: "value",
-                      each: filtered_entries_,
-                      render: methods.render_entry,
-                    }),
-                  ];
+                  return View(
+                    {
+                      class:
+                        "py-6 text-center text-sm text-muted-foreground select-none",
+                    },
+                    ["加载中..."],
+                  );
                 },
                 else() {
-                  return [
-                    View(
-                      {
-                        class:
-                          "py-6 text-center text-sm text-muted-foreground select-none",
-                      },
-                      [
-                        computed(state_, (t) => {
-                          return t.loading ? "加载中..." : "暂无数据";
-                        }),
-                      ],
+                  return Show({
+                    when: computed(
+                      filtered_entries_,
+                      (list) => list.length > 0,
                     ),
-                  ];
+                    ok() {
+                      return [
+                        For({
+                          key: "value",
+                          each: filtered_entries_,
+                          render: methods.render_entry,
+                        }),
+                      ];
+                    },
+                    else() {
+                      return [
+                        View(
+                          {
+                            class:
+                              "py-6 text-center text-sm text-muted-foreground select-none",
+                          },
+                          ["暂无数据"],
+                        ),
+                      ];
+                    },
+                  });
                 },
               }),
             ],
           ),
-          View({}, [
-            SelectPrimitive.ScrollDownButton(
-              {
-                store,
-                dataset: {
-                  "scroll-down-button": "",
-                },
-                class:
-                  "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
-              },
-              [Icon({ name: "chevron-down", size: 16 })],
-            ),
-          ]),
+          // View({}, [
+          //   SelectPrimitive.ScrollDownButton(
+          //     {
+          //       store,
+          //       dataset: {
+          //         "scroll-down-button": "",
+          //       },
+          //       class:
+          //         "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
+          //     },
+          //     [Icon({ name: "chevron-down", size: 16 })],
+          //   ),
+          // ]),
         ],
       ),
     ],

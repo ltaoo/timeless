@@ -1,4 +1,4 @@
-import { request } from "@/biz/request.js";
+import { fetchDownloadList } from "@/biz/request.js";
 
 export default function OverlayView() {
   const contextFocusedRecord_ = refobj(null);
@@ -43,6 +43,8 @@ export default function OverlayView() {
   const client$ = new Timeless.HttpClientCore({});
   // @ts-ignore
   client$.fetch = async (options) => {
+    console.log("index.debug.js - client$.fetch", options);
+
     // @ts-ignore
     const url = new URL(options.url, "http://localhost");
     const page = Number(url.searchParams.get("page")) || 1;
@@ -57,14 +59,24 @@ export default function OverlayView() {
       },
     };
   };
-
-  /** @param {Record<string, any>} params */
-  function fetchDownloadList(params) {
-    return request.get("/api/mock/downloads", params);
-  }
-
   const list$ = new Timeless.ListCore(
-    new Timeless.RequestCore(fetchDownloadList, { client: client$ }),
+    new Timeless.RequestCore(fetchDownloadList, {
+      process(tmp) {
+        console.log("index.debug.js - client$.fetch", tmp);
+        if (tmp.error) {
+          return tmp.error;
+        }
+        return Timeless.Result.Ok({
+          list: tmp.data.list.map((v) => {
+            return {
+              value: v.id,
+              label: v.name,
+            };
+          }),
+        });
+      },
+      client: client$,
+    }),
     { pageSize: 10 },
   );
 
@@ -96,7 +108,7 @@ export default function OverlayView() {
               const record = contextFocusedRecord_.value;
               ui.waterfall$.methods.deleteCell((item) => item.id === record.id);
               list$.deleteItem((item) => item.id === record.id);
-              ui.contextMenu$.hide();
+              ui.contextMenu$.hide({ reason: "manual" });
             }
           },
         }),
@@ -104,18 +116,9 @@ export default function OverlayView() {
     }),
   };
 
-  ui.contextMenu$.menu.onHide(() => {
-    contextFocusedRecord_.as(null);
-  });
-
-  list$.onDataSourceChange(({ dataSource, reason }) => {
-    if (reason === "init") {
-      ui.waterfall$.methods.appendItems(dataSource);
-    }
-  });
-  list$.onDataSourceAdded((items) => {
-    ui.waterfall$.methods.appendItems(items);
-  });
+  // ui.contextMenu$.menu.onHide(() => {
+  //   contextFocusedRecord_.as(null);
+  // });
 
   // list$.init();
   const state_ = refobj({
@@ -123,50 +126,97 @@ export default function OverlayView() {
   });
   const checked_ = ref(true);
 
+  const platform = getPlatform();
+  const search_select$ = new Timeless.ui.SelectCore({
+    platform,
+    defaultValue: null,
+    placeholder: "输入关键词搜索",
+    options: [],
+    search: new Timeless.ui.InputCore({
+      defaultValue: "",
+      placeholder: "输入水果名...",
+    }),
+  });
+
+  const handleSearch = Timeless.utils.debounce(200, async function (keyword) {
+    await list$.search({ keyword });
+    search_select$.finishSearch();
+  });
+
+  search_select$.input$.onChange((v) => {
+    if (!search_select$.can_search) {
+      return;
+    }
+    search_select$.startSearch();
+    handleSearch(v);
+  });
+  list$.onDataSourceChange(({ dataSource, reason }) => {
+    console.log("index.debug.js - list$.onDataSourceChange", dataSource);
+    search_select$.setOptions(
+      dataSource.map((item) => {
+        return new Timeless.ui.SelectItemCore({
+          value: item.value,
+          label: item.label,
+        });
+      }),
+    );
+    // if (reason === "init") {
+    //   ui.waterfall$.methods.appendItems(dataSource);
+    // }
+  });
+  list$.onDataSourceAdded((items) => {
+    ui.waterfall$.methods.appendItems(items);
+  });
+
+  list$.init();
+
   return ScrollView(
     {
       class: "p-6 h-screen",
       store: ui.view$,
     },
     [
-      Button(
-        {
-          store: new Timeless.ui.ButtonCore({
-            onClick() {
-              console.log("123");
-              checked_.toggle();
-            },
-          }),
-        },
-        ["Click it"],
-      ),
-      Show({
-        when: checked_,
-        ok() {
-          return Portal({}, [
-            View(
-              {
-                style: {
-                  "z-index": 300,
-                  position: "fixed",
-                  top: "120px",
-                  right: "120px",
-                  width: "200px",
-                  height: "120px",
-                  border: "1px solid #ccc",
-                },
-                onMouseEnter() {
-                  console.log("enter");
-                },
-                onMouseLeave() {
-                  console.log("leave");
-                },
-              },
-              ["Checked!"],
-            ),
-          ]);
-        },
+      Select({
+        store: search_select$,
       }),
+      // Button(
+      //   {
+      //     store: new Timeless.ui.ButtonCore({
+      //       onClick() {
+      //         console.log("123");
+      //         checked_.toggle();
+      //       },
+      //     }),
+      //   },
+      //   ["Click it"],
+      // ),
+      // Show({
+      //   when: checked_,
+      //   ok() {
+      //     return Portal({}, [
+      //       View(
+      //         {
+      //           style: {
+      //             "z-index": 300,
+      //             position: "fixed",
+      //             top: "120px",
+      //             right: "120px",
+      //             width: "200px",
+      //             height: "120px",
+      //             border: "1px solid #ccc",
+      //           },
+      //           onMouseEnter() {
+      //             console.log("enter");
+      //           },
+      //           onMouseLeave() {
+      //             console.log("leave");
+      //           },
+      //         },
+      //         ["Checked!"],
+      //       ),
+      //     ]);
+      //   },
+      // }),
     ],
   );
 }

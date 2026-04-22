@@ -6461,67 +6461,69 @@ declare module "packages/ui-vm/src/popper/index" {
         side: Side;
         align: Align;
         strategy: "fixed" | "absolute";
+        defaultPlaced?: boolean;
         offsetX?: number;
         offsetY?: number;
-        defaultPlaced?: boolean;
         /**
-         * Popper 关心的，可滚动容器
-         * 当容器滚动时，可以更新 Popper 的位置
+         * Popper 关心的可滚动容器
+         * 当容器滚动时，可以用来更新 Popper 的位置
          */
         view$?: ScrollViewCore;
         /**
          * 可用空间计算模式
-         * - "popper": 根据放置侧计算（底部放置时取下方空间，顶部放置时取上方空间）
+         * - "popper": 根据放置侧计算（底部放置时取上方空间，顶部放置时取下方空间）
          * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
          */
         mode?: "popper" | "item-aligned";
-        /**
-         * item-aligned 模式：获取位置状态的回调
-         */
         platform?: Platform;
     };
     type PopperState = {
         strategy: Strategy;
         x: number;
         y: number;
-        top?: number;
-        bottom?: number;
         placement: Placement;
         isPlaced: boolean;
+        top?: number;
+        bottom?: number;
         /** PopperContent height */
-        height: number;
+        height?: number;
+        maxHeight?: number;
         minWidth?: number;
         margin?: number;
         viewportOffsetTop?: number;
-        /** 是否设置了参考DOM */
-        reference: boolean;
-        arrow: {
-            x?: number;
-            y?: number;
-        } | null;
         /** 浮动元素在放置方向上的可用高度（px） */
         availableHeight: number;
         /** 浮动元素在交叉轴上的可用宽度（px） */
         availableWidth: number;
         /** viewport 可以向上滚动 */
         canScrollUp: boolean;
+        hideScrollUp?: boolean;
         /** viewport 可以向下滚动 */
         canScrollDown: boolean;
+        hideScrollDown?: boolean;
+        /** 是否设置了参考DOM */
+        reference: boolean;
+        arrow: {
+            x?: number;
+            y?: number;
+        } | null;
     };
     export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         unique_id: string;
         debug: boolean;
-        platform: Platform;
-        placement: Placement;
         strategy: Strategy;
         offsetX: number;
         offsetY: number;
+        placement: Placement;
         /** 可用空间计算模式
          * - "popper": 根据放置侧计算（底部放置时取下方空间，顶部放置时取上方空间）
          * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
          */
         mode: "popper" | "item-aligned";
         view$?: ScrollViewCore;
+        /** Popper 内部的可滚动容器 */
+        viewport$: ScrollViewCore;
+        platform: Platform;
         reference: {
             getRect: () => Rect;
             $el?: unknown;
@@ -6529,16 +6531,6 @@ declare module "packages/ui-vm/src/popper/index" {
         floating: {
             getRect: () => Rect;
             $el?: {};
-        } | null;
-        /** item-aligned 模式：选中项在列表中的垂直偏移量，用于将面板对齐到选中项 */
-        itemOffset: number;
-        /** item-aligned 模式：trigger 中的 value 节点 */
-        valueNode: {
-            getBoundingClientRect: () => DOMRect;
-        } | null;
-        /** item-aligned 模式：content wrapper 元素（用于设置 fixed 定位） */
-        contentWrapper: {
-            $el?: HTMLElement;
         } | null;
         /** item-aligned 模式：viewport 元素（用于 scroll） */
         viewport: {
@@ -6550,32 +6542,23 @@ declare module "packages/ui-vm/src/popper/index" {
             offsetTop: number;
             offsetHeight: number;
         } | null;
-        /** item-aligned 模式：选中的 item 文本元素 */
-        selectedItemText: {
-            getBoundingClientRect: () => DOMRect;
-        } | null;
-        /** item-aligned 模式：content 元素的测量数据（用于计算定位） */
-        _contentMeasurement: ItemAlignedContentMeasurement | null;
-        /** item-aligned 模式：viewport 元素的测量数据（用于计算定位） */
-        _viewportMeasurement: ItemAlignedViewportMeasurement | null;
-        /** item-aligned 模式：计算好的容器样式 */
-        _itemAlignedStyle: ItemAlignedContentWrapperStyle | null;
         _item: {
             offsetTop: number;
             offsetHeight: number;
             x: number;
             y: number;
         };
+        _prev_scroll_top: number;
         container: Node | null;
         arrow: {
             width: number;
             height: number;
         } | null;
         $arrow: any | null;
-        viewport$: ScrollViewCore;
         state: PopperState;
         _enter: boolean;
         _focus: boolean;
+        _scrolling_subscriber: null | (() => void);
         constructor(options?: Partial<{
             _name: string;
         }> & Partial<PopperProps>);
@@ -6599,8 +6582,6 @@ declare module "packages/ui-vm/src/popper/index" {
         setArrow(arrow: PopperCore["arrow"]): void;
         setArrowElement($arrow: any | null): void;
         setContainer(container: Node): void;
-        /** viewport 滚动时由 primitive 调用，更新滚动按钮可见性 */
-        handleViewportScroll(scrollTop: number, clientHeight: number, scrollHeight: number): void;
         setConfig(config: {
             placement?: Placement;
             strategy?: Strategy;
@@ -6614,33 +6595,31 @@ declare module "packages/ui-vm/src/popper/index" {
             y: number;
         }): void;
         /** 设置 item-aligned 模式下选中项的偏移量 */
-        setItemOffset(rect: {
-            offsetTop: number;
-            offsetHeight: number;
-            bottom: number;
+        adjustContentPositonWithOffsetTop(data: {
+            selectedItem: {
+                offsetTop: number;
+                offsetHeight: number;
+                bottom: number;
+                isFirst?: boolean;
+                isLast?: boolean;
+            };
+            content?: {
+                borderTopWidth: number;
+                paddingTop: number;
+                borderBottomWidth: number;
+                paddingBottom: number;
+                clientHeight: number;
+            };
         }): void;
+        realignImmediate(): void;
         /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */
         setItemAlignedElements(data: {
-            valueNode: {
-                getBoundingClientRect: () => DOMRect;
-            };
-            contentWrapper: {
-                $el?: HTMLElement;
-            };
-            viewport: {
-                $el?: HTMLElement;
-            };
             selectedItem: {
                 $el?: HTMLElement;
                 offsetTop: number;
                 offsetHeight: number;
             };
-            selectedItemText: {
-                getBoundingClientRect: () => DOMRect;
-            };
         }): void;
-        /** 设置 item-aligned 模式下的测量数据 */
-        setItemAlignedMeasurements(content: ItemAlignedContentMeasurement, viewport: ItemAlignedViewportMeasurement): void;
         /** 计算浮动元素位置 */
         place(): Promise<void>;
         computePosition(): Promise<{
@@ -6650,11 +6629,15 @@ declare module "packages/ui-vm/src/popper/index" {
             strategy: Strategy;
             middleware_data: MiddlewareData;
         }>;
-        getItemAlignedPosition(): ItemAlignedContentWrapperStyle | null;
-        placeInItemAlignedMode(): void;
+        reset(): void;
+        /** viewport 滚动时由 primitive 调用，更新滚动按钮可见性，模拟原生 select 渐进扩展高度 */
+        handleViewportScroll(event: {
+            scrollTop: number;
+            clientHeight: number;
+            scrollHeight: number;
+        }): void;
         handleEnter(): void;
         handleLeave(): void;
-        reset(): void;
         onReferenceMounted(handler: Handler<TheTypesOfEvents[Events.ReferenceMounted]>): () => void;
         onFloatingMounted(handler: Handler<TheTypesOfEvents[Events.FloatingMounted]>): () => void;
         onContainerChange(handler: Handler<TheTypesOfEvents[Events.ContainerChange]>): () => void;
@@ -6978,6 +6961,8 @@ declare module "packages/ui-vm/src/scroll-view/index" {
         [Events.OutUpOffset]: void;
         [Events.Scrolling]: {
             scrollTop: number;
+            scrollHeight: number;
+            clientHeight: number;
         };
         [Events.ReachBottom]: void;
         [Events.Mounted]: void;
@@ -7023,6 +7008,12 @@ declare module "packages/ui-vm/src/scroll-view/index" {
             scrollTop: number;
             /** 内容高度 */
             contentHeight: number;
+            /** 顶部偏移量 */
+            offsetTop: number;
+            /** 顶部内边距 */
+            paddingTop: number;
+            /** 底部内边距 */
+            paddingBottom: number;
         }>;
         disabled: boolean;
         canPullToRefresh: boolean;
@@ -7071,6 +7062,8 @@ declare module "packages/ui-vm/src/scroll-view/index" {
         isMoveDown: boolean;
         isMoveUp: boolean;
         isScrollTo: boolean;
+        /** 是否静默滚动 */
+        isSilentScroll: boolean;
         /**
          * 为了让 StartPullToRefresh、OutOffset 等事件在拖动过程中仅触发一次的标记
          */
@@ -7092,16 +7085,6 @@ declare module "packages/ui-vm/src/scroll-view/index" {
         finishPullToRefresh: () => void;
         disablePullToRefresh: () => void;
         enablePullToRefresh: () => void;
-        handleMouseDown: (event: MouseEvent) => void;
-        handleMouseMove: (event: MouseEvent) => void;
-        handleTouchStart: (event: TouchEvent) => void;
-        handleTouchMove: (event: TouchEvent) => void;
-        /** 鼠标/手指按下 */
-        handlePointDown: (e: PointEvent) => void;
-        /** 鼠标/手指移动 */
-        handlePointMove: (e: PointEvent) => void;
-        handleTouchEnd: () => void;
-        handleScrolling: () => void;
         finishLoadingMore(): void;
         setMounted(): void;
         refreshRect(): void;
@@ -7125,11 +7108,38 @@ declare module "packages/ui-vm/src/scroll-view/index" {
         getScrollClientHeight(): number;
         getScrollTop(): number;
         addScrollTop(difference: number): void;
+        setScrollTopSilent(y: number): void;
         setScrollTop(y: number): void;
         getBodyHeight(): number;
         destroy: () => void;
         inDownOffset(handler: Handler<TheTypesOfEvents[Events.InDownOffset]>): () => void;
         outDownOffset(handler: Handler<TheTypesOfEvents[Events.OutDownOffset]>): () => void;
+        handleMounted(data: {
+            width: number;
+            height: number;
+            scrollWidth?: number;
+            scrollHeight?: number;
+            clientWidth?: number;
+            clientHeight?: number;
+            offsetWidth?: number;
+            offsetHeight?: number;
+            offsetTop?: number;
+            offsetLeft?: number;
+            scrollTop?: number;
+            scrollLeft?: number;
+            paddingTop?: number;
+            paddingBottom?: number;
+        }): void;
+        handleMouseDown: (event: MouseEvent) => void;
+        handleMouseMove: (event: MouseEvent) => void;
+        handleTouchStart: (event: TouchEvent) => void;
+        handleTouchMove: (event: TouchEvent) => void;
+        /** 鼠标/手指按下 */
+        handlePointDown: (e: PointEvent) => void;
+        /** 鼠标/手指移动 */
+        handlePointMove: (e: PointEvent) => void;
+        handleTouchEnd: () => void;
+        handleScrolling: (event: any) => void;
         onPulling(handler: Handler<TheTypesOfEvents[Events.Pulling]>): () => void;
         onScroll(handler: Handler<TheTypesOfEvents[Events.Scrolling]>): () => void;
         onReachBottom(handler: Handler<TheTypesOfEvents[Events.ReachBottom]>): () => void;
@@ -7253,6 +7263,8 @@ declare module "packages/ui-vm/src/select/item" {
         selected: boolean;
         focused: boolean;
         disabled: boolean;
+        offsetTop: number;
+        height: number;
         _leave: boolean;
         _enter: boolean;
         get state(): SelectItemState<T>;
@@ -7262,8 +7274,6 @@ declare module "packages/ui-vm/src/select/item" {
         $node(): HTMLElement | null;
         getRect(): DOMRect;
         getStyles(): CSSStyleDeclaration;
-        get offsetHeight(): number;
-        get offsetTop(): number;
         setLabel(label: string): void;
         setSelected(selected: boolean): void;
         setFocused(focused: boolean): void;
@@ -7277,6 +7287,10 @@ declare module "packages/ui-vm/src/select/item" {
             y: number;
         }): void;
         enter(): void;
+        handleMounted(rect: {
+            offsetTop: number;
+            height: number;
+        }): void;
         onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
         onLeave(handler: Handler<TheTypesOfEvents<T>[Events.Leave]>): () => void;
         onEnter(handler: Handler<TheTypesOfEvents<T>[Events.Enter]>): () => void;
@@ -7366,6 +7380,7 @@ declare module "packages/ui-vm/src/select/index" {
     type SelectState<T> = {
         options: (SelectGroupCore<T> | SelectItemCore<T>)[];
         value: T | null;
+        selectedOption: SelectItemCore<T> | null;
         allowClear: boolean;
         /** 菜单是否展开 */
         open: boolean;
@@ -7400,23 +7415,13 @@ declare module "packages/ui-vm/src/select/index" {
         loading: boolean;
         /** 是否启用搜索 */
         search: boolean;
-        aligned?: boolean;
+        aligned: boolean;
+        hasItemMounted: boolean;
         popper$: PopperCore;
         presence$: any;
         layer$: DismissableLayerCore;
         input$: any;
         position: "popper" | "item-aligned";
-        /** 选中项的 DOM 节点引用（用于 item-aligned 模式计算偏移） */
-        private _selected_item;
-        /** item-aligned 定位所需的 DOM 元素引用 */
-        private _content_el;
-        private _viewport_el;
-        private _value_el;
-        /** 参考点位置 */
-        triggerPos: {
-            x: number;
-            y: number;
-        };
         reference: Rect | null;
         /** 触发按钮 */
         trigger: SelectTriggerCore | null;
@@ -7427,16 +7432,15 @@ declare module "packages/ui-vm/src/select/index" {
         viewport: SelectViewportCore | null;
         /** 选中的 item */
         selected_item$: SelectItemCore<T> | null;
+        focused_item$: SelectItemCore<T> | null;
+        input_dirty: boolean;
+        can_search: boolean;
         /** 获取过滤后的选项 */
         get state(): SelectState<T>;
         constructor(props: Partial<{
             _name: string;
         }> & SelectProps<T>);
         mapViewModelWithIndex(index: number): SelectItemCore<T>;
-        setTriggerPointerDownPos(pos: {
-            x: number;
-            y: number;
-        }): void;
         setTrigger(trigger: SelectTriggerCore): void;
         setWrap(wrap: SelectWrapCore): void;
         setContent(content: SelectContentCore): void;
@@ -7446,17 +7450,7 @@ declare module "packages/ui-vm/src/select/index" {
          * 将 Select 对齐 下拉项列表 中的 选中项
          * 模拟原生 select 交互
          */
-        alignSpecialItem(offsetTop: number, offsetHeight: number, contentPaddingTop?: number): void;
-        /** 清除选中项偏移（关闭时调用） */
-        clearSelectedItemOffset(): void;
-        /** 设置 item-aligned 定位所需的 DOM 元素（分别设置） */
-        setItemAlignedElements(elements: {
-            contentEl?: HTMLElement;
-            viewportEl?: HTMLElement;
-            valueEl?: HTMLElement;
-        }): void;
-        /** 执行 item-aligned 定位（使用 computePositionInItemAlignedMode） */
-        placeItemAligned(): void;
+        alignSpecialItem(offsetTop: number, height: number, isFirst?: boolean, isLast?: boolean): void;
         show(): Promise<void>;
         hide(): void;
         addNativeOption(): void;
@@ -7475,6 +7469,10 @@ declare module "packages/ui-vm/src/select/index" {
         setSearchKeyword(keyword: string): void;
         /** 清空搜索关键字 */
         clearSearch(): void;
+        enableSearch(): void;
+        disableSearch(): void;
+        startSearch(): void;
+        finishSearch(): void;
         focusOption(value: T): void;
         blurOption(value: T): void;
         /** 获取当前焦点选项的索引 */
@@ -7487,12 +7485,13 @@ declare module "packages/ui-vm/src/select/index" {
         selectFocusedOption(): void;
         setPosition(rect: any): void;
         refresh(): void;
+        handleClickTrigger(): void;
         handleClickItem(item$: SelectItemCore<T>): void;
         handleMouseEnterItem(item$: SelectItemCore<T>): void;
         handleMouseLeaveItem(item$: SelectItemCore<T>): void;
         handleItemMounted(data: {
-            offset_top: number;
-            offset_height: number;
+            offsetTop: number;
+            height: number;
             store: SelectItemCore<T>;
         }): void;
         onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
@@ -12882,7 +12881,7 @@ declare module "packages/ui-primitive/src/modules/select" {
     };
     export function Item(props: ViewProps & {
         select$: SelectCore<any>;
-        store: SelectItemCore<any>;
+        item$: SelectItemCore<any>;
     }, children: ViewChildren): {
         t: string;
         $elm: any;
@@ -12914,8 +12913,7 @@ declare module "packages/ui-primitive/src/modules/select" {
     };
     export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ItemIndicator(props: ViewProps & {
-        store: SelectCore<any>;
-        value: any;
+        store: SelectItemCore<any>;
     }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ScrollUpButton(props: ViewProps & {
         store: SelectCore<any>;
@@ -12947,7 +12945,7 @@ declare module "packages/ui-primitive/src/modules/select" {
     };
     export function Search(props: ViewProps & {
         store: SelectCore<any>;
-    }, children?: ViewChildren): {
+    }): {
         t: string;
         $elm: any;
         state: {
@@ -14909,10 +14907,6 @@ declare module "packages/shadcn/src/modules/search-select" {
     import { SelectCore } from "packages/ui-vm/src/index";
     export function SearchSelect<T>(props: ViewProps & {
         store: SelectCore<T>;
-        debounce?: number;
-        minLength?: number;
-        emptyText?: string;
-        loadingText?: string;
     }): {
         t: string;
         $elm: any;
