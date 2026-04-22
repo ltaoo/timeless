@@ -93,7 +93,7 @@ export function Content(
               "flex-direction": "column",
               position: "fixed",
               "box-sizing": "border-box",
-              // opacity: t.isPlaced ? 1 : 0,
+              opacity: t.isPlaced ? 1 : 0,
               "pointer-events": t.isPlaced ? "initial" : "none",
               // transform: t.isPlaced
               //   ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
@@ -227,6 +227,12 @@ export function Content(
           layer$.unregister(layer_id);
         };
       },
+      onUnmounted() {
+        if (rest.onUnmounted) {
+          rest.onUnmounted();
+        }
+        store.reset();
+      },
     },
     children,
   );
@@ -273,17 +279,15 @@ export function ScrollUpButton(
   const state_ = refobj(store.state);
 
   const listener$ = ListenerManager([state_]);
-  listener$.add(
-    store.onStateChange((v) => {
-      state_.as(v);
-    }),
-  );
 
   return Show({
-    // ...rest,
     when: computed(state_, (s) => s.canScrollUp),
-
     onMounted(event) {
+      listener$.add(
+        store.onStateChange((v) => {
+          state_.as(v);
+        }),
+      );
       if (rest.onMounted) {
         listener$.add(rest.onMounted(event));
       }
@@ -315,17 +319,17 @@ export function ScrollDownButton(
   const { store, ...rest } = props;
   const state_ = refobj(store.state);
 
-  const listener$ = ListenerManager();
-  listener$.add(
-    store.onStateChange((v) => {
-      state_.as(v);
-    }),
-  );
+  const listener$ = ListenerManager([state_]);
 
   return Show({
     when: computed(state_, (s) => s.canScrollDown),
     onMounted(event) {
-      store.realignImmediate();
+      listener$.add(
+        store.onStateChange((v) => {
+          state_.as(v);
+        }),
+      );
+
       if (rest.onMounted) {
         listener$.add(rest.onMounted(event));
       }

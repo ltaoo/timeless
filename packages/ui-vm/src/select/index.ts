@@ -472,7 +472,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   focusOption(value: T) {
     const foucse_cur_focused_item =
       this.focused_item$ && this.focused_item$.value === value;
-    logger.log("focus option", value, foucse_cur_focused_item);
+    // logger.log("focus option", value, foucse_cur_focused_item);
     if (foucse_cur_focused_item) {
       return;
     }

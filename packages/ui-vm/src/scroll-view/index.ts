@@ -184,6 +184,8 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
   isMoveDown = false;
   isMoveUp = false;
   isScrollTo = false;
+  /** 是否静默滚动 */
+  isSilentScroll = false;
   /**
    * 为了让 StartPullToRefresh、OutOffset 等事件在拖动过程中仅触发一次的标记
    */
@@ -352,6 +354,13 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
   }
   addScrollTop(difference: number) {
     this.setScrollTop(this.getScrollTop() + difference);
+  }
+  setScrollTopSilent(y: number) {
+    this.isSilentScroll = true;
+    this.setScrollTop(y);
+    setTimeout(() => {
+      this.isSilentScroll = false;
+    }, 0);
   }
   /* 设置滚动条的位置 */
   setScrollTop(y: number) {
@@ -561,11 +570,14 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     this.movetype = "pending";
     this.isMoveDown = false;
   };
-  handleScrolling = () => {
-    const scrollTop = this.getScrollTop();
+  handleScrolling = (event) => {
+    if (this.isSilentScroll) {
+      return;
+    }
+    const scrollTop = event.target.scrollTop;
     const isUp = scrollTop - this.preScrollY > 0;
-    const scrollHeight = this.getScrollHeight();
-    const clientHeight = this.getScrollClientHeight();
+    const scrollHeight = event.target.scrollHeight;
+    const clientHeight = event.target.clientHeight;
     if (!this.isLoadingMore) {
       const toBottom = scrollHeight - clientHeight - scrollTop;
       if (toBottom <= this.threshold && isUp) {

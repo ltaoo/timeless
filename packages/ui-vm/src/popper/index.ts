@@ -136,18 +136,13 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     offsetTop: number;
     offsetHeight: number;
   } | null = null;
-  /** item-aligned 模式：content 元素的测量数据（用于计算定位） */
-  _contentMeasurement: ItemAlignedContentMeasurement | null = null;
-  /** item-aligned 模式：viewport 元素的测量数据（用于计算定位） */
-  _viewportMeasurement: ItemAlignedViewportMeasurement | null = null;
-  /** item-aligned 模式：计算好的容器样式 */
-  _itemAlignedStyle: ItemAlignedContentWrapperStyle | null = null;
   _item: {
     offsetTop: number;
     offsetHeight: number;
     x: number;
     y: number;
   };
+  _prev_scroll_top = 0;
   container: Node | null = null;
   arrow: {
     width: number;
@@ -173,6 +168,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
 
   _enter = false;
   _focus = false;
+  _scrolling_subscriber: null | (() => void) = null;
 
   constructor(options: Partial<{ _name: string }> & Partial<PopperProps> = {}) {
     super(options);
@@ -201,10 +197,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.view$ = view$;
     this.platform = platform;
 
-    const handleScroll = this.handleViewportScroll.bind(this);
-    this.viewport$ = new ScrollViewCore({
-      onScroll: handleScroll,
-    });
+    this.viewport$ = new ScrollViewCore();
   }
 
   checkIsClickAnchor: (target: any) => boolean = (target: any) => {
@@ -328,25 +321,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     // this.container = container;
     // this.emit(Events.ContainerChange, container);
   }
-  /** viewport 滚动时由 primitive 调用，更新滚动按钮可见性 */
-  handleViewportScroll(event: {
-    scrollTop: number;
-    clientHeight: number;
-    scrollHeight: number;
-  }) {
-    const { scrollTop, clientHeight, scrollHeight } = event;
-    const canScrollUp = scrollTop > 0;
-    const canScrollDown = scrollTop + clientHeight < scrollHeight - 1;
-    if (
-      this.state.hideScrollUp === !canScrollUp &&
-      this.state.hideScrollDown === !canScrollDown
-    ) {
-      return;
-    }
-    this.state.hideScrollUp = !canScrollUp;
-    this.state.hideScrollDown = !canScrollDown;
-    this.emit(Events.StateChange, { ...this.state });
-  }
+
   setConfig(config: { placement?: Placement; strategy?: Strategy }) {
     if (config.placement) {
       this.placement = config.placement;
@@ -530,26 +505,38 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         content_top_to_item_middle -
         top_edge_to_trigger_middle +
         viewport_data.offsetTop;
+      // if (hasAmpleSpace) {
+      //   viewport_scroll_top += 24;
+      // }
     }
 
+    logger.log(
+      "before refresh content position",
+      height,
+      viewport_scroll_top,
+      viewport_data.offsetTop,
+    );
     this.state.x = left ?? 0;
     this.state.y = 0;
     this.state.top = top;
     this.state.bottom = bottom_val;
     this.state.height = height;
     this.state.minWidth = min_width;
-    this.state.isPlaced = true;
     this.state.margin = content_margin;
     this.state.placement = bottom_val === 0 ? "bottom" : "top";
     this.state.strategy = "fixed";
     this.state.maxHeight = available_height;
-    // this.state.viewportOffsetTop = viewportScrollTop;
-
+    this.state.viewportOffsetTop = viewport_scroll_top;
+    this._prev_scroll_top = viewport_scroll_top ?? 0;
     if (viewport_scroll_top !== undefined) {
-      viewport$.setScrollTop(viewport_scroll_top);
+      viewport$.setScrollTopSilent(viewport_scroll_top);
     }
-
-    this.emit(Events.StateChange, { ...this.state });
+    setTimeout(() => {
+      this.state.isPlaced = true;
+      const handleScroll = this.handleViewportScroll.bind(this);
+      this._scrolling_subscriber = this.viewport$.onScroll(handleScroll);
+      this.emit(Events.StateChange, { ...this.state });
+    }, 800);
   }
   realignImmediate() {}
   /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */
@@ -567,14 +554,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     // this.viewport = data.viewport;
     this.selectedItem = data.selectedItem;
     // this.selectedItemText = data.selectedItemText;
-  }
-  /** 设置 item-aligned 模式下的测量数据 */
-  setItemAlignedMeasurements(
-    content: ItemAlignedContentMeasurement,
-    viewport: ItemAlignedViewportMeasurement,
-  ) {
-    this._contentMeasurement = content;
-    this._viewportMeasurement = viewport;
   }
   /** 计算浮动元素位置 */
   async place() {
@@ -737,14 +716,73 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   }
 
   reset() {
+    logger.log("reset");
     this._enter = false;
     this._focus = false;
+    this._prev_scroll_top = 0;
     this.state.isPlaced = false;
+    this.state.canScrollDown = false;
+    this.state.canScrollUp = false;
     this.state.x = 0;
     this.state.y = 0;
+    if (this._scrolling_subscriber) {
+      this._scrolling_subscriber();
+      this._scrolling_subscriber = null;
+    }
     this.emit(Events.StateChange, { ...this.state });
   }
 
+  /** viewport 滚动时由 primitive 调用，更新滚动按钮可见性，模拟原生 select 渐进扩展高度 */
+  handleViewportScroll(event: {
+    scrollTop: number;
+    clientHeight: number;
+    scrollHeight: number;
+  }) {
+    const { scrollTop, clientHeight, scrollHeight } = event;
+    const can_scroll_up = scrollTop > 0;
+    const can_scroll_down = scrollTop + clientHeight < scrollHeight - 1;
+    const cur_height = this.state.height ?? 0;
+    let target_height = this.state.height;
+    const available_height = this.state.maxHeight ?? 0;
+    if (this.state.isPlaced) {
+      const delta = scrollTop - this._prev_scroll_top;
+      const abs_delta = Math.abs(delta);
+      this._prev_scroll_top = scrollTop;
+      const should_change_height =
+        cur_height < available_height && abs_delta > 0;
+      logger.log("handle viewport scroll", delta, scrollTop, this.state.height);
+      if (should_change_height) {
+        target_height += abs_delta;
+        if (target_height >= available_height) {
+          if (delta < 0) {
+            this.state.canScrollDown = true;
+            this.state.hideScrollDown = false;
+          }
+          if (delta > 0) {
+            this.state.canScrollUp = true;
+            this.state.hideScrollUp = false;
+          }
+          target_height = available_height;
+        }
+      }
+    }
+    logger.log(
+      "handle viewport scroll before set state",
+      target_height,
+      this.state.height,
+    );
+    if (
+      this.state.hideScrollUp === !can_scroll_up &&
+      this.state.hideScrollDown === !can_scroll_down &&
+      target_height === this.state.height
+    ) {
+      return;
+    }
+    this.state.hideScrollUp = !can_scroll_up;
+    this.state.hideScrollDown = !can_scroll_down;
+    this.state.height = target_height;
+    this.emit(Events.StateChange, { ...this.state });
+  }
   handleEnter() {
     // this.log("enter", this.reference?.x, this._enter);
     if (this._enter === true) {
