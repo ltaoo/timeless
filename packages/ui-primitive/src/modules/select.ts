@@ -3,10 +3,10 @@ import {
   View,
   ViewProps,
   ViewChildren,
+  Input as NativeInput,
   Portal as NativePortal,
   Fragment,
   Show,
-  Input as NativeInput,
   classNames,
   styleNames,
   ListenerManager,
@@ -76,9 +76,9 @@ export function Trigger(
         "aria-required": computed(state_, (t) => t.required || undefined),
       },
       onMounted(event) {
-        const $elm = event.target;
+        const $elm = event.target.get$elm();
         // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
-        // logger.log("Trigger Mounted", $elm.getBoundingClientRect());
+        // logger.log("Trigger Mounted", $elm);
         store.popper$.setReference(
           {
             $el: $elm,
@@ -90,12 +90,14 @@ export function Trigger(
         );
         const handlePointerDown = (e: any) => {
           const target = e.target as HTMLElement | null;
+          logger.log("Trigger handlePointerDown", target?.isContentEditable);
           if (
             target &&
             (target.tagName === "INPUT" ||
               target.tagName === "TEXTAREA" ||
               target.isContentEditable)
           ) {
+            // store.handleClickTrigger();
             return;
           }
           e.preventDefault();
@@ -527,21 +529,16 @@ export function Search(props: ViewProps & { store: SelectCore<any> }) {
             return t.value;
           }),
           onPointerDown(e) {
+            logger.log("Search onPointerDown");
             store.enableSearch();
             if (store.selected_item$) {
               store.input$.setValue("", { silence: true });
             }
-            // logger.log("onPointerDown", store.disabled, store.open);
+            logger.log("onPointerDown", store.disabled, store.open);
             if (!store.disabled && !store.open) {
               store.show();
             }
             e.stopPropagation();
-          },
-          onFocus() {
-            if (store.disabled) {
-              return;
-            }
-            store.show();
           },
           onInput(e) {
             const target = e.target;

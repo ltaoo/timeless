@@ -34,16 +34,18 @@ export function Arrow(
           if (placementSide === "right") {
             return "calc(-1 * var(--t1-popper-arrow-offset, 6px))";
           }
-          const x = s.middlewareData?.arrow?.x;
-          return x != null ? `${x}px` : undefined;
+          // const x = s.middleware_data?.arrow?.x;
+          // return x != null ? `${x}px` : undefined;
+          return undefined;
         }),
         top: computed(state, (s) => {
           const placementSide = (s.placement || "bottom").split("-")[0];
           if (placementSide === "bottom") {
             return "calc(-1 * var(--t1-popper-arrow-offset, 6px))";
           }
-          const y = s.middlewareData?.arrow?.y;
-          return y != null ? `${y}px` : undefined;
+          // const y = s.middlewareData?.arrow?.y;
+          // return y != null ? `${y}px` : undefined;
+          return undefined;
         }),
         right: computed(state, (s) => {
           const placementSide = (s.placement || "bottom").split("-")[0];

@@ -1,14 +1,7 @@
 import { BaseDomain, Handler, Platform } from "@timeless/base";
 
 import { InputCore } from "@/input/index";
-import {
-  PopperCore,
-  computePositionInItemAlignedMode,
-  ItemAlignedRect,
-  ItemAlignedContentMeasurement,
-  ItemAlignedViewportMeasurement,
-  ItemAlignedSelectedItemMeasurement,
-} from "@/popper/index";
+import { PopperCore } from "@/popper/index";
 import { Rect } from "@/popper/types";
 import { DismissableLayerCore } from "@/dismissable-layer/index";
 import { Direction } from "@/direction/index";
@@ -158,6 +151,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   selected_item$: SelectItemCore<T> | null = null;
   focused_item$: SelectItemCore<T> | null = null;
 
+  _tmp_searching = false;
   _tmp_options: null | SelectItemCore<T>[] = null;
   input_dirty = false;
   can_search = true;
@@ -318,7 +312,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     });
   }
   async show() {
-    // console.log(...this.log("show", this.state));
+    debugger;
+    logger.log("show", this.state);
     if (this.disabled) {
       return;
     }
@@ -359,6 +354,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.focused = false;
     this.aligned = false;
     this.hasItemMounted = false;
+    this._tmp_searching = false;
     if (this.input_dirty) {
       this.input_dirty = false;
       this.disableSearch();
@@ -366,6 +362,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         setTimeout(() => {
           if (this._tmp_options) {
             this.options = this._tmp_options;
+            logger.log("clear tmp_options");
             this._tmp_options = null;
           }
         }, 800);
@@ -500,11 +497,19 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     return this.can_search;
   }
   startSearch() {
+    logger.log(
+      "startSearch save tmp_options",
+      this.loading,
+      this.options.length,
+    );
     if (this.loading) {
       return;
     }
     this.loading = true;
-    this._tmp_options = this.options;
+    if (!this._tmp_searching) {
+      this._tmp_options = [...this.options];
+      this._tmp_searching = true;
+    }
     // this.value = null;
     // this.selected_item$ = null;
     this.emit(Events.StateChange, { ...this.state });
@@ -600,26 +605,20 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   }
 
   handleFocus() {
-    if (this.presence$.state.visible) {
-      return;
-    }
-    this.show();
+    // if (this.presence$.state.visible) {
+    //   return;
+    // }
+    // this.show();
   }
   handleBlur() {
     this.focused = false;
     this.emit(Events.StateChange, { ...this.state });
   }
   handleClickTrigger() {
+    logger.log("handleClickTrigger", this.disabled, this.open);
     if (this.disabled) {
       return;
     }
-    // 阻止事件冒泡到 document，避免 LayerManager 立即关闭
-    // e.stopPropagation();
-    // if (store.open) {
-    //   props.store.blur();
-    // } else {
-    //   props.store.focus();
-    // }
     if (this.open) {
       this.hide();
       return;

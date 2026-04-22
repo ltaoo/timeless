@@ -209,21 +209,21 @@ export function Select(
             }
             e.stopPropagation();
           },
-          onPointerDown(e) {
-            if (!store.search) {
-              return;
-            }
-            const target = e.target;
-            // @ts-ignore
-            if (target && target.tagName === "INPUT") {
-              return;
-            }
-            e.preventDefault();
-            e.stopPropagation();
-            if (!store.open && !store.disabled) {
-              store.show();
-            }
-          },
+          // onPointerDown(e) {
+          //   if (!store.search) {
+          //     return;
+          //   }
+          //   const target = e.target;
+          //   // @ts-ignore
+          //   if (target && target.tagName === "INPUT") {
+          //     return;
+          //   }
+          //   e.preventDefault();
+          //   e.stopPropagation();
+          //   if (!store.open && !store.disabled) {
+          //     store.show();
+          //   }
+          // },
         },
         [
           Show({
