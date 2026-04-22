@@ -55,6 +55,11 @@ const artifacts = [
     src: "packages/a2ui/dist/timeless.a2ui.umd.min.js",
     dest: "timeless.a2ui.umd.min.js",
   },
+  {
+    pkg: "utils",
+    src: "packages/utils/dist/timeless.utils.umd.min.js",
+    dest: "timeless.utils.umd.min.js",
+  },
 ];
 
 // Explicit build dependencies

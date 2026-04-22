@@ -534,7 +534,7 @@ export function For<T>(
       return [...state.children];
     },
     onMounted(event: MountedEvent) {
-      logger.log("onMounted", state.children);
+      // logger.log("onMounted", state.children);
       methods.subscribe_props();
       state.rendered = true;
       if (props.onMounted) {
@@ -557,7 +557,10 @@ export function For<T>(
       }
       listener$.destroy();
       for (let i = 0; i < state.idx_arr.length; i += 1) {
-        state.idx_arr[i].destroy();
+        const v = state.idx_arr[i];
+        if (v) {
+          v.destroy();
+        }
       }
       state.rendered = false;
       state.subscribed = false;

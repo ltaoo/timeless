@@ -3,8 +3,50 @@ import {
   ObjectSignal,
   Ref,
   StyleRef,
+  TimelessElement,
   ViewStyle,
+  VNodeView,
 } from "@timeless/timeless";
+import { HostElement } from "./box";
+
+export type DOMStyle = VNodeView<HTMLStyleElement> & {
+  t: "style";
+  render(elm: TimelessElement): DocumentFragment;
+};
+
+export function DOMStyle(props: {
+  build: (elm: TimelessElement) => VNodeView<HTMLStyleElement>;
+}): DOMStyle {
+  const t = "style";
+  const box$ = HostElement({ $elm: null, t, build: props.build });
+
+  return {
+    ...box$.methods,
+    t,
+    getType() {
+      return "view";
+    },
+    isDocumentFragment() {
+      return true;
+    },
+    render(elm: TimelessElement) {
+      const $elm = document.createElement("style");
+      $elm.type = "text/css";
+      if (elm.state.content) {
+        $elm.textContent = elm.state.content;
+      }
+      box$.methods.set$elm($elm);
+      document.head.appendChild($elm);
+      return document.createDocumentFragment();
+    },
+    hydrate(elm: TimelessElement, $elm: HTMLStyleElement) {
+      box$.methods.set$elm($elm);
+
+      const child_nodes: VNodeView[] = [];
+      const child_elements: (TimelessElement | null)[] = [];
+    },
+  };
+}
 
 export function viewStyleToCssText(
   style:

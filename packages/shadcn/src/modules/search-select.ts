@@ -4,6 +4,7 @@ import {
   Show,
   View,
   ViewProps,
+  Input as NativeInput,
   classNames,
   computed,
   refobj,
@@ -14,20 +15,18 @@ import { SelectCore } from "@timeless/ui-vm";
 export function SearchSelect<T>(
   props: ViewProps & {
     store: SelectCore<T>;
-    // fetchOptions: (keyword: string) => Promise<{ value: T; label: string }[]>;
-    debounce?: number;
-    minLength?: number;
-    emptyText?: string;
-    loadingText?: string;
+    // debounce?: number;
+    // minLength?: number;
+    // emptyText?: string;
+    // loadingText?: string;
   },
 ) {
   const {
     store,
-    // fetchOptions,
-    debounce = 300,
-    minLength = 1,
-    emptyText = "暂无数据",
-    loadingText = "加载中...",
+    // debounce = 300,
+    // minLength = 1,
+    // emptyText = "暂无数据",
+    // loadingText = "加载中...",
     ...rest
   } = props;
 
@@ -36,23 +35,23 @@ export function SearchSelect<T>(
     state_.as(next);
   });
 
-  let inputEl: HTMLInputElement | null = null;
-  let lastKeyword = (store.state.searchKeyword || "").trim();
-  let lastOpen = !!store.state.open;
-  let timer: number | null = null;
-  let seq = 0;
+  // let inputEl: HTMLInputElement | null = null;
+  // let lastKeyword = (store.state.searchKeyword || "").trim();
+  // let lastOpen = !!store.state.open;
+  // let timer: number | null = null;
+  // let seq = 0;
 
-  function mergeSelectedOption(options: { value: T; label: string }[]) {
-    const selected = store.state.value2;
-    if (!selected) {
-      return options;
-    }
-    const list = Array.isArray(options) ? options : [];
-    if (list.some((o) => o && o.value === selected.value)) {
-      return list;
-    }
-    return [selected, ...list];
-  }
+  // function mergeSelectedOption(options: { value: T; label: string }[]) {
+  //   const selected = store.state.value2;
+  //   if (!selected) {
+  //     return options;
+  //   }
+  //   const list = Array.isArray(options) ? options : [];
+  //   if (list.some((o) => o && o.value === selected.value)) {
+  //     return list;
+  //   }
+  //   return [selected, ...list];
+  // }
 
   async function run(keyword: string, currentSeq: number) {
     store.setLoading(true);
@@ -71,60 +70,6 @@ export function SearchSelect<T>(
     //   }
     // }
   }
-
-  store.onStateChange((state) => {
-    const open = !!state.open;
-    const keyword = (state.searchKeyword || "").trim();
-
-    const openChanged = open !== lastOpen;
-    const keywordChanged = keyword !== lastKeyword;
-
-    lastOpen = open;
-    lastKeyword = keyword;
-
-    if (openChanged && open) {
-      setTimeout(() => {
-        if (!inputEl || store.disabled) {
-          return;
-        }
-        inputEl.focus();
-        const len = inputEl.value.length;
-        if (typeof inputEl.setSelectionRange === "function") {
-          inputEl.setSelectionRange(len, len);
-        }
-      }, 1);
-    }
-
-    if (!open) {
-      if (timer) {
-        clearTimeout(timer);
-        timer = null;
-      }
-      return;
-    }
-
-    if (!openChanged && !keywordChanged) {
-      return;
-    }
-
-    if (timer) {
-      clearTimeout(timer);
-      timer = null;
-    }
-
-    if (keyword.length < minLength) {
-      seq += 1;
-      store.setLoading(false);
-      store.setOptions(state.value2 ? [state.value2] : []);
-      return;
-    }
-
-    seq += 1;
-    const currentSeq = seq;
-    timer = window.setTimeout(() => {
-      run(keyword, currentSeq);
-    }, debounce);
-  });
 
   return SelectPrimitive.Root({ store }, [
     View(
@@ -146,7 +91,7 @@ export function SearchSelect<T>(
             return;
           }
           const elm = el as unknown as HTMLElement;
-          store.popper.setReference(
+          store.popper$.setReference(
             {
               $el: elm,
               getRect() {
@@ -163,74 +108,17 @@ export function SearchSelect<T>(
           }
           e.preventDefault();
           e.stopPropagation();
-          if (inputEl) {
-            inputEl.focus();
-          }
           if (!store.open && !store.disabled) {
             store.show();
           }
         },
       },
       [
-        // NativeInput({
-        //   class:
-        //     "w-full bg-transparent outline-none placeholder:text-muted-foreground",
-        //   placeholder: computed(
-        //     state_,
-        //     (t) => t.searchPlaceholder || t.placeholder || "",
-        //   ),
-        //   disabled: computed(state_, (t) => t.disabled),
-        //   value: computed(state_, (t) => {
-        //     if (t.open) {
-        //       return t.searchKeyword || "";
-        //     }
-        //     return t.value2?.label || "";
-        //   }),
-        //   onMounted(el) {
-        //     inputEl = el as unknown as HTMLInputElement;
-        //   },
-        //   onPointerDown(e) {
-        //     e.stopPropagation();
-        //   },
-        //   onFocus() {
-        //     if (store.disabled) {
-        //       return;
-        //     }
-        //     store.show();
-        //   },
-        //   onInput(e) {
-        //     const target = e.target as any;
-        //     const value =
-        //       target && typeof target === "object" && "value" in target
-        //         ? target.value
-        //         : "";
-        //     store.setSearchKeyword(String(value));
-        //     if (!store.open) {
-        //       store.show();
-        //     }
-        //   },
-        //   onKeyDown(e) {
-        //     e.stopPropagation();
-        //     switch (e.key) {
-        //       case "ArrowDown":
-        //         e.preventDefault();
-        //         store.focusNextOption();
-        //         break;
-        //       case "ArrowUp":
-        //         e.preventDefault();
-        //         store.focusPrevOption();
-        //         break;
-        //       case "Enter":
-        //         e.preventDefault();
-        //         store.selectFocusedOption();
-        //         break;
-        //       case "Escape":
-        //         e.preventDefault();
-        //         store.hide();
-        //         break;
-        //     }
-        //   },
-        // }),
+        SelectPrimitive.Search({
+          store,
+          class:
+            "w-full bg-transparent outline-none placeholder:text-muted-foreground",
+        }),
         SelectPrimitive.Icon({ store, class: "size-4 text-muted-foreground" }, [
           Icon({ name: "chevron-down", size: 16 }),
         ]),
@@ -255,74 +143,7 @@ export function SearchSelect<T>(
             : {};
         }),
       },
-      [
-        SelectPrimitive.Viewport({ store, class: "p-1" }, [
-          Show({
-            when: computed(state_, (t) => (t.options || []).length > 0),
-            ok() {
-              return [
-                For({
-                  key: "value",
-                  each: computed(state_, (t) => t.options),
-                  render(option: any) {
-                    return SelectPrimitive.Item(
-                      {
-                        store,
-                        value: option.value,
-                        class: classNames([
-                          "relative flex w-full cursor-default select-none items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
-                          computed(state_, (d) => {
-                            const opt = d.options.find(
-                              (o: any) => o.value === option.value,
-                            );
-                            const isFocused = Boolean(opt?.focused);
-                            const isSelected = Boolean(opt?.selected);
-                            return [
-                              isSelected ? "font-medium" : "",
-                              isFocused
-                                ? "bg-accent text-accent-foreground"
-                                : "",
-                            ]
-                              .filter(Boolean)
-                              .join(" ");
-                          }),
-                        ]),
-                      },
-                      [
-                        SelectPrimitive.ItemIndicator(
-                          {
-                            store,
-                            value: option.value,
-                            class:
-                              "pointer-events-none absolute right-2 flex size-4 items-center justify-center",
-                          },
-                          [Icon({ name: "check", size: 16 })],
-                        ),
-                        SelectPrimitive.ItemText({}, [option.label]),
-                      ],
-                    );
-                  },
-                }),
-              ];
-            },
-            else() {
-              return [
-                View(
-                  {
-                    class:
-                      "py-6 text-center text-sm text-muted-foreground select-none",
-                  },
-                  [
-                    computed(state_, (t) =>
-                      t.loading ? loadingText : emptyText,
-                    ),
-                  ],
-                ),
-              ];
-            },
-          }),
-        ]),
-      ],
+      [],
     ),
   ]);
 }

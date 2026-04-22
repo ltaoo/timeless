@@ -45,7 +45,7 @@ export interface DetectOverflowOptions {
  * - 0 = lies flush with the boundary
  * @see https://floating-ui.com/docs/detectOverflow
  */
-export async function detectOverflow(
+export async function detect_overflow(
   state: MiddlewareState,
   options: DetectOverflowOptions | Derivable<DetectOverflowOptions> = {},
 ): Promise<SideObject> {

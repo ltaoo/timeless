@@ -9,7 +9,7 @@ import type {
   SideObject,
   Strategy,
 } from "./utils";
-import type { detectOverflow } from "./detect-overflow";
+import type { detect_overflow } from "./detect-overflow";
 
 type Promisable<T> = T | Promise<T>;
 
@@ -50,7 +50,7 @@ export interface Platform {
   getClientRects?: (element: any) => Promisable<Array<ClientRectObject>>;
   isRTL?: (element: any) => Promisable<boolean>;
   getScale?: (element: any) => Promisable<{ x: number; y: number }>;
-  detectOverflow?: typeof detectOverflow;
+  detectOverflow?: typeof detect_overflow;
 }
 
 export interface MiddlewareData {
@@ -159,7 +159,7 @@ export interface MiddlewareState extends Coords {
   middlewareData: MiddlewareData;
   elements: Elements;
   rects: ElementRects;
-  platform: { detectOverflow: typeof detectOverflow } & Platform;
+  platform: { detectOverflow: typeof detect_overflow } & Platform;
 }
 /**
  * @deprecated use `MiddlewareState` instead.

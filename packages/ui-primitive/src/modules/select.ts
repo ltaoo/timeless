@@ -1,4 +1,4 @@
-import { refobj, computed } from "@timeless/timeless";
+import { refobj, computed, Button, Style, Logger } from "@timeless/timeless";
 import {
   View,
   ViewProps,
@@ -11,9 +11,11 @@ import {
   styleNames,
   ListenerManager,
 } from "@timeless/timeless";
-import { SelectCore } from "@timeless/ui-vm";
+import { SelectCore, SelectItemCore } from "@timeless/ui-vm";
 
 import * as PopperPrimitive from "./popper";
+
+const logger = Logger({ prefix: "ui-primitive", scope: "select" });
 
 export function Root(
   props: ViewProps & { store: SelectCore<any> },
@@ -22,7 +24,7 @@ export function Root(
   return PopperPrimitive.Root(
     {
       ...props,
-      store: props.store.popper,
+      store: props.store.popper$,
     },
     children,
   );
@@ -35,12 +37,13 @@ export function Trigger(
   const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
-  const listener$ = ListenerManager();
+  const listener$ = ListenerManager([state_]);
 
   // 创建隐藏的 input 用于可访问性
   const _input$ = NativeInput({
     id: props.id || props.store.id,
     attributes: rest.attributes,
+    // focused: computed(state_, (t) => t.focused),
     style: {
       position: "absolute",
       width: "1px",
@@ -53,27 +56,30 @@ export function Trigger(
       "border-width": 0,
     },
     onFocus() {
-      if (props.store.presence.state.visible) {
-        return;
-      }
-      props.store.show();
+      props.store.handleFocus();
+    },
+    onBlur() {
+      props.store.handleBlur();
     },
   });
 
-  return View(
+  return Button(
     {
       ...rest,
+      attributes: {
+        role: "combobox",
+        "aria-expanded": computed(state_, (t) => (t.open ? "true" : "false")),
+        "aria-haspopup": "listbox",
+        // 'aria-controls': computed(state_, (t) => t.open ? t.id : undefined),
+        // 'aria-labelledby': computed(state_, (t) => t.id),
+        // 'aria-readonly': computed(state_, (t) => t.readOnly || undefined),
+        "aria-required": computed(state_, (t) => t.required || undefined),
+      },
       onMounted(event) {
         const $elm = event.target;
-
-        listener$.add(
-          store.onStateChange((v) => {
-            state_.as(v);
-          }),
-        );
-
         // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
-        store.popper.setReference(
+        // logger.log("Trigger Mounted", $elm.getBoundingClientRect());
+        store.popper$.setReference(
           {
             $el: $elm,
             getRect() {
@@ -83,33 +89,29 @@ export function Trigger(
           { force: true },
         );
         const handlePointerDown = (e: any) => {
+          const target = e.target as HTMLElement | null;
+          if (
+            target &&
+            (target.tagName === "INPUT" ||
+              target.tagName === "TEXTAREA" ||
+              target.isContentEditable)
+          ) {
+            return;
+          }
           e.preventDefault();
           e.stopPropagation();
-          // 如果点击的是隐藏的 input，不要再次触发
-          if (e.target.tagName === "INPUT") {
-            return;
-          }
-          if (store.disabled) {
-            return;
-          }
-          // 阻止事件冒泡到 document，避免 LayerManager 立即关闭
-          // e.stopPropagation();
-          // if (store.open) {
-          //   props.store.blur();
-          // } else {
-          //   props.store.focus();
-          // }
-          if (props.store.presence.state.visible) {
-            props.store.hide();
-            return;
-          }
-          props.store.show();
+          store.handleClickTrigger();
         };
         listener$.add($elm.addEventListener("pointerdown", handlePointerDown));
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
-        return listener$.clean;
+        return listener$.destroy;
       },
     },
     [_input$, Fragment({}, children)],
@@ -118,13 +120,16 @@ export function Trigger(
 
 export function Value(props: ViewProps & { store: SelectCore<any> }) {
   const { store, ...rest } = props;
-  const state_ = refobj(store.state);
 
-  const listener$ = ListenerManager([]);
+  const state_ = refobj(store.state);
+  const listener$ = ListenerManager([state_]);
 
   return View(
     {
       ...rest,
+      style: {
+        "pointer-events": "none",
+      },
       onMounted(event) {
         listener$.add(
           store.onStateChange((v) => {
@@ -134,14 +139,14 @@ export function Value(props: ViewProps & { store: SelectCore<any> }) {
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
-        return listener$.clean;
+        return listener$.destroy;
       },
     },
     [
       computed(state_, (d) => {
-        const opt = (d.options || []).find((o) => o.value === d.value);
-        if (opt) {
-          return opt.label;
+        const opt = d.selectedOption;
+        if (opt && opt instanceof SelectItemCore) {
+          return opt.label ?? opt.value ?? "Select...";
         }
         return d.placeholder || "Select...";
       }),
@@ -182,7 +187,7 @@ export function Clear(
 }
 
 export function Portal(
-  props: ViewProps & {
+  props: {
     store: SelectCore<any>;
     animation?: { in: string; out: string };
   },
@@ -200,8 +205,8 @@ export function Content(
 ) {
   const { store, animation, onMounted, ...rest } = props;
 
-  let _was_exiting = false;
-  const presence_ = refobj(store.presence.state);
+  const presence_ = refobj(store.presence$.state);
+
   const listener$ = ListenerManager([presence_]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -231,68 +236,21 @@ export function Content(
     }),
     onMounted(event) {
       listener$.add(
-        store.presence.onStateChange((v) => {
+        store.presence$.onStateChange((v) => {
           presence_.as(v);
         }),
       );
       if (onMounted) {
         listener$.add(onMounted(event));
       }
-      return listener$.clean;
+      return listener$.destroy;
     },
     ok() {
       return [
         NativePortal({}, [
-          PopperPrimitive.Content(
-            {
-              store: store.popper,
-              onDismiss() {
-                store.hide();
-              },
-            },
-            [
-              View(
-                {
-                  ...rest,
-                  attributes: {
-                    ...(rest.attributes || {}),
-                    tabindex: 0,
-                  },
-                  class: classNames([
-                    rest.class,
-                    computed(presence_, (t) => {
-                      if (t.exit) {
-                        _was_exiting = true;
-                      }
-                      if (!t.mounted && _was_exiting) {
-                        _was_exiting = false;
-                        return animation?.out || "";
-                      }
-                      if (t.mounted) {
-                        _was_exiting = false;
-                      }
-                      return [
-                        t.enter && animation?.in ? animation.in : "",
-                        t.exit && animation?.out ? animation.out : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ");
-                    }),
-                  ]),
-                  onKeyDown: handleKeyDown,
-                  onAnimationEnd(e: AnimationEvent) {
-                    if (e.target === e.currentTarget) {
-                      store.presence.handleAnimationEnd();
-                    }
-                    if (rest.onAnimationEnd) {
-                      // @ts-ignore
-                      rest.onAnimationEnd(e);
-                    }
-                  },
-                },
-                children,
-              ),
-            ],
+          PopperPositionContent(
+            { ...rest, store, animation, onKeyDown: handleKeyDown },
+            children,
           ),
         ]),
       ];
@@ -300,98 +258,163 @@ export function Content(
   });
 }
 
+export function PopperPositionContent(
+  props: ViewProps & {
+    store: SelectCore<any>;
+    animation?: { in: string; out: string };
+  },
+  children?: ViewChildren,
+) {
+  const { store, animation, ...rest } = props;
+
+  let _was_exiting = false;
+  const presence_ = refobj(store.presence$.state);
+
+  return PopperPrimitive.Content(
+    {
+      store: store.popper$,
+      onDismiss() {
+        store.hide();
+      },
+    },
+    [
+      View(
+        {
+          ...rest,
+          attributes: {
+            ...(rest.attributes || {}),
+            tabindex: 0,
+          },
+          class: classNames([
+            rest.class,
+            computed(presence_, (t) => {
+              if (t.exit) {
+                _was_exiting = true;
+              }
+              if (!t.mounted && _was_exiting) {
+                _was_exiting = false;
+                return animation?.out || "";
+              }
+              if (t.mounted) {
+                _was_exiting = false;
+              }
+              return [
+                t.enter && animation?.in ? animation.in : "",
+                t.exit && animation?.out ? animation.out : "",
+              ]
+                .filter(Boolean)
+                .join(" ");
+            }),
+          ]),
+          // onKeyDown: handleKeyDown,
+          onAnimationEnd(e: AnimationEvent) {
+            if (e.target === e.currentTarget) {
+              store.presence$.handleAnimationEnd();
+            }
+            if (rest.onAnimationEnd) {
+              rest.onAnimationEnd(e);
+            }
+          },
+        },
+        children,
+      ),
+    ],
+  );
+}
+
+export function AlignedPositionContent(
+  props: ViewProps & { store: SelectCore<any> },
+  children?: ViewChildren,
+) {
+  return View(
+    {
+      style: {
+        display: "flex",
+        "flex-direction": "column",
+        position: "fixed",
+      },
+    },
+    children,
+  );
+}
+
 export function Viewport(
   props: ViewProps & { store: SelectCore<any> },
   children: ViewChildren,
 ) {
-  return View(props, children);
-}
-
-export function Search(
-  props: ViewProps & { store: SelectCore<any> },
-  children?: ViewChildren,
-) {
   const { store, ...rest } = props;
-  const state_ = refobj(store.state);
-  const listener$ = ListenerManager();
 
-  return Show({
-    when: computed(state_, (s) => s.search),
-    onMounted() {
-      listener$.add(
-        store.onStateChange((v) => {
-          state_.as(v);
-        }),
-      );
-    },
-    ok() {
-      return [
-        NativeInput({
-          ...rest,
-          placeholder: computed(state_, (s) => s.searchPlaceholder),
-          value: computed(state_, (s) => s.searchKeyword),
-          onInput(e: Event) {
-            const target = e.target;
-            // @ts-ignore
-            store.setSearchKeyword(target.value);
-          },
-          onMounted(event) {
-            const $elm = event.target;
-            // 自动聚焦搜索框
-            setTimeout(() => {
-              // @ts-ignore
-              $elm.focus();
-            }, 0);
-            if (rest.onMounted) {
-              listener$.add(rest.onMounted(event));
-            }
-            return listener$.clean;
-          },
-          onClick(e: Event) {
-            // 阻止点击搜索框时关闭下拉菜单
-            e.stopPropagation();
-          },
-          onKeyDown(e: KeyboardEvent) {
-            // 阻止按键事件冒泡，避免影响 Select 的键盘导航
-            e.stopPropagation();
-          },
-        }),
-      ];
-    },
-  });
+  return Fragment({}, [
+    Style(
+      {},
+      `.__t_no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.__t_no-scrollbar::-webkit-scrollbar{
+  display: none;
+}`,
+    ),
+    PopperPrimitive.Viewport(
+      {
+        ...rest,
+        dataset: {
+          "radix-select-viewport": "",
+        },
+        class: classNames([rest.class, "__t_no-scrollbar"]),
+        style: {
+          position: "relative",
+          flex: "1 1 0%",
+          overflow: "hidden auto",
+        },
+        store: store.popper$,
+      },
+      children,
+    ),
+  ]);
 }
 
 export function Item(
-  props: ViewProps & { store: SelectCore<any>; value: any; disabled?: boolean },
+  props: ViewProps & {
+    select$: SelectCore<any>;
+    item$: SelectItemCore<any>;
+  },
   children: ViewChildren,
 ) {
-  const { store, value, disabled = false, ...rest } = props as any;
+  const { select$, item$: store, ...rest } = props;
 
-  return View(
+  const state_ = refobj(store.state);
+  const listener$ = ListenerManager([state_]);
+
+  return Button(
     {
       ...rest,
-      dataset: {
-        disabled: computed(disabled, (d) => (d ? "" : undefined)),
+      onMounted(event) {
+        const $elm = event.target.get$elm();
+        select$.handleItemMounted({
+          offsetTop: $elm.offsetTop,
+          height: $elm.offsetHeight,
+          store,
+        });
+        listener$.add(
+          store.onStateChange((v) => {
+            state_.as(v);
+          }),
+        );
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.destroy;
       },
       onClick() {
-        if (disabled) {
-          return;
-        }
-        store.select(value);
-        store.hide();
+        select$.handleClickItem(store);
       },
       onMouseEnter() {
-        console.log("[select] - onMouseEnter", value);
-        if (disabled) {
-          return;
-        }
-        store.focusOption(value);
+        select$.handleMouseEnterItem(store);
       },
       onMouseLeave() {
-        if (disabled) {
-          return;
-        }
-        store.blurOption(value);
+        select$.handleMouseLeaveItem(store);
       },
     },
     children,
@@ -399,17 +422,28 @@ export function Item(
 }
 
 export function ItemText(props: ViewProps, children: ViewChildren) {
-  return View({ ...props, as: "span" }, children);
+  return View(
+    {
+      ...props,
+      style: styleNames([
+        props.style,
+        {
+          "font-weight": "400",
+        },
+      ]),
+    },
+    children,
+  );
 }
 
 export function ItemIndicator(
-  props: ViewProps & { store: SelectCore<any>; value: any },
+  props: ViewProps & { store: SelectItemCore<any> },
   children: ViewChildren,
 ) {
-  const { store, value, ...rest } = props;
+  const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
-  const selected_ = computed(state_, (d) => d.value === value);
+  const selected_ = computed(state_, (t) => t.selected);
   const listener$ = ListenerManager([state_, selected_]);
 
   return View(
@@ -422,7 +456,6 @@ export function ItemIndicator(
         },
       ]),
       onMounted(event) {
-        console.log("[primitive]Select - item indicator mounted", value);
         listener$.add(
           store.onStateChange((v) => {
             state_.as(v);
@@ -431,15 +464,121 @@ export function ItemIndicator(
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
         }
-        // return listener$.clean;
-      },
-      onUnmounted() {
-        console.log("[primitive]Select - item indicator unmounted", value);
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
-        }
+        return listener$.destroy;
       },
     },
     children,
   );
+}
+
+export function ScrollUpButton(
+  props: ViewProps & { store: SelectCore<any> },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return PopperPrimitive.ScrollUpButton(
+    { ...rest, store: store.popper$ },
+    children,
+  );
+}
+
+export function ScrollDownButton(
+  props: ViewProps & { store: SelectCore<any> },
+  children: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  return PopperPrimitive.ScrollDownButton(
+    { ...rest, store: store.popper$ },
+    children,
+  );
+}
+
+export function Search(props: ViewProps & { store: SelectCore<any> }) {
+  const { store, ...rest } = props;
+
+  const state_ = refobj(store.state);
+  const input_ = refobj(store.input$.state);
+
+  const listener$ = ListenerManager([state_, input_]);
+
+  return Show({
+    when: computed(state_, (s) => s.search),
+    onMounted() {
+      listener$.add(
+        store.onStateChange((v) => {
+          state_.as(v);
+        }),
+      );
+      listener$.add(
+        store.input$.onStateChange((v) => {
+          input_.as(v);
+        }),
+      );
+      return listener$.destroy;
+    },
+    ok() {
+      return [
+        NativeInput({
+          ...rest,
+          placeholder: computed(input_, (t) => t.placeholder),
+          disabled: computed(input_, (t) => t.disabled),
+          value: computed(input_, (t) => {
+            // return t.value2?.label || "";
+            return t.value;
+          }),
+          onPointerDown(e) {
+            store.enableSearch();
+            if (store.selected_item$) {
+              store.input$.setValue("", { silence: true });
+            }
+            // logger.log("onPointerDown", store.disabled, store.open);
+            if (!store.disabled && !store.open) {
+              store.show();
+            }
+            e.stopPropagation();
+          },
+          onFocus() {
+            if (store.disabled) {
+              return;
+            }
+            store.show();
+          },
+          onInput(e) {
+            const target = e.target;
+            // @ts-ignore
+            logger.log("onInput", e.target?.value);
+            const value =
+              target && typeof target === "object" && "value" in target
+                ? target.value
+                : "";
+            store.input$.setValue(String(value));
+            // if (!store.open) {
+            //   store.show();
+            // }
+          },
+          onKeyDown(e) {
+            e.stopPropagation();
+            switch (e.key) {
+              case "ArrowDown":
+                e.preventDefault();
+                store.focusNextOption();
+                break;
+              case "ArrowUp":
+                e.preventDefault();
+                store.focusPrevOption();
+                break;
+              case "Enter":
+                e.preventDefault();
+                store.selectFocusedOption();
+                break;
+              case "Escape":
+                e.preventDefault();
+                store.hide();
+                break;
+            }
+          },
+        }),
+      ];
+    },
+  });
 }

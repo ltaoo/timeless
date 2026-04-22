@@ -1,18 +1,46 @@
 import { Section, Item } from "@/components/index.js";
 
 export default function FormView() {
+  const platform = getPlatform();
   const view$ = new Timeless.ui.ScrollViewCore({});
+
   const search_select$ = new Timeless.ui.SelectCore({
     defaultValue: null,
     placeholder: "输入关键词搜索",
     options: [],
-    search: false,
-    searchPlaceholder: "输入水果名...",
+    search: new Timeless.ui.InputCore({
+      defaultValue: "",
+      placeholder: "输入水果名...",
+    }),
   });
 
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
       Section("Input", [
+        View({ class: "w-full" }, [
+          Select({
+            store: new Timeless.ui.SelectCore({
+              defaultValue: "apple",
+              platform,
+              position: "item-aligned",
+              options: [
+                new Timeless.ui.SelectItemCore({
+                  value: "apple",
+                  label: "苹果",
+                }),
+                new Timeless.ui.SelectItemCore({
+                  value: "banana",
+                  label: "香蕉",
+                }),
+                new Timeless.ui.SelectItemCore({
+                  value: "orange",
+                  label: "橙子",
+                }),
+              ],
+            }),
+          }),
+        ]),
+
         Item("Default", [
           Flex({ direction: "col", gap: "4px" }, [
             Input({
@@ -127,24 +155,27 @@ export default function FormView() {
         ]),
       ]),
       Section("Select", [
-        Item("Default", [
+        Item("Scrollable (100 options)", [
           Select({
             store: new Timeless.ui.SelectCore({
-              defaultValue: "apple",
-              options: [
-                { value: "apple", label: "苹果" },
-                { value: "banana", label: "香蕉" },
-                { value: "orange", label: "橙子" },
-              ],
+              // defaultValue: null,
+              defaultValue: "option_88",
+              platform,
+              position: "item-aligned",
+              placeholder: "从 100 个选项中选择",
+              options: Array.from({ length: 100 }, (_, i) => {
+                return new Timeless.ui.SelectItemCore({
+                  value: `option_${i + 1}`,
+                  label: `选项 ${i + 1}`,
+                });
+              }),
             }),
           }),
         ]),
         Item("Search Remote", [
           View({ class: "space-y-2 w-[240px]" }, [
-            SearchSelect({
+            Select({
               store: search_select$,
-              minLength: 1,
-              debounce: 300,
             }),
           ]),
         ]),

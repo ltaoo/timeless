@@ -43,12 +43,14 @@ export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   name = "SelectItemCore";
   debug = true;
 
-  text: string;
   value: T | null = null;
+  label: string = "";
   selected: boolean = false;
   focused: boolean = false;
   disabled: boolean = false;
 
+  offsetTop: number = 0;
+  height: number = 0;
   // text: {
   //   $node: () => HTMLElement;
   //   getRect: () => DOMRect;
@@ -71,7 +73,7 @@ export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     super(options);
 
     const { name, label, value, $node, getRect, getStyles } = options;
-    this.text = label;
+    this.label = label;
     this.value = value;
     if (name) {
       this.name = `${this.name}_${name}`;
@@ -95,42 +97,60 @@ export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   getStyles() {
     return {} as CSSStyleDeclaration;
   }
-  get offsetHeight() {
-    return this.$node()?.offsetHeight ?? 0;
+  setLabel(label: string) {
+    if (this.label === label) {
+      return;
+    }
+    this.label = label;
+    this.emit(Events.StateChange, { ...this.state });
   }
-  get offsetTop() {
-    return this.$node()?.offsetTop ?? 0;
+  setSelected(selected: boolean) {
+    if (this.selected === selected) {
+      return;
+    }
+    this.selected = selected;
+    this.emit(Events.StateChange, { ...this.state });
   }
-  setText(text: SelectItemCore<T>["text"]) {
-    this.text = text;
+  setFocused(focused: boolean) {
+    if (this.focused === focused) {
+      return;
+    }
+    this.focused = focused;
+    this.emit(Events.StateChange, { ...this.state });
   }
   select() {
     // if (this.state.selected) {
     //   return;
     // }
-    this.state.selected = true;
+    if (this.selected) {
+      return;
+    }
+    this.selected = true;
     this.emit(Events.StateChange, { ...this.state });
   }
   unselect() {
     // if (this.state.selected === false) {
     //   return;
     // }
-    this.state.selected = false;
+    if (!this.selected) {
+      return;
+    }
+    this.selected = false;
     this.emit(Events.StateChange, { ...this.state });
   }
   focus() {
-    if (this.state.focused === true) {
+    if (this.focused) {
       return;
     }
-    this.state.focused = true;
+    this.focused = true;
     this.emit(Events.StateChange, { ...this.state });
     this.emit(Events.Focus);
   }
   blur() {
-    if (this.state.focused === false) {
+    if (!this.focused) {
       return;
     }
-    this.state.focused = false;
+    this.focused = false;
     this.emit(Events.StateChange, { ...this.state });
     this.emit(Events.Blur);
   }
@@ -151,6 +171,12 @@ export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     }
     this._enter = true;
     this.emit(Events.Enter);
+  }
+
+  handleMounted(rect: { offsetTop: number; height: number }) {
+    const { height, offsetTop } = rect;
+    this.offsetTop = offsetTop;
+    this.height = height;
   }
 
   onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) {

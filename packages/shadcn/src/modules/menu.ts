@@ -74,7 +74,7 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
               props.store.cur_item.menu &&
               props.store.cur_item.menu.state.open
             ) {
-              props.store.cur_item.menu.hide();
+              props.store.cur_item.menu.hide({ reason: "dismis" });
             }
           },
         };

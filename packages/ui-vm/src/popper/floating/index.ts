@@ -1,20 +1,20 @@
 // Core
-export { computePosition } from "./compute-position";
-export { detectOverflow } from "./detect-overflow";
+export { compute_position } from "./compute-position";
+export { detect_overflow } from "./detect-overflow";
 export type { DetectOverflowOptions } from "./detect-overflow";
 
 // Platform
-export { getDOMPlatform } from "./platform";
 export type { Platform } from "./types";
 
 // Middleware
-export { offset, flip, shift, limitShift, arrow } from "./middleware";
+export { offset, flip, shift, limitShift, arrow, size } from "./middleware";
 export type {
   OffsetOptions,
   FlipOptions,
   ShiftOptions,
   LimitShiftOptions,
   ArrowOptions,
+  SizeOptions,
 } from "./middleware";
 
 // Types

@@ -1,11 +1,16 @@
-import { refobj, ref, computed, isRef } from "@timeless/timeless";
+import {
+  refobj,
+  ref,
+  computed,
+  styleNames,
+  ListenerManager,
+} from "@timeless/timeless";
 import {
   View,
   ViewProps,
   ViewChildren,
   Fragment,
   Portal as NativePortal,
-  isStyleRef,
 } from "@timeless/timeless";
 import { TooltipCore, Align, Side } from "@timeless/ui-vm";
 
@@ -49,12 +54,7 @@ export function Content(
 ) {
   const { store, ...rest } = props;
 
-  return View(
-    {
-      ...rest,
-    },
-    children,
-  );
+  return View({ ...rest }, children);
 }
 
 export function Trigger(
@@ -62,6 +62,7 @@ export function Trigger(
   children?: ViewChildren,
 ) {
   const { content, side = "top", align = "center", ...rest } = props;
+
   const userOnMounted = rest.onMounted;
   const userOnMouseEnter = rest.onMouseEnter;
   const userOnMouseLeave = rest.onMouseLeave;
@@ -75,7 +76,7 @@ export function Trigger(
       onMounted(event) {
         const $e = event.target;
         const nodes = $e.getChildren();
-        $ref = nodes.find((n) => n.getType() === "view") || $e;
+        $ref = nodes.find((n) => n && n.getType() === "view") || $e;
 
         const cleanup = userOnMounted ? userOnMounted(event) : undefined;
         return () => {
@@ -118,50 +119,42 @@ export function Portal(
   props: ViewProps & { store?: TooltipCore },
   children?: ViewChildren,
 ) {
-  const store = props.store || getGlobalTooltipStore();
-  const state = refobj(store.state);
-  const contentRef = getGlobalTooltipContentRef();
-  const events: any[] = [];
+  const { class: cls, ...restProps } = props;
 
-  events.push(
+  const store = props.store || getGlobalTooltipStore();
+  const state_ = refobj(store.state);
+  // const contentRef = getGlobalTooltipContentRef();
+  const listener$ = ListenerManager([state_]);
+
+  listener$.add(
     store.onStateChange(() => {
-      state.as(store.state);
+      state_.as(store.state);
     }),
   );
-
-  const { class: className, style: styleProps, ...restProps } = props;
-  const extraStyle =
-    styleProps &&
-    typeof styleProps === "object" &&
-    !isRef(styleProps) &&
-    !isStyleRef(styleProps)
-      ? styleProps
-      : {};
 
   return NativePortal(
     {
       onUnmounted() {
-        for (const fn of events) {
-          if (typeof fn === "function") {
-            fn();
-          }
-        }
+        listener$.destroy();
       },
     },
     [
       PopperPrimitive.Content(
         {
           store: store.popper,
+          class: cls,
+          style: styleNames([
+            props.style,
+            {
+              display: computed(state_, (t) => (t.visible ? "block" : "none")),
+            },
+          ]),
           onReferenceOutOfView() {
             store.hide();
           },
-          class: className,
-          style: {
-            ...extraStyle,
-            display: computed(state, (t) => (t.visible ? "block" : "none")),
-          },
         },
-        contentRef.value?.length ? (contentRef.value as any) : (children ?? []),
+        children,
+        // contentRef.value?.length ? (contentRef.value as any) : (children ?? []),
       ),
     ],
   );

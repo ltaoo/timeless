@@ -1566,16 +1566,18 @@ declare module "packages/primitive/src/content/style" {
      *
      * @example
      * ```tsx
-     * <NativeStyle>
+     * <Style>
      *   {`body { margin: 0 }`}
-     * </NativeStyle>
+     * </Style>
      * ```
      */
-    import { ViewProps } from "@/content/view";
-    import { ViewChildren } from "@/content/type";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { MountedEvent } from "@/event";
     /** Props for NativeStyle - same as ViewProps but without 'as' */
-    export interface NativeStyleProps extends Omit<ViewProps, "as"> {
-    }
+    export type StyleProps = {
+        onMounted?: (event: MountedEvent) => void;
+        onUnmounted?: () => void;
+    };
     /**
      * Creates a native HTML style element.
      *
@@ -1583,7 +1585,16 @@ declare module "packages/primitive/src/content/style" {
      * @param children - CSS content (string or CSS text elements)
      * @returns A TimelessElement representing a style element
      */
-    export function NativeStyle(props?: NativeStyleProps, children?: ViewChildren): any;
+    export function Style(props: StyleProps, children: string | Ref<string> | DerivedRef<string>): {
+        t: string;
+        $elm: any;
+        state: {
+            rendered: boolean;
+            content: string;
+        };
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/primitive/src/content/popper" {
     /**
@@ -2599,19 +2610,178 @@ declare module "packages/primitive/src/vnode/view" {
         get$elm(): HostElm;
     };
 }
-declare module "packages/primitive/src/platform" {
+declare module "packages/base/src/base" {
+    /**
+     * 注册的监听器
+     */
+    import { EventType, Handler } from "mitt";
+    export type { Handler, EventType };
+    export enum BaseEvents {
+        Loading = "__loading",
+        Destroy = "__destroy"
+    }
+    type TheTypesOfBaseEvents = {
+        [BaseEvents.Destroy]: void;
+    };
+    type BaseDomainEvents<E> = TheTypesOfBaseEvents & E;
+    export function base<Events extends Record<EventType, unknown>>(): {
+        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
+        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
+        uid: () => number;
+        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
+        destroy(): void;
+    };
+    export class BaseDomain<Events extends Record<EventType, unknown>> {
+        /** 用于自己区别同名 Domain 不同实例的标志 */
+        unique_id: string;
+        debug: boolean;
+        _emitter: import("mitt").Emitter<BaseDomainEvents<Events>>;
+        listeners: Record<keyof BaseDomainEvents<Events>, (() => void)[]>;
+        constructor(props?: {});
+        uid(): number;
+        log(...args: unknown[]): unknown[];
+        errorTip(...args: unknown[]): void;
+        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
+        offEvent<Key extends keyof BaseDomainEvents<Events>>(k: Key): void;
+        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
+        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
+        /** 主动销毁所有的监听事件 */
+        destroy(): void;
+        onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
+        get [Symbol.toStringTag](): string;
+    }
+    export type LogLevel = "info" | "debug" | "warn" | "error";
+    export interface LoggerProps {
+        prefix?: string;
+        scope?: string;
+        time?: boolean;
+        level?: LogLevel;
+        mode?: "minimal" | "classic" | "verbose";
+        color?: string;
+    }
+    export function Logger(props?: LoggerProps): {
+        log: (...args: unknown[]) => void;
+        debug: (...args: unknown[]) => void;
+        info: (...args: unknown[]) => void;
+        warn: (...args: unknown[]) => void;
+        error: (...args: unknown[]) => void;
+        scope: string;
+        color: string;
+        setColor(value: string): void;
+    };
+    export function applyMixins(derivedCtor: any, constructors: any[]): void;
+}
+declare module "packages/base/src/result/index" {
+    import { BizError } from "@/error";
+    export type Resp<T> = {
+        data: T extends null ? null : T;
+        error: T extends null ? BizError : null;
+    };
+    export type Result<T> = Resp<T> | Resp<null>;
+    export type UnpackedResult<T> = NonNullable<T extends Resp<infer U> ? (U extends null ? U : U) : T>;
+    /** 构造一个结果对象 */
+    export const Result: {
+        /** 构造成功结果 */
+        Ok: <T>(value: T) => Result<T>;
+        /** 构造失败结果 */
+        Err: <T>(message: string | string[] | BizError | Error | Result<null>, code?: string | number, data?: unknown) => Resp<null>;
+    };
+}
+declare module "packages/base/src/error/index" {
+    export class BizError extends Error {
+        messages: string[];
+        code?: string | number;
+        data: unknown | null;
+        constructor(msg: string[], code?: string | number, data?: unknown);
+    }
+}
+declare module "packages/base/src/platform" {
+    export interface Rect {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+    export interface Dimensions {
+        width: number;
+        height: number;
+    }
+    export interface ElementRects {
+        reference: Rect;
+        floating: Rect;
+    }
+    export type Strategy = "absolute" | "fixed";
     export interface Platform {
-        /** 监听全局事件，返回取消监听的 cleanup 函数 */
         addEventListener(type: string, handler: EventListener, options?: AddEventListenerOptions): () => void;
-        /** 批量设置 document.body 样式（传空字符串可清除） */
         patchBodyStyle(style: Record<string, string>): void;
-        /** 获取视口大小 */
         getViewportSize(): {
             width: number;
             height: number;
         };
+        isBrowser(): boolean;
+        isElement(value: unknown): boolean;
+        isHTMLElement(value: unknown): boolean;
+        getBoundingClientRect(element: unknown): Rect;
+        getDimensions(element: unknown): Dimensions;
+        getElementRects(args: {
+            reference: unknown;
+            floating: unknown;
+            strategy: Strategy;
+        }): ElementRects;
+        getClippingRect(args: {
+            element: unknown;
+            boundary: unknown;
+            rootBoundary: unknown;
+            strategy: Strategy;
+        }): Rect;
+        getOffsetParent(element: unknown): unknown;
+        isRTL(element: unknown): boolean;
+        getScale(element: unknown): {
+            x: number;
+            y: number;
+        };
+        getDocumentElement(element?: unknown): unknown;
     }
-    export function setPlatform(p: Platform): Platform;
+}
+declare module "packages/base/src/type" {
+    export type Unpacked<T> = T extends (infer U)[] ? U : T extends (...args: any[]) => infer U ? U : T extends Promise<infer U> ? U : T;
+    export type MutableRecord<U> = {
+        [SubType in keyof U]: {
+            type: SubType;
+            data: U[SubType];
+        };
+    }[keyof U];
+    export type MutableRecord2<U> = {
+        [SubType in keyof U]: {
+            type: SubType;
+            data: U[SubType];
+        } & U[SubType];
+    }[keyof U];
+    export type Shift<T extends any[]> = ((...args: T) => void) extends (arg1: any, ...rest: infer R) => void ? R : never;
+    export interface JSONArray extends Array<JSONValue> {
+    }
+    export type JSONValue = string | number | boolean | JSONObject | JSONArray | null;
+    export type JSONObject = {
+        [Key in string]?: JSONValue;
+    };
+    /**
+     * type UserID = Brand<string, "UserID">;
+     */
+    const __brand: unique symbol;
+    export type Brand<T, B> = T & {
+        readonly [__brand]: B;
+    };
+}
+declare module "packages/base/src/index" {
+    export * from "packages/base/src/base";
+    export * from "packages/base/src/result/index";
+    export * from "packages/base/src/error/index";
+    export * from "packages/base/src/platform";
+    export * from "packages/base/src/type";
+}
+declare module "packages/primitive/src/platform" {
+    import { Platform } from "packages/base/src/index";
+    export function setPlatform<T extends Platform = Platform>(p: T): T;
     export function getPlatform(): Platform;
 }
 declare module "packages/primitive/src/hmr/patch" {
@@ -2770,96 +2940,6 @@ declare module "packages/primitive/src/hmr/state" {
         data: Record<string, any>;
     } | undefined | null, refs: Record<string, any>): void;
 }
-declare module "packages/base/src/base" {
-    /**
-     * 注册的监听器
-     */
-    import { EventType, Handler } from "mitt";
-    export type { Handler, EventType };
-    export enum BaseEvents {
-        Loading = "__loading",
-        Destroy = "__destroy"
-    }
-    type TheTypesOfBaseEvents = {
-        [BaseEvents.Destroy]: void;
-    };
-    type BaseDomainEvents<E> = TheTypesOfBaseEvents & E;
-    export function base<Events extends Record<EventType, unknown>>(): {
-        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
-        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
-        uid: () => number;
-        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
-        destroy(): void;
-    };
-    export class BaseDomain<Events extends Record<EventType, unknown>> {
-        /** 用于自己区别同名 Domain 不同实例的标志 */
-        unique_id: string;
-        debug: boolean;
-        _emitter: import("mitt").Emitter<BaseDomainEvents<Events>>;
-        listeners: Record<keyof BaseDomainEvents<Events>, (() => void)[]>;
-        constructor(props?: {});
-        uid(): number;
-        log(...args: unknown[]): unknown[];
-        errorTip(...args: unknown[]): void;
-        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
-        offEvent<Key extends keyof BaseDomainEvents<Events>>(k: Key): void;
-        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
-        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
-        /** 主动销毁所有的监听事件 */
-        destroy(): void;
-        onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
-        get [Symbol.toStringTag](): string;
-    }
-    export type LogLevel = "info" | "debug" | "warn" | "error";
-    export interface LoggerProps {
-        prefix?: string;
-        scope?: string;
-        time?: boolean;
-        level?: LogLevel;
-        mode?: "minimal" | "classic" | "verbose";
-        color?: string;
-    }
-    export function Logger(props?: LoggerProps): {
-        log: (...args: unknown[]) => void;
-        debug: (...args: unknown[]) => void;
-        info: (...args: unknown[]) => void;
-        warn: (...args: unknown[]) => void;
-        error: (...args: unknown[]) => void;
-        scope: string;
-        color: string;
-        setColor(value: string): void;
-    };
-    export function applyMixins(derivedCtor: any, constructors: any[]): void;
-}
-declare module "packages/base/src/result/index" {
-    import { BizError } from "@/error";
-    export type Resp<T> = {
-        data: T extends null ? null : T;
-        error: T extends null ? BizError : null;
-    };
-    export type Result<T> = Resp<T> | Resp<null>;
-    export type UnpackedResult<T> = NonNullable<T extends Resp<infer U> ? (U extends null ? U : U) : T>;
-    /** 构造一个结果对象 */
-    export const Result: {
-        /** 构造成功结果 */
-        Ok: <T>(value: T) => Result<T>;
-        /** 构造失败结果 */
-        Err: <T>(message: string | string[] | BizError | Error | Result<null>, code?: string | number, data?: unknown) => Resp<null>;
-    };
-}
-declare module "packages/base/src/error/index" {
-    export class BizError extends Error {
-        messages: string[];
-        code?: string | number;
-        data: unknown | null;
-        constructor(msg: string[], code?: string | number, data?: unknown);
-    }
-}
-declare module "packages/base/src/index" {
-    export * from "packages/base/src/base";
-    export * from "packages/base/src/result/index";
-    export * from "packages/base/src/error/index";
-}
 declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/reactive/for";
     export * from "packages/primitive/src/reactive/show";
@@ -2908,13 +2988,12 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/util/listener";
     export * from "packages/primitive/src/vnode/view";
     export { setPlatform } from "packages/primitive/src/platform";
-    export type { Platform } from "packages/primitive/src/platform";
     export { getPlatform } from "packages/primitive/src/platform";
     export { patch } from "packages/primitive/src/hmr/patch";
     export type { PatchOptions } from "packages/primitive/src/hmr/patch";
     export { hmrState, hmrRestore } from "packages/primitive/src/hmr/state";
     export { Logger, Result, base } from "packages/base/src/index";
-    export type { Handler } from "packages/base/src/index";
+    export type { Handler, Platform, MutableRecord2, MutableRecord, Unpacked, UnpackedResult, } from "packages/base/src/index";
 }
 declare module "packages/timeless/src/index" {
     export * from "packages/reactive/src/index";
@@ -4290,12 +4369,12 @@ declare module "packages/ui-vm/src/context-menu/index" {
         disabled: boolean;
         state: ContextMenuState;
         private virtualElement;
-        private initialScrollX;
-        private initialScrollY;
+        private initialScrollTop;
         private clickX;
         private clickY;
         private offsetX;
         private offsetY;
+        private view$?;
         constructor(options: Partial<{
             _name: string;
         } & ContextMenuProps>);
@@ -5798,7 +5877,7 @@ declare module "packages/ui-vm/src/popper/floating/compute-coords" {
 }
 declare module "packages/ui-vm/src/popper/floating/types" {
     import type { Axis, ClientRectObject, Coords, Dimensions, ElementRects, Placement, Rect, SideObject, Strategy } from "packages/ui-vm/src/popper/floating/utils";
-    import type { detectOverflow } from "packages/ui-vm/src/popper/floating/detect-overflow";
+    import type { detect_overflow } from "packages/ui-vm/src/popper/floating/detect-overflow";
     type Promisable<T> = T | Promise<T>;
     /**
      * Function option to derive middleware options from state.
@@ -5836,7 +5915,7 @@ declare module "packages/ui-vm/src/popper/floating/types" {
             x: number;
             y: number;
         }>;
-        detectOverflow?: typeof detectOverflow;
+        detectOverflow?: typeof detect_overflow;
     }
     export interface MiddlewareData {
         [key: string]: any;
@@ -5935,7 +6014,7 @@ declare module "packages/ui-vm/src/popper/floating/types" {
         elements: Elements;
         rects: ElementRects;
         platform: {
-            detectOverflow: typeof detectOverflow;
+            detectOverflow: typeof detect_overflow;
         } & Platform;
     }
     /**
@@ -5985,7 +6064,7 @@ declare module "packages/ui-vm/src/popper/floating/detect-overflow" {
      * - 0 = lies flush with the boundary
      * @see https://floating-ui.com/docs/detectOverflow
      */
-    export function detectOverflow(state: MiddlewareState, options?: DetectOverflowOptions | Derivable<DetectOverflowOptions>): Promise<SideObject>;
+    export function detect_overflow(state: MiddlewareState, options?: DetectOverflowOptions | Derivable<DetectOverflowOptions>): Promise<SideObject>;
 }
 declare module "packages/ui-vm/src/popper/floating/compute-position" {
     import type { ComputePosition } from "packages/ui-vm/src/popper/floating/types";
@@ -5996,19 +6075,7 @@ declare module "packages/ui-vm/src/popper/floating/compute-position" {
      * This export does not have any `platform` interface logic. You will need to
      * write one for the platform you are using Floating UI with.
      */
-    export const computePosition: ComputePosition;
-}
-declare module "packages/ui-vm/src/popper/floating/platform/dom" {
-    import type { Platform } from "packages/ui-vm/src/popper/floating/types";
-    /**
-     * Create a DOM platform implementation
-     * This is a factory function to avoid accessing DOM APIs at module level
-     */
-    export function getDOMPlatform(): Platform;
-}
-declare module "packages/ui-vm/src/popper/floating/platform/index" {
-    export { getDOMPlatform } from "packages/ui-vm/src/popper/floating/platform/dom";
-    export type { Platform } from "packages/ui-vm/src/popper/floating/types";
+    export const compute_position: ComputePosition;
 }
 declare module "packages/ui-vm/src/popper/floating/constants" {
     export const originSides: Set<string>;
@@ -6197,6 +6264,31 @@ declare module "packages/ui-vm/src/popper/floating/middleware/arrow" {
      */
     export const arrow: (options: ArrowOptions | Derivable<ArrowOptions>) => Middleware;
 }
+declare module "packages/ui-vm/src/popper/floating/middleware/size" {
+    import type { DetectOverflowOptions } from "packages/ui-vm/src/popper/floating/detect-overflow";
+    import type { Middleware, Derivable, MiddlewareState } from "packages/ui-vm/src/popper/floating/types";
+    export interface SizeOptions extends DetectOverflowOptions {
+        /**
+         * Function that is called with the available width and height.
+         */
+        apply?: (state: MiddlewareState & {
+            availableWidth: number;
+            availableHeight: number;
+        }) => void | Promise<void>;
+    }
+    /**
+     * Provides data to constrain the floating element's size so that it
+     * does not overflow the clipping boundary.
+     *
+     * In `popper` mode (default), available height is based on the placed side:
+     *   - bottom → space from floating top to viewport bottom
+     *   - top    → space from viewport top to floating bottom
+     *
+     * In `item-aligned` mode, available height is the full viewport minus margins,
+     * since the content can extend both above and below the reference.
+     */
+    export function size(options?: SizeOptions | Derivable<SizeOptions>): Middleware;
+}
 declare module "packages/ui-vm/src/popper/floating/middleware/index" {
     export { offset } from "packages/ui-vm/src/popper/floating/middleware/offset";
     export type { OffsetOptions } from "packages/ui-vm/src/popper/floating/middleware/offset";
@@ -6206,15 +6298,16 @@ declare module "packages/ui-vm/src/popper/floating/middleware/index" {
     export type { ShiftOptions, LimitShiftOptions } from "packages/ui-vm/src/popper/floating/middleware/shift";
     export { arrow } from "packages/ui-vm/src/popper/floating/middleware/arrow";
     export type { ArrowOptions } from "packages/ui-vm/src/popper/floating/middleware/arrow";
+    export { size } from "packages/ui-vm/src/popper/floating/middleware/size";
+    export type { SizeOptions } from "packages/ui-vm/src/popper/floating/middleware/size";
 }
 declare module "packages/ui-vm/src/popper/floating/index" {
-    export { computePosition } from "packages/ui-vm/src/popper/floating/compute-position";
-    export { detectOverflow } from "packages/ui-vm/src/popper/floating/detect-overflow";
+    export { compute_position } from "packages/ui-vm/src/popper/floating/compute-position";
+    export { detect_overflow } from "packages/ui-vm/src/popper/floating/detect-overflow";
     export type { DetectOverflowOptions } from "packages/ui-vm/src/popper/floating/detect-overflow";
-    export { getDOMPlatform } from "packages/ui-vm/src/popper/floating/platform/index";
     export type { Platform } from "packages/ui-vm/src/popper/floating/types";
-    export { offset, flip, shift, limitShift, arrow } from "packages/ui-vm/src/popper/floating/middleware/index";
-    export type { OffsetOptions, FlipOptions, ShiftOptions, LimitShiftOptions, ArrowOptions, } from "packages/ui-vm/src/popper/floating/middleware/index";
+    export { offset, flip, shift, limitShift, arrow, size } from "packages/ui-vm/src/popper/floating/middleware/index";
+    export type { OffsetOptions, FlipOptions, ShiftOptions, LimitShiftOptions, ArrowOptions, SizeOptions, } from "packages/ui-vm/src/popper/floating/middleware/index";
     export type { Middleware, MiddlewareData, MiddlewareReturn, MiddlewareState, ComputePositionConfig, ComputePositionReturn, Elements, Boundary, RootBoundary, ElementContext, Derivable, } from "packages/ui-vm/src/popper/floating/types";
     export type { Alignment, Side, AlignedPlacement, Placement, Strategy, Axis, Coords, Length, Dimensions, SideObject, Rect, Padding, ClientRectObject, ElementRects, VirtualElement, } from "packages/ui-vm/src/popper/floating/utils";
     export { sides, alignments, placements, getSide, getAlignment, getSideAxis, getAlignmentAxis, getAxisLength, getOppositeAxis, getOppositePlacement, getExpandedPlacements, getOppositeAxisPlacements, getAlignmentSides, clamp, evaluate, getPaddingObject, rectToClientRect, } from "packages/ui-vm/src/popper/floating/utils";
@@ -6329,9 +6422,9 @@ declare module "packages/ui-vm/src/popper/types" {
     export type ElementContext = "reference" | "floating";
 }
 declare module "packages/ui-vm/src/popper/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
-    import type { Rect, Placement, Strategy, MiddlewareData } from "packages/ui-vm/src/popper/types";
+    import { BaseDomain, Handler, Platform } from "packages/base/src/index";
     import { ScrollViewCore } from "@/scroll-view/index";
+    import type { Rect, Placement, Strategy, MiddlewareData } from "packages/ui-vm/src/popper/types";
     const SIDE_OPTIONS: readonly ["top", "right", "bottom", "left"];
     const ALIGN_OPTIONS: readonly ["start", "center", "end"];
     export type Side = (typeof SIDE_OPTIONS)[number];
@@ -6368,10 +6461,21 @@ declare module "packages/ui-vm/src/popper/index" {
         side: Side;
         align: Align;
         strategy: "fixed" | "absolute";
+        defaultPlaced?: boolean;
         offsetX?: number;
         offsetY?: number;
-        defaultPlaced?: boolean;
+        /**
+         * Popper 关心的可滚动容器
+         * 当容器滚动时，可以用来更新 Popper 的位置
+         */
         view$?: ScrollViewCore;
+        /**
+         * 可用空间计算模式
+         * - "popper": 根据放置侧计算（底部放置时取上方空间，顶部放置时取下方空间）
+         * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
+         */
+        mode?: "popper" | "item-aligned";
+        platform?: Platform;
     };
     type PopperState = {
         strategy: Strategy;
@@ -6379,24 +6483,47 @@ declare module "packages/ui-vm/src/popper/index" {
         y: number;
         placement: Placement;
         isPlaced: boolean;
-        placedSide: Side;
-        placedAlign: Align;
+        top?: number;
+        bottom?: number;
+        /** PopperContent height */
+        height?: number;
+        maxHeight?: number;
+        minWidth?: number;
+        margin?: number;
+        viewportOffsetTop?: number;
+        /** 浮动元素在放置方向上的可用高度（px） */
+        availableHeight: number;
+        /** 浮动元素在交叉轴上的可用宽度（px） */
+        availableWidth: number;
+        /** viewport 可以向上滚动 */
+        canScrollUp: boolean;
+        hideScrollUp?: boolean;
+        /** viewport 可以向下滚动 */
+        canScrollDown: boolean;
+        hideScrollDown?: boolean;
         /** 是否设置了参考DOM */
         reference: boolean;
         arrow: {
             x?: number;
             y?: number;
         } | null;
-        middlewareData: MiddlewareData;
     };
     export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         unique_id: string;
         debug: boolean;
-        placement: Placement;
         strategy: Strategy;
         offsetX: number;
         offsetY: number;
+        placement: Placement;
+        /** 可用空间计算模式
+         * - "popper": 根据放置侧计算（底部放置时取下方空间，顶部放置时取上方空间）
+         * - "item-aligned": 取视口最大可用空间（内容可以同时向上下延伸）
+         */
+        mode: "popper" | "item-aligned";
         view$?: ScrollViewCore;
+        /** Popper 内部的可滚动容器 */
+        viewport$: ScrollViewCore;
+        platform: Platform;
         reference: {
             getRect: () => Rect;
             $el?: unknown;
@@ -6405,15 +6532,33 @@ declare module "packages/ui-vm/src/popper/index" {
             getRect: () => Rect;
             $el?: {};
         } | null;
+        /** item-aligned 模式：viewport 元素（用于 scroll） */
+        viewport: {
+            $el?: HTMLElement;
+        } | null;
+        /** item-aligned 模式：选中的 item 元素 */
+        selectedItem: {
+            $el?: HTMLElement;
+            offsetTop: number;
+            offsetHeight: number;
+        } | null;
+        _item: {
+            offsetTop: number;
+            offsetHeight: number;
+            x: number;
+            y: number;
+        };
+        _prev_scroll_top: number;
         container: Node | null;
         arrow: {
             width: number;
             height: number;
         } | null;
-        arrowElement: HTMLElement | null;
+        $arrow: any | null;
         state: PopperState;
         _enter: boolean;
         _focus: boolean;
+        _scrolling_subscriber: null | (() => void);
         constructor(options?: Partial<{
             _name: string;
         }> & Partial<PopperProps>);
@@ -6435,7 +6580,7 @@ declare module "packages/ui-vm/src/popper/index" {
         setFloating(floating: PopperCore["floating"]): void;
         /** 箭头加载完成 */
         setArrow(arrow: PopperCore["arrow"]): void;
-        setArrowElement(arrowElement: HTMLElement | null): void;
+        setArrowElement($arrow: any | null): void;
         setContainer(container: Node): void;
         setConfig(config: {
             placement?: Placement;
@@ -6449,6 +6594,32 @@ declare module "packages/ui-vm/src/popper/index" {
             x: number;
             y: number;
         }): void;
+        /** 设置 item-aligned 模式下选中项的偏移量 */
+        adjustContentPositonWithOffsetTop(data: {
+            selectedItem: {
+                offsetTop: number;
+                offsetHeight: number;
+                bottom: number;
+                isFirst?: boolean;
+                isLast?: boolean;
+            };
+            content?: {
+                borderTopWidth: number;
+                paddingTop: number;
+                borderBottomWidth: number;
+                paddingBottom: number;
+                clientHeight: number;
+            };
+        }): void;
+        realignImmediate(): void;
+        /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */
+        setItemAlignedElements(data: {
+            selectedItem: {
+                $el?: HTMLElement;
+                offsetTop: number;
+                offsetHeight: number;
+            };
+        }): void;
         /** 计算浮动元素位置 */
         place(): Promise<void>;
         computePosition(): Promise<{
@@ -6456,11 +6627,17 @@ declare module "packages/ui-vm/src/popper/index" {
             y: number;
             placement: Placement;
             strategy: Strategy;
-            middlewareData: MiddlewareData;
+            middleware_data: MiddlewareData;
         }>;
+        reset(): void;
+        /** viewport 滚动时由 primitive 调用，更新滚动按钮可见性，模拟原生 select 渐进扩展高度 */
+        handleViewportScroll(event: {
+            scrollTop: number;
+            clientHeight: number;
+            scrollHeight: number;
+        }): void;
         handleEnter(): void;
         handleLeave(): void;
-        reset(): void;
         onReferenceMounted(handler: Handler<TheTypesOfEvents[Events.ReferenceMounted]>): () => void;
         onFloatingMounted(handler: Handler<TheTypesOfEvents[Events.FloatingMounted]>): () => void;
         onContainerChange(handler: Handler<TheTypesOfEvents[Events.ContainerChange]>): () => void;
@@ -6470,6 +6647,85 @@ declare module "packages/ui-vm/src/popper/index" {
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
         get [Symbol.toStringTag](): string;
     }
+    /** 仅含定位所需字段的矩形描述 */
+    export interface ItemAlignedRect {
+        top: number;
+        left: number;
+        right: number;
+        width: number;
+        height: number;
+    }
+    /** content 元素的测量值 */
+    export interface ItemAlignedContentMeasurement {
+        rect: ItemAlignedRect;
+        borderTopWidth: number;
+        paddingTop: number;
+        borderBottomWidth: number;
+        paddingBottom: number;
+        /** content.clientHeight，用于计算 viewportOffsetBottom */
+        clientHeight: number;
+    }
+    /** viewport 元素的测量值 */
+    export interface ItemAlignedViewportMeasurement {
+        /** viewport.scrollHeight，即所有 item 的总高度 */
+        scrollHeight: number;
+        /** viewport.offsetTop，相对于 content 的偏移 */
+        offsetTop: number;
+        /** viewport.offsetHeight */
+        offsetHeight: number;
+        paddingTop: number;
+        paddingBottom: number;
+    }
+    /** 选中项的测量值 */
+    export interface ItemAlignedSelectedItemMeasurement {
+        /** selectedItem.offsetTop，相对于 viewport */
+        offsetTop: number;
+        /** selectedItem.offsetHeight */
+        offsetHeight: number;
+        /** 是否为列表第一项，影响 top-anchor 时的 clamp 下限 */
+        isFirst: boolean;
+        /** 是否为列表最后一项，影响 bottom-anchor 时的 clamp 下限 */
+        isLast: boolean;
+    }
+    export interface ComputePositionItemAlignedInput {
+        dir?: "ltr" | "rtl";
+        triggerRect: ItemAlignedRect;
+        /** trigger 内部展示当前值的 span */
+        valueNodeRect: ItemAlignedRect;
+        content: ItemAlignedContentMeasurement;
+        /** content 内选中项文本节点的 rect */
+        itemTextRect: ItemAlignedRect;
+        selectedItem: ItemAlignedSelectedItemMeasurement;
+        viewport: ItemAlignedViewportMeasurement;
+        windowSize: {
+            width: number;
+            height: number;
+        };
+        /** 视口边距，默认 10 */
+        contentMargin?: number;
+    }
+    export interface ItemAlignedContentWrapperStyle {
+        /** ltr 时有值 */
+        left?: number;
+        /** rtl 时有值 */
+        right?: number;
+        minWidth: number;
+        /** top-anchor 时为 0 */
+        top?: number;
+        /** bottom-anchor 时为 0 */
+        bottom?: number;
+        height: number;
+        minHeight: number;
+        maxHeight: number;
+        /** 例如 "10px 0" */
+        margin: string;
+    }
+    export interface ComputePositionItemAlignedResult {
+        contentWrapperStyle: ItemAlignedContentWrapperStyle;
+        /** 仅 top-anchor 时存在，需写入 viewport.scrollTop */
+        viewportScrollTop?: number;
+    }
+    export function computePositionInItemAlignedMode(input: ComputePositionItemAlignedInput): ComputePositionItemAlignedResult;
 }
 declare module "packages/ui-vm/src/presence/index" {
     /**
@@ -6705,6 +6961,8 @@ declare module "packages/ui-vm/src/scroll-view/index" {
         [Events.OutUpOffset]: void;
         [Events.Scrolling]: {
             scrollTop: number;
+            scrollHeight: number;
+            clientHeight: number;
         };
         [Events.ReachBottom]: void;
         [Events.Mounted]: void;
@@ -6750,6 +7008,12 @@ declare module "packages/ui-vm/src/scroll-view/index" {
             scrollTop: number;
             /** 内容高度 */
             contentHeight: number;
+            /** 顶部偏移量 */
+            offsetTop: number;
+            /** 顶部内边距 */
+            paddingTop: number;
+            /** 底部内边距 */
+            paddingBottom: number;
         }>;
         disabled: boolean;
         canPullToRefresh: boolean;
@@ -6798,6 +7062,8 @@ declare module "packages/ui-vm/src/scroll-view/index" {
         isMoveDown: boolean;
         isMoveUp: boolean;
         isScrollTo: boolean;
+        /** 是否静默滚动 */
+        isSilentScroll: boolean;
         /**
          * 为了让 StartPullToRefresh、OutOffset 等事件在拖动过程中仅触发一次的标记
          */
@@ -6819,16 +7085,6 @@ declare module "packages/ui-vm/src/scroll-view/index" {
         finishPullToRefresh: () => void;
         disablePullToRefresh: () => void;
         enablePullToRefresh: () => void;
-        handleMouseDown: (event: MouseEvent) => void;
-        handleMouseMove: (event: MouseEvent) => void;
-        handleTouchStart: (event: TouchEvent) => void;
-        handleTouchMove: (event: TouchEvent) => void;
-        /** 鼠标/手指按下 */
-        handlePointDown: (e: PointEvent) => void;
-        /** 鼠标/手指移动 */
-        handlePointMove: (e: PointEvent) => void;
-        handleTouchEnd: () => void;
-        handleScrolling: () => void;
         finishLoadingMore(): void;
         setMounted(): void;
         refreshRect(): void;
@@ -6852,11 +7108,38 @@ declare module "packages/ui-vm/src/scroll-view/index" {
         getScrollClientHeight(): number;
         getScrollTop(): number;
         addScrollTop(difference: number): void;
+        setScrollTopSilent(y: number): void;
         setScrollTop(y: number): void;
         getBodyHeight(): number;
         destroy: () => void;
         inDownOffset(handler: Handler<TheTypesOfEvents[Events.InDownOffset]>): () => void;
         outDownOffset(handler: Handler<TheTypesOfEvents[Events.OutDownOffset]>): () => void;
+        handleMounted(data: {
+            width: number;
+            height: number;
+            scrollWidth?: number;
+            scrollHeight?: number;
+            clientWidth?: number;
+            clientHeight?: number;
+            offsetWidth?: number;
+            offsetHeight?: number;
+            offsetTop?: number;
+            offsetLeft?: number;
+            scrollTop?: number;
+            scrollLeft?: number;
+            paddingTop?: number;
+            paddingBottom?: number;
+        }): void;
+        handleMouseDown: (event: MouseEvent) => void;
+        handleMouseMove: (event: MouseEvent) => void;
+        handleTouchStart: (event: TouchEvent) => void;
+        handleTouchMove: (event: TouchEvent) => void;
+        /** 鼠标/手指按下 */
+        handlePointDown: (e: PointEvent) => void;
+        /** 鼠标/手指移动 */
+        handlePointMove: (e: PointEvent) => void;
+        handleTouchEnd: () => void;
+        handleScrolling: (event: any) => void;
         onPulling(handler: Handler<TheTypesOfEvents[Events.Pulling]>): () => void;
         onScroll(handler: Handler<TheTypesOfEvents[Events.Scrolling]>): () => void;
         onReachBottom(handler: Handler<TheTypesOfEvents[Events.ReachBottom]>): () => void;
@@ -6975,11 +7258,13 @@ declare module "packages/ui-vm/src/select/item" {
     export class SelectItemCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         name: string;
         debug: boolean;
-        text: string;
         value: T | null;
+        label: string;
         selected: boolean;
         focused: boolean;
         disabled: boolean;
+        offsetTop: number;
+        height: number;
         _leave: boolean;
         _enter: boolean;
         get state(): SelectItemState<T>;
@@ -6989,9 +7274,9 @@ declare module "packages/ui-vm/src/select/item" {
         $node(): HTMLElement | null;
         getRect(): DOMRect;
         getStyles(): CSSStyleDeclaration;
-        get offsetHeight(): number;
-        get offsetTop(): number;
-        setText(text: SelectItemCore<T>["text"]): void;
+        setLabel(label: string): void;
+        setSelected(selected: boolean): void;
+        setFocused(focused: boolean): void;
         select(): void;
         unselect(): void;
         focus(): void;
@@ -7002,6 +7287,10 @@ declare module "packages/ui-vm/src/select/item" {
             y: number;
         }): void;
         enter(): void;
+        handleMounted(rect: {
+            offsetTop: number;
+            height: number;
+        }): void;
         onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
         onLeave(handler: Handler<TheTypesOfEvents<T>[Events.Leave]>): () => void;
         onEnter(handler: Handler<TheTypesOfEvents<T>[Events.Enter]>): () => void;
@@ -7011,7 +7300,7 @@ declare module "packages/ui-vm/src/select/item" {
 }
 declare module "packages/ui-vm/src/select/group" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import type { SelectEntry } from "packages/ui-vm/src/select/index";
+    import { SelectItemCore } from "packages/ui-vm/src/select/item";
     enum Events {
         Change = 0
     }
@@ -7019,24 +7308,24 @@ declare module "packages/ui-vm/src/select/group" {
         [Events.Change]: SelectGroupCoreState<T>;
     };
     type SelectGroupCoreProps<T> = {
-        label?: unknown;
-        items: SelectEntry<T>[];
+        label?: string;
+        options: SelectItemCore<T>[];
     };
     type SelectGroupCoreState<T> = {
-        label?: unknown;
-        items: SelectEntry<T>[];
+        label?: string;
+        options: SelectItemCore<T>[];
     };
     export class SelectGroupCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         _name: string;
         debug: boolean;
         readonly type: "group";
-        label?: unknown;
-        items: SelectEntry<T>[];
+        label?: string;
+        options: SelectItemCore<T>[];
         get state(): SelectGroupCoreState<T>;
         constructor(options: Partial<{
             _name: string;
         }> & SelectGroupCoreProps<T>);
-        setItems(items: SelectEntry<T>[]): void;
+        setItems(items: SelectItemCore<T>[]): void;
         reset(): void;
         unmount(): void;
         onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
@@ -7047,7 +7336,8 @@ declare module "packages/ui-vm/src/select/utils" {
     export function clamp(value: number, [min, max]: [number, number]): number;
 }
 declare module "packages/ui-vm/src/select/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { BaseDomain, Handler, Platform } from "packages/base/src/index";
+    import { InputCore } from "@/input/index";
     import { PopperCore } from "@/popper/index";
     import { Rect } from "@/popper/types";
     import { DismissableLayerCore } from "@/dismissable-layer/index";
@@ -7072,46 +7362,26 @@ declare module "packages/ui-vm/src/select/index" {
         [Events.Blur]: void;
         [Events.Placed]: void;
     };
-    export type SelectOption<T> = {
-        value: T;
-        label: string;
-        disabled?: boolean;
-    };
-    export type SelectEntry<T> = SelectOption<T> | SelectGroupCore<T>;
-    type SelectOptionState<T> = {
-        value: T;
-        label: string;
-        selected: boolean;
-        focused: boolean;
-        disabled: boolean;
-        key?: any;
-    };
-    type SelectGroupState<T> = {
-        type: "group";
-        label?: unknown;
-        key: any;
-        items: SelectEntryState<T>[];
-    };
-    type SelectEntryState<T> = SelectOptionState<T> | SelectGroupState<T>;
     type SelectProps<T> = {
         id?: string;
         defaultValue: T | null;
         disabled?: boolean;
         placeholder?: string;
         allowClear?: boolean;
-        options?: SelectEntry<T>[];
-        onChange?: (v: T | null) => void;
+        options?: (SelectGroupCore<T> | SelectItemCore<T>)[];
+        platform?: Platform;
         /** 是否支持搜索过滤 */
-        search?: boolean;
+        search?: InputCore<any>;
         /** 搜索框占位符 */
-        searchPlaceholder?: string;
+        /** 定位模式 */
+        position?: "popper" | "item-aligned";
+        onChange?: (v: T | null) => void;
     };
     type SelectState<T> = {
-        options: SelectOptionState<T>[];
-        entries: SelectEntryState<T>[];
-        /** 过滤后的选项列表 */
+        options: (SelectGroupCore<T> | SelectItemCore<T>)[];
         value: T | null;
-        value2: SelectOption<T> | null;
+        selectedOption: SelectItemCore<T> | null;
+        allowClear: boolean;
         /** 菜单是否展开 */
         open: boolean;
         /** 加载中 */
@@ -7123,17 +7393,11 @@ declare module "packages/ui-vm/src/select/index" {
         /** 是否必填 */
         required: boolean;
         dir: Direction;
-        styles: Partial<CSSStyleDeclaration>;
         enter: boolean;
         visible: boolean;
         exit: boolean;
         /** 是否启用搜索 */
         search: boolean;
-        allowClear: boolean;
-        /** 搜索关键字 */
-        searchKeyword: string;
-        /** 搜索框占位符 */
-        searchPlaceholder: string;
     };
     export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         shape: "select";
@@ -7141,8 +7405,7 @@ declare module "packages/ui-vm/src/select/index" {
         debug: boolean;
         id: any;
         placeholder: string;
-        entries: SelectEntry<T>[];
-        options: SelectOptionState<T>[];
+        options: SelectItemCore<T>[];
         defaultValue: T | null;
         value: T | null;
         disabled: boolean;
@@ -7152,16 +7415,13 @@ declare module "packages/ui-vm/src/select/index" {
         loading: boolean;
         /** 是否启用搜索 */
         search: boolean;
-        popper: PopperCore;
-        presence: any;
-        layer: DismissableLayerCore;
-        input: any;
+        aligned: boolean;
+        hasItemMounted: boolean;
+        popper$: PopperCore;
+        presence$: any;
+        layer$: DismissableLayerCore;
+        input$: any;
         position: "popper" | "item-aligned";
-        /** 参考点位置 */
-        triggerPos: {
-            x: number;
-            y: number;
-        };
         reference: Rect | null;
         /** 触发按钮 */
         trigger: SelectTriggerCore | null;
@@ -7171,24 +7431,26 @@ declare module "packages/ui-vm/src/select/index" {
         /** 下拉列表容器 */
         viewport: SelectViewportCore | null;
         /** 选中的 item */
-        selectedItem: SelectItemCore<T> | null;
-        _findFirstValidItem: boolean;
-        private _isDisabledValue;
+        selected_item$: SelectItemCore<T> | null;
+        focused_item$: SelectItemCore<T> | null;
+        input_dirty: boolean;
+        can_search: boolean;
         /** 获取过滤后的选项 */
         get state(): SelectState<T>;
         constructor(props: Partial<{
             _name: string;
         }> & SelectProps<T>);
-        mapViewModelWithIndex(index: number): SelectOptionState<T>;
-        setTriggerPointerDownPos(pos: {
-            x: number;
-            y: number;
-        }): void;
+        mapViewModelWithIndex(index: number): SelectItemCore<T>;
         setTrigger(trigger: SelectTriggerCore): void;
         setWrap(wrap: SelectWrapCore): void;
         setContent(content: SelectContentCore): void;
         setViewport(viewport: SelectViewportCore): void;
         setSelectedItem(item: SelectItemCore<T>): void;
+        /**
+         * 将 Select 对齐 下拉项列表 中的 选中项
+         * 模拟原生 select 交互
+         */
+        alignSpecialItem(offsetTop: number, height: number, isFirst?: boolean, isLast?: boolean): void;
         show(): Promise<void>;
         hide(): void;
         addNativeOption(): void;
@@ -7207,6 +7469,10 @@ declare module "packages/ui-vm/src/select/index" {
         setSearchKeyword(keyword: string): void;
         /** 清空搜索关键字 */
         clearSearch(): void;
+        enableSearch(): void;
+        disableSearch(): void;
+        startSearch(): void;
+        finishSearch(): void;
         focusOption(value: T): void;
         blurOption(value: T): void;
         /** 获取当前焦点选项的索引 */
@@ -7219,6 +7485,15 @@ declare module "packages/ui-vm/src/select/index" {
         selectFocusedOption(): void;
         setPosition(rect: any): void;
         refresh(): void;
+        handleClickTrigger(): void;
+        handleClickItem(item$: SelectItemCore<T>): void;
+        handleMouseEnterItem(item$: SelectItemCore<T>): void;
+        handleMouseLeaveItem(item$: SelectItemCore<T>): void;
+        handleItemMounted(data: {
+            offsetTop: number;
+            height: number;
+            store: SelectItemCore<T>;
+        }): void;
         onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
         onValueChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
         onChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
@@ -10548,6 +10823,7 @@ declare module "packages/ui-vm/src/index" {
     export * from "packages/ui-vm/src/scroll-view/index";
     export * from "packages/ui-vm/src/select/index";
     export * from "packages/ui-vm/src/select/group";
+    export * from "packages/ui-vm/src/select/item";
     export * from "packages/ui-vm/src/cascader/index";
     export * from "packages/ui-vm/src/tabs/index";
     export * from "packages/ui-vm/src/toast/index";
@@ -11590,6 +11866,7 @@ declare module "packages/ui-primitive/src/modules/transition" {
 declare module "packages/ui-primitive/src/modules/popper" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { PopperCore } from "packages/ui-vm/src/index";
+    import * as ScrollViewPrimitive from "@/modules/scroll-view";
     export function Root(props: ViewProps & {
         store: PopperCore;
     }, children?: ViewChildren): {
@@ -11601,7 +11878,7 @@ declare module "packages/ui-primitive/src/modules/popper" {
         };
         children: import("@timeless/timeless").TimelessElement<any, any>[];
         append(node: any): void;
-        onMounted(event: MountedEvent): void;
+        onMounted(event: ScrollViewPrimitive): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11616,7 +11893,7 @@ declare module "packages/ui-primitive/src/modules/popper" {
         };
         children: import("@timeless/timeless").TimelessElement<any, any>[];
         append(node: any): void;
-        onMounted(event: MountedEvent): void;
+        onMounted(event: ScrollViewPrimitive): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
@@ -11628,6 +11905,37 @@ declare module "packages/ui-primitive/src/modules/popper" {
         /** 参考元素离开视口时的回调 */
         onReferenceOutOfView?: () => void;
     }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Viewport(props: ViewProps & {
+        store: PopperCore;
+    }, children: ViewChildren): any;
+    export function ScrollUpButton(props: ViewProps & {
+        store: PopperCore;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: {
+            value: boolean;
+        };
+        children: any[];
+        onMounted(event: ScrollViewPrimitive): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        _hmr_dispose(): void;
+    };
+    export function ScrollDownButton(props: ViewProps & {
+        store: PopperCore;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: {
+            value: boolean;
+        };
+        children: any[];
+        onMounted(event: ScrollViewPrimitive): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        _hmr_dispose(): void;
+    };
 }
 declare module "packages/ui-primitive/src/modules/head" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -12455,7 +12763,7 @@ declare module "packages/ui-primitive/src/modules/textarea" {
 }
 declare module "packages/ui-primitive/src/modules/select" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    import { SelectCore } from "packages/ui-vm/src/index";
+    import { SelectCore, SelectItemCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: SelectCore<any>;
     }, children?: ViewChildren): {
@@ -12474,7 +12782,35 @@ declare module "packages/ui-primitive/src/modules/select" {
     export function Trigger(props: ViewProps & {
         store: SelectCore<any>;
         id?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: {
+            onClick: any;
+            onDoubleClick: any;
+            onLongPress: any;
+            onPointerDown: any;
+            onFocus: any;
+            onBlur: any;
+            onKeyDown: any;
+            onContextMenu: any;
+            onMouseEnter: any;
+            onMouseLeave: any;
+            onDragStart: any;
+            onDrag: any;
+            onDragEnd: any;
+            onDragEnter: any;
+            onDragOver: any;
+            onDragLeave: any;
+            onDrop: any;
+            onAnimationEnd: any;
+        };
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function Value(props: ViewProps & {
         store: SelectCore<any>;
     }): import("@timeless/timeless").TimelessElement<{}, any>;
@@ -12484,7 +12820,7 @@ declare module "packages/ui-primitive/src/modules/select" {
     export function Clear(props: ViewProps & {
         store: SelectCore<any>;
     }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function Portal(props: ViewProps & {
+    export function Portal(props: {
         store: SelectCore<any>;
         animation?: {
             in: string;
@@ -12518,12 +12854,70 @@ declare module "packages/ui-primitive/src/modules/select" {
         onUnmounted(): void;
         _hmr_dispose(): void;
     };
+    export function PopperPositionContent(props: ViewProps & {
+        store: SelectCore<any>;
+        animation?: {
+            in: string;
+            out: string;
+        };
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function AlignedPositionContent(props: ViewProps & {
+        store: SelectCore<any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Viewport(props: ViewProps & {
         store: SelectCore<any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Item(props: ViewProps & {
+        select$: SelectCore<any>;
+        item$: SelectItemCore<any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: {
+            onClick: any;
+            onDoubleClick: any;
+            onLongPress: any;
+            onPointerDown: any;
+            onFocus: any;
+            onBlur: any;
+            onKeyDown: any;
+            onContextMenu: any;
+            onMouseEnter: any;
+            onMouseLeave: any;
+            onDragStart: any;
+            onDrag: any;
+            onDragEnd: any;
+            onDragEnter: any;
+            onDragOver: any;
+            onDragLeave: any;
+            onDrop: any;
+            onAnimationEnd: any;
+        };
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function ItemIndicator(props: ViewProps & {
+        store: SelectItemCore<any>;
     }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function Search(props: ViewProps & {
+    export function ScrollUpButton(props: ViewProps & {
         store: SelectCore<any>;
-    }, children?: ViewChildren): {
+    }, children: ViewChildren): {
         t: string;
         $elm: any;
         state: {
@@ -12535,16 +12929,34 @@ declare module "packages/ui-primitive/src/modules/select" {
         onUnmounted(): void;
         _hmr_dispose(): void;
     };
-    export function Item(props: ViewProps & {
+    export function ScrollDownButton(props: ViewProps & {
         store: SelectCore<any>;
-        value: any;
-        disabled?: boolean;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function ItemText(props: ViewProps, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function ItemIndicator(props: ViewProps & {
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: {
+            value: boolean;
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        _hmr_dispose(): void;
+    };
+    export function Search(props: ViewProps & {
         store: SelectCore<any>;
-        value: any;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): {
+        t: string;
+        $elm: any;
+        state: {
+            value: boolean;
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        _hmr_dispose(): void;
+    };
 }
 declare module "packages/ui-primitive/src/modules/cascader" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
@@ -14113,7 +14525,7 @@ declare module "packages/ui-primitive/src/modules/toast" {
     import { ToastCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): any[];
+    }, children?: ViewChildren): ViewChildren;
     export function Mask(props: ViewProps & {
         store: ToastCore;
     }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
@@ -14495,10 +14907,6 @@ declare module "packages/shadcn/src/modules/search-select" {
     import { SelectCore } from "packages/ui-vm/src/index";
     export function SearchSelect<T>(props: ViewProps & {
         store: SelectCore<T>;
-        debounce?: number;
-        minLength?: number;
-        emptyText?: string;
-        loadingText?: string;
     }): {
         t: string;
         $elm: any;
@@ -14693,7 +15101,7 @@ declare module "packages/shadcn/src/modules/toast" {
     import { ToastCore } from "packages/ui-vm/src/index";
     export function Toast(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): any[];
+    }, children?: ViewChildren): ViewChildren;
 }
 declare module "packages/shadcn/src/modules/toggle" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -15496,7 +15904,6 @@ declare const ListView: typeof import("@timeless/timeless").ListView;
 declare const ListenerManager: typeof import("@timeless/timeless").ListenerManager;
 declare const Logger: typeof import("@timeless/timeless").Logger;
 declare const Match: typeof import("@timeless/timeless").Match;
-declare const NativeStyle: typeof import("@timeless/timeless").NativeStyle;
 declare const ObjectSignal: typeof import("@timeless/timeless").ObjectSignal;
 declare const PasswordInput: typeof import("@timeless/timeless").PasswordInput;
 declare const Popper: typeof import("@timeless/timeless").Popper;
@@ -15513,6 +15920,7 @@ declare const Show: typeof import("@timeless/timeless").Show;
 declare const Signal: typeof import("@timeless/timeless").Signal;
 declare const SplitPane: typeof import("@timeless/timeless").SplitPane;
 declare const SplitView: typeof import("@timeless/timeless").SplitView;
+declare const Style: typeof import("@timeless/timeless").Style;
 declare const Subscriber: typeof import("@timeless/timeless").Subscriber;
 declare const SubscriberWithId: typeof import("@timeless/timeless").SubscriberWithId;
 declare const TabPane: typeof import("@timeless/timeless").TabPane;
@@ -15837,6 +16245,7 @@ declare const ScrollViewCore: typeof import("@timeless/ui-vm").ScrollViewCore;
 declare const SelectCore: typeof import("@timeless/ui-vm").SelectCore;
 declare const SelectGroupCore: typeof import("@timeless/ui-vm").SelectGroupCore;
 declare const SelectInListCore: typeof import("@timeless/ui-vm").SelectInListCore;
+declare const SelectItemCore: typeof import("@timeless/ui-vm").SelectItemCore;
 declare const ShortcutModel: typeof import("@timeless/ui-vm").ShortcutModel;
 declare const SimpleSelectCore: typeof import("@timeless/ui-vm").SimpleSelectCore;
 declare const SingleFieldCore: typeof import("@timeless/ui-vm").SingleFieldCore;
@@ -15864,6 +16273,7 @@ declare const WaterfallColumnModel: typeof import("@timeless/ui-vm").WaterfallCo
 declare const WaterfallModel: typeof import("@timeless/ui-vm").WaterfallModel;
 declare const base: typeof import("@timeless/ui-vm").base;
 declare const clamp: typeof import("@timeless/ui-vm").clamp;
+declare const computePositionInItemAlignedMode: typeof import("@timeless/ui-vm").computePositionInItemAlignedMode;
 declare const damping: typeof import("@timeless/ui-vm").damping;
 declare const getAngleByPoints: typeof import("@timeless/ui-vm").getAngleByPoints;
 declare const getGlobalLayerManager: typeof import("@timeless/ui-vm").getGlobalLayerManager;

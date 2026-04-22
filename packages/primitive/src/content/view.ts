@@ -22,27 +22,10 @@
  * </View>
  * ```
  */
-import { DerivedRef, Ref, isRef, generateTrackId } from "@timeless/reactive";
-
-import { VNodeView } from "@/vnode/view";
-import {
-  ViewStyle,
-  isClassNameRef,
-  ClassNameRef,
-  RawViewStyleProperties,
-} from "@/style/index";
 import { MountedEvent } from "@/event/index";
-import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
 
-import { Text } from "./text";
-import {
-  isElement,
-  TimelessElement,
-  ViewAttributes,
-  ViewChildren,
-  resolve_children,
-} from "./type";
+import { isElement, TimelessElement, ViewChildren } from "./type";
 import { Box, BoxProps } from "./box";
 
 const logger = Logger({ prefix: "primitive", scope: "content/view" });

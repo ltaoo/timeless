@@ -165,6 +165,9 @@ export function HostElement(props: {
       if (events.onPointerDown) {
         $elm.addEventListener("pointerdown", events.onPointerDown);
       }
+      if (events.onPointerUp) {
+        $elm.addEventListener("pointerup", events.onPointerUp);
+      }
       if (events.onFocus) {
         $elm.addEventListener("focus", events.onFocus);
       }
@@ -293,10 +296,22 @@ export function HostElement(props: {
           }
         }
       }
+      const dataset = state.dataset;
+      if (dataset) {
+        for (const [key, value] of Object.entries(dataset)) {
+          const k = `data-${key}`;
+          if (value !== undefined) {
+            methods.setAttribute(k, String(value));
+          } else {
+            methods.removeAttribute(k);
+          }
+        }
+      }
     },
     render(children: (TimelessElement | null)[] = []) {
       child_elements = [];
       const $fragment = document.createDocumentFragment();
+
       for (const child of children) {
         if (isElement(child)) {
           const child$ = props.build(child);
@@ -536,7 +551,7 @@ export function HostElement(props: {
       removed: { idx: number }[];
       moved: { from: number; to: number }[];
     }) {
-      const { added, removed, moved } = data;
+      const { added = [], removed = [], moved = [] } = data;
       const $parent = methods.getParent();
       if (!$parent) {
         console.warn("refresh parent not found");

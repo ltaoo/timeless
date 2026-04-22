@@ -40,7 +40,7 @@ export function Trigger(
       onMounted(event) {
         const $e = event.target;
         const nodes = $e.getChildren();
-        const $ref = nodes.find((n) => n.getType() === "view") || $e;
+        const $ref = nodes.find((n) => n && n.getType() === "view") || $e;
         props.store.popper.setReference(
           {
             $el: $ref,

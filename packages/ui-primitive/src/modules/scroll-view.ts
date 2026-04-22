@@ -34,19 +34,52 @@ export function Root(
   return View(
     {
       ...rest,
+      dataset: {
+        scrollview: "",
+      },
       onMounted(event) {
-        const $elm = event.target;
+        const $elm = event.target.get$elm() as HTMLDivElement;
         const { width, height } = $elm.getBoundingClientRect();
-        store.setRect({
+
+        const scrollWidth = $elm.scrollWidth;
+        const scrollHeight = $elm.scrollHeight;
+        const clientWidth = $elm.clientWidth;
+        const clientHeight = $elm.clientHeight;
+        const offsetWidth = $elm.offsetWidth;
+        const offsetHeight = $elm.offsetHeight;
+        const offsetTop = $elm.offsetTop;
+        const offsetLeft = $elm.offsetLeft;
+        const scrollTop = $elm.scrollTop;
+        const scrollLeft = $elm.scrollLeft;
+        const paddingTop = Number(
+          getComputedStyle($elm).paddingTop.replace("px", ""),
+        );
+        const paddingBottom = Number(
+          getComputedStyle($elm).paddingBottom.replace("px", ""),
+        );
+
+        store.handleMounted({
           width,
           height,
+          scrollWidth,
+          scrollHeight,
+          clientWidth,
+          clientHeight,
+          offsetWidth,
+          offsetHeight,
+          offsetTop,
+          offsetLeft,
+          scrollTop,
+          scrollLeft,
+          paddingTop,
+          paddingBottom,
         });
         const provide = global_provider?.provide_ui_scroll_view_scroll;
         if (typeof provide === "function") {
-          provide(store, $elm.get$elm());
+          provide(store, $elm);
         }
         if (props.onMounted) {
-          props.onMounted(event);
+          return props.onMounted(event);
         }
       },
     },
@@ -90,15 +123,6 @@ export function Indicator(
         props.onUnmounted();
       }
     },
-    // render() {
-    //   const $elm = indicator$.render();
-    //   const provide = global_provider?.provide_ui_scroll_view_indicator;
-    //   if (typeof provide === "function") provide(store, indicator$.$elm);
-    //   if (props.onMounted) {
-    //     props.onMounted({ target: $elm });
-    //   }
-    //   return $elm;
-    // },
   };
 }
 
@@ -123,7 +147,6 @@ export function Progress(
   const progress$ = View(
     {
       ...rest,
-      // "data-scroll-view-progress": "",
       style: { display: computed(visible, (v) => (v ? "block" : "none")) },
     },
     [
@@ -145,16 +168,9 @@ export function Progress(
     t: "view",
     $elm: progress$.$elm,
     state: {},
-    // render() {
-    //   const $elm = progress$.render();
-    //   if (props.onMounted) {
-    //     props.onMounted({ target: $elm });
-    //   }
-    //   return $elm;
-    // },
     onMounted(event) {
       if (props.onMounted) {
-        props.onMounted(event);
+        return props.onMounted(event);
       }
     },
     beforeUnmounted() {

@@ -46,6 +46,7 @@ export function DOMView(props: {
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
       console.log("[dom]host/view - hydrate", $elm, elm.state);
       box$.methods.set$elm($elm);
+      // box$.methods.applyState(elm.state);
       box$.methods.setupEventListener(elm.events);
 
       const child_nodes: VNodeView[] = [];

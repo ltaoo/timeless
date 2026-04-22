@@ -9,3 +9,6 @@ export type { ShiftOptions, LimitShiftOptions } from "./shift";
 
 export { arrow } from "./arrow";
 export type { ArrowOptions } from "./arrow";
+
+export { size } from "./size";
+export type { SizeOptions } from "./size";

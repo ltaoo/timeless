@@ -1,17 +1,4 @@
-export interface Platform {
-  /** 监听全局事件，返回取消监听的 cleanup 函数 */
-  addEventListener(
-    type: string,
-    handler: EventListener,
-    options?: AddEventListenerOptions,
-  ): () => void;
-
-  /** 批量设置 document.body 样式（传空字符串可清除） */
-  patchBodyStyle(style: Record<string, string>): void;
-
-  /** 获取视口大小 */
-  getViewportSize(): { width: number; height: number };
-}
+import { Platform } from "@timeless/base";
 
 const noop = () => {};
 
@@ -19,9 +6,23 @@ let _platform: Platform = {
   addEventListener: () => noop,
   patchBodyStyle: noop,
   getViewportSize: () => ({ width: 0, height: 0 }),
+  isBrowser: () => false,
+  isElement: () => false,
+  isHTMLElement: () => false,
+  getBoundingClientRect: () => ({ x: 0, y: 0, width: 0, height: 0 }),
+  getDimensions: () => ({ width: 0, height: 0 }),
+  getElementRects: () => ({
+    reference: { x: 0, y: 0, width: 0, height: 0 },
+    floating: { x: 0, y: 0, width: 0, height: 0 },
+  }),
+  getClippingRect: () => ({ x: 0, y: 0, width: Infinity, height: Infinity }),
+  getOffsetParent: () => null,
+  isRTL: () => false,
+  getScale: () => ({ x: 1, y: 1 }),
+  getDocumentElement: () => null,
 };
 
-export function setPlatform(p: Platform) {
+export function setPlatform<T extends Platform = Platform>(p: T): T {
   _platform = p;
   return p;
 }

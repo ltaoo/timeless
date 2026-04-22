@@ -6,7 +6,7 @@ import { hydrate_node } from "@/renderer/hydrate";
 export type DOMLink = VNodeView<HTMLAnchorElement> & {
   t: "link";
   render(elm: TimelessElement): HTMLAnchorElement;
-  hydrate(elm: TimelessElement, $e: HTMLAnchorElement): void;
+  // hydrate(elm: TimelessElement, $e: HTMLAnchorElement): void;
 };
 
 export function DOMLink(props: {
@@ -33,8 +33,8 @@ export function DOMLink(props: {
       $elm.appendChild($fragment);
       return $elm;
     },
-    hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
-      console.log("[dom]host/view - hydrate", $elm, elm.state);
+    hydrate(elm: TimelessElement, $elm: HTMLElement, opt: {}) {
+      // console.log("[dom]host/view - hydrate", $elm, elm.state);
       box$.methods.set$elm($elm);
       box$.methods.setupEventListener(elm.events);
       if (elm.children) {
@@ -44,11 +44,14 @@ export function DOMLink(props: {
         for (let i = 0; i < elm.children.length; i += 1) {
           const child = elm.children[i];
           child_elements.push(child);
+          const $child = $children[i] as HTMLElement;
           if (child) {
-            const child$ = hydrate_node(
-              child,
-              $children[i] as HTMLElement | Text,
-            );
+            const child$ = hydrate_node(child, $child, {
+              initial: true,
+              $parent: $elm,
+              offset: 0,
+              idx: i,
+            });
             if (child$) {
               child_nodes.push(child$);
             }
