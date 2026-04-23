@@ -18,6 +18,7 @@
  * ```
  */
 import { MountedEvent } from "@/event";
+import { getOwner, runWithOwner } from "@/context";
 
 import { ViewProps } from "./view";
 import {
@@ -26,6 +27,7 @@ import {
   ViewChildren,
   TimelessComponent,
 } from "./type";
+import { useErrorBoundary } from "@/reactive/error-boundary-context";
 
 /** Default error view shown when lazy loading fails */
 function defaultErrorView(error: Error, viewName: string): TimelessElement {
@@ -55,7 +57,7 @@ type LazyViewProps = ViewProps & { placeholder?: ViewChildren } & Record<
 
 /** Internal state for LazyView */
 type LazyViewState = {
-  children: TimelessElement[];
+  children: (TimelessElement | null)[];
 };
 
 /**
@@ -69,6 +71,7 @@ export function LazyView(
   props: LazyViewProps,
   children: TimelessComponent,
 ): TimelessElement {
+  const owner = getOwner();
   let $elm: any = null;
 
   const state: LazyViewState = {
@@ -76,27 +79,50 @@ export function LazyView(
   };
 
   const methods = {
-    handleError(err: unknown) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      // console.error("[LazyView] Error loading async component:", error);
-      const ErrorView = props.ErrorFallback || defaultErrorView;
-      const error_element = ErrorView(error, props.view?.name || "unknown");
-      state.children = [error_element];
+    refreshChildren() {
+      if ($elm && typeof $elm.replaceChildren === "function") {
+        $elm.replaceChildren(state.children);
+        return;
+      }
       if ($elm && typeof $elm.refresh === "function") {
         $elm.refresh(state.children);
       }
     },
+    handleError(err: unknown) {
+      const evaluate = () => {
+        const boundary = useErrorBoundary();
+        if (boundary) {
+          state.children = boundary.handle(err);
+          return;
+        }
+        const error = err instanceof Error ? err : new Error(String(err));
+        const ErrorView = props.ErrorFallback || defaultErrorView;
+        state.children = [ErrorView(error, props.view?.name || "unknown")];
+      };
+      if (owner) {
+        runWithOwner(owner, evaluate);
+      } else {
+        evaluate();
+      }
+      methods.refreshChildren();
+    },
     setup_children(children: TimelessComponent) {
-      // let loaded_element: TimelessElement | undefined;
-      const result = children(props);
-      // console.log("[]LazyView - result", result);
+      if (!children) {
+        return;
+      }
+      const result = owner
+        ? runWithOwner(owner, () => children(props))
+        : children(props);
       if (isElement(result)) {
         state.children = [result];
       } else if (isPromise(result)) {
-        result.then((m) => {
-          const Factory = m.default || m;
-          if (typeof Factory === "function") {
-            try {
+        result
+          .then((m) => {
+            const evaluate = () => {
+              const Factory = m.default || m;
+              if (typeof Factory !== "function") {
+                return;
+              }
               const hmr_path = (children as any).__hmr_path;
               if (
                 hmr_path &&
@@ -106,49 +132,58 @@ export function LazyView(
                 // @ts-ignore
                 globalThis.__TIMELESS_HMR__.beginRecord?.(hmr_path);
               }
-              const element = Factory(props);
-              if (
-                hmr_path &&
-                // @ts-ignore
-                typeof globalThis.__TIMELESS_HMR__ !== "undefined"
-              ) {
-                // @ts-ignore
-                globalThis.__TIMELESS_HMR__.endRecord?.();
-              }
-              if (!element) {
-                return;
-              }
-              if (isElement(element)) {
-                state.children = [element];
-                if ($elm && typeof $elm.replaceChildren === "function") {
-                  $elm.replaceChildren(state.children);
+              try {
+                const element = Factory(props);
+                if (!element) {
+                  return;
                 }
+                if (isElement(element)) {
+                  state.children = [element];
+                  methods.refreshChildren();
+                  if (
+                    hmr_path &&
+                    // @ts-ignore
+                    typeof globalThis.__TIMELESS_HMR__ !== "undefined"
+                  ) {
+                    // @ts-ignore
+                    globalThis.__TIMELESS_HMR__.register(hmr_path, {
+                      element,
+                      get $elm() {
+                        return $elm;
+                      },
+                      props,
+                    });
+                  }
+                }
+              } finally {
                 if (
                   hmr_path &&
                   // @ts-ignore
                   typeof globalThis.__TIMELESS_HMR__ !== "undefined"
                 ) {
                   // @ts-ignore
-                  globalThis.__TIMELESS_HMR__.register(hmr_path, {
-                    element,
-                    get $elm() {
-                      return $elm;
-                    },
-                    props,
-                  });
+                  globalThis.__TIMELESS_HMR__.endRecord?.();
                 }
               }
-            } catch (err) {
-              methods.handleError(err);
-              throw err;
+            };
+            if (owner) {
+              runWithOwner(owner, evaluate);
+            } else {
+              evaluate();
             }
-          }
-        });
+          })
+          .catch((err) => {
+            methods.handleError(err);
+          });
       }
     },
   };
 
-  methods.setup_children(children);
+  try {
+    methods.setup_children(children);
+  } catch (err) {
+    methods.handleError(err);
+  }
 
   return {
     t: "lazy-view",

@@ -211,16 +211,25 @@ function ApplicationRootView() {
   // );
 
   return Fragment({}, [
-    StandardSubViews({
-      view: root_view$,
-      views,
-      history: history$,
-      app,
-      client: client$,
-      storage: storage$,
-      NotFound: NotFoundPageView,
-      ErrorFallback: ErrorFallbackView,
-    }),
+    ErrorBoundary(
+      {
+        fallback(error) {
+          return ErrorFallbackView(error);
+        },
+      },
+      () => [
+        StandardSubViews({
+          view: root_view$,
+          views,
+          history: history$,
+          app,
+          client: client$,
+          storage: storage$,
+          NotFound: NotFoundPageView,
+          ErrorFallback: ErrorFallbackView,
+        }),
+      ],
+    ),
     Portal({}, [Toaster({ store: toaster$, position: "top-center" })]),
   ]);
 }

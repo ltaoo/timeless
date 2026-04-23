@@ -51,4 +51,4 @@ export * as ArrowPrimitive from "./modules/arrow";
 export * as SonnerPrimitive from "./modules/sonner";
 export { KeepAliveSubViews } from "./modules/keep-alive-sub-views";
 export { StandardSubViews } from "./modules/standard-sub-views";
-export * as ErrorBoundary from "./modules/error-boundary";
+export * as ErrorBoundaryPrimitive from "./modules/error-boundary";

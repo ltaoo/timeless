@@ -547,6 +547,16 @@ declare module "packages/primitive/src/reactive/for" {
         _hmr_dispose(): void;
     };
 }
+declare module "packages/primitive/src/reactive/error-boundary-context" {
+    import { TimelessElement } from "@/content/type";
+    export type ErrorBoundaryHandler = {
+        handle(error: unknown): (TimelessElement | null)[];
+        reset(): void;
+    };
+    const ErrorBoundaryContext: any;
+    export function useErrorBoundary(): any;
+    export { ErrorBoundaryContext };
+}
 declare module "packages/primitive/src/reactive/show" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewChildren } from "@/content/type";
@@ -598,6 +608,21 @@ declare module "packages/primitive/src/reactive/match" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
+}
+declare module "packages/primitive/src/reactive/error-boundary" {
+    import { TimelessElement, ViewChildren } from "@/content/type";
+    import { MountedEvent } from "@/event";
+    export type ErrorBoundaryProps = {
+        fallback?: (error: unknown, reset: () => void) => ViewChildren;
+        onError?: (error: unknown) => void;
+        throwToGlobal?: boolean;
+        onMounted?: (event: MountedEvent) => void;
+        beforeUnmounted?: () => void;
+        onUnmounted?: () => void;
+    };
+    export function ErrorBoundary(props?: ErrorBoundaryProps, children?: ViewChildren): TimelessElement<{
+        error: unknown;
+    }>;
 }
 declare module "packages/primitive/src/content/text" {
     /**
@@ -2945,6 +2970,7 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/reactive/for";
     export * from "packages/primitive/src/reactive/show";
     export * from "packages/primitive/src/reactive/match";
+    export * from "packages/primitive/src/reactive/error-boundary";
     export * from "packages/primitive/src/content/fragment";
     export { createContext, provide, use, Scope, getOwner, runWithOwner, } from "packages/primitive/src/context";
     export type { Context } from "packages/primitive/src/context";
@@ -6433,22 +6459,24 @@ declare module "packages/ui-vm/src/popper/index" {
     enum Events {
         /** 参考原始被加载 */
         ReferenceMounted = 0,
+        ReferenceOutOfView = 1,
         /** 内容元素被加载（可以获取宽高位置） */
-        FloatingMounted = 1,
+        FloatingMounted = 2,
         /** 被放置（其实就是计算好了浮动元素位置） */
-        Placed = 2,
+        Placed = 3,
         /** 鼠标进入内容区 */
-        Enter = 3,
+        Enter = 4,
         /** 鼠标离开内容区 */
-        Leave = 4,
-        StateChange = 5,
+        Leave = 5,
+        StateChange = 6,
         /** 父容器改变 */
-        ContainerChange = 6
+        ContainerChange = 7
     }
     type TheTypesOfEvents = {
         [Events.FloatingMounted]: {
             getRect: () => Rect;
         };
+        [Events.ReferenceOutOfView]: void;
         [Events.ReferenceMounted]: {
             getRect: () => Rect;
         };
@@ -6623,7 +6651,9 @@ declare module "packages/ui-vm/src/popper/index" {
             };
         }): void;
         /** 计算浮动元素位置 */
-        place(): Promise<void>;
+        place(source?: {
+            desc: string;
+        }): Promise<void>;
         computePosition(): Promise<{
             x: number;
             y: number;
@@ -6632,6 +6662,7 @@ declare module "packages/ui-vm/src/popper/index" {
             middleware_data: MiddlewareData;
         }>;
         reset(): void;
+        handleContainerScroll(): void;
         /** viewport 滚动时由 primitive 调用，更新滚动按钮可见性，模拟原生 select 渐进扩展高度 */
         handleViewportScroll(event: {
             scrollTop: number;
@@ -6641,6 +6672,7 @@ declare module "packages/ui-vm/src/popper/index" {
         handleEnter(): void;
         handleLeave(): void;
         onReferenceMounted(handler: Handler<TheTypesOfEvents[Events.ReferenceMounted]>): () => void;
+        onReferenceOutOfView(handler: Handler<TheTypesOfEvents[Events.ReferenceOutOfView]>): () => void;
         onFloatingMounted(handler: Handler<TheTypesOfEvents[Events.FloatingMounted]>): () => void;
         onContainerChange(handler: Handler<TheTypesOfEvents[Events.ContainerChange]>): () => void;
         onEnter(handler: Handler<TheTypesOfEvents[Events.Enter]>): () => void;
@@ -7427,7 +7459,7 @@ declare module "packages/ui-vm/src/select/index" {
         popper$: PopperCore;
         presence$: any;
         layer$: DismissableLayerCore;
-        input$: any;
+        search_input$: any;
         position: "popper" | "item-aligned";
         reference: Rect | null;
         /** 触发按钮 */
@@ -14771,7 +14803,7 @@ declare module "packages/ui-primitive/src/index" {
     export * as SonnerPrimitive from "packages/ui-primitive/src/modules/sonner";
     export { KeepAliveSubViews } from "packages/ui-primitive/src/modules/keep-alive-sub-views";
     export { StandardSubViews } from "packages/ui-primitive/src/modules/standard-sub-views";
-    export * as ErrorBoundary from "packages/ui-primitive/src/modules/error-boundary";
+    export * as ErrorBoundaryPrimitive from "packages/ui-primitive/src/modules/error-boundary";
 }
 declare module "packages/shadcn/src/modules/input" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -15904,6 +15936,7 @@ declare const Column: typeof import("@timeless/timeless").Column;
 declare const DepInfo: typeof import("@timeless/timeless").DepInfo;
 declare const DerivedRef: typeof import("@timeless/timeless").DerivedRef;
 declare const DismissableLayer: typeof import("@timeless/timeless").DismissableLayer;
+declare const ErrorBoundary: typeof import("@timeless/timeless").ErrorBoundary;
 declare const FilePicker: typeof import("@timeless/timeless").FilePicker;
 declare const Flex: typeof import("@timeless/timeless").Flex;
 declare const For: typeof import("@timeless/timeless").For;
@@ -16048,7 +16081,7 @@ declare const Dialog: typeof import("@timeless/shadcn").Dialog;
 declare const DialogPrimitive: typeof import("@timeless/shadcn").DialogPrimitive;
 declare const DropdownMenu: typeof import("@timeless/shadcn").DropdownMenu;
 declare const DropdownMenuPrimitive: typeof import("@timeless/shadcn").DropdownMenuPrimitive;
-declare const ErrorBoundary: typeof import("@timeless/shadcn").ErrorBoundary;
+declare const ErrorBoundaryPrimitive: typeof import("@timeless/shadcn").ErrorBoundaryPrimitive;
 declare const Field: typeof import("@timeless/shadcn").Field;
 declare const FieldDescription: typeof import("@timeless/shadcn").FieldDescription;
 declare const FieldGroup: typeof import("@timeless/shadcn").FieldGroup;

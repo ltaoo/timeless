@@ -11,6 +11,7 @@ import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
 import { getOwner, runWithOwner } from "@/context";
+import { useErrorBoundary } from "./error-boundary-context";
 
 const logger = Logger({ prefix: "primitive", scope: "reactive/show" });
 
@@ -55,13 +56,21 @@ export function Show(props: ShowProps) {
       // console.log("build_children_with_condition", condition);
       const children: (TimelessElement | null)[] = [];
       const evaluate = () => {
-        if (condition) {
-          return methods.normalize_children(props.ok());
+        try {
+          if (condition) {
+            return methods.normalize_children(props.ok());
+          }
+          if (props.else) {
+            return methods.normalize_children(props.else());
+          }
+          return [];
+        } catch (error) {
+          const boundary = useErrorBoundary();
+          if (boundary) {
+            return boundary.handle(error);
+          }
+          throw error;
         }
-        if (props.else) {
-          return methods.normalize_children(props.else());
-        }
-        return [];
       };
       const next = _owner ? runWithOwner(_owner, evaluate) : evaluate();
       for (let i = 0; i < next.length; i += 1) {

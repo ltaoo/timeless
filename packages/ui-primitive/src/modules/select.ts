@@ -498,7 +498,7 @@ export function Search(props: ViewProps & { store: SelectCore<any> }) {
   const { store, ...rest } = props;
 
   const state_ = refobj(store.state);
-  const input_ = refobj(store.input$.state);
+  const input_ = refobj(store.search_input$.state);
 
   const listener$ = ListenerManager([state_, input_]);
 
@@ -511,7 +511,7 @@ export function Search(props: ViewProps & { store: SelectCore<any> }) {
         }),
       );
       listener$.add(
-        store.input$.onStateChange((v) => {
+        store.search_input$.onStateChange((v) => {
           input_.as(v);
         }),
       );
@@ -531,7 +531,7 @@ export function Search(props: ViewProps & { store: SelectCore<any> }) {
             logger.log("Search onPointerDown");
             store.enableSearch();
             if (store.selected_item$) {
-              store.input$.setValue("", { silence: true });
+              store.search_input$.setValue("", { silence: true });
             }
             logger.log("onPointerDown", store.disabled, store.open);
             if (!store.disabled && !store.open) {
@@ -547,7 +547,7 @@ export function Search(props: ViewProps & { store: SelectCore<any> }) {
               target && typeof target === "object" && "value" in target
                 ? target.value
                 : "";
-            store.input$.setValue(String(value));
+            store.search_input$.setValue(String(value));
             // if (!store.open) {
             //   store.show();
             // }
