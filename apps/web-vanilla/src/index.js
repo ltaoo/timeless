@@ -59,7 +59,7 @@ function ErrorFallbackView(error, viewName) {
                     {
                       as: "pre",
                       class:
-                        "mt-2 text-xs text-red-500/80 dark:text-red-400/60 bg-red-100 dark:bg-red-950/50 rounded p-3 overflow-auto max-h-[300px] whitespace-pre-wrap break-words font-mono",
+                        "mt-2 text-xs text-red-500/80 dark:text-red-400/60 bg-red-100 dark:bg-red-950/50 rounded p-3 overflow-auto whitespace-pre-wrap break-words font-mono",
                     },
                     [error.stack],
                   ),

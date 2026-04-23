@@ -34,14 +34,26 @@ export function Input(
         id,
         store,
         class: classNames([
-          "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+          "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none",
+          "file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
+          "placeholder:text-muted-foreground",
+          "dark:bg-input/30 dark:disabled:bg-input/80",
+          "md:text-sm",
+          computed(state_, (t) => {
+            return t.focus ? "border-ring ring-3 ring-ring/50" : "";
+          }),
           computed(state_, (d) => {
             return d.disabled
-              ? "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 "
+              ? "pointer-events-none cursor-not-allowed bg-input/50 opacity-50 "
               : "";
           }),
-          // computed(state_, (t) => {
-          // }),
+          computed(state_, (t) => {
+            // dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40
+            // "border-destructive ring-3 !ring-destructive/20"
+            return t.status === "error"
+              ? "!border-destructive/50 !caret-destructive ring-3 !ring-destructive/40 !text-destructive"
+              : "";
+          }),
           // "aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20",
           combine({ allowClear, isLoading }, (t) => {
             return t.isLoading || t.allowClear ? "pr-8" : "";

@@ -49,9 +49,11 @@ type InputState<T> = {
   value: T;
   placeholder: string;
   disabled: boolean;
+  hovering: boolean;
   loading: boolean;
   focus: boolean;
   type: string;
+  status: "error" | "success" | "normal";
   tmpType: string;
   allowClear: boolean;
   autoFocus: boolean;
@@ -74,7 +76,9 @@ export class InputCore<T>
   value: T;
   placeholder = "Please input";
   disabled = false;
+  status: "error" | "success" | "normal" = "normal";
   allowClear = true;
+  hovering = false;
   autoComplete = false;
   autoFocus = false;
   ignoreEnterEvent = false;
@@ -94,6 +98,8 @@ export class InputCore<T>
       disabled: this.disabled,
       focus: this.isFocus,
       loading: this.loading,
+      status: this.status,
+      hovering: this.hovering,
       type: this.type,
       tmpType: this.tmpType,
       autoComplete: this.autoComplete,
@@ -190,6 +196,14 @@ export class InputCore<T>
   handleClick(event: { x: number; y: number }) {
     this.emit(Events.Click, event);
   }
+  handleMouseEnter() {
+    this.hovering = true;
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  handleMouseLeave() {
+    this.hovering = false;
+    this.emit(Events.StateChange, { ...this.state });
+  }
   handleChange(event: unknown) {
     // console.log("[DOMAIN]ui/input - handleChange", event);
     if (this.type === "file") {
@@ -211,6 +225,10 @@ export class InputCore<T>
     if (!extra.silence) {
       this.emit(Events.Change, value);
     }
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  setStatus(status: "error" | "success" | "normal") {
+    this.status = status;
     this.emit(Events.StateChange, { ...this.state });
   }
   setPlaceholder(v: string) {

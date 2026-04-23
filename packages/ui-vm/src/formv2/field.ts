@@ -208,6 +208,7 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
   }
   reset() {
     this.setValue(this._input.defaultValue);
+    this.input.setStatus("normal");
     this._error = null;
     this._status = "normal";
     this._focus = false;
@@ -268,11 +269,15 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
     }
     if (errors.length > 0) {
       this._error = new BizError(errors);
+      if (this.input) {
+        this.input.setStatus("error");
+      }
       this._bus.emit(SingleFieldEvents.Error, this._error);
       return Result.Err(new BizError(errors));
     }
     if (this._error) {
       this._error = null;
+      this.input.setStatus("normal");
       this._bus.emit(SingleFieldEvents.Error, null);
     }
     return Result.Ok(value);

@@ -137,6 +137,9 @@ export default function OverlayView() {
       defaultValue: "",
       placeholder: "输入水果名...",
     }),
+    onChange(v) {
+      console.log("index.debug.js handle select", v);
+    },
   });
 
   const handleSearch = Timeless.utils.debounce(200, async function (keyword) {
@@ -144,8 +147,8 @@ export default function OverlayView() {
     search_select$.finishSearch();
   });
 
-  search_select$.input$.onChange((v) => {
-    if (!search_select$.can_search) {
+  search_select$.onSearchChange((v) => {
+    if (!search_select$.canSearch()) {
       return;
     }
     search_select$.startSearch();
@@ -185,9 +188,23 @@ export default function OverlayView() {
         },
         [],
       ),
+      Label({ for: "search" }, ["Search"]),
       Select({
+        id: "search",
         store: search_select$,
       }),
+      Button(
+        {
+          class: "mt-4",
+          store: new Timeless.ui.ButtonCore({
+            onClick() {
+              // search_select$.focusSearchInput();
+              search_select$.focus();
+            },
+          }),
+        },
+        ["Focus Search Input"],
+      ),
       View(
         {
           style: {

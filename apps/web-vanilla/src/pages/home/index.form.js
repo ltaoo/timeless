@@ -5,9 +5,11 @@ export default function FormView() {
   const view$ = new Timeless.ui.ScrollViewCore({});
 
   const search_select$ = new Timeless.ui.SelectCore({
+    view$,
     defaultValue: null,
     placeholder: "输入关键词搜索",
     options: [],
+    platform,
     search: new Timeless.ui.InputCore({
       defaultValue: "",
       placeholder: "输入水果名...",

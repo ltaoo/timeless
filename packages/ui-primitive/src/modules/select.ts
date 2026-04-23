@@ -55,11 +55,24 @@ export function Trigger(
       "white-space": "nowrap",
       "border-width": 0,
     },
+    onMounted(event) {
+      const $elm = event.target.get$elm();
+      store.focus = function () {
+        store.show();
+        // $elm.focus();
+      };
+      store.blur = function () {
+        store.hide();
+        // $elm.blur();
+      };
+    },
     onFocus() {
-      props.store.handleFocus();
+      logger.log("Trigger _input$ handle focus");
+      store.show();
+      // props.store.handleFocus();
     },
     onBlur() {
-      props.store.handleBlur();
+      // props.store.handleBlur();
     },
   });
 
@@ -527,8 +540,17 @@ export function Search(props: ViewProps & { store: SelectCore<any> }) {
             // return t.value2?.label || "";
             return t.value;
           }),
+          onMounted(event) {
+            const $elm = event.target.get$elm();
+            store.search_input$.focus = function () {
+              $elm.focus();
+            };
+            store.search_input$.blur = function () {
+              $elm.blur();
+            };
+          },
           onPointerDown(e) {
-            logger.log("Search onPointerDown");
+            // logger.log("Search onPointerDown");
             store.enableSearch();
             if (store.selected_item$) {
               store.search_input$.setValue("", { silence: true });

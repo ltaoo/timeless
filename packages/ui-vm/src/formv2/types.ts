@@ -23,6 +23,7 @@ export type FormInputInterface<T> = {
   value: T;
   defaultValue: T;
   setValue: (v: T, extra?: Partial<{ silence: boolean }>) => void;
+  setStatus: (status: "error" | "success" | "normal") => void;
   destroy?: () => void;
   onChange: (fn: (v: T) => void) => void;
   // onStateChange: (fn: (v: any) => void) => void;

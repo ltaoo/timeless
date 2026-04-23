@@ -20,6 +20,7 @@ const logger = Logger({ prefix: "vm", scope: "select/index" });
 
 enum Events {
   StateChange,
+  SearchChange,
   Change,
   Focus,
   Blur,
@@ -28,6 +29,7 @@ enum Events {
 type TheTypesOfEvents<T> = {
   [Events.StateChange]: SelectState<T>;
   [Events.Change]: T | null;
+  [Events.SearchChange]: string;
   [Events.Focus]: void;
   [Events.Blur]: void;
   [Events.Placed]: void;
@@ -122,6 +124,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   disabled: boolean = false;
   focused = false;
   open: boolean = false;
+  status: "error" | "success" | "normal" = "normal";
   allowClear: boolean = false;
   /** 加载中 */
   loading: boolean = false;
@@ -218,22 +221,28 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       position = "item-aligned",
       onChange,
     } = props;
+
     this.position = position;
     this.search = !!search;
-    if (this.search) {
-      this.position = "popper";
-      this.search_input$ = search;
-    }
     this.options = flatten_entries(options, { value: defaultValue });
-    if (id !== undefined) {
-      this.id = id;
-    }
     this.selected_item$ = this.options.find((opt) => opt.selected) ?? null;
     this.disabled = disabled;
     this.allowClear = allowClear;
     this.value = defaultValue;
     this.defaultValue = defaultValue;
     this.placeholder = placeholder;
+
+    if (id !== undefined) {
+      this.id = id;
+    }
+    if (search) {
+      this.position = "popper";
+      this.search_input$ = search;
+      this.search_input$.onChange((v) => {
+        this.emit(Events.SearchChange, v);
+      });
+    }
+
     this.popper$ = new PopperCore({
       align: "start",
       platform,
@@ -241,6 +250,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       mode: this.position,
     });
     this.layer$ = new DismissableLayerCore();
+
     // this.collection = new CollectionCore();
     this.popper$.onReferenceMounted((reference) => {
       const { x, y, width, height } = reference.getRect();
@@ -317,7 +327,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     });
   }
   async show() {
-    logger.log("show", this.state);
+    logger.log("show", this.state, this.search);
     if (this.disabled) {
       return;
     }
@@ -334,6 +344,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
           matched_item$.focus();
         }
       }
+    }
+    if (this.selected_item$) {
+      this.popper$.setViewportOffsetTop(this.selected_item$.offsetTop - 24);
     }
     this.presence$.show();
     this.open = true;
@@ -418,8 +431,14 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.emit(Events.Change, value);
     this.emit(Events.StateChange, { ...this.state });
   }
+  focusSearchInput() {
+    this.search_input$.focus();
+  }
   focus() {
     this.emit(Events.Focus);
+  }
+  blurSearchInput() {
+    // this.emit(Events.Blur);
   }
   blur() {
     this.emit(Events.Blur);
@@ -456,6 +475,10 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.select(v);
     // this.emit(Events.Change, v);
     // this.emit(Events.StateChange, { ...this.state });
+  }
+  setStatus(status: "error" | "success" | "normal") {
+    this.status = status;
+    this.emit(Events.StateChange, { ...this.state });
   }
   clear() {
     this.value = null;
@@ -605,10 +628,11 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   }
 
   handleFocus() {
-    // if (this.presence$.state.visible) {
-    //   return;
-    // }
-    // this.show();
+    this.focused = true;
+    if (this.presence$.state.visible) {
+      return;
+    }
+    this.show();
   }
   handleBlur() {
     this.focused = false;
@@ -704,6 +728,9 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   }
   onValueChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>) {
     return this.on(Events.Change, handler);
+  }
+  onSearchChange(handler: Handler<TheTypesOfEvents<T>[Events.SearchChange]>) {
+    return this.on(Events.SearchChange, handler);
   }
   onChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>) {
     return this.on(Events.Change, handler);

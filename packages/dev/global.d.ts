@@ -7385,14 +7385,16 @@ declare module "packages/ui-vm/src/select/index" {
     import { ScrollViewCore } from "@/scroll-view";
     enum Events {
         StateChange = 0,
-        Change = 1,
-        Focus = 2,
-        Blur = 3,
-        Placed = 4
+        SearchChange = 1,
+        Change = 2,
+        Focus = 3,
+        Blur = 4,
+        Placed = 5
     }
     type TheTypesOfEvents<T> = {
         [Events.StateChange]: SelectState<T>;
         [Events.Change]: T | null;
+        [Events.SearchChange]: string;
         [Events.Focus]: void;
         [Events.Blur]: void;
         [Events.Placed]: void;
@@ -7498,7 +7500,9 @@ declare module "packages/ui-vm/src/select/index" {
         removeNativeOption(): void;
         /** 选择 item */
         select(value: T): void;
+        focusSearchInput(): void;
         focus(): void;
+        blurSearchInput(): void;
         blur(): void;
         setOptions(options: NonNullable<SelectProps<T>["options"]>): void;
         setId(v: any): void;
@@ -7540,6 +7544,7 @@ declare module "packages/ui-vm/src/select/index" {
         }): void;
         onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
         onValueChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
+        onSearchChange(handler: Handler<TheTypesOfEvents<T>[Events.SearchChange]>): () => void;
         onChange(handler: Handler<TheTypesOfEvents<T>[Events.Change]>): () => void;
         onFocus(handler: Handler<TheTypesOfEvents<T>[Events.Focus]>): () => void;
         onBlur(handler: Handler<TheTypesOfEvents<T>[Events.Blur]>): () => void;

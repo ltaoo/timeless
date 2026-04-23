@@ -248,14 +248,14 @@ export default function FormValidateView() {
             defaultValue: "z0",
             placeholder: "请选择存储区域，如 z0, z1",
             options: [
-              {
+              new Timeless.ui.SelectItemCore({
                 label: "z0",
                 value: "z0",
-              },
-              {
+              }),
+              new Timeless.ui.SelectItemCore({
                 label: "z1",
                 value: "z1",
-              },
+              }),
             ],
           }),
         }),
@@ -345,9 +345,18 @@ export default function FormValidateView() {
     input: new Timeless.ui.SelectCore({
       defaultValue: "qiniu",
       options: [
-        { value: "qiniu", label: "七牛云" },
-        { value: "s3", label: "S3" },
-        { value: "webdav", label: "WebDAV" },
+        new Timeless.ui.SelectItemCore({
+          value: "qiniu",
+          label: "七牛云",
+        }),
+        new Timeless.ui.SelectItemCore({
+          value: "s3",
+          label: "S3",
+        }),
+        new Timeless.ui.SelectItemCore({
+          value: "webdav",
+          label: "WebDAV",
+        }),
       ],
       onChange(id) {
         const matched_provider_configure = providers_configure[id];

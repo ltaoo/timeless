@@ -109,7 +109,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
 
   // side: Side = "bottom";
   // align: Align = "center";
-  strategy: Strategy = "absolute";
+  strategy: Strategy = "fixed";
   offsetX = 0;
   offsetY = 0;
   placement: Placement = "bottom";
@@ -133,6 +133,8 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
 
   /** item-aligned 模式：viewport 元素（用于 scroll） */
   viewport: { $el?: HTMLElement } | null = null;
+  /** 在 place 前设置，place 后就会尝试将 viewport 滚动到这个距离 */
+  viewportOffsetTop: null | number = null;
   /** item-aligned 模式：选中的 item 元素 */
   selectedItem: {
     $el?: HTMLElement;
@@ -180,7 +182,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       _name,
       side = "bottom",
       align = "center",
-      strategy = "absolute",
+      strategy,
       offsetX = 0,
       offsetY = 0,
       defaultPlaced = false,
@@ -191,7 +193,9 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     if (_name) {
       this.unique_id = _name;
     }
-    this.strategy = strategy;
+    if (strategy) {
+      this.strategy = strategy;
+    }
     this.placement = (side +
       (align !== "center" ? "-" + align : "")) as Placement;
     this.offsetX = offsetX;
@@ -273,11 +277,12 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       !!floating,
       "hasRef:",
       !!this.reference,
+      this.mode,
     );
     if (!floating) {
       this.floating = null;
       // this.state.isPlaced = false;
-      this.emit(Events.StateChange, { ...this.state });
+      // this.emit(Events.StateChange, { ...this.state });
       return;
     }
     this.floating = floating;
@@ -321,6 +326,10 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   setOffset(offset: { x: number; y: number }) {
     this.offsetX = offset.x;
     this.offsetY = offset.y;
+  }
+  setViewportOffsetTop(offsetTop: number) {
+    this.viewportOffsetTop = offsetTop;
+    // this.viewport$.rect.offsetTop = offsetTop;
   }
   /** 设置 item-aligned 模式下选中项的偏移量 */
   adjustContentPositionWithOffsetTop(data: {
@@ -639,7 +648,12 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       height: this.state.height,
       available_height,
       content_height,
+      viewportOffsetTop: this.viewportOffsetTop,
     });
+    if (this.viewportOffsetTop !== null) {
+      this.viewport$.setScrollTopSilent(this.viewportOffsetTop);
+      this.viewportOffsetTop = null;
+    }
     this.emit(Events.StateChange, { ...this.state });
   }
   async computePosition() {

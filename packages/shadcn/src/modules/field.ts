@@ -95,8 +95,7 @@ export function FieldLabel(
   const state_ = refobj(store.state);
   const error_ = ref(store.state.error);
 
-  store.onStateChange((v) => state_.as(v));
-  store.onError((v) => error_.as(v));
+  const listener$ = ListenerManager([state_, error_]);
 
   return NativeLabel(
     {
@@ -104,11 +103,21 @@ export function FieldLabel(
       class: classNames([
         "select-none",
         weight === "normal" ? "font-normal" : "font-medium",
-        "group-data-[invalid]:text-destructive",
-        combine({ error: error_ }, (t) => (t.error ? "text-destructive" : "")),
+        // "group-data-[invalid]:text-destructive",
+        computed(error_, (t) => (t ? "text-destructive" : "")),
         tone === "destructive" ? "text-destructive" : "",
         cls,
       ]),
+      onMounted(event) {
+        listener$.append([
+          store.onStateChange((v) => state_.as(v)),
+          store.onError((v) => error_.as(v)),
+        ]);
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.destroy;
+      },
     },
     [computed(state_, (s) => s.label)],
   );
@@ -124,18 +133,28 @@ export function FieldInlineLabel(
 
   const state_ = refobj(store.state);
   const error_ = ref(store.state.error);
-  store.onStateChange((v) => state_.as(v));
-  store.onError((v) => error_.as(v));
+
+  const listener$ = ListenerManager([state_, error_]);
 
   return NativeLabel(
     {
       ...rest,
       class: classNames([
         "text-sm font-normal select-none cursor-pointer",
-        "group-data-[invalid]:text-destructive",
+        // "group-data-[invalid]:text-destructive",
         computed(error_, (t) => (t ? "text-destructive" : "")),
         cls,
       ]),
+      onMounted(event) {
+        listener$.append([
+          store.onStateChange((v) => state_.as(v)),
+          store.onError((v) => error_.as(v)),
+        ]);
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.destroy;
+      },
     },
     [
       Show({
@@ -153,11 +172,9 @@ export function FieldInlineLabel(
   );
 }
 export function FieldHelp(props: {}, children: ViewChildren = []) {
-  void props;
   return View({ class: "text-sm text-muted-foreground" }, children);
 }
 export function FieldError(props: {}, children: ViewChildren = []) {
-  void props;
   return View({ class: "text-sm font-normal text-destructive" }, children);
 }
 

@@ -30,6 +30,7 @@ export class CheckboxCore extends BaseDomain<TheTypesOfEvents> {
   checked: boolean;
   // value: boolean;
   defaultChecked: boolean;
+  status: "error" | "success" | "normal" = "normal";
 
   presence: PresenceCore;
 
@@ -113,6 +114,10 @@ export class CheckboxCore extends BaseDomain<TheTypesOfEvents> {
       this.emit(Events.Change, this.checked);
       this.emit(Events.StateChange, { ...this.state });
     }
+  }
+  setStatus(status: "error" | "success" | "normal") {
+    this.status = status;
+    this.emit(Events.StateChange, { ...this.state });
   }
 
   onChange(handler: Handler<TheTypesOfEvents[Events.Change]>) {

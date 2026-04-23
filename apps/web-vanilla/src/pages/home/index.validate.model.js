@@ -1,3 +1,5 @@
+const platform = getPlatform();
+
 export function PaymentViewModel() {
   const field_card_name$ = new Timeless.ui.SingleFieldCore({
     label: "Name on Card",
@@ -29,7 +31,7 @@ export function PaymentViewModel() {
   });
   const month_options = Array.from({ length: 12 }, (_, i) => {
     const v = String(i + 1).padStart(2, "0");
-    return { label: v, value: v };
+    return new Timeless.ui.SelectItemCore({ label: v, value: v });
   });
   const field_exp_month$ = new Timeless.ui.SingleFieldCore({
     label: "Month",
@@ -37,18 +39,22 @@ export function PaymentViewModel() {
     input: new Timeless.ui.SelectCore({
       defaultValue: "",
       placeholder: "MM",
+      platform,
       options: month_options,
     }),
   });
-  const year_options = [2024, 2025, 2026, 2027, 2028, 2029].map((y) => ({
-    label: String(y),
-    value: String(y),
-  }));
+  const year_options = [2024, 2025, 2026, 2027, 2028, 2029].map((y) => {
+    return new Timeless.ui.SelectItemCore({
+      label: String(y),
+      value: String(y),
+    });
+  });
   const field_exp_year$ = new Timeless.ui.SingleFieldCore({
     label: "Year",
     name: "exp_year",
     input: new Timeless.ui.SelectCore({
-      defaultValue: "",
+      platform,
+      defaultValue: null,
       placeholder: "YYYY",
       options: year_options,
     }),

@@ -1,7 +1,8 @@
-import { ref, refobj, isRef, computed } from "@timeless/timeless";
+import { ref, refobj, isRef, computed, ShowProps } from "@timeless/timeless";
 import {
   View,
   ViewProps,
+  Show,
   ViewChildren,
   Input as NativeInput,
   InputProps,
@@ -21,10 +22,23 @@ export function setInputProvider(provider: Provider) {
 }
 
 export function Root(
-  props: ViewProps & { store?: InputCore<any> },
+  props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
-  return View(props, children);
+  const { store, ...rest } = props;
+
+  return View(
+    {
+      ...rest,
+      onMouseEnter() {
+        store.handleMouseEnter();
+      },
+      onMouseLeave() {
+        store.handleMouseLeave();
+      },
+    },
+    children,
+  );
 }
 
 export function Input(
@@ -110,12 +124,54 @@ export function Clear(
   props: ViewProps & { store: InputCore<any> },
   children?: ViewChildren,
 ) {
-  // const host = getHost();
   const { store, ...rest } = props;
 
+  const visible_ = ref(store.state.hovering);
+
+  // return Show({
+  //   when: visible_,
+  //   onMounted(event) {
+  //     store.onStateChange((v) => {
+  //       visible_.as(v.hovering);
+  //     });
+  //     if (rest.onMounted) {
+  //       rest.onMounted(event);
+  //     }
+  //   },
+  //   ok() {
+  //     return View(
+  //       {
+  //         onMouseDown(event) {
+  //           event.preventDefault();
+  //         },
+  //         onClick(event) {
+  //           event.stopPropagation();
+  //           store.clear();
+  //           store.focus();
+  //         },
+  //       },
+  //       children,
+  //     );
+  //   },
+  // });
   return View(
     {
       ...rest,
+      style: styleNames([
+        rest.style,
+        {
+          opacity: computed(visible_, (t) => (t ? 1 : 0)),
+          "pointer-events": computed(visible_, (t) => (t ? "auto" : "none")),
+        },
+      ]),
+      onMounted(event) {
+        store.onStateChange((v) => {
+          visible_.as(v.hovering);
+        });
+        if (rest.onMounted) {
+          return rest.onMounted(event);
+        }
+      },
       onMouseDown(event) {
         event.preventDefault();
       },
