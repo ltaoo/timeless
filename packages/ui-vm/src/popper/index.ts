@@ -16,6 +16,7 @@ export type Align = (typeof ALIGN_OPTIONS)[number];
 enum Events {
   /** 参考原始被加载 */
   ReferenceMounted,
+  ReferenceOutOfView,
   /** 内容元素被加载（可以获取宽高位置） */
   FloatingMounted,
   /** 被放置（其实就是计算好了浮动元素位置） */
@@ -36,6 +37,7 @@ type TheTypesOfEvents = {
     // x: number;
     // y: number;
   };
+  [Events.ReferenceOutOfView]: void;
   [Events.ReferenceMounted]: {
     getRect: () => Rect;
     // width: number;
@@ -171,8 +173,8 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   _focus = false;
   _scrolling_subscriber: null | (() => void) = null;
 
-  constructor(options: Partial<{ _name: string }> & Partial<PopperProps> = {}) {
-    super(options);
+  constructor(props: Partial<{ _name: string }> & Partial<PopperProps> = {}) {
+    super(props);
 
     const {
       _name,
@@ -185,7 +187,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       platform,
       mode = "popper",
       view$,
-    } = options;
+    } = props;
     if (_name) {
       this.unique_id = _name;
     }
@@ -197,8 +199,14 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.mode = mode;
     this.view$ = view$;
     this.platform = platform;
-
     this.viewport$ = new ScrollViewCore();
+
+    // 监听滚动：优先使用 ScrollViewCore，否则使用 window
+    if (view$) {
+      view$.onScroll(() => {
+        this.handleContainerScroll();
+      });
+    }
   }
 
   checkIsClickAnchor: (target: any) => boolean = (target: any) => {
@@ -273,37 +281,10 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     this.floating = floating;
+    if (this.mode === "popper") {
+      this.place();
+    }
     this.emit(Events.FloatingMounted, floating);
-    // const tryPlace = () => {
-    //   if (this.floating !== floating) {
-    //     console.log(
-    //       "[DEBUG-POPPER] tryPlace - floating mismatch",
-    //       this.unique_id,
-    //       "this.floating:",
-    //       !!this.floating,
-    //       "floating:",
-    //       !!floating,
-    //     );
-    //     return;
-    //   }
-    //   const el = floating.getRect();
-    //   logger.log("tryPlace - checking element", this.unique_id, {
-    //     hasEl: !!el,
-    //     // offsetWidth: el?.offsetWidth,
-    //     // offsetHeight: el?.offsetHeight,
-    //     // isConnected: el?.isConnected,
-    //   });
-    //   this.place();
-    //   // if (el && (el.offsetWidth > 0 || el.offsetHeight > 0)) {
-    //   //   console.log("[DEBUG-POPPER] tryPlace - calling place()", this.unique_id);
-    //   //   this.place();
-    //   // } else {
-    //   //   console.log("[DEBUG-POPPER] tryPlace - retrying", this.unique_id);
-    //   //   requestAnimationFrame(tryPlace);
-    //   // }
-    // };
-    // requestAnimationFrame(tryPlace);
-    this.place();
   }
   /** 箭头加载完成 */
   setArrow(arrow: PopperCore["arrow"]) {
@@ -565,7 +546,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     // this.selectedItemText = data.selectedItemText;
   }
   /** 计算浮动元素位置 */
-  async place() {
+  async place(source?: { desc: string }) {
     // const has$el = !!(this.reference as any)?.$el;
     if (!this.reference || !this.floating) {
       logger.warn(
@@ -583,13 +564,13 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
 
-    const coords = await this.computePosition();
+    const result = await this.computePosition();
     // const { x, y, width, height } = this.reference.getRect();
-    const { x, y, middleware_data } = coords;
+    const { x, y, middleware_data } = result;
     let x_with_offset = x + this.offsetX;
     let y_with_offset = y + this.offsetY;
     const [placed_side, placed_align] = getSideAndAlignFromPlacement(
-      coords.placement,
+      result.placement,
     );
     // When the reference is wider/taller than the floating element,
     // override arrow position based on alignment instead of pointing at reference center
@@ -621,15 +602,19 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     //   }
     // }
     // Extract available dimensions from size middleware
-    let available_height = 0;
-    let available_width = 0;
+    let available_height = undefined;
+    let available_width = undefined;
     if (middleware_data.size) {
-      available_height = middleware_data.size.availableHeight ?? 0;
-      available_width = middleware_data.size.availableWidth ?? 0;
+      if (middleware_data.size.availableHeight) {
+        available_height = middleware_data.size.availableHeight;
+      }
+      if (middleware_data.size.availableWidth) {
+        available_width = middleware_data.size.availableWidth;
+      }
     }
     const floating_rect = this.floating.getRect();
-    const viewport = this.platform.getViewportSize();
-    available_height = viewport.height - y - 10;
+    // const viewport = this.platform.getViewportSize();
+    // available_height = viewport.height - y - 10;
     const content_height = floating_rect.height;
     // const height = Math.min(content_height, available_height);
     // const should_scroll =
@@ -638,16 +623,16 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       x: x_with_offset,
       y: y_with_offset,
       strategy: this.strategy,
-      placement: coords.placement,
+      placement: result.placement,
       isPlaced: true,
       reference: true,
       arrow: middleware_data.arrow || null,
-      // maxHeight: available_height,
-      // height: available_height,
       canScrollUp: false,
       canScrollDown: false,
     };
+    this.state.height = available_height;
     logger.log("place - before emit placed", {
+      source: source?.desc || "unknown",
       x,
       y,
       offsetX: this.offsetX,
@@ -716,7 +701,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     logger.log("computePosition result", this.unique_id, {
       x: result.x,
       y: result.y,
-      useVirtual,
+      middleware: result.middlewareData,
       placement: result.placement,
     });
     return {
@@ -732,6 +717,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     logger.log("reset");
     this._enter = false;
     this._focus = false;
+    this.floating = null;
     this._prev_scroll_top = 0;
     this.state.isPlaced = false;
     this.state.canScrollDown = false;
@@ -745,6 +731,24 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, { ...this.state });
   }
 
+  handleContainerScroll() {
+    if (!this.reference || !this.floating || this.state.isPlaced === false) {
+      return;
+    }
+    const ref_rect = this.reference.getRect();
+    // 检查参考元素是否在视口内
+    const viewport = this.platform.getViewportSize();
+    const is_in_viewport =
+      ref_rect.top < viewport.height &&
+      ref_rect.bottom > 0 &&
+      ref_rect.left < viewport.width &&
+      ref_rect.right > 0;
+    if (!is_in_viewport) {
+      this.emit(Events.ReferenceOutOfView);
+      return;
+    }
+    this.place();
+  }
   /** viewport 滚动时由 primitive 调用，更新滚动按钮可见性，模拟原生 select 渐进扩展高度 */
   handleViewportScroll(event: {
     scrollTop: number;
@@ -757,7 +761,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     const cur_height = this.state.height ?? 0;
     let target_height = this.state.height;
     const available_height = this.state.maxHeight ?? 0;
-    if (this.state.isPlaced) {
+    if (this.state.isPlaced && this.mode === "item-aligned") {
       const delta = scrollTop - this._prev_scroll_top;
       const abs_delta = Math.abs(delta);
       this._prev_scroll_top = scrollTop;
@@ -817,6 +821,11 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     handler: Handler<TheTypesOfEvents[Events.ReferenceMounted]>,
   ) {
     return this.on(Events.ReferenceMounted, handler);
+  }
+  onReferenceOutOfView(
+    handler: Handler<TheTypesOfEvents[Events.ReferenceOutOfView]>,
+  ) {
+    return this.on(Events.ReferenceOutOfView, handler);
   }
   onFloatingMounted(
     handler: Handler<TheTypesOfEvents[Events.FloatingMounted]>,

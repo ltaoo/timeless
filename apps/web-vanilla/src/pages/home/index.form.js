@@ -22,7 +22,6 @@ export default function FormView() {
             store: new Timeless.ui.SelectCore({
               defaultValue: "apple",
               platform,
-              position: "item-aligned",
               options: [
                 new Timeless.ui.SelectItemCore({
                   value: "apple",
@@ -161,7 +160,6 @@ export default function FormView() {
               // defaultValue: null,
               defaultValue: "option_88",
               platform,
-              position: "item-aligned",
               placeholder: "从 100 个选项中选择",
               options: Array.from({ length: 100 }, (_, i) => {
                 return new Timeless.ui.SelectItemCore({

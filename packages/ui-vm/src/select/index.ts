@@ -14,6 +14,7 @@ import { SelectTriggerCore } from "./trigger";
 import { SelectWrapCore } from "./wrap";
 import { SelectItemCore } from "./item";
 import { SelectGroupCore } from "./group";
+import { ScrollViewCore } from "@/scroll-view";
 
 const logger = Logger({ prefix: "vm", scope: "select/index" });
 
@@ -69,6 +70,8 @@ type SelectProps<T> = {
   // options: SelectItemCore<T>[];
   options?: (SelectGroupCore<T> | SelectItemCore<T>)[];
   platform?: Platform;
+  /** Select 所在的可滚动容器 */
+  view$?: ScrollViewCore;
   /** 是否支持搜索过滤 */
   search?: InputCore<any>;
   /** 搜索框占位符 */
@@ -134,7 +137,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   popper$: PopperCore;
   presence$ = new PresenceCore();
   layer$: DismissableLayerCore;
-  input$ = new InputCore({ defaultValue: "", placeholder: "搜索" });
+  search_input$ = new InputCore({ defaultValue: "", placeholder: "搜索" });
   // collection: CollectionCore;
 
   position: "popper" | "item-aligned" = "popper";
@@ -210,15 +213,16 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       allowClear = false,
       options = [],
       platform,
+      view$,
       search,
-      position = "popper",
+      position = "item-aligned",
       onChange,
     } = props;
     this.position = position;
     this.search = !!search;
     if (this.search) {
       this.position = "popper";
-      this.input$ = search;
+      this.search_input$ = search;
     }
     this.options = flatten_entries(options, { value: defaultValue });
     if (id !== undefined) {
@@ -233,6 +237,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.popper$ = new PopperCore({
       align: "start",
       platform,
+      view$,
       mode: this.position,
     });
     this.layer$ = new DismissableLayerCore();
@@ -257,7 +262,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.presence$.onStateChange(() =>
       this.emit(Events.StateChange, { ...this.state }),
     );
-    this.input$.onChange(() => {
+    this.search_input$.onChange(() => {
       this.input_dirty = true;
     });
     if (onChange) {
@@ -312,7 +317,6 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     });
   }
   async show() {
-    debugger;
     logger.log("show", this.state);
     if (this.disabled) {
       return;
@@ -332,15 +336,11 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       }
     }
     this.presence$.show();
-    // if (this.position === "item-aligned") {
-    //   this.placeItemAligned();
-    // } else {
-    //   this.popper$.place();
-    // }
-    // await sleep(800);
     this.open = true;
     this.focused = true;
-    // this.position();
+    if (this.search) {
+      this.search_input$.focus();
+    }
     this.emit(Events.StateChange, { ...this.state });
   }
   hide() {
@@ -366,8 +366,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
             this._tmp_options = null;
           }
         }, 800);
-        this.input$.setValue(this.selected_item$.label);
-        this.input$.setPlaceholder(this.selected_item$.label);
+        this.search_input$.setValue(this.selected_item$.label);
+        this.search_input$.setPlaceholder(this.selected_item$.label);
       }
     }
     this.emit(Events.StateChange, { ...this.state });
@@ -473,18 +473,18 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   }
   /** 设置搜索关键字 */
   setSearchKeyword(keyword: string) {
-    if (this.input$.value === keyword) {
+    if (this.search_input$.value === keyword) {
       return;
     }
-    this.input$.setValue(keyword);
+    this.search_input$.setValue(keyword);
     this.emit(Events.StateChange, { ...this.state });
   }
   /** 清空搜索关键字 */
   clearSearch() {
-    if (this.input$.value === "") {
+    if (this.search_input$.value === "") {
       return;
     }
-    this.input$.setValue("");
+    this.search_input$.setValue("");
     this.emit(Events.StateChange, { ...this.state });
   }
   enableSearch() {
@@ -633,8 +633,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.select(item$.value);
     if (this.search) {
       this.disableSearch();
-      this.input$.setValue(item$.label);
-      this.input$.setPlaceholder(item$.label);
+      this.search_input$.setValue(item$.label);
+      this.search_input$.setPlaceholder(item$.label);
     }
     this.hide();
   }
@@ -690,11 +690,12 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       this.alignSpecialItem(offset_top, data.height, is_first, is_last);
       this.aligned = true;
     } else {
-      if (this.aligned) {
-        return;
-      }
-      this.popper$.place();
-      this.aligned = true;
+      // popper 模式下，在 floating mounted 后计算位置
+      // if (this.aligned) {
+      //   return;
+      // }
+      // this.popper$.place();
+      // this.aligned = true;
     }
   }
 

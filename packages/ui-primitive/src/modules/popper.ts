@@ -122,7 +122,7 @@ export function Content(
           }
           return {
             "z-index": zIndex,
-            position: "fixed",
+            position: t.strategy,
             left: 0,
             top: 0,
             opacity: t.isPlaced ? 1 : 0,
@@ -130,9 +130,8 @@ export function Content(
             transform: t.isPlaced
               ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
               : "translate3d(0, 0, 0)",
-            // height: t.height !== undefined ? `${t.height}px` : undefined,
-            // "max-height":
-            //   t.maxHeight != undefined ? `${t.maxHeight}px` : undefined,
+            height: t.height !== undefined ? `${t.height}px` : undefined,
+            // "max-height": t.height != undefined ? `${t.height}px` : undefined,
             // overflow: t.height !== undefined ? "auto" : undefined,
           };
         }),
@@ -153,53 +152,19 @@ export function Content(
             state_.as(v);
           }),
         );
-        // 监听滚动：优先使用 ScrollViewCore，否则使用 window
-        if (store.view$) {
-          // 滚动监听
-          function handleScroll() {
-            if (
-              !store.reference ||
-              !store.floating ||
-              store.state.isPlaced === false
-            ) {
-              return;
-            }
-            const ref_rect = store.reference.getRect();
-            // 检查参考元素是否在视口内
-            const viewport = platform.getViewportSize();
-            const is_in_viewport =
-              ref_rect.top < viewport.height &&
-              ref_rect.bottom > 0 &&
-              ref_rect.left < viewport.width &&
-              ref_rect.right > 0;
-            if (!is_in_viewport && onReferenceOutOfView) {
-              onReferenceOutOfView();
-              return;
-            }
-            store.place();
-          }
-          listener$.add(
-            store.view$.onScroll(() => {
-              handleScroll();
-            }),
-          );
-        }
+        listener$.add(
+          store.onReferenceOutOfView(() => {
+            onReferenceOutOfView?.();
+          }),
+        );
         // 注册到 LayerManager
         if (onDismiss) {
           const layer: Layer = {
             id: layer_id,
             containsPoint(x: number, y: number) {
-              if (!$elm) {
-                return false;
-              }
-              // const rect = host.getBoundingClientRect?.($element) as any;
-              const rect = $elm.getBoundingClientRect();
-              // 同时检查 anchor 元素
-              const $anchor_el = store.reference?.$el as
-                | HTMLElement
-                | undefined;
+              const $anchor_el = store.reference;
               if ($anchor_el) {
-                const anchor_rect = $anchor_el.getBoundingClientRect();
+                const anchor_rect = $anchor_el.getRect();
                 const in_anchor =
                   x >= anchor_rect.left &&
                   x <= anchor_rect.right &&
@@ -209,6 +174,7 @@ export function Content(
                   return true;
                 }
               }
+              const rect = $elm.getBoundingClientRect();
               return (
                 x >= rect.left &&
                 x <= rect.right &&
@@ -227,16 +193,10 @@ export function Content(
           listener$.add(rest.onMounted(event));
         }
         return () => {
+          store.reset();
           listener$.destroy();
-          store.setFloating(null);
           layer$.unregister(layer_id);
         };
-      },
-      onUnmounted() {
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
-        }
-        store.reset();
       },
     },
     children,

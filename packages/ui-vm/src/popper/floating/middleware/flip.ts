@@ -76,7 +76,7 @@ export const flip = (
       mainAxis: checkMainAxis = true,
       crossAxis: checkCrossAxis = true,
       fallbackPlacements: specifiedFallbackPlacements,
-      fallbackStrategy = "initialPlacement",
+      fallbackStrategy = "bestFit",
       fallbackAxisSideDirection = "none",
       flipAlignment = true,
       ...detectOverflowOptions

@@ -2092,6 +2092,7 @@ declare module "packages/primitive/src/input/input" {
         id?: string | null;
         name?: string | DerivedRef<string> | Ref<string>;
         value?: DerivedRef<string> | Ref<string>;
+        focused?: boolean | DerivedRef<boolean> | Ref<boolean>;
         placeholder?: string | DerivedRef<string> | Ref<string>;
         disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
         readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
@@ -6488,13 +6489,14 @@ declare module "packages/ui-vm/src/popper/index" {
         /** PopperContent height */
         height?: number;
         maxHeight?: number;
+        maxWidth?: number;
         minWidth?: number;
         margin?: number;
         viewportOffsetTop?: number;
         /** 浮动元素在放置方向上的可用高度（px） */
-        availableHeight: number;
+        availableHeight?: number;
         /** 浮动元素在交叉轴上的可用宽度（px） */
-        availableWidth: number;
+        availableWidth?: number;
         /** viewport 可以向上滚动 */
         canScrollUp: boolean;
         hideScrollUp?: boolean;
@@ -6559,7 +6561,7 @@ declare module "packages/ui-vm/src/popper/index" {
         _enter: boolean;
         _focus: boolean;
         _scrolling_subscriber: null | (() => void);
-        constructor(options?: Partial<{
+        constructor(props?: Partial<{
             _name: string;
         }> & Partial<PopperProps>);
         checkIsClickAnchor: (target: any) => boolean;
@@ -6595,7 +6597,7 @@ declare module "packages/ui-vm/src/popper/index" {
             y: number;
         }): void;
         /** 设置 item-aligned 模式下选中项的偏移量 */
-        adjustContentPositonWithOffsetTop(data: {
+        adjustContentPositionWithOffsetTop(data: {
             selectedItem: {
                 offsetTop: number;
                 offsetHeight: number;
@@ -7348,6 +7350,7 @@ declare module "packages/ui-vm/src/select/index" {
     import { SelectWrapCore } from "packages/ui-vm/src/select/wrap";
     import { SelectItemCore } from "packages/ui-vm/src/select/item";
     import { SelectGroupCore } from "packages/ui-vm/src/select/group";
+    import { ScrollViewCore } from "@/scroll-view";
     enum Events {
         StateChange = 0,
         Change = 1,
@@ -7370,6 +7373,8 @@ declare module "packages/ui-vm/src/select/index" {
         allowClear?: boolean;
         options?: (SelectGroupCore<T> | SelectItemCore<T>)[];
         platform?: Platform;
+        /** Select 所在的可滚动容器 */
+        view$?: ScrollViewCore;
         /** 是否支持搜索过滤 */
         search?: InputCore<any>;
         /** 搜索框占位符 */
@@ -7390,6 +7395,7 @@ declare module "packages/ui-vm/src/select/index" {
         placeholder: string;
         /** 禁用 */
         disabled: boolean;
+        focused: boolean;
         /** 是否必填 */
         required: boolean;
         dir: Direction;
@@ -7409,6 +7415,7 @@ declare module "packages/ui-vm/src/select/index" {
         defaultValue: T | null;
         value: T | null;
         disabled: boolean;
+        focused: boolean;
         open: boolean;
         allowClear: boolean;
         /** 加载中 */
@@ -7433,6 +7440,8 @@ declare module "packages/ui-vm/src/select/index" {
         /** 选中的 item */
         selected_item$: SelectItemCore<T> | null;
         focused_item$: SelectItemCore<T> | null;
+        _tmp_searching: boolean;
+        _tmp_options: null | SelectItemCore<T>[];
         input_dirty: boolean;
         can_search: boolean;
         /** 获取过滤后的选项 */
@@ -7471,6 +7480,7 @@ declare module "packages/ui-vm/src/select/index" {
         clearSearch(): void;
         enableSearch(): void;
         disableSearch(): void;
+        canSearch(): boolean;
         startSearch(): void;
         finishSearch(): void;
         focusOption(value: T): void;
@@ -7485,6 +7495,8 @@ declare module "packages/ui-vm/src/select/index" {
         selectFocusedOption(): void;
         setPosition(rect: any): void;
         refresh(): void;
+        handleFocus(): void;
+        handleBlur(): void;
         handleClickTrigger(): void;
         handleClickItem(item$: SelectItemCore<T>): void;
         handleMouseEnterItem(item$: SelectItemCore<T>): void;

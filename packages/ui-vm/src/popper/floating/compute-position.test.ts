@@ -245,7 +245,7 @@ describe("computePosition", () => {
     const result = await compute_position(reference, floating, {
       platform,
       placement: "bottom",
-      middleware: [flip()],
+      middleware: [offset(4), flip()],
     });
 
     expect(result.placement).toBe("top");

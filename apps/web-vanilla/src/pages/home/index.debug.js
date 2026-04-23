@@ -128,6 +128,7 @@ export default function OverlayView() {
 
   const platform = getPlatform();
   const search_select$ = new Timeless.ui.SelectCore({
+    view$: ui.view$,
     platform,
     defaultValue: null,
     placeholder: "输入关键词搜索",

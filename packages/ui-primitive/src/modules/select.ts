@@ -97,7 +97,6 @@ export function Trigger(
               target.tagName === "TEXTAREA" ||
               target.isContentEditable)
           ) {
-            // store.handleClickTrigger();
             return;
           }
           e.preventDefault();
