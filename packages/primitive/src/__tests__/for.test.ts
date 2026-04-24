@@ -83,8 +83,9 @@ describe("For", () => {
       expect(removed).toHaveLength(2);
       expect(removed.map((r: any) => r.idx).sort()).toEqual([0, 1]);
 
-      expect(added).toHaveLength(2);
-      expect(added.map((a: any) => a.idx).sort()).toEqual([0, 1]);
+      expect(added).toHaveLength(1);
+      expect(added[0].idx).toBe(0);
+      expect(added[0].elements).toHaveLength(2);
 
       // no items survived → no moves
       expect(moved).toHaveLength(0);
@@ -105,8 +106,9 @@ describe("For", () => {
 
       expect(removed).toHaveLength(0);
 
-      expect(added).toHaveLength(2);
-      expect(added.map((a: any) => a.idx).sort()).toEqual([1, 2]);
+      expect(added).toHaveLength(1);
+      expect(added[0].idx).toBe(1);
+      expect(added[0].elements).toHaveLength(2);
 
       // id:1 stays at idx 0 → no move
       expect(moved).toHaveLength(0);
@@ -156,6 +158,125 @@ describe("For", () => {
       expect(added).toHaveLength(0);
       expect(removed).toHaveLength(0);
       expect(moved).toHaveLength(0);
+    });
+
+    it("should report no moves when order is preserved", () => {
+      const { todos, refreshSpy } = setup([
+        { id: 1, title: "1", completed: false },
+        { id: 2, title: "2", completed: false },
+        { id: 3, title: "3", completed: false },
+        { id: 4, title: "4", completed: false },
+        { id: 5, title: "5", completed: false },
+        { id: 6, title: "6", completed: false },
+        { id: 7, title: "7", completed: false },
+        { id: 8, title: "8", completed: false },
+        { id: 9, title: "9", completed: false },
+        { id: 10, title: "10", completed: false },
+        { id: 11, title: "11", completed: false },
+        { id: 12, title: "12", completed: false },
+        { id: 13, title: "13", completed: false },
+        { id: 14, title: "14", completed: false },
+        { id: 15, title: "15", completed: false },
+        { id: 16, title: "16", completed: false },
+        { id: 17, title: "17", completed: false },
+        { id: 18, title: "18", completed: false },
+        { id: 19, title: "19", completed: false },
+        { id: 20, title: "20", completed: false },
+        { id: 21, title: "21", completed: false },
+        { id: 22, title: "22", completed: false },
+        { id: 23, title: "23", completed: false },
+        { id: 24, title: "24", completed: false },
+        { id: 25, title: "25", completed: false },
+        { id: 26, title: "26", completed: false },
+        { id: 27, title: "27", completed: false },
+        { id: 28, title: "28", completed: false },
+        { id: 29, title: "29", completed: false },
+        { id: 30, title: "30", completed: false },
+        { id: 31, title: "31", completed: false },
+        { id: 32, title: "32", completed: false },
+        { id: 33, title: "33", completed: false },
+        { id: 34, title: "34", completed: false },
+        { id: 35, title: "35", completed: false },
+        { id: 36, title: "36", completed: false },
+        { id: 37, title: "37", completed: false },
+        { id: 38, title: "38", completed: false },
+        { id: 39, title: "39", completed: false },
+        { id: 40, title: "40", completed: false },
+        { id: 41, title: "41", completed: false },
+        { id: 42, title: "42", completed: false },
+        { id: 43, title: "43", completed: false },
+        { id: 44, title: "44", completed: false },
+        { id: 45, title: "45", completed: false },
+        { id: 46, title: "46", completed: false },
+        { id: 47, title: "47", completed: false },
+        { id: 48, title: "48", completed: false },
+        { id: 49, title: "49", completed: false },
+        { id: 50, title: "50", completed: false },
+      ]);
+
+      todos.as([{ id: 34, title: "34", completed: false }]);
+
+      // same order, just update titles
+      todos.as([
+        { id: 3, title: "3", completed: false },
+        { id: 13, title: "13", completed: false },
+        { id: 23, title: "23", completed: false },
+        { id: 30, title: "30", completed: false },
+        { id: 31, title: "31", completed: false },
+        { id: 32, title: "32", completed: false },
+        { id: 33, title: "33", completed: false },
+        { id: 34, title: "34", completed: false },
+        { id: 35, title: "35", completed: false },
+        { id: 36, title: "36", completed: false },
+        { id: 37, title: "37", completed: false },
+        { id: 38, title: "38", completed: false },
+        { id: 39, title: "39", completed: false },
+        { id: 43, title: "43", completed: false },
+      ]);
+
+      const { added, removed, moved } = refreshSpy.mock.calls[0][0];
+
+      expect(added).toHaveLength(0);
+      expect(removed.map((r: any) => r.idx).sort()).toEqual(
+        expect.arrayContaining([
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+          20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 34, 35, 36, 37,
+          38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+        ]),
+      );
+      expect(removed).toHaveLength(49);
+      expect(moved).toEqual([{ from: 33, to: 0 }]);
+
+      todos.as([
+        { id: 3, title: "3", completed: false },
+        { id: 13, title: "13", completed: false },
+        { id: 23, title: "23", completed: false },
+        { id: 30, title: "30", completed: false },
+        { id: 31, title: "31", completed: false },
+        { id: 32, title: "32", completed: false },
+        { id: 33, title: "33", completed: false },
+        { id: 34, title: "34", completed: false },
+        { id: 35, title: "35", completed: false },
+        { id: 36, title: "36", completed: false },
+        { id: 37, title: "37", completed: false },
+        { id: 38, title: "38", completed: false },
+        { id: 39, title: "39", completed: false },
+        { id: 43, title: "43", completed: false },
+      ]);
+
+      const {
+        added: added2,
+        removed: removed2,
+        moved: moved2,
+      } = refreshSpy.mock.calls[1][0];
+
+      expect(added2).toHaveLength(2);
+      expect(added2[0].idx).toBe(0);
+      expect(added2[0].elements).toHaveLength(7);
+      expect(added2[1].idx).toBe(8);
+      expect(added2[1].elements).toHaveLength(6);
+      expect(removed2).toHaveLength(0);
+      expect(moved2).toHaveLength(0);
     });
 
     it("should detect pure reorder with no add/remove", () => {
@@ -279,7 +400,10 @@ describe("For", () => {
         expect.objectContaining({
           added: [],
           removed: [],
-          moved: [{ from: 2, to: 0 }, { from: 0, to: 2 }],
+          moved: [
+            { from: 2, to: 0 },
+            { from: 0, to: 2 },
+          ],
         }),
       );
       expect(todos.value).toStrictEqual(["Cherry", "Banana", "Apple"]);

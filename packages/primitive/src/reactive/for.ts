@@ -20,6 +20,8 @@ import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
 import { get_owner, run_with_owner } from "@/context/context";
 
+const logger = Logger({ prefix: "primitive", scope: "reactive/for" });
+
 export type ForProps<T> = {
   key?: string;
   each: T[] | DerivedRef<T[]> | Ref<T[]>;
@@ -36,8 +38,6 @@ export type ForState<T> = {
   children: (TimelessElement | null)[];
   idx_arr: DerivedRef<number>[];
 };
-
-const logger = Logger({ prefix: "primitive", scope: "reactive/for" });
 
 export function For<T>(
   props: ForProps<T>,
@@ -59,6 +59,11 @@ export function For<T>(
 ) {
   let $elm: any = null;
   const _owner = get_owner();
+  const _existing_map = new Map();
+  // Track subscription unsubscribers separately for HMR
+  const _hmr_subs: (() => void)[] = [];
+  let _id = 0;
+  const listener$ = ListenerManager();
 
   const _key = props.key;
   const state: ForState<T> = {
@@ -69,11 +74,6 @@ export function For<T>(
     children: [],
     idx_arr: [],
   };
-  let _id = 0;
-  const _existing_map = new Map();
-  const listener$ = ListenerManager();
-  // Track subscription unsubscribers separately for HMR
-  const _hmr_subs: (() => void)[] = [];
 
   const methods = {
     unique_id() {
@@ -259,42 +259,6 @@ export function For<T>(
         $elm.remove(index, count);
       }
     },
-    // update(index: number, item: any) {
-    //   // const $parent = host.getParentNode(anchor);
-    //   const $parent = $anchor.getParentNode();
-    //   if (!$parent) return;
-
-    //   // Reuse existing computed index or create new one
-    //   let idxComputed = _index_computed[index];
-    //   if (!idxComputed) {
-    //     idxComputed = create_idx(item);
-    //     _index_computed[index] = idxComputed;
-    //     _original_items[index] = item;
-    //   }
-    //   const res = methods.render_item(item, idxComputed);
-    //   if (!res) {
-    //     return;
-    //   }
-    //   if (res.delete) {
-    //     return;
-    //   }
-    //   const old = _$children[index];
-    //   const $pa = old.getParentNode();
-    //   if (old && $pa === $parent && res.elm) {
-    //     // host.replaceChild($parent, res.elm, old);
-    //     $parent.replaceChild(res.elm, old);
-    //   } else if (res.elm) {
-    //     // host.insertBefore($parent, res.elm, anchor);
-    //     $parent.insertBefore(res.elm, $anchor);
-    //   }
-    //   const prev_item = state.items[index];
-    //   if (prev_item !== item && _existing_map.has(prev_item)) {
-    //     _existing_map.delete(prev_item);
-    //   }
-    //   state.items[index] = item;
-    //   _elements[index] = res.node;
-    //   _$children[index] = res.elm;
-    // },
     /** 将元素从 from 位置移动到 to 位置（splice 语义） */
     move(from: number, to: number) {
       const splice_arr = (arr: any[]) => {
@@ -340,12 +304,7 @@ export function For<T>(
      * 计算出 新增、更新 和 删除 的记录，提交给宿主层，刷新视图
      */
     refresh(v: T[]) {
-      console.log(
-        "[primitive]for - refresh called with",
-        v.length,
-        "items, current:",
-        state.items.length,
-      );
+      logger.log("refresh", v.length, "items, current:", state.items.length);
       const new_wrapped_items = v.map((item) => {
         const existing = state.wrapped_items.find((vv) => {
           if (_key && typeof item === "object") {
@@ -396,6 +355,7 @@ export function For<T>(
       }[] = [];
       const removed_nodes: { idx: number }[] = [];
       const moved_nodes: { from: number; to: number }[] = [];
+      let _add_start = -1;
 
       // Iterate new items -> Determine Reused vs Added
       for (let i = 0; i < new_wrapped_items.length; i++) {
@@ -408,6 +368,7 @@ export function For<T>(
         const prev_indices = old_map.get(k);
         if (prev_indices && prev_indices.length > 0) {
           // Reused - same key found in old list
+          _add_start = -1;
           const old_idx = prev_indices.shift()!;
           const prev_item = prev_items[old_idx];
           // Reuse existing DOM element and computed index
@@ -415,8 +376,28 @@ export function For<T>(
           // new_children[i] = prev_children[old_idx];
           // new_original_items[i] = prev_original_items[old_idx];
           new_index_computed[i] = prev_index_computed[old_idx];
-          // Track moved items
-          if (old_idx !== i) {
+          // Track moved items only for swaps/reorders, not insertions
+          // A move means the item's relative order among reused items changed,
+          // not just that it was shifted by insertions.
+          // Expected position = old_idx + count_of_inserted_items_before_this_item_in_new_list
+          // Inserted items = new items (not found in old_map)
+          const shift_by_insertion = (() => {
+            let count = 0;
+            for (let j = 0; j < i; j++) {
+              const new_j = new_wrapped_items[j];
+              const k_j =
+                _key && new_j
+                  ? // @ts-ignore
+                    new_j.v[_key]
+                  : new_j.v;
+              if (!old_map.has(k_j)) {
+                count++;
+              }
+            }
+            return count;
+          })();
+          const expected_new_idx = old_idx + shift_by_insertion;
+          if (i !== expected_new_idx) {
             moved_nodes.push({ from: old_idx, to: i });
           }
           // No need to manually update index - computed auto-recomputes based on `each`
@@ -435,13 +416,19 @@ export function For<T>(
           }
         } else {
           // Added (New) - create new computed index and render
+          if (_add_start === -1) {
+            _add_start = i;
+            added_nodes.push({ idx: i, elements: [] });
+          }
           const idx_computed = methods.create_idx(new_item);
           new_index_computed[i] = idx_computed;
           const res = _owner
-            ? run_with_owner(_owner, () => props.render(new_item.v, idx_computed))
+            ? run_with_owner(_owner, () =>
+                props.render(new_item.v, idx_computed),
+              )
             : props.render(new_item.v, idx_computed);
           new_elements[i] = res;
-          added_nodes.push({ idx: i, elements: [res] });
+          added_nodes[added_nodes.length - 1].elements.push(res);
         }
       }
 

@@ -38,13 +38,17 @@ function SearchTablePage() {
     const query = t.searchInput;
     if (!query) return d;
     const q = query.toLowerCase();
-    return d.filter(
-      (row) =>
-        row.name.toLowerCase().includes(q) ||
-        row.email.toLowerCase().includes(q) ||
-        row.department.toLowerCase().includes(q) ||
-        row.location.toLowerCase().includes(q),
-    );
+    const r = d
+      .filter(
+        (row) =>
+          row.name.toLowerCase().includes(q) ||
+          row.email.toLowerCase().includes(q) ||
+          row.department.toLowerCase().includes(q) ||
+          row.location.toLowerCase().includes(q),
+      )
+      .sort((a, b) => a.id - b.id);
+    console.log("before return filtered data", r);
+    return r;
   });
 
   const totalScore = computed(filteredData, (rows) => {
@@ -109,6 +113,7 @@ function SearchTablePage() {
           ],
         ),
         For({
+          key: "id",
           each: filteredData,
           render(row) {
             return View(
