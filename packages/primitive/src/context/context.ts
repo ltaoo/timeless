@@ -13,7 +13,11 @@
  * so their lazy callbacks (ok/render) can access provided context.
  */
 import { Fragment } from "@/content/fragment";
-import { TimelessElement, ViewChildren, resolve_children } from "@/content/type";
+import {
+  TimelessElement,
+  ViewChildren,
+  resolve_children,
+} from "@/content/type";
 
 // === Owner ===
 
@@ -22,24 +26,24 @@ interface Owner {
   context: Map<symbol, any>;
 }
 
-let currentOwner: Owner | null = null;
+let current_owner: Owner | null = null;
 
-export function createOwner(parent: Owner | null = currentOwner): Owner {
+export function create_owner(parent: Owner | null = current_owner): Owner {
   return { parent, context: new Map() };
 }
 
-export function runWithOwner<T>(owner: Owner, fn: () => T): T {
-  const prev = currentOwner;
-  currentOwner = owner;
+export function run_with_owner<T>(owner: Owner, fn: () => T): T {
+  const prev = current_owner;
+  current_owner = owner;
   try {
     return fn();
   } finally {
-    currentOwner = prev;
+    current_owner = prev;
   }
 }
 
-export function getOwner(): Owner | null {
-  return currentOwner;
+export function get_owner(): Owner | null {
+  return current_owner;
 }
 
 // === Context API ===
@@ -51,16 +55,16 @@ export function createContext<T>(name?: string, defaultValue?: T): Context<T> {
 }
 
 export function provide<T>(ctx: Context<T>, value: T): void {
-  if (!currentOwner) {
+  if (!current_owner) {
     throw new Error(
       `provide("${ctx.name ?? ""}") called outside of owner scope`,
     );
   }
-  currentOwner.context.set(ctx.key, value);
+  current_owner.context.set(ctx.key, value);
 }
 
 export function use<T>(ctx: Context<T>): T {
-  let owner = currentOwner;
+  let owner = current_owner;
   while (owner) {
     if (owner.context.has(ctx.key)) {
       return owner.context.get(ctx.key);
@@ -79,8 +83,8 @@ export function Scope(
   setup: () => void,
   children: ViewChildren,
 ): TimelessElement {
-  const owner = createOwner(currentOwner);
-  return runWithOwner(owner, () => {
+  const owner = create_owner(current_owner);
+  return run_with_owner(owner, () => {
     setup();
     return Fragment({}, resolve_children(children));
   });

@@ -18,16 +18,16 @@
  * ```
  */
 import { MountedEvent } from "@/event";
-import { getOwner, runWithOwner } from "@/context";
+import { get_owner, run_with_owner } from "@/context/context";
 
 import { ViewProps } from "./view";
+import { useErrorBoundary } from "./error-boundary-context";
 import {
   isElement,
   TimelessElement,
   ViewChildren,
   TimelessComponent,
 } from "./type";
-import { useErrorBoundary } from "@/reactive/error-boundary-context";
 
 /** Default error view shown when lazy loading fails */
 function defaultErrorView(error: Error, viewName: string): TimelessElement {
@@ -71,7 +71,7 @@ export function LazyView(
   props: LazyViewProps,
   children: TimelessComponent,
 ): TimelessElement {
-  const owner = getOwner();
+  const owner = get_owner();
   let $elm: any = null;
 
   const state: LazyViewState = {
@@ -100,7 +100,7 @@ export function LazyView(
         state.children = [ErrorView(error, props.view?.name || "unknown")];
       };
       if (owner) {
-        runWithOwner(owner, evaluate);
+        run_with_owner(owner, evaluate);
       } else {
         evaluate();
       }
@@ -111,7 +111,7 @@ export function LazyView(
         return;
       }
       const result = owner
-        ? runWithOwner(owner, () => children(props))
+        ? run_with_owner(owner, () => children(props))
         : children(props);
       if (isElement(result)) {
         state.children = [result];
@@ -167,7 +167,7 @@ export function LazyView(
               }
             };
             if (owner) {
-              runWithOwner(owner, evaluate);
+              run_with_owner(owner, evaluate);
             } else {
               evaluate();
             }

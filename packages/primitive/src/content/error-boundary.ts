@@ -9,7 +9,12 @@ import {
 } from "@/content/type";
 import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
-import { createOwner, getOwner, provide, runWithOwner } from "@/context";
+import {
+  create_owner,
+  get_owner,
+  provide,
+  run_with_owner,
+} from "@/context/context";
 import { BoxState } from "@/content/box";
 
 import {
@@ -19,8 +24,8 @@ import {
 
 export type ErrorBoundaryProps = {
   fallback?: (error: unknown, reset: () => void) => ViewChildren;
-  onError?: (error: unknown) => void;
   throwToGlobal?: boolean;
+  onError?: (error: unknown) => void;
   onMounted?: (event: MountedEvent) => void;
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
@@ -30,65 +35,26 @@ type ErrorBoundaryState = {
   error: unknown;
 } & BoxState;
 
-function toErrorMessage(error: unknown) {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-  if (typeof error === "string" && error) {
-    return error;
-  }
-  return "Unknown error";
-}
-
-function toThrowableError(error: unknown) {
-  if (error instanceof Error) {
-    return error;
-  }
-  return new Error(toErrorMessage(error));
-}
-
-function throwErrorToGlobal(error: unknown) {
-  if (typeof globalThis === "undefined") {
-    return;
-  }
-
-  if (typeof globalThis.reportError === "function") {
-    globalThis.reportError(error);
-    return;
-  }
-
-  const throwable = toThrowableError(error);
-  if (typeof globalThis.queueMicrotask === "function") {
-    globalThis.queueMicrotask(() => {
-      throw throwable;
-    });
-    return;
-  }
-
-  setTimeout(() => {
-    throw throwable;
-  }, 0);
-}
-
 export function ErrorBoundary(
   props: ErrorBoundaryProps = {},
   children?: ViewChildren,
 ): TimelessElement<{ error: unknown }> {
   const {
     fallback,
-    onError,
     throwToGlobal = false,
+    onError,
     onMounted,
     beforeUnmounted,
     onUnmounted,
   } = props;
-  const owner = getOwner();
-  const boundaryOwner = createOwner(owner);
   let $elm: any = null;
 
+  const owner = get_owner();
+  const boundary_owner = create_owner(owner);
+
   const state: ErrorBoundaryState = {
-    error: null,
     rendered: false,
+    error: null,
     style: {},
     styleSet: [],
     attributes: {},
@@ -135,12 +101,12 @@ export function ErrorBoundary(
       return result;
     },
     evaluate<T>(fn: () => T): T {
-      return runWithOwner(boundaryOwner, () => {
+      return run_with_owner(boundary_owner, () => {
         provide(ErrorBoundaryContext, handler);
         return fn();
       });
     },
-    reportError(error: unknown) {
+    report_error(error: unknown) {
       state.error = error;
       if (onError) {
         onError(error);
@@ -170,7 +136,7 @@ export function ErrorBoundary(
         state.error = null;
         state.children = methods.build_nodes(next);
       } catch (error) {
-        methods.reportError(error);
+        methods.report_error(error);
         state.children = methods.build_with_fallback(error);
       }
       return state.children;
@@ -191,7 +157,7 @@ export function ErrorBoundary(
 
   const handler: ErrorBoundaryHandler = {
     handle(error: unknown) {
-      methods.reportError(error);
+      methods.report_error(error);
       return methods.build_with_fallback(error);
     },
     reset() {
@@ -252,4 +218,44 @@ export function ErrorBoundary(
       $elm = null;
     },
   };
+}
+
+function toErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  if (typeof error === "string" && error) {
+    return error;
+  }
+  return "Unknown error";
+}
+
+function toThrowableError(error: unknown) {
+  if (error instanceof Error) {
+    return error;
+  }
+  return new Error(toErrorMessage(error));
+}
+
+function throwErrorToGlobal(error: unknown) {
+  if (typeof globalThis === "undefined") {
+    return;
+  }
+
+  if (typeof globalThis.reportError === "function") {
+    globalThis.reportError(error);
+    return;
+  }
+
+  const throwable = toThrowableError(error);
+  if (typeof globalThis.queueMicrotask === "function") {
+    globalThis.queueMicrotask(() => {
+      throw throwable;
+    });
+    return;
+  }
+
+  setTimeout(() => {
+    throw throwable;
+  }, 0);
 }

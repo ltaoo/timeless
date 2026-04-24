@@ -3,17 +3,17 @@ console.log("primitive.version " + __Version);
 export * from "./reactive/for";
 export * from "./reactive/show";
 export * from "./reactive/match";
-export * from "./reactive/error-boundary";
+export * from "./content/error-boundary";
 export * from "./content/fragment";
 export {
   createContext,
   provide,
   use,
   Scope,
-  getOwner,
-  runWithOwner,
-} from "./context";
-export type { Context } from "./context";
+  get_owner as getOwner,
+  run_with_owner as runWithOwner,
+} from "./context/context";
+export type { Context } from "./context/context";
 
 // Content
 export * from "./content/view";

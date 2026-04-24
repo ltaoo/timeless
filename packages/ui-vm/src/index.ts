@@ -18,7 +18,7 @@ export const base = {
 };
 
 export * from "./accordion";
-export * from "./menu"; // Export first
+export * from "./menu";
 export * from "./menu/item";
 export * from "./menu/separator";
 export * from "./menu/group";

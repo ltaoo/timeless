@@ -1,4 +1,4 @@
-import { createContext, use } from "@/context";
+import { createContext, use } from "@/context/context";
 import { TimelessElement } from "@/content/type";
 
 export type ErrorBoundaryHandler = {

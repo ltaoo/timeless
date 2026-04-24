@@ -18,7 +18,7 @@ import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
-import { getOwner, runWithOwner } from "@/context";
+import { get_owner, run_with_owner } from "@/context/context";
 
 export type ForProps<T> = {
   key?: string;
@@ -58,7 +58,7 @@ export function For<T>(
   }>,
 ) {
   let $elm: any = null;
-  const _owner = getOwner();
+  const _owner = get_owner();
 
   const _key = props.key;
   const state: ForState<T> = {
@@ -168,7 +168,7 @@ export function For<T>(
         const item = items[i];
         const idx_computed = methods.create_idx(item);
         const elm = _owner
-          ? runWithOwner(_owner, () => props.render(item.v, idx_computed))
+          ? run_with_owner(_owner, () => props.render(item.v, idx_computed))
           : props.render(item.v, idx_computed);
         state.items[i] = item.v;
         if (isElement(elm)) {
@@ -205,7 +205,7 @@ export function For<T>(
         inserted_items.push(item);
         inserted_idx.push(idx);
         const child_tmp = _owner
-          ? runWithOwner(_owner, () => props.render(item, idx))
+          ? run_with_owner(_owner, () => props.render(item, idx))
           : props.render(item, idx);
         const child = (() => {
           if (isElement(child_tmp)) {
@@ -438,7 +438,7 @@ export function For<T>(
           const idx_computed = methods.create_idx(new_item);
           new_index_computed[i] = idx_computed;
           const res = _owner
-            ? runWithOwner(_owner, () => props.render(new_item.v, idx_computed))
+            ? run_with_owner(_owner, () => props.render(new_item.v, idx_computed))
             : props.render(new_item.v, idx_computed);
           new_elements[i] = res;
           added_nodes.push({ idx: i, elements: [res] });

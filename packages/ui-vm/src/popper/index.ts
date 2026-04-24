@@ -4,6 +4,7 @@ import { ScrollViewCore } from "@/scroll-view/index";
 import { Logger } from "@/util";
 
 import { compute_position, flip, shift, offset, arrow, size } from "./floating";
+import { getPopperPlatform } from "./platform";
 import type { Rect, Placement, Strategy, MiddlewareData } from "./types";
 
 const logger = Logger({ prefix: "vm", scope: "popper" });
@@ -202,7 +203,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.offsetY = offsetY;
     this.mode = mode;
     this.view$ = view$;
-    this.platform = platform;
+    this.platform = platform ?? getPopperPlatform();
     this.viewport$ = new ScrollViewCore();
 
     // 监听滚动：优先使用 ScrollViewCore，否则使用 window
@@ -1098,3 +1099,5 @@ function getSideAndAlignFromPlacement(placement: Placement) {
   const [side, align = "center"] = placement.split("-");
   return [side as Side, align as Align] as const;
 }
+
+export { getPopperPlatform, setPopperPlatform } from "./platform";

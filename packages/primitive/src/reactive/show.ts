@@ -10,8 +10,8 @@ import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
-import { getOwner, runWithOwner } from "@/context";
-import { useErrorBoundary } from "./error-boundary-context";
+import { get_owner, run_with_owner } from "@/context/context";
+import { useErrorBoundary } from "@/content/error-boundary-context";
 
 const logger = Logger({ prefix: "primitive", scope: "reactive/show" });
 
@@ -26,18 +26,24 @@ export type ShowProps = {
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
 };
-type ShowState = { value: boolean; children: (TimelessElement | null)[] };
+type ShowState = {
+  rendered: boolean;
+  value: boolean;
+  children: (TimelessElement | null)[];
+};
 
 export function Show(props: ShowProps) {
   const { when, onMounted, beforeUnmounted, onUnmounted } = props;
-  const _owner = getOwner();
+
   let $elm: any = null;
+  const _owner = get_owner();
 
   const state: ShowState = {
+    rendered: false,
     value: false,
     children: [],
   };
-  const listener$ = ListenerManager([when]);
+  const listener$ = ListenerManager();
   // Track subscription unsubscribers separately for HMR —
   // _hmr_dispose must only unsubscribe, NOT destroy the shared ref.
   const _hmr_subs: (() => void)[] = [];
@@ -72,7 +78,7 @@ export function Show(props: ShowProps) {
           throw error;
         }
       };
-      const next = _owner ? runWithOwner(_owner, evaluate) : evaluate();
+      const next = _owner ? run_with_owner(_owner, evaluate) : evaluate();
       for (let i = 0; i < next.length; i += 1) {
         const node = next[i];
         (() => {
