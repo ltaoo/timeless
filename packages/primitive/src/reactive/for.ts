@@ -376,27 +376,22 @@ export function For<T>(
           // new_children[i] = prev_children[old_idx];
           // new_original_items[i] = prev_original_items[old_idx];
           new_index_computed[i] = prev_index_computed[old_idx];
-          // Track moved items only for swaps/reorders, not insertions
-          // A move means the item's relative order among reused items changed,
-          // not just that it was shifted by insertions.
-          // Expected position = old_idx + count_of_inserted_items_before_this_item_in_new_list
-          // Inserted items = new items (not found in old_map)
-          const shift_by_insertion = (() => {
-            let count = 0;
-            for (let j = 0; j < i; j++) {
-              const new_j = new_wrapped_items[j];
-              const k_j =
-                _key && new_j
-                  ? // @ts-ignore
-                    new_j.v[_key]
-                  : new_j.v;
-              if (!old_map.has(k_j)) {
-                count++;
-              }
+          // Track moved items only for swaps/reorders, not insertions/deletions
+          // Expected position = old_idx + insertions_before
+          // Insertions shift positions naturally; reorder means actual != expected
+          let insertions_before = 0;
+          for (let j = 0; j < i; j++) {
+            const new_j = new_wrapped_items[j];
+            const k_j =
+              _key && new_j
+                ? // @ts-ignore
+                  new_j.v[_key]
+                : new_j.v;
+            if (!old_map.has(k_j)) {
+              insertions_before++;
             }
-            return count;
-          })();
-          const expected_new_idx = old_idx + shift_by_insertion;
+          }
+          const expected_new_idx = old_idx + insertions_before;
           if (i !== expected_new_idx) {
             moved_nodes.push({ from: old_idx, to: i });
           }
