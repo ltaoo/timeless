@@ -1,7 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "dialog": "/components/ui/dialog",
-    "icon": "/components/ui/icon"
-  }
-}

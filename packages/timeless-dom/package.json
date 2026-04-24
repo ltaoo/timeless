@@ -13,7 +13,6 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/timeless": "workspace:*",
-    "@timeless/svg": "workspace:*"
+    "@timeless/timeless": "workspace:*"
   }
 }

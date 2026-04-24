@@ -1,3 +1,0 @@
-<view class="{{className}}" style="{{style}}" data-state="{{open ? 'open' : 'closed'}}">
-    <slot />
-</view>

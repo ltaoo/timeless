@@ -1,7 +1,13 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
-import * as ASN from "@timeless/svg/asn";
+import {
+  getIconRegistry,
+  type ASNNode,
+  type IconRegistry,
+} from "@timeless/timeless";
 
 import { HostElement } from "./box";
+
+export { type ASNNode, type IconRegistry };
 
 export type DOMIcon = VNodeView<SVGSVGElement> & {
   t: "icon";
@@ -34,14 +40,28 @@ export function DOMIcon(props: {
         return null;
       }
       // Convert kebab-case to PascalCase (e.g., "check" -> "Check", "chevron-down" -> "ChevronDown")
-      const pascal_name = name
-        .split("-")
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join("");
-      const asn_node = (ASN as any)[pascal_name] as ASNNode | undefined;
+      const pascal_name = name;
+      // const pascal_name = name
+      //   .split("-")
+      //   .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      //   .join("");
+      const asn_node = getIconRegistry()[pascal_name];
+      console.log(
+        "[]icon - render pascal_name",
+        pascal_name,
+        getIconRegistry(),
+        asn_node,
+      );
       if (!asn_node) {
-        console.warn(`Icon "${name}" not found in @timeless/svg/asn`);
-        return null;
+        $elm = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        $elm.setAttribute("width", String(elm.state.size || 24));
+        $elm.setAttribute("height", String(elm.state.size || 24));
+        $elm.setAttribute("viewBox", "0 0 24 24");
+        $elm.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+        $elm.style.display = "inline-block";
+        $elm.style.borderRadius = "4px";
+        common$.methods.set$elm($elm);
+        return $elm;
       }
       $elm = render_asn_to_svg(asn_node, elm.state) as SVGSVGElement;
       common$.methods.set$elm($elm);
@@ -57,12 +77,6 @@ export function DOMIcon(props: {
 export function isDOMIcon(value: any): value is DOMIcon {
   return value.t === "icon";
 }
-
-type ASNNode = {
-  tag: string;
-  attrs?: Record<string, string>;
-  children?: readonly ASNNode[];
-};
 
 function render_asn_to_svg(
   asn: ASNNode,

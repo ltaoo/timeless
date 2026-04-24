@@ -5,23 +5,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Timeless vanilla js example</title>
-  <link href="../../packages/shadcn/dist/shadcn.css" rel="stylesheet" />
+  <base href="/" />
+  <script type="importmap">
+    {
+      "imports": {
+        "@/": "./src/"
+      }
+    }
+  </script>
+  <link href="public/timeless/0.21.0/timeless.shadcn.css" rel="stylesheet" />
+  <script>!function () { try { var d = document.documentElement; var e = localStorage.getItem('theme'); var resolved; if ('system' === e || !e) { var t = '(prefers-color-scheme: dark)', m = window.matchMedia(t); resolved = (m.media !== t || m.matches) ? 'dark' : 'light' } else { resolved = e } d.style.colorScheme = resolved; if (resolved === 'dark') { d.classList.add('dark') } else { d.classList.remove('dark') } } catch (e) { } }()</script>
+  <script src="public/tailwindcss@4.js"></script>
+  <script src="public/timeless/0.21.0/timeless.umd.min.js"></script>
+  <script src="public/timeless/0.21.0/timeless.dom.umd.min.js"></script>
+  <script src="public/timeless/0.21.0/timeless.shadcn.umd.min.js"></script>
+  <script src="public/timeless/0.21.0/timeless.web.umd.min.js"></script>
+  <script src="public/timeless/0.21.0/timeless.utils.umd.min.js"></script>
+  <script src="public/timeless/0.21.0/timeless.a2ui.umd.min.js"></script>
+  <script>
+    Object.assign(Timeless, Timeless.shadcn.kit);
+    Timeless.ui = Timeless.shadcn.ui;
+    Object.assign(window, Timeless);
+    Object.assign(window, Timeless.shadcn);
+  </script>
 </head>
 
 <body>
-  <script>!function () { try { var d = document.documentElement, n = 'data-theme', s = 'setAttribute'; var e = localStorage.getItem('theme'); if ('system' === e || (!e && true)) { var t = '(prefers-color-scheme: dark)', m = window.matchMedia(t); if (m.media !== t || m.matches) { d.style.colorScheme = 'dark'; d[s](n, 'dark') } else { d.style.colorScheme = 'light'; d[s](n, 'light') } } else if (e) { d[s](n, e || '') } if (e === 'light' || e === 'dark') d.style.colorScheme = e } catch (e) { } }()</script>
-  <script src="../../packages/reactive/dist/timeless.reactive.umd.min.js"></script>
-  <script src="../../packages/ui/dist/timeless.ui.umd.min.js"></script>
-  <script src="../../packages/kit/dist/timeless.kit.umd.min.js"></script>
-  <script>
-    Object.assign(window.Timeless, window.Timeless.kit);
-  </script>
-  <script src="../../packages/provider-web/dist/timeless.web.umd.min.js"></script>
-  <script src="../../packages/timeless/dist/timeless.umd.min.js"></script>
-  <script src="../../packages/icons/dist/timeless.icons.umd.min.js"></script>
-  <script src="../../packages/shadcn/dist/timeless.shadcn.umd.min.js"></script>
   <div id="root"></div>
-  <script src="./src/index.js"></script>
+  <script type="module" src="src/index.js"></script>
 </body>
 
 </html>

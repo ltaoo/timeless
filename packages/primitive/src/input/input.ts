@@ -64,12 +64,6 @@ export function Input(props: InputProps = {}) {
 
   const state = box$.state;
   const events = box$.events;
-  if (onInput) {
-    events.onInput = onInput;
-  }
-  if (onChange) {
-    events.onChange = onChange;
-  }
 
   const methods = {
     listen(type: string, handler: (event: any) => void, options?: any) {
@@ -290,6 +284,13 @@ export function Input(props: InputProps = {}) {
 
   methods.subscribe_props();
   box$.methods.add_event();
+
+  if (onInput) {
+    events.onInput = onInput;
+  }
+  if (onChange) {
+    events.onChange = onChange;
+  }
 
   return {
     t: "input",

@@ -15,6 +15,9 @@ import { MountedEvent } from "@/event";
 import { ListenerManager } from "@/util/listener";
 
 import { Box, BoxProps, BoxState } from "./box";
+import { Logger } from "@/util/logger";
+
+const logger = Logger({ prefix: "primitive", scope: "icon" });
 
 /** Props for Icon component */
 type IconProps = BoxProps & {
@@ -32,6 +35,30 @@ type IconState = {
   size: number;
   color: string;
 };
+
+export type ASNNode = {
+  tag: string;
+  attrs?: Record<string, string>;
+  children?: readonly ASNNode[];
+};
+
+export type IconRegistry = Record<string, ASNNode>;
+
+const iconRegistry: IconRegistry = {};
+
+export function registerIcons(icons: IconRegistry): void {
+  logger.log("registerIcons", icons);
+  Object.assign(iconRegistry, icons);
+}
+
+export function clearIcons(): void {
+  Object.keys(iconRegistry).forEach((key) => delete iconRegistry[key]);
+}
+
+export function getIconRegistry(): IconRegistry {
+  logger.log("getIconRegistry", iconRegistry);
+  return iconRegistry;
+}
 
 /**
  * Creates an Icon component.
@@ -117,3 +144,5 @@ export function Icon(props: IconProps) {
 export function isIcon(v: any) {
   return v.t === "icon";
 }
+
+(Icon as any).register = registerIcons;

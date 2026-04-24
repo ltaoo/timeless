@@ -271,39 +271,17 @@ importers:
         specifier: workspace:^
         version: link:../../packages/timeless-tui
 
-  apps/weapp-vanilla:
-    dependencies:
-      '@timeless/biz':
-        specifier: workspace:*
-        version: link:../../packages/biz
-      '@timeless/kit':
-        specifier: workspace:*
-        version: link:../../packages/kit
-      '@timeless/provider-weapp':
-        specifier: workspace:*
-        version: link:../../packages/provider-weapp
-      '@timeless/ui-vm':
-        specifier: workspace:*
-        version: link:../../packages/ui-vm
-      '@timeless/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      mitt:
-        specifier: ^3.0.1
-        version: 3.0.1
+  apps/web-shadcn:
     devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.11
-      '@types/wechat-miniprogram':
-        specifier: ^3.4.7
-        version: 3.4.10
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+      '@timeless/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
+      '@timeless/dev':
+        specifier: workspace:*
+        version: link:../../packages/dev
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
 
   apps/web-solid:
     dependencies:
@@ -386,18 +364,6 @@ importers:
       '@timeless/ui-vm':
         specifier: workspace:^
         version: link:../../packages/ui-vm
-
-  apps/web-vanilla:
-    devDependencies:
-      '@timeless/cli':
-        specifier: workspace:*
-        version: link:../../packages/cli
-      '@timeless/dev':
-        specifier: workspace:*
-        version: link:../../packages/dev
-      eslint:
-        specifier: ^8.56.0
-        version: 8.57.1
 
   apps/web-vue:
     dependencies:
@@ -750,9 +716,6 @@ importers:
 
   packages/timeless-dom:
     dependencies:
-      '@timeless/svg':
-        specifier: workspace:*
-        version: link:../svg
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless
@@ -2463,9 +2426,6 @@ packages:
 
   '@types/validate-npm-package-name@4.0.2':
     resolution: {integrity: sha512-lrpDziQipxCEeK5kWxvljWYhUvOiB2A9izZd9B2AFarYAkqZshb4lPbRs7zKEic6eGtH8V/2qJW+dPp9OtF6bw==}
-
-  '@types/wechat-miniprogram@3.4.10':
-    resolution: {integrity: sha512-NG8mvXxQABE+gUHO2DAnK0W6f2hLT9AvWqzCxjqGUvGuRNkegMomzjm1z3LNPrgm9kfI8OhMO7kbilhwpREriw==}
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
@@ -6271,8 +6231,6 @@ snapshots:
   '@types/unist@3.0.3': {}
 
   '@types/validate-npm-package-name@4.0.2': {}
-
-  '@types/wechat-miniprogram@3.4.10': {}
 
   '@types/ws@8.18.1':
     dependencies:

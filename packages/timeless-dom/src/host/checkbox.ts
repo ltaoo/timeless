@@ -22,18 +22,23 @@ export function DOMCheckbox(props: {
     getType() {
       return "input";
     },
-    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
       return false;
     },
     render(elm: TimelessElement) {
       const $elm = document.createElement("input");
+      console.log('[dom]create checkbox', elm.state);
       // $elm.style.backgroundColor = "transparent";
       // console.log("[DOMCheckbox] render", elm.value);
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
       $elm.type = "checkbox";
-      $elm.checked = !!elm.state.value;
+      if (elm.state !== undefined) {
+        $elm.checked = !!elm.state.checked;
+        if (elm.state.checked) {
+          $elm.setAttribute("checked", "checked");
+        }
+      }
       if (elm.state.id) {
         $elm.id = elm.state.id;
       }
@@ -42,7 +47,6 @@ export function DOMCheckbox(props: {
       }
       common$.methods.set$elm($elm);
       common$.methods.applyState(elm.state, { initial: true });
-      delete elm.state.value;
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
       $elm.addEventListener("click", function (event) {
@@ -73,7 +77,7 @@ export function DOMCheckbox(props: {
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
       $elm.addEventListener("click", function (event) {
-        console.log('click', event)
+        console.log("click", event);
         // event.preventDefault();
         if (events && events.onChange) {
           events.onChange(event);

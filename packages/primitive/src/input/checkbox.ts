@@ -5,16 +5,13 @@ import { ViewProps } from "@/content/view";
 import { ListenerManager } from "@/util/listener";
 import { isClassNameRef, isStyleRef, RawViewStyleProperties } from "@/style";
 import { Logger } from "@/util/logger";
+import { Box, BoxProps } from "@/content/box";
 
 const logger = Logger({ prefix: "primitive", scope: "input/checkbox" });
 
-export interface CheckboxProps {
+export type CheckboxProps = BoxProps & {
   id?: string;
   name?: string | DerivedRef<string> | Ref<string>;
-  class?: ViewProps["class"];
-  style?: ViewProps["style"];
-  attributes?: ViewProps["attributes"];
-  dataset?: ViewProps["dataset"];
   checked?: boolean | DerivedRef<boolean> | Ref<boolean>;
   indeterminate?: boolean | DerivedRef<boolean> | Ref<boolean>;
   readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
@@ -25,7 +22,7 @@ export interface CheckboxProps {
   onMounted?: ViewProps["onMounted"];
   beforeUnmounted?: ViewProps["beforeUnmounted"];
   onUnmounted?: ViewProps["onUnmounted"];
-}
+};
 
 type CheckboxState = {
   id: string;
@@ -34,16 +31,13 @@ type CheckboxState = {
   indeterminate: boolean;
   disabled: boolean;
   required: boolean;
-  style: RawViewStyleProperties;
-  styleSet: string[];
+  readonly: boolean;
 };
 
 export function Checkbox(props: CheckboxProps) {
   const {
     id,
     name,
-    style,
-    class: cls,
     checked,
     indeterminate,
     disabled,
@@ -55,93 +49,69 @@ export function Checkbox(props: CheckboxProps) {
   } = props;
 
   let $elm: any = null;
-  const state: CheckboxState = {
+  const box$ = Box<CheckboxState>(rest, {
     id: "",
     name: "",
     checked: false,
     indeterminate: false,
     disabled: false,
     required: false,
-    style: {},
-    styleSet: [],
-  };
-  const events = {
-    onChange(event: any) {
-      // logger.log("handle change", event);
-      if (props.onChange) {
-        props.onChange(event);
-      }
-    },
-    onClick(event: any) {
-      if (props.onClick) {
-        props.onClick(event);
-      }
-    },
-  };
-
-  const listener$ = ListenerManager();
+    readonly: false,
+  } as CheckboxState);
+  const state = box$.state;
+  const events = box$.events;
 
   const methods = {
-    setProp(key: string, value: any) {
-      console.log("set prop", key, value, $elm, $elm.setAttribute);
-      if ($elm && typeof $elm.setAttribute === "function") {
-        $elm.setAttribute(key, value);
-      }
-      // state.props[key] = value;
-    },
-    applyAttr(k: string, v: any) {
-      if (v === undefined || v === null || v === false) {
-        // host.removeAttribute($elm, k);
-        if ($elm) {
-          $elm.removeAttribute(k);
-        }
-        return;
-      }
-      if (v === true) {
-        // host.setAttribute($elm, k, "");
-        if ($elm) {
-          $elm.setAttribute(k, "");
-        }
-        return;
-      }
-      // host.setAttribute($elm, k, String(v));
-      if ($elm) {
-        $elm.setAttribute(k, String(v));
-      }
-    },
     subscribe_props() {
+      box$.methods.subscribe_props();
+
       if (id !== undefined) {
         if (isRef(id)) {
+          state.id = id.value;
           const unsub = id.subscribe({
             onChange(v) {
               state.id = String(v);
-              methods.setProp("id", String(v));
+              // methods.setProp("id", String(v));
             },
           });
-          listener$.push(unsub);
+          box$.methods.unsubscribe(unsub);
           // methods.setProp("id", id.value);
-          state.id = id.value;
         } else {
           // methods.setProp("id", id);
           state.id = id;
+        }
+      }
+      // Handle name attribute
+      if (name !== undefined) {
+        if (isRef(name)) {
+          state.name = name.value;
+          const unsub = name.subscribe({
+            onChange(v) {
+              state.name = v;
+              // methods.setProp("name", v);
+            },
+          });
+          box$.methods.unsubscribe(unsub);
+        } else {
+          state.name = name;
         }
       }
 
       // Handle value attribute
       if (checked !== undefined) {
         if (isRef(checked)) {
+          state.checked = checked.value;
           const unsub = checked.subscribe({
             onChange(v) {
               state.checked = v;
-              if ($elm && typeof $elm.setChecked === "function") {
-                setTimeout(() => {
-                  $elm.setChecked(v);
-                }, 0);
-              }
+              // if ($elm && typeof $elm.setChecked === "function") {
+              //   setTimeout(() => {
+              //     $elm.setChecked(v);
+              //   }, 0);
+              // }
             },
           });
-          listener$.push(unsub);
-          state.checked = checked.value;
+          box$.methods.unsubscribe(unsub);
         } else {
           state.checked = checked;
         }
@@ -150,14 +120,15 @@ export function Checkbox(props: CheckboxProps) {
       // Handle disabled attribute
       if (disabled !== undefined) {
         if (isRef(disabled)) {
+          state.disabled = disabled.value;
           const unsub = disabled.subscribe({
             onChange(v) {
-              methods.setProp("disabled", v);
+              state.disabled = v;
+              // methods.setProp("disabled", v);
             },
           });
-          listener$.push(unsub);
+          box$.methods.unsubscribe(unsub);
           // methods.setProp("disabled", disabled.value);
-          state.disabled = disabled.value;
         } else {
           // methods.setProp("disabled", disabled as boolean);
           state.disabled = disabled as boolean;
@@ -167,165 +138,44 @@ export function Checkbox(props: CheckboxProps) {
       // Handle readonly attribute
       if (readonly !== undefined) {
         if (isRef(readonly)) {
+          state.readonly = readonly.value;
           const unsub = readonly.subscribe({
             onChange(v) {
-              methods.setProp("readOnly", v);
+              state.readonly = v;
+              // methods.setProp("readOnly", v);
             },
           });
-          listener$.push(unsub);
-          // methods.setProp("readOnly", readonly.value);
-          // state.readonly = readonly.value;
+          box$.methods.unsubscribe(unsub);
         } else {
-          // methods.setProp("readOnly", readonly as boolean);
-          // state.readonly = readonly as boolean;
+          state.readonly = readonly as boolean;
         }
       }
 
       // Handle required attribute
       if (required !== undefined) {
         if (isRef(required)) {
+          state.required = required.value;
           const unsub = required.subscribe({
             onChange(v) {
-              methods.setProp("required", v);
+              // methods.setProp("required", v);
             },
           });
-          listener$.push(unsub);
+          box$.methods.unsubscribe(unsub);
           // methods.setProp("required", required.value);
-          state.required = required.value;
         } else {
           // methods.setProp("required", required as boolean);
-          state.required = required as boolean;
-        }
-      }
-      // Handle name attribute
-      if (name !== undefined) {
-        if (isRef(name)) {
-          const unsub = name.subscribe({
-            onChange(v) {
-              state.name = String(v);
-              methods.setProp("name", v);
-            },
-          });
-          listener$.push(unsub);
-          state.name = name.value;
-          // methods.setProp("name", name.value);
-        } else {
-          state.name = name;
-          // methods.setProp("name", name as string);
-        }
-      }
-
-      // Handle dataset
-      // Object.keys(dataset).forEach((k) => {
-      //   if (!dataset) return;
-      //   const vv = dataset[k];
-      //   const attrName = `data-${k}`;
-      //   if (isRef(vv)) {
-      //     vv.subscribe({
-      //       onChange(v: any) {
-      //         methods.applyAttr(attrName, v);
-      //       },
-      //     });
-      //     methods.applyAttr(attrName, vv.value);
-      //     return;
-      //   }
-      //   methods.applyAttr(attrName, vv);
-      // });
-
-      // Handle class
-      if (cls !== undefined) {
-        if (typeof cls === "string") {
-          state.styleSet = [cls];
-        } else if (isRef(cls)) {
-          const unsub = cls.subscribe({
-            onChange(v) {
-              // host.setClassName($elm, String(v));
-              state.styleSet = [v as string];
-              if ($elm) {
-                $elm.setStyleSet(v);
-              }
-            },
-          });
-          listener$.push(unsub);
-          // host.setClassName($elm, String(cls.value));
-          state.styleSet = [cls.value];
-        } else if (isClassNameRef(cls)) {
-          const unsub = cls.subscribe({
-            onChange(v) {
-              state.styleSet = v;
-              if ($elm) {
-                $elm.setStyleSet(Array.isArray(v) ? v : [v]);
-              }
-            },
-          });
-          listener$.push(unsub);
-          if ($elm) {
-            $elm.setStyleSet(cls.toString());
-          }
-          state.styleSet = [cls.toString()];
-        } else {
-          state.styleSet = [cls];
-        }
-      }
-
-      // Handle style
-      if (style) {
-        if (isRef(style)) {
-          const st = style;
-          const unsub = st.subscribe({
-            onChange(v) {
-              state.style = v as RawViewStyleProperties;
-              // host.setStyleText($elm, viewStyleToCssText(v ?? {}));
-              if ($elm) {
-                $elm.setStyleSet(v);
-              }
-            },
-          });
-          listener$.push(unsub);
-          Object.keys(st.value).forEach((k) => {
-            const vv = st.value[k];
-            if (isRef(vv)) {
-              const unsub = vv.subscribe({
-                onChange() {
-                  // applyStyle();
-                },
-              });
-              listener$.push(unsub);
-            } else {
-              state.style[k] = vv;
-            }
-          });
-          // host.setStyleText($elm, viewStyleToCssText(st.value));
-          // state.style = st.value;
-        } else if (isStyleRef(style)) {
-          const unsub = style.subscribe({
-            onChange(v) {
-              $elm.setStyleSet(v as RawViewStyleProperties);
-            },
-          });
-          listener$.push(unsub);
-          state.style = style.value;
-        } else {
-          Object.keys(style as any).forEach((k) => {
-            const vv = style[k];
-            if (isRef(vv)) {
-              const unsub = vv.subscribe({
-                onChange(v) {
-                  $elm.setStyleSet(v);
-                },
-              });
-              listener$.push(unsub);
-              state.style[k] = vv.value;
-            } else {
-              state.style[k] = vv;
-            }
-          });
+          state.required = required;
         }
       }
     },
   };
 
   methods.subscribe_props();
+  box$.methods.add_event();
+
+  if (onChange) {
+    events.onChange = onChange;
+  }
 
   return {
     t: "checkbox",
@@ -340,14 +190,15 @@ export function Checkbox(props: CheckboxProps) {
     events,
     onMounted(event: MountedEvent) {
       if (props.onMounted) {
-        props.onMounted(event);
+        const unsubscribe = props.onMounted(event);
+        box$.methods.unsubscribe(unsubscribe);
       }
     },
     onUnmounted() {
-      listener$.destroy();
       if (props.onUnmounted) {
         props.onUnmounted();
       }
+      box$.methods.destroy();
     },
   };
 }

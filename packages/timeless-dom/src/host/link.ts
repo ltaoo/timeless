@@ -1,7 +1,8 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { HostElement } from "./box";
 import { hydrate_node } from "@/renderer/hydrate";
+
+import { HostElement } from "./box";
 
 export type DOMLink = VNodeView<HTMLAnchorElement> & {
   t: "link";
@@ -28,6 +29,15 @@ export function DOMLink(props: {
       const $elm = document.createElement("a");
       box$.methods.set$elm($elm);
       box$.methods.applyState(elm.state, { initial: true });
+      if (elm.state.href) {
+        $elm.href = elm.state.href;
+      }
+      if (elm.state.target) {
+        $elm.target = elm.state.target;
+      }
+      if (elm.state.rel) {
+        $elm.rel = elm.state.rel;
+      }
       const $fragment = box$.methods.render(elm.children);
       box$.methods.setupEventListener(elm.events);
       $elm.appendChild($fragment);

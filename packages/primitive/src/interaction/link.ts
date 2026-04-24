@@ -1,11 +1,19 @@
-import { Ref, combine, isRef } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
-import { View, ViewProps } from "@/content/view";
-import { ViewAttributes, ViewChildren } from "@/content/type";
+import { isElement, ViewChildren } from "@/content/type";
+import { Box, BoxProps } from "@/content/box";
+import { MountedEvent } from "@/event";
 
-export interface LinkProps extends Omit<ViewProps, "as"> {
-  href?: string | Ref<string>;
-  target?: NativeLinkTarget | Ref<NativeLinkTarget>;
+export type LinkTarget =
+  | "_self"
+  | "_blank"
+  | "_parent"
+  | "_top"
+  | (string & {});
+
+export type LinkProps = BoxProps & {
+  href?: string | DerivedRef<string> | Ref<string>;
+  target?: LinkTarget | Ref<LinkTarget>;
   rel?: string | Ref<string>;
   disabled?: boolean | Ref<boolean>;
   download?: boolean | string | Ref<boolean | string>;
@@ -14,14 +22,19 @@ export interface LinkProps extends Omit<ViewProps, "as"> {
   hrefLang?: string | Ref<string>;
   type?: string | Ref<string>;
   ping?: string | Ref<string>;
-}
-
-export type NativeLinkTarget =
-  | "_self"
-  | "_blank"
-  | "_parent"
-  | "_top"
-  | (string & {});
+};
+type LinkState = {
+  href?: string;
+  target?: LinkTarget;
+  rel?: string;
+  disabled?: boolean;
+  download?: boolean | string;
+  referrerPolicy?: ReferrerPolicy;
+  hreflang?: string;
+  hrefLang?: string;
+  type?: string;
+  ping?: string;
+};
 
 export function Link(props: LinkProps = {}, children?: ViewChildren) {
   const {
@@ -39,79 +52,102 @@ export function Link(props: LinkProps = {}, children?: ViewChildren) {
     ...rest
   } = props;
 
-  const attrHrefLang = hreflang ?? hrefLang;
-  const isDisabled = () => (isRef(disabled) ? !!disabled.value : !!disabled);
-  const ariaDisabled = isRef(disabled)
-    ? combine([disabled], (d) => (d ? "true" : undefined))
-    : disabled
-      ? "true"
-      : undefined;
-  const tabIndex = isRef(disabled)
-    ? combine([disabled], (d) => (d ? -1 : undefined))
-    : disabled
-      ? -1
-      : undefined;
+  let $elm: any = null;
+  const box$ = Box<LinkState>(rest, {} as LinkState);
+  const state = box$.state;
+  const events = box$.events;
 
-  let mergedAttributes: ViewAttributes | undefined = attributes;
-  if (href !== undefined) {
-    mergedAttributes = { ...(mergedAttributes || {}), href };
-  }
-  if (target !== undefined) {
-    mergedAttributes = { ...(mergedAttributes || {}), target };
-  }
-  if (rel !== undefined) {
-    mergedAttributes = { ...(mergedAttributes || {}), rel };
-  }
-  if (disabled !== undefined) {
-    mergedAttributes = {
-      ...(mergedAttributes || {}),
-      "aria-disabled": ariaDisabled as any,
-      tabindex: tabIndex as any,
-    };
-  }
-  if (download !== undefined) {
-    mergedAttributes = { ...(mergedAttributes || {}), download };
-  }
-  if (referrerPolicy !== undefined) {
-    mergedAttributes = {
-      ...(mergedAttributes || {}),
-      referrerpolicy: referrerPolicy as any,
-    };
-  }
-  if (attrHrefLang !== undefined) {
-    mergedAttributes = { ...(mergedAttributes || {}), hreflang: attrHrefLang };
-  }
-  if (type !== undefined) {
-    mergedAttributes = { ...(mergedAttributes || {}), type };
-  }
-  if (ping !== undefined) {
-    mergedAttributes = { ...(mergedAttributes || {}), ping };
-  }
-
-  return View(
-    {
-      ...rest,
-      as: "a",
-      attributes: mergedAttributes,
-      onPointerDown(e) {
-        if (isDisabled()) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          return;
+  const methods = {
+    subscribe_props() {
+      box$.methods.subscribe_props();
+      if (href) {
+        if (isRef(href)) {
+          state.href = href.value;
+          href.subscribe({
+            onChange(v) {
+              state.href = v;
+            },
+          });
+        } else {
+          state.href = href;
         }
-        if (rest.onPointerDown) rest.onPointerDown(e);
-      },
-      onClick(e) {
-        if (isDisabled()) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          return;
+      }
+      if (target) {
+        if (isRef(target)) {
+          state.target = target.value;
+          target.subscribe({
+            onChange(v) {
+              state.target = v;
+            },
+          });
+        } else {
+          state.target = target;
         }
-        if (rest.onClick) rest.onClick(e);
-      },
+      }
+      if (rel) {
+        if (isRef(rel)) {
+          state.rel = rel.value;
+          rel.subscribe({
+            onChange(v) {
+              state.rel = v;
+            },
+          });
+        } else {
+          state.rel = rel;
+        }
+      }
     },
-    children,
-  );
+  };
+
+  methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "link",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      $elm = v;
+    },
+    state,
+    events,
+    children: state.children,
+    onMounted(event: MountedEvent) {
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.onUnmounted) {
+          node.onUnmounted();
+        }
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
 }

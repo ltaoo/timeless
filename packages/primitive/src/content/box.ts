@@ -358,12 +358,6 @@ export function Box<T>(props: BoxProps, extra_state: T) {
       if (props.onContextMenu) {
         events.onContextMenu = props.onContextMenu;
       }
-      // if (props.onInput) {
-      //   events.onInput = props.onInput;
-      // }
-      // if (props.onChange) {
-      //   events.onChange = props.onChange;
-      // }
       if (props.onFocus) {
         events.onFocus = props.onFocus;
       }
