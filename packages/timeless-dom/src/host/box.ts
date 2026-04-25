@@ -455,35 +455,37 @@ export function HostElement(props: {
     },
     insert(idx: number, children: (TimelessElement | null)[]) {
       const $parent = methods.getParent();
-      const inserted_elements: TimelessElement[] = [];
-      const inserted_child: VNodeView[] = [];
-      const $reference = $children[idx] || $elm;
-      console.log("[dom]insert child", idx, children, $parent, $reference);
       if (!$parent) {
         return;
       }
+      const $reference = $children[idx];
+      console.log("[dom]insert child", idx, children, $parent, $reference, [
+        ...$children,
+      ]);
+      const inserted_elements: TimelessElement[] = [];
+      const inserted_child: VNodeView[] = [];
+      const inserted_host_nodes: any[] = [];
+      const $fragment = document.createDocumentFragment();
       for (const child of children) {
         if (child) {
           const child$ = props.build(child);
           inserted_child.push(child$);
-          // console.log("[dom]For - insert - $child", child$, idx, $reference);
           const $child = child$.render(child);
           if ($child) {
-            if ($reference) {
-              $children.splice(idx, 0, $child);
-              inserted_elements.push(child);
-              $parent.insertBefore($child, $reference);
-            } else {
-              $children.push($child);
-              inserted_elements.push(child);
-              $parent.appendChild($child);
-            }
+            inserted_host_nodes.push($child);
+            inserted_elements.push(child);
+            $fragment.appendChild($child);
           }
         }
       }
+      if ($reference) {
+        $parent.insertBefore($fragment, $reference);
+      } else {
+        $parent.appendChild($fragment);
+      }
+      $children.splice(idx, 0, ...inserted_host_nodes);
       child_elements.splice(idx, 0, ...inserted_elements);
       child_nodes.splice(idx, 0, ...inserted_child);
-      // console.log("[dom]for - insert", inserted_elements);
       for (const child of inserted_elements) {
         if (child.onMounted) {
           child.onMounted({
@@ -548,7 +550,7 @@ export function HostElement(props: {
     refresh(data: {
       children: (TimelessElement | null)[];
       added: { idx: number; elements: (TimelessElement | null)[] }[];
-      removed: { idx: number }[];
+      removed: { idx: number; count: number }[];
       moved: { from: number; to: number }[];
     }) {
       const { added = [], removed = [], moved = [] } = data;
@@ -557,21 +559,29 @@ export function HostElement(props: {
         console.warn("refresh parent not found");
         return;
       }
+      console.log("[dom]refresh - before", [...$children]);
       // 1. Remove (descending order to keep indices stable)
       const sorted_removed = [...removed].sort((a, b) => b.idx - a.idx);
-      const removed_elements: TimelessElement[] = [];
-      for (const { idx } of sorted_removed) {
-        const $child = $children[idx];
-        if ($child) {
-          $parent.removeChild($child);
+      const removed_elements: (TimelessElement | null)[] = [];
+      const removed_childs: any[] = [];
+      const removed_child_nodes: (VNodeView<any> | null)[] = [];
+      const fragment = document.createDocumentFragment();
+      for (const { idx, count } of sorted_removed) {
+        for (let i = 0; i < count; i++) {
+          const $child = $children[idx + i];
+          console.log("remove $child", idx + i, $child);
+          if ($child) {
+            fragment.appendChild($child);
+          }
         }
-        $children.splice(idx, 1);
-        const child_elm = child_elements[idx];
-        if (child_elm) {
-          removed_elements.push(child_elm);
-        }
-        child_elements.splice(idx, 1);
-        child_nodes.splice(idx, 1);
+      }
+      for (const { idx, count } of sorted_removed) {
+        const childs = $children.splice(idx, count);
+        removed_childs.push(...childs);
+        const childs_elm = child_elements.splice(idx, count);
+        removed_elements.push(...childs_elm);
+        const childs_node = child_nodes.splice(idx, count);
+        removed_child_nodes.push(...childs_node);
       }
       // Call onUnmounted for removed elements
       for (const child of removed_elements) {
@@ -582,9 +592,6 @@ export function HostElement(props: {
 
       // 2. Move
       if (moved.length > 0) {
-        // for (let i = 0; i < moved.length; i++) {
-        //   const { from, to } = moved[i];
-        // }
         // moved.from 是原始数组下标，需映射到 remove 之后的下标
         const removedIdxs = removed.map((r) => r.idx).sort((a, b) => a - b);
         const entries = moved
@@ -610,24 +617,8 @@ export function HostElement(props: {
       // 3. Insert added nodes
       for (const { idx, elements } of added) {
         methods.insert(idx, elements);
-        // if (element) {
-        //   const child$ = props.build(element);
-        //   const $child = child$.render(element);
-        //   if ($child) {
-        //     const $reference = $children[idx];
-        //     if ($reference) {
-        //       $children.splice(idx, 0, $child);
-        //       const $parent = $reference.parentElement;
-        //       if ($parent) {
-        //         $parent.insertBefore($child, $reference);
-        //       }
-        //     } else {
-        //       $children.push($child);
-        //       $parent.appendChild($child);
-        //     }
-        //   }
-        // }
       }
+      console.log("[dom]refresh - end", [...$children]);
     },
     getParent() {
       if (!$elm) {

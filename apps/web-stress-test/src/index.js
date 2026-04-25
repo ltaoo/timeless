@@ -13,6 +13,7 @@ function generateData(count) {
     role: i % 3 === 0 ? "Admin" : i % 2 === 0 ? "Editor" : "Viewer",
     status: i % 4 === 0 ? "Inactive" : "Active",
     score: Math.floor(Math.random() * 100),
+    age: Math.floor(Math.random() * 50) + 18,
   }));
 }
 
@@ -26,6 +27,8 @@ function SearchTablePage() {
       name: `User ${i + 1}`,
       email: `user${i + 1}@example.com`,
       role: i % 3 === 0 ? "Admin" : i % 2 === 0 ? "Editor" : "Viewer",
+      page: 10,
+      age: Math.floor(Math.random() * 50) + 18,
       status: i % 4 === 0 ? "Inactive" : "Active",
       score: Math.floor(Math.random() * 100),
       department: ["Sales", "Engineering", "Marketing", "HR", "Finance"][i % 5],
@@ -55,33 +58,76 @@ function SearchTablePage() {
     if (!rows || rows.length === 0) return 0;
     return rows.reduce((sum, row) => sum + row.score, 0);
   });
+  let timer = null;
 
   return View({ style: { padding: "16px", borderRadius: "8px" } }, [
     View(
       {
         style: {
           marginBottom: "12px",
-          display: "flex",
           gap: "8px",
           alignItems: "center",
         },
       },
       [
-        View({}, ["Search (5000 rows, 300ms debounce):"]),
-        Input({
-          value: searchInput,
-          placeholder: "Search name, email, department, location...",
-          style: {
-            padding: "6px 10px",
-            border: "1px solid #ddd",
-            borderRadius: "4px",
-            fontSize: "14px",
-            width: "300px",
-          },
-          onInput(event) {
-            searchInput.as(event.target.value);
-          },
-        }),
+        View({}, [
+          View({}, ["Search (5000 rows, 300ms debounce):"]),
+          Input({
+            value: searchInput,
+            placeholder: "Search name, email, department, location...",
+            style: {
+              padding: "6px 10px",
+              border: "1px solid #ddd",
+              "border-radius": "4px",
+              "font-size": "14px",
+            },
+            onInput(event) {
+              searchInput.as(event.target.value);
+            },
+          }),
+        ]),
+        View({}, [
+          View(
+            {
+              style: {
+                padding: "6px 12px",
+                background: "#007bff",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "14px",
+              },
+              onClick() {
+                if (timer) return;
+                timer = setInterval(() => {
+                  data.as((d) => {
+                    const newData = [...d];
+                    const user = newData.find((u) => u.id === 23);
+                    if (user) {
+                      user.age = (user.age || 0) + 1;
+                    }
+                    return newData;
+                  });
+                }, 1000);
+              },
+            },
+            ["Start Age+1"],
+          ),
+          View(
+            {
+              style: {
+                padding: "6px 12px",
+                background: "#007bff",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "14px",
+              },
+              onClick() {
+                clearInterval(timer);
+              },
+            },
+            ["Stop Age+1"],
+          ),
+        ]),
         View({}, [`Showing ${filteredData.length} of ${TABLE_ROWS}`]),
       ],
     ),
@@ -98,7 +144,7 @@ function SearchTablePage() {
           {
             style: {
               display: "grid",
-              "grid-template-columns": "repeat(7, 1fr)",
+              "grid-template-columns": "repeat(8, 1fr)",
               gap: "1px",
             },
           },
@@ -107,6 +153,7 @@ function SearchTablePage() {
             View({ style: { padding: "10px", fontWeight: "600" } }, ["Name"]),
             View({ style: { padding: "10px", fontWeight: "600" } }, ["Email"]),
             View({ style: { padding: "10px", fontWeight: "600" } }, ["Role"]),
+            View({ style: { padding: "10px", fontWeight: "600" } }, ["Age"]),
             View({ style: { padding: "10px", fontWeight: "600" } }, ["Status"]),
             View({ style: { padding: "10px", fontWeight: "600" } }, ["Dept"]),
             View({ style: { padding: "10px", fontWeight: "600" } }, ["Loc"]),
@@ -120,7 +167,7 @@ function SearchTablePage() {
               {
                 style: {
                   display: "grid",
-                  "grid-template-columns": "repeat(7, 1fr)",
+                  "grid-template-columns": "repeat(8, 1fr)",
                   gap: "1px",
                 },
               },
@@ -129,6 +176,9 @@ function SearchTablePage() {
                 View({ style: { padding: "8px" } }, [row.name]),
                 View({ style: { padding: "8px" } }, [row.email]),
                 View({ style: { padding: "8px" } }, [row.role]),
+                View({ style: { padding: "8px" } }, [
+                  computed(row, (t) => t.age),
+                ]),
                 View(
                   {
                     style: {
@@ -156,6 +206,7 @@ function TablePage() {
   const sortAsc = ref(true);
   const data = refarr(generateData(TABLE_ROWS_2));
   const refreshCount = ref(0);
+  const ageTimer = ref(null);
 
   const filteredData = combine(
     { data, searchQuery, sortField, sortAsc },
@@ -236,6 +287,24 @@ function TablePage() {
             },
           },
           ["Refresh"],
+        ),
+        View(
+          {
+            onClick() {
+              if (ageTimer.value) {
+                clearInterval(ageTimer.value);
+                ageTimer.value = null;
+              }
+            },
+            style: {
+              padding: "6px 12px",
+              background: "#dc3545",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "14px",
+            },
+          },
+          ["Stop Age+1"],
         ),
       ],
     ),
@@ -698,7 +767,7 @@ function MultiShowPage() {
 }
 
 function ApplicationView() {
-  const currentPage = ref("table");
+  const currentPage = ref("searchtable");
   const pageStats = ref({
     table: 0,
     searchtable: 0,

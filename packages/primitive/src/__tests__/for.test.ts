@@ -53,7 +53,7 @@ describe("For", () => {
       const { added, removed, moved, children } = refreshSpy.mock.calls[0][0];
 
       // id:3 (old idx 2) removed
-      expect(removed).toEqual([{ idx: 2 }]);
+      expect(removed).toEqual([{ idx: 2, count: 1 }]);
 
       // id:4 added at new idx 2
       expect(added).toHaveLength(1);
@@ -80,8 +80,8 @@ describe("For", () => {
 
       const { added, removed, moved } = refreshSpy.mock.calls[0][0];
 
-      expect(removed).toHaveLength(2);
-      expect(removed.map((r: any) => r.idx).sort()).toEqual([0, 1]);
+      expect(removed).toHaveLength(1);
+      expect(removed[0]).toEqual({ idx: 0, count: 2 });
 
       expect(added).toHaveLength(1);
       expect(added[0].idx).toBe(0);
@@ -130,6 +130,8 @@ describe("For", () => {
 
       expect(removed).toHaveLength(2);
       expect(removed.map((r: any) => r.idx).sort()).toEqual([0, 2]);
+      expect(removed).toContainEqual({ idx: 0, count: 1 });
+      expect(removed).toContainEqual({ idx: 2, count: 1 });
 
       expect(added).toHaveLength(0);
 
@@ -237,14 +239,9 @@ describe("For", () => {
       const { added, removed, moved } = refreshSpy.mock.calls[0][0];
 
       expect(added).toHaveLength(0);
-      expect(removed.map((r: any) => r.idx).sort()).toEqual(
-        expect.arrayContaining([
-          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-          20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 34, 35, 36, 37,
-          38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
-        ]),
-      );
-      expect(removed).toHaveLength(49);
+      expect(removed).toHaveLength(2);
+      expect(removed).toContainEqual({ idx: 0, count: 33 });
+      expect(removed).toContainEqual({ idx: 34, count: 16 });
       expect(moved).toEqual([{ from: 33, to: 0 }]);
 
       todos.as([

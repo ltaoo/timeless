@@ -43,7 +43,7 @@ export function DOMInput(props: {
       }
       common$.methods.set$elm($elm);
       common$.methods.applyState(elm.state, { initial: true });
-      $elm.style.width = "100%";
+      // $elm.style.width = "100%";
       console.log("[dom]input render - before setupEvent", elm.events);
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
@@ -72,7 +72,7 @@ export function DOMInput(props: {
     hydrate(elm: TimelessElement, $elm: HTMLInputElement) {
       console.log("[dom]host/input hydrate", $elm, elm.state.value);
       common$.methods.set$elm($elm);
-      $elm.style.width = "100%";
+      // $elm.style.width = "100%";
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
       $elm.addEventListener("input", function (event) {

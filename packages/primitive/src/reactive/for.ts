@@ -348,12 +348,46 @@ export function For<T>(
         indices.push(index);
       });
 
+      // Pre-compute prefix sums for accurate move detection.
+      // A position shift caused purely by removals/insertions is not a "move".
+      // Formula: expected_new_idx = old_idx - deletions_before_old_idx + insertions_before_new_idx
+      const new_key_set = new Set<any>();
+      for (const item of new_wrapped_items) {
+        // @ts-ignore
+        const k = _key && item ? item.v[_key] : item.v;
+        new_key_set.add(k);
+      }
+      // removed_old_prefix[i] = number of old items at indices [0, i) that are NOT in new array
+      const removed_old_prefix: number[] = new Array(prev_items.length + 1).fill(0);
+      for (let i = 0; i < prev_items.length; i++) {
+        const item = prev_items[i];
+        const k = _key && item ? (item as any)[_key] : item;
+        removed_old_prefix[i + 1] =
+          removed_old_prefix[i] + (new_key_set.has(k) ? 0 : 1);
+      }
+      const old_key_set = new Set<any>();
+      for (const item of prev_items) {
+        const k = _key && item ? (item as any)[_key] : item;
+        old_key_set.add(k);
+      }
+      // insertion_new_prefix[i] = number of new items at indices [0, i) that are NOT in old array
+      const insertion_new_prefix: number[] = new Array(
+        new_wrapped_items.length + 1,
+      ).fill(0);
+      for (let i = 0; i < new_wrapped_items.length; i++) {
+        const item = new_wrapped_items[i];
+        // @ts-ignore
+        const k = _key && item ? item.v[_key] : item.v;
+        insertion_new_prefix[i + 1] =
+          insertion_new_prefix[i] + (old_key_set.has(k) ? 0 : 1);
+      }
+
       // 3. Diff Phase: Identify operations
       const added_nodes: {
         idx: number;
         elements: (TimelessElement | null)[];
       }[] = [];
-      const removed_nodes: { idx: number }[] = [];
+      const removed_nodes: { idx: number; count: number }[] = [];
       const moved_nodes: { from: number; to: number }[] = [];
       let _add_start = -1;
 
@@ -376,22 +410,12 @@ export function For<T>(
           // new_children[i] = prev_children[old_idx];
           // new_original_items[i] = prev_original_items[old_idx];
           new_index_computed[i] = prev_index_computed[old_idx];
-          // Track moved items only for swaps/reorders, not insertions/deletions
-          // Expected position = old_idx + insertions_before
-          // Insertions shift positions naturally; reorder means actual != expected
-          let insertions_before = 0;
-          for (let j = 0; j < i; j++) {
-            const new_j = new_wrapped_items[j];
-            const k_j =
-              _key && new_j
-                ? // @ts-ignore
-                  new_j.v[_key]
-                : new_j.v;
-            if (!old_map.has(k_j)) {
-              insertions_before++;
-            }
-          }
-          const expected_new_idx = old_idx + insertions_before;
+          // Track moved items only for true reorders, not position shifts caused
+          // by removals or insertions.
+          // expected = old_idx - (removed old items before old_idx) + (inserted new items before new_idx i)
+          const deletions_before = removed_old_prefix[old_idx];
+          const insertions_before = insertion_new_prefix[i];
+          const expected_new_idx = old_idx - deletions_before + insertions_before;
           if (i !== expected_new_idx) {
             moved_nodes.push({ from: old_idx, to: i });
           }
@@ -427,19 +451,39 @@ export function For<T>(
         }
       }
 
-      // Remaining items in old_map are Removed
+      // Remaining items in old_map are Removed - merge consecutive indices
+      const sorted_removed_indices: number[] = [];
       for (const indices of old_map.values()) {
         for (const index of indices) {
-          removed_nodes.push({ idx: index });
+          sorted_removed_indices.push(index);
         }
+      }
+      sorted_removed_indices.sort((a, b) => a - b);
+
+      let start = -1;
+      let count = 0;
+      for (let i = 0; i < sorted_removed_indices.length; i++) {
+        if (start === -1) {
+          start = sorted_removed_indices[i];
+          count = 1;
+        } else if (sorted_removed_indices[i] === start + count) {
+          count++;
+        } else {
+          removed_nodes.push({ idx: start, count });
+          start = sorted_removed_indices[i];
+          count = 1;
+        }
+      }
+      if (start !== -1) {
+        removed_nodes.push({ idx: start, count });
       }
       console.log(
         "[primitive]for removed:",
-        removed_nodes.length,
+        removed_nodes,
         "added:",
         added_nodes.length,
         "moved:",
-        moved_nodes.length,
+        moved_nodes,
       );
 
       // Destroy idx_computed for removed items
