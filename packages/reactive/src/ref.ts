@@ -169,6 +169,9 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
       const comparisonValue = isRef(v) ? (v as any).value : v;
       return (raw_value as any) > comparisonValue;
     },
+    diff(v: T) {
+      
+    }
   };
 
   if (hot && __hmr_key) {

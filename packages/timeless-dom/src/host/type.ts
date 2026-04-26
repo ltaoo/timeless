@@ -24,6 +24,7 @@ import { DOMFor } from "./for";
 import { DOMSelect } from "./select";
 import { DOMLink } from "./link";
 import { DOMWebview } from "./webview";
+import { DOMListView } from "./list-view";
 
 export type DOMHostNode =
   | null
@@ -39,6 +40,7 @@ export type DOMHostNode =
   | DOMInput
   | DOMTextarea
   | DOMFilePicker
+  | DOMListView
   | DOMNumberInput
   | DOMCheckbox
   | DOMRadio

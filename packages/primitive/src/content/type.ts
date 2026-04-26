@@ -55,7 +55,6 @@ export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
 export interface TimelessElement<T = any, Elm = any> {
   t: string;
   $elm: VNodeView<Elm>;
-  /** 描述该元素的状态，用来替代 value */
   state: T & BoxState;
   children?: (TimelessElement | null)[];
   events?: {
@@ -80,6 +79,7 @@ export interface TimelessElement<T = any, Elm = any> {
     onDragLeave?: (e: DragEvent) => void;
     onDrop?: (e: DragEvent) => void;
     onAnimationEnd?: (e: AnimationEvent) => void;
+    onScroll?: (e: any) => void;
   };
   a11y?: VNodeA11y;
   // hydrate?(existingDom: any): any;

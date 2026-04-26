@@ -100,6 +100,8 @@ export type BoxEvents = Partial<{
 /** Internal state structure for Box */
 export type BoxState = {
   rendered: boolean;
+  top: number;
+  height: number;
   style: RawViewStyleProperties;
   styleSet: string[];
   attributes: Record<string, string | number | boolean | undefined>;
@@ -125,6 +127,8 @@ export function Box<T>(props: BoxProps, extra_state: T) {
     dataset: {},
     attributes: {},
     children: [],
+    top: 0,
+    height: 0,
     ...extra_state,
   };
   const events: BoxEvents = {};

@@ -29,6 +29,7 @@ import { DOMSplitView, DOMSplitPane } from "@/host/split-view";
 import { DOMScrollView } from "@/host/scroll-view";
 import { DOMTabView, DOMTabPane } from "@/host/tab-view";
 import { DOMStyle } from "@/host/style";
+import { DOMListView } from "@/host/list-view";
 
 export function buildAndRender(elm: TimelessElement): {
   vnode: VNodeView<any>;
@@ -84,6 +85,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const img$ = DOMImg({ build });
     elm.$elm = img$;
     return img$;
+  }
+  if (elm.t === "list-view") {
+    const listview$ = DOMListView({ build });
+    elm.$elm = listview$;
+    return listview$;
   }
   if (elm.t === "webview") {
     const webview$ = DOMWebview({ build });

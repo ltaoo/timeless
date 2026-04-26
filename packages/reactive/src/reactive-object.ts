@@ -62,6 +62,7 @@ export interface RefObject<T> extends Ref<T> {
   setIn(path: string, value: unknown): void;
   hasIn(path: string): boolean;
   update(key: keyof T, fn: (current: T[keyof T]) => T[keyof T]): void;
+  diff(v: T): void;
 }
 
 export interface RefObjectNullable<T> extends Ref<T> {
@@ -114,13 +115,14 @@ export function refObject<T extends Record<string, any>>(
     obj = hot.data.__hmr_refs[__hmr_key!].value;
   }
 
-  let _v = obj;
+  let raw_value = obj;
   const deps: SubscriberWithId<T>[] = [];
   function notify(action: { type: string }) {
+    console.log("[reactive]reactive-object - notify", deps.length);
     for (let i = 0; i < deps.length; i += 1) {
       const ctx = deps[i];
       if (ctx.onChange) {
-        ctx.onChange(_v as T);
+        ctx.onChange(raw_value as T);
       }
     }
   }
@@ -139,48 +141,35 @@ export function refObject<T extends Record<string, any>>(
       deps.length = 0;
     },
     get value() {
-      return _v;
+      return raw_value;
     },
     isSame(v: unknown) {
-      return Object.is(_v, v);
+      return Object.is(raw_value, v);
     },
     isStrictEqual(v: unknown) {
-      return _v === v;
-    },
-    getDeps(): DepInfo[] {
-      return deps.map((ctx) => ({
-        trackId: ctx.__trackId || "unknown",
-        trackInfo: ctx.__trackInfo,
-      }));
-    },
-    dump() {
-      console.log("[reactive.dump] refObject subscribers:", deps.length);
-      deps.forEach((ctx, i) => {
-        console.log(
-          `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
-          ctx.__trackInfo || "",
-        );
-      });
+      return raw_value === v;
     },
     set(
       key: keyof T,
       item: T[keyof T] | ((current: T[keyof T]) => T[keyof T]),
     ) {
-      if (_v && typeof item === "function") {
-        _v[key] = (item as (current: T[keyof T]) => T[keyof T])(_v[key]);
+      if (raw_value && typeof item === "function") {
+        raw_value[key] = (item as (current: T[keyof T]) => T[keyof T])(
+          raw_value[key],
+        );
       } else {
-        if (!_v) {
-          _v = {} as T;
+        if (!raw_value) {
+          raw_value = {} as T;
         }
-        _v[key] = item as T[keyof T];
+        raw_value[key] = item as T[keyof T];
       }
       notify({ type: "update" });
     },
     get(key: keyof T) {
-      if (!_v) {
+      if (!raw_value) {
         return null;
       }
-      const vv = _v[key];
+      const vv = raw_value[key];
       if (isRef(vv)) {
         return vv;
       }
@@ -195,30 +184,30 @@ export function refObject<T extends Record<string, any>>(
       console.warn("reactiveObject get", key);
     },
     delete(key: keyof T) {
-      if (!_v) {
+      if (!raw_value) {
         return;
       }
-      delete _v[key];
+      delete raw_value[key];
       notify({ type: "refresh" });
     },
     as(nextObj: T | ((cur: T | null) => T)) {
       if (typeof nextObj === "function") {
-        if (_v) {
-          Object.assign(_v, nextObj(_v));
+        if (raw_value) {
+          Object.assign(raw_value, nextObj(raw_value));
         } else {
-          _v = nextObj(_v);
+          raw_value = nextObj(raw_value);
         }
       } else {
-        _v = nextObj;
+        raw_value = nextObj;
       }
       notify({ type: "refresh" });
     },
     assign(updated: Partial<T>) {
-      if (_v === null) {
+      if (raw_value === null) {
         // @ts-ignore
-        _v = updated;
+        raw_value = updated;
       } else {
-        Object.assign(_v, updated);
+        Object.assign(raw_value, updated);
       }
       // Object.keys(updated).map((k) => {
       //   const v = updated[k];
@@ -229,112 +218,112 @@ export function refObject<T extends Record<string, any>>(
       notify({ type: "refresh" });
     },
     has(key: keyof T) {
-      if (!_v) return false;
-      return key in _v;
+      if (!raw_value) return false;
+      return key in raw_value;
     },
     keys() {
-      if (!_v) return [];
-      return Object.keys(_v) as (keyof T)[];
+      if (!raw_value) return [];
+      return Object.keys(raw_value) as (keyof T)[];
     },
     values() {
-      if (!_v) return [];
-      return Object.values(_v);
+      if (!raw_value) return [];
+      return Object.values(raw_value);
     },
     entries() {
-      if (!_v) return [];
-      return Object.entries(_v) as [keyof T, T[keyof T]][];
+      if (!raw_value) return [];
+      return Object.entries(raw_value) as [keyof T, T[keyof T]][];
     },
     isEmpty() {
-      if (!_v) return true;
-      return Object.keys(_v).length === 0;
+      if (!raw_value) return true;
+      return Object.keys(raw_value).length === 0;
     },
     size() {
-      if (!_v) return 0;
-      return Object.keys(_v).length;
+      if (!raw_value) return 0;
+      return Object.keys(raw_value).length;
     },
     pick<K extends keyof T>(...keys: K[]) {
-      if (!_v) return null as unknown as Pick<T, K>;
+      if (!raw_value) return null as unknown as Pick<T, K>;
       const result = {} as Record<string, unknown>;
       for (const key of keys) {
-        if (key in _v) {
-          result[key as string] = _v[key];
+        if (key in raw_value) {
+          result[key as string] = raw_value[key];
         }
       }
       return result as unknown as Pick<T, K>;
     },
     omit<K extends keyof T>(...keys: K[]) {
-      if (!_v) return null as unknown as Omit<T, K>;
-      const result: Record<string, unknown> = { ..._v };
+      if (!raw_value) return null as unknown as Omit<T, K>;
+      const result: Record<string, unknown> = { ...raw_value };
       for (const key of keys) {
         delete result[key as string];
       }
       return result as unknown as Omit<T, K>;
     },
     toggle(key: keyof T) {
-      if (!_v) return;
-      (_v as Record<keyof T, boolean>)[key] = !(_v as Record<keyof T, boolean>)[
-        key
-      ];
+      if (!raw_value) return;
+      (raw_value as Record<keyof T, boolean>)[key] = !(
+        raw_value as Record<keyof T, boolean>
+      )[key];
       notify({ type: "update" });
     },
     increment(key: keyof T, amount: number = 1) {
-      if (!_v) return;
-      (_v as Record<keyof T, number>)[key] = ((_v as Record<keyof T, number>)[
-        key
-      ] + amount) as T[keyof T] & number;
+      if (!raw_value) return;
+      (raw_value as Record<keyof T, number>)[key] = ((
+        raw_value as Record<keyof T, number>
+      )[key] + amount) as T[keyof T] & number;
       notify({ type: "update" });
     },
     decrement(key: keyof T, amount: number = 1) {
-      if (!_v) return;
-      (_v as Record<keyof T, number>)[key] = ((_v as Record<keyof T, number>)[
-        key
-      ] - amount) as T[keyof T] & number;
+      if (!raw_value) return;
+      (raw_value as Record<keyof T, number>)[key] = ((
+        raw_value as Record<keyof T, number>
+      )[key] - amount) as T[keyof T] & number;
       notify({ type: "update" });
     },
     clear() {
-      if (!_v) return;
-      for (const key of Object.keys(_v)) {
-        delete (_v as Record<string, unknown>)[key];
+      if (!raw_value) return;
+      for (const key of Object.keys(raw_value)) {
+        delete (raw_value as Record<string, unknown>)[key];
       }
       notify({ type: "refresh" });
     },
     merge(source: Partial<T>) {
-      if (!_v) {
-        _v = { ...source } as T;
+      if (!raw_value) {
+        raw_value = { ...source } as T;
       } else {
-        deepMerge(_v, source);
+        deepMerge(raw_value, source);
       }
       notify({ type: "refresh" });
     },
     clone() {
-      if (!_v) return null as any;
-      return JSON.parse(JSON.stringify(_v));
+      if (!raw_value) return null as any;
+      return JSON.parse(JSON.stringify(raw_value));
     },
     renameKey(oldKey: keyof T, newKey: string) {
-      if (!_v) return;
-      if (!(oldKey in _v)) return;
+      if (!raw_value) return;
+      if (!(oldKey in raw_value)) return;
       if ((oldKey as string) === newKey) return;
-      const value = _v[oldKey];
-      delete _v[oldKey];
-      (_v as any)[newKey] = value;
+      const value = raw_value[oldKey];
+      delete raw_value[oldKey];
+      (raw_value as any)[newKey] = value;
       notify({ type: "refresh" });
     },
     mapValues<U>(fn: (value: T[keyof T], key: keyof T) => U) {
-      if (!_v) return {};
+      if (!raw_value) return {};
       const result: Record<string, U> = {};
-      for (const key of Object.keys(_v)) {
-        result[key] = fn(_v[key as keyof T], key as keyof T);
+      for (const key of Object.keys(raw_value)) {
+        result[key] = fn(raw_value[key as keyof T], key as keyof T);
       }
       return result;
     },
     toJSON() {
-      if (!_v) return null as any;
-      return JSON.parse(JSON.stringify(_v));
+      if (!raw_value) return null as any;
+      return JSON.parse(JSON.stringify(raw_value));
     },
     getIn(path: string) {
-      if (!_v) return undefined;
+      if (!raw_value) return undefined;
       const segments = path.split(".");
-      let current: any = _v;
+      let current: any = raw_value;
       for (const seg of segments) {
         if (current === null || current === undefined) return undefined;
         current = current[seg];
@@ -342,11 +331,11 @@ export function refObject<T extends Record<string, any>>(
       return current;
     },
     setIn(path: string, value: any) {
-      if (!_v) {
-        _v = {} as T;
+      if (!raw_value) {
+        raw_value = {} as T;
       }
       const segments = path.split(".");
-      let current: any = _v;
+      let current: any = raw_value;
       for (let i = 0; i < segments.length - 1; i++) {
         const seg = segments[i];
         if (
@@ -362,9 +351,9 @@ export function refObject<T extends Record<string, any>>(
       notify({ type: "refresh" });
     },
     hasIn(path: string) {
-      if (!_v) return false;
+      if (!raw_value) return false;
       const segments = path.split(".");
-      let current: any = _v;
+      let current: any = raw_value;
       for (const seg of segments) {
         if (current === null || current === undefined || !(seg in current))
           return false;
@@ -373,9 +362,80 @@ export function refObject<T extends Record<string, any>>(
       return true;
     },
     update(key: keyof T, fn: (current: any) => any) {
-      if (!_v) return;
-      _v[key] = fn(_v[key]);
+      if (!raw_value) return;
+      raw_value[key] = fn(raw_value[key]);
       notify({ type: "update" });
+    },
+    diff(v: T) {
+      if (raw_value === null) {
+        if (v !== null) {
+          raw_value = v;
+          notify({ type: "update" });
+        }
+        return;
+      }
+      if (v === null) {
+        if (raw_value !== null) {
+          raw_value = v;
+          notify({ type: "update" });
+          return;
+        }
+      }
+      const keys = Object.keys(v);
+      const prev_keys = Object.keys(raw_value);
+      if (keys.length !== prev_keys.length) {
+        raw_value = v;
+        notify({ type: "update" });
+        return;
+      }
+      for (let i = 0; i < keys.length; i += 1) {
+        const k = keys[i];
+        const vv = v[k];
+        const prev_value = raw_value[k];
+        // console.log(
+        //   "------------ check the value is change?",
+        //   k,
+        //   vv,
+        //   prev_value,
+        // );
+        if (typeof vv === "string") {
+          if (vv !== prev_value) {
+            Object.assign(raw_value, { [k]: vv });
+            notify({ type: "update" });
+          }
+        }
+        if (typeof vv === "number") {
+          if (vv !== prev_value) {
+            Object.assign(raw_value, { [k]: vv });
+            notify({ type: "update" });
+          }
+        }
+        if (Array.isArray(vv)) {
+          Object.assign(raw_value, { [k]: vv });
+          // get(prev_value)?.diff(vv);
+          notify({ type: "update" });
+        }
+        if (typeof vv === "object") {
+          Object.assign(raw_value, { [k]: vv });
+          // get(prev_value)?.diff(vv);
+          notify({ type: "update" });
+        }
+      }
+    },
+    getDeps(): DepInfo[] {
+      return deps.map((ctx) => ({
+        trackId: ctx.__trackId || "unknown",
+        trackInfo: ctx.__trackInfo,
+      }));
+    },
+    dump() {
+      console.log("[reactive.dump] refObject subscribers:", deps.length);
+      deps.forEach((ctx, i) => {
+        console.log(
+          `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
+          ctx.__trackInfo || "",
+        );
+      });
     },
   };
 

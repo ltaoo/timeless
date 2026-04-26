@@ -131,7 +131,7 @@ export interface RefArray<T> extends Ref<T[]> {
   partition(predicate: (item: T, index: number) => boolean): [T[], T[]];
   intersect(other: T[]): T[];
   union(...others: T[][]): T[];
-  diff(other: T[]): T[];
+  diff(other: T[]): void;
   symmetricDiff(other: T[]): T[];
   sum(fn?: (item: T) => number): number;
   min(fn?: (item: T) => number): T | undefined;
@@ -629,10 +629,6 @@ export function refArray<T>(
       }
       return result;
     },
-    diff(other: T[]) {
-      const set = new Set(other);
-      return raw_value.filter((item) => !set.has(item));
-    },
     symmetricDiff(other: T[]) {
       const setA = new Set(raw_value);
       const setB = new Set(other);
@@ -730,6 +726,14 @@ export function refArray<T>(
     toArray() {
       return raw_value.slice();
     },
+    diff(v: T[]) {
+      // if (v.length !== raw_value.length) {
+      //   notify({ type: "refresh" });
+      //   return;
+      // }
+      raw_value = v;
+      notify({ type: "refresh" });
+    },
     [Symbol.iterator]() {
       return raw_value[Symbol.iterator]();
     },
@@ -739,5 +743,6 @@ export function refArray<T>(
     hot.data.__hmr_refs[__hmr_key] = r;
   }
 
+  // @ts-ignore
   return r;
 }

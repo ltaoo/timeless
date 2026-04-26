@@ -48,6 +48,7 @@ export type TimelessRef<T> = {
   isNullish: () => boolean;
   lt: (v: T | DerivedRef<T> | Ref<T>) => boolean;
   gt: (v: T | DerivedRef<T> | Ref<T>) => boolean;
+  diff: (v: T) => void;
 };
 
 export type TimelessRefObject<T> = {
@@ -286,6 +287,7 @@ export type DerivedRef<T> = {
   value: T;
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;
+  diff: (v: T) => void;
   getDeps?: () => DepInfo[];
   dump?: () => void;
 };

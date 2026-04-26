@@ -7,3 +7,7 @@ export interface MountedEvent<T = any> {
   target: T;
   error?: Error;
 }
+
+export type ScrollEvent<T = any> = {
+  scrollTop: number;
+};

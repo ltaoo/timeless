@@ -5,4 +5,5 @@ export * from "./result";
 export * from "./error";
 export * from "./platform";
 export * from "./type";
-// export * from "./logger";
+export * from "./utils";
+export * from "./throttle";

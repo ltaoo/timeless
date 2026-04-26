@@ -453,8 +453,15 @@ export function HostElement(props: {
       $children = [];
       child_nodes = [];
     },
-    insert(idx: number, children: (TimelessElement | null)[]) {
-      const $parent = methods.getParent();
+    insert(
+      idx: number,
+      children: (TimelessElement | null)[],
+      extra?: { $parent: any },
+    ) {
+      if (children.length === 0) {
+        return;
+      }
+      const $parent = extra?.$parent || methods.getParent();
       if (!$parent) {
         return;
       }
@@ -494,25 +501,31 @@ export function HostElement(props: {
         }
       }
     },
-    remove(idx: number, count: number) {
-      // console.log("[dom]for - remove", child_elements);
-      const $parent = methods.getParent();
+    remove(idx: number, count: number, extra?: { $parent: any }) {
+      console.log(props.t + "[box]remove", [...$children], child_elements);
+      if (count === 0) {
+        return;
+      }
+      const $parent = extra?.$parent || methods.getParent();
       if (!$parent) {
         console.warn("remove parent not found");
         return;
       }
+      const $fragment = document.createDocumentFragment();
       const removed_elements: TimelessElement[] = [];
       for (let i = 0; i < count; i++) {
         const $child = $children[idx + i];
-        if ($child && $child.parentElement === $parent) {
-          $children.splice(idx + i, 1);
+        if ($child) {
+          console.log(props.t + "[box]remove", idx + i, $child);
+          $fragment.appendChild($child);
           const child_elm = child_elements[idx + i];
           if (child_elm) {
             removed_elements.push(child_elm);
           }
-          $parent.removeChild($child);
+          // $parent.removeChild($child);
         }
       }
+      $children.splice(idx, count);
       child_elements.splice(idx, count);
       child_nodes.splice(idx, count);
       setTimeout(() => {

@@ -28,7 +28,7 @@ import { Logger } from "@/util/logger";
 import { isElement, TimelessElement, ViewChildren } from "./type";
 import { Box, BoxProps } from "./box";
 
-const logger = Logger({ prefix: "primitive", scope: "content/view" });
+const logger = Logger({ prefix: "primitive", scope: "content/list-item-view" });
 
 /** Props for View component */
 export type ViewProps = BoxProps & {
@@ -36,10 +36,6 @@ export type ViewProps = BoxProps & {
   id?: string;
   /** Unique key for list rendering */
   key?: string | number;
-  /** HTML tag to render as */
-  as?: string;
-  /** Whether element is draggable */
-  draggable?: boolean;
 };
 
 /** Internal state for View */
@@ -52,7 +48,7 @@ type ViewState = {};
  * @param children - Child elements
  * @returns A TimelessElement representing a view/container
  */
-export function View(
+export function ListItemView(
   props: ViewProps = {},
   children?: ViewChildren,
 ): TimelessElement<ViewState> {
@@ -86,8 +82,8 @@ export function View(
       $elm = v;
     },
     state,
-    children: state.children,
     events,
+    children: state.children,
     onMounted(event: MountedEvent) {
       // logger.log("onMounted", state.children.length);
       state.rendered = true;
@@ -124,4 +120,4 @@ export function View(
   };
 }
 
-export type View = ReturnType<typeof View>;
+export type ListItemView = ReturnType<typeof ListItemView>;

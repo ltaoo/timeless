@@ -308,14 +308,17 @@ export function For<T>(
       const new_wrapped_items = v.map((item) => {
         const existing = state.wrapped_items.find((vv) => {
           if (_key && typeof item === "object") {
-            // @ts-ignore
-            if (item[_key] === vv.v[_key]) {
+            const _item = item as Record<string, unknown>;
+            const _vv = vv as { v: Record<string, unknown> };
+            if (_item[_key] === _vv.v[_key]) {
               return true;
             }
           }
           return item === vv.v;
         });
         if (existing) {
+          logger.log("diff existing object", item);
+          registryGet(existing.v)?.diff(item);
           return existing;
         }
         return {
@@ -339,7 +342,7 @@ export function For<T>(
       // 2. Index old items for O(1) lookup
       const old_map = new Map<any, number[]>();
       prev_items.forEach((item, index) => {
-        const k = props.key && item ? (item as any)[props.key] : item;
+        const k = _key && item ? (item as any)[_key] : item;
         let indices = old_map.get(k);
         if (!indices) {
           indices = [];
@@ -353,12 +356,16 @@ export function For<T>(
       // Formula: expected_new_idx = old_idx - deletions_before_old_idx + insertions_before_new_idx
       const new_key_set = new Set<any>();
       for (const item of new_wrapped_items) {
-        // @ts-ignore
-        const k = _key && item ? item.v[_key] : item.v;
+        const k =
+          _key && item
+            ? (item as { v: Record<string, unknown> }).v[_key]
+            : item.v;
         new_key_set.add(k);
       }
       // removed_old_prefix[i] = number of old items at indices [0, i) that are NOT in new array
-      const removed_old_prefix: number[] = new Array(prev_items.length + 1).fill(0);
+      const removed_old_prefix: number[] = new Array(
+        prev_items.length + 1,
+      ).fill(0);
       for (let i = 0; i < prev_items.length; i++) {
         const item = prev_items[i];
         const k = _key && item ? (item as any)[_key] : item;
@@ -376,8 +383,10 @@ export function For<T>(
       ).fill(0);
       for (let i = 0; i < new_wrapped_items.length; i++) {
         const item = new_wrapped_items[i];
-        // @ts-ignore
-        const k = _key && item ? item.v[_key] : item.v;
+        const k =
+          _key && item
+            ? (item as { v: Record<string, unknown> }).v[_key]
+            : item.v;
         insertion_new_prefix[i + 1] =
           insertion_new_prefix[i] + (old_key_set.has(k) ? 0 : 1);
       }
@@ -415,7 +424,8 @@ export function For<T>(
           // expected = old_idx - (removed old items before old_idx) + (inserted new items before new_idx i)
           const deletions_before = removed_old_prefix[old_idx];
           const insertions_before = insertion_new_prefix[i];
-          const expected_new_idx = old_idx - deletions_before + insertions_before;
+          const expected_new_idx =
+            old_idx - deletions_before + insertions_before;
           if (i !== expected_new_idx) {
             moved_nodes.push({ from: old_idx, to: i });
           }
@@ -500,6 +510,11 @@ export function For<T>(
         moved: moved_nodes,
       };
 
+      const actions_count =
+        diff.added.length + diff.removed.length + diff.moved.length;
+      if (actions_count === 0) {
+        return;
+      }
       // 4. Patch Phase: Apply to DOM
 
       if (bus?.onRefresh) {
@@ -509,29 +524,6 @@ export function For<T>(
       if ($elm && typeof $elm.refresh === "function") {
         $elm.refresh(diff);
       }
-      // 4.2 Trigger Lifecycle (Unmounted) for removed elements
-      // for (const { idx } of removed_nodes) {
-      //   const element = prev_elements[idx];
-      //   if (element && isElement(element)) {
-      //     if (element.beforeUnmounted) {
-      //       element.beforeUnmounted();
-      //     }
-      //     if (element.onUnmounted) {
-      //       element.onUnmounted();
-      //     }
-      //   }
-      // }
-
-      // 4.3 Trigger Lifecycle (Mounted) for newly added elements
-      // for (const { element } of added_nodes) {
-      //   if (element && isElement(element) && element.onMounted) {
-      //     element.onMounted({ target: element.$elm });
-      //   }
-      // }
-
-      // 5. Update State
-      // Use slice() to create a copy, preventing _values from referencing _local_value directly
-      // This ensures prev_items reflects the state before reverse/sort operations
       state.wrapped_items = new_wrapped_items.slice();
       state.items = new_wrapped_items.slice().map((item) => item.v);
       state.idx_arr = new_index_computed;

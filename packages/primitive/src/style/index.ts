@@ -119,6 +119,7 @@ export type ClassNameRef = {
   del(v: string): void;
   add(v: string): void;
   append(c: string): void;
+  diff(v: string): void;
   toString(): string;
 };
 
@@ -259,6 +260,7 @@ export function classNames(
     as(v: string) {
       return;
     },
+    diff(v: string) {},
     del(v: string) {
       // manualAdds.delete(v);
       _names = _names.filter((vv) => vv !== v);
@@ -535,6 +537,7 @@ export function styleNames(
       // return v === this.value;
       return false;
     },
+    diff(v: any) {},
     // toString() {
     //   return styleObjectToCssText(computeStyle());
     // },

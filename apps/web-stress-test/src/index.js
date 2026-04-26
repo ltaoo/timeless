@@ -4,6 +4,58 @@ const { render } = window.Timeless.DOM;
 
 const TABLE_ROWS = 1000;
 const COLS = 5;
+function generate_user(i) {
+  return {
+    id: i + 1,
+    name: `User ${i + 1}`,
+    email: `user${i + 1}@example.com`,
+    role: {
+      text: i % 3 === 0 ? "Admin" : i % 2 === 0 ? "Editor" : "Viewer",
+    },
+    page: 10,
+    age: Math.floor(Math.random() * 50) + 18,
+    status: Math.floor(Math.random() * 100) % 4 === 0 ? "Inactive" : "Active",
+    score: Math.floor(Math.random() * 100),
+    department: ["Sales", "Engineering", "Marketing", "HR", "Finance"][
+      Math.floor(Math.random() * 100) % 5
+    ],
+    location: ["NY", "LA", "SF", "Chicago", "Boston"][i % 5],
+    skills: [
+      {
+        id: `${i}_1`,
+        name: "computer",
+        level: Math.floor(Math.random() * 50) + 18,
+        histories: [
+          {
+            id: `${i}_1_1`,
+            text: "first time",
+            time: "2020/12/01",
+            value: Math.floor(Math.random() * 50) + 18,
+          },
+        ],
+      },
+      {
+        id: `${i}_2`,
+        name: "draw",
+        level: Math.floor(Math.random() * 50) + 0,
+        histories: [
+          {
+            id: `${i}_2_1`,
+            text: "first time",
+            time: "2022/12/01",
+            value: Math.floor(Math.random() * 50) + 18,
+          },
+          {
+            id: `${i}_2_2`,
+            text: "f",
+            time: "2024/12/01",
+            value: Math.floor(Math.random() * 50) + 18,
+          },
+        ],
+      },
+    ],
+  };
+}
 
 function generateData(count) {
   return Array.from({ length: count }, (_, i) => ({
@@ -18,22 +70,13 @@ function generateData(count) {
 }
 
 function SearchTablePage() {
-  const TABLE_ROWS = 50;
+  const TABLE_ROWS = 5000;
   const searchInput = ref("");
   const searchQuery = ref("");
   const data = refarr(
-    Array.from({ length: TABLE_ROWS }, (_, i) => ({
-      id: i + 1,
-      name: `User ${i + 1}`,
-      email: `user${i + 1}@example.com`,
-      role: i % 3 === 0 ? "Admin" : i % 2 === 0 ? "Editor" : "Viewer",
-      page: 10,
-      age: Math.floor(Math.random() * 50) + 18,
-      status: i % 4 === 0 ? "Inactive" : "Active",
-      score: Math.floor(Math.random() * 100),
-      department: ["Sales", "Engineering", "Marketing", "HR", "Finance"][i % 5],
-      location: ["NY", "LA", "SF", "Chicago", "Boston"][i % 5],
-    })),
+    Array.from({ length: TABLE_ROWS }, (_, i) => {
+      return generate_user(i, {});
+    }),
   );
 
   const filteredData = combine({ data, searchInput }, (t) => {
@@ -97,17 +140,29 @@ function SearchTablePage() {
                 fontSize: "14px",
               },
               onClick() {
-                if (timer) return;
-                timer = setInterval(() => {
-                  data.as((d) => {
-                    const newData = [...d];
-                    const user = newData.find((u) => u.id === 23);
-                    if (user) {
-                      user.age = (user.age || 0) + 1;
-                    }
-                    return newData;
-                  });
-                }, 1000);
+                const next_data = Array.from({ length: TABLE_ROWS }, (_, i) => {
+                  return generate_user(i, {});
+                });
+                data.as(next_data);
+                // data.as((d) => {
+                // const newData = [...d];
+                // const user = newData.find((u) => u.id === 2);
+                // if (user) {
+                //   user.age = (user.age || 0) + 1;
+                // }
+                // return newData;
+                // });
+                // if (timer) return;
+                // timer = setInterval(() => {
+                //   data.as((d) => {
+                //     const newData = [...d];
+                //     const user = newData.find((u) => u.id === 2);
+                //     if (user) {
+                //       user.age = (user.age || 0) + 1;
+                //     }
+                //     return newData;
+                //   });
+                // }, 5000);
               },
             },
             ["Start Age+1"],
@@ -159,41 +214,85 @@ function SearchTablePage() {
             View({ style: { padding: "10px", fontWeight: "600" } }, ["Loc"]),
           ],
         ),
-        For({
-          key: "id",
-          each: filteredData,
-          render(row) {
-            return View(
-              {
-                style: {
-                  display: "grid",
-                  "grid-template-columns": "repeat(8, 1fr)",
-                  gap: "1px",
-                },
-              },
-              [
-                View({ style: { padding: "8px" } }, [row.id]),
-                View({ style: { padding: "8px" } }, [row.name]),
-                View({ style: { padding: "8px" } }, [row.email]),
-                View({ style: { padding: "8px" } }, [row.role]),
-                View({ style: { padding: "8px" } }, [
-                  computed(row, (t) => t.age),
-                ]),
-                View(
+        View(
+          {
+            style: {
+              height: "500px",
+            },
+          },
+          [
+            ListView({
+              key: "id",
+              size: 10,
+              itemHeight: 186.5,
+              each: filteredData,
+              render(row) {
+                return View(
                   {
                     style: {
-                      padding: "8px",
-                      color: row.status === "Active" ? "#28a745" : "#dc3545",
+                      display: "grid",
+                      "grid-template-columns": "repeat(8, 1fr)",
+                      gap: "1px",
                     },
                   },
-                  [row.status],
-                ),
-                View({ style: { padding: "8px" } }, [row.department]),
-                View({ style: { padding: "8px" } }, [row.location]),
-              ],
-            );
-          },
-        }),
+                  [
+                    View({ style: { padding: "8px" } }, [row.id]),
+                    View({ style: { padding: "8px" } }, [row.name]),
+                    View({ style: { padding: "8px" } }, [row.email]),
+                    View({ style: { padding: "8px" } }, [
+                      computed(row, (t) => {
+                        return t.role.text;
+                      }),
+                    ]),
+                    View({ style: { padding: "8px" } }, [
+                      computed(row, (t) => t.age),
+                    ]),
+                    View(
+                      {
+                        style: {
+                          padding: "8px",
+                          color: computed(row, (t) =>
+                            t.status === "Active" ? "#28a745" : "#dc3545",
+                          ),
+                        },
+                      },
+                      [computed(row, (t) => t.status)],
+                    ),
+                    View({ style: { padding: "8px" } }, [
+                      computed(row, (t) => t.department),
+                    ]),
+                    View({ style: { padding: "8px" } }, [
+                      For({
+                        key: "id",
+                        each: computed(row, (t) => t.skills),
+                        render(skill) {
+                          return View({}, [
+                            View({}, [skill.name]),
+                            View({}, [
+                              For({
+                                key: "id",
+                                each: computed(skill, (t) => t.histories),
+                                render(history) {
+                                  return View({}, [
+                                    View({}, [history.text]),
+                                    View({}, [history.time]),
+                                    View({}, [
+                                      computed(history, (t) => t.value),
+                                    ]),
+                                  ]);
+                                },
+                              }),
+                            ]),
+                          ]);
+                        },
+                      }),
+                    ]),
+                  ],
+                );
+              },
+            }),
+          ],
+        ),
       ],
     ),
   ]);
