@@ -211,19 +211,20 @@ function SearchTablePage() {
             View({ style: { padding: "10px", fontWeight: "600" } }, ["Age"]),
             View({ style: { padding: "10px", fontWeight: "600" } }, ["Status"]),
             View({ style: { padding: "10px", fontWeight: "600" } }, ["Dept"]),
-            View({ style: { padding: "10px", fontWeight: "600" } }, ["Loc"]),
+            // View({ style: { padding: "10px", fontWeight: "600" } }, ["Loc"]),
           ],
         ),
         View(
           {
             style: {
-              height: "500px",
+              height: "600px",
             },
           },
           [
             ListView({
               key: "id",
-              size: 10,
+              size: 30,
+              // itemHeight: 31.5,
               itemHeight: 186.5,
               each: filteredData,
               render(row) {
@@ -236,9 +237,15 @@ function SearchTablePage() {
                     },
                   },
                   [
-                    View({ style: { padding: "8px" } }, [row.id]),
-                    View({ style: { padding: "8px" } }, [row.name]),
-                    View({ style: { padding: "8px" } }, [row.email]),
+                    View({ style: { padding: "8px" } }, [
+                      computed(row, (t) => t.id),
+                    ]),
+                    View({ style: { padding: "8px" } }, [
+                      computed(row, (t) => t.name),
+                    ]),
+                    View({ style: { padding: "8px" } }, [
+                      computed(row, (t) => t.email),
+                    ]),
                     View({ style: { padding: "8px" } }, [
                       computed(row, (t) => {
                         return t.role.text;
@@ -267,15 +274,19 @@ function SearchTablePage() {
                         each: computed(row, (t) => t.skills),
                         render(skill) {
                           return View({}, [
-                            View({}, [skill.name]),
+                            View({}, [computed(skill, (t) => t.name)]),
                             View({}, [
                               For({
                                 key: "id",
                                 each: computed(skill, (t) => t.histories),
                                 render(history) {
                                   return View({}, [
-                                    View({}, [history.text]),
-                                    View({}, [history.time]),
+                                    View({}, [
+                                      computed(history, (t) => t.text),
+                                    ]),
+                                    View({}, [
+                                      computed(history, (t) => t.time),
+                                    ]),
                                     View({}, [
                                       computed(history, (t) => t.value),
                                     ]),

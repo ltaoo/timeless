@@ -45,6 +45,7 @@ import { View } from "./view";
 import { get_owner, run_with_owner } from "@/context/context";
 import { ListenerManager } from "@/util/listener";
 import { Text } from "./text";
+import { ListItemView } from "./list-item-view";
 
 const logger = Logger({ prefix: "primitive", scope: "list-view" });
 
@@ -96,11 +97,20 @@ export function ListView<T>(props: ListViewProps<T>) {
   let $elm: any = null;
   // let _dirty_from = Infinity;
   /** 固定槽位池 */
-  let _slots: View[] = [];
+  let _slots: ListItemView[] = [];
+  // let _slots: ListItemView[] = Array.from({ length: 50 }, (_, i) => {
+  //   return ListItemView({
+  //     uid: -1,
+  //     top: 0,
+  //     height: 0,
+  //     payload: undefined,
+  //     bound: false,
+  //   });
+  // });
   /** 数据 dataId → 绑定的槽位 */
   let _slot_bindings = new Map<string, View>();
   /** 空闲槽位池 */
-  let _free_slots: View[] = [];
+  let _free_slots: ListItemView[] = [..._slots];
   /** 渲染的列表 */
   let _children: (TimelessElement | null)[] = [];
   /** 默认显示的数量 */
@@ -144,6 +154,100 @@ export function ListView<T>(props: ListViewProps<T>) {
   const methods = {
     unique_id() {
       return _id++;
+    },
+    init_slot() {
+      const visible_count = size + 2 * buffer;
+      const range = { start: 0, end: visible_count };
+      for (let i = 0; i < visible_count; i++) {
+        const wrapped_item = state.wrapped_items[i];
+        const idx_computed = methods.create_idx(wrapped_item);
+        const elm = _owner
+          ? run_with_owner(_owner, () =>
+              props.render(wrapped_item.v, idx_computed),
+            )
+          : props.render(wrapped_item.v, idx_computed);
+        state.items[i] = wrapped_item.v;
+        const top =
+          (range.start + i) * itemHeight + (range.start + i - 1) * gutter;
+        const child = (() => {
+          if (isElement(elm)) {
+            return elm;
+          }
+          if (isRef(elm)) {
+            return Text(elm);
+          }
+          if (elm) {
+            return Text(elm);
+          }
+          return null;
+        })();
+
+        state.idx_arr[i] = idx_computed;
+        // const slot = _free_slots.pop()!;
+        // const slot = _slots[_slots.length - 1];
+        // slot.setState({
+        //   uid: wrapped_item.k,
+        //   top,
+        //   height: itemHeight,
+        //   payload: wrapped_item.v,
+        //   bound: i < 20,
+        //   children: [child],
+        // });
+        const slot = (() => {
+          if (i < size) {
+            const r = ListItemView(
+              {
+                uid: wrapped_item.k,
+                top,
+                height: itemHeight,
+                payload: wrapped_item.v,
+                bound: true,
+                // slotId: `slot-col${_index}-${i}`,
+              },
+              [child],
+            );
+            const dataId = wrapped_item.k;
+            _slot_bindings.set(methods._dataIdStr(dataId), r);
+            return r;
+          }
+          const r = ListItemView(
+            {
+              uid: -1,
+              top: 0,
+              height: 0,
+              payload: null,
+              bound: false,
+            },
+            [],
+          );
+          _free_slots.push(r);
+          return r;
+        })();
+        // slot.unbind();
+        // 槽位的高度变化需要转发给当前绑定的数据 Cell
+        // slot.onHeightChange(([original_height, height_difference]) => {
+        //   if (!slot.state.bound || slot.state.dataId === undefined) {
+        //     return;
+        //   }
+        //   // 找到对应的数据 Cell 并更新其高度
+        //   const dataCell = _$total_items.find(
+        //     (v) => (v.state.id ?? v.uid) === slot.state.dataId,
+        //   );
+        //   if (dataCell) {
+        //     dataCell.methods.updateHeight(slot.state.height);
+        //     const idx = _$total_items.indexOf(dataCell);
+        //     if (idx !== -1) {
+        //       _dirty_from = Math.min(_dirty_from, idx + 1);
+        //     }
+        //   }
+        //   _height += height_difference;
+        //   bus.emit(Events.HeightChange, _height);
+        //   bus.emit(Events.CellUpdate, { $item: slot });
+        //   methods.refresh();
+        // });
+        _slots.push(slot);
+      }
+      logger.log("after init slot", _slot_bindings.size);
     },
     ready() {
       const vv = props.each;
@@ -861,120 +965,90 @@ export function ListView<T>(props: ListViewProps<T>) {
         return;
       }
 
-      // 先假设是慢慢滚动的场景，上面的内容被移除，下面的内容被添加
-      // let removed_count = Math.abs(range.start - _start);
-      // let inserted_count = Math.abs(range.end - _end);
-
-      // if (range.start < _start) {
-
-      // }
-      const { scroll_down, removed_count, inserted_count, insert_idx } =
-        (() => {
-          if (range.start > _start || range.end > _end) {
-            return {
-              scroll_down: true,
-              removed_count: Math.abs(range.start - _start),
-              inserted_count: Math.abs(range.end - _end),
-              insert_idx: _end,
-            };
-          }
-          return {
-            scroll_down: false,
-            removed_count: Math.abs(_end - range.end),
-            inserted_count: Math.abs(_start - range.start),
-            insert_idx: range.start,
-          };
-        })();
-
-      logger.log(
-        "update - removed and inserted count",
-        removed_count,
-        inserted_count,
-      );
-
-      const inserted_elements = (() => {
-        const items = state.items.slice(
-          insert_idx,
-          insert_idx + inserted_count,
-        );
-        logger.log("sliced items count is", items.length);
-        const result: (TimelessElement | null)[] = [];
-        for (let i = 0; i < items.length; i += 1) {
-          const item = items[i];
-          const existing_idx = state.wrapped_items.findIndex(
-            (wi) => wi.v === item,
-          );
-          const wrapped_item =
-            existing_idx !== -1
-              ? state.wrapped_items[existing_idx]
-              : {
-                  k: methods.unique_id(),
-                  v: item,
-                  top: i * itemHeight + (i - 1) * gutter,
-                  height: itemHeight,
-                };
-          const idx =
-            existing_idx !== -1
-              ? state.idx_arr[existing_idx]
-              : methods.create_idx(wrapped_item);
-          const child_tmp = _owner
-            ? run_with_owner(_owner, () => props.render(item, idx))
-            : props.render(item, idx);
-          const child = (() => {
-            if (isElement(child_tmp)) {
-              return child_tmp;
-            }
-            if (isRef(child_tmp)) {
-              return Text(child_tmp);
-            }
-            if (child_tmp) {
-              return Text(child_tmp);
-            }
-            return null;
-          })();
-          const top = (insert_idx + i) * itemHeight;
-          result[i] = View(
-            {
-              dataset: {
-                id: wrapped_item.k,
-              },
-              style: {
-                position: "absolute",
-                top: `${top}px`,
-              },
-            },
-            child,
-          );
-        }
-        return result;
-      })();
-
-      // 往下滚动
-      // 5,25  ->  15,45
-      // removed 10   inserted 20
-      // 0,10        (25-5)20,inserted 20
-      // 往上滚动
-      // 15,45  ->  5,25
-      // insert 10    removed 20
-      //
-      if (range.start !== _start) {
-        if (range.start < _start) {
-          $elm.insert(0, inserted_elements);
-        } else {
-          $elm.remove(0, removed_count);
-        }
-      }
-      if (range.end !== _end) {
-        if (range.end > _end) {
-          $elm.insert(_end - _start, inserted_elements);
-        } else {
-          // 35 -> 25   -> remove 10 -> 25-
-          $elm.remove(_end - _start, removed_count);
-        }
+      const sliced_items = state.wrapped_items.slice(range.start, range.end);
+      if (sliced_items.length === 0) {
+        return;
       }
 
       _start = range.start;
       _end = range.end;
+
+      // 构建新数据 Cell 的 dataId Set
+      const sliced_data_id_set = new Set<string>();
+      for (const cell of sliced_items) {
+        const dataId = cell.k;
+        sliced_data_id_set.add(methods._dataIdStr(dataId));
+      }
+
+      // 计算 exitingCells（当前绑定但不在 newDataCells 中的）
+      const existing_keys: string[] = [];
+      for (const [key, slot] of _slot_bindings) {
+        if (!sliced_data_id_set.has(key)) {
+          existing_keys.push(key);
+        }
+      }
+
+      // 对 exitingCells: slot.unbind()，归还到 _freeSlots
+      for (const key of existing_keys) {
+        logger.log("update - release slot", key);
+        const slot = _slot_bindings.get(key)!;
+        slot.unbind();
+        _slot_bindings.delete(key);
+        _free_slots.push(slot);
+      }
+
+      // 计算 enteringCells（在 newDataCells 中但当前未绑定的）
+      for (const cell of sliced_items) {
+        const dataId = cell.k;
+        const key = methods._dataIdStr(dataId);
+        logger.log(
+          "update - bind slot",
+          key,
+          cell.k,
+          cell.v,
+          _slot_bindings.has(key),
+        );
+        if (!_slot_bindings.has(key)) {
+          // 从 _freeSlots 取槽位
+          logger.log("update - alloce free to", key, cell.v);
+          const slot = _free_slots.pop();
+          if (slot) {
+            const wrapped_item = cell;
+            const idx_computed = methods.create_idx(wrapped_item);
+            const elm = _owner
+              ? run_with_owner(_owner, () =>
+                  props.render(wrapped_item.v, idx_computed),
+                )
+              : props.render(wrapped_item.v, idx_computed);
+            const child = (() => {
+              if (isElement(elm)) {
+                return elm;
+              }
+              if (isRef(elm)) {
+                return Text(elm);
+              }
+              if (elm) {
+                return Text(elm);
+              }
+              return null;
+            })();
+            slot.rebind({
+              uid: cell.k,
+              dataId,
+              top: cell.top,
+              height: cell.height,
+              payload: cell.v,
+              child,
+            });
+            _slot_bindings.set(key, slot);
+          }
+        } else {
+          // stayingCells — 仅更新 top/height
+          const slot = _slot_bindings.get(key)!;
+          logger.log("update - stayingCells", key, cell.top, cell.v);
+          // slot.setTop(cell.top);
+        }
+      }
 
       // const new_children = state.wrapped_items.slice(range.start, range.end);
       // if (new_children.length === 0 && _children.length === 0) {
@@ -1059,18 +1133,19 @@ export function ListView<T>(props: ListViewProps<T>) {
       }
       methods.update(range);
     },
-    handleScroll: throttle(800, (event) => {
+    handleScroll: throttle(100, (event) => {
       methods.handleScrollForce(event);
     }),
   };
 
   methods.ready();
   methods.subscribe_props();
-  methods.build_children({ start: 0, end: size + buffer });
+  // methods.build_children({ start: 0, end: size + buffer });
   // methods.compute_visible_children();
   box$.methods.subscribe_props();
   box$.methods.add_event();
-  const children = state.children;
+  methods.init_slot();
+  const children = _slots;
 
   state.height =
     state.wrapped_items.length * itemHeight +

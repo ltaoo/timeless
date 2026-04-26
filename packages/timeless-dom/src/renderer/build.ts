@@ -30,6 +30,7 @@ import { DOMScrollView } from "@/host/scroll-view";
 import { DOMTabView, DOMTabPane } from "@/host/tab-view";
 import { DOMStyle } from "@/host/style";
 import { DOMListView } from "@/host/list-view";
+import { DOMListItemView } from "@/host/list-item-view";
 
 export function buildAndRender(elm: TimelessElement): {
   vnode: VNodeView<any>;
@@ -90,6 +91,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const listview$ = DOMListView({ build });
     elm.$elm = listview$;
     return listview$;
+  }
+  if (elm.t === "list-item-view") {
+    const listitemview$ = DOMListItemView({ build });
+    elm.$elm = listitemview$;
+    return listitemview$;
   }
   if (elm.t === "webview") {
     const webview$ = DOMWebview({ build });

@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Waterfall Column Update 示意图</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #f5f5f5;
+        padding: 40px;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 8px;
+      }
+      .subtitle {
+        color: #666;
+        margin-bottom: 40px;
+      }
+
+      .section {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      h2 {
+        color: #2c3e50;
+        margin-bottom: 16px;
+        font-size: 18px;
+      }
+      h3 {
+        color: #34495e;
+        margin: 20px 0 12px;
+        font-size: 15px;
+      }
+
+      .code-block {
+        background: #282c34;
+        color: #abb2bf;
+        padding: 16px;
+        border-radius: 8px;
+        font-family: "Monaco", "Menlo", monospace;
+        font-size: 13px;
+        overflow-x: auto;
+      }
+      .code-keyword {
+        color: #c678dd;
+      }
+      .code-string {
+        color: #98c379;
+      }
+      .code-number {
+        color: #d19a66;
+      }
+      .code-comment {
+        color: #5c6370;
+      }
+
+      .diagram {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin: 20px 0;
+      }
+
+      .step {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .step-num {
+        width: 28px;
+        height: 28px;
+        background: #3498db;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+      .step-content {
+        flex: 1;
+      }
+      .step-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+      }
+
+      .visual-box {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+
+      .cell {
+        width: 60px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .cell-data {
+        background: #e8f5e9;
+        border: 2px solid #4caf50;
+        color: #2e7d32;
+      }
+
+      .cell-slot {
+        background: #e3f2fd;
+        border: 2px solid #2196f3;
+        color: #1565c0;
+      }
+
+      .cell-slot-bound {
+        background: #fff3e0;
+        border: 2px solid #ff9800;
+        color: #e65100;
+      }
+
+      .cell-empty {
+        background: #f5f5f5;
+        border: 2px dashed #ccc;
+        color: #999;
+      }
+
+      .arrow {
+        display: flex;
+        align-items: center;
+        color: #666;
+        font-size: 20px;
+        padding: 0 8px;
+      }
+
+      .legend {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        margin: 16px 0;
+        padding: 12px;
+        background: #fafafa;
+        border-radius: 8px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .legend-box {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+      }
+
+      .state-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .state-table th,
+      .state-table td {
+        padding: 10px 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+      .state-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #555;
+      }
+      .state-table td {
+        color: #666;
+      }
+      .highlight {
+        background: #fff9c4;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Waterfall Column Update 函数解读</h1>
+      <p class="subtitle">packages/ui-vm/src/waterfall/column.ts:302-363</p>
+
+      <div class="section">
+        <h2>📋 函数概述</h2>
+        <p>
+          update
+          函数根据可见范围（range）的变化，<strong>更新槽位与数据的绑定关系</strong>。它实现了虚拟列表的"对象池"模式：预创建固定数量的槽位，通过复用槽位来渲染可见区域的数据。
+        </p>
+      </div>
+
+      <div class="section">
+        <h2>🔧 核心数据结构</h2>
+        <table class="state-table">
+          <tr>
+            <th>变量</th>
+            <th>说明</th>
+          </tr>
+          <tr>
+            <td><code class="highlight">_$total_items</code></td>
+            <td>完整数据 Cell 列表（全部数据）</td>
+          </tr>
+          <tr>
+            <td><code class="highlight">_slotBindings</code></td>
+            <td>Map&lt;dataId, slot&gt; 当前已绑定的槽位</td>
+          </tr>
+          <tr>
+            <td><code class="highlight">_freeSlots</code></td>
+            <td>空闲槽位池（未绑定）</td>
+          </tr>
+          <tr>
+            <td><code class="highlight">_start, _end</code></td>
+            <td>当前可见范围起始/结束索引</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <h2>📊 update 函数逻辑流程</h2>
+
+        <div class="legend">
+          <div class="legend-item">
+            <div
+              class="legend-box"
+              style="background: #e8f5e9; border: 2px solid #4caf50"
+            ></div>
+            <span>数据 Cell (_$total_items)</span>
+          </div>
+          <div class="legend-item">
+            <div
+              class="legend-box"
+              style="background: #fff3e0; border: 2px solid #ff9800"
+            ></div>
+            <span>已绑定槽位 (slot)</span>
+          </div>
+          <div class="legend-item">
+            <div
+              class="legend-box"
+              style="background: #e3f2fd; border: 2px solid #2196f3"
+            ></div>
+            <span>空闲槽位</span>
+          </div>
+          <div class="legend-item">
+            <div
+              class="legend-box"
+              style="background: #f5f5f5; border: 2px dashed #ccc"
+            ></div>
+            <span>未使用</span>
+          </div>
+        </div>
+
+        <div class="diagram">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">更新可见范围</div>
+              <p style="color: #666; font-size: 14px">
+                将 _start 和 _end 更新为新的可见范围
+              </p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">提取新范围内的数据</div>
+              <p style="color: #666; font-size: 14px">
+                从 _$total_items 切片出 start~end 范围内的数据 Cells
+              </p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">找出 Exiting Cells（离开可见区的）</div>
+              <p style="color: #666; font-size: 14px">
+                遍历当前 _slotBindings，找出不在新范围的数据，解绑并释放槽位到
+                _freeSlots
+              </p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-title">处理 Entering Cells（进入可见区的）</div>
+              <p style="color: #666; font-size: 14px">
+                遍历新数据 Cells，从 _freeSlots 取空闲槽位进行绑定
+              </p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <div class="step-title">更新 Staying Cells（仍在可见区的）</div>
+              <p style="color: #666; font-size: 14px">
+                更新已绑定槽位的 top 值（位置可能因滚动变化）
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>🎯 场景示例：滚动导致范围变化</h2>
+        <p style="margin-bottom: 16px; color: #666">
+          假设原来可见范围 [2, 6]，滚动后变为 [4, 8]：
+        </p>
+
+        <h3>变化前状态（范围 2-6）</h3>
+        <div class="visual-box">
+          <div class="cell cell-data">0</div>
+          <div class="cell cell-data">1</div>
+          <div class="cell cell-slot-bound">2✓</div>
+          <div class="cell cell-slot-bound">3✓</div>
+          <div class="cell cell-slot-bound">4✓</div>
+          <div class="cell cell-slot-bound">5✓</div>
+          <div class="cell cell-slot-bound">6✓</div>
+          <div class="cell cell-data">7</div>
+          <div class="cell cell-data">8</div>
+          <div class="cell cell-data">...</div>
+        </div>
+        <p style="margin-top: 8px; font-size: 13px; color: #888">
+          槽位 2-6 已绑定数据 2-6
+        </p>
+
+        <h3 style="margin-top: 24px">变化后状态（范围 4-8）</h3>
+        <div class="visual-box">
+          <div class="cell cell-data">0</div>
+          <div class="cell cell-data">1</div>
+          <div class="cell cell-data">2</div>
+          <div class="cell cell-data">3</div>
+          <div class="cell cell-slot-bound">4✓</div>
+          <div class="cell cell-slot-bound">5✓</div>
+          <div class="cell cell-slot-bound">6✓</div>
+          <div class="cell cell-slot-bound">7✓</div>
+          <div class="cell cell-slot">8</div>
+          <div class="cell cell-data">9</div>
+          <div class="cell cell-data">...</div>
+        </div>
+        <p style="margin-top: 8px; font-size: 13px; color: #888">
+          需要：解绑 2,3 → 绑定 7,8（6 保持）
+        </p>
+      </div>
+
+      <div class="section">
+        <h2>📝 源码注释</h2>
+        <div class="code-block">
+          <span class="code-comment">// 第 302-363 行</span>
+          <span class="code-keyword">update</span>(range: {
+          <span class="code-keyword">start</span>:
+          <span class="code-keyword">number</span>;
+          <span class="code-keyword">end</span>:
+          <span class="code-keyword">number</span> }) {
+          <span class="code-comment">// 1. 更新可见范围</span>
+          _start = range.<span class="code-keyword">start</span>; _end =
+          range.<span class="code-keyword">end</span>;
+
+          <span class="code-comment">// 2. 提取新范围内的数据 Cells</span>
+          <span class="code-keyword">const</span> newDataCells =
+          _$total_items.<span class="code-keyword">slice</span>(range.<span
+            class="code-keyword"
+            >start</span
+          >, range.<span class="code-keyword">end</span>);
+
+          <span class="code-comment">// 3. 构建新数据的 dataId Set</span>
+          <span class="code-keyword">const</span> newDataIdSet =
+          <span class="code-keyword">new</span>
+          <span class="code-keyword">Set</span>&lt;<span class="code-keyword"
+            >string</span
+          >&gt;(); <span class="code-keyword">for</span> (<span
+            class="code-keyword"
+            >const</span
+          >
+          cell <span class="code-keyword">of</span> newDataCells) { ... }
+
+          <span class="code-comment">// 4. 找出 Exiting Cells（需要解绑）</span>
+          <span class="code-keyword">const</span> exitingKeys:
+          <span class="code-keyword">string</span>[] = [];
+          <span class="code-keyword">for</span> (<span class="code-keyword"
+            >const</span
+          >
+          [key, slot] <span class="code-keyword">of</span> _slotBindings) {
+          <span class="code-keyword">if</span> (!newDataIdSet.<span
+            class="code-keyword"
+            >has</span
+          >(key)) { exitingKeys.<span class="code-keyword">push</span>(key); } }
+          <span class="code-comment">// 解绑并释放</span>
+          <span class="code-keyword">for</span> (<span class="code-keyword"
+            >const</span
+          >
+          key <span class="code-keyword">of</span> exitingKeys) {
+          slot.methods.<span class="code-keyword">unbind</span>();
+          _freeSlots.<span class="code-keyword">push</span>(slot); }
+
+          <span class="code-comment"
+            >// 5. 处理 Entering Cells（需要绑定）</span
+          >
+          <span class="code-keyword">for</span> (<span class="code-keyword"
+            >const</span
+          >
+          cell <span class="code-keyword">of</span> newDataCells) {
+          <span class="code-keyword">if</span> (!_slotBindings.<span
+            class="code-keyword"
+            >has</span
+          >(key)) { <span class="code-keyword">const</span> slot =
+          _freeSlots.<span class="code-keyword">pop</span>(); slot.methods.<span
+            class="code-keyword"
+            >rebind</span
+          >({...}); } }
+
+          <span class="code-comment">// 6. Staying Cells - 仅更新 top</span>
+          <span class="code-keyword">else</span> {
+          <span class="code-keyword">const</span> slot = _slotBindings.<span
+            class="code-keyword"
+            >get</span
+          >(key)!; slot.methods.<span class="code-keyword">setTop</span
+          >(cell.state.<span class="code-keyword">top</span>); } methods.<span
+            class="code-keyword"
+            >refresh</span
+          >(); }
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>✨ 关键设计要点</h2>
+        <ul style="color: #555; line-height: 2">
+          <li>
+            <strong>对象池模式</strong>：预创建 _size + 2*_buffer
+            个槽位，避免频繁创建/销毁 DOM
+          </li>
+          <li>
+            <strong>增量更新</strong>：仅处理进出可见区的 Cells，不触发全量重绘
+          </li>
+          <li>
+            <strong>top 同步</strong>：Staying Cells 也需要更新
+            top（数据位置可能因插入/删除变化）
+          </li>
+          <li>
+            <strong>先解绑后绑定</strong>：确保槽位先释放再分配，避免临时不足
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

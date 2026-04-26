@@ -384,9 +384,13 @@ export function HostElement(props: {
         child_nodes,
       };
     },
-    insertChildren(children: (TimelessElement | null)[]) {
+    // 这个应该叫 insert sibling 更合理
+    insertChildren(
+      children: (TimelessElement | null)[],
+      opt?: { $parent: any },
+    ) {
       const r = methods.buildChildren(children);
-      const $parent = methods.getParent();
+      const $parent = opt?.$parent || methods.getParent();
       console.log(
         "[HostElement.insertChildren]",
         props.t,
@@ -412,7 +416,7 @@ export function HostElement(props: {
         methods.handleElementsMounted();
       }, 0);
     },
-    removeChildren() {
+    removeChildren(extra?: { $parent: any }) {
       // console.log(
       //   props.t + "[]removeChildren",
       //   $children,
@@ -422,7 +426,7 @@ export function HostElement(props: {
       if ($children.length === 0 && child_nodes.length === 0) {
         return;
       }
-      const $parent = methods.getParent();
+      const $parent = extra?.$parent || methods.getParent();
       // console.log(props.t + "[]removeChildren", $parent, child_host_nodes);
       // hydrate 加载的，没有 child_nodes，导致通过该方法销毁的子元素没有 onUnmounted 方法
       for (const child of child_nodes) {
@@ -430,13 +434,15 @@ export function HostElement(props: {
           child.removeChildren();
         }
       }
+      const $fragment = document.createDocumentFragment();
       if ($parent) {
         for (const $child of $children) {
           if ($child === $elm) {
             continue;
           }
-          if ($child && $child.parentElement === $parent) {
-            $parent.removeChild($child);
+          if ($child) {
+            $fragment.appendChild($child);
+            // $parent.removeChild($child);
           }
         }
       }
