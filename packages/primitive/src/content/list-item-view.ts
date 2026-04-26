@@ -59,6 +59,7 @@ export function ListItemView<T>(
       $elm.setStyle({
         position: "absolute",
         top: `${data.top}px`,
+        width: "100%",
       });
       $elm.removeChildren();
       $elm.insertChildren([data.child]);

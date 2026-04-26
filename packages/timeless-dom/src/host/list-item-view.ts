@@ -11,7 +11,7 @@ import {
 } from "./box";
 import { Logger } from "@/util/logger";
 
-const logger = Logger({ prefix: "dom", scope: "view" });
+const logger = Logger({ prefix: "dom", scope: "list-item-view" });
 
 export type DOMListItemView = VNodeView<HTMLDivElement> & {
   t: "list-item-view";
@@ -36,7 +36,7 @@ export function DOMListItemView(props: {
       return true;
     },
     insertChildren(children: TimelessElement[]) {
-      logger.log('insertChildren', children);
+      logger.log("insertChildren", children);
       const r = box$.methods.insertChildren(children, { $parent: $elm });
     },
     removeChildren() {
@@ -56,6 +56,7 @@ export function DOMListItemView(props: {
       } else {
         $elm.style.display = "none";
       }
+      $elm.style.width = "100%";
       const $fragment = box$.methods.render(elm.children);
       box$.methods.setupEventListener(elm.events);
       $elm.appendChild($fragment);

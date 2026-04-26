@@ -352,6 +352,7 @@ export function ListView<T>(props: ListViewProps<T>) {
               style: {
                 position: "absolute",
                 top: `${top}px`,
+                width: "100%",
               },
             },
             [elm],
@@ -363,6 +364,7 @@ export function ListView<T>(props: ListViewProps<T>) {
               style: {
                 position: "absolute",
                 top: `${top}px`,
+                width: "100%",
               },
             },
             [Text(elm)],
@@ -374,6 +376,7 @@ export function ListView<T>(props: ListViewProps<T>) {
               style: {
                 position: "absolute",
                 top: `${top}px`,
+                width: "100%",
               },
             },
             [Text(elm)],

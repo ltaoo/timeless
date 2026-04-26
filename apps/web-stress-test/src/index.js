@@ -192,6 +192,8 @@ function SearchTablePage() {
           "border-radius": "4px",
           overflow: "hidden",
           "font-size": "13px",
+          border: "1px solid #ddd",
+          "border-top": "none",
         },
       },
       [
@@ -199,25 +201,109 @@ function SearchTablePage() {
           {
             style: {
               display: "grid",
-              "grid-template-columns": "repeat(8, 1fr)",
-              gap: "1px",
+              "grid-template-columns":
+                "60px 120px 200px 80px 60px 80px 100px 1fr",
+              border: "1px solid #ddd",
+              "border-left": "none",
+              "border-right": "none",
             },
           },
           [
-            View({ style: { padding: "10px", fontWeight: "600" } }, ["ID"]),
-            View({ style: { padding: "10px", fontWeight: "600" } }, ["Name"]),
-            View({ style: { padding: "10px", fontWeight: "600" } }, ["Email"]),
-            View({ style: { padding: "10px", fontWeight: "600" } }, ["Role"]),
-            View({ style: { padding: "10px", fontWeight: "600" } }, ["Age"]),
-            View({ style: { padding: "10px", fontWeight: "600" } }, ["Status"]),
-            View({ style: { padding: "10px", fontWeight: "600" } }, ["Dept"]),
-            // View({ style: { padding: "10px", fontWeight: "600" } }, ["Loc"]),
+            View(
+              {
+                style: {
+                  padding: "10px",
+                  "font-weight": "600",
+                  // background: "#f8f9fa",
+                  "border-right": "1px solid #ddd",
+                },
+              },
+              ["ID"],
+            ),
+            View(
+              {
+                style: {
+                  padding: "10px",
+                  "font-weight": "600",
+                  // background: "#f8f9fa",
+                  "border-right": "1px solid #ddd",
+                },
+              },
+              ["Name"],
+            ),
+            View(
+              {
+                style: {
+                  padding: "10px",
+                  "font-weight": "600",
+                  // background: "#f8f9fa",
+                  "border-right": "1px solid #ddd",
+                },
+              },
+              ["Email"],
+            ),
+            View(
+              {
+                style: {
+                  padding: "10px",
+                  "font-weight": "600",
+                  // background: "#f8f9fa",
+                  "border-right": "1px solid #ddd",
+                },
+              },
+              ["Role"],
+            ),
+            View(
+              {
+                style: {
+                  padding: "10px",
+                  "font-weight": "600",
+                  // background: "#f8f9fa",
+                  "border-right": "1px solid #ddd",
+                },
+              },
+              ["Age"],
+            ),
+            View(
+              {
+                style: {
+                  padding: "10px",
+                  "font-weight": "600",
+                  // background: "#f8f9fa",
+                  "border-right": "1px solid #ddd",
+                },
+              },
+              ["Status"],
+            ),
+            View(
+              {
+                style: {
+                  padding: "10px",
+                  "font-weight": "600",
+                  // background: "#f8f9fa",
+                  "border-right": "1px solid #ddd",
+                },
+              },
+              ["Dept"],
+            ),
+            View(
+              {
+                style: {
+                  padding: "10px",
+                  "font-weight": "600",
+                  // "border-right": "1px solid #ddd",
+                },
+              },
+              ["Loc"],
+            ),
           ],
         ),
         View(
           {
             style: {
               height: "600px",
+              // border: "1px solid #ddd",
+              "border-top": "none",
             },
           },
           [
@@ -232,32 +318,68 @@ function SearchTablePage() {
                   {
                     style: {
                       display: "grid",
-                      "grid-template-columns": "repeat(8, 1fr)",
-                      gap: "1px",
+                      "grid-template-columns":
+                        "60px 120px 200px 80px 60px 80px 100px 1fr",
+                      width: "100%",
+                      "border-bottom": "1px solid #ddd",
+                      "border-right": "1px solid #ddd",
                     },
                   },
                   [
-                    View({ style: { padding: "8px" } }, [
-                      computed(row, (t) => t.id),
-                    ]),
-                    View({ style: { padding: "8px" } }, [
-                      computed(row, (t) => t.name),
-                    ]),
-                    View({ style: { padding: "8px" } }, [
-                      computed(row, (t) => t.email),
-                    ]),
-                    View({ style: { padding: "8px" } }, [
-                      computed(row, (t) => {
-                        return t.role.text;
-                      }),
-                    ]),
-                    View({ style: { padding: "8px" } }, [
-                      computed(row, (t) => t.age),
-                    ]),
                     View(
                       {
                         style: {
                           padding: "8px",
+                          "border-right": "1px solid #ddd",
+                        },
+                      },
+                      [computed(row, (t) => t.id)],
+                    ),
+                    View(
+                      {
+                        style: {
+                          padding: "8px",
+                          "border-right": "1px solid #ddd",
+                        },
+                      },
+                      [computed(row, (t) => t.name)],
+                    ),
+                    View(
+                      {
+                        style: {
+                          padding: "8px",
+                          "border-right": "1px solid #ddd",
+                        },
+                      },
+                      [computed(row, (t) => t.email)],
+                    ),
+                    View(
+                      {
+                        style: {
+                          padding: "8px",
+                          "border-right": "1px solid #ddd",
+                        },
+                      },
+                      [
+                        computed(row, (t) => {
+                          return t.role.text;
+                        }),
+                      ],
+                    ),
+                    View(
+                      {
+                        style: {
+                          padding: "8px",
+                          "border-right": "1px solid #ddd",
+                        },
+                      },
+                      [computed(row, (t) => t.age)],
+                    ),
+                    View(
+                      {
+                        style: {
+                          padding: "8px",
+                          "border-right": "1px solid #ddd",
                           color: computed(row, (t) =>
                             t.status === "Active" ? "#28a745" : "#dc3545",
                           ),
@@ -265,39 +387,53 @@ function SearchTablePage() {
                       },
                       [computed(row, (t) => t.status)],
                     ),
-                    View({ style: { padding: "8px" } }, [
-                      computed(row, (t) => t.department),
-                    ]),
-                    View({ style: { padding: "8px" } }, [
-                      For({
-                        key: "id",
-                        each: computed(row, (t) => t.skills),
-                        render(skill) {
-                          return View({}, [
-                            View({}, [computed(skill, (t) => t.name)]),
-                            View({}, [
-                              For({
-                                key: "id",
-                                each: computed(skill, (t) => t.histories),
-                                render(history) {
-                                  return View({}, [
-                                    View({}, [
-                                      computed(history, (t) => t.text),
-                                    ]),
-                                    View({}, [
-                                      computed(history, (t) => t.time),
-                                    ]),
-                                    View({}, [
-                                      computed(history, (t) => t.value),
-                                    ]),
-                                  ]);
-                                },
-                              }),
-                            ]),
-                          ]);
+                    View(
+                      {
+                        style: {
+                          padding: "8px",
+                          "border-right": "1px solid #ddd",
                         },
-                      }),
-                    ]),
+                      },
+                      [computed(row, (t) => t.department)],
+                    ),
+                    View(
+                      {
+                        style: {
+                          padding: "8px",
+                          // "border-right": "1px solid #ddd",
+                        },
+                      },
+                      [
+                        For({
+                          key: "id",
+                          each: computed(row, (t) => t.skills),
+                          render(skill) {
+                            return View({}, [
+                              View({}, [computed(skill, (t) => t.name)]),
+                              View({}, [
+                                For({
+                                  key: "id",
+                                  each: computed(skill, (t) => t.histories),
+                                  render(history) {
+                                    return View({}, [
+                                      View({}, [
+                                        computed(history, (t) => t.text),
+                                      ]),
+                                      View({}, [
+                                        computed(history, (t) => t.time),
+                                      ]),
+                                      View({}, [
+                                        computed(history, (t) => t.value),
+                                      ]),
+                                    ]);
+                                  },
+                                }),
+                              ]),
+                            ]);
+                          },
+                        }),
+                      ],
+                    ),
                   ],
                 );
               },
@@ -440,7 +576,7 @@ function TablePage() {
             {
               style: {
                 padding: "10px",
-                fontWeight: "600",
+                "font-weight": "600",
               },
             },
             ["ID"],
@@ -449,7 +585,7 @@ function TablePage() {
             {
               style: {
                 padding: "10px",
-                fontWeight: "600",
+                "font-weight": "600",
               },
             },
             ["Name"],
@@ -458,7 +594,7 @@ function TablePage() {
             {
               style: {
                 padding: "10px",
-                fontWeight: "600",
+                "font-weight": "600",
               },
             },
             ["Email"],
@@ -467,7 +603,7 @@ function TablePage() {
             {
               style: {
                 padding: "10px",
-                fontWeight: "600",
+                "font-weight": "600",
               },
             },
             ["Role"],
@@ -476,7 +612,7 @@ function TablePage() {
             {
               style: {
                 padding: "10px",
-                fontWeight: "600",
+                "font-weight": "600",
               },
             },
             ["Status"],
@@ -547,7 +683,11 @@ function FormPage() {
     [
       View(
         {
-          style: { fontSize: "18px", fontWeight: "600", marginBottom: "16px" },
+          style: {
+            fontSize: "18px",
+            "font-weight": "600",
+            marginBottom: "16px",
+          },
         },
         ["User Form"],
       ),
@@ -652,7 +792,7 @@ function DashboardPage() {
   return View({ style: { padding: "16px", borderRadius: "8px" } }, [
     View(
       {
-        style: { fontSize: "18px", fontWeight: "600", marginBottom: "16px" },
+        style: { fontSize: "18px", "font-weight": "600", marginBottom: "16px" },
       },
       ["Dashboard"],
     ),
@@ -685,7 +825,7 @@ function DashboardPage() {
               },
               ["Total"],
             ),
-            View({ style: { fontSize: "24px", fontWeight: "600" } }, [
+            View({ style: { fontSize: "24px", "font-weight": "600" } }, [
               totalValue.value,
             ]),
           ],
@@ -713,7 +853,7 @@ function DashboardPage() {
               {
                 style: {
                   fontSize: "24px",
-                  fontWeight: "600",
+                  "font-weight": "600",
                   color: avgChange.value >= 0 ? "#4caf50" : "#f44336",
                 },
               },
@@ -740,7 +880,7 @@ function DashboardPage() {
               },
               ["Items"],
             ),
-            View({ style: { fontSize: "24px", fontWeight: "600" } }, [
+            View({ style: { fontSize: "24px", "font-weight": "600" } }, [
               stats.length,
             ]),
           ],
@@ -764,7 +904,7 @@ function DashboardPage() {
               },
               ["Last Update"],
             ),
-            View({ style: { fontSize: "24px", fontWeight: "600" } }, [
+            View({ style: { fontSize: "24px", "font-weight": "600" } }, [
               new Date().toLocaleTimeString(),
             ]),
           ],
@@ -800,7 +940,7 @@ function DashboardPage() {
                   {
                     style: {
                       color: item.change >= 0 ? "#4caf50" : "#f44336",
-                      fontWeight: "500",
+                      "font-weight": "500",
                     },
                   },
                   [item.change >= 0 ? "+" : "", item.change, "%"],
@@ -820,7 +960,7 @@ function MultiShowPage() {
   return View({ style: { padding: "16px", borderRadius: "8px" } }, [
     View(
       {
-        style: { fontSize: "18px", fontWeight: "600", marginBottom: "16px" },
+        style: { fontSize: "18px", "font-weight": "600", marginBottom: "16px" },
       },
       ["Nested Show Test"],
     ),
