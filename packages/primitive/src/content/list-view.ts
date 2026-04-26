@@ -862,8 +862,29 @@ export function ListView<T>(props: ListViewProps<T>) {
       }
 
       // 先假设是慢慢滚动的场景，上面的内容被移除，下面的内容被添加
-      const removed_count = Math.abs(range.start - _start);
-      const inserted_count = Math.abs(range.end - _end);
+      // let removed_count = Math.abs(range.start - _start);
+      // let inserted_count = Math.abs(range.end - _end);
+
+      // if (range.start < _start) {
+
+      // }
+      const { scroll_down, removed_count, inserted_count, insert_idx } =
+        (() => {
+          if (range.start > _start || range.end > _end) {
+            return {
+              scroll_down: true,
+              removed_count: Math.abs(range.start - _start),
+              inserted_count: Math.abs(range.end - _end),
+              insert_idx: _end,
+            };
+          }
+          return {
+            scroll_down: false,
+            removed_count: Math.abs(_end - range.end),
+            inserted_count: Math.abs(_start - range.start),
+            insert_idx: range.start,
+          };
+        })();
 
       logger.log(
         "update - removed and inserted count",
@@ -872,7 +893,10 @@ export function ListView<T>(props: ListViewProps<T>) {
       );
 
       const inserted_elements = (() => {
-        const items = state.items.slice(_end, _end + inserted_count);
+        const items = state.items.slice(
+          insert_idx,
+          insert_idx + inserted_count,
+        );
         logger.log("sliced items count is", items.length);
         const result: (TimelessElement | null)[] = [];
         for (let i = 0; i < items.length; i += 1) {
@@ -908,7 +932,7 @@ export function ListView<T>(props: ListViewProps<T>) {
             }
             return null;
           })();
-          const top = (_end + i) * itemHeight;
+          const top = (insert_idx + i) * itemHeight;
           result[i] = View(
             {
               dataset: {
@@ -925,15 +949,28 @@ export function ListView<T>(props: ListViewProps<T>) {
         return result;
       })();
 
-      if (range.start > _start) {
-        $elm.insert(_end, inserted_elements);
-      } else {
-        $elm.insert(range.start, inserted_elements);
+      // 往下滚动
+      // 5,25  ->  15,45
+      // removed 10   inserted 20
+      // 0,10        (25-5)20,inserted 20
+      // 往上滚动
+      // 15,45  ->  5,25
+      // insert 10    removed 20
+      //
+      if (range.start !== _start) {
+        if (range.start < _start) {
+          $elm.insert(0, inserted_elements);
+        } else {
+          $elm.remove(0, removed_count);
+        }
       }
-      if (range.end > _end) {
-        $elm.remove(0, removed_count);
-      } else {
-        $elm.remove(range.end, removed_count);
+      if (range.end !== _end) {
+        if (range.end > _end) {
+          $elm.insert(_end - _start, inserted_elements);
+        } else {
+          // 35 -> 25   -> remove 10 -> 25-
+          $elm.remove(_end - _start, removed_count);
+        }
       }
 
       _start = range.start;
