@@ -472,9 +472,14 @@ export function HostElement(props: {
         return;
       }
       const $reference = $children[idx];
-      console.log("[dom]insert child", idx, children, $parent, $reference, [
-        ...$children,
-      ]);
+      console.log(
+        props.t + "[dom]insert child",
+        idx,
+        children,
+        $parent,
+        $reference,
+        [...$children],
+      );
       const inserted_elements: TimelessElement[] = [];
       const inserted_child: VNodeView[] = [];
       const inserted_host_nodes: any[] = [];
@@ -566,14 +571,20 @@ export function HostElement(props: {
       const $to = $children[to + 1] || null;
       $parent.insertBefore($from, $to);
     },
-    refresh(data: {
-      children: (TimelessElement | null)[];
-      added: { idx: number; elements: (TimelessElement | null)[] }[];
-      removed: { idx: number; count: number }[];
-      moved: { from: number; to: number }[];
-    }) {
+    refresh(
+      data: {
+        children: (TimelessElement | null)[];
+        added: { idx: number; elements: (TimelessElement | null)[] }[];
+        removed: { idx: number; count: number }[];
+        moved: { from: number; to: number }[];
+      },
+      extra?: { $parent: any },
+    ) {
       const { added = [], removed = [], moved = [] } = data;
-      const $parent = methods.getParent();
+      if (added.length === 0 && removed.length === 0 && moved.length === 0) {
+        return;
+      }
+      const $parent = extra?.$parent || methods.getParent();
       if (!$parent) {
         console.warn("refresh parent not found");
         return;
@@ -635,7 +646,7 @@ export function HostElement(props: {
 
       // 3. Insert added nodes
       for (const { idx, elements } of added) {
-        methods.insert(idx, elements);
+        methods.insert(idx, elements, extra);
       }
       console.log("[dom]refresh - end", [...$children]);
     },

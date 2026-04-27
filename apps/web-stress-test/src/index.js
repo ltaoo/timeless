@@ -70,12 +70,17 @@ function generateData(count) {
 }
 
 function SearchTablePage() {
-  const TABLE_ROWS = 5000;
+  const TABLE_ROWS = 50;
+  const page = refobj({
+    page: 1,
+    pageSize: 50,
+    total: 1231,
+  });
   const searchInput = ref("");
   const searchQuery = ref("");
   const data = refarr(
-    Array.from({ length: TABLE_ROWS }, (_, i) => {
-      return generate_user(i, {});
+    Array.from({ length: page.value.pageSize }, (_, i) => {
+      return generate_user((page.value.page - 1) * page.value.pageSize + i, {});
     }),
   );
 
@@ -183,7 +188,7 @@ function SearchTablePage() {
             ["Stop Age+1"],
           ),
         ]),
-        View({}, [`Showing ${filteredData.length} of ${TABLE_ROWS}`]),
+        View({}, [`Showing ${filteredData.length} of ${page.value.total}`]),
       ],
     ),
     View(
@@ -301,7 +306,7 @@ function SearchTablePage() {
         View(
           {
             style: {
-              height: "600px",
+              height: "530px",
               // border: "1px solid #ddd",
               "border-top": "none",
             },
@@ -313,7 +318,7 @@ function SearchTablePage() {
               // itemHeight: 31.5,
               itemHeight: 186.5,
               each: filteredData,
-              render(row) {
+              render(row, idx) {
                 return View(
                   {
                     style: {
@@ -321,8 +326,12 @@ function SearchTablePage() {
                       "grid-template-columns":
                         "60px 120px 200px 80px 60px 80px 100px 1fr",
                       width: "100%",
-                      "border-bottom": "1px solid #ddd",
-                      "border-right": "1px solid #ddd",
+                      "border-bottom": computed(idx, (t) =>
+                        t === filteredData.value.length - 1
+                          ? "none"
+                          : "1px solid #ddd",
+                      ),
+                      // "border-right": "1px solid #ddd",
                     },
                   },
                   [
@@ -440,6 +449,90 @@ function SearchTablePage() {
             }),
           ],
         ),
+      ],
+    ),
+    // Pagination
+    View(
+      {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          padding: "12px",
+          borderTop: "1px solid #ddd",
+        },
+      },
+      [
+        Button(
+          {
+            style: {
+              padding: "6px 12px",
+              background: computed(page, (t) =>
+                t.page <= 1 ? "#ccc" : "#007bff",
+              ),
+              "border-radius": "4px",
+              cursor: computed(page, (t) =>
+                t.page <= 1 ? "not-allowed" : "pointer",
+              ),
+              "font-size": "14px",
+              color: "#fff",
+            },
+            onClick() {
+              if (page.value.page > 1) {
+                page.as((p) => ({ ...p, page: p.page - 1 }));
+                data.as(
+                  Array.from({ length: page.value.pageSize }, (_, i) => {
+                    return generate_user(
+                      (page.value.page - 1) * page.value.pageSize + i,
+                      {},
+                    );
+                  }),
+                );
+              }
+            },
+          },
+          ["Previous"],
+        ),
+        View({}, [
+          "Page ",
+          computed(page, (t) => t.page),
+          " of ",
+          computed(page, (t) => Math.ceil(t.total / t.pageSize)),
+        ]),
+        Button(
+          {
+            style: {
+              padding: "6px 12px",
+              background: computed(page, (t) =>
+                t.page * t.pageSize >= t.total ? "#ccc" : "#007bff",
+              ),
+              "border-radius": "4px",
+              cursor: computed(page, (t) =>
+                t.page * t.pageSize >= t.total ? "not-allowed" : "pointer",
+              ),
+              "font-size": "14px",
+              "font-size": "14px",
+              color: "#fff",
+            },
+            onClick() {
+              if (page.value.page * page.value.pageSize < page.value.total) {
+                page.as((p) => ({ ...p, page: p.page + 1 }));
+                data.as(
+                  Array.from({ length: page.value.pageSize }, (_, i) => {
+                    return generate_user(
+                      (page.value.page - 1) * page.value.pageSize + i,
+                      {},
+                    );
+                  }),
+                  { reset: true },
+                );
+              }
+            },
+          },
+          ["Next"],
+        ),
+        View({}, [`Total: `, computed(page, (t) => t.total)]),
       ],
     ),
   ]);

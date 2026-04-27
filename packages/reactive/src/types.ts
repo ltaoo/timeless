@@ -1,14 +1,17 @@
 export type Subscriber<T> = {
-  onChange: (v: T) => void;
-  onPatch?: (action: {
-    type: "insert" | "delete" | "update" | "move" | "swap";
-    index: number;
-    item: T;
-    items?: T;
-    deleteCount?: number;
-    from?: number;
-    to?: number;
-  }) => void;
+  onChange: (v: T, extra?: Record<string, unknown>) => void;
+  onPatch?: (
+    action: {
+      type: "insert" | "delete" | "update" | "move" | "swap";
+      index: number;
+      item: T;
+      items?: T;
+      deleteCount?: number;
+      from?: number;
+      to?: number;
+    },
+    extra?: Record<string, unknown>,
+  ) => void;
   ignore?: boolean;
   __trackId?: string;
   __trackInfo?: Record<string, unknown>;
@@ -34,7 +37,7 @@ export type TimelessRef<T> = {
   isStrictEqual: (v: unknown) => boolean;
   getDeps: () => DepInfo[];
   dump: () => void;
-  as: (value: T | ((cur: T) => T)) => void;
+  as: (value: T | ((cur: T) => T), extra?: Record<string, unknown>) => void;
   set: (value: T) => void;
   update: (fn: (current: T) => T) => void;
   reset: () => void;

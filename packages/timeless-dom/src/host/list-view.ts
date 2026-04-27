@@ -24,7 +24,7 @@ export type DOMListView = VNodeView<HTMLDivElement> & {
   refresh(data: {
     children: (TimelessElement | null)[];
     added: { idx: number; elements: (TimelessElement | null)[] }[];
-    removed: { idx: number }[];
+    removed: { idx: number; count: number }[];
     moved: { from: number; to: number }[];
   }): void;
   move(from: number, to: number): void;
@@ -51,15 +51,18 @@ export function DOMListView(props: {
     isDocumentFragment() {
       return true;
     },
-    insert(idx: number, children: (TimelessElement<any, any> | null)[]) {
+    insert(idx, children) {
       logger.log("insert", idx, children);
       return box$.methods.insert(idx, children, { $parent: $content });
     },
-    remove(idx: number, count: number) {
+    remove(idx, count) {
       logger.log("remove", idx, count);
       box$.methods.remove(idx, count, { $parent: $content });
     },
-    refresh: box$.methods.refresh,
+    refresh(payload) {
+      logger.log("refresh", payload.added, payload.removed, payload.moved);
+      box$.methods.refresh(payload, { $parent: $content });
+    },
     move: box$.methods.move,
     swap: box$.methods.move,
     render(elm: TimelessElement) {

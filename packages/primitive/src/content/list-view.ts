@@ -301,12 +301,12 @@ export function ListView<T>(props: ListViewProps<T>) {
               return;
             }
           },
-          onChange(v) {
+          onChange(v, extra) {
             logger.log("ctx.onChange", v, state.rendered);
             // if (!state.rendered) {
             //   return;
             // }
-            methods.refresh(v);
+            methods.refresh(v, extra);
           },
         });
         listener$.add(unsub);
@@ -504,7 +504,7 @@ export function ListView<T>(props: ListViewProps<T>) {
      * 使用新的列表，覆盖原先的
      * 计算出 新增、更新 和 删除 的记录，提交给宿主层，刷新视图
      */
-    refresh(v: T[]) {
+    refresh(v: T[], extra?: { reset?: boolean }) {
       logger.log("refresh", v.length, "items, current:", state.items.length);
       const new_wrapped_items = v.map((item, i) => {
         const existing = state.wrapped_items.find((vv) => {
@@ -713,14 +713,56 @@ export function ListView<T>(props: ListViewProps<T>) {
         moved: moved_nodes,
       };
 
+      // 释放已移除的 slot（仅处理可见范围内的）
+      for (const { idx, count } of removed_nodes) {
+        for (let i = 0; i < count; i++) {
+          const itemIdx = idx + i;
+          if (itemIdx < _start || itemIdx >= _end) continue;
+          const prevItem = prev_items[itemIdx];
+          const k = _key && prevItem ? (prevItem as any)[_key] : prevItem;
+          const key = methods._dataIdStr(k);
+          const slot = _slot_bindings.get(key);
+          if (slot) {
+            slot.unbind();
+            _slot_bindings.delete(key);
+            _free_slots.push(slot);
+          }
+        }
+      }
+
+      // 复用 free_slots 给新增的（仅处理可见范围内的）
+      for (const { idx, elements } of added_nodes) {
+        for (let i = 0; i < elements.length; i++) {
+          const itemIdx = idx + i;
+          if (itemIdx < _start || itemIdx >= _end) continue;
+          if (_free_slots.length === 0) break;
+          const newItem = new_wrapped_items[itemIdx];
+          const k =
+            _key && newItem
+              ? // @ts-ignore
+                newItem.v[_key]
+              : newItem.v;
+          const key = methods._dataIdStr(k);
+          if (!_slot_bindings.has(key)) {
+            const slot = _free_slots.pop()!;
+            slot.rebind({
+              uid: key,
+              dataId: newItem.k,
+              top: newItem.top,
+              height: newItem.height,
+              payload: newItem.v,
+              child: elements[i],
+            });
+            _slot_bindings.set(key, slot);
+          }
+        }
+      }
+
+      // 跳过 $elm.refresh，使用 slot rebind 方式复用 DOM
       const actions_count =
-        diff.added.length + diff.removed.length + diff.moved.length;
+        added_nodes.length + removed_nodes.length + moved_nodes.length;
       if (actions_count === 0) {
         return;
-      }
-      // 4.1 Remove nodes
-      if ($elm && typeof $elm.refresh === "function") {
-        $elm.refresh(diff);
       }
       state.wrapped_items = new_wrapped_items.slice();
       state.items = new_wrapped_items.slice().map((item) => item.v);

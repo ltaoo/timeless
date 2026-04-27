@@ -166,19 +166,19 @@ export function refArray<T>(
 
   let raw_value = items;
   const deps: SubscriberWithId<T[]>[] = [];
-  function notify(action: any) {
+  function notify(action: any, extra?: Record<string, unknown>) {
     for (let i = 0; i < deps.length; i += 1) {
       console.log("[]reactive-array - notify", i, action, deps.length);
       const ctx = deps[i];
       (() => {
         if (action.type === "refresh") {
           if (ctx.onChange) {
-            ctx.onChange(raw_value);
+            ctx.onChange(raw_value, extra);
           }
           return;
         }
         if (ctx.onPatch) {
-          ctx.onPatch(action);
+          ctx.onPatch(action, extra);
         }
       })();
     }
@@ -317,7 +317,10 @@ export function refArray<T>(
       Array.prototype.splice.call(raw_value, index, 1);
       notify({ type: "delete", index, deleteCount: 1 });
     },
-    as(items: T[] | ((cur: T[]) => T[]), opt: { silent?: boolean } = {}) {
+    as(
+      items: T[] | ((cur: T[]) => T[]),
+      opt: { reset?: boolean; silent?: boolean } = {},
+    ) {
       if (typeof items === "function") {
         raw_value = items(raw_value);
       } else {
@@ -326,7 +329,7 @@ export function refArray<T>(
       if (opt.silent) {
         return;
       }
-      notify({ type: "refresh" });
+      notify({ type: "refresh" }, opt);
     },
     assign(items: T[]) {
       raw_value = items;
