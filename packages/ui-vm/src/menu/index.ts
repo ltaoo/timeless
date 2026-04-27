@@ -216,7 +216,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   prepareShow(opt: { reason: string }) {
     this.cancelHide();
     this.open_timer = setTimeout(() => {
-      logger.log("[]invoke show in prepareShow timer", this._name);
+      // logger.log("[]invoke show in prepareShow timer", this._name);
       this.show();
     }, 80);
   }
@@ -239,7 +239,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     this.hide_timer = setTimeout(() => {
-      logger.log("[]invoke hide in prepareHide timer", this._name);
+      // logger.log("[]invoke hide in prepareHide timer", this._name);
       this.hide(opt);
     }, 80);
     this.emit(Events.PrepareHide);

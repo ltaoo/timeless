@@ -61,7 +61,7 @@ export function ListItemView<T>(
         top: `${data.top}px`,
         width: "100%",
       });
-      $elm.removeChildren();
+      // $elm.removeChildren();
       $elm.insertChildren([data.child]);
     },
     unbind() {

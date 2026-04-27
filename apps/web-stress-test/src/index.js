@@ -70,10 +70,9 @@ function generateData(count) {
 }
 
 function SearchTablePage() {
-  const TABLE_ROWS = 50;
   const page = refobj({
     page: 1,
-    pageSize: 50,
+    pageSize: 500,
     total: 1231,
   });
   const searchInput = ref("");
@@ -145,9 +144,12 @@ function SearchTablePage() {
                 fontSize: "14px",
               },
               onClick() {
-                const next_data = Array.from({ length: TABLE_ROWS }, (_, i) => {
-                  return generate_user(i, {});
-                });
+                const next_data = Array.from(
+                  { length: page.value.pageSize },
+                  (_, i) => {
+                    return generate_user(i, {});
+                  },
+                );
                 data.as(next_data);
                 // data.as((d) => {
                 // const newData = [...d];
@@ -188,7 +190,10 @@ function SearchTablePage() {
             ["Stop Age+1"],
           ),
         ]),
-        View({}, [`Showing ${filteredData.length} of ${page.value.total}`]),
+        View({}, [
+          computed(filteredData, (t) => `Showing ${t.length} of `),
+          computed(page, (t) => t.total),
+        ]),
       ],
     ),
     View(
@@ -488,7 +493,6 @@ function SearchTablePage() {
                       {},
                     );
                   }),
-                  { reset: true },
                 );
               }
             },
@@ -519,14 +523,13 @@ function SearchTablePage() {
             onClick() {
               if (page.value.page * page.value.pageSize < page.value.total) {
                 page.as((p) => ({ ...p, page: p.page + 1 }));
+                const startIndex = (page.value.page - 1) * page.value.pageSize;
+                const remaining = page.value.total - startIndex;
+                const count = Math.min(page.value.pageSize, remaining);
                 data.as(
-                  Array.from({ length: page.value.pageSize }, (_, i) => {
-                    return generate_user(
-                      (page.value.page - 1) * page.value.pageSize + i,
-                      {},
-                    );
+                  Array.from({ length: count }, (_, i) => {
+                    return generate_user(startIndex + i, {});
                   }),
-                  { reset: true },
                 );
               }
             },

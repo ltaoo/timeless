@@ -161,6 +161,21 @@ export function ListView<T>(props: ListViewProps<T>) {
       for (let i = 0; i < visible_count; i++) {
         const wrapped_item = state.wrapped_items[i];
         const idx_computed = methods.create_idx(wrapped_item);
+        if (!wrapped_item) {
+          const slot = ListItemView(
+            {
+              uid: -1,
+              top: 0,
+              height: 0,
+              payload: null,
+              bound: false,
+            },
+            [],
+          );
+          _free_slots.push(slot);
+          _slots.push(slot);
+          continue;
+        }
         const elm = _owner
           ? run_with_owner(_owner, () =>
               props.render(wrapped_item.v, idx_computed),
@@ -442,21 +457,17 @@ export function ListView<T>(props: ListViewProps<T>) {
     },
     /** 从指定下标移除 n 个元素 */
     remove(index: number, count: number) {
-      console.log("[primitive]for - remove", index, count, state.idx_arr);
+      logger.log("remove", index, count, state.idx_arr);
       const removed_idx: DerivedRef<number>[] = [];
       for (let i = 0; i < count; i += 1) {
         const item = state.items[index + i];
         if (_existing_map.has(item)) {
           _existing_map.delete(item);
         }
-        console.log(
-          "[primitive]for - remove in loop",
-          index + i,
-          state.idx_arr[index + i],
-        );
+        logger.log("remove in loop", index + i, state.idx_arr[index + i]);
         removed_idx.push(state.idx_arr[index + i]);
       }
-      console.log("[primitive]for - remove before destroy idx", removed_idx);
+      logger.log("remove before destroy idx", removed_idx);
       for (const idx of removed_idx) {
         idx.destroy();
       }
@@ -549,6 +560,7 @@ export function ListView<T>(props: ListViewProps<T>) {
         };
       });
       const prev_items = state.items;
+      const prev_wrapped_items = state.wrapped_items;
       const prev_elements = state.children;
       const prev_index_computed = state.idx_arr;
       // 1. Prepare target state
@@ -709,11 +721,13 @@ export function ListView<T>(props: ListViewProps<T>) {
       if (start !== -1) {
         removed_nodes.push({ idx: start, count });
       }
-      console.log(
-        "[primitive]for removed:",
+      logger.log(
+        "removed:",
         removed_nodes,
         "added:",
-        added_nodes.length,
+        added_nodes.map((op) => {
+          return { idx: op.idx, couont: op.elements.length };
+        }),
         "moved:",
         moved_nodes,
       );
@@ -735,13 +749,29 @@ export function ListView<T>(props: ListViewProps<T>) {
       // 释放已移除的 slot（仅处理可见范围内的）
       for (const { idx, count } of removed_nodes) {
         for (let i = 0; i < count; i++) {
-          const itemIdx = idx + i;
-          if (itemIdx < _start || itemIdx >= _end) continue;
-          const prevItem = prev_items[itemIdx];
-          const k = _key && prevItem ? (prevItem as any)[_key] : prevItem;
+          const item_idx = idx + i;
+          logger.log(
+            "prepare free slot",
+            _start,
+            _end,
+            item_idx,
+            prev_wrapped_items,
+            _slot_bindings,
+          );
+          if (item_idx < _start || item_idx >= _end) continue;
+          const prev_wrapped_item = prev_wrapped_items[item_idx];
+          const k = prev_wrapped_item.k;
           const key = methods._dataIdStr(k);
           const slot = _slot_bindings.get(key);
           if (slot) {
+            logger.log(
+              "before unbind slot",
+              idx,
+              item_idx,
+              key,
+              prev_items,
+              prev_wrapped_item,
+            );
             slot.unbind();
             _slot_bindings.delete(key);
             _free_slots.push(slot);
@@ -749,25 +779,22 @@ export function ListView<T>(props: ListViewProps<T>) {
         }
       }
 
-      // 复用 free_slots 给新增的
+      // 复用 free_slots 给新增的（仅处理可见范围内的）
       for (const { idx, elements } of added_nodes) {
         for (let i = 0; i < elements.length; i++) {
+          const item_idx = idx + i;
+          if (item_idx < _start || item_idx >= _end) continue;
           if (_free_slots.length === 0) break;
-          const newItem = new_wrapped_items[idx + i];
-          const k =
-            _key && newItem
-              ? // @ts-ignore
-                newItem.v[_key]
-              : newItem.v;
-          const key = methods._dataIdStr(k);
+          const new_wrapped_item = new_wrapped_items[item_idx];
+          const key = methods._dataIdStr(new_wrapped_item.k);
           if (!_slot_bindings.has(key)) {
             const slot = _free_slots.pop()!;
             slot.rebind({
               uid: key,
-              dataId: newItem.k,
-              top: newItem.top,
-              height: newItem.height,
-              payload: newItem.v,
+              dataId: new_wrapped_item.k,
+              top: new_wrapped_item.top,
+              height: new_wrapped_item.height,
+              payload: new_wrapped_item.v,
               child: elements[i],
             });
             _slot_bindings.set(key, slot);
@@ -785,6 +812,19 @@ export function ListView<T>(props: ListViewProps<T>) {
       state.items = new_wrapped_items.slice().map((item) => item.v);
       state.idx_arr = new_index_computed;
       state.children = new_elements;
+
+      const total_height =
+        state.wrapped_items.length * itemHeight +
+        (state.wrapped_items.length - 1) * gutter;
+      logger.log(
+        "refresh - before $elm.setStyleValue",
+        state.wrapped_items.length,
+        total_height,
+      );
+      if (state.height !== total_height) {
+        state.height = total_height;
+        $elm.setStyleValue("height", total_height);
+      }
 
       return diff;
     },
@@ -1020,7 +1060,7 @@ export function ListView<T>(props: ListViewProps<T>) {
       return result;
     },
     update(range: { start: number; end: number }) {
-      logger.log("update case range is changed", range);
+      logger.log("update case range is changed", _start, _end, range);
 
       const has_change = range.start !== _start || range.end !== _end;
       if (!has_change) {
@@ -1037,9 +1077,8 @@ export function ListView<T>(props: ListViewProps<T>) {
 
       // 构建新数据 Cell 的 dataId Set
       const sliced_data_id_set = new Set<string>();
-      for (const cell of sliced_items) {
-        const dataId = cell.k;
-        sliced_data_id_set.add(methods._dataIdStr(dataId));
+      for (const wrapped_item of sliced_items) {
+        sliced_data_id_set.add(methods._dataIdStr(wrapped_item.k));
       }
 
       // 计算 exitingCells（当前绑定但不在 newDataCells 中的）
@@ -1208,6 +1247,11 @@ export function ListView<T>(props: ListViewProps<T>) {
   box$.methods.add_event();
   methods.init_slot();
   const children = _slots;
+
+  if (state.items.length < _end) {
+    // 总数量小于 插槽数量
+    _end = state.items.length;
+  }
 
   state.height =
     state.wrapped_items.length * itemHeight +

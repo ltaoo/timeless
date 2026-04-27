@@ -75,6 +75,7 @@ export function HostElement(props: {
       }
     },
     setStyleValue(key: any, value: string) {
+      console.log(props.t + "[HostElement]setStyleValue", key, value, $elm);
       if (!$elm || $elm instanceof Text) {
         return;
       }
@@ -328,7 +329,7 @@ export function HostElement(props: {
       return $fragment;
     },
     handleElementsMounted() {
-      console.log(props.t + "[]box handleElements Mounted", child_elements);
+      // console.log(props.t + "[]box handleElements Mounted", child_elements);
       for (const child of child_elements) {
         if (child && child.onMounted) {
           child.onMounted({
@@ -392,14 +393,13 @@ export function HostElement(props: {
       const r = methods.buildChildren(children);
       const $parent = opt?.$parent || methods.getParent();
       console.log(
-        "[HostElement.insertChildren]",
-        props.t,
-        "$elm=",
-        $elm,
+        props.t + "[HostElement]insertChildren",
         "$parent=",
         $parent,
         "fragment children=",
         r.$fragment.childNodes.length,
+        "children=",
+        children.length,
       );
       if ($parent) {
         if ($elm && $elm instanceof Text) {
@@ -412,28 +412,30 @@ export function HostElement(props: {
       $children = r.child_host_nodes;
       child_nodes = r.child_nodes;
       setTimeout(() => {
-        console.log(props.t + "[]invoke children onMounted function");
+        // console.log(props.t + "[]invoke children onMounted function");
         methods.handleElementsMounted();
       }, 0);
     },
     removeChildren(extra?: { $parent: any }) {
-      // console.log(
-      //   props.t + "[]removeChildren",
-      //   $children,
-      //   child_nodes,
-      //   child_elements,
-      // );
+      const $parent = extra?.$parent || methods.getParent();
+      console.log(
+        props.t + "[HostElement]removeChildren",
+        "$parent=",
+        $parent,
+        [...$children],
+        child_nodes,
+        child_elements,
+      );
       if ($children.length === 0 && child_nodes.length === 0) {
         return;
       }
-      const $parent = extra?.$parent || methods.getParent();
       // console.log(props.t + "[]removeChildren", $parent, child_host_nodes);
       // hydrate 加载的，没有 child_nodes，导致通过该方法销毁的子元素没有 onUnmounted 方法
-      for (const child of child_nodes) {
-        if (child) {
-          child.removeChildren();
-        }
-      }
+      // for (const child of child_nodes) {
+      //   if (child) {
+      //     child.removeChildren();
+      //   }
+      // }
       const $fragment = document.createDocumentFragment();
       if ($parent) {
         for (const $child of $children) {

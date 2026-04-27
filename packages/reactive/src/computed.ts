@@ -32,7 +32,7 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
 
   const _deps: SubscriberWithId<any>[] = [];
   function notify(action: { type: string }, extra?: Record<string, unknown>) {
-    console.log("[]computed invoke notify", action, _deps, extra);
+    // console.log("[]computed invoke notify", action, _deps, extra);
     for (let i = 0; i < _deps.length; i += 1) {
       const ctx = _deps[i];
       if (ctx.onChange) {
@@ -72,7 +72,7 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
     },
     onChange(v, extra) {
       const r = fn(_computed_ref.value);
-      console.log("[]computed invoke onChange", r, raw_value, r === raw_value, extra);
+      // console.log("[]computed invoke onChange", r, raw_value, r === raw_value, extra);
       if (r === raw_value) {
         return;
       }

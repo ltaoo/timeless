@@ -65,6 +65,19 @@ export function DOMListView(props: {
     },
     move: box$.methods.move,
     swap: box$.methods.move,
+    setStyleValue(k: string, value: string | number) {
+      logger.log("setStyleValue", $content, k, value);
+      if ($content) {
+        $content.style[k] = `${value}px`;
+        if (k === "height") {
+          const newHeight = Number(value);
+          const maxScroll = Math.max(0, newHeight - $content.clientHeight);
+          if ($content.scrollTop > maxScroll) {
+            $content.scrollTop = maxScroll;
+          }
+        }
+      }
+    },
     render(elm: TimelessElement) {
       const $elm = document.createElement("div");
       $content = document.createElement("div");

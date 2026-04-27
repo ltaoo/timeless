@@ -40,6 +40,7 @@ export function DOMListItemView(props: {
       const r = box$.methods.insertChildren(children, { $parent: $elm });
     },
     removeChildren() {
+      logger.log("removeChildren");
       const r = box$.methods.removeChildren({ $parent: $elm });
     },
     render(elm: TimelessElement) {
