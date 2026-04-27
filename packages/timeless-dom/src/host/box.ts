@@ -650,6 +650,12 @@ export function HostElement(props: {
       }
       console.log("[dom]refresh - end", [...$children]);
     },
+    setScrollTop(v: number) {
+      if (!$elm) {
+        return;
+      }
+      $elm.scrollTop = v;
+    },
     getParent() {
       if (!$elm) {
         return null;

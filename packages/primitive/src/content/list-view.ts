@@ -302,7 +302,7 @@ export function ListView<T>(props: ListViewProps<T>) {
             }
           },
           onChange(v, extra) {
-            logger.log("ctx.onChange", v, state.rendered);
+            logger.log("ctx.onChange", v, state.rendered, extra);
             // if (!state.rendered) {
             //   return;
             // }
@@ -505,7 +505,26 @@ export function ListView<T>(props: ListViewProps<T>) {
      * 计算出 新增、更新 和 删除 的记录，提交给宿主层，刷新视图
      */
     refresh(v: T[], extra?: { reset?: boolean }) {
-      logger.log("refresh", v.length, "items, current:", state.items.length);
+      logger.log(
+        "refresh",
+        v.length,
+        "items, current:",
+        state.items.length,
+        extra,
+      );
+
+      // reset 模式：重置 range，全量替换
+      if (extra?.reset) {
+        $elm.setScrollTop(0);
+        _start = 0;
+        _end = _size + _buffer_size;
+        for (const [, slot] of _slot_bindings) {
+          slot.unbind();
+          _free_slots.push(slot);
+        }
+        _slot_bindings.clear();
+      }
+
       const new_wrapped_items = v.map((item, i) => {
         const existing = state.wrapped_items.find((vv) => {
           if (_key && typeof item === "object") {
@@ -730,13 +749,11 @@ export function ListView<T>(props: ListViewProps<T>) {
         }
       }
 
-      // 复用 free_slots 给新增的（仅处理可见范围内的）
+      // 复用 free_slots 给新增的
       for (const { idx, elements } of added_nodes) {
         for (let i = 0; i < elements.length; i++) {
-          const itemIdx = idx + i;
-          if (itemIdx < _start || itemIdx >= _end) continue;
           if (_free_slots.length === 0) break;
-          const newItem = new_wrapped_items[itemIdx];
+          const newItem = new_wrapped_items[idx + i];
           const k =
             _key && newItem
               ? // @ts-ignore

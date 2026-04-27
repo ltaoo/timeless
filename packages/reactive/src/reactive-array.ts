@@ -168,7 +168,7 @@ export function refArray<T>(
   const deps: SubscriberWithId<T[]>[] = [];
   function notify(action: any, extra?: Record<string, unknown>) {
     for (let i = 0; i < deps.length; i += 1) {
-      console.log("[]reactive-array - notify", i, action, deps.length);
+      console.log("[]reactive-array - notify", i, action, deps.length, extra);
       const ctx = deps[i];
       (() => {
         if (action.type === "refresh") {

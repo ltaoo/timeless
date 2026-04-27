@@ -51,23 +51,23 @@ export function derive<T>(deps: any, fn: any): DerivedRef<T> {
 
   raw_value = is_array ? fn(...get_values()) : fn(get_values());
 
-  function notify() {
+  function notify(v: unknown, extra?: Record<string, unknown>) {
     for (let i = 0; i < _deps.length; i += 1) {
       const ctx = _deps[i];
       if (ctx.onChange) {
-        ctx.onChange(raw_value);
+        ctx.onChange(raw_value, extra);
       }
     }
   }
 
-  const onChange = () => {
+  const onChange = (v: unknown, extra?: Record<string, unknown>) => {
     const args = get_values();
     const next_value = is_array ? fn(...args) : fn(args);
     if (raw_value === next_value) {
       return;
     }
     raw_value = next_value;
-    notify();
+    notify(null, extra);
   };
   const unsubscribe_list: (() => void)[] = [];
   dep_refs.forEach((ref) => {

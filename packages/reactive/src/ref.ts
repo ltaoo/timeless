@@ -20,29 +20,32 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
   const _initial_value = v;
   const deps: SubscriberWithId<any>[] = [];
 
-  function notify(action: {
-    type: string;
-    index?: number;
-    deleteCount?: number;
-    item?: any;
-    items?: any;
-  }) {
+  function notify(
+    action: {
+      type: string;
+      index?: number;
+      deleteCount?: number;
+      item?: any;
+      items?: any;
+    },
+    extra?: Record<string, unknown>,
+  ) {
     for (let i = 0; i < deps.length; i += 1) {
       const ctx = deps[i];
       if (action.type === "insert") {
         if (ctx.onPatch) {
-          ctx.onPatch(action as any);
+          ctx.onPatch(action as any, extra);
         }
         continue;
       }
       if (action.type === "update") {
         if (ctx.onPatch) {
-          ctx.onPatch(action as any);
+          ctx.onPatch(action as any, extra);
         }
         continue;
       }
       if (ctx.onChange) {
-        ctx.onChange(raw_value);
+        ctx.onChange(raw_value, extra);
       }
     }
   }
@@ -92,13 +95,13 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
         );
       });
     },
-    as(value: T | ((cur: T) => T)) {
+    as(value: T | ((cur: T) => T), extra?: Record<string, unknown>) {
       if (typeof value === "function") {
         raw_value = (value as (cur: T) => T)(raw_value);
       } else {
         raw_value = value;
       }
-      notify({ type: "refresh" });
+      notify({ type: "refresh" }, extra);
     },
     set(value: T) {
       raw_value = value;
@@ -169,9 +172,7 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
       const comparisonValue = isRef(v) ? (v as any).value : v;
       return (raw_value as any) > comparisonValue;
     },
-    diff(v: T) {
-      
-    }
+    diff(v: T) {},
   };
 
   if (hot && __hmr_key) {

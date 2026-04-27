@@ -488,6 +488,7 @@ function SearchTablePage() {
                       {},
                     );
                   }),
+                  { reset: true },
                 );
               }
             },
