@@ -72,9 +72,10 @@ function generateData(count) {
 function SearchTablePage() {
   const page = refobj({
     page: 1,
-    pageSize: 500,
+    pageSize: 100,
     total: 1231,
   });
+  const totalPages = computed(page, (t) => Math.ceil(t.total / t.pageSize));
   const searchInput = ref("");
   const searchQuery = ref("");
   const data = refarr(
@@ -144,13 +145,13 @@ function SearchTablePage() {
                 fontSize: "14px",
               },
               onClick() {
-                const next_data = Array.from(
-                  { length: page.value.pageSize },
-                  (_, i) => {
-                    return generate_user(i, {});
-                  },
-                );
-                data.as(next_data);
+                // const next_data = Array.from(
+                //   { length: page.value.pageSize },
+                //   (_, i) => {
+                //     return generate_user(i, {});
+                //   },
+                // );
+                // data.as(next_data);
                 // data.as((d) => {
                 // const newData = [...d];
                 // const user = newData.find((u) => u.id === 2);
@@ -161,14 +162,20 @@ function SearchTablePage() {
                 // });
                 // if (timer) return;
                 // timer = setInterval(() => {
-                //   data.as((d) => {
-                //     const newData = [...d];
-                //     const user = newData.find((u) => u.id === 2);
-                //     if (user) {
-                //       user.age = (user.age || 0) + 1;
-                //     }
-                //     return newData;
-                //   });
+                data.as((d) => {
+                  // const newData = [...d];
+                  // const user = newData.find((u) => u.id === 2);
+                  // if (user) {
+                  //   user.age = (user.age || 0) + 1;
+                  // }
+                  // return newData;
+                  return d.map((v) => {
+                    return {
+                      ...v,
+                      age: v.id === 2 ? (v.age || 0) + 1 : v.age,
+                    };
+                  });
+                });
                 // }, 5000);
               },
             },
@@ -308,152 +315,158 @@ function SearchTablePage() {
             ),
           ],
         ),
-        View(
-          {
-            style: {
-              height: "530px",
-              // border: "1px solid #ddd",
-              "border-top": "none",
-            },
+        // View(
+        //   {
+        //     style: {
+        //       "max-height": "530px",
+        //       height: "auto",
+        //       "border-top": "none",
+        //     },
+        //   },
+        //   [
+        //     View(
+        //       {
+        //         style: {
+        //           "overflow-y": "auto",
+        //         },
+        //       },
+        //       [,],
+        //     ),
+        //   ],
+        // ),
+        ListView({
+          style: {
+            "max-height": "530px",
+            height: "auto",
           },
-          [
-            ListView({
-              key: "id",
-              size: 30,
-              // itemHeight: 31.5,
-              itemHeight: 186.5,
-              each: filteredData,
-              render(row, idx) {
-                return View(
+          key: "id",
+          size: 30,
+          // itemHeight: 31.5,
+          itemHeight: 186.5,
+          each: filteredData,
+          render(row, idx) {
+            return View(
+              {
+                style: {
+                  display: "grid",
+                  "grid-template-columns":
+                    "60px 120px 200px 80px 60px 80px 100px 1fr",
+                  width: "100%",
+                  "border-bottom": computed(idx, (t) =>
+                    t === filteredData.value.length - 1
+                      ? "none"
+                      : "1px solid #ddd",
+                  ),
+                  // "border-right": "1px solid #ddd",
+                },
+              },
+              [
+                View(
                   {
                     style: {
-                      display: "grid",
-                      "grid-template-columns":
-                        "60px 120px 200px 80px 60px 80px 100px 1fr",
-                      width: "100%",
-                      "border-bottom": computed(idx, (t) =>
-                        t === filteredData.value.length - 1
-                          ? "none"
-                          : "1px solid #ddd",
+                      padding: "8px",
+                      "border-right": "1px solid #ddd",
+                    },
+                  },
+                  [computed(row, (t) => t.id)],
+                ),
+                View(
+                  {
+                    style: {
+                      padding: "8px",
+                      "border-right": "1px solid #ddd",
+                    },
+                  },
+                  [computed(row, (t) => t.name)],
+                ),
+                View(
+                  {
+                    style: {
+                      padding: "8px",
+                      "border-right": "1px solid #ddd",
+                    },
+                  },
+                  [computed(row, (t) => t.email)],
+                ),
+                View(
+                  {
+                    style: {
+                      padding: "8px",
+                      "border-right": "1px solid #ddd",
+                    },
+                  },
+                  [
+                    computed(row, (t) => {
+                      return t.role.text;
+                    }),
+                  ],
+                ),
+                View(
+                  {
+                    style: {
+                      padding: "8px",
+                      "border-right": "1px solid #ddd",
+                    },
+                  },
+                  [computed(row, (t) => t.age)],
+                ),
+                View(
+                  {
+                    style: {
+                      padding: "8px",
+                      "border-right": "1px solid #ddd",
+                      color: computed(row, (t) =>
+                        t.status === "Active" ? "#28a745" : "#dc3545",
                       ),
+                    },
+                  },
+                  [computed(row, (t) => t.status)],
+                ),
+                View(
+                  {
+                    style: {
+                      padding: "8px",
+                      "border-right": "1px solid #ddd",
+                    },
+                  },
+                  [computed(row, (t) => t.department)],
+                ),
+                View(
+                  {
+                    style: {
+                      padding: "8px",
                       // "border-right": "1px solid #ddd",
                     },
                   },
                   [
-                    View(
-                      {
-                        style: {
-                          padding: "8px",
-                          "border-right": "1px solid #ddd",
-                        },
+                    For({
+                      key: "id",
+                      each: computed(row, (t) => t.skills),
+                      render(skill) {
+                        return View({}, [
+                          View({}, [computed(skill, (t) => t.name)]),
+                          View({}, [
+                            For({
+                              key: "id",
+                              each: computed(skill, (t) => t.histories),
+                              render(history) {
+                                return View({}, [
+                                  View({}, [computed(history, (t) => t.text)]),
+                                  View({}, [computed(history, (t) => t.time)]),
+                                  View({}, [computed(history, (t) => t.value)]),
+                                ]);
+                              },
+                            }),
+                          ]),
+                        ]);
                       },
-                      [computed(row, (t) => t.id)],
-                    ),
-                    View(
-                      {
-                        style: {
-                          padding: "8px",
-                          "border-right": "1px solid #ddd",
-                        },
-                      },
-                      [computed(row, (t) => t.name)],
-                    ),
-                    View(
-                      {
-                        style: {
-                          padding: "8px",
-                          "border-right": "1px solid #ddd",
-                        },
-                      },
-                      [computed(row, (t) => t.email)],
-                    ),
-                    View(
-                      {
-                        style: {
-                          padding: "8px",
-                          "border-right": "1px solid #ddd",
-                        },
-                      },
-                      [
-                        computed(row, (t) => {
-                          return t.role.text;
-                        }),
-                      ],
-                    ),
-                    View(
-                      {
-                        style: {
-                          padding: "8px",
-                          "border-right": "1px solid #ddd",
-                        },
-                      },
-                      [computed(row, (t) => t.age)],
-                    ),
-                    View(
-                      {
-                        style: {
-                          padding: "8px",
-                          "border-right": "1px solid #ddd",
-                          color: computed(row, (t) =>
-                            t.status === "Active" ? "#28a745" : "#dc3545",
-                          ),
-                        },
-                      },
-                      [computed(row, (t) => t.status)],
-                    ),
-                    View(
-                      {
-                        style: {
-                          padding: "8px",
-                          "border-right": "1px solid #ddd",
-                        },
-                      },
-                      [computed(row, (t) => t.department)],
-                    ),
-                    View(
-                      {
-                        style: {
-                          padding: "8px",
-                          // "border-right": "1px solid #ddd",
-                        },
-                      },
-                      [
-                        For({
-                          key: "id",
-                          each: computed(row, (t) => t.skills),
-                          render(skill) {
-                            return View({}, [
-                              View({}, [computed(skill, (t) => t.name)]),
-                              View({}, [
-                                For({
-                                  key: "id",
-                                  each: computed(skill, (t) => t.histories),
-                                  render(history) {
-                                    return View({}, [
-                                      View({}, [
-                                        computed(history, (t) => t.text),
-                                      ]),
-                                      View({}, [
-                                        computed(history, (t) => t.time),
-                                      ]),
-                                      View({}, [
-                                        computed(history, (t) => t.value),
-                                      ]),
-                                    ]);
-                                  },
-                                }),
-                              ]),
-                            ]);
-                          },
-                        }),
-                      ],
-                    ),
+                    }),
                   ],
-                );
-              },
-            }),
-          ],
-        ),
+                ),
+              ],
+            );
+          },
+        }),
       ],
     ),
     // Pagination
@@ -499,12 +512,171 @@ function SearchTablePage() {
           },
           ["Previous"],
         ),
-        View({}, [
-          "Page ",
-          computed(page, (t) => t.page),
-          " of ",
-          computed(page, (t) => Math.ceil(t.total / t.pageSize)),
-        ]),
+        View(
+          {
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            },
+          },
+          [
+            View(
+              {
+                style: {
+                  padding: "4px 8px",
+                  background: computed(page, (t) =>
+                    t.page === 1 ? "#007bff" : "#f0f0f0",
+                  ),
+                  "border-radius": "4px",
+                  cursor: "pointer",
+                  "font-size": "14px",
+                  color: computed(page, (t) =>
+                    t.page === 1 ? "#fff" : "#333",
+                  ),
+                },
+                onClick() {
+                  if (page.value.page === 1) {
+                    return;
+                  }
+                  page.as((p) => ({ ...p, page: 1 }));
+                  data.as(
+                    Array.from({ length: page.value.pageSize }, (_, i) => {
+                      return generate_user(i, {});
+                    }),
+                    { reset: true },
+                  );
+                },
+              },
+              ["1"],
+            ),
+            Show({
+              when: computed(page, (t) => {
+                const totalPages = Math.ceil(t.total / t.pageSize);
+                if (t.page > 3) {
+                  return true;
+                }
+                return false;
+              }),
+              ok() {
+                return View(
+                  {
+                    style: {
+                      padding: "4px 8px",
+                      "font-size": "14px",
+                    },
+                  },
+                  ["..."],
+                );
+              },
+            }),
+            For({
+              each: computed(page, (t) => {
+                const totalPages = Math.ceil(t.total / t.pageSize);
+                const pages = [];
+                const start = Math.max(2, t.page - 1);
+                const end = Math.min(totalPages - 1, t.page + 1);
+                for (let i = start; i <= end; i++) {
+                  pages.push(i);
+                }
+                return pages;
+              }),
+              render(p) {
+                return View(
+                  {
+                    style: {
+                      padding: "4px 8px",
+                      background: computed(page, (t) =>
+                        t.page === p ? "#007bff" : "#f0f0f0",
+                      ),
+                      "border-radius": "4px",
+                      cursor: "pointer",
+                      "font-size": "14px",
+                      color: computed(page, (t) =>
+                        t.page === p ? "#fff" : "#333",
+                      ),
+                    },
+                    onClick() {
+                      console.log("[]click page", p, page.value.page);
+                      if (p === page.value.page) {
+                        return;
+                      }
+                      page.as((pg) => ({ ...pg, page: p }));
+                      const startIndex = (p - 1) * page.value.pageSize;
+                      const remaining = page.value.total - startIndex;
+                      const count = Math.min(page.value.pageSize, remaining);
+                      data.as(
+                        Array.from({ length: count }, (_, i) => {
+                          return generate_user(startIndex + i, {});
+                        }),
+                        { reset: true },
+                      );
+                    },
+                  },
+                  [p],
+                );
+              },
+            }),
+            Show({
+              when: computed(page, (t) => {
+                const totalPages = Math.ceil(t.total / t.pageSize);
+                if (t.page < totalPages - 2 && totalPages > 3) {
+                  return true;
+                }
+                return false;
+              }),
+              ok() {
+                return View(
+                  {
+                    style: {
+                      padding: "4px 8px",
+                      "font-size": "14px",
+                    },
+                  },
+                  ["..."],
+                );
+              },
+            }),
+            Show({
+              when: computed(totalPages, (t) => {
+                return t > 1;
+              }),
+              ok() {
+                return View(
+                  {
+                    style: {
+                      padding: "4px 8px",
+                      background: combine({ page, totalPages }, (t) =>
+                        t.page.page === t.totalPages ? "#007bff" : "#f0f0f0",
+                      ),
+                      "border-radius": "4px",
+                      cursor: "pointer",
+                      "font-size": "14px",
+                      color: combine({ page, totalPages }, (t) =>
+                        t.page === t.totalPages ? "#fff" : "#333",
+                      ),
+                    },
+                    onClick() {
+                      const totalPages = Math.ceil(
+                        page.value.total / page.value.pageSize,
+                      );
+                      page.as((p) => ({ ...p, page: totalPages }));
+                      const startIndex = (totalPages - 1) * page.value.pageSize;
+                      const remaining = page.value.total - startIndex;
+                      const count = Math.min(page.value.pageSize, remaining);
+                      data.as(
+                        Array.from({ length: count }, (_, i) => {
+                          return generate_user(startIndex + i, {});
+                        }),
+                      );
+                    },
+                  },
+                  [computed(page, (t) => Math.ceil(t.total / t.pageSize))],
+                );
+              },
+            }),
+          ],
+        ),
         Button(
           {
             style: {
@@ -535,6 +707,59 @@ function SearchTablePage() {
             },
           },
           ["Next"],
+        ),
+        View(
+          {
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              "margin-left": "16px",
+            },
+          },
+          [
+            View({ style: { "font-size": "14px" } }, ["Go to:"]),
+            Input({
+              style: {
+                width: "50px",
+                padding: "4px 8px",
+                "border-radius": "4px",
+                border: "1px solid #ddd",
+                "font-size": "14px",
+                "text-align": "center",
+              },
+              value: ref(""),
+              placeholder: "1",
+              onKeyDown(event) {
+                if (event.key === "Enter") {
+                  const totalPages = Math.ceil(
+                    page.value.total / page.value.pageSize,
+                  );
+                  let targetPage = parseInt(event.target.value, 10);
+                  if (isNaN(targetPage) || targetPage < 1) {
+                    targetPage = 1;
+                  }
+                  if (targetPage > totalPages) {
+                    targetPage = totalPages;
+                  }
+                  page.as((p) => ({ ...p, page: targetPage }));
+                  const startIndex = (targetPage - 1) * page.value.pageSize;
+                  const remaining = page.value.total - startIndex;
+                  const count = Math.min(page.value.pageSize, remaining);
+                  data.as(
+                    Array.from({ length: count }, (_, i) => {
+                      return generate_user(startIndex + i, {});
+                    }),
+                  );
+                  event.target.value = "";
+                }
+              },
+            }),
+            View({ style: { "font-size": "14px" } }, [
+              " / ",
+              computed(page, (t) => Math.ceil(t.total / t.pageSize)),
+            ]),
+          ],
         ),
         View({}, [`Total: `, computed(page, (t) => t.total)]),
       ],

@@ -7,6 +7,9 @@ import {
   For,
   ErrorBoundary,
   refarr,
+  refobj,
+  computed,
+  combine,
   LazyView,
 } from "@timeless/timeless";
 import { render } from "@timeless/timeless-dom";
@@ -57,96 +60,230 @@ function ApplicationView() {
   const up_ = ref(true);
   const down_ = ref(true);
 
-  return View({ style: { color: "#fff", padding: "20px" } }, [
-    Fragment({}, [
-      View(
-        {
-          onClick() {
-            visible_.as((prev) => !prev);
-          },
-        },
-        ["Trigger"],
-      ),
-      ErrorBoundary(
-        {
-          throwToGlobal: true,
-          fallback(error) {
-            const title = error?.name || "Error";
-            const message = error?.message || String(error);
-            const stack = error?.stack || `${title}: ${message}`;
+  const page = refobj({
+    page: 1,
+    pageSize: 10,
+    total: 1231,
+  });
+  const totalPages = computed(page, (t) => Math.ceil(t.total / t.pageSize));
 
-            return View(
-              {
-                style: {
-                  color: "#d93025",
-                  border: "1px solid #f1b7b3",
-                  borderRadius: "8px",
-                  background: "#fff",
-                  padding: "12px 14px",
-                  marginTop: "12px",
-                  fontFamily:
-                    'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                  boxShadow: "0 1px 2px rgba(60,64,67,0.15)",
-                },
-              },
-              [
-                View(
-                  {
-                    style: {
-                      fontSize: "13px",
-                      fontWeight: "600",
-                      marginBottom: "8px",
-                    },
-                  },
-                  [`${title}: ${message}`],
-                ),
-                View(
-                  {
-                    style: {
-                      fontSize: "12px",
-                      lineHeight: "1.5",
-                      whiteSpace: "pre-wrap",
-                      color: "#5f6368",
-                    },
-                  },
-                  [stack],
-                ),
-              ],
-            );
-          },
+  return View({ style: { display: "flex", color: "#fff", padding: "20px" } }, [
+    View(
+      {
+        style: {
+          padding: "4px 8px",
+          background: computed(page, (t) =>
+            t.page === 1 ? "#007bff" : "#f0f0f0",
+          ),
+          "border-radius": "4px",
+          cursor: "pointer",
+          "font-size": "14px",
+          color: computed(page, (t) => (t.page === 1 ? "#fff" : "#333")),
         },
-        () => [
-          For({
-            each: [{}],
-            render() {
-              return LazyView(
-                {},
-                () => new Promise((resolve) => {
-                  setTimeout(() => {
-                    resolve(SubContent);
-                  }, 800);
-                }),
-              );
+        onClick() {
+          if (page.value.page === 1) {
+            return;
+          }
+          page.as((p) => ({ ...p, page: 1 }));
+        },
+      },
+      ["1"],
+    ),
+    Show({
+      when: computed(page, (t) => {
+        const totalPages = Math.ceil(t.total / t.pageSize);
+        if (t.page > 3) {
+          return true;
+        }
+        return false;
+      }),
+      ok() {
+        return View(
+          {
+            style: {
+              padding: "4px 8px",
+              "font-size": "14px",
             },
-          }),
-          // Content({ visible_ }, () => [
-          //   Show({
-          //     when: up_,
-          //     ok() {
-          //       return View({}, "Up");
-          //     },
-          //   }),
-          //   View({}, ["Content"]),
-          //   Show({
-          //     when: down_,
-          //     ok() {
-          //       return View({}, "Down");
-          //     },
-          //   }),
-          // ]),
-        ],
-      ),
-    ]),
+          },
+          ["..."],
+        );
+      },
+    }),
+    For({
+      each: computed(page, (t) => {
+        const totalPages = Math.ceil(t.total / t.pageSize);
+        const pages = [];
+        const start = Math.max(2, t.page - 1);
+        const end = Math.min(totalPages - 1, t.page + 1);
+        for (let i = start; i <= end; i++) {
+          pages.push(i);
+        }
+        return pages;
+      }),
+      render(p) {
+        return View(
+          {
+            style: {
+              padding: "4px 8px",
+              background: computed(page, (t) =>
+                t.page === p ? "#007bff" : "#f0f0f0",
+              ),
+              "border-radius": "4px",
+              cursor: "pointer",
+              "font-size": "14px",
+              color: computed(page, (t) => (t.page === p ? "#fff" : "#333")),
+            },
+            onClick() {
+              console.log("[]click page", p, page.value.page);
+              if (p === page.value.page) {
+                return;
+              }
+              page.as((pg) => ({ ...pg, page: p }));
+            },
+          },
+          [p],
+        );
+      },
+    }),
+    Show({
+      when: computed(page, (t) => {
+        const totalPages = Math.ceil(t.total / t.pageSize);
+        if (t.page < totalPages - 2 && totalPages > 3) {
+          return true;
+        }
+        return false;
+      }),
+      ok() {
+        return View(
+          {
+            style: {
+              padding: "4px 8px",
+              "font-size": "14px",
+            },
+          },
+          ["..."],
+        );
+      },
+    }),
+    Show({
+      when: computed(totalPages, (t) => {
+        return t > 1;
+      }),
+      ok() {
+        return View(
+          {
+            style: {
+              padding: "4px 8px",
+              background: combine({ page, totalPages }, (t) =>
+                t.page.page === t.totalPages ? "#007bff" : "#f0f0f0",
+              ),
+              "border-radius": "4px",
+              cursor: "pointer",
+              "font-size": "14px",
+              color: combine({ page, totalPages }, (t) =>
+                t.page === t.totalPages ? "#fff" : "#333",
+              ),
+            },
+            onClick() {
+              const totalPages = Math.ceil(
+                page.value.total / page.value.pageSize,
+              );
+              page.as((p) => ({ ...p, page: totalPages }));
+            },
+          },
+          [computed(page, (t) => Math.ceil(t.total / t.pageSize))],
+        );
+      },
+    }),
+    // Fragment({}, [
+    //   View(
+    //     {
+    //       onClick() {
+    //         visible_.as((prev) => !prev);
+    //       },
+    //     },
+    //     ["Trigger"],
+    //   ),
+    //   ErrorBoundary(
+    //     {
+    //       throwToGlobal: true,
+    //       fallback(error) {
+    //         const title = error?.name || "Error";
+    //         const message = error?.message || String(error);
+    //         const stack = error?.stack || `${title}: ${message}`;
+
+    //         return View(
+    //           {
+    //             style: {
+    //               color: "#d93025",
+    //               border: "1px solid #f1b7b3",
+    //               borderRadius: "8px",
+    //               background: "#fff",
+    //               padding: "12px 14px",
+    //               marginTop: "12px",
+    //               fontFamily:
+    //                 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+    //               boxShadow: "0 1px 2px rgba(60,64,67,0.15)",
+    //             },
+    //           },
+    //           [
+    //             View(
+    //               {
+    //                 style: {
+    //                   fontSize: "13px",
+    //                   fontWeight: "600",
+    //                   marginBottom: "8px",
+    //                 },
+    //               },
+    //               [`${title}: ${message}`],
+    //             ),
+    //             View(
+    //               {
+    //                 style: {
+    //                   fontSize: "12px",
+    //                   lineHeight: "1.5",
+    //                   whiteSpace: "pre-wrap",
+    //                   color: "#5f6368",
+    //                 },
+    //               },
+    //               [stack],
+    //             ),
+    //           ],
+    //         );
+    //       },
+    //     },
+    //     () => [
+    //       For({
+    //         each: [{}],
+    //         render() {
+    //           return LazyView(
+    //             {},
+    //             () => new Promise((resolve) => {
+    //               setTimeout(() => {
+    //                 resolve(SubContent);
+    //               }, 800);
+    //             }),
+    //           );
+    //         },
+    //       }),
+    //       // Content({ visible_ }, () => [
+    //       //   Show({
+    //       //     when: up_,
+    //       //     ok() {
+    //       //       return View({}, "Up");
+    //       //     },
+    //       //   }),
+    //       //   View({}, ["Content"]),
+    //       //   Show({
+    //       //     when: down_,
+    //       //     ok() {
+    //       //       return View({}, "Down");
+    //       //     },
+    //       //   }),
+    //       // ]),
+    //     ],
+    //   ),
+    // ]),
 
     // View(
     //   {

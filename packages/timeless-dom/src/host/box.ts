@@ -75,7 +75,7 @@ export function HostElement(props: {
       }
     },
     setStyleValue(key: any, value: string) {
-      console.log(props.t + "[HostElement]setStyleValue", key, value, $elm);
+      // console.log(props.t + "[HostElement]setStyleValue", key, value, $elm);
       if (!$elm || $elm instanceof Text) {
         return;
       }
@@ -473,6 +473,11 @@ export function HostElement(props: {
       if (!$parent) {
         return;
       }
+      /**
+       * 这里的 $elm 其实是 $anchor，一个 文本节点用于瞄定结尾位置
+       * 比如 [Show({}), For({}), View({})] 这种场景，For 组件插入元素是在自己的「范围」内
+       * 这个范围，无法靠 $children 来确定
+       */
       const $reference = $children[idx];
       console.log(
         props.t + "[dom]insert child",
@@ -500,6 +505,8 @@ export function HostElement(props: {
       }
       if ($reference) {
         $parent.insertBefore($fragment, $reference);
+      } else if ($elm) {
+        $parent.insertBefore($fragment, $elm);
       } else {
         $parent.appendChild($fragment);
       }
@@ -591,7 +598,7 @@ export function HostElement(props: {
         console.warn("refresh parent not found");
         return;
       }
-      console.log("[dom]refresh - before", [...$children]);
+      console.log(props.t + "[dom]refresh - start", [...$children]);
       // 1. Remove (descending order to keep indices stable)
       const sorted_removed = [...removed].sort((a, b) => b.idx - a.idx);
       const removed_elements: (TimelessElement | null)[] = [];
