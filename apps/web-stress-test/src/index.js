@@ -72,7 +72,7 @@ function generateData(count) {
 function SearchTablePage() {
   const page = refobj({
     page: 1,
-    pageSize: 100,
+    pageSize: 5,
     total: 1231,
   });
   const totalPages = computed(page, (t) => Math.ceil(t.total / t.pageSize));
@@ -108,642 +108,632 @@ function SearchTablePage() {
   });
   let timer = null;
 
-  return View({ style: { padding: "16px", borderRadius: "8px" } }, [
-    View(
-      {
-        style: {
-          marginBottom: "12px",
-          gap: "8px",
-          alignItems: "center",
-        },
+  return View(
+    {
+      style: {
+        display: "flex",
+        "flex-direction": "column",
+        flex: 1,
+        padding: "16px",
+        "border-radius": "8px",
+        "min-height": 0,
       },
-      [
-        View({}, [
-          View({}, ["Search (5000 rows, 300ms debounce):"]),
-          Input({
-            value: searchInput,
-            placeholder: "Search name, email, department, location...",
-            style: {
-              padding: "6px 10px",
-              border: "1px solid #ddd",
-              "border-radius": "4px",
-              "font-size": "14px",
-            },
-            onInput(event) {
-              searchInput.as(event.target.value);
-            },
-          }),
-        ]),
-        View({}, [
-          View(
-            {
-              style: {
-                padding: "6px 12px",
-                background: "#007bff",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "14px",
-              },
-              onClick() {
-                // const next_data = Array.from(
-                //   { length: page.value.pageSize },
-                //   (_, i) => {
-                //     return generate_user(i, {});
-                //   },
-                // );
-                // data.as(next_data);
-                // data.as((d) => {
-                // const newData = [...d];
-                // const user = newData.find((u) => u.id === 2);
-                // if (user) {
-                //   user.age = (user.age || 0) + 1;
-                // }
-                // return newData;
-                // });
-                // if (timer) return;
-                // timer = setInterval(() => {
-                data.as((d) => {
-                  // const newData = [...d];
-                  // const user = newData.find((u) => u.id === 2);
-                  // if (user) {
-                  //   user.age = (user.age || 0) + 1;
-                  // }
-                  // return newData;
-                  return d.map((v) => {
-                    return {
-                      ...v,
-                      age: v.id === 2 ? (v.age || 0) + 1 : v.age,
-                    };
-                  });
-                });
-                // }, 5000);
-              },
-            },
-            ["Start Age+1"],
-          ),
-          View(
-            {
-              style: {
-                padding: "6px 12px",
-                background: "#007bff",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "14px",
-              },
-              onClick() {
-                clearInterval(timer);
-              },
-            },
-            ["Stop Age+1"],
-          ),
-        ]),
-        View({}, [
-          computed(filteredData, (t) => `Showing ${t.length} of `),
-          computed(page, (t) => t.total),
-        ]),
-      ],
-    ),
-    View(
-      {
-        style: {
-          "border-radius": "4px",
-          overflow: "hidden",
-          "font-size": "13px",
-          border: "1px solid #ddd",
-          "border-top": "none",
-        },
-      },
-      [
-        View(
-          {
-            style: {
-              display: "grid",
-              "grid-template-columns":
-                "60px 120px 200px 80px 60px 80px 100px 1fr",
-              border: "1px solid #ddd",
-              "border-left": "none",
-              "border-right": "none",
-            },
-          },
-          [
-            View(
-              {
-                style: {
-                  padding: "10px",
-                  "font-weight": "600",
-                  // background: "#f8f9fa",
-                  "border-right": "1px solid #ddd",
-                },
-              },
-              ["ID"],
-            ),
-            View(
-              {
-                style: {
-                  padding: "10px",
-                  "font-weight": "600",
-                  // background: "#f8f9fa",
-                  "border-right": "1px solid #ddd",
-                },
-              },
-              ["Name"],
-            ),
-            View(
-              {
-                style: {
-                  padding: "10px",
-                  "font-weight": "600",
-                  // background: "#f8f9fa",
-                  "border-right": "1px solid #ddd",
-                },
-              },
-              ["Email"],
-            ),
-            View(
-              {
-                style: {
-                  padding: "10px",
-                  "font-weight": "600",
-                  // background: "#f8f9fa",
-                  "border-right": "1px solid #ddd",
-                },
-              },
-              ["Role"],
-            ),
-            View(
-              {
-                style: {
-                  padding: "10px",
-                  "font-weight": "600",
-                  // background: "#f8f9fa",
-                  "border-right": "1px solid #ddd",
-                },
-              },
-              ["Age"],
-            ),
-            View(
-              {
-                style: {
-                  padding: "10px",
-                  "font-weight": "600",
-                  // background: "#f8f9fa",
-                  "border-right": "1px solid #ddd",
-                },
-              },
-              ["Status"],
-            ),
-            View(
-              {
-                style: {
-                  padding: "10px",
-                  "font-weight": "600",
-                  // background: "#f8f9fa",
-                  "border-right": "1px solid #ddd",
-                },
-              },
-              ["Dept"],
-            ),
-            View(
-              {
-                style: {
-                  padding: "10px",
-                  "font-weight": "600",
-                  // "border-right": "1px solid #ddd",
-                },
-              },
-              ["Loc"],
-            ),
-          ],
-        ),
-        // View(
-        //   {
-        //     style: {
-        //       "max-height": "530px",
-        //       height: "auto",
-        //       "border-top": "none",
-        //     },
-        //   },
-        //   [
-        //     View(
-        //       {
-        //         style: {
-        //           "overflow-y": "auto",
-        //         },
-        //       },
-        //       [,],
-        //     ),
-        //   ],
-        // ),
-        ListView({
+    },
+    [
+      View(
+        {
           style: {
-            "max-height": "530px",
-            height: "auto",
+            "margin-bottom": "12px",
+            gap: "8px",
+            "align-items": "center",
+            "flex-shrink": 0,
           },
-          key: "id",
-          size: 30,
-          // itemHeight: 31.5,
-          itemHeight: 186.5,
-          each: filteredData,
-          render(row, idx) {
-            return View(
+        },
+        [
+          View({}, [
+            View({}, ["Search (5000 rows, 300ms debounce):"]),
+            View(
               {
                 style: {
-                  display: "grid",
-                  "grid-template-columns":
-                    "60px 120px 200px 80px 60px 80px 100px 1fr",
-                  width: "100%",
-                  "border-bottom": computed(idx, (t) =>
-                    t === filteredData.value.length - 1
-                      ? "none"
-                      : "1px solid #ddd",
-                  ),
-                  // "border-right": "1px solid #ddd",
+                  display: "flex",
                 },
               },
               [
+                Input({
+                  value: searchInput,
+                  placeholder: "Search name, email, department, location...",
+                  style: {
+                    padding: "6px 10px",
+                    border: "1px solid #ddd",
+                    "border-radius": "4px",
+                    "font-size": "14px",
+                  },
+                  onInput(event) {
+                    searchInput.as(event.target.value);
+                  },
+                }),
                 View(
                   {
                     style: {
-                      padding: "8px",
-                      "border-right": "1px solid #ddd",
+                      padding: "6px 12px",
+                      background: "#007bff",
+                      "border-radius": "4px",
+                      cursor: "pointer",
+                      "font-size": "14px",
+                    },
+                    onClick() {
+                      // const next_data = Array.from(
+                      //   { length: page.value.pageSize },
+                      //   (_, i) => {
+                      //     return generate_user(i, {});
+                      //   },
+                      // );
+                      // data.as(next_data);
+                      // data.as((d) => {
+                      // const newData = [...d];
+                      // const user = newData.find((u) => u.id === 2);
+                      // if (user) {
+                      //   user.age = (user.age || 0) + 1;
+                      // }
+                      // return newData;
+                      // });
+                      // if (timer) return;
+                      // timer = setInterval(() => {
+                      // data.as((d) => {
+                      //   return d.map((v) => {
+                      //     return {
+                      //       ...v,
+                      //       age: v.id === 2 ? (v.age || 0) + 1 : v.age,
+                      //     };
+                      //   });
+                      // });
+                      const user = data.find((v) => v.id === 2);
+                      console.log(user.value.age);
+                      if (user) {
+                        user.set("age", user.value.age + 1);
+                        // user.as((u) => ({
+                        //   ...u,
+                        //   age: (u.age || 0) + 1,
+                        // }));
+                      }
+                      console.log(user.value.age);
+                      // }, 5000);
                     },
                   },
-                  [computed(row, (t) => t.id)],
+                  ["Start Age+1"],
                 ),
                 View(
                   {
                     style: {
-                      padding: "8px",
-                      "border-right": "1px solid #ddd",
+                      padding: "6px 12px",
+                      background: "#007bff",
+                      "border-radius": "4px",
+                      cursor: "pointer",
+                      "font-size": "14px",
+                    },
+                    onClick() {
+                      clearInterval(timer);
                     },
                   },
-                  [computed(row, (t) => t.name)],
-                ),
-                View(
-                  {
-                    style: {
-                      padding: "8px",
-                      "border-right": "1px solid #ddd",
-                    },
-                  },
-                  [computed(row, (t) => t.email)],
-                ),
-                View(
-                  {
-                    style: {
-                      padding: "8px",
-                      "border-right": "1px solid #ddd",
-                    },
-                  },
-                  [
-                    computed(row, (t) => {
-                      return t.role.text;
-                    }),
-                  ],
-                ),
-                View(
-                  {
-                    style: {
-                      padding: "8px",
-                      "border-right": "1px solid #ddd",
-                    },
-                  },
-                  [computed(row, (t) => t.age)],
-                ),
-                View(
-                  {
-                    style: {
-                      padding: "8px",
-                      "border-right": "1px solid #ddd",
-                      color: computed(row, (t) =>
-                        t.status === "Active" ? "#28a745" : "#dc3545",
-                      ),
-                    },
-                  },
-                  [computed(row, (t) => t.status)],
-                ),
-                View(
-                  {
-                    style: {
-                      padding: "8px",
-                      "border-right": "1px solid #ddd",
-                    },
-                  },
-                  [computed(row, (t) => t.department)],
-                ),
-                View(
-                  {
-                    style: {
-                      padding: "8px",
-                      // "border-right": "1px solid #ddd",
-                    },
-                  },
-                  [
-                    For({
-                      key: "id",
-                      each: computed(row, (t) => t.skills),
-                      render(skill) {
-                        return View({}, [
-                          View({}, [computed(skill, (t) => t.name)]),
-                          View({}, [
-                            For({
-                              key: "id",
-                              each: computed(skill, (t) => t.histories),
-                              render(history) {
-                                return View({}, [
-                                  View({}, [computed(history, (t) => t.text)]),
-                                  View({}, [computed(history, (t) => t.time)]),
-                                  View({}, [computed(history, (t) => t.value)]),
-                                ]);
-                              },
-                            }),
-                          ]),
-                        ]);
-                      },
-                    }),
-                  ],
+                  ["Stop Age+1"],
                 ),
               ],
-            );
+            ),
+          ]),
+
+          View({}, [
+            computed(filteredData, (t) => `Showing ${t.length} of `),
+            computed(page, (t) => t.total),
+          ]),
+        ],
+      ),
+      View(
+        {
+          style: {
+            "border-radius": "4px",
+            overflow: "hidden",
+            "font-size": "13px",
+            border: "1px solid #ddd",
+            "border-top": "none",
+            display: "flex",
+            "flex-direction": "column",
+            flex: 1,
+            "min-height": 0,
           },
-        }),
-      ],
-    ),
-    // Pagination
-    View(
-      {
-        style: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "8px",
-          padding: "12px",
-          borderTop: "1px solid #ddd",
         },
-      },
-      [
-        Button(
-          {
-            style: {
-              padding: "6px 12px",
-              background: computed(page, (t) =>
-                t.page <= 1 ? "#ccc" : "#007bff",
-              ),
-              "border-radius": "4px",
-              cursor: computed(page, (t) =>
-                t.page <= 1 ? "not-allowed" : "pointer",
-              ),
-              "font-size": "14px",
-              color: "#fff",
+        [
+          View(
+            {
+              style: {
+                display: "grid",
+                "grid-template-columns":
+                  "60px 120px 200px 80px 60px 80px 100px 1fr",
+                border: "1px solid #ddd",
+                "border-left": "none",
+                "border-right": "none",
+                flexShrink: 0,
+              },
             },
-            onClick() {
-              if (page.value.page > 1) {
-                page.as((p) => ({ ...p, page: p.page - 1 }));
-                data.as(
-                  Array.from({ length: page.value.pageSize }, (_, i) => {
-                    return generate_user(
-                      (page.value.page - 1) * page.value.pageSize + i,
-                      {},
-                    );
-                  }),
-                );
-              }
-            },
-          },
-          ["Previous"],
-        ),
-        View(
-          {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            },
-          },
-          [
-            View(
-              {
-                style: {
-                  padding: "4px 8px",
-                  background: computed(page, (t) =>
-                    t.page === 1 ? "#007bff" : "#f0f0f0",
-                  ),
-                  "border-radius": "4px",
-                  cursor: "pointer",
-                  "font-size": "14px",
-                  color: computed(page, (t) =>
-                    t.page === 1 ? "#fff" : "#333",
-                  ),
+            [
+              View(
+                {
+                  style: {
+                    padding: "10px",
+                    "font-weight": "600",
+                    // background: "#f8f9fa",
+                    "border-right": "1px solid #ddd",
+                  },
                 },
-                onClick() {
-                  if (page.value.page === 1) {
-                    return;
-                  }
-                  page.as((p) => ({ ...p, page: 1 }));
+                ["ID"],
+              ),
+              View(
+                {
+                  style: {
+                    padding: "10px",
+                    "font-weight": "600",
+                    // background: "#f8f9fa",
+                    "border-right": "1px solid #ddd",
+                  },
+                },
+                ["Name"],
+              ),
+              View(
+                {
+                  style: {
+                    padding: "10px",
+                    "font-weight": "600",
+                    // background: "#f8f9fa",
+                    "border-right": "1px solid #ddd",
+                  },
+                },
+                ["Email"],
+              ),
+              View(
+                {
+                  style: {
+                    padding: "10px",
+                    "font-weight": "600",
+                    // background: "#f8f9fa",
+                    "border-right": "1px solid #ddd",
+                  },
+                },
+                ["Role"],
+              ),
+              View(
+                {
+                  style: {
+                    padding: "10px",
+                    "font-weight": "600",
+                    // background: "#f8f9fa",
+                    "border-right": "1px solid #ddd",
+                  },
+                },
+                ["Age"],
+              ),
+              View(
+                {
+                  style: {
+                    padding: "10px",
+                    "font-weight": "600",
+                    // background: "#f8f9fa",
+                    "border-right": "1px solid #ddd",
+                  },
+                },
+                ["Status"],
+              ),
+              View(
+                {
+                  style: {
+                    padding: "10px",
+                    "font-weight": "600",
+                    // background: "#f8f9fa",
+                    "border-right": "1px solid #ddd",
+                  },
+                },
+                ["Dept"],
+              ),
+              View(
+                {
+                  style: {
+                    padding: "10px",
+                    "font-weight": "600",
+                    // "border-right": "1px solid #ddd",
+                  },
+                },
+                ["Loc"],
+              ),
+            ],
+          ),
+          // View(
+          //   {
+          //     style: {
+          //       "max-height": "530px",
+          //       height: "auto",
+          //       "border-top": "none",
+          //     },
+          //   },
+          //   [
+          //     View(
+          //       {
+          //         style: {
+          //           "overflow-y": "auto",
+          //         },
+          //       },
+          //       [,],
+          //     ),
+          //   ],
+          // ),
+          ListView({
+            style: {
+              flex: 1,
+              "min-height": 0,
+              overflow: "auto",
+            },
+            key: "id",
+            size: 30,
+            // itemHeight: 31.5,
+            itemHeight: 186.5,
+            each: filteredData,
+            render(row, idx) {
+              return View(
+                {
+                  style: {
+                    display: "grid",
+                    "grid-template-columns":
+                      "60px 120px 200px 80px 60px 80px 100px 1fr",
+                    width: "100%",
+                    "border-bottom": computed(idx, (t) =>
+                      t === filteredData.value.length - 1
+                        ? "none"
+                        : "1px solid #ddd",
+                    ),
+                    // "border-right": "1px solid #ddd",
+                  },
+                },
+                [
+                  View(
+                    {
+                      style: {
+                        padding: "8px",
+                        "border-right": "1px solid #ddd",
+                      },
+                    },
+                    [computed(row, (t) => t.id)],
+                  ),
+                  View(
+                    {
+                      style: {
+                        padding: "8px",
+                        "border-right": "1px solid #ddd",
+                      },
+                    },
+                    [computed(row, (t) => t.name)],
+                  ),
+                  View(
+                    {
+                      style: {
+                        padding: "8px",
+                        "border-right": "1px solid #ddd",
+                      },
+                    },
+                    [computed(row, (t) => t.email)],
+                  ),
+                  View(
+                    {
+                      style: {
+                        padding: "8px",
+                        "border-right": "1px solid #ddd",
+                      },
+                    },
+                    [
+                      computed(row, (t) => {
+                        return t.role.text;
+                      }),
+                    ],
+                  ),
+                  View(
+                    {
+                      style: {
+                        padding: "8px",
+                        "border-right": "1px solid #ddd",
+                      },
+                    },
+                    [computed(row, (t) => t.age)],
+                  ),
+                  View(
+                    {
+                      style: {
+                        padding: "8px",
+                        "border-right": "1px solid #ddd",
+                        color: computed(row, (t) =>
+                          t.status === "Active" ? "#28a745" : "#dc3545",
+                        ),
+                      },
+                    },
+                    [computed(row, (t) => t.status)],
+                  ),
+                  View(
+                    {
+                      style: {
+                        padding: "8px",
+                        "border-right": "1px solid #ddd",
+                      },
+                    },
+                    [computed(row, (t) => t.department)],
+                  ),
+                  View(
+                    {
+                      style: {
+                        padding: "8px",
+                        // "border-right": "1px solid #ddd",
+                      },
+                    },
+                    [
+                      For({
+                        key: "id",
+                        each: computed(row, (t) => t.skills),
+                        render(skill) {
+                          return View({}, [
+                            View({}, [computed(skill, (t) => t.name)]),
+                            View({}, [
+                              For({
+                                key: "id",
+                                each: computed(skill, (t) => t.histories),
+                                render(history) {
+                                  return View({}, [
+                                    View({}, [
+                                      computed(history, (t) => t.text),
+                                    ]),
+                                    View({}, [
+                                      computed(history, (t) => t.time),
+                                    ]),
+                                    View({}, [
+                                      computed(history, (t) => t.value),
+                                    ]),
+                                  ]);
+                                },
+                              }),
+                            ]),
+                          ]);
+                        },
+                      }),
+                    ],
+                  ),
+                ],
+              );
+            },
+          }),
+        ],
+      ),
+      // Pagination
+      View(
+        {
+          style: {
+            display: "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            gap: "8px",
+            padding: "12px",
+            "flex-shrink": 0,
+          },
+        },
+        [
+          Button(
+            {
+              style: {
+                padding: "6px 12px",
+                background: computed(page, (t) =>
+                  t.page <= 1 ? "#ccc" : "#007bff",
+                ),
+                "border-radius": "4px",
+                cursor: computed(page, (t) =>
+                  t.page <= 1 ? "not-allowed" : "pointer",
+                ),
+                "font-size": "14px",
+                color: "#fff",
+              },
+              onClick() {
+                if (page.value.page > 1) {
+                  page.as((p) => ({ ...p, page: p.page - 1 }));
                   data.as(
                     Array.from({ length: page.value.pageSize }, (_, i) => {
-                      return generate_user(i, {});
+                      return generate_user(
+                        (page.value.page - 1) * page.value.pageSize + i,
+                        {},
+                      );
                     }),
-                    { reset: true },
+                  );
+                }
+              },
+            },
+            ["Previous"],
+          ),
+          View(
+            {
+              style: {
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              },
+            },
+            [
+              View(
+                {
+                  style: {
+                    padding: "4px 8px",
+                    background: computed(page, (t) =>
+                      t.page === 1 ? "#007bff" : "#f0f0f0",
+                    ),
+                    "border-radius": "4px",
+                    cursor: "pointer",
+                    "font-size": "14px",
+                    color: computed(page, (t) =>
+                      t.page === 1 ? "#fff" : "#333",
+                    ),
+                  },
+                  onClick() {
+                    if (page.value.page === 1) {
+                      return;
+                    }
+                    page.as((p) => ({ ...p, page: 1 }));
+                    data.as(
+                      Array.from({ length: page.value.pageSize }, (_, i) => {
+                        return generate_user(i, {});
+                      }),
+                      { reset: true },
+                    );
+                  },
+                },
+                ["1"],
+              ),
+              Show({
+                when: computed(page, (t) => {
+                  const totalPages = Math.ceil(t.total / t.pageSize);
+                  if (t.page > 3) {
+                    return true;
+                  }
+                  return false;
+                }),
+                ok() {
+                  return View(
+                    {
+                      style: {
+                        padding: "4px 8px",
+                        "font-size": "14px",
+                      },
+                    },
+                    ["..."],
                   );
                 },
-              },
-              ["1"],
-            ),
-            Show({
-              when: computed(page, (t) => {
-                const totalPages = Math.ceil(t.total / t.pageSize);
-                if (t.page > 3) {
-                  return true;
-                }
-                return false;
               }),
-              ok() {
-                return View(
-                  {
-                    style: {
-                      padding: "4px 8px",
-                      "font-size": "14px",
+              For({
+                each: computed(page, (t) => {
+                  const totalPages = Math.ceil(t.total / t.pageSize);
+                  const pages = [];
+                  const start = Math.max(2, t.page - 1);
+                  const end = Math.min(totalPages - 1, t.page + 1);
+                  for (let i = start; i <= end; i++) {
+                    pages.push(i);
+                  }
+                  return pages;
+                }),
+                render(p) {
+                  return View(
+                    {
+                      style: {
+                        padding: "4px 8px",
+                        background: computed(page, (t) =>
+                          t.page === p ? "#007bff" : "#f0f0f0",
+                        ),
+                        "border-radius": "4px",
+                        cursor: "pointer",
+                        "font-size": "14px",
+                        color: computed(page, (t) =>
+                          t.page === p ? "#fff" : "#333",
+                        ),
+                      },
+                      onClick() {
+                        console.log("[]click page", p, page.value.page);
+                        if (p === page.value.page) {
+                          return;
+                        }
+                        page.as((pg) => ({ ...pg, page: p }));
+                        const startIndex = (p - 1) * page.value.pageSize;
+                        const remaining = page.value.total - startIndex;
+                        const count = Math.min(page.value.pageSize, remaining);
+                        data.as(
+                          Array.from({ length: count }, (_, i) => {
+                            return generate_user(startIndex + i, {});
+                          }),
+                          { reset: true },
+                        );
+                      },
                     },
-                  },
-                  ["..."],
-                );
-              },
-            }),
-            For({
-              each: computed(page, (t) => {
-                const totalPages = Math.ceil(t.total / t.pageSize);
-                const pages = [];
-                const start = Math.max(2, t.page - 1);
-                const end = Math.min(totalPages - 1, t.page + 1);
-                for (let i = start; i <= end; i++) {
-                  pages.push(i);
-                }
-                return pages;
-              }),
-              render(p) {
-                return View(
-                  {
-                    style: {
-                      padding: "4px 8px",
-                      background: computed(page, (t) =>
-                        t.page === p ? "#007bff" : "#f0f0f0",
-                      ),
-                      "border-radius": "4px",
-                      cursor: "pointer",
-                      "font-size": "14px",
-                      color: computed(page, (t) =>
-                        t.page === p ? "#fff" : "#333",
-                      ),
-                    },
-                    onClick() {
-                      console.log("[]click page", p, page.value.page);
-                      if (p === page.value.page) {
-                        return;
-                      }
-                      page.as((pg) => ({ ...pg, page: p }));
-                      const startIndex = (p - 1) * page.value.pageSize;
-                      const remaining = page.value.total - startIndex;
-                      const count = Math.min(page.value.pageSize, remaining);
-                      data.as(
-                        Array.from({ length: count }, (_, i) => {
-                          return generate_user(startIndex + i, {});
-                        }),
-                        { reset: true },
-                      );
-                    },
-                  },
-                  [p],
-                );
-              },
-            }),
-            Show({
-              when: computed(page, (t) => {
-                const totalPages = Math.ceil(t.total / t.pageSize);
-                if (t.page < totalPages - 2 && totalPages > 3) {
-                  return true;
-                }
-                return false;
-              }),
-              ok() {
-                return View(
-                  {
-                    style: {
-                      padding: "4px 8px",
-                      "font-size": "14px",
-                    },
-                  },
-                  ["..."],
-                );
-              },
-            }),
-            Show({
-              when: computed(totalPages, (t) => {
-                return t > 1;
-              }),
-              ok() {
-                return View(
-                  {
-                    style: {
-                      padding: "4px 8px",
-                      background: combine({ page, totalPages }, (t) =>
-                        t.page.page === t.totalPages ? "#007bff" : "#f0f0f0",
-                      ),
-                      "border-radius": "4px",
-                      cursor: "pointer",
-                      "font-size": "14px",
-                      color: combine({ page, totalPages }, (t) =>
-                        t.page === t.totalPages ? "#fff" : "#333",
-                      ),
-                    },
-                    onClick() {
-                      const totalPages = Math.ceil(
-                        page.value.total / page.value.pageSize,
-                      );
-                      page.as((p) => ({ ...p, page: totalPages }));
-                      const startIndex = (totalPages - 1) * page.value.pageSize;
-                      const remaining = page.value.total - startIndex;
-                      const count = Math.min(page.value.pageSize, remaining);
-                      data.as(
-                        Array.from({ length: count }, (_, i) => {
-                          return generate_user(startIndex + i, {});
-                        }),
-                      );
-                    },
-                  },
-                  [computed(page, (t) => Math.ceil(t.total / t.pageSize))],
-                );
-              },
-            }),
-          ],
-        ),
-        Button(
-          {
-            style: {
-              padding: "6px 12px",
-              background: computed(page, (t) =>
-                t.page * t.pageSize >= t.total ? "#ccc" : "#007bff",
-              ),
-              "border-radius": "4px",
-              cursor: computed(page, (t) =>
-                t.page * t.pageSize >= t.total ? "not-allowed" : "pointer",
-              ),
-              "font-size": "14px",
-              "font-size": "14px",
-              color: "#fff",
-            },
-            onClick() {
-              if (page.value.page * page.value.pageSize < page.value.total) {
-                page.as((p) => ({ ...p, page: p.page + 1 }));
-                const startIndex = (page.value.page - 1) * page.value.pageSize;
-                const remaining = page.value.total - startIndex;
-                const count = Math.min(page.value.pageSize, remaining);
-                data.as(
-                  Array.from({ length: count }, (_, i) => {
-                    return generate_user(startIndex + i, {});
-                  }),
-                );
-              }
-            },
-          },
-          ["Next"],
-        ),
-        View(
-          {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              "margin-left": "16px",
-            },
-          },
-          [
-            View({ style: { "font-size": "14px" } }, ["Go to:"]),
-            Input({
-              style: {
-                width: "50px",
-                padding: "4px 8px",
-                "border-radius": "4px",
-                border: "1px solid #ddd",
-                "font-size": "14px",
-                "text-align": "center",
-              },
-              value: ref(""),
-              placeholder: "1",
-              onKeyDown(event) {
-                if (event.key === "Enter") {
-                  const totalPages = Math.ceil(
-                    page.value.total / page.value.pageSize,
+                    [p],
                   );
-                  let targetPage = parseInt(event.target.value, 10);
-                  if (isNaN(targetPage) || targetPage < 1) {
-                    targetPage = 1;
+                },
+              }),
+              Show({
+                when: computed(page, (t) => {
+                  const totalPages = Math.ceil(t.total / t.pageSize);
+                  if (t.page < totalPages - 2 && totalPages > 3) {
+                    return true;
                   }
-                  if (targetPage > totalPages) {
-                    targetPage = totalPages;
-                  }
-                  page.as((p) => ({ ...p, page: targetPage }));
-                  const startIndex = (targetPage - 1) * page.value.pageSize;
+                  return false;
+                }),
+                ok() {
+                  return View(
+                    {
+                      style: {
+                        padding: "4px 8px",
+                        "font-size": "14px",
+                      },
+                    },
+                    ["..."],
+                  );
+                },
+              }),
+              Show({
+                when: computed(totalPages, (t) => {
+                  return t > 1;
+                }),
+                ok() {
+                  return View(
+                    {
+                      style: {
+                        padding: "4px 8px",
+                        background: combine({ page, totalPages }, (t) =>
+                          t.page.page === t.totalPages ? "#007bff" : "#f0f0f0",
+                        ),
+                        "border-radius": "4px",
+                        cursor: "pointer",
+                        "font-size": "14px",
+                        color: combine({ page, totalPages }, (t) =>
+                          t.page === t.totalPages ? "#fff" : "#333",
+                        ),
+                      },
+                      onClick() {
+                        const totalPages = Math.ceil(
+                          page.value.total / page.value.pageSize,
+                        );
+                        page.as((p) => ({ ...p, page: totalPages }));
+                        const startIndex =
+                          (totalPages - 1) * page.value.pageSize;
+                        const remaining = page.value.total - startIndex;
+                        const count = Math.min(page.value.pageSize, remaining);
+                        data.as(
+                          Array.from({ length: count }, (_, i) => {
+                            return generate_user(startIndex + i, {});
+                          }),
+                        );
+                      },
+                    },
+                    [computed(page, (t) => Math.ceil(t.total / t.pageSize))],
+                  );
+                },
+              }),
+            ],
+          ),
+          Button(
+            {
+              style: {
+                padding: "6px 12px",
+                background: computed(page, (t) =>
+                  t.page * t.pageSize >= t.total ? "#ccc" : "#007bff",
+                ),
+                "border-radius": "4px",
+                cursor: computed(page, (t) =>
+                  t.page * t.pageSize >= t.total ? "not-allowed" : "pointer",
+                ),
+                "font-size": "14px",
+                "font-size": "14px",
+                color: "#fff",
+              },
+              onClick() {
+                if (page.value.page * page.value.pageSize < page.value.total) {
+                  page.as((p) => ({ ...p, page: p.page + 1 }));
+                  const startIndex =
+                    (page.value.page - 1) * page.value.pageSize;
                   const remaining = page.value.total - startIndex;
                   const count = Math.min(page.value.pageSize, remaining);
                   data.as(
@@ -751,20 +741,69 @@ function SearchTablePage() {
                       return generate_user(startIndex + i, {});
                     }),
                   );
-                  event.target.value = "";
                 }
               },
-            }),
-            View({ style: { "font-size": "14px" } }, [
-              " / ",
-              computed(page, (t) => Math.ceil(t.total / t.pageSize)),
-            ]),
-          ],
-        ),
-        View({}, [`Total: `, computed(page, (t) => t.total)]),
-      ],
-    ),
-  ]);
+            },
+            ["Next"],
+          ),
+          View(
+            {
+              style: {
+                display: "flex",
+                "align-items": "center",
+                gap: "4px",
+                "margin-left": "16px",
+              },
+            },
+            [
+              View({ style: { "font-size": "14px" } }, ["Go to:"]),
+              Input({
+                style: {
+                  width: "50px",
+                  padding: "4px 8px",
+                  "border-radius": "4px",
+                  border: "1px solid #ddd",
+                  "font-size": "14px",
+                  "text-align": "center",
+                },
+                value: ref(""),
+                placeholder: "1",
+                onKeyDown(event) {
+                  if (event.key === "Enter") {
+                    const totalPages = Math.ceil(
+                      page.value.total / page.value.pageSize,
+                    );
+                    let targetPage = parseInt(event.target.value, 10);
+                    if (isNaN(targetPage) || targetPage < 1) {
+                      targetPage = 1;
+                    }
+                    if (targetPage > totalPages) {
+                      targetPage = totalPages;
+                    }
+                    page.as((p) => ({ ...p, page: targetPage }));
+                    const startIndex = (targetPage - 1) * page.value.pageSize;
+                    const remaining = page.value.total - startIndex;
+                    const count = Math.min(page.value.pageSize, remaining);
+                    data.as(
+                      Array.from({ length: count }, (_, i) => {
+                        return generate_user(startIndex + i, {});
+                      }),
+                    );
+                    event.target.value = "";
+                  }
+                },
+              }),
+              View({ style: { "font-size": "14px" } }, [
+                " / ",
+                computed(page, (t) => Math.ceil(t.total / t.pageSize)),
+              ]),
+            ],
+          ),
+          View({}, [`Total: `, computed(page, (t) => t.total)]),
+        ],
+      ),
+    ],
+  );
 }
 
 function TablePage() {
@@ -818,10 +857,10 @@ function TablePage() {
     View(
       {
         style: {
-          marginBottom: "12px",
           display: "flex",
+          "align-items": "center",
           gap: "8px",
-          alignItems: "center",
+          "margin-bottom": "12px",
         },
       },
       [
@@ -832,8 +871,8 @@ function TablePage() {
           style: {
             padding: "6px 10px",
             border: "1px solid #ddd",
-            borderRadius: "4px",
-            fontSize: "14px",
+            "border-radius": "4px",
+            "font-size": "14px",
           },
           onInput(event) {
             searchQuery.as(event.target.value);
@@ -849,9 +888,9 @@ function TablePage() {
             style: {
               padding: "6px 12px",
               background: "#28a745",
-              borderRadius: "4px",
+              "border-radius": "4px",
               cursor: "pointer",
-              fontSize: "14px",
+              "font-size": "14px",
             },
           },
           ["Refresh"],
@@ -867,9 +906,9 @@ function TablePage() {
             style: {
               padding: "6px 12px",
               background: "#dc3545",
-              borderRadius: "4px",
+              "border-radius": "4px",
               cursor: "pointer",
-              fontSize: "14px",
+              "font-size": "14px",
             },
           },
           ["Stop Age+1"],
@@ -1348,124 +1387,144 @@ function ApplicationView() {
     multishow: 0,
   });
 
-  return View({}, [
-    View(
-      {
-        class: "nav",
-        style: {
-          display: "flex",
-          gap: "8px",
-          flexWrap: "wrap",
+  return View(
+    { style: { height: "100%", display: "flex", "flex-direction": "column" } },
+    [
+      View(
+        {
+          class: "nav",
+          style: {
+            display: "flex",
+            gap: "8px",
+            padding: "12px",
+            "flex-wrap": "wrap",
+            "flex-shrink": 0,
+          },
         },
-      },
-      [
-        View(
-          {
-            onClick() {
-              currentPage.as("table");
-              pageStats.as((s) => ({ ...s, table: s.table + 1 }));
+        [
+          View(
+            {
+              onClick() {
+                currentPage.as("table");
+                pageStats.as((s) => ({ ...s, table: s.table + 1 }));
+              },
+              style: {
+                background:
+                  currentPage.value === "table" ? "#0056b3" : "#007bff",
+              },
             },
-            style: {
-              background: currentPage.value === "table" ? "#0056b3" : "#007bff",
+            ["Table (1000 rows)"],
+          ),
+          View(
+            {
+              onClick() {
+                currentPage.as("searchtable");
+                pageStats.as((s) => ({ ...s, searchtable: s.searchtable + 1 }));
+              },
+              style: {
+                background:
+                  currentPage.value === "searchtable" ? "#0056b3" : "#007bff",
+              },
             },
+            ["SearchTable (5000 rows)"],
+          ),
+          View(
+            {
+              onClick() {
+                currentPage.as("form");
+                pageStats.as((s) => ({ ...s, form: s.form + 1 }));
+              },
+              style: {
+                background:
+                  currentPage.value === "form" ? "#0056b3" : "#007bff",
+              },
+            },
+            ["Form"],
+          ),
+          View(
+            {
+              onClick() {
+                currentPage.as("dashboard");
+                pageStats.as((s) => ({ ...s, dashboard: s.dashboard + 1 }));
+              },
+              style: {
+                background:
+                  currentPage.value === "dashboard" ? "#0056b3" : "#007bff",
+              },
+            },
+            ["Dashboard"],
+          ),
+          View(
+            {
+              onClick() {
+                currentPage.as("multishow");
+                pageStats.as((s) => ({ ...s, multishow: s.multishow + 1 }));
+              },
+              style: {
+                background:
+                  currentPage.value === "multishow" ? "#0056b3" : "#007bff",
+              },
+            },
+            ["MultiShow"],
+          ),
+        ],
+      ),
+      // View(
+      //   {
+      //     style: {
+      //       padding: "8px",
+      //       borderRadius: "4px",
+      //       marginBottom: "16px",
+      //       fontSize: "12px",
+      //       flexShrink: 0,
+      //     },
+      //   },
+      //   ["Page visits: ", JSON.stringify(pageStats.value)],
+      // ),
+      View(
+        {
+          style: {
+            flex: 1,
+            "min-height": 0,
+            display: "flex",
+            "flex-direction": "column",
           },
-          ["Table (1000 rows)"],
-        ),
-        View(
-          {
-            onClick() {
-              currentPage.as("searchtable");
-              pageStats.as((s) => ({ ...s, searchtable: s.searchtable + 1 }));
-            },
-            style: {
-              background:
-                currentPage.value === "searchtable" ? "#0056b3" : "#007bff",
-            },
-          },
-          ["SearchTable (5000 rows)"],
-        ),
-        View(
-          {
-            onClick() {
-              currentPage.as("form");
-              pageStats.as((s) => ({ ...s, form: s.form + 1 }));
-            },
-            style: {
-              background: currentPage.value === "form" ? "#0056b3" : "#007bff",
-            },
-          },
-          ["Form"],
-        ),
-        View(
-          {
-            onClick() {
-              currentPage.as("dashboard");
-              pageStats.as((s) => ({ ...s, dashboard: s.dashboard + 1 }));
-            },
-            style: {
-              background:
-                currentPage.value === "dashboard" ? "#0056b3" : "#007bff",
-            },
-          },
-          ["Dashboard"],
-        ),
-        View(
-          {
-            onClick() {
-              currentPage.as("multishow");
-              pageStats.as((s) => ({ ...s, multishow: s.multishow + 1 }));
-            },
-            style: {
-              background:
-                currentPage.value === "multishow" ? "#0056b3" : "#007bff",
-            },
-          },
-          ["MultiShow"],
-        ),
-      ],
-    ),
-    View(
-      {
-        style: {
-          padding: "8px",
-          borderRadius: "4px",
-          marginBottom: "16px",
-          fontSize: "12px",
         },
-      },
-      ["Page visits: ", JSON.stringify(pageStats.value)],
-    ),
-    Show({
-      when: computed(currentPage, (p) => p === "table"),
-      ok() {
-        return TablePage();
-      },
-    }),
-    Show({
-      when: computed(currentPage, (p) => p === "searchtable"),
-      ok() {
-        return SearchTablePage();
-      },
-    }),
-    Show({
-      when: computed(currentPage, (p) => p === "form"),
-      ok() {
-        return FormPage();
-      },
-    }),
-    Show({
-      when: computed(currentPage, (p) => p === "dashboard"),
-      ok() {
-        return DashboardPage();
-      },
-    }),
-    Show({
-      when: computed(currentPage, (p) => p === "multishow"),
-      ok() {
-        return MultiShowPage();
-      },
-    }),
-  ]);
+        [
+          Show({
+            when: computed(currentPage, (p) => p === "table"),
+            ok() {
+              return TablePage();
+            },
+          }),
+          Show({
+            when: computed(currentPage, (p) => p === "searchtable"),
+            ok() {
+              return SearchTablePage();
+            },
+          }),
+          Show({
+            when: computed(currentPage, (p) => p === "form"),
+            ok() {
+              return FormPage();
+            },
+          }),
+          Show({
+            when: computed(currentPage, (p) => p === "dashboard"),
+            ok() {
+              return DashboardPage();
+            },
+          }),
+          Show({
+            when: computed(currentPage, (p) => p === "multishow"),
+            ok() {
+              return MultiShowPage();
+            },
+          }),
+        ],
+      ),
+    ],
+  );
 }
 
 render(ApplicationView(), document.getElementById("root"));

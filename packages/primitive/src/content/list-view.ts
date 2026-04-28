@@ -221,8 +221,7 @@ export function ListView<T>(props: ListViewProps<T>) {
               },
               [child],
             );
-            const dataId = wrapped_item.k;
-            _slot_bindings.set(methods._dataIdStr(dataId), r);
+            _slot_bindings.set(methods._dataIdStr(wrapped_item.k), r);
             return r;
           }
           const r = ListItemView(
@@ -550,6 +549,7 @@ export function ListView<T>(props: ListViewProps<T>) {
         if (existing) {
           logger.log("diff existing object", item);
           registryGet(existing.v)?.diff(item);
+          existing.top = i * itemHeight + gutter;
           return existing;
         }
         return {
@@ -791,7 +791,6 @@ export function ListView<T>(props: ListViewProps<T>) {
             const slot = _free_slots.pop()!;
             slot.rebind({
               uid: key,
-              dataId: new_wrapped_item.k,
               top: new_wrapped_item.top,
               height: new_wrapped_item.height,
               payload: new_wrapped_item.v,
@@ -799,6 +798,18 @@ export function ListView<T>(props: ListViewProps<T>) {
             });
             _slot_bindings.set(key, slot);
           }
+        }
+      }
+
+      // 更新所有保留槽位的 top
+      const wrapped_item_by_key = new Map<string, WrappedItemInListView<T>>();
+      for (const w of new_wrapped_items) {
+        wrapped_item_by_key.set(methods._dataIdStr(w.k), w);
+      }
+      for (const [key, slot] of _slot_bindings) {
+        const wrapped_item = wrapped_item_by_key.get(key);
+        if (wrapped_item) {
+          slot.setTop(wrapped_item.top);
         }
       }
 
@@ -1099,22 +1110,20 @@ export function ListView<T>(props: ListViewProps<T>) {
       }
 
       // 计算 enteringCells（在 newDataCells 中但当前未绑定的）
-      for (const cell of sliced_items) {
-        const dataId = cell.k;
-        const key = methods._dataIdStr(dataId);
+      for (const wrapped_item of sliced_items) {
+        const key = methods._dataIdStr(wrapped_item.k);
         logger.log(
           "update - bind slot",
           key,
-          cell.k,
-          cell.v,
+          wrapped_item.k,
+          wrapped_item.v,
           _slot_bindings.has(key),
         );
         if (!_slot_bindings.has(key)) {
           // 从 _freeSlots 取槽位
-          logger.log("update - alloce free to", key, cell.v);
+          logger.log("update - alloce free to", key, wrapped_item.v);
           const slot = _free_slots.pop();
           if (slot) {
-            const wrapped_item = cell;
             const idx_computed = methods.create_idx(wrapped_item);
             const elm = _owner
               ? run_with_owner(_owner, () =>
@@ -1134,11 +1143,10 @@ export function ListView<T>(props: ListViewProps<T>) {
               return null;
             })();
             slot.rebind({
-              uid: cell.k,
-              dataId,
-              top: cell.top,
-              height: cell.height,
-              payload: cell.v,
+              uid: wrapped_item.k,
+              top: wrapped_item.top,
+              height: wrapped_item.height,
+              payload: wrapped_item.v,
               child,
             });
             _slot_bindings.set(key, slot);
@@ -1146,7 +1154,12 @@ export function ListView<T>(props: ListViewProps<T>) {
         } else {
           // stayingCells — 仅更新 top/height
           const slot = _slot_bindings.get(key)!;
-          logger.log("update - stayingCells", key, cell.top, cell.v);
+          logger.log(
+            "update - stayingCells",
+            key,
+            wrapped_item.top,
+            wrapped_item.v,
+          );
           // slot.setTop(cell.top);
         }
       }
