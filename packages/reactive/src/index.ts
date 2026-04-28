@@ -37,6 +37,12 @@ export function generateTrackId(prefix = "track"): string {
   return `${prefix}-${_trackIdCounter}-${Date.now()}`;
 }
 
+export {
+  _current_disposables,
+  start_tracking,
+  stop_tracking,
+} from "./disposal";
+
 export function getDeps<T extends { getDeps?: () => any[] }>(ref: T): any[] {
   return ref.getDeps?.() || [];
 }

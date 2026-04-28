@@ -6,7 +6,8 @@ const { spawn } = require("child_process");
 
 const rootDir = path.resolve(__dirname, "..");
 const packagesDir = path.join(rootDir, "packages");
-const playgroundDir = path.join(rootDir, "apps/web-stress-test");
+const playgroundDir = path.join(rootDir, "apps/js-heap-size");
+// const playgroundDir = path.join(rootDir, "apps/web-stress-test");
 // const playgroundDir = path.join(rootDir, "apps/web-vanilla");
 // const playgroundDir = path.join(rootDir, "apps/web-shadcn");
 // const playgroundDir = path.join(rootDir, "apps/ssr-demo");

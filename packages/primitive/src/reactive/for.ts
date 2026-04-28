@@ -18,7 +18,12 @@ import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
-import { get_owner, run_with_owner } from "@/context/context";
+import {
+  get_owner,
+  create_owner,
+  run_with_owner,
+  dispose_owner,
+} from "@/context/context";
 
 const logger = Logger({ prefix: "primitive", scope: "reactive/for" });
 
@@ -37,6 +42,7 @@ export type ForState<T> = {
   wrapped_items: { k: number; v: T }[];
   children: (TimelessElement | null)[];
   idx_arr: DerivedRef<number>[];
+  item_owners: any[];
 };
 
 export function For<T>(
@@ -73,6 +79,7 @@ export function For<T>(
     wrapped_items: [] as { k: number; v: T }[],
     children: [],
     idx_arr: [],
+    item_owners: [],
   };
 
   const methods = {
@@ -167,9 +174,11 @@ export function For<T>(
       for (let i = 0; i < items.length; i += 1) {
         const item = items[i];
         const idx_computed = methods.create_idx(item);
-        const elm = _owner
-          ? run_with_owner(_owner, () => props.render(item.v, idx_computed))
-          : props.render(item.v, idx_computed);
+        // Create per-item owner for tracking render-created refs
+        const item_owner = create_owner(_owner);
+        const elm = run_with_owner(item_owner, () =>
+          props.render(item.v, idx_computed),
+        );
         state.items[i] = item.v;
         if (isElement(elm)) {
           state.children[i] = elm;
@@ -182,6 +191,7 @@ export function For<T>(
         }
 
         state.idx_arr[i] = idx_computed;
+        state.item_owners[i] = item_owner;
       }
     },
     /** 在指定位置，插入 n 个节点 */
@@ -191,10 +201,13 @@ export function For<T>(
       const inserted_items: T[] = [];
       const inserted_wrapped_items: { k: number; v: T }[] = [];
       const inserted_idx: DerivedRef<number>[] = [];
+      const inserted_owners: any[] = [];
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         const wrapped_item = { k: methods.unique_id(), v: item };
         const idx = methods.create_idx(wrapped_item);
+        // Create per-item owner for tracking render-created refs
+        const item_owner = create_owner(_owner);
         console.log(
           "[primitive]for - insert items",
           isRef(props.each) ? props.each.value : props.each,
@@ -204,9 +217,10 @@ export function For<T>(
         inserted_wrapped_items.push(wrapped_item);
         inserted_items.push(item);
         inserted_idx.push(idx);
-        const child_tmp = _owner
-          ? run_with_owner(_owner, () => props.render(item, idx))
-          : props.render(item, idx);
+        inserted_owners.push(item_owner);
+        const child_tmp = run_with_owner(item_owner, () =>
+          props.render(item, idx),
+        );
         const child = (() => {
           if (isElement(child_tmp)) {
             return child_tmp;
@@ -227,6 +241,7 @@ export function For<T>(
       state.items.splice(index, 0, ...inserted_items);
       state.idx_arr.splice(index, 0, ...inserted_idx);
       state.children.splice(index, 0, ...inserted_elements);
+      state.item_owners.splice(index, 0, ...inserted_owners);
       if ($elm && typeof $elm.insert === "function") {
         $elm.insert(index, inserted_elements);
       }
@@ -235,6 +250,7 @@ export function For<T>(
     remove(index: number, count: number) {
       console.log("[primitive]for - remove", index, count, state.idx_arr);
       const removed_idx: DerivedRef<number>[] = [];
+      const removed_owners: any[] = [];
       for (let i = 0; i < count; i += 1) {
         const item = state.items[index + i];
         if (_existing_map.has(item)) {
@@ -246,15 +262,21 @@ export function For<T>(
           state.idx_arr[index + i],
         );
         removed_idx.push(state.idx_arr[index + i]);
+        removed_owners.push(state.item_owners[index + i]);
       }
       console.log("[primitive]for - remove before destroy idx", removed_idx);
       for (const idx of removed_idx) {
         idx.destroy();
       }
+      // Dispose per-item owners (cleans up render-created refs)
+      for (const owner of removed_owners) {
+        if (owner) dispose_owner(owner);
+      }
       state.wrapped_items.splice(index, count);
       state.items.splice(index, count);
       state.idx_arr.splice(index, count);
       state.children.splice(index, count);
+      state.item_owners.splice(index, count);
       if ($elm && typeof $elm.remove === "function") {
         $elm.remove(index, count);
       }
@@ -269,6 +291,7 @@ export function For<T>(
       splice_arr(state.wrapped_items);
       splice_arr(state.children);
       splice_arr(state.idx_arr);
+      splice_arr(state.item_owners);
 
       // console.log('[]For move', $elm);
       if ($elm && typeof $elm.move === "function") {
@@ -294,6 +317,7 @@ export function For<T>(
       swap_arr(state.wrapped_items);
       swap_arr(state.children);
       swap_arr(state.idx_arr);
+      swap_arr(state.item_owners);
 
       if ($elm && typeof $elm.swap === "function") {
         $elm.swap(indexA, indexB);
@@ -329,6 +353,7 @@ export function For<T>(
       const prev_items = state.items;
       const prev_elements = state.children;
       const prev_index_computed = state.idx_arr;
+      const prev_item_owners = state.item_owners;
       // 1. Prepare target state
       const new_elements: (TimelessElement | null)[] = new Array(
         new_wrapped_items.length,
@@ -338,6 +363,7 @@ export function For<T>(
       const new_index_computed: DerivedRef<number>[] = new Array(
         new_wrapped_items.length,
       );
+      const new_item_owners: any[] = new Array(new_wrapped_items.length);
 
       // 2. Index old items for O(1) lookup
       const old_map = new Map<any, number[]>();
@@ -414,11 +440,10 @@ export function For<T>(
           _add_start = -1;
           const old_idx = prev_indices.shift()!;
           const prev_item = prev_items[old_idx];
-          // Reuse existing DOM element and computed index
+          // Reuse existing DOM element, computed index, and owner
           new_elements[i] = prev_elements[old_idx];
-          // new_children[i] = prev_children[old_idx];
-          // new_original_items[i] = prev_original_items[old_idx];
           new_index_computed[i] = prev_index_computed[old_idx];
+          new_item_owners[i] = prev_item_owners[old_idx];
           // Track moved items only for true reorders, not position shifts caused
           // by removals or insertions.
           // expected = old_idx - (removed old items before old_idx) + (inserted new items before new_idx i)
@@ -451,11 +476,12 @@ export function For<T>(
           }
           const idx_computed = methods.create_idx(new_item);
           new_index_computed[i] = idx_computed;
-          const res = _owner
-            ? run_with_owner(_owner, () =>
-                props.render(new_item.v, idx_computed),
-              )
-            : props.render(new_item.v, idx_computed);
+          // Create per-item owner for tracking render-created refs
+          const item_owner = create_owner(_owner);
+          new_item_owners[i] = item_owner;
+          const res = run_with_owner(item_owner, () =>
+            props.render(new_item.v, idx_computed),
+          );
           new_elements[i] = res;
           added_nodes[added_nodes.length - 1].elements.push(res);
         }
@@ -496,10 +522,13 @@ export function For<T>(
         moved_nodes,
       );
 
-      // Destroy idx_computed for removed items
+      // Destroy idx_computed and dispose owners for removed items
       for (const { idx } of removed_nodes) {
         if (prev_index_computed[idx]) {
           prev_index_computed[idx].destroy();
+        }
+        if (prev_item_owners[idx]) {
+          dispose_owner(prev_item_owners[idx]);
         }
       }
 
@@ -528,6 +557,7 @@ export function For<T>(
       state.items = new_wrapped_items.slice().map((item) => item.v);
       state.idx_arr = new_index_computed;
       state.children = new_elements;
+      state.item_owners = new_item_owners;
 
       return diff;
     },
@@ -580,12 +610,20 @@ export function For<T>(
           v.destroy();
         }
       }
+      // Dispose all per-item owners (cleans up render-created refs)
+      for (let i = 0; i < state.item_owners.length; i += 1) {
+        const owner = state.item_owners[i];
+        if (owner) {
+          dispose_owner(owner);
+        }
+      }
       state.rendered = false;
       state.subscribed = false;
-      // state.items = [];
-      // state.wrapped_items = [];
+      state.items = [];
+      state.wrapped_items = [];
       state.idx_arr = [];
-      // state.children = [];
+      state.item_owners = [];
+      state.children = [];
     },
     _hmr_dispose() {
       _hmr_subs.forEach((fn) => fn());

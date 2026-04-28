@@ -9,6 +9,7 @@ import {
   isRef,
   DepInfo,
 } from "./types";
+import { _current_disposables } from "./disposal";
 
 type RefValue<R> = R extends { __is_ref: true; value: infer T } ? T : R;
 
@@ -123,6 +124,11 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
       });
     },
   };
+
+  // Register with owner's disposal tracking if active
+  if (_current_disposables) {
+    _current_disposables.push(() => res.destroy());
+  }
 
   return res as DerivedRef<T>;
 }

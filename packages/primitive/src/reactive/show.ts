@@ -10,7 +10,13 @@ import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
-import { get_owner, run_with_owner } from "@/context/context";
+import {
+  get_owner,
+  create_owner,
+  run_with_owner,
+  dispose_owner,
+  clear_owner_disposables,
+} from "@/context/context";
 import { useErrorBoundary } from "@/content/error-boundary-context";
 
 const logger = Logger({ prefix: "primitive", scope: "reactive/show" });
@@ -36,7 +42,9 @@ export function Show(props: ShowProps) {
   const { when, onMounted, beforeUnmounted, onUnmounted } = props;
 
   let $elm: any = null;
-  const _owner = get_owner();
+  const _parent_owner = get_owner();
+  // Create own owner so render-created refs are tracked separately from parent
+  const _owner = create_owner(_parent_owner);
 
   const state: ShowState = {
     rendered: false,
@@ -59,7 +67,8 @@ export function Show(props: ShowProps) {
       return [resolved];
     },
     build_children_with_condition(condition: boolean) {
-      // console.log("build_children_with_condition", condition);
+      // Clear old render's disposables before building new children
+      clear_owner_disposables(_owner);
       const children: (TimelessElement | null)[] = [];
       const evaluate = () => {
         try {
@@ -78,7 +87,7 @@ export function Show(props: ShowProps) {
           throw error;
         }
       };
-      const next = _owner ? run_with_owner(_owner, evaluate) : evaluate();
+      const next = run_with_owner(_owner, evaluate);
       for (let i = 0; i < next.length; i += 1) {
         const node = next[i];
         (() => {
@@ -115,6 +124,9 @@ export function Show(props: ShowProps) {
             state.value = condition;
             if (!condition) {
               if (props.else) {
+                if ($elm && typeof $elm.removeChildren === "function") {
+                  $elm.removeChildren();
+                }
                 const target = methods.build_children_with_condition(condition);
                 state.children = target;
                 logger.log("before insert", target, !!$elm?.insertChildren);
@@ -129,6 +141,9 @@ export function Show(props: ShowProps) {
                 $elm.removeChildren();
               }
             } else {
+              if ($elm && typeof $elm.removeChildren === "function") {
+                $elm.removeChildren();
+              }
               const target = methods.build_children_with_condition(condition);
               state.children = target;
               // logger.log("before insert children", target.length);
@@ -198,6 +213,8 @@ export function Show(props: ShowProps) {
         onUnmounted();
       }
       listener$.destroy();
+      // Dispose all refs created during render callbacks
+      dispose_owner(_owner);
       // Don't clear state.children here — they are needed if this Show
       // is re-mounted by a parent (e.g. Presence show/hide cycle).
       // When Show's own condition flips false, onChange already clears children.

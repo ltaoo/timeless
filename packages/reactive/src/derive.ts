@@ -1,4 +1,5 @@
 import { Subscriber, Ref, DerivedRef, isRef } from "./types";
+import { _current_disposables } from "./disposal";
 
 type UnwrapRef<T> =
   T extends Ref<infer V>
@@ -77,7 +78,7 @@ export function derive<T>(deps: any, fn: any): DerivedRef<T> {
     }
   });
 
-  return {
+  const res: DerivedRef<T> = {
     __is_ref: true as const,
     subscribe(ctx: Subscriber<T>) {
       _deps.push(ctx);
@@ -99,4 +100,11 @@ export function derive<T>(deps: any, fn: any): DerivedRef<T> {
       return raw_value === v;
     },
   };
+
+  // Register with owner's disposal tracking if active
+  if (_current_disposables) {
+    _current_disposables.push(() => res.destroy());
+  }
+
+  return res;
 }

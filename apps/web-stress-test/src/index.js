@@ -72,7 +72,7 @@ function generateData(count) {
 function SearchTablePage() {
   const page = refobj({
     page: 1,
-    pageSize: 5,
+    pageSize: 500,
     total: 1231,
   });
   const totalPages = computed(page, (t) => Math.ceil(t.total / t.pageSize));
@@ -113,10 +113,10 @@ function SearchTablePage() {
       style: {
         display: "flex",
         "flex-direction": "column",
-        flex: 1,
         padding: "16px",
         "border-radius": "8px",
-        "min-height": 0,
+        "box-sizing": "border-box",
+        height: "100%",
       },
     },
     [
@@ -363,143 +363,164 @@ function SearchTablePage() {
           //     ),
           //   ],
           // ),
-          ListView({
-            style: {
-              flex: 1,
-              "min-height": 0,
-              overflow: "auto",
-            },
-            key: "id",
-            size: 30,
-            // itemHeight: 31.5,
-            itemHeight: 186.5,
-            each: filteredData,
-            render(row, idx) {
-              return View(
-                {
-                  style: {
-                    display: "grid",
-                    "grid-template-columns":
-                      "60px 120px 200px 80px 60px 80px 100px 1fr",
-                    width: "100%",
-                    "border-bottom": computed(idx, (t) =>
-                      t === filteredData.value.length - 1
-                        ? "none"
-                        : "1px solid #ddd",
-                    ),
-                    // "border-right": "1px solid #ddd",
-                  },
+          Show({
+            when: computed(filteredData, (t) => t.length),
+            ok() {
+              return ListView({
+                style: {
+                  "max-height": "100%",
+                  overflow: "auto",
+                  position: "relative",
                 },
-                [
-                  View(
+                key: "id",
+                size: 30,
+                // itemHeight: 31.5,
+                itemHeight: 186.5,
+                each: filteredData,
+                render(row, idx) {
+                  return View(
                     {
                       style: {
-                        padding: "8px",
-                        "border-right": "1px solid #ddd",
-                      },
-                    },
-                    [computed(row, (t) => t.id)],
-                  ),
-                  View(
-                    {
-                      style: {
-                        padding: "8px",
-                        "border-right": "1px solid #ddd",
-                      },
-                    },
-                    [computed(row, (t) => t.name)],
-                  ),
-                  View(
-                    {
-                      style: {
-                        padding: "8px",
-                        "border-right": "1px solid #ddd",
-                      },
-                    },
-                    [computed(row, (t) => t.email)],
-                  ),
-                  View(
-                    {
-                      style: {
-                        padding: "8px",
-                        "border-right": "1px solid #ddd",
-                      },
-                    },
-                    [
-                      computed(row, (t) => {
-                        return t.role.text;
-                      }),
-                    ],
-                  ),
-                  View(
-                    {
-                      style: {
-                        padding: "8px",
-                        "border-right": "1px solid #ddd",
-                      },
-                    },
-                    [computed(row, (t) => t.age)],
-                  ),
-                  View(
-                    {
-                      style: {
-                        padding: "8px",
-                        "border-right": "1px solid #ddd",
-                        color: computed(row, (t) =>
-                          t.status === "Active" ? "#28a745" : "#dc3545",
+                        display: "grid",
+                        "grid-template-columns":
+                          "60px 120px 200px 80px 60px 80px 100px 1fr",
+                        width: "100%",
+                        "border-bottom": computed(idx, (t) =>
+                          t === filteredData.value.length - 1
+                            ? "none"
+                            : "1px solid #ddd",
                         ),
-                      },
-                    },
-                    [computed(row, (t) => t.status)],
-                  ),
-                  View(
-                    {
-                      style: {
-                        padding: "8px",
-                        "border-right": "1px solid #ddd",
-                      },
-                    },
-                    [computed(row, (t) => t.department)],
-                  ),
-                  View(
-                    {
-                      style: {
-                        padding: "8px",
                         // "border-right": "1px solid #ddd",
                       },
                     },
                     [
-                      For({
-                        key: "id",
-                        each: computed(row, (t) => t.skills),
-                        render(skill) {
-                          return View({}, [
-                            View({}, [computed(skill, (t) => t.name)]),
-                            View({}, [
-                              For({
-                                key: "id",
-                                each: computed(skill, (t) => t.histories),
-                                render(history) {
-                                  return View({}, [
-                                    View({}, [
-                                      computed(history, (t) => t.text),
-                                    ]),
-                                    View({}, [
-                                      computed(history, (t) => t.time),
-                                    ]),
-                                    View({}, [
-                                      computed(history, (t) => t.value),
-                                    ]),
-                                  ]);
-                                },
-                              }),
-                            ]),
-                          ]);
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
                         },
-                      }),
+                        [computed(row, (t) => t.id)],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [computed(row, (t) => t.name)],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [computed(row, (t) => t.email)],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [
+                          computed(row, (t) => {
+                            return t.role.text;
+                          }),
+                        ],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [computed(row, (t) => t.age)],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                            color: computed(row, (t) =>
+                              t.status === "Active" ? "#28a745" : "#dc3545",
+                            ),
+                          },
+                        },
+                        [computed(row, (t) => t.status)],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [computed(row, (t) => t.department)],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            // "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [
+                          For({
+                            key: "id",
+                            each: computed(row, (t) => t.skills),
+                            render(skill) {
+                              return View({}, [
+                                View({}, [computed(skill, (t) => t.name)]),
+                                View({}, [
+                                  For({
+                                    key: "id",
+                                    each: computed(skill, (t) => t.histories),
+                                    render(history) {
+                                      return View({}, [
+                                        View({}, [
+                                          computed(history, (t) => t.text),
+                                        ]),
+                                        View({}, [
+                                          computed(history, (t) => t.time),
+                                        ]),
+                                        View({}, [
+                                          computed(history, (t) => t.value),
+                                        ]),
+                                      ]);
+                                    },
+                                  }),
+                                ]),
+                              ]);
+                            },
+                          }),
+                        ],
+                      ),
                     ],
-                  ),
-                ],
+                  );
+                },
+              });
+            },
+            else() {
+              return View(
+                {
+                  style: {
+                    display: "flex",
+                    "align-items": "center",
+                    "justify-content": "center",
+                    gap: "8px",
+                    padding: "12px",
+                    "flex-shrink": 0,
+                    height: "100%",
+                  },
+                },
+                ["No data available"],
               );
             },
           }),
@@ -1038,7 +1059,6 @@ function FormPage() {
       style: {
         padding: "16px",
         borderRadius: "8px",
-        maxWidth: "500px",
       },
     },
     [

@@ -85,7 +85,7 @@ export function DOMListView(props: {
       box$.methods.applyState(elm.state);
       box$.methods.setupEventListener(elm.events);
       $elm.style.position = "relative";
-      $elm.style.height = "100%";
+      // $elm.style.height = "100%";
       $elm.style.overflowY = "auto";
       if (elm.state.height) {
         $content.style.height = `${elm.state.height}px`;

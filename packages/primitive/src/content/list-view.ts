@@ -42,7 +42,7 @@ import {
 } from "./type";
 import { Box, BoxEvents, BoxProps } from "./box";
 import { View } from "./view";
-import { get_owner, run_with_owner } from "@/context/context";
+import { get_owner, run_with_owner, dispose_owner } from "@/context/context";
 import { ListenerManager } from "@/util/listener";
 import { Text } from "./text";
 import { ListItemView } from "./list-item-view";
@@ -129,6 +129,10 @@ export function ListView<T>(props: ListViewProps<T>) {
   // Track subscription unsubscribers separately for HMR
   const _hmr_subs: (() => void)[] = [];
   let _id = 0;
+  let _refreshing = false;
+  let _pending_raf = 0;
+  let _pending_v: T[] | null = null;
+  let _pending_extra: any = null;
   const listener$ = ListenerManager();
 
   const _key = props.key;
@@ -160,7 +164,6 @@ export function ListView<T>(props: ListViewProps<T>) {
       const range = { start: 0, end: visible_count };
       for (let i = 0; i < visible_count; i++) {
         const wrapped_item = state.wrapped_items[i];
-        const idx_computed = methods.create_idx(wrapped_item);
         if (!wrapped_item) {
           const slot = ListItemView(
             {
@@ -176,6 +179,7 @@ export function ListView<T>(props: ListViewProps<T>) {
           _slots.push(slot);
           continue;
         }
+        const idx_computed = methods.create_idx(wrapped_item);
         const elm = _owner
           ? run_with_owner(_owner, () =>
               props.render(wrapped_item.v, idx_computed),
@@ -317,10 +321,18 @@ export function ListView<T>(props: ListViewProps<T>) {
           },
           onChange(v, extra) {
             logger.log("ctx.onChange", v, state.rendered, extra);
-            // if (!state.rendered) {
-            //   return;
-            // }
-            methods.refresh(v, extra);
+            _pending_v = v;
+            _pending_extra = extra;
+            if (!_pending_raf) {
+              _pending_raf = requestAnimationFrame(() => {
+                _pending_raf = 0;
+                const pv = _pending_v;
+                const pe = _pending_extra;
+                _pending_v = null;
+                _pending_extra = null;
+                if (pv) methods.refresh(pv, pe);
+              });
+            }
           },
         });
         listener$.add(unsub);
@@ -404,7 +416,7 @@ export function ListView<T>(props: ListViewProps<T>) {
     },
     /** 在指定位置，插入 n 个节点 */
     insert(index: number, items: T[]) {
-      logger.log("insert - start", index, items);
+      // logger.log("insert - start", index, items);
       const inserted_elements: (TimelessElement | null)[] = [];
       const inserted_items: T[] = [];
       const inserted_wrapped_items: WrappedItemInListView<T>[] = [];
@@ -515,6 +527,8 @@ export function ListView<T>(props: ListViewProps<T>) {
      * 计算出 新增、更新 和 删除 的记录，提交给宿主层，刷新视图
      */
     refresh(v: T[], extra?: { reset?: boolean }) {
+      if (_refreshing) return;
+      _refreshing = true;
       logger.log(
         "refresh",
         v.length,
@@ -547,7 +561,7 @@ export function ListView<T>(props: ListViewProps<T>) {
           return item === vv.v;
         });
         if (existing) {
-          logger.log("diff existing object", item);
+          // logger.log("diff existing object", item);
           registryGet(existing.v)?.diff(item);
           existing.top = i * itemHeight + gutter;
           return existing;
@@ -750,14 +764,14 @@ export function ListView<T>(props: ListViewProps<T>) {
       for (const { idx, count } of removed_nodes) {
         for (let i = 0; i < count; i++) {
           const item_idx = idx + i;
-          logger.log(
-            "prepare free slot",
-            _start,
-            _end,
-            item_idx,
-            prev_wrapped_items,
-            _slot_bindings,
-          );
+          // logger.log(
+          //   "prepare free slot",
+          //   _start,
+          //   _end,
+          //   item_idx,
+          //   prev_wrapped_items,
+          //   _slot_bindings,
+          // );
           if (item_idx < _start || item_idx >= _end) continue;
           const prev_wrapped_item = prev_wrapped_items[item_idx];
           const k = prev_wrapped_item.k;
@@ -776,6 +790,18 @@ export function ListView<T>(props: ListViewProps<T>) {
             _slot_bindings.delete(key);
             _free_slots.push(slot);
           }
+        }
+      }
+
+      // 更新所有保留槽位的 top
+      const wrapped_item_by_key = new Map<string, WrappedItemInListView<T>>();
+      for (const w of new_wrapped_items) {
+        wrapped_item_by_key.set(methods._dataIdStr(w.k), w);
+      }
+      for (const [key, slot] of _slot_bindings) {
+        const wrapped_item = wrapped_item_by_key.get(key);
+        if (wrapped_item) {
+          slot.setTop(wrapped_item.top);
         }
       }
 
@@ -801,22 +827,11 @@ export function ListView<T>(props: ListViewProps<T>) {
         }
       }
 
-      // 更新所有保留槽位的 top
-      const wrapped_item_by_key = new Map<string, WrappedItemInListView<T>>();
-      for (const w of new_wrapped_items) {
-        wrapped_item_by_key.set(methods._dataIdStr(w.k), w);
-      }
-      for (const [key, slot] of _slot_bindings) {
-        const wrapped_item = wrapped_item_by_key.get(key);
-        if (wrapped_item) {
-          slot.setTop(wrapped_item.top);
-        }
-      }
-
       // 跳过 $elm.refresh，使用 slot rebind 方式复用 DOM
       const actions_count =
         added_nodes.length + removed_nodes.length + moved_nodes.length;
       if (actions_count === 0) {
+        _refreshing = false;
         return;
       }
       state.wrapped_items = new_wrapped_items.slice();
@@ -837,6 +852,86 @@ export function ListView<T>(props: ListViewProps<T>) {
         $elm.setStyleValue("height", total_height);
       }
 
+      // 更新可见范围，处理新增/删除导致的可见项变化
+      const itemCount = state.wrapped_items.length;
+      // 当数据量大幅变化时，根据当前滚动位置重新计算 _start
+      if (prev_items.length > 0 && itemCount > prev_items.length * 2) {
+        const scroll_top = _scroll.scrollTop;
+        let lo = 0;
+        let hi = itemCount - 1;
+        let found = itemCount;
+        while (lo <= hi) {
+          const mid = (lo + hi) >>> 1;
+          if (state.wrapped_items[mid].top >= scroll_top) {
+            found = mid;
+            hi = mid - 1;
+          } else {
+            lo = mid + 1;
+          }
+        }
+        _start = Math.max(0, Math.min(found - 1, itemCount - 1) - _buffer_size);
+      }
+      _end = Math.min(_start + _size + 2 * _buffer_size, itemCount);
+      if (_start >= itemCount) {
+        _start = Math.max(0, itemCount - 1);
+      }
+
+      // 强制同步：无条件确保 [_start, _end) 范围内的槽位正确绑定
+      {
+        const visibleMap = new Map<string, WrappedItemInListView<T>>();
+        for (let i = _start; i < _end; i++) {
+          const wi = state.wrapped_items[i];
+          visibleMap.set(methods._dataIdStr(wi.k), wi);
+        }
+
+        // unbind 离开可见范围的槽位
+        for (const [key, slot] of _slot_bindings) {
+          if (!visibleMap.has(key)) {
+            slot.unbind();
+            _slot_bindings.delete(key);
+            _free_slots.push(slot);
+          }
+        }
+
+        // 同步所有保留槽位的 top
+        for (const [key, slot] of _slot_bindings) {
+          const wi = visibleMap.get(key);
+          if (wi) {
+            slot.setTop(wi.top);
+          }
+        }
+
+        // bind 进入可见范围的槽位
+        for (let i = _start; i < _end; i++) {
+          const key = methods._dataIdStr(state.wrapped_items[i].k);
+          if (!_slot_bindings.has(key) && _free_slots.length > 0) {
+            const wrapped_item = state.wrapped_items[i];
+            const slot = _free_slots.pop()!;
+            const idx_computed = methods.create_idx(wrapped_item);
+            const elm = _owner
+              ? run_with_owner(_owner, () =>
+                  props.render(wrapped_item.v, idx_computed),
+                )
+              : props.render(wrapped_item.v, idx_computed);
+            const child = (() => {
+              if (isElement(elm)) return elm;
+              if (isRef(elm)) return Text(elm);
+              if (elm) return Text(elm);
+              return null;
+            })();
+            slot.rebind({
+              uid: wrapped_item.k,
+              top: wrapped_item.top,
+              height: wrapped_item.height,
+              payload: wrapped_item.v,
+              child,
+            });
+            _slot_bindings.set(key, slot);
+          }
+        }
+      }
+
+      _refreshing = false;
       return diff;
     },
     compute_visible_children() {
@@ -1261,11 +1356,6 @@ export function ListView<T>(props: ListViewProps<T>) {
   methods.init_slot();
   const children = _slots;
 
-  if (state.items.length < _end) {
-    // 总数量小于 插槽数量
-    _end = state.items.length;
-  }
-
   state.height =
     state.wrapped_items.length * itemHeight +
     (state.wrapped_items.length - 1) * gutter;
@@ -1307,15 +1397,14 @@ export function ListView<T>(props: ListViewProps<T>) {
       }
     },
     onUnmounted() {
-      // console.log(
-      //   "[View] onUnmounted called, children count:",
-      //   _children.length,
-      // );
+      logger.log("onUnmounted called, children count:", _children.length);
       if (props.onUnmounted) {
         // console.log("[View] calling props.onUnmounted");
         props.onUnmounted();
       }
-      // listener$.destroy();
+      listener$.destroy();
+      box$.methods.destroy();
+      if (_owner) { dispose_owner(_owner); }
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
         if (isElement(node)) {
@@ -1323,7 +1412,8 @@ export function ListView<T>(props: ListViewProps<T>) {
         }
       }
       state.rendered = false;
-      $elm = null;
+      if (_pending_raf) { cancelAnimationFrame(_pending_raf); _pending_raf = 0; }
+      // $elm = null;
     },
   };
 }
