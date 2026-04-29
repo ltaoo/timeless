@@ -24,12 +24,17 @@ export function HostElement(props: {
   let child_nodes: (VNodeView<any> | null)[] = [];
   /** Timeless 子列表 */
   let child_elements: (TimelessElement | null)[] = [];
+  let _events: any = null;
+
+  console.log("create box");
 
   const methods = {
     set$elm(elm: HTMLElement | Text) {
       $elm = elm;
     },
-    startBatch() { _batch_mode = true; },
+    startBatch() {
+      _batch_mode = true;
+    },
     endBatch() {
       _batch_mode = false;
       if (_pending_mounted.length > 0 && !_raf_scheduled) {
@@ -233,6 +238,7 @@ export function HostElement(props: {
       if (!events || !$elm || $elm instanceof Text) {
         return;
       }
+      _events = events;
       if (events.onClick) {
         $elm.removeEventListener("click", events.onClick);
       }
@@ -447,6 +453,8 @@ export function HostElement(props: {
       child_elements = [];
       $children = [];
       child_nodes = [];
+      $elm = null;
+      methods.teardownEventListener(_events);
     },
     insert(
       idx: number,
@@ -466,14 +474,14 @@ export function HostElement(props: {
        * 这个范围，无法靠 $children 来确定
        */
       const $reference = $children[idx];
-      console.log(
-        props.t + "[dom]insert child",
-        idx,
-        children,
-        $parent,
-        $reference,
-        [...$children],
-      );
+      // console.log(
+      //   props.t + "[dom]insert child",
+      //   idx,
+      //   children,
+      //   $parent,
+      //   $reference,
+      //   [...$children],
+      // );
       const inserted_elements: TimelessElement[] = [];
       const inserted_child: VNodeView[] = [];
       const inserted_host_nodes: any[] = [];
@@ -518,7 +526,7 @@ export function HostElement(props: {
       }
     },
     remove(idx: number, count: number, extra?: { $parent: any }) {
-      console.log(props.t + "[box]remove", [...$children], child_elements);
+      // console.log(props.t + "[box]remove", [...$children], child_elements);
       if (count === 0) {
         return;
       }
@@ -532,7 +540,7 @@ export function HostElement(props: {
       for (let i = 0; i < count; i++) {
         const $child = $children[idx + i];
         if ($child) {
-          console.log(props.t + "[box]remove", idx + i, $child);
+          // console.log(props.t + "[box]remove", idx + i, $child);
           $fragment.appendChild($child);
           const child_elm = child_elements[idx + i];
           if (child_elm) {
@@ -568,7 +576,7 @@ export function HostElement(props: {
         console.warn("move node not found from", from);
         return;
       }
-      console.log("[timeless-dom]move node", from, to, $from);
+      // console.log("[timeless-dom]move node", from, to, $from);
 
       $children.splice(from, 1);
       $children.splice(to, 0, $from);
@@ -594,7 +602,7 @@ export function HostElement(props: {
         console.warn("refresh parent not found");
         return;
       }
-      console.log(props.t + "[dom]refresh - start", [...$children]);
+      // console.log(props.t + "[dom]refresh - start", [...$children]);
       // 1. Remove (descending order to keep indices stable)
       const sorted_removed = [...removed].sort((a, b) => b.idx - a.idx);
       const removed_elements: (TimelessElement | null)[] = [];
@@ -604,7 +612,7 @@ export function HostElement(props: {
       for (const { idx, count } of sorted_removed) {
         for (let i = 0; i < count; i++) {
           const $child = $children[idx + i];
-          console.log("remove $child", idx + i, $child);
+          // console.log("remove $child", idx + i, $child);
           if ($child) {
             fragment.appendChild($child);
           }
@@ -653,7 +661,7 @@ export function HostElement(props: {
       for (const { idx, elements } of added) {
         methods.insert(idx, elements, extra);
       }
-      console.log("[dom]refresh - end", [...$children]);
+      // console.log("[dom]refresh - end", [...$children]);
     },
     setScrollTop(v: number) {
       if (!$elm) {

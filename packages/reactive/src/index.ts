@@ -27,6 +27,7 @@ import {
   release,
   get as registryGet,
   set as registrySet,
+  deleteKey as registryDelete,
   getobj as registryGetObj,
   getarr as registryGetArr,
 } from "./registry";
@@ -115,6 +116,7 @@ export {
   release,
   registryGet,
   registrySet,
+  registryDelete,
   registryGetObj,
   registryGetArr,
   registryGetObj as getobj,

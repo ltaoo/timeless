@@ -188,7 +188,7 @@ function SearchTablePage() {
                       //   });
                       // });
                       const user = data.find((v) => v.id === 2);
-                      console.log(user.value.age);
+                      // console.log(user.value.age);
                       if (user) {
                         user.set("age", user.value.age + 1);
                         // user.as((u) => ({
@@ -196,7 +196,7 @@ function SearchTablePage() {
                         //   age: (u.age || 0) + 1,
                         // }));
                       }
-                      console.log(user.value.age);
+                      // console.log(user.value.age);
                       // }, 5000);
                     },
                   },
@@ -378,6 +378,25 @@ function SearchTablePage() {
                 itemHeight: 186.5,
                 each: filteredData,
                 render(row, idx) {
+                  const borderBottom_ = computed(idx, (t) =>
+                    t === filteredData.value.length - 1
+                      ? "none"
+                      : "1px solid #ddd",
+                  );
+                  const id_ = computed(row, (t) => t.id);
+                  const name_ = computed(row, (t) => t.name);
+                  const email_ = computed(row, (t) => t.email);
+                  const role_ = computed(row, (t) => {
+                    return t.role.text;
+                  });
+                  const age_ = computed(row, (t) => t.age);
+                  const color_ = computed(row, (t) =>
+                    t.status === "Active" ? "#28a745" : "#dc3545",
+                  );
+                  const status_ = computed(row, (t) => t.status);
+                  const department_ = computed(row, (t) => t.department);
+                  const skills_ = computed(row, (t) => t.skills);
+
                   return View(
                     {
                       style: {
@@ -385,12 +404,21 @@ function SearchTablePage() {
                         "grid-template-columns":
                           "60px 120px 200px 80px 60px 80px 100px 1fr",
                         width: "100%",
-                        "border-bottom": computed(idx, (t) =>
-                          t === filteredData.value.length - 1
-                            ? "none"
-                            : "1px solid #ddd",
-                        ),
+                        "border-bottom": borderBottom_,
                         // "border-right": "1px solid #ddd",
+                      },
+                      onUnmounted() {
+                        // console.log("destroy", id_.value);
+                        borderBottom_.destroy();
+                        id_.destroy();
+                        name_.destroy();
+                        email_.destroy();
+                        role_.destroy();
+                        age_.destroy();
+                        color_.destroy();
+                        status_.destroy();
+                        department_.destroy();
+                        skills_.destroy();
                       },
                     },
                     [
@@ -401,7 +429,7 @@ function SearchTablePage() {
                             "border-right": "1px solid #ddd",
                           },
                         },
-                        [computed(row, (t) => t.id)],
+                        [id_],
                       ),
                       View(
                         {
@@ -410,7 +438,7 @@ function SearchTablePage() {
                             "border-right": "1px solid #ddd",
                           },
                         },
-                        [computed(row, (t) => t.name)],
+                        [name_],
                       ),
                       View(
                         {
@@ -419,7 +447,7 @@ function SearchTablePage() {
                             "border-right": "1px solid #ddd",
                           },
                         },
-                        [computed(row, (t) => t.email)],
+                        [email_],
                       ),
                       View(
                         {
@@ -428,11 +456,7 @@ function SearchTablePage() {
                             "border-right": "1px solid #ddd",
                           },
                         },
-                        [
-                          computed(row, (t) => {
-                            return t.role.text;
-                          }),
-                        ],
+                        [role_],
                       ),
                       View(
                         {
@@ -441,19 +465,17 @@ function SearchTablePage() {
                             "border-right": "1px solid #ddd",
                           },
                         },
-                        [computed(row, (t) => t.age)],
+                        [age_],
                       ),
                       View(
                         {
                           style: {
                             padding: "8px",
                             "border-right": "1px solid #ddd",
-                            color: computed(row, (t) =>
-                              t.status === "Active" ? "#28a745" : "#dc3545",
-                            ),
+                            color: color_,
                           },
                         },
-                        [computed(row, (t) => t.status)],
+                        [status_],
                       ),
                       View(
                         {
@@ -462,7 +484,7 @@ function SearchTablePage() {
                             "border-right": "1px solid #ddd",
                           },
                         },
-                        [computed(row, (t) => t.department)],
+                        [department_],
                       ),
                       View(
                         {
@@ -474,30 +496,62 @@ function SearchTablePage() {
                         [
                           For({
                             key: "id",
-                            each: computed(row, (t) => t.skills),
+                            each: skills_,
                             render(skill) {
-                              return View({}, [
-                                View({}, [computed(skill, (t) => t.name)]),
-                                View({}, [
-                                  For({
-                                    key: "id",
-                                    each: computed(skill, (t) => t.histories),
-                                    render(history) {
-                                      return View({}, [
-                                        View({}, [
-                                          computed(history, (t) => t.text),
-                                        ]),
-                                        View({}, [
-                                          computed(history, (t) => t.time),
-                                        ]),
-                                        View({}, [
-                                          computed(history, (t) => t.value),
-                                        ]),
-                                      ]);
-                                    },
-                                  }),
-                                ]),
-                              ]);
+                              const skill_name_ = computed(
+                                skill,
+                                (t) => t.name,
+                              );
+                              const histories_ = computed(
+                                skill,
+                                (t) => t.histories,
+                              );
+
+                              return View(
+                                {
+                                  onUnmounted() {
+                                    skill_name_.destroy();
+                                    histories_.destroy();
+                                  },
+                                },
+                                [
+                                  View({}, [skill_name_]),
+                                  View({}, [
+                                    For({
+                                      key: "id",
+                                      each: histories_,
+                                      render(history) {
+                                        const history_text_ = computed(
+                                          history,
+                                          (t) => t.text,
+                                        );
+                                        const history_time_ = computed(
+                                          history,
+                                          (t) => t.time,
+                                        );
+                                        const history_value_ = computed(
+                                          history,
+                                          (t) => t.value,
+                                        );
+                                        return View(
+                                          {
+                                            onUnmounted() {
+                                              history_text_.destroy();
+                                              history_time_.destroy();
+                                              history_value_.destroy();
+                                            },
+                                          },
+                                          [
+                                            View({}, [history_text_]),
+                                            View({}, [history_time_]),
+                                            View({}, [history_value_]),
+                                          ],
+                                        );
+                                      },
+                                    }),
+                                  ]),
+                                ],
+                              );
                             },
                           }),
                         ],

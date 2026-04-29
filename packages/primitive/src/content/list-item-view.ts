@@ -95,10 +95,12 @@ export function ListItemView<T>(
     rebind: methods.rebind,
     setState(data: ListItemViewState<T> & { children: TimelessElement[] }) {
       state.top = data.top;
+      state.height = data.height;
       state.bound = true;
       state.children = data.children;
     },
     setTop(v: number) {
+      state.top = v;
       if ($elm) {
         $elm.setStyleValue("top", `${v}px`);
       }

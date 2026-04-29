@@ -3,6 +3,7 @@ import {
   Ref,
   registryGet,
   registrySet,
+  registryDelete,
   computed,
   DerivedRef,
   isWriteableRef,
@@ -110,11 +111,11 @@ export function For<T>(
             if (!state.rendered) {
               return;
             }
-            console.log(
-              "[primitive]For - ctx.onPatch - handle patch",
-              action,
-              vv.value,
-            );
+            // console.log(
+            //   "[primitive]For - ctx.onPatch - handle patch",
+            //   action,
+            //   vv.value,
+            // );
             if (action.type === "insert" && action.items !== undefined) {
               methods.insert(action.index, action.items as T[]);
               return;
@@ -141,7 +142,7 @@ export function For<T>(
             }
           },
           onChange(v) {
-            console.log("[primitive]For - ctx.onChange", v, state.rendered);
+            // console.log("[primitive]For - ctx.onChange", v, state.rendered);
             // if (!state.rendered) {
             //   return;
             // }
@@ -196,7 +197,7 @@ export function For<T>(
     },
     /** 在指定位置，插入 n 个节点 */
     insert(index: number, items: T[]) {
-      console.log("[primitive]for - insert", index, items);
+      // console.log("[primitive]for - insert", index, items);
       const inserted_elements: (TimelessElement | null)[] = [];
       const inserted_items: T[] = [];
       const inserted_wrapped_items: { k: number; v: T }[] = [];
@@ -208,12 +209,12 @@ export function For<T>(
         const idx = methods.create_idx(wrapped_item);
         // Create per-item owner for tracking render-created refs
         const item_owner = create_owner(_owner);
-        console.log(
-          "[primitive]for - insert items",
-          isRef(props.each) ? props.each.value : props.each,
-          item,
-          idx.value,
-        );
+        // console.log(
+        //   "[primitive]for - insert items",
+        //   isRef(props.each) ? props.each.value : props.each,
+        //   item,
+        //   idx.value,
+        // );
         inserted_wrapped_items.push(wrapped_item);
         inserted_items.push(item);
         inserted_idx.push(idx);
@@ -248,7 +249,7 @@ export function For<T>(
     },
     /** 从指定下标移除 n 个元素 */
     remove(index: number, count: number) {
-      console.log("[primitive]for - remove", index, count, state.idx_arr);
+      // console.log("[primitive]for - remove", index, count, state.idx_arr);
       const removed_idx: DerivedRef<number>[] = [];
       const removed_owners: any[] = [];
       for (let i = 0; i < count; i += 1) {
@@ -256,21 +257,28 @@ export function For<T>(
         if (_existing_map.has(item)) {
           _existing_map.delete(item);
         }
-        console.log(
-          "[primitive]for - remove in loop",
-          index + i,
-          state.idx_arr[index + i],
-        );
+        // console.log(
+        //   "[primitive]for - remove in loop",
+        //   index + i,
+        //   state.idx_arr[index + i],
+        // );
         removed_idx.push(state.idx_arr[index + i]);
         removed_owners.push(state.item_owners[index + i]);
       }
-      console.log("[primitive]for - remove before destroy idx", removed_idx);
+      // console.log("[primitive]for - remove before destroy idx", removed_idx);
       for (const idx of removed_idx) {
         idx.destroy();
       }
       // Dispose per-item owners (cleans up render-created refs)
       for (const owner of removed_owners) {
         if (owner) dispose_owner(owner);
+      }
+      // Clean up stale registry entries for removed items
+      for (let i = 0; i < count; i += 1) {
+        const item = state.items[index + i];
+        if (item && typeof item === "object") {
+          registryDelete(item);
+        }
       }
       state.wrapped_items.splice(index, count);
       state.items.splice(index, count);
@@ -464,6 +472,10 @@ export function For<T>(
             const proxy = registryGet(prev_item);
             if (proxy && isWriteableRef(proxy)) {
               proxy.as(new_item.v);
+              // Clean up stale registry entry for old raw object
+              if (prev_item !== new_item.v) {
+                registryDelete(prev_item);
+              }
               // Update registry to map new item to the same proxy
               registrySet(new_item.v, proxy);
             }
@@ -513,22 +525,29 @@ export function For<T>(
       if (start !== -1) {
         removed_nodes.push({ idx: start, count });
       }
-      console.log(
-        "[primitive]for removed:",
-        removed_nodes,
-        "added:",
-        added_nodes.length,
-        "moved:",
-        moved_nodes,
-      );
+      // console.log(
+      //   "[primitive]for removed:",
+      //   removed_nodes,
+      //   "added:",
+      //   added_nodes.length,
+      //   "moved:",
+      //   moved_nodes,
+      // );
 
       // Destroy idx_computed and dispose owners for removed items
-      for (const { idx } of removed_nodes) {
-        if (prev_index_computed[idx]) {
-          prev_index_computed[idx].destroy();
-        }
-        if (prev_item_owners[idx]) {
-          dispose_owner(prev_item_owners[idx]);
+      for (const { idx, count } of removed_nodes) {
+        for (let i = 0; i < count; i++) {
+          if (prev_index_computed[idx + i]) {
+            prev_index_computed[idx + i].destroy();
+          }
+          if (prev_item_owners[idx + i]) {
+            dispose_owner(prev_item_owners[idx + i]);
+          }
+          // Clean up stale registry entry
+          const removed_item = prev_items[idx + i];
+          if (removed_item && typeof removed_item === "object") {
+            registryDelete(removed_item);
+          }
         }
       }
 

@@ -9,6 +9,9 @@ export function release(ref: DerivedRef<any> | Ref<any>) {
 export function set(key: any, v: DerivedRef<any> | Ref<any>) {
   global_refs.set(key, v);
 }
+export function deleteKey(key: any) {
+  global_refs.delete(key);
+}
 export function has(v: any) {
   return global_refs.has(v);
 }

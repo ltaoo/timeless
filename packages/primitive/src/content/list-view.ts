@@ -9,18 +9,8 @@
  * - Hydration for SSR/SSG
  *
  * This is the main scrollable container used in Timeless apps.
- *
- * @example
- * ```tsx
- * <ListView
- *   style={{ height: 300 }}
- *   onScroll={(e) => console.log('scroll', e)}
- * >
- *   {items.map(item => <Text>{item}</Text>)}
- * </ListView>
- * ```
  */
-import { remove_arr_item, throttle } from "@timeless/base";
+import { throttle } from "@timeless/base";
 import {
   computed,
   DerivedRef,
@@ -32,6 +22,8 @@ import {
 
 import { MountedEvent, ScrollEvent } from "@/event/index";
 import { For, ForProps } from "@/reactive/for";
+import { get_owner, run_with_owner, dispose_owner } from "@/context/context";
+import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
 
 import {
@@ -42,21 +34,19 @@ import {
 } from "./type";
 import { Box, BoxEvents, BoxProps } from "./box";
 import { View } from "./view";
-import { get_owner, run_with_owner, dispose_owner } from "@/context/context";
-import { ListenerManager } from "@/util/listener";
 import { Text } from "./text";
 import { ListItemView } from "./list-item-view";
 
 const logger = Logger({ prefix: "primitive", scope: "list-view" });
 
-type WrappedItemInListView<T> = {
+type WrappedItemInListView<T extends Record<string, unknown>> = {
   k: number;
   v: T;
   top: number;
   height: number;
 };
 /** Props for ListView component */
-export type ListViewProps<T> = BoxProps &
+export type ListViewProps<T extends Record<string, unknown>> = BoxProps &
   ForProps<T> & {
     size: number;
     buffer?: number;
@@ -65,13 +55,14 @@ export type ListViewProps<T> = BoxProps &
     onScroll?: (event: {}) => void;
     onReachBottom?: () => void;
   };
-type ListViewState<T> = {
+type ListViewState<T extends Record<string, unknown>> = {
   height: number;
   clientHeight: number;
   offsetTop: number;
   scrollTop: number;
   subscribed: boolean;
   items: T[];
+  /** 可见范围内的，带 k 的容器 */
   wrapped_items: WrappedItemInListView<T>[];
   children: (TimelessElement | null)[];
   idx_arr: DerivedRef<number>[];
@@ -80,7 +71,9 @@ type ListViewEvents = BoxEvents & {
   onScroll?: (event: ScrollEvent) => void;
 };
 
-export function ListView<T>(props: ListViewProps<T>) {
+export function ListView<T extends Record<string, unknown>>(
+  props: ListViewProps<T>,
+) {
   const {
     itemHeight,
     gutter = 0,
@@ -96,35 +89,28 @@ export function ListView<T>(props: ListViewProps<T>) {
 
   let $elm: any = null;
   // let _dirty_from = Infinity;
-  /** 固定槽位池 */
-  let _slots: ListItemView[] = [];
-  // let _slots: ListItemView[] = Array.from({ length: 50 }, (_, i) => {
-  //   return ListItemView({
-  //     uid: -1,
-  //     top: 0,
-  //     height: 0,
-  //     payload: undefined,
-  //     bound: false,
-  //   });
-  // });
-  /** 数据 dataId → 绑定的槽位 */
-  let _slot_bindings = new Map<string, View>();
-  /** 空闲槽位池 */
-  let _free_slots: ListItemView[] = [..._slots];
-  /** 渲染的列表 */
-  let _children: (TimelessElement | null)[] = [];
-  /** 默认显示的数量 */
   let _size = size ?? 4;
   /** 缓冲的数量 */
   let _buffer_size = buffer ?? 10;
   /** 每个元素和下面元素的距离 */
   let _gutter = gutter ?? 0;
+  let _visible_count = _size;
+  let _slot_count = _size + 2 * _buffer_size;
+  /** 固定槽位池 */
+  let _slots: ListItemView[] = [];
+  /** 绑定的槽位，以 wrapped_item.k 为 key */
+  let _slot_bindings = new Map<string, View>();
+  /** 空闲槽位池 */
+  let _free_slots: ListItemView[] = [];
+  /** 渲染的列表 */
+  let _children: (TimelessElement | null)[] = [];
+  /** 默认显示的数量 */
   let _scroll = { scrollTop: 0 };
   let _start = 0;
-  let _end = _size + _buffer_size;
+  let _end = _size;
   /** 标记从哪个下标开始 top 需要重算，Infinity 表示干净 */
   let _dirty_from = Infinity;
-  const _owner = get_owner();
+  // const _owner = get_owner();
   const _existing_map = new Map();
   // Track subscription unsubscribers separately for HMR
   const _hmr_subs: (() => void)[] = [];
@@ -152,120 +138,10 @@ export function ListView<T>(props: ListViewProps<T>) {
 
   const state = box$.state;
   const events: ListViewEvents = box$.events;
-  // _children = for$.state.items;
-  // let children = for$.children;
 
   const methods = {
     unique_id() {
       return _id++;
-    },
-    init_slot() {
-      const visible_count = size + 2 * buffer;
-      const range = { start: 0, end: visible_count };
-      for (let i = 0; i < visible_count; i++) {
-        const wrapped_item = state.wrapped_items[i];
-        if (!wrapped_item) {
-          const slot = ListItemView(
-            {
-              uid: -1,
-              top: 0,
-              height: 0,
-              payload: null,
-              bound: false,
-            },
-            [],
-          );
-          _free_slots.push(slot);
-          _slots.push(slot);
-          continue;
-        }
-        const idx_computed = methods.create_idx(wrapped_item);
-        const elm = _owner
-          ? run_with_owner(_owner, () =>
-              props.render(wrapped_item.v, idx_computed),
-            )
-          : props.render(wrapped_item.v, idx_computed);
-        state.items[i] = wrapped_item.v;
-        const top =
-          (range.start + i) * itemHeight + (range.start + i - 1) * gutter;
-        const child = (() => {
-          if (isElement(elm)) {
-            return elm;
-          }
-          if (isRef(elm)) {
-            return Text(elm);
-          }
-          if (elm) {
-            return Text(elm);
-          }
-          return null;
-        })();
-
-        state.idx_arr[i] = idx_computed;
-        // const slot = _free_slots.pop()!;
-        // const slot = _slots[_slots.length - 1];
-        // slot.setState({
-        //   uid: wrapped_item.k,
-        //   top,
-        //   height: itemHeight,
-        //   payload: wrapped_item.v,
-        //   bound: i < 20,
-        //   children: [child],
-        // });
-        const slot = (() => {
-          if (i < size) {
-            const r = ListItemView(
-              {
-                uid: wrapped_item.k,
-                top,
-                height: itemHeight,
-                payload: wrapped_item.v,
-                bound: true,
-                // slotId: `slot-col${_index}-${i}`,
-              },
-              [child],
-            );
-            _slot_bindings.set(methods._dataIdStr(wrapped_item.k), r);
-            return r;
-          }
-          const r = ListItemView(
-            {
-              uid: -1,
-              top: 0,
-              height: 0,
-              payload: null,
-              bound: false,
-            },
-            [],
-          );
-          _free_slots.push(r);
-          return r;
-        })();
-        // slot.unbind();
-        // 槽位的高度变化需要转发给当前绑定的数据 Cell
-        // slot.onHeightChange(([original_height, height_difference]) => {
-        //   if (!slot.state.bound || slot.state.dataId === undefined) {
-        //     return;
-        //   }
-        //   // 找到对应的数据 Cell 并更新其高度
-        //   const dataCell = _$total_items.find(
-        //     (v) => (v.state.id ?? v.uid) === slot.state.dataId,
-        //   );
-        //   if (dataCell) {
-        //     dataCell.methods.updateHeight(slot.state.height);
-        //     const idx = _$total_items.indexOf(dataCell);
-        //     if (idx !== -1) {
-        //       _dirty_from = Math.min(_dirty_from, idx + 1);
-        //     }
-        //   }
-        //   _height += height_difference;
-        //   bus.emit(Events.HeightChange, _height);
-        //   bus.emit(Events.CellUpdate, { $item: slot });
-        //   methods.refresh();
-        // });
-        _slots.push(slot);
-      }
-      logger.log("after init slot", _slot_bindings.size);
     },
     ready() {
       const vv = props.each;
@@ -273,12 +149,16 @@ export function ListView<T>(props: ListViewProps<T>) {
         return;
       }
       const items = isRef(vv) ? (vv.value as T[]) : (vv as T[]);
-      state.wrapped_items = items.map((item, i) => ({
-        k: methods.unique_id(),
-        v: item,
-        height: itemHeight,
-        top: i * itemHeight + gutter,
-      }));
+      for (let i = 0; i < _end; i += 1) {
+        const item = items[i];
+        const wrapped_item = {
+          k: methods.unique_id(),
+          v: item,
+          height: itemHeight,
+          top: i * itemHeight + gutter,
+        };
+        state.wrapped_items[i] = wrapped_item;
+      }
       state.items = [...items];
     },
     subscribe_props() {
@@ -286,6 +166,7 @@ export function ListView<T>(props: ListViewProps<T>) {
         return;
       }
       state.subscribed = true;
+      box$.methods.subscribe_props();
       const vv = props.each;
       if (isRef(vv)) {
         const unsub = vv.subscribe({
@@ -361,12 +242,13 @@ export function ListView<T>(props: ListViewProps<T>) {
       for (let i = 0; i < wrapped_items.length; i += 1) {
         const wrapped_item = wrapped_items[i];
         const idx_computed = methods.create_idx(wrapped_item);
-        const elm = _owner
-          ? run_with_owner(_owner, () =>
-              props.render(wrapped_item.v, idx_computed),
-            )
-          : props.render(wrapped_item.v, idx_computed);
-        state.items[i] = wrapped_item.v;
+        // const elm = _owner
+        //   ? run_with_owner(_owner, () =>
+        //       props.render(wrapped_item.v, idx_computed),
+        //     )
+        //   : props.render(wrapped_item.v, idx_computed);
+        const elm = props.render(wrapped_item.v, idx_computed);
+        // state.items[i] = wrapped_item.v;
         const top =
           (range.start + i) * itemHeight + (range.start + i - 1) * _gutter;
         if (isElement(elm)) {
@@ -414,6 +296,103 @@ export function ListView<T>(props: ListViewProps<T>) {
         state.idx_arr[i] = idx_computed;
       }
     },
+    init_slot() {
+      // const range = { start: _start, end: _end };
+      for (let i = 0; i < _slot_count; i++) {
+        const slot = ListItemView(
+          {
+            uid: -1,
+            top: 0,
+            height: 0,
+            payload: null,
+            bound: false,
+          },
+          [],
+        );
+
+        const wrapped_item = state.wrapped_items[i];
+
+        // if (!wrapped_item) {
+        //   _free_slots.push(slot);
+        //   _slots.push(slot);
+        //   continue;
+        // }
+
+        if (wrapped_item) {
+          const idx_computed = methods.create_idx(wrapped_item);
+          state.idx_arr[i] = idx_computed;
+          // const elm = _owner
+          //   ? run_with_owner(_owner, () =>
+          //       props.render(wrapped_item.v, idx_computed),
+          //     )
+          //   : props.render(wrapped_item.v, idx_computed);
+          const elm = props.render(wrapped_item.v, idx_computed);
+
+          const child = (() => {
+            if (isElement(elm)) {
+              return elm;
+            }
+            if (isRef(elm)) {
+              return Text(elm);
+            }
+            if (elm) {
+              return Text(elm);
+            }
+            return null;
+          })();
+
+          const top = (_start + i) * itemHeight + (_start + i - 1) * _gutter;
+          slot.setState({
+            uid: wrapped_item.k,
+            top,
+            height: itemHeight,
+            payload: wrapped_item.v,
+            bound: true,
+            children: [child],
+          });
+          _slot_bindings.set(methods._dataIdStr(wrapped_item.k), slot);
+        } else {
+          _free_slots.push(slot);
+        }
+
+        // state.items[i] = wrapped_item.v;
+
+        // const slot = _free_slots.pop()!;
+        // const slot = _slots[_slots.length - 1];
+        // slot.setState({
+        //   uid: wrapped_item.k,
+        //   top,
+        //   height: itemHeight,
+        //   payload: wrapped_item.v,
+        //   bound: i < 20,
+        //   children: [child],
+        // });
+        // slot.unbind();
+        // 槽位的高度变化需要转发给当前绑定的数据 Cell
+        // slot.onHeightChange(([original_height, height_difference]) => {
+        //   if (!slot.state.bound || slot.state.dataId === undefined) {
+        //     return;
+        //   }
+        //   // 找到对应的数据 Cell 并更新其高度
+        //   const dataCell = _$total_items.find(
+        //     (v) => (v.state.id ?? v.uid) === slot.state.dataId,
+        //   );
+        //   if (dataCell) {
+        //     dataCell.methods.updateHeight(slot.state.height);
+        //     const idx = _$total_items.indexOf(dataCell);
+        //     if (idx !== -1) {
+        //       _dirty_from = Math.min(_dirty_from, idx + 1);
+        //     }
+        //   }
+        //   _height += height_difference;
+        //   bus.emit(Events.HeightChange, _height);
+        //   bus.emit(Events.CellUpdate, { $item: slot });
+        //   methods.refresh();
+        // });
+        _slots.push(slot);
+      }
+      logger.log("after init slot", _slot_bindings.size);
+    },
     /** 在指定位置，插入 n 个节点 */
     insert(index: number, items: T[]) {
       // logger.log("insert - start", index, items);
@@ -439,9 +418,10 @@ export function ListView<T>(props: ListViewProps<T>) {
         inserted_wrapped_items.push(wrapped_item);
         inserted_items.push(item);
         inserted_idx.push(idx);
-        const child_tmp = _owner
-          ? run_with_owner(_owner, () => props.render(item, idx))
-          : props.render(item, idx);
+        // const child_tmp = _owner
+        //   ? run_with_owner(_owner, () => props.render(item, idx))
+        //   : props.render(item, idx);
+        const child_tmp = props.render(item, idx);
         const child = (() => {
           if (isElement(child_tmp)) {
             return child_tmp;
@@ -527,15 +507,17 @@ export function ListView<T>(props: ListViewProps<T>) {
      * 计算出 新增、更新 和 删除 的记录，提交给宿主层，刷新视图
      */
     refresh(v: T[], extra?: { reset?: boolean }) {
-      if (_refreshing) return;
+      if (_refreshing) {
+        return;
+      }
       _refreshing = true;
-      logger.log(
-        "refresh",
-        v.length,
-        "items, current:",
-        state.items.length,
-        extra,
-      );
+      // logger.log(
+      //   "refresh",
+      //   v.length,
+      //   "items, current:",
+      //   state.items.length,
+      //   extra,
+      // );
 
       // reset 模式：重置 range，全量替换
       if (extra?.reset) {
@@ -549,48 +531,56 @@ export function ListView<T>(props: ListViewProps<T>) {
         _slot_bindings.clear();
       }
 
-      const new_wrapped_items = v.map((item, i) => {
-        const existing = state.wrapped_items.find((vv) => {
+      const visible_items = v.slice(_start, _end);
+      const new_visible_wrapped_items: WrappedItemInListView<T>[] = [];
+
+      for (let i = 0; i < visible_items.length; i += 1) {
+        const item = visible_items[i];
+        const existing = state.wrapped_items.find((wrapped_item) => {
           if (_key && typeof item === "object") {
-            const _item = item as Record<string, unknown>;
-            const _vv = vv as { v: Record<string, unknown> };
+            const _item = item;
+            const _vv = wrapped_item;
             if (_item[_key] === _vv.v[_key]) {
               return true;
             }
           }
-          return item === vv.v;
+          return item === wrapped_item.v;
         });
+        const top = _start * itemHeight + (_start - 1) * _gutter;
         if (existing) {
           // logger.log("diff existing object", item);
-          registryGet(existing.v)?.diff(item);
-          existing.top = i * itemHeight + gutter;
-          return existing;
+          // registryGet(existing.v)?.diff(item);
+          existing.top = top;
+          existing.v = item;
+          new_visible_wrapped_items[i] = existing;
+          continue;
         }
-        return {
+        const new_wrapped_item = {
           k: methods.unique_id(),
           v: item,
-          top: i * itemHeight + gutter,
+          top,
           height: itemHeight,
         };
-      });
-      const prev_items = state.items;
-      const prev_wrapped_items = state.wrapped_items;
-      const prev_elements = state.children;
+        new_visible_wrapped_items[i] = new_wrapped_item;
+      }
+      const prev_items = [...state.items];
+      const prev_wrapped_items = [...state.wrapped_items];
+      const prev_elements = [...state.children];
       const prev_index_computed = state.idx_arr;
       // 1. Prepare target state
       const new_elements: (TimelessElement | null)[] = new Array(
-        new_wrapped_items.length,
+        new_visible_wrapped_items.length,
       );
       // const new_children: (any | null)[] = new Array(new_items.length);
       // const new_original_items: T[] = new Array(new_items.length);
       const new_index_computed: DerivedRef<number>[] = new Array(
-        new_wrapped_items.length,
+        new_visible_wrapped_items.length,
       );
 
       // 2. Index old items for O(1) lookup
       const old_map = new Map<any, number[]>();
       prev_items.forEach((item, index) => {
-        const k = _key && item ? (item as any)[_key] : item;
+        const k = _key && item ? item[_key] : item;
         let indices = old_map.get(k);
         if (!indices) {
           indices = [];
@@ -603,11 +593,8 @@ export function ListView<T>(props: ListViewProps<T>) {
       // A position shift caused purely by removals/insertions is not a "move".
       // Formula: expected_new_idx = old_idx - deletions_before_old_idx + insertions_before_new_idx
       const new_key_set = new Set<any>();
-      for (const item of new_wrapped_items) {
-        const k =
-          _key && item
-            ? (item as { v: Record<string, unknown> }).v[_key]
-            : item.v;
+      for (const item of new_visible_wrapped_items) {
+        const k = _key && item ? item.v[_key] : item.v;
         new_key_set.add(k);
       }
       // removed_old_prefix[i] = number of old items at indices [0, i) that are NOT in new array
@@ -616,21 +603,21 @@ export function ListView<T>(props: ListViewProps<T>) {
       ).fill(0);
       for (let i = 0; i < prev_items.length; i++) {
         const item = prev_items[i];
-        const k = _key && item ? (item as any)[_key] : item;
+        const k = _key && item ? item[_key] : item;
         removed_old_prefix[i + 1] =
           removed_old_prefix[i] + (new_key_set.has(k) ? 0 : 1);
       }
       const old_key_set = new Set<any>();
       for (const item of prev_items) {
-        const k = _key && item ? (item as any)[_key] : item;
+        const k = _key && item ? item[_key] : item;
         old_key_set.add(k);
       }
       // insertion_new_prefix[i] = number of new items at indices [0, i) that are NOT in old array
       const insertion_new_prefix: number[] = new Array(
-        new_wrapped_items.length + 1,
+        new_visible_wrapped_items.length + 1,
       ).fill(0);
-      for (let i = 0; i < new_wrapped_items.length; i++) {
-        const item = new_wrapped_items[i];
+      for (let i = 0; i < new_visible_wrapped_items.length; i++) {
+        const item = new_visible_wrapped_items[i];
         const k =
           _key && item
             ? (item as { v: Record<string, unknown> }).v[_key]
@@ -649,13 +636,9 @@ export function ListView<T>(props: ListViewProps<T>) {
       let _add_start = -1;
 
       // Iterate new items -> Determine Reused vs Added
-      for (let i = 0; i < new_wrapped_items.length; i++) {
-        const new_item = new_wrapped_items[i];
-        const k =
-          _key && new_item
-            ? // @ts-ignore
-              new_item.v[_key]
-            : new_item.v;
+      for (let i = 0; i < new_visible_wrapped_items.length; i++) {
+        const new_item = new_visible_wrapped_items[i];
+        const k = _key && new_item ? new_item.v[_key] : new_item.v;
         const prev_indices = old_map.get(k);
         if (prev_indices && prev_indices.length > 0) {
           // Reused - same key found in old list
@@ -699,13 +682,14 @@ export function ListView<T>(props: ListViewProps<T>) {
           }
           const idx_computed = methods.create_idx(new_item);
           new_index_computed[i] = idx_computed;
-          const res = _owner
-            ? run_with_owner(_owner, () =>
-                props.render(new_item.v, idx_computed),
-              )
-            : props.render(new_item.v, idx_computed);
-          new_elements[i] = res;
-          added_nodes[added_nodes.length - 1].elements.push(res);
+          // const res = _owner
+          //   ? run_with_owner(_owner, () =>
+          //       props.render(new_item.v, idx_computed),
+          //     )
+          //   : props.render(new_item.v, idx_computed);
+          const new_elm = props.render(new_item.v, idx_computed);
+          new_elements[i] = new_elm;
+          added_nodes[added_nodes.length - 1].elements.push(new_elm);
         }
       }
 
@@ -735,16 +719,16 @@ export function ListView<T>(props: ListViewProps<T>) {
       if (start !== -1) {
         removed_nodes.push({ idx: start, count });
       }
-      logger.log(
-        "removed:",
-        removed_nodes,
-        "added:",
-        added_nodes.map((op) => {
-          return { idx: op.idx, couont: op.elements.length };
-        }),
-        "moved:",
-        moved_nodes,
-      );
+      // logger.log(
+      //   "removed:",
+      //   removed_nodes,
+      //   "added:",
+      //   added_nodes.map((op) => {
+      //     return { idx: op.idx, couont: op.elements.length };
+      //   }),
+      //   "moved:",
+      //   moved_nodes,
+      // );
 
       // Destroy idx_computed for removed items
       for (const { idx } of removed_nodes) {
@@ -772,20 +756,25 @@ export function ListView<T>(props: ListViewProps<T>) {
           //   prev_wrapped_items,
           //   _slot_bindings,
           // );
-          if (item_idx < _start || item_idx >= _end) continue;
+          if (item_idx < _start || item_idx >= _end) {
+            continue;
+          }
           const prev_wrapped_item = prev_wrapped_items[item_idx];
+          if (!prev_wrapped_item) {
+            continue;
+          }
           const k = prev_wrapped_item.k;
           const key = methods._dataIdStr(k);
           const slot = _slot_bindings.get(key);
           if (slot) {
-            logger.log(
-              "before unbind slot",
-              idx,
-              item_idx,
-              key,
-              prev_items,
-              prev_wrapped_item,
-            );
+            // logger.log(
+            //   "before unbind slot",
+            //   idx,
+            //   item_idx,
+            //   key,
+            //   prev_items,
+            //   prev_wrapped_item,
+            // );
             slot.unbind();
             _slot_bindings.delete(key);
             _free_slots.push(slot);
@@ -795,7 +784,7 @@ export function ListView<T>(props: ListViewProps<T>) {
 
       // 更新所有保留槽位的 top
       const wrapped_item_by_key = new Map<string, WrappedItemInListView<T>>();
-      for (const w of new_wrapped_items) {
+      for (const w of new_visible_wrapped_items) {
         wrapped_item_by_key.set(methods._dataIdStr(w.k), w);
       }
       for (const [key, slot] of _slot_bindings) {
@@ -809,9 +798,11 @@ export function ListView<T>(props: ListViewProps<T>) {
       for (const { idx, elements } of added_nodes) {
         for (let i = 0; i < elements.length; i++) {
           const item_idx = idx + i;
-          if (item_idx < _start || item_idx >= _end) continue;
-          if (_free_slots.length === 0) break;
-          const new_wrapped_item = new_wrapped_items[item_idx];
+          // if (item_idx < _start || item_idx >= _end) continue;
+          if (_free_slots.length === 0) {
+            break;
+          }
+          const new_wrapped_item = new_visible_wrapped_items[item_idx];
           const key = methods._dataIdStr(new_wrapped_item.k);
           if (!_slot_bindings.has(key)) {
             const slot = _free_slots.pop()!;
@@ -834,19 +825,19 @@ export function ListView<T>(props: ListViewProps<T>) {
         _refreshing = false;
         return;
       }
-      state.wrapped_items = new_wrapped_items.slice();
-      state.items = new_wrapped_items.slice().map((item) => item.v);
+      state.wrapped_items = new_visible_wrapped_items.slice();
+      state.items = new_visible_wrapped_items.slice().map((item) => item.v);
       state.idx_arr = new_index_computed;
       state.children = new_elements;
 
       const total_height =
         state.wrapped_items.length * itemHeight +
         (state.wrapped_items.length - 1) * gutter;
-      logger.log(
-        "refresh - before $elm.setStyleValue",
-        state.wrapped_items.length,
-        total_height,
-      );
+      // logger.log(
+      //   "refresh - before $elm.setStyleValue",
+      //   state.wrapped_items.length,
+      //   total_height,
+      // );
       if (state.height !== total_height) {
         state.height = total_height;
         $elm.setStyleValue("height", total_height);
@@ -878,15 +869,15 @@ export function ListView<T>(props: ListViewProps<T>) {
 
       // 强制同步：无条件确保 [_start, _end) 范围内的槽位正确绑定
       {
-        const visibleMap = new Map<string, WrappedItemInListView<T>>();
+        const visible_map = new Map<string, WrappedItemInListView<T>>();
         for (let i = _start; i < _end; i++) {
           const wi = state.wrapped_items[i];
-          visibleMap.set(methods._dataIdStr(wi.k), wi);
+          visible_map.set(methods._dataIdStr(wi.k), wi);
         }
 
         // unbind 离开可见范围的槽位
         for (const [key, slot] of _slot_bindings) {
-          if (!visibleMap.has(key)) {
+          if (!visible_map.has(key)) {
             slot.unbind();
             _slot_bindings.delete(key);
             _free_slots.push(slot);
@@ -895,7 +886,7 @@ export function ListView<T>(props: ListViewProps<T>) {
 
         // 同步所有保留槽位的 top
         for (const [key, slot] of _slot_bindings) {
-          const wi = visibleMap.get(key);
+          const wi = visible_map.get(key);
           if (wi) {
             slot.setTop(wi.top);
           }
@@ -908,11 +899,12 @@ export function ListView<T>(props: ListViewProps<T>) {
             const wrapped_item = state.wrapped_items[i];
             const slot = _free_slots.pop()!;
             const idx_computed = methods.create_idx(wrapped_item);
-            const elm = _owner
-              ? run_with_owner(_owner, () =>
-                  props.render(wrapped_item.v, idx_computed),
-                )
-              : props.render(wrapped_item.v, idx_computed);
+            // const elm = _owner
+            //   ? run_with_owner(_owner, () =>
+            //       props.render(wrapped_item.v, idx_computed),
+            //     )
+            //   : props.render(wrapped_item.v, idx_computed);
+            const elm = props.render(wrapped_item.v, idx_computed);
             const child = (() => {
               if (isElement(elm)) return elm;
               if (isRef(elm)) return Text(elm);
@@ -1216,15 +1208,16 @@ export function ListView<T>(props: ListViewProps<T>) {
         );
         if (!_slot_bindings.has(key)) {
           // 从 _freeSlots 取槽位
-          logger.log("update - alloce free to", key, wrapped_item.v);
+          // logger.log("update - alloce free to", key, wrapped_item.v);
           const slot = _free_slots.pop();
           if (slot) {
             const idx_computed = methods.create_idx(wrapped_item);
-            const elm = _owner
-              ? run_with_owner(_owner, () =>
-                  props.render(wrapped_item.v, idx_computed),
-                )
-              : props.render(wrapped_item.v, idx_computed);
+            // const elm = _owner
+            //   ? run_with_owner(_owner, () =>
+            //       props.render(wrapped_item.v, idx_computed),
+            //     )
+            //   : props.render(wrapped_item.v, idx_computed);
+            const elm = props.render(wrapped_item.v, idx_computed);
             const child = (() => {
               if (isElement(elm)) {
                 return elm;
@@ -1349,16 +1342,12 @@ export function ListView<T>(props: ListViewProps<T>) {
 
   methods.ready();
   methods.subscribe_props();
-  // methods.build_children({ start: 0, end: size + buffer });
-  // methods.compute_visible_children();
-  box$.methods.subscribe_props();
   box$.methods.add_event();
   methods.init_slot();
   const children = _slots;
 
   state.height =
-    state.wrapped_items.length * itemHeight +
-    (state.wrapped_items.length - 1) * gutter;
+    state.items.length * itemHeight + (state.items.length - 1) * gutter;
 
   events.onScroll = methods.handleScroll;
 
@@ -1397,14 +1386,16 @@ export function ListView<T>(props: ListViewProps<T>) {
       }
     },
     onUnmounted() {
-      logger.log("onUnmounted called, children count:", _children.length);
+      // logger.log("onUnmounted called, children count:", _children.length);
       if (props.onUnmounted) {
         // console.log("[View] calling props.onUnmounted");
         props.onUnmounted();
       }
       listener$.destroy();
       box$.methods.destroy();
-      if (_owner) { dispose_owner(_owner); }
+      // if (_owner) {
+      //   dispose_owner(_owner);
+      // }
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
         if (isElement(node)) {
@@ -1412,7 +1403,10 @@ export function ListView<T>(props: ListViewProps<T>) {
         }
       }
       state.rendered = false;
-      if (_pending_raf) { cancelAnimationFrame(_pending_raf); _pending_raf = 0; }
+      if (_pending_raf) {
+        cancelAnimationFrame(_pending_raf);
+        _pending_raf = 0;
+      }
       // $elm = null;
     },
   };
