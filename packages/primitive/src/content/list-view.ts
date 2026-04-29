@@ -17,8 +17,8 @@ import {
   isRef,
   isWriteableRef,
   registryGet,
-  registrySet,
-  registryDelete,
+  // registrySet,
+  // registryDelete,
 } from "@timeless/reactive";
 
 import { MountedEvent, ScrollEvent } from "@/event/index";
@@ -227,8 +227,8 @@ export function ListView<T extends Record<string, unknown>>(
             // }
           },
         });
-        listener$.add(unsub);
-        _hmr_subs.push(unsub);
+        // listener$.add(unsub);
+        // _hmr_subs.push(unsub);
       }
     },
     destroy() {
@@ -536,7 +536,7 @@ export function ListView<T extends Record<string, unknown>>(
           _existing_map.delete(item);
         }
         if (item && typeof item === "object") {
-          registryDelete(item);
+          // registryDelete(item);
         }
         logger.log("remove in loop", index + i, state.idx_arr[index + i]);
         removed_idx.push(state.idx_arr[index + i]);
@@ -747,12 +747,15 @@ export function ListView<T extends Record<string, unknown>>(
             if (proxy && isWriteableRef(proxy)) {
               proxy.as(new_item.v);
               if (prev_item !== new_item.v) {
-                registryDelete(prev_item);
+                // registryDelete(prev_item);
               }
               // Update registry to map new item to the same proxy
-              registrySet(new_item.v, proxy);
+              // registrySet(new_item.v, proxy);
             } else {
-              const rerendered = props.render(new_item.v, new_index_computed[i]);
+              const rerendered = props.render(
+                new_item.v,
+                new_index_computed[i],
+              );
               new_elements[i] = rerendered;
               updated_nodes.set(methods._dataIdStr(new_item.k), rerendered);
             }
@@ -824,7 +827,7 @@ export function ListView<T extends Record<string, unknown>>(
           }
           const removed_item = prev_items[idx + i];
           if (removed_item && typeof removed_item === "object") {
-            registryDelete(removed_item);
+            // registryDelete(removed_item);
           }
         }
       }
@@ -1507,7 +1510,7 @@ export function ListView<T extends Record<string, unknown>>(
         cancelAnimationFrame(_pending_raf);
         _pending_raf = 0;
       }
-      // $elm = null;
+      $elm = null;
     },
   };
 }

@@ -13,7 +13,7 @@ export function DOMText(props: {
 }): DOMText {
   const t = "text";
   let $text: any = null;
-  const box$ = HostElement({ $elm: null, t, build: props.build });
+  let box$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
     ...box$.methods,
@@ -30,6 +30,10 @@ export function DOMText(props: {
       } else {
         $text.textContent = "";
       }
+    },
+    removeChildren() {
+      $text = null;
+      box$.methods.destroy();
     },
     render(elm: TimelessElement) {
       // if (elm.state.value === undefined || elm.state.value === null) {

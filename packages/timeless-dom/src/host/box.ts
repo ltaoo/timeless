@@ -26,7 +26,7 @@ export function HostElement(props: {
   let child_elements: (TimelessElement | null)[] = [];
   let _events: any = null;
 
-  console.log("create box");
+  // console.log("create box");
 
   const methods = {
     set$elm(elm: HTMLElement | Text) {
@@ -431,17 +431,23 @@ export function HostElement(props: {
         setTimeout(() => methods.handleElementsMounted(), 0);
       }
     },
+    /**
+     * 应该命名为 destroy children
+     * 其实等同于 innerHTML = "" 即销毁全部内容
+     */
     removeChildren(extra?: { $parent: any }) {
       const $parent = extra?.$parent || methods.getParent();
       if ($children.length === 0 && child_nodes.length === 0) {
         return;
       }
-      // Call onUnmounted for all child elements
-      for (const child of child_elements) {
-        if (child && child.onUnmounted) {
-          child.onUnmounted();
+
+      for (let i = 0; i < child_nodes.length; i += 1) {
+        const child_node = child_nodes[i];
+        if (child_node) {
+          child_node.removeChildren();
         }
       }
+
       // Remove child DOM nodes from parent
       if ($parent) {
         for (const $child of $children) {
@@ -450,11 +456,19 @@ export function HostElement(props: {
           }
         }
       }
-      child_elements = [];
-      $children = [];
-      child_nodes = [];
-      $elm = null;
+      $children.length = 0;
+      child_nodes.length = 0;
+      // $elm = null;
       methods.teardownEventListener(_events);
+      setTimeout(() => {
+        // Call onUnmounted for all child elements
+        for (const child of child_elements) {
+          if (child && child.onUnmounted) {
+            child.onUnmounted();
+          }
+        }
+        child_elements.length = 0;
+      }, 0);
     },
     insert(
       idx: number,
@@ -674,6 +688,13 @@ export function HostElement(props: {
         return null;
       }
       return $elm.parentElement;
+    },
+    destroy() {
+      $elm = null;
+      $children.length = 0;
+      child_nodes.length = 0;
+      child_elements.length = 0;
+      _events = null;
     },
     trackChild(
       dom: any,

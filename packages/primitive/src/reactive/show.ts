@@ -116,7 +116,7 @@ export function Show(props: ShowProps) {
         const unsubscribe = when.subscribe({
           onChange(value) {
             const condition = !!value;
-            logger.log("the when is changed", condition, state.value);
+            // logger.log("the when is changed", condition, state.value);
             // 如果条件没有变化，直接返回
             if (condition === state.value) {
               return;
@@ -159,8 +159,8 @@ export function Show(props: ShowProps) {
             }
           },
         });
-        listener$.add(unsubscribe);
-        _hmr_subs.push(unsubscribe);
+        // listener$.add(unsubscribe);
+        // _hmr_subs.push(unsubscribe);
       } else {
         state.value = !!when;
       }

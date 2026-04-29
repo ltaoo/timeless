@@ -77,12 +77,13 @@ function SearchTablePage() {
   });
   const totalPages = computed(page, (t) => Math.ceil(t.total / t.pageSize));
   const searchInput = ref("");
-  const searchQuery = ref("");
+  // const searchQuery = ref("");
   const data = refarr(
     Array.from({ length: page.value.pageSize }, (_, i) => {
       return generate_user((page.value.page - 1) * page.value.pageSize + i, {});
     }),
   );
+  const visible_ = ref(true);
 
   const filteredData = combine({ data, searchInput }, (t) => {
     const d = t.data;
@@ -98,7 +99,7 @@ function SearchTablePage() {
           row.location.toLowerCase().includes(q),
       )
       .sort((a, b) => a.id - b.id);
-    console.log("before return filtered data", r);
+    // console.log("before return filtered data", r);
     return r;
   });
 
@@ -187,17 +188,14 @@ function SearchTablePage() {
                       //     };
                       //   });
                       // });
-                      const user = data.find((v) => v.id === 2);
                       // console.log(user.value.age);
-                      if (user) {
-                        user.set("age", user.value.age + 1);
-                        // user.as((u) => ({
-                        //   ...u,
-                        //   age: (u.age || 0) + 1,
-                        // }));
-                      }
+                      // const user = data.find((v) => v.id === 2);
+                      // if (user) {
+                      //   user.set("age", user.value.age + 1);
+                      // }
                       // console.log(user.value.age);
                       // }, 5000);
+                      visible_.toggle();
                     },
                   },
                   ["Start Age+1"],
@@ -222,7 +220,7 @@ function SearchTablePage() {
           ]),
 
           View({}, [
-            computed(filteredData, (t) => `Showing ${t.length} of `),
+            computed(data, (t) => `Showing ${t.length} of `),
             computed(page, (t) => t.total),
           ]),
         ],
@@ -344,236 +342,218 @@ function SearchTablePage() {
               ),
             ],
           ),
-          // View(
-          //   {
-          //     style: {
-          //       "max-height": "530px",
-          //       height: "auto",
-          //       "border-top": "none",
-          //     },
-          //   },
-          //   [
-          //     View(
-          //       {
-          //         style: {
-          //           "overflow-y": "auto",
-          //         },
-          //       },
-          //       [,],
-          //     ),
-          //   ],
-          // ),
-          // Show({
-          //   when: computed(filteredData, (t) => t.length),
-          //   ok() {
-          //     return ;
-          //   },
-          //   else() {
-          //     return View(
-          //       {
-          //         style: {
-          //           display: "flex",
-          //           "align-items": "center",
-          //           "justify-content": "center",
-          //           gap: "8px",
-          //           padding: "12px",
-          //           "flex-shrink": 0,
-          //           height: "100%",
-          //         },
-          //       },
-          //       ["No data available"],
-          //     );
-          //   },
-          // }),
-          ListView({
-            style: {
-              "max-height": "100%",
-              overflow: "auto",
-              position: "relative",
-            },
-            key: "id",
-            size: 30,
-            // itemHeight: 31.5,
-            itemHeight: 186.5,
-            each: filteredData,
-            render(row, idx) {
-              const borderBottom_ = computed(idx, (t) =>
-                t === filteredData.value.length - 1 ? "none" : "1px solid #ddd",
-              );
-              const id_ = computed(row, (t) => t.id);
-              const name_ = computed(row, (t) => t.name);
-              const email_ = computed(row, (t) => t.email);
-              const role_ = computed(row, (t) => {
-                return t.role.text;
-              });
-              const age_ = computed(row, (t) => t.age);
-              const color_ = computed(row, (t) =>
-                t.status === "Active" ? "#28a745" : "#dc3545",
-              );
-              const status_ = computed(row, (t) => t.status);
-              const department_ = computed(row, (t) => t.department);
-              const skills_ = computed(row, (t) => t.skills);
-
-              return View(
-                {
-                  style: {
-                    display: "grid",
-                    "grid-template-columns":
-                      "60px 120px 200px 80px 60px 80px 100px 1fr",
-                    width: "100%",
-                    "border-bottom": borderBottom_,
-                    // "border-right": "1px solid #ddd",
-                  },
-                  onUnmounted() {
-                    // console.log("destroy", id_.value);
-                    borderBottom_.destroy();
-                    id_.destroy();
-                    name_.destroy();
-                    email_.destroy();
-                    role_.destroy();
-                    age_.destroy();
-                    color_.destroy();
-                    status_.destroy();
-                    department_.destroy();
-                    skills_.destroy();
-                  },
+          Show({
+            // when: computed(filteredData, (t) => t.length),
+            when: visible_,
+            ok() {
+              return ListView({
+                style: {
+                  "max-height": "100%",
+                  overflow: "auto",
+                  position: "relative",
                 },
-                [
-                  name_,
-                  // View(
-                  //   {
-                  //     style: {
-                  //       padding: "8px",
-                  //       "border-right": "1px solid #ddd",
-                  //     },
-                  //   },
-                  //   [id_],
-                  // ),
-                  // View(
-                  //   {
-                  //     style: {
-                  //       padding: "8px",
-                  //       "border-right": "1px solid #ddd",
-                  //     },
-                  //   },
-                  //   [name_],
-                  // ),
-                  // View(
-                  //   {
-                  //     style: {
-                  //       padding: "8px",
-                  //       "border-right": "1px solid #ddd",
-                  //     },
-                  //   },
-                  //   [email_],
-                  // ),
-                  // View(
-                  //   {
-                  //     style: {
-                  //       padding: "8px",
-                  //       "border-right": "1px solid #ddd",
-                  //     },
-                  //   },
-                  //   [role_],
-                  // ),
-                  // View(
-                  //   {
-                  //     style: {
-                  //       padding: "8px",
-                  //       "border-right": "1px solid #ddd",
-                  //     },
-                  //   },
-                  //   [age_],
-                  // ),
-                  // View(
-                  //   {
-                  //     style: {
-                  //       padding: "8px",
-                  //       "border-right": "1px solid #ddd",
-                  //       color: color_,
-                  //     },
-                  //   },
-                  //   [status_],
-                  // ),
-                  // View(
-                  //   {
-                  //     style: {
-                  //       padding: "8px",
-                  //       "border-right": "1px solid #ddd",
-                  //     },
-                  //   },
-                  //   [department_],
-                  // ),
-                  // View(
-                  //   {
-                  //     style: {
-                  //       padding: "8px",
-                  //       // "border-right": "1px solid #ddd",
-                  //     },
-                  //   },
-                  //   [
-                  //     For({
-                  //       key: "id",
-                  //       each: skills_,
-                  //       render(skill) {
-                  //         const skill_name_ = computed(skill, (t) => t.name);
-                  //         const histories_ = computed(
-                  //           skill,
-                  //           (t) => t.histories,
-                  //         );
+                key: "id",
+                size: 30,
+                // itemHeight: 31.5,
+                itemHeight: 186.5,
+                each: filteredData,
+                render(row, idx) {
+                  const borderBottom_ = computed(idx, (t) =>
+                    t === filteredData.value.length - 1
+                      ? "none"
+                      : "1px solid #ddd",
+                  );
+                  const id_ = computed(row, (t) => t.id);
+                  const name_ = computed(row, (t) => t.name);
+                  const email_ = computed(row, (t) => t.email);
+                  const role_ = computed(row, (t) => {
+                    return t.role.text;
+                  });
+                  const age_ = computed(row, (t) => t.age);
+                  const color_ = computed(row, (t) =>
+                    t.status === "Active" ? "#28a745" : "#dc3545",
+                  );
+                  const status_ = computed(row, (t) => t.status);
+                  const department_ = computed(row, (t) => t.department);
+                  const skills_ = computed(row, (t) => t.skills);
 
-                  //         return View(
-                  //           {
-                  //             onUnmounted() {
-                  //               skill_name_.destroy();
-                  //               histories_.destroy();
-                  //             },
-                  //           },
-                  //           [
-                  //             View({}, [skill_name_]),
-                  //             View({}, [
-                  //               For({
-                  //                 key: "id",
-                  //                 each: histories_,
-                  //                 render(history) {
-                  //                   const history_text_ = computed(
-                  //                     history,
-                  //                     (t) => t.text,
-                  //                   );
-                  //                   const history_time_ = computed(
-                  //                     history,
-                  //                     (t) => t.time,
-                  //                   );
-                  //                   const history_value_ = computed(
-                  //                     history,
-                  //                     (t) => t.value,
-                  //                   );
-                  //                   return View(
-                  //                     {
-                  //                       onUnmounted() {
-                  //                         history_text_.destroy();
-                  //                         history_time_.destroy();
-                  //                         history_value_.destroy();
-                  //                       },
-                  //                     },
-                  //                     [
-                  //                       View({}, [history_text_]),
-                  //                       View({}, [history_time_]),
-                  //                       View({}, [history_value_]),
-                  //                     ],
-                  //                   );
-                  //                 },
-                  //               }),
-                  //             ]),
-                  //           ],
-                  //         );
-                  //       },
-                  //     }),
-                  //   ],
-                  // ),
-                ],
-              );
+                  return View(
+                    {
+                      style: {
+                        display: "grid",
+                        "grid-template-columns":
+                          "60px 120px 200px 80px 60px 80px 100px 1fr",
+                        width: "100%",
+                        "border-bottom": borderBottom_,
+                        // "border-right": "1px solid #ddd",
+                      },
+                      onUnmounted() {
+                        // console.log("destroy", id_.value);
+                        borderBottom_.destroy();
+                        id_.destroy();
+                        name_.destroy();
+                        email_.destroy();
+                        role_.destroy();
+                        age_.destroy();
+                        color_.destroy();
+                        status_.destroy();
+                        department_.destroy();
+                        skills_.destroy();
+                      },
+                    },
+                    [
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [id_],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [name_],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [email_],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [role_],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [age_],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                            color: color_,
+                          },
+                        },
+                        [status_],
+                      ),
+                      View(
+                        {
+                          style: {
+                            padding: "8px",
+                            "border-right": "1px solid #ddd",
+                          },
+                        },
+                        [department_],
+                      ),
+                      // View(
+                      //   {
+                      //     style: {
+                      //       padding: "8px",
+                      //       // "border-right": "1px solid #ddd",
+                      //     },
+                      //   },
+                      //   [
+                      //     For({
+                      //       key: "id",
+                      //       each: skills_,
+                      //       render(skill) {
+                      //         const skill_name_ = computed(skill, (t) => t.name);
+                      //         const histories_ = computed(
+                      //           skill,
+                      //           (t) => t.histories,
+                      //         );
+
+                      //         return View(
+                      //           {
+                      //             onUnmounted() {
+                      //               skill_name_.destroy();
+                      //               histories_.destroy();
+                      //             },
+                      //           },
+                      //           [
+                      //             View({}, [skill_name_]),
+                      //             View({}, [
+                      //               For({
+                      //                 key: "id",
+                      //                 each: histories_,
+                      //                 render(history) {
+                      //                   const history_text_ = computed(
+                      //                     history,
+                      //                     (t) => t.text,
+                      //                   );
+                      //                   const history_time_ = computed(
+                      //                     history,
+                      //                     (t) => t.time,
+                      //                   );
+                      //                   const history_value_ = computed(
+                      //                     history,
+                      //                     (t) => t.value,
+                      //                   );
+                      //                   return View(
+                      //                     {
+                      //                       onUnmounted() {
+                      //                         history_text_.destroy();
+                      //                         history_time_.destroy();
+                      //                         history_value_.destroy();
+                      //                       },
+                      //                     },
+                      //                     [
+                      //                       View({}, [history_text_]),
+                      //                       View({}, [history_time_]),
+                      //                       View({}, [history_value_]),
+                      //                     ],
+                      //                   );
+                      //                 },
+                      //               }),
+                      //             ]),
+                      //           ],
+                      //         );
+                      //       },
+                      //     }),
+                      //   ],
+                      // ),
+                    ],
+                  );
+                },
+              });
             },
+            // else() {
+            //   return View(
+            //     {
+            //       style: {
+            //         display: "flex",
+            //         "align-items": "center",
+            //         "justify-content": "center",
+            //         gap: "8px",
+            //         padding: "12px",
+            //         "flex-shrink": 0,
+            //         height: "100%",
+            //       },
+            //     },
+            //     ["No data available"],
+            //   );
+            // },
           }),
         ],
       ),
@@ -1473,19 +1453,19 @@ function ApplicationView() {
           },
         },
         [
-          View(
-            {
-              onClick() {
-                currentPage.as("table");
-                pageStats.as((s) => ({ ...s, table: s.table + 1 }));
-              },
-              style: {
-                background:
-                  currentPage.value === "table" ? "#0056b3" : "#007bff",
-              },
-            },
-            ["Table (1000 rows)"],
-          ),
+          // View(
+          //   {
+          //     onClick() {
+          //       currentPage.as("table");
+          //       pageStats.as((s) => ({ ...s, table: s.table + 1 }));
+          //     },
+          //     style: {
+          //       background:
+          //         currentPage.value === "table" ? "#0056b3" : "#007bff",
+          //     },
+          //   },
+          //   ["Table (1000 rows)"],
+          // ),
           View(
             {
               onClick() {
@@ -1499,45 +1479,45 @@ function ApplicationView() {
             },
             ["SearchTable (5000 rows)"],
           ),
-          View(
-            {
-              onClick() {
-                currentPage.as("form");
-                pageStats.as((s) => ({ ...s, form: s.form + 1 }));
-              },
-              style: {
-                background:
-                  currentPage.value === "form" ? "#0056b3" : "#007bff",
-              },
-            },
-            ["Form"],
-          ),
-          View(
-            {
-              onClick() {
-                currentPage.as("dashboard");
-                pageStats.as((s) => ({ ...s, dashboard: s.dashboard + 1 }));
-              },
-              style: {
-                background:
-                  currentPage.value === "dashboard" ? "#0056b3" : "#007bff",
-              },
-            },
-            ["Dashboard"],
-          ),
-          View(
-            {
-              onClick() {
-                currentPage.as("multishow");
-                pageStats.as((s) => ({ ...s, multishow: s.multishow + 1 }));
-              },
-              style: {
-                background:
-                  currentPage.value === "multishow" ? "#0056b3" : "#007bff",
-              },
-            },
-            ["MultiShow"],
-          ),
+          // View(
+          //   {
+          //     onClick() {
+          //       currentPage.as("form");
+          //       pageStats.as((s) => ({ ...s, form: s.form + 1 }));
+          //     },
+          //     style: {
+          //       background:
+          //         currentPage.value === "form" ? "#0056b3" : "#007bff",
+          //     },
+          //   },
+          //   ["Form"],
+          // ),
+          // View(
+          //   {
+          //     onClick() {
+          //       currentPage.as("dashboard");
+          //       pageStats.as((s) => ({ ...s, dashboard: s.dashboard + 1 }));
+          //     },
+          //     style: {
+          //       background:
+          //         currentPage.value === "dashboard" ? "#0056b3" : "#007bff",
+          //     },
+          //   },
+          //   ["Dashboard"],
+          // ),
+          // View(
+          //   {
+          //     onClick() {
+          //       currentPage.as("multishow");
+          //       pageStats.as((s) => ({ ...s, multishow: s.multishow + 1 }));
+          //     },
+          //     style: {
+          //       background:
+          //         currentPage.value === "multishow" ? "#0056b3" : "#007bff",
+          //     },
+          //   },
+          //   ["MultiShow"],
+          // ),
         ],
       ),
       // View(
@@ -1562,36 +1542,37 @@ function ApplicationView() {
           },
         },
         [
-          Show({
-            when: computed(currentPage, (p) => p === "table"),
-            ok() {
-              return TablePage();
-            },
-          }),
-          Show({
-            when: computed(currentPage, (p) => p === "searchtable"),
-            ok() {
-              return SearchTablePage();
-            },
-          }),
-          Show({
-            when: computed(currentPage, (p) => p === "form"),
-            ok() {
-              return FormPage();
-            },
-          }),
-          Show({
-            when: computed(currentPage, (p) => p === "dashboard"),
-            ok() {
-              return DashboardPage();
-            },
-          }),
-          Show({
-            when: computed(currentPage, (p) => p === "multishow"),
-            ok() {
-              return MultiShowPage();
-            },
-          }),
+          SearchTablePage(),
+          // Show({
+          //   when: computed(currentPage, (p) => p === "table"),
+          //   ok() {
+          //     return TablePage();
+          //   },
+          // }),
+          // Show({
+          //   when: computed(currentPage, (p) => p === "searchtable"),
+          //   ok() {
+          //     return SearchTablePage();
+          //   },
+          // }),
+          // Show({
+          //   when: computed(currentPage, (p) => p === "form"),
+          //   ok() {
+          //     return FormPage();
+          //   },
+          // }),
+          // Show({
+          //   when: computed(currentPage, (p) => p === "dashboard"),
+          //   ok() {
+          //     return DashboardPage();
+          //   },
+          // }),
+          // Show({
+          //   when: computed(currentPage, (p) => p === "multishow"),
+          //   ok() {
+          //     return MultiShowPage();
+          //   },
+          // }),
         ],
       ),
     ],

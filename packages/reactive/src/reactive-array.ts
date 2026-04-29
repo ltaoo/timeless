@@ -195,7 +195,7 @@ export function refArray<T>(
     }
   }
   const _inner: any[] = [];
-  const getProxy = (vv: any, idx?: number) => {
+  const get_computed_value = (vv: any, idx?: number) => {
     if (isRef(vv)) {
       return vv;
     }
@@ -222,10 +222,10 @@ export function refArray<T>(
       return raw_value.length;
     },
     subscribe(ctx: Subscriber<T[]>) {
-      const trackCtx = ctx as SubscriberWithId<T[]>;
-      deps.push(trackCtx);
+      const track_ctx = ctx as SubscriberWithId<T[]>;
+      deps.push(track_ctx);
       return function () {
-        const idx = deps.indexOf(trackCtx);
+        const idx = deps.indexOf(track_ctx);
         if (idx > -1) deps.splice(idx, 1);
       };
     },
@@ -256,7 +256,7 @@ export function refArray<T>(
     },
     get(idx: number) {
       const vv = raw_value[idx];
-      return getProxy(vv, idx);
+      return get_computed_value(vv, idx);
     },
     set(idx: number, item: any) {
       Array.prototype.splice.call(raw_value, idx, 1, item);
@@ -265,7 +265,7 @@ export function refArray<T>(
     splice(idx: number, dcount: number, ...items: any[]) {
       const res = Array.prototype.splice.call(raw_value, idx, dcount, ...items);
       notify({ type: "refresh" });
-      return res.map((item: any) => getProxy(item));
+      return res.map((item: any) => get_computed_value(item));
     },
     insert(idx: number, ...items: any[]) {
       Array.prototype.splice.call(raw_value, idx, 0, ...items);
@@ -309,13 +309,13 @@ export function refArray<T>(
       const index = raw_value.length - 1;
       const item = Array.prototype.pop.call(raw_value);
       notify({ type: "delete", index, deleteCount: 1 });
-      return getProxy(item);
+      return get_computed_value(item);
     },
     shift() {
       if (raw_value.length === 0) return undefined;
       const item = Array.prototype.shift.call(raw_value);
       notify({ type: "delete", index: 0, deleteCount: 1 });
-      return getProxy(item);
+      return get_computed_value(item);
     },
     delete(idx: number) {
       Array.prototype.splice.call(raw_value, idx, 1);
@@ -350,7 +350,9 @@ export function refArray<T>(
       notify({ type: "refresh" });
     },
     filter(predicate: (item: T, index: number, array: T[]) => boolean) {
-      return raw_value.filter(predicate).map((item: any) => getProxy(item));
+      return raw_value
+        .filter(predicate)
+        .map((item: any) => get_computed_value(item));
     },
     includes(item: T) {
       return raw_value.includes(item);
@@ -385,7 +387,9 @@ export function refArray<T>(
       return raw_value.join(separator);
     },
     slice(start?: number, end?: number) {
-      return raw_value.slice(start, end).map((item: any) => getProxy(item));
+      return raw_value
+        .slice(start, end)
+        .map((item: any) => get_computed_value(item));
     },
     indexOf(v: T | Ref<T>, from_idx?: number) {
       if (isRef(v)) {
@@ -457,7 +461,7 @@ export function refArray<T>(
         return null;
       }
       const vv = raw_value[idx];
-      return getProxy(vv, idx);
+      return get_computed_value(vv, idx);
     },
     findIndex(
       predicate: (value: T, index: number, obj: T[]) => unknown,
@@ -566,18 +570,18 @@ export function refArray<T>(
     },
     first() {
       if (raw_value.length === 0) return undefined;
-      return getProxy(raw_value[0], 0);
+      return get_computed_value(raw_value[0], 0);
     },
     last() {
       if (raw_value.length === 0) return undefined;
       const idx = raw_value.length - 1;
-      return getProxy(raw_value[idx], idx);
+      return get_computed_value(raw_value[idx], idx);
     },
     nth(index: number) {
       const len = raw_value.length;
       const idx = index < 0 ? len + index : index;
       if (idx < 0 || idx >= len) return undefined;
-      return getProxy(raw_value[idx], idx);
+      return get_computed_value(raw_value[idx], idx);
     },
     count(predicate?: (item: T, index: number) => boolean) {
       if (!predicate) return raw_value.length;
@@ -737,7 +741,7 @@ export function refArray<T>(
     at(index: number) {
       const idx = index < 0 ? raw_value.length + index : index;
       if (idx < 0 || idx >= raw_value.length) return undefined;
-      return getProxy(raw_value[idx], idx);
+      return get_computed_value(raw_value[idx], idx);
     },
     toArray() {
       return raw_value.slice();

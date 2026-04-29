@@ -140,17 +140,17 @@ export function ListItemView<T>(
         }
       }
     },
-    beforeUnmounted() {
-      if (rest.beforeUnmounted) {
-        rest.beforeUnmounted();
-      }
-      for (let i = 0; i < state.children.length; i += 1) {
-        const node = state.children[i];
-        if (isElement(node) && node.beforeUnmounted) {
-          node.beforeUnmounted();
-        }
-      }
-    },
+    // beforeUnmounted() {
+    //   if (rest.beforeUnmounted) {
+    //     rest.beforeUnmounted();
+    //   }
+    //   for (let i = 0; i < state.children.length; i += 1) {
+    //     const node = state.children[i];
+    //     if (isElement(node) && node.beforeUnmounted) {
+    //       node.beforeUnmounted();
+    //     }
+    //   }
+    // },
     onUnmounted() {
       // logger.log("onUnmounted", box$.listener$.length);
       box$.methods.destroy();
@@ -158,7 +158,7 @@ export function ListItemView<T>(
         rest.onUnmounted();
       }
       state.rendered = false;
-      state.children = [];
+      state.children.length = 0;
       $elm = null;
     },
   };

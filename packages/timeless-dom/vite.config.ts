@@ -21,7 +21,7 @@ export default createLibConfig({
     if (format === "umd") return "timeless.dom.umd.min.js";
     return `index.${format}.js`;
   },
-  minify: true,
+  minify: false,
   alias: {
     "@": resolve(__dirname, "src"),
   },

@@ -1,4 +1,4 @@
-import { get, set } from "./registry";
+import { get, release, set } from "./registry";
 import { ref } from "./ref";
 import { refArray } from "./reactive-array";
 import { refObject } from "./reactive-object";
@@ -98,6 +98,7 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
     destroy() {
       unsubscribe();
       _deps.length = 0;
+      release(deps);
     },
     get value() {
       return raw_value;
@@ -115,13 +116,13 @@ export function computed<T = any>(deps: any, fn: (t: any) => T): DerivedRef<T> {
       }));
     },
     dump() {
-      console.log("[reactive.dump] computed subscribers:", _deps.length);
-      _deps.forEach((ctx, i) => {
-        console.log(
-          `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
-          ctx.__trackInfo || "",
-        );
-      });
+      // console.log("[reactive.dump] computed subscribers:", _deps.length);
+      // _deps.forEach((ctx, i) => {
+      //   console.log(
+      //     `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
+      //     ctx.__trackInfo || "",
+      //   );
+      // });
     },
   };
 
