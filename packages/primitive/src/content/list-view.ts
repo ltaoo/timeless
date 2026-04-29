@@ -1505,12 +1505,16 @@ export function ListView<T extends Record<string, unknown>>(
           node.onUnmounted();
         }
       }
-      state.rendered = false;
       if (_pending_raf) {
         cancelAnimationFrame(_pending_raf);
         _pending_raf = 0;
       }
       $elm = null;
+      state.rendered = false;
+      state.idx_arr.length = 0;
+      state.children.length = 0;
+      state.items.length = 0;
+      state.wrapped_items.length = 0;
     },
   };
 }
