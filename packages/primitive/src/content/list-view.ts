@@ -18,11 +18,17 @@ import {
   isWriteableRef,
   registryGet,
   registrySet,
+  registryDelete,
 } from "@timeless/reactive";
 
 import { MountedEvent, ScrollEvent } from "@/event/index";
 import { For, ForProps } from "@/reactive/for";
-import { get_owner, run_with_owner, dispose_owner } from "@/context/context";
+import {
+  create_owner,
+  get_owner,
+  run_with_owner,
+  dispose_owner,
+} from "@/context/context";
 import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
 
@@ -110,8 +116,12 @@ export function ListView<T extends Record<string, unknown>>(
   let _end = _size;
   /** 标记从哪个下标开始 top 需要重算，Infinity 表示干净 */
   let _dirty_from = Infinity;
-  // const _owner = get_owner();
+  const _owner = get_owner();
   const _existing_map = new Map();
+  const _slot_render_owners = new Map<
+    ListItemView,
+    ReturnType<typeof create_owner>
+  >();
   // Track subscription unsubscribers separately for HMR
   const _hmr_subs: (() => void)[] = [];
   let _id = 0;
@@ -201,23 +211,60 @@ export function ListView<T extends Record<string, unknown>>(
             }
           },
           onChange(v, extra) {
-            logger.log("ctx.onChange", v, state.rendered, extra);
-            _pending_v = v;
-            _pending_extra = extra;
-            if (!_pending_raf) {
-              _pending_raf = requestAnimationFrame(() => {
-                _pending_raf = 0;
-                const pv = _pending_v;
-                const pe = _pending_extra;
-                _pending_v = null;
-                _pending_extra = null;
-                if (pv) methods.refresh(pv, pe);
-              });
-            }
+            // logger.log("ctx.onChange", v, state.rendered, extra);
+            methods.refresh(v, extra);
+            // _pending_v = v;
+            // _pending_extra = extra;
+            // if (!_pending_raf) {
+            //   _pending_raf = requestAnimationFrame(() => {
+            //     _pending_raf = 0;
+            //     const pv = _pending_v;
+            //     const pe = _pending_extra;
+            //     _pending_v = null;
+            //     _pending_extra = null;
+            //     if (pv) methods.refresh(pv, pe);
+            //   });
+            // }
           },
         });
         listener$.add(unsub);
         _hmr_subs.push(unsub);
+      }
+    },
+    destroy() {
+      listener$.destroy();
+      box$.methods.destroy();
+      for (let i = 0; i < state.idx_arr.length; i += 1) {
+        const idx = state.idx_arr[i];
+        if (idx) {
+          idx.destroy();
+        }
+      }
+      for (const slot of _slots) {
+        methods.dispose_slot_owner(slot);
+      }
+      _slot_render_owners.clear();
+      // if (_owner) {
+      //   dispose_owner(_owner);
+      // }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node)) {
+          node.onUnmounted();
+        }
+      }
+      state.rendered = false;
+      state.items = [];
+      state.wrapped_items = [];
+      state.children = [];
+      state.idx_arr = [];
+      // @ts-ignore
+      _slot_bindings = null;
+      _free_slots = [];
+      _slots = [];
+      if (_pending_raf) {
+        cancelAnimationFrame(_pending_raf);
+        _pending_raf = 0;
       }
     },
     // Helper to create a computed index that depends on `each`
@@ -227,6 +274,40 @@ export function ListView<T extends Record<string, unknown>>(
         // console.log("recompute index when the each is changed", origin_item);
         return r;
       });
+    },
+    get_idx(origin_item: WrappedItemInListView<T>, index?: number) {
+      const idx =
+        index !== undefined ? index : state.wrapped_items.indexOf(origin_item);
+      if (idx !== -1 && state.idx_arr[idx]) {
+        return state.idx_arr[idx];
+      }
+      const idx_computed = methods.create_idx(origin_item);
+      if (idx !== -1) {
+        state.idx_arr[idx] = idx_computed;
+      }
+      return idx_computed;
+    },
+    dispose_slot_owner(slot: ListItemView) {
+      const owner = _slot_render_owners.get(slot);
+      if (owner) {
+        dispose_owner(owner);
+        _slot_render_owners.delete(slot);
+      }
+    },
+    render_for_slot(
+      slot: ListItemView,
+      item: T,
+      idx_computed: DerivedRef<number>,
+    ) {
+      methods.dispose_slot_owner(slot);
+      const item_owner = create_owner(_owner);
+      _slot_render_owners.set(slot, item_owner);
+      return run_with_owner(item_owner, () => props.render(item, idx_computed));
+    },
+    release_slot(slot: ListItemView) {
+      slot.unbind();
+      methods.dispose_slot_owner(slot);
+      _free_slots.push(slot);
     },
     normalize_children(children?: ViewChildren) {
       if (children === null || children === undefined) return [];
@@ -241,7 +322,7 @@ export function ListView<T extends Record<string, unknown>>(
       const wrapped_items = state.wrapped_items.slice(range.start, range.end);
       for (let i = 0; i < wrapped_items.length; i += 1) {
         const wrapped_item = wrapped_items[i];
-        const idx_computed = methods.create_idx(wrapped_item);
+        const idx_computed = methods.get_idx(wrapped_item, range.start + i);
         // const elm = _owner
         //   ? run_with_owner(_owner, () =>
         //       props.render(wrapped_item.v, idx_computed),
@@ -319,14 +400,13 @@ export function ListView<T extends Record<string, unknown>>(
         // }
 
         if (wrapped_item) {
-          const idx_computed = methods.create_idx(wrapped_item);
+          const idx_computed = methods.get_idx(wrapped_item, i);
           state.idx_arr[i] = idx_computed;
-          // const elm = _owner
-          //   ? run_with_owner(_owner, () =>
-          //       props.render(wrapped_item.v, idx_computed),
-          //     )
-          //   : props.render(wrapped_item.v, idx_computed);
-          const elm = props.render(wrapped_item.v, idx_computed);
+          const elm = methods.render_for_slot(
+            slot,
+            wrapped_item.v,
+            idx_computed,
+          );
 
           const child = (() => {
             if (isElement(elm)) {
@@ -455,6 +535,9 @@ export function ListView<T extends Record<string, unknown>>(
         if (_existing_map.has(item)) {
           _existing_map.delete(item);
         }
+        if (item && typeof item === "object") {
+          registryDelete(item);
+        }
         logger.log("remove in loop", index + i, state.idx_arr[index + i]);
         removed_idx.push(state.idx_arr[index + i]);
       }
@@ -518,22 +601,18 @@ export function ListView<T extends Record<string, unknown>>(
       //   state.items.length,
       //   extra,
       // );
-
       // reset 模式：重置 range，全量替换
       if (extra?.reset) {
         $elm.setScrollTop(0);
         _start = 0;
         _end = _size + _buffer_size;
         for (const [, slot] of _slot_bindings) {
-          slot.unbind();
-          _free_slots.push(slot);
+          methods.release_slot(slot);
         }
         _slot_bindings.clear();
       }
-
       const visible_items = v.slice(_start, _end);
       const new_visible_wrapped_items: WrappedItemInListView<T>[] = [];
-
       for (let i = 0; i < visible_items.length; i += 1) {
         const item = visible_items[i];
         const existing = state.wrapped_items.find((wrapped_item) => {
@@ -576,7 +655,6 @@ export function ListView<T extends Record<string, unknown>>(
       const new_index_computed: DerivedRef<number>[] = new Array(
         new_visible_wrapped_items.length,
       );
-
       // 2. Index old items for O(1) lookup
       const old_map = new Map<any, number[]>();
       prev_items.forEach((item, index) => {
@@ -588,7 +666,6 @@ export function ListView<T extends Record<string, unknown>>(
         }
         indices.push(index);
       });
-
       // Pre-compute prefix sums for accurate move detection.
       // A position shift caused purely by removals/insertions is not a "move".
       // Formula: expected_new_idx = old_idx - deletions_before_old_idx + insertions_before_new_idx
@@ -625,16 +702,15 @@ export function ListView<T extends Record<string, unknown>>(
         insertion_new_prefix[i + 1] =
           insertion_new_prefix[i] + (old_key_set.has(k) ? 0 : 1);
       }
-
       // 3. Diff Phase: Identify operations
       const added_nodes: {
         idx: number;
         elements: (TimelessElement | null)[];
       }[] = [];
+      const updated_nodes = new Map<string, TimelessElement | null>();
       const removed_nodes: { idx: number; count: number }[] = [];
       const moved_nodes: { from: number; to: number }[] = [];
       let _add_start = -1;
-
       // Iterate new items -> Determine Reused vs Added
       for (let i = 0; i < new_visible_wrapped_items.length; i++) {
         const new_item = new_visible_wrapped_items[i];
@@ -670,9 +746,20 @@ export function ListView<T extends Record<string, unknown>>(
             const proxy = registryGet(prev_item);
             if (proxy && isWriteableRef(proxy)) {
               proxy.as(new_item.v);
+              if (prev_item !== new_item.v) {
+                registryDelete(prev_item);
+              }
               // Update registry to map new item to the same proxy
               registrySet(new_item.v, proxy);
+            } else {
+              const rerendered = props.render(new_item.v, new_index_computed[i]);
+              new_elements[i] = rerendered;
+              updated_nodes.set(methods._dataIdStr(new_item.k), rerendered);
             }
+          } else if (new_item.v !== prev_item) {
+            const rerendered = props.render(new_item.v, new_index_computed[i]);
+            new_elements[i] = rerendered;
+            updated_nodes.set(methods._dataIdStr(new_item.k), rerendered);
           }
         } else {
           // Added (New) - create new computed index and render
@@ -692,7 +779,6 @@ export function ListView<T extends Record<string, unknown>>(
           added_nodes[added_nodes.length - 1].elements.push(new_elm);
         }
       }
-
       // Remaining items in old_map are Removed - merge consecutive indices
       const sorted_removed_indices: number[] = [];
       for (const indices of old_map.values()) {
@@ -701,7 +787,6 @@ export function ListView<T extends Record<string, unknown>>(
         }
       }
       sorted_removed_indices.sort((a, b) => a - b);
-
       let start = -1;
       let count = 0;
       for (let i = 0; i < sorted_removed_indices.length; i++) {
@@ -729,21 +814,26 @@ export function ListView<T extends Record<string, unknown>>(
       //   "moved:",
       //   moved_nodes,
       // );
-
-      // Destroy idx_computed for removed items
-      for (const { idx } of removed_nodes) {
-        if (prev_index_computed[idx]) {
-          prev_index_computed[idx].destroy();
+      // Destroy idx_computed for every removed item in each removed range.
+      // Keeping any stale computed alive will retain the wrapped item and the
+      // rendered view graph through its closure.
+      for (const { idx, count } of removed_nodes) {
+        for (let i = 0; i < count; i += 1) {
+          if (prev_index_computed[idx + i]) {
+            prev_index_computed[idx + i].destroy();
+          }
+          const removed_item = prev_items[idx + i];
+          if (removed_item && typeof removed_item === "object") {
+            registryDelete(removed_item);
+          }
         }
       }
-
       const diff = {
         children: new_elements,
         added: added_nodes,
         removed: removed_nodes,
         moved: moved_nodes,
       };
-
       // 释放已移除的 slot（仅处理可见范围内的）
       for (const { idx, count } of removed_nodes) {
         for (let i = 0; i < count; i++) {
@@ -775,13 +865,11 @@ export function ListView<T extends Record<string, unknown>>(
             //   prev_items,
             //   prev_wrapped_item,
             // );
-            slot.unbind();
+            methods.release_slot(slot);
             _slot_bindings.delete(key);
-            _free_slots.push(slot);
           }
         }
       }
-
       // 更新所有保留槽位的 top
       const wrapped_item_by_key = new Map<string, WrappedItemInListView<T>>();
       for (const w of new_visible_wrapped_items) {
@@ -791,9 +879,19 @@ export function ListView<T extends Record<string, unknown>>(
         const wrapped_item = wrapped_item_by_key.get(key);
         if (wrapped_item) {
           slot.setTop(wrapped_item.top);
+          slot.setPayload(wrapped_item.v);
+          const updated_child = updated_nodes.get(key);
+          if (updated_child) {
+            slot.rebind({
+              uid: wrapped_item.k,
+              top: wrapped_item.top,
+              height: wrapped_item.height,
+              payload: wrapped_item.v,
+              child: updated_child,
+            });
+          }
         }
       }
-
       // 复用 free_slots 给新增的（仅处理可见范围内的）
       for (const { idx, elements } of added_nodes) {
         for (let i = 0; i < elements.length; i++) {
@@ -817,22 +915,12 @@ export function ListView<T extends Record<string, unknown>>(
           }
         }
       }
-
-      // 跳过 $elm.refresh，使用 slot rebind 方式复用 DOM
-      const actions_count =
-        added_nodes.length + removed_nodes.length + moved_nodes.length;
-      if (actions_count === 0) {
-        _refreshing = false;
-        return;
-      }
       state.wrapped_items = new_visible_wrapped_items.slice();
-      state.items = new_visible_wrapped_items.slice().map((item) => item.v);
+      state.items = [...v];
       state.idx_arr = new_index_computed;
       state.children = new_elements;
-
       const total_height =
-        state.wrapped_items.length * itemHeight +
-        (state.wrapped_items.length - 1) * gutter;
+        v.length * itemHeight + Math.max(0, v.length - 1) * gutter;
       // logger.log(
       //   "refresh - before $elm.setStyleValue",
       //   state.wrapped_items.length,
@@ -842,7 +930,6 @@ export function ListView<T extends Record<string, unknown>>(
         state.height = total_height;
         $elm.setStyleValue("height", total_height);
       }
-
       // 更新可见范围，处理新增/删除导致的可见项变化
       const itemCount = state.wrapped_items.length;
       // 当数据量大幅变化时，根据当前滚动位置重新计算 _start
@@ -866,7 +953,16 @@ export function ListView<T extends Record<string, unknown>>(
       if (_start >= itemCount) {
         _start = Math.max(0, itemCount - 1);
       }
-
+      // 跳过 $elm.refresh，使用 slot rebind 方式复用 DOM
+      const actions_count =
+        added_nodes.length +
+        removed_nodes.length +
+        moved_nodes.length +
+        updated_nodes.size;
+      if (actions_count === 0) {
+        _refreshing = false;
+        return;
+      }
       // 强制同步：无条件确保 [_start, _end) 范围内的槽位正确绑定
       {
         const visible_map = new Map<string, WrappedItemInListView<T>>();
@@ -874,37 +970,33 @@ export function ListView<T extends Record<string, unknown>>(
           const wi = state.wrapped_items[i];
           visible_map.set(methods._dataIdStr(wi.k), wi);
         }
-
         // unbind 离开可见范围的槽位
         for (const [key, slot] of _slot_bindings) {
           if (!visible_map.has(key)) {
-            slot.unbind();
+            methods.release_slot(slot);
             _slot_bindings.delete(key);
-            _free_slots.push(slot);
           }
         }
-
         // 同步所有保留槽位的 top
         for (const [key, slot] of _slot_bindings) {
           const wi = visible_map.get(key);
           if (wi) {
             slot.setTop(wi.top);
+            slot.setPayload(wi.v);
           }
         }
-
         // bind 进入可见范围的槽位
         for (let i = _start; i < _end; i++) {
           const key = methods._dataIdStr(state.wrapped_items[i].k);
           if (!_slot_bindings.has(key) && _free_slots.length > 0) {
             const wrapped_item = state.wrapped_items[i];
             const slot = _free_slots.pop()!;
-            const idx_computed = methods.create_idx(wrapped_item);
-            // const elm = _owner
-            //   ? run_with_owner(_owner, () =>
-            //       props.render(wrapped_item.v, idx_computed),
-            //     )
-            //   : props.render(wrapped_item.v, idx_computed);
-            const elm = props.render(wrapped_item.v, idx_computed);
+            const idx_computed = methods.get_idx(wrapped_item, i);
+            const elm = methods.render_for_slot(
+              slot,
+              wrapped_item.v,
+              idx_computed,
+            );
             const child = (() => {
               if (isElement(elm)) return elm;
               if (isRef(elm)) return Text(elm);
@@ -922,7 +1014,6 @@ export function ListView<T extends Record<string, unknown>>(
           }
         }
       }
-
       _refreshing = false;
       return diff;
     },
@@ -1191,9 +1282,8 @@ export function ListView<T extends Record<string, unknown>>(
       for (const key of existing_keys) {
         logger.log("update - release slot", key);
         const slot = _slot_bindings.get(key)!;
-        slot.unbind();
+        methods.release_slot(slot);
         _slot_bindings.delete(key);
-        _free_slots.push(slot);
       }
 
       // 计算 enteringCells（在 newDataCells 中但当前未绑定的）
@@ -1211,13 +1301,13 @@ export function ListView<T extends Record<string, unknown>>(
           // logger.log("update - alloce free to", key, wrapped_item.v);
           const slot = _free_slots.pop();
           if (slot) {
-            const idx_computed = methods.create_idx(wrapped_item);
-            // const elm = _owner
-            //   ? run_with_owner(_owner, () =>
-            //       props.render(wrapped_item.v, idx_computed),
-            //     )
-            //   : props.render(wrapped_item.v, idx_computed);
-            const elm = props.render(wrapped_item.v, idx_computed);
+            const idx_pos = state.wrapped_items.indexOf(wrapped_item);
+            const idx_computed = methods.get_idx(wrapped_item, idx_pos);
+            const elm = methods.render_for_slot(
+              slot,
+              wrapped_item.v,
+              idx_computed,
+            );
             const child = (() => {
               if (isElement(elm)) {
                 return elm;
@@ -1393,6 +1483,16 @@ export function ListView<T extends Record<string, unknown>>(
       }
       listener$.destroy();
       box$.methods.destroy();
+      for (let i = 0; i < state.idx_arr.length; i += 1) {
+        const idx = state.idx_arr[i];
+        if (idx) {
+          idx.destroy();
+        }
+      }
+      for (const slot of _slots) {
+        methods.dispose_slot_owner(slot);
+      }
+      _slot_render_owners.clear();
       // if (_owner) {
       //   dispose_owner(_owner);
       // }

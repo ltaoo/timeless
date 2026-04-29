@@ -3,7 +3,7 @@ import type { RefObject } from "./reactive-object";
 import type { RefArray } from "./reactive-array";
 
 const global_refs = new Map<any, DerivedRef<any> | Ref<any>>();
-export function release(ref: DerivedRef<any> | Ref<any>) {
+export function release(ref: any) {
   global_refs.delete(ref);
 }
 export function set(key: any, v: DerivedRef<any> | Ref<any>) {

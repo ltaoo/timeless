@@ -58,28 +58,28 @@ export interface DependencyDump {
   value: any;
 }
 
-export function dumpAll(refs: any[]): DependencyDump[] {
-  return refs.map((ref) => ({
-    ref,
-    deps: getDeps(ref),
-    value: ref.value,
-  }));
-}
+// export function dumpAll(refs: any[]): DependencyDump[] {
+//   return refs.map((ref) => ({
+//     ref,
+//     deps: getDeps(ref),
+//     value: ref.value,
+//   }));
+// }
 
 export function printDepTree(refs: any[]): void {
-  console.log("\n=== Reactive Dependency Tree ===");
-  refs.forEach((ref, i) => {
-    const deps = getDeps(ref);
-    console.log(`\n[${i}] ref:`, ref.value);
-    if (deps.length === 0) {
-      console.log("  └── (no subscribers)");
-    }
-    deps.forEach((dep, j) => {
-      const icon = j === deps.length - 1 ? "└──" : "├──";
-      console.log(`  ${icon} [${j}] ${dep.trackId}`, dep.trackInfo || "");
-    });
-  });
-  console.log("\n=================================\n");
+  // console.log("\n=== Reactive Dependency Tree ===");
+  // refs.forEach((ref, i) => {
+  //   const deps = getDeps(ref);
+  //   console.log(`\n[${i}] ref:`, ref.value);
+  //   if (deps.length === 0) {
+  //     console.log("  └── (no subscribers)");
+  //   }
+  //   deps.forEach((dep, j) => {
+  //     const icon = j === deps.length - 1 ? "└──" : "├──";
+  //     console.log(`  ${icon} [${j}] ${dep.trackId}`, dep.trackInfo || "");
+  //   });
+  // });
+  // console.log("\n=================================\n");
 }
 
 export function findLeakedDeps(refs: any[]): DepInfo[] {

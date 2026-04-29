@@ -1039,6 +1039,19 @@ describe("RefArray", () => {
       arr.push(4);
       expect(handler).not.toHaveBeenCalled();
     });
+
+    it("should destroy cached item proxies when replaced via as", () => {
+      const arr = refArray([{ id: 1 }, { id: 2 }]);
+      const item0 = arr.get(0) as { subscribe: Function; getDeps: Function };
+      const handler = vi.fn();
+
+      item0.subscribe({ onChange: handler });
+      expect(item0.getDeps()).toHaveLength(1);
+
+      arr.as([{ id: 3 }, { id: 4 }]);
+
+      expect(item0.getDeps()).toHaveLength(0);
+    });
   });
 
   describe("refarr with computed", () => {

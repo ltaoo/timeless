@@ -9,7 +9,7 @@ import {
   DerivedRef,
   DepInfo,
 } from "./types";
-import { __hmr_get_hot } from "./hmr";
+// import { __hmr_get_hot } from "./hmr";
 
 export interface RefArray<T> extends Ref<T[]> {
   key: unknown;
@@ -158,14 +158,25 @@ export function refArray<T>(
     opt = optOrHmrKey;
   }
 
-  const hot = __hmr_key ? __hmr_get_hot() : null;
+  // const hot = __hmr_key ? __hmr_get_hot() : null;
+  const hot: any = null;
 
-  if (hot?.data?.__hmr_refs?.[__hmr_key!]) {
-    items = hot.data.__hmr_refs[__hmr_key!].value;
-  }
+  // if (hot?.data?.__hmr_refs?.[__hmr_key!]) {
+  //   items = hot.data.__hmr_refs[__hmr_key!].value;
+  // }
 
   let raw_value = items;
   const deps: SubscriberWithId<T[]>[] = [];
+  // const destroyInner = () => {
+  //   for (let i = 0; i < _inner.length; i += 1) {
+  //     const proxy = _inner[i];
+  //     if (proxy && typeof proxy.destroy === "function") {
+  //       proxy.destroy();
+  //     }
+  //     _inner[i] = undefined;
+  //   }
+  //   _inner.length = 0;
+  // };
   function notify(action: any, extra?: Record<string, unknown>) {
     for (let i = 0; i < deps.length; i += 1) {
       // console.log("[]reactive-array - notify", i, action, deps.length, extra);
@@ -219,6 +230,7 @@ export function refArray<T>(
       };
     },
     destroy() {
+      // destroyInner();
       deps.length = 0;
     },
     isSame(v: unknown) {
@@ -234,13 +246,13 @@ export function refArray<T>(
       }));
     },
     dump() {
-      console.log("[reactive.dump] refArray subscribers:", deps.length);
-      deps.forEach((ctx, i) => {
-        console.log(
-          `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
-          ctx.__trackInfo || "",
-        );
-      });
+      // console.log("[reactive.dump] refArray subscribers:", deps.length);
+      // deps.forEach((ctx, i) => {
+      //   console.log(
+      //     `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
+      //     ctx.__trackInfo || "",
+      //   );
+      // });
     },
     get(idx: number) {
       const vv = raw_value[idx];
@@ -321,6 +333,7 @@ export function refArray<T>(
       items: T[] | ((cur: T[]) => T[]),
       opt: { reset?: boolean; silent?: boolean } = {},
     ) {
+      // destroyInner();
       if (typeof items === "function") {
         raw_value = items(raw_value);
       } else {
@@ -332,8 +345,8 @@ export function refArray<T>(
       notify({ type: "refresh" }, opt);
     },
     assign(items: T[]) {
+      // destroyInner();
       raw_value = items;
-      _inner.length = 0;
       notify({ type: "refresh" });
     },
     filter(predicate: (item: T, index: number, array: T[]) => boolean) {
@@ -537,8 +550,8 @@ export function refArray<T>(
       notify({ type: "refresh" });
     },
     clear() {
+      // destroyInner();
       raw_value.length = 0;
-      _inner.length = 0;
       notify({ type: "refresh" });
     },
     replace(oldItem: T, newItem: T) {

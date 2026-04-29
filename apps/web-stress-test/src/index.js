@@ -363,218 +363,215 @@ function SearchTablePage() {
           //     ),
           //   ],
           // ),
-          Show({
-            when: computed(filteredData, (t) => t.length),
-            ok() {
-              return ListView({
-                style: {
-                  "max-height": "100%",
-                  overflow: "auto",
-                  position: "relative",
-                },
-                key: "id",
-                size: 30,
-                // itemHeight: 31.5,
-                itemHeight: 186.5,
-                each: filteredData,
-                render(row, idx) {
-                  const borderBottom_ = computed(idx, (t) =>
-                    t === filteredData.value.length - 1
-                      ? "none"
-                      : "1px solid #ddd",
-                  );
-                  const id_ = computed(row, (t) => t.id);
-                  const name_ = computed(row, (t) => t.name);
-                  const email_ = computed(row, (t) => t.email);
-                  const role_ = computed(row, (t) => {
-                    return t.role.text;
-                  });
-                  const age_ = computed(row, (t) => t.age);
-                  const color_ = computed(row, (t) =>
-                    t.status === "Active" ? "#28a745" : "#dc3545",
-                  );
-                  const status_ = computed(row, (t) => t.status);
-                  const department_ = computed(row, (t) => t.department);
-                  const skills_ = computed(row, (t) => t.skills);
-
-                  return View(
-                    {
-                      style: {
-                        display: "grid",
-                        "grid-template-columns":
-                          "60px 120px 200px 80px 60px 80px 100px 1fr",
-                        width: "100%",
-                        "border-bottom": borderBottom_,
-                        // "border-right": "1px solid #ddd",
-                      },
-                      onUnmounted() {
-                        // console.log("destroy", id_.value);
-                        borderBottom_.destroy();
-                        id_.destroy();
-                        name_.destroy();
-                        email_.destroy();
-                        role_.destroy();
-                        age_.destroy();
-                        color_.destroy();
-                        status_.destroy();
-                        department_.destroy();
-                        skills_.destroy();
-                      },
-                    },
-                    [
-                      View(
-                        {
-                          style: {
-                            padding: "8px",
-                            "border-right": "1px solid #ddd",
-                          },
-                        },
-                        [id_],
-                      ),
-                      View(
-                        {
-                          style: {
-                            padding: "8px",
-                            "border-right": "1px solid #ddd",
-                          },
-                        },
-                        [name_],
-                      ),
-                      View(
-                        {
-                          style: {
-                            padding: "8px",
-                            "border-right": "1px solid #ddd",
-                          },
-                        },
-                        [email_],
-                      ),
-                      View(
-                        {
-                          style: {
-                            padding: "8px",
-                            "border-right": "1px solid #ddd",
-                          },
-                        },
-                        [role_],
-                      ),
-                      View(
-                        {
-                          style: {
-                            padding: "8px",
-                            "border-right": "1px solid #ddd",
-                          },
-                        },
-                        [age_],
-                      ),
-                      View(
-                        {
-                          style: {
-                            padding: "8px",
-                            "border-right": "1px solid #ddd",
-                            color: color_,
-                          },
-                        },
-                        [status_],
-                      ),
-                      View(
-                        {
-                          style: {
-                            padding: "8px",
-                            "border-right": "1px solid #ddd",
-                          },
-                        },
-                        [department_],
-                      ),
-                      View(
-                        {
-                          style: {
-                            padding: "8px",
-                            // "border-right": "1px solid #ddd",
-                          },
-                        },
-                        [
-                          For({
-                            key: "id",
-                            each: skills_,
-                            render(skill) {
-                              const skill_name_ = computed(
-                                skill,
-                                (t) => t.name,
-                              );
-                              const histories_ = computed(
-                                skill,
-                                (t) => t.histories,
-                              );
-
-                              return View(
-                                {
-                                  onUnmounted() {
-                                    skill_name_.destroy();
-                                    histories_.destroy();
-                                  },
-                                },
-                                [
-                                  View({}, [skill_name_]),
-                                  View({}, [
-                                    For({
-                                      key: "id",
-                                      each: histories_,
-                                      render(history) {
-                                        const history_text_ = computed(
-                                          history,
-                                          (t) => t.text,
-                                        );
-                                        const history_time_ = computed(
-                                          history,
-                                          (t) => t.time,
-                                        );
-                                        const history_value_ = computed(
-                                          history,
-                                          (t) => t.value,
-                                        );
-                                        return View(
-                                          {
-                                            onUnmounted() {
-                                              history_text_.destroy();
-                                              history_time_.destroy();
-                                              history_value_.destroy();
-                                            },
-                                          },
-                                          [
-                                            View({}, [history_text_]),
-                                            View({}, [history_time_]),
-                                            View({}, [history_value_]),
-                                          ],
-                                        );
-                                      },
-                                    }),
-                                  ]),
-                                ],
-                              );
-                            },
-                          }),
-                        ],
-                      ),
-                    ],
-                  );
-                },
-              });
+          // Show({
+          //   when: computed(filteredData, (t) => t.length),
+          //   ok() {
+          //     return ;
+          //   },
+          //   else() {
+          //     return View(
+          //       {
+          //         style: {
+          //           display: "flex",
+          //           "align-items": "center",
+          //           "justify-content": "center",
+          //           gap: "8px",
+          //           padding: "12px",
+          //           "flex-shrink": 0,
+          //           height: "100%",
+          //         },
+          //       },
+          //       ["No data available"],
+          //     );
+          //   },
+          // }),
+          ListView({
+            style: {
+              "max-height": "100%",
+              overflow: "auto",
+              position: "relative",
             },
-            else() {
+            key: "id",
+            size: 30,
+            // itemHeight: 31.5,
+            itemHeight: 186.5,
+            each: filteredData,
+            render(row, idx) {
+              const borderBottom_ = computed(idx, (t) =>
+                t === filteredData.value.length - 1 ? "none" : "1px solid #ddd",
+              );
+              const id_ = computed(row, (t) => t.id);
+              const name_ = computed(row, (t) => t.name);
+              const email_ = computed(row, (t) => t.email);
+              const role_ = computed(row, (t) => {
+                return t.role.text;
+              });
+              const age_ = computed(row, (t) => t.age);
+              const color_ = computed(row, (t) =>
+                t.status === "Active" ? "#28a745" : "#dc3545",
+              );
+              const status_ = computed(row, (t) => t.status);
+              const department_ = computed(row, (t) => t.department);
+              const skills_ = computed(row, (t) => t.skills);
+
               return View(
                 {
                   style: {
-                    display: "flex",
-                    "align-items": "center",
-                    "justify-content": "center",
-                    gap: "8px",
-                    padding: "12px",
-                    "flex-shrink": 0,
-                    height: "100%",
+                    display: "grid",
+                    "grid-template-columns":
+                      "60px 120px 200px 80px 60px 80px 100px 1fr",
+                    width: "100%",
+                    "border-bottom": borderBottom_,
+                    // "border-right": "1px solid #ddd",
+                  },
+                  onUnmounted() {
+                    // console.log("destroy", id_.value);
+                    borderBottom_.destroy();
+                    id_.destroy();
+                    name_.destroy();
+                    email_.destroy();
+                    role_.destroy();
+                    age_.destroy();
+                    color_.destroy();
+                    status_.destroy();
+                    department_.destroy();
+                    skills_.destroy();
                   },
                 },
-                ["No data available"],
+                [
+                  name_,
+                  // View(
+                  //   {
+                  //     style: {
+                  //       padding: "8px",
+                  //       "border-right": "1px solid #ddd",
+                  //     },
+                  //   },
+                  //   [id_],
+                  // ),
+                  // View(
+                  //   {
+                  //     style: {
+                  //       padding: "8px",
+                  //       "border-right": "1px solid #ddd",
+                  //     },
+                  //   },
+                  //   [name_],
+                  // ),
+                  // View(
+                  //   {
+                  //     style: {
+                  //       padding: "8px",
+                  //       "border-right": "1px solid #ddd",
+                  //     },
+                  //   },
+                  //   [email_],
+                  // ),
+                  // View(
+                  //   {
+                  //     style: {
+                  //       padding: "8px",
+                  //       "border-right": "1px solid #ddd",
+                  //     },
+                  //   },
+                  //   [role_],
+                  // ),
+                  // View(
+                  //   {
+                  //     style: {
+                  //       padding: "8px",
+                  //       "border-right": "1px solid #ddd",
+                  //     },
+                  //   },
+                  //   [age_],
+                  // ),
+                  // View(
+                  //   {
+                  //     style: {
+                  //       padding: "8px",
+                  //       "border-right": "1px solid #ddd",
+                  //       color: color_,
+                  //     },
+                  //   },
+                  //   [status_],
+                  // ),
+                  // View(
+                  //   {
+                  //     style: {
+                  //       padding: "8px",
+                  //       "border-right": "1px solid #ddd",
+                  //     },
+                  //   },
+                  //   [department_],
+                  // ),
+                  // View(
+                  //   {
+                  //     style: {
+                  //       padding: "8px",
+                  //       // "border-right": "1px solid #ddd",
+                  //     },
+                  //   },
+                  //   [
+                  //     For({
+                  //       key: "id",
+                  //       each: skills_,
+                  //       render(skill) {
+                  //         const skill_name_ = computed(skill, (t) => t.name);
+                  //         const histories_ = computed(
+                  //           skill,
+                  //           (t) => t.histories,
+                  //         );
+
+                  //         return View(
+                  //           {
+                  //             onUnmounted() {
+                  //               skill_name_.destroy();
+                  //               histories_.destroy();
+                  //             },
+                  //           },
+                  //           [
+                  //             View({}, [skill_name_]),
+                  //             View({}, [
+                  //               For({
+                  //                 key: "id",
+                  //                 each: histories_,
+                  //                 render(history) {
+                  //                   const history_text_ = computed(
+                  //                     history,
+                  //                     (t) => t.text,
+                  //                   );
+                  //                   const history_time_ = computed(
+                  //                     history,
+                  //                     (t) => t.time,
+                  //                   );
+                  //                   const history_value_ = computed(
+                  //                     history,
+                  //                     (t) => t.value,
+                  //                   );
+                  //                   return View(
+                  //                     {
+                  //                       onUnmounted() {
+                  //                         history_text_.destroy();
+                  //                         history_time_.destroy();
+                  //                         history_value_.destroy();
+                  //                       },
+                  //                     },
+                  //                     [
+                  //                       View({}, [history_text_]),
+                  //                       View({}, [history_time_]),
+                  //                       View({}, [history_value_]),
+                  //                     ],
+                  //                   );
+                  //                 },
+                  //               }),
+                  //             ]),
+                  //           ],
+                  //         );
+                  //       },
+                  //     }),
+                  //   ],
+                  // ),
+                ],
               );
             },
           }),

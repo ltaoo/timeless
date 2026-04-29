@@ -1,9 +1,9 @@
 import { MountedEvent } from "@/event/index";
+import { VNodeView } from "@/vnode/view";
 import { Logger } from "@/util/logger";
 
 import { isElement, TimelessElement, ViewChildren } from "./type";
 import { Box, BoxProps } from "./box";
-import { VNodeView } from "@/vnode/view";
 
 const logger = Logger({ prefix: "primitive", scope: "content/list-item-view" });
 
@@ -54,18 +54,33 @@ export function ListItemView<T>(
     subscribe_props() {
       box$.methods.subscribe_props();
     },
-    rebind(data: { top: number; child: TimelessElement }) {
+    rebind(data: {
+      uid?: number | string;
+      top: number;
+      height?: number;
+      payload?: T;
+      child: TimelessElement;
+    }) {
       state.bound = true;
+      state.top = data.top;
+      if (data.height !== undefined) {
+        state.height = data.height;
+      }
+      if (data.payload !== undefined) {
+        state.payload = data.payload;
+      }
+      state.children = [data.child];
       $elm.setStyle({
         position: "absolute",
         top: `${data.top}px`,
         width: "100%",
       });
-      // $elm.removeChildren();
+      $elm.removeChildren();
       $elm.insertChildren([data.child]);
     },
     unbind() {
       state.bound = false;
+      state.children = [];
       $elm.setStyle({
         display: "none",
       });
@@ -96,7 +111,8 @@ export function ListItemView<T>(
     setState(data: ListItemViewState<T> & { children: TimelessElement[] }) {
       state.top = data.top;
       state.height = data.height;
-      state.bound = true;
+      state.bound = data.bound;
+      state.payload = data.payload;
       state.children = data.children;
     },
     setTop(v: number) {
@@ -104,6 +120,9 @@ export function ListItemView<T>(
       if ($elm) {
         $elm.setStyleValue("top", `${v}px`);
       }
+    },
+    setPayload(v: T) {
+      state.payload = v;
     },
     onMounted(event: MountedEvent<VNodeView>) {
       // logger.log("onMounted", state.children.length);
@@ -139,6 +158,7 @@ export function ListItemView<T>(
         rest.onUnmounted();
       }
       state.rendered = false;
+      state.children = [];
       $elm = null;
     },
   };
