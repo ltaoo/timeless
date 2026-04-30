@@ -72,7 +72,7 @@ export { patch } from "./hmr/patch";
 export type { PatchOptions } from "./hmr/patch";
 export { hmrState, hmrRestore } from "./hmr/state";
 
-export { Logger, Result, base } from "@timeless/base";
+export { Logger, Result, base, debounce, throttle } from "@timeless/base";
 export type {
   Handler,
   Platform,

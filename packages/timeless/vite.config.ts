@@ -31,7 +31,7 @@ export default defineConfig({
       },
       name: buildLibName(name),
     },
-    minify: isProd ? "terser" : true,
+    minify: isProd ? "terser" : false,
     ...(isProd && {
       terserOptions: {
         compress: {

@@ -58,9 +58,8 @@ export function View(
 ): TimelessElement<ViewState> {
   const { ...rest } = props;
 
-  const box$ = Box(rest, {});
-
   let $elm: any = null;
+  let box$ = Box(rest, {});
 
   const state = box$.state;
   const events = box$.events;
@@ -120,6 +119,7 @@ export function View(
       }
       state.rendered = false;
       $elm = null;
+      // box$.methods.remove_event();
     },
   };
 }

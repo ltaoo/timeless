@@ -18,32 +18,62 @@ import {
   ViewChildren,
   resolve_children,
 } from "@/content/type";
+import {
+  start_tracking,
+  stop_tracking,
+} from "@timeless/reactive";
 
 // === Owner ===
 
 interface Owner {
   parent: Owner | null;
   context: Map<symbol, any>;
+  disposables: (() => void)[];
 }
 
 let current_owner: Owner | null = null;
 
 export function create_owner(parent: Owner | null = current_owner): Owner {
-  return { parent, context: new Map() };
+  return { parent, context: new Map(), disposables: [] };
 }
 
 export function run_with_owner<T>(owner: Owner, fn: () => T): T {
   const prev = current_owner;
   current_owner = owner;
+  start_tracking(owner.disposables);
   try {
     return fn();
   } finally {
+    stop_tracking();
     current_owner = prev;
   }
 }
 
 export function get_owner(): Owner | null {
   return current_owner;
+}
+
+/** Register a disposable with the current owner */
+export function track_disposable(clean: () => void): void {
+  if (current_owner) {
+    current_owner.disposables.push(clean);
+  }
+}
+
+/** Destroy all disposables registered with an owner */
+export function dispose_owner(owner: Owner): void {
+  for (const clean of owner.disposables) {
+    clean();
+  }
+  owner.disposables.length = 0;
+}
+
+/** Dispose and clear disposables (for re-render cycles) */
+export function clear_owner_disposables(owner: Owner): void {
+  for (const clean of owner.disposables) {
+    clean();
+  }
+  owner.disposables.length = 0;
 }
 
 // === Context API ===
@@ -84,8 +114,14 @@ export function Scope(
   children: ViewChildren,
 ): TimelessElement {
   const owner = create_owner(current_owner);
-  return run_with_owner(owner, () => {
+  const fragment = run_with_owner(owner, () => {
     setup();
     return Fragment({}, resolve_children(children));
   });
+  const originalUnmounted = fragment.onUnmounted;
+  fragment.onUnmounted = () => {
+    originalUnmounted();
+    dispose_owner(owner);
+  };
+  return fragment;
 }

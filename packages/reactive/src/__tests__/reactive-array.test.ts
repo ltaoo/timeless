@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { refArray } from "../reactive-array";
 import { computed } from "@/computed";
+import { signal } from "@/signal";
+import { getarr as registryGetArr } from "@/index";
 
 describe("RefArray", () => {
   describe("get/set", () => {
@@ -1039,6 +1041,19 @@ describe("RefArray", () => {
       arr.push(4);
       expect(handler).not.toHaveBeenCalled();
     });
+
+    it("should destroy cached item proxies when replaced via as", () => {
+      const arr = refArray([{ id: 1 }, { id: 2 }]);
+      const item0 = arr.get(0) as { subscribe: Function; getDeps: Function };
+      const handler = vi.fn();
+
+      item0.subscribe({ onChange: handler });
+      expect(item0.getDeps()).toHaveLength(1);
+
+      arr.as([{ id: 3 }, { id: 4 }]);
+
+      expect(item0.getDeps()).toHaveLength(0);
+    });
   });
 
   describe("refarr with computed", () => {
@@ -1059,6 +1074,78 @@ describe("RefArray", () => {
       expect(spy).toHaveBeenCalledTimes(2);
       expect(spy).toHaveBeenNthCalledWith(2, [3, 2, 1]);
       expect(idx.value).toBe(2);
+    });
+
+    it("should debounce notify when configured", () => {
+      vi.useFakeTimers();
+      try {
+        const arr = refArray([1, 2, 3]);
+        const idx = computed(
+          arr,
+          (t) => t.indexOf(1),
+          { debounce: 50 },
+        );
+        const handler = vi.fn();
+
+        idx.subscribe({ onChange: handler });
+
+        arr.reverse();
+        expect(handler).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(49);
+        expect(handler).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(1);
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenLastCalledWith(2, undefined);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("should throttle notify when configured", () => {
+      vi.useFakeTimers();
+      try {
+        const arr = refArray([1, 2, 3]);
+        const idx = computed(
+          arr,
+          (t) => t.indexOf(1),
+          { throttle: 50 },
+        );
+        const handler = vi.fn();
+
+        idx.subscribe({ onChange: handler });
+
+        arr.reverse();
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenNthCalledWith(1, 2, undefined);
+
+        arr.reverse();
+        expect(handler).toHaveBeenCalledTimes(1);
+
+        vi.advanceTimersByTime(50);
+        expect(handler).toHaveBeenCalledTimes(2);
+        expect(handler).toHaveBeenNthCalledWith(2, 0, undefined);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("should rekey registry when replacing the backing array", () => {
+      const initial = [{ id: 1 }, { id: 2 }];
+      const next = [{ id: 3 }, { id: 4 }];
+
+      const arr = signal(initial);
+      expect(registryGetArr(initial)).toBe(arr);
+
+      arr.as(next);
+
+      expect(registryGetArr(initial)).toBeUndefined();
+      expect(registryGetArr(next)).toBe(arr);
+      expect(arr.value).toBe(next);
+
+      arr.destroy();
+      expect(registryGetArr(next)).toBeUndefined();
     });
   });
 });

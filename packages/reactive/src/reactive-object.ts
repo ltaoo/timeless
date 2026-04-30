@@ -7,8 +7,8 @@ import {
   TimelessRefObjectNullable,
   DepInfo,
 } from "./types";
-import { get, has } from "./registry";
-import { __hmr_get_hot } from "./hmr";
+import { get, has, release } from "./registry";
+// import { __hmr_get_hot } from "./hmr";
 
 function deepMerge(target: any, source: any): any {
   if (!source || typeof source !== "object") return target;
@@ -38,7 +38,7 @@ export interface RefObject<T> extends Ref<T> {
   ): void;
   get(key: keyof T): unknown;
   delete(key: keyof T): void;
-  as(nextObj: T | ((cur: T) => T)): void;
+  as(nextObj: T | ((cur: T) => T), extra?: Record<string, unknown>): void;
   assign(updated: Partial<T>): void;
   refresh(): void;
   has(key: keyof T): boolean;
@@ -72,7 +72,10 @@ export interface RefObjectNullable<T> extends Ref<T> {
   ): void;
   get(key: keyof T): unknown;
   delete(key: keyof T): void;
-  as(v: T | ((cur: T | null) => T) | null): void;
+  as(
+    v: T | ((cur: T | null) => T) | null,
+    extra?: Record<string, unknown>,
+  ): void;
   refresh(): void;
   has(key: keyof T): boolean;
   keys(): (keyof T)[];
@@ -109,7 +112,8 @@ export function refObject<T extends Record<string, any>>(
   obj: T | null,
   __hmr_key?: string,
 ): TimelessRefObject<T> | TimelessRefObjectNullable<T> {
-  const hot = __hmr_key ? __hmr_get_hot() : null;
+  // const hot = __hmr_key ? __hmr_get_hot() : null;
+  const hot: any = null;
 
   if (hot?.data?.__hmr_refs?.[__hmr_key!]) {
     obj = hot.data.__hmr_refs[__hmr_key!].value;
@@ -117,8 +121,8 @@ export function refObject<T extends Record<string, any>>(
 
   let raw_value = obj;
   const deps: SubscriberWithId<T>[] = [];
-  function notify(action: { type: string }) {
-    console.log("[reactive]reactive-object - notify", deps.length);
+  function notify(action: { type: string }, extra?: Record<string, unknown>) {
+    // console.log("[reactive]reactive-object - notify", deps.length);
     for (let i = 0; i < deps.length; i += 1) {
       const ctx = deps[i];
       if (ctx.onChange) {
@@ -139,6 +143,8 @@ export function refObject<T extends Record<string, any>>(
     },
     destroy() {
       deps.length = 0;
+      release(raw_value);
+      raw_value = null;
     },
     get value() {
       return raw_value;
@@ -190,7 +196,7 @@ export function refObject<T extends Record<string, any>>(
       delete raw_value[key];
       notify({ type: "refresh" });
     },
-    as(nextObj: T | ((cur: T | null) => T)) {
+    as(nextObj: T | ((cur: T | null) => T), extra?: Record<string, unknown>) {
       if (typeof nextObj === "function") {
         if (raw_value) {
           Object.assign(raw_value, nextObj(raw_value));
@@ -200,7 +206,7 @@ export function refObject<T extends Record<string, any>>(
       } else {
         raw_value = nextObj;
       }
-      notify({ type: "refresh" });
+      notify({ type: "refresh" }, extra);
     },
     assign(updated: Partial<T>) {
       if (raw_value === null) {

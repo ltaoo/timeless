@@ -395,6 +395,8 @@ export function Box<T>(props: BoxProps, extra_state: T) {
     },
     unsubscribe: listener$.add,
     destroy() {
+      $elm = null;
+      state.children.length = 0;
       listener$.destroy();
     },
   };

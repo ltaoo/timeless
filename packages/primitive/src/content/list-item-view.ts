@@ -1,13 +1,12 @@
 import { MountedEvent } from "@/event/index";
+import { VNodeView } from "@/vnode/view";
 import { Logger } from "@/util/logger";
 
 import { isElement, TimelessElement, ViewChildren } from "./type";
 import { Box, BoxProps } from "./box";
-import { VNodeView } from "@/vnode/view";
 
 const logger = Logger({ prefix: "primitive", scope: "content/list-item-view" });
 
-/** Props for View component */
 export type ListItemViewProps<T> = BoxProps & {
   uid: number;
   top: number;
@@ -21,7 +20,7 @@ type ListItemViewState<T> = {
   top: number;
   height: number;
   bound: boolean;
-  payload: T;
+  payload: T | null;
 };
 
 /**
@@ -54,21 +53,55 @@ export function ListItemView<T>(
     subscribe_props() {
       box$.methods.subscribe_props();
     },
-    rebind(data: { top: number; child: TimelessElement }) {
+    cleanup_children(children = state.children) {
+      for (let i = 0; i < children.length; i += 1) {
+        const child = children[i];
+        if (!isElement(child)) {
+          continue;
+        }
+        if (child.beforeUnmounted) {
+          child.beforeUnmounted();
+        }
+        if (child.onUnmounted) {
+          child.onUnmounted();
+        }
+      }
+    },
+    rebind(data: {
+      uid?: number | string;
+      top: number;
+      height?: number;
+      payload?: T;
+      child: TimelessElement;
+    }) {
+      const prev_children = [...state.children];
       state.bound = true;
+      state.top = data.top;
+      if (data.height !== undefined) {
+        state.height = data.height;
+      }
+      if (data.payload !== undefined) {
+        state.payload = data.payload;
+      }
+      state.children = [data.child];
       $elm.setStyle({
         position: "absolute",
         top: `${data.top}px`,
         width: "100%",
       });
-      // $elm.removeChildren();
+      methods.cleanup_children(prev_children);
+      $elm.removeChildren();
       $elm.insertChildren([data.child]);
     },
     unbind() {
+      const prev_children = [...state.children];
       state.bound = false;
+      state.children = [];
+      state.payload = null;
       $elm.setStyle({
         display: "none",
       });
+      methods.cleanup_children(prev_children);
       $elm.removeChildren();
     },
   };
@@ -95,13 +128,19 @@ export function ListItemView<T>(
     rebind: methods.rebind,
     setState(data: ListItemViewState<T> & { children: TimelessElement[] }) {
       state.top = data.top;
-      state.bound = true;
+      state.height = data.height;
+      state.bound = data.bound;
+      state.payload = data.payload;
       state.children = data.children;
     },
     setTop(v: number) {
+      state.top = v;
       if ($elm) {
         $elm.setStyleValue("top", `${v}px`);
       }
+    },
+    setPayload(v: T) {
+      state.payload = v;
     },
     onMounted(event: MountedEvent<VNodeView>) {
       // logger.log("onMounted", state.children.length);
@@ -119,24 +158,26 @@ export function ListItemView<T>(
         }
       }
     },
-    beforeUnmounted() {
-      if (rest.beforeUnmounted) {
-        rest.beforeUnmounted();
-      }
-      for (let i = 0; i < state.children.length; i += 1) {
-        const node = state.children[i];
-        if (isElement(node) && node.beforeUnmounted) {
-          node.beforeUnmounted();
-        }
-      }
-    },
+    // beforeUnmounted() {
+    //   if (rest.beforeUnmounted) {
+    //     rest.beforeUnmounted();
+    //   }
+    //   for (let i = 0; i < state.children.length; i += 1) {
+    //     const node = state.children[i];
+    //     if (isElement(node) && node.beforeUnmounted) {
+    //       node.beforeUnmounted();
+    //     }
+    //   }
+    // },
     onUnmounted() {
       // logger.log("onUnmounted", box$.listener$.length);
-      box$.methods.destroy();
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }
+      methods.cleanup_children();
+      box$.methods.destroy();
       state.rendered = false;
+      state.children.length = 0;
       $elm = null;
     },
   };

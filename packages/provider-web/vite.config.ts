@@ -15,7 +15,7 @@ export default createLibConfig({
     "@timeless/ui-vm": "Timeless.ui",
   },
   formats: ["es", "cjs", "umd"],
-  minify: true,
+  minify: false,
   alias: {
     "@": resolve(__dirname, "src"),
   },

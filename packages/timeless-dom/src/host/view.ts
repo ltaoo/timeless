@@ -1,6 +1,7 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { hydrate_node } from "@/renderer/hydrate";
+import { Logger } from "@/util/logger";
 
 import {
   HostElement,
@@ -9,7 +10,6 @@ import {
   isEmptyNode,
   isFragment,
 } from "./box";
-import { Logger } from "@/util/logger";
 
 const logger = Logger({ prefix: "dom", scope: "view" });
 

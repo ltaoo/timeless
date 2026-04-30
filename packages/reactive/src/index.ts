@@ -25,8 +25,10 @@ import { computed } from "./computed";
 import { derive } from "./derive";
 import {
   release,
+  release_all,
   get as registryGet,
   set as registrySet,
+  deleteKey as registryDelete,
   getobj as registryGetObj,
   getarr as registryGetArr,
 } from "./registry";
@@ -36,6 +38,12 @@ export function generateTrackId(prefix = "track"): string {
   _trackIdCounter++;
   return `${prefix}-${_trackIdCounter}-${Date.now()}`;
 }
+
+export {
+  _current_disposables,
+  start_tracking,
+  stop_tracking,
+} from "./disposal";
 
 export function getDeps<T extends { getDeps?: () => any[] }>(ref: T): any[] {
   return ref.getDeps?.() || [];
@@ -51,28 +59,28 @@ export interface DependencyDump {
   value: any;
 }
 
-export function dumpAll(refs: any[]): DependencyDump[] {
-  return refs.map((ref) => ({
-    ref,
-    deps: getDeps(ref),
-    value: ref.value,
-  }));
-}
+// export function dumpAll(refs: any[]): DependencyDump[] {
+//   return refs.map((ref) => ({
+//     ref,
+//     deps: getDeps(ref),
+//     value: ref.value,
+//   }));
+// }
 
 export function printDepTree(refs: any[]): void {
-  console.log("\n=== Reactive Dependency Tree ===");
-  refs.forEach((ref, i) => {
-    const deps = getDeps(ref);
-    console.log(`\n[${i}] ref:`, ref.value);
-    if (deps.length === 0) {
-      console.log("  └── (no subscribers)");
-    }
-    deps.forEach((dep, j) => {
-      const icon = j === deps.length - 1 ? "└──" : "├──";
-      console.log(`  ${icon} [${j}] ${dep.trackId}`, dep.trackInfo || "");
-    });
-  });
-  console.log("\n=================================\n");
+  // console.log("\n=== Reactive Dependency Tree ===");
+  // refs.forEach((ref, i) => {
+  //   const deps = getDeps(ref);
+  //   console.log(`\n[${i}] ref:`, ref.value);
+  //   if (deps.length === 0) {
+  //     console.log("  └── (no subscribers)");
+  //   }
+  //   deps.forEach((dep, j) => {
+  //     const icon = j === deps.length - 1 ? "└──" : "├──";
+  //     console.log(`  ${icon} [${j}] ${dep.trackId}`, dep.trackInfo || "");
+  //   });
+  // });
+  // console.log("\n=================================\n");
 }
 
 export function findLeakedDeps(refs: any[]): DepInfo[] {
@@ -109,6 +117,7 @@ export {
   release,
   registryGet,
   registrySet,
+  registryDelete,
   registryGetObj,
   registryGetArr,
   registryGetObj as getobj,
@@ -117,5 +126,6 @@ export {
   refArray as refarr,
   refObject as refobj,
   release as uncomputed,
+  release_all,
   hmrScope,
 };

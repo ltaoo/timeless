@@ -1,4 +1,4 @@
-import { has, get } from "./registry";
+import { has, get, release } from "./registry";
 import { refObject } from "./reactive-object";
 import {
   Subscriber,
@@ -9,7 +9,7 @@ import {
   DerivedRef,
   DepInfo,
 } from "./types";
-import { __hmr_get_hot } from "./hmr";
+// import { __hmr_get_hot } from "./hmr";
 
 export interface RefArray<T> extends Ref<T[]> {
   key: unknown;
@@ -148,28 +148,48 @@ export interface RefArray<T> extends Ref<T[]> {
 
 export function refArray<T>(
   items: T[],
-  optOrHmrKey?: Partial<{ key: any }> | string,
+  opt_or_hmr_key?: Partial<{ key: any }> | string,
   __hmr_key?: string,
 ): TimelessRefArray<T> {
   let opt: Partial<{ key: any }> = {};
-  if (typeof optOrHmrKey === "string") {
-    __hmr_key = optOrHmrKey;
-  } else if (optOrHmrKey) {
-    opt = optOrHmrKey;
+  if (typeof opt_or_hmr_key === "string") {
+    __hmr_key = opt_or_hmr_key;
+  } else if (opt_or_hmr_key) {
+    opt = opt_or_hmr_key;
   }
 
-  const hot = __hmr_key ? __hmr_get_hot() : null;
+  // const hot = __hmr_key ? __hmr_get_hot() : null;
+  const hot: any = null;
 
-  if (hot?.data?.__hmr_refs?.[__hmr_key!]) {
-    items = hot.data.__hmr_refs[__hmr_key!].value;
-  }
+  // if (hot?.data?.__hmr_refs?.[__hmr_key!]) {
+  //   items = hot.data.__hmr_refs[__hmr_key!].value;
+  // }
 
   let raw_value = items;
-  const deps: SubscriberWithId<T[]>[] = [];
+  const _arr_deps: SubscriberWithId<T[]>[] = [];
+  function destroy_inner() {
+    for (let i = 0; i < _inner.length; i += 1) {
+      const proxy = _inner[i];
+      if (proxy && typeof proxy.destroy === "function") {
+        proxy.destroy();
+      }
+      _inner[i] = undefined;
+    }
+    // Also clean up stale global_refs entries for items that had proxies
+    for (let i = 0; i < raw_value.length; i += 1) {
+      const item = raw_value[i];
+      if (item !== null && item !== undefined && typeof item === "object") {
+        if (has(item)) {
+          release(item);
+        }
+      }
+    }
+    _inner.length = 0;
+  }
   function notify(action: any, extra?: Record<string, unknown>) {
-    for (let i = 0; i < deps.length; i += 1) {
-      console.log("[]reactive-array - notify", i, action, deps.length, extra);
-      const ctx = deps[i];
+    for (let i = 0; i < _arr_deps.length; i += 1) {
+      // console.log("[]reactive-array - notify", i, action, deps.length, extra);
+      const ctx = _arr_deps[i];
       (() => {
         if (action.type === "refresh") {
           if (ctx.onChange) {
@@ -183,8 +203,17 @@ export function refArray<T>(
       })();
     }
   }
-  const _inner: any[] = [];
-  const getProxy = (vv: any, idx?: number) => {
+  const _inner: Ref<unknown>[] = [];
+  const sync_registry_key = (prev_raw_value: T[], next_raw_value: T[]) => {
+    // if (prev_raw_value === next_raw_value) {
+    //   return;
+    // }
+    // if (Array.isArray(prev_raw_value) && get(prev_raw_value) === r) {
+    //   release(prev_raw_value);
+    //   set(next_raw_value, r);
+    // }
+  };
+  const get_computed_value = (vv: any, idx?: number) => {
     if (isRef(vv)) {
       return vv;
     }
@@ -211,15 +240,17 @@ export function refArray<T>(
       return raw_value.length;
     },
     subscribe(ctx: Subscriber<T[]>) {
-      const trackCtx = ctx as SubscriberWithId<T[]>;
-      deps.push(trackCtx);
+      const track_ctx = ctx as SubscriberWithId<T[]>;
+      _arr_deps.push(track_ctx);
       return function () {
-        const idx = deps.indexOf(trackCtx);
-        if (idx > -1) deps.splice(idx, 1);
+        const idx = _arr_deps.indexOf(track_ctx);
+        if (idx > -1) _arr_deps.splice(idx, 1);
       };
     },
     destroy() {
-      deps.length = 0;
+      destroy_inner();
+      _arr_deps.length = 0;
+      release(raw_value);
     },
     isSame(v: unknown) {
       return Object.is(raw_value, v);
@@ -228,23 +259,23 @@ export function refArray<T>(
       return raw_value === v;
     },
     getDeps(): DepInfo[] {
-      return deps.map((ctx) => ({
+      return _arr_deps.map((ctx) => ({
         trackId: ctx.__trackId || "unknown",
         trackInfo: ctx.__trackInfo,
       }));
     },
     dump() {
-      console.log("[reactive.dump] refArray subscribers:", deps.length);
-      deps.forEach((ctx, i) => {
-        console.log(
-          `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
-          ctx.__trackInfo || "",
-        );
-      });
+      // console.log("[reactive.dump] refArray subscribers:", deps.length);
+      // deps.forEach((ctx, i) => {
+      //   console.log(
+      //     `  [${i}] trackId: ${ctx.__trackId || "unknown"}`,
+      //     ctx.__trackInfo || "",
+      //   );
+      // });
     },
     get(idx: number) {
       const vv = raw_value[idx];
-      return getProxy(vv, idx);
+      return get_computed_value(vv, idx);
     },
     set(idx: number, item: any) {
       Array.prototype.splice.call(raw_value, idx, 1, item);
@@ -253,7 +284,7 @@ export function refArray<T>(
     splice(idx: number, dcount: number, ...items: any[]) {
       const res = Array.prototype.splice.call(raw_value, idx, dcount, ...items);
       notify({ type: "refresh" });
-      return res.map((item: any) => getProxy(item));
+      return res.map((item: any) => get_computed_value(item));
     },
     insert(idx: number, ...items: any[]) {
       Array.prototype.splice.call(raw_value, idx, 0, ...items);
@@ -266,7 +297,7 @@ export function refArray<T>(
       return raw_value.length;
     },
     push(...items: T[]) {
-      console.log("[reactive]reactive-array - push", items);
+      // console.log("[reactive]reactive-array - push", items);
       const res = Array.prototype.push.call(raw_value, ...items);
       notify({
         type: "insert",
@@ -289,21 +320,21 @@ export function refArray<T>(
       if (raw_value.length === 0) {
         return null;
       }
-      console.log(
-        "[reactive]reactive-array - pop",
-        raw_value,
-        raw_value.length,
-      );
+      // console.log(
+      //   "[reactive]reactive-array - pop",
+      //   raw_value,
+      //   raw_value.length,
+      // );
       const index = raw_value.length - 1;
       const item = Array.prototype.pop.call(raw_value);
       notify({ type: "delete", index, deleteCount: 1 });
-      return getProxy(item);
+      return get_computed_value(item);
     },
     shift() {
       if (raw_value.length === 0) return undefined;
       const item = Array.prototype.shift.call(raw_value);
       notify({ type: "delete", index: 0, deleteCount: 1 });
-      return getProxy(item);
+      return get_computed_value(item);
     },
     delete(idx: number) {
       Array.prototype.splice.call(raw_value, idx, 1);
@@ -321,23 +352,30 @@ export function refArray<T>(
       items: T[] | ((cur: T[]) => T[]),
       opt: { reset?: boolean; silent?: boolean } = {},
     ) {
+      destroy_inner();
+      const prev_raw_value = [...raw_value];
       if (typeof items === "function") {
-        raw_value = items(raw_value);
+        raw_value = [...items(raw_value)];
       } else {
-        raw_value = items;
+        raw_value = [...items];
       }
+      sync_registry_key(prev_raw_value, raw_value);
       if (opt.silent) {
         return;
       }
       notify({ type: "refresh" }, opt);
     },
     assign(items: T[]) {
+      // destroyInner();
+      const prev_raw_value = raw_value;
       raw_value = items;
-      _inner.length = 0;
+      sync_registry_key(prev_raw_value, raw_value);
       notify({ type: "refresh" });
     },
     filter(predicate: (item: T, index: number, array: T[]) => boolean) {
-      return raw_value.filter(predicate).map((item: any) => getProxy(item));
+      return raw_value
+        .filter(predicate)
+        .map((item: any) => get_computed_value(item));
     },
     includes(item: T) {
       return raw_value.includes(item);
@@ -372,7 +410,9 @@ export function refArray<T>(
       return raw_value.join(separator);
     },
     slice(start?: number, end?: number) {
-      return raw_value.slice(start, end).map((item: any) => getProxy(item));
+      return raw_value
+        .slice(start, end)
+        .map((item: any) => get_computed_value(item));
     },
     indexOf(v: T | Ref<T>, from_idx?: number) {
       if (isRef(v)) {
@@ -444,7 +484,7 @@ export function refArray<T>(
         return null;
       }
       const vv = raw_value[idx];
-      return getProxy(vv, idx);
+      return get_computed_value(vv, idx);
     },
     findIndex(
       predicate: (value: T, index: number, obj: T[]) => unknown,
@@ -537,8 +577,8 @@ export function refArray<T>(
       notify({ type: "refresh" });
     },
     clear() {
+      // destroyInner();
       raw_value.length = 0;
-      _inner.length = 0;
       notify({ type: "refresh" });
     },
     replace(oldItem: T, newItem: T) {
@@ -553,18 +593,18 @@ export function refArray<T>(
     },
     first() {
       if (raw_value.length === 0) return undefined;
-      return getProxy(raw_value[0], 0);
+      return get_computed_value(raw_value[0], 0);
     },
     last() {
       if (raw_value.length === 0) return undefined;
       const idx = raw_value.length - 1;
-      return getProxy(raw_value[idx], idx);
+      return get_computed_value(raw_value[idx], idx);
     },
     nth(index: number) {
       const len = raw_value.length;
       const idx = index < 0 ? len + index : index;
       if (idx < 0 || idx >= len) return undefined;
-      return getProxy(raw_value[idx], idx);
+      return get_computed_value(raw_value[idx], idx);
     },
     count(predicate?: (item: T, index: number) => boolean) {
       if (!predicate) return raw_value.length;
@@ -724,7 +764,7 @@ export function refArray<T>(
     at(index: number) {
       const idx = index < 0 ? raw_value.length + index : index;
       if (idx < 0 || idx >= raw_value.length) return undefined;
-      return getProxy(raw_value[idx], idx);
+      return get_computed_value(raw_value[idx], idx);
     },
     toArray() {
       return raw_value.slice();
@@ -742,9 +782,9 @@ export function refArray<T>(
     },
   };
 
-  if (hot && __hmr_key) {
-    hot.data.__hmr_refs[__hmr_key] = r;
-  }
+  // if (hot && __hmr_key) {
+  //   hot.data.__hmr_refs[__hmr_key] = r;
+  // }
 
   // @ts-ignore
   return r;

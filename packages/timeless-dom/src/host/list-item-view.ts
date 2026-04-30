@@ -33,15 +33,15 @@ export function DOMListItemView(props: {
       return "view";
     },
     isDocumentFragment() {
-      return true;
+      return false;
     },
     insertChildren(children: TimelessElement[]) {
-      logger.log("insertChildren", children);
-      const r = box$.methods.insertChildren(children, { $parent: $elm });
+      // logger.log("insertChildren", children);
+      box$.methods.insertChildren(children, { $parent: $elm });
     },
     removeChildren() {
-      logger.log("removeChildren");
-      const r = box$.methods.removeChildren({ $parent: $elm });
+      // logger.log("removeChildren");
+      box$.methods.removeChildren({ $parent: $elm });
     },
     render(elm: TimelessElement) {
       // console.log("[dom]list-item-view - render", elm.state);
@@ -64,7 +64,7 @@ export function DOMListItemView(props: {
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
-      console.log("[dom]host/view - hydrate", $elm, elm.state);
+      // console.log("[dom]host/view - hydrate", $elm, elm.state);
       box$.methods.set$elm($elm);
       // box$.methods.applyState(elm.state);
       box$.methods.setupEventListener(elm.events);

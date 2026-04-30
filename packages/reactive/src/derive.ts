@@ -1,4 +1,11 @@
+import { debounce, throttle } from "@timeless/base";
 import { Subscriber, Ref, DerivedRef, isRef } from "./types";
+import { _current_disposables } from "./disposal";
+
+type ComputedOptions = {
+  debounce?: number;
+  throttle?: number;
+};
 
 type UnwrapRef<T> =
   T extends Ref<infer V>
@@ -16,14 +23,16 @@ export function derive<T extends readonly any[], R>(
   fn: (
     ...args: { [K in keyof T]: UnwrapRef<T[K]> } & { length: T["length"] }
   ) => R,
+  options?: ComputedOptions,
 ): DerivedRef<R>;
 export function derive<T extends Record<string, any>, R>(
   deps: T,
   fn: (args: { [K in keyof T]: UnwrapRef<T[K]> }) => R,
+  options?: ComputedOptions,
 ): DerivedRef<R>;
 
-export function derive<T>(deps: any, fn: any): DerivedRef<T> {
-  const _deps: Subscriber<T>[] = [];
+export function derive<T>(deps: any, fn: any, options?: ComputedOptions): DerivedRef<T> {
+  const _derive_deps: Subscriber<T>[] = [];
   let raw_value: any;
 
   const is_single_ref = isRef(deps);
@@ -51,16 +60,24 @@ export function derive<T>(deps: any, fn: any): DerivedRef<T> {
 
   raw_value = is_array ? fn(...get_values()) : fn(get_values());
 
-  function notify(v: unknown, extra?: Record<string, unknown>) {
-    for (let i = 0; i < _deps.length; i += 1) {
-      const ctx = _deps[i];
+  function _notify(v: unknown, extra?: Record<string, unknown>) {
+    for (let i = 0; i < _derive_deps.length; i += 1) {
+      const ctx = _derive_deps[i];
       if (ctx.onChange) {
         ctx.onChange(raw_value, extra);
       }
     }
   }
+  let notify = _notify;
+  if (typeof options?.throttle === "number") {
+    notify = throttle(options.throttle, notify);
+  }
+  if (typeof options?.debounce === "number") {
+    notify = debounce(options.debounce, notify);
+  }
 
   const onChange = (v: unknown, extra?: Record<string, unknown>) => {
+    // console.log("derive handle change", v, extra);
     const args = get_values();
     const next_value = is_array ? fn(...args) : fn(args);
     if (raw_value === next_value) {
@@ -77,17 +94,18 @@ export function derive<T>(deps: any, fn: any): DerivedRef<T> {
     }
   });
 
-  return {
+  const res: DerivedRef<T> = {
     __is_ref: true as const,
     subscribe(ctx: Subscriber<T>) {
-      _deps.push(ctx);
+      _derive_deps.push(ctx);
       return function () {
-        _deps.splice(_deps.indexOf(ctx), 1);
+        _derive_deps.splice(_derive_deps.indexOf(ctx), 1);
       };
     },
     destroy() {
       unsubscribe_list.forEach((unsubscribe) => unsubscribe());
-      _deps.length = 0;
+      _derive_deps.length = 0;
+      unsubscribe_list.length = 0;
     },
     get value() {
       return raw_value;
@@ -99,4 +117,11 @@ export function derive<T>(deps: any, fn: any): DerivedRef<T> {
       return raw_value === v;
     },
   };
+
+  // Register with owner's disposal tracking if active
+  // if (_current_disposables) {
+  //   _current_disposables.push(res.destroy);
+  // }
+
+  return res;
 }

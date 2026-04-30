@@ -7,6 +7,10 @@ import {
 
 import { viewStyleToCssText } from "./style";
 
+let _batch_mode = false;
+let _pending_mounted: (() => void)[] = [];
+let _raf_scheduled = false;
+
 export function HostElement(props: {
   t: string;
   $elm: null | any;
@@ -20,10 +24,28 @@ export function HostElement(props: {
   let child_nodes: (VNodeView<any> | null)[] = [];
   /** Timeless 子列表 */
   let child_elements: (TimelessElement | null)[] = [];
+  let _events: any = null;
+
+  // console.log("create box");
 
   const methods = {
     set$elm(elm: HTMLElement | Text) {
       $elm = elm;
+    },
+    startBatch() {
+      _batch_mode = true;
+    },
+    endBatch() {
+      _batch_mode = false;
+      if (_pending_mounted.length > 0 && !_raf_scheduled) {
+        _raf_scheduled = true;
+        requestAnimationFrame(() => {
+          _raf_scheduled = false;
+          const cbs = _pending_mounted;
+          _pending_mounted = [];
+          for (const cb of cbs) cb();
+        });
+      }
     },
     get$elm() {
       return $elm;
@@ -216,6 +238,7 @@ export function HostElement(props: {
       if (!events || !$elm || $elm instanceof Text) {
         return;
       }
+      _events = events;
       if (events.onClick) {
         $elm.removeEventListener("click", events.onClick);
       }
@@ -392,15 +415,6 @@ export function HostElement(props: {
     ) {
       const r = methods.buildChildren(children);
       const $parent = opt?.$parent || methods.getParent();
-      console.log(
-        props.t + "[HostElement]insertChildren",
-        "$parent=",
-        $parent,
-        "fragment children=",
-        r.$fragment.childNodes.length,
-        "children=",
-        children.length,
-      );
       if ($parent) {
         if ($elm && $elm instanceof Text) {
           $parent.insertBefore(r.$fragment, $elm);
@@ -411,55 +425,50 @@ export function HostElement(props: {
       child_elements = r.child_elements as TimelessElement[];
       $children = r.child_host_nodes;
       child_nodes = r.child_nodes;
-      setTimeout(() => {
-        // console.log(props.t + "[]invoke children onMounted function");
-        methods.handleElementsMounted();
-      }, 0);
+      if (_batch_mode) {
+        _pending_mounted.push(() => methods.handleElementsMounted());
+      } else {
+        setTimeout(() => methods.handleElementsMounted(), 0);
+      }
     },
+    /**
+     * 应该命名为 destroy children
+     * 其实等同于 innerHTML = "" 即销毁全部内容
+     */
     removeChildren(extra?: { $parent: any }) {
       const $parent = extra?.$parent || methods.getParent();
-      console.log(
-        props.t + "[HostElement]removeChildren",
-        "$parent=",
-        $parent,
-        [...$children],
-        child_nodes,
-        child_elements,
-      );
       if ($children.length === 0 && child_nodes.length === 0) {
         return;
       }
-      // console.log(props.t + "[]removeChildren", $parent, child_host_nodes);
-      // hydrate 加载的，没有 child_nodes，导致通过该方法销毁的子元素没有 onUnmounted 方法
-      // for (const child of child_nodes) {
-      //   if (child) {
-      //     child.removeChildren();
-      //   }
-      // }
-      const $fragment = document.createDocumentFragment();
+
+      for (let i = 0; i < child_nodes.length; i += 1) {
+        const child_node = child_nodes[i];
+        if (child_node) {
+          child_node.removeChildren();
+        }
+      }
+
+      // Remove child DOM nodes from parent
       if ($parent) {
         for (const $child of $children) {
-          if ($child === $elm) {
-            continue;
-          }
-          if ($child) {
-            $fragment.appendChild($child);
-            // $parent.removeChild($child);
+          if ($child && $child.parentNode === $parent) {
+            $parent.removeChild($child);
           }
         }
       }
-      // console.log(
-      //   props.t + "[]removeChildren invoke onUnmounted",
-      //   child_elements,
-      // );
-      for (const child of child_elements) {
-        if (child && child.onUnmounted) {
-          child.onUnmounted();
+      $children.length = 0;
+      child_nodes.length = 0;
+      // $elm = null;
+      methods.teardownEventListener(_events);
+      setTimeout(() => {
+        // Call onUnmounted for all child elements
+        for (const child of child_elements) {
+          if (child && child.onUnmounted) {
+            child.onUnmounted();
+          }
         }
-      }
-      child_elements = [];
-      $children = [];
-      child_nodes = [];
+        child_elements.length = 0;
+      }, 0);
     },
     insert(
       idx: number,
@@ -479,14 +488,14 @@ export function HostElement(props: {
        * 这个范围，无法靠 $children 来确定
        */
       const $reference = $children[idx];
-      console.log(
-        props.t + "[dom]insert child",
-        idx,
-        children,
-        $parent,
-        $reference,
-        [...$children],
-      );
+      // console.log(
+      //   props.t + "[dom]insert child",
+      //   idx,
+      //   children,
+      //   $parent,
+      //   $reference,
+      //   [...$children],
+      // );
       const inserted_elements: TimelessElement[] = [];
       const inserted_child: VNodeView[] = [];
       const inserted_host_nodes: any[] = [];
@@ -513,16 +522,25 @@ export function HostElement(props: {
       $children.splice(idx, 0, ...inserted_host_nodes);
       child_elements.splice(idx, 0, ...inserted_elements);
       child_nodes.splice(idx, 0, ...inserted_child);
-      for (const child of inserted_elements) {
-        if (child.onMounted) {
-          child.onMounted({
-            target: child.$elm,
-          });
+      if (_batch_mode) {
+        const elements = [...inserted_elements];
+        _pending_mounted.push(() => {
+          for (const child of elements) {
+            if (child.onMounted) child.onMounted({ target: child.$elm });
+          }
+        });
+      } else {
+        for (const child of inserted_elements) {
+          if (child.onMounted) {
+            child.onMounted({
+              target: child.$elm,
+            });
+          }
         }
       }
     },
     remove(idx: number, count: number, extra?: { $parent: any }) {
-      console.log(props.t + "[box]remove", [...$children], child_elements);
+      // console.log(props.t + "[box]remove", [...$children], child_elements);
       if (count === 0) {
         return;
       }
@@ -536,7 +554,7 @@ export function HostElement(props: {
       for (let i = 0; i < count; i++) {
         const $child = $children[idx + i];
         if ($child) {
-          console.log(props.t + "[box]remove", idx + i, $child);
+          // console.log(props.t + "[box]remove", idx + i, $child);
           $fragment.appendChild($child);
           const child_elm = child_elements[idx + i];
           if (child_elm) {
@@ -572,7 +590,7 @@ export function HostElement(props: {
         console.warn("move node not found from", from);
         return;
       }
-      console.log("[timeless-dom]move node", from, to, $from);
+      // console.log("[timeless-dom]move node", from, to, $from);
 
       $children.splice(from, 1);
       $children.splice(to, 0, $from);
@@ -598,7 +616,7 @@ export function HostElement(props: {
         console.warn("refresh parent not found");
         return;
       }
-      console.log(props.t + "[dom]refresh - start", [...$children]);
+      // console.log(props.t + "[dom]refresh - start", [...$children]);
       // 1. Remove (descending order to keep indices stable)
       const sorted_removed = [...removed].sort((a, b) => b.idx - a.idx);
       const removed_elements: (TimelessElement | null)[] = [];
@@ -608,7 +626,7 @@ export function HostElement(props: {
       for (const { idx, count } of sorted_removed) {
         for (let i = 0; i < count; i++) {
           const $child = $children[idx + i];
-          console.log("remove $child", idx + i, $child);
+          // console.log("remove $child", idx + i, $child);
           if ($child) {
             fragment.appendChild($child);
           }
@@ -657,7 +675,7 @@ export function HostElement(props: {
       for (const { idx, elements } of added) {
         methods.insert(idx, elements, extra);
       }
-      console.log("[dom]refresh - end", [...$children]);
+      // console.log("[dom]refresh - end", [...$children]);
     },
     setScrollTop(v: number) {
       if (!$elm) {
@@ -670,6 +688,13 @@ export function HostElement(props: {
         return null;
       }
       return $elm.parentElement;
+    },
+    destroy() {
+      $elm = null;
+      $children.length = 0;
+      child_nodes.length = 0;
+      child_elements.length = 0;
+      _events = null;
     },
     trackChild(
       dom: any,
