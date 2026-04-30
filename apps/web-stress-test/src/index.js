@@ -1,4 +1,4 @@
-const { ref, View, Input, Show, For, computed, combine, refarr } =
+const { ref, View, Input, Show, For, computed, combine, refarr, release_all } =
   window.Timeless;
 const { render } = window.Timeless.DOM;
 
@@ -82,14 +82,20 @@ function SearchTablePage() {
       return generate_user((page.value.page - 1) * page.value.pageSize + i, {});
     }),
   );
-  const visible_ = ref(false);
+  const visible_ = ref(true);
 
-  const filteredData = combine({ data, searchInput }, (t) => {
-    return filter_with_keyword(t.data, t.searchInput);
-  });
+  const filteredData = combine(
+    { data, searchInput },
+    (t) => {
+      return filter_with_keyword(t.data, t.searchInput);
+    },
+    {
+      debounce: 600,
+    },
+  );
 
   function filter_with_keyword(arr, keyword) {
-    console.log("filter_with_keyword", keyword);
+    // console.log("filter_with_keyword", keyword);
     if (!keyword) {
       return arr;
     }
@@ -106,16 +112,16 @@ function SearchTablePage() {
     // console.log("before return filtered data", r);
     return r;
   }
-  // const handleSearch = debounce(800, function (keyword) {
-  //   const r = data.value;
-  //   const filtered = filter_with_keyword(r, keyword);
-  //   data.as(filtered);
-  // });
+  const handleSearch = debounce(800, function (keyword) {
+    const r = data.value;
+    const filtered = filter_with_keyword(r, keyword);
+    data.as(filtered);
+  });
 
-  // const totalScore = computed(filteredData, (rows) => {
-  //   if (!rows || rows.length === 0) return 0;
-  //   return rows.reduce((sum, row) => sum + row.score, 0);
-  // });
+  const totalScore = computed(filteredData, (rows) => {
+    if (!rows || rows.length === 0) return 0;
+    return rows.reduce((sum, row) => sum + row.score, 0);
+  });
   let timer = null;
 
   return View(
@@ -221,10 +227,55 @@ function SearchTablePage() {
                     },
                     onClick() {
                       // clearInterval(timer);
+                      // data.as([]);
+                      // release_all();
+                      // page.as((p) => ({ ...p, page: p.page + 1 }));
+                      const count = 500;
+                      var startIndex = 500;
+                      data.as(
+                        Array.from({ length: count }, (_, i) => {
+                          return generate_user(startIndex + i, {});
+                        }),
+                      );
+                    },
+                  },
+                  ["Page 2"],
+                ),
+                View(
+                  {
+                    style: {
+                      padding: "6px 12px",
+                      background: "#007bff",
+                      "border-radius": "4px",
+                      cursor: "pointer",
+                      "font-size": "14px",
+                    },
+                    onClick() {
+                      const count = 500;
+                      const startIndex = 1000;
+                      data.as(
+                        Array.from({ length: count }, (_, i) => {
+                          return generate_user(startIndex + i, {});
+                        }),
+                      );
+                    },
+                  },
+                  ["Page 3"],
+                ),
+                View(
+                  {
+                    style: {
+                      padding: "6px 12px",
+                      background: "#007bff",
+                      "border-radius": "4px",
+                      cursor: "pointer",
+                      "font-size": "14px",
+                    },
+                    onClick() {
                       data.as([]);
                     },
                   },
-                  ["Stop Age+1"],
+                  ["Clean"],
                 ),
               ],
             ),
@@ -369,14 +420,14 @@ function SearchTablePage() {
                 itemHeight: 186.5,
                 each: filteredData,
                 render(row, idx) {
-                  // const borderBottom_ = combine(
-                  //   { idx, data: filteredData },
-                  //   (t) => {
-                  //     return t.idx === t.data.length - 1
-                  //       ? "none"
-                  //       : "1px solid #ddd";
-                  //   },
-                  // );
+                  const borderBottom_ = combine(
+                    { idx, data: filteredData },
+                    (t) => {
+                      return t.idx === t.data.length - 1
+                        ? "none"
+                        : "1px solid #ddd";
+                    },
+                  );
                   const id_ = computed(row, (t) => t.id);
                   const name_ = computed(row, (t) => t.name);
                   const email_ = computed(row, (t) => t.email);
@@ -398,12 +449,12 @@ function SearchTablePage() {
                         "grid-template-columns":
                           "60px 120px 200px 80px 60px 80px 100px 1fr",
                         width: "100%",
-                        // "border-bottom": borderBottom_,
+                        "border-bottom": borderBottom_,
                         // "border-right": "1px solid #ddd",
                       },
                       onUnmounted() {
                         // console.log("destroy", id_.value);
-                        // borderBottom_.destroy();
+                        borderBottom_.destroy();
                         id_.destroy();
                         name_.destroy();
                         email_.destroy();
@@ -1046,7 +1097,7 @@ function TablePage() {
           ),
         ]),
         For({
-          each: filteredData,
+          each: data,
           render(row) {
             return View(
               {
@@ -1124,7 +1175,7 @@ function FormPage() {
             style: { width: "100%" },
             value: name,
             onInput(event) {
-              console.log("name change", event.target.value);
+              // console.log("name change", event.target.value);
               name.as(event.target.value);
             },
           }),
@@ -1137,7 +1188,7 @@ function FormPage() {
             style: { width: "100%" },
             value: email,
             onInput(event) {
-              console.log("email change", event.target.value);
+              // console.log("email change", event.target.value);
               email.as(event.target.value);
             },
           }),
@@ -1150,7 +1201,7 @@ function FormPage() {
             style: { width: "100%" },
             value: role,
             onChange(event) {
-              console.log("role change", event.target.value);
+              // console.log("role change", event.target.value);
               role.as(event.target.value);
             },
           }),
@@ -1161,7 +1212,7 @@ function FormPage() {
         Checkbox({
           checked: enabled,
           onChange(event) {
-            console.log("enabled change", event.target.checked);
+            // console.log("enabled change", event.target.checked);
             enabled.as(event.target.checked);
           },
         }),

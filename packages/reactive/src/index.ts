@@ -25,6 +25,7 @@ import { computed } from "./computed";
 import { derive } from "./derive";
 import {
   release,
+  release_all,
   get as registryGet,
   set as registrySet,
   deleteKey as registryDelete,
@@ -125,5 +126,6 @@ export {
   refArray as refarr,
   refObject as refobj,
   release as uncomputed,
+  release_all,
   hmrScope,
 };

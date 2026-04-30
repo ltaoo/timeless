@@ -124,6 +124,13 @@ export function Show(props: ShowProps) {
             if ($elm && typeof $elm.removeChildren === "function") {
               $elm.removeChildren();
             }
+            // Unmount old children before any condition change
+            for (const child of state.children) {
+              if (isElement(child)) {
+                if (child.beforeUnmounted) child.beforeUnmounted();
+                if (child.onUnmounted) child.onUnmounted();
+              }
+            }
             if (!condition) {
               if (props.else) {
                 const target = methods.build_children_with_condition(condition);

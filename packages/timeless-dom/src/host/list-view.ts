@@ -52,21 +52,21 @@ export function DOMListView(props: {
       return true;
     },
     insert(idx, children) {
-      logger.log("insert", idx, children);
+      // logger.log("insert", idx, children);
       return box$.methods.insert(idx, children, { $parent: $content });
     },
     remove(idx, count) {
-      logger.log("remove", idx, count);
+      // logger.log("remove", idx, count);
       box$.methods.remove(idx, count, { $parent: $content });
     },
     refresh(payload) {
-      logger.log("refresh", payload.added, payload.removed, payload.moved);
+      // logger.log("refresh", payload.added, payload.removed, payload.moved);
       box$.methods.refresh(payload, { $parent: $content });
     },
     move: box$.methods.move,
     swap: box$.methods.move,
     setStyleValue(k: string, value: string | number) {
-      logger.log("setStyleValue", $content, k, value);
+      // logger.log("setStyleValue", $content, k, value);
       if ($content) {
         $content.style[k] = `${value}px`;
         if (k === "height") {
@@ -108,7 +108,7 @@ export function DOMListView(props: {
       $elm: HTMLElement | Text,
       opt: { $parent: any; offset: number; idx: number },
     ) {
-      logger.log("hydrate", elm, $elm, opt.$parent, opt.offset, opt.idx);
+      // logger.log("hydrate", elm, $elm, opt.$parent, opt.offset, opt.idx);
       const $anchor = document.createTextNode("");
       box$.methods.set$elm($anchor);
 
@@ -131,7 +131,7 @@ export function DOMListView(props: {
           box$.methods.set$childrne($children_belong_me);
 
           const $last = $children[idx + total_nodes];
-          logger.log("$children belong me", idx, $children_belong_me, $last);
+          // logger.log("$children belong me", idx, $children_belong_me, $last);
 
           let offset = idx;
           let $child_offset = 0;
@@ -144,7 +144,7 @@ export function DOMListView(props: {
               | HTMLElement
               | Text;
 
-            logger.log("each child", i, child, $child, offset, prev_child);
+            // logger.log("each child", i, child, $child, offset, prev_child);
 
             if (child) {
               const child$ = hydrate_node(child, $child, {

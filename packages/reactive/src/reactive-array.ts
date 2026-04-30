@@ -1,4 +1,4 @@
-import { has, get } from "./registry";
+import { has, get, release } from "./registry";
 import { refObject } from "./reactive-object";
 import {
   Subscriber,
@@ -167,16 +167,25 @@ export function refArray<T>(
 
   let raw_value = items;
   const _arr_deps: SubscriberWithId<T[]>[] = [];
-  // const destroyInner = () => {
-  //   for (let i = 0; i < _inner.length; i += 1) {
-  //     const proxy = _inner[i];
-  //     if (proxy && typeof proxy.destroy === "function") {
-  //       proxy.destroy();
-  //     }
-  //     _inner[i] = undefined;
-  //   }
-  //   _inner.length = 0;
-  // };
+  function destroy_inner() {
+    for (let i = 0; i < _inner.length; i += 1) {
+      const proxy = _inner[i];
+      if (proxy && typeof proxy.destroy === "function") {
+        proxy.destroy();
+      }
+      _inner[i] = undefined;
+    }
+    // Also clean up stale global_refs entries for items that had proxies
+    for (let i = 0; i < raw_value.length; i += 1) {
+      const item = raw_value[i];
+      if (item !== null && item !== undefined && typeof item === "object") {
+        if (has(item)) {
+          release(item);
+        }
+      }
+    }
+    _inner.length = 0;
+  }
   function notify(action: any, extra?: Record<string, unknown>) {
     for (let i = 0; i < _arr_deps.length; i += 1) {
       // console.log("[]reactive-array - notify", i, action, deps.length, extra);
@@ -194,7 +203,16 @@ export function refArray<T>(
       })();
     }
   }
-  const _inner: any[] = [];
+  const _inner: Ref<unknown>[] = [];
+  const sync_registry_key = (prev_raw_value: T[], next_raw_value: T[]) => {
+    // if (prev_raw_value === next_raw_value) {
+    //   return;
+    // }
+    // if (Array.isArray(prev_raw_value) && get(prev_raw_value) === r) {
+    //   release(prev_raw_value);
+    //   set(next_raw_value, r);
+    // }
+  };
   const get_computed_value = (vv: any, idx?: number) => {
     if (isRef(vv)) {
       return vv;
@@ -230,8 +248,9 @@ export function refArray<T>(
       };
     },
     destroy() {
-      // destroyInner();
+      destroy_inner();
       _arr_deps.length = 0;
+      release(raw_value);
     },
     isSame(v: unknown) {
       return Object.is(raw_value, v);
@@ -278,7 +297,7 @@ export function refArray<T>(
       return raw_value.length;
     },
     push(...items: T[]) {
-      console.log("[reactive]reactive-array - push", items);
+      // console.log("[reactive]reactive-array - push", items);
       const res = Array.prototype.push.call(raw_value, ...items);
       notify({
         type: "insert",
@@ -301,11 +320,11 @@ export function refArray<T>(
       if (raw_value.length === 0) {
         return null;
       }
-      console.log(
-        "[reactive]reactive-array - pop",
-        raw_value,
-        raw_value.length,
-      );
+      // console.log(
+      //   "[reactive]reactive-array - pop",
+      //   raw_value,
+      //   raw_value.length,
+      // );
       const index = raw_value.length - 1;
       const item = Array.prototype.pop.call(raw_value);
       notify({ type: "delete", index, deleteCount: 1 });
@@ -333,12 +352,14 @@ export function refArray<T>(
       items: T[] | ((cur: T[]) => T[]),
       opt: { reset?: boolean; silent?: boolean } = {},
     ) {
-      // destroyInner();
+      destroy_inner();
+      const prev_raw_value = [...raw_value];
       if (typeof items === "function") {
-        raw_value = items(raw_value);
+        raw_value = [...items(raw_value)];
       } else {
-        raw_value = items;
+        raw_value = [...items];
       }
+      sync_registry_key(prev_raw_value, raw_value);
       if (opt.silent) {
         return;
       }
@@ -346,7 +367,9 @@ export function refArray<T>(
     },
     assign(items: T[]) {
       // destroyInner();
+      const prev_raw_value = raw_value;
       raw_value = items;
+      sync_registry_key(prev_raw_value, raw_value);
       notify({ type: "refresh" });
     },
     filter(predicate: (item: T, index: number, array: T[]) => boolean) {
@@ -759,9 +782,9 @@ export function refArray<T>(
     },
   };
 
-  if (hot && __hmr_key) {
-    hot.data.__hmr_refs[__hmr_key] = r;
-  }
+  // if (hot && __hmr_key) {
+  //   hot.data.__hmr_refs[__hmr_key] = r;
+  // }
 
   // @ts-ignore
   return r;

@@ -20,7 +20,7 @@ type ListItemViewState<T> = {
   top: number;
   height: number;
   bound: boolean;
-  payload: T;
+  payload: T | null;
 };
 
 /**
@@ -53,6 +53,20 @@ export function ListItemView<T>(
     subscribe_props() {
       box$.methods.subscribe_props();
     },
+    cleanup_children(children = state.children) {
+      for (let i = 0; i < children.length; i += 1) {
+        const child = children[i];
+        if (!isElement(child)) {
+          continue;
+        }
+        if (child.beforeUnmounted) {
+          child.beforeUnmounted();
+        }
+        if (child.onUnmounted) {
+          child.onUnmounted();
+        }
+      }
+    },
     rebind(data: {
       uid?: number | string;
       top: number;
@@ -60,6 +74,7 @@ export function ListItemView<T>(
       payload?: T;
       child: TimelessElement;
     }) {
+      const prev_children = [...state.children];
       state.bound = true;
       state.top = data.top;
       if (data.height !== undefined) {
@@ -74,15 +89,19 @@ export function ListItemView<T>(
         top: `${data.top}px`,
         width: "100%",
       });
+      methods.cleanup_children(prev_children);
       $elm.removeChildren();
       $elm.insertChildren([data.child]);
     },
     unbind() {
+      const prev_children = [...state.children];
       state.bound = false;
       state.children = [];
+      state.payload = null;
       $elm.setStyle({
         display: "none",
       });
+      methods.cleanup_children(prev_children);
       $elm.removeChildren();
     },
   };
@@ -155,6 +174,7 @@ export function ListItemView<T>(
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }
+      methods.cleanup_children();
       box$.methods.destroy();
       state.rendered = false;
       state.children.length = 0;

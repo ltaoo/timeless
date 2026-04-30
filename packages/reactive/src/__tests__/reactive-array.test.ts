@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { refArray } from "../reactive-array";
 import { computed } from "@/computed";
+import { signal } from "@/signal";
+import { getarr as registryGetArr } from "@/index";
 
 describe("RefArray", () => {
   describe("get/set", () => {
@@ -1127,6 +1129,23 @@ describe("RefArray", () => {
       } finally {
         vi.useRealTimers();
       }
+    });
+
+    it("should rekey registry when replacing the backing array", () => {
+      const initial = [{ id: 1 }, { id: 2 }];
+      const next = [{ id: 3 }, { id: 4 }];
+
+      const arr = signal(initial);
+      expect(registryGetArr(initial)).toBe(arr);
+
+      arr.as(next);
+
+      expect(registryGetArr(initial)).toBeUndefined();
+      expect(registryGetArr(next)).toBe(arr);
+      expect(arr.value).toBe(next);
+
+      arr.destroy();
+      expect(registryGetArr(next)).toBeUndefined();
     });
   });
 });

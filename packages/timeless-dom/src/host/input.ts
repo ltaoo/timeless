@@ -44,7 +44,7 @@ export function DOMInput(props: {
       common$.methods.set$elm($elm);
       common$.methods.applyState(elm.state, { initial: true });
       // $elm.style.width = "100%";
-      console.log("[dom]input render - before setupEvent", elm.events);
+      // console.log("[dom]input render - before setupEvent", elm.events);
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
       $elm.addEventListener("input", function (event) {

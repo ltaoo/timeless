@@ -184,7 +184,7 @@ export function ListView<T extends Record<string, unknown>>(
             if (!state.rendered) {
               return;
             }
-            logger.log("ctx.onPatch - handle patch", action, vv.value);
+            // logger.log("ctx.onPatch - handle patch", action, vv.value);
             if (action.type === "insert" && action.items !== undefined) {
               methods.insert(action.index, action.items as T[]);
               return;
@@ -211,7 +211,7 @@ export function ListView<T extends Record<string, unknown>>(
             }
           },
           onChange(v, extra) {
-            logger.log("each handle change", v, state.rendered, extra);
+            // logger.log("each handle change", v, state.rendered, extra);
             methods.refresh(v, extra);
             // _pending_v = v;
             // _pending_extra = extra;
@@ -310,7 +310,9 @@ export function ListView<T extends Record<string, unknown>>(
       _free_slots.push(slot);
     },
     normalize_children(children?: ViewChildren) {
-      if (children === null || children === undefined) return [];
+      if (children === null || children === undefined) {
+        return [];
+      }
       const resolved = resolve_children(children);
       if (!resolved) return [];
       if (Array.isArray(resolved)) {
@@ -476,7 +478,7 @@ export function ListView<T extends Record<string, unknown>>(
         // });
         _slots.push(slot);
       }
-      logger.log("after init slot", _slot_bindings.size);
+      // logger.log("after init slot", _slot_bindings.size);
     },
     /** 在指定位置，插入 n 个节点 */
     insert(index: number, items: T[]) {
@@ -532,7 +534,7 @@ export function ListView<T extends Record<string, unknown>>(
     },
     /** 从指定下标移除 n 个元素 */
     remove(index: number, count: number) {
-      logger.log("remove", index, count, state.idx_arr);
+      // logger.log("remove", index, count, state.idx_arr);
       const removed_idx: DerivedRef<number>[] = [];
       for (let i = 0; i < count; i += 1) {
         const item = state.items[index + i];
@@ -542,10 +544,10 @@ export function ListView<T extends Record<string, unknown>>(
         if (item && typeof item === "object") {
           registryDelete(item);
         }
-        logger.log("remove in loop", index + i, state.idx_arr[index + i]);
+        // logger.log("remove in loop", index + i, state.idx_arr[index + i]);
         removed_idx.push(state.idx_arr[index + i]);
       }
-      logger.log("remove before destroy idx", removed_idx);
+      // logger.log("remove before destroy idx", removed_idx);
       for (const idx of removed_idx) {
         idx.destroy();
       }
@@ -594,14 +596,14 @@ export function ListView<T extends Record<string, unknown>>(
      * 计算出 新增、更新 和 删除 的记录，提交给宿主层，刷新视图
      */
     refresh(v: T[], extra?: { reset?: boolean }) {
-      logger.log(
-        "refresh",
-        v.length,
-        "items, current:",
-        state.items.length,
-        _refreshing,
-        extra,
-      );
+      // logger.log(
+      //   "refresh",
+      //   v.length,
+      //   "items, current:",
+      //   state.items.length,
+      //   _refreshing,
+      //   extra,
+      // );
       if (_refreshing) {
         return;
       }
@@ -713,10 +715,7 @@ export function ListView<T extends Record<string, unknown>>(
       ).fill(0);
       for (let i = 0; i < new_visible_wrapped_items.length; i++) {
         const item = new_visible_wrapped_items[i];
-        const k =
-          _key && item
-            ? (item as { v: Record<string, unknown> }).v[_key]
-            : item.v;
+        const k = _key && item ? item.v[_key] : item.v;
         insertion_new_prefix[i + 1] =
           insertion_new_prefix[i] + (old_key_set.has(k) ? 0 : 1);
       }
@@ -866,9 +865,9 @@ export function ListView<T extends Record<string, unknown>>(
           //   prev_wrapped_items,
           //   _slot_bindings,
           // );
-          if (item_idx < _start || item_idx >= _end) {
-            continue;
-          }
+          // if (item_idx < _start || item_idx >= _end) {
+          //   continue;
+          // }
           const prev_wrapped_item = prev_wrapped_items[item_idx];
           if (!prev_wrapped_item) {
             continue;
@@ -902,6 +901,7 @@ export function ListView<T extends Record<string, unknown>>(
           slot.setPayload(wrapped_item.v);
           const updated_child = updated_nodes.get(key);
           if (updated_child) {
+            methods.dispose_slot_owner(slot);
             slot.rebind({
               uid: wrapped_item.k,
               top: wrapped_item.top,
@@ -932,6 +932,23 @@ export function ListView<T extends Record<string, unknown>>(
               child: elements[i],
             });
             _slot_bindings.set(key, slot);
+          }
+        }
+      }
+      // Release slots for items no longer in the visible range.
+      // The removed_nodes loop above only handles items whose OLD position
+      // was within _start.._end.  Slots bound to items that scrolled out of
+      // view or whose data was completely replaced stay in _slot_bindings
+      // indefinitely, starving _free_slots.
+      {
+        const visible_key_set = new Set<string>();
+        for (let i = _start; i < _end && i < state.wrapped_items.length; i++) {
+          visible_key_set.add(methods._dataIdStr(state.wrapped_items[i].k));
+        }
+        for (const [key, slot] of _slot_bindings) {
+          if (!visible_key_set.has(key)) {
+            methods.release_slot(slot);
+            _slot_bindings.delete(key);
           }
         }
       }
@@ -1231,7 +1248,7 @@ export function ListView<T extends Record<string, unknown>>(
       // methods.refresh();
     },
     calcVisibleRange(scroll_top: number) {
-      logger.log("calcVisibleRange - start", scroll_top, _start, _end);
+      // logger.log("calcVisibleRange - start", scroll_top, _start, _end);
       let start = _start;
       let end = _end;
       // 二分查找，快速定位第一个 top >= scroll_top 的元素
@@ -1259,11 +1276,11 @@ export function ListView<T extends Record<string, unknown>>(
         start = Math.max(0, baseStart - _buffer_size);
         end = Math.min(baseStart + _size + _buffer_size, len);
       })();
-      logger.log(
-        "calcVisibleRange - before Math.max",
-        [start, start - _buffer_size],
-        [end, _children.length],
-      );
+      // logger.log(
+      //   "calcVisibleRange - before Math.max",
+      //   [start, start - _buffer_size],
+      //   [end, _children.length],
+      // );
       const result = {
         start,
         end,
@@ -1271,7 +1288,7 @@ export function ListView<T extends Record<string, unknown>>(
       return result;
     },
     update(range: { start: number; end: number }) {
-      logger.log("update case range is changed", _start, _end, range);
+      // logger.log("update case range is changed", _start, _end, range);
 
       const has_change = range.start !== _start || range.end !== _end;
       if (!has_change) {
@@ -1302,7 +1319,7 @@ export function ListView<T extends Record<string, unknown>>(
 
       // 对 exitingCells: slot.unbind()，归还到 _freeSlots
       for (const key of existing_keys) {
-        logger.log("update - release slot", key);
+        // logger.log("update - release slot", key);
         const slot = _slot_bindings.get(key)!;
         methods.release_slot(slot);
         _slot_bindings.delete(key);
@@ -1312,13 +1329,13 @@ export function ListView<T extends Record<string, unknown>>(
       for (const wrapped_item of sliced_items) {
         const key = methods._dataIdStr(wrapped_item.k);
         const is_bound = _slot_bindings.has(key);
-        logger.log(
-          "update - bind slot",
-          key,
-          wrapped_item.k,
-          wrapped_item.v,
-          is_bound,
-        );
+        // logger.log(
+        //   "update - bind slot",
+        //   key,
+        //   wrapped_item.k,
+        //   wrapped_item.v,
+        //   is_bound,
+        // );
         if (!is_bound) {
           // logger.log("update - alloce free to", key, wrapped_item.v);
           const slot = _free_slots.pop();
@@ -1385,7 +1402,7 @@ export function ListView<T extends Record<string, unknown>>(
         }
         return false;
       })();
-      logger.log("before if (!update", update, scrollTop, range);
+      // logger.log("before if (!update", update, scrollTop, range);
       if (!update) {
         return;
       }
@@ -1449,20 +1466,15 @@ export function ListView<T extends Record<string, unknown>>(
       }
       listener$.destroy();
       box$.methods.destroy();
-      for (let i = 0; i < state.idx_arr.length; i += 1) {
-        const idx = state.idx_arr[i];
-        if (idx) {
-          idx.destroy();
-        }
-      }
+      methods.cleanup_idx_refs();
       for (const slot of _slots) {
         methods.dispose_slot_owner(slot);
       }
       _slot_render_owners.clear();
       methods.cleanup_registry_items();
-      // if (_owner) {
-      //   dispose_owner(_owner);
-      // }
+      if (_owner) {
+        dispose_owner(_owner);
+      }
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
         if (isElement(node)) {

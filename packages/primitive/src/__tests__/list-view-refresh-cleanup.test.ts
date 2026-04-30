@@ -45,11 +45,7 @@ describe("ListView refresh cleanup", () => {
           mountedChildren = [...children];
         },
         removeChildren() {
-          const removed = mountedChildren;
           mountedChildren = [];
-          for (const child of removed as any[]) {
-            child?.onUnmounted?.();
-          }
         },
       };
     }
@@ -117,11 +113,7 @@ describe("ListView refresh cleanup", () => {
           mountedChildren = [...children];
         },
         removeChildren() {
-          const removed = mountedChildren;
           mountedChildren = [];
-          for (const child of removed as any[]) {
-            child?.onUnmounted?.();
-          }
         },
       };
     }
@@ -179,9 +171,7 @@ describe("ListView refresh cleanup", () => {
         setStyleValue: vi.fn(),
         insertChildren: vi.fn(),
         removeChildren() {
-          for (const child of slot.children as any[]) {
-            child?.onUnmounted?.();
-          }
+          return;
         },
       };
     }
@@ -247,11 +237,7 @@ describe("ListView refresh cleanup", () => {
           mountedChildren = [...children];
         },
         removeChildren() {
-          const removed = mountedChildren;
           mountedChildren = [];
-          for (const child of removed as any[]) {
-            child?.onUnmounted?.();
-          }
         },
       };
     }
@@ -324,11 +310,7 @@ describe("ListView refresh cleanup", () => {
           mountedChildren = [...children];
         },
         removeChildren() {
-          const removed = mountedChildren;
           mountedChildren = [];
-          for (const child of removed as any[]) {
-            child?.onUnmounted?.();
-          }
         },
       };
     }
