@@ -119,8 +119,6 @@ export function View(
       }
       state.rendered = false;
       $elm = null;
-      // @ts-ignore
-      box$ = null;
       // box$.methods.remove_event();
     },
   };

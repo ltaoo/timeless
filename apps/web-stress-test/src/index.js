@@ -12,7 +12,6 @@ function generate_user(i) {
     role: {
       text: i % 3 === 0 ? "Admin" : i % 2 === 0 ? "Editor" : "Viewer",
     },
-    page: 10,
     age: Math.floor(Math.random() * 50) + 18,
     status: Math.floor(Math.random() * 100) % 4 === 0 ? "Inactive" : "Active",
     score: Math.floor(Math.random() * 100),
@@ -20,40 +19,40 @@ function generate_user(i) {
       Math.floor(Math.random() * 100) % 5
     ],
     location: ["NY", "LA", "SF", "Chicago", "Boston"][i % 5],
-    skills: [
-      {
-        id: `${i}_1`,
-        name: "computer",
-        level: Math.floor(Math.random() * 50) + 18,
-        histories: [
-          {
-            id: `${i}_1_1`,
-            text: "first time",
-            time: "2020/12/01",
-            value: Math.floor(Math.random() * 50) + 18,
-          },
-        ],
-      },
-      {
-        id: `${i}_2`,
-        name: "draw",
-        level: Math.floor(Math.random() * 50) + 0,
-        histories: [
-          {
-            id: `${i}_2_1`,
-            text: "first time",
-            time: "2022/12/01",
-            value: Math.floor(Math.random() * 50) + 18,
-          },
-          {
-            id: `${i}_2_2`,
-            text: "f",
-            time: "2024/12/01",
-            value: Math.floor(Math.random() * 50) + 18,
-          },
-        ],
-      },
-    ],
+    // skills: [
+    //   {
+    //     id: `${i}_1`,
+    //     name: "computer",
+    //     level: Math.floor(Math.random() * 50) + 18,
+    //     histories: [
+    //       {
+    //         id: `${i}_1_1`,
+    //         text: "first time",
+    //         time: "2020/12/01",
+    //         value: Math.floor(Math.random() * 50) + 18,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     id: `${i}_2`,
+    //     name: "draw",
+    //     level: Math.floor(Math.random() * 50) + 0,
+    //     histories: [
+    //       {
+    //         id: `${i}_2_1`,
+    //         text: "first time",
+    //         time: "2022/12/01",
+    //         value: Math.floor(Math.random() * 50) + 18,
+    //       },
+    //       {
+    //         id: `${i}_2_2`,
+    //         text: "f",
+    //         time: "2024/12/01",
+    //         value: Math.floor(Math.random() * 50) + 18,
+    //       },
+    //     ],
+    //   },
+    // ],
   };
 }
 
@@ -83,14 +82,19 @@ function SearchTablePage() {
       return generate_user((page.value.page - 1) * page.value.pageSize + i, {});
     }),
   );
-  const visible_ = ref(true);
+  const visible_ = ref(false);
 
   const filteredData = combine({ data, searchInput }, (t) => {
-    const d = t.data;
-    const query = t.searchInput;
-    if (!query) return d;
-    const q = query.toLowerCase();
-    const r = d
+    return filter_with_keyword(t.data, t.searchInput);
+  });
+
+  function filter_with_keyword(arr, keyword) {
+    console.log("filter_with_keyword", keyword);
+    if (!keyword) {
+      return arr;
+    }
+    const q = keyword.toLowerCase();
+    const r = arr
       .filter(
         (row) =>
           row.name.toLowerCase().includes(q) ||
@@ -101,12 +105,17 @@ function SearchTablePage() {
       .sort((a, b) => a.id - b.id);
     // console.log("before return filtered data", r);
     return r;
-  });
+  }
+  // const handleSearch = debounce(800, function (keyword) {
+  //   const r = data.value;
+  //   const filtered = filter_with_keyword(r, keyword);
+  //   data.as(filtered);
+  // });
 
-  const totalScore = computed(filteredData, (rows) => {
-    if (!rows || rows.length === 0) return 0;
-    return rows.reduce((sum, row) => sum + row.score, 0);
-  });
+  // const totalScore = computed(filteredData, (rows) => {
+  //   if (!rows || rows.length === 0) return 0;
+  //   return rows.reduce((sum, row) => sum + row.score, 0);
+  // });
   let timer = null;
 
   return View(
@@ -151,6 +160,7 @@ function SearchTablePage() {
                   },
                   onInput(event) {
                     searchInput.as(event.target.value);
+                    // handleSearch(event.target.value);
                   },
                 }),
                 View(
@@ -210,7 +220,8 @@ function SearchTablePage() {
                       "font-size": "14px",
                     },
                     onClick() {
-                      clearInterval(timer);
+                      // clearInterval(timer);
+                      data.as([]);
                     },
                   },
                   ["Stop Age+1"],
@@ -358,11 +369,14 @@ function SearchTablePage() {
                 itemHeight: 186.5,
                 each: filteredData,
                 render(row, idx) {
-                  const borderBottom_ = computed(idx, (t) =>
-                    t === filteredData.value.length - 1
-                      ? "none"
-                      : "1px solid #ddd",
-                  );
+                  // const borderBottom_ = combine(
+                  //   { idx, data: filteredData },
+                  //   (t) => {
+                  //     return t.idx === t.data.length - 1
+                  //       ? "none"
+                  //       : "1px solid #ddd";
+                  //   },
+                  // );
                   const id_ = computed(row, (t) => t.id);
                   const name_ = computed(row, (t) => t.name);
                   const email_ = computed(row, (t) => t.email);
@@ -384,12 +398,12 @@ function SearchTablePage() {
                         "grid-template-columns":
                           "60px 120px 200px 80px 60px 80px 100px 1fr",
                         width: "100%",
-                        "border-bottom": borderBottom_,
+                        // "border-bottom": borderBottom_,
                         // "border-right": "1px solid #ddd",
                       },
                       onUnmounted() {
                         // console.log("destroy", id_.value);
-                        borderBottom_.destroy();
+                        // borderBottom_.destroy();
                         id_.destroy();
                         name_.destroy();
                         email_.destroy();
@@ -632,7 +646,7 @@ function SearchTablePage() {
                       Array.from({ length: page.value.pageSize }, (_, i) => {
                         return generate_user(i, {});
                       }),
-                      { reset: true },
+                      { reset: false },
                     );
                   },
                 },
@@ -697,7 +711,7 @@ function SearchTablePage() {
                           Array.from({ length: count }, (_, i) => {
                             return generate_user(startIndex + i, {});
                           }),
-                          { reset: true },
+                          { reset: false },
                         );
                       },
                     },

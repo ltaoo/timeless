@@ -24,7 +24,7 @@ export function derive<T extends Record<string, any>, R>(
 ): DerivedRef<R>;
 
 export function derive<T>(deps: any, fn: any): DerivedRef<T> {
-  const _deps: Subscriber<T>[] = [];
+  const _derive_deps: Subscriber<T>[] = [];
   let raw_value: any;
 
   const is_single_ref = isRef(deps);
@@ -53,8 +53,8 @@ export function derive<T>(deps: any, fn: any): DerivedRef<T> {
   raw_value = is_array ? fn(...get_values()) : fn(get_values());
 
   function notify(v: unknown, extra?: Record<string, unknown>) {
-    for (let i = 0; i < _deps.length; i += 1) {
-      const ctx = _deps[i];
+    for (let i = 0; i < _derive_deps.length; i += 1) {
+      const ctx = _derive_deps[i];
       if (ctx.onChange) {
         ctx.onChange(raw_value, extra);
       }
@@ -62,6 +62,7 @@ export function derive<T>(deps: any, fn: any): DerivedRef<T> {
   }
 
   const onChange = (v: unknown, extra?: Record<string, unknown>) => {
+    // console.log("derive handle change", v, extra);
     const args = get_values();
     const next_value = is_array ? fn(...args) : fn(args);
     if (raw_value === next_value) {
@@ -81,14 +82,15 @@ export function derive<T>(deps: any, fn: any): DerivedRef<T> {
   const res: DerivedRef<T> = {
     __is_ref: true as const,
     subscribe(ctx: Subscriber<T>) {
-      _deps.push(ctx);
+      _derive_deps.push(ctx);
       return function () {
-        _deps.splice(_deps.indexOf(ctx), 1);
+        _derive_deps.splice(_derive_deps.indexOf(ctx), 1);
       };
     },
     destroy() {
       unsubscribe_list.forEach((unsubscribe) => unsubscribe());
-      _deps.length = 0;
+      _derive_deps.length = 0;
+      unsubscribe_list.length = 0;
     },
     get value() {
       return raw_value;
@@ -102,9 +104,9 @@ export function derive<T>(deps: any, fn: any): DerivedRef<T> {
   };
 
   // Register with owner's disposal tracking if active
-  if (_current_disposables) {
-    _current_disposables.push(() => res.destroy());
-  }
+  // if (_current_disposables) {
+  //   _current_disposables.push(res.destroy);
+  // }
 
   return res;
 }

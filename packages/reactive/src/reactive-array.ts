@@ -148,14 +148,14 @@ export interface RefArray<T> extends Ref<T[]> {
 
 export function refArray<T>(
   items: T[],
-  optOrHmrKey?: Partial<{ key: any }> | string,
+  opt_or_hmr_key?: Partial<{ key: any }> | string,
   __hmr_key?: string,
 ): TimelessRefArray<T> {
   let opt: Partial<{ key: any }> = {};
-  if (typeof optOrHmrKey === "string") {
-    __hmr_key = optOrHmrKey;
-  } else if (optOrHmrKey) {
-    opt = optOrHmrKey;
+  if (typeof opt_or_hmr_key === "string") {
+    __hmr_key = opt_or_hmr_key;
+  } else if (opt_or_hmr_key) {
+    opt = opt_or_hmr_key;
   }
 
   // const hot = __hmr_key ? __hmr_get_hot() : null;
@@ -166,7 +166,7 @@ export function refArray<T>(
   // }
 
   let raw_value = items;
-  const deps: SubscriberWithId<T[]>[] = [];
+  const _arr_deps: SubscriberWithId<T[]>[] = [];
   // const destroyInner = () => {
   //   for (let i = 0; i < _inner.length; i += 1) {
   //     const proxy = _inner[i];
@@ -178,9 +178,9 @@ export function refArray<T>(
   //   _inner.length = 0;
   // };
   function notify(action: any, extra?: Record<string, unknown>) {
-    for (let i = 0; i < deps.length; i += 1) {
+    for (let i = 0; i < _arr_deps.length; i += 1) {
       // console.log("[]reactive-array - notify", i, action, deps.length, extra);
-      const ctx = deps[i];
+      const ctx = _arr_deps[i];
       (() => {
         if (action.type === "refresh") {
           if (ctx.onChange) {
@@ -223,15 +223,15 @@ export function refArray<T>(
     },
     subscribe(ctx: Subscriber<T[]>) {
       const track_ctx = ctx as SubscriberWithId<T[]>;
-      deps.push(track_ctx);
+      _arr_deps.push(track_ctx);
       return function () {
-        const idx = deps.indexOf(track_ctx);
-        if (idx > -1) deps.splice(idx, 1);
+        const idx = _arr_deps.indexOf(track_ctx);
+        if (idx > -1) _arr_deps.splice(idx, 1);
       };
     },
     destroy() {
       // destroyInner();
-      deps.length = 0;
+      _arr_deps.length = 0;
     },
     isSame(v: unknown) {
       return Object.is(raw_value, v);
@@ -240,7 +240,7 @@ export function refArray<T>(
       return raw_value === v;
     },
     getDeps(): DepInfo[] {
-      return deps.map((ctx) => ({
+      return _arr_deps.map((ctx) => ({
         trackId: ctx.__trackId || "unknown",
         trackInfo: ctx.__trackInfo,
       }));

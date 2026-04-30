@@ -1073,5 +1073,60 @@ describe("RefArray", () => {
       expect(spy).toHaveBeenNthCalledWith(2, [3, 2, 1]);
       expect(idx.value).toBe(2);
     });
+
+    it("should debounce notify when configured", () => {
+      vi.useFakeTimers();
+      try {
+        const arr = refArray([1, 2, 3]);
+        const idx = computed(
+          arr,
+          (t) => t.indexOf(1),
+          { debounce: 50 },
+        );
+        const handler = vi.fn();
+
+        idx.subscribe({ onChange: handler });
+
+        arr.reverse();
+        expect(handler).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(49);
+        expect(handler).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(1);
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenLastCalledWith(2, undefined);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("should throttle notify when configured", () => {
+      vi.useFakeTimers();
+      try {
+        const arr = refArray([1, 2, 3]);
+        const idx = computed(
+          arr,
+          (t) => t.indexOf(1),
+          { throttle: 50 },
+        );
+        const handler = vi.fn();
+
+        idx.subscribe({ onChange: handler });
+
+        arr.reverse();
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenNthCalledWith(1, 2, undefined);
+
+        arr.reverse();
+        expect(handler).toHaveBeenCalledTimes(1);
+
+        vi.advanceTimersByTime(50);
+        expect(handler).toHaveBeenCalledTimes(2);
+        expect(handler).toHaveBeenNthCalledWith(2, 0, undefined);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 });

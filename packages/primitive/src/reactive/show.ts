@@ -87,20 +87,20 @@ export function Show(props: ShowProps) {
           throw error;
         }
       };
-      const next = run_with_owner(_owner, evaluate);
-      for (let i = 0; i < next.length; i += 1) {
-        const node = next[i];
+      const elements = run_with_owner(_owner, evaluate);
+      for (let i = 0; i < elements.length; i += 1) {
+        const elm = elements[i];
         (() => {
-          if (isElement(node)) {
-            children[i] = node;
+          if (isElement(elm)) {
+            children[i] = elm;
             return;
           }
-          if (isRef(node)) {
-            children[i] = Text(node);
+          if (isRef(elm)) {
+            children[i] = Text(elm);
             return;
           }
-          if (node) {
-            children[i] = Text(String(node));
+          if (elm) {
+            children[i] = Text(String(elm));
             return;
           }
           children[i] = null;
@@ -117,50 +117,34 @@ export function Show(props: ShowProps) {
           onChange(value) {
             const condition = !!value;
             // logger.log("the when is changed", condition, state.value);
-            // 如果条件没有变化，直接返回
             if (condition === state.value) {
               return;
             }
             state.value = condition;
+            if ($elm && typeof $elm.removeChildren === "function") {
+              $elm.removeChildren();
+            }
             if (!condition) {
               if (props.else) {
-                if ($elm && typeof $elm.removeChildren === "function") {
-                  $elm.removeChildren();
-                }
                 const target = methods.build_children_with_condition(condition);
                 state.children = target;
-                logger.log("before insert", target, !!$elm?.insertChildren);
-                if ($elm && typeof $elm.insertChildren === "function") {
-                  $elm.insertChildren(target);
-                }
+                // logger.log("before insert", target, !!$elm?.insertChildren);
+                $elm.insertChildren(target);
                 return;
               }
               state.children = [];
-              logger.log("before remove", !!$elm?.insertChildren);
-              if ($elm && typeof $elm.removeChildren === "function") {
-                $elm.removeChildren();
-              }
+              // logger.log("before remove", !!$elm?.insertChildren);
             } else {
-              if ($elm && typeof $elm.removeChildren === "function") {
-                $elm.removeChildren();
-              }
               const target = methods.build_children_with_condition(condition);
               state.children = target;
               // logger.log("before insert children", target.length);
-              logger.log("before insert", !!$elm?.insertChildren);
-              if ($elm && typeof $elm.insertChildren === "function") {
-                $elm.insertChildren(target);
-              } else {
-                logger.warn(
-                  "[Show.onChange] SKIPPED insertChildren — $elm is",
-                  $elm,
-                );
-              }
+              // logger.log("before insert", !!$elm?.insertChildren);
+              $elm.insertChildren(target);
             }
           },
         });
-        // listener$.add(unsubscribe);
-        // _hmr_subs.push(unsubscribe);
+        listener$.add(unsubscribe);
+        _hmr_subs.push(unsubscribe);
       } else {
         state.value = !!when;
       }
@@ -215,6 +199,9 @@ export function Show(props: ShowProps) {
       listener$.destroy();
       // Dispose all refs created during render callbacks
       dispose_owner(_owner);
+      _hmr_subs.forEach((fn) => fn());
+      state.children.length = 0;
+      _hmr_subs.length = 0;
       // Don't clear state.children here — they are needed if this Show
       // is re-mounted by a parent (e.g. Presence show/hide cycle).
       // When Show's own condition flips false, onChange already clears children.

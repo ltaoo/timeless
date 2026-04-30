@@ -56,10 +56,10 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
       return deps;
     },
     subscribe(ctx: Subscriber<T>) {
-      const trackCtx: SubscriberWithId<T> = ctx as SubscriberWithId<T>;
-      deps.push(trackCtx);
+      const track_ctx: SubscriberWithId<T> = ctx as SubscriberWithId<T>;
+      deps.push(track_ctx);
       return function () {
-        const idx = deps.indexOf(trackCtx);
+        const idx = deps.indexOf(track_ctx);
         if (idx > -1) {
           deps.splice(idx, 1);
         }

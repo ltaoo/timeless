@@ -17,8 +17,8 @@ import {
   isRef,
   isWriteableRef,
   registryGet,
-  // registrySet,
-  // registryDelete,
+  registrySet,
+  registryDelete,
 } from "@timeless/reactive";
 
 import { MountedEvent, ScrollEvent } from "@/event/index";
@@ -158,14 +158,14 @@ export function ListView<T extends Record<string, unknown>>(
       if (!vv) {
         return;
       }
-      const items = isRef(vv) ? (vv.value as T[]) : (vv as T[]);
-      for (let i = 0; i < _end; i += 1) {
+      const items = isRef(vv) ? vv.value : vv;
+      for (let i = 0; i < items.length; i += 1) {
         const item = items[i];
         const wrapped_item = {
           k: methods.unique_id(),
           v: item,
           height: itemHeight,
-          top: i * itemHeight + gutter,
+          top: i * itemHeight + (i - 1) * _gutter,
         };
         state.wrapped_items[i] = wrapped_item;
       }
@@ -211,7 +211,7 @@ export function ListView<T extends Record<string, unknown>>(
             }
           },
           onChange(v, extra) {
-            // logger.log("ctx.onChange", v, state.rendered, extra);
+            logger.log("each handle change", v, state.rendered, extra);
             methods.refresh(v, extra);
             // _pending_v = v;
             // _pending_extra = extra;
@@ -227,8 +227,8 @@ export function ListView<T extends Record<string, unknown>>(
             // }
           },
         });
-        // listener$.add(unsub);
-        // _hmr_subs.push(unsub);
+        listener$.add(unsub);
+        _hmr_subs.push(unsub);
       }
     },
     destroy() {
@@ -244,9 +244,10 @@ export function ListView<T extends Record<string, unknown>>(
         methods.dispose_slot_owner(slot);
       }
       _slot_render_owners.clear();
-      // if (_owner) {
-      //   dispose_owner(_owner);
-      // }
+      methods.cleanup_registry_items();
+      if (_owner) {
+        dispose_owner(_owner);
+      }
       for (let i = 0; i < state.children.length; i += 1) {
         const node = state.children[i];
         if (isElement(node)) {
@@ -258,8 +259,7 @@ export function ListView<T extends Record<string, unknown>>(
       state.wrapped_items = [];
       state.children = [];
       state.idx_arr = [];
-      // @ts-ignore
-      _slot_bindings = null;
+      _slot_bindings.clear();
       _free_slots = [];
       _slots = [];
       if (_pending_raf) {
@@ -318,18 +318,23 @@ export function ListView<T extends Record<string, unknown>>(
       }
       return [resolved];
     },
+    cleanup_registry_items(items = state.items) {
+      for (const item of items) {
+        if (item && typeof item === "object") {
+          registryDelete(item);
+        }
+      }
+    },
     build_children(range: { start: number; end: number }) {
       const wrapped_items = state.wrapped_items.slice(range.start, range.end);
       for (let i = 0; i < wrapped_items.length; i += 1) {
         const wrapped_item = wrapped_items[i];
         const idx_computed = methods.get_idx(wrapped_item, range.start + i);
-        // const elm = _owner
-        //   ? run_with_owner(_owner, () =>
-        //       props.render(wrapped_item.v, idx_computed),
-        //     )
-        //   : props.render(wrapped_item.v, idx_computed);
-        const elm = props.render(wrapped_item.v, idx_computed);
-        // state.items[i] = wrapped_item.v;
+        const elm = _owner
+          ? run_with_owner(_owner, () =>
+              props.render(wrapped_item.v, idx_computed),
+            )
+          : props.render(wrapped_item.v, idx_computed);
         const top =
           (range.start + i) * itemHeight + (range.start + i - 1) * _gutter;
         if (isElement(elm)) {
@@ -498,21 +503,20 @@ export function ListView<T extends Record<string, unknown>>(
         inserted_wrapped_items.push(wrapped_item);
         inserted_items.push(item);
         inserted_idx.push(idx);
-        // const child_tmp = _owner
-        //   ? run_with_owner(_owner, () => props.render(item, idx))
-        //   : props.render(item, idx);
-        const child_tmp = props.render(item, idx);
+        const child_elm = _owner
+          ? run_with_owner(_owner, () => props.render(item, idx))
+          : props.render(item, idx);
         const child = (() => {
-          if (isElement(child_tmp)) {
-            return child_tmp;
+          if (isElement(child_elm)) {
+            return child_elm;
           }
-          if (isRef(child_tmp)) {
-            return Text(child_tmp);
+          if (isRef(child_elm)) {
+            return Text(child_elm);
           }
-          if (typeof child_tmp === "function") {
+          if (typeof child_elm === "function") {
           }
-          if (child_tmp) {
-            return Text(child_tmp);
+          if (child_elm) {
+            return Text(child_elm);
           }
           return null;
         })();
@@ -536,7 +540,7 @@ export function ListView<T extends Record<string, unknown>>(
           _existing_map.delete(item);
         }
         if (item && typeof item === "object") {
-          // registryDelete(item);
+          registryDelete(item);
         }
         logger.log("remove in loop", index + i, state.idx_arr[index + i]);
         removed_idx.push(state.idx_arr[index + i]);
@@ -590,62 +594,76 @@ export function ListView<T extends Record<string, unknown>>(
      * 计算出 新增、更新 和 删除 的记录，提交给宿主层，刷新视图
      */
     refresh(v: T[], extra?: { reset?: boolean }) {
+      logger.log(
+        "refresh",
+        v.length,
+        "items, current:",
+        state.items.length,
+        _refreshing,
+        extra,
+      );
       if (_refreshing) {
         return;
       }
       _refreshing = true;
-      // logger.log(
-      //   "refresh",
-      //   v.length,
-      //   "items, current:",
-      //   state.items.length,
-      //   extra,
-      // );
-      // reset 模式：重置 range，全量替换
+
       if (extra?.reset) {
         $elm.setScrollTop(0);
         _start = 0;
-        _end = _size + _buffer_size;
-        for (const [, slot] of _slot_bindings) {
-          methods.release_slot(slot);
-        }
-        _slot_bindings.clear();
-      }
-      const visible_items = v.slice(_start, _end);
-      const new_visible_wrapped_items: WrappedItemInListView<T>[] = [];
-      for (let i = 0; i < visible_items.length; i += 1) {
-        const item = visible_items[i];
-        const existing = state.wrapped_items.find((wrapped_item) => {
-          if (_key && typeof item === "object") {
-            const _item = item;
-            const _vv = wrapped_item;
-            if (_item[_key] === _vv.v[_key]) {
-              return true;
-            }
-          }
-          return item === wrapped_item.v;
-        });
-        const top = _start * itemHeight + (_start - 1) * _gutter;
-        if (existing) {
-          // logger.log("diff existing object", item);
-          // registryGet(existing.v)?.diff(item);
-          existing.top = top;
-          existing.v = item;
-          new_visible_wrapped_items[i] = existing;
-          continue;
-        }
-        const new_wrapped_item = {
-          k: methods.unique_id(),
-          v: item,
-          top,
-          height: itemHeight,
-        };
-        new_visible_wrapped_items[i] = new_wrapped_item;
+        _end = _size;
+        // for (const [, slot] of _slot_bindings) {
+        //   methods.release_slot(slot);
+        // }
+        // _slot_bindings.clear();
       }
       const prev_items = [...state.items];
       const prev_wrapped_items = [...state.wrapped_items];
       const prev_elements = [...state.children];
       const prev_index_computed = state.idx_arr;
+      const prev_wrapped_by_key = new Map<any, WrappedItemInListView<T>[]>();
+      for (let i = 0; i < prev_wrapped_items.length; i += 1) {
+        const wrapped_item = prev_wrapped_items[i];
+        if (!wrapped_item) {
+          continue;
+        }
+        const wrapped_key =
+          _key && wrapped_item.v ? wrapped_item.v[_key] : wrapped_item.v;
+        let wrapped_items = prev_wrapped_by_key.get(wrapped_key);
+        if (!wrapped_items) {
+          wrapped_items = [];
+          prev_wrapped_by_key.set(wrapped_key, wrapped_items);
+        }
+        wrapped_items.push(wrapped_item);
+      }
+      const next_wrapped_items: WrappedItemInListView<T>[] = new Array(
+        v.length,
+      );
+      for (let i = 0; i < v.length; i += 1) {
+        const item = v[i];
+        const item_key = _key && item ? item[_key] : item;
+        const existing = prev_wrapped_by_key.get(item_key)?.shift();
+        const top = i * itemHeight + Math.max(0, i - 1) * _gutter;
+        if (existing) {
+          registryGet(existing.v)?.diff(item);
+          existing.v = item;
+          existing.top = top;
+          existing.height = itemHeight;
+          next_wrapped_items[i] = existing;
+          continue;
+        }
+        next_wrapped_items[i] = {
+          k: methods.unique_id(),
+          v: item,
+          top,
+          height: itemHeight,
+        };
+      }
+      state.wrapped_items = next_wrapped_items;
+      const visible_items = v.slice(_start, _end);
+      const new_visible_wrapped_items: WrappedItemInListView<T>[] = [];
+      for (let i = 0; i < visible_items.length; i += 1) {
+        new_visible_wrapped_items[i] = state.wrapped_items[_start + i];
+      }
       // 1. Prepare target state
       const new_elements: (TimelessElement | null)[] = new Array(
         new_visible_wrapped_items.length,
@@ -747,10 +765,10 @@ export function ListView<T extends Record<string, unknown>>(
             if (proxy && isWriteableRef(proxy)) {
               proxy.as(new_item.v);
               if (prev_item !== new_item.v) {
-                // registryDelete(prev_item);
+                registryDelete(prev_item);
               }
               // Update registry to map new item to the same proxy
-              // registrySet(new_item.v, proxy);
+              registrySet(new_item.v, proxy);
             } else {
               const rerendered = props.render(
                 new_item.v,
@@ -772,12 +790,11 @@ export function ListView<T extends Record<string, unknown>>(
           }
           const idx_computed = methods.create_idx(new_item);
           new_index_computed[i] = idx_computed;
-          // const res = _owner
-          //   ? run_with_owner(_owner, () =>
-          //       props.render(new_item.v, idx_computed),
-          //     )
-          //   : props.render(new_item.v, idx_computed);
-          const new_elm = props.render(new_item.v, idx_computed);
+          const new_elm = _owner
+            ? run_with_owner(_owner, () =>
+                props.render(new_item.v, idx_computed),
+              )
+            : props.render(new_item.v, idx_computed);
           new_elements[i] = new_elm;
           added_nodes[added_nodes.length - 1].elements.push(new_elm);
         }
@@ -827,7 +844,7 @@ export function ListView<T extends Record<string, unknown>>(
           }
           const removed_item = prev_items[idx + i];
           if (removed_item && typeof removed_item === "object") {
-            // registryDelete(removed_item);
+            registryDelete(removed_item);
           }
         }
       }
@@ -918,7 +935,6 @@ export function ListView<T extends Record<string, unknown>>(
           }
         }
       }
-      state.wrapped_items = new_visible_wrapped_items.slice();
       state.items = [...v];
       state.idx_arr = new_index_computed;
       state.children = new_elements;
@@ -952,6 +968,11 @@ export function ListView<T extends Record<string, unknown>>(
         }
         _start = Math.max(0, Math.min(found - 1, itemCount - 1) - _buffer_size);
       }
+      // const next_range = extra?.reset
+      //   ? methods.calcVisibleRange(0)
+      //   : methods.calcVisibleRange(_scroll.scrollTop);
+      // _start = next_range.start;
+      // _end = next_range.end;
       _end = Math.min(_start + _size + 2 * _buffer_size, itemCount);
       if (_start >= itemCount) {
         _start = Math.max(0, itemCount - 1);
@@ -1195,33 +1216,30 @@ export function ListView<T extends Record<string, unknown>>(
       // }
       _slot_bindings.clear();
       _children = [];
-      state.height = 0;
       _dirty_from = Infinity;
       _start = 0;
-      _end = _size + _buffer_size;
+      _end = _size;
+      state.height = 0;
       // bus.emit(Events.StateChange, { ..._state });
     },
     resetRange() {
       _start = 0;
-      _end = _size + _buffer_size;
+      _end = _size;
       // 重新计算范围并 rebind 所有槽位
-      const range = {
-        start: _start,
-        end: Math.min(_end, _children.length),
-      };
+      const range = methods.calcVisibleRange(0);
       methods.update(range);
       // methods.refresh();
     },
     calcVisibleRange(scroll_top: number) {
-      // 先批量重算脏区间的 top，保证二分查找数据正确
-      // methods.recomputeTops();
       logger.log("calcVisibleRange - start", scroll_top, _start, _end);
       let start = _start;
       let end = _end;
       // 二分查找，快速定位第一个 top >= scroll_top 的元素
       (() => {
-        const len = state.wrapped_items.length;
+        const len = state.items.length;
         if (len === 0) {
+          start = 0;
+          end = 0;
           return;
         }
         let lo = 0;
@@ -1229,7 +1247,8 @@ export function ListView<T extends Record<string, unknown>>(
         let found = len; // 默认值：没找到则指向末尾之后
         while (lo <= hi) {
           const mid = (lo + hi) >>> 1;
-          if (state.wrapped_items[mid].top >= scroll_top) {
+          const mid_top = mid * itemHeight + Math.max(0, mid - 1) * _gutter;
+          if (mid_top >= scroll_top) {
             found = mid;
             hi = mid - 1;
           } else {
@@ -1292,15 +1311,15 @@ export function ListView<T extends Record<string, unknown>>(
       // 计算 enteringCells（在 newDataCells 中但当前未绑定的）
       for (const wrapped_item of sliced_items) {
         const key = methods._dataIdStr(wrapped_item.k);
+        const is_bound = _slot_bindings.has(key);
         logger.log(
           "update - bind slot",
           key,
           wrapped_item.k,
           wrapped_item.v,
-          _slot_bindings.has(key),
+          is_bound,
         );
-        if (!_slot_bindings.has(key)) {
-          // 从 _freeSlots 取槽位
+        if (!is_bound) {
           // logger.log("update - alloce free to", key, wrapped_item.v);
           const slot = _free_slots.pop();
           if (slot) {
@@ -1334,72 +1353,16 @@ export function ListView<T extends Record<string, unknown>>(
           }
         } else {
           // stayingCells — 仅更新 top/height
-          const slot = _slot_bindings.get(key)!;
-          logger.log(
-            "update - stayingCells",
-            key,
-            wrapped_item.top,
-            wrapped_item.v,
-          );
+          // const slot = _slot_bindings.get(key)!;
+          // logger.log(
+          //   "update - stayingCells",
+          //   key,
+          //   wrapped_item.top,
+          //   wrapped_item.v,
+          // );
           // slot.setTop(cell.top);
         }
       }
-
-      // const new_children = state.wrapped_items.slice(range.start, range.end);
-      // if (new_children.length === 0 && _children.length === 0) {
-      //   return;
-      // }
-
-      // methods.build_children(range);
-
-      // 构建新数据 Cell 的 dataId Set
-      // const newDataIdSet = new Set<string>();
-      // for (const cell of new_cells) {
-      //   const dataId = (cell.state as any).id ?? cell.uid;
-      //   newDataIdSet.add(methods._dataIdStr(dataId));
-      // }
-
-      // 计算 exitingCells（当前绑定但不在 newDataCells 中的）
-      // const exitingKeys: string[] = [];
-      // for (const [key, slot] of _slot_bindings) {
-      //   if (!newDataIdSet.has(key)) {
-      //     exitingKeys.push(key);
-      //   }
-      // }
-
-      // // 对 exitingCells: slot.unbind()，归还到 _freeSlots
-      // for (const key of exitingKeys) {
-      //   const slot = _slot_bindings.get(key)!;
-      //   slot.methods.unbind();
-      //   _slot_bindings.delete(key);
-      //   _free_slots.push(slot);
-      // }
-
-      // // 计算 enteringCells（在 newDataCells 中但当前未绑定的）
-      // for (const cell of new_cells) {
-      //   const dataId = (cell.state as any).id ?? cell.uid;
-      //   const key = methods._dataIdStr(dataId);
-      //   if (!_slot_bindings.has(key)) {
-      //     // 从 _freeSlots 取槽位
-      //     if (_free_slots.length > 0) {
-      //       const slot = _free_slots.pop()!;
-      //       slot.methods.rebind({
-      //         payload: cell.state.payload,
-      //         uid: cell.uid,
-      //         dataId,
-      //         top: cell.state.top,
-      //         height: cell.state.height,
-      //       });
-      //       _slot_bindings.set(key, slot);
-      //     }
-      //   } else {
-      //     // stayingCells — 仅更新 top/height
-      //     const slot = _slot_bindings.get(key)!;
-      //     slot.methods.setTop(cell.state.top);
-      //   }
-      // }
-
-      // methods.refresh();
     },
     handleScrollForce(event: ScrollEvent) {
       const { scrollTop } = event;
@@ -1496,6 +1459,7 @@ export function ListView<T extends Record<string, unknown>>(
         methods.dispose_slot_owner(slot);
       }
       _slot_render_owners.clear();
+      methods.cleanup_registry_items();
       // if (_owner) {
       //   dispose_owner(_owner);
       // }
@@ -1515,6 +1479,9 @@ export function ListView<T extends Record<string, unknown>>(
       state.children.length = 0;
       state.items.length = 0;
       state.wrapped_items.length = 0;
+      _free_slots.length = 0;
+      _slot_bindings.clear();
+      _slots.length = 0;
     },
   };
 }

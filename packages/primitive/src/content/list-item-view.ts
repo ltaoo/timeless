@@ -7,7 +7,6 @@ import { Box, BoxProps } from "./box";
 
 const logger = Logger({ prefix: "primitive", scope: "content/list-item-view" });
 
-/** Props for View component */
 export type ListItemViewProps<T> = BoxProps & {
   uid: number;
   top: number;
@@ -153,10 +152,10 @@ export function ListItemView<T>(
     // },
     onUnmounted() {
       // logger.log("onUnmounted", box$.listener$.length);
-      box$.methods.destroy();
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }
+      box$.methods.destroy();
       state.rendered = false;
       state.children.length = 0;
       $elm = null;
