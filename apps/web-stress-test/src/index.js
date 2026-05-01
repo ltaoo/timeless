@@ -1,5 +1,16 @@
-const { ref, View, Input, Show, For, computed, combine, refarr, release_all } =
-  window.Timeless;
+const {
+  ref,
+  View,
+  Input,
+  Switch,
+  Select,
+  Show,
+  For,
+  computed,
+  combine,
+  refarr,
+  release_all,
+} = window.Timeless;
 const { render } = window.Timeless.DOM;
 
 const TABLE_ROWS = 1000;
@@ -83,16 +94,47 @@ function SearchTablePage() {
     }),
   );
   const visible_ = ref(true);
-
-  const filteredData = combine(
-    { data, searchInput },
-    (t) => {
-      return filter_with_keyword(t.data, t.searchInput);
+  const checked_ = ref(false);
+  const switch_loading_ = ref(false);
+  const fruit_ = ref("melon");
+  const options_ = [
+    {
+      label: "热带水果",
+      options: [
+        {
+          label: "芒果",
+          value: "mango",
+        },
+      ],
     },
     {
-      debounce: 600,
+      label: "浆果",
+      options: [
+        {
+          label: "草莓",
+          value: "strawberry",
+        },
+      ],
     },
-  );
+    {
+      label: "瓜类",
+      options: [
+        {
+          label: "甜瓜",
+          value: "melon",
+        },
+        {
+          label: "西瓜",
+          value: "watermelon",
+          disabled: true,
+        },
+      ],
+    },
+  ];
+
+  const filteredData = combine({ data, searchInput }, (t) => {
+    return filter_with_keyword(t.data, t.searchInput);
+  });
 
   function filter_with_keyword(arr, keyword) {
     // console.log("filter_with_keyword", keyword);
@@ -277,6 +319,26 @@ function SearchTablePage() {
                   },
                   ["Clean"],
                 ),
+                Switch({
+                  checked: checked_,
+                  loading: switch_loading_,
+                  onChange(event) {
+                    console.log(event.target.checked);
+                    switch_loading_.as(true);
+                    setTimeout(() => {
+                      checked_.as(event.target.checked);
+                      switch_loading_.as(false);
+                    }, 3000);
+                  },
+                }),
+                Select({
+                  placeholder: "请选择水果",
+                  value: fruit_,
+                  options: options_,
+                  onChange(event) {
+                    console.log(event.target.value);
+                  },
+                }),
               ],
             ),
           ]),
@@ -416,8 +478,8 @@ function SearchTablePage() {
                 },
                 key: "id",
                 size: 30,
-                // itemHeight: 31.5,
-                itemHeight: 186.5,
+                itemHeight: 31.5,
+                // itemHeight: 186.5,
                 each: filteredData,
                 render(row, idx) {
                   const borderBottom_ = combine(

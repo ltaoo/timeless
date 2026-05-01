@@ -20,7 +20,11 @@ import { DOMLabel } from "@/host/label";
 import { DOMTextarea } from "@/host/textarea";
 import { DOMFilePicker } from "@/host/file-picker";
 import { DOMNumberInput } from "@/host/number-input";
-import { DOMSelect } from "@/host/select";
+import {
+  DOMSelect,
+  DOMSelectOption,
+  DOMSelectOptionGroup,
+} from "@/host/select";
 import { DOMRow } from "@/host/row";
 import { DOMColumn, DOMCol } from "@/host/column";
 import { DOMLink } from "@/host/link";
@@ -31,6 +35,7 @@ import { DOMTabView, DOMTabPane } from "@/host/tab-view";
 import { DOMStyle } from "@/host/style";
 import { DOMListView } from "@/host/list-view";
 import { DOMListItemView } from "@/host/list-item-view";
+import { DOMSwitch } from "@/host/switch";
 
 export function buildAndRender(elm: TimelessElement): {
   vnode: VNodeView<any>;
@@ -127,6 +132,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     elm.$elm = input$;
     return input$;
   }
+  if (elm.t === "switch") {
+    const switch$ = DOMSwitch({ build });
+    elm.$elm = switch$;
+    return switch$;
+  }
   if (elm.t === "file-picker") {
     const file_picker$ = DOMFilePicker({ build });
     elm.$elm = file_picker$;
@@ -156,6 +166,16 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const select$ = DOMSelect({ build });
     elm.$elm = select$;
     return select$;
+  }
+  if (elm.t === "select-option") {
+    const option$ = DOMSelectOption({ build });
+    elm.$elm = option$;
+    return option$;
+  }
+  if (elm.t === "select-option-group") {
+    const group$ = DOMSelectOptionGroup({ build });
+    elm.$elm = group$;
+    return group$;
   }
   if (elm.t === "button") {
     const button$ = DOMButton({ build });

@@ -1,10 +1,7 @@
 import {
-  For,
   Icon,
-  Show,
   View,
   ViewProps,
-  Input as NativeInput,
   classNames,
   computed,
   refobj,

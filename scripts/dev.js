@@ -69,14 +69,14 @@ const artifacts = [
 const buildRelations = {
   base: ["timeless"],
   reactive: ["timeless"],
-  utils: ["timeless"],
-  kit: ["timeless"],
-  "ui-primitive": ["timeless"],
-  "ui-vm": ["timeless"],
-  shadcn: ["timeless"],
+  // utils: ["timeless"],
+  // kit: ["timeless"],
+  // "ui-primitive": ["timeless"],
+  // "ui-vm": ["timeless"],
+  // shadcn: ["timeless"],
   // icons: ["timeless"],
   primitive: ["timeless"],
-  timeless: ["shadcn", "timeless-dom"],
+  // timeless: ["shadcn", "timeless-dom"],
 };
 
 let buildQueue = null;

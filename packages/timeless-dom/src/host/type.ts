@@ -21,7 +21,7 @@ import { DOMPopper } from "./popper";
 import { DOMShow } from "./show";
 import { DOMMatch } from "./match";
 import { DOMFor } from "./for";
-import { DOMSelect } from "./select";
+import { DOMSelect, DOMSelectOption, DOMSelectOptionGroup } from "./select";
 import { DOMLink } from "./link";
 import { DOMWebview } from "./webview";
 import { DOMListView } from "./list-view";
@@ -47,6 +47,8 @@ export type DOMHostNode =
   | DOMCheckbox
   | DOMRadio
   | DOMSelect
+  | DOMSelectOption
+  | DOMSelectOptionGroup
   | DOMButton
   | DOMLink
   | DOMPortal

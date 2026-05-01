@@ -1466,7 +1466,11 @@ export function ListView<T extends Record<string, unknown>>(
       }
       listener$.destroy();
       box$.methods.destroy();
-      methods.cleanup_idx_refs();
+      // methods.cleanup_idx_refs();
+      for (let i = 0; i < state.idx_arr.length; i += 1) {
+        const idx = state.idx_arr[i];
+        idx.destroy();
+      }
       for (const slot of _slots) {
         methods.dispose_slot_owner(slot);
       }

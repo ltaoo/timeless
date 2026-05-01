@@ -46,6 +46,7 @@ export * from "./layout/tab";
 
 // Input
 export * from "./input/input";
+export * from "./input/switch";
 export * from "./input/number-input";
 export * from "./input/password-input";
 export * from "./input/checkbox";
