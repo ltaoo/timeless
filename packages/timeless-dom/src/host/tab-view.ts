@@ -8,6 +8,7 @@ export type DOMTabView = VNodeView<HTMLDivElement> & {
   t: "tab-view";
   render(elm: TimelessElement): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
+  switchPanel(children: TimelessElement[], options: { from: number; to: number }): void;
 };
 
 function injectTabCSS(id: string, css: string) {
@@ -23,6 +24,9 @@ function injectTabCSS(id: string, css: string) {
 export function DOMTabView(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
 }): DOMTabView {
+  let $contents: any = null;
+  let $track: any = null;
+  let _animating = false;
   const box$ = HostElement({ $elm: null, t: "tab-view", build: props.build });
 
   return {
@@ -39,71 +43,52 @@ export function DOMTabView(props: {
       box$.methods.set$elm($elm);
       box$.methods.applyState(elm.state, { initial: true });
 
-      const s = elm.state ?? {};
-      const activeIndex = s.activeIndex ?? 0;
-      const position = s.position ?? "top";
+      $elm.setAttribute("data-tab-view", "");
+      $elm.style.height = "100%";
 
-      const cls = `tl-tabview-${++_tabSeq}`;
+      // let tabBarStyle = "display:flex;";
+      // if (position === "top" || position === "bottom") {
+      //   tabBarStyle += "flex-direction:row;";
+      // } else {
+      //   tabBarStyle += "flex-direction:column;";
+      // }
 
-      let tabBarStyle = "display:flex;";
-      if (position === "top" || position === "bottom") {
-        tabBarStyle += "flex-direction:row;";
-      } else {
-        tabBarStyle += "flex-direction:column;";
+      const $tabs = document.createElement("div");
+      $tabs.setAttribute("data-tab-view-tabs", "");
+      $tabs.style.cssText = "display: flex;";
+      if (elm.state.tabs) {
+        const $tab_fragment = document.createDocumentFragment();
+        for (let i = 0; i < elm.state.tabs.length; i += 1) {
+          const t = elm.state.tabs[i];
+          const $tab = document.createElement("div");
+          $tab.setAttribute("data-tab-view-tab", t.tab);
+          $tab.addEventListener("click", function (event) {
+            elm.handleClickTab(t);
+          });
+
+          $tab.innerText = t.label;
+          $tab_fragment.appendChild($tab);
+        }
+        $tabs.appendChild($tab_fragment);
       }
 
-      const tabContentStyle = "flex:1;position:relative;overflow:hidden;";
-      const tabPaneStyle =
-        "position:absolute;top:0;left:0;width:100%;height:100%;display:none;";
-      const activeTabPaneStyle = "display:block;";
+      $contents = document.createElement("div");
+      $contents.setAttribute("data-tab-view-panels", "");
+      $contents.style.cssText = "width: 100%; height: 100%; overflow: hidden;";
 
-      const css = `
-        .${cls}{display:flex;flex-direction:${position === "top" || position === "bottom" ? "column" : "row"};width:100%;height:100%;}
-        .${cls}-bar{${tabBarStyle}border-bottom:1px solid #ddd;flex-shrink:0;}
-        .${cls}-tab{padding:8px 16px;cursor:pointer;border:1px solid transparent;background:none;}
-        .${cls}-tab.active{border-bottom:2px solid #007AFF;color:#007AFF;font-weight:500;}
-        .${cls}-content{${tabContentStyle}}
-        .${cls}-pane{${tabPaneStyle}}
-        .${cls}-pane.active{${activeTabPaneStyle}}
-      `;
-      injectTabCSS(`tl-tabview-style-${cls}`, css);
-      $elm.classList.add(cls);
-
-      const $bar = document.createElement("div");
-      $bar.className = `${cls}-bar`;
+      $track = document.createElement("div");
+      $track.setAttribute("data-tab-view-track", "");
+      $track.style.cssText = "display: flex; width: 100%; height: 100%; transition: transform 0.3s ease;";
 
       const $content = document.createElement("div");
-      $content.className = `${cls}-content`;
+      $content.setAttribute("data-tab-view-panel", "");
+      $content.style.cssText = "flex-shrink: 0; width: 100%; height: 100%;";
 
-      // if (elm.children && elm.children.length > 0) {
-      //   elm.children.forEach((child: TimelessElement, i: number) => {
-      //     if (child?.t === "tab-pane") {
-      //       const label = child.state?.label ?? `Tab ${i + 1}`;
-      //       const $tab = document.createElement("button");
-      //       $tab.className = `${cls}-tab${i === activeIndex ? " active" : ""}`;
-      //       $tab.textContent = label;
-      //       $tab.onclick = () => {
-      //         document
-      //           .querySelectorAll(`.${cls}-tab`)
-      //           .forEach((t: any) => t.classList.remove("active"));
-      //         $tab.classList.add("active");
-      //         document
-      //           .querySelectorAll(`.${cls}-pane`)
-      //           .forEach((p: any) => p.classList.remove("active"));
-      //         $panes[i].classList.add("active");
-      //         if (s.onChange) s.onChange(i);
-      //       };
-      //       $bar.appendChild($tab);
+      const $fragment = box$.methods.render(elm.children);
+      $content.appendChild($fragment);
 
-      //       const $pane = document.createElement("div");
-      //       $pane.className = `${cls}-pane${i === activeIndex ? " active" : ""}`;
-      //       const childFragment = box$.methods.render(child.children);
-      //       $pane.appendChild(childFragment);
-      //       $content.appendChild($pane);
-      //     }
-      //   });
-
-      //   const $panes = Array.from($content.querySelectorAll(`.${cls}-pane`));
+      $track.appendChild($content);
+      $contents.appendChild($track);
 
       //   $bar.addEventListener("click", (e) => {
       //     const target = e.target as HTMLElement;
@@ -119,8 +104,8 @@ export function DOMTabView(props: {
       //   });
       // }
 
-      $elm.appendChild($bar);
-      $elm.appendChild($content);
+      $elm.appendChild($tabs);
+      $elm.appendChild($contents);
 
       box$.methods.setupEventListener(elm.events);
 
@@ -129,6 +114,53 @@ export function DOMTabView(props: {
     hydrate(elm: TimelessElement, $elm: HTMLDivElement) {
       box$.methods.set$elm($elm);
       box$.methods.setupEventListener(elm.events);
+    },
+    switchPanel(children: TimelessElement[], options: { from: number; to: number }) {
+      if (_animating) {
+        return;
+      }
+      const forward = options.to > options.from;
+
+      const $content = document.createElement("div");
+      $content.setAttribute("data-tab-view-panel", "");
+      $content.style.cssText = "flex-shrink: 0; width: 100%; height: 100%;";
+
+      const $fragment = box$.methods.render(children);
+      $content.appendChild($fragment);
+
+      _animating = true;
+
+      const onTransitionEnd = () => {
+        $track.removeEventListener("transitionend", onTransitionEnd);
+        if (forward) {
+          $track.removeChild($track.firstChild!);
+        } else {
+          $track.removeChild($track.lastChild!);
+        }
+        $track.style.transition = "none";
+        $track.style.transform = "translateX(0%)";
+        $track.offsetWidth;
+        $track.style.transition = "transform 0.3s ease";
+        _animating = false;
+      };
+
+      $track.addEventListener("transitionend", onTransitionEnd);
+
+      if (forward) {
+        $track.appendChild($content);
+        requestAnimationFrame(() => {
+          $track.style.transform = "translateX(-100%)";
+        });
+      } else {
+        $track.insertBefore($content, $track.firstChild);
+        $track.style.transition = "none";
+        $track.style.transform = "translateX(-100%)";
+        $track.offsetWidth;
+        $track.style.transition = "transform 0.3s ease";
+        requestAnimationFrame(() => {
+          $track.style.transform = "translateX(0%)";
+        });
+      }
     },
   };
 }

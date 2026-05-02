@@ -8,6 +8,9 @@ const {
   WindowView,
   SplitView,
   SplitPanel,
+  TabView,
+  TabPane,
+  ScrollView,
   For,
   computed,
   combine,
@@ -1033,7 +1036,7 @@ function TablePage() {
     return rows.filter((row) => row.status === "Active").length;
   });
 
-  return View({ style: { padding: "16px", borderRadius: "8px" } }, [
+  return ScrollView({ style: { padding: "16px", borderRadius: "8px" } }, [
     View(
       {
         style: {
@@ -1557,14 +1560,7 @@ function MultiShowPage() {
 }
 
 function ApplicationView() {
-  const currentPage = ref("searchtable");
-  const pageStats = ref({
-    table: 0,
-    searchtable: 0,
-    form: 0,
-    dashboard: 0,
-    multishow: 0,
-  });
+  const tab_ = ref("table");
 
   return WindowView({}, [
     SplitView({
@@ -1583,148 +1579,47 @@ function ApplicationView() {
             "flex-direction": "column",
           },
           content() {
-            return [
-              View(
+            return TabView({
+              tab: tab_,
+              panels: [
                 {
-                  class: "content",
-                  style: {
-                    display: "flex",
-                    gap: "8px",
-                    padding: "12px",
-                    "flex-wrap": "wrap",
-                    "flex-shrink": 0,
+                  tab: "table",
+                  label: "Table (1000 rows)",
+                  content() {
+                    return TablePage();
                   },
                 },
-                [
-                  View(
-                    {
-                      onClick() {
-                        currentPage.as("table");
-                        pageStats.as((s) => ({ ...s, table: s.table + 1 }));
-                      },
-                      style: {
-                        background:
-                          currentPage.value === "table" ? "#0056b3" : "#007bff",
-                      },
-                    },
-                    ["Table (1000 rows)"],
-                  ),
-                  View(
-                    {
-                      onClick() {
-                        currentPage.as("searchtable");
-                        pageStats.as((s) => ({
-                          ...s,
-                          searchtable: s.searchtable + 1,
-                        }));
-                      },
-                      style: {
-                        background:
-                          currentPage.value === "searchtable"
-                            ? "#0056b3"
-                            : "#007bff",
-                      },
-                    },
-                    ["SearchTable (5000 rows)"],
-                  ),
-                  View(
-                    {
-                      onClick() {
-                        currentPage.as("form");
-                        pageStats.as((s) => ({ ...s, form: s.form + 1 }));
-                      },
-                      style: {
-                        background:
-                          currentPage.value === "form" ? "#0056b3" : "#007bff",
-                      },
-                    },
-                    ["Form"],
-                  ),
-                  View(
-                    {
-                      onClick() {
-                        currentPage.as("dashboard");
-                        pageStats.as((s) => ({
-                          ...s,
-                          dashboard: s.dashboard + 1,
-                        }));
-                      },
-                      style: {
-                        background:
-                          currentPage.value === "dashboard"
-                            ? "#0056b3"
-                            : "#007bff",
-                      },
-                    },
-                    ["Dashboard"],
-                  ),
-                  View(
-                    {
-                      onClick() {
-                        currentPage.as("multishow");
-                        pageStats.as((s) => ({
-                          ...s,
-                          multishow: s.multishow + 1,
-                        }));
-                      },
-                      style: {
-                        background:
-                          currentPage.value === "multishow"
-                            ? "#0056b3"
-                            : "#007bff",
-                      },
-                    },
-                    ["MultiShow"],
-                  ),
-                ],
-              ),
-              View(
                 {
-                  style: {
-                    flex: 1,
-                    "min-height": 0,
-                    display: "flex",
-                    "flex-direction": "column",
+                  tab: "search-table",
+                  label: "SearchTable (5000 rows)",
+                  content() {
+                    return SearchTablePage();
                   },
                 },
-                [
-                  Show({
-                    when: computed(currentPage, (p) => p === "table"),
-                    ok() {
-                      return TablePage();
-                    },
-                  }),
-                  Show({
-                    when: computed(currentPage, (p) => p === "searchtable"),
-                    ok() {
-                      return SearchTablePage();
-                    },
-                  }),
-                  Show({
-                    when: computed(currentPage, (p) => p === "form"),
-                    ok() {
-                      return FormPage();
-                    },
-                  }),
-                  Show({
-                    when: computed(currentPage, (p) => p === "dashboard"),
-                    ok() {
-                      return DashboardPage();
-                    },
-                  }),
-                  Show({
-                    when: computed(currentPage, (p) => p === "multishow"),
-                    ok() {
-                      return MultiShowPage();
-                    },
-                  }),
-                ],
-              ),
-            ];
+                {
+                  tab: "form",
+                  label: "Form",
+                  content() {
+                    return FormPage();
+                  },
+                },
+                {
+                  tab: "dashboard",
+                  label: "Dashboard",
+                  content() {
+                    return DashboardPage();
+                  },
+                },
+                {
+                  tab: "multi-show",
+                  label: "MultiShow",
+                  content() {
+                    return MultiShowPage();
+                  },
+                },
+              ],
+            });
           },
-        },
-        {
-          
         },
       ],
     }),

@@ -28,27 +28,34 @@ export function DOMScrollView(props: {
     },
     render(elm: TimelessElement) {
       const $elm = document.createElement("div");
+      $elm.setAttribute("data-scroll-view", "");
+      // $elm.style.cssText = "overflow-y: auto; max-height: 100%;";
+      Object.assign(elm.state.style, {
+        "overflow-y": "auto",
+        "max-height": "100%",
+      });
+
       box$.methods.set$elm($elm);
       box$.methods.applyState(elm.state, { initial: true });
 
-      const s = elm.state ?? {};
-      const horizontal = s.horizontal ?? "auto";
-      const vertical = s.vertical ?? "auto";
+      // const s = elm.state ?? {};
+      // const horizontal = s.horizontal ?? "auto";
+      // const vertical = s.vertical ?? "auto";
 
-      $elm.style.display = "flex";
-      $elm.style.flexDirection = "column";
-      $elm.style.overflow = "auto";
+      // $elm.style.display = "flex";
+      // $elm.style.flexDirection = "column";
+      // $elm.style.overflow = "auto";
 
-      if (horizontal === "hidden") {
-        $elm.style.overflowX = "hidden";
-      } else if (horizontal === "visible") {
-        $elm.style.overflowX = "visible";
-      }
-      if (vertical === "hidden") {
-        $elm.style.overflowY = "hidden";
-      } else if (vertical === "visible") {
-        $elm.style.overflowY = "visible";
-      }
+      // if (horizontal === "hidden") {
+      //   $elm.style.overflowX = "hidden";
+      // } else if (horizontal === "visible") {
+      //   $elm.style.overflowX = "visible";
+      // }
+      // if (vertical === "hidden") {
+      //   $elm.style.overflowY = "hidden";
+      // } else if (vertical === "visible") {
+      //   $elm.style.overflowY = "visible";
+      // }
 
       const $fragment = box$.methods.render(elm.children);
       box$.methods.setupEventListener(elm.events);
