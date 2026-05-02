@@ -23,18 +23,18 @@ export function WindowView(props: WindowViewProps, children?: ViewChildren) {
   const state = box$.state;
 
   const methods = {
-    subscribe_props() {
-      box$.methods.subscribe_props();
-      state.width = width;
-      state.height = height;
-    },
+    // subscribe_props() {
+    //   box$.methods.subscribe_props();
+    //   state.width = width;
+    //   state.height = height;
+    // },
   };
 
-  methods.subscribe_props();
+  // methods.subscribe_props();
   box$.methods.build_children(children);
 
   return {
-    t: "window-view",
+    t: "window",
     get $elm() {
       return $elm;
     },

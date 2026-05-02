@@ -1,29 +1,36 @@
-import { DerivedRef, Ref, isRef } from "@timeless/reactive";
-
 import { ViewProps } from "@/content/view";
-import { ViewChildren, isElement } from "@/content/type";
-import { Box } from "@/content/box";
+import { ViewChildren, isElement, resolve_children } from "@/content/type";
+import { Box, BoxProps } from "@/content/box";
+import { MountedEvent } from "@/event";
+import { isRef } from "@timeless/reactive";
+import { Text } from "@/content/text";
+import { getPlatform } from "@/platform";
+
+const platform = getPlatform();
 
 export type SplitDirection = "horizontal" | "vertical";
 
-export type SplitViewProps = ViewProps & {
+export type SplitViewProps = BoxProps & {
   direction?: SplitDirection;
-  defaultSizes?: number | number[];
-  minSizes?: number | number[];
-  maxSizes?: number | number[];
-  dividerStyle?: "thin" | "light" | "dark" | "none";
+  panels: {
+    size: string | number;
+    style: BoxProps["style"];
+    content: ViewChildren;
+  }[];
+  // dividerStyle?: "thin" | "light" | "dark" | "none";
   onResize?: (sizes: number[]) => void;
 };
 
 type SplitViewState = {
   direction: SplitDirection;
-  sizes: number[];
-  isResizing: boolean;
-  dividerIndex: number | null;
-  dividerStyle: "thin" | "light" | "dark" | "none";
+  // sizes: number[];
+  // isResizing: boolean;
+  // dividerIndex: number | null;
+  // dividerStyle: "thin" | "light" | "dark" | "none";
+  panels: (ReturnType<typeof SplitPane> | ReturnType<typeof SplitHandler>)[];
 };
 
-function normalizeSizes(
+function normalize_sizes(
   sizes: number | number[] | undefined,
   defaultVal: number[],
 ): number[] {
@@ -32,13 +39,10 @@ function normalizeSizes(
   return sizes;
 }
 
-export function SplitView(props: SplitViewProps, children?: ViewChildren) {
+export function SplitView(props: SplitViewProps) {
   const {
     direction = "horizontal",
-    defaultSizes,
-    minSizes,
-    maxSizes,
-    dividerStyle = "thin",
+    // dividerStyle = "thin",
     onResize,
     ...rest
   } = props;
@@ -46,49 +50,64 @@ export function SplitView(props: SplitViewProps, children?: ViewChildren) {
   let $elm: any = null;
   const box$ = Box<SplitViewState>(rest, {
     direction,
-    sizes: normalizeSizes(defaultSizes, [50, 50]),
+    panels: [],
+    // sizes: normalize_sizes(defaultSizes, [50, 50]),
     isResizing: false,
     dividerIndex: null,
-    dividerStyle,
+    // dividerStyle,
   } as SplitViewState);
   const state = box$.state;
 
   const methods = {
     subscribe_props() {
       box$.methods.subscribe_props();
-      if (direction !== undefined) state.direction = direction;
-      if (defaultSizes) {
-        state.sizes = normalizeSizes(defaultSizes, [50, 50]);
+      // if (direction !== undefined) state.direction = direction;
+      // if (defaultSizes) {
+      //   state.sizes = normalize_sizes(defaultSizes, [50, 50]);
+      // }
+      // if (dividerStyle !== undefined) state.dividerStyle = dividerStyle;
+    },
+    build_panels() {
+      // const panels$: ReturnType<typeof SplitPane> = [];
+      for (let i = 0; i < props.panels.length; i += 1) {
+        const panel = props.panels[i];
+        const panel$ = SplitPane(panel, panel.content);
+        state.panels.push(panel$);
+        if (i < props.panels.length - 1) {
+          const handler$ = SplitHandler({});
+          state.panels.push(handler$);
+        }
       }
-      if (dividerStyle !== undefined) state.dividerStyle = dividerStyle;
     },
     setSize(index: number, size: number) {
-      const minArr = normalizeSizes(
-        minSizes,
-        Array(state.sizes.length).fill(10),
-      );
-      const maxArr = normalizeSizes(
-        maxSizes,
-        Array(state.sizes.length).fill(90),
-      );
-      const min = minArr[index] ?? 10;
-      const max = maxArr[index] ?? 90;
-      const clamped = Math.max(min, Math.min(max, size));
-      state.sizes[index] = clamped;
-      onResize?.([...state.sizes]);
+      // const minArr = normalize_sizes(
+      //   minSizes,
+      //   Array(state.sizes.length).fill(10),
+      // );
+      // const maxArr = normalize_sizes(
+      //   maxSizes,
+      //   Array(state.sizes.length).fill(90),
+      // );
+      // const min = minArr[index] ?? 10;
+      // const max = maxArr[index] ?? 90;
+      // const clamped = Math.max(min, Math.min(max, size));
+      // state.sizes[index] = clamped;
+      // onResize?.([...state.sizes]);
     },
     startResize(dividerIndex: number) {
-      state.isResizing = true;
-      state.dividerIndex = dividerIndex;
+      // state.isResizing = true;
+      // state.dividerIndex = dividerIndex;
     },
     endResize() {
-      state.isResizing = false;
-      state.dividerIndex = null;
+      // state.isResizing = false;
+      // state.dividerIndex = null;
     },
   };
 
   methods.subscribe_props();
-  box$.methods.build_children(children);
+  methods.build_panels();
+  // box$.methods.build_children(children);
+  const children = state.panels;
 
   return {
     t: "split-view",
@@ -100,24 +119,32 @@ export function SplitView(props: SplitViewProps, children?: ViewChildren) {
       $elm = v;
     },
     state,
-    children: state.children,
-    methods,
+    children,
+    onMounted(event: MountedEvent) {
+      if (rest.onMounted) {
+        rest.onMounted(event);
+      }
+    },
+    onUnmounted() {
+      if (rest.onUnmounted) {
+        rest.onUnmounted();
+      }
+    },
   };
 }
 
-export type SplitPaneProps = ViewProps & {
-  size?: number;
+export type SplitPaneProps = BoxProps & {
+  size: number | string;
   minSize?: number;
   maxSize?: number;
   collapsible?: boolean;
-  collapsedSize?: number;
 };
 
 type SplitPaneState = {
   size: number;
-  minSize: number;
-  maxSize: number;
-  isCollapsed: boolean;
+  minSize?: number;
+  maxSize?: number;
+  isCollapsed?: boolean;
 };
 
 export function SplitPane(props: SplitPaneProps, children?: ViewChildren) {
@@ -126,7 +153,7 @@ export function SplitPane(props: SplitPaneProps, children?: ViewChildren) {
     minSize = 10,
     maxSize = 90,
     collapsible = false,
-    collapsedSize = 0,
+    // collapsedSize = 0,
     ...rest
   } = props;
 
@@ -142,30 +169,30 @@ export function SplitPane(props: SplitPaneProps, children?: ViewChildren) {
   const methods = {
     subscribe_props() {
       box$.methods.subscribe_props();
-      state.size = size;
+      // state.size = size;
       state.minSize = minSize;
       state.maxSize = maxSize;
     },
     setSize(newSize: number) {
-      if (collapsible && newSize <= minSize) {
-        state.size = collapsedSize;
-        state.isCollapsed = true;
-      } else {
-        state.size = Math.max(minSize, Math.min(maxSize, newSize));
-        state.isCollapsed = false;
-      }
+      // if (collapsible && newSize <= minSize) {
+      //   state.size = collapsedSize;
+      //   state.isCollapsed = true;
+      // } else {
+      //   state.size = Math.max(minSize, Math.min(maxSize, newSize));
+      //   state.isCollapsed = false;
+      // }
     },
     collapse() {
-      if (collapsible) {
-        state.size = collapsedSize;
-        state.isCollapsed = true;
-      }
+      // if (collapsible) {
+      //   state.size = collapsedSize;
+      //   state.isCollapsed = true;
+      // }
     },
     expand() {
-      if (state.isCollapsed) {
-        state.size = minSize;
-        state.isCollapsed = false;
-      }
+      // if (state.isCollapsed) {
+      //   state.size = minSize;
+      //   state.isCollapsed = false;
+      // }
     },
   };
 
@@ -183,6 +210,97 @@ export function SplitPane(props: SplitPaneProps, children?: ViewChildren) {
     },
     state,
     children: state.children,
-    methods,
+    onMounted(event: MountedEvent) {
+      if (rest.onMounted) {
+        rest.onMounted(event);
+      }
+    },
+    onUnmounted() {
+      if (rest.onUnmounted) {
+        rest.onUnmounted();
+      }
+    },
+  };
+}
+
+type SplitHandlerProps = BoxProps & {};
+type SplitHandlerState = {};
+
+export function SplitHandler(
+  props: SplitHandlerProps,
+  children?: ViewChildren,
+) {
+  const { ...rest } = props;
+
+  let $elm: any = null;
+  const box$ = Box<SplitHandlerState>(rest, {
+    isCollapsed: false,
+  } as SplitHandlerState);
+
+  const state = box$.state;
+  const events = box$.events;
+
+  const methods = {
+    subscribe_props() {
+      box$.methods.subscribe_props();
+    },
+    setSize(newSize: number) {
+      // if (collapsible && newSize <= minSize) {
+      //   state.size = collapsedSize;
+      //   state.isCollapsed = true;
+      // } else {
+      //   state.size = Math.max(minSize, Math.min(maxSize, newSize));
+      //   state.isCollapsed = false;
+      // }
+    },
+    collapse() {
+      // if (collapsible) {
+      //   state.size = collapsedSize;
+      //   state.isCollapsed = true;
+      // }
+    },
+    expand() {
+      // if (state.isCollapsed) {
+      //   state.size = minSize;
+      //   state.isCollapsed = false;
+      // }
+    },
+  };
+
+  methods.subscribe_props();
+  box$.methods.build_children(children);
+
+  events.onPointerDown = function (event) {
+    console.log("split onPointerDown");
+    // const cursor =
+    //   state.direction === "horizontal" ? "col-resize" : "row-resize";
+    const cursor = "col-resize";
+    platform.patchBodyStyle({ cursor, "user-select": "none" });
+  };
+  // events.onMouseEnter = function() {
+  // }
+
+  return {
+    t: "split-handler",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    events,
+    children: state.children,
+    onMounted(event: MountedEvent) {
+      if (rest.onMounted) {
+        rest.onMounted(event);
+      }
+    },
+    onUnmounted() {
+      if (rest.onUnmounted) {
+        rest.onUnmounted();
+      }
+    },
   };
 }

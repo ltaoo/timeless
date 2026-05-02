@@ -5,6 +5,9 @@ const {
   Switch,
   Select,
   Show,
+  WindowView,
+  SplitView,
+  SplitPanel,
   For,
   computed,
   combine,
@@ -324,11 +327,9 @@ function SearchTablePage() {
                   loading: switch_loading_,
                   onChange(event) {
                     console.log(event.target.checked);
-                    switch_loading_.as(true);
-                    setTimeout(() => {
-                      checked_.as(event.target.checked);
-                      switch_loading_.as(false);
-                    }, 3000);
+                    // switch_loading_.as(true);
+                    checked_.as(event.target.checked);
+                    // switch_loading_.as(false);
                   },
                 }),
                 Select({
@@ -1565,145 +1566,169 @@ function ApplicationView() {
     multishow: 0,
   });
 
-  return View(
-    { style: { height: "100%", display: "flex", "flex-direction": "column" } },
-    [
-      View(
+  return WindowView({}, [
+    SplitView({
+      panels: [
+        // SplitPanel
         {
-          class: "nav",
-          style: {
-            display: "flex",
-            gap: "8px",
-            padding: "12px",
-            "flex-wrap": "wrap",
-            "flex-shrink": 0,
+          size: 120,
+          content() {
+            return View({ class: "aside" }, [View({}, ["Logo"])]);
           },
         },
-        [
-          // View(
-          //   {
-          //     onClick() {
-          //       currentPage.as("table");
-          //       pageStats.as((s) => ({ ...s, table: s.table + 1 }));
-          //     },
-          //     style: {
-          //       background:
-          //         currentPage.value === "table" ? "#0056b3" : "#007bff",
-          //     },
-          //   },
-          //   ["Table (1000 rows)"],
-          // ),
-          View(
-            {
-              onClick() {
-                currentPage.as("searchtable");
-                pageStats.as((s) => ({ ...s, searchtable: s.searchtable + 1 }));
-              },
-              style: {
-                background:
-                  currentPage.value === "searchtable" ? "#0056b3" : "#007bff",
-              },
-            },
-            ["SearchTable (5000 rows)"],
-          ),
-          // View(
-          //   {
-          //     onClick() {
-          //       currentPage.as("form");
-          //       pageStats.as((s) => ({ ...s, form: s.form + 1 }));
-          //     },
-          //     style: {
-          //       background:
-          //         currentPage.value === "form" ? "#0056b3" : "#007bff",
-          //     },
-          //   },
-          //   ["Form"],
-          // ),
-          // View(
-          //   {
-          //     onClick() {
-          //       currentPage.as("dashboard");
-          //       pageStats.as((s) => ({ ...s, dashboard: s.dashboard + 1 }));
-          //     },
-          //     style: {
-          //       background:
-          //         currentPage.value === "dashboard" ? "#0056b3" : "#007bff",
-          //     },
-          //   },
-          //   ["Dashboard"],
-          // ),
-          // View(
-          //   {
-          //     onClick() {
-          //       currentPage.as("multishow");
-          //       pageStats.as((s) => ({ ...s, multishow: s.multishow + 1 }));
-          //     },
-          //     style: {
-          //       background:
-          //         currentPage.value === "multishow" ? "#0056b3" : "#007bff",
-          //     },
-          //   },
-          //   ["MultiShow"],
-          // ),
-        ],
-      ),
-      // View(
-      //   {
-      //     style: {
-      //       padding: "8px",
-      //       borderRadius: "4px",
-      //       marginBottom: "16px",
-      //       fontSize: "12px",
-      //       flexShrink: 0,
-      //     },
-      //   },
-      //   ["Page visits: ", JSON.stringify(pageStats.value)],
-      // ),
-      View(
         {
+          size: "auto",
           style: {
-            flex: 1,
-            "min-height": 0,
             display: "flex",
             "flex-direction": "column",
           },
+          content() {
+            return [
+              View(
+                {
+                  class: "content",
+                  style: {
+                    display: "flex",
+                    gap: "8px",
+                    padding: "12px",
+                    "flex-wrap": "wrap",
+                    "flex-shrink": 0,
+                  },
+                },
+                [
+                  View(
+                    {
+                      onClick() {
+                        currentPage.as("table");
+                        pageStats.as((s) => ({ ...s, table: s.table + 1 }));
+                      },
+                      style: {
+                        background:
+                          currentPage.value === "table" ? "#0056b3" : "#007bff",
+                      },
+                    },
+                    ["Table (1000 rows)"],
+                  ),
+                  View(
+                    {
+                      onClick() {
+                        currentPage.as("searchtable");
+                        pageStats.as((s) => ({
+                          ...s,
+                          searchtable: s.searchtable + 1,
+                        }));
+                      },
+                      style: {
+                        background:
+                          currentPage.value === "searchtable"
+                            ? "#0056b3"
+                            : "#007bff",
+                      },
+                    },
+                    ["SearchTable (5000 rows)"],
+                  ),
+                  View(
+                    {
+                      onClick() {
+                        currentPage.as("form");
+                        pageStats.as((s) => ({ ...s, form: s.form + 1 }));
+                      },
+                      style: {
+                        background:
+                          currentPage.value === "form" ? "#0056b3" : "#007bff",
+                      },
+                    },
+                    ["Form"],
+                  ),
+                  View(
+                    {
+                      onClick() {
+                        currentPage.as("dashboard");
+                        pageStats.as((s) => ({
+                          ...s,
+                          dashboard: s.dashboard + 1,
+                        }));
+                      },
+                      style: {
+                        background:
+                          currentPage.value === "dashboard"
+                            ? "#0056b3"
+                            : "#007bff",
+                      },
+                    },
+                    ["Dashboard"],
+                  ),
+                  View(
+                    {
+                      onClick() {
+                        currentPage.as("multishow");
+                        pageStats.as((s) => ({
+                          ...s,
+                          multishow: s.multishow + 1,
+                        }));
+                      },
+                      style: {
+                        background:
+                          currentPage.value === "multishow"
+                            ? "#0056b3"
+                            : "#007bff",
+                      },
+                    },
+                    ["MultiShow"],
+                  ),
+                ],
+              ),
+              View(
+                {
+                  style: {
+                    flex: 1,
+                    "min-height": 0,
+                    display: "flex",
+                    "flex-direction": "column",
+                  },
+                },
+                [
+                  Show({
+                    when: computed(currentPage, (p) => p === "table"),
+                    ok() {
+                      return TablePage();
+                    },
+                  }),
+                  Show({
+                    when: computed(currentPage, (p) => p === "searchtable"),
+                    ok() {
+                      return SearchTablePage();
+                    },
+                  }),
+                  Show({
+                    when: computed(currentPage, (p) => p === "form"),
+                    ok() {
+                      return FormPage();
+                    },
+                  }),
+                  Show({
+                    when: computed(currentPage, (p) => p === "dashboard"),
+                    ok() {
+                      return DashboardPage();
+                    },
+                  }),
+                  Show({
+                    when: computed(currentPage, (p) => p === "multishow"),
+                    ok() {
+                      return MultiShowPage();
+                    },
+                  }),
+                ],
+              ),
+            ];
+          },
         },
-        [
-          SearchTablePage(),
-          // Show({
-          //   when: computed(currentPage, (p) => p === "table"),
-          //   ok() {
-          //     return TablePage();
-          //   },
-          // }),
-          // Show({
-          //   when: computed(currentPage, (p) => p === "searchtable"),
-          //   ok() {
-          //     return SearchTablePage();
-          //   },
-          // }),
-          // Show({
-          //   when: computed(currentPage, (p) => p === "form"),
-          //   ok() {
-          //     return FormPage();
-          //   },
-          // }),
-          // Show({
-          //   when: computed(currentPage, (p) => p === "dashboard"),
-          //   ok() {
-          //     return DashboardPage();
-          //   },
-          // }),
-          // Show({
-          //   when: computed(currentPage, (p) => p === "multishow"),
-          //   ok() {
-          //     return MultiShowPage();
-          //   },
-          // }),
-        ],
-      ),
-    ],
-  );
+        {
+          
+        },
+      ],
+    }),
+  ]);
 }
 
 render(ApplicationView(), document.getElementById("root"));

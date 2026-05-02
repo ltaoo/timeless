@@ -32,11 +32,11 @@ export function DOMSwitch(props: {
     render(elm: TimelessElement) {
       $root = document.createElement("button");
       $root.style.cssText =
-        "position: relative; display: inline-flex; flex-shrink: 0; width: 32px; height: 18px; padding: 0; border-width: 1px; border-color: transparent; border-radius: 3.40282e38px; cursor-pointer";
+        "position: relative; display: inline-flex; flex-shrink: 0; width: 32px; height: 18px; padding: 0; border-width: 1px; border-color: transparent; border-radius: 3.40282e38px; background-color: buttonface; transition-property: background-color; transition-timing-function: cubic-bezier(.4,0,.2,1); transition-duration: .15s;";
 
       $thumb = document.createElement("div");
       $thumb.style.cssText =
-        "display: block; width: 16px; height: 16px; border-radius: 3.40282e38px; background-color: #fafafa; pointer-events: none; transform: translateX(0); transition-property: transform,translate,scale,rotate; transition-timing-function: cubic-bezier(.4,0,.2,1); transition-duration: .15s;";
+        "display: block; width: 16px; height: 16px; border-radius: 3.40282e38px; background-color: CanvasText; pointer-events: none; transform: translateX(0); transition-property: transform,translate,scale,rotate; transition-timing-function: cubic-bezier(.4,0,.2,1); transition-duration: .15s;";
 
       $loading = document.createElement("div");
       //       $loading.innerHTML = "L";
@@ -123,17 +123,19 @@ export function DOMSwitch(props: {
         console.warn("DOMInput setValue: $elm is null");
         return;
       }
-      if (!checked) {
-        $thumb.style.transform = `translateX(0)`;
-        setTimeout(() => {
-          $thumb!.style.backgroundColor = "#fafafa";
-          $root!.style.backgroundColor = "#272727";
-        }, 120);
-      } else {
+      if (checked) {
         $thumb.style.transform = `translateX(calc(100% - 2px))`;
         setTimeout(() => {
-          $thumb!.style.backgroundColor = "#171717";
-          $root!.style.backgroundColor = "#e4e4e4";
+          $root!.style.backgroundColor = "CanvasText";
+          $thumb!.style.backgroundColor = "buttonface";
+          //   $thumb!.style.backgroundColor = "Canvas";
+        }, 120);
+      } else {
+        $thumb.style.transform = `translateX(0)`;
+        setTimeout(() => {
+          $root!.style.backgroundColor = "buttonface";
+          $thumb!.style.backgroundColor = "CanvasText";
+          //   $thumb!.style.backgroundColor = "color-mix(in srgb, Canvas 50%, transparent)";
         }, 120);
       }
     },
