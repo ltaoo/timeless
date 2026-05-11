@@ -127,6 +127,11 @@
       "import": "./dist/file-picker/index.esm.js",
       "require": "./dist/file-picker/index.js"
     },
+    "./flow": {
+      "types": "./dist/flow/index.d.ts",
+      "import": "./dist/flow/index.esm.js",
+      "require": "./dist/flow/index.js"
+    },
     "./focus-scope": {
       "types": "./dist/focus-scope/index.d.ts",
       "import": "./dist/focus-scope/index.esm.js",

@@ -86,6 +86,15 @@ import {
   // dismiss,
 } from "./modules/sonner";
 import { Affix } from "./modules/affix";
+import {
+  FlowView,
+  FlowNode,
+  FlowHandle,
+  FlowEdge,
+  FlowBackground,
+  FlowMinimap,
+  FlowControls,
+} from "./modules/flow";
 
 try {
   if (typeof window !== "undefined") {
@@ -179,6 +188,13 @@ export {
   LLMProviderForm,
   Toaster,
   Affix,
+  FlowView,
+  FlowNode,
+  FlowHandle,
+  FlowEdge,
+  FlowBackground,
+  FlowMinimap,
+  FlowControls,
   // toast,
   // success,
   // error,

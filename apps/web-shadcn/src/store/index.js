@@ -89,6 +89,11 @@ const routes_configure = /** @type {const} */ ({
             pathname: "/home/index/download_task",
             component: Timeless.lazy("@/pages/home/index.download_task.js"),
           },
+          flow: {
+            title: "流程图",
+            pathname: "/home/index/flow",
+            component: Timeless.lazy("@/pages/home/index.flow.js"),
+          },
         },
       },
       settings: {

@@ -52,3 +52,4 @@ export * as SonnerPrimitive from "./modules/sonner";
 export { KeepAliveSubViews } from "./modules/keep-alive-sub-views";
 export { StandardSubViews } from "./modules/standard-sub-views";
 export * as ErrorBoundaryPrimitive from "./modules/error-boundary";
+export * as FlowPrimitive from "./modules/flow";

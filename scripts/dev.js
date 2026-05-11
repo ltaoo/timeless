@@ -7,9 +7,9 @@ const { spawn } = require("child_process");
 const rootDir = path.resolve(__dirname, "..");
 const packagesDir = path.join(rootDir, "packages");
 // const playgroundDir = path.join(rootDir, "apps/js-heap-size");
-const playgroundDir = path.join(rootDir, "apps/web-stress-test");
+// const playgroundDir = path.join(rootDir, "apps/web-stress-test");
 // const playgroundDir = path.join(rootDir, "apps/web-vanilla");
-// const playgroundDir = path.join(rootDir, "apps/web-shadcn");
+const playgroundDir = path.join(rootDir, "apps/web-shadcn");
 // const playgroundDir = path.join(rootDir, "apps/ssr-demo");
 // const playgroundDir = path.join(rootDir, "apps/download-task-list");
 // const playgroundDir = path.join(rootDir, "apps/reactive-playground");
@@ -38,31 +38,31 @@ const artifacts = [
     src: "packages/timeless/dist/timeless.umd.min.js",
     dest: "timeless.umd.min.js",
   },
-  // {
-  //   pkg: "shadcn",
-  //   src: "packages/shadcn/dist/timeless.shadcn.umd.min.js",
-  //   dest: "timeless.shadcn.umd.min.js",
-  // },
+  {
+    pkg: "shadcn",
+    src: "packages/shadcn/dist/timeless.shadcn.umd.min.js",
+    dest: "timeless.shadcn.umd.min.js",
+  },
   {
     pkg: "timeless-dom",
     src: "packages/timeless-dom/dist/timeless.dom.umd.min.js",
     dest: "timeless.dom.umd.min.js",
   },
-  // {
-  //   pkg: "provider-web",
-  //   src: "packages/provider-web/dist/timeless.web.umd.min.js",
-  //   dest: "timeless.web.umd.min.js",
-  // },
+  {
+    pkg: "provider-web",
+    src: "packages/provider-web/dist/timeless.web.umd.min.js",
+    dest: "timeless.web.umd.min.js",
+  },
   // {
   //   pkg: "a2ui",
   //   src: "packages/a2ui/dist/timeless.a2ui.umd.min.js",
   //   dest: "timeless.a2ui.umd.min.js",
   // },
-  // {
-  //   pkg: "utils",
-  //   src: "packages/utils/dist/timeless.utils.umd.min.js",
-  //   dest: "timeless.utils.umd.min.js",
-  // },
+  {
+    pkg: "utils",
+    src: "packages/utils/dist/timeless.utils.umd.min.js",
+    dest: "timeless.utils.umd.min.js",
+  },
 ];
 
 // Explicit build dependencies

@@ -23,6 +23,7 @@ export default function HomePageView(props) {
       { title: "Debug", name: "root.home_layout.index.debug" },
       { title: "Lifecycle", name: "root.home_layout.index.lifecycle" },
       { title: "Download Task", name: "root.home_layout.index.download_task" },
+      { title: "Flow", name: "root.home_layout.index.flow" },
     ]),
   });
 
