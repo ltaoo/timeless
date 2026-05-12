@@ -1,4 +1,11 @@
-import { combine, computed, For, ref, refobj } from "@timeless/timeless";
+import {
+  combine,
+  computed,
+  For,
+  ref,
+  refarr,
+  refobj,
+} from "@timeless/timeless";
 import {
   classNames,
   View,
@@ -29,15 +36,6 @@ export interface FlowViewProps extends ViewProps {
   nodesConnectable?: boolean;
 }
 
-export interface FlowHandleViewProps extends ViewProps {
-  store: FlowCanvasModel;
-  nodeId: string;
-  handleId: string;
-  type: "source" | "target";
-  position?: "top" | "right" | "bottom" | "left";
-  connectable?: boolean;
-}
-
 const handlePositions: Record<string, Record<string, string>> = {
   left: { top: "50%", right: "auto", bottom: "auto", left: "0" },
   right: { top: "50%", right: "0", bottom: "auto", left: "auto" },
@@ -52,6 +50,17 @@ const handleTransforms: Record<string, string> = {
   bottom: "translate(-50%, 50%)",
 };
 
+export interface FlowHandleViewProps extends ViewProps {
+  store: FlowCanvasModel;
+  nodeId: string;
+  handleId: string;
+  type: "source" | "target";
+  position?: "top" | "right" | "bottom" | "left";
+  index: number;
+  total: number;
+  connectable?: boolean;
+}
+
 export function FlowHandle(props: FlowHandleViewProps) {
   const {
     store,
@@ -59,14 +68,31 @@ export function FlowHandle(props: FlowHandleViewProps) {
     handleId,
     type,
     position = type === "source" ? "right" : "left",
+    index = 0,
+    total = 1,
     connectable = true,
     class: cls,
     ...rest
   } = props;
 
   const id = `${nodeId}-${handleId}`;
-  const positions = handlePositions[position] || handlePositions.right;
   const transform = handleTransforms[position] || handleTransforms.right;
+
+  const spacing = 20;
+  const total_span = (total - 1) * spacing;
+  const offset = -total_span / 2 + index * spacing;
+  const is_horizontal = position === "left" || position === "right";
+
+  const base_position = handlePositions[position] || handlePositions.right;
+  const positions = { ...base_position };
+
+  if (is_horizontal) {
+    // handles distribute vertically along the side
+    positions.top = `calc(50% + ${offset}px)`;
+  } else {
+    // handles distribute horizontally along the side
+    positions.left = `calc(50% + ${offset}px)`;
+  }
 
   return View(
     {
@@ -106,28 +132,12 @@ export function FlowHandle(props: FlowHandleViewProps) {
   );
 }
 
-function getDefaultNodeContent(
-  node: FlowNodeModel,
-  // store: FlowCanvasModel,
-): ViewChildren {
+function getDefaultNodeContent(node: FlowNodeModel): ViewChildren {
   return [
-    FlowHandle({
-      store: node.canvas$,
-      nodeId: node.id,
-      handleId: "default-target",
-      type: "target",
-      position: "left",
-    }),
-    View({ class: "flex-1 flex items-center justify-center" }, [
-      node.data["label"] || node.id,
-    ]),
-    FlowHandle({
-      store: node.canvas$,
-      nodeId: node.id,
-      handleId: "default-source",
-      type: "source",
-      position: "right",
-    }),
+    View(
+      { class: "flow-node-content flex-1 flex items-center justify-center" },
+      [node.data["label"] || node.id],
+    ),
   ];
 }
 
@@ -140,6 +150,13 @@ export function FlowNodeView(props: FlowNodeViewProps) {
   const { store: node$, nodeTypes, class: cls, ...rest } = props;
 
   const state_ = refobj(node$.state);
+  const target_handlers_ = refarr([]);
+  const source_handlers_ = refarr([]);
+
+  node$.onStateChange(() => {
+    source_handlers_.as(node$.handles.filter((h) => h.type === "source"));
+    target_handlers_.as(node$.handles.filter((h) => h.type === "target"));
+  });
 
   let isDragging = false;
   let dragStartClientX = 0;
@@ -229,16 +246,45 @@ export function FlowNodeView(props: FlowNodeViewProps) {
       },
     },
     [
+      // computed(target_handlers_, (t) => t.length),
+      // computed(source_handlers_, (t) => t.length),
+      For({
+        key: "id",
+        each: source_handlers_,
+        render(h, idx) {
+          return FlowHandle({
+            index: idx.value,
+            total: source_handlers_.value.length,
+            store: node$.canvas$,
+            nodeId: node$.id,
+            handleId: h.id,
+            type: "source",
+            position: h.position || "right",
+          });
+        },
+      }),
       Show({
         when: !!(nodeTypes && node$.type && nodeTypes[node$.type]),
-        // when: computed(state_, (t) => {
-        //   return !!(nodeTypes && t.type && nodeTypes[t.type]);
-        // }),
         ok() {
           return nodeTypes[node$.type]({ node: node$ });
         },
         else() {
           return getDefaultNodeContent(node$);
+        },
+      }),
+      For({
+        key: "id",
+        each: target_handlers_,
+        render(h, idx) {
+          return FlowHandle({
+            index: idx.value,
+            total: target_handlers_.value.length,
+            store: node$.canvas$,
+            nodeId: node$.id,
+            handleId: h.id,
+            type: "target",
+            position: h.position || "left",
+          });
         },
       }),
     ],
@@ -539,19 +585,17 @@ export function FlowCanvas(props: FlowViewProps, children?: ViewChildren) {
     ...rest
   } = props;
 
-  const nodes_ = store.nodes.slice();
-  const edges_ = store.edges.slice();
+  const nodes_ = refarr(store.nodes.slice());
+  const edges_ = refarr(store.edges.slice());
 
   store.onNodesChange((v) => {
-    nodes_.length = 0;
-    nodes_.push(...v);
+    nodes_.as(v);
   });
   store.onEdgesChange((v) => {
-    edges_.length = 0;
-    edges_.push(...v);
+    edges_.as(v);
   });
 
-  const canvas_transform_ = combine(store.viewport, (v) => {
+  const canvas_transform_ = computed(store.viewport, (v) => {
     return `translate(${v.x}px, ${v.y}px) scale(${v.zoom})`;
   });
 
@@ -681,6 +725,7 @@ export function FlowCanvas(props: FlowViewProps, children?: ViewChildren) {
             [FlowConnectingLine({ store })],
           ),
           For({
+            key: "id",
             each: nodes_,
             render(node) {
               return FlowNodeView({ store: node, nodeTypes });

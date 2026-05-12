@@ -1,14 +1,14 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
-import type { FlowCanvasModel, FlowNode } from "./index";
+import type { FlowCanvasModel, FlowHandle, FlowNode } from "./index";
 
 enum Events {
   Mounted,
-  Click = "Click",
-  DoubleClick = "DoubleClick",
-  FocusedChange = "FocusedChange",
-  PositionChange = "PositionChange",
-  StateChange = "StateChange",
+  Click,
+  DoubleClick,
+  FocusedChange,
+  PositionChange,
+  StateChange,
 }
 
 type TheTypesOfEvents<T> = {
@@ -31,6 +31,8 @@ export interface FlowNodeModelProps<T extends any> {
   dragging?: boolean;
   width?: number;
   height?: number;
+  /** 连接点 */
+  handles: FlowHandle[];
   canvas$: FlowCanvasModel;
   // data: FlowNode;
   onClick?: (node: FlowNodeModel<T>) => void;
@@ -54,6 +56,7 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
   type: string;
   label: string;
   data: T;
+  handles: FlowHandle[];
 
   focused: boolean = false;
   selected: boolean = false;
@@ -89,6 +92,7 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
       width,
       height,
       data,
+      handles,
       canvas$,
       onClick,
       onDoubleClick,
@@ -103,6 +107,7 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
     this.width = width;
     this.height = height;
     this.data = data;
+    this.handles = handles || [];
     this.canvas$ = canvas$;
 
     if (onClick) {
@@ -176,6 +181,10 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
     this.dragging = false;
   }
 
+  setHandlers(handlers: FlowHandle[]) {
+    this.handles = [...handlers];
+    this.emit(Events.StateChange, { ...this.state });
+  }
   registerHandle(handleId: string, el: HTMLElement): void {
     this.handleRects.set(handleId, el.getBoundingClientRect());
   }
@@ -222,25 +231,19 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
   }
   onPositionChange(
     handler: Handler<TheTypesOfEvents<T>[Events.PositionChange]>,
-  ): () => void {
+  ) {
     return this.on(Events.PositionChange, handler);
   }
-  onClick(handler: Handler<TheTypesOfEvents<T>[Events.Click]>): () => void {
+  onClick(handler: Handler<TheTypesOfEvents<T>[Events.Click]>) {
     return this.on(Events.Click, handler);
   }
-  onDoubleClick(
-    handler: Handler<TheTypesOfEvents<T>[Events.DoubleClick]>,
-  ): () => void {
+  onDoubleClick(handler: Handler<TheTypesOfEvents<T>[Events.DoubleClick]>) {
     return this.on(Events.DoubleClick, handler);
   }
-  onFocusedChange(
-    handler: Handler<TheTypesOfEvents<T>[Events.FocusedChange]>,
-  ): () => void {
+  onFocusedChange(handler: Handler<TheTypesOfEvents<T>[Events.FocusedChange]>) {
     return this.on(Events.FocusedChange, handler);
   }
-  onStateChange(
-    handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>,
-  ): () => void {
+  onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) {
     return this.on(Events.StateChange, handler);
   }
 }

@@ -203,20 +203,22 @@ export function For<T>(
       const inserted_wrapped_items: { k: number; v: T }[] = [];
       const inserted_idx: DerivedRef<number>[] = [];
       const inserted_owners: any[] = [];
+
+      // Build wrapped items and insert into state first,
+      // so create_idx can find them via indexOf
+      for (let i = 0; i < items.length; i++) {
+        inserted_wrapped_items.push({ k: methods.unique_id(), v: items[i] });
+        inserted_items.push(items[i]);
+      }
+      state.wrapped_items.splice(index, 0, ...inserted_wrapped_items);
+      state.items.splice(index, 0, ...inserted_items);
+
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        const wrapped_item = { k: methods.unique_id(), v: item };
+        const wrapped_item = inserted_wrapped_items[i];
         const idx = methods.create_idx(wrapped_item);
         // Create per-item owner for tracking render-created refs
         const item_owner = create_owner(_owner);
-        // console.log(
-        //   "[primitive]for - insert items",
-        //   isRef(props.each) ? props.each.value : props.each,
-        //   item,
-        //   idx.value,
-        // );
-        inserted_wrapped_items.push(wrapped_item);
-        inserted_items.push(item);
         inserted_idx.push(idx);
         inserted_owners.push(item_owner);
         const child_tmp = run_with_owner(item_owner, () =>
@@ -238,8 +240,6 @@ export function For<T>(
         })();
         inserted_elements[i] = child;
       }
-      state.wrapped_items.splice(index, 0, ...inserted_wrapped_items);
-      state.items.splice(index, 0, ...inserted_items);
       state.idx_arr.splice(index, 0, ...inserted_idx);
       state.children.splice(index, 0, ...inserted_elements);
       state.item_owners.splice(index, 0, ...inserted_owners);
@@ -435,6 +435,8 @@ export function For<T>(
       let _add_start = -1;
 
       // Iterate new items -> Determine Reused vs Added
+      // Update wrapped_items before rendering so create_idx can find new items
+      state.wrapped_items = new_wrapped_items;
       for (let i = 0; i < new_wrapped_items.length; i++) {
         const new_item = new_wrapped_items[i];
         const k =

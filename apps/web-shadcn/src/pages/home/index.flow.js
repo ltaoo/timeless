@@ -74,25 +74,13 @@ export default function FlowExamplePage() {
                 showMinimap: false,
                 backgroundVariant: "dots",
                 nodeTypes: {
-                  default: ({ node, store }) => [
-                    FlowHandle({
-                      store,
-                      nodeId: node.id,
-                      handleId: "input",
-                      type: "target",
-                      position: "left",
-                    }),
-                    View({ class: "px-4 py-2 text-sm text-center" }, [
-                      node.data?.label || node.id,
-                    ]),
-                    FlowHandle({
-                      store,
-                      nodeId: node.id,
-                      handleId: "output",
-                      type: "source",
-                      position: "right",
-                    }),
-                  ],
+                  default({ node }) {
+                    return [
+                      View({ class: "px-4 py-2 text-sm text-center" }, [
+                        node.data?.label || node.id,
+                      ]),
+                    ];
+                  },
                 },
               }),
             ],

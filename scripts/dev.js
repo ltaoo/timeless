@@ -72,11 +72,11 @@ const buildRelations = {
   // utils: ["timeless"],
   // kit: ["timeless"],
   // "ui-primitive": ["timeless"],
-  // "ui-vm": ["timeless"],
+  "ui-vm": ["timeless"],
   // shadcn: ["timeless"],
   // icons: ["timeless"],
   primitive: ["timeless"],
-  // timeless: ["shadcn", "timeless-dom"],
+  timeless: ["shadcn", "timeless-dom"],
 };
 
 let buildQueue = null;

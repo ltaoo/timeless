@@ -325,7 +325,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
             state.children[i] = Text(child);
             return;
           }
-          if (child) {
+          if (child !== undefined) {
             state.children[i] = Text(String(child));
             return;
           }

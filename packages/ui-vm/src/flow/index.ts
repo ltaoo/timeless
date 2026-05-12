@@ -31,8 +31,10 @@ export interface FlowEdge {
   id: string;
   source: string;
   sourceHandle?: string;
+  sourcePosition?: "top" | "right" | "bottom" | "left";
   target: string;
   targetHandle?: string;
+  targetPosition?: "top" | "right" | "bottom" | "left";
   type?: "bezier" | "step" | "straight" | "smoothstep";
   label?: string;
   animated?: boolean;
@@ -224,6 +226,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
         unlisten();
         this._mountedNodeCount += 1;
         if (this._mountedNodeCount === nodes.length) {
+          this.computeNodeHandles();
           this.refreshEdgesPosition();
         }
       });
@@ -254,6 +257,8 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
       target: targetNode,
       sourceHandle: edge.sourceHandle,
       targetHandle: edge.targetHandle,
+      sourcePosition: edge.sourcePosition,
+      targetPosition: edge.targetPosition,
       type: edge.type,
       label: edge.label,
       animated: edge.animated,
@@ -279,6 +284,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
 
     this.edges = [...this.edges, edgeModel];
     this.addEdgeToMap(edgeModel);
+    this.computeNodeHandles();
     this.emit(Events.EdgesChange, this.edges);
     this.emit(Events.StateChange, this.state);
     return edgeModel;
@@ -287,6 +293,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
   removeEdge(id: string): void {
     this.edges = this.edges.filter((e) => e.id !== id);
     this.removeEdgeFromMap(id);
+    this.computeNodeHandles();
     this.emit(Events.EdgesChange, this.edges);
     this.emit(Events.StateChange, this.state);
   }
@@ -321,6 +328,48 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
     }
     this.emit(Events.EdgesChange, this.edges);
     this.emit(Events.StateChange, this.state);
+  }
+
+  private computeNodeHandles(): void {
+    // console.log("[]flow/index - computeNodeHandles");
+
+    const nodeHandlesMap = new Map<string, FlowHandle[]>();
+
+    for (const edge of this.edges) {
+      // source node → source handle
+      const sourceHandles = nodeHandlesMap.get(edge.source.id) || [];
+      const sourceHandleId = edge.sourceHandle || `source-${edge.id}`;
+      if (!sourceHandles.some((h) => h.id === sourceHandleId)) {
+        sourceHandles.push({
+          id: sourceHandleId,
+          type: "source",
+          position: edge.sourcePosition,
+        });
+      }
+      nodeHandlesMap.set(edge.source.id, sourceHandles);
+
+      // target node → target handle
+      const targetHandles = nodeHandlesMap.get(edge.target.id) || [];
+      const targetHandleId = edge.targetHandle || `target-${edge.id}`;
+      if (!targetHandles.some((h) => h.id === targetHandleId)) {
+        targetHandles.push({
+          id: targetHandleId,
+          type: "target",
+          position: edge.targetPosition,
+        });
+      }
+      nodeHandlesMap.set(edge.target.id, targetHandles);
+    }
+
+    for (const node of this.nodes) {
+      const handlers = nodeHandlesMap.get(node.id) || [];
+      console.log(
+        "[]flow/index - computeNodeHandles set handlers to node",
+        node.id,
+        handlers,
+      );
+      node.setHandlers(handlers);
+    }
   }
 
   refreshEdgesPosition() {
