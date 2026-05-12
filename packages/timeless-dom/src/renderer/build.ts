@@ -37,6 +37,26 @@ import { DOMListView } from "@/host/list-view";
 import { DOMListItemView } from "@/host/list-item-view";
 import { DOMSwitch } from "@/host/switch";
 import { DOMWindow } from "@/host/window";
+import {
+  DOMSVG,
+  DOMG,
+  DOMCircle,
+  DOMRect,
+  DOMPath,
+  DOMLine,
+  DOMPolyline,
+  DOMPolygon,
+  DOMEllipse,
+  DOMSVGText,
+  DOMDefs,
+  DOMSymbol,
+  DOMUse,
+  DOMLinearGradient,
+  DOMRadialGradient,
+  DOMStop,
+  DOMMask,
+  DOMClipPath,
+} from "@/host/svg";
 
 export function buildAndRender(elm: TimelessElement): {
   vnode: VNodeView<any>;
@@ -242,6 +262,96 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const tabPane$ = DOMTabPane({ build });
     elm.$elm = tabPane$;
     return tabPane$;
+  }
+  if (elm.t === "svg-svg") {
+    const svg$ = DOMSVG({ build });
+    elm.$elm = svg$;
+    return svg$;
+  }
+  if (elm.t === "svg-g") {
+    const g$ = DOMG({ build });
+    elm.$elm = g$;
+    return g$;
+  }
+  if (elm.t === "svg-circle") {
+    const circle$ = DOMCircle({ build });
+    elm.$elm = circle$;
+    return circle$;
+  }
+  if (elm.t === "svg-rect") {
+    const rect$ = DOMRect({ build });
+    elm.$elm = rect$;
+    return rect$;
+  }
+  if (elm.t === "svg-path") {
+    const path$ = DOMPath({ build });
+    elm.$elm = path$;
+    return path$;
+  }
+  if (elm.t === "svg-line") {
+    const line$ = DOMLine({ build });
+    elm.$elm = line$;
+    return line$;
+  }
+  if (elm.t === "svg-polyline") {
+    const polyline$ = DOMPolyline({ build });
+    elm.$elm = polyline$;
+    return polyline$;
+  }
+  if (elm.t === "svg-polygon") {
+    const polygon$ = DOMPolygon({ build });
+    elm.$elm = polygon$;
+    return polygon$;
+  }
+  if (elm.t === "svg-ellipse") {
+    const ellipse$ = DOMEllipse({ build });
+    elm.$elm = ellipse$;
+    return ellipse$;
+  }
+  if (elm.t === "svg-text") {
+    const text$ = DOMSVGText({ build });
+    elm.$elm = text$;
+    return text$;
+  }
+  if (elm.t === "svg-defs") {
+    const defs$ = DOMDefs({ build });
+    elm.$elm = defs$;
+    return defs$;
+  }
+  if (elm.t === "svg-symbol") {
+    const symbol$ = DOMSymbol({ build });
+    elm.$elm = symbol$;
+    return symbol$;
+  }
+  if (elm.t === "svg-use") {
+    const use$ = DOMUse({ build });
+    elm.$elm = use$;
+    return use$;
+  }
+  if (elm.t === "svg-linear-gradient") {
+    const linearGradient$ = DOMLinearGradient({ build });
+    elm.$elm = linearGradient$;
+    return linearGradient$;
+  }
+  if (elm.t === "svg-radial-gradient") {
+    const radialGradient$ = DOMRadialGradient({ build });
+    elm.$elm = radialGradient$;
+    return radialGradient$;
+  }
+  if (elm.t === "svg-stop") {
+    const stop$ = DOMStop({ build });
+    elm.$elm = stop$;
+    return stop$;
+  }
+  if (elm.t === "svg-mask") {
+    const mask$ = DOMMask({ build });
+    elm.$elm = mask$;
+    return mask$;
+  }
+  if (elm.t === "svg-clippath") {
+    const clipPath$ = DOMClipPath({ build });
+    elm.$elm = clipPath$;
+    return clipPath$;
   }
   return DOMView({ build });
 }

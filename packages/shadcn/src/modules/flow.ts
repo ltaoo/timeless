@@ -1,20 +1,21 @@
-import { combine } from "@timeless/timeless";
+import { combine, computed, For, ref, refobj } from "@timeless/timeless";
 import {
   classNames,
   View,
   ViewChildren,
   ViewProps,
   Show,
+  SVG,
 } from "@timeless/timeless";
 import { FlowPrimitive } from "@timeless/ui-primitive";
-import { FlowCore, FlowNodeCore } from "@timeless/ui-vm";
+import { FlowCanvasModel, FlowNodeModel, FlowEdgeModel } from "@timeless/ui-vm";
 import type { FlowNode, FlowEdge } from "@timeless/ui-vm";
 
 export interface FlowViewProps extends ViewProps {
-  store: FlowCore;
+  store: FlowCanvasModel;
   nodeTypes?: Record<
     string,
-    (props: { node: FlowNode; store: FlowCore }) => ViewChildren
+    (props: { node: FlowNode; store: FlowCanvasModel }) => ViewChildren
   >;
   showBackground?: boolean;
   backgroundVariant?: "dots" | "lines" | "cross";
@@ -28,16 +29,16 @@ export interface FlowViewProps extends ViewProps {
 }
 
 export interface FlowNodeViewProps extends ViewProps {
-  store: FlowCore;
+  store: FlowCanvasModel;
   node: FlowNode;
   nodeTypes?: Record<
     string,
-    (props: { node: FlowNode; store: FlowCore }) => ViewChildren
+    (props: { node: FlowNode; store: FlowCanvasModel }) => ViewChildren
   >;
 }
 
 export interface FlowHandleViewProps extends ViewProps {
-  store: FlowCore;
+  store: FlowCanvasModel;
   nodeId: string;
   handleId: string;
   type: "source" | "target";
@@ -113,7 +114,10 @@ export function FlowHandle(props: FlowHandleViewProps) {
   );
 }
 
-function getDefaultNodeContent(node: FlowNode, store: FlowCore): ViewChildren {
+function getDefaultNodeContent(
+  node: FlowNode,
+  store: FlowCanvasModel,
+): ViewChildren {
   return [
     FlowHandle({
       store,
@@ -135,17 +139,20 @@ function getDefaultNodeContent(node: FlowNode, store: FlowCore): ViewChildren {
   ];
 }
 
-export function FlowNode(props: FlowNodeViewProps) {
+export function FlowNodeView(props: FlowNodeViewProps) {
   const { store, node, nodeTypes, class: cls, ...rest } = props;
 
-  const nodeCore = new FlowNodeCore(node);
+  const node$ = new FlowNodeModel(node);
+
+  const state_ = refobj(node$.state);
+
   let isDragging = false;
   let dragStartClientX = 0;
   let dragStartClientY = 0;
   let nodeStartX = 0;
   let nodeStartY = 0;
 
-  const currentNode = () => store.getNode(node.id) || node;
+  // const currentNode = () => store.getNode(node.id) || node;
 
   return View(
     {
@@ -155,171 +162,146 @@ export function FlowNode(props: FlowNodeViewProps) {
         "bg-white dark:bg-gray-800",
         "shadow-md",
         "select-none",
-        "overflow-hidden",
         node.dragging && "shadow-xl",
         node.selected && "ring-2 ring-blue-500 dark:ring-blue-400",
         cls,
       ]),
       style: {
-        left: `${currentNode().position.x}px`,
-        top: `${currentNode().position.y}px`,
+        left: `${node.position.x}px`,
+        top: `${node.position.y}px`,
+        // left: `${currentNode().position.x}px`,
+        // top: `${currentNode().position.y}px`,
       },
       onMounted(e) {
         const rect = e.target.get$elm().getBoundingClientRect();
         store.updateNode(node.id, { width: rect.width, height: rect.height });
       },
       onMouseDown(e: MouseEvent) {
-        if (e.button !== 0) return;
-        if (!store.state.nodesDraggable) return;
-        e.stopPropagation();
-
-        const nodeData = currentNode();
-
-        store.selectNode(node.id, e.ctrlKey);
-        store.emit("NodeDragStart" as any, { node: nodeData });
-
-        isDragging = true;
-        dragStartClientX = e.clientX;
-        dragStartClientY = e.clientY;
-        nodeStartX = nodeData.position.x;
-        nodeStartY = nodeData.position.y;
-
-        nodeCore.startDrag(e.clientX, e.clientY);
-
-        const onMouseMove = (moveEvent: MouseEvent) => {
-          if (!isDragging) return;
-
-          const deltaX =
-            (moveEvent.clientX - dragStartClientX) / store.viewport.zoom;
-          const deltaY =
-            (moveEvent.clientY - dragStartClientY) / store.viewport.zoom;
-
-          const newX = nodeStartX + deltaX;
-          const newY = nodeStartY + deltaY;
-
-          store.updateNode(node.id, { position: { x: newX, y: newY } });
-          store.emit("NodeDrag" as any, {
-            node: store.getNode(node.id)!,
-            position: { x: newX, y: newY },
-          });
-        };
-
-        const onMouseUp = () => {
-          if (isDragging) {
-            isDragging = false;
-            store.emit("NodeDragStop" as any, {
-              node: store.getNode(node.id)!,
-            });
-            nodeCore.stopDrag();
-          }
-          window.removeEventListener("mousemove", onMouseMove);
-          window.removeEventListener("mouseup", onMouseUp);
-        };
-
-        window.addEventListener("mousemove", onMouseMove);
-        window.addEventListener("mouseup", onMouseUp);
+        // if (e.button !== 0) return;
+        // if (!store.state.nodesDraggable) return;
+        // e.stopPropagation();
+        // const nodeData = currentNode();
+        // store.selectNode(node.id, e.ctrlKey);
+        // store.emit("NodeDragStart" as any, { node: nodeData });
+        // isDragging = true;
+        // dragStartClientX = e.clientX;
+        // dragStartClientY = e.clientY;
+        // nodeStartX = nodeData.position.x;
+        // nodeStartY = nodeData.position.y;
+        // node$.startDrag(e.clientX, e.clientY);
+        // const onMouseMove = (moveEvent: MouseEvent) => {
+        //   if (!isDragging) return;
+        //   const deltaX =
+        //     (moveEvent.clientX - dragStartClientX) / store.viewport.zoom;
+        //   const deltaY =
+        //     (moveEvent.clientY - dragStartClientY) / store.viewport.zoom;
+        //   const newX = nodeStartX + deltaX;
+        //   const newY = nodeStartY + deltaY;
+        //   store.updateNode(node.id, { position: { x: newX, y: newY } });
+        //   store.emit("NodeDrag" as any, {
+        //     node: store.getNode(node.id)!,
+        //     position: { x: newX, y: newY },
+        //   });
+        // };
+        // const onMouseUp = () => {
+        //   if (isDragging) {
+        //     isDragging = false;
+        //     store.emit("NodeDragStop" as any, {
+        //       node: store.getNode(node.id)!,
+        //     });
+        //     node$.stopDrag();
+        //   }
+        //   window.removeEventListener("mousemove", onMouseMove);
+        //   window.removeEventListener("mouseup", onMouseUp);
+        // };
+        // window.addEventListener("mousemove", onMouseMove);
+        // window.addEventListener("mouseup", onMouseUp);
       },
       onClick(e: MouseEvent) {
-        store.emit("NodeClick" as any, { node: currentNode(), event: e });
+        // store.emit("NodeClick" as any, { node: currentNode(), event: e });
       },
     },
-    nodeTypes && node.type && nodeTypes[node.type]
-      ? nodeTypes[node.type]({ node: currentNode(), store })
-      : getDefaultNodeContent(currentNode(), store),
+    [
+      Show({
+        when: !!(nodeTypes && node.type && nodeTypes[node.type]),
+        ok() {
+          return nodeTypes[node.type]({ node, store });
+        },
+        else() {
+          return getDefaultNodeContent(node, store);
+        },
+      }),
+    ],
   );
 }
 
-export function FlowEdge(
-  props: ViewProps & { store: FlowCore; edge: FlowEdge },
-) {
-  const { store, edge, class: cls, ...rest } = props;
+export function FlowEdgeView(props: ViewProps & { store: FlowEdgeModel }) {
+  const { store, class: cls, ...rest } = props;
 
-  const sourceNode = store.getNode(edge.source);
-  const targetNode = store.getNode(edge.target);
+  const state_ = refobj(store.state);
 
-  if (!sourceNode || !targetNode) {
-    return View(rest, []);
-  }
+  store.onStateChange((v) => {
+    state_.as(v);
+  });
 
-  const sourceX = sourceNode.position.x + (sourceNode.width || 150);
-  const sourceY = sourceNode.position.y + (sourceNode.height || 80) / 2;
-  const targetX = targetNode.position.x;
-  const targetY = targetNode.position.y + (targetNode.height || 80) / 2;
+  const handleClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    store.toggle();
+  };
 
-  const path = getEdgePath(
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    edge.type || "bezier",
-  );
-
-  return View(
-    {
-      ...rest,
-      as: "path",
-      d: path,
-      class: classNames([
-        "fill-none pointer-events-auto cursor-pointer",
-        edge.selected
-          ? "stroke-blue-500 dark:stroke-blue-400"
-          : "stroke-gray-400 dark:stroke-gray-600",
-        edge.animated && "animate-dash",
-        cls,
-      ]),
-      style: { strokeWidth: edge.selected ? 3 : 2 },
-      onClick(e: MouseEvent) {
-        e.stopPropagation();
-        store.emit("EdgeClick" as any, { edge, event: e });
+  return SVG.G({}, [
+    SVG.Path(
+      {
+        d: computed(state_, (t) => t.d),
+        class:
+          "fill-none stroke-transparent pointer-events-auto cursor-pointer",
+        style: { "stroke-width": 20 },
+        onClick: handleClick,
       },
-    },
-    [],
-  );
+      [],
+    ),
+    SVG.Path(
+      {
+        d: computed(state_, (t) => t.d),
+        class: classNames([
+          "fill-none pointer-events-none",
+          computed(state_, (t) => {
+            if (t.selected) {
+              return "stroke-blue-500 dark:stroke-blue-400";
+            }
+            return "stroke-gray-400 dark:stroke-gray-600";
+          }),
+          computed(state_, (t) => {
+            if (t.animated) {
+              return "animate-dash";
+            }
+            return null;
+          }),
+          cls,
+        ]),
+        style: { strokeWidth: computed(state_, (t) => (t.selected ? 3 : 2)) },
+      },
+      [],
+    ),
+  ]);
 }
 
-function getEdgePath(
-  sourceX: number,
-  sourceY: number,
-  targetX: number,
-  targetY: number,
-  type: string,
-): string {
-  const dx = Math.abs(targetX - sourceX);
-  const controlOffset = Math.max(dx * 0.5, 50);
-
-  switch (type) {
-    case "straight":
-      return `M ${sourceX},${sourceY} L ${targetX},${targetY}`;
-    case "step":
-      const midX = (sourceX + targetX) / 2;
-      return `M ${sourceX},${sourceY} L ${midX},${sourceY} L ${midX},${targetY} L ${targetX},${targetY}`;
-    case "smoothstep":
-      const smoothOffset = Math.min(dx * 0.3, 20);
-      return `M ${sourceX},${sourceY} L ${sourceX + smoothOffset},${sourceY} L ${targetX - smoothOffset},${targetY} L ${targetX},${targetY}`;
-    case "bezier":
-    default:
-      return `M ${sourceX},${sourceY} C ${sourceX + controlOffset},${sourceY} ${targetX - controlOffset},${targetY} ${targetX},${targetY}`;
-  }
-}
-
-function FlowConnectingLine(props: ViewProps & { store: FlowCore }) {
+function FlowConnectingLine(props: ViewProps & { store: FlowCanvasModel }) {
   const { store, ...rest } = props;
 
-  let visible_ = false;
-  let path_ = "";
+  let visible_ = ref(false);
+  let path_ = ref("");
 
   window.flowConnectingLineUpdate = (newPath: string, visible: boolean) => {
-    path_ = newPath;
-    visible_ = visible;
+    path_.as(newPath);
+    visible_.as(visible);
   };
 
   return Show({
-    when: () => visible_,
+    when: visible_,
     ok() {
-      return View(
+      return SVG.Path(
         {
-          ...rest,
-          as: "path",
           d: path_,
           class:
             "fill-none stroke-gray-400 dark:stroke-gray-600 pointer-events-none",
@@ -378,7 +360,7 @@ export function FlowBackground(
   );
 }
 
-export function FlowMinimap(props: ViewProps & { store: FlowCore }) {
+export function FlowMinimap(props: ViewProps & { store: FlowCanvasModel }) {
   const { store, class: cls, ...rest } = props;
 
   const minimapWidth = 200;
@@ -402,9 +384,9 @@ export function FlowMinimap(props: ViewProps & { store: FlowCore }) {
     return { minX, minY, maxX, maxY };
   });
 
-  const scale = combine(bounds, (b) => {
-    const w = b.maxX - b.minX;
-    const h = b.maxY - b.minY;
+  const scale = combine({ bounds }, (b) => {
+    const w = b.bounds.maxX - b.bounds.minX;
+    const h = b.bounds.maxY - b.bounds.minY;
     return Math.min(
       (minimapWidth - padding * 2) / (w || 1),
       (minimapHeight - padding * 2) / (h || 1),
@@ -469,7 +451,7 @@ export function FlowMinimap(props: ViewProps & { store: FlowCore }) {
   );
 }
 
-export function FlowControls(props: ViewProps & { store: FlowCore }) {
+export function FlowControls(props: ViewProps & { store: FlowCanvasModel }) {
   const { store, class: cls, ...rest } = props;
 
   return View(
@@ -529,7 +511,7 @@ export function FlowControls(props: ViewProps & { store: FlowCore }) {
   );
 }
 
-export function FlowView(props: FlowViewProps, children?: ViewChildren) {
+export function FlowCanvas(props: FlowViewProps, children?: ViewChildren) {
   const {
     store,
     nodeTypes,
@@ -559,7 +541,7 @@ export function FlowView(props: FlowViewProps, children?: ViewChildren) {
     edges_.push(...v);
   });
 
-  const canvasTransform = combine(store.viewport, (v) => {
+  const canvas_transform_ = combine(store.viewport, (v) => {
     return `translate(${v.x}px, ${v.y}px) scale(${v.zoom})`;
   });
 
@@ -580,7 +562,7 @@ export function FlowView(props: FlowViewProps, children?: ViewChildren) {
     },
     [
       Show({
-        when: () => showBackground,
+        when: showBackground,
         ok() {
           return FlowBackground({ variant: backgroundVariant });
         },
@@ -588,40 +570,40 @@ export function FlowView(props: FlowViewProps, children?: ViewChildren) {
       View(
         {
           class: "absolute inset-0",
-          style: combine(canvasTransform, (t) => ({
+          style: computed(canvas_transform_, (t) => ({
             transform: t,
             transformOrigin: "0 0",
           })),
-          onWheel(e: WheelEvent) {
-            e.preventDefault();
+          // onWheel(e: WheelEvent) {
+          //   e.preventDefault();
 
-            const isZooming = e.ctrlKey || e.metaKey;
-            const v = store.viewport;
+          //   const isZooming = e.ctrlKey || e.metaKey;
+          //   const v = store.viewport;
 
-            if (isZooming) {
-              const delta = -e.deltaY * 0.001;
-              const newZoom = Math.max(
-                minZoom,
-                Math.min(maxZoom, v.zoom + delta),
-              );
+          //   if (isZooming) {
+          //     const delta = -e.deltaY * 0.001;
+          //     const newZoom = Math.max(
+          //       minZoom,
+          //       Math.min(maxZoom, v.zoom + delta),
+          //     );
 
-              const rect = (
-                e.currentTarget as HTMLElement
-              ).getBoundingClientRect();
-              const mouseX = e.clientX - rect.left;
-              const mouseY = e.clientY - rect.top;
+          //     const rect = (
+          //       e.currentTarget as HTMLElement
+          //     ).getBoundingClientRect();
+          //     const mouseX = e.clientX - rect.left;
+          //     const mouseY = e.clientY - rect.top;
 
-              const worldX = (mouseX - v.x) / v.zoom;
-              const worldY = (mouseY - v.y) / v.zoom;
+          //     const worldX = (mouseX - v.x) / v.zoom;
+          //     const worldY = (mouseY - v.y) / v.zoom;
 
-              const newX = mouseX - worldX * newZoom;
-              const newY = mouseY - worldY * newZoom;
+          //     const newX = mouseX - worldX * newZoom;
+          //     const newY = mouseY - worldY * newZoom;
 
-              store.setViewport({ x: newX, y: newY, zoom: newZoom });
-            } else {
-              store.setViewport({ x: v.x - e.deltaX, y: v.y - e.deltaY });
-            }
-          },
+          //     store.setViewport({ x: newX, y: newY, zoom: newZoom });
+          //   } else {
+          //     store.setViewport({ x: v.x - e.deltaX, y: v.y - e.deltaY });
+          //   }
+          // },
           onMouseDown(e: MouseEvent) {
             if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
               e.preventDefault();
@@ -645,16 +627,14 @@ export function FlowView(props: FlowViewProps, children?: ViewChildren) {
               const rect = canvas.getBoundingClientRect();
               const v = store.viewport;
 
-              const sourceX = window.flowConnecting.startX;
-              const sourceY = window.flowConnecting.startY;
-
-              const path = getEdgePath(
-                (sourceX - rect.left - v.x) / v.zoom,
-                (sourceY - rect.top - v.y) / v.zoom,
-                (e.clientX - rect.left - v.x) / v.zoom,
-                (e.clientY - rect.top - v.y) / v.zoom,
-                "bezier",
-              );
+              const sx =
+                (window.flowConnecting.startX - rect.left - v.x) / v.zoom;
+              const sy =
+                (window.flowConnecting.startY - rect.top - v.y) / v.zoom;
+              const tx = (e.clientX - rect.left - v.x) / v.zoom;
+              const ty = (e.clientY - rect.top - v.y) / v.zoom;
+              const offset = Math.max(Math.abs(tx - sx) * 0.5, 50);
+              const path = `M ${sx},${sy} C ${sx + offset},${sy} ${tx - offset},${ty} ${tx},${ty}`;
 
               window.flowConnectingLineUpdate?.(path, true);
             }
@@ -671,30 +651,41 @@ export function FlowView(props: FlowViewProps, children?: ViewChildren) {
           },
         },
         [
-          View(
+          For({
+            each: edges_,
+            render(edge: FlowEdgeModel) {
+              return SVG.SVG(
+                {
+                  class: "absolute inset-0 w-full h-full pointer-events-none",
+                  style: { overflow: "visible" },
+                },
+                [FlowEdgeView({ store: edge })],
+              );
+            },
+          }),
+          SVG.SVG(
             {
-              as: "svg",
               class: "absolute inset-0 w-full h-full pointer-events-none",
               style: { overflow: "visible" },
             },
-            [
-              ...edges_.map((edge: FlowEdge) => FlowEdge({ store, edge })),
-              FlowConnectingLine({ store }),
-            ],
+            [FlowConnectingLine({ store })],
           ),
-          ...nodes_.map((node: FlowNode) =>
-            FlowNode({ store, node, nodeTypes }),
-          ),
+          For({
+            each: nodes_,
+            render(node) {
+              return FlowNodeView({ store, node, nodeTypes });
+            },
+          }),
         ],
       ),
       Show({
-        when: () => showControls,
+        when: showControls,
         ok() {
           return FlowControls({ store });
         },
       }),
       Show({
-        when: () => showMinimap,
+        when: showMinimap,
         ok() {
           return FlowMinimap({ store });
         },
@@ -703,8 +694,8 @@ export function FlowView(props: FlowViewProps, children?: ViewChildren) {
   );
 }
 
-export const FlowEdge_ = FlowEdge;
-export const FlowNode_ = FlowNode;
+export const FlowEdge_ = FlowEdgeView;
+export const FlowNode_ = FlowNodeView;
 export const FlowHandle_ = FlowHandle;
 
 declare global {

@@ -1,8 +1,8 @@
 import { View, ViewProps, ViewChildren } from "@timeless/timeless";
-import { FlowCore } from "@timeless/ui-vm";
+import { FlowCanvasModel } from "@timeless/ui-vm";
 
 export function Root(
-  props: ViewProps & { store: FlowCore },
+  props: ViewProps & { store: FlowCanvasModel },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
@@ -10,7 +10,7 @@ export function Root(
 }
 
 export function Canvas(
-  props: ViewProps & { store: FlowCore },
+  props: ViewProps & { store: FlowCanvasModel },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
@@ -29,7 +29,7 @@ export function EdgeLayer(props: ViewProps, children?: ViewChildren) {
 
 export function Node(
   props: ViewProps & {
-    store: FlowCore;
+    store: FlowCanvasModel;
     nodeId: string;
   },
   children?: ViewChildren,
@@ -40,7 +40,7 @@ export function Node(
 
 export function Edge(
   props: ViewProps & {
-    store: FlowCore;
+    store: FlowCanvasModel;
     edgeId: string;
   },
   children?: ViewChildren,
@@ -51,7 +51,7 @@ export function Edge(
 
 export function Handle(
   props: ViewProps & {
-    store: FlowCore;
+    store: FlowCanvasModel;
     nodeId: string;
     handleId: string;
     type: "source" | "target";
@@ -83,7 +83,7 @@ export function Background(
 }
 
 export function Minimap(
-  props: ViewProps & { store: FlowCore },
+  props: ViewProps & { store: FlowCanvasModel },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
@@ -91,7 +91,7 @@ export function Minimap(
 }
 
 export function Controls(
-  props: ViewProps & { store: FlowCore },
+  props: ViewProps & { store: FlowCanvasModel },
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;

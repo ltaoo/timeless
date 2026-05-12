@@ -1,4 +1,11 @@
 import { BaseDomain, Handler } from "@timeless/base";
+import { FlowNodeModel } from "./node";
+import { FlowEdgeModel } from "./edge";
+
+export { FlowNodeModel } from "./node";
+export type { FlowNodeModelProps, FlowNodeState } from "./node";
+export { FlowEdgeModel } from "./edge";
+export type { FlowEdgeModelProps, FlowEdgeState } from "./edge";
 
 export interface FlowNode<T = any> {
   id: string;
@@ -58,23 +65,26 @@ enum Events {
 }
 
 type TheTypesOfEvents = {
-  [Events.NodesChange]: FlowNode[];
-  [Events.EdgesChange]: FlowEdge[];
+  [Events.NodesChange]: FlowNodeModel[];
+  [Events.EdgesChange]: FlowEdgeModel[];
   [Events.Connect]: Connection;
-  [Events.NodeClick]: { node: FlowNode; event: MouseEvent };
-  [Events.NodeDoubleClick]: { node: FlowNode; event: MouseEvent };
-  [Events.NodeDragStart]: { node: FlowNode };
-  [Events.NodeDrag]: { node: FlowNode; position: { x: number; y: number } };
-  [Events.NodeDragStop]: { node: FlowNode };
-  [Events.EdgeClick]: { edge: FlowEdge; event: MouseEvent };
-  [Events.SelectionChange]: { nodes: FlowNode[]; edges: FlowEdge[] };
+  [Events.NodeClick]: { node: FlowNodeModel; event: MouseEvent };
+  [Events.NodeDoubleClick]: { node: FlowNodeModel; event: MouseEvent };
+  [Events.NodeDragStart]: { node: FlowNodeModel };
+  [Events.NodeDrag]: {
+    node: FlowNodeModel;
+    position: { x: number; y: number };
+  };
+  [Events.NodeDragStop]: { node: FlowNodeModel };
+  [Events.EdgeClick]: { edge: FlowEdgeModel; event: MouseEvent };
+  [Events.SelectionChange]: { nodes: FlowNodeModel[]; edges: FlowEdgeModel[] };
   [Events.ViewportChange]: Viewport;
   [Events.StateChange]: FlowState;
 };
 
 export interface FlowState {
-  nodes: FlowNode[];
-  edges: FlowEdge[];
+  nodes: FlowNodeModel[];
+  edges: FlowEdgeModel[];
   viewport: Viewport;
   nodesDraggable: boolean;
   nodesConnectable: boolean;
@@ -83,18 +93,18 @@ export interface FlowState {
 
 export type IsValidConnection = (connection: Connection) => boolean;
 
-export interface FlowCoreProps {
-  nodes?: FlowNode[];
-  edges?: FlowEdge[];
+export interface FlowCanvasModelProps {
+  nodes: FlowNodeModel[];
+  edges: FlowEdge[];
   viewport?: Partial<Viewport>;
   isValidConnection?: IsValidConnection;
   minZoom?: number;
   maxZoom?: number;
 }
 
-export class FlowCore extends BaseDomain<TheTypesOfEvents> {
-  nodes: FlowNode[] = [];
-  edges: FlowEdge[] = [];
+export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
+  nodes: FlowNodeModel[] = [];
+  edges: FlowEdgeModel[] = [];
   viewport: Viewport = { x: 0, y: 0, zoom: 1 };
   minZoom: number = 0.1;
   maxZoom: number = 2;
@@ -103,20 +113,20 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
   nodesConnectable: boolean = true;
   multiSelect: boolean = false;
 
-  private nodeMap: Map<string, FlowNode> = new Map();
-  private edgeMap: Map<string, FlowEdge> = new Map();
+  private nodeMap: Map<string, FlowNodeModel> = new Map();
+  private edgeMap: Map<string, FlowEdgeModel> = new Map();
 
   constructor(
-    props: FlowCoreProps & {
+    props: FlowCanvasModelProps & {
       nodesDraggable?: boolean;
       nodesConnectable?: boolean;
       multiSelect?: boolean;
-    } = {},
+    },
   ) {
     super(props);
     const {
-      nodes = [],
-      edges = [],
+      nodes,
+      edges,
       viewport = {},
       isValidConnection,
       minZoom = 0.1,
@@ -152,7 +162,7 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  private addNodeToMap(node: FlowNode) {
+  private addNodeToMap(node: FlowNodeModel) {
     this.nodeMap.set(node.id, node);
   }
 
@@ -160,43 +170,39 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
     this.nodeMap.delete(id);
   }
 
-  addNode(node: Omit<FlowNode, "id"> & { id?: string }): FlowNode {
-    const id = node.id || `node-${this.uid()}`;
-    const newNode: FlowNode = { ...node, id };
-    this.nodes = [...this.nodes, newNode];
-    this.addNodeToMap(newNode);
+  addNode(node: FlowNodeModel): FlowNodeModel {
+    this.nodes = [...this.nodes, node];
+    this.addNodeToMap(node);
     this.emit(Events.NodesChange, this.nodes);
     this.emit(Events.StateChange, this.state);
-    return newNode;
+    return node;
   }
 
   removeNode(id: string): void {
-    this.nodes = this.nodes.filter((n) => n.id !== id);
+    this.nodes = this.nodes.filter((n) => n.data.id !== id);
     this.removeNodeFromMap(id);
-    this.edges = this.edges.filter((e) => e.source !== id && e.target !== id);
+    this.edges = this.edges.filter(
+      (e) => e.source.id !== id && e.target.id !== id,
+    );
     this.emit(Events.NodesChange, this.nodes);
     this.emit(Events.EdgesChange, this.edges);
     this.emit(Events.StateChange, this.state);
   }
 
   updateNode(id: string, patch: Partial<FlowNode>): void {
-    const index = this.nodes.findIndex((n) => n.id === id);
-    if (index === -1) return;
-    this.nodes = [
-      ...this.nodes.slice(0, index),
-      { ...this.nodes[index], ...patch },
-      ...this.nodes.slice(index + 1),
-    ];
-    this.addNodeToMap(this.nodes[index]);
+    const node = this.nodeMap.get(id);
+    if (!node) return;
+    node.updateData(patch);
+    this.nodes = [...this.nodes];
     this.emit(Events.NodesChange, this.nodes);
     this.emit(Events.StateChange, this.state);
   }
 
-  getNode(id: string): FlowNode | undefined {
+  getNode(id: string): FlowNodeModel | undefined {
     return this.nodeMap.get(id);
   }
 
-  setNodes(nodes: FlowNode[]): void {
+  setNodes(nodes: FlowNodeModel[]): void {
     this.nodes = nodes;
     this.nodeMap.clear();
     nodes.forEach((n) => this.addNodeToMap(n));
@@ -204,7 +210,7 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, this.state);
   }
 
-  private addEdgeToMap(edge: FlowEdge) {
+  private addEdgeToMap(edge: FlowEdgeModel) {
     this.edgeMap.set(edge.id, edge);
   }
 
@@ -212,7 +218,24 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
     this.edgeMap.delete(id);
   }
 
-  addEdge(edge: Omit<FlowEdge, "id"> & { id?: string }): FlowEdge | null {
+  private createEdgeModel(edge: FlowEdge): FlowEdgeModel | null {
+    const sourceNode = this.nodeMap.get(edge.source);
+    const targetNode = this.nodeMap.get(edge.target);
+    if (!sourceNode || !targetNode) return null;
+
+    return new FlowEdgeModel({
+      id: edge.id,
+      source: sourceNode,
+      target: targetNode,
+      sourceHandle: edge.sourceHandle,
+      targetHandle: edge.targetHandle,
+      type: edge.type,
+      label: edge.label,
+      animated: edge.animated,
+    });
+  }
+
+  addEdge(edge: Omit<FlowEdge, "id"> & { id?: string }): FlowEdgeModel | null {
     const connection: Connection = {
       source: edge.source,
       sourceHandle: edge.sourceHandle,
@@ -225,12 +248,14 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
     }
 
     const id = edge.id || `edge-${this.uid()}`;
-    const newEdge: FlowEdge = { ...edge, id };
-    this.edges = [...this.edges, newEdge];
-    this.addEdgeToMap(newEdge);
+    const edgeModel = this.createEdgeModel({ ...edge, id } as FlowEdge);
+    if (!edgeModel) return null;
+
+    this.edges = [...this.edges, edgeModel];
+    this.addEdgeToMap(edgeModel);
     this.emit(Events.EdgesChange, this.edges);
     this.emit(Events.StateChange, this.state);
-    return newEdge;
+    return edgeModel;
   }
 
   removeEdge(id: string): void {
@@ -241,26 +266,33 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
   }
 
   updateEdge(id: string, patch: Partial<FlowEdge>): void {
-    const index = this.edges.findIndex((e) => e.id === id);
-    if (index === -1) return;
-    this.edges = [
-      ...this.edges.slice(0, index),
-      { ...this.edges[index], ...patch },
-      ...this.edges.slice(index + 1),
-    ];
-    this.addEdgeToMap(this.edges[index]);
+    const edge = this.edgeMap.get(id);
+    if (!edge) return;
+    if (patch.label !== undefined) edge.label = patch.label;
+    if (patch.animated !== undefined) edge.animated = patch.animated;
+    if (patch.type !== undefined) {
+      edge.type = patch.type;
+      edge.computePath();
+    }
+    this.edges = [...this.edges];
     this.emit(Events.EdgesChange, this.edges);
     this.emit(Events.StateChange, this.state);
   }
 
-  getEdge(id: string): FlowEdge | undefined {
+  getEdge(id: string): FlowEdgeModel | undefined {
     return this.edgeMap.get(id);
   }
 
   setEdges(edges: FlowEdge[]): void {
-    this.edges = edges;
+    this.edges = [];
     this.edgeMap.clear();
-    edges.forEach((e) => this.addEdgeToMap(e));
+    for (const edge of edges) {
+      const edgeModel = this.createEdgeModel(edge);
+      if (edgeModel) {
+        this.edges.push(edgeModel);
+        this.addEdgeToMap(edgeModel);
+      }
+    }
     this.emit(Events.EdgesChange, this.edges);
     this.emit(Events.StateChange, this.state);
   }
@@ -290,10 +322,10 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
       maxY = -Infinity;
 
     this.nodes.forEach((node) => {
-      const x = node.position.x;
-      const y = node.position.y;
-      const w = node.width || 150;
-      const h = node.height || 80;
+      const x = node.data.position.x;
+      const y = node.data.position.y;
+      const w = node.data.width || 150;
+      const h = node.data.height || 80;
       minX = Math.min(minX, x);
       minY = Math.min(minY, y);
       maxX = Math.max(maxX, x + w);
@@ -317,15 +349,15 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
   selectNode(id: string, multi: boolean = false): void {
     if (!multi) {
       this.nodes.forEach((n) => {
-        n.selected = n.id === id;
+        n.data.selected = n.data.id === id;
       });
       this.edges.forEach((e) => {
-        e.selected = false;
+        e.deselect();
       });
     } else {
       const node = this.getNode(id);
       if (node) {
-        node.selected = !node.selected;
+        node.data.selected = !node.data.selected;
       }
     }
     this.emit(Events.SelectionChange, {
@@ -338,15 +370,23 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
   selectEdge(id: string, multi: boolean = false): void {
     if (!multi) {
       this.edges.forEach((e) => {
-        e.selected = e.id === id;
+        if (e.id === id) {
+          e.select();
+        } else {
+          e.deselect();
+        }
       });
       this.nodes.forEach((n) => {
-        n.selected = false;
+        n.data.selected = false;
       });
     } else {
       const edge = this.getEdge(id);
       if (edge) {
-        edge.selected = !edge.selected;
+        if (edge.selected) {
+          edge.deselect();
+        } else {
+          edge.select();
+        }
       }
     }
     this.emit(Events.SelectionChange, {
@@ -358,33 +398,43 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
 
   clearSelection(): void {
     this.nodes.forEach((n) => {
-      n.selected = false;
+      n.data.selected = false;
     });
     this.edges.forEach((e) => {
-      e.selected = false;
+      e.deselect();
     });
     this.emit(Events.SelectionChange, { nodes: [], edges: [] });
     this.emit(Events.StateChange, this.state);
   }
 
-  getSelectedNodes(): FlowNode[] {
-    return this.nodes.filter((n) => n.selected);
+  getSelectedNodes(): FlowNodeModel[] {
+    return this.nodes.filter((n) => n.data.selected);
   }
 
-  getSelectedEdges(): FlowEdge[] {
+  getSelectedEdges(): FlowEdgeModel[] {
     return this.edges.filter((e) => e.selected);
   }
 
   toJSON(): { nodes: FlowNode[]; edges: FlowEdge[]; viewport: Viewport } {
     return {
-      nodes: this.nodes,
-      edges: this.edges,
+      nodes: this.nodes.map((n) => n.data),
+      edges: this.edges.map((e) => ({
+        id: e.id,
+        source: e.source.id,
+        target: e.target.id,
+        sourceHandle: e.sourceHandle,
+        targetHandle: e.targetHandle,
+        type: e.type,
+        label: e.label,
+        animated: e.animated,
+        selected: e.selected,
+      })),
       viewport: this.viewport,
     };
   }
 
   fromJSON(data: {
-    nodes: FlowNode[];
+    nodes: FlowNodeModel[];
     edges: FlowEdge[];
     viewport?: Viewport;
   }): void {
@@ -399,48 +449,51 @@ export class FlowCore extends BaseDomain<TheTypesOfEvents> {
     return this.on(Events.Connect, handler);
   }
 
-  onNodesChange(handler: Handler<FlowNode[]>): () => void {
+  onNodesChange(handler: Handler<FlowNodeModel[]>): () => void {
     return this.on(Events.NodesChange, handler);
   }
 
-  onEdgesChange(handler: Handler<FlowEdge[]>): () => void {
+  onEdgesChange(handler: Handler<FlowEdgeModel[]>): () => void {
     return this.on(Events.EdgesChange, handler);
   }
 
   onNodeClick(
-    handler: Handler<{ node: FlowNode; event: MouseEvent }>,
+    handler: Handler<{ node: FlowNodeModel; event: MouseEvent }>,
   ): () => void {
     return this.on(Events.NodeClick, handler);
   }
 
   onNodeDoubleClick(
-    handler: Handler<{ node: FlowNode; event: MouseEvent }>,
+    handler: Handler<{ node: FlowNodeModel; event: MouseEvent }>,
   ): () => void {
     return this.on(Events.NodeDoubleClick, handler);
   }
 
-  onNodeDragStart(handler: Handler<{ node: FlowNode }>): () => void {
+  onNodeDragStart(handler: Handler<{ node: FlowNodeModel }>): () => void {
     return this.on(Events.NodeDragStart, handler);
   }
 
   onNodeDrag(
-    handler: Handler<{ node: FlowNode; position: { x: number; y: number } }>,
+    handler: Handler<{
+      node: FlowNodeModel;
+      position: { x: number; y: number };
+    }>,
   ): () => void {
     return this.on(Events.NodeDrag, handler);
   }
 
-  onNodeDragStop(handler: Handler<{ node: FlowNode }>): () => void {
+  onNodeDragStop(handler: Handler<{ node: FlowNodeModel }>): () => void {
     return this.on(Events.NodeDragStop, handler);
   }
 
   onEdgeClick(
-    handler: Handler<{ edge: FlowEdge; event: MouseEvent }>,
+    handler: Handler<{ edge: FlowEdgeModel; event: MouseEvent }>,
   ): () => void {
     return this.on(Events.EdgeClick, handler);
   }
 
   onSelectionChange(
-    handler: Handler<{ nodes: FlowNode[]; edges: FlowEdge[] }>,
+    handler: Handler<{ nodes: FlowNodeModel[]; edges: FlowEdgeModel[] }>,
   ): () => void {
     return this.on(Events.SelectionChange, handler);
   }

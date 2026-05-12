@@ -17,18 +17,20 @@
  * </SVG>
  * ```
  */
-import { DerivedRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/reactive";
 
 import { isElement } from "@/content/type";
 import { ViewStyle, ClassNameRef } from "@/style/index";
 import { MountedEvent } from "@/event/index";
+import { VNodeView } from "@/vnode/view";
+import { Box } from "./box";
 
 /** Type for attribute values - supports static or reactive values */
 type AttrValue =
   | string
   | number
-  | DerivedRef<string | number>
-  | Ref<string | number>;
+  | DerivedRef<string | number | boolean | undefined>
+  | Ref<string | number | boolean | undefined>;
 
 /** Props shared by all SVG elements (lifecycle, events, style, class) */
 interface SVGBaseProps {
@@ -42,7 +44,7 @@ interface SVGBaseProps {
   "aria-hidden"?: "true" | "false";
   "aria-describedby"?: string;
   "aria-labelledby"?: string;
-  onMounted?(event: MountedEvent<SVGElement>): void;
+  onMounted?(event: MountedEvent<VNodeView>): void | (() => void);
   beforeUnmounted?(): void;
   onUnmounted?(): void;
   onClick?(e: MouseEvent): void;
@@ -91,6 +93,1158 @@ export interface SVGProps extends SVGBaseProps, SVGPresentationAttrs {
   color?: AttrValue;
 }
 
+export function SVG(props: SVGProps = {}, children?: any) {
+  let $elm: SVGSVGElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-svg",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface GProps extends SVGBaseProps, SVGPresentationAttrs {}
+
+export function G(props: GProps = {}, children?: any) {
+  let $elm: SVGGElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-g",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface CircleProps extends SVGBaseProps, SVGPresentationAttrs {
+  cx?: AttrValue;
+  cy?: AttrValue;
+  r?: AttrValue;
+}
+
+export function Circle(props: CircleProps = {}, children?: any) {
+  let $elm: SVGCircleElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-circle",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface RectProps extends SVGBaseProps, SVGPresentationAttrs {
+  x?: AttrValue;
+  y?: AttrValue;
+  width?: AttrValue;
+  height?: AttrValue;
+  rx?: AttrValue;
+  ry?: AttrValue;
+}
+
+export function Rect(props: RectProps = {}, children?: any) {
+  let $elm: SVGRectElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-rect",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface PathProps extends SVGBaseProps, SVGPresentationAttrs {
+  d?: string | DerivedRef<string> | Ref<string>;
+  pathLength?: AttrValue;
+}
+
+export function Path(props: PathProps = {}, children?: any) {
+  let $elm: any = null;
+  const box$ = Box(props, {
+    d: "",
+  });
+  const state = box$.state;
+  const events = box$.events;
+
+  const methods = {
+    subscribe_props() {
+      box$.methods.subscribe_props();
+      const d = props.d;
+      if (d !== undefined) {
+        if (isRef(d)) {
+          state.d = d.value;
+          d.subscribe({
+            onChange(v) {
+              state.d = v;
+            },
+          });
+        } else {
+          state.d = d;
+        }
+      }
+    },
+  };
+
+  methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-path",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface LineProps extends SVGBaseProps, SVGPresentationAttrs {
+  x1?: AttrValue;
+  y1?: AttrValue;
+  x2?: AttrValue;
+  y2?: AttrValue;
+}
+
+export function Line(props: LineProps = {}, children?: any) {
+  let $elm: SVGLineElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-line",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface PolylineProps extends SVGBaseProps, SVGPresentationAttrs {
+  points?: AttrValue;
+}
+
+export function Polyline(props: PolylineProps = {}, children?: any) {
+  let $elm: SVGPolylineElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-polyline",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface PolygonProps extends SVGBaseProps, SVGPresentationAttrs {
+  points?: AttrValue;
+}
+
+export function Polygon(props: PolygonProps = {}, children?: any) {
+  let $elm: SVGPolygonElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-polygon",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface TextProps extends SVGBaseProps, SVGPresentationAttrs {
+  x?: AttrValue;
+  y?: AttrValue;
+  dx?: AttrValue;
+  dy?: AttrValue;
+  "text-anchor"?: AttrValue;
+  "dominant-baseline"?: AttrValue;
+  "font-size"?: AttrValue;
+  "font-family"?: AttrValue;
+  "font-weight"?: AttrValue;
+  "font-style"?: AttrValue;
+  "letter-spacing"?: AttrValue;
+  "word-spacing"?: AttrValue;
+  "text-decoration"?: AttrValue;
+  textLength?: AttrValue;
+  lengthAdjust?: AttrValue;
+  rotate?: AttrValue;
+}
+
+export function Text(props: TextProps = {}, children?: any) {
+  let $elm: SVGTextElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-text",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface DefsProps extends SVGBaseProps {}
+
+export function Defs(props: DefsProps = {}, children?: any) {
+  let $elm: SVGDefsElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-defs",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface SymbolProps extends SVGBaseProps {
+  viewBox?: AttrValue;
+}
+
+export function Symbol(props: SymbolProps = {}, children?: any) {
+  let $elm: SVGSymbolElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-symbol",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface UseProps extends SVGBaseProps, SVGPresentationAttrs {
+  href?: AttrValue;
+  x?: AttrValue;
+  y?: AttrValue;
+  width?: AttrValue;
+  height?: AttrValue;
+}
+
+export function Use(props: UseProps = {}, children?: any) {
+  let $elm: SVGUseElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-use",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface LinearGradientProps extends SVGBaseProps {
+  x1?: AttrValue;
+  y1?: AttrValue;
+  x2?: AttrValue;
+  y2?: AttrValue;
+  gradientUnits?: AttrValue;
+  gradientTransform?: AttrValue;
+  spreadMethod?: AttrValue;
+}
+
+export function LinearGradient(
+  props: LinearGradientProps = {},
+  children?: any,
+) {
+  let $elm: SVGLinearGradientElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-linear-gradient",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface RadialGradientProps extends SVGBaseProps {
+  cx?: AttrValue;
+  cy?: AttrValue;
+  r?: AttrValue;
+  fx?: AttrValue;
+  fy?: AttrValue;
+  gradientUnits?: AttrValue;
+  gradientTransform?: AttrValue;
+  spreadMethod?: AttrValue;
+}
+
+export function RadialGradient(
+  props: RadialGradientProps = {},
+  children?: any,
+) {
+  let $elm: SVGRadialGradientElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-radial-gradient",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface StopProps extends SVGBaseProps {
+  offset?: AttrValue;
+  "stop-color"?: AttrValue;
+  "stop-opacity"?: AttrValue;
+}
+
+export function Stop(props: StopProps = {}, children?: any) {
+  let $elm: SVGStopElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-stop",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface MaskProps extends SVGBaseProps {
+  x?: AttrValue;
+  y?: AttrValue;
+  width?: AttrValue;
+  height?: AttrValue;
+  maskUnits?: AttrValue;
+  maskContentUnits?: AttrValue;
+}
+
+export function Mask(props: MaskProps = {}, children?: any) {
+  let $elm: SVGMaskElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-mask",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface ClipPathProps extends SVGBaseProps {
+  clipPathUnits?: AttrValue;
+}
+
+export function ClipPath(props: ClipPathProps = {}, children?: any) {
+  let $elm: SVGClipPathElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-clippath",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
+export interface EllipseProps extends SVGBaseProps, SVGPresentationAttrs {
+  cx?: AttrValue;
+  cy?: AttrValue;
+  rx?: AttrValue;
+  ry?: AttrValue;
+}
+
+export function Ellipse(props: EllipseProps = {}, children?: any) {
+  let $elm: SVGEllipseElement | null = null;
+  const box$ = Box(props, {});
+  const state = box$.state;
+  const events = box$.events;
+
+  box$.methods.subscribe_props();
+  box$.methods.add_event();
+  box$.methods.build_children(children);
+
+  return {
+    t: "svg-ellipse",
+    get $elm() {
+      return $elm;
+    },
+    set $elm(v) {
+      box$.methods.set$elm(v);
+      $elm = v;
+    },
+    state,
+    children: state.children,
+    events,
+    onMounted(event: MountedEvent) {
+      state.rendered = true;
+      if (props.onMounted) {
+        box$.methods.unsubscribe(props.onMounted(event));
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (props.beforeUnmounted) {
+        props.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
+        if (isElement(node) && node.beforeUnmounted) {
+          node.beforeUnmounted();
+        }
+      }
+    },
+    onUnmounted() {
+      box$.methods.destroy();
+      if (props.onUnmounted) {
+        props.onUnmounted();
+      }
+      state.rendered = false;
+      $elm = null;
+    },
+  };
+}
+
 export interface GProps extends SVGBaseProps, SVGPresentationAttrs {}
 
 export interface CircleProps extends SVGBaseProps, SVGPresentationAttrs {
@@ -109,7 +1263,7 @@ export interface RectProps extends SVGBaseProps, SVGPresentationAttrs {
 }
 
 export interface PathProps extends SVGBaseProps, SVGPresentationAttrs {
-  d?: AttrValue;
+  d?: string | DerivedRef<string> | Ref<string>;
   pathLength?: AttrValue;
 }
 
@@ -208,51 +1362,76 @@ export interface EllipseProps extends SVGBaseProps, SVGPresentationAttrs {
   ry?: AttrValue;
 }
 
-type InternalSVGProps = SVGBaseProps &
-  SVGPresentationAttrs & { type?: string } & Record<string, any>;
+interface SVGBaseProps {
+  style?: ViewStyle;
+  class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
+  dataset?: Record<string, AttrValue>;
+  id?: AttrValue;
+  tabindex?: AttrValue;
+  role?: string;
+  "aria-label"?: string;
+  "aria-hidden"?: "true" | "false";
+  "aria-describedby"?: string;
+  "aria-labelledby"?: string;
+  onMounted?(event: MountedEvent<SVGElement>): void;
+  beforeUnmounted?(): void;
+  onUnmounted?(): void;
+  onClick?(e: MouseEvent): void;
+  onPointerDown?(e: PointerEvent): void;
+  onPointerUp?(e: PointerEvent): void;
+  onPointerMove?(e: PointerEvent): void;
+  onMouseEnter?(e: MouseEvent): void;
+  onMouseLeave?(e: MouseEvent): void;
+  onFocus?(e: FocusEvent): void;
+  onBlur?(e: FocusEvent): void;
+}
 
-function createSVGElement(props: InternalSVGProps = {}, children?: any) {
-  // const host = getHost();
-  const {
-    type = "svg",
-    style,
-    class: cls,
-    dataset = {},
-    onMounted,
-    onUnmounted,
-    onClick,
-    onPointerDown,
-    onPointerUp,
-    onPointerMove,
-    onMouseEnter,
-    onMouseLeave,
-    onFocus,
-    onBlur,
-    beforeUnmounted,
-    ...rest
-  } = props;
-  // const $elm = safeCreateElementNS("http://www.w3.org/2000/svg", type);
-  let $elm: any = null;
+interface SVGPresentationAttrs {
+  fill?: AttrValue;
+  "fill-opacity"?: AttrValue;
+  "fill-rule"?: AttrValue;
+  stroke?: AttrValue;
+  "stroke-width"?: AttrValue;
+  "stroke-opacity"?: AttrValue;
+  "stroke-linecap"?: AttrValue;
+  "stroke-linejoin"?: AttrValue;
+  "stroke-dasharray"?: AttrValue;
+  "stroke-dashoffset"?: AttrValue;
+  opacity?: AttrValue;
+  transform?: AttrValue;
+  "clip-path"?: AttrValue;
+  "clip-rule"?: AttrValue;
+  mask?: AttrValue;
+  filter?: AttrValue;
+  visibility?: AttrValue;
+  display?: AttrValue;
+  "pointer-events"?: AttrValue;
+  cursor?: AttrValue;
+}
 
-  let _children = children ?? [];
-  if (!Array.isArray(_children)) {
-    _children = [_children];
-  }
+function createElement<P extends SVGBaseProps>(
+  props: P,
+  createBox: (props: P) => ReturnType<typeof Box>,
+) {
+  const box$ = createBox(props);
+  const state = box$.state;
 
   return {
     t: "svg",
-    get $elm() {
-      return $elm;
-    },
-    set $elm(v: any) {
-      $elm = v;
+    $elm: null as SVGGElement | null,
+    state,
+    children: state.children,
+    onMounted(event: MountedEvent) {
+      if (props.onMounted) {
+        props.onMounted(event);
+      }
     },
     beforeUnmounted() {
       if (props.beforeUnmounted) {
         props.beforeUnmounted();
       }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (isElement(node) && node.beforeUnmounted) {
           node.beforeUnmounted();
         }
@@ -262,147 +1441,15 @@ function createSVGElement(props: InternalSVGProps = {}, children?: any) {
       if (props.onUnmounted) {
         props.onUnmounted();
       }
-      for (let i = 0; i < _children.length; i += 1) {
-        const node = _children[i];
+      for (let i = 0; i < state.children.length; i += 1) {
+        const node = state.children[i];
         if (isElement(node) && node.onUnmounted) {
           node.onUnmounted();
         }
       }
     },
     append(node: any) {
-      _children.push(node);
+      state.children.push(node);
     },
   };
-}
-
-export function SVG(props: SVGProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "svg" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function G(props: GProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "g" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Circle(props: CircleProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "circle" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Rect(props: RectProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "rect" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Path(props: PathProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "path" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Line(props: LineProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "line" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Polyline(props: PolylineProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "polyline" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Polygon(props: PolygonProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "polygon" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Text(props: TextProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "text" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Defs(props: DefsProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "defs" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Symbol(props: SymbolProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "symbol" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Use(props: UseProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "use" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function LinearGradient(
-  props: LinearGradientProps = {},
-  children?: any,
-) {
-  return createSVGElement(
-    { ...props, type: "linearGradient" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function RadialGradient(
-  props: RadialGradientProps = {},
-  children?: any,
-) {
-  return createSVGElement(
-    { ...props, type: "radialGradient" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Stop(props: StopProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "stop" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Mask(props: MaskProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "mask" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function ClipPath(props: ClipPathProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "clipPath" } as InternalSVGProps,
-    children,
-  );
-}
-
-export function Ellipse(props: EllipseProps = {}, children?: any) {
-  return createSVGElement(
-    { ...props, type: "ellipse" } as InternalSVGProps,
-    children,
-  );
 }

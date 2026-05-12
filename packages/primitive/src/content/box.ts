@@ -77,6 +77,7 @@ export type BoxEvents = Partial<{
   onMouseUp?: (e: MouseEvent) => void;
   onMouseEnter?: (e: MouseEvent) => void;
   onMouseLeave?: (e: MouseEvent) => void;
+  onMouseMove?: (e: MouseEvent) => void;
   onLongPress?: (e: PointerEvent) => void;
   onPointerDown?: (e: PointerEvent) => void;
   onPointerUp?: (e: PointerEvent) => void;
@@ -94,6 +95,7 @@ export type BoxEvents = Partial<{
   onDragOver?: (e: DragEvent) => void;
   onDragLeave?: (e: DragEvent) => void;
   onDrop?: (e: DragEvent) => void;
+  onWheel?: (e: WheelEvent) => void;
   onAnimationEnd?: (e: AnimationEvent) => void;
 }>;
 

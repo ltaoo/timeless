@@ -3,7 +3,7 @@ import { Section, Item } from "@/components/index.js";
 export default function FlowExamplePage() {
   const view$ = new Timeless.ui.ScrollViewCore({});
 
-  const flowStore = new Timeless.ui.FlowCore({
+  const flow$ = new Timeless.ui.FlowCanvasModel({
     nodes: [
       {
         id: "1",
@@ -39,9 +39,9 @@ export default function FlowExamplePage() {
     isValidConnection: (conn) => conn.source !== conn.target,
   });
 
-  flowStore.onConnect((conn) => {
+  flow$.onConnect((conn) => {
     console.log("Connection:", conn);
-    flowStore.addEdge({
+    flow$.addEdge({
       source: conn.source,
       sourceHandle: conn.sourceHandle,
       target: conn.target,
@@ -49,11 +49,11 @@ export default function FlowExamplePage() {
     });
   });
 
-  flowStore.onNodeClick(({ node, event }) => {
+  flow$.onNodeClick(({ node, event }) => {
     console.log("Node clicked:", node.id, event);
   });
 
-  flowStore.onNodeDrag(({ node, position }) => {
+  flow$.onNodeDrag(({ node, position }) => {
     console.log("Node dragging:", node.id, position);
   });
 
@@ -67,8 +67,8 @@ export default function FlowExamplePage() {
                 "w-full h-[500px] border border-border rounded-lg overflow-hidden",
             },
             [
-              FlowView({
-                store: flowStore,
+              FlowCanvas({
+                store: flow$,
                 showBackground: true,
                 showControls: true,
                 showMinimap: false,
@@ -98,23 +98,6 @@ export default function FlowExamplePage() {
             ],
           ),
         ]),
-        Item("With Minimap", [
-          View(
-            {
-              class:
-                "w-full h-[500px] border border-border rounded-lg overflow-hidden",
-            },
-            [
-              FlowView({
-                store: flowStore,
-                showBackground: true,
-                showControls: true,
-                showMinimap: true,
-                backgroundVariant: "lines",
-              }),
-            ],
-          ),
-        ]),
       ]),
       Section("Operations", [
         Item("Add Node", [
@@ -124,7 +107,7 @@ export default function FlowExamplePage() {
                 store: new Timeless.ui.ButtonCore({}),
                 onClick() {
                   const id = `node-${Date.now()}`;
-                  flowStore.addNode({
+                  flow$.addNode({
                     id,
                     position: {
                       x: Math.random() * 400 + 100,
@@ -140,9 +123,9 @@ export default function FlowExamplePage() {
               {
                 store: new Timeless.ui.ButtonCore({}),
                 onClick() {
-                  const nodes = flowStore.nodes;
+                  const nodes = flow$.nodes;
                   if (nodes.length > 0) {
-                    flowStore.removeNode(nodes[nodes.length - 1].id);
+                    flow$.removeNode(nodes[nodes.length - 1].id);
                   }
                 },
               },
@@ -152,7 +135,7 @@ export default function FlowExamplePage() {
               {
                 store: new Timeless.ui.ButtonCore({}),
                 onClick() {
-                  flowStore.fitView({ padding: 50 });
+                  flow$.fitView({ padding: 50 });
                 },
               },
               ["Fit View"],
@@ -165,7 +148,7 @@ export default function FlowExamplePage() {
               {
                 store: new Timeless.ui.ButtonCore({}),
                 onClick() {
-                  flowStore.resetView();
+                  flow$.resetView();
                 },
               },
               ["Reset View"],
@@ -174,7 +157,7 @@ export default function FlowExamplePage() {
               {
                 store: new Timeless.ui.ButtonCore({}),
                 onClick() {
-                  flowStore.zoomIn();
+                  flow$.zoomIn();
                 },
               },
               ["Zoom In"],
@@ -183,7 +166,7 @@ export default function FlowExamplePage() {
               {
                 store: new Timeless.ui.ButtonCore({}),
                 onClick() {
-                  flowStore.zoomOut();
+                  flow$.zoomOut();
                 },
               },
               ["Zoom Out"],
@@ -197,7 +180,7 @@ export default function FlowExamplePage() {
             {
               class: "p-4 bg-muted rounded-lg text-xs font-mono whitespace-pre",
             },
-            [JSON.stringify(flowStore.toJSON(), null, 2)],
+            [JSON.stringify(flow$.toJSON(), null, 2)],
           ),
         ]),
       ]),

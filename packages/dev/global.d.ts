@@ -3,7 +3,7 @@
 // === Bundled package type declarations ===
 declare module "packages/reactive/src/types" {
     export type Subscriber<T> = {
-        onChange: (v: T) => void;
+        onChange: (v: T, extra?: Record<string, unknown>) => void;
         onPatch?: (action: {
             type: "insert" | "delete" | "update" | "move" | "swap";
             index: number;
@@ -12,7 +12,7 @@ declare module "packages/reactive/src/types" {
             deleteCount?: number;
             from?: number;
             to?: number;
-        }) => void;
+        }, extra?: Record<string, unknown>) => void;
         ignore?: boolean;
         __trackId?: string;
         __trackInfo?: Record<string, unknown>;
@@ -35,7 +35,7 @@ declare module "packages/reactive/src/types" {
         isStrictEqual: (v: unknown) => boolean;
         getDeps: () => DepInfo[];
         dump: () => void;
-        as: (value: T | ((cur: T) => T)) => void;
+        as: (value: T | ((cur: T) => T), extra?: Record<string, unknown>) => void;
         set: (value: T) => void;
         update: (fn: (current: T) => T) => void;
         reset: () => void;
@@ -49,6 +49,7 @@ declare module "packages/reactive/src/types" {
         isNullish: () => boolean;
         lt: (v: T | DerivedRef<T> | Ref<T>) => boolean;
         gt: (v: T | DerivedRef<T> | Ref<T>) => boolean;
+        diff: (v: T) => void;
     };
     export type TimelessRefObject<T> = {
         __is_ref: true;
@@ -215,6 +216,7 @@ declare module "packages/reactive/src/types" {
         value: T;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
+        diff: (v: T) => void;
         getDeps?: () => DepInfo[];
         dump?: () => void;
     };
@@ -226,10 +228,6 @@ declare module "packages/reactive/src/types" {
     export function isRef(v: unknown): v is DerivedRef<any>;
     export function isArrayRef<T>(v: T[] | TimelessRefArray<T>): v is TimelessRefArray<T>;
     export function isArrayRef<T>(v: unknown): v is TimelessRefArray<T>;
-}
-declare module "packages/reactive/src/hmr" {
-    export function hmrScope(hot: any): void;
-    export function __hmr_get_hot(): any;
 }
 declare module "packages/reactive/src/reactive-array" {
     import { Ref, TimelessRefArray } from "packages/reactive/src/types";
@@ -303,7 +301,7 @@ declare module "packages/reactive/src/reactive-array" {
         partition(predicate: (item: T, index: number) => boolean): [T[], T[]];
         intersect(other: T[]): T[];
         union(...others: T[][]): T[];
-        diff(other: T[]): T[];
+        diff(other: T[]): void;
         symmetricDiff(other: T[]): T[];
         sum(fn?: (item: T) => number): number;
         min(fn?: (item: T) => number): T | undefined;
@@ -317,7 +315,7 @@ declare module "packages/reactive/src/reactive-array" {
         at(index: number): T | undefined;
         toArray(): T[];
     }
-    export function refArray<T>(items: T[], optOrHmrKey?: Partial<{
+    export function refArray<T>(items: T[], opt_or_hmr_key?: Partial<{
         key: any;
     }> | string, __hmr_key?: string): TimelessRefArray<T>;
 }
@@ -325,8 +323,10 @@ declare module "packages/reactive/src/registry" {
     import { DerivedRef, Ref } from "packages/reactive/src/types";
     import type { RefObject } from "packages/reactive/src/reactive-object";
     import type { RefArray } from "packages/reactive/src/reactive-array";
-    export function release(ref: DerivedRef<any> | Ref<any>): void;
+    export function release(ref: any): void;
+    export function release_all(): void;
     export function set(key: any, v: DerivedRef<any> | Ref<any>): void;
+    export function deleteKey(key: any): void;
     export function has(v: any): boolean;
     export function get(v: any): DerivedRef<any> | Ref<any>;
     export function getobj<T extends Record<string, any>>(v: T): RefObject<T> | undefined;
@@ -338,7 +338,7 @@ declare module "packages/reactive/src/reactive-object" {
         set(key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])): void;
         get(key: keyof T): unknown;
         delete(key: keyof T): void;
-        as(nextObj: T | ((cur: T) => T)): void;
+        as(nextObj: T | ((cur: T) => T), extra?: Record<string, unknown>): void;
         assign(updated: Partial<T>): void;
         refresh(): void;
         has(key: keyof T): boolean;
@@ -362,12 +362,13 @@ declare module "packages/reactive/src/reactive-object" {
         setIn(path: string, value: unknown): void;
         hasIn(path: string): boolean;
         update(key: keyof T, fn: (current: T[keyof T]) => T[keyof T]): void;
+        diff(v: T): void;
     }
     export interface RefObjectNullable<T> extends Ref<T> {
         set(key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])): void;
         get(key: keyof T): unknown;
         delete(key: keyof T): void;
-        as(v: T | ((cur: T | null) => T) | null): void;
+        as(v: T | ((cur: T | null) => T) | null, extra?: Record<string, unknown>): void;
         refresh(): void;
         has(key: keyof T): boolean;
         keys(): (keyof T)[];
@@ -393,6 +394,10 @@ declare module "packages/reactive/src/reactive-object" {
     }
     export function refObject<T extends Record<string, any>>(obj: T, __hmr_key?: string): TimelessRefObject<T>;
     export function refObject<T extends Record<string, any>>(obj: T | null, __hmr_key?: string): TimelessRefObjectNullable<T>;
+}
+declare module "packages/reactive/src/hmr" {
+    export function hmrScope(hot: any): void;
+    export function __hmr_get_hot(): any;
 }
 declare module "packages/reactive/src/ref" {
     import { TimelessRef } from "packages/reactive/src/types";
@@ -441,29 +446,231 @@ declare module "packages/reactive/src/model" {
         listeners?: Array<Unlisten | undefined | null>;
     }): TimelessViewModel<S, M, H, U, Sr>;
 }
+declare module "packages/base/src/base" {
+    /**
+     * 注册的监听器
+     */
+    import { EventType, Handler } from "mitt";
+    export type { Handler, EventType };
+    export enum BaseEvents {
+        Loading = "__loading",
+        Destroy = "__destroy"
+    }
+    type TheTypesOfBaseEvents = {
+        [BaseEvents.Destroy]: void;
+    };
+    type BaseDomainEvents<E> = TheTypesOfBaseEvents & E;
+    export function base<Events extends Record<EventType, unknown>>(): {
+        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
+        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
+        uid: () => number;
+        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
+        destroy(): void;
+    };
+    export class BaseDomain<Events extends Record<EventType, unknown>> {
+        /** 用于自己区别同名 Domain 不同实例的标志 */
+        unique_id: string;
+        debug: boolean;
+        _emitter: import("mitt").Emitter<BaseDomainEvents<Events>>;
+        listeners: Record<keyof BaseDomainEvents<Events>, (() => void)[]>;
+        constructor(props?: {});
+        uid(): number;
+        log(...args: unknown[]): unknown[];
+        errorTip(...args: unknown[]): void;
+        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
+        offEvent<Key extends keyof BaseDomainEvents<Events>>(k: Key): void;
+        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
+        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
+        /** 主动销毁所有的监听事件 */
+        destroy(): void;
+        onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
+        get [Symbol.toStringTag](): string;
+    }
+    export type LogLevel = "info" | "debug" | "warn" | "error";
+    export interface LoggerProps {
+        prefix?: string;
+        scope?: string;
+        time?: boolean;
+        level?: LogLevel;
+        mode?: "minimal" | "classic" | "verbose";
+        color?: string;
+    }
+    export function Logger(props?: LoggerProps): {
+        log: (...args: unknown[]) => void;
+        debug: (...args: unknown[]) => void;
+        info: (...args: unknown[]) => void;
+        warn: (...args: unknown[]) => void;
+        error: (...args: unknown[]) => void;
+        scope: string;
+        color: string;
+        setColor(value: string): void;
+    };
+    export function applyMixins(derivedCtor: any, constructors: any[]): void;
+}
+declare module "packages/base/src/result/index" {
+    import { BizError } from "@/error";
+    export type Resp<T> = {
+        data: T extends null ? null : T;
+        error: T extends null ? BizError : null;
+    };
+    export type Result<T> = Resp<T> | Resp<null>;
+    export type UnpackedResult<T> = NonNullable<T extends Resp<infer U> ? (U extends null ? U : U) : T>;
+    /** 构造一个结果对象 */
+    export const Result: {
+        /** 构造成功结果 */
+        Ok: <T>(value: T) => Result<T>;
+        /** 构造失败结果 */
+        Err: <T>(message: string | string[] | BizError | Error | Result<null>, code?: string | number, data?: unknown) => Resp<null>;
+    };
+}
+declare module "packages/base/src/error/index" {
+    export class BizError extends Error {
+        messages: string[];
+        code?: string | number;
+        data: unknown | null;
+        constructor(msg: string[], code?: string | number, data?: unknown);
+    }
+}
+declare module "packages/base/src/platform" {
+    export interface Rect {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+    export interface Dimensions {
+        width: number;
+        height: number;
+    }
+    export interface ElementRects {
+        reference: Rect;
+        floating: Rect;
+    }
+    export type Strategy = "absolute" | "fixed";
+    export interface Platform {
+        addEventListener(type: string, handler: EventListener, options?: AddEventListenerOptions): () => void;
+        patchBodyStyle(style: Record<string, string>): void;
+        getViewportSize(): {
+            width: number;
+            height: number;
+        };
+        isBrowser(): boolean;
+        isElement(value: unknown): boolean;
+        isHTMLElement(value: unknown): boolean;
+        getBoundingClientRect(element: unknown): Rect;
+        getDimensions(element: unknown): Dimensions;
+        getElementRects(args: {
+            reference: unknown;
+            floating: unknown;
+            strategy: Strategy;
+        }): ElementRects;
+        getClippingRect(args: {
+            element: unknown;
+            boundary: unknown;
+            rootBoundary: unknown;
+            strategy: Strategy;
+        }): Rect;
+        getOffsetParent(element: unknown): unknown;
+        isRTL(element: unknown): boolean;
+        getScale(element: unknown): {
+            x: number;
+            y: number;
+        };
+        getDocumentElement(element?: unknown): unknown;
+    }
+}
+declare module "packages/base/src/type" {
+    export type Unpacked<T> = T extends (infer U)[] ? U : T extends (...args: any[]) => infer U ? U : T extends Promise<infer U> ? U : T;
+    export type MutableRecord<U> = {
+        [SubType in keyof U]: {
+            type: SubType;
+            data: U[SubType];
+        };
+    }[keyof U];
+    export type MutableRecord2<U> = {
+        [SubType in keyof U]: {
+            type: SubType;
+            data: U[SubType];
+        } & U[SubType];
+    }[keyof U];
+    export type Shift<T extends any[]> = ((...args: T) => void) extends (arg1: any, ...rest: infer R) => void ? R : never;
+    export interface JSONArray extends Array<JSONValue> {
+    }
+    export type JSONValue = string | number | boolean | JSONObject | JSONArray | null;
+    export type JSONObject = {
+        [Key in string]?: JSONValue;
+    };
+    /**
+     * type UserID = Brand<string, "UserID">;
+     */
+    const __brand: unique symbol;
+    export type Brand<T, B> = T & {
+        readonly [__brand]: B;
+    };
+}
+declare module "packages/base/src/utils" {
+    export function update_arr_item<T>(arr: T[], index: number, v2: T): T[];
+    export function remove_arr_item<T>(arr: T[], index: number): T[];
+}
+declare module "packages/base/src/throttle" {
+    export function throttle<T extends (...args: any[]) => any>(delay: number, func: T): (...args: Parameters<T>) => any;
+}
+declare module "packages/base/src/debounce" {
+    export function debounce<T extends (...args: any[]) => any>(wait: number, func: T): (...args: Parameters<T>) => void;
+}
+declare module "packages/base/src/index" {
+    export * from "packages/base/src/base";
+    export * from "packages/base/src/result/index";
+    export * from "packages/base/src/error/index";
+    export * from "packages/base/src/platform";
+    export * from "packages/base/src/type";
+    export * from "packages/base/src/utils";
+    export * from "packages/base/src/throttle";
+    export * from "packages/base/src/debounce";
+}
+declare module "packages/reactive/src/disposal" {
+    /**
+     * Disposal tracking for owner-based cleanup.
+     *
+     * When a computed/derive ref is created while _current_disposables is set,
+     * it registers its destroy function. The owner system (in primitive) uses
+     * this to auto-cleanup refs created during render callbacks.
+     */
+    export let _current_disposables: (() => void)[] | null;
+    export function start_tracking(disposables: (() => void)[]): void;
+    export function stop_tracking(): void;
+}
 declare module "packages/reactive/src/computed" {
     import { DerivedRef } from "packages/reactive/src/types";
     type RefValue<R> = R extends {
         __is_ref: true;
         value: infer T;
     } ? T : R;
+    type ComputedOptions = {
+        debounce?: number;
+        throttle?: number;
+    };
     export function computed<D extends {
         __is_ref: true;
         value: any;
-    }, R>(deps: D, fn: (val: RefValue<D>) => R): DerivedRef<R>;
-    export function computed<T extends object, R>(deps: T, fn: (val: T) => R): DerivedRef<R>;
+    }, R>(deps: D, fn: (val: RefValue<D>) => R, options?: ComputedOptions): DerivedRef<R>;
+    export function computed<T extends object, R>(deps: T, fn: (val: T) => R, options?: ComputedOptions): DerivedRef<R>;
 }
 declare module "packages/reactive/src/derive" {
     import { Ref, DerivedRef } from "packages/reactive/src/types";
+    type ComputedOptions = {
+        debounce?: number;
+        throttle?: number;
+    };
     type UnwrapRef<T> = T extends Ref<infer V> ? V extends Ref<any> ? UnwrapRef<V> : V : T extends DerivedRef<infer V> ? V extends DerivedRef<any> ? UnwrapRef<V> : V : T;
     export function derive<T extends readonly any[], R>(deps: readonly [...T], fn: (...args: {
         [K in keyof T]: UnwrapRef<T[K]>;
     } & {
         length: T["length"];
-    }) => R): DerivedRef<R>;
+    }) => R, options?: ComputedOptions): DerivedRef<R>;
     export function derive<T extends Record<string, any>, R>(deps: T, fn: (args: {
         [K in keyof T]: UnwrapRef<T[K]>;
-    }) => R): DerivedRef<R>;
+    }) => R, options?: ComputedOptions): DerivedRef<R>;
 }
 declare module "packages/reactive/src/index" {
     import type { Subscriber, SubscriberWithId, DepInfo, Ref, DerivedRef, TimelessRefArray } from "packages/reactive/src/types";
@@ -479,8 +686,9 @@ declare module "packages/reactive/src/index" {
     import { signal } from "packages/reactive/src/signal";
     import { computed } from "packages/reactive/src/computed";
     import { derive } from "packages/reactive/src/derive";
-    import { release, get as registryGet, set as registrySet, getobj as registryGetObj, getarr as registryGetArr } from "packages/reactive/src/registry";
+    import { release, release_all, get as registryGet, set as registrySet, deleteKey as registryDelete, getobj as registryGetObj, getarr as registryGetArr } from "packages/reactive/src/registry";
     export function generateTrackId(prefix?: string): string;
+    export { _current_disposables, start_tracking, stop_tracking, } from "packages/reactive/src/disposal";
     export function getDeps<T extends {
         getDeps?: () => any[];
     }>(ref: T): any[];
@@ -492,10 +700,9 @@ declare module "packages/reactive/src/index" {
         deps: DepInfo[];
         value: any;
     }
-    export function dumpAll(refs: any[]): DependencyDump[];
     export function printDepTree(refs: any[]): void;
     export function findLeakedDeps(refs: any[]): DepInfo[];
-    export { Subscriber, SubscriberWithId, DepInfo, Ref, DerivedRef, RefObject, RefArray, TimelessRefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, isWriteableRef, isArrayRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, hmrScope, };
+    export { Subscriber, SubscriberWithId, DepInfo, Ref, DerivedRef, RefObject, RefArray, TimelessRefArray, Signal, PrimitiveSignal, ObjectSignal, ArraySignal, isRef, isWriteableRef, isArrayRef, ref, signal, refArray as reactiveArray, refObject as reactiveObject, defineModel, computed, derive, release, registryGet, registrySet, registryDelete, registryGetObj, registryGetArr, registryGetObj as getobj, registryGetArr as getarr, derive as combine, refArray as refarr, refObject as refobj, release as uncomputed, release_all, hmrScope, };
 }
 declare module "packages/primitive/src/reactive/for" {
     import { Ref, DerivedRef } from "packages/reactive/src/index";
@@ -519,6 +726,7 @@ declare module "packages/primitive/src/reactive/for" {
         }[];
         children: (TimelessElement | null)[];
         idx_arr: DerivedRef<number>[];
+        item_owners: any[];
     };
     export function For<T>(props: ForProps<T>, bus?: Partial<{
         onRefresh: (diff: {
@@ -546,16 +754,6 @@ declare module "packages/primitive/src/reactive/for" {
         onUnmounted(): void;
         _hmr_dispose(): void;
     };
-}
-declare module "packages/primitive/src/reactive/error-boundary-context" {
-    import { TimelessElement } from "@/content/type";
-    export type ErrorBoundaryHandler = {
-        handle(error: unknown): (TimelessElement | null)[];
-        reset(): void;
-    };
-    const ErrorBoundaryContext: any;
-    export function useErrorBoundary(): any;
-    export { ErrorBoundaryContext };
 }
 declare module "packages/primitive/src/reactive/show" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
@@ -609,13 +807,23 @@ declare module "packages/primitive/src/reactive/match" {
         onUnmounted(): void;
     };
 }
-declare module "packages/primitive/src/reactive/error-boundary" {
+declare module "packages/primitive/src/content/error-boundary-context" {
+    import { TimelessElement } from "@/content/type";
+    export type ErrorBoundaryHandler = {
+        handle(error: unknown): (TimelessElement | null)[];
+        reset(): void;
+    };
+    const ErrorBoundaryContext: any;
+    export function useErrorBoundary(): any;
+    export { ErrorBoundaryContext };
+}
+declare module "packages/primitive/src/content/error-boundary" {
     import { TimelessElement, ViewChildren } from "@/content/type";
     import { MountedEvent } from "@/event";
     export type ErrorBoundaryProps = {
         fallback?: (error: unknown, reset: () => void) => ViewChildren;
-        onError?: (error: unknown) => void;
         throwToGlobal?: boolean;
+        onError?: (error: unknown) => void;
         onMounted?: (event: MountedEvent) => void;
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
@@ -708,6 +916,7 @@ declare module "packages/primitive/src/content/box" {
         onMouseUp?: (e: MouseEvent) => void;
         onMouseEnter?: (e: MouseEvent) => void;
         onMouseLeave?: (e: MouseEvent) => void;
+        onMouseMove?: (e: MouseEvent) => void;
         onLongPress?: (e: PointerEvent) => void;
         onPointerDown?: (e: PointerEvent) => void;
         onPointerUp?: (e: PointerEvent) => void;
@@ -725,11 +934,14 @@ declare module "packages/primitive/src/content/box" {
         onDragOver?: (e: DragEvent) => void;
         onDragLeave?: (e: DragEvent) => void;
         onDrop?: (e: DragEvent) => void;
+        onWheel?: (e: WheelEvent) => void;
         onAnimationEnd?: (e: AnimationEvent) => void;
     }>;
     /** Internal state structure for Box */
     export type BoxState = {
         rendered: boolean;
+        top: number;
+        height: number;
         style: RawViewStyleProperties;
         styleSet: string[];
         attributes: Record<string, string | number | boolean | undefined>;
@@ -756,6 +968,7 @@ declare module "packages/primitive/src/content/box" {
             onMouseUp?: (e: MouseEvent) => void;
             onMouseEnter?: (e: MouseEvent) => void;
             onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
             onLongPress?: (e: PointerEvent) => void;
             onPointerDown?: (e: PointerEvent) => void;
             onPointerUp?: (e: PointerEvent) => void;
@@ -773,6 +986,7 @@ declare module "packages/primitive/src/content/box" {
             onDragOver?: (e: DragEvent) => void;
             onDragLeave?: (e: DragEvent) => void;
             onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
         }>;
         methods: {
@@ -810,6 +1024,7 @@ declare module "packages/primitive/src/content/view" {
      * @returns A TimelessElement representing a view/container
      */
     export function View(props?: ViewProps, children?: ViewChildren): TimelessElement<ViewState>;
+    export type View = ReturnType<typeof View>;
 }
 declare module "packages/primitive/src/content/lazy-view" {
     import { ViewProps } from "packages/primitive/src/content/view";
@@ -847,7 +1062,7 @@ declare module "packages/primitive/src/content/type" {
     import { VNodeView } from "@/vnode/view";
     import { MountedEvent } from "@/event";
     import { TimelessLazyComponent } from "packages/primitive/src/content/lazy-view";
-    import { BoxState } from "packages/primitive/src/content/box";
+    import { BoxEvents, BoxState } from "packages/primitive/src/content/box";
     /** Possible prop values */
     export type ViewPropValue = string | number | boolean | undefined | null;
     /** HTML attributes record */
@@ -881,33 +1096,11 @@ declare module "packages/primitive/src/content/type" {
      */
     export interface TimelessElement<T = any, Elm = any> {
         t: string;
+        svgType?: string;
         $elm: VNodeView<Elm>;
-        /** 描述该元素的状态，用来替代 value */
         state: T & BoxState;
         children?: (TimelessElement | null)[];
-        events?: {
-            onMounted?: (e: MountedEvent<VNodeView<Elm>>) => void;
-            onClick?: (e: MouseEvent) => void;
-            onDoubleClick?: (e: MouseEvent) => void;
-            onLongPress?: (e: PointerEvent) => void;
-            onPointerDown?: (e: PointerEvent) => void;
-            onMouseEnter?: (e: MouseEvent) => void;
-            onMouseLeave?: (e: MouseEvent) => void;
-            onChange?: (e: Event) => void;
-            onInput?: (e: Event) => void;
-            onFocus?: (e: FocusEvent) => void;
-            onBlur?: (e: FocusEvent) => void;
-            onKeyDown?: (e: KeyboardEvent) => void;
-            onContextMenu?: (e: MouseEvent) => void;
-            onDragStart?: (e: DragEvent) => void;
-            onDrag?: (e: DragEvent) => void;
-            onDragEnd?: (e: DragEvent) => void;
-            onDragEnter?: (e: DragEvent) => void;
-            onDragOver?: (e: DragEvent) => void;
-            onDragLeave?: (e: DragEvent) => void;
-            onDrop?: (e: DragEvent) => void;
-            onAnimationEnd?: (e: AnimationEvent) => void;
-        };
+        events?: BoxEvents;
         a11y?: VNodeA11y;
         onMounted(event: MountedEvent): void;
         beforeUnmounted?(): void;
@@ -986,15 +1179,22 @@ declare module "packages/primitive/src/content/fragment" {
     type Fragment = ReturnType<typeof Fragment>;
     export function isFragment(v: any): v is Fragment;
 }
-declare module "packages/primitive/src/context" {
+declare module "packages/primitive/src/context/context" {
     import { TimelessElement, ViewChildren } from "@/content/type";
     interface Owner {
         parent: Owner | null;
         context: Map<symbol, any>;
+        disposables: (() => void)[];
     }
-    export function createOwner(parent?: Owner | null): Owner;
-    export function runWithOwner<T>(owner: Owner, fn: () => T): T;
-    export function getOwner(): Owner | null;
+    export function create_owner(parent?: Owner | null): Owner;
+    export function run_with_owner<T>(owner: Owner, fn: () => T): T;
+    export function get_owner(): Owner | null;
+    /** Register a disposable with the current owner */
+    export function track_disposable(clean: () => void): void;
+    /** Destroy all disposables registered with an owner */
+    export function dispose_owner(owner: Owner): void;
+    /** Dispose and clear disposables (for re-render cycles) */
+    export function clear_owner_disposables(owner: Owner): void;
     export type Context<T> = {
         key: symbol;
         name?: string;
@@ -1057,8 +1257,9 @@ declare module "packages/primitive/src/content/svg" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewStyle, ClassNameRef } from "@/style/index";
     import { MountedEvent } from "@/event/index";
+    import { VNodeView } from "@/vnode/view";
     /** Type for attribute values - supports static or reactive values */
-    type AttrValue = string | number | DerivedRef<string | number> | Ref<string | number>;
+    type AttrValue = string | number | DerivedRef<string | number | boolean | undefined> | Ref<string | number | boolean | undefined>;
     /** Props shared by all SVG elements (lifecycle, events, style, class) */
     interface SVGBaseProps {
         style?: ViewStyle;
@@ -1071,7 +1272,7 @@ declare module "packages/primitive/src/content/svg" {
         "aria-hidden"?: "true" | "false";
         "aria-describedby"?: string;
         "aria-labelledby"?: string;
-        onMounted?(event: MountedEvent<SVGElement>): void;
+        onMounted?(event: MountedEvent<VNodeView>): void | (() => void);
         beforeUnmounted?(): void;
         onUnmounted?(): void;
         onClick?(e: MouseEvent): void;
@@ -1117,6 +1318,830 @@ declare module "packages/primitive/src/content/svg" {
         overflow?: AttrValue;
         color?: AttrValue;
     }
+    export function SVG(props?: SVGProps, children?: any): {
+        t: string;
+        $elm: SVGSVGElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface GProps extends SVGBaseProps, SVGPresentationAttrs {
+    }
+    export function G(props?: GProps, children?: any): {
+        t: string;
+        $elm: SVGGElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface CircleProps extends SVGBaseProps, SVGPresentationAttrs {
+        cx?: AttrValue;
+        cy?: AttrValue;
+        r?: AttrValue;
+    }
+    export function Circle(props?: CircleProps, children?: any): {
+        t: string;
+        $elm: SVGCircleElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface RectProps extends SVGBaseProps, SVGPresentationAttrs {
+        x?: AttrValue;
+        y?: AttrValue;
+        width?: AttrValue;
+        height?: AttrValue;
+        rx?: AttrValue;
+        ry?: AttrValue;
+    }
+    export function Rect(props?: RectProps, children?: any): {
+        t: string;
+        $elm: SVGRectElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface PathProps extends SVGBaseProps, SVGPresentationAttrs {
+        d?: string | DerivedRef<string> | Ref<string>;
+        pathLength?: AttrValue;
+    }
+    export function Path(props?: PathProps, children?: any): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            d: string;
+        };
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface LineProps extends SVGBaseProps, SVGPresentationAttrs {
+        x1?: AttrValue;
+        y1?: AttrValue;
+        x2?: AttrValue;
+        y2?: AttrValue;
+    }
+    export function Line(props?: LineProps, children?: any): {
+        t: string;
+        $elm: SVGLineElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface PolylineProps extends SVGBaseProps, SVGPresentationAttrs {
+        points?: AttrValue;
+    }
+    export function Polyline(props?: PolylineProps, children?: any): {
+        t: string;
+        $elm: SVGPolylineElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface PolygonProps extends SVGBaseProps, SVGPresentationAttrs {
+        points?: AttrValue;
+    }
+    export function Polygon(props?: PolygonProps, children?: any): {
+        t: string;
+        $elm: SVGPolygonElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface TextProps extends SVGBaseProps, SVGPresentationAttrs {
+        x?: AttrValue;
+        y?: AttrValue;
+        dx?: AttrValue;
+        dy?: AttrValue;
+        "text-anchor"?: AttrValue;
+        "dominant-baseline"?: AttrValue;
+        "font-size"?: AttrValue;
+        "font-family"?: AttrValue;
+        "font-weight"?: AttrValue;
+        "font-style"?: AttrValue;
+        "letter-spacing"?: AttrValue;
+        "word-spacing"?: AttrValue;
+        "text-decoration"?: AttrValue;
+        textLength?: AttrValue;
+        lengthAdjust?: AttrValue;
+        rotate?: AttrValue;
+    }
+    export function Text(props?: TextProps, children?: any): {
+        t: string;
+        $elm: SVGTextElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface DefsProps extends SVGBaseProps {
+    }
+    export function Defs(props?: DefsProps, children?: any): {
+        t: string;
+        $elm: SVGDefsElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface SymbolProps extends SVGBaseProps {
+        viewBox?: AttrValue;
+    }
+    export function Symbol(props?: SymbolProps, children?: any): {
+        t: string;
+        $elm: SVGSymbolElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface UseProps extends SVGBaseProps, SVGPresentationAttrs {
+        href?: AttrValue;
+        x?: AttrValue;
+        y?: AttrValue;
+        width?: AttrValue;
+        height?: AttrValue;
+    }
+    export function Use(props?: UseProps, children?: any): {
+        t: string;
+        $elm: SVGUseElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface LinearGradientProps extends SVGBaseProps {
+        x1?: AttrValue;
+        y1?: AttrValue;
+        x2?: AttrValue;
+        y2?: AttrValue;
+        gradientUnits?: AttrValue;
+        gradientTransform?: AttrValue;
+        spreadMethod?: AttrValue;
+    }
+    export function LinearGradient(props?: LinearGradientProps, children?: any): {
+        t: string;
+        $elm: SVGLinearGradientElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface RadialGradientProps extends SVGBaseProps {
+        cx?: AttrValue;
+        cy?: AttrValue;
+        r?: AttrValue;
+        fx?: AttrValue;
+        fy?: AttrValue;
+        gradientUnits?: AttrValue;
+        gradientTransform?: AttrValue;
+        spreadMethod?: AttrValue;
+    }
+    export function RadialGradient(props?: RadialGradientProps, children?: any): {
+        t: string;
+        $elm: SVGRadialGradientElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface StopProps extends SVGBaseProps {
+        offset?: AttrValue;
+        "stop-color"?: AttrValue;
+        "stop-opacity"?: AttrValue;
+    }
+    export function Stop(props?: StopProps, children?: any): {
+        t: string;
+        $elm: SVGStopElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface MaskProps extends SVGBaseProps {
+        x?: AttrValue;
+        y?: AttrValue;
+        width?: AttrValue;
+        height?: AttrValue;
+        maskUnits?: AttrValue;
+        maskContentUnits?: AttrValue;
+    }
+    export function Mask(props?: MaskProps, children?: any): {
+        t: string;
+        $elm: SVGMaskElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface ClipPathProps extends SVGBaseProps {
+        clipPathUnits?: AttrValue;
+    }
+    export function ClipPath(props?: ClipPathProps, children?: any): {
+        t: string;
+        $elm: SVGClipPathElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export interface EllipseProps extends SVGBaseProps, SVGPresentationAttrs {
+        cx?: AttrValue;
+        cy?: AttrValue;
+        rx?: AttrValue;
+        ry?: AttrValue;
+    }
+    export function Ellipse(props?: EllipseProps, children?: any): {
+        t: string;
+        $elm: SVGEllipseElement;
+        state: import("packages/primitive/src/content/box").BoxState;
+        children: import("@timeless/primitive").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export interface GProps extends SVGBaseProps, SVGPresentationAttrs {
     }
     export interface CircleProps extends SVGBaseProps, SVGPresentationAttrs {
@@ -1133,7 +2158,7 @@ declare module "packages/primitive/src/content/svg" {
         ry?: AttrValue;
     }
     export interface PathProps extends SVGBaseProps, SVGPresentationAttrs {
-        d?: AttrValue;
+        d?: string | DerivedRef<string> | Ref<string>;
         pathLength?: AttrValue;
     }
     export interface LineProps extends SVGBaseProps, SVGPresentationAttrs {
@@ -1219,132 +2244,51 @@ declare module "packages/primitive/src/content/svg" {
         rx?: AttrValue;
         ry?: AttrValue;
     }
-    export function SVG(props?: SVGProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function G(props?: GProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Circle(props?: CircleProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Rect(props?: RectProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Path(props?: PathProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Line(props?: LineProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Polyline(props?: PolylineProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Polygon(props?: PolygonProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Text(props?: TextProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Defs(props?: DefsProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Symbol(props?: SymbolProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Use(props?: UseProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function LinearGradient(props?: LinearGradientProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function RadialGradient(props?: RadialGradientProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Stop(props?: StopProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Mask(props?: MaskProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function ClipPath(props?: ClipPathProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
-    export function Ellipse(props?: EllipseProps, children?: any): {
-        t: string;
-        $elm: any;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-        append(node: any): void;
-    };
+    interface SVGBaseProps {
+        style?: ViewStyle;
+        class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
+        dataset?: Record<string, AttrValue>;
+        id?: AttrValue;
+        tabindex?: AttrValue;
+        role?: string;
+        "aria-label"?: string;
+        "aria-hidden"?: "true" | "false";
+        "aria-describedby"?: string;
+        "aria-labelledby"?: string;
+        onMounted?(event: MountedEvent<SVGElement>): void;
+        beforeUnmounted?(): void;
+        onUnmounted?(): void;
+        onClick?(e: MouseEvent): void;
+        onPointerDown?(e: PointerEvent): void;
+        onPointerUp?(e: PointerEvent): void;
+        onPointerMove?(e: PointerEvent): void;
+        onMouseEnter?(e: MouseEvent): void;
+        onMouseLeave?(e: MouseEvent): void;
+        onFocus?(e: FocusEvent): void;
+        onBlur?(e: FocusEvent): void;
+    }
+    interface SVGPresentationAttrs {
+        fill?: AttrValue;
+        "fill-opacity"?: AttrValue;
+        "fill-rule"?: AttrValue;
+        stroke?: AttrValue;
+        "stroke-width"?: AttrValue;
+        "stroke-opacity"?: AttrValue;
+        "stroke-linecap"?: AttrValue;
+        "stroke-linejoin"?: AttrValue;
+        "stroke-dasharray"?: AttrValue;
+        "stroke-dashoffset"?: AttrValue;
+        opacity?: AttrValue;
+        transform?: AttrValue;
+        "clip-path"?: AttrValue;
+        "clip-rule"?: AttrValue;
+        mask?: AttrValue;
+        filter?: AttrValue;
+        visibility?: AttrValue;
+        display?: AttrValue;
+        "pointer-events"?: AttrValue;
+        cursor?: AttrValue;
+    }
 }
 declare module "packages/primitive/src/content/img" {
     /**
@@ -1434,6 +2378,7 @@ declare module "packages/primitive/src/content/img" {
             onMouseUp?: (e: MouseEvent) => void;
             onMouseEnter?: (e: MouseEvent) => void;
             onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
             onLongPress?: (e: PointerEvent) => void;
             onPointerDown?: (e: PointerEvent) => void;
             onPointerUp?: (e: PointerEvent) => void;
@@ -1451,6 +2396,7 @@ declare module "packages/primitive/src/content/img" {
             onDragOver?: (e: DragEvent) => void;
             onDragLeave?: (e: DragEvent) => void;
             onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
@@ -1668,89 +2614,80 @@ declare module "packages/primitive/src/content/popper" {
      */
     export function Popper(props: PopperProps, children?: ViewChildren): TimelessElement<{}, any>;
 }
-declare module "packages/primitive/src/content/list-view" {
+declare module "packages/primitive/src/content/list-item-view" {
+    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
+    import { BoxProps } from "packages/primitive/src/content/box";
+    export type ListItemViewProps<T> = BoxProps & {
+        uid: number;
+        top: number;
+        height: number;
+        payload: T;
+        bound?: boolean;
+    };
+    /** Internal state for View */
+    type ListItemViewState<T> = {
+        top: number;
+        height: number;
+        bound: boolean;
+        payload: T | null;
+    };
     /**
-     * ListView - A scrollable list container component.
+     * Creates a View component - the primary container.
      *
-     * ListView is designed for rendering lists of items with virtual scrolling.
-     * It supports:
-     * - Child element rendering
-     * - Reactive style/class updates
-     * - Full event handling (click, drag, keyboard)
-     * - Hydration for SSR/SSG
-     *
-     * This is the main scrollable container used in Timeless apps.
-     *
-     * @example
-     * ```tsx
-     * <ListView
-     *   style={{ height: 300 }}
-     *   onScroll={(e) => console.log('scroll', e)}
-     * >
-     *   {items.map(item => <Text>{item}</Text>)}
-     * </ListView>
-     * ```
+     * @param props - View props (style, class, events, etc.)
+     * @param children - Child elements
+     * @returns A TimelessElement representing a view/container
      */
-    import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { ViewStyle, ClassNameRef } from "@/style/index";
-    import { MountedEvent } from "@/event/index";
-    import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
+    export function ListItemView<T>(props: ListItemViewProps<T>, children?: ViewChildren): TimelessElement<ListItemViewState<T>>;
+    export type ListItemView = ReturnType<typeof ListItemView>;
+}
+declare module "packages/primitive/src/content/list-view" {
+    import { DerivedRef } from "packages/reactive/src/index";
+    import { MountedEvent, ScrollEvent } from "@/event/index";
+    import { ForProps } from "@/reactive/for";
+    import { TimelessElement } from "packages/primitive/src/content/type";
+    import { BoxEvents, BoxProps } from "packages/primitive/src/content/box";
+    type WrappedItemInListView<T extends Record<string, unknown>> = {
+        k: number;
+        v: T;
+        top: number;
+        height: number;
+    };
     /** Props for ListView component */
-    export interface ListViewProps {
-        key?: string | number;
-        style?: ViewStyle;
-        class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
-        draggable?: boolean;
-        attributes?: ViewAttributes;
-        dataset?: Record<string, string | number | DerivedRef<string> | Ref<string | number>>;
-        onMounted?(event: MountedEvent): void | (() => void);
-        beforeUnmounted?(): void;
-        onUnmounted?(): void;
-        onClick?(e: MouseEvent): void;
-        onDoubleClick?(e: MouseEvent): void;
-        onLongPress?(e: PointerEvent): void;
-        onPointerDown?: (e: PointerEvent) => void;
-        onFocus?(e: FocusEvent): void;
-        onBlur?(e: FocusEvent): void;
-        onKeyDown?: (e: KeyboardEvent) => void;
-        onContextMenu?: (e: MouseEvent) => void;
-        onMouseEnter?: (e: MouseEvent) => void;
-        onMouseLeave?: (e: MouseEvent) => void;
-        onDragStart?: (e: DragEvent) => void;
-        onDrag?: (e: DragEvent) => void;
-        onDragEnd?: (e: DragEvent) => void;
-        onDragEnter?: (e: DragEvent) => void;
-        onDragOver?: (e: DragEvent) => void;
-        onDragLeave?: (e: DragEvent) => void;
-        onDrop?: (e: DragEvent) => void;
-        onAnimationEnd?: (e: AnimationEvent) => void;
-    }
-    export function ListView(props?: ListViewProps, children?: ViewChildren): {
+    export type ListViewProps<T extends Record<string, unknown>> = BoxProps & ForProps<T> & {
+        size: number;
+        buffer?: number;
+        itemHeight: number;
+        gutter?: number;
+        onScroll?: (event: {}) => void;
+        onReachBottom?: () => void;
+    };
+    type ListViewState<T extends Record<string, unknown>> = {
+        height: number;
+        clientHeight: number;
+        offsetTop: number;
+        scrollTop: number;
+        subscribed: boolean;
+        items: T[];
+        /** 可见范围内的，带 k 的容器 */
+        wrapped_items: WrappedItemInListView<T>[];
+        children: (TimelessElement | null)[];
+        idx_arr: DerivedRef<number>[];
+    };
+    type ListViewEvents = BoxEvents & {
+        onScroll?: (event: ScrollEvent) => void;
+    };
+    export function ListView<T extends Record<string, unknown>>(props: ListViewProps<T>): {
         t: string;
         $elm: any;
-        state: {};
-        children: TimelessElement<any, any>[];
-        events: Partial<{
-            onClick?: (e: MouseEvent) => void;
-            onDoubleClick?: (e: MouseEvent) => void;
-            onLongPress?: (e: PointerEvent) => void;
-            onPointerDown?: (e: PointerEvent) => void;
-            onFocus?: (e: FocusEvent) => void;
-            onBlur?: (e: FocusEvent) => void;
-            onKeyDown?: (e: KeyboardEvent) => void;
-            onContextMenu?: (e: MouseEvent) => void;
-            onMouseEnter?: (e: MouseEvent) => void;
-            onMouseLeave?: (e: MouseEvent) => void;
-            onDragStart?: (e: DragEvent) => void;
-            onDrag?: (e: DragEvent) => void;
-            onDragEnd?: (e: DragEvent) => void;
-            onDragEnter?: (e: DragEvent) => void;
-            onDragOver?: (e: DragEvent) => void;
-            onDragLeave?: (e: DragEvent) => void;
-            onDrop?: (e: DragEvent) => void;
-            onAnimationEnd?: (e: AnimationEvent) => void;
-        }>;
-        hydrate(existing_dom: any): any;
+        state: import("packages/primitive/src/content/box").BoxState & ListViewState<T>;
+        events: ListViewEvents;
+        children: TimelessElement<{
+            top: number;
+            height: number;
+            bound: boolean;
+            payload: unknown;
+        }, any>[];
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -1774,6 +2711,15 @@ declare module "packages/primitive/src/content/icon" {
         size: number;
         color: string;
     };
+    export type ASNNode = {
+        tag: string;
+        attrs?: Record<string, string>;
+        children?: readonly ASNNode[];
+    };
+    export type IconRegistry = Record<string, ASNNode>;
+    export function registerIcons(icons: IconRegistry): void;
+    export function clearIcons(): void;
+    export function getIconRegistry(): IconRegistry;
     /**
      * Creates an Icon component.
      *
@@ -1990,47 +2936,50 @@ declare module "packages/primitive/src/layout/column" {
     };
 }
 declare module "packages/primitive/src/layout/split" {
-    import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
+    import { BoxProps } from "@/content/box";
+    import { MountedEvent } from "@/event";
     export type SplitDirection = "horizontal" | "vertical";
-    export type SplitViewProps = ViewProps & {
+    export type SplitViewProps = BoxProps & {
         direction?: SplitDirection;
-        defaultSizes?: number | number[];
-        minSizes?: number | number[];
-        maxSizes?: number | number[];
-        dividerStyle?: "thin" | "light" | "dark" | "none";
+        panels: {
+            size: string | number;
+            style: BoxProps["style"];
+            content: ViewChildren;
+        }[];
         onResize?: (sizes: number[]) => void;
     };
-    export function SplitView(props: SplitViewProps, children?: ViewChildren): {
+    export function SplitView(props: SplitViewProps): {
         t: string;
         $elm: any;
         state: any;
         children: any;
-        methods: {
-            subscribe_props(): void;
-            setSize(index: number, size: number): void;
-            startResize(dividerIndex: number): void;
-            endResize(): void;
-        };
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
-    export type SplitPaneProps = ViewProps & {
-        size?: number;
+    export type SplitPaneProps = BoxProps & {
+        size: number | string;
         minSize?: number;
         maxSize?: number;
         collapsible?: boolean;
-        collapsedSize?: number;
     };
     export function SplitPane(props: SplitPaneProps, children?: ViewChildren): {
         t: string;
         $elm: any;
         state: any;
         children: any;
-        methods: {
-            subscribe_props(): void;
-            setSize(newSize: number): void;
-            collapse(): void;
-            expand(): void;
-        };
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    type SplitHandlerProps = BoxProps & {};
+    export function SplitHandler(props: SplitHandlerProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        events: any;
+        children: any;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
     };
 }
 declare module "packages/primitive/src/layout/scroll" {
@@ -2068,30 +3017,42 @@ declare module "packages/primitive/src/layout/window" {
         $elm: any;
         state: any;
         children: any;
-        methods: {
-            subscribe_props(): void;
-        };
+        methods: {};
     };
 }
 declare module "packages/primitive/src/layout/tab" {
     import { ViewProps } from "@/content/view";
-    import { ViewChildren } from "@/content/type";
+    import { TimelessElement, ViewChildren } from "@/content/type";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     export type TabPosition = "top" | "bottom" | "left" | "right";
     export type TabViewProps = ViewProps & {
-        activeIndex?: number;
+        tab?: string | Ref<string> | DerivedRef<string>;
         position?: TabPosition;
+        panels: {
+            tab: string;
+            label: string;
+            content: ViewChildren;
+        }[];
         onChange?: (index: number) => void;
     };
     type TabViewState = {
-        activeIndex: number;
+        tab: null | string;
+        tabs: {
+            tab: string;
+            label: string;
+        }[];
         position: TabPosition;
-        children: any[];
+        children: (TimelessElement | null)[];
     };
     export function TabView(props: TabViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
         state: TabViewState;
         children: any[];
+        handleClickTab(tab: {
+            tab: string;
+            label: string;
+        }): void;
     };
     export type TabPaneProps = ViewProps & {
         label?: string;
@@ -2131,6 +3092,35 @@ declare module "packages/primitive/src/input/input" {
         onChange?: (e: Event) => void;
     };
     export function Input(props?: InputProps): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any[];
+        events: any;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/primitive/src/input/switch" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { MountedEvent } from "@/event";
+    import { ViewProps } from "@/content/view";
+    import { BoxProps } from "@/content/box";
+    export type SwitchProps = BoxProps & {
+        id?: string;
+        name?: string | DerivedRef<string> | Ref<string>;
+        checked?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        required?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        loading?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        onChange?: (event: Event) => void;
+        onClick?: (event: MouseEvent) => void;
+        onMounted?: ViewProps["onMounted"];
+        beforeUnmounted?: ViewProps["beforeUnmounted"];
+        onUnmounted?: ViewProps["onUnmounted"];
+    };
+    export function Switch(props: SwitchProps): {
         t: string;
         $elm: any;
         state: any;
@@ -2184,14 +3174,10 @@ declare module "packages/primitive/src/input/checkbox" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { MountedEvent } from "@/event";
     import { ViewProps } from "@/content/view";
-    import { RawViewStyleProperties } from "@/style";
-    export interface CheckboxProps {
+    import { BoxProps } from "@/content/box";
+    export type CheckboxProps = BoxProps & {
         id?: string;
         name?: string | DerivedRef<string> | Ref<string>;
-        class?: ViewProps["class"];
-        style?: ViewProps["style"];
-        attributes?: ViewProps["attributes"];
-        dataset?: ViewProps["dataset"];
         checked?: boolean | DerivedRef<boolean> | Ref<boolean>;
         indeterminate?: boolean | DerivedRef<boolean> | Ref<boolean>;
         readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
@@ -2202,38 +3188,27 @@ declare module "packages/primitive/src/input/checkbox" {
         onMounted?: ViewProps["onMounted"];
         beforeUnmounted?: ViewProps["beforeUnmounted"];
         onUnmounted?: ViewProps["onUnmounted"];
-    }
-    type CheckboxState = {
-        id: string;
-        name: string;
-        checked: boolean;
-        indeterminate: boolean;
-        disabled: boolean;
-        required: boolean;
-        style: RawViewStyleProperties;
-        styleSet: string[];
     };
     export function Checkbox(props: CheckboxProps): {
         t: string;
         $elm: any;
-        state: CheckboxState;
+        state: any;
         children: any[];
-        events: {
-            onChange(event: any): void;
-            onClick(event: any): void;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         onUnmounted(): void;
     };
 }
 declare module "packages/primitive/src/input/select" {
     import { Ref } from "packages/reactive/src/index";
-    import { ViewChildren } from "@/content/type";
     import { MountedEvent } from "@/event";
     import { ForProps } from "@/reactive/for";
     import { BoxProps } from "@/content/box";
     type SelectValue = string[];
-    export type SelectProps<T> = BoxProps & {
+    export type SelectProps<T extends {
+        label: string;
+        value: any;
+    }> = BoxProps & {
         id?: string | Ref<string>;
         name?: string | Ref<string>;
         key?: string;
@@ -2246,18 +3221,63 @@ declare module "packages/primitive/src/input/select" {
         required?: boolean | Ref<boolean>;
         multiple?: boolean | Ref<boolean>;
         onChange?: (e: Event) => void;
-        onInput?: (e: Event) => void;
     };
     export function Select<T extends {
         value: any;
         label: string;
-    }>(props: SelectProps<T>, children?: ViewChildren): {
+    }>(props: SelectProps<T>): {
         t: string;
         $elm: any;
         state: any;
+        events: any;
         children: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    type SelectOptionProps = BoxProps & {
+        value: any;
+        label: string;
+        disabled?: boolean;
+    };
+    export function SelectOption(props: SelectOptionProps): {
+        t: string;
+        $elm: any;
+        state: {
+            value: any;
+            label: any;
+            disabled: any;
+            selected: boolean;
+        };
+        children: any[];
+        select(): void;
+        unselect(): void;
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    type SelectOptionGroupProps<T extends {
+        label: string;
+        value: any;
+    }> = BoxProps & {
+        key?: string;
+        label: string;
+        options: ForProps<T>["each"];
+        render?: ForProps<T>["render"];
+    };
+    export function SelectOptionGroup<T extends {
+        label: string;
+        value: any;
+    }>(props: SelectOptionGroupProps<T>): {
+        t: string;
+        $elm: any;
+        state: {
+            label: any;
+            selected: any;
+        };
+        children: any;
+        select(v: any): any;
+        unselect(): void;
+        onMounted(event: MountedEvent): void;
         onUnmounted(): void;
     };
 }
@@ -2384,14 +3404,19 @@ declare module "packages/primitive/src/event/index" {
         target: T;
         error?: Error;
     }
+    export type ScrollEvent<T = any> = {
+        scrollTop: number;
+    };
 }
 declare module "packages/primitive/src/interaction/link" {
-    import { Ref } from "packages/reactive/src/index";
-    import { ViewProps } from "@/content/view";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewChildren } from "@/content/type";
-    export interface LinkProps extends Omit<ViewProps, "as"> {
-        href?: string | Ref<string>;
-        target?: NativeLinkTarget | Ref<NativeLinkTarget>;
+    import { BoxProps } from "@/content/box";
+    import { MountedEvent } from "@/event";
+    export type LinkTarget = "_self" | "_blank" | "_parent" | "_top" | (string & {});
+    export type LinkProps = BoxProps & {
+        href?: string | DerivedRef<string> | Ref<string>;
+        target?: LinkTarget | Ref<LinkTarget>;
         rel?: string | Ref<string>;
         disabled?: boolean | Ref<boolean>;
         download?: boolean | string | Ref<boolean | string>;
@@ -2400,9 +3425,17 @@ declare module "packages/primitive/src/interaction/link" {
         hrefLang?: string | Ref<string>;
         type?: string | Ref<string>;
         ping?: string | Ref<string>;
-    }
-    export type NativeLinkTarget = "_self" | "_blank" | "_parent" | "_top" | (string & {});
-    export function Link(props?: LinkProps, children?: ViewChildren): any;
+    };
+    export function Link(props?: LinkProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        events: any;
+        children: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/primitive/src/interaction/button" {
     import { ViewChildren } from "@/content/type";
@@ -2414,26 +3447,7 @@ declare module "packages/primitive/src/interaction/button" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -2535,6 +3549,7 @@ declare module "packages/primitive/src/style/index" {
         del(v: string): void;
         add(v: string): void;
         append(c: string): void;
+        diff(v: string): void;
         toString(): string;
     };
     export function isClassNameRef(v: any): v is ClassNameRef;
@@ -2635,175 +3650,6 @@ declare module "packages/primitive/src/vnode/view" {
         getParent(): any;
         get$elm(): HostElm;
     };
-}
-declare module "packages/base/src/base" {
-    /**
-     * 注册的监听器
-     */
-    import { EventType, Handler } from "mitt";
-    export type { Handler, EventType };
-    export enum BaseEvents {
-        Loading = "__loading",
-        Destroy = "__destroy"
-    }
-    type TheTypesOfBaseEvents = {
-        [BaseEvents.Destroy]: void;
-    };
-    type BaseDomainEvents<E> = TheTypesOfBaseEvents & E;
-    export function base<Events extends Record<EventType, unknown>>(): {
-        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
-        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
-        uid: () => number;
-        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
-        destroy(): void;
-    };
-    export class BaseDomain<Events extends Record<EventType, unknown>> {
-        /** 用于自己区别同名 Domain 不同实例的标志 */
-        unique_id: string;
-        debug: boolean;
-        _emitter: import("mitt").Emitter<BaseDomainEvents<Events>>;
-        listeners: Record<keyof BaseDomainEvents<Events>, (() => void)[]>;
-        constructor(props?: {});
-        uid(): number;
-        log(...args: unknown[]): unknown[];
-        errorTip(...args: unknown[]): void;
-        off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): void;
-        offEvent<Key extends keyof BaseDomainEvents<Events>>(k: Key): void;
-        on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>): () => void;
-        emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]): void;
-        /** 主动销毁所有的监听事件 */
-        destroy(): void;
-        onDestroy(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Destroy]>): () => void;
-        get [Symbol.toStringTag](): string;
-    }
-    export type LogLevel = "info" | "debug" | "warn" | "error";
-    export interface LoggerProps {
-        prefix?: string;
-        scope?: string;
-        time?: boolean;
-        level?: LogLevel;
-        mode?: "minimal" | "classic" | "verbose";
-        color?: string;
-    }
-    export function Logger(props?: LoggerProps): {
-        log: (...args: unknown[]) => void;
-        debug: (...args: unknown[]) => void;
-        info: (...args: unknown[]) => void;
-        warn: (...args: unknown[]) => void;
-        error: (...args: unknown[]) => void;
-        scope: string;
-        color: string;
-        setColor(value: string): void;
-    };
-    export function applyMixins(derivedCtor: any, constructors: any[]): void;
-}
-declare module "packages/base/src/result/index" {
-    import { BizError } from "@/error";
-    export type Resp<T> = {
-        data: T extends null ? null : T;
-        error: T extends null ? BizError : null;
-    };
-    export type Result<T> = Resp<T> | Resp<null>;
-    export type UnpackedResult<T> = NonNullable<T extends Resp<infer U> ? (U extends null ? U : U) : T>;
-    /** 构造一个结果对象 */
-    export const Result: {
-        /** 构造成功结果 */
-        Ok: <T>(value: T) => Result<T>;
-        /** 构造失败结果 */
-        Err: <T>(message: string | string[] | BizError | Error | Result<null>, code?: string | number, data?: unknown) => Resp<null>;
-    };
-}
-declare module "packages/base/src/error/index" {
-    export class BizError extends Error {
-        messages: string[];
-        code?: string | number;
-        data: unknown | null;
-        constructor(msg: string[], code?: string | number, data?: unknown);
-    }
-}
-declare module "packages/base/src/platform" {
-    export interface Rect {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    }
-    export interface Dimensions {
-        width: number;
-        height: number;
-    }
-    export interface ElementRects {
-        reference: Rect;
-        floating: Rect;
-    }
-    export type Strategy = "absolute" | "fixed";
-    export interface Platform {
-        addEventListener(type: string, handler: EventListener, options?: AddEventListenerOptions): () => void;
-        patchBodyStyle(style: Record<string, string>): void;
-        getViewportSize(): {
-            width: number;
-            height: number;
-        };
-        isBrowser(): boolean;
-        isElement(value: unknown): boolean;
-        isHTMLElement(value: unknown): boolean;
-        getBoundingClientRect(element: unknown): Rect;
-        getDimensions(element: unknown): Dimensions;
-        getElementRects(args: {
-            reference: unknown;
-            floating: unknown;
-            strategy: Strategy;
-        }): ElementRects;
-        getClippingRect(args: {
-            element: unknown;
-            boundary: unknown;
-            rootBoundary: unknown;
-            strategy: Strategy;
-        }): Rect;
-        getOffsetParent(element: unknown): unknown;
-        isRTL(element: unknown): boolean;
-        getScale(element: unknown): {
-            x: number;
-            y: number;
-        };
-        getDocumentElement(element?: unknown): unknown;
-    }
-}
-declare module "packages/base/src/type" {
-    export type Unpacked<T> = T extends (infer U)[] ? U : T extends (...args: any[]) => infer U ? U : T extends Promise<infer U> ? U : T;
-    export type MutableRecord<U> = {
-        [SubType in keyof U]: {
-            type: SubType;
-            data: U[SubType];
-        };
-    }[keyof U];
-    export type MutableRecord2<U> = {
-        [SubType in keyof U]: {
-            type: SubType;
-            data: U[SubType];
-        } & U[SubType];
-    }[keyof U];
-    export type Shift<T extends any[]> = ((...args: T) => void) extends (arg1: any, ...rest: infer R) => void ? R : never;
-    export interface JSONArray extends Array<JSONValue> {
-    }
-    export type JSONValue = string | number | boolean | JSONObject | JSONArray | null;
-    export type JSONObject = {
-        [Key in string]?: JSONValue;
-    };
-    /**
-     * type UserID = Brand<string, "UserID">;
-     */
-    const __brand: unique symbol;
-    export type Brand<T, B> = T & {
-        readonly [__brand]: B;
-    };
-}
-declare module "packages/base/src/index" {
-    export * from "packages/base/src/base";
-    export * from "packages/base/src/result/index";
-    export * from "packages/base/src/error/index";
-    export * from "packages/base/src/platform";
-    export * from "packages/base/src/type";
 }
 declare module "packages/primitive/src/platform" {
     import { Platform } from "packages/base/src/index";
@@ -2970,10 +3816,10 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/reactive/for";
     export * from "packages/primitive/src/reactive/show";
     export * from "packages/primitive/src/reactive/match";
-    export * from "packages/primitive/src/reactive/error-boundary";
+    export * from "packages/primitive/src/content/error-boundary";
     export * from "packages/primitive/src/content/fragment";
-    export { createContext, provide, use, Scope, getOwner, runWithOwner, } from "packages/primitive/src/context";
-    export type { Context } from "packages/primitive/src/context";
+    export { createContext, provide, use, Scope, get_owner as getOwner, run_with_owner as runWithOwner, } from "packages/primitive/src/context/context";
+    export type { Context } from "packages/primitive/src/context/context";
     export * from "packages/primitive/src/content/view";
     export * from "packages/primitive/src/content/text";
     export * from "packages/primitive/src/content/portal";
@@ -2998,6 +3844,7 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/layout/window";
     export * from "packages/primitive/src/layout/tab";
     export * from "packages/primitive/src/input/input";
+    export * from "packages/primitive/src/input/switch";
     export * from "packages/primitive/src/input/number-input";
     export * from "packages/primitive/src/input/password-input";
     export * from "packages/primitive/src/input/checkbox";
@@ -3019,7 +3866,7 @@ declare module "packages/primitive/src/index" {
     export { patch } from "packages/primitive/src/hmr/patch";
     export type { PatchOptions } from "packages/primitive/src/hmr/patch";
     export { hmrState, hmrRestore } from "packages/primitive/src/hmr/state";
-    export { Logger, Result, base } from "packages/base/src/index";
+    export { Logger, Result, base, debounce, throttle } from "packages/base/src/index";
     export type { Handler, Platform, MutableRecord2, MutableRecord, Unpacked, UnpackedResult, } from "packages/base/src/index";
 }
 declare module "packages/timeless/src/index" {
@@ -4342,6 +5189,7 @@ declare module "packages/ui-vm/src/checkbox/index" {
         disabled: CheckboxProps["disabled"];
         checked: boolean;
         defaultChecked: boolean;
+        status: "error" | "success" | "normal";
         presence: PresenceCore;
         get state(): CheckboxState;
         get value(): boolean;
@@ -4358,6 +5206,7 @@ declare module "packages/ui-vm/src/checkbox/index" {
         setValue(v: boolean, extra?: Partial<{
             silence: boolean;
         }>): void;
+        setStatus(status: "error" | "success" | "normal"): void;
         onChange(handler: Handler<TheTypesOfEvents[Events.Change]>): () => void;
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
     }
@@ -4896,6 +5745,7 @@ declare module "packages/ui-vm/src/formv2/types" {
         setValue: (v: T, extra?: Partial<{
             silence: boolean;
         }>) => void;
+        setStatus: (status: "error" | "success" | "normal") => void;
         destroy?: () => void;
         onChange: (fn: (v: T) => void) => void;
     };
@@ -5326,9 +6176,11 @@ declare module "packages/ui-vm/src/input/index" {
         value: T;
         placeholder: string;
         disabled: boolean;
+        hovering: boolean;
         loading: boolean;
         focus: boolean;
         type: string;
+        status: "error" | "success" | "normal";
         tmpType: string;
         allowClear: boolean;
         autoFocus: boolean;
@@ -5346,7 +6198,9 @@ declare module "packages/ui-vm/src/input/index" {
         value: T;
         placeholder: string;
         disabled: boolean;
+        status: "error" | "success" | "normal";
         allowClear: boolean;
+        hovering: boolean;
         autoComplete: boolean;
         autoFocus: boolean;
         ignoreEnterEvent: boolean;
@@ -5374,10 +6228,13 @@ declare module "packages/ui-vm/src/input/index" {
             x: number;
             y: number;
         }): void;
+        handleMouseEnter(): void;
+        handleMouseLeave(): void;
         handleChange(event: unknown): void;
         setValue(value: T, extra?: Partial<{
             silence: boolean;
         }>): void;
+        setStatus(status: "error" | "success" | "normal"): void;
         setPlaceholder(v: string): void;
         setLoading(loading: boolean): void;
         clear(): void;
@@ -6339,6 +7196,15 @@ declare module "packages/ui-vm/src/popper/floating/index" {
     export type { Alignment, Side, AlignedPlacement, Placement, Strategy, Axis, Coords, Length, Dimensions, SideObject, Rect, Padding, ClientRectObject, ElementRects, VirtualElement, } from "packages/ui-vm/src/popper/floating/utils";
     export { sides, alignments, placements, getSide, getAlignment, getSideAxis, getAlignmentAxis, getAxisLength, getOppositeAxis, getOppositePlacement, getExpandedPlacements, getOppositeAxisPlacements, getAlignmentSides, clamp, evaluate, getPaddingObject, rectToClientRect, } from "packages/ui-vm/src/popper/floating/utils";
 }
+declare module "packages/ui-vm/src/popper/platform" {
+    import type { Platform } from "packages/base/src/index";
+    /**
+     * 为 Popper 注入平台能力。通常在应用启动时调用一次即可，
+     * 之后各个 Popper/Select/Tooltip 等组件无需再层层透传 `platform`。
+     */
+    export function setPopperPlatform<T extends Platform = Platform>(platform?: T): T | undefined;
+    export function getPopperPlatform(): Platform;
+}
 declare module "packages/ui-vm/src/popper/types" {
     export type Alignment = "start" | "end";
     export type Align = "start" | "end";
@@ -6566,6 +7432,8 @@ declare module "packages/ui-vm/src/popper/index" {
         viewport: {
             $el?: HTMLElement;
         } | null;
+        /** 在 place 前设置，place 后就会尝试将 viewport 滚动到这个距离 */
+        viewportOffsetTop: null | number;
         /** item-aligned 模式：选中的 item 元素 */
         selectedItem: {
             $el?: HTMLElement;
@@ -6624,6 +7492,7 @@ declare module "packages/ui-vm/src/popper/index" {
             x: number;
             y: number;
         }): void;
+        setViewportOffsetTop(offsetTop: number): void;
         /** 设置 item-aligned 模式下选中项的偏移量 */
         adjustContentPositionWithOffsetTop(data: {
             selectedItem: {
@@ -6760,6 +7629,7 @@ declare module "packages/ui-vm/src/popper/index" {
         viewportScrollTop?: number;
     }
     export function computePositionInItemAlignedMode(input: ComputePositionItemAlignedInput): ComputePositionItemAlignedResult;
+    export { getPopperPlatform, setPopperPlatform } from "packages/ui-vm/src/popper/platform";
 }
 declare module "packages/ui-vm/src/presence/index" {
     /**
@@ -7451,6 +8321,7 @@ declare module "packages/ui-vm/src/select/index" {
         disabled: boolean;
         focused: boolean;
         open: boolean;
+        status: "error" | "success" | "normal";
         allowClear: boolean;
         /** 加载中 */
         loading: boolean;
@@ -7507,6 +8378,7 @@ declare module "packages/ui-vm/src/select/index" {
         setOptions(options: NonNullable<SelectProps<T>["options"]>): void;
         setId(v: any): void;
         setValue(v: T | null): void;
+        setStatus(status: "error" | "success" | "normal"): void;
         clear(): void;
         /** 设置加载状态 */
         setLoading(loading: boolean): void;
@@ -10825,6 +11697,352 @@ declare module "packages/ui-vm/src/sonner/index" {
     };
     export type ToastModel = ReturnType<typeof ToastModel>;
 }
+declare module "packages/ui-vm/src/flow/node" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    import type { FlowNode } from "packages/ui-vm/src/flow/index";
+    export interface FlowNodeModelProps extends FlowNode {
+        onClick?: (node: FlowNodeModel) => void;
+        onDoubleClick?: (node: FlowNodeModel) => void;
+    }
+    enum Events {
+        Click = "Click",
+        DoubleClick = "DoubleClick",
+        FocusedChange = "FocusedChange",
+        PositionChange = "PositionChange",
+        StateChange = "StateChange"
+    }
+    type TheTypesOfEvents = {
+        [Events.Click]: FlowNodeModel;
+        [Events.DoubleClick]: FlowNodeModel;
+        [Events.FocusedChange]: boolean;
+        [Events.PositionChange]: {
+            x: number;
+            y: number;
+        };
+        [Events.StateChange]: FlowNodeState;
+    };
+    export interface FlowNodeState {
+        dragging: boolean;
+        selected: boolean;
+        focused: boolean;
+    }
+    export class FlowNodeModel extends BaseDomain<TheTypesOfEvents> {
+        id: string;
+        data: FlowNode;
+        focused: boolean;
+        selected: boolean;
+        private handleRects;
+        private dragStartPos;
+        private nodeStartPos;
+        position: {
+            x: number;
+            y: number;
+        };
+        width: number;
+        height: number;
+        get state(): FlowNodeState;
+        constructor(props: FlowNodeModelProps);
+        updateData(patch: Partial<FlowNode>): void;
+        focus(): void;
+        blur(): void;
+        click(): void;
+        doubleClick(): void;
+        startDrag(clientX: number, clientY: number): void;
+        drag(clientX: number, clientY: number, zoom?: number): void;
+        stopDrag(): void;
+        registerHandle(handleId: string, el: HTMLElement): void;
+        unregisterHandle(handleId: string): void;
+        getHandleRect(handleId: string): DOMRect | null;
+        updateHandleRect(handleId: string): void;
+        onPositionChange(handler: Handler<{
+            x: number;
+            y: number;
+        }>): () => void;
+        onStateChange(handler: Handler<FlowNodeState>): () => void;
+        onClick(handler: Handler<FlowNodeModel>): () => void;
+        onDoubleClick(handler: Handler<FlowNodeModel>): () => void;
+        onFocusedChange(handler: Handler<boolean>): () => void;
+    }
+}
+declare module "packages/ui-vm/src/flow/edge" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    import type { FlowEdge } from "packages/ui-vm/src/flow/index";
+    import { FlowNodeModel } from "packages/ui-vm/src/flow/node";
+    type HandlePosition = "top" | "right" | "bottom" | "left";
+    export interface FlowEdgeModelProps {
+        id: string;
+        source: FlowNodeModel;
+        target: FlowNodeModel;
+        sourceHandle?: string;
+        targetHandle?: string;
+        sourcePosition?: HandlePosition;
+        targetPosition?: HandlePosition;
+        type?: FlowEdge["type"];
+        label?: string;
+        animated?: boolean;
+    }
+    enum Events {
+        PathChange = "PathChange",
+        SelectedChange = "SelectedChange",
+        StateChange = "StateChange"
+    }
+    type TheTypesOfEvents = {
+        [Events.PathChange]: string;
+        [Events.SelectedChange]: boolean;
+        [Events.StateChange]: FlowEdgeState;
+    };
+    export interface FlowEdgeState {
+        d: string;
+        selected: boolean;
+        animated: boolean;
+        sourceX: number;
+        sourceY: number;
+        targetX: number;
+        targetY: number;
+    }
+    export class FlowEdgeModel extends BaseDomain<TheTypesOfEvents> {
+        id: string;
+        source: FlowNodeModel;
+        target: FlowNodeModel;
+        sourceHandle?: string;
+        targetHandle?: string;
+        sourcePosition: HandlePosition;
+        targetPosition: HandlePosition;
+        type: FlowEdge["type"];
+        label?: string;
+        animated: boolean;
+        selected: boolean;
+        d: string;
+        sourceX: number;
+        sourceY: number;
+        targetX: number;
+        targetY: number;
+        constructor(props: FlowEdgeModelProps);
+        get state(): FlowEdgeState;
+        select(): void;
+        deselect(): void;
+        computePath(): void;
+        private getAnchorPoint;
+        private buildStraightPath;
+        private buildBezierPath;
+        private buildStepPath;
+        private buildSmoothStepPath;
+        private getControlPoints;
+        private getMidPoint;
+        private isHorizontal;
+        onPathChange(handler: Handler<string>): () => void;
+        onSelectedChange(handler: Handler<boolean>): () => void;
+        onStateChange(handler: Handler<FlowEdgeState>): () => void;
+    }
+}
+declare module "packages/ui-vm/src/flow/index" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { FlowNodeModel } from "packages/ui-vm/src/flow/node";
+    import { FlowEdgeModel } from "packages/ui-vm/src/flow/edge";
+    export { FlowNodeModel } from "packages/ui-vm/src/flow/node";
+    export type { FlowNodeModelProps, FlowNodeState } from "packages/ui-vm/src/flow/node";
+    export { FlowEdgeModel } from "packages/ui-vm/src/flow/edge";
+    export type { FlowEdgeModelProps, FlowEdgeState } from "packages/ui-vm/src/flow/edge";
+    export interface FlowNode<T = any> {
+        id: string;
+        type?: string;
+        position: {
+            x: number;
+            y: number;
+        };
+        data: T;
+        selected?: boolean;
+        dragging?: boolean;
+        width?: number;
+        height?: number;
+    }
+    export interface FlowHandle {
+        id: string;
+        type: "source" | "target";
+        position?: "top" | "right" | "bottom" | "left";
+    }
+    export interface FlowEdge {
+        id: string;
+        source: string;
+        sourceHandle?: string;
+        target: string;
+        targetHandle?: string;
+        type?: "bezier" | "step" | "straight" | "smoothstep";
+        label?: string;
+        animated?: boolean;
+        selected?: boolean;
+    }
+    export interface Viewport {
+        x: number;
+        y: number;
+        zoom: number;
+    }
+    export interface Connection {
+        source: string;
+        sourceHandle?: string;
+        target: string;
+        targetHandle?: string;
+    }
+    enum Events {
+        NodesChange = "NodesChange",
+        EdgesChange = "EdgesChange",
+        Connect = "Connect",
+        NodeClick = "NodeClick",
+        NodeDoubleClick = "NodeDoubleClick",
+        NodeDragStart = "NodeDragStart",
+        NodeDrag = "NodeDrag",
+        NodeDragStop = "NodeDragStop",
+        EdgeClick = "EdgeClick",
+        SelectionChange = "SelectionChange",
+        ViewportChange = "ViewportChange",
+        StateChange = "StateChange"
+    }
+    type TheTypesOfEvents = {
+        [Events.NodesChange]: FlowNodeModel[];
+        [Events.EdgesChange]: FlowEdgeModel[];
+        [Events.Connect]: Connection;
+        [Events.NodeClick]: {
+            node: FlowNodeModel;
+            event: MouseEvent;
+        };
+        [Events.NodeDoubleClick]: {
+            node: FlowNodeModel;
+            event: MouseEvent;
+        };
+        [Events.NodeDragStart]: {
+            node: FlowNodeModel;
+        };
+        [Events.NodeDrag]: {
+            node: FlowNodeModel;
+            position: {
+                x: number;
+                y: number;
+            };
+        };
+        [Events.NodeDragStop]: {
+            node: FlowNodeModel;
+        };
+        [Events.EdgeClick]: {
+            edge: FlowEdgeModel;
+            event: MouseEvent;
+        };
+        [Events.SelectionChange]: {
+            nodes: FlowNodeModel[];
+            edges: FlowEdgeModel[];
+        };
+        [Events.ViewportChange]: Viewport;
+        [Events.StateChange]: FlowState;
+    };
+    export interface FlowState {
+        nodes: FlowNodeModel[];
+        edges: FlowEdgeModel[];
+        viewport: Viewport;
+        nodesDraggable: boolean;
+        nodesConnectable: boolean;
+        multiSelect: boolean;
+    }
+    export type IsValidConnection = (connection: Connection) => boolean;
+    export interface FlowCanvasModelProps {
+        nodes: FlowNodeModel[];
+        edges: FlowEdge[];
+        viewport?: Partial<Viewport>;
+        isValidConnection?: IsValidConnection;
+        minZoom?: number;
+        maxZoom?: number;
+    }
+    export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
+        nodes: FlowNodeModel[];
+        edges: FlowEdgeModel[];
+        viewport: Viewport;
+        minZoom: number;
+        maxZoom: number;
+        isValidConnection: IsValidConnection;
+        nodesDraggable: boolean;
+        nodesConnectable: boolean;
+        multiSelect: boolean;
+        private nodeMap;
+        private edgeMap;
+        constructor(props: FlowCanvasModelProps & {
+            nodesDraggable?: boolean;
+            nodesConnectable?: boolean;
+            multiSelect?: boolean;
+        });
+        get state(): FlowState;
+        private addNodeToMap;
+        private removeNodeFromMap;
+        addNode(node: FlowNodeModel): FlowNodeModel;
+        removeNode(id: string): void;
+        updateNode(id: string, patch: Partial<FlowNode>): void;
+        getNode(id: string): FlowNodeModel | undefined;
+        setNodes(nodes: FlowNodeModel[]): void;
+        private addEdgeToMap;
+        private removeEdgeFromMap;
+        private createEdgeModel;
+        addEdge(edge: Omit<FlowEdge, "id"> & {
+            id?: string;
+        }): FlowEdgeModel | null;
+        removeEdge(id: string): void;
+        updateEdge(id: string, patch: Partial<FlowEdge>): void;
+        getEdge(id: string): FlowEdgeModel | undefined;
+        setEdges(edges: FlowEdge[]): void;
+        setViewport(viewport: Partial<Viewport>): void;
+        zoomIn(step?: number): void;
+        zoomOut(step?: number): void;
+        fitView(options?: {
+            padding?: number;
+        }): void;
+        resetView(): void;
+        selectNode(id: string, multi?: boolean): void;
+        selectEdge(id: string, multi?: boolean): void;
+        clearSelection(): void;
+        getSelectedNodes(): FlowNodeModel[];
+        getSelectedEdges(): FlowEdgeModel[];
+        toJSON(): {
+            nodes: FlowNode[];
+            edges: FlowEdge[];
+            viewport: Viewport;
+        };
+        fromJSON(data: {
+            nodes: FlowNodeModel[];
+            edges: FlowEdge[];
+            viewport?: Viewport;
+        }): void;
+        onConnect(handler: Handler<Connection>): () => void;
+        onNodesChange(handler: Handler<FlowNodeModel[]>): () => void;
+        onEdgesChange(handler: Handler<FlowEdgeModel[]>): () => void;
+        onNodeClick(handler: Handler<{
+            node: FlowNodeModel;
+            event: MouseEvent;
+        }>): () => void;
+        onNodeDoubleClick(handler: Handler<{
+            node: FlowNodeModel;
+            event: MouseEvent;
+        }>): () => void;
+        onNodeDragStart(handler: Handler<{
+            node: FlowNodeModel;
+        }>): () => void;
+        onNodeDrag(handler: Handler<{
+            node: FlowNodeModel;
+            position: {
+                x: number;
+                y: number;
+            };
+        }>): () => void;
+        onNodeDragStop(handler: Handler<{
+            node: FlowNodeModel;
+        }>): () => void;
+        onEdgeClick(handler: Handler<{
+            edge: FlowEdgeModel;
+            event: MouseEvent;
+        }>): () => void;
+        onSelectionChange(handler: Handler<{
+            nodes: FlowNodeModel[];
+            edges: FlowEdgeModel[];
+        }>): () => void;
+        onViewportChange(handler: Handler<Viewport>): () => void;
+        onStateChange(handler: Handler<FlowState>): () => void;
+    }
+}
 declare module "packages/ui-vm/src/index" {
     import { Result as _Result, BizError as _BizError, base as _base, BaseDomain as _BaseDomain } from "packages/base/src/index";
     export const Result: {
@@ -10908,6 +12126,8 @@ declare module "packages/ui-vm/src/index" {
     export * from "packages/ui-vm/src/shortcut/index";
     export * from "packages/ui-vm/src/click-outside/index";
     export * from "packages/ui-vm/src/sonner/index";
+    export * from "packages/ui-vm/src/flow/index";
+    export * from "packages/ui-vm/src/flow/node";
 }
 declare module "packages/kit/src/route_view/utils" {
     import { JSONObject } from "packages/types/src/index";
@@ -12084,6 +13304,7 @@ declare module "packages/ui-primitive/src/modules/avatar" {
             onMouseUp?: (e: MouseEvent) => void;
             onMouseEnter?: (e: MouseEvent) => void;
             onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
             onLongPress?: (e: PointerEvent) => void;
             onPointerDown?: (e: PointerEvent) => void;
             onPointerUp?: (e: PointerEvent) => void;
@@ -12101,6 +13322,7 @@ declare module "packages/ui-primitive/src/modules/avatar" {
             onDragOver?: (e: DragEvent) => void;
             onDragLeave?: (e: DragEvent) => void;
             onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
@@ -12139,26 +13361,7 @@ declare module "packages/ui-primitive/src/modules/button" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12611,26 +13814,7 @@ declare module "packages/ui-primitive/src/modules/tabs" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12675,7 +13859,7 @@ declare module "packages/ui-primitive/src/modules/input" {
     };
     export function setInputProvider(provider: Provider): void;
     export function Root(props: ViewProps & {
-        store?: InputCore<any>;
+        store: InputCore<any>;
     }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Input(props: InputProps & {
         store: InputCore<any>;
@@ -12836,26 +14020,7 @@ declare module "packages/ui-primitive/src/modules/select" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -12936,26 +14101,7 @@ declare module "packages/ui-primitive/src/modules/select" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13319,26 +14465,7 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13350,26 +14477,7 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13401,26 +14509,7 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13505,26 +14594,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13536,26 +14606,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13567,26 +14618,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13598,26 +14630,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13645,26 +14658,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13744,26 +14738,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13779,26 +14754,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13814,26 +14770,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13845,26 +14782,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13876,26 +14794,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13927,26 +14826,7 @@ declare module "packages/ui-primitive/src/modules/checkbox" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -13971,21 +14851,9 @@ declare module "packages/ui-primitive/src/modules/checkbox" {
     }): {
         t: string;
         $elm: any;
-        state: {
-            id: string;
-            name: string;
-            checked: boolean;
-            indeterminate: boolean;
-            disabled: boolean;
-            required: boolean;
-            style: RawViewStyleProperties;
-            styleSet: string[];
-        };
+        state: any;
         children: any[];
-        events: {
-            onChange(event: any): void;
-            onClick(event: any): void;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         onUnmounted(): void;
     };
@@ -14042,26 +14910,7 @@ declare module "packages/ui-primitive/src/modules/radio" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -14145,26 +14994,7 @@ declare module "packages/ui-primitive/src/modules/toggle" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -14184,26 +15014,7 @@ declare module "packages/ui-primitive/src/modules/switch" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -14297,26 +15108,7 @@ declare module "packages/ui-primitive/src/modules/popover" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -14363,26 +15155,7 @@ declare module "packages/ui-primitive/src/modules/popconfirm" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -14394,26 +15167,7 @@ declare module "packages/ui-primitive/src/modules/popconfirm" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -14425,26 +15179,7 @@ declare module "packages/ui-primitive/src/modules/popconfirm" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -14755,6 +15490,45 @@ declare module "packages/ui-primitive/src/modules/standard-sub-views" {
         _hmr_dispose(): void;
     };
 }
+declare module "packages/ui-primitive/src/modules/flow" {
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    import { FlowCanvasModel } from "packages/ui-vm/src/index";
+    export function Root(props: ViewProps & {
+        store: FlowCanvasModel;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Canvas(props: ViewProps & {
+        store: FlowCanvasModel;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function NodeLayer(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function EdgeLayer(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Node(props: ViewProps & {
+        store: FlowCanvasModel;
+        nodeId: string;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Edge(props: ViewProps & {
+        store: FlowCanvasModel;
+        edgeId: string;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Handle(props: ViewProps & {
+        store: FlowCanvasModel;
+        nodeId: string;
+        handleId: string;
+        type: "source" | "target";
+        position?: "top" | "right" | "bottom" | "left";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Background(props: ViewProps & {
+        variant?: "dots" | "lines" | "cross";
+        gap?: number;
+        size?: number;
+        color?: string;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Minimap(props: ViewProps & {
+        store: FlowCanvasModel;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Controls(props: ViewProps & {
+        store: FlowCanvasModel;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+}
 declare module "packages/ui-primitive/src/index" {
     export * as kit from "packages/kit/src/index";
     export * as PresencePrimitive from "packages/ui-primitive/src/modules/presence";
@@ -14809,6 +15583,7 @@ declare module "packages/ui-primitive/src/index" {
     export { KeepAliveSubViews } from "packages/ui-primitive/src/modules/keep-alive-sub-views";
     export { StandardSubViews } from "packages/ui-primitive/src/modules/standard-sub-views";
     export * as ErrorBoundaryPrimitive from "packages/ui-primitive/src/modules/error-boundary";
+    export * as FlowPrimitive from "packages/ui-primitive/src/modules/flow";
 }
 declare module "packages/shadcn/src/modules/input" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -14972,7 +15747,16 @@ declare module "packages/shadcn/src/modules/search-select" {
 }
 declare module "packages/shadcn/src/modules/link" {
     import { ViewChildren, LinkProps as NativeLinkProps } from "packages/timeless/src/index";
-    export function Link(props?: NativeLinkProps, children?: ViewChildren): any;
+    export function Link(props?: NativeLinkProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        events: any;
+        children: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/cascader" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -15163,26 +15947,7 @@ declare module "packages/shadcn/src/modules/toggle" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -15199,26 +15964,7 @@ declare module "packages/shadcn/src/modules/switch" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -15256,26 +16002,7 @@ declare module "packages/shadcn/src/modules/button" {
         $elm: any;
         state: any;
         children: any;
-        events: {
-            onClick: any;
-            onDoubleClick: any;
-            onLongPress: any;
-            onPointerDown: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
-            onContextMenu: any;
-            onMouseEnter: any;
-            onMouseLeave: any;
-            onDragStart: any;
-            onDrag: any;
-            onDragEnd: any;
-            onDragEnter: any;
-            onDragOver: any;
-            onDragLeave: any;
-            onDrop: any;
-            onAnimationEnd: any;
-        };
+        events: any;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -15653,6 +16380,119 @@ declare module "packages/shadcn/src/modules/affix" {
         target?: () => HTMLElement | Window;
     }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
+declare module "packages/shadcn/src/modules/flow" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    import { FlowCanvasModel, FlowEdgeModel } from "packages/ui-vm/src/index";
+    import type { FlowNode } from "packages/ui-vm/src/index";
+    export interface FlowViewProps extends ViewProps {
+        store: FlowCanvasModel;
+        nodeTypes?: Record<string, (props: {
+            node: FlowNode;
+            store: FlowCanvasModel;
+        }) => ViewChildren>;
+        showBackground?: boolean;
+        backgroundVariant?: "dots" | "lines" | "cross";
+        showMinimap?: boolean;
+        showControls?: boolean;
+        multiSelect?: boolean;
+        minZoom?: number;
+        maxZoom?: number;
+        nodesDraggable?: boolean;
+        nodesConnectable?: boolean;
+    }
+    export interface FlowNodeViewProps extends ViewProps {
+        store: FlowCanvasModel;
+        node: FlowNode;
+        nodeTypes?: Record<string, (props: {
+            node: FlowNode;
+            store: FlowCanvasModel;
+        }) => ViewChildren>;
+    }
+    export interface FlowHandleViewProps extends ViewProps {
+        store: FlowCanvasModel;
+        nodeId: string;
+        handleId: string;
+        type: "source" | "target";
+        position?: "top" | "right" | "bottom" | "left";
+        connectable?: boolean;
+    }
+    export function FlowHandle(props: FlowHandleViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FlowNodeView(props: FlowNodeViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FlowEdgeView(props: ViewProps & {
+        store: FlowEdgeModel;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            d: string;
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function FlowBackground(props: ViewProps & {
+        variant?: "dots" | "lines" | "cross";
+        gap?: number;
+        size?: number;
+        color?: string;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FlowMinimap(props: ViewProps & {
+        store: FlowCanvasModel;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FlowControls(props: ViewProps & {
+        store: FlowCanvasModel;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FlowCanvas(props: FlowViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export const FlowEdge_: typeof FlowEdgeView;
+    export const FlowNode_: typeof FlowNodeView;
+    export const FlowHandle_: typeof FlowHandle;
+    global {
+        interface Window {
+            flowConnecting: {
+                nodeId: string;
+                handleId: string;
+                type: "source" | "target";
+                startX: number;
+                startY: number;
+                currentX: number;
+                currentY: number;
+            } | null;
+            flowConnectingLineUpdate: ((path: string, visible: boolean) => void) | null;
+        }
+    }
+}
 declare module "packages/shadcn/src/index" {
     import { Input } from "packages/shadcn/src/modules/input";
     import { FileInput } from "packages/shadcn/src/modules/file-picker";
@@ -15706,10 +16546,11 @@ declare module "packages/shadcn/src/index" {
     import { LLMProviderForm } from "packages/shadcn/src/modules/llm-provider-form";
     import { Toaster } from "packages/shadcn/src/modules/sonner";
     import { Affix } from "packages/shadcn/src/modules/affix";
+    import { FlowCanvas, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls } from "packages/shadcn/src/modules/flow";
     export const TimelessShadcnVersion: any;
     export * from "packages/ui-primitive/src/index";
     export * as ui from "packages/ui-vm/src/index";
-    export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, Affix, };
+    export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, Affix, FlowCanvas, FlowNodeView as FlowNode, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
 }
 declare module "packages/icons/src/util/index" {
     export const defaultWidth = "24";
@@ -15966,8 +16807,11 @@ declare const RichText: typeof import("@timeless/timeless").RichText;
 declare const Row: typeof import("@timeless/timeless").Row;
 declare const SVG: typeof import("@timeless/timeless").SVG;
 declare const Scope: typeof import("@timeless/timeless").Scope;
+declare const SelectOption: typeof import("@timeless/timeless").SelectOption;
+declare const SelectOptionGroup: typeof import("@timeless/timeless").SelectOptionGroup;
 declare const Show: typeof import("@timeless/timeless").Show;
 declare const Signal: typeof import("@timeless/timeless").Signal;
+declare const SplitHandler: typeof import("@timeless/timeless").SplitHandler;
 declare const SplitPane: typeof import("@timeless/timeless").SplitPane;
 declare const SplitView: typeof import("@timeless/timeless").SplitView;
 declare const Style: typeof import("@timeless/timeless").Style;
@@ -15980,17 +16824,20 @@ declare const TimelessRefArray: typeof import("@timeless/timeless").TimelessRefA
 declare const View: typeof import("@timeless/timeless").View;
 declare const Webview: typeof import("@timeless/timeless").Webview;
 declare const WindowView: typeof import("@timeless/timeless").WindowView;
+declare const _current_disposables: typeof import("@timeless/timeless")._current_disposables;
 declare const classNames: typeof import("@timeless/timeless").classNames;
+declare const clearIcons: typeof import("@timeless/timeless").clearIcons;
 declare const combine: typeof import("@timeless/timeless").combine;
 declare const computed: typeof import("@timeless/timeless").computed;
 declare const createContext: typeof import("@timeless/timeless").createContext;
+declare const debounce: typeof import("@timeless/timeless").debounce;
 declare const defineModel: typeof import("@timeless/timeless").defineModel;
 declare const derive: typeof import("@timeless/timeless").derive;
-declare const dumpAll: typeof import("@timeless/timeless").dumpAll;
 declare const dumpDeps: typeof import("@timeless/timeless").dumpDeps;
 declare const findLeakedDeps: typeof import("@timeless/timeless").findLeakedDeps;
 declare const generateTrackId: typeof import("@timeless/timeless").generateTrackId;
 declare const getDeps: typeof import("@timeless/timeless").getDeps;
+declare const getIconRegistry: typeof import("@timeless/timeless").getIconRegistry;
 declare const getOwner: typeof import("@timeless/timeless").getOwner;
 declare const getPlatform: typeof import("@timeless/timeless").getPlatform;
 declare const getarr: typeof import("@timeless/timeless").getarr;
@@ -16018,16 +16865,22 @@ declare const reactiveObject: typeof import("@timeless/timeless").reactiveObject
 declare const ref: typeof import("@timeless/timeless").ref;
 declare const refarr: typeof import("@timeless/timeless").refarr;
 declare const refobj: typeof import("@timeless/timeless").refobj;
+declare const registerIcons: typeof import("@timeless/timeless").registerIcons;
+declare const registryDelete: typeof import("@timeless/timeless").registryDelete;
 declare const registryGet: typeof import("@timeless/timeless").registryGet;
 declare const registryGetArr: typeof import("@timeless/timeless").registryGetArr;
 declare const registryGetObj: typeof import("@timeless/timeless").registryGetObj;
 declare const registrySet: typeof import("@timeless/timeless").registrySet;
 declare const release: typeof import("@timeless/timeless").release;
+declare const release_all: typeof import("@timeless/timeless").release_all;
 declare const resolve_children: typeof import("@timeless/timeless").resolve_children;
 declare const runWithOwner: typeof import("@timeless/timeless").runWithOwner;
 declare const setPlatform: typeof import("@timeless/timeless").setPlatform;
 declare const signal: typeof import("@timeless/timeless").signal;
+declare const start_tracking: typeof import("@timeless/timeless").start_tracking;
+declare const stop_tracking: typeof import("@timeless/timeless").stop_tracking;
 declare const styleNames: typeof import("@timeless/timeless").styleNames;
+declare const throttle: typeof import("@timeless/timeless").throttle;
 declare const uncomputed: typeof import("@timeless/timeless").uncomputed;
 declare const use: typeof import("@timeless/timeless").use;
 
@@ -16098,6 +16951,14 @@ declare const FieldSeparator: typeof import("@timeless/shadcn").FieldSeparator;
 declare const FieldSet: typeof import("@timeless/shadcn").FieldSet;
 declare const FileInput: typeof import("@timeless/shadcn").FileInput;
 declare const FilePickerPrimitive: typeof import("@timeless/shadcn").FilePickerPrimitive;
+declare const FlowBackground: typeof import("@timeless/shadcn").FlowBackground;
+declare const FlowCanvas: typeof import("@timeless/shadcn").FlowCanvas;
+declare const FlowControls: typeof import("@timeless/shadcn").FlowControls;
+declare const FlowEdgeView: typeof import("@timeless/shadcn").FlowEdgeView;
+declare const FlowHandle: typeof import("@timeless/shadcn").FlowHandle;
+declare const FlowMinimap: typeof import("@timeless/shadcn").FlowMinimap;
+declare const FlowNode: typeof import("@timeless/shadcn").FlowNode;
+declare const FlowPrimitive: typeof import("@timeless/shadcn").FlowPrimitive;
 declare const Form: typeof import("@timeless/shadcn").Form;
 declare const HeadPrimitive: typeof import("@timeless/shadcn").HeadPrimitive;
 declare const HistoryPanel: typeof import("@timeless/shadcn").HistoryPanel;
@@ -16256,6 +17117,9 @@ declare const DynamicContentCore: typeof import("@timeless/ui-vm").DynamicConten
 declare const DynamicContentInListCore: typeof import("@timeless/ui-vm").DynamicContentInListCore;
 declare const ElementCore: typeof import("@timeless/ui-vm").ElementCore;
 declare const FilePickerCore: typeof import("@timeless/ui-vm").FilePickerCore;
+declare const FlowCanvasModel: typeof import("@timeless/ui-vm").FlowCanvasModel;
+declare const FlowEdgeModel: typeof import("@timeless/ui-vm").FlowEdgeModel;
+declare const FlowNodeModel: typeof import("@timeless/ui-vm").FlowNodeModel;
 declare const FocusScopeCore: typeof import("@timeless/ui-vm").FocusScopeCore;
 declare const FormCore: typeof import("@timeless/ui-vm").FormCore;
 declare const FormFieldCore: typeof import("@timeless/ui-vm").FormFieldCore;
@@ -16328,7 +17192,9 @@ declare const damping: typeof import("@timeless/ui-vm").damping;
 declare const getAngleByPoints: typeof import("@timeless/ui-vm").getAngleByPoints;
 declare const getGlobalLayerManager: typeof import("@timeless/ui-vm").getGlobalLayerManager;
 declare const getPoint: typeof import("@timeless/ui-vm").getPoint;
+declare const getPopperPlatform: typeof import("@timeless/ui-vm").getPopperPlatform;
 declare const initGlobalPointerListener: typeof import("@timeless/ui-vm").initGlobalPointerListener;
 declare const onCreateScrollView: typeof import("@timeless/ui-vm").onCreateScrollView;
 declare const preventDefault: typeof import("@timeless/ui-vm").preventDefault;
 declare const resetGlobalLayerManager: typeof import("@timeless/ui-vm").resetGlobalLayerManager;
+declare const setPopperPlatform: typeof import("@timeless/ui-vm").setPopperPlatform;

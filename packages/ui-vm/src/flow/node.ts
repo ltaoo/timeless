@@ -1,31 +1,104 @@
 import { BaseDomain, Handler } from "@timeless/base";
 import type { FlowNode } from "./index";
 
-export interface FlowNodeCoreState {
-  dragging: boolean;
-  selected: boolean;
+export interface FlowNodeModelProps extends FlowNode {
+  onClick?: (node: FlowNodeModel) => void;
+  onDoubleClick?: (node: FlowNodeModel) => void;
 }
 
-export class FlowNodeCore extends BaseDomain<any> {
+enum Events {
+  Click = "Click",
+  DoubleClick = "DoubleClick",
+  FocusedChange = "FocusedChange",
+  PositionChange = "PositionChange",
+  StateChange = "StateChange",
+}
+
+type TheTypesOfEvents = {
+  [Events.Click]: FlowNodeModel;
+  [Events.DoubleClick]: FlowNodeModel;
+  [Events.FocusedChange]: boolean;
+  [Events.PositionChange]: { x: number; y: number };
+  [Events.StateChange]: FlowNodeState;
+};
+
+export interface FlowNodeState {
+  dragging: boolean;
+  selected: boolean;
+  focused: boolean;
+}
+
+export class FlowNodeModel extends BaseDomain<TheTypesOfEvents> {
+  id: string;
   data: FlowNode;
+  focused: boolean = false;
+  selected: boolean = false;
+
   private handleRects: Map<string, DOMRect> = new Map();
   private dragStartPos: { x: number; y: number } | null = null;
   private nodeStartPos: { x: number; y: number } | null = null;
+  position: {
+    x: number;
+    y: number;
+  };
+  width: number;
+  height: number;
 
-  constructor(data: FlowNode) {
-    super({ unique_id: `FlowNodeCore-${data.id}` });
-    this.data = data;
-  }
-
-  get state(): FlowNodeCoreState {
+  get state(): FlowNodeState {
     return {
       dragging: this.data.dragging || false,
       selected: this.data.selected || false,
+      focused: this.focused,
     };
+  }
+
+  constructor(props: FlowNodeModelProps) {
+    super({ unique_id: `FlowNodeCore-${props.id}` });
+    const { onClick, onDoubleClick, ...data } = props;
+    this.data = data;
+
+    this.id = data.id;
+    this.position = data.position;
+    this.width = data.width;
+    this.height = data.height;
+
+    if (onClick) {
+      this.on(Events.Click, onClick);
+    }
+    if (onDoubleClick) {
+      this.on(Events.DoubleClick, onDoubleClick);
+    }
   }
 
   updateData(patch: Partial<FlowNode>): void {
     this.data = { ...this.data, ...patch };
+  }
+
+  focus(): void {
+    if (this.focused) {
+      return;
+    }
+    this.focused = true;
+    this.emit(Events.FocusedChange, true);
+    this.emit(Events.StateChange, this.state);
+  }
+
+  blur(): void {
+    if (!this.focused) {
+      return;
+    }
+    this.focused = false;
+    this.emit(Events.FocusedChange, false);
+    this.emit(Events.StateChange, this.state);
+  }
+
+  click() {
+    this.selected = true;
+    this.emit(Events.Click, this as FlowNodeModel);
+  }
+
+  doubleClick(): void {
+    this.emit(Events.DoubleClick, this as FlowNodeModel);
   }
 
   startDrag(clientX: number, clientY: number): void {
@@ -72,10 +145,22 @@ export class FlowNodeCore extends BaseDomain<any> {
   }
 
   onPositionChange(handler: Handler<{ x: number; y: number }>): () => void {
-    return this.on("PositionChange" as any, handler);
+    return this.on(Events.PositionChange, handler);
   }
 
-  onStateChange(handler: Handler<FlowNodeCoreState>): () => void {
-    return this.on("StateChange" as any, handler);
+  onStateChange(handler: Handler<FlowNodeState>): () => void {
+    return this.on(Events.StateChange, handler);
+  }
+
+  onClick(handler: Handler<FlowNodeModel>): () => void {
+    return this.on(Events.Click, handler);
+  }
+
+  onDoubleClick(handler: Handler<FlowNodeModel>): () => void {
+    return this.on(Events.DoubleClick, handler);
+  }
+
+  onFocusedChange(handler: Handler<boolean>): () => void {
+    return this.on(Events.FocusedChange, handler);
   }
 }

@@ -15,7 +15,7 @@ import { VNodeView } from "@/vnode/view";
 import { MountedEvent } from "@/event";
 
 import { TimelessLazyComponent } from "./lazy-view";
-import { BoxState } from "./box";
+import { BoxEvents, BoxState } from "./box";
 
 /** Possible prop values */
 export type ViewPropValue = string | number | boolean | undefined | null;
@@ -54,36 +54,12 @@ export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
  */
 export interface TimelessElement<T = any, Elm = any> {
   t: string;
+  svgType?: string;
   $elm: VNodeView<Elm>;
   state: T & BoxState;
   children?: (TimelessElement | null)[];
-  events?: {
-    onMounted?: (e: MountedEvent<VNodeView<Elm>>) => void;
-    onClick?: (e: MouseEvent) => void;
-    onDoubleClick?: (e: MouseEvent) => void;
-    onLongPress?: (e: PointerEvent) => void;
-    onPointerDown?: (e: PointerEvent) => void;
-    onMouseEnter?: (e: MouseEvent) => void;
-    onMouseLeave?: (e: MouseEvent) => void;
-    onChange?: (e: Event) => void;
-    onInput?: (e: Event) => void;
-    onFocus?: (e: FocusEvent) => void;
-    onBlur?: (e: FocusEvent) => void;
-    onKeyDown?: (e: KeyboardEvent) => void;
-    onContextMenu?: (e: MouseEvent) => void;
-    onDragStart?: (e: DragEvent) => void;
-    onDrag?: (e: DragEvent) => void;
-    onDragEnd?: (e: DragEvent) => void;
-    onDragEnter?: (e: DragEvent) => void;
-    onDragOver?: (e: DragEvent) => void;
-    onDragLeave?: (e: DragEvent) => void;
-    onDrop?: (e: DragEvent) => void;
-    onAnimationEnd?: (e: AnimationEvent) => void;
-    onScroll?: (e: any) => void;
-  };
+  events?: BoxEvents;
   a11y?: VNodeA11y;
-  // hydrate?(existingDom: any): any;
-  // cleanup?: () => void;
   onMounted(event: MountedEvent): void;
   beforeUnmounted?(): void;
   onUnmounted(): void;
