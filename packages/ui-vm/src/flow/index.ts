@@ -1,11 +1,14 @@
 import { BaseDomain, Handler } from "@timeless/base";
 import { FlowNodeModel } from "./node";
 import { FlowEdgeModel } from "./edge";
+import { Logger } from "@/util";
 
 export { FlowNodeModel } from "./node";
 export type { FlowNodeModelProps, FlowNodeState } from "./node";
 export { FlowEdgeModel } from "./edge";
 export type { FlowEdgeModelProps, FlowEdgeState } from "./edge";
+
+const logger = Logger({ prefix: "ui-vm", scope: "flow/index" });
 
 export interface FlowNode<T = any> {
   id: string;
@@ -77,7 +80,10 @@ type TheTypesOfEvents = {
   };
   [Events.NodeDragStop]: { node: FlowNodeModel };
   [Events.EdgeClick]: { edge: FlowEdgeModel; event: MouseEvent };
-  [Events.SelectionChange]: { nodes: FlowNodeModel[]; edges: FlowEdgeModel[] };
+  [Events.SelectionChange]: {
+    nodes: FlowNodeModel[];
+    edges: FlowEdgeModel[];
+  };
   [Events.ViewportChange]: Viewport;
   [Events.StateChange]: FlowState;
 };
@@ -115,6 +121,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
 
   private nodeMap: Map<string, FlowNodeModel> = new Map();
   private edgeMap: Map<string, FlowEdgeModel> = new Map();
+  _mountedNodeCount = 0;
 
   constructor(
     props: FlowCanvasModelProps & {
@@ -179,7 +186,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
   }
 
   removeNode(id: string): void {
-    this.nodes = this.nodes.filter((n) => n.data.id !== id);
+    this.nodes = this.nodes.filter((n) => n.id !== id);
     this.removeNodeFromMap(id);
     this.edges = this.edges.filter(
       (e) => e.source.id !== id && e.target.id !== id,
@@ -189,11 +196,14 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, this.state);
   }
 
-  updateNode(id: string, patch: Partial<FlowNode>): void {
+  updateNode(id: string, patch: any): void {
     const node = this.nodeMap.get(id);
-    if (!node) return;
+    if (!node) {
+      return;
+    }
+    console.log("before ", node);
     node.updateData(patch);
-    this.nodes = [...this.nodes];
+    // this.nodes = [...this.nodes];
     this.emit(Events.NodesChange, this.nodes);
     this.emit(Events.StateChange, this.state);
   }
@@ -203,6 +213,21 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
   }
 
   setNodes(nodes: FlowNodeModel[]): void {
+    for (let i = 0; i < nodes.length; i += 1) {
+      const node = nodes[i];
+      node.setCanvas$(this);
+      const unlisten = node.onMounted(() => {
+        logger.log(
+          "[]setNodes node onMounted callback",
+          this._mountedNodeCount,
+        );
+        unlisten();
+        this._mountedNodeCount += 1;
+        if (this._mountedNodeCount === nodes.length) {
+          this.refreshEdgesPosition();
+        }
+      });
+    }
     this.nodes = nodes;
     this.nodeMap.clear();
     nodes.forEach((n) => this.addNodeToMap(n));
@@ -232,6 +257,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
       type: edge.type,
       label: edge.label,
       animated: edge.animated,
+      canvas$: this,
     });
   }
 
@@ -272,15 +298,15 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
     if (patch.animated !== undefined) edge.animated = patch.animated;
     if (patch.type !== undefined) {
       edge.type = patch.type;
-      edge.computePath();
+      // edge.computePath();
     }
     this.edges = [...this.edges];
     this.emit(Events.EdgesChange, this.edges);
     this.emit(Events.StateChange, this.state);
   }
 
-  getEdge(id: string): FlowEdgeModel | undefined {
-    return this.edgeMap.get(id);
+  getEdge(id: string): FlowEdgeModel | null {
+    return this.edgeMap.get(id) ?? null;
   }
 
   setEdges(edges: FlowEdge[]): void {
@@ -295,6 +321,13 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
     }
     this.emit(Events.EdgesChange, this.edges);
     this.emit(Events.StateChange, this.state);
+  }
+
+  refreshEdgesPosition() {
+    for (let i = 0; i < this.edges.length; i += 1) {
+      const edge = this.edges[i];
+      edge.computePath();
+    }
   }
 
   setViewport(viewport: Partial<Viewport>): void {
@@ -322,10 +355,10 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
       maxY = -Infinity;
 
     this.nodes.forEach((node) => {
-      const x = node.data.position.x;
-      const y = node.data.position.y;
-      const w = node.data.width || 150;
-      const h = node.data.height || 80;
+      const x = node.position.x;
+      const y = node.position.y;
+      const w = node.width || 150;
+      const h = node.height || 80;
       minX = Math.min(minX, x);
       minY = Math.min(minY, y);
       maxX = Math.max(maxX, x + w);
@@ -349,7 +382,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
   selectNode(id: string, multi: boolean = false): void {
     if (!multi) {
       this.nodes.forEach((n) => {
-        n.data.selected = n.data.id === id;
+        n.selected = n.id === id;
       });
       this.edges.forEach((e) => {
         e.deselect();
@@ -357,7 +390,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
     } else {
       const node = this.getNode(id);
       if (node) {
-        node.data.selected = !node.data.selected;
+        node.selected = !node.selected;
       }
     }
     this.emit(Events.SelectionChange, {
@@ -377,7 +410,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
         }
       });
       this.nodes.forEach((n) => {
-        n.data.selected = false;
+        n.selected = false;
       });
     } else {
       const edge = this.getEdge(id);
@@ -398,7 +431,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
 
   clearSelection(): void {
     this.nodes.forEach((n) => {
-      n.data.selected = false;
+      n.selected = false;
     });
     this.edges.forEach((e) => {
       e.deselect();
@@ -408,7 +441,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
   }
 
   getSelectedNodes(): FlowNodeModel[] {
-    return this.nodes.filter((n) => n.data.selected);
+    return this.nodes.filter((n) => n.selected);
   }
 
   getSelectedEdges(): FlowEdgeModel[] {
@@ -417,18 +450,12 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
 
   toJSON(): { nodes: FlowNode[]; edges: FlowEdge[]; viewport: Viewport } {
     return {
-      nodes: this.nodes.map((n) => n.data),
-      edges: this.edges.map((e) => ({
-        id: e.id,
-        source: e.source.id,
-        target: e.target.id,
-        sourceHandle: e.sourceHandle,
-        targetHandle: e.targetHandle,
-        type: e.type,
-        label: e.label,
-        animated: e.animated,
-        selected: e.selected,
-      })),
+      nodes: this.nodes.map((n) => {
+        return n.toJSON();
+      }),
+      edges: this.edges.map((e) => {
+        return e.toJSON();
+      }),
       viewport: this.viewport,
     };
   }

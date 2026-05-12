@@ -1,12 +1,9 @@
 import { BaseDomain, Handler } from "@timeless/base";
-import type { FlowNode } from "./index";
 
-export interface FlowNodeModelProps extends FlowNode {
-  onClick?: (node: FlowNodeModel) => void;
-  onDoubleClick?: (node: FlowNodeModel) => void;
-}
+import type { FlowCanvasModel, FlowNode } from "./index";
 
 enum Events {
+  Mounted,
   Click = "Click",
   DoubleClick = "DoubleClick",
   FocusedChange = "FocusedChange",
@@ -14,29 +11,53 @@ enum Events {
   StateChange = "StateChange",
 }
 
-type TheTypesOfEvents = {
-  [Events.Click]: FlowNodeModel;
-  [Events.DoubleClick]: FlowNodeModel;
+type TheTypesOfEvents<T> = {
+  [Events.Mounted]: {
+    data: { x: number; y: number; width: number; height: number };
+  };
+  [Events.Click]: FlowNodeModel<T>;
+  [Events.DoubleClick]: FlowNodeModel<T>;
   [Events.FocusedChange]: boolean;
   [Events.PositionChange]: { x: number; y: number };
-  [Events.StateChange]: FlowNodeState;
+  [Events.StateChange]: FlowNodeState<T>;
 };
 
-export interface FlowNodeState {
+export interface FlowNodeModelProps<T extends any> {
+  id: string;
+  type?: string;
+  position: { x: number; y: number };
+  data: T;
+  selected?: boolean;
+  dragging?: boolean;
+  width?: number;
+  height?: number;
+  canvas$: FlowCanvasModel;
+  // data: FlowNode;
+  onClick?: (node: FlowNodeModel<T>) => void;
+  onDoubleClick?: (node: FlowNodeModel<T>) => void;
+}
+
+export interface FlowNodeState<T extends any> {
   dragging: boolean;
   selected: boolean;
   focused: boolean;
+  position: {
+    x: number;
+    y: number;
+  };
 }
 
-export class FlowNodeModel extends BaseDomain<TheTypesOfEvents> {
+export class FlowNodeModel<T extends any = {}> extends BaseDomain<
+  TheTypesOfEvents<T>
+> {
   id: string;
-  data: FlowNode;
+  type: string;
+  label: string;
+  data: T;
+
   focused: boolean = false;
   selected: boolean = false;
-
-  private handleRects: Map<string, DOMRect> = new Map();
-  private dragStartPos: { x: number; y: number } | null = null;
-  private nodeStartPos: { x: number; y: number } | null = null;
+  dragging: boolean = false;
   position: {
     x: number;
     y: number;
@@ -44,23 +65,45 @@ export class FlowNodeModel extends BaseDomain<TheTypesOfEvents> {
   width: number;
   height: number;
 
-  get state(): FlowNodeState {
+  private handleRects: Map<string, DOMRect> = new Map();
+  private dragStartPos: { x: number; y: number } | null = null;
+  private nodeStartPos: { x: number; y: number } | null = null;
+
+  canvas$: FlowCanvasModel;
+
+  get state(): FlowNodeState<T> {
     return {
-      dragging: this.data.dragging || false,
-      selected: this.data.selected || false,
+      dragging: false,
+      selected: this.selected || false,
       focused: this.focused,
+      position: this.position,
     };
   }
 
-  constructor(props: FlowNodeModelProps) {
+  constructor(props: FlowNodeModelProps<T>) {
     super({ unique_id: `FlowNodeCore-${props.id}` });
-    const { onClick, onDoubleClick, ...data } = props;
-    this.data = data;
+    const {
+      id,
+      type,
+      position,
+      width,
+      height,
+      data,
+      canvas$,
+      onClick,
+      onDoubleClick,
+    } = props;
 
-    this.id = data.id;
-    this.position = data.position;
-    this.width = data.width;
-    this.height = data.height;
+    this.id = id;
+    this.type = type;
+    this.position = position ?? {
+      x: 0,
+      y: 0,
+    };
+    this.width = width;
+    this.height = height;
+    this.data = data;
+    this.canvas$ = canvas$;
 
     if (onClick) {
       this.on(Events.Click, onClick);
@@ -70,8 +113,16 @@ export class FlowNodeModel extends BaseDomain<TheTypesOfEvents> {
     }
   }
 
-  updateData(patch: Partial<FlowNode>): void {
-    this.data = { ...this.data, ...patch };
+  setCanvas$(v: FlowCanvasModel) {
+    this.canvas$ = v;
+  }
+
+  updateData(patch: Partial<T>): void {
+    this.data = {
+      // @ts-ignore
+      ...this.data,
+      ...patch,
+    };
   }
 
   focus(): void {
@@ -94,17 +145,17 @@ export class FlowNodeModel extends BaseDomain<TheTypesOfEvents> {
 
   click() {
     this.selected = true;
-    this.emit(Events.Click, this as FlowNodeModel);
+    this.emit(Events.Click, this as FlowNodeModel<T>);
   }
 
   doubleClick(): void {
-    this.emit(Events.DoubleClick, this as FlowNodeModel);
+    this.emit(Events.DoubleClick, this as FlowNodeModel<T>);
   }
 
   startDrag(clientX: number, clientY: number): void {
     this.dragStartPos = { x: clientX, y: clientY };
-    this.nodeStartPos = { ...this.data.position };
-    this.data.dragging = true;
+    this.nodeStartPos = { ...this.position };
+    this.dragging = true;
   }
 
   drag(clientX: number, clientY: number, zoom: number = 1): void {
@@ -113,7 +164,7 @@ export class FlowNodeModel extends BaseDomain<TheTypesOfEvents> {
     const deltaX = (clientX - this.dragStartPos.x) / zoom;
     const deltaY = (clientY - this.dragStartPos.y) / zoom;
 
-    this.data.position = {
+    this.position = {
       x: this.nodeStartPos.x + deltaX,
       y: this.nodeStartPos.y + deltaY,
     };
@@ -122,7 +173,7 @@ export class FlowNodeModel extends BaseDomain<TheTypesOfEvents> {
   stopDrag(): void {
     this.dragStartPos = null;
     this.nodeStartPos = null;
-    this.data.dragging = false;
+    this.dragging = false;
   }
 
   registerHandle(handleId: string, el: HTMLElement): void {
@@ -144,23 +195,52 @@ export class FlowNodeModel extends BaseDomain<TheTypesOfEvents> {
     }
   }
 
-  onPositionChange(handler: Handler<{ x: number; y: number }>): () => void {
+  toJSON() {
+    return {
+      id: this.id,
+      position: this.position,
+      width: this.width,
+      height: this.height,
+      data: this.data,
+    };
+  }
+
+  handleMounted(event: {
+    data: { x: number; y: number; width: number; height: number };
+  }) {
+    this.position = {
+      x: event.data.x,
+      y: event.data.y,
+    };
+    this.width = event.data.width;
+    this.height = event.data.height;
+    this.emit(Events.Mounted, event);
+  }
+
+  onMounted(handler: Handler<TheTypesOfEvents<T>[Events.Mounted]>) {
+    return this.on(Events.Mounted, handler);
+  }
+  onPositionChange(
+    handler: Handler<TheTypesOfEvents<T>[Events.PositionChange]>,
+  ): () => void {
     return this.on(Events.PositionChange, handler);
   }
-
-  onStateChange(handler: Handler<FlowNodeState>): () => void {
-    return this.on(Events.StateChange, handler);
-  }
-
-  onClick(handler: Handler<FlowNodeModel>): () => void {
+  onClick(handler: Handler<TheTypesOfEvents<T>[Events.Click]>): () => void {
     return this.on(Events.Click, handler);
   }
-
-  onDoubleClick(handler: Handler<FlowNodeModel>): () => void {
+  onDoubleClick(
+    handler: Handler<TheTypesOfEvents<T>[Events.DoubleClick]>,
+  ): () => void {
     return this.on(Events.DoubleClick, handler);
   }
-
-  onFocusedChange(handler: Handler<boolean>): () => void {
+  onFocusedChange(
+    handler: Handler<TheTypesOfEvents<T>[Events.FocusedChange]>,
+  ): () => void {
     return this.on(Events.FocusedChange, handler);
+  }
+  onStateChange(
+    handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>,
+  ): () => void {
+    return this.on(Events.StateChange, handler);
   }
 }

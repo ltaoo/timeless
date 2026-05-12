@@ -3,10 +3,11 @@ import { defineConfig } from "vite";
 import fs from "fs";
 import dts from "vite-plugin-dts";
 
-import { buildLibName, isProd } from "../../vite.config.base";
+import { buildLibName } from "../../vite.config.base";
 
 import pkg from "./package.json";
 
+const isProd = false;
 const name = "timeless.ui";
 const isWhole = process.argv.includes("--whole");
 const isUmdOnly = process.argv.includes("--umd");
@@ -90,13 +91,13 @@ export default defineConfig({
       name: buildLibName(name),
     },
     minify: isProd ? "terser" : true,
-    ...(isProd && {
+    ...(isProd ? {
       terserOptions: {
         compress: {
           drop_console: true,
         },
       },
-    }),
+    } : {}),
     sourcemap: false,
     rollupOptions: {
       external: ["@timeless/base", "@timeless/reactive"],

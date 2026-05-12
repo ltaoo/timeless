@@ -94,7 +94,7 @@ export interface SVGProps extends SVGBaseProps, SVGPresentationAttrs {
 }
 
 export function SVG(props: SVGProps = {}, children?: any) {
-  let $elm: SVGSVGElement | null = null;
+  let $elm: any | null = null;
   const box$ = Box(props, {});
   const state = box$.state;
   const events = box$.events;
@@ -357,6 +357,7 @@ export function Path(props: PathProps = {}, children?: any) {
           d.subscribe({
             onChange(v) {
               state.d = v;
+              $elm.setAttribute("d", v);
             },
           });
         } else {

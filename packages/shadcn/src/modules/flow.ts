@@ -9,14 +9,15 @@ import {
 } from "@timeless/timeless";
 import { FlowPrimitive } from "@timeless/ui-primitive";
 import { FlowCanvasModel, FlowNodeModel, FlowEdgeModel } from "@timeless/ui-vm";
-import type { FlowNode, FlowEdge } from "@timeless/ui-vm";
+
+type FlowNodeViewRender = Record<
+  string,
+  (props: { node: FlowNodeModel }) => ViewChildren
+>;
 
 export interface FlowViewProps extends ViewProps {
   store: FlowCanvasModel;
-  nodeTypes?: Record<
-    string,
-    (props: { node: FlowNode; store: FlowCanvasModel }) => ViewChildren
-  >;
+  nodeTypes?: FlowNodeViewRender;
   showBackground?: boolean;
   backgroundVariant?: "dots" | "lines" | "cross";
   showMinimap?: boolean;
@@ -26,15 +27,6 @@ export interface FlowViewProps extends ViewProps {
   maxZoom?: number;
   nodesDraggable?: boolean;
   nodesConnectable?: boolean;
-}
-
-export interface FlowNodeViewProps extends ViewProps {
-  store: FlowCanvasModel;
-  node: FlowNode;
-  nodeTypes?: Record<
-    string,
-    (props: { node: FlowNode; store: FlowCanvasModel }) => ViewChildren
-  >;
 }
 
 export interface FlowHandleViewProps extends ViewProps {
@@ -115,22 +107,22 @@ export function FlowHandle(props: FlowHandleViewProps) {
 }
 
 function getDefaultNodeContent(
-  node: FlowNode,
-  store: FlowCanvasModel,
+  node: FlowNodeModel,
+  // store: FlowCanvasModel,
 ): ViewChildren {
   return [
     FlowHandle({
-      store,
+      store: node.canvas$,
       nodeId: node.id,
       handleId: "default-target",
       type: "target",
       position: "left",
     }),
     View({ class: "flex-1 flex items-center justify-center" }, [
-      node.data?.label || node.id,
+      node.data["label"] || node.id,
     ]),
     FlowHandle({
-      store,
+      store: node.canvas$,
       nodeId: node.id,
       handleId: "default-source",
       type: "source",
@@ -139,10 +131,13 @@ function getDefaultNodeContent(
   ];
 }
 
-export function FlowNodeView(props: FlowNodeViewProps) {
-  const { store, node, nodeTypes, class: cls, ...rest } = props;
+export interface FlowNodeViewProps extends ViewProps {
+  store: FlowNodeModel;
+  nodeTypes: FlowNodeViewRender;
+}
 
-  const node$ = new FlowNodeModel(node);
+export function FlowNodeView(props: FlowNodeViewProps) {
+  const { store: node$, nodeTypes, class: cls, ...rest } = props;
 
   const state_ = refobj(node$.state);
 
@@ -158,23 +153,35 @@ export function FlowNodeView(props: FlowNodeViewProps) {
     {
       ...rest,
       class: classNames([
-        "absolute rounded-lg border border-gray-200 dark:border-gray-700",
+        "absolute min-w-[68px] rounded-lg border border-gray-200 dark:border-gray-700",
         "bg-white dark:bg-gray-800",
         "shadow-md",
         "select-none",
-        node.dragging && "shadow-xl",
-        node.selected && "ring-2 ring-blue-500 dark:ring-blue-400",
+        computed(state_, (t) => (t.dragging ? "shadow-xl" : null)),
+        computed(state_, (t) =>
+          t.selected ? "ring-2 ring-blue-500 dark:ring-blue-400" : null,
+        ),
         cls,
       ]),
-      style: {
-        left: `${node.position.x}px`,
-        top: `${node.position.y}px`,
-        // left: `${currentNode().position.x}px`,
-        // top: `${currentNode().position.y}px`,
-      },
+      style: computed(state_, (t) => {
+        return {
+          left: `${t.position.x}px`,
+          top: `${t.position.y}px`,
+        };
+      }),
       onMounted(e) {
-        const rect = e.target.get$elm().getBoundingClientRect();
-        store.updateNode(node.id, { width: rect.width, height: rect.height });
+        const $elm = e.target.get$elm();
+        const rect = $elm.getBoundingClientRect();
+        console.log("the flow node is mounted", rect.width, rect.height);
+        node$.handleMounted({
+          data: {
+            x: $elm.offsetLeft,
+            y: $elm.offsetTop,
+            width: rect.width,
+            height: rect.height,
+          },
+        });
+        // store.updateNode(node.id, { width: rect.width, height: rect.height });
       },
       onMouseDown(e: MouseEvent) {
         // if (e.button !== 0) return;
@@ -223,12 +230,15 @@ export function FlowNodeView(props: FlowNodeViewProps) {
     },
     [
       Show({
-        when: !!(nodeTypes && node.type && nodeTypes[node.type]),
+        when: !!(nodeTypes && node$.type && nodeTypes[node$.type]),
+        // when: computed(state_, (t) => {
+        //   return !!(nodeTypes && t.type && nodeTypes[t.type]);
+        // }),
         ok() {
-          return nodeTypes[node.type]({ node, store });
+          return nodeTypes[node$.type]({ node: node$ });
         },
         else() {
-          return getDefaultNodeContent(node, store);
+          return getDefaultNodeContent(node$);
         },
       }),
     ],
@@ -673,7 +683,7 @@ export function FlowCanvas(props: FlowViewProps, children?: ViewChildren) {
           For({
             each: nodes_,
             render(node) {
-              return FlowNodeView({ store, node, nodeTypes });
+              return FlowNodeView({ store: node, nodeTypes });
             },
           }),
         ],

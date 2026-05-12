@@ -5,30 +5,30 @@ export default function FlowExamplePage() {
 
   const flow$ = new Timeless.ui.FlowCanvasModel({
     nodes: [
-      {
+      new Timeless.ui.FlowNodeModel({
         id: "1",
         position: { x: 100, y: 100 },
         data: { label: "Start" },
         type: "default",
-      },
-      {
+      }),
+      new Timeless.ui.FlowNodeModel({
         id: "2",
         position: { x: 350, y: 50 },
         data: { label: "Process A" },
         type: "default",
-      },
-      {
+      }),
+      new Timeless.ui.FlowNodeModel({
         id: "3",
         position: { x: 350, y: 200 },
         data: { label: "Process B" },
         type: "default",
-      },
-      {
+      }),
+      new Timeless.ui.FlowNodeModel({
         id: "4",
         position: { x: 600, y: 125 },
         data: { label: "End" },
         type: "default",
-      },
+      }),
     ],
     edges: [
       { id: "e1-2", source: "1", target: "2", type: "bezier" },
@@ -107,14 +107,16 @@ export default function FlowExamplePage() {
                 store: new Timeless.ui.ButtonCore({}),
                 onClick() {
                   const id = `node-${Date.now()}`;
-                  flow$.addNode({
-                    id,
-                    position: {
-                      x: Math.random() * 400 + 100,
-                      y: Math.random() * 300 + 100,
-                    },
-                    data: { label: `New Node ${id.slice(-4)}` },
-                  });
+                  flow$.addNode(
+                    new Timeless.ui.FlowNodeModel({
+                      id,
+                      position: {
+                        x: Math.random() * 400 + 100,
+                        y: Math.random() * 300 + 100,
+                      },
+                      data: { label: `New Node ${id.slice(-4)}` },
+                    }),
+                  );
                 },
               },
               ["Add Random Node"],

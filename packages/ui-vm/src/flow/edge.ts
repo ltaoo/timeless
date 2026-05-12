@@ -1,10 +1,11 @@
 import { BaseDomain, Handler } from "@timeless/base";
-import type { FlowEdge } from "./index";
+
+import type { FlowCanvasModel, FlowEdge } from "./index";
 import { FlowNodeModel } from "./node";
 
 type HandlePosition = "top" | "right" | "bottom" | "left";
 
-export interface FlowEdgeModelProps {
+export interface FlowEdgeModelProps<T extends any> {
   id: string;
   source: FlowNodeModel;
   target: FlowNodeModel;
@@ -15,6 +16,7 @@ export interface FlowEdgeModelProps {
   type?: FlowEdge["type"];
   label?: string;
   animated?: boolean;
+  canvas$: FlowCanvasModel;
 }
 
 enum Events {
@@ -39,7 +41,9 @@ export interface FlowEdgeState {
   targetY: number;
 }
 
-export class FlowEdgeModel extends BaseDomain<TheTypesOfEvents> {
+export class FlowEdgeModel<
+  T extends any = {},
+> extends BaseDomain<TheTypesOfEvents> {
   id: string;
   source: FlowNodeModel;
   target: FlowNodeModel;
@@ -58,21 +62,7 @@ export class FlowEdgeModel extends BaseDomain<TheTypesOfEvents> {
   targetX: number = 0;
   targetY: number = 0;
 
-  constructor(props: FlowEdgeModelProps) {
-    super({ unique_id: `FlowEdge-${props.id}` });
-    this.id = props.id;
-    this.source = props.source;
-    this.target = props.target;
-    this.sourceHandle = props.sourceHandle;
-    this.targetHandle = props.targetHandle;
-    this.sourcePosition = props.sourcePosition || "right";
-    this.targetPosition = props.targetPosition || "left";
-    this.type = props.type || "bezier";
-    this.label = props.label;
-    this.animated = props.animated || false;
-
-    this.computePath();
-  }
+  canvas$: FlowCanvasModel;
 
   get state(): FlowEdgeState {
     return {
@@ -84,6 +74,24 @@ export class FlowEdgeModel extends BaseDomain<TheTypesOfEvents> {
       targetX: this.targetX,
       targetY: this.targetY,
     };
+  }
+
+  constructor(props: FlowEdgeModelProps<T>) {
+    super({ unique_id: `FlowEdge-${props.id}` });
+
+    this.id = props.id;
+    this.source = props.source;
+    this.target = props.target;
+    this.sourceHandle = props.sourceHandle;
+    this.targetHandle = props.targetHandle;
+    this.sourcePosition = props.sourcePosition || "right";
+    this.targetPosition = props.targetPosition || "left";
+    this.type = props.type || "bezier";
+    this.label = props.label;
+    this.animated = props.animated || false;
+    this.canvas$ = props.canvas$;
+
+    // this.computePath();
   }
 
   toggle() {
@@ -112,13 +120,21 @@ export class FlowEdgeModel extends BaseDomain<TheTypesOfEvents> {
   }
 
   computePath(): void {
+    console.log(
+      "before get anchor point",
+      this.source.width,
+      this.source.height,
+      this.source.position,
+    );
     const { x: sx, y: sy } = this.getAnchorPoint(
       this.source,
       this.sourcePosition,
+      "source",
     );
     const { x: tx, y: ty } = this.getAnchorPoint(
       this.target,
       this.targetPosition,
+      "target",
     );
 
     this.sourceX = sx;
@@ -126,7 +142,7 @@ export class FlowEdgeModel extends BaseDomain<TheTypesOfEvents> {
     this.targetX = tx;
     this.targetY = ty;
 
-    const prevD = this.d;
+    const prev_d = this.d;
 
     switch (this.type) {
       case "straight":
@@ -140,34 +156,74 @@ export class FlowEdgeModel extends BaseDomain<TheTypesOfEvents> {
         break;
       case "bezier":
       default:
-        this.d = this.buildBezierPath(sx, sy, tx, ty);
+        console.log("before buildBezierPath", sx, sy, tx, ty);
+        this.d = this.buildBezierPath(
+          {
+            x: sx,
+            y: sy,
+          },
+          {
+            x: tx,
+            y: ty,
+          },
+        );
         break;
     }
 
-    if (this.d !== prevD) {
-      this.emit(Events.PathChange, this.d);
-      this.emit(Events.StateChange, this.state);
+    console.log("before update the d", this.d, prev_d, this.d === prev_d);
+    if (this.d === prev_d) {
+      return;
     }
+    this.emit(Events.PathChange, this.d);
+    this.emit(Events.StateChange, { ...this.state });
   }
 
   private getAnchorPoint(
     node: FlowNodeModel,
     position: HandlePosition,
+    role: "source" | "target",
   ): { x: number; y: number } {
-    const w = node.width || 150;
-    const h = node.height || 80;
+    const w = node.width;
+    const h = node.height;
     const { x, y } = node.position;
+
+    const { index, total } = this.getAnchorIndex(node, position, role);
+    const spacing = 20;
+    const totalSpan = (total - 1) * spacing;
 
     switch (position) {
       case "top":
-        return { x: x + w / 2, y };
-      case "bottom":
-        return { x: x + w / 2, y: y + h };
+      case "bottom": {
+        const centerX = x + w / 2;
+        const anchorX = centerX - totalSpan / 2 + index * spacing;
+        const anchorY = position === "top" ? y : y + h;
+        return { x: anchorX, y: anchorY };
+      }
       case "left":
-        return { x, y: y + h / 2 };
-      case "right":
-        return { x: x + w, y: y + h / 2 };
+      case "right": {
+        const centerY = y + h / 2;
+        const anchorY = centerY - totalSpan / 2 + index * spacing;
+        const anchorX = position === "left" ? x : x + w;
+        return { x: anchorX, y: anchorY };
+      }
     }
+  }
+
+  private getAnchorIndex(
+    node: FlowNodeModel,
+    position: HandlePosition,
+    role: "source" | "target",
+  ): { index: number; total: number } {
+    const edges = this.canvas$.edges;
+    const sameAnchorEdges = edges.filter((e) => {
+      if (role === "source") {
+        return e.source === node && e.sourcePosition === position;
+      }
+      return e.target === node && e.targetPosition === position;
+    });
+
+    const index = sameAnchorEdges.indexOf(this as any);
+    return { index: index === -1 ? 0 : index, total: sameAnchorEdges.length };
   }
 
   private buildStraightPath(
@@ -180,13 +236,22 @@ export class FlowEdgeModel extends BaseDomain<TheTypesOfEvents> {
   }
 
   private buildBezierPath(
-    sx: number,
-    sy: number,
-    tx: number,
-    ty: number,
+    start: {
+      x: number;
+      y: number;
+    },
+    end: {
+      x: number;
+      y: number;
+    },
   ): string {
-    const { cx1, cy1, cx2, cy2 } = this.getControlPoints(sx, sy, tx, ty);
-    return `M ${sx} ${sy} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${tx} ${ty}`;
+    const { cx1, cy1, cx2, cy2 } = this.getControlPoints(
+      start.x,
+      start.y,
+      end.x,
+      end.y,
+    );
+    return `M ${start.x} ${start.y} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${end.x} ${end.y}`;
   }
 
   private buildStepPath(
@@ -275,6 +340,20 @@ export class FlowEdgeModel extends BaseDomain<TheTypesOfEvents> {
 
   private isHorizontal(position: HandlePosition): boolean {
     return position === "left" || position === "right";
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      type: this.type,
+      label: this.label,
+      source: this.source.id,
+      target: this.target.id,
+      sourceHandle: this.sourceHandle,
+      targetHandle: this.targetHandle,
+      // animated: this.animated,
+      // selected: this.selected,
+    };
   }
 
   onPathChange(handler: Handler<string>): () => void {

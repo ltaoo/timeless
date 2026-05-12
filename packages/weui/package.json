@@ -1,6 +1,6 @@
 {
   "name": "@timeless/weui",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "main": "dist/index.js",
   "module": "dist/timeless.weui.esm.js",
   "types": "dist/index.d.ts",
