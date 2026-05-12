@@ -154,8 +154,16 @@ export function FlowNodeView(props: FlowNodeViewProps) {
   const source_handlers_ = refarr([]);
 
   node$.onStateChange(() => {
-    source_handlers_.as(node$.handles.filter((h) => h.type === "source"));
-    target_handlers_.as(node$.handles.filter((h) => h.type === "target"));
+    source_handlers_.as(
+      node$.handles
+        .filter((h) => h.type === "source")
+        .sort((a, b) => a.idx - b.idx),
+    );
+    target_handlers_.as(
+      node$.handles
+        .filter((h) => h.type === "target")
+        .sort((a, b) => a.idx - b.idx),
+    );
   });
 
   let isDragging = false;
@@ -189,7 +197,7 @@ export function FlowNodeView(props: FlowNodeViewProps) {
       onMounted(e) {
         const $elm = e.target.get$elm();
         const rect = $elm.getBoundingClientRect();
-        console.log("the flow node is mounted", rect.width, rect.height);
+        // console.log("the flow node is mounted", rect.width, rect.height);
         node$.handleMounted({
           data: {
             x: $elm.offsetLeft,
@@ -251,9 +259,9 @@ export function FlowNodeView(props: FlowNodeViewProps) {
       For({
         key: "id",
         each: source_handlers_,
-        render(h, idx) {
+        render(h) {
           return FlowHandle({
-            index: idx.value,
+            index: h.idx,
             total: source_handlers_.value.length,
             store: node$.canvas$,
             nodeId: node$.id,
@@ -275,9 +283,9 @@ export function FlowNodeView(props: FlowNodeViewProps) {
       For({
         key: "id",
         each: target_handlers_,
-        render(h, idx) {
+        render(h) {
           return FlowHandle({
-            index: idx.value,
+            index: h.idx,
             total: target_handlers_.value.length,
             store: node$.canvas$,
             nodeId: node$.id,

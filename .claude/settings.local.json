@@ -49,7 +49,8 @@
       "Bash(B=~/.claude/skills/gstack/browse/dist/browse\n$B console\n$B text | head -20)",
       "Bash(B=~/.claude/skills/gstack/browse/dist/browse\n$B goto http://localhost:5173\n$B snapshot -C | grep -i feedback)",
       "Bash(B=~/.claude/skills/gstack/browse/dist/browse\n$B click @c17\nsleep 0.5\n$B text | grep -i \"transition\\\\|toggle visibility\" | head -5)",
-      "Bash(do f=/Users/mayfair/Documents/other/timeless/packages/$pkg/dist/ echo '=== $pkg ===' ls $f)"
+      "Bash(do f=/Users/mayfair/Documents/other/timeless/packages/$pkg/dist/ echo '=== $pkg ===' ls $f)",
+      "Bash(ls apps/web-shadcn/vite.config.* 2>/dev/null; head -50 apps/web-shadcn/vite.config.ts 2>/dev/null || head -50 apps/web-shadcn/vite.config.js 2>/dev/null)"
     ]
   }
 }

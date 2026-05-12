@@ -1,12 +1,15 @@
 import { BaseDomain, Handler } from "@timeless/base";
 import { FlowNodeModel } from "./node";
 import { FlowEdgeModel } from "./edge";
+import { FlowHandleModel } from "./handle";
 import { Logger } from "@/util";
 
 export { FlowNodeModel } from "./node";
 export type { FlowNodeModelProps, FlowNodeState } from "./node";
 export { FlowEdgeModel } from "./edge";
 export type { FlowEdgeModelProps, FlowEdgeState } from "./edge";
+export { FlowHandleModel } from "./handle";
+export type { FlowHandleModelProps, FlowHandleState } from "./handle";
 
 const logger = Logger({ prefix: "ui-vm", scope: "flow/index" });
 
@@ -25,6 +28,7 @@ export interface FlowHandle {
   id: string;
   type: "source" | "target";
   position?: "top" | "right" | "bottom" | "left";
+  idx: number;
 }
 
 export interface FlowEdge {
@@ -227,6 +231,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
         this._mountedNodeCount += 1;
         if (this._mountedNodeCount === nodes.length) {
           this.computeNodeHandles();
+          this.computePassThroughNodes();
           this.refreshEdgesPosition();
         }
       });
@@ -333,10 +338,15 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
   private computeNodeHandles(): void {
     // console.log("[]flow/index - computeNodeHandles");
 
-    const nodeHandlesMap = new Map<string, FlowHandle[]>();
+    // Collect handles with peer node info for sorting
+    type HandleWithPeer = FlowHandle & {
+      peerNode: FlowNodeModel;
+      edge: FlowEdgeModel;
+    };
+    const nodeHandlesMap = new Map<string, HandleWithPeer[]>();
 
     for (const edge of this.edges) {
-      // source node → source handle
+      // source node → source handle (peer is target node)
       const sourceHandles = nodeHandlesMap.get(edge.source.id) || [];
       const sourceHandleId = edge.sourceHandle || `source-${edge.id}`;
       if (!sourceHandles.some((h) => h.id === sourceHandleId)) {
@@ -344,11 +354,14 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
           id: sourceHandleId,
           type: "source",
           position: edge.sourcePosition,
+          idx: 0,
+          peerNode: edge.target,
+          edge,
         });
       }
       nodeHandlesMap.set(edge.source.id, sourceHandles);
 
-      // target node → target handle
+      // target node → target handle (peer is source node)
       const targetHandles = nodeHandlesMap.get(edge.target.id) || [];
       const targetHandleId = edge.targetHandle || `target-${edge.id}`;
       if (!targetHandles.some((h) => h.id === targetHandleId)) {
@@ -356,13 +369,70 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
           id: targetHandleId,
           type: "target",
           position: edge.targetPosition,
+          idx: 0,
+          peerNode: edge.source,
+          edge,
         });
       }
       nodeHandlesMap.set(edge.target.id, targetHandles);
     }
 
+    // Sort handles by peer node position and assign idx per node
     for (const node of this.nodes) {
-      const handlers = nodeHandlesMap.get(node.id) || [];
+      const handlesWithPeer = nodeHandlesMap.get(node.id) || [];
+
+      const nodeCenterX = node.position.x + (node.width || 0) / 2;
+      const nodeCenterY = node.position.y + (node.height || 0) / 2;
+
+      // Sort within same-position groups
+      handlesWithPeer.sort((a, b) => {
+        const posA = a.position || (a.type === "source" ? "right" : "left");
+        const posB = b.position || (b.type === "source" ? "right" : "left");
+        if (posA !== posB) return 0;
+
+        const aCenterX = a.peerNode.position.x + (a.peerNode.width || 0) / 2;
+        const aCenterY = a.peerNode.position.y + (a.peerNode.height || 0) / 2;
+        const bCenterX = b.peerNode.position.x + (b.peerNode.width || 0) / 2;
+        const bCenterY = b.peerNode.position.y + (b.peerNode.height || 0) / 2;
+
+        const isHorizontal = posA === "left" || posA === "right";
+        if (isHorizontal) {
+          // Primary: X distance ascending (closer peer first)
+          const distA = Math.abs(aCenterX - nodeCenterX);
+          const distB = Math.abs(bCenterX - nodeCenterX);
+          if (distA !== distB) return distA - distB;
+          // Secondary: peer Y descending (lower on screen → smaller idx)
+          return bCenterY - aCenterY;
+        } else {
+          // Primary: Y distance ascending (closer peer first)
+          const distA = Math.abs(aCenterY - nodeCenterY);
+          const distB = Math.abs(bCenterY - nodeCenterY);
+          if (distA !== distB) return distA - distB;
+          // Secondary: peer X descending
+          return bCenterX - aCenterX;
+        }
+      });
+
+      // Assign idx per position group
+      const positionCounters = new Map<string, number>();
+      for (const handle of handlesWithPeer) {
+        const key = handle.position || "default";
+        const idx = positionCounters.get(key) || 0;
+        handle.idx = idx;
+        positionCounters.set(key, idx + 1);
+      }
+
+      const handlers: FlowHandleModel[] = handlesWithPeer.map(
+        ({ peerNode, edge, ...h }) =>
+          new FlowHandleModel({
+            id: h.id,
+            type: h.type,
+            position: h.position,
+            idx: h.idx,
+            node,
+            edge,
+          }),
+      );
       console.log(
         "[]flow/index - computeNodeHandles set handlers to node",
         node.id,
@@ -370,6 +440,79 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
       );
       node.setHandlers(handlers);
     }
+  }
+
+  private computePassThroughNodes(): void {
+    for (const edge of this.edges) {
+      const source = edge.source;
+      const target = edge.target;
+
+      if (this.isHorizontalEdge(edge)) {
+        // Horizontal edge: find nodes whose x range overlaps the corridor
+        const leftX = Math.min(
+          source.position.x + source.width,
+          target.position.x,
+        );
+        const rightX = Math.max(
+          source.position.x + source.width,
+          target.position.x,
+        );
+        // Y corridor: the bezier spans between source and target center Y
+        const sourceCenterY = source.position.y + source.height / 2;
+        const targetCenterY = target.position.y + target.height / 2;
+        const corridorTopY = Math.min(sourceCenterY, targetCenterY);
+        const corridorBottomY = Math.max(sourceCenterY, targetCenterY);
+
+        edge.passThroughNodes = this.nodes.filter((n) => {
+          if (n === source || n === target) return false;
+          const nLeft = n.position.x;
+          const nRight = n.position.x + n.width;
+          const nTop = n.position.y;
+          const nBottom = n.position.y + n.height;
+          // Node must overlap both X corridor and Y corridor
+          return (
+            nRight > leftX &&
+            nLeft < rightX &&
+            nBottom > corridorTopY &&
+            nTop < corridorBottomY
+          );
+        });
+      } else {
+        // Vertical edge: find nodes whose y range overlaps the corridor
+        const topY = Math.min(
+          source.position.y + source.height,
+          target.position.y,
+        );
+        const bottomY = Math.max(
+          source.position.y + source.height,
+          target.position.y,
+        );
+        // X corridor: the bezier spans between source and target center X
+        const sourceCenterX = source.position.x + source.width / 2;
+        const targetCenterX = target.position.x + target.width / 2;
+        const corridorLeftX = Math.min(sourceCenterX, targetCenterX);
+        const corridorRightX = Math.max(sourceCenterX, targetCenterX);
+
+        edge.passThroughNodes = this.nodes.filter((n) => {
+          if (n === source || n === target) return false;
+          const nLeft = n.position.x;
+          const nRight = n.position.x + n.width;
+          const nTop = n.position.y;
+          const nBottom = n.position.y + n.height;
+          // Node must overlap both Y corridor and X corridor
+          return (
+            nBottom > topY &&
+            nTop < bottomY &&
+            nRight > corridorLeftX &&
+            nLeft < corridorRightX
+          );
+        });
+      }
+    }
+  }
+
+  private isHorizontalEdge(edge: FlowEdgeModel): boolean {
+    return edge.sourcePosition === "left" || edge.sourcePosition === "right";
   }
 
   refreshEdgesPosition() {
@@ -381,7 +524,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
 
   setViewport(viewport: Partial<Viewport>): void {
     this.viewport = { ...this.viewport, ...viewport };
-    console.log('[]flow/index - setViewport', this.viewport);
+    // console.log('[]flow/index - setViewport', this.viewport);
     // this.emit(Events.ViewportChange, this.viewport);
     // this.emit(Events.StateChange, this.state);
   }

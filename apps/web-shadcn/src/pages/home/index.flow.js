@@ -72,6 +72,7 @@ export default function FlowExamplePage() {
       { id: "e-request-parse", source: "request", target: "parse", type: "bezier" },
       { id: "e-parse-img", source: "parse", target: "img-extract", type: "bezier" },
       { id: "e-parse-css", source: "parse", target: "css-extract", type: "bezier" },
+      { id: "e-parse-merge", source: "parse", target: "merge", type: "bezier" },
       { id: "e-img-extract-req", source: "img-extract", target: "img-request", type: "bezier" },
       { id: "e-css-extract-req", source: "css-extract", target: "css-request", type: "bezier" },
       { id: "e-img-req-merge", source: "img-request", target: "merge", type: "bezier" },

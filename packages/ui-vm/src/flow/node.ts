@@ -1,6 +1,7 @@
 import { BaseDomain, Handler } from "@timeless/base";
 
-import type { FlowCanvasModel, FlowHandle, FlowNode } from "./index";
+import type { FlowCanvasModel, FlowHandle } from "./index";
+import type { FlowHandleModel } from "./handle";
 
 enum Events {
   Mounted,
@@ -32,7 +33,7 @@ export interface FlowNodeModelProps<T extends any> {
   width?: number;
   height?: number;
   /** 连接点 */
-  handles?: FlowHandle[];
+  handles?: (FlowHandle | FlowHandleModel)[];
   canvas$?: FlowCanvasModel;
   // data: FlowNode;
   onClick?: (node: FlowNodeModel<T>) => void;
@@ -56,7 +57,7 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
   type: string;
   label: string;
   data: T;
-  handles: FlowHandle[];
+  handles: FlowHandleModel[];
 
   focused: boolean = false;
   selected: boolean = false;
@@ -107,7 +108,7 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
     this.width = width;
     this.height = height;
     this.data = data;
-    this.handles = handles || [];
+    this.handles = (handles || []) as FlowHandleModel[];
     this.canvas$ = canvas$;
 
     if (onClick) {
@@ -181,7 +182,7 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
     this.dragging = false;
   }
 
-  setHandlers(handlers: FlowHandle[]) {
+  setHandlers(handlers: FlowHandleModel[]) {
     this.handles = [...handlers];
     this.emit(Events.StateChange, { ...this.state });
   }

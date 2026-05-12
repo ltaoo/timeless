@@ -55,6 +55,7 @@ export class FlowEdgeModel<
   label?: string;
   animated: boolean;
   selected: boolean = false;
+  passThroughNodes: FlowNodeModel[] = [];
 
   d: string = "";
   sourceX: number = 0;
@@ -120,12 +121,17 @@ export class FlowEdgeModel<
   }
 
   computePath(): void {
-    console.log(
-      "before get anchor point",
-      this.source.width,
-      this.source.height,
-      this.source.position,
-    );
+    if (this.id === "e-parse-merge") {
+      console.log(
+        "[]flow/edge - computePath",
+        this.id,
+        this.type,
+        this.passThroughNodes,
+        this.target,
+      );
+      const handlers = this.target.handles;
+      console.log(handlers);
+    }
     const { x: sx, y: sy } = this.getAnchorPoint(
       this.source,
       this.sourcePosition,
@@ -156,21 +162,12 @@ export class FlowEdgeModel<
         break;
       case "bezier":
       default:
-        console.log("before buildBezierPath", sx, sy, tx, ty);
-        this.d = this.buildBezierPath(
-          {
-            x: sx,
-            y: sy,
-          },
-          {
-            x: tx,
-            y: ty,
-          },
-        );
+        // console.log("before buildBezierPath", sx, sy, tx, ty);
+        this.d = this.buildBezierPath({ x: sx, y: sy }, { x: tx, y: ty });
         break;
     }
 
-    console.log("before update the d", this.d, prev_d, this.d === prev_d);
+    // console.log("before update the d", this.d, prev_d, this.d === prev_d);
     if (this.d === prev_d) {
       return;
     }
@@ -222,8 +219,28 @@ export class FlowEdgeModel<
       return e.target === node && e.targetPosition === position;
     });
 
-    const index = sameAnchorEdges.indexOf(this as any);
-    return { index: index === -1 ? 0 : index, total: sameAnchorEdges.length };
+    // 按连接距离排序：近的在前，远的在后；同距离按 y 排序
+    const sorted = [...sameAnchorEdges].sort((a, b) => {
+      const aOther = role === "source" ? a.target : a.source;
+      const bOther = role === "source" ? b.target : b.source;
+
+      if (this.isHorizontal(position)) {
+        // 水平方向的 handle：按 x 距离排序，同距离按 y
+        const aDist = Math.abs(aOther.position.x - node.position.x);
+        const bDist = Math.abs(bOther.position.x - node.position.x);
+        if (aDist !== bDist) return aDist - bDist;
+        return aOther.position.y - bOther.position.y;
+      } else {
+        // 垂直方向的 handle：按 y 距离排序，同距离按 x
+        const aDist = Math.abs(aOther.position.y - node.position.y);
+        const bDist = Math.abs(bOther.position.y - node.position.y);
+        if (aDist !== bDist) return aDist - bDist;
+        return aOther.position.x - bOther.position.x;
+      }
+    });
+
+    const index = sorted.indexOf(this as any);
+    return { index: index === -1 ? 0 : index, total: sorted.length };
   }
 
   private buildStraightPath(
@@ -321,12 +338,67 @@ export class FlowEdgeModel<
     if (this.isHorizontal(this.sourcePosition)) {
       const dx = this.sourcePosition === "right" ? offset : -offset;
       const dtx = this.targetPosition === "left" ? -offset : offset;
-      return { cx1: sx + dx, cy1: sy, cx2: tx + dtx, cy2: ty };
+
+      let cy1 = sy;
+      let cy2 = ty;
+
+      // When edge passes through nodes, push control points beyond node bounds
+      if (this.passThroughNodes.length > 0) {
+        const margin = 30;
+        let minY = Infinity;
+        let maxY = -Infinity;
+        for (const n of this.passThroughNodes) {
+          minY = Math.min(minY, n.position.y);
+          maxY = Math.max(maxY, n.position.y + n.height);
+        }
+        // Decide direction: anchor below node center → push down, otherwise push up
+        const anchorOffset =
+          sy - (this.source.position.y + this.source.height / 2);
+        if (anchorOffset > 0) {
+          // Push control points below the lowest node
+          const pushY = maxY + margin;
+          cy1 = Math.max(cy1, pushY);
+          cy2 = Math.max(cy2, pushY);
+        } else {
+          // Push control points above the highest node
+          const pushY = minY - margin;
+          cy1 = Math.min(cy1, pushY);
+          cy2 = Math.min(cy2, pushY);
+        }
+      }
+
+      return { cx1: sx + dx, cy1, cx2: tx + dtx, cy2 };
     }
 
     const dy = this.sourcePosition === "bottom" ? offset : -offset;
     const dty = this.targetPosition === "top" ? -offset : offset;
-    return { cx1: sx, cy1: sy + dy, cx2: tx, cy2: ty + dty };
+
+    let cx1 = sx;
+    let cx2 = tx;
+
+    // When edge passes through nodes, push control points beyond node bounds
+    if (this.passThroughNodes.length > 0) {
+      const margin = 30;
+      let minX = Infinity;
+      let maxX = -Infinity;
+      for (const n of this.passThroughNodes) {
+        minX = Math.min(minX, n.position.x);
+        maxX = Math.max(maxX, n.position.x + n.width);
+      }
+      const anchorOffset =
+        sx - (this.source.position.x + this.source.width / 2);
+      if (anchorOffset > 0) {
+        const pushX = maxX + margin;
+        cx1 = Math.max(cx1, pushX);
+        cx2 = Math.max(cx2, pushX);
+      } else {
+        const pushX = minX - margin;
+        cx1 = Math.min(cx1, pushX);
+        cx2 = Math.min(cx2, pushX);
+      }
+    }
+
+    return { cx1, cy1: sy + dy, cx2, cy2: ty + dty };
   }
 
   private getMidPoint(
