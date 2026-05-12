@@ -665,64 +665,51 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
     }
   }
 
-  onConnect(handler: Handler<Connection>): () => void {
+  onNodeRerun() {}
+  onConnect(handler: Handler<TheTypesOfEvents[Events.Connect]>) {
     return this.on(Events.Connect, handler);
   }
-
-  onNodesChange(handler: Handler<FlowNodeModel[]>): () => void {
+  onNodesChange(handler: Handler<FlowNodeModel[]>) {
     return this.on(Events.NodesChange, handler);
   }
-
-  onEdgesChange(handler: Handler<FlowEdgeModel[]>): () => void {
+  onEdgesChange(handler: Handler<FlowEdgeModel[]>) {
     return this.on(Events.EdgesChange, handler);
   }
-
-  onNodeClick(
-    handler: Handler<{ node: FlowNodeModel; event: MouseEvent }>,
-  ): () => void {
+  onNodeClick(handler: Handler<{ node: FlowNodeModel; event: MouseEvent }>) {
     return this.on(Events.NodeClick, handler);
   }
-
   onNodeDoubleClick(
     handler: Handler<{ node: FlowNodeModel; event: MouseEvent }>,
-  ): () => void {
+  ) {
     return this.on(Events.NodeDoubleClick, handler);
   }
-
-  onNodeDragStart(handler: Handler<{ node: FlowNodeModel }>): () => void {
+  onNodeDragStart(handler: Handler<{ node: FlowNodeModel }>) {
     return this.on(Events.NodeDragStart, handler);
   }
-
   onNodeDrag(
     handler: Handler<{
       node: FlowNodeModel;
       position: { x: number; y: number };
     }>,
-  ): () => void {
+  ) {
     return this.on(Events.NodeDrag, handler);
   }
-
-  onNodeDragStop(handler: Handler<{ node: FlowNodeModel }>): () => void {
+  onNodeDragStop(handler: Handler<{ node: FlowNodeModel }>) {
     return this.on(Events.NodeDragStop, handler);
   }
-
-  onEdgeClick(
-    handler: Handler<{ edge: FlowEdgeModel; event: MouseEvent }>,
-  ): () => void {
+  onEdgeClick(handler: Handler<{ edge: FlowEdgeModel; event: MouseEvent }>) {
     return this.on(Events.EdgeClick, handler);
   }
-
   onSelectionChange(
     handler: Handler<{ nodes: FlowNodeModel[]; edges: FlowEdgeModel[] }>,
-  ): () => void {
+  ) {
     return this.on(Events.SelectionChange, handler);
   }
 
-  onViewportChange(handler: Handler<Viewport>): () => void {
+  onViewportChange(handler: Handler<Viewport>) {
     return this.on(Events.ViewportChange, handler);
   }
-
-  onStateChange(handler: Handler<FlowState>): () => void {
+  onStateChange(handler: Handler<FlowState>) {
     return this.on(Events.StateChange, handler);
   }
 }

@@ -336,6 +336,7 @@ export const globals = {
   FilePickerCore: "readonly",
   FlowCanvasModel: "readonly",
   FlowEdgeModel: "readonly",
+  FlowHandleModel: "readonly",
   FlowNodeModel: "readonly",
   FocusScopeCore: "readonly",
   FormCore: "readonly",

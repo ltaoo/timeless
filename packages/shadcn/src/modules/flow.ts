@@ -2,6 +2,7 @@ import {
   combine,
   computed,
   For,
+  Fragment,
   ref,
   refarr,
   refobj,
@@ -36,19 +37,13 @@ export interface FlowViewProps extends ViewProps {
   nodesConnectable?: boolean;
 }
 
-const handlePositions: Record<string, Record<string, string>> = {
-  left: { top: "50%", right: "auto", bottom: "auto", left: "0" },
-  right: { top: "50%", right: "0", bottom: "auto", left: "auto" },
-  top: { top: "0", right: "auto", bottom: "auto", left: "50%" },
-  bottom: { top: "auto", right: "auto", bottom: "0", left: "50%" },
+const handlePositions: Record<string, { left: string; top: string }> = {
+  left: { left: "0", top: "50%" },
+  right: { left: "100%", top: "50%" },
+  top: { left: "50%", top: "0" },
+  bottom: { left: "50%", top: "100%" },
 };
 
-const handleTransforms: Record<string, string> = {
-  left: "translate(-50%, -50%)",
-  right: "translate(50%, -50%)",
-  top: "translate(-50%, -50%)",
-  bottom: "translate(-50%, 50%)",
-};
 
 export interface FlowHandleViewProps extends ViewProps {
   store: FlowCanvasModel;
@@ -76,7 +71,6 @@ export function FlowHandle(props: FlowHandleViewProps) {
   } = props;
 
   const id = `${nodeId}-${handleId}`;
-  const transform = handleTransforms[position] || handleTransforms.right;
 
   const spacing = 20;
   const total_span = (total - 1) * spacing;
@@ -100,6 +94,7 @@ export function FlowHandle(props: FlowHandleViewProps) {
       id,
       class: classNames([
         "absolute w-3 h-3 rounded-full border-2 border-white",
+        "-translate-x-1/2 -translate-y-1/2",
         "dark:border-gray-800",
         type === "source"
           ? "bg-blue-500 dark:bg-blue-600"
@@ -108,7 +103,10 @@ export function FlowHandle(props: FlowHandleViewProps) {
         connectable && "cursor-crosshair hover:scale-125",
         cls,
       ]),
-      style: { ...positions, transform, zIndex: 10 },
+      style: {
+        ...positions,
+        zIndex: 10,
+      },
       onMouseDown(e: MouseEvent) {
         if (!connectable || !store.state.nodesConnectable) return;
         e.stopPropagation();
@@ -146,14 +144,82 @@ export interface FlowNodeViewProps extends ViewProps {
   nodeTypes: FlowNodeViewRender;
 }
 
+const statusColors: Record<string, string> = {
+  pending: "border-gray-300 dark:border-gray-600",
+  running: "border-yellow-400 dark:border-yellow-500 animate-pulse",
+  completed: "border-green-500 dark:border-green-400",
+  failed: "border-red-500 dark:border-red-400",
+  skipped: "border-blue-400 dark:border-blue-500",
+};
+
+const statusBadges: Record<
+  string,
+  { bg: string; text: string; label: string }
+> = {
+  pending: {
+    bg: "bg-gray-100 dark:bg-gray-700",
+    text: "text-gray-600 dark:text-gray-300",
+    label: "等待",
+  },
+  running: {
+    bg: "bg-yellow-100 dark:bg-yellow-900",
+    text: "text-yellow-700 dark:text-yellow-300",
+    label: "运行中",
+  },
+  completed: {
+    bg: "bg-green-100 dark:bg-green-900",
+    text: "text-green-700 dark:text-green-300",
+    label: "完成",
+  },
+  failed: {
+    bg: "bg-red-100 dark:bg-red-900",
+    text: "text-red-700 dark:text-red-300",
+    label: "失败",
+  },
+  skipped: {
+    bg: "bg-blue-100 dark:bg-blue-900",
+    text: "text-blue-700 dark:text-blue-300",
+    label: "跳过",
+  },
+};
+
+const actionButtons: Record<
+  string,
+  { label: string; class?: string; action: string }[]
+> = {
+  pending: [
+    { label: "详情", action: "detail" },
+    { label: "更多", action: "more" },
+  ],
+  running: [
+    { label: "详情", action: "detail" },
+    { label: "更多", action: "more" },
+  ],
+  completed: [
+    { label: "详情", action: "detail" },
+    { label: "更多", action: "more" },
+  ],
+  failed: [
+    { label: "重试", class: "text-red-500 hover:bg-red-50 dark:hover:bg-red-950", action: "rerun" },
+    { label: "详情", action: "detail" },
+    { label: "更多", action: "more" },
+  ],
+  skipped: [
+    { label: "详情", action: "detail" },
+    { label: "更多", action: "more" },
+  ],
+};
+
 export function FlowNodeView(props: FlowNodeViewProps) {
-  const { store: node$, nodeTypes, class: cls, ...rest } = props;
+  const { store: node$, class: cls, ...rest } = props;
 
   const state_ = refobj(node$.state);
   const target_handlers_ = refarr([]);
   const source_handlers_ = refarr([]);
+  const execution_ = refobj(node$.execution);
 
-  node$.onStateChange(() => {
+  node$.onStateChange((v) => {
+    state_.as(v);
     source_handlers_.as(
       node$.handles
         .filter((h) => h.type === "source")
@@ -166,19 +232,43 @@ export function FlowNodeView(props: FlowNodeViewProps) {
     );
   });
 
-  let isDragging = false;
-  let dragStartClientX = 0;
-  let dragStartClientY = 0;
-  let nodeStartX = 0;
-  let nodeStartY = 0;
+  const handleAction = (action: string, e: MouseEvent) => {
+    e.stopPropagation();
+    if (action === "rerun") {
+      node$.canvas$.emit("NodeRerun" as any, { node: node$ });
+    } else if (action === "detail") {
+      node$.canvas$.emit("NodeDetail" as any, { node: node$ });
+    } else if (action === "more") {
+      node$.canvas$.emit("NodeMore" as any, { node: node$ });
+    }
+  };
 
-  // const currentNode = () => store.getNode(node.id) || node;
+  let hideTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const startHide = () => {
+    hideTimer = setTimeout(() => {
+      hideTimer = null;
+      node$.setHovering(false);
+    }, 150);
+  };
+
+  const cancelHide = () => {
+    if (hideTimer !== null) {
+      clearTimeout(hideTimer);
+      hideTimer = null;
+    }
+  };
+
+  const buttons = computed(
+    execution_,
+    () => actionButtons[execution_.value.status] || actionButtons.pending,
+  );
 
   return View(
     {
       ...rest,
       class: classNames([
-        "absolute min-w-[68px] rounded-lg border border-gray-200 dark:border-gray-700",
+        "absolute min-w-[68px] rounded-lg border-2",
         "bg-white dark:bg-gray-800",
         "shadow-md",
         "select-none",
@@ -186,18 +276,26 @@ export function FlowNodeView(props: FlowNodeViewProps) {
         computed(state_, (t) =>
           t.selected ? "ring-2 ring-blue-500 dark:ring-blue-400" : null,
         ),
+        statusColors[execution_.value.status] || statusColors.pending,
         cls,
       ]),
-      style: computed(state_, (t) => {
-        return {
-          left: `${t.position.x}px`,
-          top: `${t.position.y}px`,
-        };
-      }),
+      style: computed(state_, (t) => ({
+        left: `${t.position.x}px`,
+        top: `${t.position.y}px`,
+      })),
+      onMouseEnter() {
+        cancelHide();
+        node$.setHovering(true);
+      },
+      onMouseLeave() {
+        startHide();
+      },
+      onClick() {
+        node$.click();
+      },
       onMounted(e) {
         const $elm = e.target.get$elm();
         const rect = $elm.getBoundingClientRect();
-        // console.log("the flow node is mounted", rect.width, rect.height);
         node$.handleMounted({
           data: {
             x: $elm.offsetLeft,
@@ -206,56 +304,46 @@ export function FlowNodeView(props: FlowNodeViewProps) {
             height: rect.height,
           },
         });
-        // store.updateNode(node.id, { width: rect.width, height: rect.height });
-      },
-      onMouseDown(e: MouseEvent) {
-        // if (e.button !== 0) return;
-        // if (!store.state.nodesDraggable) return;
-        // e.stopPropagation();
-        // const nodeData = currentNode();
-        // store.selectNode(node.id, e.ctrlKey);
-        // store.emit("NodeDragStart" as any, { node: nodeData });
-        // isDragging = true;
-        // dragStartClientX = e.clientX;
-        // dragStartClientY = e.clientY;
-        // nodeStartX = nodeData.position.x;
-        // nodeStartY = nodeData.position.y;
-        // node$.startDrag(e.clientX, e.clientY);
-        // const onMouseMove = (moveEvent: MouseEvent) => {
-        //   if (!isDragging) return;
-        //   const deltaX =
-        //     (moveEvent.clientX - dragStartClientX) / store.viewport.zoom;
-        //   const deltaY =
-        //     (moveEvent.clientY - dragStartClientY) / store.viewport.zoom;
-        //   const newX = nodeStartX + deltaX;
-        //   const newY = nodeStartY + deltaY;
-        //   store.updateNode(node.id, { position: { x: newX, y: newY } });
-        //   store.emit("NodeDrag" as any, {
-        //     node: store.getNode(node.id)!,
-        //     position: { x: newX, y: newY },
-        //   });
-        // };
-        // const onMouseUp = () => {
-        //   if (isDragging) {
-        //     isDragging = false;
-        //     store.emit("NodeDragStop" as any, {
-        //       node: store.getNode(node.id)!,
-        //     });
-        //     node$.stopDrag();
-        //   }
-        //   window.removeEventListener("mousemove", onMouseMove);
-        //   window.removeEventListener("mouseup", onMouseUp);
-        // };
-        // window.addEventListener("mousemove", onMouseMove);
-        // window.addEventListener("mouseup", onMouseUp);
-      },
-      onClick(e: MouseEvent) {
-        // store.emit("NodeClick" as any, { node: currentNode(), event: e });
       },
     },
     [
-      // computed(target_handlers_, (t) => t.length),
-      // computed(source_handlers_, (t) => t.length),
+      Show({
+        when: computed(state_, (t) => t.hovering),
+        ok() {
+          return View(
+            {
+              class:
+                "absolute bottom-full left-0 mb-1 flex items-center gap-1 px-1.5 py-1 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-30 whitespace-nowrap",
+              onMouseEnter() {
+                cancelHide();
+              },
+              onMouseLeave() {
+                startHide();
+              },
+            },
+            [
+              For({
+                each: buttons,
+                render(btn) {
+                  return View(
+                    {
+                      class: classNames([
+                        "px-2 py-0.5 rounded text-xs font-medium cursor-pointer transition-colors",
+                        btn.class ||
+                          "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700",
+                      ]),
+                      onClick(e: MouseEvent) {
+                        handleAction(btn.action, e);
+                      },
+                    },
+                    [btn.label],
+                  );
+                },
+              }),
+            ],
+          );
+        },
+      }),
       For({
         key: "id",
         each: source_handlers_,
@@ -271,15 +359,22 @@ export function FlowNodeView(props: FlowNodeViewProps) {
           });
         },
       }),
-      Show({
-        when: !!(nodeTypes && node$.type && nodeTypes[node$.type]),
-        ok() {
-          return nodeTypes[node$.type]({ node: node$ });
-        },
-        else() {
-          return getDefaultNodeContent(node$);
-        },
-      }),
+      View({ class: "px-4 py-2" }, [
+        View({ class: "text-sm text-center font-medium whitespace-nowrap" }, [
+          node$.data["label"] || node$.id,
+        ]),
+        Show({
+          when: node$.data["desc"],
+          ok() {
+            return View(
+              {
+                class: "text-xs text-gray-500 dark:text-gray-400 text-center",
+              },
+              [node$.data["desc"]],
+            );
+          },
+        }),
+      ]),
       For({
         key: "id",
         each: target_handlers_,

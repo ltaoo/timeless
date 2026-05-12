@@ -23,6 +23,30 @@ type TheTypesOfEvents<T> = {
   [Events.StateChange]: FlowNodeState<T>;
 };
 
+export type NodeExecutionStatus =
+  | "pending"
+  | "running"
+  | "completed"
+  | "failed"
+  | "skipped";
+
+export interface FlowNodeExecutionData {
+  status: NodeExecutionStatus;
+  input?: any;
+  output?: any;
+  logs?: Array<{
+    timestamp: Date;
+    level: "debug" | "info" | "warn" | "error";
+    message: string;
+  }>;
+  error?: { message: string; stack?: string };
+  timing?: { startTime?: Date; endTime?: Date; duration?: number };
+  retries?: {
+    attempt: number;
+    history: Array<{ timestamp: Date; error: string }>;
+  };
+}
+
 export interface FlowNodeModelProps<T extends any> {
   id: string;
   type?: string;
@@ -32,10 +56,9 @@ export interface FlowNodeModelProps<T extends any> {
   dragging?: boolean;
   width?: number;
   height?: number;
-  /** 连接点 */
   handles?: (FlowHandle | FlowHandleModel)[];
   canvas$?: FlowCanvasModel;
-  // data: FlowNode;
+  execution?: FlowNodeExecutionData;
   onClick?: (node: FlowNodeModel<T>) => void;
   onDoubleClick?: (node: FlowNodeModel<T>) => void;
 }
@@ -44,6 +67,7 @@ export interface FlowNodeState<T extends any> {
   dragging: boolean;
   selected: boolean;
   focused: boolean;
+  hovering: boolean;
   position: {
     x: number;
     y: number;
@@ -62,12 +86,18 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
   focused: boolean = false;
   selected: boolean = false;
   dragging: boolean = false;
+  hovering: boolean = false;
   position: {
     x: number;
     y: number;
   };
   width: number;
   height: number;
+
+  execution: FlowNodeExecutionData = {
+    status: "pending",
+    logs: [],
+  };
 
   private handleRects: Map<string, DOMRect> = new Map();
   private dragStartPos: { x: number; y: number } | null = null;
@@ -77,9 +107,10 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
 
   get state(): FlowNodeState<T> {
     return {
-      dragging: false,
+      dragging: this.dragging,
       selected: this.selected || false,
       focused: this.focused,
+      hovering: this.hovering,
       position: this.position,
     };
   }
@@ -95,6 +126,7 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
       data,
       handles,
       canvas$,
+      execution,
       onClick,
       onDoubleClick,
     } = props;
@@ -110,6 +142,7 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
     this.data = data;
     this.handles = (handles || []) as FlowHandleModel[];
     this.canvas$ = canvas$;
+    this.execution = execution || { status: "pending", logs: [] };
 
     if (onClick) {
       this.on(Events.Click, onClick);
@@ -117,6 +150,42 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
     if (onDoubleClick) {
       this.on(Events.DoubleClick, onDoubleClick);
     }
+  }
+
+  updateExecution(patch: Partial<FlowNodeExecutionData>): void {
+    this.execution = { ...this.execution, ...patch };
+  }
+
+  setExecutionStatus(status: NodeExecutionStatus): void {
+    this.execution.status = status;
+    if (status === "running" && !this.execution.timing?.startTime) {
+      this.execution.timing = { startTime: new Date() };
+    }
+    if (
+      (status === "completed" || status === "failed" || status === "skipped") &&
+      !this.execution.timing?.endTime
+    ) {
+      this.execution.timing = {
+        ...this.execution.timing,
+        endTime: new Date(),
+      };
+      if (this.execution.timing?.startTime) {
+        this.execution.timing.duration =
+          this.execution.timing.endTime.getTime() -
+          this.execution.timing.startTime.getTime();
+      }
+    }
+  }
+
+  addLog(level: "debug" | "info" | "warn" | "error", message: string): void {
+    if (!this.execution.logs) {
+      this.execution.logs = [];
+    }
+    this.execution.logs.push({
+      timestamp: new Date(),
+      level,
+      message,
+    });
   }
 
   setCanvas$(v: FlowCanvasModel) {
@@ -129,6 +198,12 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
       ...this.data,
       ...patch,
     };
+  }
+
+  setHovering(value: boolean): void {
+    if (this.hovering === value) return;
+    this.hovering = value;
+    this.emit(Events.StateChange, this.state);
   }
 
   focus(): void {
@@ -208,10 +283,12 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
   toJSON() {
     return {
       id: this.id,
+      type: this.type,
       position: this.position,
       width: this.width,
       height: this.height,
       data: this.data,
+      execution: this.execution,
     };
   }
 

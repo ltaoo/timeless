@@ -23,6 +23,7 @@ import { isElement } from "@/content/type";
 import { ViewStyle, ClassNameRef } from "@/style/index";
 import { MountedEvent } from "@/event/index";
 import { VNodeView } from "@/vnode/view";
+
 import { Box } from "./box";
 
 /** Type for attribute values - supports static or reactive values */

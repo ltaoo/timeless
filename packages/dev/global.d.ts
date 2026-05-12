@@ -11697,123 +11697,6 @@ declare module "packages/ui-vm/src/sonner/index" {
     };
     export type ToastModel = ReturnType<typeof ToastModel>;
 }
-declare module "packages/ui-vm/src/flow/node" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
-    import type { FlowCanvasModel, FlowHandle } from "packages/ui-vm/src/flow/index";
-    enum Events {
-        Mounted = 0,
-        Click = 1,
-        DoubleClick = 2,
-        FocusedChange = 3,
-        PositionChange = 4,
-        StateChange = 5
-    }
-    type TheTypesOfEvents<T> = {
-        [Events.Mounted]: {
-            data: {
-                x: number;
-                y: number;
-                width: number;
-                height: number;
-            };
-        };
-        [Events.Click]: FlowNodeModel<T>;
-        [Events.DoubleClick]: FlowNodeModel<T>;
-        [Events.FocusedChange]: boolean;
-        [Events.PositionChange]: {
-            x: number;
-            y: number;
-        };
-        [Events.StateChange]: FlowNodeState<T>;
-    };
-    export interface FlowNodeModelProps<T extends any> {
-        id: string;
-        type?: string;
-        position: {
-            x: number;
-            y: number;
-        };
-        data: T;
-        selected?: boolean;
-        dragging?: boolean;
-        width?: number;
-        height?: number;
-        /** 连接点 */
-        handles?: FlowHandle[];
-        canvas$?: FlowCanvasModel;
-        onClick?: (node: FlowNodeModel<T>) => void;
-        onDoubleClick?: (node: FlowNodeModel<T>) => void;
-    }
-    export interface FlowNodeState<T extends any> {
-        dragging: boolean;
-        selected: boolean;
-        focused: boolean;
-        position: {
-            x: number;
-            y: number;
-        };
-    }
-    export class FlowNodeModel<T extends any = {}> extends BaseDomain<TheTypesOfEvents<T>> {
-        id: string;
-        type: string;
-        label: string;
-        data: T;
-        handles: FlowHandle[];
-        focused: boolean;
-        selected: boolean;
-        dragging: boolean;
-        position: {
-            x: number;
-            y: number;
-        };
-        width: number;
-        height: number;
-        private handleRects;
-        private dragStartPos;
-        private nodeStartPos;
-        canvas$: FlowCanvasModel;
-        get state(): FlowNodeState<T>;
-        constructor(props: FlowNodeModelProps<T>);
-        setCanvas$(v: FlowCanvasModel): void;
-        updateData(patch: Partial<T>): void;
-        focus(): void;
-        blur(): void;
-        click(): void;
-        doubleClick(): void;
-        startDrag(clientX: number, clientY: number): void;
-        drag(clientX: number, clientY: number, zoom?: number): void;
-        stopDrag(): void;
-        setHandlers(handlers: FlowHandle[]): void;
-        registerHandle(handleId: string, el: HTMLElement): void;
-        unregisterHandle(handleId: string): void;
-        getHandleRect(handleId: string): DOMRect | null;
-        updateHandleRect(handleId: string): void;
-        toJSON(): {
-            id: string;
-            position: {
-                x: number;
-                y: number;
-            };
-            width: number;
-            height: number;
-            data: T;
-        };
-        handleMounted(event: {
-            data: {
-                x: number;
-                y: number;
-                width: number;
-                height: number;
-            };
-        }): void;
-        onMounted(handler: Handler<TheTypesOfEvents<T>[Events.Mounted]>): () => void;
-        onPositionChange(handler: Handler<TheTypesOfEvents<T>[Events.PositionChange]>): () => void;
-        onClick(handler: Handler<TheTypesOfEvents<T>[Events.Click]>): () => void;
-        onDoubleClick(handler: Handler<TheTypesOfEvents<T>[Events.DoubleClick]>): () => void;
-        onFocusedChange(handler: Handler<TheTypesOfEvents<T>[Events.FocusedChange]>): () => void;
-        onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
-    }
-}
 declare module "packages/ui-vm/src/flow/edge" {
     import { BaseDomain, Handler } from "packages/base/src/index";
     import type { FlowCanvasModel, FlowEdge } from "packages/ui-vm/src/flow/index";
@@ -11863,6 +11746,7 @@ declare module "packages/ui-vm/src/flow/edge" {
         label?: string;
         animated: boolean;
         selected: boolean;
+        passThroughNodes: FlowNodeModel[];
         d: string;
         sourceX: number;
         sourceY: number;
@@ -11898,6 +11782,165 @@ declare module "packages/ui-vm/src/flow/edge" {
         onStateChange(handler: Handler<FlowEdgeState>): () => void;
     }
 }
+declare module "packages/ui-vm/src/flow/handle" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    import type { FlowNodeModel } from "packages/ui-vm/src/flow/node";
+    import type { FlowEdgeModel } from "packages/ui-vm/src/flow/edge";
+    type HandlePosition = "top" | "right" | "bottom" | "left";
+    enum Events {
+        StateChange = "StateChange"
+    }
+    type TheTypesOfEvents = {
+        [Events.StateChange]: FlowHandleState;
+    };
+    export interface FlowHandleModelProps {
+        id: string;
+        type: "source" | "target";
+        position?: HandlePosition;
+        idx: number;
+        node: FlowNodeModel;
+        edge: FlowEdgeModel;
+    }
+    export interface FlowHandleState {
+        id: string;
+        type: "source" | "target";
+        position: HandlePosition;
+        idx: number;
+    }
+    export class FlowHandleModel extends BaseDomain<TheTypesOfEvents> {
+        id: string;
+        type: "source" | "target";
+        position: HandlePosition;
+        idx: number;
+        node: FlowNodeModel;
+        edge: FlowEdgeModel;
+        get state(): FlowHandleState;
+        constructor(props: FlowHandleModelProps);
+        /** 获取 edge 另一端的 FlowNodeModel */
+        getFromNode(): FlowNodeModel;
+        setIdx(idx: number): void;
+        setPosition(position: HandlePosition): void;
+        onStateChange(handler: Handler<FlowHandleState>): () => void;
+    }
+}
+declare module "packages/ui-vm/src/flow/node" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    import type { FlowCanvasModel, FlowHandle } from "packages/ui-vm/src/flow/index";
+    import type { FlowHandleModel } from "packages/ui-vm/src/flow/handle";
+    enum Events {
+        Mounted = 0,
+        Click = 1,
+        DoubleClick = 2,
+        FocusedChange = 3,
+        PositionChange = 4,
+        StateChange = 5
+    }
+    type TheTypesOfEvents<T> = {
+        [Events.Mounted]: {
+            data: {
+                x: number;
+                y: number;
+                width: number;
+                height: number;
+            };
+        };
+        [Events.Click]: FlowNodeModel<T>;
+        [Events.DoubleClick]: FlowNodeModel<T>;
+        [Events.FocusedChange]: boolean;
+        [Events.PositionChange]: {
+            x: number;
+            y: number;
+        };
+        [Events.StateChange]: FlowNodeState<T>;
+    };
+    export interface FlowNodeModelProps<T extends any> {
+        id: string;
+        type?: string;
+        position: {
+            x: number;
+            y: number;
+        };
+        data: T;
+        selected?: boolean;
+        dragging?: boolean;
+        width?: number;
+        height?: number;
+        /** 连接点 */
+        handles?: (FlowHandle | FlowHandleModel)[];
+        canvas$?: FlowCanvasModel;
+        onClick?: (node: FlowNodeModel<T>) => void;
+        onDoubleClick?: (node: FlowNodeModel<T>) => void;
+    }
+    export interface FlowNodeState<T extends any> {
+        dragging: boolean;
+        selected: boolean;
+        focused: boolean;
+        position: {
+            x: number;
+            y: number;
+        };
+    }
+    export class FlowNodeModel<T extends any = {}> extends BaseDomain<TheTypesOfEvents<T>> {
+        id: string;
+        type: string;
+        label: string;
+        data: T;
+        handles: FlowHandleModel[];
+        focused: boolean;
+        selected: boolean;
+        dragging: boolean;
+        position: {
+            x: number;
+            y: number;
+        };
+        width: number;
+        height: number;
+        private handleRects;
+        private dragStartPos;
+        private nodeStartPos;
+        canvas$: FlowCanvasModel;
+        get state(): FlowNodeState<T>;
+        constructor(props: FlowNodeModelProps<T>);
+        setCanvas$(v: FlowCanvasModel): void;
+        updateData(patch: Partial<T>): void;
+        focus(): void;
+        blur(): void;
+        click(): void;
+        doubleClick(): void;
+        startDrag(clientX: number, clientY: number): void;
+        drag(clientX: number, clientY: number, zoom?: number): void;
+        stopDrag(): void;
+        setHandlers(handlers: FlowHandleModel[]): void;
+        registerHandle(handleId: string, el: HTMLElement): void;
+        unregisterHandle(handleId: string): void;
+        getHandleRect(handleId: string): DOMRect | null;
+        updateHandleRect(handleId: string): void;
+        toJSON(): {
+            id: string;
+            position: {
+                x: number;
+                y: number;
+            };
+            width: number;
+            height: number;
+            data: T;
+        };
+        handleMounted(event: {
+            data: {
+                x: number;
+                y: number;
+                width: number;
+                height: number;
+            };
+        }): void;
+        onMounted(handler: Handler<TheTypesOfEvents<T>[Events.Mounted]>): () => void;
+        onPositionChange(handler: Handler<TheTypesOfEvents<T>[Events.PositionChange]>): () => void;
+        onClick(handler: Handler<TheTypesOfEvents<T>[Events.Click]>): () => void;
+        onDoubleClick(handler: Handler<TheTypesOfEvents<T>[Events.DoubleClick]>): () => void;
+        onFocusedChange(handler: Handler<TheTypesOfEvents<T>[Events.FocusedChange]>): () => void;
+        onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
+    }
+}
 declare module "packages/ui-vm/src/flow/index" {
     import { BaseDomain, Handler } from "packages/base/src/index";
     import { FlowNodeModel } from "packages/ui-vm/src/flow/node";
@@ -11906,6 +11949,8 @@ declare module "packages/ui-vm/src/flow/index" {
     export type { FlowNodeModelProps, FlowNodeState } from "packages/ui-vm/src/flow/node";
     export { FlowEdgeModel } from "packages/ui-vm/src/flow/edge";
     export type { FlowEdgeModelProps, FlowEdgeState } from "packages/ui-vm/src/flow/edge";
+    export { FlowHandleModel } from "packages/ui-vm/src/flow/handle";
+    export type { FlowHandleModelProps, FlowHandleState } from "packages/ui-vm/src/flow/handle";
     export interface FlowNode<T = any> {
         id: string;
         type?: string;
@@ -11923,6 +11968,7 @@ declare module "packages/ui-vm/src/flow/index" {
         id: string;
         type: "source" | "target";
         position?: "top" | "right" | "bottom" | "left";
+        idx: number;
     }
     export interface FlowEdge {
         id: string;
@@ -12052,6 +12098,8 @@ declare module "packages/ui-vm/src/flow/index" {
         getEdge(id: string): FlowEdgeModel | null;
         setEdges(edges: FlowEdge[]): void;
         private computeNodeHandles;
+        private computePassThroughNodes;
+        private isHorizontalEdge;
         refreshEdgesPosition(): void;
         setViewport(viewport: Partial<Viewport>): void;
         zoomIn(step?: number): void;
@@ -17182,6 +17230,7 @@ declare const ElementCore: typeof import("@timeless/ui-vm").ElementCore;
 declare const FilePickerCore: typeof import("@timeless/ui-vm").FilePickerCore;
 declare const FlowCanvasModel: typeof import("@timeless/ui-vm").FlowCanvasModel;
 declare const FlowEdgeModel: typeof import("@timeless/ui-vm").FlowEdgeModel;
+declare const FlowHandleModel: typeof import("@timeless/ui-vm").FlowHandleModel;
 declare const FlowNodeModel: typeof import("@timeless/ui-vm").FlowNodeModel;
 declare const FocusScopeCore: typeof import("@timeless/ui-vm").FocusScopeCore;
 declare const FormCore: typeof import("@timeless/ui-vm").FormCore;

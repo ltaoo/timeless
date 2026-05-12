@@ -6,7 +6,6 @@ declare namespace Dayjs {
     add(value: number, unit: string): Dayjs;
     subtract(value: number, unit: string): Dayjs;
     isValid(): boolean;
-    // 添加其他你需要的方法
   }
 
   function dayjs(date?: string | number | Date): Dayjs;
@@ -23,6 +22,15 @@ declare function invoke(
     args?: Record<string, unknown>;
   },
 ): Promise<any>;
+
+type TimelessRef<T> = {
+  value: T;
+  as(newVal: T): void;
+  subscribe(listener: (value: T) => void): () => void;
+  destroy(): void;
+};
+
+declare function ref<T = any>(v: T): TimelessRef<T>;
 
 declare interface Window {
   dayjs: typeof dayjs;
