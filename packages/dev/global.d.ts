@@ -1320,7 +1320,7 @@ declare module "packages/primitive/src/content/svg" {
     }
     export function SVG(props?: SVGProps, children?: any): {
         t: string;
-        $elm: SVGSVGElement;
+        $elm: any;
         state: import("packages/primitive/src/content/box").BoxState;
         children: import("@timeless/primitive").TimelessElement<any, any>[];
         events: Partial<{
@@ -11699,50 +11699,83 @@ declare module "packages/ui-vm/src/sonner/index" {
 }
 declare module "packages/ui-vm/src/flow/node" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import type { FlowNode } from "packages/ui-vm/src/flow/index";
-    export interface FlowNodeModelProps extends FlowNode {
-        onClick?: (node: FlowNodeModel) => void;
-        onDoubleClick?: (node: FlowNodeModel) => void;
-    }
+    import type { FlowCanvasModel, FlowHandle } from "packages/ui-vm/src/flow/index";
     enum Events {
-        Click = "Click",
-        DoubleClick = "DoubleClick",
-        FocusedChange = "FocusedChange",
-        PositionChange = "PositionChange",
-        StateChange = "StateChange"
+        Mounted = 0,
+        Click = 1,
+        DoubleClick = 2,
+        FocusedChange = 3,
+        PositionChange = 4,
+        StateChange = 5
     }
-    type TheTypesOfEvents = {
-        [Events.Click]: FlowNodeModel;
-        [Events.DoubleClick]: FlowNodeModel;
+    type TheTypesOfEvents<T> = {
+        [Events.Mounted]: {
+            data: {
+                x: number;
+                y: number;
+                width: number;
+                height: number;
+            };
+        };
+        [Events.Click]: FlowNodeModel<T>;
+        [Events.DoubleClick]: FlowNodeModel<T>;
         [Events.FocusedChange]: boolean;
         [Events.PositionChange]: {
             x: number;
             y: number;
         };
-        [Events.StateChange]: FlowNodeState;
+        [Events.StateChange]: FlowNodeState<T>;
     };
-    export interface FlowNodeState {
+    export interface FlowNodeModelProps<T extends any> {
+        id: string;
+        type?: string;
+        position: {
+            x: number;
+            y: number;
+        };
+        data: T;
+        selected?: boolean;
+        dragging?: boolean;
+        width?: number;
+        height?: number;
+        /** 连接点 */
+        handles?: FlowHandle[];
+        canvas$?: FlowCanvasModel;
+        onClick?: (node: FlowNodeModel<T>) => void;
+        onDoubleClick?: (node: FlowNodeModel<T>) => void;
+    }
+    export interface FlowNodeState<T extends any> {
         dragging: boolean;
         selected: boolean;
         focused: boolean;
+        position: {
+            x: number;
+            y: number;
+        };
     }
-    export class FlowNodeModel extends BaseDomain<TheTypesOfEvents> {
+    export class FlowNodeModel<T extends any = {}> extends BaseDomain<TheTypesOfEvents<T>> {
         id: string;
-        data: FlowNode;
+        type: string;
+        label: string;
+        data: T;
+        handles: FlowHandle[];
         focused: boolean;
         selected: boolean;
-        private handleRects;
-        private dragStartPos;
-        private nodeStartPos;
+        dragging: boolean;
         position: {
             x: number;
             y: number;
         };
         width: number;
         height: number;
-        get state(): FlowNodeState;
-        constructor(props: FlowNodeModelProps);
-        updateData(patch: Partial<FlowNode>): void;
+        private handleRects;
+        private dragStartPos;
+        private nodeStartPos;
+        canvas$: FlowCanvasModel;
+        get state(): FlowNodeState<T>;
+        constructor(props: FlowNodeModelProps<T>);
+        setCanvas$(v: FlowCanvasModel): void;
+        updateData(patch: Partial<T>): void;
         focus(): void;
         blur(): void;
         click(): void;
@@ -11750,26 +11783,43 @@ declare module "packages/ui-vm/src/flow/node" {
         startDrag(clientX: number, clientY: number): void;
         drag(clientX: number, clientY: number, zoom?: number): void;
         stopDrag(): void;
+        setHandlers(handlers: FlowHandle[]): void;
         registerHandle(handleId: string, el: HTMLElement): void;
         unregisterHandle(handleId: string): void;
         getHandleRect(handleId: string): DOMRect | null;
         updateHandleRect(handleId: string): void;
-        onPositionChange(handler: Handler<{
-            x: number;
-            y: number;
-        }>): () => void;
-        onStateChange(handler: Handler<FlowNodeState>): () => void;
-        onClick(handler: Handler<FlowNodeModel>): () => void;
-        onDoubleClick(handler: Handler<FlowNodeModel>): () => void;
-        onFocusedChange(handler: Handler<boolean>): () => void;
+        toJSON(): {
+            id: string;
+            position: {
+                x: number;
+                y: number;
+            };
+            width: number;
+            height: number;
+            data: T;
+        };
+        handleMounted(event: {
+            data: {
+                x: number;
+                y: number;
+                width: number;
+                height: number;
+            };
+        }): void;
+        onMounted(handler: Handler<TheTypesOfEvents<T>[Events.Mounted]>): () => void;
+        onPositionChange(handler: Handler<TheTypesOfEvents<T>[Events.PositionChange]>): () => void;
+        onClick(handler: Handler<TheTypesOfEvents<T>[Events.Click]>): () => void;
+        onDoubleClick(handler: Handler<TheTypesOfEvents<T>[Events.DoubleClick]>): () => void;
+        onFocusedChange(handler: Handler<TheTypesOfEvents<T>[Events.FocusedChange]>): () => void;
+        onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
     }
 }
 declare module "packages/ui-vm/src/flow/edge" {
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import type { FlowEdge } from "packages/ui-vm/src/flow/index";
+    import type { FlowCanvasModel, FlowEdge } from "packages/ui-vm/src/flow/index";
     import { FlowNodeModel } from "packages/ui-vm/src/flow/node";
     type HandlePosition = "top" | "right" | "bottom" | "left";
-    export interface FlowEdgeModelProps {
+    export interface FlowEdgeModelProps<T extends any> {
         id: string;
         source: FlowNodeModel;
         target: FlowNodeModel;
@@ -11780,6 +11830,7 @@ declare module "packages/ui-vm/src/flow/edge" {
         type?: FlowEdge["type"];
         label?: string;
         animated?: boolean;
+        canvas$: FlowCanvasModel;
     }
     enum Events {
         PathChange = "PathChange",
@@ -11800,7 +11851,7 @@ declare module "packages/ui-vm/src/flow/edge" {
         targetX: number;
         targetY: number;
     }
-    export class FlowEdgeModel extends BaseDomain<TheTypesOfEvents> {
+    export class FlowEdgeModel<T extends any = {}> extends BaseDomain<TheTypesOfEvents> {
         id: string;
         source: FlowNodeModel;
         target: FlowNodeModel;
@@ -11817,12 +11868,15 @@ declare module "packages/ui-vm/src/flow/edge" {
         sourceY: number;
         targetX: number;
         targetY: number;
-        constructor(props: FlowEdgeModelProps);
+        canvas$: FlowCanvasModel;
         get state(): FlowEdgeState;
+        constructor(props: FlowEdgeModelProps<T>);
+        toggle(): void;
         select(): void;
         deselect(): void;
         computePath(): void;
         private getAnchorPoint;
+        private getAnchorIndex;
         private buildStraightPath;
         private buildBezierPath;
         private buildStepPath;
@@ -11830,6 +11884,15 @@ declare module "packages/ui-vm/src/flow/edge" {
         private getControlPoints;
         private getMidPoint;
         private isHorizontal;
+        toJSON(): {
+            id: string;
+            type: "step" | "bezier" | "straight" | "smoothstep";
+            label: string;
+            source: string;
+            target: string;
+            sourceHandle: string;
+            targetHandle: string;
+        };
         onPathChange(handler: Handler<string>): () => void;
         onSelectedChange(handler: Handler<boolean>): () => void;
         onStateChange(handler: Handler<FlowEdgeState>): () => void;
@@ -11865,8 +11928,10 @@ declare module "packages/ui-vm/src/flow/index" {
         id: string;
         source: string;
         sourceHandle?: string;
+        sourcePosition?: "top" | "right" | "bottom" | "left";
         target: string;
         targetHandle?: string;
+        targetPosition?: "top" | "right" | "bottom" | "left";
         type?: "bezier" | "step" | "straight" | "smoothstep";
         label?: string;
         animated?: boolean;
@@ -11962,6 +12027,7 @@ declare module "packages/ui-vm/src/flow/index" {
         multiSelect: boolean;
         private nodeMap;
         private edgeMap;
+        _mountedNodeCount: number;
         constructor(props: FlowCanvasModelProps & {
             nodesDraggable?: boolean;
             nodesConnectable?: boolean;
@@ -11972,7 +12038,7 @@ declare module "packages/ui-vm/src/flow/index" {
         private removeNodeFromMap;
         addNode(node: FlowNodeModel): FlowNodeModel;
         removeNode(id: string): void;
-        updateNode(id: string, patch: Partial<FlowNode>): void;
+        updateNode(id: string, patch: any): void;
         getNode(id: string): FlowNodeModel | undefined;
         setNodes(nodes: FlowNodeModel[]): void;
         private addEdgeToMap;
@@ -11983,8 +12049,10 @@ declare module "packages/ui-vm/src/flow/index" {
         }): FlowEdgeModel | null;
         removeEdge(id: string): void;
         updateEdge(id: string, patch: Partial<FlowEdge>): void;
-        getEdge(id: string): FlowEdgeModel | undefined;
+        getEdge(id: string): FlowEdgeModel | null;
         setEdges(edges: FlowEdge[]): void;
+        private computeNodeHandles;
+        refreshEdgesPosition(): void;
         setViewport(viewport: Partial<Viewport>): void;
         zoomIn(step?: number): void;
         zoomOut(step?: number): void;
@@ -16382,14 +16450,13 @@ declare module "packages/shadcn/src/modules/affix" {
 }
 declare module "packages/shadcn/src/modules/flow" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { FlowCanvasModel, FlowEdgeModel } from "packages/ui-vm/src/index";
-    import type { FlowNode } from "packages/ui-vm/src/index";
+    import { FlowCanvasModel, FlowNodeModel, FlowEdgeModel } from "packages/ui-vm/src/index";
+    type FlowNodeViewRender = Record<string, (props: {
+        node: FlowNodeModel;
+    }) => ViewChildren>;
     export interface FlowViewProps extends ViewProps {
         store: FlowCanvasModel;
-        nodeTypes?: Record<string, (props: {
-            node: FlowNode;
-            store: FlowCanvasModel;
-        }) => ViewChildren>;
+        nodeTypes?: FlowNodeViewRender;
         showBackground?: boolean;
         backgroundVariant?: "dots" | "lines" | "cross";
         showMinimap?: boolean;
@@ -16400,32 +16467,28 @@ declare module "packages/shadcn/src/modules/flow" {
         nodesDraggable?: boolean;
         nodesConnectable?: boolean;
     }
-    export interface FlowNodeViewProps extends ViewProps {
-        store: FlowCanvasModel;
-        node: FlowNode;
-        nodeTypes?: Record<string, (props: {
-            node: FlowNode;
-            store: FlowCanvasModel;
-        }) => ViewChildren>;
-    }
     export interface FlowHandleViewProps extends ViewProps {
         store: FlowCanvasModel;
         nodeId: string;
         handleId: string;
         type: "source" | "target";
         position?: "top" | "right" | "bottom" | "left";
+        index: number;
+        total: number;
         connectable?: boolean;
     }
     export function FlowHandle(props: FlowHandleViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
+    export interface FlowNodeViewProps extends ViewProps {
+        store: FlowNodeModel;
+        nodeTypes: FlowNodeViewRender;
+    }
     export function FlowNodeView(props: FlowNodeViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
     export function FlowEdgeView(props: ViewProps & {
         store: FlowEdgeModel;
     }): {
         t: string;
-        $elm: any;
-        state: import("packages/primitive/src/content/box").BoxState & {
-            d: string;
-        };
+        $elm: SVGGElement;
+        state: import("packages/primitive/src/content/box").BoxState;
         children: import("@timeless/timeless").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
@@ -16474,7 +16537,7 @@ declare module "packages/shadcn/src/modules/flow" {
     export function FlowControls(props: ViewProps & {
         store: FlowCanvasModel;
     }): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function FlowCanvas(props: FlowViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export const FlowEdge_: typeof FlowEdgeView;
     export const FlowNode_: typeof FlowNodeView;
     export const FlowHandle_: typeof FlowHandle;
@@ -16546,11 +16609,11 @@ declare module "packages/shadcn/src/index" {
     import { LLMProviderForm } from "packages/shadcn/src/modules/llm-provider-form";
     import { Toaster } from "packages/shadcn/src/modules/sonner";
     import { Affix } from "packages/shadcn/src/modules/affix";
-    import { FlowCanvas, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls } from "packages/shadcn/src/modules/flow";
+    import { FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls } from "packages/shadcn/src/modules/flow";
     export const TimelessShadcnVersion: any;
     export * from "packages/ui-primitive/src/index";
     export * as ui from "packages/ui-vm/src/index";
-    export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, Affix, FlowCanvas, FlowNodeView as FlowNode, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
+    export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, Affix, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
 }
 declare module "packages/icons/src/util/index" {
     export const defaultWidth = "24";
@@ -16952,12 +17015,12 @@ declare const FieldSet: typeof import("@timeless/shadcn").FieldSet;
 declare const FileInput: typeof import("@timeless/shadcn").FileInput;
 declare const FilePickerPrimitive: typeof import("@timeless/shadcn").FilePickerPrimitive;
 declare const FlowBackground: typeof import("@timeless/shadcn").FlowBackground;
-declare const FlowCanvas: typeof import("@timeless/shadcn").FlowCanvas;
+declare const FlowCanvasView: typeof import("@timeless/shadcn").FlowCanvasView;
 declare const FlowControls: typeof import("@timeless/shadcn").FlowControls;
 declare const FlowEdgeView: typeof import("@timeless/shadcn").FlowEdgeView;
 declare const FlowHandle: typeof import("@timeless/shadcn").FlowHandle;
 declare const FlowMinimap: typeof import("@timeless/shadcn").FlowMinimap;
-declare const FlowNode: typeof import("@timeless/shadcn").FlowNode;
+declare const FlowNodeView: typeof import("@timeless/shadcn").FlowNodeView;
 declare const FlowPrimitive: typeof import("@timeless/shadcn").FlowPrimitive;
 declare const Form: typeof import("@timeless/shadcn").Form;
 declare const HeadPrimitive: typeof import("@timeless/shadcn").HeadPrimitive;

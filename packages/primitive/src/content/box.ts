@@ -394,6 +394,9 @@ export function Box<T>(props: BoxProps, extra_state: T) {
       if (props.onAnimationEnd) {
         events.onAnimationEnd = props.onAnimationEnd;
       }
+      if (props.onWheel) {
+        events.onWheel = props.onWheel;
+      }
     },
     unsubscribe: listener$.add,
     destroy() {

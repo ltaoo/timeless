@@ -32,8 +32,8 @@ export interface FlowNodeModelProps<T extends any> {
   width?: number;
   height?: number;
   /** 连接点 */
-  handles: FlowHandle[];
-  canvas$: FlowCanvasModel;
+  handles?: FlowHandle[];
+  canvas$?: FlowCanvasModel;
   // data: FlowNode;
   onClick?: (node: FlowNodeModel<T>) => void;
   onDoubleClick?: (node: FlowNodeModel<T>) => void;

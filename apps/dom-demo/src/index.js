@@ -86,6 +86,9 @@ function ApplicationView() {
           }
           page.as((p) => ({ ...p, page: 1 }));
         },
+        onWheel() {
+          console.log("wheel");
+        },
       },
       ["1"],
     ),

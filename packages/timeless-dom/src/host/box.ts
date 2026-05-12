@@ -233,6 +233,9 @@ export function HostElement(props: {
       if (events.onAnimationEnd) {
         $elm.addEventListener("animationend", events.onAnimationEnd);
       }
+      if (events.onWheel) {
+        $elm.addEventListener("wheel", events.onWheel);
+      }
     },
     teardownEventListener(events: any) {
       if (!events || !$elm || $elm instanceof Text) {

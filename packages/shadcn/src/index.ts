@@ -87,7 +87,7 @@ import {
 } from "./modules/sonner";
 import { Affix } from "./modules/affix";
 import {
-  FlowCanvas,
+  FlowCanvasView,
   FlowNodeView,
   FlowHandle,
   FlowEdgeView,
@@ -188,8 +188,8 @@ export {
   LLMProviderForm,
   Toaster,
   Affix,
-  FlowCanvas,
-  FlowNodeView as FlowNode,
+  FlowCanvasView,
+  FlowNodeView,
   FlowHandle,
   FlowEdgeView,
   FlowBackground,

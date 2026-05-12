@@ -567,7 +567,7 @@ export function FlowControls(props: ViewProps & { store: FlowCanvasModel }) {
   );
 }
 
-export function FlowCanvas(props: FlowViewProps, children?: ViewChildren) {
+export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
   const {
     store,
     nodeTypes,
@@ -595,13 +595,15 @@ export function FlowCanvas(props: FlowViewProps, children?: ViewChildren) {
     edges_.as(v);
   });
 
-  const canvas_transform_ = computed(store.viewport, (v) => {
-    return `translate(${v.x}px, ${v.y}px) scale(${v.zoom})`;
+  const viewport_ = refobj({ ...store.viewport });
+  store.onViewportChange((v) => {
+    viewport_.as(v);
   });
 
   let panStartX = 0;
   let panStartY = 0;
   let isPanning = false;
+  let $canvas: HTMLElement | null = null;
 
   return FlowPrimitive.Root(
     {
@@ -613,6 +615,71 @@ export function FlowCanvas(props: FlowViewProps, children?: ViewChildren) {
         cls,
       ]),
       style: sty,
+      onMounted(event) {
+        const $root = event.target.get$elm();
+
+        let rafId = 0;
+        let accDeltaX = 0;
+        let accDeltaY = 0;
+        let accZoomDelta = 0;
+        let isZooming = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
+        const flush = () => {
+          rafId = 0;
+          if (!$canvas) return;
+
+          const v = store.viewport;
+          if (isZooming) {
+            const newZoom = Math.max(
+              minZoom,
+              Math.min(maxZoom, v.zoom + accZoomDelta),
+            );
+            const worldX = (lastMouseX - v.x) / v.zoom;
+            const worldY = (lastMouseY - v.y) / v.zoom;
+            const newX = lastMouseX - worldX * newZoom;
+            const newY = lastMouseY - worldY * newZoom;
+            store.setViewport({ x: newX, y: newY, zoom: newZoom });
+            $canvas.style.transform = `translate(${newX}px, ${newY}px) scale(${newZoom})`;
+          } else {
+            const nx = v.x - accDeltaX;
+            const ny = v.y - accDeltaY;
+            store.setViewport({ x: nx, y: ny });
+            $canvas.style.transform = `translate(${nx}px, ${ny}px) scale(${v.zoom})`;
+          }
+
+          accDeltaX = 0;
+          accDeltaY = 0;
+          accZoomDelta = 0;
+        };
+
+        $root.addEventListener(
+          "wheel",
+          function (e) {
+            e.preventDefault();
+            if (!$canvas) return;
+
+            const zooming = e.ctrlKey || e.metaKey;
+            if (zooming) {
+              accZoomDelta += -e.deltaY * 0.001;
+              isZooming = true;
+              const rect = $root.getBoundingClientRect();
+              lastMouseX = e.clientX - rect.left;
+              lastMouseY = e.clientY - rect.top;
+            } else {
+              accDeltaX += e.deltaX;
+              accDeltaY += e.deltaY;
+              isZooming = false;
+            }
+
+            if (!rafId) {
+              rafId = requestAnimationFrame(flush);
+            }
+          },
+          { passive: false },
+        );
+      },
     },
     [
       Show({
@@ -624,40 +691,12 @@ export function FlowCanvas(props: FlowViewProps, children?: ViewChildren) {
       View(
         {
           class: "absolute inset-0",
-          style: computed(canvas_transform_, (t) => ({
-            transform: t,
-            transformOrigin: "0 0",
-          })),
-          // onWheel(e: WheelEvent) {
-          //   e.preventDefault();
-
-          //   const isZooming = e.ctrlKey || e.metaKey;
-          //   const v = store.viewport;
-
-          //   if (isZooming) {
-          //     const delta = -e.deltaY * 0.001;
-          //     const newZoom = Math.max(
-          //       minZoom,
-          //       Math.min(maxZoom, v.zoom + delta),
-          //     );
-
-          //     const rect = (
-          //       e.currentTarget as HTMLElement
-          //     ).getBoundingClientRect();
-          //     const mouseX = e.clientX - rect.left;
-          //     const mouseY = e.clientY - rect.top;
-
-          //     const worldX = (mouseX - v.x) / v.zoom;
-          //     const worldY = (mouseY - v.y) / v.zoom;
-
-          //     const newX = mouseX - worldX * newZoom;
-          //     const newY = mouseY - worldY * newZoom;
-
-          //     store.setViewport({ x: newX, y: newY, zoom: newZoom });
-          //   } else {
-          //     store.setViewport({ x: v.x - e.deltaX, y: v.y - e.deltaY });
-          //   }
-          // },
+          style: {
+            "transform-origin": "0 0",
+          },
+          onMounted(event) {
+            $canvas = event.target.get$elm();
+          },
           onMouseDown(e: MouseEvent) {
             if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
               e.preventDefault();
