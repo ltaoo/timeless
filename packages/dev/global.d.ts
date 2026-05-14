@@ -210,6 +210,7 @@ declare module "packages/reactive/src/types" {
         isEmpty: () => boolean;
         at: (index: number) => T | undefined;
         toArray: () => T[];
+        getDeps?: () => DepInfo[];
     };
     export type DerivedRef<T> = {
         __is_ref: true;
@@ -2623,6 +2624,8 @@ declare module "packages/primitive/src/content/popper" {
     export function Popper(props: PopperProps, children?: ViewChildren): TimelessElement<{}, any>;
 }
 declare module "packages/primitive/src/content/list-item-view" {
+    import { MountedEvent } from "@/event/index";
+    import { VNodeView } from "@/vnode/view";
     import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
     import { BoxProps } from "packages/primitive/src/content/box";
     export type ListItemViewProps<T> = BoxProps & {
@@ -2646,7 +2649,58 @@ declare module "packages/primitive/src/content/list-item-view" {
      * @param children - Child elements
      * @returns A TimelessElement representing a view/container
      */
-    export function ListItemView<T>(props: ListItemViewProps<T>, children?: ViewChildren): TimelessElement<ListItemViewState<T>>;
+    export function ListItemView<T>(props: ListItemViewProps<T>, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & ListItemViewState<T>;
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        readonly children: TimelessElement<any, any>[];
+        unbind: () => void;
+        rebind: (data: {
+            uid?: number | string;
+            top: number;
+            height?: number;
+            payload?: T;
+            child: TimelessElement;
+        }) => void;
+        setState(data: ListItemViewState<T> & {
+            children: TimelessElement[];
+        }): void;
+        setTop(v: number): void;
+        setPayload(v: T): void;
+        onMounted(event: MountedEvent<VNodeView>): void;
+        onUnmounted(): void;
+    };
     export type ListItemView = ReturnType<typeof ListItemView>;
 }
 declare module "packages/primitive/src/content/list-view" {
@@ -2690,12 +2744,68 @@ declare module "packages/primitive/src/content/list-view" {
         $elm: any;
         state: import("packages/primitive/src/content/box").BoxState & ListViewState<T>;
         events: ListViewEvents;
-        children: TimelessElement<{
-            top: number;
-            height: number;
-            bound: boolean;
-            payload: unknown;
-        }, any>[];
+        children: {
+            t: string;
+            $elm: any;
+            state: import("packages/primitive/src/content/box").BoxState & {
+                top: number;
+                height: number;
+                bound: boolean;
+                payload: unknown;
+            };
+            events: Partial<{
+                onMounted?: (event: MountedEvent<MountedEvent>) => void | (() => void);
+                beforeUnmounted?: () => void;
+                onUnmounted?: () => void;
+                onClick?: (e: MouseEvent) => void;
+                onDoubleClick?: (e: MouseEvent) => void;
+                onMouseDown?: (e: MouseEvent) => void;
+                onMouseUp?: (e: MouseEvent) => void;
+                onMouseEnter?: (e: MouseEvent) => void;
+                onMouseLeave?: (e: MouseEvent) => void;
+                onMouseMove?: (e: MouseEvent) => void;
+                onLongPress?: (e: PointerEvent) => void;
+                onPointerDown?: (e: PointerEvent) => void;
+                onPointerUp?: (e: PointerEvent) => void;
+                onInput?: (e: Event) => void;
+                onChange?: (e: Event) => void;
+                onFocus?: (e: FocusEvent) => void;
+                onBlur?: (e: FocusEvent) => void;
+                onKeyDown?: (e: KeyboardEvent) => void;
+                onKeyUp?: (e: KeyboardEvent) => void;
+                onContextMenu?: (e: MouseEvent) => void;
+                onDragStart?: (e: DragEvent) => void;
+                onDrag?: (e: DragEvent) => void;
+                onDragEnd?: (e: DragEvent) => void;
+                onDragEnter?: (e: DragEvent) => void;
+                onDragOver?: (e: DragEvent) => void;
+                onDragLeave?: (e: DragEvent) => void;
+                onDrop?: (e: DragEvent) => void;
+                onWheel?: (e: WheelEvent) => void;
+                onAnimationEnd?: (e: AnimationEvent) => void;
+            }>;
+            readonly children: TimelessElement<any, any>[];
+            unbind: () => void;
+            rebind: (data: {
+                uid?: number | string;
+                top: number;
+                height?: number;
+                payload?: unknown;
+                child: TimelessElement;
+            }) => void;
+            setState(data: {
+                top: number;
+                height: number;
+                bound: boolean;
+                payload: unknown;
+            } & {
+                children: TimelessElement[];
+            }): void;
+            setTop(v: number): void;
+            setPayload(v: unknown): void;
+            onMounted(event: MountedEvent<MountedEvent>): void;
+            onUnmounted(): void;
+        }[];
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -2950,8 +3060,10 @@ declare module "packages/primitive/src/layout/split" {
     export type SplitDirection = "horizontal" | "vertical";
     export type SplitViewProps = BoxProps & {
         direction?: SplitDirection;
+        resizable?: boolean;
         panels: {
             size: string | number;
+            minSize?: number;
             style: BoxProps["style"];
             content: ViewChildren;
         }[];
@@ -3279,7 +3391,7 @@ declare module "packages/primitive/src/input/select" {
         t: string;
         $elm: any;
         state: {
-            label: any;
+            label: string;
             selected: any;
         };
         children: any;
@@ -5595,7 +5707,7 @@ declare module "packages/ui-vm/src/dropdown-menu/index" {
             width: number;
             height: number;
         }>): void;
-        hide(opt: {
+        hide(opt?: {
             reason: string;
         }): void;
         unmount(): void;
@@ -8325,7 +8437,7 @@ declare module "packages/ui-vm/src/select/index" {
         placeholder: string;
         options: SelectItemCore<T>[];
         /** 保留原始的分组结构，供渲染使用 */
-        rawOptions: (SelectGroupCore<T> | SelectItemCore<T>)[];
+        raw_options: (SelectGroupCore<T> | SelectItemCore<T>)[];
         defaultValue: T | null;
         value: T | null;
         disabled: boolean;
@@ -13319,7 +13431,7 @@ declare module "packages/ui-primitive/src/modules/presence" {
             in: string;
             out: string;
         };
-    }, children?: ViewChildren): {
+    }, children?: ViewChildren | (() => ViewChildren)): {
         t: string;
         $elm: any;
         state: {
@@ -14412,7 +14524,7 @@ declare module "packages/ui-primitive/src/modules/cascader" {
             in: string;
             out: string;
         };
-    }, children: ViewChildren): {
+    }, children: ViewChildren | (() => ViewChildren)): {
         t: string;
         $elm: any;
         state: {
@@ -14662,7 +14774,7 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
             in: string;
             out: string;
         };
-    }, children: ViewChildren): {
+    }, children: ViewChildren | (() => ViewChildren)): {
         t: string;
         $elm: any;
         state: {
@@ -14782,7 +14894,7 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
             in: string;
             out: string;
         };
-    }, children: ViewChildren): {
+    }, children: ViewChildren | (() => ViewChildren)): {
         t: string;
         $elm: any;
         state: {
@@ -14934,7 +15046,7 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
             in: string;
             out: string;
         };
-    }, children: ViewChildren): {
+    }, children: ViewChildren | (() => ViewChildren)): {
         t: string;
         $elm: any;
         state: {

@@ -207,39 +207,46 @@ release_all();                 // 清空全局注册表
 
 ---
 
-## 5. 页面构建流程
+## 5. 页面标准写法
 
-1. **确定数据模型** → 创建 Core 实例（ButtonCore, InputCore, DialogCore...）
-2. **拆解 UI 为组件** → 从组件目录选择匹配的组件
-3. **组合布局** → 用 View / Flex / Show / For 组装
-4. **绑定事件** → 用户操作调用 store 方法
-5. **挂载** → `page.render()` + `page.onMounted()`
+> 详见 [references/page-pattern.md](references/page-pattern.md)
+
+每个页面由 **Model 文件**（`*.model.js`）+ **View 文件**（`*.js`）组成：
+
+```
+pages/home/
+  index.model.js    ← HomePageModel()：状态 + 方法 + UI Core
+  index.js          ← HomePageView()：实例化 Model，组装视图
+```
+
+三种 Model 模式：
+
+| 场景 | 模式 | 返回值 |
+|------|------|--------|
+| 有 API 请求、列表分页、CRUD | `defineModel({ state, methods, ui, services, listeners })` | defineModel 包装对象 |
+| 纯前端状态、配置页 | `Timeless.base()` 事件总线 + `onStateChange` | `{ state, methods, ui, onStateChange, destroy }` |
+| 只有表单、无复杂状态 | 简单返回 | `{ ui }` |
 
 ```js
-// 业务层示例
-const ui = {
-  btnSubmit: new ButtonCore({ variant: "default" }),
-  inputName: new InputCore({ placeholder: "请输入名称" }),
-  dialogConfirm: new DialogCore(),
-};
-
-ui.btnSubmit.onClick(() => ui.dialogConfirm.show());
-ui.dialogConfirm.onOk(() => {
-  ui.btnSubmit.setLoading(true);
-  // ... API 请求
-});
-
-// 视图层
-function Page() {
-  return View({ class: "p-4 space-y-4" }, [
-    Input({ store: ui.inputName }),
-    Button({ store: ui.btnSubmit }, ["提交"]),
-    Dialog({ store: ui.dialogConfirm }, ["确认提交吗？"]),
-  ]);
+// Model（defineModel 模式）
+/** @param {ViewComponentProps} props */
+export function HomePageModel(props) {
+  const items_ = refarr([]);
+  const ui = { view_page$: new Timeless.ui.ScrollViewCore({}) };
+  const methods = { async init() { /* 加载数据 */ } };
+  return defineModel({ state: { items: items_ }, methods, ui });
 }
 
-// 挂载
-Timeless.DOM.render(Page(), document.getElementById("app"));
+// View — props 类型为 ViewComponentProps（见 apps/web-shadcn/types/global.d.ts）
+// 包含：view, views, history, app, client, storage
+/** @param {ViewComponentProps} props */
+export default function HomePageView(props) {
+  const vm$ = HomePageModel(props);
+  return ScrollView({
+    store: vm$.ui.view_page$,
+    onMounted() { vm$.methods.init(); },
+  }, [ For({ each: vm$.state.items, render(item) { /* ... */ } }) ]);
+}
 ```
 
 ---
@@ -272,7 +279,55 @@ View({
 
 ---
 
-## 7. 常见陷阱
+## 7. 路由
+
+> 详见 [references/routing.md](references/routing.md)
+
+关键 API 速查：
+
+```js
+// 路由配置 → src/store/index.js
+const routes_configure = {
+  home_layout: { title: "首页", pathname: "/home", component: HomeLayoutView, children: { ... } },
+  login: { title: "登录", pathname: "/login", component: Timeless.lazy("@/pages/login/index.js") },
+  notfound: { title: "404", pathname: "/notfound", component: NotFoundPageView, notfound: true },
+};
+const router = Timeless.buildRoutes(routes_configure);
+
+// 导航
+history$.push("root.home_layout.index.form", {});          // push 跳转
+history$.replace("root.login", { redirect: route.name });  // replace
+history$.push("root.home_layout", {}, { ignore: true });   // 不更新 URL
+
+// 权限守卫 → options.require: ["login"]
+```
+
+---
+
+## 8. 网络请求
+
+> 详见 [references/request.md](references/request.md)
+
+关键 API 速查：
+
+```js
+// request_factory — 业务接口封装（推荐）
+import { request } from "@/biz/request.js";
+request.get("/api/fruit", params);
+request.post("/api/items", data);
+
+// HttpClientCore — 全局客户端
+const client$ = new Timeless.HttpClientCore({ headers: {...} });
+client$.appendHeaders({ Authorization: token });
+
+// 返回值：{ data, error } — 始终检查 r.error
+const r = await someRequest(params);
+if (r.error) { app.tip?.({ text: [r.error.message] }); return; }
+```
+
+---
+
+## 9. 常见陷阱
 
 1. **忘记在 onUnmounted 中清理订阅** — `store.onStateChange()` 返回取消函数，必须收集并在 `onUnmounted` 中逐一调用
 2. **直接修改响应式对象** — 使用 `.as()`、`.set()` 或 `.update()`，不要 `state.value.someProp = x`
@@ -283,7 +338,7 @@ View({
 
 ---
 
-## 8. 参考文件索引
+## 10. 参考文件索引
 
 需要更详细的 API 时，读取对应的 reference 文件：
 
@@ -293,6 +348,9 @@ View({
 | 视图组件 API（View, Txt, Show, For, Match, Portal, Fragment, Flex, Grid 等） | [references/view-components.md](references/view-components.md) |
 | 所有 shadcn 组件速查（props, store 类型, 用法示例） | [references/component-catalog.md](references/component-catalog.md) |
 | 所有 Core 类速查（构造函数参数, state 结构, 方法, 事件） | [references/store-catalog.md](references/store-catalog.md) |
+| 页面标准写法（Model + View 双文件、defineModel、base 事件总线） | [references/page-pattern.md](references/page-pattern.md) |
+| 路由系统（配置、导航、守卫、链接处理） | [references/routing.md](references/routing.md) |
+| 网络请求（HttpClientCore, request_factory, 接口封装） | [references/request.md](references/request.md) |
 
 ### 示例文件
 
@@ -304,7 +362,7 @@ View({
 
 ---
 
-## 9. 样式约定
+## 11. 样式约定
 
 - 使用 **Tailwind CSS** 类名，支持 `dark:` 前缀
 - `View({ class: "flex items-center gap-2 p-4" })` — 内联 Tailwind 类名

@@ -12,8 +12,10 @@ export type SplitDirection = "horizontal" | "vertical";
 
 export type SplitViewProps = BoxProps & {
   direction?: SplitDirection;
+  resizable?: boolean;
   panels: {
     size: string | number;
+    minSize?: number;
     style: BoxProps["style"];
     content: ViewChildren;
   }[];
@@ -42,6 +44,7 @@ function normalize_sizes(
 export function SplitView(props: SplitViewProps) {
   const {
     direction = "horizontal",
+    resizable = true,
     // dividerStyle = "thin",
     onResize,
     ...rest
@@ -73,7 +76,7 @@ export function SplitView(props: SplitViewProps) {
         const panel = props.panels[i];
         const panel$ = SplitPane(panel, panel.content);
         state.panels.push(panel$);
-        if (i < props.panels.length - 1) {
+        if (resizable && i < props.panels.length - 1) {
           const handler$ = SplitHandler({});
           state.panels.push(handler$);
         }

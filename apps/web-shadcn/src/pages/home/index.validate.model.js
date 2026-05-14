@@ -144,5 +144,6 @@ export function PaymentViewModel() {
     cancel_btn$,
     form$,
   };
+
   return { ui };
 }

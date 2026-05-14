@@ -77,14 +77,18 @@ function setupDragResize(
     let newLeft = leftPx + deltaX;
     let newRight = rightPx - deltaX;
 
-    const MIN_WIDTH = 20;
-    if (newLeft < MIN_WIDTH) {
-      newRight -= MIN_WIDTH - newLeft;
-      newLeft = MIN_WIDTH;
+    const leftPanel = $splitView.children[leftColIdx];
+    const rightPanel = $splitView.children[rightColIdx];
+    const leftMinWidth = leftPanel ? parseInt(leftPanel.getAttribute("data-min-size") || "20") : 20;
+    const rightMinWidth = rightPanel ? parseInt(rightPanel.getAttribute("data-min-size") || "20") : 20;
+
+    if (newLeft < leftMinWidth) {
+      newRight -= leftMinWidth - newLeft;
+      newLeft = leftMinWidth;
     }
-    if (newRight < MIN_WIDTH) {
-      newLeft -= MIN_WIDTH - newRight;
-      newRight = MIN_WIDTH;
+    if (newRight < rightMinWidth) {
+      newLeft -= rightMinWidth - newRight;
+      newRight = rightMinWidth;
     }
 
     columns[leftColIdx] = `${Math.round(newLeft)}px`;
@@ -192,11 +196,17 @@ export function DOMSplitPane(props: {
       const $elm = document.createElement("div");
 
       $elm.setAttribute("data-split-view-panel", "");
+      if (elm.state.minSize) {
+        $elm.setAttribute("data-min-size", String(elm.state.minSize));
+      }
       Object.assign(elm.state.style, {
         overflow: "clip",
         width: "100%",
         height: "100%",
       });
+      if (elm.state.minSize) {
+        elm.state.style["min-width"] = `${elm.state.minSize}px`;
+      }
 
       box$.methods.set$elm($elm);
       box$.methods.applyState(elm.state, { initial: true });
