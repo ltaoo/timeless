@@ -193,7 +193,7 @@ export function DOMSplitPane(props: {
 
       $elm.setAttribute("data-split-view-panel", "");
       Object.assign(elm.state.style, {
-        overflow: "hidden",
+        overflow: "clip",
         width: "100%",
         height: "100%",
       });

@@ -45,6 +45,8 @@ export function DOMTabView(props: {
 
       $elm.setAttribute("data-tab-view", "");
       $elm.style.height = "100%";
+      $elm.style.display = "flex";
+      $elm.style.flexDirection = "column";
 
       // let tabBarStyle = "display:flex;";
       // if (position === "top" || position === "bottom") {
@@ -74,7 +76,7 @@ export function DOMTabView(props: {
 
       $contents = document.createElement("div");
       $contents.setAttribute("data-tab-view-panels", "");
-      $contents.style.cssText = "width: 100%; height: 100%; overflow: hidden;";
+      $contents.style.cssText = "width: 100%; flex: 1; min-height: 0;";
 
       $track = document.createElement("div");
       $track.setAttribute("data-tab-view-track", "");

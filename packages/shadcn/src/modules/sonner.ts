@@ -264,6 +264,9 @@ export function Toaster(props: ToasterProps) {
 
   return View(
     {
+      dataset: {
+        "sonner-root": "",
+      },
       attributes: {
         "tab-index": -1,
         "aria-live": "polite",
