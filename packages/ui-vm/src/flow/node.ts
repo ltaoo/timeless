@@ -2,6 +2,7 @@ import { BaseDomain, Handler } from "@timeless/base";
 
 import type { FlowCanvasModel, FlowHandle } from "./index";
 import type { FlowHandleModel } from "./handle";
+import { CanvasPointer } from "../pointer";
 
 enum Events {
   Mounted,
@@ -102,6 +103,7 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
   private handleRects: Map<string, DOMRect> = new Map();
   private dragStartPos: { x: number; y: number } | null = null;
   private nodeStartPos: { x: number; y: number } | null = null;
+  private _pointer: CanvasPointer;
 
   canvas$: FlowCanvasModel;
 
@@ -143,6 +145,18 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
     this.handles = (handles || []) as FlowHandleModel[];
     this.canvas$ = canvas$;
     this.execution = execution || { status: "pending", logs: [] };
+
+    this._pointer = CanvasPointer({});
+    this._pointer.onMove((moveData) => {
+      if (this.dragging && this.nodeStartPos) {
+        const zoom = this.canvas$?.viewport?.zoom || 1;
+        this.position = {
+          x: this.nodeStartPos.x + moveData.dx / zoom,
+          y: this.nodeStartPos.y + moveData.dy / zoom,
+        };
+        this.emit(Events.PositionChange, this.position);
+      }
+    });
 
     if (onClick) {
       this.on(Events.Click, onClick);
@@ -190,6 +204,26 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
 
   setCanvas$(v: FlowCanvasModel) {
     this.canvas$ = v;
+  }
+
+  pointerDown(x: number, y: number): void {
+    this.nodeStartPos = { ...this.position };
+    this.dragging = true;
+    this._pointer.handleMouseDown({ x, y });
+  }
+
+  pointerMove(x: number, y: number): void {
+    this._pointer.handleMouseMove({ x, y });
+  }
+
+  pointerUp(x: number, y: number): void {
+    this._pointer.handleMouseUp({ x, y });
+    this.dragging = false;
+    this.nodeStartPos = null;
+  }
+
+  getPointer(): CanvasPointer {
+    return this._pointer;
   }
 
   updateData(patch: Partial<T>): void {
@@ -240,6 +274,14 @@ export class FlowNodeModel<T extends any = {}> extends BaseDomain<
   }
 
   drag(clientX: number, clientY: number, zoom: number = 1): void {
+    if (this._pointer && this._pointer.dragging) {
+      const moving = this._pointer.instanceOfMoving;
+      this.position = {
+        x: (this.nodeStartPos?.x || this.position.x) + moving.x / zoom,
+        y: (this.nodeStartPos?.y || this.position.y) + moving.y / zoom,
+      };
+      return;
+    }
     if (!this.dragStartPos || !this.nodeStartPos) return;
 
     const deltaX = (clientX - this.dragStartPos.x) / zoom;

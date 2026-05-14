@@ -44,7 +44,6 @@ const handlePositions: Record<string, { left: string; top: string }> = {
   bottom: { left: "50%", top: "100%" },
 };
 
-
 export interface FlowHandleViewProps extends ViewProps {
   store: FlowCanvasModel;
   nodeId: string;
@@ -200,7 +199,11 @@ const actionButtons: Record<
     { label: "更多", action: "more" },
   ],
   failed: [
-    { label: "重试", class: "text-red-500 hover:bg-red-50 dark:hover:bg-red-950", action: "rerun" },
+    {
+      label: "重试",
+      class: "text-red-500 hover:bg-red-50 dark:hover:bg-red-950",
+      action: "rerun",
+    },
     { label: "详情", action: "detail" },
     { label: "更多", action: "more" },
   ],
@@ -272,6 +275,7 @@ export function FlowNodeView(props: FlowNodeViewProps) {
         "bg-white dark:bg-gray-800",
         "shadow-md",
         "select-none",
+        "cursor-move",
         computed(state_, (t) => (t.dragging ? "shadow-xl" : null)),
         computed(state_, (t) =>
           t.selected ? "ring-2 ring-blue-500 dark:ring-blue-400" : null,
@@ -292,6 +296,32 @@ export function FlowNodeView(props: FlowNodeViewProps) {
       },
       onClick() {
         node$.click();
+      },
+      onMouseDown(e: MouseEvent) {
+        if (e.button !== 0) return;
+        e.stopPropagation();
+        e.preventDefault();
+
+        const $elm = e.currentTarget as HTMLElement;
+        node$.pointerDown(e.clientX, e.clientY);
+
+        const handleMove = (moveEvent: MouseEvent) => {
+          node$.pointerMove(moveEvent.clientX, moveEvent.clientY);
+          const moving = node$.getPointer().instanceOfMoving;
+          const v = node$.canvas$?.viewport || { zoom: 1 };
+          $elm.style.left = `${node$.position.x + moving.x / v.zoom}px`;
+          $elm.style.top = `${node$.position.y + moving.y / v.zoom}px`;
+          node$.canvas$?.refreshEdgesPosition();
+        };
+
+        const handleUp = (upEvent: MouseEvent) => {
+          node$.pointerUp(upEvent.clientX, upEvent.clientY);
+          document.removeEventListener("mousemove", handleMove);
+          document.removeEventListener("mouseup", handleUp);
+        };
+
+        document.addEventListener("mousemove", handleMove);
+        document.addEventListener("mouseup", handleUp);
       },
       onMounted(e) {
         const $elm = e.target.get$elm();
