@@ -10,12 +10,12 @@ type TheTypesOfEvents<T> = {
 };
 
 type SelectGroupCoreProps<T> = {
-  label?: string;
+  label?: unknown;
   options: SelectItemCore<T>[];
 };
 
 type SelectGroupCoreState<T> = {
-  label?: string;
+  label?: unknown;
   options: SelectItemCore<T>[];
 };
 
@@ -25,7 +25,7 @@ export class SelectGroupCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
   readonly type = "group" as const;
 
-  label?: string;
+  label?: unknown;
   options: SelectItemCore<T>[];
 
   get state(): SelectGroupCoreState<T> {

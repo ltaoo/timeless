@@ -52,6 +52,8 @@ export function Input(props: InputProps = {}) {
     autocorrect = "off",
     onInput,
     onChange,
+    onFocus,
+    onBlur,
     ...rest
   } = props;
 
@@ -290,6 +292,12 @@ export function Input(props: InputProps = {}) {
   }
   if (onChange) {
     events.onChange = onChange;
+  }
+  if (onFocus) {
+    events.onFocus = onFocus;
+  }
+  if (onBlur) {
+    events.onBlur = onBlur;
   }
 
   return {

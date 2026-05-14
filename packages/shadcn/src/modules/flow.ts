@@ -307,10 +307,8 @@ export function FlowNodeView(props: FlowNodeViewProps) {
 
         const handleMove = (moveEvent: MouseEvent) => {
           node$.pointerMove(moveEvent.clientX, moveEvent.clientY);
-          const moving = node$.getPointer().instanceOfMoving;
-          const v = node$.canvas$?.viewport || { zoom: 1 };
-          $elm.style.left = `${node$.position.x + moving.x / v.zoom}px`;
-          $elm.style.top = `${node$.position.y + moving.y / v.zoom}px`;
+          $elm.style.left = `${node$.position.x}px`;
+          $elm.style.top = `${node$.position.y}px`;
           node$.canvas$?.refreshEdgesPosition();
         };
 

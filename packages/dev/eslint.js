@@ -318,6 +318,7 @@ export const globals = {
   ButtonCore: "readonly",
   ButtonInListCore: "readonly",
   CalendarCore: "readonly",
+  CanvasPointer: "readonly",
   CascaderCore: "readonly",
   CheckboxCore: "readonly",
   CheckboxGroupCore: "readonly",

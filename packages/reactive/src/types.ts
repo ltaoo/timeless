@@ -61,6 +61,7 @@ export type TimelessRefObject<T> = {
   value: T;
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;
+  diff(v: T): void;
   set: (
     key: keyof T,
     item: T[keyof T] | ((current: T[keyof T]) => T[keyof T]),
@@ -102,6 +103,7 @@ export type TimelessRefObjectNullable<T> = {
   value: T | null;
   isSame: (v: unknown) => boolean;
   isStrictEqual: (v: unknown) => boolean;
+  diff(v: T): void;
   set: (
     key: keyof T,
     item: T[keyof T] | ((current: T[keyof T]) => T[keyof T]),
@@ -281,22 +283,23 @@ export type TimelessRefArray<T> = {
   isEmpty: () => boolean;
   at: (index: number) => T | undefined;
   toArray: () => T[];
+  getDeps?: () => DepInfo[];
 };
 
 export type DerivedRef<T> = {
   __is_ref: true;
-  subscribe: (ctx: Subscriber<T>) => () => void;
-  destroy: () => void;
+  subscribe(ctx: Subscriber<T>): () => void;
+  destroy(): void;
   value: T;
-  isSame: (v: unknown) => boolean;
-  isStrictEqual: (v: unknown) => boolean;
-  diff: (v: T) => void;
-  getDeps?: () => DepInfo[];
-  dump?: () => void;
+  isSame(v: unknown): boolean;
+  isStrictEqual(v: unknown): boolean;
+  diff(v: T): void;
+  getDeps?(): DepInfo[];
+  dump?(): void;
 };
 
 export type Ref<T> = DerivedRef<T> & {
-  as: (value: T | ((cur: T | null) => T)) => void;
+  as(value: T | ((cur: T | null) => T)): void;
 };
 
 export function isWriteableRef<T>(v: Ref<T> | T): v is Ref<T>;

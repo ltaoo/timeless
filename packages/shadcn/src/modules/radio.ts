@@ -16,7 +16,7 @@ export function Radio(props: { store: RadioCore; id?: string }) {
       {
         store,
         class: classNames([
-          "peer relative flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border outline-none cursor-pointer after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+          "peer relative flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border outline-none cursor-default after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
           computed(state, (s) =>
             s.checked
               ? "border-primary bg-primary text-primary-foreground dark:bg-primary"

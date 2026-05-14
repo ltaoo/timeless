@@ -7,7 +7,7 @@ export function Presence(
     store: PresenceCore;
     animation?: { in: string; out: string };
   },
-  children?: ViewChildren,
+  children?: ViewChildren | (() => ViewChildren),
 ) {
   const { store, animation, ...rest } = props;
   const state = refobj(store.state);
@@ -23,6 +23,9 @@ export function Presence(
       return t.mounted || t.visible || t.exit;
     }),
     ok() {
+      if (typeof children === "function") {
+        return children();
+      }
       return children || [];
     },
     onUnmounted() {

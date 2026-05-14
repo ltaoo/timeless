@@ -82,9 +82,10 @@ export function Trigger(
           },
           { force: true },
         );
-        const handlePointerDown = (e: PointerEvent) => {
+        function handlePointerDown(e: PointerEvent) {
           e.preventDefault();
           e.stopPropagation();
+          // logger.log("handlePointerDown", e.target?.tagName);
           // @ts-ignore
           if (e.target.tagName === "INPUT") {
             return;
@@ -92,12 +93,12 @@ export function Trigger(
           if (store.disabled) {
             return;
           }
-          if (props.store.presence.state.visible) {
+          if (store.open) {
             props.store.hide();
             return;
           }
           props.store.show();
-        };
+        }
         // @ts-ignore
         listener$.add($elm.addEventListener("pointerdown", handlePointerDown));
         if (rest.onMounted) {
@@ -182,7 +183,7 @@ export function Content(
     store: CascaderCore<any>;
     animation?: { in: string; out: string };
   },
-  children: ViewChildren,
+  children: ViewChildren | (() => ViewChildren),
 ) {
   const { store, animation, onMounted, ...rest } = props;
 
@@ -235,6 +236,8 @@ export function Content(
       // return listener$.destroy;
     },
     ok() {
+      const resolvedChildren =
+        typeof children === "function" ? children() : children;
       return [
         NativePortal({}, [
           PopperPrimitive.Content(
@@ -284,7 +287,7 @@ export function Content(
                     }
                   },
                 },
-                children,
+                resolvedChildren,
               ),
             ],
           ),

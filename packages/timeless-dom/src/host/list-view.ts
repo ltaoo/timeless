@@ -94,7 +94,7 @@ export function DOMListView(props: {
       $content.setAttribute("data-list-view-content", "");
       $elm.addEventListener("scroll", function (event) {
         const top = (event.target as any).scrollTop;
-        elm.events?.onScroll?.({
+        (elm.events as any)?.onScroll?.({
           scrollTop: top,
         });
       });

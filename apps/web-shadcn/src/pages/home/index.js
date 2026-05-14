@@ -1,5 +1,3 @@
-import { SplitLayout } from "@/components/layout.js";
-
 /**
  *
  * @param {ViewComponentProps} props
@@ -39,16 +37,12 @@ export default function HomePageView(props) {
       },
     },
     [
-      SplitLayout({
-        direction: "horizontal",
-        items: [
+      SplitView({
+        panels: [
           {
-            defaultSize: 25,
-            minSize: 20,
-            maxSize: 50,
-            scroll: false,
-            children: [
-              Flex({ direction: "col", class: "py-4" }, [
+            size: 220,
+            content() {
+              return Flex({ direction: "col", class: "py-4" }, [
                 Flex(
                   { items: "center", justify: "between", class: "px-3 mb-3" },
                   [
@@ -84,14 +78,14 @@ export default function HomePageView(props) {
                     },
                   }),
                 ]),
-              ]),
-            ],
+              ]);
+            },
           },
           {
-            defaultSize: 85,
-            minSize: 70,
-            scroll: false,
-            children: [KeepAliveSubViews(props)],
+            size: "auto",
+            content() {
+              return KeepAliveSubViews(props);
+            },
           },
         ],
       }),

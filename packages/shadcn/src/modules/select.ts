@@ -132,9 +132,11 @@ export function Select(
           Show({
             when: !!entry.label,
             ok() {
+              const label_content =
+                typeof entry.label === "function" ? entry.label() : entry.label;
               return [
                 View({ class: SelectGroupLabelClassName }, [
-                  entry.label ?? null,
+                  label_content as any,
                 ]),
               ];
             },
@@ -247,12 +249,7 @@ export function Select(
                   "flex items-center gap-1.5 line-clamp-1",
                   computed(state_, (t) => {
                     const has_selected =
-                      t.value != null &&
-                      (t.options || []).some((o) => {
-                        return (
-                          o instanceof SelectItemCore && o.value === t.value
-                        );
-                      });
+                      t.value != null && hasItemWithValue(t.options, t.value);
                     return has_selected
                       ? "text-foreground"
                       : "text-muted-foreground";
@@ -376,7 +373,6 @@ export function Select(
                     ok() {
                       return [
                         For({
-                          key: "value",
                           each: filtered_entries_,
                           render: methods.render_entry,
                         }),
@@ -415,4 +411,19 @@ export function Select(
       ),
     ],
   );
+}
+
+function hasItemWithValue(
+  entries: (SelectGroupCore<any> | SelectItemCore<any>)[],
+  value: any,
+): boolean {
+  for (let i = 0; i < entries.length; i += 1) {
+    const entry = entries[i];
+    if (entry instanceof SelectGroupCore) {
+      if (hasItemWithValue(entry.options, value)) return true;
+    } else if (entry instanceof SelectItemCore && entry.value === value) {
+      return true;
+    }
+  }
+  return false;
 }

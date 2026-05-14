@@ -183,7 +183,7 @@ export function Content(
     store: TimePickerCore;
     animation?: { in: string; out: string };
   },
-  children: ViewChildren,
+  children: ViewChildren | (() => ViewChildren),
 ) {
   const { store, animation, ...rest } = props;
 
@@ -194,7 +194,7 @@ export function Content(
     presence_.as(v);
   });
 
-  return Presence({ store: store.$presence }, [
+  return Presence({ store: store.$presence }, () => [
     NativePortal({}, [
       PopperPrimitive.Content(
         {
@@ -237,7 +237,7 @@ export function Content(
                 }
               },
             },
-            children,
+            typeof children === "function" ? children() : children,
           ),
         ],
       ),

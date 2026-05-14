@@ -1,4 +1,4 @@
-import { Icon, ListenerManager, ViewProps } from "@timeless/timeless";
+import { Icon, ListenerManager, View, ViewProps } from "@timeless/timeless";
 import { ref, computed, classNames } from "@timeless/timeless";
 import { CheckboxPrimitive } from "@timeless/ui-primitive";
 import { CheckboxCore } from "@timeless/ui-vm";
@@ -27,7 +27,7 @@ export function Checkbox(
           ...rest,
           store,
           class: classNames([
-            "peer relative flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors outline-none cursor-pointer focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+            "peer relative flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors outline-none cursor-default focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
             computed(state_, (s) => {
               return !!s.checked
                 ? "border-primary bg-primary text-primary-foreground dark:bg-primary"
@@ -40,9 +40,17 @@ export function Checkbox(
           ]),
         },
         [
-          CheckboxPrimitive.Indicator({ store }, [
-            Icon({ name: "check", size: 16 }),
-          ]),
+          View(
+            {
+              class: classNames([
+                "grid place-content-center text-current transition-none [&>svg]:size-3.5",
+                computed(state_, (s) => {
+                  return !!s.checked ? "" : "invisible";
+                }),
+              ]),
+            },
+            [Icon({ name: "check", size: 16 })],
+          ),
         ],
       ),
     ],

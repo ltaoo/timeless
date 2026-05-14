@@ -185,8 +185,11 @@ export class InputCore<T>
   }
   handleFocus() {
     this.isFocus = true;
+    this.emit(Events.StateChange, { ...this.state });
   }
   handleBlur() {
+    this.isFocus = false;
+    this.emit(Events.StateChange, { ...this.state });
     if (this.value === this.valueUsed) {
       return;
     }

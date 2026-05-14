@@ -110,14 +110,6 @@ export function DOMShow(props: {
     getChildren: box$.methods.getChildren,
     buildChildren: box$.methods.buildChildren,
     insertChildren(children: TimelessElement[]) {
-      console.log(
-        "[DOMShow.insertChildren] called",
-        children.length,
-        "anchor in DOM=",
-        document.contains($anchor),
-        "parentElement=",
-        $anchor.parentElement,
-      );
       box$.methods.removeChildren();
       box$.methods.insertChildren(children);
     },

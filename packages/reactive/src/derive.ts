@@ -1,4 +1,5 @@
 import { debounce, throttle } from "@timeless/base";
+
 import { Subscriber, Ref, DerivedRef, isRef } from "./types";
 import { _current_disposables } from "./disposal";
 
@@ -7,16 +8,11 @@ type ComputedOptions = {
   throttle?: number;
 };
 
-type UnwrapRef<T> =
-  T extends Ref<infer V>
-    ? V extends Ref<any>
-      ? UnwrapRef<V>
-      : V
-    : T extends DerivedRef<infer V>
-      ? V extends DerivedRef<any>
-        ? UnwrapRef<V>
-        : V
-      : T;
+type UnwrapRef<T> = T extends { __is_ref: true; value: infer V }
+  ? V extends { __is_ref: true; value: any }
+    ? UnwrapRef<V>
+    : V
+  : T;
 
 export function derive<T extends readonly any[], R>(
   deps: readonly [...T],
@@ -31,7 +27,11 @@ export function derive<T extends Record<string, any>, R>(
   options?: ComputedOptions,
 ): DerivedRef<R>;
 
-export function derive<T>(deps: any, fn: any, options?: ComputedOptions): DerivedRef<T> {
+export function derive<T>(
+  deps: any,
+  fn: any,
+  options?: ComputedOptions,
+): DerivedRef<T> {
   const _derive_deps: Subscriber<T>[] = [];
   let raw_value: any;
 
@@ -116,6 +116,7 @@ export function derive<T>(deps: any, fn: any, options?: ComputedOptions): Derive
     isStrictEqual(v: unknown) {
       return raw_value === v;
     },
+    diff(v) {},
   };
 
   // Register with owner's disposal tracking if active

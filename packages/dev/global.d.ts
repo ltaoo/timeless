@@ -58,6 +58,7 @@ declare module "packages/reactive/src/types" {
         value: T;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
+        diff(v: T): void;
         set: (key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])) => void;
         get: (key: keyof T) => unknown;
         delete: (key: keyof T) => void;
@@ -93,6 +94,7 @@ declare module "packages/reactive/src/types" {
         value: T | null;
         isSame: (v: unknown) => boolean;
         isStrictEqual: (v: unknown) => boolean;
+        diff(v: T): void;
         set: (key: keyof T, item: T[keyof T] | ((current: T[keyof T]) => T[keyof T])) => void;
         get: (key: keyof T) => unknown;
         delete: (key: keyof T) => void;
@@ -211,17 +213,17 @@ declare module "packages/reactive/src/types" {
     };
     export type DerivedRef<T> = {
         __is_ref: true;
-        subscribe: (ctx: Subscriber<T>) => () => void;
-        destroy: () => void;
+        subscribe(ctx: Subscriber<T>): () => void;
+        destroy(): void;
         value: T;
-        isSame: (v: unknown) => boolean;
-        isStrictEqual: (v: unknown) => boolean;
-        diff: (v: T) => void;
-        getDeps?: () => DepInfo[];
-        dump?: () => void;
+        isSame(v: unknown): boolean;
+        isStrictEqual(v: unknown): boolean;
+        diff(v: T): void;
+        getDeps?(): DepInfo[];
+        dump?(): void;
     };
     export type Ref<T> = DerivedRef<T> & {
-        as: (value: T | ((cur: T | null) => T)) => void;
+        as(value: T | ((cur: T | null) => T)): void;
     };
     export function isWriteableRef<T>(v: Ref<T> | T): v is Ref<T>;
     export function isRef<T>(v: DerivedRef<T> | Ref<T> | T): v is DerivedRef<T>;
@@ -657,12 +659,18 @@ declare module "packages/reactive/src/computed" {
     export function computed<T extends object, R>(deps: T, fn: (val: T) => R, options?: ComputedOptions): DerivedRef<R>;
 }
 declare module "packages/reactive/src/derive" {
-    import { Ref, DerivedRef } from "packages/reactive/src/types";
+    import { DerivedRef } from "packages/reactive/src/types";
     type ComputedOptions = {
         debounce?: number;
         throttle?: number;
     };
-    type UnwrapRef<T> = T extends Ref<infer V> ? V extends Ref<any> ? UnwrapRef<V> : V : T extends DerivedRef<infer V> ? V extends DerivedRef<any> ? UnwrapRef<V> : V : T;
+    type UnwrapRef<T> = T extends {
+        __is_ref: true;
+        value: infer V;
+    } ? V extends {
+        __is_ref: true;
+        value: any;
+    } ? UnwrapRef<V> : V : T;
     export function derive<T extends readonly any[], R>(deps: readonly [...T], fn: (...args: {
         [K in keyof T]: UnwrapRef<T[K]>;
     } & {
@@ -8212,18 +8220,18 @@ declare module "packages/ui-vm/src/select/group" {
         [Events.Change]: SelectGroupCoreState<T>;
     };
     type SelectGroupCoreProps<T> = {
-        label?: string;
+        label?: unknown;
         options: SelectItemCore<T>[];
     };
     type SelectGroupCoreState<T> = {
-        label?: string;
+        label?: unknown;
         options: SelectItemCore<T>[];
     };
     export class SelectGroupCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
         _name: string;
         debug: boolean;
         readonly type: "group";
-        label?: string;
+        label?: unknown;
         options: SelectItemCore<T>[];
         get state(): SelectGroupCoreState<T>;
         constructor(options: Partial<{
@@ -8316,6 +8324,8 @@ declare module "packages/ui-vm/src/select/index" {
         id: any;
         placeholder: string;
         options: SelectItemCore<T>[];
+        /** 保留原始的分组结构，供渲染使用 */
+        rawOptions: (SelectGroupCore<T> | SelectItemCore<T>)[];
         defaultValue: T | null;
         value: T | null;
         disabled: boolean;
@@ -11823,10 +11833,63 @@ declare module "packages/ui-vm/src/flow/handle" {
         onStateChange(handler: Handler<FlowHandleState>): () => void;
     }
 }
+declare module "packages/ui-vm/src/pointer/index" {
+    /**
+     * 画布上鼠标相关逻辑
+     * 是否按下、移动距离等等
+     */
+    import { Handler } from "packages/base/src/index";
+    export function CanvasPointer(props: {}): {
+        readonly pressing: boolean;
+        readonly dragging: boolean;
+        readonly instanceOfMoving: {
+            x: number;
+            y: number;
+        };
+        getMousePoint(): {
+            x: number;
+            y: number;
+            text: string;
+        };
+        handleMouseDown(pos: {
+            x: number;
+            y: number;
+        }): void;
+        handleMouseMove(pos: {
+            x: number;
+            y: number;
+        }): void;
+        handleMouseUp(pos: {
+            x: number;
+            y: number;
+        }): void;
+        onMove(handler: Handler<{
+            x: number;
+            y: number;
+            dx: number;
+            dy: number;
+            pressing: boolean;
+        }>): () => void;
+        onDoubleClick(handler: Handler<{
+            x: number;
+            y: number;
+        }>): () => void;
+        onClick(handler: Handler<{
+            x: number;
+            y: number;
+        }>): () => void;
+        onLongPress(handler: Handler<{
+            x: number;
+            y: number;
+        }>): () => void;
+    };
+    export type CanvasPointer = ReturnType<typeof CanvasPointer>;
+}
 declare module "packages/ui-vm/src/flow/node" {
     import { BaseDomain, Handler } from "packages/base/src/index";
     import type { FlowCanvasModel, FlowHandle } from "packages/ui-vm/src/flow/index";
     import type { FlowHandleModel } from "packages/ui-vm/src/flow/handle";
+    import { CanvasPointer } from "packages/ui-vm/src/pointer/index";
     enum Events {
         Mounted = 0,
         Click = 1,
@@ -11853,6 +11916,33 @@ declare module "packages/ui-vm/src/flow/node" {
         };
         [Events.StateChange]: FlowNodeState<T>;
     };
+    export type NodeExecutionStatus = "pending" | "running" | "completed" | "failed" | "skipped";
+    export interface FlowNodeExecutionData {
+        status: NodeExecutionStatus;
+        input?: any;
+        output?: any;
+        logs?: Array<{
+            timestamp: Date;
+            level: "debug" | "info" | "warn" | "error";
+            message: string;
+        }>;
+        error?: {
+            message: string;
+            stack?: string;
+        };
+        timing?: {
+            startTime?: Date;
+            endTime?: Date;
+            duration?: number;
+        };
+        retries?: {
+            attempt: number;
+            history: Array<{
+                timestamp: Date;
+                error: string;
+            }>;
+        };
+    }
     export interface FlowNodeModelProps<T extends any> {
         id: string;
         type?: string;
@@ -11865,9 +11955,9 @@ declare module "packages/ui-vm/src/flow/node" {
         dragging?: boolean;
         width?: number;
         height?: number;
-        /** 连接点 */
         handles?: (FlowHandle | FlowHandleModel)[];
         canvas$?: FlowCanvasModel;
+        execution?: FlowNodeExecutionData;
         onClick?: (node: FlowNodeModel<T>) => void;
         onDoubleClick?: (node: FlowNodeModel<T>) => void;
     }
@@ -11875,6 +11965,7 @@ declare module "packages/ui-vm/src/flow/node" {
         dragging: boolean;
         selected: boolean;
         focused: boolean;
+        hovering: boolean;
         position: {
             x: number;
             y: number;
@@ -11889,20 +11980,31 @@ declare module "packages/ui-vm/src/flow/node" {
         focused: boolean;
         selected: boolean;
         dragging: boolean;
+        hovering: boolean;
         position: {
             x: number;
             y: number;
         };
         width: number;
         height: number;
+        execution: FlowNodeExecutionData;
         private handleRects;
         private dragStartPos;
         private nodeStartPos;
+        private _pointer;
         canvas$: FlowCanvasModel;
         get state(): FlowNodeState<T>;
         constructor(props: FlowNodeModelProps<T>);
+        updateExecution(patch: Partial<FlowNodeExecutionData>): void;
+        setExecutionStatus(status: NodeExecutionStatus): void;
+        addLog(level: "debug" | "info" | "warn" | "error", message: string): void;
         setCanvas$(v: FlowCanvasModel): void;
+        pointerDown(x: number, y: number): void;
+        pointerMove(x: number, y: number): void;
+        pointerUp(x: number, y: number): void;
+        getPointer(): CanvasPointer;
         updateData(patch: Partial<T>): void;
+        setHovering(value: boolean): void;
         focus(): void;
         blur(): void;
         click(): void;
@@ -11917,6 +12019,7 @@ declare module "packages/ui-vm/src/flow/node" {
         updateHandleRect(handleId: string): void;
         toJSON(): {
             id: string;
+            type: string;
             position: {
                 x: number;
                 y: number;
@@ -11924,6 +12027,7 @@ declare module "packages/ui-vm/src/flow/node" {
             width: number;
             height: number;
             data: T;
+            execution: FlowNodeExecutionData;
         };
         handleMounted(event: {
             data: {
@@ -12123,7 +12227,8 @@ declare module "packages/ui-vm/src/flow/index" {
             edges: FlowEdge[];
             viewport?: Viewport;
         }): void;
-        onConnect(handler: Handler<Connection>): () => void;
+        onNodeRerun(): void;
+        onConnect(handler: Handler<TheTypesOfEvents[Events.Connect]>): () => void;
         onNodesChange(handler: Handler<FlowNodeModel[]>): () => void;
         onEdgesChange(handler: Handler<FlowEdgeModel[]>): () => void;
         onNodeClick(handler: Handler<{
@@ -12244,6 +12349,7 @@ declare module "packages/ui-vm/src/index" {
     export * from "packages/ui-vm/src/sonner/index";
     export * from "packages/ui-vm/src/flow/index";
     export * from "packages/ui-vm/src/flow/node";
+    export * from "packages/ui-vm/src/pointer/index";
 }
 declare module "packages/kit/src/route_view/utils" {
     import { JSONObject } from "packages/types/src/index";
@@ -17212,6 +17318,7 @@ declare const BizError: typeof import("@timeless/ui-vm").BizError;
 declare const ButtonCore: typeof import("@timeless/ui-vm").ButtonCore;
 declare const ButtonInListCore: typeof import("@timeless/ui-vm").ButtonInListCore;
 declare const CalendarCore: typeof import("@timeless/ui-vm").CalendarCore;
+declare const CanvasPointer: typeof import("@timeless/ui-vm").CanvasPointer;
 declare const CascaderCore: typeof import("@timeless/ui-vm").CascaderCore;
 declare const CheckboxCore: typeof import("@timeless/ui-vm").CheckboxCore;
 declare const CheckboxGroupCore: typeof import("@timeless/ui-vm").CheckboxGroupCore;

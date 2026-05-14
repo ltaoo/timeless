@@ -190,7 +190,7 @@ export function Select<T extends { value: any; label: string }>(
         }
       }
       for (let i = 0; i < state.children.length; i += 1) {
-        const child = state.children[i];
+        const child = state.children[i] as any;
         if (child) {
           if (child.t === "select-option-group") {
             const selected = child.select(value);
@@ -242,7 +242,7 @@ export function Select<T extends { value: any; label: string }>(
     if (onChange) {
       onChange(event);
     }
-    methods.select(event.target.value);
+    methods.select((event.target as any).value);
   };
 
   if (state.value) {
@@ -352,7 +352,7 @@ export function SelectOptionGroup<T extends { label: string; value: any }>(
     each: options,
     render,
   });
-  const state = {
+  const state: { label: string; selected: any } = {
     label: props.label,
     selected: null,
   };
@@ -376,7 +376,7 @@ export function SelectOptionGroup<T extends { label: string; value: any }>(
     select(v: any) {
       const matched = children.find((child) => {
         return child?.state.value === v;
-      });
+      }) as any;
       if (!matched) {
         return null;
       }

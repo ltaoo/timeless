@@ -63,7 +63,7 @@ export function DOMTabView(props: {
           const $tab = document.createElement("div");
           $tab.setAttribute("data-tab-view-tab", t.tab);
           $tab.addEventListener("click", function (event) {
-            elm.handleClickTab(t);
+            (elm as any).handleClickTab(t);
           });
 
           $tab.innerText = t.label;

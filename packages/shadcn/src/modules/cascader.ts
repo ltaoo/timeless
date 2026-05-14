@@ -126,7 +126,7 @@ export function Cascader(
           //     : {};
           // }),
         },
-        [
+        () => [
           // 搜索框
           CascaderPrimitive.Search({
             store,
@@ -163,11 +163,13 @@ export function Cascader(
           // 面板区域 - 在搜索模式下隐藏
           View(
             {
-              class: computed(state_, (d) =>
-                d.search && d.searchKeyword ? "hidden" : "flex",
-              ),
+              class: computed(state_, (d) => {
+                return d.search && d.searchKeyword ? "hidden" : "flex";
+              }),
             },
             [
+              "Content",
+              View({}, [computed(state_, (d) => d.panels.length)]),
               For({
                 key: "key",
                 each: computed(state_, (d) => d.panels),

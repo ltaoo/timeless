@@ -1,3 +1,6 @@
+import { registerIcons } from "@timeless/timeless";
+import { iconRegistry } from "@timeless/svg/asn/registry";
+
 import { Input } from "./modules/input";
 import { FileInput } from "./modules/file-picker";
 import { NumberInput } from "./modules/number-input";
@@ -102,6 +105,7 @@ try {
     import("./styles/globals.css");
   }
 } catch {}
+registerIcons(iconRegistry);
 
 console.log("shadcn.version" + __Version);
 export const TimelessShadcnVersion = __Version;

@@ -1044,7 +1044,7 @@ describe("RefArray", () => {
 
     it("should destroy cached item proxies when replaced via as", () => {
       const arr = refArray([{ id: 1 }, { id: 2 }]);
-      const item0 = arr.get(0) as { subscribe: Function; getDeps: Function };
+      const item0 = arr.get(0) as unknown as { subscribe: Function; getDeps: Function };
       const handler = vi.fn();
 
       item0.subscribe({ onChange: handler });

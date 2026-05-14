@@ -609,6 +609,20 @@ export function For<T>(
       if (props.onMounted) {
         listener$.add(props.onMounted(event));
       }
+      // After remount, children may have been cleared by onUnmounted.
+      // Rebuild from the current value of `each`.
+      // if (state.children.length === 0) {
+      //   const vv = props.each;
+      //   const items = isRef(vv) ? (vv as Ref<T[]>).value : (vv as T[]);
+      //   if (items && items.length > 0) {
+      //     state.wrapped_items = items.map((item) => ({
+      //       k: methods.unique_id(),
+      //       v: item,
+      //     }));
+      //     state.items = [...items];
+      //     methods.build_children();
+      //   }
+      // }
       for (const child of state.children) {
         if (isElement(child) && child.onMounted) {
           child.onMounted({ target: child.$elm });
@@ -625,26 +639,26 @@ export function For<T>(
         props.onUnmounted();
       }
       listener$.destroy();
-      for (let i = 0; i < state.idx_arr.length; i += 1) {
-        const v = state.idx_arr[i];
-        if (v) {
-          v.destroy();
-        }
-      }
-      // Dispose all per-item owners (cleans up render-created refs)
-      for (let i = 0; i < state.item_owners.length; i += 1) {
-        const owner = state.item_owners[i];
-        if (owner) {
-          dispose_owner(owner);
-        }
-      }
-      state.rendered = false;
-      state.subscribed = false;
-      state.items = [];
-      state.wrapped_items = [];
-      state.idx_arr = [];
-      state.item_owners = [];
-      state.children = [];
+      // for (let i = 0; i < state.idx_arr.length; i += 1) {
+      //   const v = state.idx_arr[i];
+      //   if (v) {
+      //     v.destroy();
+      //   }
+      // }
+      // // Dispose all per-item owners (cleans up render-created refs)
+      // for (let i = 0; i < state.item_owners.length; i += 1) {
+      //   const owner = state.item_owners[i];
+      //   if (owner) {
+      //     dispose_owner(owner);
+      //   }
+      // }
+      // state.rendered = false;
+      // state.subscribed = false;
+      // state.items = [];
+      // state.wrapped_items = [];
+      // state.idx_arr = [];
+      // state.item_owners = [];
+      // state.children = [];
     },
     _hmr_dispose() {
       _hmr_subs.forEach((fn) => fn());

@@ -305,7 +305,7 @@ export function DateRangePicker(
         class:
           "cn-menu-target cn-menu-translucent z-50 w-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
-      [
+      () => [
         DateRangePickerPrimitive.Calendars({ store, class: "w-full" }, [
           View({ class: "grid grid-cols-[280px_280px] items-start gap-0" }, [
             View({ class: "w-[280px] p-3 border-r border-border" }, [

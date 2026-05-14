@@ -203,7 +203,7 @@ export function refArray<T>(
       })();
     }
   }
-  const _inner: Ref<unknown>[] = [];
+  const _inner: (Ref<unknown> | undefined)[] = [];
   const sync_registry_key = (prev_raw_value: T[], next_raw_value: T[]) => {
     // if (prev_raw_value === next_raw_value) {
     //   return;

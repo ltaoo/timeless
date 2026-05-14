@@ -105,7 +105,7 @@ export function ListView<T extends Record<string, unknown>>(
   /** 固定槽位池 */
   let _slots: ListItemView[] = [];
   /** 绑定的槽位，以 wrapped_item.k 为 key */
-  let _slot_bindings = new Map<string, View>();
+  let _slot_bindings = new Map<string, ListItemView>();
   /** 空闲槽位池 */
   let _free_slots: ListItemView[] = [];
   /** 渲染的列表 */

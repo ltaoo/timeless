@@ -33,7 +33,7 @@ type ListItemViewState<T> = {
 export function ListItemView<T>(
   props: ListItemViewProps<T>,
   children?: ViewChildren,
-): TimelessElement<ListItemViewState<T>> {
+) {
   const { uid, top, height, payload, bound, ...rest } = props;
 
   const box$ = Box<ListItemViewState<T>>(rest, {

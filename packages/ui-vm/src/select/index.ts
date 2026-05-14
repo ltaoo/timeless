@@ -119,6 +119,8 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   placeholder: string;
   // entries: SelectEntry<T>[] = [];
   options: SelectItemCore<T>[] = [];
+  /** 保留原始的分组结构，供渲染使用 */
+  raw_options: (SelectGroupCore<T> | SelectItemCore<T>)[] = [];
   defaultValue: T | null = null;
   value: T | null = null;
   disabled: boolean = false;
@@ -187,7 +189,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     //   optionByValue.set(opt.value, opt);
     // }
     return {
-      options: this.options,
+      options: this.raw_options,
       placeholder: this.placeholder,
       value: this.value,
       selectedOption: this.selected_item$,
@@ -224,6 +226,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
 
     this.position = position;
     this.search = !!search;
+    this.raw_options = options;
     this.options = flatten_entries(options, { value: defaultValue });
     this.selected_item$ = this.options.find((opt) => opt.selected) ?? null;
     this.disabled = disabled;
@@ -444,6 +447,7 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.emit(Events.Blur);
   }
   setOptions(options: NonNullable<SelectProps<T>["options"]>) {
+    this.raw_options = options;
     this.options = flatten_entries(options, { value: this.value });
     // console.log("[DOMAIN]ui/select - setOptions", this.unique_id, this.value, options);
     if (this.value === null) {

@@ -82,12 +82,12 @@ export function Input(
         store.setValue(e.target.value);
       }
     },
-    // onChange(event) {
-    //   console.log("onChange", event.target.value);
-    //   if (event.target) {
-    //     store.setValue(event.target.value as string);
-    //   }
-    // },
+    onFocus() {
+      store.handleFocus();
+    },
+    onBlur() {
+      store.handleBlur();
+    },
   });
 }
 

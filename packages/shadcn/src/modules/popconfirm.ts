@@ -56,7 +56,7 @@ export function Popconfirm(
                 props.store.popper.setArrowElement((event as any).target);
               },
               class: computed(popper_state_, (t) => {
-                const side = t.placedSide;
+                const side = t.placement?.split("-")[0] as string;
                 const base =
                   "absolute w-3 h-3 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800";
                 let borderClass = "";
@@ -67,8 +67,7 @@ export function Popconfirm(
                 return [base, borderClass].join(" ");
               }),
               style: computed(popper_state_, (s) => {
-                const side = s.placedSide;
-                const align = s.placedAlign;
+                const [side, align = "center"] = (s.placement || "bottom").split("-");
                 const styles: ViewStyleProperties = {};
                 if (side === "bottom") styles.top = "-6px";
                 if (side === "top") styles.bottom = "-6px";
