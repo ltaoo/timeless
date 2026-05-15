@@ -210,6 +210,8 @@ export function DOMSplitPane(props: {
 
       box$.methods.set$elm($elm);
       box$.methods.applyState(elm.state, { initial: true });
+      $elm.style.position = "relative";
+      $elm.style.zIndex = "0";
 
       const $fragment = box$.methods.render(elm.children);
       box$.methods.setupEventListener(elm.events);
@@ -220,6 +222,8 @@ export function DOMSplitPane(props: {
     hydrate(elm: TimelessElement, $elm: HTMLDivElement) {
       box$.methods.set$elm($elm);
       box$.methods.setupEventListener(elm.events);
+      $elm.style.position = "relative";
+      $elm.style.zIndex = "0";
     },
   };
 }
@@ -246,6 +250,7 @@ export function DOMSplitHandler(props: {
     },
     render(elm: TimelessElement) {
       const $elm = document.createElement("div");
+      const $line = document.createElement("div");
       const $hover_zone = document.createElement("div");
       let hover_timer: ReturnType<typeof setTimeout> | null = null;
       let is_hover_highlighted = false;
@@ -255,18 +260,21 @@ export function DOMSplitHandler(props: {
         display: "flex",
         width: "1px",
         height: "100%",
-        "z-index": 1,
+        "z-index": 2,
         position: "relative",
         overflow: "visible",
-        "background-color": "CanvasText",
       });
-      // const $handler = document.createElement("div");
-      // $handler.style.cssText =
-      //   "z-index: 2; position: relative; width: 4px; transform: translateX(-2px);";
-      // $elm.appendChild($handler);
 
       box$.methods.set$elm($elm);
       box$.methods.applyState(elm.state, { initial: true });
+      $elm.style.zIndex = "2";
+
+      Object.assign($line.style, {
+        width: "1px",
+        height: "100%",
+        "pointer-events": "none",
+        "background-color": "color-mix(in srgb, CanvasText 20%, black)",
+      });
 
       Object.assign($hover_zone.style, {
         position: "absolute",
@@ -275,18 +283,18 @@ export function DOMSplitHandler(props: {
         left: "-2px",
         right: "-2px",
         "pointer-events": "auto",
+        cursor: "col-resize",
         transition: "background-color 0.2s ease",
       });
 
       const setHoverHighlight = (highlighted: boolean) => {
         is_hover_highlighted = highlighted;
         $hover_zone.style.backgroundColor = highlighted
-          ? "blue"
+          ? "#3376cd"
           : "transparent";
       };
 
       $hover_zone.addEventListener("pointerenter", () => {
-        window.document.body.style.cursor = "col-resize";
         if (hover_timer) {
           clearTimeout(hover_timer);
         }
@@ -297,7 +305,6 @@ export function DOMSplitHandler(props: {
       });
 
       $hover_zone.addEventListener("pointerleave", () => {
-        window.document.body.style.cursor = "unset";
         if (hover_timer) {
           clearTimeout(hover_timer);
           hover_timer = null;
@@ -307,14 +314,16 @@ export function DOMSplitHandler(props: {
         }
       });
 
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
       $hover_zone.addEventListener("pointerdown", function (event: PointerEvent) {
         const $splitView = $hover_zone.closest("[data-split-view]") as HTMLElement;
         if ($splitView) {
           setupDragResize($hover_zone, $splitView, elm, event);
         }
       });
+
+      const $fragment = box$.methods.render(elm.children);
+      box$.methods.setupEventListener(elm.events);
+      $elm.appendChild($line);
       $elm.appendChild($hover_zone);
       $elm.appendChild($fragment);
 
@@ -323,6 +332,7 @@ export function DOMSplitHandler(props: {
     hydrate(elm: TimelessElement, $elm: HTMLDivElement) {
       box$.methods.set$elm($elm);
       box$.methods.setupEventListener(elm.events);
+      $elm.style.zIndex = "2";
     },
   };
 }

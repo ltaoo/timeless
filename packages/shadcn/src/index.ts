@@ -2,7 +2,7 @@ import { registerIcons } from "@timeless/timeless";
 import { iconRegistry } from "@timeless/svg/asn/registry";
 
 import { Input } from "./modules/input";
-import { FileInput } from "./modules/file-picker";
+import { FileDropZone, FileInput } from "./modules/file-picker";
 import { NumberInput } from "./modules/number-input";
 import { Textarea } from "./modules/textarea";
 import { Label } from "./modules/label";
@@ -116,6 +116,7 @@ export * as ui from "@timeless/ui-vm";
 export {
   Input,
   FileInput,
+  FileDropZone,
   NumberInput,
   Textarea,
   Label,

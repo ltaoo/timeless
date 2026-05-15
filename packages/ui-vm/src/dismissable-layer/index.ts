@@ -10,10 +10,19 @@ enum Events {
 }
 
 type TheTypesOfEvents = {
-  [Events.Dismiss]: void;
-  [Events.PointerDownOutside]: void;
+  [Events.Dismiss]: PointerEvent | undefined;
+  [Events.PointerDownOutside]: PointerEvent | undefined;
   [Events.FocusOutside]: void;
-  [Events.InteractOutside]: void;
+  [Events.InteractOutside]: PointerEvent | undefined;
+};
+
+type RectLike = {
+  x?: number;
+  y?: number;
+  left?: number;
+  top?: number;
+  width: number;
+  height: number;
 };
 
 let idCounter = 0;
@@ -28,9 +37,8 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
 
   readonly id: string;
   private layerManager: LayerManager;
-  private getRect:
-    | (() => { x: number; y: number; width: number; height: number })
-    | null = null;
+  private getRect: (() => RectLike | null | undefined) | null = null;
+  private branches: Array<() => RectLike | null | undefined> = [];
   private registered = false;
 
   constructor(
@@ -48,10 +56,33 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
    * 设置层的位置信息（用于 containsPoint 检测）
    * 在层挂载时调用
    */
-  setRect(
-    getRect: () => { x: number; y: number; width: number; height: number },
-  ) {
+  setRect(getRect: () => RectLike | null | undefined) {
     this.getRect = getRect;
+  }
+
+  addBranch(getRect: () => RectLike | null | undefined) {
+    this.branches.push(getRect);
+    return () => {
+      const index = this.branches.indexOf(getRect);
+      if (index !== -1) {
+        this.branches.splice(index, 1);
+      }
+    };
+  }
+
+  private rectContainsPoint(
+    rect: RectLike | null | undefined,
+    x: number,
+    y: number,
+  ) {
+    if (!rect) {
+      return false;
+    }
+    const left = rect.left ?? rect.x ?? 0;
+    const top = rect.top ?? rect.y ?? 0;
+    return (
+      x >= left && x <= left + rect.width && y >= top && y <= top + rect.height
+    );
   }
 
   /**
@@ -66,21 +97,17 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
     const layer: Layer = {
       id: this.id,
       containsPoint: (x: number, y: number) => {
-        if (!this.getRect) {
-          return false;
+        if (this.getRect && this.rectContainsPoint(this.getRect(), x, y)) {
+          return true;
         }
-        const rect = this.getRect();
-        return (
-          x >= rect.x &&
-          x <= rect.x + rect.width &&
-          y >= rect.y &&
-          y <= rect.y + rect.height
+        return this.branches.some((getRect) =>
+          this.rectContainsPoint(getRect(), x, y),
         );
       },
-      dismiss: () => {
-        this.emit(Events.PointerDownOutside);
-        this.emit(Events.InteractOutside);
-        this.emit(Events.Dismiss);
+      dismiss: (event?: PointerEvent) => {
+        this.emit(Events.PointerDownOutside, event);
+        this.emit(Events.InteractOutside, event);
+        this.emit(Events.Dismiss, event);
       },
     };
 

@@ -58,11 +58,6 @@ export function Dialog(
       View(
         {
           class: "fixed inset-0 z-50 flex items-center justify-center p-4",
-          onClick(e: Event) {
-            if (e.target === e.currentTarget && store.closeable) {
-              store.hide();
-            }
-          },
         },
         [
           View(
@@ -87,7 +82,7 @@ export function Dialog(
                   store,
                   class: computed(presence_state_, (d) => {
                     const baseClass =
-                      "relative w-full max-w-sm grid gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none transform-gpu";
+                      "relative w-full grid gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none transform-gpu";
                     const enterClass = d.enter
                       ? "animate-in fill-mode-both fade-in-0 zoom-in-95 slide-in-from-top-2 duration-120 ease-out"
                       : "";

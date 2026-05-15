@@ -56,7 +56,7 @@ export function clearIcons(): void {
 }
 
 export function getIconRegistry(): IconRegistry {
-  logger.log("getIconRegistry", iconRegistry);
+  // logger.log("getIconRegistry", iconRegistry);
   return iconRegistry;
 }
 

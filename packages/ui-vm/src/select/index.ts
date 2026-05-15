@@ -707,6 +707,17 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
       const is_first = idx === 0;
       const is_last = idx === this.options.length - 1;
       const offset_top = idx * data.height + data.offsetTop;
+      // The viewport mounts before items exist, so its rect has stale
+      // dimensions (contentHeight=0, height=0). Estimate from the first
+      // item's measurements so adjustContentPositionWithOffsetTop sees
+      // a realistic full_content_height.
+      const viewport_padding = data.offsetTop;
+      const estimated_scroll_height =
+        this.options.length * data.height + viewport_padding * 2;
+      this.popper$.viewport$.rect.contentHeight = estimated_scroll_height;
+      this.popper$.viewport$.rect.height = estimated_scroll_height;
+      this.popper$.viewport$.rect.paddingTop = viewport_padding;
+      this.popper$.viewport$.rect.paddingBottom = viewport_padding;
       logger.log(
         "[]before alignSpecialItem",
         selected_item$.label,

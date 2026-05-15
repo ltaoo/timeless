@@ -46,12 +46,12 @@ export function DOMIcon(props: {
       //   .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       //   .join("");
       const asn_node = getIconRegistry()[pascal_name];
-      console.log(
-        "[]icon - render pascal_name",
-        pascal_name,
-        getIconRegistry(),
-        asn_node,
-      );
+      // console.log(
+      //   "[]icon - render pascal_name",
+      //   pascal_name,
+      //   getIconRegistry(),
+      //   asn_node,
+      // );
       if (!asn_node) {
         $elm = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         $elm.setAttribute("width", String(elm.state.size || 24));

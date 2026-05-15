@@ -3,8 +3,13 @@ import {
   ViewProps,
   ViewChildren,
   Portal as NativePortal,
+  ListenerManager,
 } from "@timeless/timeless";
-import { DialogCore } from "@timeless/ui-vm";
+import {
+  DialogCore,
+  DismissableLayerCore,
+  initGlobalPointerListener,
+} from "@timeless/ui-vm";
 
 import { Presence } from "./presence";
 
@@ -35,11 +40,6 @@ export function Overlay(
   return View(
     {
       ...rest,
-      onClick() {
-        if (store.closeable) {
-          store.hide();
-        }
-      },
     },
     children,
   );
@@ -50,7 +50,37 @@ export function Content(
   children?: ViewChildren,
 ) {
   const { store, ...rest } = props;
-  return View(rest, children);
+  const listener$ = ListenerManager();
+  const dismissableLayer$ = new DismissableLayerCore();
+
+  initGlobalPointerListener();
+
+  return View(
+    {
+      ...rest,
+      onMounted(event) {
+        const $elm = event.target.get$elm();
+        dismissableLayer$.setRect(() => $elm.getBoundingClientRect());
+        listener$.add(
+          dismissableLayer$.onDismiss(() => {
+            if (store.closeable) {
+              dismissableLayer$.unregister();
+              store.hide();
+            }
+          }),
+        );
+        dismissableLayer$.register();
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return () => {
+          dismissableLayer$.unregister();
+          listener$.destroy();
+        };
+      },
+    },
+    children,
+  );
 }
 
 export function Header(

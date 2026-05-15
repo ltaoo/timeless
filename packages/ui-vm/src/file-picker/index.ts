@@ -144,6 +144,41 @@ export class FilePickerCore extends BaseDomain<TheTypesOfEvents> {
     this.setValue(files);
   }
 
+  handleDrop(dataTransfer: DataTransfer) {
+    const files = this.filterFiles(dataTransfer);
+    if (files.length === 0) {
+      return;
+    }
+    this.setValue(files);
+  }
+
+  filterFiles(dataTransfer: DataTransfer): FileList {
+    const acceptValue = this.accept;
+    if (!acceptValue) {
+      return dataTransfer.files;
+    }
+    const acceptTypes = acceptValue
+      .split(",")
+      .map((t) => t.trim().toLowerCase());
+    const dt = new DataTransfer();
+    for (let i = 0; i < dataTransfer.files.length; i++) {
+      const file = dataTransfer.files[i];
+      const matched = acceptTypes.some((type) => {
+        if (type.startsWith(".")) {
+          return file.name.toLowerCase().endsWith(type);
+        }
+        if (type.endsWith("/*")) {
+          return file.type.startsWith(type.slice(0, -1));
+        }
+        return file.type === type;
+      });
+      if (matched) {
+        dt.items.add(file);
+      }
+    }
+    return dt.files;
+  }
+
   setValue(value: FileList | null, extra: Partial<{ silence: boolean }> = {}) {
     this.value = value;
     if (!extra.silence) {

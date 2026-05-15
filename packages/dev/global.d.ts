@@ -17278,6 +17278,7 @@ declare const FieldLegend: typeof import("@timeless/shadcn").FieldLegend;
 declare const FieldPrimitive: typeof import("@timeless/shadcn").FieldPrimitive;
 declare const FieldSeparator: typeof import("@timeless/shadcn").FieldSeparator;
 declare const FieldSet: typeof import("@timeless/shadcn").FieldSet;
+declare const FileDropZone: typeof import("@timeless/shadcn").FileDropZone;
 declare const FileInput: typeof import("@timeless/shadcn").FileInput;
 declare const FilePickerPrimitive: typeof import("@timeless/shadcn").FilePickerPrimitive;
 declare const FlowBackground: typeof import("@timeless/shadcn").FlowBackground;

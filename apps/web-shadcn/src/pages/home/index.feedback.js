@@ -106,6 +106,59 @@ export default function FeedbackView() {
           ),
           TestDialog({ store: dialog$ }),
         ]),
+        Item("With Select", [
+          (() => {
+            const selectInDialog$ = new Timeless.ui.DialogCore({
+              title: "Dialog With Select",
+            });
+            const select$ = new Timeless.ui.SelectCore({
+              defaultValue: null,
+              placeholder: "请选择水果",
+              options: [
+                new Timeless.ui.SelectItemCore({
+                  value: "apple",
+                  label: "苹果",
+                }),
+                new Timeless.ui.SelectItemCore({
+                  value: "banana",
+                  label: "香蕉",
+                }),
+                new Timeless.ui.SelectItemCore({
+                  value: "orange",
+                  label: "橙子",
+                }),
+                new Timeless.ui.SelectItemCore({
+                  value: "grape",
+                  label: "葡萄",
+                }),
+                new Timeless.ui.SelectItemCore({
+                  value: "watermelon",
+                  label: "西瓜",
+                }),
+              ],
+            });
+            return View({}, [
+              Button(
+                {
+                  store: new Timeless.ui.ButtonCore({
+                    onClick() {
+                      selectInDialog$.show();
+                    },
+                  }),
+                },
+                ["Open Dialog with Select"],
+              ),
+              Dialog({ store: selectInDialog$ }, [
+                View({ class: "space-y-4" }, [
+                  View({ class: "text-sm text-zinc-500" }, [
+                    "Select dropdown should position correctly inside the dialog.",
+                  ]),
+                  Select({ store: select$ }),
+                ]),
+              ]),
+            ]);
+          })(),
+        ]),
         Item("setViewport({ getRect })", [
           View(
             {

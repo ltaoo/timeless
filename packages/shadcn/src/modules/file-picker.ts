@@ -6,10 +6,147 @@ import {
   refobj,
   View,
   Show,
+  Text,
   ViewProps,
+  ViewChildren,
 } from "@timeless/timeless";
 import { FilePickerPrimitive } from "@timeless/ui-primitive";
 import { FilePickerCore } from "@timeless/ui-vm";
+
+export function FileDropZone(
+  props: ViewProps & {
+    store: FilePickerCore;
+    tip?: string;
+  },
+  children?: ViewChildren,
+) {
+  const { store, tip, ...rest } = props;
+  const state_ = refobj(store.state);
+
+  store.onStateChange((v) => {
+    state_.as(v);
+  });
+
+  const hasValue = computed(state_, (d) => d.value && d.value.length > 0);
+  const isLoading = computed(state_, (d) => d.loading || false);
+
+  const fileNames = computed(state_, (d) => {
+    if (!d.value || d.value.length === 0) {
+      return "";
+    }
+    if (d.value.length === 1) {
+      return d.value[0].name;
+    }
+    return `${d.value.length} files selected`;
+  });
+
+  return FilePickerPrimitive.Root(
+    { store, class: classNames(["t-file-dropzone relative", rest.class]) },
+    [
+      // Hidden native input for click-to-select
+      FilePickerPrimitive.Input({
+        store,
+        class: "sr-only",
+      }),
+      FilePickerPrimitive.DropZone(
+        {
+          store,
+          class: classNames([
+            "flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input px-6 py-8 cursor-pointer transition-colors hover:border-ring hover:bg-accent/50 data-[dragging]:border-ring data-[dragging]:bg-accent/50",
+            computed(isLoading, (t) =>
+              t ? "pointer-events-none opacity-50" : "",
+            ),
+          ]),
+        },
+        [
+          Show({
+            when: combine(
+              { hasValue, isLoading },
+              (t) => !t.hasValue && !t.isLoading,
+            ),
+            ok() {
+              return [
+                View(
+                  {
+                    class:
+                      "flex flex-col items-center justify-center gap-2 text-muted-foreground",
+                  },
+                  [
+                    Icon({
+                      name: "upload",
+                      size: 24,
+                      class: "text-muted-foreground/60",
+                    }),
+                    View({ class: "text-sm" }, [
+                      Text(tip || "Drag & drop files here, or click to select"),
+                    ]),
+                    ...(store.accept
+                      ? [
+                          View({ class: "text-xs text-muted-foreground/60" }, [
+                            Text(store.accept),
+                          ]),
+                        ]
+                      : []),
+                  ],
+                ),
+              ];
+            },
+          }),
+          Show({
+            when: combine(
+              { hasValue, isLoading },
+              (t) => t.hasValue && !t.isLoading,
+            ),
+            ok() {
+              return [
+                View(
+                  {
+                    class: "flex items-center gap-2 text-sm text-foreground",
+                  },
+                  [
+                    Icon({
+                      name: "file",
+                      size: 16,
+                      class: "text-muted-foreground",
+                    }),
+                    View({ class: "truncate" }, [Text(fileNames)]),
+                    FilePickerPrimitive.Clear(
+                      {
+                        store,
+                        class:
+                          "flex items-center justify-center cursor-pointer text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
+                      },
+                      [Icon({ name: "circle-x", size: 16 })],
+                    ),
+                  ],
+                ),
+              ];
+            },
+          }),
+          Show({
+            when: isLoading,
+            ok() {
+              return [
+                View(
+                  {
+                    class:
+                      "flex items-center gap-2 text-sm text-muted-foreground",
+                  },
+                  [
+                    View({ class: "h-4 w-4 animate-spin" }, [
+                      Icon({ name: "loader" }),
+                    ]),
+                    View({}, [Text("Uploading...")]),
+                  ],
+                ),
+              ];
+            },
+          }),
+        ],
+      ),
+    ],
+  );
+}
 
 export function FileInput(
   props: ViewProps & {

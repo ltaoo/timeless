@@ -12,7 +12,7 @@ import { optimize } from "svgo";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const SVG_DIR = join(__dirname, "../src");
+const SVG_DIR = join(__dirname, "../src/icons");
 const ASN_DIR = join(__dirname, "../src/asn");
 
 function ensureDir(dir) {
@@ -179,14 +179,64 @@ function main() {
     processIcon(name, content);
   }
 
-  const indexContent = svgFiles
-    .map((f) => {
-      const name = f.replace(".svg", "");
-      return `export { default as ${toPascalCase(name)} } from "./${name}";`;
+  const iconNames = svgFiles.map((f) => f.replace(".svg", ""));
+
+  const asnIndexContent = iconNames
+    .map(
+      (name) => `export { default as ${toPascalCase(name)} } from "./${name}";`,
+    )
+    .join("\n");
+  writeFileSync(join(ASN_DIR, "index.ts"), asnIndexContent);
+
+  const asnRegistryImports = iconNames
+    .map((name) => {
+      const pascalName = toPascalCase(name);
+      const varName = pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
+      return `import ${varName} from "./${name}";`;
     })
     .join("\n");
 
-  writeFileSync(join(ASN_DIR, "index.ts"), indexContent);
+  const asnRegistryContent = `${asnRegistryImports}
+
+export const iconRegistry = {
+${iconNames
+  .map((name) => {
+    const pascalName = toPascalCase(name);
+    const varName = pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
+    const key = name.replace(/-\d+$/, (m) => m.replace("-", ""));
+    return `  "${key}": ${varName},`;
+  })
+  .join("\n")}
+};
+`;
+  writeFileSync(join(ASN_DIR, "registry.ts"), asnRegistryContent);
+
+  const srcIndexContent = `export * from "./asn/index";
+`;
+  writeFileSync(join(__dirname, "../src/index.ts"), srcIndexContent);
+
+  const srcRegistryImports = iconNames
+    .map((name) => {
+      const pascalName = toPascalCase(name);
+      const varName = pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
+      return `import ${varName} from "./asn/${name}";`;
+    })
+    .join("\n");
+
+  const srcRegistryContent = `${srcRegistryImports}
+
+export const iconRegistry = {
+${iconNames
+  .map((name) => {
+    const pascalName = toPascalCase(name);
+    const varName = pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
+    const key = name.replace(/-\d+$/, (m) => m.replace("-", ""));
+    return `  "${key}": ${varName},`;
+  })
+  .join("\n")}
+};
+`;
+  writeFileSync(join(__dirname, "../src/registry.ts"), srcRegistryContent);
 }
 
 function toPascalCase(str) {

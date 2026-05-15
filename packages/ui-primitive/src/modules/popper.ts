@@ -11,17 +11,13 @@ import {
 } from "@timeless/timeless";
 import {
   PopperCore,
-  getGlobalLayerManager,
+  DismissableLayerCore,
   initGlobalPointerListener,
-  Layer,
 } from "@timeless/ui-vm";
 
 import * as ScrollViewPrimitive from "@/modules/scroll-view";
 
 const logger = Logger({ prefix: "ui-primitive", scope: "popper" });
-
-const platform = getPlatform();
-let layer_id_counter = 0;
 
 export function Root(
   props: ViewProps & { store: PopperCore },
@@ -39,6 +35,7 @@ export function Anchor(
     {
       ...rest,
       onMounted(event) {
+        store.platform = getPlatform();
         const $anchor = event.target.get$children()[0];
         console.log("[primitive]popper Anchor mounted - ", $anchor);
         store.setReference({
@@ -89,7 +86,7 @@ export function Content(
         props.style,
         computed(state_, (t) => {
           if (store.mode === "item-aligned") {
-            return {
+            const next_style = {
               "z-index": zIndex,
               display: "flex",
               "flex-direction": "column",
@@ -119,6 +116,22 @@ export function Content(
               //     : undefined,
               margin: t.margin !== undefined ? `${t.margin}px 0` : undefined,
             };
+            logger.log("Content item-aligned style computed", {
+              state: {
+                x: t.x,
+                y: t.y,
+                top: t.top,
+                bottom: t.bottom,
+                height: t.height,
+                minWidth: t.minWidth,
+                margin: t.margin,
+                isPlaced: t.isPlaced,
+                placement: t.placement,
+                maxHeight: t.maxHeight,
+              },
+              style: next_style,
+            });
+            return next_style;
           }
           return {
             "z-index": zIndex,
@@ -137,9 +150,9 @@ export function Content(
         }),
       ]),
       onMounted(event) {
+        store.platform = getPlatform();
         const $elm = event.target;
-        const layer_id = `popper-${++layer_id_counter}`;
-        const layer$ = getGlobalLayerManager();
+        const dismissableLayer$ = new DismissableLayerCore();
         // logger.log("the floating mounted", $elm.getBoundingClientRect());
         store.setFloating({
           $el: $elm,
@@ -149,6 +162,18 @@ export function Content(
         });
         listener$.add(
           store.onStateChange((v) => {
+            logger.log("Content received StateChange", {
+              mode: store.mode,
+              height: v.height,
+              top: v.top,
+              bottom: v.bottom,
+              x: v.x,
+              y: v.y,
+              minWidth: v.minWidth,
+              margin: v.margin,
+              isPlaced: v.isPlaced,
+              placement: v.placement,
+            });
             state_.as(v);
           }),
         );
@@ -159,35 +184,16 @@ export function Content(
         );
         // 注册到 LayerManager
         if (onDismiss) {
-          const layer: Layer = {
-            id: layer_id,
-            containsPoint(x: number, y: number) {
-              const $anchor_el = store.reference;
-              if ($anchor_el) {
-                const anchor_rect = $anchor_el.getRect();
-                const in_anchor =
-                  x >= anchor_rect.left &&
-                  x <= anchor_rect.right &&
-                  y >= anchor_rect.top &&
-                  y <= anchor_rect.bottom;
-                if (in_anchor) {
-                  return true;
-                }
-              }
-              const rect = $elm.getBoundingClientRect();
-              return (
-                x >= rect.left &&
-                x <= rect.right &&
-                y >= rect.top &&
-                y <= rect.bottom
-              );
-            },
-            dismiss() {
+          dismissableLayer$.setRect(() => $elm.getBoundingClientRect());
+          dismissableLayer$.addBranch(() => store.reference?.getRect());
+          listener$.add(
+            dismissableLayer$.onDismiss(() => {
               logger.log("dismiss popper with layer click");
+              dismissableLayer$.unregister();
               onDismiss();
-            },
-          };
-          layer$.register(layer);
+            }),
+          );
+          dismissableLayer$.register();
         }
         if (rest.onMounted) {
           listener$.add(rest.onMounted(event));
@@ -195,7 +201,7 @@ export function Content(
         return () => {
           store.reset();
           listener$.destroy();
-          layer$.unregister(layer_id);
+          dismissableLayer$.unregister();
         };
       },
     },

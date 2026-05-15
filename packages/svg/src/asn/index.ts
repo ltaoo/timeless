@@ -44,4 +44,5 @@ export { default as Sun } from "./sun";
 export { default as Trash2 } from "./trash-2";
 export { default as Trash } from "./trash";
 export { default as Undo2 } from "./undo-2";
+export { default as Upload } from "./upload";
 export { default as X } from "./x";

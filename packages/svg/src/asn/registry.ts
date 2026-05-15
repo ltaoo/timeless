@@ -1,97 +1,99 @@
-import ArrowDownToLine from "./arrow-down-to-line";
-import Bolt from "./bolt";
-import Calendar from "./calendar";
-import Check from "./check";
-import ChevronDown from "./chevron-down";
-import ChevronLeft from "./chevron-left";
-import ChevronRight from "./chevron-right";
-import ChevronUp from "./chevron-up";
-import CircleArrowDown from "./circle-arrow-down";
-import CircleEllipsis from "./circle-ellipsis";
-import CircleX from "./circle-x";
-import ClockArrowDown from "./clock-arrow-down";
-import Clock from "./clock";
-import CloudDownload from "./cloud-download";
-import Download from "./download";
-import EllipsisVertical from "./ellipsis-vertical";
-import Ellipsis from "./ellipsis";
-import FileBox from "./file-box";
-import FileImage from "./file-image";
-import FileLock from "./file-lock";
-import FilePlay from "./file-play";
-import FileSymlink from "./file-symlink";
-import FileVideoCamera from "./file-video-camera";
-import FileVolume from "./file-volume";
-import File from "./file";
-import FolderClosed from "./folder-closed";
-import Folder from "./folder";
-import GitFork from "./git-fork";
-import Grid3x3 from "./grid-3x3";
-import House from "./house";
-import LoaderCircle from "./loader-circle";
-import Loader from "./loader";
-import Menu from "./menu";
-import MessageSquareMore from "./message-square-more";
-import Moon from "./moon";
-import Pause from "./pause";
-import Play from "./play";
-import Plus from "./plus";
-import RefreshCcw from "./refresh-ccw";
-import Rss from "./rss";
-import Search from "./search";
-import SquareArrowDown from "./square-arrow-down";
-import Sun from "./sun";
-import Trash2 from "./trash-2";
-import Trash from "./trash";
-import Undo2 from "./undo-2";
-import X from "./x";
+import arrowDownToLine from "./arrow-down-to-line";
+import bolt from "./bolt";
+import calendar from "./calendar";
+import check from "./check";
+import chevronDown from "./chevron-down";
+import chevronLeft from "./chevron-left";
+import chevronRight from "./chevron-right";
+import chevronUp from "./chevron-up";
+import circleArrowDown from "./circle-arrow-down";
+import circleEllipsis from "./circle-ellipsis";
+import circleX from "./circle-x";
+import clockArrowDown from "./clock-arrow-down";
+import clock from "./clock";
+import cloudDownload from "./cloud-download";
+import download from "./download";
+import ellipsisVertical from "./ellipsis-vertical";
+import ellipsis from "./ellipsis";
+import fileBox from "./file-box";
+import fileImage from "./file-image";
+import fileLock from "./file-lock";
+import filePlay from "./file-play";
+import fileSymlink from "./file-symlink";
+import fileVideoCamera from "./file-video-camera";
+import fileVolume from "./file-volume";
+import file from "./file";
+import folderClosed from "./folder-closed";
+import folder from "./folder";
+import gitFork from "./git-fork";
+import grid3x3 from "./grid-3x3";
+import house from "./house";
+import loaderCircle from "./loader-circle";
+import loader from "./loader";
+import menu from "./menu";
+import messageSquareMore from "./message-square-more";
+import moon from "./moon";
+import pause from "./pause";
+import play from "./play";
+import plus from "./plus";
+import refreshCcw from "./refresh-ccw";
+import rss from "./rss";
+import search from "./search";
+import squareArrowDown from "./square-arrow-down";
+import sun from "./sun";
+import trash2 from "./trash-2";
+import trash from "./trash";
+import undo2 from "./undo-2";
+import upload from "./upload";
+import x from "./x";
 
 export const iconRegistry = {
-  "arrow-down-to-line": ArrowDownToLine,
-  bolt: Bolt,
-  calendar: Calendar,
-  check: Check,
-  "chevron-down": ChevronDown,
-  "chevron-left": ChevronLeft,
-  "chevron-right": ChevronRight,
-  "chevron-up": ChevronUp,
-  "circle-arrow-down": CircleArrowDown,
-  "circle-ellipsis": CircleEllipsis,
-  "circle-x": CircleX,
-  clock: Clock,
-  "clock-arrow-down": ClockArrowDown,
-  "cloud-download": CloudDownload,
-  download: Download,
-  ellipsis: Ellipsis,
-  "ellipsis-vertical": EllipsisVertical,
-  file: File,
-  "file-box": FileBox,
-  "file-image": FileImage,
-  "file-lock": FileLock,
-  "file-play": FilePlay,
-  "file-symlink": FileSymlink,
-  "file-video-camera": FileVideoCamera,
-  "file-volume": FileVolume,
-  folder: Folder,
-  "folder-closed": FolderClosed,
-  "git-fork": GitFork,
-  "grid-3x3": Grid3x3,
-  house: House,
-  loader: Loader,
-  "loader-circle": LoaderCircle,
-  menu: Menu,
-  "message-square-more": MessageSquareMore,
-  moon: Moon,
-  pause: Pause,
-  play: Play,
-  plus: Plus,
-  "refresh-ccw": RefreshCcw,
-  rss: Rss,
-  search: Search,
-  "square-arrow-down": SquareArrowDown,
-  sun: Sun,
-  trash: Trash,
-  "trash-2": Trash2,
-  "undo-2": Undo2,
-  x: X,
+  "arrow-down-to-line": arrowDownToLine,
+  "bolt": bolt,
+  "calendar": calendar,
+  "check": check,
+  "chevron-down": chevronDown,
+  "chevron-left": chevronLeft,
+  "chevron-right": chevronRight,
+  "chevron-up": chevronUp,
+  "circle-arrow-down": circleArrowDown,
+  "circle-ellipsis": circleEllipsis,
+  "circle-x": circleX,
+  "clock-arrow-down": clockArrowDown,
+  "clock": clock,
+  "cloud-download": cloudDownload,
+  "download": download,
+  "ellipsis-vertical": ellipsisVertical,
+  "ellipsis": ellipsis,
+  "file-box": fileBox,
+  "file-image": fileImage,
+  "file-lock": fileLock,
+  "file-play": filePlay,
+  "file-symlink": fileSymlink,
+  "file-video-camera": fileVideoCamera,
+  "file-volume": fileVolume,
+  "file": file,
+  "folder-closed": folderClosed,
+  "folder": folder,
+  "git-fork": gitFork,
+  "grid-3x3": grid3x3,
+  "house": house,
+  "loader-circle": loaderCircle,
+  "loader": loader,
+  "menu": menu,
+  "message-square-more": messageSquareMore,
+  "moon": moon,
+  "pause": pause,
+  "play": play,
+  "plus": plus,
+  "refresh-ccw": refreshCcw,
+  "rss": rss,
+  "search": search,
+  "square-arrow-down": squareArrowDown,
+  "sun": sun,
+  "trash2": trash2,
+  "trash": trash,
+  "undo2": undo2,
+  "upload": upload,
+  "x": x,
 };

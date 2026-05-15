@@ -21,7 +21,7 @@ export interface Layer {
   /** 检查坐标是否在层内（各平台实现不同） */
   containsPoint(x: number, y: number): boolean;
   /** 关闭层 */
-  dismiss(): void;
+  dismiss(event?: PointerEvent): void;
   /** 是否阻止向下传播关闭（可选） */
   preventDismissBelow?: boolean;
 }
@@ -41,6 +41,11 @@ type TheTypesOfEvents = {
 
 export class LayerManager extends BaseDomain<TheTypesOfEvents> {
   private stack: Layer[] = [];
+  private consumedPointerDown: {
+    x: number;
+    y: number;
+    time: number;
+  } | null = null;
 
   /** 注册一个新层（push 到栈顶） */
   register(layer: Layer) {
@@ -94,52 +99,66 @@ export class LayerManager extends BaseDomain<TheTypesOfEvents> {
 
   /**
    * 处理点击/触摸事件
-   * 从栈顶向下检查，关闭不包含点击点的层
+   * 只允许栈顶层消费一次 outside 交互，避免子层关闭后父层继续关闭。
    */
-  handlePointerDown(x: number, y: number) {
-    console.log("[LayerManager] handlePointerDown", {
-      x,
-      y,
-      stackSize: this.stack.length,
-    });
+  handlePointerDown(eventOrX: PointerEvent | number, y?: number) {
+    const event = typeof eventOrX === "number" ? undefined : eventOrX;
+    const x = typeof eventOrX === "number" ? eventOrX : eventOrX.clientX;
+    const pointY = typeof eventOrX === "number" ? y || 0 : eventOrX.clientY;
 
     if (this.stack.length === 0) {
       return;
     }
 
-    // 先收集需要关闭的层（避免遍历时修改栈）
-    const layersToDismiss: Layer[] = [];
-
-    // 从栈顶向下遍历
-    for (let i = this.stack.length - 1; i >= 0; i--) {
-      const layer = this.stack[i];
-      const contains = layer.containsPoint(x, y);
-      console.log("[LayerManager] checking layer", { id: layer.id, contains });
-
-      if (contains) {
-        // 点击在这层内部，停止检查
-        // 这层及其下面的所有层都保持打开
-        break;
-      } else {
-        // 点击在这层外部，标记为需要关闭
-        layersToDismiss.push(layer);
-      }
+    const layer = this.getTopLayer();
+    if (!layer) {
+      return;
     }
 
-    console.log(
-      "[LayerManager] layers to dismiss:",
-      layersToDismiss.map((l) => l.id),
-    );
-
-    // 统一关闭（从栈顶到栈底的顺序）
-    for (const layer of layersToDismiss) {
-      layer.dismiss();
+    if (layer.containsPoint(x, pointY)) {
+      return;
     }
 
-    // 如果所有层都被检查完且都在外部，发出事件
+    this.markPointerDownConsumed(x, pointY);
+    layer.dismiss(event);
+
     if (this.stack.length === 0) {
-      this.emit(Events.PointerDownOutside, { x, y });
+      this.emit(Events.PointerDownOutside, { x, y: pointY });
     }
+  }
+
+  private markPointerDownConsumed(x: number, y: number) {
+    this.consumedPointerDown = {
+      x,
+      y,
+      time: Date.now(),
+    };
+  }
+
+  /**
+   * 判断当前 click 是否紧跟一次已被子层消费的 pointerdown。
+   * pointerdown 和 click 是两个不同事件，因此用坐标和短时间窗口关联。
+   */
+  isRecentlyConsumedEvent(event: MouseEvent | PointerEvent | Event) {
+    if (typeof MouseEvent === "undefined" || !(event instanceof MouseEvent)) {
+      return false;
+    }
+    const consumed = this.consumedPointerDown;
+    if (!consumed) {
+      return false;
+    }
+    const isExpired = Date.now() - consumed.time > 800;
+    if (isExpired) {
+      this.consumedPointerDown = null;
+      return false;
+    }
+    const matched =
+      Math.abs(event.clientX - consumed.x) <= 2 &&
+      Math.abs(event.clientY - consumed.y) <= 2;
+    if (matched) {
+      this.consumedPointerDown = null;
+    }
+    return matched;
   }
 
   /** 关闭所有层 */
@@ -203,9 +222,13 @@ export function initGlobalPointerListener() {
 
   const layer$ = getGlobalLayerManager();
 
-  document.addEventListener("pointerdown", (e) => {
-    layer$.handlePointerDown(e.clientX, e.clientY);
-  });
+  document.addEventListener(
+    "pointerdown",
+    (e) => {
+      layer$.handlePointerDown(e);
+    },
+    true,
+  );
 }
 
 /** 用于测试：重置全局实例 */

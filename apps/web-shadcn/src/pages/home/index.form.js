@@ -87,6 +87,42 @@ export default function FormView() {
           }),
         ]),
       ]),
+      Section("FileDropZone", [
+        Item("Default", [
+          FileDropZone({
+            store: new Timeless.ui.FilePickerCore({
+              accept: "image/*",
+              onChange(e) {
+                console.log("File dropped:", e);
+              },
+            }),
+          }),
+        ]),
+        Item("Multiple", [
+          FileDropZone({
+            store: new Timeless.ui.FilePickerCore({
+              accept: ".pdf,.doc,.docx",
+              multiple: true,
+              onChange(e) {
+                console.log("Files dropped:", e);
+              },
+            }),
+            tip: "拖拽文件到此处，或点击选择",
+          }),
+        ]),
+        Item("Custom Content", [
+          FileDropZone({
+            store: new Timeless.ui.FilePickerCore({
+              multiple: true,
+              onChange(e) {
+                console.log("Files dropped:", e);
+              },
+            }),
+            tip: "支持所有文件类型",
+            class: "w-full",
+          }),
+        ]),
+      ]),
       Section("NumberInput", [
         Item("Default", [
           NumberInput({

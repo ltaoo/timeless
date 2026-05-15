@@ -104,6 +104,23 @@ type PopperState = {
     y?: number;
   } | null;
 };
+type ItemAlignedAdjustmentData = {
+  selectedItem: {
+    offsetTop: number;
+    offsetHeight: number;
+    bottom: number;
+    isFirst?: boolean;
+    isLast?: boolean;
+  };
+  content?: {
+    borderTopWidth: number;
+    paddingTop: number;
+    borderBottomWidth: number;
+    paddingBottom: number;
+    clientHeight: number;
+  };
+};
+
 export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   unique_id = "PopperCore";
   debug = true;
@@ -149,6 +166,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     y: number;
   };
   _prev_scroll_top = 0;
+  _pending_item_aligned_adjustment: ItemAlignedAdjustmentData | null = null;
   container: Node | null = null;
   arrow: {
     width: number;
@@ -244,6 +262,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.reference = reference;
     this.state.reference = !!reference;
     this.place();
+    this.flushPendingItemAlignedAdjustment();
     this.emit(Events.ReferenceMounted, reference);
     this.emit(Events.StateChange, { ...this.state });
   }
@@ -290,6 +309,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     if (this.mode === "popper") {
       this.place();
     }
+    this.flushPendingItemAlignedAdjustment();
     this.emit(Events.FloatingMounted, floating);
   }
   /** 箭头加载完成 */
@@ -333,22 +353,22 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     // this.viewport$.rect.offsetTop = offsetTop;
   }
   /** 设置 item-aligned 模式下选中项的偏移量 */
-  adjustContentPositionWithOffsetTop(data: {
-    selectedItem: {
-      offsetTop: number;
-      offsetHeight: number;
-      bottom: number;
-      isFirst?: boolean;
-      isLast?: boolean;
-    };
-    content?: {
-      borderTopWidth: number;
-      paddingTop: number;
-      borderBottomWidth: number;
-      paddingBottom: number;
-      clientHeight: number;
-    };
-  }) {
+  flushPendingItemAlignedAdjustment() {
+    if (
+      this.mode !== "item-aligned" ||
+      !this._pending_item_aligned_adjustment ||
+      !this.viewport$ ||
+      !this.reference ||
+      !this.floating
+    ) {
+      return;
+    }
+    this.adjustContentPositionWithOffsetTop(
+      this._pending_item_aligned_adjustment,
+    );
+  }
+  adjustContentPositionWithOffsetTop(data: ItemAlignedAdjustmentData) {
+    this._pending_item_aligned_adjustment = data;
     if (!this.viewport$ || !this.reference || !this.floating) {
       return;
     }
@@ -516,9 +536,46 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.state.maxHeight = available_height;
     this.state.viewportOffsetTop = viewport_scroll_top;
     this._prev_scroll_top = viewport_scroll_top ?? 0;
+    logger.log("item-aligned computed state", {
+      referenceRect: reference_rect,
+      floatingRect: floating_rect,
+      windowSize: window_size,
+      content,
+      viewport: viewport_data,
+      selectedItem: {
+        offsetTop: item_offset_top,
+        offsetHeight,
+        bottom,
+        isFirst,
+        isLast,
+      },
+      derived: {
+        availableHeight: available_height,
+        fullContentHeight: full_content_height,
+        minContentHeight,
+        topEdgeToTriggerMiddle: top_edge_to_trigger_middle,
+        triggerMiddleToBottomEdge: trigger_middle_to_bottom_edge,
+        contentTopToItemMiddle: content_top_to_item_middle,
+        itemMiddleToContentBottom: item_middle_to_content_bottom,
+        willAlignWithoutTopOverflow,
+      },
+      nextState: {
+        x: this.state.x,
+        y: this.state.y,
+        top: this.state.top,
+        bottom: this.state.bottom,
+        height: this.state.height,
+        minWidth: this.state.minWidth,
+        margin: this.state.margin,
+        placement: this.state.placement,
+        maxHeight: this.state.maxHeight,
+        viewportOffsetTop: this.state.viewportOffsetTop,
+      },
+    });
 
     // 先出现
     this.state.isPlaced = true;
+    logger.log("item-aligned emit StateChange", { ...this.state });
     this.emit(Events.StateChange, { ...this.state });
 
     // 1s 后滚动到正确的位置
@@ -739,6 +796,10 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.state.canScrollUp = false;
     this.state.x = 0;
     this.state.y = 0;
+    this.state.top = undefined;
+    this.state.bottom = undefined;
+    this.state.height = 0;
+    this._pending_item_aligned_adjustment = null;
     if (this._scrolling_subscriber) {
       this._scrolling_subscriber();
       this._scrolling_subscriber = null;

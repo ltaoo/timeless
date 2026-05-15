@@ -69,3 +69,59 @@ describe("Popper platform injection", () => {
     expect(popper.platform.getViewportSize()).toEqual({ width: 1024, height: 768 });
   });
 });
+
+describe("Popper item-aligned placement", () => {
+  it("应在 floating 后挂载时补算已到达的 item-aligned 定位", () => {
+    const popper = new PopperCore({
+      mode: "item-aligned",
+      platform: createPlatform({ width: 1024, height: 768 }),
+    });
+
+    popper.viewport$.rect.contentHeight = 168;
+    popper.viewport$.rect.height = 168;
+    popper.viewport$.rect.offsetTop = 0;
+    popper.viewport$.rect.paddingTop = 4;
+    popper.viewport$.rect.paddingBottom = 4;
+
+    popper.adjustContentPositionWithOffsetTop({
+      selectedItem: {
+        offsetTop: 4,
+        offsetHeight: 32,
+        bottom: 36,
+        isFirst: true,
+        isLast: false,
+      },
+    });
+
+    expect(popper.state.height).toBe(0);
+
+    popper.setReference({
+      getRect: () => ({
+        x: 100,
+        y: 100,
+        left: 100,
+        top: 100,
+        right: 260,
+        bottom: 132,
+        width: 160,
+        height: 32,
+      }),
+    });
+    popper.setFloating({
+      getRect: () => ({
+        x: 0,
+        y: 0,
+        left: 0,
+        top: 0,
+        right: 180,
+        bottom: 168,
+        width: 180,
+        height: 168,
+      }),
+    });
+
+    expect(popper.state.height).toBeGreaterThan(0);
+    expect(popper.state.minWidth).toBe(159);
+    expect(popper.state.isPlaced).toBe(true);
+  });
+});
