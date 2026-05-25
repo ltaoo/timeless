@@ -127,6 +127,23 @@ export function SplitView(props: SplitViewProps) {
       if (rest.onMounted) {
         rest.onMounted(event);
       }
+      for (let i = 0; i < children.length; i += 1) {
+        const child = children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (rest.beforeUnmounted) {
+        rest.beforeUnmounted();
+      }
+      for (let i = 0; i < children.length; i += 1) {
+        const child = children[i];
+        if (isElement(child) && child.beforeUnmounted) {
+          child.beforeUnmounted();
+        }
+      }
     },
     onUnmounted() {
       if (rest.onUnmounted) {
@@ -217,6 +234,23 @@ export function SplitPane(props: SplitPaneProps, children?: ViewChildren) {
       if (rest.onMounted) {
         rest.onMounted(event);
       }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (rest.beforeUnmounted) {
+        rest.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.beforeUnmounted) {
+          child.beforeUnmounted();
+        }
+      }
     },
     onUnmounted() {
       if (rest.onUnmounted) {
@@ -298,6 +332,23 @@ export function SplitHandler(
     onMounted(event: MountedEvent) {
       if (rest.onMounted) {
         rest.onMounted(event);
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.onMounted) {
+          child.onMounted({ target: child.$elm });
+        }
+      }
+    },
+    beforeUnmounted() {
+      if (rest.beforeUnmounted) {
+        rest.beforeUnmounted();
+      }
+      for (let i = 0; i < state.children.length; i += 1) {
+        const child = state.children[i];
+        if (isElement(child) && child.beforeUnmounted) {
+          child.beforeUnmounted();
+        }
       }
     },
     onUnmounted() {

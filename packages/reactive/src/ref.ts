@@ -4,12 +4,11 @@ import {
   Ref,
   Subscriber,
   SubscriberWithId,
-  TimelessRef,
   DepInfo,
 } from "./types";
 import { __hmr_get_hot } from "./hmr";
 
-export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
+export function ref<T = any>(v: T, __hmr_key?: string): Ref<T> {
   const hot = __hmr_key ? __hmr_get_hot() : null;
 
   if (hot?.data?.__hmr_refs?.[__hmr_key!]) {
@@ -179,5 +178,5 @@ export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T> {
     hot.data.__hmr_refs[__hmr_key] = r as any;
   }
 
-  return r as TimelessRef<T>;
+  return r as Ref<T>;
 }

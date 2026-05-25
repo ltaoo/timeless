@@ -8,35 +8,44 @@ enum Events {
   Blur,
   Clear,
   Click,
+  Reject,
 }
+
+type TFile = { name: string; kind: string; type: string };
+
+type RejectInfo = {
+  files: TFile[];
+  accept: string;
+};
 
 type TheTypesOfEvents = {
   [Events.Mounted]: void;
-  [Events.Change]: FileList | null;
-  [Events.Blur]: FileList | null;
+  [Events.Change]: TFile[] | null;
+  [Events.Blur]: TFile[] | null;
   [Events.Focus]: void;
   [Events.Clear]: void;
   [Events.Click]: { x: number; y: number };
   [Events.StateChange]: FilePickerState;
+  [Events.Reject]: RejectInfo;
 };
 
 export type FilePickerCoreProps = {
   name?: string;
   disabled?: boolean;
-  defaultValue?: FileList | null;
+  defaultValue?: TFile[] | null;
   placeholder?: string;
   accept?: string;
   multiple?: boolean;
   capture?: string;
   autoFocus?: boolean;
-  onChange?: (v: FileList | null) => void;
-  onBlur?: (v: FileList | null) => void;
+  onChange?: (v: TFile[] | null) => void;
+  onBlur?: (v: TFile[] | null) => void;
   onClear?: () => void;
   onMounted?: () => void;
 };
 
 type FilePickerState = {
-  value: FileList | null;
+  value: TFile[] | null;
   placeholder: string;
   disabled: boolean;
   loading: boolean;
@@ -44,12 +53,15 @@ type FilePickerState = {
   accept?: string;
   multiple: boolean;
   autoFocus: boolean;
+  dragging: boolean;
+  invalid: boolean;
+  invalid_files: TFile[];
 };
 
 export class FilePickerCore extends BaseDomain<TheTypesOfEvents> {
   shape = "file-input" as const;
-  defaultValue: FileList | null = null;
-  value: FileList | null = null;
+  defaultValue: TFile[] | null = null;
+  value: TFile[] | null = null;
   placeholder = "";
   disabled = false;
   accept?: string;
@@ -58,8 +70,11 @@ export class FilePickerCore extends BaseDomain<TheTypesOfEvents> {
   autoFocus = false;
   isFocus = false;
   loading = false;
+  dragging = false;
+  invalid = false;
   /** 被消费过的值，用于做比较判断值是否发生改变 */
   valueUsed: unknown;
+  invalid_files: TFile[] = [];
 
   get state(): FilePickerState {
     return {
@@ -71,6 +86,9 @@ export class FilePickerCore extends BaseDomain<TheTypesOfEvents> {
       accept: this.accept,
       multiple: this.multiple,
       autoFocus: this.autoFocus,
+      dragging: this.dragging,
+      invalid: this.invalid,
+      invalid_files: this.invalid_files,
     };
   }
 
@@ -139,31 +157,102 @@ export class FilePickerCore extends BaseDomain<TheTypesOfEvents> {
   }
 
   handleChange(event: unknown) {
-    const { target } = event as { target: { files: FileList | null } };
+    const { target } = event as { target: { files: TFile[] | null } };
     const { files } = target;
     this.setValue(files);
   }
 
-  handleDrop(dataTransfer: DataTransfer) {
-    const files = this.filterFiles(dataTransfer);
+  handleDragOver(event: { files?: TFile[] }) {
+    if (this.dragging) {
+      return;
+    }
+    this.dragging = true;
+    const files = event.files;
+    console.log("[]handle drag over", files, files ? files[0] : null);
+    const valid = files ? this.validateFiles(files) : true;
+    if (!valid) {
+      this.invalid = true;
+      // $elm.setAttribute("data-drag-invalid", "true");
+    } else {
+      this.invalid = false;
+      // $elm.removeAttribute("data-drag-invalid");
+    }
+    this.emit(Events.StateChange, { ...this.state });
+  }
+
+  handleDragLeave() {
+    console.log("[]handle drag leave");
+    this.dragging = false;
+    this.invalid = false;
+    this.emit(Events.StateChange, { ...this.state });
+  }
+
+  handleDrop(event: { files?: TFile[] }) {
+    console.log("[]handle drop");
+    this.dragging = false;
+    this.invalid = false;
+    this.invalid_files = [];
+    // this.value = [];
+    this.emit(Events.StateChange, { ...this.state });
+    const files = this.filter_valid_files(event);
+    // const files = event.files;
+    // console.log("after this.filterFiles", files, event.files);
     if (files.length === 0) {
+      if (this.accept && event.files.length > 0) {
+        const rejected: TFile[] = [];
+        for (let i = 0; i < event.files.length; i++) {
+          rejected.push(event.files[i]);
+        }
+        this.invalid_files = rejected;
+        this.emit(Events.Reject, { files: rejected, accept: this.accept });
+      }
       return;
     }
     this.setValue(files);
   }
 
-  filterFiles(dataTransfer: DataTransfer): FileList {
-    const acceptValue = this.accept;
-    if (!acceptValue) {
-      return dataTransfer.files;
+  /**
+   * 在 dragover 阶段检查 dataTransfer.items 的类型是否匹配 accept
+   * 返回 true 表示有匹配项，false 表示全部不匹配
+   */
+  validateFiles(items: TFile[]): boolean {
+    if (!this.accept) {
+      return true;
     }
-    const acceptTypes = acceptValue
+    const acceptTypes = this.accept
       .split(",")
       .map((t) => t.trim().toLowerCase());
-    const dt = new DataTransfer();
-    for (let i = 0; i < dataTransfer.files.length; i++) {
-      const file = dataTransfer.files[i];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind !== "file") continue;
+      const mimeType = item.type.toLowerCase();
       const matched = acceptTypes.some((type) => {
+        if (type.startsWith(".")) {
+          // 扩展名无法在 dragover 阶段判断，放行
+          return true;
+        }
+        if (type.endsWith("/*")) {
+          return mimeType.startsWith(type.slice(0, -1));
+        }
+        return mimeType === type;
+      });
+      if (matched) return true;
+    }
+    return false;
+  }
+
+  filter_valid_files(event: { files?: TFile[] }): TFile[] {
+    const accept_value = this.accept;
+    if (!accept_value) {
+      return Array.from(event.files);
+    }
+    const accept_types = accept_value
+      .split(",")
+      .map((t) => t.trim().toLowerCase());
+    const files: TFile[] = [];
+    for (let i = 0; i < event.files?.length; i++) {
+      const file = event.files[i];
+      const matched = accept_types.some((type) => {
         if (type.startsWith(".")) {
           return file.name.toLowerCase().endsWith(type);
         }
@@ -173,13 +262,15 @@ export class FilePickerCore extends BaseDomain<TheTypesOfEvents> {
         return file.type === type;
       });
       if (matched) {
-        dt.items.add(file);
+        // dt.items.add(file);
+        files.push(file);
       }
     }
-    return dt.files;
+    return files;
   }
 
-  setValue(value: FileList | null, extra: Partial<{ silence: boolean }> = {}) {
+  setValue(value: TFile[] | null, extra: Partial<{ silence: boolean }> = {}) {
+    console.log("[]FilePicker - setValue", value);
     this.value = value;
     if (!extra.silence) {
       this.emit(Events.Change, value);
@@ -242,5 +333,9 @@ export class FilePickerCore extends BaseDomain<TheTypesOfEvents> {
 
   onClear(handler: Handler<TheTypesOfEvents[Events.Clear]>) {
     return this.on(Events.Clear, handler);
+  }
+
+  onReject(handler: Handler<TheTypesOfEvents[Events.Reject]>) {
+    return this.on(Events.Reject, handler);
   }
 }

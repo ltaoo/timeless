@@ -6,28 +6,28 @@ import { refObject } from "./reactive-object";
 import {
   Subscriber,
   SubscriberWithId,
+  Ref,
   DerivedRef,
   isRef,
   DepInfo,
 } from "./types";
 import { _current_disposables } from "./disposal";
 
-type RefValue<R> = R extends { __is_ref: true; value: infer T } ? T : R;
 type ComputedOptions = {
   debounce?: number;
   throttle?: number;
 };
 
-export function computed<D extends { __is_ref: true; value: any }, R>(
-  deps: D,
-  fn: (val: RefValue<D>) => R,
-  options?: ComputedOptions,
-): DerivedRef<R>;
-export function computed<T extends object, R>(
-  deps: T,
+export function computed<T, R>(
+  deps: Ref<T> | DerivedRef<T>,
   fn: (val: T) => R,
   options?: ComputedOptions,
 ): DerivedRef<R>;
+// export function computed<T extends object, R>(
+//   deps: T,
+//   fn: (val: T) => R,
+//   options?: ComputedOptions,
+// ): DerivedRef<R>;
 export function computed<T = any>(
   deps: any,
   fn: (t: any) => T,

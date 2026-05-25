@@ -23,15 +23,6 @@ declare function invoke(
   },
 ): Promise<any>;
 
-type TimelessRef<T> = {
-  value: T;
-  as(newVal: T): void;
-  subscribe(listener: (value: T) => void): () => void;
-  destroy(): void;
-};
-
-declare function ref<T = any>(v: T): TimelessRef<T>;
-
 declare interface Window {
   dayjs: typeof dayjs;
 }

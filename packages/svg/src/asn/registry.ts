@@ -6,6 +6,7 @@ import chevronDown from "./chevron-down";
 import chevronLeft from "./chevron-left";
 import chevronRight from "./chevron-right";
 import chevronUp from "./chevron-up";
+import circleAlert from "./circle-alert";
 import circleArrowDown from "./circle-arrow-down";
 import circleEllipsis from "./circle-ellipsis";
 import circleX from "./circle-x";
@@ -56,6 +57,7 @@ export const iconRegistry = {
   "chevron-left": chevronLeft,
   "chevron-right": chevronRight,
   "chevron-up": chevronUp,
+  "circle-alert": circleAlert,
   "circle-arrow-down": circleArrowDown,
   "circle-ellipsis": circleEllipsis,
   "circle-x": circleX,

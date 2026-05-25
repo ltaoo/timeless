@@ -170,6 +170,7 @@ export const globals = {
   FieldPrimitive: "readonly",
   FieldSeparator: "readonly",
   FieldSet: "readonly",
+  FileDropZone: "readonly",
   FileInput: "readonly",
   FilePickerPrimitive: "readonly",
   FlowBackground: "readonly",

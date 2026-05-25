@@ -3,6 +3,7 @@ import {
   combine,
   computed,
   Icon,
+  ref,
   refobj,
   View,
   Show,
@@ -22,22 +23,38 @@ export function FileDropZone(
 ) {
   const { store, tip, ...rest } = props;
   const state_ = refobj(store.state);
+  const error_msg_ = ref("");
+  const error_files_ = ref("");
+
+  const has_value_ = computed(state_, (d) => d.value && d.value.length > 0);
+  const is_loading_ = computed(state_, (d) => d.loading || false);
+  const is_valid_ = computed(state_, (d) => !!d.invalid_files.length);
+  const file_names_ = computed(state_, (d) => {
+    console.log(d.value);
+    return d.value ? d.value.map((f) => f.name).join("、") : "";
+  });
+  const wait_upload_ = combine(
+    {
+      hasValue: has_value_,
+      isLoading: is_loading_,
+      hasReject: is_valid_,
+    },
+    (t) => !t.hasValue && !t.isLoading && !t.hasReject,
+  );
 
   store.onStateChange((v) => {
     state_.as(v);
+    if (v.value && v.value.length > 0) {
+      error_msg_.as("");
+      error_files_.as("");
+    }
   });
 
-  const hasValue = computed(state_, (d) => d.value && d.value.length > 0);
-  const isLoading = computed(state_, (d) => d.loading || false);
-
-  const fileNames = computed(state_, (d) => {
-    if (!d.value || d.value.length === 0) {
-      return "";
-    }
-    if (d.value.length === 1) {
-      return d.value[0].name;
-    }
-    return `${d.value.length} files selected`;
+  store.onReject((data) => {
+    store.clear();
+    const names = data.files.map((f) => f.name).join(", ");
+    error_files_.as(names);
+    error_msg_.as(`不支持的文件类型，仅支持 ${data.accept}`);
   });
 
   return FilePickerPrimitive.Root(
@@ -52,18 +69,24 @@ export function FileDropZone(
         {
           store,
           class: classNames([
-            "flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input px-6 py-8 cursor-pointer transition-colors hover:border-ring hover:bg-accent/50 data-[dragging]:border-ring data-[dragging]:bg-accent/50",
-            computed(isLoading, (t) =>
+            "flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input px-6 py-8 cursor-pointer transition-colors hover:border-ring hover:bg-accent/50",
+            computed(is_loading_, (t) =>
               t ? "pointer-events-none opacity-50" : "",
             ),
+            computed(state_, (t) => {
+              if (t.invalid) {
+                return "border-destructive bg-destructive/10";
+              }
+              if (t.dragging) {
+                return "border-ring bg-accent/50";
+              }
+              return "";
+            }),
           ]),
         },
         [
           Show({
-            when: combine(
-              { hasValue, isLoading },
-              (t) => !t.hasValue && !t.isLoading,
-            ),
+            when: wait_upload_,
             ok() {
               return [
                 View(
@@ -78,15 +101,60 @@ export function FileDropZone(
                       class: "text-muted-foreground/60",
                     }),
                     View({ class: "text-sm" }, [
-                      Text(tip || "Drag & drop files here, or click to select"),
+                      Show({
+                        when: !!tip,
+                        ok() {
+                          return tip;
+                        },
+                        else() {
+                          return "Drag & drop files here, or click to select";
+                        },
+                      }),
                     ]),
-                    ...(store.accept
-                      ? [
-                          View({ class: "text-xs text-muted-foreground/60" }, [
-                            Text(store.accept),
-                          ]),
-                        ]
-                      : []),
+                    Show({
+                      when: !!store.accept,
+                      ok() {
+                        return View(
+                          { class: "text-xs text-muted-foreground/60" },
+                          [store.accept],
+                        );
+                      },
+                    }),
+                  ],
+                ),
+              ];
+            },
+          }),
+          Show({
+            when: is_valid_,
+            ok() {
+              return [
+                View(
+                  {
+                    class:
+                      "flex flex-col items-center justify-center gap-2 text-destructive",
+                  },
+                  [
+                    Icon({
+                      name: "circle-alert",
+                      size: 24,
+                      class: "text-destructive/80",
+                    }),
+                    View(
+                      {
+                        class:
+                          "flex items-center gap-1.5 text-sm text-destructive/90",
+                      },
+                      [
+                        Icon({
+                          name: "file",
+                          size: 14,
+                          class: "shrink-0",
+                        }),
+                        View({ class: "truncate" }, [error_files_]),
+                      ],
+                    ),
+                    View({ class: "text-xs" }, [error_msg_]),
                   ],
                 ),
               ];
@@ -94,7 +162,7 @@ export function FileDropZone(
           }),
           Show({
             when: combine(
-              { hasValue, isLoading },
+              { hasValue: has_value_, isLoading: is_loading_ },
               (t) => t.hasValue && !t.isLoading,
             ),
             ok() {
@@ -109,7 +177,7 @@ export function FileDropZone(
                       size: 16,
                       class: "text-muted-foreground",
                     }),
-                    View({ class: "truncate" }, [Text(fileNames)]),
+                    View({ class: "truncate" }, [file_names_]),
                     FilePickerPrimitive.Clear(
                       {
                         store,
@@ -124,7 +192,7 @@ export function FileDropZone(
             },
           }),
           Show({
-            when: isLoading,
+            when: is_loading_,
             ok() {
               return [
                 View(
@@ -136,7 +204,7 @@ export function FileDropZone(
                     View({ class: "h-4 w-4 animate-spin" }, [
                       Icon({ name: "loader" }),
                     ]),
-                    View({}, [Text("Uploading...")]),
+                    View({}, ["Uploading..."]),
                   ],
                 ),
               ];

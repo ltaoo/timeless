@@ -25,7 +25,7 @@ declare module "packages/reactive/src/types" {
         trackId: string;
         trackInfo?: Record<string, unknown>;
     };
-    export type TimelessRef<T> = {
+    export type Ref<T> = {
         __is_ref: true;
         subscribe: (ctx: Subscriber<T>) => () => void;
         destroy: () => void;
@@ -223,9 +223,6 @@ declare module "packages/reactive/src/types" {
         getDeps?(): DepInfo[];
         dump?(): void;
     };
-    export type Ref<T> = DerivedRef<T> & {
-        as(value: T | ((cur: T | null) => T)): void;
-    };
     export function isWriteableRef<T>(v: Ref<T> | T): v is Ref<T>;
     export function isRef<T>(v: DerivedRef<T> | Ref<T> | T): v is DerivedRef<T>;
     export function isRef(v: unknown): v is DerivedRef<any>;
@@ -331,7 +328,7 @@ declare module "packages/reactive/src/registry" {
     export function set(key: any, v: DerivedRef<any> | Ref<any>): void;
     export function deleteKey(key: any): void;
     export function has(v: any): boolean;
-    export function get(v: any): DerivedRef<any> | Ref<any>;
+    export function get(v: any): Ref<any> | DerivedRef<any>;
     export function getobj<T extends Record<string, any>>(v: T): RefObject<T> | undefined;
     export function getarr<T>(v: T[]): RefArray<T> | undefined;
 }
@@ -403,8 +400,8 @@ declare module "packages/reactive/src/hmr" {
     export function __hmr_get_hot(): any;
 }
 declare module "packages/reactive/src/ref" {
-    import { TimelessRef } from "packages/reactive/src/types";
-    export function ref<T = any>(v: T, __hmr_key?: string): TimelessRef<T>;
+    import { Ref } from "packages/reactive/src/types";
+    export function ref<T = any>(v: T, __hmr_key?: string): Ref<T>;
 }
 declare module "packages/reactive/src/signal" {
     import type { RefArray } from "packages/reactive/src/reactive-array";
@@ -644,20 +641,12 @@ declare module "packages/reactive/src/disposal" {
     export function stop_tracking(): void;
 }
 declare module "packages/reactive/src/computed" {
-    import { DerivedRef } from "packages/reactive/src/types";
-    type RefValue<R> = R extends {
-        __is_ref: true;
-        value: infer T;
-    } ? T : R;
+    import { Ref, DerivedRef } from "packages/reactive/src/types";
     type ComputedOptions = {
         debounce?: number;
         throttle?: number;
     };
-    export function computed<D extends {
-        __is_ref: true;
-        value: any;
-    }, R>(deps: D, fn: (val: RefValue<D>) => R, options?: ComputedOptions): DerivedRef<R>;
-    export function computed<T extends object, R>(deps: T, fn: (val: T) => R, options?: ComputedOptions): DerivedRef<R>;
+    export function computed<T, R>(deps: Ref<T> | DerivedRef<T>, fn: (val: T) => R, options?: ComputedOptions): DerivedRef<R>;
 }
 declare module "packages/reactive/src/derive" {
     import { DerivedRef } from "packages/reactive/src/types";
@@ -3075,6 +3064,7 @@ declare module "packages/primitive/src/layout/split" {
         state: any;
         children: any;
         onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
         onUnmounted(): void;
     };
     export type SplitPaneProps = BoxProps & {
@@ -3089,6 +3079,7 @@ declare module "packages/primitive/src/layout/split" {
         state: any;
         children: any;
         onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
         onUnmounted(): void;
     };
     type SplitHandlerProps = BoxProps & {};
@@ -3099,6 +3090,7 @@ declare module "packages/primitive/src/layout/split" {
         events: any;
         children: any;
         onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
         onUnmounted(): void;
     };
 }
@@ -3429,6 +3421,7 @@ declare module "packages/primitive/src/input/file-picker" {
         capture?: string | Ref<string>;
         files?: Ref<FileList | null>;
         onChange?: (event: Event) => void;
+        onFileDrop?: (files: FileList, event: DragEvent) => void;
     };
     export function FilePicker(props?: FilePickerProps): {
         t: string;
@@ -5514,10 +5507,18 @@ declare module "packages/ui-vm/src/dismissable-layer/index" {
         InteractOutside = 3
     }
     type TheTypesOfEvents = {
-        [Events.Dismiss]: void;
-        [Events.PointerDownOutside]: void;
+        [Events.Dismiss]: PointerEvent | undefined;
+        [Events.PointerDownOutside]: PointerEvent | undefined;
         [Events.FocusOutside]: void;
-        [Events.InteractOutside]: void;
+        [Events.InteractOutside]: PointerEvent | undefined;
+    };
+    type RectLike = {
+        x?: number;
+        y?: number;
+        left?: number;
+        top?: number;
+        width: number;
+        height: number;
     };
     /**
      * DismissableLayerCore - 可关闭的浮动层
@@ -5529,6 +5530,7 @@ declare module "packages/ui-vm/src/dismissable-layer/index" {
         readonly id: string;
         private layerManager;
         private getRect;
+        private branches;
         private registered;
         constructor(options?: Partial<{
             _name: string;
@@ -5538,12 +5540,9 @@ declare module "packages/ui-vm/src/dismissable-layer/index" {
          * 设置层的位置信息（用于 containsPoint 检测）
          * 在层挂载时调用
          */
-        setRect(getRect: () => {
-            x: number;
-            y: number;
-            width: number;
-            height: number;
-        }): void;
+        setRect(getRect: () => RectLike | null | undefined): void;
+        addBranch(getRect: () => RectLike | null | undefined): () => void;
+        private rectContainsPoint;
         /**
          * 注册到 LayerManager
          * 在层显示/挂载时调用
@@ -5584,7 +5583,7 @@ declare module "packages/ui-vm/src/layer/index" {
         /** 检查坐标是否在层内（各平台实现不同） */
         containsPoint(x: number, y: number): boolean;
         /** 关闭层 */
-        dismiss(): void;
+        dismiss(event?: PointerEvent): void;
         /** 是否阻止向下传播关闭（可选） */
         preventDismissBelow?: boolean;
     }
@@ -5604,6 +5603,7 @@ declare module "packages/ui-vm/src/layer/index" {
     };
     export class LayerManager extends BaseDomain<TheTypesOfEvents> {
         private stack;
+        private consumedPointerDown;
         /** 注册一个新层（push 到栈顶） */
         register(layer: Layer): void;
         /** 注销层 */
@@ -5616,9 +5616,15 @@ declare module "packages/ui-vm/src/layer/index" {
         get size(): number;
         /**
          * 处理点击/触摸事件
-         * 从栈顶向下检查，关闭不包含点击点的层
+         * 只允许栈顶层消费一次 outside 交互，避免子层关闭后父层继续关闭。
          */
-        handlePointerDown(x: number, y: number): void;
+        handlePointerDown(eventOrX: PointerEvent | number, y?: number): void;
+        private markPointerDownConsumed;
+        /**
+         * 判断当前 click 是否紧跟一次已被子层消费的 pointerdown。
+         * pointerdown 和 click 是两个不同事件，因此用坐标和短时间窗口关联。
+         */
+        isRecentlyConsumedEvent(event: MouseEvent | PointerEvent | Event): boolean;
         /** 关闭所有层 */
         dismissAll(): void;
         /** 关闭栈顶层 */
@@ -6409,12 +6415,22 @@ declare module "packages/ui-vm/src/file-picker/index" {
         Focus = 13,
         Blur = 14,
         Clear = 15,
-        Click = 16
+        Click = 16,
+        Reject = 17
     }
+    type TFile = {
+        name: string;
+        kind: string;
+        type: string;
+    };
+    type RejectInfo = {
+        files: TFile[];
+        accept: string;
+    };
     type TheTypesOfEvents = {
         [Events.Mounted]: void;
-        [Events.Change]: FileList | null;
-        [Events.Blur]: FileList | null;
+        [Events.Change]: TFile[] | null;
+        [Events.Blur]: TFile[] | null;
         [Events.Focus]: void;
         [Events.Clear]: void;
         [Events.Click]: {
@@ -6422,23 +6438,24 @@ declare module "packages/ui-vm/src/file-picker/index" {
             y: number;
         };
         [Events.StateChange]: FilePickerState;
+        [Events.Reject]: RejectInfo;
     };
     export type FilePickerCoreProps = {
         name?: string;
         disabled?: boolean;
-        defaultValue?: FileList | null;
+        defaultValue?: TFile[] | null;
         placeholder?: string;
         accept?: string;
         multiple?: boolean;
         capture?: string;
         autoFocus?: boolean;
-        onChange?: (v: FileList | null) => void;
-        onBlur?: (v: FileList | null) => void;
+        onChange?: (v: TFile[] | null) => void;
+        onBlur?: (v: TFile[] | null) => void;
         onClear?: () => void;
         onMounted?: () => void;
     };
     type FilePickerState = {
-        value: FileList | null;
+        value: TFile[] | null;
         placeholder: string;
         disabled: boolean;
         loading: boolean;
@@ -6446,11 +6463,13 @@ declare module "packages/ui-vm/src/file-picker/index" {
         accept?: string;
         multiple: boolean;
         autoFocus: boolean;
+        dragging: boolean;
+        invalid: boolean;
     };
     export class FilePickerCore extends BaseDomain<TheTypesOfEvents> {
         shape: "file-input";
-        defaultValue: FileList | null;
-        value: FileList | null;
+        defaultValue: TFile[] | null;
+        value: TFile[] | null;
         placeholder: string;
         disabled: boolean;
         accept?: string;
@@ -6459,6 +6478,8 @@ declare module "packages/ui-vm/src/file-picker/index" {
         autoFocus: boolean;
         isFocus: boolean;
         loading: boolean;
+        dragging: boolean;
+        invalid: boolean;
         /** 被消费过的值，用于做比较判断值是否发生改变 */
         valueUsed: unknown;
         get state(): FilePickerState;
@@ -6473,7 +6494,22 @@ declare module "packages/ui-vm/src/file-picker/index" {
             y: number;
         }): void;
         handleChange(event: unknown): void;
-        setValue(value: FileList | null, extra?: Partial<{
+        handleDragOver(event: {
+            files?: TFile[];
+        }): void;
+        handleDragLeave(): void;
+        handleDrop(event: {
+            files?: TFile[];
+        }): void;
+        /**
+         * 在 dragover 阶段检查 dataTransfer.items 的类型是否匹配 accept
+         * 返回 true 表示有匹配项，false 表示全部不匹配
+         */
+        validateFiles(items: TFile[]): boolean;
+        filterFiles(event: {
+            files?: TFile[];
+        }): TFile[];
+        setValue(value: TFile[] | null, extra?: Partial<{
             silence: boolean;
         }>): void;
         setAccept(accept: string): void;
@@ -6488,6 +6524,7 @@ declare module "packages/ui-vm/src/file-picker/index" {
         onBlur(handler: Handler<TheTypesOfEvents[Events.Blur]>): () => void;
         onClick(handler: Handler<TheTypesOfEvents[Events.Click]>): () => void;
         onClear(handler: Handler<TheTypesOfEvents[Events.Clear]>): () => void;
+        onReject(handler: Handler<TheTypesOfEvents[Events.Reject]>): () => void;
     }
 }
 declare module "packages/ui-vm/src/number-input/index" {
@@ -7524,6 +7561,22 @@ declare module "packages/ui-vm/src/popper/index" {
             y?: number;
         } | null;
     };
+    type ItemAlignedAdjustmentData = {
+        selectedItem: {
+            offsetTop: number;
+            offsetHeight: number;
+            bottom: number;
+            isFirst?: boolean;
+            isLast?: boolean;
+        };
+        content?: {
+            borderTopWidth: number;
+            paddingTop: number;
+            borderBottomWidth: number;
+            paddingBottom: number;
+            clientHeight: number;
+        };
+    };
     export class PopperCore extends BaseDomain<TheTypesOfEvents> {
         unique_id: string;
         debug: boolean;
@@ -7567,6 +7620,7 @@ declare module "packages/ui-vm/src/popper/index" {
             y: number;
         };
         _prev_scroll_top: number;
+        _pending_item_aligned_adjustment: ItemAlignedAdjustmentData | null;
         container: Node | null;
         arrow: {
             width: number;
@@ -7614,22 +7668,8 @@ declare module "packages/ui-vm/src/popper/index" {
         }): void;
         setViewportOffsetTop(offsetTop: number): void;
         /** 设置 item-aligned 模式下选中项的偏移量 */
-        adjustContentPositionWithOffsetTop(data: {
-            selectedItem: {
-                offsetTop: number;
-                offsetHeight: number;
-                bottom: number;
-                isFirst?: boolean;
-                isLast?: boolean;
-            };
-            content?: {
-                borderTopWidth: number;
-                paddingTop: number;
-                borderBottomWidth: number;
-                paddingBottom: number;
-                clientHeight: number;
-            };
-        }): void;
+        flushPendingItemAlignedAdjustment(): void;
+        adjustContentPositionWithOffsetTop(data: ItemAlignedAdjustmentData): void;
         realignImmediate(): void;
         /** 设置 item-aligned 模式下的 DOM 元素和测量数据 */
         setItemAlignedElements(data: {
@@ -14244,6 +14284,15 @@ declare module "packages/ui-primitive/src/modules/file-picker" {
     export function Loading(props: ViewProps & {
         store: FilePickerCore;
     }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function DropZone(props: ViewProps & {
+        store: FilePickerCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Dragging(props: ViewProps & {
+        store: FilePickerCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function DragInvalid(props: ViewProps & {
+        store: FilePickerCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function Disabled(props: ViewProps & {
         store: FilePickerCore;
     }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
@@ -15928,8 +15977,12 @@ declare module "packages/shadcn/src/modules/input" {
     }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/file-picker" {
-    import { ViewProps } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { FilePickerCore } from "packages/ui-vm/src/index";
+    export function FileDropZone(props: ViewProps & {
+        store: FilePickerCore;
+        tip?: string;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function FileInput(props: ViewProps & {
         store: FilePickerCore;
         id?: string;
@@ -16824,7 +16877,7 @@ declare module "packages/shadcn/src/modules/flow" {
 }
 declare module "packages/shadcn/src/index" {
     import { Input } from "packages/shadcn/src/modules/input";
-    import { FileInput } from "packages/shadcn/src/modules/file-picker";
+    import { FileDropZone, FileInput } from "packages/shadcn/src/modules/file-picker";
     import { NumberInput } from "packages/shadcn/src/modules/number-input";
     import { Textarea } from "packages/shadcn/src/modules/textarea";
     import { Label } from "packages/shadcn/src/modules/label";
@@ -16879,7 +16932,7 @@ declare module "packages/shadcn/src/index" {
     export const TimelessShadcnVersion: any;
     export * from "packages/ui-primitive/src/index";
     export * as ui from "packages/ui-vm/src/index";
-    export { Input, FileInput, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, Affix, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
+    export { Input, FileInput, FileDropZone, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, Affix, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
 }
 declare module "packages/icons/src/util/index" {
     export const defaultWidth = "24";

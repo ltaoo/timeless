@@ -1,4 +1,4 @@
-import { ref, isRef, computed } from "@timeless/timeless";
+import { ref, computed } from "@timeless/timeless";
 import { FilePicker as NativeFilePicker } from "@timeless/timeless";
 import {
   View,
@@ -97,45 +97,136 @@ export function DropZone(
 ) {
   const { store, ...rest } = props;
 
+  const dragging_ = ref(store.dragging || false);
+  const invalid_ = ref(store.invalid || false);
+
+  const listener$ = ListenerManager();
+
   return View(
     {
       ...rest,
+      style: styleNames([
+        rest.style,
+        computed(dragging_, (t) => ({
+          "pointer-events": t ? "auto" : "",
+        })),
+      ]),
       onMounted(event) {
         const $elm = event.target.get$elm();
-        const handleDragOver = (e: any) => {
+
+        listener$.add(
+          store.onStateChange(() => {
+            dragging_.as(store.dragging || false);
+            invalid_.as(store.invalid || false);
+          }),
+        );
+
+        function handleDragOver(e: DragEvent) {
           e.preventDefault();
-          $elm.setAttribute("data-dragging", "true");
-        };
-        const handleDragLeave = (e: any) => {
+          const files = (e.dataTransfer ? e.dataTransfer.items : []) as any[];
+          store.handleDragOver({ files });
+        }
+        function handleDragLeave(e: DragEvent) {
           e.preventDefault();
-          $elm.removeAttribute("data-dragging");
-        };
-        const handleDrop = (e: any) => {
-          e.preventDefault();
-          $elm.removeAttribute("data-dragging");
-          if (e.dataTransfer) {
-            store.handleDrop(e.dataTransfer);
+          const related = e.relatedTarget as Node | null;
+          if (related && $elm.contains(related)) {
+            return;
           }
-        };
-        const handleClick = () => {
+          store.handleDragLeave();
+        }
+        function handleDrop(e: DragEvent) {
+          e.preventDefault();
+          const files = (e.dataTransfer ? e.dataTransfer?.files : []) as any[];
+          store.handleDrop({ files });
+        }
+        function handleClick() {
           const input = $elm.parentElement?.querySelector('input[type="file"]');
           if (input) {
             input.click();
           }
-        };
+        }
         $elm.addEventListener("dragover", handleDragOver);
         $elm.addEventListener("dragleave", handleDragLeave);
         $elm.addEventListener("drop", handleDrop);
         $elm.addEventListener("click", handleClick);
         if (rest.onMounted) {
-          rest.onMounted(event);
+          listener$.add(rest.onMounted(event));
         }
         return () => {
+          listener$.clean();
           $elm.removeEventListener("dragover", handleDragOver);
           $elm.removeEventListener("dragleave", handleDragLeave);
           $elm.removeEventListener("drop", handleDrop);
           $elm.removeEventListener("click", handleClick);
         };
+      },
+    },
+    children,
+  );
+}
+
+export function Dragging(
+  props: ViewProps & { store: FilePickerCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  const dragging_ = ref(store.dragging || false);
+
+  const listener$ = ListenerManager();
+
+  return View(
+    {
+      ...rest,
+      style: styleNames([
+        rest.style,
+        computed(dragging_, (t) => ({
+          display: t ? "" : "none",
+        })),
+      ]),
+      onMounted(event) {
+        listener$.add(
+          store.onStateChange(() => {
+            dragging_.as(store.dragging || false);
+          }),
+        );
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.clean;
+      },
+    },
+    children,
+  );
+}
+
+export function DragInvalid(
+  props: ViewProps & { store: FilePickerCore },
+  children?: ViewChildren,
+) {
+  const { store, ...rest } = props;
+  const invalid_ = ref(store.invalid || false);
+
+  const listener$ = ListenerManager();
+
+  return View(
+    {
+      ...rest,
+      style: styleNames([
+        rest.style,
+        computed(invalid_, (t) => ({
+          display: t ? "" : "none",
+        })),
+      ]),
+      onMounted(event) {
+        listener$.add(
+          store.onStateChange(() => {
+            invalid_.as(store.invalid || false);
+          }),
+        );
+        if (rest.onMounted) {
+          listener$.add(rest.onMounted(event));
+        }
+        return listener$.clean;
       },
     },
     children,

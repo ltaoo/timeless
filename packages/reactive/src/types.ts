@@ -27,7 +27,7 @@ export type DepInfo = {
   trackInfo?: Record<string, unknown>;
 };
 
-export type TimelessRef<T> = {
+export type Ref<T> = {
   __is_ref: true;
   subscribe: (ctx: Subscriber<T>) => () => void;
   destroy: () => void;
@@ -298,9 +298,6 @@ export type DerivedRef<T> = {
   dump?(): void;
 };
 
-export type Ref<T> = DerivedRef<T> & {
-  as(value: T | ((cur: T | null) => T)): void;
-};
 
 export function isWriteableRef<T>(v: Ref<T> | T): v is Ref<T>;
 export function isWriteableRef(v: any): boolean {

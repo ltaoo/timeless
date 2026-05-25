@@ -6,6 +6,7 @@ export { default as ChevronDown } from "./chevron-down";
 export { default as ChevronLeft } from "./chevron-left";
 export { default as ChevronRight } from "./chevron-right";
 export { default as ChevronUp } from "./chevron-up";
+export { default as CircleAlert } from "./circle-alert";
 export { default as CircleArrowDown } from "./circle-arrow-down";
 export { default as CircleEllipsis } from "./circle-ellipsis";
 export { default as CircleX } from "./circle-x";

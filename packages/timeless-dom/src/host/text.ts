@@ -25,6 +25,9 @@ export function DOMText(props: {
       return false;
     },
     setText(v?: string | number | null) {
+      if (!$text) {
+        return;
+      }
       if (v !== undefined && v !== null) {
         $text.textContent = String(v);
       } else {
