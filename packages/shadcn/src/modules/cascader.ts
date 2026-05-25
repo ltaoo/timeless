@@ -168,8 +168,6 @@ export function Cascader(
               }),
             },
             [
-              "Content",
-              View({}, [computed(state_, (d) => d.panels.length)]),
               For({
                 key: "key",
                 each: computed(state_, (d) => d.panels),

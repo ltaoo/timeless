@@ -101,8 +101,7 @@ export function FieldLabel(
     {
       ...rest,
       class: classNames([
-        "select-none",
-        weight === "normal" ? "font-normal" : "font-medium",
+        "select-none font-normal",
         // "group-data-[invalid]:text-destructive",
         computed(error_, (t) => (t ? "text-destructive" : "")),
         tone === "destructive" ? "text-destructive" : "",
@@ -127,7 +126,7 @@ export function FieldInlineLabel(
     store?: SingleFieldCore<any>;
     for?: string;
   },
-  children,
+  children?: ViewChildren,
 ) {
   const { class: cls, store, ...rest } = props;
 
@@ -158,9 +157,7 @@ export function FieldInlineLabel(
     },
     [
       Show({
-        when: computed(children, (t) => {
-          return !!(t && t.length);
-        }),
+        when: !!children,
         ok() {
           return children;
         },

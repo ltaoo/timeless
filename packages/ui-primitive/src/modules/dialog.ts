@@ -15,7 +15,7 @@ import { Presence } from "./presence";
 
 export function Root(
   props: ViewProps & { store: DialogCore },
-  children?: ViewChildren,
+  children?: ViewChildren | (() => ViewChildren),
 ) {
   const { store, ...rest } = props;
 

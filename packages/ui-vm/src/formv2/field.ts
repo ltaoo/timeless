@@ -158,6 +158,13 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
     setTimeout(() => {
       this._input.onChange(() => {
         // console.log("the input change in SingleFieldCore", this._input.value);
+        if (this._error !== null) {
+          this._status = "normal";
+          this._error = null;
+          this.input.setStatus("normal");
+          this._bus.emit(SingleFieldEvents.Error, null);
+          this._bus.emit(SingleFieldEvents.StateChange, { ...this.state });
+        }
         this._bus.emit(SingleFieldEvents.Change, this._input.value);
       });
       // 必需要800，为什么？少了也不行
@@ -306,6 +313,13 @@ export class SingleFieldCore<T extends FormInputInterface<any>> {
   }
   handleValueChange(value: T["value"]) {
     this._dirty = true;
+    if (this._status === "error") {
+      this._status = "normal";
+      this._error = null;
+      this.input.setStatus("normal");
+      this._bus.emit(SingleFieldEvents.Error, null);
+      this._bus.emit(SingleFieldEvents.StateChange, { ...this.state });
+    }
     this._input.setValue(value);
   }
   ready() {}

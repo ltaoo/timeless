@@ -7,7 +7,7 @@ import { Button } from "./button";
 
 export function Dialog(
   props: ViewProps & { store: DialogCore },
-  children?: ViewChildren,
+  children?: ViewChildren | (() => ViewChildren),
 ) {
   const { store, class: cls, style: sty, ...rest } = props;
   const state_ = refobj(store.state);
@@ -36,7 +36,7 @@ export function Dialog(
         unlistens.forEach((fn) => fn());
       },
     },
-    [
+    () => [
       DialogPrimitive.Overlay({
         store,
         class: computed(presence_state_, (d) => {
@@ -125,7 +125,10 @@ export function Dialog(
                       ];
                     },
                   }),
-                  DialogPrimitive.Body({ store }, children || []),
+                  DialogPrimitive.Body(
+                    { store },
+                    typeof children === "function" ? children() : children || [],
+                  ),
                   DialogPrimitive.Close(
                     {
                       store,

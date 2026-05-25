@@ -144,8 +144,6 @@ export function Content(
               ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
               : "translate3d(0, 0, 0)",
             height: t.height !== undefined ? `${t.height}px` : undefined,
-            // "max-height": t.height != undefined ? `${t.height}px` : undefined,
-            // overflow: t.height !== undefined ? "auto" : undefined,
           };
         }),
       ]),
@@ -184,7 +182,15 @@ export function Content(
         );
         // 注册到 LayerManager
         if (onDismiss) {
-          dismissableLayer$.setRect(() => $elm.getBoundingClientRect());
+          dismissableLayer$.setRect(() => {
+            if (store.mode === "item-aligned") {
+              const children = $elm.get$children();
+              if (children && children[0]) {
+                return children[0].getBoundingClientRect();
+              }
+            }
+            return $elm.getBoundingClientRect();
+          });
           dismissableLayer$.addBranch(() => store.reference?.getRect());
           listener$.add(
             dismissableLayer$.onDismiss(() => {

@@ -36,7 +36,7 @@ export function Sheet(
     store: DialogCore;
     side?: "right" | "top" | "bottom" | "left";
   },
-  children: ViewChildren = [],
+  children: ViewChildren | (() => ViewChildren) = [],
 ) {
   const { store, side = "right", ...rest } = props;
   const state_ = refobj(store.state);
@@ -45,7 +45,7 @@ export function Sheet(
     state_.as(v);
   });
 
-  return SheetPrimitive.Root({ store }, [
+  return SheetPrimitive.Root({ store }, () => [
     SheetPrimitive.Overlay({
       store,
       class: computed(state_, (d) => {
@@ -90,7 +90,7 @@ export function Sheet(
               [Icon({ name: "x" })],
             ),
             // @ts-ignore
-            children,
+            typeof children === "function" ? children() : children,
           ],
         ),
       ],

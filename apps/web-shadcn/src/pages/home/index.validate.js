@@ -1,5 +1,3 @@
-import { PageContent, SplitLayout } from "@/components/layout.js";
-
 import { PaymentViewModel } from "./index.validate.model.js";
 
 function FormRender(props, children) {
@@ -381,44 +379,41 @@ export default function FormValidateView() {
   });
   const payment$ = PaymentViewModel();
 
-  return PageContent({ class: "page--validate overflow-x-hidden" }, [
-    SplitLayout({
+  return View({ class: "page--validate h-screen" }, [
+    SplitView({
       direction: "vertical",
-      items: [
+      panels: [
         {
-          defaultSize: 75,
-          minSize: 50,
-          maxSize: 90,
-          class: "p-6",
-          children: [
-            PaymentFormView({
-              store: payment$,
-            }),
-            Separator({ class: "my-6" }),
-            View(
-              {
-                class: "w-full max-w-md rounded-xl border border-border p-6",
-              },
-              [
-                Field({ store: field_provider$ }, [
-                  Select({
-                    id: field_provider$.name,
-                    store: field_provider$.input,
-                  }),
-                ]),
-                FormRender({ class: "mt-6", store: configure$_ }, [
-                  Button({ store: submit_configure_btn$ }, ["Submit"]),
-                ]),
-              ],
-            ),
-          ],
+          size: "auto",
+          content() {
+            return View({ class: "p-6 overflow-y-auto h-full" }, [
+              PaymentFormView({
+                store: payment$,
+              }),
+              Separator({ class: "my-6" }),
+              View(
+                {
+                  class: "w-full max-w-md rounded-xl border border-border p-6",
+                },
+                [
+                  Field({ store: field_provider$ }, [
+                    Select({
+                      id: field_provider$.name,
+                      store: field_provider$.input,
+                    }),
+                  ]),
+                  FormRender({ class: "mt-6", store: configure$_ }, [
+                    Button({ store: submit_configure_btn$ }, ["Submit"]),
+                  ]),
+                ],
+              ),
+            ]);
+          },
         },
         {
-          defaultSize: 25,
-          minSize: 10,
-          maxSize: 50,
-          children: [
-            View({ class: "flex items-center gap-2 p-6" }, [
+          size: 300,
+          content() {
+            return View({ class: "flex items-center gap-2 p-6" }, [
               Button(
                 {
                   store: new Timeless.ui.ButtonCore({
@@ -480,8 +475,8 @@ export default function FormValidateView() {
                 },
                 ["Loading data"],
               ),
-            ]),
-          ],
+            ]);
+          },
         },
       ],
     }),

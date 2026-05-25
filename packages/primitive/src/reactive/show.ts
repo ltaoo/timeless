@@ -207,7 +207,6 @@ export function Show(props: ShowProps) {
       // Dispose all refs created during render callbacks
       dispose_owner(_owner);
       _hmr_subs.forEach((fn) => fn());
-      state.children.length = 0;
       _hmr_subs.length = 0;
       // Don't clear state.children here — they are needed if this Show
       // is re-mounted by a parent (e.g. Presence show/hide cycle).

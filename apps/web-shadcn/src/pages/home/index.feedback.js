@@ -148,7 +148,7 @@ export default function FeedbackView() {
                 },
                 ["Open Dialog with Select"],
               ),
-              Dialog({ store: selectInDialog$ }, [
+              Dialog({ store: selectInDialog$ }, () => [
                 View({ class: "space-y-4" }, [
                   View({ class: "text-sm text-zinc-500" }, [
                     "Select dropdown should position correctly inside the dialog.",

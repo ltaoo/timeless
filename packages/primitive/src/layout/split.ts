@@ -74,10 +74,10 @@ export function SplitView(props: SplitViewProps) {
       // const panels$: ReturnType<typeof SplitPane> = [];
       for (let i = 0; i < props.panels.length; i += 1) {
         const panel = props.panels[i];
-        const panel$ = SplitPane(panel, panel.content);
+        const panel$ = SplitPane({ ...panel, direction }, panel.content);
         state.panels.push(panel$);
         if (resizable && i < props.panels.length - 1) {
-          const handler$ = SplitHandler({});
+          const handler$ = SplitHandler({ direction });
           state.panels.push(handler$);
         }
       }
@@ -158,9 +158,11 @@ export type SplitPaneProps = BoxProps & {
   minSize?: number;
   maxSize?: number;
   collapsible?: boolean;
+  direction?: SplitDirection;
 };
 
 type SplitPaneState = {
+  direction: SplitDirection;
   size: number;
   minSize?: number;
   maxSize?: number;
@@ -173,12 +175,14 @@ export function SplitPane(props: SplitPaneProps, children?: ViewChildren) {
     minSize = 10,
     maxSize = 90,
     collapsible = false,
+    direction: paneDirection = "horizontal",
     // collapsedSize = 0,
     ...rest
   } = props;
 
   let $elm: any = null;
   const box$ = Box<SplitPaneState>(rest, {
+    direction: paneDirection,
     size,
     minSize,
     maxSize,
@@ -260,17 +264,22 @@ export function SplitPane(props: SplitPaneProps, children?: ViewChildren) {
   };
 }
 
-type SplitHandlerProps = BoxProps & {};
-type SplitHandlerState = {};
+type SplitHandlerProps = BoxProps & {
+  direction?: SplitDirection;
+};
+type SplitHandlerState = {
+  direction: SplitDirection;
+};
 
 export function SplitHandler(
   props: SplitHandlerProps,
   children?: ViewChildren,
 ) {
-  const { ...rest } = props;
+  const { direction: handlerDirection = "horizontal", ...rest } = props;
 
   let $elm: any = null;
   const box$ = Box<SplitHandlerState>(rest, {
+    direction: handlerDirection,
     isCollapsed: false,
   } as SplitHandlerState);
 

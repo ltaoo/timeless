@@ -34,18 +34,23 @@ function setupDragResize(
     handlerElm.events.onPointerDown(event);
   }
 
+  const isVertical = $splitView.getAttribute("data-split-direction") === "vertical";
+  const templateProp = isVertical ? "grid-template-rows" : "grid-template-columns";
+  const cursorStyle = isVertical ? "row-resize" : "col-resize";
+
   event.preventDefault();
   $handler.setPointerCapture(event.pointerId);
 
-  let startX = event.clientX;
-  let startTemplate = $splitView.style["grid-template-columns"];
+  let startPos = isVertical ? event.clientY : event.clientX;
+  let startTemplate = $splitView.style[templateProp as any];
 
-  document.body.style.cursor = "col-resize";
+  document.body.style.cursor = cursorStyle;
   document.body.style.userSelect = "none";
   $handler.style.touchAction = "none";
 
   const onMove = (moveEvent: PointerEvent) => {
-    const deltaX = moveEvent.clientX - startX;
+    const currentPos = isVertical ? moveEvent.clientY : moveEvent.clientX;
+    const delta = currentPos - startPos;
     const columns = parseGridTemplate(startTemplate);
 
     let handlerIndex = 0;
@@ -67,15 +72,16 @@ function setupDragResize(
     const isLeftAuto = leftCol === "auto" || leftCol === "1fr";
     const isRightAuto = rightCol === "auto" || rightCol === "1fr";
 
+    const rect = (idx: number) => $splitView.children[idx].getBoundingClientRect();
     const leftPx = isLeftAuto
-      ? $splitView.children[leftColIdx].getBoundingClientRect().width
+      ? (isVertical ? rect(leftColIdx).height : rect(leftColIdx).width)
       : parseFloat(leftCol);
     const rightPx = isRightAuto
-      ? $splitView.children[rightColIdx].getBoundingClientRect().width
+      ? (isVertical ? rect(rightColIdx).height : rect(rightColIdx).width)
       : parseFloat(rightCol);
 
-    let newLeft = leftPx + deltaX;
-    let newRight = rightPx - deltaX;
+    let newLeft = leftPx + delta;
+    let newRight = rightPx - delta;
 
     const leftPanel = $splitView.children[leftColIdx];
     const rightPanel = $splitView.children[rightColIdx];
@@ -95,8 +101,8 @@ function setupDragResize(
     columns[rightColIdx] = `${Math.round(newRight)}px`;
 
     startTemplate = columns.join(" ");
-    $splitView.style["grid-template-columns"] = startTemplate;
-    startX = moveEvent.clientX;
+    $splitView.style[templateProp as any] = startTemplate;
+    startPos = currentPos;
   };
 
   const onUp = () => {
@@ -133,8 +139,10 @@ export function DOMSplitView(props: {
     },
     render(elm: TimelessElement) {
       const $elm = document.createElement("div");
+      const isVertical = elm.state.direction === "vertical";
 
       $elm.setAttribute("data-split-view", "");
+      $elm.setAttribute("data-split-direction", isVertical ? "vertical" : "horizontal");
 
       $elm.style.display = "grid";
       $elm.style.height = "100%";
@@ -152,9 +160,8 @@ export function DOMSplitView(props: {
           return String(panel.state.size);
         })
         .join(" ");
-      $elm.style["grid-template-columns"] = columns;
-      $elm.style.flexDirection =
-        elm.state.direction === "horizontal" ? "row" : "column";
+      const templateProp = isVertical ? "grid-template-rows" : "grid-template-columns";
+      $elm.style[templateProp as any] = columns;
 
       box$.methods.set$elm($elm);
       box$.methods.applyState(elm.state, { initial: true });
@@ -205,7 +212,8 @@ export function DOMSplitPane(props: {
         height: "100%",
       });
       if (elm.state.minSize) {
-        elm.state.style["min-width"] = `${elm.state.minSize}px`;
+        const isVertical = elm.state.direction === "vertical";
+        elm.state.style[isVertical ? "min-height" : "min-width"] = `${elm.state.minSize}px`;
       }
 
       box$.methods.set$elm($elm);
@@ -256,36 +264,67 @@ export function DOMSplitHandler(props: {
       let is_hover_highlighted = false;
 
       $elm.setAttribute("data-split-view-handler", "");
-      Object.assign(elm.state.style, {
-        display: "flex",
-        width: "1px",
-        height: "100%",
-        "z-index": 2,
-        position: "relative",
-        overflow: "visible",
-      });
+
+      // Use direction from element state
+      const applyDirection = () => {
+        const isVertical = elm.state.direction === "vertical";
+        if (isVertical) {
+          Object.assign(elm.state.style, {
+            display: "flex",
+            width: "100%",
+            height: "1px",
+            "z-index": 2,
+            position: "relative",
+            overflow: "visible",
+          });
+          Object.assign($line.style, {
+            width: "100%",
+            height: "1px",
+            "pointer-events": "none",
+            "background-color": "color-mix(in srgb, CanvasText 20%, black)",
+          });
+          Object.assign($hover_zone.style, {
+            position: "absolute",
+            left: "0",
+            right: "0",
+            top: "-2px",
+            bottom: "-2px",
+            "pointer-events": "auto",
+            cursor: "row-resize",
+            transition: "background-color 0.2s ease",
+          });
+        } else {
+          Object.assign(elm.state.style, {
+            display: "flex",
+            width: "1px",
+            height: "100%",
+            "z-index": 2,
+            position: "relative",
+            overflow: "visible",
+          });
+          Object.assign($line.style, {
+            width: "1px",
+            height: "100%",
+            "pointer-events": "none",
+            "background-color": "color-mix(in srgb, CanvasText 20%, black)",
+          });
+          Object.assign($hover_zone.style, {
+            position: "absolute",
+            top: "0",
+            bottom: "0",
+            left: "-2px",
+            right: "-2px",
+            "pointer-events": "auto",
+            cursor: "col-resize",
+            transition: "background-color 0.2s ease",
+          });
+        }
+      };
 
       box$.methods.set$elm($elm);
+      applyDirection();
       box$.methods.applyState(elm.state, { initial: true });
       $elm.style.zIndex = "2";
-
-      Object.assign($line.style, {
-        width: "1px",
-        height: "100%",
-        "pointer-events": "none",
-        "background-color": "color-mix(in srgb, CanvasText 20%, black)",
-      });
-
-      Object.assign($hover_zone.style, {
-        position: "absolute",
-        top: "0",
-        bottom: "0",
-        left: "-2px",
-        right: "-2px",
-        "pointer-events": "auto",
-        cursor: "col-resize",
-        transition: "background-color 0.2s ease",
-      });
 
       const setHoverHighlight = (highlighted: boolean) => {
         is_hover_highlighted = highlighted;
