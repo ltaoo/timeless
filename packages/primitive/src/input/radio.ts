@@ -12,6 +12,7 @@ export type RadioProps = BoxProps & {
   readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
   disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
   required?: boolean | DerivedRef<boolean> | Ref<boolean>;
+  tabindex?: number;
   onChange?: (event: MouseEvent) => void;
   onClick?: (event: Event) => void;
   onMounted?: ViewProps["onMounted"];
@@ -25,6 +26,7 @@ type RadioState = {
   disabled: boolean;
   readonly: boolean;
   required: boolean;
+  tabindex?: number;
 };
 
 export function Radio(props: RadioProps) {
@@ -35,6 +37,7 @@ export function Radio(props: RadioProps) {
     disabled,
     readonly,
     required,
+    tabindex,
     onMounted,
     onChange,
     ...rest
@@ -154,6 +157,10 @@ export function Radio(props: RadioProps) {
         } else {
           state.required = required;
         }
+      }
+
+      if (tabindex !== undefined) {
+        state.tabindex = tabindex;
       }
     },
   };

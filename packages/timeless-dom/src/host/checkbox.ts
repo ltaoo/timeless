@@ -47,6 +47,9 @@ export function DOMCheckbox(props: {
       }
       common$.methods.set$elm($elm);
       common$.methods.applyState(elm.state, { initial: true });
+      if (elm.state.tabindex !== undefined) {
+        $elm.setAttribute("tabindex", elm.state.tabindex);
+      }
       common$.methods.setupEventListener(elm.events);
       const events = elm.events;
       $elm.addEventListener("click", function (event) {

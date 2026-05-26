@@ -214,7 +214,7 @@ const actionButtons: Record<
 };
 
 export function FlowNodeView(props: FlowNodeViewProps) {
-  const { store: node$, class: cls, ...rest } = props;
+  const { store: node$, nodeTypes, class: cls, ...rest } = props;
 
   const state_ = refobj(node$.state);
   const target_handlers_ = refarr([]);
@@ -296,6 +296,10 @@ export function FlowNodeView(props: FlowNodeViewProps) {
       },
       onClick() {
         node$.click();
+      },
+      onDoubleClick(e: MouseEvent) {
+        e.stopPropagation();
+        node$.doubleClick();
       },
       onMouseDown(e: MouseEvent) {
         if (e.button !== 0) return;
@@ -387,22 +391,26 @@ export function FlowNodeView(props: FlowNodeViewProps) {
           });
         },
       }),
-      View({ class: "px-4 py-2" }, [
-        View({ class: "text-sm text-center font-medium whitespace-nowrap" }, [
-          node$.data["label"] || node$.id,
-        ]),
-        Show({
-          when: node$.data["desc"],
-          ok() {
-            return View(
-              {
-                class: "text-xs text-gray-500 dark:text-gray-400 text-center",
+      nodeTypes?.[node$.type]
+        ? Fragment({}, nodeTypes[node$.type]({ node: node$ }))
+        : View({ class: "px-4 py-2" }, [
+            View(
+              { class: "text-sm text-center font-medium whitespace-nowrap" },
+              [node$.data["label"] || node$.id],
+            ),
+            Show({
+              when: node$.data["desc"],
+              ok() {
+                return View(
+                  {
+                    class:
+                      "text-xs text-gray-500 dark:text-gray-400 text-center",
+                  },
+                  [node$.data["desc"]],
+                );
               },
-              [node$.data["desc"]],
-            );
-          },
-        }),
-      ]),
+            }),
+          ]),
       For({
         key: "id",
         each: target_handlers_,
@@ -734,7 +742,19 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
   let panStartX = 0;
   let panStartY = 0;
   let isPanning = false;
+  let hasPanned = false;
   let $canvas: HTMLElement | null = null;
+  let $root: HTMLElement | null = null;
+
+  const updateCanvasTransform = () => {
+    if (!$canvas) return;
+    const v = store.viewport;
+    $canvas.style.transform = `translate(${v.x}px, ${v.y}px) scale(${v.zoom})`;
+  };
+
+  store.onViewportChange(() => {
+    updateCanvasTransform();
+  });
 
   return FlowPrimitive.Root(
     {
@@ -747,69 +767,77 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
       ]),
       style: sty,
       onMounted(event) {
-        const $root = event.target.get$elm();
-
-        let rafId = 0;
-        let accDeltaX = 0;
-        let accDeltaY = 0;
-        let accZoomDelta = 0;
-        let isZooming = false;
-        let lastMouseX = 0;
-        let lastMouseY = 0;
-
-        const flush = () => {
-          rafId = 0;
-          if (!$canvas) return;
-
-          const v = store.viewport;
-          if (isZooming) {
-            const newZoom = Math.max(
-              minZoom,
-              Math.min(maxZoom, v.zoom + accZoomDelta),
-            );
-            const worldX = (lastMouseX - v.x) / v.zoom;
-            const worldY = (lastMouseY - v.y) / v.zoom;
-            const newX = lastMouseX - worldX * newZoom;
-            const newY = lastMouseY - worldY * newZoom;
-            store.setViewport({ x: newX, y: newY, zoom: newZoom });
-            $canvas.style.transform = `translate(${newX}px, ${newY}px) scale(${newZoom})`;
-          } else {
-            const nx = v.x - accDeltaX;
-            const ny = v.y - accDeltaY;
-            store.setViewport({ x: nx, y: ny });
-            $canvas.style.transform = `translate(${nx}px, ${ny}px) scale(${v.zoom})`;
-          }
-
-          accDeltaX = 0;
-          accDeltaY = 0;
-          accZoomDelta = 0;
-        };
+        $root = event.target.get$elm();
 
         $root.addEventListener(
           "wheel",
-          function (e) {
+          function (e: WheelEvent) {
             e.preventDefault();
-            if (!$canvas) return;
 
-            const zooming = e.ctrlKey || e.metaKey;
-            if (zooming) {
-              accZoomDelta += -e.deltaY * 0.001;
-              isZooming = true;
-              const rect = $root.getBoundingClientRect();
-              lastMouseX = e.clientX - rect.left;
-              lastMouseY = e.clientY - rect.top;
-            } else {
-              accDeltaX += e.deltaX;
-              accDeltaY += e.deltaY;
-              isZooming = false;
-            }
+            const rect = $root!.getBoundingClientRect();
+            const cursorX = e.clientX - rect.left;
+            const cursorY = e.clientY - rect.top;
 
-            if (!rafId) {
-              rafId = requestAnimationFrame(flush);
-            }
+            const v = store.viewport;
+            const oldZoom = v.zoom;
+
+            // Trackpad pinch fires with ctrlKey=true and small deltaY;
+            // mouse wheel fires with larger deltaY. Both should zoom.
+            const zoomSensitivity = e.ctrlKey ? 0.01 : 0.001;
+            const factor = 1 - e.deltaY * zoomSensitivity;
+            const newZoom = Math.min(
+              Math.max(oldZoom * factor, minZoom),
+              maxZoom,
+            );
+
+            // Zoom toward cursor: keep the world point under the cursor fixed
+            const worldX = (cursorX - v.x) / oldZoom;
+            const worldY = (cursorY - v.y) / oldZoom;
+            const newX = cursorX - worldX * newZoom;
+            const newY = cursorY - worldY * newZoom;
+
+            store.setViewport({ x: newX, y: newY, zoom: newZoom });
           },
           { passive: false },
         );
+      },
+      onMouseDown(e: MouseEvent) {
+        if (e.button !== 0) return;
+        // Only pan when clicking on the root itself or the background/canvas layer,
+        // not on nodes, controls, etc. (those stopPropagation)
+        const tag = (e.target as HTMLElement).tagName;
+        if (tag === "BUTTON" || tag === "INPUT" || tag === "SELECT") return;
+
+        e.preventDefault();
+        isPanning = true;
+        hasPanned = false;
+        panStartX = e.clientX - store.viewport.x;
+        panStartY = e.clientY - store.viewport.y;
+
+        if ($root) document.body.style.cursor = "grabbing";
+
+        const handleMove = (moveEvent: MouseEvent) => {
+          hasPanned = true;
+          const nx = moveEvent.clientX - panStartX;
+          const ny = moveEvent.clientY - panStartY;
+          store.setViewport({ x: nx, y: ny });
+        };
+
+        const handleUp = () => {
+          document.removeEventListener("mousemove", handleMove);
+          document.removeEventListener("mouseup", handleUp);
+
+          if ($root) document.body.style.cursor = "";
+
+          if (!hasPanned) {
+            store.clearSelection();
+          }
+          isPanning = false;
+          hasPanned = false;
+        };
+
+        document.addEventListener("mousemove", handleMove);
+        document.addEventListener("mouseup", handleUp);
       },
     },
     [
@@ -828,23 +856,7 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
           onMounted(event) {
             $canvas = event.target.get$elm();
           },
-          onMouseDown(e: MouseEvent) {
-            if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
-              e.preventDefault();
-              isPanning = true;
-              panStartX = e.clientX - store.viewport.x;
-              panStartY = e.clientY - store.viewport.y;
-            } else if (e.button === 0 && e.target === e.currentTarget) {
-              store.clearSelection();
-            }
-          },
           onMouseMove(e: MouseEvent) {
-            if (isPanning) {
-              store.setViewport({
-                x: e.clientX - panStartX,
-                y: e.clientY - panStartY,
-              });
-            }
 
             if (window.flowConnecting) {
               const canvas = e.currentTarget as HTMLElement;
@@ -864,10 +876,6 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
             }
           },
           onMouseUp() {
-            if (isPanning) {
-              isPanning = false;
-            }
-
             if (window.flowConnecting) {
               window.flowConnectingLineUpdate?.("", false);
               window.flowConnecting = null;

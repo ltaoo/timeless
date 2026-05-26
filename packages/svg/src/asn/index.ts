@@ -42,6 +42,7 @@ export { default as Rss } from "./rss";
 export { default as Search } from "./search";
 export { default as SquareArrowDown } from "./square-arrow-down";
 export { default as Sun } from "./sun";
+export { default as Table } from "./table";
 export { default as Trash2 } from "./trash-2";
 export { default as Trash } from "./trash";
 export { default as Undo2 } from "./undo-2";

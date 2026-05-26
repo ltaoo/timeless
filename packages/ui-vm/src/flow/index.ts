@@ -524,9 +524,7 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
 
   setViewport(viewport: Partial<Viewport>): void {
     this.viewport = { ...this.viewport, ...viewport };
-    // console.log('[]flow/index - setViewport', this.viewport);
-    // this.emit(Events.ViewportChange, this.viewport);
-    // this.emit(Events.StateChange, this.state);
+    this.emit(Events.ViewportChange, this.viewport);
   }
 
   zoomIn(step: number = 0.1): void {

@@ -97,7 +97,7 @@ export function DOMSelectOption(props: {
     ...common$.methods,
     t,
     getType() {
-      return "view";
+      return "view" as const;
     },
     get$elm: common$.methods.get$elm,
     isDocumentFragment() {
@@ -165,7 +165,7 @@ export function DOMSelectOptionGroup(props: {
     ...common$.methods,
     t,
     getType() {
-      return "view";
+      return "view" as const;
     },
     get$elm: common$.methods.get$elm,
     isDocumentFragment() {

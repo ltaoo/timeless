@@ -42,6 +42,7 @@ import rss from "./rss";
 import search from "./search";
 import squareArrowDown from "./square-arrow-down";
 import sun from "./sun";
+import table from "./table";
 import trash2 from "./trash-2";
 import trash from "./trash";
 import undo2 from "./undo-2";
@@ -93,6 +94,7 @@ export const iconRegistry = {
   "search": search,
   "square-arrow-down": squareArrowDown,
   "sun": sun,
+  "table": table,
   "trash2": trash2,
   "trash": trash,
   "undo2": undo2,

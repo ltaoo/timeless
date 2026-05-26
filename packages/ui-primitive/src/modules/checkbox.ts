@@ -113,6 +113,7 @@ export function Input(
   return Checkbox({
     ...rest,
     id,
+    tabindex: -1,
     style: {
       position: "absolute",
       "pointer-events": "none",

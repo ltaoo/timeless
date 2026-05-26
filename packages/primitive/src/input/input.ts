@@ -21,6 +21,7 @@ export type InputProps = BoxProps & {
   required?: boolean | DerivedRef<boolean> | Ref<boolean>;
   autocomplete?: boolean | DerivedRef<boolean> | Ref<boolean>;
   autocorrect?: boolean;
+  tabindex?: number;
   onInput?: (e: Event) => void;
   onChange?: (e: Event) => void;
 };
@@ -32,6 +33,8 @@ type InputState = {
   placeholder: string;
   disabled: boolean;
   required: boolean;
+  tabindex: number;
+  autoComplete: boolean;
   maxLength?: number;
   minLength?: number;
 };
@@ -50,6 +53,7 @@ export function Input(props: InputProps = {}) {
     required,
     autocomplete,
     autocorrect = "off",
+    tabindex,
     onInput,
     onChange,
     onFocus,
@@ -61,6 +65,7 @@ export function Input(props: InputProps = {}) {
 
   const box$ = Box<InputState>(rest, {
     value: "",
+    autoComplete: false,
   } as InputState);
   const listener$ = ListenerManager();
 
@@ -280,6 +285,10 @@ export function Input(props: InputProps = {}) {
         } else {
           state.name = name;
         }
+      }
+
+      if (tabindex !== undefined) {
+        state.tabindex = tabindex;
       }
     },
   };

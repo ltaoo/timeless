@@ -43,6 +43,15 @@ export function DOMInput(props: {
       }
       common$.methods.set$elm($elm);
       common$.methods.applyState(elm.state, { initial: true });
+      if (elm.state.maxLength !== undefined) {
+        $elm.setAttribute("max-length", elm.state.maxLength);
+      }
+      if (elm.state.tabindex !== undefined) {
+        $elm.setAttribute("tabindex", elm.state.tabindex);
+      }
+      if (elm.state.autoComplete !== undefined) {
+        $elm.setAttribute("autocomplete", elm.state.autoComplete);
+      }
       // $elm.style.width = "100%";
       // console.log("[dom]input render - before setupEvent", elm.events);
       common$.methods.setupEventListener(elm.events);

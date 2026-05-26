@@ -44,6 +44,7 @@ export function Trigger(
     id: props.id || props.store.id,
     attributes: rest.attributes,
     // focused: computed(state_, (t) => t.focused),
+    tabindex: -1,
     style: {
       position: "absolute",
       width: "1px",
@@ -54,25 +55,6 @@ export function Trigger(
       clip: "rect(0, 0, 0, 0)",
       "white-space": "nowrap",
       "border-width": 0,
-    },
-    onMounted(event) {
-      const $elm = event.target.get$elm();
-      store.focus = function () {
-        store.show();
-        // $elm.focus();
-      };
-      store.blur = function () {
-        store.hide();
-        // $elm.blur();
-      };
-    },
-    onFocus() {
-      logger.log("Trigger _input$ handle focus");
-      store.show();
-      // props.store.handleFocus();
-    },
-    onBlur() {
-      // props.store.handleBlur();
     },
   });
 
@@ -88,8 +70,21 @@ export function Trigger(
         // 'aria-readonly': computed(state_, (t) => t.readOnly || undefined),
         "aria-required": computed(state_, (t) => t.required || undefined),
       },
+      onFocus() {
+        logger.log("Trigger Button handle focus");
+        store.show();
+      },
+      onBlur() {
+        store.hide();
+      },
       onMounted(event) {
         const $elm = event.target.get$elm();
+        store.focus = function () {
+          $elm.focus();
+        };
+        store.blur = function () {
+          $elm.blur();
+        };
         // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
         // logger.log("Trigger Mounted", $elm);
         store.popper$.setReference(

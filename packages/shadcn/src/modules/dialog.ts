@@ -1,4 +1,4 @@
-import { computed, Icon, ref, refobj } from "@timeless/timeless";
+import { computed, Fragment, Icon, ref, refobj } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps, Show } from "@timeless/timeless";
 import { DialogPrimitive } from "@timeless/ui-primitive";
 import { DialogCore } from "@timeless/ui-vm";
@@ -57,7 +57,7 @@ export function Dialog(
       }),
       View(
         {
-          class: "fixed inset-0 z-50 flex items-center justify-center p-4",
+          class: "fixed inset-0 z-50 flex items-start justify-center p-4 pt-[10vh]",
         },
         [
           View(
@@ -82,7 +82,7 @@ export function Dialog(
                   store,
                   class: computed(presence_state_, (d) => {
                     const baseClass =
-                      "relative w-full grid gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none transform-gpu";
+                      "relative w-full flex flex-col rounded-xl bg-popover text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none transform-gpu max-h-[calc(90vh-2rem)]";
                     const enterClass = d.enter
                       ? "animate-in fill-mode-both fade-in-0 zoom-in-95 slide-in-from-top-2 duration-120 ease-out"
                       : "";
@@ -110,7 +110,7 @@ export function Dialog(
                         DialogPrimitive.Header(
                           {
                             store,
-                            class: "flex flex-col gap-2",
+                            class: "flex flex-col gap-2 px-4 pt-4",
                           },
                           [
                             DialogPrimitive.Title(
@@ -125,15 +125,20 @@ export function Dialog(
                       ];
                     },
                   }),
-                  DialogPrimitive.Body(
-                    { store },
-                    typeof children === "function" ? children() : children || [],
+                  // DialogPrimitive.Body(
+                  //   { store },
+                  // ),
+                  Fragment(
+                    {},
+                    typeof children === "function"
+                      ? children()
+                      : children || [],
                   ),
                   DialogPrimitive.Close(
                     {
                       store,
                       class:
-                        "absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                        "absolute right-2 top-2 z-10 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     },
                     [Icon({ name: "circle-x", size: 16 })],
                   ),
@@ -145,7 +150,7 @@ export function Dialog(
                           {
                             store,
                             class:
-                              "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
+                              "flex flex-col-reverse gap-2 rounded-b-xl border-t border-border bg-muted/50 p-4 sm:flex-row sm:justify-end",
                           },
                           [
                             Button({ store: store.cancelBtn }, ["取消"]),

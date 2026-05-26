@@ -34,8 +34,11 @@ function setupDragResize(
     handlerElm.events.onPointerDown(event);
   }
 
-  const isVertical = $splitView.getAttribute("data-split-direction") === "vertical";
-  const templateProp = isVertical ? "grid-template-rows" : "grid-template-columns";
+  const isVertical =
+    $splitView.getAttribute("data-split-direction") === "vertical";
+  const templateProp = isVertical
+    ? "grid-template-rows"
+    : "grid-template-columns";
   const cursorStyle = isVertical ? "row-resize" : "col-resize";
 
   event.preventDefault();
@@ -72,12 +75,17 @@ function setupDragResize(
     const isLeftAuto = leftCol === "auto" || leftCol === "1fr";
     const isRightAuto = rightCol === "auto" || rightCol === "1fr";
 
-    const rect = (idx: number) => $splitView.children[idx].getBoundingClientRect();
+    const rect = (idx: number) =>
+      $splitView.children[idx].getBoundingClientRect();
     const leftPx = isLeftAuto
-      ? (isVertical ? rect(leftColIdx).height : rect(leftColIdx).width)
+      ? isVertical
+        ? rect(leftColIdx).height
+        : rect(leftColIdx).width
       : parseFloat(leftCol);
     const rightPx = isRightAuto
-      ? (isVertical ? rect(rightColIdx).height : rect(rightColIdx).width)
+      ? isVertical
+        ? rect(rightColIdx).height
+        : rect(rightColIdx).width
       : parseFloat(rightCol);
 
     let newLeft = leftPx + delta;
@@ -85,8 +93,12 @@ function setupDragResize(
 
     const leftPanel = $splitView.children[leftColIdx];
     const rightPanel = $splitView.children[rightColIdx];
-    const leftMinWidth = leftPanel ? parseInt(leftPanel.getAttribute("data-min-size") || "20") : 20;
-    const rightMinWidth = rightPanel ? parseInt(rightPanel.getAttribute("data-min-size") || "20") : 20;
+    const leftMinWidth = leftPanel
+      ? parseInt(leftPanel.getAttribute("data-min-size") || "20")
+      : 20;
+    const rightMinWidth = rightPanel
+      ? parseInt(rightPanel.getAttribute("data-min-size") || "20")
+      : 20;
 
     if (newLeft < leftMinWidth) {
       newRight -= leftMinWidth - newLeft;
@@ -142,12 +154,15 @@ export function DOMSplitView(props: {
       const isVertical = elm.state.direction === "vertical";
 
       $elm.setAttribute("data-split-view", "");
-      $elm.setAttribute("data-split-direction", isVertical ? "vertical" : "horizontal");
+      $elm.setAttribute(
+        "data-split-direction",
+        isVertical ? "vertical" : "horizontal",
+      );
 
       $elm.style.display = "grid";
       $elm.style.height = "100%";
       const columns = elm.state.panels
-        .map((panel) => {
+        .map((panel: { t: string; state: { size: string | number } }) => {
           if (panel.t === "split-handler") {
             return "1px";
           }
@@ -160,7 +175,9 @@ export function DOMSplitView(props: {
           return String(panel.state.size);
         })
         .join(" ");
-      const templateProp = isVertical ? "grid-template-rows" : "grid-template-columns";
+      const templateProp = isVertical
+        ? "grid-template-rows"
+        : "grid-template-columns";
       $elm.style[templateProp as any] = columns;
 
       box$.methods.set$elm($elm);
@@ -210,10 +227,12 @@ export function DOMSplitPane(props: {
         overflow: "clip",
         width: "100%",
         height: "100%",
+        "min-height": "0",
       });
       if (elm.state.minSize) {
         const isVertical = elm.state.direction === "vertical";
-        elm.state.style[isVertical ? "min-height" : "min-width"] = `${elm.state.minSize}px`;
+        elm.state.style[isVertical ? "min-height" : "min-width"] =
+          `${elm.state.minSize}px`;
       }
 
       box$.methods.set$elm($elm);
@@ -353,12 +372,17 @@ export function DOMSplitHandler(props: {
         }
       });
 
-      $hover_zone.addEventListener("pointerdown", function (event: PointerEvent) {
-        const $splitView = $hover_zone.closest("[data-split-view]") as HTMLElement;
-        if ($splitView) {
-          setupDragResize($hover_zone, $splitView, elm, event);
-        }
-      });
+      $hover_zone.addEventListener(
+        "pointerdown",
+        function (event: PointerEvent) {
+          const $splitView = $hover_zone.closest(
+            "[data-split-view]",
+          ) as HTMLElement;
+          if ($splitView) {
+            setupDragResize($hover_zone, $splitView, elm, event);
+          }
+        },
+      );
 
       const $fragment = box$.methods.render(elm.children);
       box$.methods.setupEventListener(elm.events);

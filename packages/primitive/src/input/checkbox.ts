@@ -17,6 +17,7 @@ export type CheckboxProps = BoxProps & {
   readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
   disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
   required?: boolean | DerivedRef<boolean> | Ref<boolean>;
+  tabindex?: number;
   onChange?: (event: Event) => void;
   onClick?: (event: MouseEvent) => void;
   onMounted?: ViewProps["onMounted"];
@@ -32,6 +33,7 @@ type CheckboxState = {
   disabled: boolean;
   required: boolean;
   readonly: boolean;
+  tabindex?: number;
 };
 
 export function Checkbox(props: CheckboxProps) {
@@ -43,6 +45,7 @@ export function Checkbox(props: CheckboxProps) {
     disabled,
     readonly,
     required,
+    tabindex,
     onMounted,
     onChange,
     ...rest
@@ -166,6 +169,10 @@ export function Checkbox(props: CheckboxProps) {
           // methods.setProp("required", required as boolean);
           state.required = required;
         }
+      }
+
+      if (tabindex !== undefined) {
+        state.tabindex = tabindex;
       }
     },
   };

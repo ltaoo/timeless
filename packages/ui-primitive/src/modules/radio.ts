@@ -86,6 +86,7 @@ export function Input(props: RadioProps & { store: RadioCore; id?: string }) {
   return Radio({
     ...rest,
     id,
+    tabindex: -1,
     style: {
       position: "absolute",
       "pointer-events": "none",
