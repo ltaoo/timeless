@@ -217,15 +217,20 @@ function getRowKey(columns) {
   return columns.length > 0 ? columns[0].name : "id";
 }
 
-function makeColumnResizeHandle(colIdx, colWidths_) {
+function makeColumnResizeHandle(colIdx, colWidths_, opts) {
   // Resize only the column to the LEFT of the handle (mainstream behavior:
   // Excel, Google Sheets, DataGrip, etc.). Right column stays fixed width.
   var leftIdx = colIdx + 1;
   var MIN = 50;
+  var onLeft = !!(opts && opts.onLeft);
 
   return View({
-    class: "absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize z-10",
-    style: { "margin-right": "-3px" },
+    class: onLeft
+      ? "absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize"
+      : "absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize",
+    style: onLeft
+      ? { "margin-left": "-3px", "z-index": "1" }
+      : { "margin-right": "-3px", "z-index": "1" },
     onMounted: function (event) {
       var $el = event.target.get$elm();
 
@@ -552,8 +557,6 @@ export default function TablesPageView(props) {
                       for (var i = 0; i < arr.length; i++) { sum += arr[i]; }
                       return sum;
                     });
-                    var scrollLeft_ = ref(0);
-
                     return [
                       // Loading
                       Show({
@@ -570,11 +573,42 @@ export default function TablesPageView(props) {
                         when: computed(panel.loaded, function (t) { return t; }),
                         ok: function () {
                           var cleanupScroll_ = null;
+                          var cleanupHeaderScroll_ = null;
+                          var headerScrollEl_ = null;
+                          var isScrollSyncing_ = false;
 
                           return View({ class: "flex flex-col h-full min-h-0" }, [
-                            // Column headers (clipped, synced with body scroll)
+                            // Column headers — native scroll synced with body
                             View(
-                              { class: "shrink-0 overflow-hidden border-b border-border bg-muted/50" },
+                              {
+                                class: "shrink-0 border-b border-border bg-muted/50",
+                                style: {
+                                  overflow: "auto",
+                                  "scrollbar-width": "none",
+                                },
+                                onMounted: function (event) {
+                                  var $hdr = event.target.get$elm();
+                                  headerScrollEl_ = $hdr;
+                                  function onHeaderScroll() {
+                                    if (isScrollSyncing_) return;
+                                    isScrollSyncing_ = true;
+                                    var $data = document.querySelector("[data-table-body-scroll]");
+                                    if ($data) $data.scrollLeft = $hdr.scrollLeft;
+                                    isScrollSyncing_ = false;
+                                  }
+                                  $hdr.addEventListener("scroll", onHeaderScroll);
+                                  cleanupHeaderScroll_ = function () {
+                                    $hdr.removeEventListener("scroll", onHeaderScroll);
+                                  };
+                                },
+                                beforeUnmounted: function () {
+                                  if (cleanupHeaderScroll_) {
+                                    cleanupHeaderScroll_();
+                                    cleanupHeaderScroll_ = null;
+                                  }
+                                  headerScrollEl_ = null;
+                                },
+                              },
                               [
                                 View(
                                   {
@@ -582,9 +616,6 @@ export default function TablesPageView(props) {
                                       display: "grid",
                                       "grid-template-columns": gridTemplate_,
                                       "min-width": computed(totalWidth_, function (w) { return w + "px"; }),
-                                      transform: computed(scrollLeft_, function (sx) {
-                                        return "translateX(-" + sx + "px)";
-                                      }),
                                     },
                                   },
                                   [
@@ -594,8 +625,8 @@ export default function TablesPageView(props) {
                                         style: {
                                           position: "sticky",
                                           left: "0px",
-                                          zIndex: 4,
-                                          backgroundColor: "#f5f5f4",
+                                          "z-index": 4,
+                                          "background-color": "var(--muted)",
                                         },
                                       },
                                       ["#"],
@@ -607,32 +638,33 @@ export default function TablesPageView(props) {
                                         var gridIdx = colIdx + 1;
                                         var isLeftSticky = stickyLefts_[gridIdx] !== undefined;
                                         var isRightSticky = rightFixedSet_[gridIdx] === true;
+                                        var isLast = colIdx === colCount - 1;
                                         var headerStickyStyle = {};
                                         if (isLeftSticky) {
                                           headerStickyStyle.position = "sticky";
                                           headerStickyStyle.left = computed(stickyLefts_[gridIdx], function (v) { return v + "px"; });
-                                          headerStickyStyle.zIndex = 4;
-                                          headerStickyStyle.backgroundColor = "#f5f5f4";
+                                          headerStickyStyle["z-index"] = 4;
+                                          headerStickyStyle["background-color"] = "var(--muted)";
                                           if (gridIdx === lastLeftFixedIdx_) {
-                                            headerStickyStyle.boxShadow = "2px 0 4px rgba(0,0,0,0.06)";
+                                            headerStickyStyle["box-shadow"] = "inset -1px 0 0 0 var(--border)";
                                           }
                                         } else if (isRightSticky) {
                                           headerStickyStyle.position = "sticky";
                                           headerStickyStyle.right = "0px";
-                                          headerStickyStyle.zIndex = 4;
-                                          headerStickyStyle.backgroundColor = "#f5f5f4";
-                                          headerStickyStyle.boxShadow = "-2px 0 4px rgba(0,0,0,0.06)";
+                                          headerStickyStyle["z-index"] = 5;
+                                          headerStickyStyle["background-color"] = "var(--muted)";
+                                          headerStickyStyle["box-shadow"] = "inset 1px 0 0 0 var(--border)";
                                         }
-                                        var isLast = colIdx === colCount - 1;
                                         return View(
                                           { class: "px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-1 relative", style: headerStickyStyle },
                                           [
+                                            isRightSticky ? makeColumnResizeHandle(colIdx, colWidths_, { onLeft: true }) : null,
                                             View({ class: "truncate" }, [col.name]),
                                             View(
                                               { class: "text-[10px] text-muted-foreground/60 font-mono shrink-0" },
                                               [col.type],
                                             ),
-                                            !isLast ? makeColumnResizeHandle(colIdx, colWidths_) : null,
+                                            !isLast && !isRightSticky ? makeColumnResizeHandle(colIdx, colWidths_) : null,
                                           ],
                                         );
                                       },
@@ -657,8 +689,12 @@ export default function TablesPageView(props) {
                                 },
                                 onMounted: function (event) {
                                   var $elm = event.target.get$elm();
+                                  $elm.setAttribute("data-table-body-scroll", "");
                                   function onScroll() {
-                                    scrollLeft_.as($elm.scrollLeft);
+                                    if (isScrollSyncing_) return;
+                                    isScrollSyncing_ = true;
+                                    if (headerScrollEl_) headerScrollEl_.scrollLeft = $elm.scrollLeft;
+                                    isScrollSyncing_ = false;
                                   }
                                   $elm.addEventListener("scroll", onScroll);
                                   cleanupScroll_ = function () {
@@ -704,8 +740,8 @@ export default function TablesPageView(props) {
                                           style: {
                                             position: "sticky",
                                             left: "0px",
-                                            zIndex: 2,
-                                            backgroundColor: "#ffffff",
+                                            "z-index": 2,
+                                            "background-color": "var(--background)",
                                           },
                                         },
                                         [rowNum],
@@ -718,17 +754,17 @@ export default function TablesPageView(props) {
                                         if (isLeftSticky) {
                                           cellStickyStyle.position = "sticky";
                                           cellStickyStyle.left = computed(stickyLefts_[cellGridIdx], function (v) { return v + "px"; });
-                                          cellStickyStyle.zIndex = 2;
-                                          cellStickyStyle.backgroundColor = "#ffffff";
+                                          cellStickyStyle["z-index"] = 2;
+                                          cellStickyStyle["background-color"] = "var(--background)";
                                           if (cellGridIdx === lastLeftFixedIdx_) {
-                                            cellStickyStyle.boxShadow = "2px 0 4px rgba(0,0,0,0.06)";
+                                            cellStickyStyle["box-shadow"] = "inset -1px 0 0 0 var(--border)";
                                           }
                                         } else if (isRightSticky) {
                                           cellStickyStyle.position = "sticky";
                                           cellStickyStyle.right = "0px";
-                                          cellStickyStyle.zIndex = 2;
-                                          cellStickyStyle.backgroundColor = "#ffffff";
-                                          cellStickyStyle.boxShadow = "-2px 0 4px rgba(0,0,0,0.06)";
+                                          cellStickyStyle["z-index"] = 2;
+                                          cellStickyStyle["background-color"] = "var(--background)";
+                                          cellStickyStyle["box-shadow"] = "inset 1px 0 0 0 var(--border)";
                                         }
                                         return View(
                                           { class: "px-3 py-2 text-sm truncate", style: cellStickyStyle },

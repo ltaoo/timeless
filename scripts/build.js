@@ -10,6 +10,7 @@ const INCLUDED_PACKAGES = [
   "base",
   "reactive",
   "utils",
+  // "svg",
   "kit",
   "primitive",
   "ui-primitive",

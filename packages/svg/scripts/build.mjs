@@ -211,10 +211,6 @@ ${iconNames
 `;
   writeFileSync(join(ASN_DIR, "registry.ts"), asnRegistryContent);
 
-  const srcIndexContent = `export * from "./asn/index";
-`;
-  writeFileSync(join(__dirname, "../src/index.ts"), srcIndexContent);
-
   const srcRegistryImports = iconNames
     .map((name) => {
       const pascalName = toPascalCase(name);
@@ -223,7 +219,9 @@ ${iconNames
     })
     .join("\n");
 
-  const srcRegistryContent = `${srcRegistryImports}
+  const srcIndexContent = `export * from "./asn/index";
+
+${srcRegistryImports}
 
 export const iconRegistry = {
 ${iconNames
@@ -236,7 +234,7 @@ ${iconNames
   .join("\n")}
 };
 `;
-  writeFileSync(join(__dirname, "../src/registry.ts"), srcRegistryContent);
+  writeFileSync(join(__dirname, "../src/index.ts"), srcIndexContent);
 }
 
 function toPascalCase(str) {

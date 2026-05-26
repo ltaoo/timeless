@@ -3072,6 +3072,7 @@ declare module "packages/primitive/src/layout/split" {
         minSize?: number;
         maxSize?: number;
         collapsible?: boolean;
+        direction?: SplitDirection;
     };
     export function SplitPane(props: SplitPaneProps, children?: ViewChildren): {
         t: string;
@@ -3082,7 +3083,9 @@ declare module "packages/primitive/src/layout/split" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
-    type SplitHandlerProps = BoxProps & {};
+    type SplitHandlerProps = BoxProps & {
+        direction?: SplitDirection;
+    };
     export function SplitHandler(props: SplitHandlerProps, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -3200,6 +3203,7 @@ declare module "packages/primitive/src/input/input" {
         required?: boolean | DerivedRef<boolean> | Ref<boolean>;
         autocomplete?: boolean | DerivedRef<boolean> | Ref<boolean>;
         autocorrect?: boolean;
+        tabindex?: number;
         onInput?: (e: Event) => void;
         onChange?: (e: Event) => void;
     };
@@ -3295,6 +3299,7 @@ declare module "packages/primitive/src/input/checkbox" {
         readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
         disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
         required?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        tabindex?: number;
         onChange?: (event: Event) => void;
         onClick?: (event: MouseEvent) => void;
         onMounted?: ViewProps["onMounted"];
@@ -3475,6 +3480,7 @@ declare module "packages/primitive/src/input/radio" {
         readonly?: boolean | DerivedRef<boolean> | Ref<boolean>;
         disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
         required?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        tabindex?: number;
         onChange?: (event: MouseEvent) => void;
         onClick?: (event: Event) => void;
         onMounted?: ViewProps["onMounted"];
@@ -6465,6 +6471,7 @@ declare module "packages/ui-vm/src/file-picker/index" {
         autoFocus: boolean;
         dragging: boolean;
         invalid: boolean;
+        invalid_files: TFile[];
     };
     export class FilePickerCore extends BaseDomain<TheTypesOfEvents> {
         shape: "file-input";
@@ -6482,6 +6489,7 @@ declare module "packages/ui-vm/src/file-picker/index" {
         invalid: boolean;
         /** 被消费过的值，用于做比较判断值是否发生改变 */
         valueUsed: unknown;
+        invalid_files: TFile[];
         get state(): FilePickerState;
         constructor(props: {
             unique_id?: string;
@@ -6506,7 +6514,7 @@ declare module "packages/ui-vm/src/file-picker/index" {
          * 返回 true 表示有匹配项，false 表示全部不匹配
          */
         validateFiles(items: TFile[]): boolean;
-        filterFiles(event: {
+        filter_valid_files(event: {
             files?: TFile[];
         }): TFile[];
         setValue(value: TFile[] | null, extra?: Partial<{
@@ -15614,7 +15622,7 @@ declare module "packages/ui-primitive/src/modules/sheet" {
     import { DialogCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
+    }, children?: ViewChildren | (() => ViewChildren)): {
         t: string;
         $elm: any;
         state: {
@@ -15649,7 +15657,7 @@ declare module "packages/ui-primitive/src/modules/dialog" {
     import { DialogCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
+    }, children?: ViewChildren | (() => ViewChildren)): {
         t: string;
         $elm: any;
         state: {
@@ -16400,7 +16408,7 @@ declare module "packages/shadcn/src/modules/dialog" {
     import { DialogCore } from "packages/ui-vm/src/index";
     export function Dialog(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): {
+    }, children?: ViewChildren | (() => ViewChildren)): {
         t: string;
         $elm: any;
         state: {
@@ -16541,7 +16549,7 @@ declare module "packages/shadcn/src/modules/sheet" {
     export function Sheet(props: ViewProps & {
         store: DialogCore;
         side?: "right" | "top" | "bottom" | "left";
-    }, children?: ViewChildren): {
+    }, children?: ViewChildren | (() => ViewChildren)): {
         t: string;
         $elm: any;
         state: {
@@ -16615,7 +16623,7 @@ declare module "packages/shadcn/src/modules/field" {
     export function FieldInlineLabel(props: ViewProps & {
         store?: SingleFieldCore<any>;
         for?: string;
-    }, children: any): {
+    }, children?: ViewChildren): {
         t: string;
         $elm: any;
         state: import("packages/primitive/src/content/box").BoxState & import("@timeless/timeless").LabelState;

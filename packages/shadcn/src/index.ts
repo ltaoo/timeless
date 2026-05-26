@@ -1,5 +1,5 @@
 import { registerIcons } from "@timeless/timeless";
-import { iconRegistry } from "@timeless/svg/asn/registry";
+import { iconRegistry } from "@timeless/svg";
 
 import { Input } from "./modules/input";
 import { FileDropZone, FileInput } from "./modules/file-picker";
